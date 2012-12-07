@@ -154,8 +154,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $menu = id(new PhabricatorMainMenuView())
       ->setUser($request->getUser())
-      ->setController($this->getController())
       ->setDefaultSearchScope($this->getSearchDefaultScope());
+
+    if ($this->getController()) {
+      $menu->setController($this->getController());
+    }
 
     if ($this->getApplicationMenu()) {
       $menu->setApplicationMenu($this->getApplicationMenu());

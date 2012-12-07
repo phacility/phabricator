@@ -222,7 +222,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         ->setName(pht('Phabricator Home'))
         ->setHref('/')
         ->appendChild($this->renderMenuIcon('logo-light-large')));
-    if ($controller->getCurrentApplication()) {
+    if ($controller && $controller->getCurrentApplication()) {
       $application = $controller->getCurrentApplication();
       $icon = $application->getIconName().'-light-large';
       $view->addMenuItem(
