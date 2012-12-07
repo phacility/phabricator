@@ -20,6 +20,10 @@
   min-height: 44px;
 }
 
+.device-desktop .phabricator-main-menu {
+  height: 44px;
+}
+
 .phabricator-main-menu a:hover {
   text-decoration: none;
 }
@@ -355,6 +359,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 .device .phabricator-core-menu-expanded .phabricator-core-menu {
   display: block;
+  padding-top: 44px;
 }
 
 .device .phabricator-core-menu .phabricator-menu-item-type-link {

@@ -134,8 +134,6 @@ JX.behavior('phabricator-nav', function(config) {
       drag.style.left = '';
     }
     content.style.marginLeft = '';
-
-    select_button(2);
   });
 
 });
