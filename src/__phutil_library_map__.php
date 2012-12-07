@@ -1009,7 +1009,6 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryCommitChangeParserWorker' => 'applications/repository/worker/commitchangeparser/PhabricatorRepositoryCommitChangeParserWorker.php',
     'PhabricatorRepositoryCommitData' => 'applications/repository/storage/PhabricatorRepositoryCommitData.php',
     'PhabricatorRepositoryCommitHeraldWorker' => 'applications/repository/worker/PhabricatorRepositoryCommitHeraldWorker.php',
-    'PhabricatorRepositoryCommitMessageDetailParser' => 'applications/repository/parser/PhabricatorRepositoryCommitMessageDetailParser.php',
     'PhabricatorRepositoryCommitMessageParserWorker' => 'applications/repository/worker/commitmessageparser/PhabricatorRepositoryCommitMessageParserWorker.php',
     'PhabricatorRepositoryCommitOwnersWorker' => 'applications/repository/worker/PhabricatorRepositoryCommitOwnersWorker.php',
     'PhabricatorRepositoryCommitParserWorker' => 'applications/repository/worker/PhabricatorRepositoryCommitParserWorker.php',
