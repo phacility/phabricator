@@ -6,7 +6,7 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
     return '/paste/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'paste';
   }
 

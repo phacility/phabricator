@@ -205,12 +205,17 @@ final class PhabricatorMainMenuView extends AphrontView {
     $more = array();
     $actions = array();
 
+    require_celerity_resource('sprite-apps-large-css');
+
     $group_core = PhabricatorApplication::GROUP_CORE;
     foreach ($applications as $application) {
       if ($application->shouldAppearInLaunchView()) {
+        $icon = $application->getIconName().'-light-large';
+
         $item = id(new PhabricatorMenuItemView())
           ->setName($application->getName())
-          ->setHref($application->getBaseURI());
+          ->setHref($application->getBaseURI())
+          ->appendChild($this->renderMenuIcon($icon));
         if ($application->getApplicationGroup() == $group_core) {
           $core[] = $item;
         } else {
@@ -239,13 +244,16 @@ final class PhabricatorMainMenuView extends AphrontView {
       id(new PhabricatorMenuItemView())
         ->addClass('phabricator-core-item-device')
         ->setName(pht('Phabricator Home'))
-        ->setHref('/'));
+        ->setHref('/')
+        ->appendChild($this->renderMenuIcon('logo-light-large')));
     if ($controller->getCurrentApplication()) {
       $application = $controller->getCurrentApplication();
+      $icon = $application->getIconName().'-light-large';
       $view->addMenuItem(
         id(new PhabricatorMenuItemView())
           ->addClass('phabricator-core-item-device')
           ->setName(pht('%s Home', $application->getName()))
+          ->appendChild($this->renderMenuIcon($icon))
           ->setHref($controller->getApplicationURI()));
     }
 
@@ -271,24 +279,11 @@ final class PhabricatorMainMenuView extends AphrontView {
       foreach ($actions as $action) {
         $icon = $action->getIcon();
         if ($icon) {
-          $classes = array(
-            'phabricator-core-menu-icon',
-            'autosprite',
-          );
-
           if ($action->getSelected()) {
-            $classes[] = 'main-menu-item-icon-'.$icon.'-selected';
+            $action->appendChild($this->renderMenuIcon($icon.'-blue-large'));
           } else {
-            $classes[] = 'main-menu-item-icon-'.$icon;
+            $action->appendChild($this->renderMenuIcon($icon.'-light-large'));
           }
-
-          $action->appendChild(
-            phutil_render_tag(
-              'span',
-              array(
-                'class' => implode(' ', $classes),
-              ),
-              ''));
         }
         $view->addMenuItem($action);
       }
@@ -380,6 +375,16 @@ final class PhabricatorMainMenuView extends AphrontView {
       '');
 
     return array($bubble_tag, $notification_dropdown);
+  }
+
+  private function renderMenuIcon($name) {
+    return phutil_render_tag(
+      'span',
+      array(
+        'class' => 'phabricator-core-menu-icon '.
+                   'sprite-apps-large app-'.$name,
+      ),
+      '');
   }
 
 }

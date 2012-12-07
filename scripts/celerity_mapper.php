@@ -83,7 +83,6 @@ $package_spec = array(
     'aphront-headsup-view-css',
     'phabricator-flag-css',
     'aphront-error-view-css',
-    'autosprite-css',
     'sprite-icon-css',
     'phabricator-main-menu-view',
     'phabricator-notification-css',

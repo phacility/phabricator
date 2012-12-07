@@ -55,6 +55,6 @@
   "scales"  : [
     1
   ],
-  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {\n    background-image: url(\/rsrc\/image\/sprite-gradient-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}",
+  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
   "type"    : "repeat-x"
 }

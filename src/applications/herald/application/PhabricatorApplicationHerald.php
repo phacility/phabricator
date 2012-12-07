@@ -6,7 +6,7 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
     return '/herald/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'herald';
   }
 

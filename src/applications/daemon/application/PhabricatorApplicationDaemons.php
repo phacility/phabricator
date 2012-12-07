@@ -18,8 +18,8 @@ final class PhabricatorApplicationDaemons extends PhabricatorApplication {
     return "\xE2\x98\xAF";
   }
 
-  public function getAutospriteName() {
-    return 'daemons';
+  public function getIconName() {
+    return 'daemon';
   }
 
   public function getApplicationGroup() {

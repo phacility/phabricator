@@ -14,7 +14,7 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
     return '/project/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'projects';
   }
 

@@ -6,7 +6,7 @@ final class PhabricatorApplicationRepositories extends PhabricatorApplication {
     return '/repository/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'repositories';
   }
 

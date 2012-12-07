@@ -42,7 +42,8 @@ final class PhabricatorCrumbView extends AphrontView {
       $icon = phutil_render_tag(
         'span',
         array(
-          'class' => 'phabricator-crumb-icon '.$this->icon,
+          'class' => 'phabricator-crumb-icon '.
+                     'sprite-apps-large app-'.$this->icon.'-dark',
         ),
         '');
     }

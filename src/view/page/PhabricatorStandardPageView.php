@@ -101,7 +101,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $console = $this->getConsole();
 
     require_celerity_resource('phabricator-core-css');
-    require_celerity_resource('autosprite-css');
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');

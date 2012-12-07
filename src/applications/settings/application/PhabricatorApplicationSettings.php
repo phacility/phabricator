@@ -10,7 +10,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
     return 'User Preferences';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'settings';
   }
 

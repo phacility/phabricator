@@ -14,7 +14,7 @@ final class PhabricatorApplicationMailingLists extends PhabricatorApplication {
     return 'Manage External Lists';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'mail';
   }
 

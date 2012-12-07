@@ -18,7 +18,7 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return 'Design Review';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'pholio';
   }
 

@@ -25,6 +25,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
     $application = $this->application;
 
     require_celerity_resource('phabricator-application-launch-view-css');
+    require_celerity_resource('sprite-apps-xlarge-css');
 
     $content = array();
     $content[] = phutil_render_tag(
@@ -79,9 +80,9 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
     if ($application->getIconURI()) {
       $styles[] = 'background-image: url('.$application->getIconURI().')';
     } else {
-      $autosprite = $application->getAutospriteName();
-      $classes[] = 'autosprite';
-      $classes[] = 'app-'.$autosprite.'-large';
+      $icon = $application->getIconName();
+      $classes[] = 'sprite-apps-xlarge';
+      $classes[] = 'app-'.$icon.'-dark-xlarge';
     }
 
     $icon = phutil_render_tag(

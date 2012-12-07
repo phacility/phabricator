@@ -10,7 +10,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return 'Review Code';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'differential';
   }
 

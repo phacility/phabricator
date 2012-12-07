@@ -10,7 +10,7 @@ final class PhabricatorApplicationDrydock extends PhabricatorApplication {
     return 'Allocate Software Resources';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'drydock';
   }
 

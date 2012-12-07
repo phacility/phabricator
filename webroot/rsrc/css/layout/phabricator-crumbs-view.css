@@ -28,14 +28,13 @@
   display: inline-block;
   height: 31px;
   line-height: 31px;
-  overflow: hidden;
 }
 
 .phabricator-crumb-icon {
   display: inline-block;
-  width: 30px;
-  height: 30px;
-  margin: 1px 2px 0 8px;
+  width: 28px;
+  height: 28px;
+  margin: 2px 2px 0 8px;
   vertical-align: top;
 }
 

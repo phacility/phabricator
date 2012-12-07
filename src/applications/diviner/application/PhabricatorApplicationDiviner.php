@@ -6,7 +6,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     return '/diviner/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'diviner';
   }
 

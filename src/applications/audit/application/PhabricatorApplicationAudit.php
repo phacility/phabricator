@@ -10,7 +10,7 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     return '/audit/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'audit';
   }
 

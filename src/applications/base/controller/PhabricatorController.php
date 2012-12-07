@@ -253,14 +253,14 @@ abstract class PhabricatorController extends AphrontController {
 
     $application = $this->getCurrentApplication();
     if ($application) {
-      $sprite = $application->getAutospriteName();
+      $sprite = $application->getIconName();
       if (!$sprite) {
-        $sprite = 'default';
+        $sprite = 'application';
       }
 
       $crumbs[] = id(new PhabricatorCrumbView())
         ->setHref($this->getApplicationURI())
-        ->setIcon('temporary-icon-apps');
+        ->setIcon($sprite);
     }
 
     $view = new PhabricatorCrumbsView();

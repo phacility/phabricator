@@ -8,14 +8,8 @@
   background-repeat: repeat-x;
 }
 
-@media
-only screen and (min-device-pixel-ratio: 1.5),
-only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-  .sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {
-    background-image: url(/rsrc/image/sprite-gradient-X2.png);
-    background-size: 4px 274px;
-  }
-}
+
+
 
 .gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit {
   background-position: 0px -26px;

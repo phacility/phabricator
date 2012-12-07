@@ -14,7 +14,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return PhabricatorEnv::getEnvConfig('maniphest.enabled');
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'maniphest';
   }
 

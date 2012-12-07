@@ -10,7 +10,7 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
     return 'Find Answers';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'ponder';
   }
 

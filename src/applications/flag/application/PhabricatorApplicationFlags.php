@@ -10,7 +10,7 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
     return '/flag/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'flags';
   }
 

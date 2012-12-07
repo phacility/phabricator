@@ -341,12 +341,12 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 .phabricator-core-menu-icon {
   position: absolute;
   display: block;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
 }
 
 .phabricator-core-menu-profile-image {
-  background-size: 26px 26px;
+  background-size: 28px 28px;
 }
 
 .device .phabricator-core-menu {

@@ -10,7 +10,7 @@ final class PhabricatorApplicationPHID extends PhabricatorApplication {
     return '/phid/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'phid';
   }
 

@@ -14,7 +14,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return "\xE2\x99\x9F";
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'people';
   }
 

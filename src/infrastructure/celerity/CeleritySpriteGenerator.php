@@ -67,7 +67,7 @@ final class CeleritySpriteGenerator {
       $sprites[] = $sprite;
     }
 
-    $sheet = $this->buildSheet('icon');
+    $sheet = $this->buildSheet('icon', true);
     $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
@@ -146,7 +146,7 @@ final class CeleritySpriteGenerator {
       $sprites[] = $sprite;
     }
 
-    $sheet = $this->buildSheet('menu');
+    $sheet = $this->buildSheet('menu', true);
     $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
@@ -206,9 +206,117 @@ final class CeleritySpriteGenerator {
 
     $sheet = $this->buildSheet(
       'gradient',
+      false,
       PhutilSpriteSheet::TYPE_REPEAT_X,
       ', button, a.button, a.button:visited, input.inputsubmit, '.
       '.phabricator-dark-menu .phabricator-menu-item-type-label');
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+  public function buildAppsSheet() {
+    return $this->buildAppsSheetVariant(1);
+  }
+
+  public function buildAppsLargeSheet() {
+    return $this->buildAppsSheetVariant(2);
+  }
+
+  public function buildAppsXLargeSheet() {
+    return $this->buildAppsSheetVariant(3);
+  }
+
+  private function buildAppsSheetVariant($variant) {
+
+    if ($variant == 1) {
+      $scales = array(
+        '1x' => 1,
+        '2x' => 2,
+      );
+      $variant_name = 'apps';
+      $variant_short = '';
+      $size_x = 14;
+      $size_y = 14;
+
+      $colors = array(
+        'dark'  => 'dark',
+      );
+    } else if ($variant == 2) {
+      $scales = array(
+        '2x' => 1,
+        '4x' => 2,
+      );
+      $variant_name = 'apps-large';
+      $variant_short = '-large';
+      $size_x = 28;
+      $size_y = 28;
+
+      $colors = array(
+        'light' => 'lb',
+        'dark'  => 'dark',
+        'blue'  => 'blue',
+        'glow'  => 'glow',
+      );
+    } else {
+      $scales = array(
+        '4x' => 1,
+      );
+      $variant_name = 'apps-xlarge';
+      $variant_short = '-xlarge';
+      $size_x = 56;
+      $size_y = 56;
+
+      $colors = array(
+        'dark'  => 'dark',
+        /*
+
+        TODO: These are available but not currently used.
+
+        'blue'  => 'blue',
+        'light' => 'lb',
+        'glow'  => 'glow',
+        */
+      );
+    }
+
+
+    $apps = $this->getDirectoryList('apps_dark_1x');
+
+    $template = id(new PhutilSprite())
+      ->setSourceSize($size_x, $size_y);
+
+    $sprites = array();
+    foreach ($apps as $app) {
+      foreach ($colors as $color => $color_path) {
+
+        $css = '.app-'.$app.'-'.$color.$variant_short;
+        if ($color == 'blue' && $variant_name == 'apps-large') {
+          $css .= ', .phabricator-crumb-view:hover .app-'.$app.'-dark-large';
+        }
+        if ($color == 'glow' && $variant_name == 'apps-large') {
+          $css .= ', .device-desktop .phabricator-dark-menu a:hover '.
+                  '.app-'.$app.'-light-large';
+        }
+
+        $sprite = id(clone $template)
+          ->setName('app-'.$app.'-'.$color.$variant_short)
+          ->setTargetCSS($css);
+
+        foreach ($scales as $scale_name => $scale) {
+          $path = $this->getPath(
+            'apps_'.$color_path.'_'.$scale_name.'/'.$app.'.png');
+          $sprite->setSourceFile($path, $scale);
+        }
+
+        $sprites[] = $sprite;
+      }
+    }
+
+    $sheet = $this->buildSheet($variant_name, count($scales) > 1);
+    $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }
@@ -240,7 +348,12 @@ final class CeleritySpriteGenerator {
     return $result;
   }
 
-  private function buildSheet($name, $type = null, $extra_css = '') {
+  private function buildSheet(
+    $name,
+    $has_retina,
+    $type = null,
+    $extra_css = '') {
+
     $sheet = new PhutilSpriteSheet();
 
     $at = '@';
@@ -259,6 +372,20 @@ final class CeleritySpriteGenerator {
         break;
     }
 
+    $retina_rules = null;
+    if ($has_retina) {
+      $retina_rules = <<<EOCSS
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-{$name}{$extra_css} {
+    background-image: url(/rsrc/image/sprite-{$name}-X2.png);
+    background-size: {X}px {Y}px;
+  }
+}
+EOCSS;
+    }
+
     $sheet->setSheetType($type);
     $sheet->setCSSHeader(<<<EOCSS
 /**
@@ -271,14 +398,8 @@ final class CeleritySpriteGenerator {
   background-repeat: {$repeat_rule};
 }
 
-@media
-only screen and (min-device-pixel-ratio: 1.5),
-only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-  .sprite-{$name}{$extra_css} {
-    background-image: url(/rsrc/image/sprite-{$name}-X2.png);
-    background-size: {X}px {Y}px;
-  }
-}
+{$retina_rules}
+
 EOCSS
 );
 
