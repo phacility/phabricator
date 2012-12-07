@@ -234,14 +234,11 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $detail->appendChild($output);
     $detail->setVsChangesetID($left_source);
 
-    $panel = id(new DifferentialPrimaryPaneView())
-      ->setLineWidthFromChangesets(array($changeset));
-
+    $panel = new DifferentialPrimaryPaneView();
     $panel->appendChild(phutil_render_tag('div',
       array(
         'class' => 'differential-review-stage',
         'id'    => 'differential-review-stage',
-        'style' => "max-width: {$panel->calculateSideBySideWidth()}px;"
       ), $detail->render())
     );
 

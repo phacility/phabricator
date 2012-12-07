@@ -1,7 +1,6 @@
 <?php
 
-final class DifferentialChangesetListView
-  extends DifferentialCodeWidthSensitiveView {
+final class DifferentialChangesetListView extends AphrontView {
 
   private $changesets = array();
   private $visibleChangesets = array();
@@ -194,7 +193,6 @@ final class DifferentialChangesetListView
       array(
         'class' => 'differential-review-stage',
         'id'    => 'differential-review-stage',
-        'style' => "max-width: {$this->calculateSideBySideWidth()}px; ",
       ),
       implode("\n", $output));
   }
