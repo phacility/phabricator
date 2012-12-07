@@ -1552,7 +1552,6 @@ final class DifferentialChangesetParser {
           $n_colspan--;
         }
 
-
         if ($this->new[$ii]['type']) {
           if ($this->new[$ii]['type'] == '\\') {
             $n_text = $this->new[$ii]['text'];
@@ -1590,8 +1589,8 @@ final class DifferentialChangesetParser {
               ),
               '');
           }
+          $n_colspan--;
         }
-        $n_colspan--;
       }
       $n_classes .= ' right'.$n_colspan;
 
