@@ -1652,7 +1652,8 @@ final class DifferentialChangesetParser {
               '<th />'.
               '<td class="left">'.$xhp.'</td>'.
               '<th />'.
-              $this->renderRightCode($new, 3).
+              '<td colspan="2">'.$new.'</td>'.
+              '<td class="cov" />'.
             '</tr>';
         }
       }
@@ -1664,7 +1665,8 @@ final class DifferentialChangesetParser {
               '<th />'.
               '<td class="left" />'.
               '<th />'.
-              $this->renderRightCode($xhp, 3).
+              '<td colspan="2">'.$xhp.'</td>'.
+              '<td class="cov" />'.
             '</tr>';
         }
       }
