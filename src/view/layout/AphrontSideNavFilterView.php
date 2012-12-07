@@ -129,28 +129,29 @@ final class AphrontSideNavFilterView extends AphrontView {
       }
     }
 
-    $view = new AphrontSideNavView();
-    $view->setFlexNav($this->flexNav);
-    $view->setFlexible($this->flexible);
-    $view->setActive($this->active);
-    if ($this->user) {
-      $view->setUser($this->user);
+    if ($this->flexNav) {
+      return $this->renderFlexNav();
+    } else {
+      return $this->renderLegacyNav();
     }
+  }
+
+  private function renderNavItems() {
+    $results = array();
     foreach ($this->items as $item) {
       list($type, $key, $name) = $item;
       switch ($type) {
         case 'custom':
-          $view->addNavItem($name);
+          $results[] = $name;
           break;
         case 'spacer':
-          $view->addNavItem('<br />');
+          $results[] = '<br />';
           break;
         case 'label':
-          $view->addNavItem(
-            phutil_render_tag(
-              'span',
-              array(),
-              phutil_escape_html($name)));
+          $results[] = phutil_render_tag(
+            'span',
+            array(),
+            phutil_escape_html($name));
           break;
         case 'filter':
           $class = ($key == $this->selectedFilter)
@@ -173,22 +174,121 @@ final class AphrontSideNavFilterView extends AphrontView {
             }
           }
 
-          $view->addNavItem(
-            phutil_render_tag(
-              'a',
-              array(
-                'href'  => $href,
-                'class' => $class,
-              ),
-              phutil_escape_html($name)));
+          $results[] = phutil_render_tag(
+            'a',
+            array(
+              'href'  => $href,
+              'class' => $class,
+            ),
+            phutil_escape_html($name));
           break;
         default:
           throw new Exception("Unknown item type '{$type}'.");
       }
     }
-    $view->appendChild($this->renderChildren());
+    return $results;
+  }
 
-    return $view->render();
+  private function renderFlexNav() {
+
+    $user = $this->user;
+
+    require_celerity_resource('phabricator-nav-view-css');
+
+    $nav_classes = array();
+    $nav_classes[] = 'phabricator-nav';
+
+    $nav_id = null;
+    $drag_id = null;
+    $content_id = celerity_generate_unique_node_id();
+    $local_id = null;
+    $local_menu = null;
+    $main_id = celerity_generate_unique_node_id();
+
+    if ($this->flexible) {
+      $drag_id = celerity_generate_unique_node_id();
+      $flex_bar = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-nav-drag',
+          'id' => $drag_id,
+        ),
+        '');
+    } else {
+      $flex_bar = null;
+    }
+
+    $nav_menu = null;
+    if ($this->items) {
+      $local_id = celerity_generate_unique_node_id();
+      $nav_classes[] = 'has-local-nav';
+      $local_menu = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-nav-col phabricator-nav-local',
+          'id'    => $local_id,
+        ),
+        self::renderSingleView($this->renderNavItems()));
+    }
+
+    Javelin::initBehavior(
+      'phabricator-nav',
+      array(
+        'mainID'      => $main_id,
+        'localID'     => $local_id,
+        'dragID'      => $drag_id,
+        'contentID'   => $content_id,
+      ));
+
+    if ($this->active && $local_id) {
+      Javelin::initBehavior(
+        'phabricator-active-nav',
+        array(
+          'localID' => $local_id,
+        ));
+    }
+
+    $header_part =
+      '<div class="phabricator-nav-head">'.
+        '<div class="phabricator-nav-head-tablet">'.
+          '<a href="#" class="nav-button nav-button-w nav-button-menu" '.
+            'id="tablet-menu1"></a>'.
+          '<a href="#" class="nav-button nav-button-e nav-button-content '.
+            'nav-button-selected" id="tablet-menu2"></a>'.
+        '</div>'.
+      '</div>';
+
+    return $header_part.phutil_render_tag(
+      'div',
+      array(
+        'class' => implode(' ', $nav_classes),
+        'id'    => $main_id,
+      ),
+      $local_menu.
+      $flex_bar.
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-nav-content',
+          'id' => $content_id,
+        ),
+        $this->renderChildren()));
+  }
+
+  public function renderLegacyNav() {
+    require_celerity_resource('aphront-side-nav-view-css');
+
+    return
+      '<table class="aphront-side-nav-view">'.
+        '<tr>'.
+          '<th class="aphront-side-nav-navigation">'.
+            self::renderSingleView($this->renderNavItems()).
+          '</th>'.
+          '<td class="aphront-side-nav-content">'.
+            $this->renderChildren().
+          '</td>'.
+        '</tr>'.
+      '</table>';
   }
 
 }
