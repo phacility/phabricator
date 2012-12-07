@@ -308,17 +308,9 @@ final class PhabricatorOwnersListController
     return $panel;
   }
 
-  protected function getExtraPackageViews() {
-    switch ($this->view) {
-      case 'search':
-        $extra = array(array('name' => 'Search Results',
-                             'key'  => 'view/search'));
-        break;
-      default:
-        $extra = array();
-        break;
+  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
+    if ($this->view == 'search') {
+      $view->addFilter('view/search', 'Search Results');
     }
-
-    return $extra;
   }
 }

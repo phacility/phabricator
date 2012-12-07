@@ -979,9 +979,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $nav->setBaseURI(new PhutilURI('/D'.$revision->getID()));
     $nav->setFlexible(true);
 
-    $nav->addFilter('top', 'D'.$revision->getID(), '#top',
-      $relative = false,
-      'phabricator-active-nav-focus');
+    $nav->addFilter('top', 'D'.$revision->getID(), '#top');
 
     $tree = new PhutilFileTree();
     foreach ($changesets as $changeset) {

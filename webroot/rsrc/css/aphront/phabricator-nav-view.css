@@ -59,11 +59,6 @@
   display: none;
 }
 
-.phabricator-nav-col a,
-.phabricator-nav-col span {
-  display: block;
-}
-
 .has-local-nav .phabricator-nav-content {
   margin-left: 180px;
 }
@@ -82,23 +77,6 @@
 
 .device-desktop .local-nav-collapsed .phabricator-nav-content {
   margin-left: 2.5em !important;
-}
-
-.phabricator-nav-col span {
-  display: block;
-  font-weight: bold;
-  padding: 6px 6px 6px 12px;
-  color: #222222;
-}
-
-.phabricator-nav-col a {
-  display: block;
-  padding: 3px 6px 3px 24px;
-  font-weight: bold;
-}
-
-.phabricator-nav-col a.aphront-side-nav-selected {
-  background-color: #a1bbe5;
 }
 
 .device-desktop .phabricator-nav-head {

@@ -256,15 +256,11 @@ final class PhabricatorOwnersEditController
       ));
   }
 
-  protected function getExtraPackageViews() {
+  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
     if ($this->id) {
-      $extra = array(array('name' => 'Edit',
-                           'key'  => 'edit/'.$this->id));
+      $view->addFilter('edit/'.$this->id, 'Edit');
     } else {
-      $extra = array(array('name' => 'New',
-                           'key'  => 'new'));
+      $view->addFilter('new', 'New');
     }
-
-    return $extra;
   }
 }

@@ -28,6 +28,11 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $flexible;
   private $user;
   private $active;
+  private $menu;
+
+  public function __construct() {
+    $this->menu = new PhabricatorMenuView();
+  }
 
   public function setActive($active) {
     $this->active = $active;
@@ -49,50 +54,49 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this;
   }
 
-  public function addFilter(
-    $key,
-    $name,
-    $uri = null,
-    $relative = false,
-    $class = null) {
-
-    $this->items[] = array(
-      'filter',
-      $key,
-      $name,
-      'uri' => $uri,
-      'relative' => $relative,
-      'class' => $class,
-    );
-
+  public function addMenuItem(PhabricatorMenuItemView $item) {
+    $this->menu->addMenuItem($item);
     return $this;
   }
 
-  public function addFilters(array $views) {
-    foreach ($views as $view) {
-      $uri = isset($view['uri']) ? $view['uri'] : null;
-      $relative = isset($view['relative']) ? $view['relative'] : false;
-      $this->addFilter(
-        $view['key'],
-        $view['name'],
-        $uri,
-        $relative);
+  public function addFilter(
+    $key,
+    $name,
+    $uri = null) {
+
+    $item = id(new PhabricatorMenuItemView())
+      ->setKey($key)
+      ->setName($name);
+
+    if ($uri) {
+      $item->setHref($uri);
+    } else {
+      $href = clone $this->baseURI;
+      $href->setPath(rtrim($href->getPath().$key, '/').'/');
+      $href = (string)$href;
+
+      $item->setHref($href);
     }
+
+    return $this->addMenuItem($item);
   }
 
   public function addCustomBlock($block) {
-    $this->items[] = array('custom', null, $block);
+    $this->menu->appendChild($block);
     return $this;
   }
 
   public function addLabel($name) {
-    $this->items[] = array('label', null, $name);
-    return $this;
+    return $this->addMenuItem(
+      id(new PhabricatorMenuItemView())
+        ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+        ->setName($name));
   }
 
   public function addSpacer() {
-    $this->items[] = array('spacer', null, null);
-    return $this;
+    return $this->addMenuItem(
+      id(new PhabricatorMenuItemView())
+        ->setType(PhabricatorMenuItemView::TYPE_SPACER));
   }
 
   public function setBaseURI(PhutilURI $uri) {
@@ -106,21 +110,14 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function selectFilter($key, $default = null) {
     $this->selectedFilter = $default;
-    if ($key !== null) {
-      foreach ($this->items as $item) {
-        if ($item[0] == 'filter') {
-          if ($item[1] == $key) {
-            $this->selectedFilter = $key;
-            break;
-          }
-        }
-      }
+    if ($this->menu->getItem($key)) {
+      $this->selectedFilter = $key;
     }
     return $this->selectedFilter;
   }
 
   public function render() {
-    if ($this->items) {
+    if ($this->menu->getItems()) {
       if (!$this->baseURI) {
         throw new Exception("Call setBaseURI() before render()!");
       }
@@ -129,64 +126,16 @@ final class AphrontSideNavFilterView extends AphrontView {
       }
     }
 
+    $selected_item = $this->menu->getItem($this->selectedFilter);
+    if ($selected_item) {
+      $selected_item->addClass('phabricator-menu-item-selected');
+    }
+
     if ($this->flexNav) {
       return $this->renderFlexNav();
     } else {
       return $this->renderLegacyNav();
     }
-  }
-
-  private function renderNavItems() {
-    $results = array();
-    foreach ($this->items as $item) {
-      list($type, $key, $name) = $item;
-      switch ($type) {
-        case 'custom':
-          $results[] = $name;
-          break;
-        case 'spacer':
-          $results[] = '<br />';
-          break;
-        case 'label':
-          $results[] = phutil_render_tag(
-            'span',
-            array(),
-            phutil_escape_html($name));
-          break;
-        case 'filter':
-          $class = ($key == $this->selectedFilter)
-            ? 'aphront-side-nav-selected'
-            : null;
-
-          $class = trim($class.' '.idx($item, 'class', ''));
-
-          if (empty($item['uri'])) {
-            $href = clone $this->baseURI;
-            $href->setPath(rtrim($href->getPath().$key, '/').'/');
-            $href = (string)$href;
-          } else {
-            if (empty($item['relative'])) {
-              $href = $item['uri'];
-            } else {
-              $href = clone $this->baseURI;
-              $href->setPath($href->getPath().$item['uri']);
-              $href = (string)$href;
-            }
-          }
-
-          $results[] = phutil_render_tag(
-            'a',
-            array(
-              'href'  => $href,
-              'class' => $class,
-            ),
-            phutil_escape_html($name));
-          break;
-        default:
-          throw new Exception("Unknown item type '{$type}'.");
-      }
-    }
-    return $results;
   }
 
   private function renderFlexNav() {
@@ -219,7 +168,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     }
 
     $nav_menu = null;
-    if ($this->items) {
+    if ($this->menu->getItems()) {
       $local_id = celerity_generate_unique_node_id();
       $nav_classes[] = 'has-local-nav';
       $local_menu = phutil_render_tag(
@@ -228,7 +177,7 @@ final class AphrontSideNavFilterView extends AphrontView {
           'class' => 'phabricator-nav-col phabricator-nav-local',
           'id'    => $local_id,
         ),
-        self::renderSingleView($this->renderNavItems()));
+        self::renderSingleView($this->menu));
     }
 
     Javelin::initBehavior(
@@ -282,7 +231,7 @@ final class AphrontSideNavFilterView extends AphrontView {
       '<table class="aphront-side-nav-view">'.
         '<tr>'.
           '<th class="aphront-side-nav-navigation">'.
-            self::renderSingleView($this->renderNavItems()).
+            self::renderSingleView($this->menu).
           '</th>'.
           '<td class="aphront-side-nav-content">'.
             $this->renderChildren().
