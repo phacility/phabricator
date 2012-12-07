@@ -50,49 +50,25 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $header_id = celerity_generate_unique_node_id();
     $menus = array();
-
-    $group = new PhabricatorMainMenuGroupView();
-    $group->addClass('phabricator-main-menu-group-logo');
-    $group->setCollapsible(false);
-
-    $group->appendChild(
-      phutil_render_tag(
-        'a',
-        array(
-          'class' => 'phabricator-main-menu-logo',
-          'href'  => '/',
-        ),
-        ''));
+    $alerts = array();
 
     if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
         $user->isLoggedIn()) {
       list($menu, $dropdown) = $this->renderNotificationMenu();
-      $group->appendChild($menu);
+      $alerts[] = $menu;
       $menus[] = $dropdown;
     }
 
-    $group->appendChild(
-      javelin_render_tag(
-        'a',
-        array(
-          'class' => 'phabricator-main-menu-expand-button',
-          'sigil' => 'jx-toggle-class',
-          'meta'  => array(
-            'map' => array(
-              $header_id => 'phabricator-core-menu-expand',
-            ),
-          ),
-        ),
-        ''));
-    $logo = $group->render();
-
     $phabricator_menu = $this->renderPhabricatorMenu();
-//    $menus[] = $this->renderApplicationMenu();
 
-
-
-
-    $actions = '';
+    if ($alerts) {
+      $alerts = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-main-menu-alerts',
+        ),
+        self::renderSingleView($alerts));
+    }
 
     $application_menu = $this->getApplicationMenu();
     if ($application_menu) {
@@ -303,6 +279,16 @@ final class PhabricatorMainMenuView extends AphrontView {
 
 
     return $view;
+  }
+
+  private function renderPhabricatorLogo() {
+    return phutil_render_tag(
+      'a',
+      array(
+        'class' => 'phabricator-main-menu-logo',
+        'href'  => '/',
+      ),
+      '');
   }
 
   private function renderNotificationMenu() {
