@@ -33,19 +33,13 @@ final class PhabricatorRepositoryEditController
       $this->view = head_key($views);
     }
 
-    $nav = new AphrontSideNavView();
+    $nav = new AphrontSideNavFilterView();
+    $base_uri = new PhutilURI('/repository/edit/'.$repository->getID().'/');
+    $nav->setBaseURI($base_uri);
     foreach ($views as $view => $name) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'class' => ($view == $this->view
-              ? 'aphront-side-nav-selected'
-              : null),
-            'href'  => '/repository/edit/'.$repository->getID().'/'.$view.'/',
-          ),
-          phutil_escape_html($name)));
+      $nav->addFilter($view, $name);
     }
+    $nav->selectFilter($this->view, null);
 
     $nav->appendChild($this->renderDaemonNotice());
 

@@ -82,32 +82,17 @@ final class DifferentialRevisionListController extends DifferentialController {
       'order' => 'modified',
     );
 
-    $side_nav = new AphrontSideNavView();
+    $side_nav = new AphrontSideNavFilterView();
+    $side_nav->setBaseURI(id(clone $uri)->setPath('/differential/filter/'));
     foreach ($filters as $filter) {
       list($filter_name, $display_name) = $filter;
       if ($filter_name) {
-        $href = clone $uri;
-        $href->setPath('/differential/filter/'.$filter_name.'/'.$username);
-        if ($filter_name == $this->filter) {
-          $class = 'aphront-side-nav-selected';
-        } else {
-          $class = null;
-        }
-        $item = phutil_render_tag(
-          'a',
-          array(
-            'href' => (string)$href,
-            'class' => $class,
-          ),
-          phutil_escape_html($display_name));
+        $side_nav->addFilter($filter_name.'/'.$username, $display_name);
       } else {
-        $item = phutil_render_tag(
-          'span',
-          array(),
-          phutil_escape_html($display_name));
+        $side_nav->addLabel($display_name);
       }
-      $side_nav->addNavItem($item);
     }
+    $side_nav->selectFilter($this->filter.'/'.$username, null);
 
     $panels = array();
     $handles = array();

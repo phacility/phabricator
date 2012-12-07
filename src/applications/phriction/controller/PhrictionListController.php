@@ -27,19 +27,12 @@ final class PhrictionListController
       $this->view = 'active';
     }
 
-    $nav = new AphrontSideNavView();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/phriction/list/'));
     foreach ($views as $view => $name) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href'  => '/phriction/list/'.$view.'/',
-            'class' => ($this->view == $view)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($name)));
+      $nav->addFilter($view, $name);
     }
+    $nav->selectFilter($this->view, null);
 
     $pager = new AphrontPagerView();
     $pager->setURI($request->getRequestURI(), 'page');

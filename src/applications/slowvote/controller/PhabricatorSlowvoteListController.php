@@ -143,19 +143,12 @@ final class PhabricatorSlowvoteListController
   }
 
   private function renderSideNav(array $views, $view) {
-    $side_nav = new AphrontSideNavView();
+    $side_nav = new AphrontSideNavFilterView();
+    $side_nav->setBaseURI(new PhutilURI('/vote/view/'));
     foreach ($views as $key => $name) {
-      $side_nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/vote/view/'.$key.'/',
-            'class' => ($view == $key)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($name)));
+      $side_nav->addFilter($key, $name);
     }
+    $side_nav->selectFilter($view, null);
     return $side_nav;
   }
 
