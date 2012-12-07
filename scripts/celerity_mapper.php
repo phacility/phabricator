@@ -83,7 +83,12 @@ $package_spec = array(
     'aphront-headsup-view-css',
     'phabricator-flag-css',
     'aphront-error-view-css',
+
     'sprite-icon-css',
+    'sprite-gradient-css',
+    'sprite-menu-css',
+    'sprite-apps-large-css',
+
     'phabricator-main-menu-view',
     'phabricator-notification-css',
     'phabricator-notification-menu-css',
@@ -92,6 +97,10 @@ $package_spec = array(
     'phabricator-form-view-css',
     'phabricator-filetree-view-css',
     'phabricator-nav-view-css',
+    'phabricator-side-menu-view-css',
+    'phabricator-crumbs-view-css',
+    'phabricator-object-item-list-view-css',
+
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
