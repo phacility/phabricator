@@ -24,4 +24,17 @@ abstract class DifferentialController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $create_uri = new PhutilURI('/differential/diff/create/');
+    $crumbs->addAction(
+      id(new PhabricatorMenuItemView())
+        ->setHref($this->getApplicationURI('/diff/create/'))
+        ->setName('Create Diff')
+        ->setIcon('create'));
+
+    return $crumbs;
+  }
+
 }

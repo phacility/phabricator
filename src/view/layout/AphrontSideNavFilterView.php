@@ -83,7 +83,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $uri = null) {
 
     $item = id(new PhabricatorMenuItemView())
-      ->setKey($key)
+      ->setKey(strlen($key) ? $key : null)
       ->setName($name);
 
     if ($uri) {

@@ -175,25 +175,24 @@ final class DifferentialRevisionListController extends DifferentialController {
     $filter_view = new AphrontListFilterView();
     $filter_view->appendChild($filter_form);
 
-    if (!$viewer_is_anonymous) {
-      $create_uri = new PhutilURI('/differential/diff/create/');
-      $filter_view->addButton(
-        phutil_render_tag(
-          'a',
-          array(
-            'href'  => (string)$create_uri,
-            'class' => 'green button',
-          ),
-          'Create Revision'));
-    }
-
     $side_nav->appendChild($filter_view);
 
     foreach ($panels as $panel) {
       $side_nav->appendChild($panel);
     }
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildApplicationCrumbs();
+    $name = $side_nav
+      ->getMenu()
+      ->getItem($side_nav->getSelectedFilter())
+      ->getName();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($name)
+        ->setHref($request->getRequestURI()));
+    $side_nav->setCrumbs($crumbs);
+
+    return $this->buildApplicationPage(
       $side_nav,
       array(
         'title' => 'Differential Home',

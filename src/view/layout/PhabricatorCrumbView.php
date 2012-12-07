@@ -43,7 +43,7 @@ final class PhabricatorCrumbView extends AphrontView {
         'span',
         array(
           'class' => 'phabricator-crumb-icon '.
-                     'sprite-apps-large app-'.$this->icon.'-dark',
+                     'sprite-apps-large app-'.$this->icon.'-dark-large',
         ),
         '');
     }
