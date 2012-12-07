@@ -5,23 +5,11 @@ final class AphrontSideNavView extends AphrontView {
   private $items = array();
   private $flexNav;
   private $isFlexible;
-  private $showApplicationMenu;
   private $user;
-  private $currentApplication;
   private $active;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
-    return $this;
-  }
-
-  public function setShowApplicationMenu($show_application_menu) {
-    $this->showApplicationMenu = $show_application_menu;
-    return $this;
-  }
-
-  public function setCurrentApplication(PhabricatorApplication $current) {
-    $this->currentApplication = $current;
     return $this;
   }
 
@@ -57,23 +45,12 @@ final class AphrontSideNavView extends AphrontView {
       $nav_classes = array();
       $nav_classes[] = 'phabricator-nav';
 
-      $app_id = celerity_generate_unique_node_id();
       $nav_id = null;
       $drag_id = null;
       $content_id = celerity_generate_unique_node_id();
       $local_id = null;
       $local_menu = null;
       $main_id = celerity_generate_unique_node_id();
-
-      $apps = $this->renderApplications();
-
-      $app_menu = phutil_render_tag(
-        'div',
-        array(
-          'class' => 'phabricator-nav-col phabricator-nav-app',
-          'id'    => $app_id,
-        ),
-        $apps->render());
 
       if ($this->isFlexible) {
         $drag_id = celerity_generate_unique_node_id();
@@ -105,7 +82,6 @@ final class AphrontSideNavView extends AphrontView {
         'phabricator-nav',
         array(
           'mainID'      => $main_id,
-          'appID'       => $app_id,
           'localID'     => $local_id,
           'dragID'      => $drag_id,
           'contentID'   => $content_id,
@@ -127,14 +103,6 @@ final class AphrontSideNavView extends AphrontView {
             '<a href="#" class="nav-button nav-button-e nav-button-content '.
               'nav-button-selected" id="tablet-menu2"></a>'.
           '</div>'.
-          '<div class="phabricator-nav-head-phone">'.
-            '<a href="#" class="nav-button nav-button-w nav-button-apps" '.
-              'id="phone-menu1"></button>'.
-            '<a href="#" class="nav-button nav-button-menu" '.
-              'id="phone-menu2"></button>'.
-            '<a href="#" class="nav-button nav-button-e nav-button-content '.
-              'nav-button-selected" id="phone-menu3"></button>'.
-          '</div>'.
         '</div>';
 
       return $header_part.phutil_render_tag(
@@ -143,7 +111,6 @@ final class AphrontSideNavView extends AphrontView {
           'class' => implode(' ', $nav_classes),
           'id'    => $main_id,
         ),
-        $app_menu.
         $local_menu.
         $flex_bar.
         phutil_render_tag(
@@ -169,93 +136,6 @@ final class AphrontSideNavView extends AphrontView {
           '</tr>'.
         '</table>';
     }
-  }
-
-  private function renderApplications() {
-    $core = array();
-    $current = $this->currentApplication;
-
-    $meta = null;
-
-    $group_core = PhabricatorApplication::GROUP_CORE;
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    foreach ($applications as $application) {
-      if ($application instanceof PhabricatorApplicationApplications) {
-        $meta = $application;
-        continue;
-      }
-      if ($application->getApplicationGroup() != $group_core) {
-        continue;
-      }
-      if ($application->getApplicationOrder() !== null) {
-        $core[] = $application;
-      }
-    }
-
-    $core = msort($core, 'getApplicationOrder');
-    if ($meta) {
-      $core[] = $meta;
-    }
-    $core = mpull($core, null, 'getPHID');
-
-    if ($current && empty($core[$current->getPHID()])) {
-      array_unshift($core, $current);
-    }
-
-    Javelin::initBehavior('phabricator-tooltips', array());
-    require_celerity_resource('aphront-tooltip-css');
-
-    $apps = array();
-    foreach ($core as $phid => $application) {
-      $classes = array();
-      $classes[] = 'phabricator-nav-app-item';
-
-      if ($current && $phid == $current->getPHID()) {
-        $selected = true;
-      } else {
-        $selected = false;
-      }
-
-      $iclasses = array();
-      $iclasses[] = 'phabricator-nav-app-item-icon';
-      $style = null;
-      if ($application->getIconURI()) {
-        $style = 'background-image: url('.$application->getIconURI().'); '.
-                 'background-size: 30px auto;';
-      } else {
-        $iclasses[] = 'autosprite';
-        $sprite = $application->getAutospriteName();
-        if ($selected) {
-          $sprite .= '-selected';
-        }
-        $iclasses[] = 'app-'.$sprite;
-      }
-
-      $icon = phutil_render_tag(
-        'span',
-        array(
-          'class' => implode(' ', $iclasses),
-          'style' => $style,
-        ),
-        '');
-
-      $apps[] = javelin_render_tag(
-        'a',
-        array(
-          'class' => implode(' ', $classes),
-          'href' => $application->getBaseURI(),
-          'sigil' => 'has-tooltip',
-          'meta' => array(
-            'tip' => $application->getName(),
-            'align' => 'E',
-          ),
-        ),
-        $icon.
-        phutil_escape_html($application->getName()));
-    }
-
-    return id(new AphrontNullView())->appendChild($apps);
   }
 
 }

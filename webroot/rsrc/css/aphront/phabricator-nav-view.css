@@ -19,13 +19,6 @@
   z-index: 3;
 }
 
-.phabricator-nav-app {
-  width: 149px;
-  background: #262b2e;
-  border-right: 1px solid #222222;
-  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
-}
-
 .phabricator-nav-local {
   width: 179px;
   background: #ececec;
@@ -43,7 +36,7 @@
 .phabricator-nav-drag {
   position: fixed;
   top: 0;
-  left: 217px;
+  left: 179px;
   width: 7px;
   bottom: 0;
   z-index: 4;
@@ -71,28 +64,12 @@
   display: block;
 }
 
-.phabricator-nav-local {
-  left: 150px;
-}
-
-.device-desktop .phabricator-nav-local {
-  left: 38px;
-}
-
-.phabricator-nav-content {
-  margin-left: 150px;
-}
-
 .has-local-nav .phabricator-nav-content {
-  margin-left: 330px;
-}
-
-.device-desktop .phabricator-nav-content {
-  margin-left: 38px;
+  margin-left: 180px;
 }
 
 .device-desktop .has-local-nav .phabricator-nav-content {
-  margin-left: 216px;
+  margin-left: 178px;
 }
 
 .device-desktop .local-nav-collapsed .phabricator-nav-local {
@@ -124,45 +101,6 @@
   background-color: #a1bbe5;
 }
 
-a.phabricator-nav-app-item {
-  color: #e9e9e9;
-  font-weight: normal;
-  padding: 4px;
-  padding-left: 40px;
-  vertical-align: middle;
-  line-height: 30px;
-  height: 30px;
-
-  position: relative;
-}
-
-/**
- * On the desktop, constrain the size of the <a /> so that the tooltip is
- * positioned correctly. Without this rule, it ends up too far to the right.
- */
-.device-desktop a.phabricator-nav-app-item {
-  padding-left: 38px;
-  padding-right: 0px;
-}
-
-span.phabricator-nav-app-item-icon {
-  position: absolute;
-  display: block;
-
-  left: 5px;
-  top: 6px;
-  background-repeat: no-repeat;
-
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  margin: 0;
-}
-
-.device-desktop .phabricator-nav-app {
-  width: 37px;
-}
-
 .device-desktop .phabricator-nav-head {
   display: none;
 }
@@ -173,22 +111,9 @@ span.phabricator-nav-app-item-icon {
   top: 0px;
 }
 
-.device-tablet .phabricator-nav-app,
-.device-phone .phabricator-nav-app {
-  left: -450px;
-}
-
 .device-tablet .phabricator-nav-local,
 .device-phone .phabricator-nav-local {
   left: -300px;
-}
-
-.device-phone .phabricator-nav-head-tablet {
-  display: none;
-}
-
-.device-tablet .phabricator-nav-head-phone {
-  display: none;
 }
 
 .device-tablet .phabricator-nav,
@@ -246,12 +171,6 @@ span.phabricator-nav-app-item-icon {
 
 .nav-button-e {
   border-radius: 0 6px 6px 0;
-}
-
-.nav-button-apps {
-  background-image: url(/rsrc/image/button_apps.png);
-  background-size: 24px auto;
-  background-position: center;
 }
 
 .nav-button-menu {

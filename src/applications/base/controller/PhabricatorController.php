@@ -159,13 +159,8 @@ abstract class PhabricatorController extends AphrontController {
       $view = $nav;
     }
 
-    if ($application) {
-      $view->setCurrentApplication($application);
-    }
-
     $view->setUser($this->getRequest()->getUser());
     $view->setFlexNav(true);
-    $view->setShowApplicationMenu(true);
 
     $page->appendChild($view);
 
