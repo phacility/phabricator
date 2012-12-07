@@ -21,6 +21,11 @@
       "rule" : ".menu-icon-eye",
       "hash" : "d598b1acb1933a86eaed3dea3347f7b0"
     },
+    "logo"             : {
+      "name" : "logo",
+      "rule" : ".phabricator-main-menu-logo-image",
+      "hash" : "c6c7ab165dce13a51ef329928c7c4aba"
+    },
     "round_bubble"     : {
       "name" : "round_bubble",
       "rule" : ".phabricator-main-menu-alert-bubble",

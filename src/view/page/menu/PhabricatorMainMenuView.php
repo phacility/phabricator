@@ -288,7 +288,12 @@ final class PhabricatorMainMenuView extends AphrontView {
         'class' => 'phabricator-main-menu-logo',
         'href'  => '/',
       ),
-      '');
+      phutil_render_tag(
+        'span',
+        array(
+          'class' => 'sprite-menu phabricator-main-menu-logo-image',
+        ),
+        ''));
   }
 
   private function renderNotificationMenu() {

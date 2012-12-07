@@ -69,16 +69,3 @@
   vertical-align: top;
   margin: 0 9px;
 }
-
-.temporary-icon-apps {
-  background-image: url(/rsrc/image/button_apps.png);
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-
-.temporary-icon-list {
-  background-image: url(/rsrc/image/button_menu.png);
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: 24px 15px;
-}

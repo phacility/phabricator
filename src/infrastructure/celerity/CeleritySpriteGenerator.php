@@ -123,6 +123,11 @@ final class CeleritySpriteGenerator {
         'y' => 20,
         'css' => '.menu-icon-app',
       ),
+      'logo' => array(
+        'x' => 139,
+        'y' => 25,
+        'css' => '.phabricator-main-menu-logo-image',
+      ),
     );
 
     $scales = array(

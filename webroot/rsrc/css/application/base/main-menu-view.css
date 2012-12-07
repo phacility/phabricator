@@ -42,10 +42,18 @@
 
 .phabricator-main-menu-logo {
   display: inline-block;
+  position: relative;
   height: 44px;
-  width: 170px;
+  width: 139px;
   margin-right: 12px;
-  background: 6px 9px url(/rsrc/image/header_logo.png) no-repeat;
+  margin-left: 6px;
+}
+
+.phabricator-main-menu-logo-image {
+  position: absolute;
+  width: 139px;
+  height: 25px;
+  top: 9px;
 }
 
 .device .phabricator-main-menu-logo {
