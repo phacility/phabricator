@@ -1530,9 +1530,9 @@ final class DifferentialChangesetParser {
         }
       }
 
-      $n_copy = null;
+      $n_copy = '<td class="copy" />';
       $n_cov = null;
-      $n_colspan = 3;
+      $n_colspan = 2;
       $n_classes = '';
       $n_num  = null;
       $n_text = null;
@@ -1589,7 +1589,6 @@ final class DifferentialChangesetParser {
               ),
               '');
           }
-          $n_colspan--;
         }
       }
       $n_classes .= ' right'.$n_colspan;
