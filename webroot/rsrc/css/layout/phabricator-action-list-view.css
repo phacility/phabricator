@@ -20,8 +20,7 @@
   box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.10);
 }
 
-.device-tablet .phabricator-action-list-view,
-.device-phone .phabricator-action-list-view {
+.device .phabricator-action-list-view {
   background: #f3f3f3;
   border-top: 1px solid #dcdcdc;
   padding: .5em 0;

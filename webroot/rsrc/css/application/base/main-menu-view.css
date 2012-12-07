@@ -44,6 +44,10 @@
   background: 6px 9px url(/rsrc/image/header_logo.png) no-repeat;
 }
 
+.device .phabricator-main-menu-logo {
+  display: none;
+}
+
 /* - Expand/Collapse Button ----------------------------------------------------
 
   On phones, the menu switches to a vertical layout and uses a button to expand
@@ -85,8 +89,7 @@
   display: none;
 }
 
-.device-tablet .phabricator-main-menu-expand-button,
-.device-phone .phabricator-main-menu-expand-button {
+.device .phabricator-main-menu-expand-button {
   display: block;
 }
 
@@ -124,8 +127,7 @@
   margin-left: -150px;
 }
 
-.device-tablet .phabricator-main-menu-search-target,
-.device-phone .phabricator-main-menu-search-target {
+.device .phabricator-main-menu-search-target {
   width: 100%;
   margin-left: -25px;
 
@@ -135,8 +137,7 @@
   margin: 0 8px 0 50px;
 }
 
-.device-tablet .phabricator-main-menu-search-container,
-.device-phone .phabricator-main-menu-search-container {
+.device .phabricator-main-menu-search-container {
   margin: 0 18px 0 60px;
 }
 
@@ -235,8 +236,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   display: inline-block;
 }
 
-.device-tablet .phabricator-main-menu-alerts,
-.device-phone .phabricator-main-menu-alerts {
+.device .phabricator-main-menu-alerts {
   position: absolute;
   left: 60px;
   right: 60px;
@@ -296,21 +296,17 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 */
 
-.device-phone .phabricator-dark-menu,
-.device-tablet .phabricator-dark-menu,
-.device-phone .phabricator-dark-menu a.phabricator-menu-item-type-link,
-.device-tablet .phabricator-dark-menu a.phabricator-menu-item-type-link {
+.device .phabricator-dark-menu,
+.device .phabricator-dark-menu a.phabricator-menu-item-type-link{
   color: #ffffff;
 }
 
-.device-phone .phabricator-dark-menu .phabricator-menu-item-view,
-.device-tablet .phabricator-dark-menu .phabricator-menu-item-view {
+.device .phabricator-dark-menu .phabricator-menu-item-view {
   display: block;
   padding: 4px 0;
 }
 
-.device-phone .phabricator-dark-menu .phabricator-menu-item-type-label,
-.device-tablet .phabricator-dark-menu .phabricator-menu-item-type-label {
+.device .phabricator-dark-menu .phabricator-menu-item-type-label {
   text-transform: uppercase;
   font-size: 11px;
   background-color: #151719;
@@ -318,21 +314,17 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   height: 24px;
 }
 
-.device-phone .phabricator-dark-menu .phabricator-menu-item-type-spacer,
-.device-tablet .phabricator-dark-menu .phabricator-menu-item-type-spacer {
+.device .phabricator-dark-menu .phabricator-menu-item-type-spacer {
   display: none;
 }
 
-.device-phone .phabricator-dark-menu .phabricator-menu-item-type-label
-  .phabricator-menu-item-name,
-.device-tablet .phabricator-dark-menu .phabricator-menu-item-type-label
+.device .phabricator-dark-menu .phabricator-menu-item-type-label
   .phabricator-menu-item-name {
   display: block;
   padding: 6px 0 0;
 }
 
-.device-phone .phabricator-dark-menu .phabricator-menu-item-type-link,
-.device-tablet .phabricator-dark-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phabricator-menu-item-type-link {
   border-width: 1px 0;
   border-style: solid;
   border-color: #34373b transparent #282c2d;
@@ -357,25 +349,20 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   background-size: 26px 26px;
 }
 
-.device-phone .phabricator-core-menu,
-.device-tablet .phabricator-core-menu {
+.device .phabricator-core-menu {
   display: none;
 }
 
-.device-phone .phabricator-core-menu-expanded .phabricator-core-menu,
-.device-tablet .phabricator-core-menu-expanded .phabricator-core-menu {
+.device .phabricator-core-menu-expanded .phabricator-core-menu {
   display: block;
 }
 
-.device-phone .phabricator-core-menu .phabricator-menu-item-type-link,
-.device-tablet .phabricator-core-menu .phabricator-menu-item-type-link {
+.device .phabricator-core-menu .phabricator-menu-item-type-link {
   font-size: 15px;
   min-height: 30px;
 }
 
-.device-phone .phabricator-core-menu
-   .phabricator-menu-item-type-link .phabricator-menu-item-name,
-.device-tablet .phabricator-core-menu
+.device .phabricator-core-menu
    .phabricator-menu-item-type-link .phabricator-menu-item-name {
   margin-left: 40px;
   line-height: 28px;
@@ -409,8 +396,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   left: 6px;
 }
 
-.device-phone .phabricator-core-menu-icon,
-.device-tablet .phabricator-core-menu-icon {
+.device .phabricator-core-menu-icon {
   left: 6px;
 }
 
@@ -428,10 +414,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 */
 
-.device-phone .phabricator-application-menu-expanded
-  .phabricator-application-menu,
-.device-tablet .phabricator-application-menu-expanded
-  .phabricator-application-menu {
+.device .phabricator-application-menu-expanded .phabricator-application-menu {
   display: block;
   padding-top: 44px;
 }
@@ -445,10 +428,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   padding-left: 12px;
 }
 
-.device-phone .phabricator-application-menu-expanded
-  .phabricator-application-menu,
-.device-tablet .phabricator-application-menu-expanded
-  .phabricator-application-menu {
+.device .phabricator-application-menu-expanded .phabricator-application-menu {
   display: block;
   padding-top: 44px;
 }

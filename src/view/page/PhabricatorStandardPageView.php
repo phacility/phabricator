@@ -287,10 +287,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     // Try to guess the device resolution based on UA strings to avoid a flash
     // of incorrectly-styled content.
     $device_guess = 'device-desktop';
-    if (preg_match('/iPhone|iPod/', $agent)) {
-      $device_guess = 'device-phone';
-    } else if (preg_match('/iPad/', $agent)) {
-      $device_guess = 'device-tablet';
+    if (preg_match('@iPhone|iPod|(Android.*Chrome/[.0-9]* Mobile)@', $agent)) {
+      $device_guess = 'device-phone device';
+    } else if (preg_match('@iPad|(Android.*Chrome/)@', $agent)) {
+      $device_guess = 'device-tablet device';
     }
 
     $classes = array(

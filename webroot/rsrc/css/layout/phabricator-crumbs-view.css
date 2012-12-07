@@ -2,8 +2,7 @@
  * @provides phabricator-crumbs-view-css
  */
 
-.device-phone .phabricator-crumbs-view,
-.device-tablet .phabricator-crumbs-view {
+.device .phabricator-crumbs-view {
   display: none;
 }
 

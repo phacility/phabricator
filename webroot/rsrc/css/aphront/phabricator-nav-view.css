@@ -32,8 +32,7 @@
   background-image: url(/rsrc/image/menu_texture.png);
 }
 
-.device-tablet .phabricator-nav-local,
-.device-phone .phabricator-nav-local {
+.device .phabricator-nav-local {
   display: none;
 }
 
@@ -58,8 +57,7 @@
   background-repeat: no-repeat;
 }
 
-.device-tablet .phabricator-nav-drag,
-.device-phone .phabricator-nav-drag {
+.device .phabricator-nav-drag {
   display: none;
 }
 
@@ -83,30 +81,25 @@
   margin-left: 2.5em !important;
 }
 
-.device-tablet .phabricator-nav-col,
-.device-phone .phabricator-nav-col {
+.device .phabricator-nav-col {
   position: absolute;
   top: 0px;
 }
 
-.device-tablet .phabricator-nav-local,
-.device-phone .phabricator-nav-local {
+.device .phabricator-nav-local {
   left: -300px;
 }
 
-.device-tablet .phabricator-nav,
-.device-phone .phabricator-nav {
+.device .phabricator-nav {
   overflow-x: hidden;
   position: relative;
 }
 
-.device-tablet .phabricator-nav-content,
-.device-phone .phabricator-nav-content {
+.device .phabricator-nav-content {
   width: 100%;
 }
 
-.device-tablet .phabricator-nav-content,
-.device-phone .phabricator-nav-content {
+.device .phabricator-nav-content {
   margin-left: 0;
   position: relative;
 }

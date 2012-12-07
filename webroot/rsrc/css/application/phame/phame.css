@@ -29,8 +29,7 @@
   padding: 0px 8px 12px 8px;
 }
 
-.device-tablet .blog-post-list,
-.device-phone .blog-post-list {
+.device .blog-post-list {
   float: none;
   width: 90%;
   margin: 16px auto;
@@ -43,8 +42,7 @@
   padding: 0px 16px 0px 16px;
 }
 
-.device-tablet .blog-post-list-full,
-.device-phone .blog-post-list-full {
+.device .blog-post-list-full {
   float: none;
   margin: 16px auto;
 }
@@ -56,8 +54,7 @@
   margin: 16px 16px 16px 0px;
 }
 
-.device-tablet .blog-detail,
-.device-phone .blog-detail {
+.device .blog-detail {
   float: none;
   margin: 16px auto;
   width: 90%;

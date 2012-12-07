@@ -39,6 +39,7 @@ JX.behavior('device', function(config) {
     JX.DOM.alterClass(e, 'device-phone', (device == 'phone'));
     JX.DOM.alterClass(e, 'device-tablet', (device == 'tablet'));
     JX.DOM.alterClass(e, 'device-desktop', (device == 'desktop'));
+    JX.DOM.alterClass(e, 'device', (device != 'desktop'));
 
     JX.Stratcom.invoke('phabricator-device-change', null, device);
   }

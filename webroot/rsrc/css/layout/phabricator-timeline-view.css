@@ -105,8 +105,7 @@
   border-color: #009966;
 }
 
-.device-tablet .phabricator-timeline-event-view,
-.device-phone .phabricator-timeline-event-view {
+.device .phabricator-timeline-event-view {
   min-height: 25px;
   position: relative;
   margin-left: 3px;
@@ -116,21 +115,18 @@
   border-right-style: solid;
 }
 
-.device-tablet .phabricator-timeline-image,
-.device-phone .phabricator-timeline-image {
+.device .phabricator-timeline-image {
   display: none;
 }
 
-.device-tablet .phabricator-timeline-title,
-.device-phone .phabricator-timeline-title {
+.device .phabricator-timeline-title {
   line-height: 25px;
   min-height: 25px;
   background: #f7f7f7;
   padding: 0 5px;
 }
 
-.device-tablet .phabricator-timeline-spacer,
-.device-phone .phabricator-timeline-spacer {
+.device .phabricator-timeline-spacer {
   min-height: 8px;
   border-width: 0;
 }
