@@ -193,11 +193,16 @@ final class DiffusionLintController extends DiffusionController {
       foreach ($paths as $path) {
         $branch = idx($branches, $repositories[$path->getRepositoryPHID()]);
         if ($branch) {
-          $or[] = qsprintf(
+          $condition = qsprintf(
             $conn,
             '(branchID IN (%Ld) AND path LIKE %>)',
             array_keys($branch),
             $path->getPath());
+          if ($path->getExcluded()) {
+            $where[] = 'NOT '.$condition;
+          } else {
+            $or[] = $condition;
+          }
         }
       }
       if (!$or) {

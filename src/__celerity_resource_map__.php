@@ -2326,7 +2326,7 @@ celerity_register_resource_map(array(
   ),
   'owners-path-editor' =>
   array(
-    'uri' => '/res/e6c51eb6/rsrc/js/application/owners/OwnersPathEditor.js',
+    'uri' => '/res/29b68354/rsrc/js/application/owners/OwnersPathEditor.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2335,12 +2335,13 @@ celerity_register_resource_map(array(
       2 => 'path-typeahead',
       3 => 'javelin-dom',
       4 => 'javelin-util',
+      5 => 'phabricator-prefab',
     ),
     'disk' => '/rsrc/js/application/owners/OwnersPathEditor.js',
   ),
   'owners-path-editor-css' =>
   array(
-    'uri' => '/res/9bc5332c/rsrc/css/application/owners/owners-path-editor.css',
+    'uri' => '/res/4fcaabf6/rsrc/css/application/owners/owners-path-editor.css',
     'type' => 'css',
     'requires' =>
     array(

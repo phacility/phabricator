@@ -47,6 +47,7 @@ final class PhabricatorOwnersEditController
 
       $paths = $request->getArr('path');
       $repos = $request->getArr('repo');
+      $excludes = $request->getArr('exclude');
 
       $path_refs = array();
       for ($ii = 0; $ii < count($paths); $ii++) {
@@ -56,6 +57,7 @@ final class PhabricatorOwnersEditController
         $path_refs[] = array(
           'repositoryPHID'  => $repos[$ii],
           'path'            => $paths[$ii],
+          'excluded'        => $excludes[$ii],
         );
       }
 
@@ -102,6 +104,7 @@ final class PhabricatorOwnersEditController
         $path_refs[] = array(
           'repositoryPHID' => $path->getRepositoryPHID(),
           'path' => $path->getPath(),
+          'excluded' => $path->getExcluded(),
         );
       }
     }

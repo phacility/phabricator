@@ -100,7 +100,9 @@ final class PhabricatorOwnersDetailController
           'href' => (string) $href,
         ),
         phutil_escape_html($path->getPath()));
-      $path_links[] = $repo_name.' '.$path_link;
+      $path_links[] =
+        ($path->getExcluded() ? '&ndash;' : '+').' '.
+        $repo_name.' '.$path_link;
     }
     $path_links = implode('<br />', $path_links);
     $rows[] = array(
