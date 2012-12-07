@@ -31,4 +31,8 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     return $nav;
   }
 
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView(null)->getMenu();
+  }
+
 }

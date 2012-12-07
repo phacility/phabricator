@@ -169,6 +169,11 @@ abstract class PhabricatorController extends AphrontController {
       $view->appendChild($page->renderFooter());
     }
 
+    $application_menu = $this->buildApplicationMenu();
+    if ($application_menu) {
+      $page->setApplicationMenu($application_menu);
+    }
+
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
   }
@@ -236,6 +241,10 @@ abstract class PhabricatorController extends AphrontController {
       $items[] = $this->getHandle($phid)->renderLink();
     }
     return implode('<br />', $items);
+  }
+
+  protected function buildApplicationMenu() {
+    return null;
   }
 
 }

@@ -53,8 +53,7 @@
 
 .phabricator-main-menu-expand-button {
   position: absolute;
-  right: 10px;
-  top: 10px;
+  top: 7px;
   display: block;
   width: 40px;
   height: 28px;
@@ -67,6 +66,14 @@
                     0 1px 0 rgba(255, 255, 255, 0.075);
 }
 
+.phabricator-expand-core-menu {
+  left: 10px;
+}
+
+.phabricator-expand-application-menu {
+  right: 10px;
+}
+
 .device-desktop .phabricator-main-menu-expand-button {
   display: none;
 }
@@ -76,9 +83,12 @@
   display: block;
 }
 
-.phabricator-core-menu-expand .phabricator-main-menu-expand-button {
+.phabricator-core-menu-expanded .phabricator-expand-core-menu,
+.phabricator-application-menu-expanded .phabricator-expand-application-menu {
   background-color: #55595d;
 }
+
+
 
 
 /* - Search --------------------------------------------------------------------
@@ -257,7 +267,47 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   display: block;
 }
 
+/* - Dark Menu -----------------------------------------------------------------
+
+  Styles shared between the "core" menu (left button on mobile) and
+  "application" menu (right button on mobile). These styles give the menu a
+  white-on-black appearance.
+
+*/
+
+.device-phone .phabricator-dark-menu,
+.device-tablet .phabricator-dark-menu,
+.device-phone .phabricator-dark-menu a.phabricator-menu-item-type-link,
+.device-tablet .phabricator-dark-menu a.phabricator-menu-item-type-link {
+  color: #ffffff;
+}
+
+.device-phone .phabricator-dark-menu .phabricator-menu-item-view,
+.device-tablet .phabricator-dark-menu .phabricator-menu-item-view {
+  display: block;
+  padding: 4px 0;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #35383b transparent #282b2d;
+}
+
+.device-phone .phabricator-dark-menu .phabricator-menu-item-type-label,
+.device-tablet .phabricator-dark-menu .phabricator-menu-item-type-label {
+  text-transform: uppercase;
+  font-size: 11px;
+  background: #151719;
+  padding-left: 12px;
+}
+
+.device-phone .phabricator-dark-menu .phabricator-menu-item-type-spacer,
+.device-tablet .phabricator-dark-menu .phabricator-menu-item-type-spacer {
+  display: none;
+}
+
+
 /* - Core Menu -----------------------------------------------------------------
+
+  Styles unique to the core menu (left button on mobile).
 
 */
 
@@ -277,33 +327,9 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   display: none;
 }
 
-.device-phone .phabricator-core-menu-expand .phabricator-core-menu,
-.device-tablet .phabricator-core-menu-expand .phabricator-core-menu {
+.device-phone .phabricator-core-menu-expanded .phabricator-core-menu,
+.device-tablet .phabricator-core-menu-expanded .phabricator-core-menu {
   display: block;
-}
-
-.device-phone .phabricator-core-menu,
-.device-tablet .phabricator-core-menu,
-.device-phone .phabricator-core-menu a.phabricator-menu-item-type-link,
-.device-tablet .phabricator-core-menu a.phabricator-menu-item-type-link {
-  color: #ffffff;
-}
-
-.device-phone .phabricator-core-menu .phabricator-menu-item-view,
-.device-tablet .phabricator-core-menu .phabricator-menu-item-view {
-  display: block;
-  padding: 4px 0;
-  border-width: 1px 0;
-  border-style: solid;
-  border-color: #35383b transparent #282b2d;
-}
-
-.device-phone .phabricator-core-menu .phabricator-menu-item-type-label,
-.device-tablet .phabricator-core-menu .phabricator-menu-item-type-label {
-  text-transform: uppercase;
-  font-size: 11px;
-  background: #151719;
-  padding-left: 12px;
 }
 
 .device-phone .phabricator-core-menu .phabricator-menu-item-type-link,
@@ -359,3 +385,36 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   border-color: #44494d;
   margin: 0 8px;
 }
+
+
+/* - Application Menu ----------------------------------------------------------
+
+  Styles unique to the application menu (right button on mobile).
+
+*/
+
+.device-phone .phabricator-application-menu-expanded
+  .phabricator-application-menu,
+.device-tablet .phabricator-application-menu-expanded
+  .phabricator-application-menu {
+  display: block;
+  padding-top: 44px;
+}
+
+.phabricator-application-menu {
+  display: none;
+}
+
+.phabricator-application-menu .phabricator-menu-item-type-link
+  .phabricator-menu-item-name {
+  padding-left: 12px;
+}
+
+.device-phone .phabricator-application-menu-expanded
+  .phabricator-application-menu,
+.device-tablet .phabricator-application-menu-expanded
+  .phabricator-application-menu {
+  display: block;
+  padding-top: 44px;
+}
+

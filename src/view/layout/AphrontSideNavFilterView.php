@@ -31,7 +31,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $menu;
 
   public function __construct() {
-    $this->menu = id(new PhabricatorMenuView());
+    $this->menu = new PhabricatorMenuView();
   }
 
   public function setActive($active) {
@@ -57,6 +57,10 @@ final class AphrontSideNavFilterView extends AphrontView {
   public function addMenuItem(PhabricatorMenuItemView $item) {
     $this->menu->addMenuItem($item);
     return $this;
+  }
+
+  public function getMenu() {
+    return $this->menu;
   }
 
   public function addFilter(

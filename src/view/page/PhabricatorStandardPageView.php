@@ -15,6 +15,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $disableConsole;
   private $searchDefaultScope;
   private $pageObjects = array();
+  private $applicationMenu;
+
+  public function setApplicationMenu(PhabricatorMenuView $application_menu) {
+    $this->applicationMenu = $application_menu;
+    return $this;
+  }
+
+  public function getApplicationMenu() {
+    return $this->applicationMenu;
+  }
 
   public function setApplicationName($application_name) {
     $this->applicationName = $application_name;
@@ -142,11 +152,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       require_celerity_resource('javelin-behavior-error-log');
     }
 
-    $this->menuContent = id(new PhabricatorMainMenuView())
+    $menu = id(new PhabricatorMainMenuView())
       ->setUser($request->getUser())
       ->setController($this->getController())
-      ->setDefaultSearchScope($this->getSearchDefaultScope())
-      ->render();
+      ->setDefaultSearchScope($this->getSearchDefaultScope());
+
+    if ($this->getApplicationMenu()) {
+      $menu->setApplicationMenu($this->getApplicationMenu());
+    }
+
+    $this->menuContent = $menu->render();
   }
 
 

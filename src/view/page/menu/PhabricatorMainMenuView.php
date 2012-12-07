@@ -5,6 +5,17 @@ final class PhabricatorMainMenuView extends AphrontView {
   private $user;
   private $defaultSearchScope;
   private $controller;
+  private $applicationMenu;
+
+
+  public function setApplicationMenu(PhabricatorMenuView $application_menu) {
+    $this->applicationMenu = $application_menu;
+    return $this;
+  }
+
+  public function getApplicationMenu() {
+    return $this->applicationMenu;
+  }
 
   public function setController(PhabricatorController $controller) {
     $this->controller = $controller;
@@ -84,6 +95,12 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $actions = '';
 
+    $application_menu = $this->getApplicationMenu();
+    if ($application_menu) {
+      $application_menu->addClass('phabricator-dark-menu');
+      $application_menu->addClass('phabricator-application-menu');
+    }
+
     return phutil_render_tag(
       'div',
       array(
@@ -92,8 +109,12 @@ final class PhabricatorMainMenuView extends AphrontView {
       ),
       self::renderSingleView(
         array(
-          $logo,
+          $this->renderPhabricatorMenuButton($header_id),
+          $this->renderApplicationMenuButton($header_id),
+          $this->renderPhabricatorLogo(),
+          $alerts,
           $phabricator_menu,
+          $application_menu,
         ))).
       self::renderSingleView($menus);
   }
@@ -130,6 +151,38 @@ final class PhabricatorMainMenuView extends AphrontView {
     return $result;
   }
 
+  private function renderPhabricatorMenuButton($header_id) {
+    return javelin_render_tag(
+      'a',
+      array(
+        'class' => 'phabricator-main-menu-expand-button '.
+                   'phabricator-expand-core-menu',
+        'sigil' => 'jx-toggle-class',
+        'meta'  => array(
+          'map' => array(
+            $header_id => 'phabricator-core-menu-expanded',
+          ),
+        ),
+      ),
+      '');
+  }
+
+  public function renderApplicationMenuButton($header_id) {
+    return javelin_render_tag(
+      'a',
+      array(
+        'class' => 'phabricator-main-menu-expand-button '.
+                   'phabricator-expand-application-menu',
+        'sigil' => 'jx-toggle-class',
+        'meta'  => array(
+          'map' => array(
+            $header_id => 'phabricator-application-menu-expanded',
+          ),
+        ),
+      ),
+      '');
+  }
+
   private function renderPhabricatorMenu() {
     $user = $this->getUser();
     $controller = $this->getController();
@@ -162,6 +215,7 @@ final class PhabricatorMainMenuView extends AphrontView {
 
 
     $view = new PhabricatorMenuView();
+    $view->addClass('phabricator-dark-menu');
     $view->addClass('phabricator-core-menu');
 
     $search = $this->renderSearch();
