@@ -142,7 +142,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       require_celerity_resource('javelin-behavior-error-log');
     }
 
-    $this->menuContent = $this->renderMainMenu();
+    $this->menuContent = id(new PhabricatorMainMenuView())
+      ->setUser($request->getUser())
+      ->setController($this->getController())
+      ->setDefaultSearchScope($this->getSearchDefaultScope())
+      ->render();
   }
 
 
@@ -361,46 +365,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return null;
     }
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
-  }
-
-  private function renderMainMenu() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $menu = new PhabricatorMainMenuView();
-    $menu->setUser($user);
-
-    $keyboard_config = array(
-      'helpURI' => '/help/keyboardshortcut/',
-    );
-
-    if ($user->isLoggedIn()) {
-      $search = new PhabricatorMainMenuSearchView();
-      $search->setUser($user);
-      $search->setScope($this->getSearchDefaultScope());
-      $menu->appendChild($search);
-
-      $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
-      if ($user->loadPreferences()->getPreference($pref_shortcut, true)) {
-        $keyboard_config['searchID'] = $search->getID();
-      }
-    }
-
-    Javelin::initBehavior('phabricator-keyboard-shortcuts', $keyboard_config);
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    $icon_views = array();
-    foreach ($applications as $application) {
-      $icon_views[] = $application->buildMainMenuItems(
-        $this->getRequest()->getUser(),
-        $this->getController());
-    }
-    $icon_views = array_mergev($icon_views);
-    $icon_views = msort($icon_views, 'getSortOrder');
-
-    $menu->appendChild($icon_views);
-
-    return $menu->render();
   }
 
   public function renderFooter() {

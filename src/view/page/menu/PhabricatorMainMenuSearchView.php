@@ -79,10 +79,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         $target.
       '</div>');
 
-    $group = new PhabricatorMainMenuGroupView();
-    $group->addClass('phabricator-main-menu-search');
-    $group->appendChild($form);
-    return $group->render();
+    return $form;
   }
 
 }

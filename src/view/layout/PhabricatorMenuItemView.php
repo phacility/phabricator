@@ -12,6 +12,28 @@ final class PhabricatorMenuItemView extends AphrontView {
   private $isExternal;
   private $key;
   private $classes = array();
+  private $workflow;
+  private $sortOrder = 1.0;
+  private $icon;
+  private $selected;
+
+  public function setSelected($selected) {
+    $this->selected = $selected;
+    return $this;
+  }
+
+  public function getSelected() {
+    return $this->selected;
+  }
+
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  public function getIcon() {
+    return $this->icon;
+  }
 
   public function setKey($key) {
     $this->key = $key;
@@ -63,8 +85,18 @@ final class PhabricatorMenuItemView extends AphrontView {
     return $this;
   }
 
-  protected function canAppendChild() {
-    return false;
+  public function setWorkflow($workflow) {
+    $this->workflow = $workflow;
+    return $this;
+  }
+
+  public function setSortOrder($order) {
+    $this->sortOrder = $order;
+    return $this;
+  }
+
+  public function getSortOrder() {
+    return $this->sortOrder;
   }
 
   public function render() {
@@ -73,20 +105,31 @@ final class PhabricatorMenuItemView extends AphrontView {
       'phabricator-menu-item-'.$this->type,
     );
 
-    $external = null;
-    if ($this->isExternal) {
-      $external = " \xE2\x86\x97";
-    }
-
     $classes = array_merge($classes, $this->classes);
 
-    return phutil_render_tag(
+    $name = null;
+    if ($this->name) {
+      $external = null;
+      if ($this->isExternal) {
+        $external = " \xE2\x86\x97";
+      }
+      $name = phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-menu-item-name',
+        ),
+        phutil_escape_html($this->name.$external));
+    }
+
+    return javelin_render_tag(
       $this->href ? 'a' : 'div',
       array(
-        'class' => implode(' ', $classes),
-        'href'  => $this->href,
+        'class'     => implode(' ', $classes),
+        'href'      => $this->href,
+        'sigil'     => $this->workflow ? 'workflow' : null,
       ),
-      phutil_escape_html($this->name.$external));
+      $this->renderChildren().
+      $name);
   }
 
 }

@@ -48,23 +48,29 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
     $items = array();
 
-    if (($controller instanceof PhabricatorPeopleProfileController) &&
-        ($controller->getProfileUser()) &&
-        ($controller->getProfileUser()->getPHID() == $user->getPHID())) {
-      $class = 'main-menu-item-icon-profile-selected';
-    } else {
-      $class = 'main-menu-item-icon-profile-not-selected';
-    }
-
     if ($user->isLoggedIn()) {
       $image = $user->loadProfileImageURI();
 
-      $item = new PhabricatorMainMenuIconView();
+      $item = new PhabricatorMenuItemView();
       $item->setName($user->getUsername());
-      $item->addClass('main-menu-item-icon-profile '.$class);
-      $item->addStyle('background-image: url('.$image.')');
       $item->setHref('/p/'.$user->getUsername().'/');
       $item->setSortOrder(0.0);
+      $item->addClass('phabricator-core-menu-item-profile');
+
+      $classes = array(
+        'phabricator-core-menu-icon',
+        'phabricator-core-menu-profile-image',
+      );
+
+      $item->appendChild(
+        phutil_render_tag(
+          'span',
+          array(
+            'class' => implode(' ', $classes),
+            'style' => 'background-image: url('.$image.')',
+          ),
+          ''));
+
       $items[] = $item;
     }
 

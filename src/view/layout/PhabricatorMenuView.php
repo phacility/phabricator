@@ -4,6 +4,12 @@ final class PhabricatorMenuView extends AphrontView {
 
   private $items = array();
   private $map = array();
+  private $classes = array();
+
+  public function addClass($class) {
+    $this->classes[] = $class;
+    return $this;
+  }
 
   public function addMenuItem(PhabricatorMenuItemView $item) {
     $key = $item->getKey();
@@ -30,11 +36,13 @@ final class PhabricatorMenuView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('phabricator-menu-view-css');
+    $classes = $this->classes;
+    $classes[] = 'phabricator-menu-view';
+
     return phutil_render_tag(
       'div',
       array(
-        'class' => 'phabricator-menu-view',
+        'class' => implode(' ', $classes),
       ),
       $this->renderChildren());
   }

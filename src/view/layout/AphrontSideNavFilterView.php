@@ -31,7 +31,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $menu;
 
   public function __construct() {
-    $this->menu = new PhabricatorMenuView();
+    $this->menu = id(new PhabricatorMenuView());
   }
 
   public function setActive($active) {
@@ -131,6 +131,8 @@ final class AphrontSideNavFilterView extends AphrontView {
       $selected_item->addClass('phabricator-menu-item-selected');
     }
 
+    require_celerity_resource('phabricator-side-menu-view-css');
+
     if ($this->flexNav) {
       return $this->renderFlexNav();
     } else {
@@ -174,7 +176,8 @@ final class AphrontSideNavFilterView extends AphrontView {
       $local_menu = phutil_render_tag(
         'div',
         array(
-          'class' => 'phabricator-nav-col phabricator-nav-local',
+          'class' => 'phabricator-nav-col phabricator-nav-local '.
+                     'phabricator-side-menu',
           'id'    => $local_id,
         ),
         self::renderSingleView($this->menu));
@@ -228,7 +231,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     require_celerity_resource('aphront-side-nav-view-css');
 
     return
-      '<table class="aphront-side-nav-view">'.
+      '<table class="aphront-side-nav-view phabricator-side-menu">'.
         '<tr>'.
           '<th class="aphront-side-nav-navigation">'.
             self::renderSingleView($this->menu).
