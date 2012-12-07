@@ -113,6 +113,16 @@ final class CeleritySpriteGenerator {
         'y' => 31,
         'css' => '.phabricator-crumb-divider',
       ),
+      'eye' => array(
+        'x' => 24,
+        'y' => 20,
+        'css' => '.menu-icon-eye',
+      ),
+      'app' => array(
+        'x' => 24,
+        'y' => 20,
+        'css' => '.menu-icon-app',
+      ),
     );
 
     $scales = array(
@@ -177,6 +187,8 @@ final class CeleritySpriteGenerator {
                         'button.grey_active, a.dropdown-open',
       'green-dark' => ', button.green, a.green, a.green:visited',
       'green-light' => ', button.green:active, a.green:active',
+      'dark-menu-label'
+        => ', .phabricator-dark-menu .phabricator-menu-item-type-label',
     );
 
     $sprites = array();
@@ -195,7 +207,8 @@ final class CeleritySpriteGenerator {
     $sheet = $this->buildSheet(
       'gradient',
       PhutilSpriteSheet::TYPE_REPEAT_X,
-      ', button, a.button, a.button:visited, input.inputsubmit');
+      ', button, a.button, a.button:visited, input.inputsubmit, '.
+      '.phabricator-dark-menu .phabricator-menu-item-type-label');
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }

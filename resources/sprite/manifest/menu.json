@@ -1,6 +1,11 @@
 {
   "version" : 1,
   "sprites" : {
+    "app"              : {
+      "name" : "app",
+      "rule" : ".menu-icon-app",
+      "hash" : "a389f99d9c00f688e625da71579ee90a"
+    },
     "arrow-right"      : {
       "name" : "arrow-right",
       "rule" : ".phabricator-crumb-divider",
@@ -10,6 +15,11 @@
       "name" : "bubble",
       "rule" : ".phabricator-main-menu-alert-bubble.alert-unread",
       "hash" : "1145ac8a137a2a22517c1945fe22c517"
+    },
+    "eye"              : {
+      "name" : "eye",
+      "rule" : ".menu-icon-eye",
+      "hash" : "d598b1acb1933a86eaed3dea3347f7b0"
     },
     "round_bubble"     : {
       "name" : "round_bubble",

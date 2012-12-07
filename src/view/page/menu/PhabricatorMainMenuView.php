@@ -7,7 +7,6 @@ final class PhabricatorMainMenuView extends AphrontView {
   private $controller;
   private $applicationMenu;
 
-
   public function setApplicationMenu(PhabricatorMenuView $application_menu) {
     $this->applicationMenu = $application_menu;
     return $this;
@@ -110,7 +109,9 @@ final class PhabricatorMainMenuView extends AphrontView {
       self::renderSingleView(
         array(
           $this->renderPhabricatorMenuButton($header_id),
-          $this->renderApplicationMenuButton($header_id),
+          $application_menu
+            ? $this->renderApplicationMenuButton($header_id)
+            : null,
           $this->renderPhabricatorLogo(),
           $alerts,
           $phabricator_menu,
@@ -164,7 +165,12 @@ final class PhabricatorMainMenuView extends AphrontView {
           ),
         ),
       ),
-      '');
+      phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-eye',
+        ),
+        ''));
   }
 
   public function renderApplicationMenuButton($header_id) {
@@ -180,7 +186,12 @@ final class PhabricatorMainMenuView extends AphrontView {
           ),
         ),
       ),
-      '');
+      phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-app',
+        ),
+        ''));
   }
 
   private function renderPhabricatorMenu() {
@@ -220,6 +231,23 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $search = $this->renderSearch();
     $view->appendChild($search);
+
+    $view
+      ->newLabel(pht('Home'))
+      ->addClass('phabricator-core-item-device');
+    $view->addMenuItem(
+      id(new PhabricatorMenuItemView())
+        ->addClass('phabricator-core-item-device')
+        ->setName(pht('Phabricator Home'))
+        ->setHref('/'));
+    if ($controller->getCurrentApplication()) {
+      $application = $controller->getCurrentApplication();
+      $view->addMenuItem(
+        id(new PhabricatorMenuItemView())
+          ->addClass('phabricator-core-item-device')
+          ->setName(pht('%s Home', $application->getName()))
+          ->setHref($controller->getApplicationURI()));
+    }
 
     if ($core) {
       $view->addMenuItem(

@@ -204,6 +204,16 @@ $sheets = array(
   'gradient' => $generator->buildGradientSheet(),
 );
 
+list($err) = exec_manual('optipng');
+if ($err) {
+  $have_optipng = false;
+  echo phutil_console_format(
+    "<bg:red> WARNING </bg> `optipng` not found in PATH.\n".
+    "Sprites will not be optimized! Install `optipng`!\n");
+} else {
+  $have_optipng = true;
+}
+
 foreach ($sheets as $name => $sheet) {
   $manifest_path = $root.'/resources/sprite/manifest/'.$name.'.json';
   if (!$args->getArg('force')) {
@@ -226,7 +236,14 @@ foreach ($sheets as $name => $sheet) {
     } else {
       $sheet_name = "sprite-{$name}-X{$scale}.png";
     }
-    $sheet->generateImage("{$webroot}/image/{$sheet_name}", $scale);
+
+    $full_path = "{$webroot}/image/{$sheet_name}";
+    $sheet->generateImage($full_path, $scale);
+
+    if ($have_optipng) {
+      echo "Optimizing...\n";
+      phutil_passthru('optipng -o7 -clobber %s', $full_path);
+    }
   }
 }
 

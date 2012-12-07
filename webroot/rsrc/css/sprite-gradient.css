@@ -3,7 +3,7 @@
  * @generated
  */
 
-.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit {
+.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {
   background-image: url(/rsrc/image/sprite-gradient.png);
   background-repeat: repeat-x;
 }
@@ -11,7 +11,7 @@
 @media
 only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-  .sprite-gradient, button, a.button, a.button:visited, input.inputsubmit {
+  .sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {
     background-image: url(/rsrc/image/sprite-gradient-X2.png);
     background-size: 4px 274px;
   }
@@ -37,7 +37,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -242px;
 }
 
-.gradient-dark-menu-label {
+.gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label {
   background-position: 0px 0px;
 }
 
