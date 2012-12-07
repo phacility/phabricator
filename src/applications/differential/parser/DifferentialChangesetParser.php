@@ -1650,8 +1650,7 @@ final class DifferentialChangesetParser {
               '<th />'.
               '<td class="left">'.$xhp.'</td>'.
               '<th />'.
-              '<td colspan="2">'.$new.'</td>'.
-              '<td class="cov" />'.
+              '<td colspan="3" class="right3">'.$new.'</td>'.
             '</tr>';
         }
       }
@@ -1663,8 +1662,7 @@ final class DifferentialChangesetParser {
               '<th />'.
               '<td class="left" />'.
               '<th />'.
-              '<td colspan="2">'.$xhp.'</td>'.
-              '<td class="cov" />'.
+              '<td colspan="3" class="right3">'.$xhp.'</td>'.
             '</tr>';
         }
       }
