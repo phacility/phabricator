@@ -218,7 +218,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         'localID'     => $local_id,
         'dragID'      => $drag_id,
         'contentID'   => $content_id,
-        'menuSize'   => ($crumbs ? 78 : 44),
+        'menuSize'   => ($crumbs ? 76 : 44),
       ));
 
     if ($this->active && $local_id) {

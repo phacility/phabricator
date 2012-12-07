@@ -108,6 +108,11 @@ final class CeleritySpriteGenerator {
         'css' =>
           '.alert-notifications.alert-unread .phabricator-main-menu-alert-icon',
       ),
+      'arrow-right' => array(
+        'x' => 9,
+        'y' => 31,
+        'css' => '.phabricator-crumb-divider',
+      ),
     );
 
     $scales = array(
@@ -123,7 +128,7 @@ final class CeleritySpriteGenerator {
         ->setTargetCSS($spec['css']);
 
       foreach ($scales as $scale_name => $scale) {
-        $path = 'notifications_'.$scale_name.'/'.$name.'.png';
+        $path = 'menu_'.$scale_name.'/'.$name.'.png';
         $path = $this->getPath($path);
 
         $sprite->setSourceFile($path, $scale);
@@ -139,6 +144,65 @@ final class CeleritySpriteGenerator {
 
     return $sheet;
   }
+
+  public function buildGradientSheet() {
+    $gradients = $this->getDirectoryList('gradients');
+
+    $template = new PhutilSprite();
+
+    $unusual_heights = array(
+      'dark-menu-label' => 25,
+      'breadcrumbs'     => 31,
+    );
+
+    // Reorder the sprites so less-specific rules generate earlier in the sheet.
+    // Otherwise we end up with blue "a.black" buttons because the blue rules
+    // have the same specificity but appear later.
+    $gradients = array_combine($gradients, $gradients);
+    $gradients = array_select_keys(
+      $gradients,
+      array(
+        'blue-dark',
+        'blue-light',
+      )) + $gradients;
+
+    $extra_css = array(
+      'black-dark' => ', button.black, a.black, a.black:visited',
+      'black-light' => ', button.black:active, a.black:active',
+      'blue-dark' => ', button, a.button, a.button:visited, input.inputsubmit',
+      'blue-light' => ', button:active, a.button:active',
+      'grey-dark' => ', button.grey, input.inputaux, a.grey, a.grey:visited, '.
+                        'a.button.disabled, button[disabled], button.disabled',
+      'grey-light' => ', button.grey:active, a.grey:active, '.
+                        'button.grey_active, a.dropdown-open',
+      'green-dark' => ', button.green, a.green, a.green:visited',
+      'green-light' => ', button.green:active, a.green:active',
+    );
+
+    $sprites = array();
+    foreach ($gradients as $gradient) {
+      $path = $this->getPath('gradients/'.$gradient.'.png');
+      $sprite = id(clone $template)
+        ->setName('gradient-'.$gradient)
+        ->setSourceFile($path)
+        ->setTargetCSS('.gradient-'.$gradient.idx($extra_css, $gradient));
+
+      $sprite->setSourceSize(4, idx($unusual_heights, $gradient, 26));
+
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet(
+      'gradient',
+      PhutilSpriteSheet::TYPE_REPEAT_X,
+      ', button, a.button, a.button:visited, input.inputsubmit');
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
 
   private function getPath($to_path = null) {
     $root = dirname(phutil_get_library_root('phabricator'));
@@ -163,25 +227,41 @@ final class CeleritySpriteGenerator {
     return $result;
   }
 
-  private function buildSheet($name) {
+  private function buildSheet($name, $type = null, $extra_css = '') {
     $sheet = new PhutilSpriteSheet();
 
     $at = '@';
+
+    switch ($type) {
+      case PhutilSpriteSheet::TYPE_STANDARD:
+      default:
+        $type = PhutilSpriteSheet::TYPE_STANDARD;
+        $repeat_rule = 'no-repeat';
+        break;
+      case PhutilSpriteSheet::TYPE_REPEAT_X:
+        $repeat_rule = 'repeat-x';
+        break;
+      case PhutilSpriteSheet::TYPE_REPEAT_Y:
+        $repeat_rule = 'repeat-y';
+        break;
+    }
+
+    $sheet->setSheetType($type);
     $sheet->setCSSHeader(<<<EOCSS
 /**
  * @provides sprite-{$name}-css
  * {$at}generated
  */
 
-.sprite-{$name} {
+.sprite-{$name}{$extra_css} {
   background-image: url(/rsrc/image/sprite-{$name}.png);
-  background-repeat: no-repeat;
+  background-repeat: {$repeat_rule};
 }
 
 @media
 only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-  .sprite-{$name} {
+  .sprite-{$name}{$extra_css} {
     background-image: url(/rsrc/image/sprite-{$name}-X2.png);
     background-size: {X}px {Y}px;
   }

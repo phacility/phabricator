@@ -59,7 +59,7 @@ final class PhabricatorCrumbView extends AphrontView {
       $divider = phutil_render_tag(
         'span',
         array(
-          'class' => 'phabricator-crumb-divider',
+          'class' => 'sprite-menu phabricator-crumb-divider',
         ),
         '');
     }

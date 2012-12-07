@@ -88,6 +88,7 @@ foreach ($icon_map as $icon => $coords) {
   foreach ($menu_map as $suffix => $template) {
     $sheet->addSprite(
       id(clone $template)
+        ->setName('menu-item-'.$icon.'-'.$suffix)
         ->setSourcePosition(glx($x), gly($y))
         ->setTargetCSS('.main-menu-item-icon-'.$icon.$suffix));
   }
@@ -183,6 +184,7 @@ foreach ($app_map as $icon => $coords) {
     }
     $sheet->addSprite(
       id(clone $template)
+        ->setName('app-'.$icon.'-'.$suffix)
         ->setSourcePosition(($xadj + glx($x)) * $scale, gly($y) * $scale)
         ->setTargetCSS($prefix.'.app-'.$icon.$suffix));
   }
@@ -199,6 +201,7 @@ $generator = new CeleritySpriteGenerator();
 $sheets = array(
   'icon' => $generator->buildIconSheet(),
   'menu' => $generator->buildMenuSheet(),
+  'gradient' => $generator->buildGradientSheet(),
 );
 
 foreach ($sheets as $name => $sheet) {
@@ -214,10 +217,17 @@ foreach ($sheets as $name => $sheet) {
   }
 
   $sheet
-    ->generateImage($webroot."/image/sprite-{$name}.png", 1)
-    ->generateImage($webroot."/image/sprite-{$name}-X2.png", 2)
     ->generateCSS($webroot."/css/sprite-{$name}.css")
     ->generateManifest($root."/resources/sprite/manifest/{$name}.json");
+
+  foreach ($sheet->getScales() as $scale) {
+    if ($scale == 1) {
+      $sheet_name = "sprite-{$name}.png";
+    } else {
+      $sheet_name = "sprite-{$name}-X{$scale}.png";
+    }
+    $sheet->generateImage("{$webroot}/image/{$sheet_name}", $scale);
+  }
 }
 
 echo "Done.\n";

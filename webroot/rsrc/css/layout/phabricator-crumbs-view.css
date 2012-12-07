@@ -8,11 +8,12 @@
 }
 
 .phabricator-crumbs-view {
-  background: #e1e5eb;
-  border-bottom: 1px solid #c5c9ce;
-  height: 33px;
+  background-color: #d8dce2;
+  height: 31px;
   overflow: hidden;
   vertical-align: top;
+
+  box-shadow: 0 1px rgba(0, 0, 0, 0.25);
 }
 
 .phabricator-crumbs-view,
@@ -26,8 +27,8 @@
 
 .phabricator-crumb-view {
   display: inline-block;
-  height: 33px;
-  line-height: 33px;
+  height: 31px;
+  line-height: 31px;
   overflow: hidden;
 }
 
@@ -35,7 +36,7 @@
   display: inline-block;
   width: 30px;
   height: 30px;
-  margin: 2px 2px 1px 8px;
+  margin: 1px 2px 0 8px;
   vertical-align: top;
 }
 
@@ -61,8 +62,7 @@
 .phabricator-crumb-divider {
   display: inline-block;
   width: 9px;
-  height: 33px;
-  background-image: url(/rsrc/image/tab_divider.png);
+  height: 31px;
   vertical-align: top;
   margin: 0 9px;
 }

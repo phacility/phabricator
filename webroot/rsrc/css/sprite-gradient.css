@@ -1,0 +1,58 @@
+/**
+ * @provides sprite-gradient-css
+ * @generated
+ */
+
+.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit {
+  background-image: url(/rsrc/image/sprite-gradient.png);
+  background-repeat: repeat-x;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-gradient, button, a.button, a.button:visited, input.inputsubmit {
+    background-image: url(/rsrc/image/sprite-gradient-X2.png);
+    background-size: 4px 274px;
+  }
+}
+
+.gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit {
+  background-position: 0px -26px;
+}
+
+.gradient-blue-light, button:active, a.button:active {
+  background-position: 0px -53px;
+}
+
+.gradient-black-dark, button.black, a.black, a.black:visited {
+  background-position: 0px -80px;
+}
+
+.gradient-black-light, button.black:active, a.black:active {
+  background-position: 0px -107px;
+}
+
+.gradient-breadcrumbs {
+  background-position: 0px -242px;
+}
+
+.gradient-dark-menu-label {
+  background-position: 0px 0px;
+}
+
+.gradient-green-dark, button.green, a.green, a.green:visited {
+  background-position: 0px -134px;
+}
+
+.gradient-green-light, button.green:active, a.green:active {
+  background-position: 0px -161px;
+}
+
+.gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled {
+  background-position: 0px -188px;
+}
+
+.gradient-grey-light, button.grey:active, a.grey:active, button.grey_active, a.dropdown-open {
+  background-position: 0px -215px;
+}

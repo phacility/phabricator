@@ -61,7 +61,8 @@ final class PhabricatorCrumbsView extends AphrontView {
     return phutil_render_tag(
       'div',
       array(
-        'class' => 'phabricator-crumbs-view',
+        'class' => 'phabricator-crumbs-view '.
+                   'sprite-gradient gradient-breadcrumbs',
       ),
       $action_view.
       self::renderSingleView($this->crumbs));

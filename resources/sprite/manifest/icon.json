@@ -966,5 +966,6 @@
     1,
     2
   ],
-  "header"  : "\/**\n * @provides sprite-icon-css\n * @generated\n *\/\n\n.sprite-icon {\n  background-image: url(\/rsrc\/image\/sprite-icon.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-icon {\n    background-image: url(\/rsrc\/image\/sprite-icon-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}"
+  "header"  : "\/**\n * @provides sprite-icon-css\n * @generated\n *\/\n\n.sprite-icon {\n  background-image: url(\/rsrc\/image\/sprite-icon.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-icon {\n    background-image: url(\/rsrc\/image\/sprite-icon-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}",
+  "type"    : "standard"
 }
