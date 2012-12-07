@@ -49,7 +49,7 @@ final class PhabricatorMenuView extends AphrontView {
   }
 
   public function getItem($key) {
-    return idx($this->map, $key);
+    return idx($this->map, (string)$key);
   }
 
   public function getItems() {

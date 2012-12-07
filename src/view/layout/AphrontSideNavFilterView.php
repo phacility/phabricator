@@ -29,9 +29,19 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $user;
   private $active;
   private $menu;
+  private $crumbs;
 
   public function __construct() {
     $this->menu = new PhabricatorMenuView();
+  }
+
+  public function setCrumbs(PhabricatorCrumbsView $crumbs) {
+    $this->crumbs = $crumbs;
+    return $this;
+  }
+
+  public function getCrumbs() {
+    return $this->crumbs;
   }
 
   public function setActive($active) {
@@ -52,6 +62,10 @@ final class AphrontSideNavFilterView extends AphrontView {
   public function setFlexible($flexible) {
     $this->flexible = $flexible;
     return $this;
+  }
+
+  public function getMenuView() {
+    return $this->menu;
   }
 
   public function addMenuItem(PhabricatorMenuItemView $item) {
@@ -117,6 +131,10 @@ final class AphrontSideNavFilterView extends AphrontView {
     if ($this->menu->getItem($key)) {
       $this->selectedFilter = $key;
     }
+    return $this->selectedFilter;
+  }
+
+  public function getSelectedFilter() {
     return $this->selectedFilter;
   }
 
@@ -187,6 +205,12 @@ final class AphrontSideNavFilterView extends AphrontView {
         self::renderSingleView($this->menu));
     }
 
+    $crumbs = null;
+    if ($this->crumbs) {
+      $crumbs = $this->crumbs->render();
+      $nav_classes[] = 'has-crumbs';
+    }
+
     Javelin::initBehavior(
       'phabricator-nav',
       array(
@@ -194,6 +218,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         'localID'     => $local_id,
         'dragID'      => $drag_id,
         'contentID'   => $content_id,
+        'menuSize'   => ($crumbs ? 78 : 44),
       ));
 
     if ($this->active && $local_id) {
@@ -204,17 +229,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         ));
     }
 
-    $header_part =
-      '<div class="phabricator-nav-head">'.
-        '<div class="phabricator-nav-head-tablet">'.
-          '<a href="#" class="nav-button nav-button-w nav-button-menu" '.
-            'id="tablet-menu1"></a>'.
-          '<a href="#" class="nav-button nav-button-e nav-button-content '.
-            'nav-button-selected" id="tablet-menu2"></a>'.
-        '</div>'.
-      '</div>';
-
-    return $header_part.phutil_render_tag(
+    return $crumbs.phutil_render_tag(
       'div',
       array(
         'class' => implode(' ', $nav_classes),

@@ -247,4 +247,28 @@ abstract class PhabricatorController extends AphrontController {
     return null;
   }
 
+  protected function buildApplicationCrumbs() {
+
+    $crumbs = array();
+
+    $application = $this->getCurrentApplication();
+    if ($application) {
+      $sprite = $application->getAutospriteName();
+      if (!$sprite) {
+        $sprite = 'default';
+      }
+
+      $crumbs[] = id(new PhabricatorCrumbView())
+        ->setHref($this->getApplicationURI())
+        ->setIcon('temporary-icon-apps');
+    }
+
+    $view = new PhabricatorCrumbsView();
+    foreach ($crumbs as $crumb) {
+      $view->addCrumb($crumb);
+    }
+
+    return $view;
+  }
+
 }

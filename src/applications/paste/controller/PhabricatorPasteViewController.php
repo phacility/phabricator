@@ -51,19 +51,20 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $properties = $this->buildPropertyView($paste, $fork_phids);
     $source_code = $this->buildSourceCodeView($paste, $file);
 
-    $nav = $this->buildSideNavView($paste);
-    $nav->selectFilter('paste');
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName('P'.$paste->getID())
+          ->setHref('/P'.$paste->getID()));
 
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         $header,
         $actions,
         $properties,
         $source_code,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $paste->getFullName(),
         'device' => true,
@@ -87,6 +88,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $can_fork = $user->isLoggedIn();
+    $fork_uri = $this->getApplicationURI('/create/?parent='.$paste->getID());
 
     return id(new PhabricatorActionListView())
       ->setUser($user)
@@ -97,7 +99,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           ->setIcon('fork')
           ->setDisabled(!$can_fork)
           ->setWorkflow(!$can_fork)
-          ->setHref($this->getApplicationURI('?parent='.$paste->getID())))
+          ->setHref($fork_uri))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))

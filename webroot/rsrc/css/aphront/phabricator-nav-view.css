@@ -19,6 +19,10 @@
   z-index: 3;
 }
 
+.has-crumbs .phabricator-nav-col {
+  top: 78px;
+}
+
 .phabricator-nav-local {
   width: 179px;
   background: #ececec;
@@ -30,7 +34,7 @@
 
 .device-tablet .phabricator-nav-local,
 .device-phone .phabricator-nav-local {
-  width: 299px;
+  display: none;
 }
 
 .phabricator-nav-drag {
@@ -79,10 +83,6 @@
   margin-left: 2.5em !important;
 }
 
-.device-desktop .phabricator-nav-head {
-  display: none;
-}
-
 .device-tablet .phabricator-nav-col,
 .device-phone .phabricator-nav-col {
   position: absolute;
@@ -109,56 +109,4 @@
 .device-phone .phabricator-nav-content {
   margin-left: 0;
   position: relative;
-}
-
-.phabricator-nav-head {
-  display: block;
-  position: relative;
-  height: 43px;
-  background: #fafafa;
-  overflow: hidden;
-  border-bottom: 1px solid #5d5d5d;
-  text-align: center;
-  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.10),
-              0px 1px 2px rgba(0, 0, 0, 0.10);
-}
-
-.nav-button {
-  background-color: #f3f3f3;
-  height: 32px;
-  width: 40px;
-  margin: 5px 0px;
-  display: inline-block;
-  border: 1px solid #999999;
-  box-shadow: inset -1px -1px 3px rgba(0, 0, 0, 0.10);
-  background-repeat: no-repeat;
-}
-
-.nav-button-selected {
-  background-color: #c9c9c9;
-  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.20);
-}
-
-.nav-button + .nav-button {
-  margin-left: -1px;
-}
-
-.nav-button-w {
-  border-radius: 6px 0 0 6px;
-}
-
-.nav-button-e {
-  border-radius: 0 6px 6px 0;
-}
-
-.nav-button-menu {
-  background-image: url(/rsrc/image/button_menu.png);
-  background-size: 24px auto;
-  background-position: center;
-}
-
-.nav-button-content {
-  background-image: url(/rsrc/image/button_content.png);
-  background-size: 24px auto;
-  background-position: center;
 }

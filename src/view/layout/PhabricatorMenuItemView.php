@@ -36,7 +36,7 @@ final class PhabricatorMenuItemView extends AphrontView {
   }
 
   public function setKey($key) {
-    $this->key = $key;
+    $this->key = (string)$key;
     return $this;
   }
 

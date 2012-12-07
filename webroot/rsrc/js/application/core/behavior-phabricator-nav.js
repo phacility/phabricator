@@ -6,8 +6,6 @@
  *           javelin-dom
  *           javelin-magical-init
  *           javelin-vector
- *           javelin-util
- *           javelin-fx
  * @javelin
  */
 
@@ -16,70 +14,6 @@ JX.behavior('phabricator-nav', function(config) {
   var content = JX.$(config.contentID);
   var local = config.localID ? JX.$(config.localID) : null;
   var main = JX.$(config.mainID);
-
-
-// - Sliding Menu Animations ---------------------------------------------------
-
-  var animations = [];
-  function slide_menu(position) {
-    var local_width = local ? 300 : 0;
-
-    var shifts = {
-      0: 0,
-      1: -10,
-      2: local_width
-    };
-    var shift = shifts[position];
-
-    while (animations.length) {
-      animations.pop().stop();
-    }
-    local && animations.push(build_animation(local, -shift));
-    animations.push(build_animation(content, -shift + local_width));
-
-    select_button(position);
-  }
-
-  function build_animation(element, target) {
-    return new JX.FX(element)
-      .setDuration(100)
-      .start({left: [JX.$V(element).x, target]});
-  }
-
-
-// - Sliding Menu Buttons ------------------------------------------------------
-
-  var button_positions = {
-    0: [JX.$('tablet-menu1')],
-    1: [],
-    2: [JX.$('tablet-menu2')]
-  };
-
-  for (var k in button_positions) {
-    for (var ii = 0; ii < button_positions[k].length; ii++) {
-      var onclick = function(p, e) {
-        e.kill();
-        slide_menu(p);
-      };
-      onclick = JX.bind(null, onclick, k);
-      JX.DOM.listen(
-        button_positions[k][ii],
-        ['touchstart', 'mousedown'],
-        null,
-        onclick);
-    }
-  }
-
-  function select_button(position) {
-    for (var k in button_positions) {
-      for (var ii = 0; ii < button_positions[k].length; ii++) {
-        JX.DOM.alterClass(
-          button_positions[k][ii],
-          'nav-button-selected',
-          (k == position));
-      }
-    }
-  }
 
 
 // - Flexible Navigation Column ------------------------------------------------
@@ -183,7 +117,7 @@ JX.behavior('phabricator-nav', function(config) {
       return;
     }
 
-    var y = Math.max(0, 44 - JX.Vector.getScroll().y);
+    var y = Math.max(0, config.menuSize - JX.Vector.getScroll().y);
     local.style.top = y + 'px';
   });
 

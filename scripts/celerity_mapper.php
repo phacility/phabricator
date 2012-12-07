@@ -22,8 +22,6 @@ $package_spec = array(
     'javelin-typeahead-preloaded-source',
     'javelin-typeahead-ondemand-source',
     'javelin-tokenizer',
-    'javelin-fx',
-    'javelin-color',
   ),
   'core.pkg.js' => array(
     'javelin-behavior-aphront-basic-tokenizer',
