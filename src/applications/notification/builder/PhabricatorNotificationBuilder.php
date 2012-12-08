@@ -123,8 +123,9 @@ final class PhabricatorNotificationBuilder {
     $null_view = new AphrontNullView();
 
     foreach ($stories as $story) {
-      $view = $story->renderNotificationView();
-      $null_view->appendChild($view);
+      $view = $story->renderView();
+
+      $null_view->appendChild($view->renderNotification());
     }
 
     return $null_view;

@@ -14,7 +14,8 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
     ) + parent::getConfiguration();
   }
 
-  static public function updateObjectNotificationViews(PhabricatorUser $user,
+  static public function updateObjectNotificationViews(
+    PhabricatorUser $user,
     $object_phid) {
 
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
@@ -38,22 +39,18 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
     }
   }
 
-  /* should only be called when notifications are enabled */
-  public function countUnread(
-    PhabricatorUser $user) {
+  public function countUnread(PhabricatorUser $user) {
+    $conn = $this->establishConnection('r');
 
-      $conn = $this->establishConnection('r');
+    $data = queryfx_one(
+      $conn,
+      'SELECT COUNT(*) as count
+       FROM %T
+       WHERE userPHID = %s AND hasViewed = 0',
+      $this->getTableName(),
+      $user->getPHID());
 
-      $data = queryfx_one(
-        $conn,
-        "SELECT COUNT(*) as count
-         FROM %T
-         WHERE userPHID = %s
-           AND hasViewed=0",
-        $this->getTableName(),
-        $user->getPHID());
-
-      return $data['count'];
+    return $data['count'];
   }
 
 }

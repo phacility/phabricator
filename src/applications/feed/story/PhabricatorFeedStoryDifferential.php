@@ -10,6 +10,7 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $data = $this->getStoryData();
 
     $view = new PhabricatorFeedStoryView();
+    $view->setViewed($this->getHasViewed());
 
     $line = $this->getLineForData($data);
     $view->setTitle($line);
@@ -33,18 +34,6 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     } else {
       $view->setOneLineStory(true);
     }
-
-    return $view;
-  }
-
-  public function renderNotificationView() {
-    $data = $this->getStoryData();
-
-    $view = new PhabricatorNotificationStoryView();
-
-    $view->setTitle($this->getLineForData($data));
-    $view->setEpoch($data->getEpoch());
-    $view->setViewed($this->getHasViewed());
 
     return $view;
   }
