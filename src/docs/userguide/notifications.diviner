@@ -10,7 +10,7 @@ tasks or commenting on code reviews) through email and in-application
 notifications.
 
 Phabricator can also be configured to deliver notifications in real time, by
-popping up by popping up a message in any open browser windows if something has
+popping up a message in any open browser windows if something has
 happened or an object has been updated.
 
 To enable real-time notifications:
