@@ -23,7 +23,7 @@ final class DifferentialChangesetParser {
 
   protected $renderCacheKey = null;
 
-  private $handles;
+  private $handles = array();
   private $user;
 
   private $leftSideChangesetID;

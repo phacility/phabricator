@@ -74,8 +74,6 @@ final class DifferentialChangesetTwoUpRenderer
       count($old_lines),
       count($new_lines));
 
-    phlog($rows);
-
     if ($range_start === null) {
       $range_start = 0;
     }

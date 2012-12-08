@@ -172,7 +172,6 @@ abstract class DifferentialChangesetRenderer {
   }
 
   public function setNewLines(array $new_lines) {
-    phlog(print_r($new_lines, true));
     $this->newLines = $new_lines;
     return $this;
   }
@@ -181,7 +180,6 @@ abstract class DifferentialChangesetRenderer {
   }
 
   public function setOldLines(array $old_lines) {
-    phlog(print_r($old_lines, true));
     $this->oldLines = $old_lines;
     return $this;
   }
