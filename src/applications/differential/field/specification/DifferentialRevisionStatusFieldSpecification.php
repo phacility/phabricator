@@ -25,20 +25,14 @@ final class DifferentialRevisionStatusFieldSpecification
 
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
       $next_step = null;
-      if ($local_vcs == $backing_vcs) {
-        switch ($local_vcs) {
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-            $next_step = '<tt>hg push</tt>';
-            break;
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-            $next_step = '<tt>arc land</tt>';
-            break;
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-            $next_step = '<tt>arc commit</tt>';
-            break;
-        }
-      } else {
-        $next_step = '<tt>arc amend</tt>';
+      switch ($local_vcs) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $next_step = '<tt>arc land</tt>';
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $next_step = '<tt>arc commit</tt>';
+          break;
       }
       if ($next_step) {
         $info = ' &middot; Next step: '.$next_step;
