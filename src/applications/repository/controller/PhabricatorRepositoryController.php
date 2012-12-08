@@ -55,7 +55,7 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
       $message =
         "<p>The repository daemon is not running on this machine. ".
         "{$common}</p>";
-    } catch (CommandException $ex) {
+    } catch (Exception $ex) {
       $title = "Unable To Verify Repository Daemon";
       $message =
         "<p>Unable to determine if the repository daemon is running on this ".
