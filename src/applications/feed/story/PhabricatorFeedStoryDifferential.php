@@ -16,6 +16,9 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $view->setTitle($line);
     $view->setEpoch($data->getEpoch());
 
+    $href = $this->getHandle($data->getValue('revision_phid'))->getURI();
+    $view->setHref($href);
+
     $action = $data->getValue('action');
     switch ($action) {
       case DifferentialAction::ACTION_CREATE:

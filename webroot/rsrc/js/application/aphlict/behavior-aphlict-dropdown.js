@@ -5,6 +5,7 @@
  *           javelin-stratcom
  *           javelin-vector
  *           javelin-dom
+ *           javelin-uri
  */
 
 JX.behavior('aphlict-dropdown', function(config) {
@@ -39,13 +40,25 @@ JX.behavior('aphlict-dropdown', function(config) {
     'click',
     null,
     function(e) {
-      if(e.getNode('phabricator-notification-menu')) {
-         // Click is inside the dropdown.
+      if (!e.getNode('phabricator-notification-menu')) {
+        // Click outside the dropdown; hide it.
+        JX.DOM.hide(dropdown);
+        visible = false;
         return;
       }
 
-      JX.DOM.hide(dropdown);
-      visible = false;
+      if (e.getNode('tag:a')) {
+        // User clicked a link, just follow the link.
+        return;
+      }
+
+      // If the user clicked a notification (but missed a link) and it has a
+      // primary URI, go there.
+      var href = e.getNodeData('notification').href;
+      if (href) {
+        JX.$U(href).go();
+        e.kill();
+      }
     });
 
 

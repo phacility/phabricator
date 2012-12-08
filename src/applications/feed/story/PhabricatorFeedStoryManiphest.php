@@ -41,6 +41,9 @@ final class PhabricatorFeedStoryManiphest
       $view->setOneLineStory(true);
     }
 
+    $href = $this->getHandle($data->getValue('taskPHID'))->getURI();
+    $view->setHref($href);
+
     return $view;
   }
 

@@ -8,6 +8,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
   private $epoch;
   private $viewer;
   private $viewed;
+  private $href;
 
   private $oneLine;
 
@@ -45,6 +46,15 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
     return $this->viewed;
   }
 
+  public function setHref($href) {
+    $this->href = $href;
+    return $this;
+  }
+
+  public function getHref() {
+    return $this->href;
+  }
+
   public function renderNotification() {
     $classes = array(
       'phabricator-notification',
@@ -54,10 +64,14 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
       $classes[] = 'phabricator-notification-unread';
     }
 
-    return phutil_render_tag(
+    return javelin_render_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
+        'sigil' => 'notification',
+        'meta' => array(
+          'href' => $this->getHref(),
+        ),
       ),
       $this->title);
   }

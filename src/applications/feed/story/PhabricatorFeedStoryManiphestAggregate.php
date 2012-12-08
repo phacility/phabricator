@@ -59,6 +59,9 @@ final class PhabricatorFeedStoryManiphestAggregate
     $view->setViewed($this->getHasViewed());
     $view->setTitle($title);
 
+    $href = $this->getHandle($data->getValue('taskPHID'))->getURI();
+    $view->setHref($href);
+
     return $view;
   }
 

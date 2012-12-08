@@ -59,6 +59,9 @@ final class PhabricatorFeedStoryDifferentialAggregate
     $view->setViewed($this->getHasViewed());
     $view->setTitle($title);
 
+    $href = $this->getHandle($data->getValue('revision_phid'))->getURI();
+    $view->setHref($href);
+
     return $view;
   }
 

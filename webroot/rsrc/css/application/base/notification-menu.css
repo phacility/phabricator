@@ -16,18 +16,26 @@
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
   z-index: 9;
 
-  border: 1px solid #33393d;
+  border: 2px solid #33393d;
   border-top-width: 0;
+  border-radius: 3px;
 }
 
 .device .phabricator-notification-menu {
   border-bottom: 1px solid #222222;
 }
 
-
 .phabricator-notification {
-  padding: 6px 6px;
-  margin: 1px 0;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.device-desktop .phabricator-notification:hover {
+  background: #f4f6f9;
+}
+
+.phabricator-notification + .phabricator-notification {
+  border-top: 1px solid #e9e9e9;
 }
 
 .no-notifications {
@@ -43,9 +51,17 @@
   background: #aacfef;
 }
 
-.view-all-notifications {
+.phabricator-notification-header {
+  font-weight: bold;
+  padding: 6px;
+  font-size: 12px;
+  border-bottom: 1px solid #e9e9e9;
+}
+
+.phabricator-notification-view-all {
   text-align: center;
   font-weight: bold;
-  background: #eeeeee;
-  border-top: 1px solid #dddddd;
+  background: #f7f7f7;
+  border-top: 1px solid #e9e9e9;
+  padding: 6px;
 }

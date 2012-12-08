@@ -26,8 +26,12 @@ final class PhabricatorNotificationPanelController
         '</div>';
     }
 
-    $content .=
-      '<div class="phabricator-notification view-all-notifications">'.
+    $content =
+      '<div class="phabricator-notification-header">'.
+        pht('Notifications').
+      '</div>'.
+      $content.
+      '<div class="phabricator-notification-view-all">'.
         phutil_render_tag(
           'a',
           array(
