@@ -227,6 +227,8 @@ phutil_register_library_map(array(
     'DifferentialChangesetListView' => 'applications/differential/view/DifferentialChangesetListView.php',
     'DifferentialChangesetParser' => 'applications/differential/parser/DifferentialChangesetParser.php',
     'DifferentialChangesetParserTestCase' => 'applications/differential/parser/__tests__/DifferentialChangesetParserTestCase.php',
+    'DifferentialChangesetRenderer' => 'applications/differential/render/DifferentialChangesetRenderer.php',
+    'DifferentialChangesetTwoUpRenderer' => 'applications/differential/render/DifferentialChangesetTwoUpRenderer.php',
     'DifferentialChangesetViewController' => 'applications/differential/controller/DifferentialChangesetViewController.php',
     'DifferentialComment' => 'applications/differential/storage/DifferentialComment.php',
     'DifferentialCommentEditor' => 'applications/differential/editor/DifferentialCommentEditor.php',
@@ -1510,6 +1512,7 @@ phutil_register_library_map(array(
     'DifferentialChangesetDetailView' => 'AphrontView',
     'DifferentialChangesetListView' => 'AphrontView',
     'DifferentialChangesetParserTestCase' => 'ArcanistPhutilTestCase',
+    'DifferentialChangesetTwoUpRenderer' => 'DifferentialChangesetRenderer',
     'DifferentialChangesetViewController' => 'DifferentialController',
     'DifferentialComment' =>
     array(
