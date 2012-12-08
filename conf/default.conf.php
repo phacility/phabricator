@@ -191,7 +191,10 @@ return array(
 
 // -- Notifications --------------------------------------------------------- //
 
-  'notification.enabled' => false,
+  // Set this to true to enable real-time notifications. You must also run a
+  // notification server for this to work. Consult the documentation in
+  // "Notifications User Guide: Setup and Configuration" for instructions.
+  'notification.enabled'      => false,
 
   // Client port for the realtime server to listen on, and for realtime clients
   // to connect to. Use "localhost" if you are running the notification server

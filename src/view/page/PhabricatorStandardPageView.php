@@ -323,8 +323,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $user = $request->getUser();
 
     $container = null;
-    if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
-        $user->isLoggedIn()) {
+    if ($user->isLoggedIn()) {
 
       $aphlict_object_id = celerity_generate_unique_node_id();
       $aphlict_container_id = celerity_generate_unique_node_id();

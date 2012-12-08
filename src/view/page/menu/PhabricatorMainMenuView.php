@@ -52,8 +52,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $menus = array();
     $alerts = array();
 
-    if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
-        $user->isLoggedIn()) {
+    if ($user->isLoggedIn()) {
       list($menu, $dropdown) = $this->renderNotificationMenu();
       $alerts[] = $menu;
       $menus[] = $dropdown;

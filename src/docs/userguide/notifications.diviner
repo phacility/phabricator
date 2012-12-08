@@ -5,19 +5,20 @@ Guide to setting up notifications.
 
 = Overview =
 
-Phabricator can be configured to notify users when events happen in real time,
-so they'll get a message in their browser window if something has happened or
-the object they're looking at has been updated.
+By default, Phabricator delivers information about events (like users creating
+tasks or commenting on code reviews) through email and in-application
+notifications.
 
-NOTE: This feature is new and still needs some work.
+Phabricator can also be configured to deliver notifications in real time, by
+popping up by popping up a message in any open browser windows if something has
+happened or an object has been updated.
 
-= Enabling Notifications =
+To enable real-time notifications:
 
-To enable notifications, set `notification.enabled` to `true` in your
-configuration. This will enable the notification menu in the menu bar, and
-notifications will be published when users take actions.
+  - Set `notification.enabled` in your configuration to true.
+  - Run the notification server, as described below.
 
-NOTE: This setting will be turned on for everyone soon.
+This document describes the process in detail.
 
 = Running the Aphlict Server =
 
@@ -52,7 +53,7 @@ You may want to adjust these settings:
     aphlict is restarted.
 
 In most cases, the defaults are appropriate, except that you should set
-`notification.user` to some valid user so Aphlict isn't running as root.
+`notification.user` to some valid system user so Aphlict isn't running as root.
 
 == Verifying Server Status ==
 
@@ -62,13 +63,11 @@ server is working. If it isn't working, you should see an error.
 
 == Testing the Server ==
 
-The easiest way to test the server is to open a Maniphest Task or Differential
-Revision in two browser windows at the same time, then comment on it with one.
-You should get a notification in the other window.
+The easiest way to test the server is to have two users login and comment on
+the same Maniphest Task or Differential Revision. They should receive in-browser
+notifications about the other user's activity.
 
-NOTE: This will stop working soon, since we'll soon stop delivering
-notifications about your own actions. We'll provide an alternate way to test
-operation when this stops working.
+NOTE: This is cumbersome. There will be better testing tools at some point.
 
 == Debugging Server Problems ==
 
