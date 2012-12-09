@@ -316,6 +316,17 @@ return array(
   // The default is 'full'.
   'metamta.user-address-format' => 'full',
 
+  // If you're using PHPMailer to send email, provide the mailer and options
+  // here. PHPMailer is a superior to PHPMailerLite and provides more mailers.
+  // You need it when you want to use SMTP instead of sendmail as the mailer.
+  'phpmailer.mailer'            =>  'smtp',
+  'phpmailer.smtp-host'         =>  '',
+  'phpmailer.smtp-port'         =>  25,
+
+  // Set following if your smtp server requires authentication.
+  'phpmailer.smtp-user'         =>  null,
+  'phpmailer.smtp-password'     =>  null,
+
   // If you're using Amazon SES to send email, provide your AWS access key
   // and AWS secret key here. To set up Amazon SES with Phabricator, you need
   // to:
