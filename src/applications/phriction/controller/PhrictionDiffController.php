@@ -71,6 +71,11 @@ final class PhrictionDiffController
     $parser->setRenderingReference("{$l},{$r}");
     $parser->setWhitespaceMode($whitespace_mode);
 
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($user);
+    $engine->process();
+    $parser->setMarkupEngine($engine);
+
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
