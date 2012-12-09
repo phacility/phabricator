@@ -3,33 +3,41 @@
  */
 
 .aphront-calendar-view {
-  width:            100%;
-  border-collapse:  collapse;
-  background:       #fdfdfd;
-  border:           2px solid #003366;
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 2px solid #4f3612;
+  box-shadow: 0px 2px 6px #ccc;
 }
 
 tr.aphront-calendar-month-year-header th {
   text-align: center;
   font-weight: bold;
-  font-size: 14px;
-  padding: .5em;
+  font-size: 20px;
+  padding: 10px;
   color: white;
-  background: #003366;
+  background: #4f3612;
+  height: 26px;
+
 }
 
 tr.aphront-calendar-month-year-header th a {
   color: white;
   font-weight: bold;
   text-decoration: none;
+  display: block;
+}
+
+tr.aphront-calendar-month-year-header th a:hover {
+  color: #feffd0;
 }
 
 tr.aphront-calendar-day-of-week-header th {
   text-align: center;
   font-size: 11px;
-  padding: .25em;
+  padding: 3px;
   color: white;
-  background: #3366BB;
+  background: #896c45;
 }
 
 table.aphront-calendar-view td {
@@ -38,7 +46,7 @@ table.aphront-calendar-view td {
 }
 
 table.aphront-calendar-view td div.aphront-calendar-day {
-  min-height: 110px;
+  min-height: 125px;
 }
 
 .aphront-calendar-holiday {
@@ -49,9 +57,9 @@ table.aphront-calendar-view td div.aphront-calendar-day {
 }
 
 .aphront-calendar-date-number {
-  font-weight: bold;
-  color: #666666;
-  padding: .5em;
+  font-weight: normal;
+  color: #999;
+  padding: 4px;
   border-color: #dfdfdf;
   border-style: solid;
   border-width: 0 0 1px 1px;
@@ -73,21 +81,18 @@ table.aphront-calendar-view td div.aphront-calendar-day {
 
 .aphront-calendar-event {
   clear: both;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #6666ff;
 
-  background: #ddddff;
+  background: #006799;
   font-size: 11px;
   margin: 2px 0;
-
-  border-radius: 8px;
-  -moz-border-radius: 8px;
+  border-radius: 10px;
   padding: 3px 5%;
-  color: #222266;
-
   width: 90%;
   overflow: hidden;
+}
+
+.aphront-calendar-event a {
+  color: #fff;
 }
 
 .aphront-calendar-event-empty {
