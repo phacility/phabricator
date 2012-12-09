@@ -11,7 +11,7 @@
 
 /* On desktops, put some space around the whole grid. */
 .device-desktop .phabricator-application-list {
-  padding: .5em;
+  padding: 0 0 20px 20px;
 }
 
 /* On tablets, show two columns in the center. */
@@ -30,31 +30,34 @@
 
 a.phabricator-application-launch-container {
   display: inline-block;
-  width: 200px;
+  width: 220px;
   min-height: 90px;
-  padding: 5px 15px 5px 90px;
+  padding: 12px 15px 10px 75px;
   margin: 3px 6px;
   overflow: hidden;
   position: relative;
 
   text-decoration: none;
-  border: 1px solid #737373;
+  border: 1px solid #a7a8aa;
   background-color: #f3f3f3;
 
-  border-radius: 4px;
-  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.10),
-              inset -1px -1px 2px rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  box-shadow: 0px 1px 2px #ccc;
 }
 
 a.phabricator-application-launch-container:hover {
   text-decoration: none;
 }
 
+a.phabricator-application-launch-container:active {
+  box-shadow: inset 0 0px 3px rgba(0, 0, 0, 0.9);
+}
+
 /* The hover effect looks awful on phones/tablets when scrolling. */
 .device-desktop a.phabricator-application-launch-container:hover {
-  background-color: #3875d7;
-  border-color: #223366;
-  color: #eeeeee;
+  background-color: #638ed3;
+  border-color: #0a1d59;
+  color: #fff;
 }
 
 .phabricator-application-launch-name,
@@ -66,7 +69,7 @@ a.phabricator-application-launch-container:hover {
 .phabricator-application-launch-icon {
   display: block;
   position: absolute;
-  left: 15px;
+  left: 10px;
   top: 10px;
   width: 56px;
   height: 56px;
@@ -75,10 +78,13 @@ a.phabricator-application-launch-container:hover {
 
 .phabricator-application-launch-name {
   font-weight: bold;
+  font-size: 14px;
+  padding-bottom: 2px
 }
 
 .phabricator-application-launch-description {
-  color: #666666;
+  color: #888;
+  font-size: 12px
 }
 
 .device-desktop a.phabricator-application-launch-container:hover
@@ -133,13 +139,13 @@ a.phabricator-application-launch-container:hover {
 }
 
 .phabricator-application-status-type-needs {
-  background-image: url(/rsrc/image/appstatus_needs.png);
+  background-image: url(/res/2c1e193b/rsrc/image/appstatus_needs.png);
 }
 
 .phabricator-application-status-type-empty {
-  background-image: url(/rsrc/image/appstatus_empty.png);
+  background-image: url(/res/2f8102e0/rsrc/image/appstatus_empty.png);
 }
 
 .phabricator-application-status-type-info {
-  background-image: url(/rsrc/image/appstatus_info.png);
+  background-image: url(/res/407de6da/rsrc/image/appstatus_info.png);
 }
