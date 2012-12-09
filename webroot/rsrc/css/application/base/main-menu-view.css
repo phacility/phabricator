@@ -45,8 +45,13 @@
   position: relative;
   height: 44px;
   width: 139px;
-  margin-right: 12px;
-  margin-left: 6px;
+  margin-right: 6px;
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+.phabricator-main-menu-logo:hover {
+  background-color: #000;
 }
 
 .phabricator-main-menu-logo-image {
