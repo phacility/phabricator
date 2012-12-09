@@ -65,9 +65,17 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       $this->renderBody());
 
     if ($this->onRight) {
-      $core = '<th></th><td></td><th></th><td colspan="2">'.$content.'</td>';
+      $core =
+        '<th></th>'.
+        '<td class="left"></td>'.
+        '<th></th>'.
+        '<td colspan="3" class="right3">'.$content.'</td>';
     } else {
-      $core = '<th></th><td>'.$content.'</td><th></th><td colspan="2"></td>';
+      $core =
+        '<th></th>'.
+        '<td class="left">'.$content.'</td>'.
+        '<th></th>'.
+        '<td colspan="3" class="right3"></td>';
     }
 
     return '<table><tr class="inline-comment-splint">'.$core.'</tr></table>';
