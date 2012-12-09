@@ -139,13 +139,13 @@ a.phabricator-application-launch-container:active {
 }
 
 .phabricator-application-status-type-needs {
-  background-image: url(/res/2c1e193b/rsrc/image/appstatus_needs.png);
+  background-image: url(/rsrc/image/appstatus_needs.png);
 }
 
 .phabricator-application-status-type-empty {
-  background-image: url(/res/2f8102e0/rsrc/image/appstatus_empty.png);
+  background-image: url(/rsrc/image/appstatus_empty.png);
 }
 
 .phabricator-application-status-type-info {
-  background-image: url(/res/407de6da/rsrc/image/appstatus_info.png);
+  background-image: url(/rsrc/image/appstatus_info.png);
 }
