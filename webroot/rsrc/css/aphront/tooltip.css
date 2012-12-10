@@ -8,20 +8,69 @@
 }
 
 .jx-tooltip {
-  background: #222222;
+  background: #000;
   color: #f9f9f9;
-  padding: 6px 8px;
+  font-size: 12px;
+  padding: 4px 8px;
   overflow: hidden;
   white-space: pre-wrap;
+  border-radius: 3px;
   opacity: 0.9;
 
   box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
+.jx-tooltip:after {
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-color: rgba(0, 0, 0, 0);
+  border-width: 5px;
+}
+
 .jx-tooltip-align-E {
-  padding-left: 3px;
+  margin-left: 5px;
+}
+
+.jx-tooltip-align-E .jx-tooltip:after {
+  margin-top: -5px;
+  border-right-color: #000;
+  right: 100%;
+  top: 50%;
+}
+
+.jx-tooltip-align-W {
+  margin-right: 5px;
+}
+
+.jx-tooltip-align-W .jx-tooltip:after {
+  margin-top: -5px;
+  border-left-color: #000;
+  left: 100%;
+  top: 50%;
 }
 
 .jx-tooltip-align-N {
-  padding-bottom: 3px;
+  margin-top: -5px;
+}
+
+.jx-tooltip-align-N .jx-tooltip:after {
+  margin-left: -5px;
+  border-top-color: #000;
+  top: 100%;
+  left: 50%;
+}
+
+.jx-tooltip-align-S {
+  margin-bottom: -5px;
+}
+
+.jx-tooltip-align-S .jx-tooltip:after {
+  margin-left: -5px;
+  border-bottom-color: #000;
+  bottom: 100%;
+  left: 50%;
 }

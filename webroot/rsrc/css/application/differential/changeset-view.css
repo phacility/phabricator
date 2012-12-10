@@ -63,11 +63,11 @@
 
 .differential-diff td.right,
 .differential-diff td.right1 {
-  width: 43%;
+  width: 43.5%;
 }
 
 .differential-diff td.right2 {
-  width: 44.3%;
+  width: 44.5%;
 }
 .differential-diff td.right3 {
   width: 45%;
@@ -104,8 +104,8 @@
 }
 
 .differential-diff td.copy {
-  min-width: 0.7%;
-  width: 0.7%;
+  min-width: 0.5%;
+  width: 0.5%;
   padding: 0;
 }
 
@@ -124,8 +124,8 @@
 }
 
 .differential-diff td.cov {
-  min-width: 1.3%;
-  width: 1.3%;
+  min-width: 1%;
+  width: 1%;
   padding: 0;
 }
 

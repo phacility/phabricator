@@ -113,15 +113,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
       return array();
     }
 
-    $fragments = array(
-      '/' => true,
-    );
-
-    foreach ($paths as $path) {
-      $fragments += self::splitPath($path);
-    }
-
-    return self::loadPackagesForPaths($repository, array_keys($fragments));
+    return self::loadPackagesForPaths($repository, $paths);
  }
 
  public static function loadOwningPackages($repository, $path) {
@@ -129,14 +121,21 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
       return array();
     }
 
-    $fragments = self::splitPath($path);
-    return self::loadPackagesForPaths($repository, array_keys($fragments), 1);
+    return self::loadPackagesForPaths($repository, array($path), 1);
  }
 
   private static function loadPackagesForPaths(
     PhabricatorRepository $repository,
     array $paths,
     $limit = 0) {
+
+    $fragments = array();
+    foreach ($paths as $path) {
+      foreach (self::splitPath($path) as $fragment) {
+        $fragments[$fragment][$path] = true;
+      }
+    }
+
     $package = new PhabricatorOwnersPackage();
     $path = new PhabricatorOwnersPath();
     $conn = $package->establishConnection('r');
@@ -151,28 +150,21 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     // branch. Break it apart so that it will fit within 'max_allowed_packet',
     // and then merge results in PHP.
 
-    $ids = array();
-    foreach (array_chunk($paths, 128) as $chunk) {
-      $rows = queryfx_all(
+    $rows = array();
+    foreach (array_chunk(array_keys($fragments), 128) as $chunk) {
+      $rows[] = queryfx_all(
         $conn,
-        'SELECT pkg.id id, LENGTH(p.path) len
+        'SELECT pkg.id, p.excluded, p.path
           FROM %T pkg JOIN %T p ON p.packageID = pkg.id
           WHERE p.path IN (%Ls) %Q',
         $package->getTableName(),
         $path->getTableName(),
         $chunk,
         $repository_clause);
-
-      foreach ($rows as $row) {
-        $id = (int)$row['id'];
-        $len = (int)$row['len'];
-        if (isset($ids[$id])) {
-          $ids[$id] = max($len, $ids[$id]);
-        } else {
-          $ids[$id] = $len;
-        }
-      }
     }
+    $rows = array_mergev($rows);
+
+    $ids = self::findLongestPathsPerPackage($rows, $fragments);
 
     if (!$ids) {
       return array();
@@ -188,6 +180,38 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     $packages = array_select_keys($packages, $ids);
 
     return $packages;
+  }
+
+  public static function findLongestPathsPerPackage(array $rows, array $paths) {
+    $ids = array();
+
+    foreach (igroup($rows, 'id') as $id => $package_paths) {
+      $relevant_paths = array_select_keys(
+        $paths,
+        ipull($package_paths, 'path'));
+
+      // For every package, remove all excluded paths.
+      $remove = array();
+      foreach ($package_paths as $package_path) {
+        if ($package_path['excluded']) {
+          $remove += $relevant_paths[$package_path['path']];
+          unset($relevant_paths[$package_path['path']]);
+        }
+      }
+
+      if ($remove) {
+        foreach ($relevant_paths as $fragment => $fragment_paths) {
+          $relevant_paths[$fragment] = array_diff_key($fragment_paths, $remove);
+        }
+      }
+
+      $relevant_paths = array_filter($relevant_paths);
+      if ($relevant_paths) {
+        $ids[$id] = max(array_map('strlen', array_keys($relevant_paths)));
+      }
+    }
+
+    return $ids;
   }
 
   public function save() {
@@ -238,9 +262,15 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
       $new_paths = igroup($this->unsavedPaths, 'repositoryPHID', 'path');
       $cur_paths = $this->loadPaths();
       foreach ($cur_paths as $key => $path) {
-        if (empty($new_paths[$path->getRepositoryPHID()][$path->getPath()])) {
-          $touched_repos[$path->getRepositoryPHID()] = true;
-          $remove_paths[$path->getRepositoryPHID()][$path->getPath()] = true;
+        $repository_phid = $path->getRepositoryPHID();
+        $new_path = head(idx(
+          idx($new_paths, $repository_phid, array()),
+          $path->getPath(),
+          array()));
+        $excluded = $path->getExcluded();
+        if (!$new_path || $new_path['excluded'] != $excluded) {
+          $touched_repos[$repository_phid] = true;
+          $remove_paths[$repository_phid][$path->getPath()] = $excluded;
           $path->delete();
           unset($cur_paths[$key]);
         }
@@ -255,7 +285,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
         if (!$repository) {
           continue;
         }
-        foreach ($paths as $path => $ignored) {
+        foreach ($paths as $path => $dicts) {
           $path = ltrim($path, '/');
           // build query to validate path
           $drequest = DiffusionRequest::newFromDictionary(
@@ -286,11 +316,13 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
           }
           if (empty($cur_paths[$repository_phid][$path]) && $valid) {
             $touched_repos[$repository_phid] = true;
-            $add_paths[$repository_phid][$path] = true;
+            $excluded = idx(reset($dicts), 'excluded', 0);
+            $add_paths[$repository_phid][$path] = $excluded;
             $obj = new PhabricatorOwnersPath();
             $obj->setPackageID($this->getID());
             $obj->setRepositoryPHID($repository_phid);
             $obj->setPath($path);
+            $obj->setExcluded($excluded);
             $obj->save();
           }
         }
@@ -340,12 +372,12 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
   }
 
   private static function splitPath($path) {
-    $result = array();
+    $result = array('/');
     $trailing_slash = preg_match('@/$@', $path) ? '/' : '';
     $path = trim($path, '/');
     $parts = explode('/', $path);
     while (count($parts)) {
-      $result['/'.implode('/', $parts).$trailing_slash] = true;
+      $result[] = '/'.implode('/', $parts).$trailing_slash;
       $trailing_slash = '/';
       array_pop($parts);
     }

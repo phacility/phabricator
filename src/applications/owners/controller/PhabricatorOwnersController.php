@@ -28,32 +28,22 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
   }
 
   public function renderSideNav() {
-    $package_views = array(
-      array('name' => 'Owned',
-            'key'  => 'view/owned'),
-      array('name' => 'All',
-            'key'  => 'view/all'),
-    );
-
-    $package_views =
-      array_merge($this->getExtraPackageViews(),
-                  $package_views);
-
-    $base_uri = new PhutilURI('/owners/');
     $nav = new AphrontSideNavFilterView();
-    $nav->setBaseUri($base_uri);
+    $base_uri = new PhutilURI('/owners/');
+    $nav->setBaseURI($base_uri);
 
     $nav->addLabel('Packages');
-    $nav->addFilters($package_views);
+    $this->getExtraPackageViews($nav);
+    $nav->addFilter('view/owned', 'Owned');
+    $nav->addFilter('view/all', 'All');
 
-    $filter = $this->getSideNavFilter();
-    $nav->selectFilter($filter, 'view/owned');
+    $nav->selectFilter($this->getSideNavFilter(), 'view/owned');
 
     return $nav;
   }
 
-  protected function getExtraPackageViews() {
-    return array();
+  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
+    return;
   }
 
 }

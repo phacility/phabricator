@@ -99,8 +99,8 @@ final class PhabricatorFeedStoryPublisher {
         implode(', ', $sql));
     }
 
+    $this->insertNotifications($chrono_key);
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
-      $this->insertNotifications($chrono_key);
       $this->sendNotification($chrono_key);
     }
 

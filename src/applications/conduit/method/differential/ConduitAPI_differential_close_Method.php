@@ -45,9 +45,14 @@ final class ConduitAPI_differential_close_Method
 
     $revision->loadRelationships();
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+
     $editor = new DifferentialCommentEditor(
       $revision,
       DifferentialAction::ACTION_CLOSE);
+    $editor->setContentSource($content_source);
     $editor->setActor($request->getUser());
     $editor->save();
 

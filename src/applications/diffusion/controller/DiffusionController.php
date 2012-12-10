@@ -42,7 +42,8 @@ abstract class DiffusionController extends PhabricatorController {
   }
 
   final protected function buildSideNav($selected, $has_change_view) {
-    $nav = new AphrontSideNavView();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI(''));
 
     $navs = array(
       'history' => 'History View',
@@ -61,36 +62,27 @@ abstract class DiffusionController extends PhabricatorController {
       $navs['lint'] = 'Lint View';
     }
 
+    $selected_href = null;
     foreach ($navs as $action => $name) {
       $href = $drequest->generateURI(
         array(
           'action' => $action,
         ));
+      if ($action == $selected) {
+        $selected_href = $href;
+      }
 
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href'  => $href,
-            'class' =>
-              ($action == $selected
-                ? 'aphront-side-nav-selected'
-                : null),
-          ),
-          $name));
+      $nav->addFilter($href, $name);
     }
+    $nav->selectFilter($selected_href, null);
 
     // TODO: URI encoding might need to be sorted out for this link.
 
-    $nav->addNavItem(
-      phutil_render_tag(
-        'a',
-        array(
-          'href'  => '/owners/view/search/'.
-            '?repository='.phutil_escape_uri($drequest->getCallsign()).
-            '&path='.phutil_escape_uri('/'.$drequest->getPath()),
-        ),
-        "Search Owners \xE2\x86\x97"));
+    $nav->addFilter(
+      '/owners/view/search/'.
+        '?repository='.phutil_escape_uri($drequest->getCallsign()).
+        '&path='.phutil_escape_uri('/'.$drequest->getPath()),
+      "Search Owners \xE2\x86\x97");
 
     return $nav;
   }

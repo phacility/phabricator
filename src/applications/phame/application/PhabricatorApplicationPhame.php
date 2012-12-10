@@ -6,7 +6,7 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
     return '/phame/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'phame';
   }
 

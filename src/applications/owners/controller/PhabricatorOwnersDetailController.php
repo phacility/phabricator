@@ -82,6 +82,9 @@ final class PhabricatorOwnersDetailController
     $path_links = array();
     foreach ($paths as $path) {
       $repo = $repositories[$path->getRepositoryPHID()];
+      if (!$repo) {
+        continue;
+      }
       $href = DiffusionRequest::generateDiffusionURI(
         array(
           'callsign' => $repo->getCallsign(),
@@ -97,7 +100,9 @@ final class PhabricatorOwnersDetailController
           'href' => (string) $href,
         ),
         phutil_escape_html($path->getPath()));
-      $path_links[] = $repo_name.' '.$path_link;
+      $path_links[] =
+        ($path->getExcluded() ? '&ndash;' : '+').' '.
+        $repo_name.' '.$path_link;
     }
     $path_links = implode('<br />', $path_links);
     $rows[] = array(
@@ -223,12 +228,9 @@ final class PhabricatorOwnersDetailController
       ));
   }
 
-  protected function getExtraPackageViews() {
+  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
     $package = $this->package;
-    return array(
-      array('name' => 'Details',
-            'key'  => 'package/'.$package->getID(),
-        ));
+    $view->addFilter('package/'.$package->getID(), 'Details');
   }
 
 }

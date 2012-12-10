@@ -34,6 +34,7 @@ final class PhabricatorOwnersListController
 
         $where = array('1 = 1');
         $join = array();
+        $having = '';
 
         if ($request->getStr('name')) {
           $where[] = qsprintf(
@@ -59,10 +60,14 @@ final class PhabricatorOwnersListController
           if ($request->getStr('path')) {
             $where[] = qsprintf(
               $conn_r,
-              'path.path LIKE %~ OR %s LIKE CONCAT(path.path, %s)',
+              '(path.path LIKE %~ AND NOT path.excluded) OR
+                %s LIKE CONCAT(REPLACE(path.path, %s, %s), %s)',
               $request->getStr('path'),
               $request->getStr('path'),
+              '_',
+              '\_',
               '%');
+            $having = 'HAVING MAX(path.excluded) = 0';
           }
 
         }
@@ -80,10 +85,11 @@ final class PhabricatorOwnersListController
 
         $data = queryfx_all(
           $conn_r,
-          'SELECT p.* FROM %T p %Q WHERE %Q GROUP BY p.id',
+          'SELECT p.* FROM %T p %Q WHERE %Q GROUP BY p.id %Q',
           $package->getTableName(),
           implode(' ', $join),
-          '('.implode(') AND (', $where).')');
+          '('.implode(') AND (', $where).')',
+          $having);
         $packages = $package->loadAllFromArray($data);
 
         $header = 'Search Results';
@@ -254,6 +260,7 @@ final class PhabricatorOwnersListController
               'action'   => 'browse',
             ));
           $pkg_paths[$key] =
+            ($path->getExcluded() ? '&ndash;' : '+').' '.
             '<strong>'.phutil_escape_html($repo->getName()).'</strong> '.
             phutil_render_tag(
               'a',
@@ -308,17 +315,9 @@ final class PhabricatorOwnersListController
     return $panel;
   }
 
-  protected function getExtraPackageViews() {
-    switch ($this->view) {
-      case 'search':
-        $extra = array(array('name' => 'Search Results',
-                             'key'  => 'view/search'));
-        break;
-      default:
-        $extra = array();
-        break;
+  protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
+    if ($this->view == 'search') {
+      $view->addFilter('view/search', 'Search Results');
     }
-
-    return $extra;
   }
 }

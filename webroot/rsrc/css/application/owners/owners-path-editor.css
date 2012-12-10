@@ -10,12 +10,12 @@
   padding: 2px 4px;
 }
 
-.owners-path-editor-table select {
+.owners-path-editor-table select.owners-repo {
   width: 150px;
 }
 
 .owners-path-editor-table input {
-  width: 550px;
+  width: 450px;
 }
 
 .owners-path-editor-table div.error-display {

@@ -6,7 +6,7 @@ final class PhabricatorApplicationPHPAST extends PhabricatorApplication {
     return '/xhpast/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'phpast';
   }
 

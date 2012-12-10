@@ -82,32 +82,17 @@ final class DifferentialRevisionListController extends DifferentialController {
       'order' => 'modified',
     );
 
-    $side_nav = new AphrontSideNavView();
+    $side_nav = new AphrontSideNavFilterView();
+    $side_nav->setBaseURI(id(clone $uri)->setPath('/differential/filter/'));
     foreach ($filters as $filter) {
       list($filter_name, $display_name) = $filter;
       if ($filter_name) {
-        $href = clone $uri;
-        $href->setPath('/differential/filter/'.$filter_name.'/'.$username);
-        if ($filter_name == $this->filter) {
-          $class = 'aphront-side-nav-selected';
-        } else {
-          $class = null;
-        }
-        $item = phutil_render_tag(
-          'a',
-          array(
-            'href' => (string)$href,
-            'class' => $class,
-          ),
-          phutil_escape_html($display_name));
+        $side_nav->addFilter($filter_name.'/'.$username, $display_name);
       } else {
-        $item = phutil_render_tag(
-          'span',
-          array(),
-          phutil_escape_html($display_name));
+        $side_nav->addLabel($display_name);
       }
-      $side_nav->addNavItem($item);
     }
+    $side_nav->selectFilter($this->filter.'/'.$username, null);
 
     $panels = array();
     $handles = array();
@@ -190,25 +175,24 @@ final class DifferentialRevisionListController extends DifferentialController {
     $filter_view = new AphrontListFilterView();
     $filter_view->appendChild($filter_form);
 
-    if (!$viewer_is_anonymous) {
-      $create_uri = new PhutilURI('/differential/diff/create/');
-      $filter_view->addButton(
-        phutil_render_tag(
-          'a',
-          array(
-            'href'  => (string)$create_uri,
-            'class' => 'green button',
-          ),
-          'Create Revision'));
-    }
-
     $side_nav->appendChild($filter_view);
 
     foreach ($panels as $panel) {
       $side_nav->appendChild($panel);
     }
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildApplicationCrumbs();
+    $name = $side_nav
+      ->getMenu()
+      ->getItem($side_nav->getSelectedFilter())
+      ->getName();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($name)
+        ->setHref($request->getRequestURI()));
+    $side_nav->setCrumbs($crumbs);
+
+    return $this->buildApplicationPage(
       $side_nav,
       array(
         'title' => 'Differential Home',

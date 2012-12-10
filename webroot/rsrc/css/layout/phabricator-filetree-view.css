@@ -17,6 +17,7 @@
 .phabricator-filetree .phabricator-filetree-item {
   margin: 0;
   padding: 0;
+  display: block;
 }
 
 .phabricator-filetree span.phabricator-filetree-icon {
@@ -30,7 +31,7 @@
 
 .phabricator-filetree span.phabricator-filetree-name {
   padding: 0;
-  margin-left: 20px;
+  margin-left: 4px;
   font-size: 11px;
   font-weight: normal;
   line-height: 20px;

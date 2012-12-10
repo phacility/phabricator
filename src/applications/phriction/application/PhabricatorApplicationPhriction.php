@@ -10,7 +10,7 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return '/w/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'phriction';
   }
 

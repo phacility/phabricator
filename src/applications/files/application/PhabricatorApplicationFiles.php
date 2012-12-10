@@ -10,7 +10,7 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return 'Store and Share Files';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'files';
   }
 

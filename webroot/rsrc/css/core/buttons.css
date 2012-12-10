@@ -8,8 +8,6 @@ a.button,
 a.button:visited,
 input.inputsubmit {
   background-color: #19558D;
-  background-image: url('/rsrc/image/button_gradients.png');
-  background-position: 0 -26px;
 
   color: white;
   text-shadow: 0 -1px #19558D;
@@ -39,37 +37,24 @@ a.icon:visited {
 button:active,
 a.button:active {
   background-color: #19558D;
-  background-position: 0 0;
 }
 
 button.black,
 a.black,
 a.black:visited {
   background-color: #383838;
-  background-position: 0 -182px;
   border: 1px solid #333;
   text-shadow: 0 -1px #000;
   border-bottom-color: #000;
-}
-
-button.black:active,
-a.black:active {
-  background-position: 0 -156px;
 }
 
 button.green,
 a.green,
 a.green:visited {
   background-color: #006600;
-  background-position: 0 -130px;
   border: 1px solid #3b6e22;
   text-shadow: 0 -1px #006600;
   border-bottom-color: #2c5a15;
-}
-
-button.green:active,
-a.green:active {
-  background-position: 0 -104px;
 }
 
 button.grey,
@@ -80,8 +65,6 @@ a.button.disabled,
 button[disabled], /* Set by JX.Workflow. */
 button.disabled {
   background-color: #f7f7f7;
-  background-image: url('/rsrc/image/button_gradients.png');
-  background-position: 0 -52px;
   border-color: #aaa;
   color: #333;
   border-bottom-color: #999;
@@ -101,7 +84,6 @@ a.grey:active,
 button.grey_active,
 a.dropdown-open {
   background-color: #7d7d7d;
-  background-position: 0 -78px;
   color: #777;
 }
 

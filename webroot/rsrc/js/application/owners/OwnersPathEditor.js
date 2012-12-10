@@ -4,6 +4,7 @@
  *           path-typeahead
  *           javelin-dom
  *           javelin-util
+ *           phabricator-prefab
  * @provides owners-path-editor
  * @javelin
  */
@@ -95,7 +96,8 @@ JX.install('OwnersPathEditor', {
         this._lastRepositoryChoice;
       var options = this._buildRepositoryOptions(selected_repository);
       var attrs = {
-        name : "repo[" + this._count + "]"
+        name : "repo[" + this._count + "]",
+        className : 'owners-repo'
       };
       var repo_select = JX.$N('select', attrs, options);
 
@@ -132,8 +134,14 @@ JX.install('OwnersPathEditor', {
 
       var error_display_cell = JX.$N('td', {}, error_display);
 
+      var exclude = JX.Prefab.renderSelect(
+        {'0' : 'Include', '1' : 'Exclude'},
+        path_ref.excluded,
+        {name : 'exclude[' + this._count + ']'});
+      var exclude_cell = JX.$N('td', {}, exclude);
+
       var row = this._rowManager.addRow(
-        [repo_cell, typeahead_cell, error_display_cell]);
+        [exclude_cell, repo_cell, typeahead_cell, error_display_cell]);
 
       new JX.PathTypeahead({
         repositoryDefaultPaths : this._repositoryDefaultPaths,

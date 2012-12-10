@@ -4,11 +4,6 @@ final class PhabricatorFeedStoryDifferentialAggregate
   extends PhabricatorFeedStoryAggregate {
 
   public function renderView() {
-    return null;
-  }
-
-
-  public function renderNotificationView() {
     $data = $this->getStoryData();
 
     $task_link = $this->linkTo($data->getValue('revision_phid'));
@@ -59,10 +54,13 @@ final class PhabricatorFeedStoryDifferentialAggregate
         break;
     }
 
-    $view = new PhabricatorNotificationStoryView();
+    $view = new PhabricatorFeedStoryView();
     $view->setEpoch($this->getEpoch());
     $view->setViewed($this->getHasViewed());
     $view->setTitle($title);
+
+    $href = $this->getHandle($data->getValue('revision_phid'))->getURI();
+    $view->setHref($href);
 
     return $view;
   }

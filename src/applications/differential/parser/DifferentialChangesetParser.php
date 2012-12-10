@@ -23,7 +23,7 @@ final class DifferentialChangesetParser {
 
   protected $renderCacheKey = null;
 
-  private $handles;
+  private $handles = array();
   private $user;
 
   private $leftSideChangesetID;
@@ -188,7 +188,7 @@ final class DifferentialChangesetParser {
     return $this->renderCacheKey;
   }
 
-  public function setChangeset($changeset) {
+  public function setChangeset(DifferentialChangeset $changeset) {
     $this->changeset = $changeset;
 
     $this->setFilename($changeset->getFilename());
@@ -204,6 +204,10 @@ final class DifferentialChangesetParser {
   public function setRenderingReference($ref) {
     $this->renderingReference = $ref;
     return $this;
+  }
+
+  private function getRenderingReference() {
+    return $this->renderingReference;
   }
 
   public function getChangeset() {
@@ -775,10 +779,6 @@ final class DifferentialChangesetParser {
     return idx($this->specialAttributes, self::ATTR_WHITELINES, false);
   }
 
-  public function getLength() {
-    return max(count($this->old), count($this->new));
-  }
-
   protected function applyIntraline(&$render, $intra, $corpus) {
 
     foreach ($render as $key => $text) {
@@ -928,6 +928,33 @@ final class DifferentialChangesetParser {
     }
   }
 
+  private function shouldRenderPropertyChangeHeader($changeset) {
+    if (!$this->isTopLevel) {
+      // We render properties only at top level; otherwise we get multiple
+      // copies of them when a user clicks "Show More".
+      return false;
+    }
+
+    $old = $changeset->getOldProperties();
+    $new = $changeset->getNewProperties();
+
+    if ($old === $new) {
+      return false;
+    }
+
+    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_ADD &&
+        $new == array('unix:filemode' => '100644')) {
+      return false;
+    }
+
+    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_DELETE &&
+        $old == array('unix:filemode' => '100644')) {
+      return false;
+     }
+
+    return true;
+  }
+
   public function render(
     $range_start  = null,
     $range_len    = null,
@@ -938,46 +965,116 @@ final class DifferentialChangesetParser {
     // generate property changes and "shield" UI elements only for toplevel
     // requests.
     $this->isTopLevel = (($range_start === null) && ($range_len === null));
-
     $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
-
     $this->tryCacheStuff();
+    $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);
+
+    $renderer = id(new DifferentialChangesetTwoUpRenderer())
+      ->setChangeset($this->changeset)
+      ->setRenderPropertyChangeHeader($render_pch)
+      ->setOldLines($this->old)
+      ->setNewLines($this->new)
+      ->setOldRender($this->oldRender)
+      ->setNewRender($this->newRender)
+      ->setMissingOldLines($this->missingOld)
+      ->setMissingNewLines($this->missingNew)
+      ->setVisibleLines($this->visible)
+      ->setOldChangesetID($this->leftSideChangesetID)
+      ->setNewChangesetID($this->rightSideChangesetID)
+      ->setOldAttachesToNewFile($this->leftSideAttachesToNewFile)
+      ->setNewAttachesToNewFile($this->rightSideAttachesToNewFile)
+      ->setLinesOfContext(self::LINES_CONTEXT)
+      ->setCodeCoverage($this->coverage)
+      ->setRenderingReference($this->getRenderingReference())
+      ->setMarkupEngine($this->markupEngine)
+      ->setHandles($this->handles);
 
     $shield = null;
     if ($this->isTopLevel && !$this->comments) {
       if ($this->isGenerated()) {
-        $shield = $this->renderShield(
-          "This file contains generated code, which does not normally need ".
-          "to be reviewed.",
+        $shield = $renderer->renderShield(
+          pht(
+            'This file contains generated code, which does not normally '.
+            'need to be reviewed.'),
           true);
       } else if ($this->isUnchanged()) {
         if ($this->isWhitespaceOnly()) {
-          $shield = $this->renderShield(
-            "This file was changed only by adding or removing trailing ".
-            "whitespace.",
+          $shield = $renderer->renderShield(
+            pht(
+              'This file was changed only by adding or removing trailing '.
+              'whitespace.'),
             false);
         } else {
-          $shield = $this->renderShield(
-            "The contents of this file were not changed.",
+          $shield = $renderer->renderShield(
+            pht("The contents of this file were not changed."),
             false);
         }
       } else if ($this->isDeleted()) {
-        $shield = $this->renderShield(
-          "This file was completely deleted.",
+        $shield = $renderer->renderShield(
+          pht("This file was completely deleted."),
           true);
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
         $lines = number_format($this->changeset->getAffectedLineCount());
-        $shield = $this->renderShield(
-          "This file has a very large number of changes ({$lines} lines).",
+        $shield = $renderer->renderShield(
+          pht(
+            'This file has a very large number of changes ({%s} lines).',
+            $lines),
           true);
       }
     }
 
     if ($shield) {
-      return $this->renderChangesetTable($this->changeset, $shield);
+      return $renderer->renderChangesetTable($shield);
     }
 
+    $old_comments = array();
+    $new_comments = array();
+    $old_mask = array();
+    $new_mask = array();
     $feedback_mask = array();
+
+    if ($this->comments) {
+      foreach ($this->comments as $comment) {
+        $start = max($comment->getLineNumber() - self::LINES_CONTEXT, 0);
+        $end = $comment->getLineNumber() +
+          $comment->getLineLength() +
+          self::LINES_CONTEXT;
+        $new_side = $this->isCommentOnRightSideWhenDisplayed($comment);
+        for ($ii = $start; $ii <= $end; $ii++) {
+          if ($new_side) {
+            $new_mask[$ii] = true;
+          } else {
+            $old_mask[$ii] = true;
+          }
+        }
+      }
+
+      foreach ($this->old as $ii => $old) {
+        if (isset($old['line']) && isset($old_mask[$old['line']])) {
+          $feedback_mask[$ii] = true;
+        }
+      }
+
+      foreach ($this->new as $ii => $new) {
+        if (isset($new['line']) && isset($new_mask[$new['line']])) {
+          $feedback_mask[$ii] = true;
+        }
+      }
+      $this->comments = msort($this->comments, 'getID');
+      foreach ($this->comments as $comment) {
+        $final = $comment->getLineNumber() +
+          $comment->getLineLength();
+        $final = max(1, $final);
+        if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
+          $new_comments[$final][] = $comment;
+        } else {
+          $old_comments[$final][] = $comment;
+        }
+      }
+    }
+    $renderer
+      ->setOldComments($old_comments)
+      ->setNewComments($new_comments);
 
     switch ($this->changeset->getFileType()) {
       case DifferentialChangeType::FILE_IMAGE:
@@ -985,7 +1082,7 @@ final class DifferentialChangesetParser {
         $cur = null;
         // TODO: Improve the architectural issue as discussed in D955
         // https://secure.phabricator.com/D955
-        $reference = $this->renderingReference;
+        $reference = $this->getRenderingReference();
         $parts = explode('/', $reference);
         if (count($parts) == 2) {
           list($id, $vs) = $parts;
@@ -1013,7 +1110,6 @@ final class DifferentialChangesetParser {
         }
 
         if ($old_phid || $new_phid) {
-
           // grab the files, (micro) optimization for 1 query not 2
           $file_phids = array();
           if ($old_phid) {
@@ -1026,163 +1122,44 @@ final class DifferentialChangesetParser {
           $files = id(new PhabricatorFile())->loadAllWhere(
             'phid IN (%Ls)',
             $file_phids);
-
           foreach ($files as $file) {
             if (empty($file)) {
               continue;
             }
             if ($file->getPHID() == $old_phid) {
-              $old = phutil_render_tag(
-                'div',
-                array(
-                  'class' => 'differential-image-stage'
-                ),
-                phutil_render_tag(
-                  'img',
-                  array(
-                    'src' => $file->getBestURI(),
-                  )
-                )
-              );
-            } else {
-              $cur = phutil_render_tag(
-                'div',
-                array(
-                  'class' => 'differential-image-stage'
-                ),
-                phutil_render_tag(
-                  'img',
-                  array(
-                    'src' => $file->getBestURI(),
-                  )
-                )
-              );
+              $old = $file;
+            } else if ($file->getPHID() == $new_phid) {
+              $new = $file;
             }
           }
         }
-
-        $this->comments = msort($this->comments, 'getID');
-        $old_comments = array();
-        $new_comments = array();
-        foreach ($this->comments as $comment) {
-          if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
-            $new_comments[] = $comment;
-          } else {
-            $old_comments[] = $comment;
-          }
-        }
-
-        $html_old = array();
-        $html_new = array();
-        foreach ($old_comments as $comment) {
-          $xhp = $this->renderInlineComment($comment);
-          $html_old[] =
-            '<tr class="inline">'.
-              '<th />'.
-              '<td class="left">'.$xhp.'</td>'.
-              '<th />'.
-              '<td class="right3" colspan="3" />'.
-            '</tr>';
-        }
-        foreach ($new_comments as $comment) {
-          $xhp = $this->renderInlineComment($comment);
-          $html_new[] =
-            '<tr class="inline">'.
-              '<th />'.
-              '<td class="left" />'.
-              '<th />'.
-              '<td class="right3" colspan="3">'.$xhp.'</td>'.
-            '</tr>';
-        }
-
-        if (!$old) {
-          $th_old = '<th></th>';
-        } else {
-          $th_old = '<th id="C'.$vs.'OL1">1</th>';
-        }
-
-        if (!$cur) {
-          $th_new = '<th></th>';
-        } else {
-          $th_new = '<th id="C'.$id.'NL1">1</th>';
-        }
-
-        $output = $this->renderChangesetTable(
-          $this->changeset,
-          '<tr class="differential-image-diff">'.
-            $th_old.
-            '<td class="left differential-old-image">'.$old.'</td>'.
-            $th_new.
-            '<td class="right3 differential-new-image" colspan="3">'.
-              $cur.
-            '</td>'.
-          '</tr>'.
-          implode('', $html_old).
-          implode('', $html_new));
-
-        return $output;
+        return $renderer->renderFileChange($old, $new, $id, $vs);
       case DifferentialChangeType::FILE_DIRECTORY:
       case DifferentialChangeType::FILE_BINARY:
-        $output = $this->renderChangesetTable($this->changeset, null);
+        $output = $renderer->renderChangesetTable(null);
         return $output;
     }
 
-    $old_comments = array();
-    $new_comments = array();
-
-    $old_mask = array();
-    $new_mask = array();
-    $feedback_mask = array();
-
-    if ($this->comments) {
-      foreach ($this->comments as $comment) {
-        $start = max($comment->getLineNumber() - self::LINES_CONTEXT, 0);
-        $end = $comment->getLineNumber() +
-               $comment->getLineLength() +
-               self::LINES_CONTEXT;
-        $new = $this->isCommentOnRightSideWhenDisplayed($comment);
-        for ($ii = $start; $ii <= $end; $ii++) {
-          if ($new) {
-            $new_mask[$ii] = true;
-          } else {
-            $old_mask[$ii] = true;
-          }
-        }
-      }
-
-      foreach ($this->old as $ii => $old) {
-        if (isset($old['line']) && isset($old_mask[$old['line']])) {
-          $feedback_mask[$ii] = true;
-        }
-      }
-
-      foreach ($this->new as $ii => $new) {
-        if (isset($new['line']) && isset($new_mask[$new['line']])) {
-          $feedback_mask[$ii] = true;
-        }
-      }
-      $this->comments = msort($this->comments, 'getID');
-      foreach ($this->comments as $comment) {
-        $final = $comment->getLineNumber() +
-                 $comment->getLineLength();
-        $final = max(1, $final);
-        if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
-          $new_comments[$final][] = $comment;
-        } else {
-          $old_comments[$final][] = $comment;
-        }
-      }
+    if ($this->originalLeft && $this->originalRight) {
+      list($highlight_old, $highlight_new) = $this->diffOriginals();
+      $highlight_old = array_flip($highlight_old);
+      $highlight_new = array_flip($highlight_new);
+      $renderer
+        ->setHighlightOld($highlight_old)
+        ->setHighlightNew($highlight_new);
     }
+    $renderer
+      ->setOriginalOld($this->originalLeft)
+      ->setOriginalNew($this->originalRight);
 
-    $html = $this->renderTextChange(
+    $html = $renderer->renderTextChange(
       $range_start,
       $range_len,
       $mask_force,
-      $feedback_mask,
-      $old_comments,
-      $new_comments);
+      $feedback_mask
+    );
 
-    return $this->renderChangesetTable($this->changeset, $html);
+    return $renderer->renderChangesetTable($html);
   }
 
   /**
@@ -1196,18 +1173,18 @@ final class DifferentialChangesetParser {
   private function isCommentVisibleOnRenderedDiff(
     PhabricatorInlineCommentInterface $comment) {
 
-    $changeset_id = $comment->getChangesetID();
-    $is_new = $comment->getIsNewFile();
+      $changeset_id = $comment->getChangesetID();
+      $is_new = $comment->getIsNewFile();
 
-    if ($changeset_id == $this->rightSideChangesetID &&
+      if ($changeset_id == $this->rightSideChangesetID &&
         $is_new == $this->rightSideAttachesToNewFile) {
-      return true;
-    }
+          return true;
+        }
 
-    if ($changeset_id == $this->leftSideChangesetID &&
+      if ($changeset_id == $this->leftSideChangesetID &&
         $is_new == $this->leftSideAttachesToNewFile) {
-      return true;
-    }
+          return true;
+        }
 
     return false;
   }
@@ -1238,803 +1215,6 @@ final class DifferentialChangesetParser {
     }
 
     return false;
-  }
-
-  protected function renderShield($message, $more) {
-
-    if ($more) {
-      $end = $this->getLength();
-      $reference = $this->renderingReference;
-      $more =
-        ' '.
-        javelin_render_tag(
-          'a',
-          array(
-            'mustcapture' => true,
-            'sigil'       => 'show-more',
-            'class'       => 'complete',
-            'href'        => '#',
-            'meta'        => array(
-              'ref'         => $reference,
-              'range'       => "0-{$end}",
-            ),
-          ),
-          'Show File Contents');
-    } else {
-      $more = null;
-    }
-
-    return javelin_render_tag(
-      'tr',
-      array(
-        'sigil' => 'context-target',
-      ),
-      '<td class="differential-shield" colspan="6">'.
-        phutil_escape_html($message).
-        $more.
-      '</td>');
-  }
-
-  protected function renderTextChange(
-    $range_start,
-    $range_len,
-    $mask_force,
-    $feedback_mask,
-    array $old_comments,
-    array $new_comments) {
-    foreach (array_merge($old_comments, $new_comments) as $comments) {
-      assert_instances_of($comments, 'PhabricatorInlineCommentInterface');
-    }
-
-    $context_not_available = null;
-    if ($this->missingOld || $this->missingNew) {
-      $context_not_available = javelin_render_tag(
-        'tr',
-        array(
-          'sigil' => 'context-target',
-        ),
-        phutil_render_tag(
-          'td',
-          array(
-            'colspan' => 6,
-            'class' => 'show-more'
-          ),
-          pht('Context not available.')
-        )
-      );
-    }
-
-    $html = array();
-
-    $rows = max(
-      count($this->old),
-      count($this->new));
-
-    if ($range_start === null) {
-      $range_start = 0;
-    }
-
-    if ($range_len === null) {
-      $range_len = $rows;
-    }
-
-    $range_len = min($range_len, $rows - $range_start);
-
-    // Gaps - compute gaps in the visible display diff, where we will render
-    // "Show more context" spacers. This builds an aggregate $mask of all the
-    // lines we must show (because they are near changed lines, near inline
-    // comments, or the request has explicitly asked for them, i.e. resulting
-    // from the user clicking "show more") and then finds all the gaps between
-    // visible lines. If a gap is smaller than the context size, we just
-    // display it. Otherwise, we record it into $gaps and will render a
-    // "show more context" element instead of diff text below.
-
-    $gaps = array();
-    $gap_start = 0;
-    $in_gap = false;
-    $mask = $this->visible + $mask_force + $feedback_mask;
-    $mask[$range_start + $range_len] = true;
-    for ($ii = $range_start; $ii <= $range_start + $range_len; $ii++) {
-      if (isset($mask[$ii])) {
-        if ($in_gap) {
-          $gap_length = $ii - $gap_start;
-          if ($gap_length <= self::LINES_CONTEXT) {
-            for ($jj = $gap_start; $jj <= $gap_start + $gap_length; $jj++) {
-              $mask[$jj] = true;
-            }
-          } else {
-            $gaps[] = array($gap_start, $gap_length);
-          }
-          $in_gap = false;
-        }
-      } else {
-        if (!$in_gap) {
-          $gap_start = $ii;
-          $in_gap = true;
-        }
-      }
-    }
-
-    $gaps = array_reverse($gaps);
-
-    $reference = $this->renderingReference;
-
-    $left_id = $this->leftSideChangesetID;
-    $right_id = $this->rightSideChangesetID;
-
-    // "N" stands for 'new' and means the comment should attach to the new file
-    // when stored, i.e. DifferentialInlineComment->setIsNewFile().
-    // "O" stands for 'old' and means the comment should attach to the old file.
-
-    $left_char = $this->leftSideAttachesToNewFile
-      ? 'N'
-      : 'O';
-    $right_char = $this->rightSideAttachesToNewFile
-      ? 'N'
-      : 'O';
-
-    $copy_lines = idx($this->changeset->getMetadata(), 'copy:lines', array());
-
-    if ($this->originalLeft && $this->originalRight) {
-      list($highlight_old, $highlight_new) = $this->diffOriginals();
-      $highlight_old = array_flip($highlight_old);
-      $highlight_new = array_flip($highlight_new);
-    }
-
-    // We need to go backwards to properly indent whitespace in this code:
-    //
-    //   0: class C {
-    //   1:
-    //   1:   function f() {
-    //   2:
-    //   2:     return;
-    //
-    $depths = array();
-    $last_depth = 0;
-    $range_end = $range_start + $range_len;
-    if (!isset($this->new[$range_end])) {
-      $range_end--;
-    }
-    for ($ii = $range_end; $ii >= $range_start; $ii--) {
-      // We need to expand tabs to process mixed indenting and to round
-      // correctly later.
-      $line = str_replace("\t", "  ", $this->new[$ii]['text']);
-      $trimmed = ltrim($line);
-      if ($trimmed != '') {
-        // We round down to flatten "/**" and " *".
-        $last_depth = floor((strlen($line) - strlen($trimmed)) / 2);
-      }
-      $depths[$ii] = $last_depth;
-    }
-
-    for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
-      if (empty($mask[$ii])) {
-        // If we aren't going to show this line, we've just entered a gap.
-        // Pop information about the next gap off the $gaps stack and render
-        // an appropriate "Show more context" element. This branch eventually
-        // increments $ii by the entire size of the gap and then continues
-        // the loop.
-        $gap = array_pop($gaps);
-        $top = $gap[0];
-        $len = $gap[1];
-
-        $end   = $top + $len - 20;
-
-        $contents = array();
-
-        if ($len > 40) {
-          $is_first_block = false;
-          if ($ii == 0) {
-            $is_first_block = true;
-          }
-
-          $contents[] = javelin_render_tag(
-            'a',
-            array(
-              'href' => '#',
-              'mustcapture' => true,
-              'sigil'       => 'show-more',
-              'meta'        => array(
-                'ref'    => $reference,
-                'range' => "{$top}-{$len}/{$top}-20",
-              ),
-            ),
-            $is_first_block
-              ? "Show First 20 Lines"
-              : "\xE2\x96\xB2 Show 20 Lines");
-        }
-
-        $contents[] = javelin_render_tag(
-          'a',
-          array(
-            'href' => '#',
-            'mustcapture' => true,
-            'sigil'       => 'show-more',
-            'meta'        => array(
-              'type'   => 'all',
-              'ref'    => $reference,
-              'range'  => "{$top}-{$len}/{$top}-{$len}",
-            ),
-          ),
-          'Show All '.$len.' Lines');
-
-        $is_last_block = false;
-        if ($ii + $len >= $rows) {
-          $is_last_block = true;
-        }
-
-        if ($len > 40) {
-          $contents[] = javelin_render_tag(
-            'a',
-            array(
-              'href' => '#',
-              'mustcapture' => true,
-              'sigil'       => 'show-more',
-              'meta'        => array(
-                'ref'    => $reference,
-                'range' => "{$top}-{$len}/{$end}-20",
-              ),
-            ),
-            $is_last_block
-              ? "Show Last 20 Lines"
-              : "\xE2\x96\xBC Show 20 Lines");
-        }
-
-        $context = null;
-        $context_line = null;
-        if (!$is_last_block && $depths[$ii + $len]) {
-          for ($l = $ii + $len - 1; $l >= $ii; $l--) {
-            $line = $this->new[$l]['text'];
-            if ($depths[$l] < $depths[$ii + $len] && trim($line) != '') {
-              $context = $this->newRender[$l];
-              $context_line = $this->new[$l]['line'];
-              break;
-            }
-          }
-        }
-
-        $container = javelin_render_tag(
-          'tr',
-          array(
-            'sigil' => 'context-target',
-          ),
-          '<td colspan="2" class="show-more">'.
-            implode(' &bull; ', $contents).
-          '</td>'.
-          '<th class="show-context-line">'.$context_line.'</td>'.
-          '<td colspan="3" class="show-context">'.$context.'</td>');
-
-        $html[] = $container;
-
-        $ii += ($len - 1);
-        continue;
-      }
-
-      $o_num = null;
-      $o_classes = 'left';
-      $o_text = null;
-      if (isset($this->old[$ii])) {
-        $o_num  = $this->old[$ii]['line'];
-        $o_text = isset($this->oldRender[$ii]) ? $this->oldRender[$ii] : null;
-        if ($this->old[$ii]['type']) {
-          if ($this->old[$ii]['type'] == '\\') {
-            $o_text = $this->old[$ii]['text'];
-            $o_classes .= ' comment';
-          } else if ($this->originalLeft && !isset($highlight_old[$o_num])) {
-            $o_classes .= ' old-rebase';
-          } else if (empty($this->new[$ii])) {
-            $o_classes .= ' old old-full';
-          } else {
-            $o_classes .= ' old';
-          }
-        }
-      }
-
-      $n_copy = null;
-      $n_cov = null;
-      $n_colspan = 3;
-      $n_classes = '';
-      $n_num  = null;
-      $n_text = null;
-
-      if (isset($this->new[$ii])) {
-        $n_num  = $this->new[$ii]['line'];
-        $n_text = isset($this->newRender[$ii]) ? $this->newRender[$ii] : null;
-
-        if ($this->coverage !== null) {
-          if (empty($this->coverage[$n_num - 1])) {
-            $cov_class = 'N';
-          } else {
-            $cov_class = $this->coverage[$n_num - 1];
-          }
-          $cov_class = 'cov-'.$cov_class;
-          $n_cov = '<td class="cov '.$cov_class.'"></td>';
-          $n_colspan--;
-        }
-
-
-        if ($this->new[$ii]['type']) {
-          if ($this->new[$ii]['type'] == '\\') {
-            $n_text = $this->new[$ii]['text'];
-            $n_class = 'comment';
-          } else if ($this->originalRight && !isset($highlight_new[$n_num])) {
-            $n_class = 'new-rebase';
-          } else if (empty($this->old[$ii])) {
-            $n_class = 'new new-full';
-          } else {
-            $n_class = 'new';
-          }
-          $n_classes = $n_class;
-
-          if ($this->new[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
-            $n_copy = '<td class="copy '.$n_class.'"></td>';
-          } else {
-            list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
-            $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
-            if ($orig_file == '') {
-              $title .= "line {$orig_line}";
-            } else {
-              $title .=
-                basename($orig_file).
-                ":{$orig_line} in dir ".
-                dirname('/'.$orig_file);
-            }
-            $class = ($orig_type == '-' ? 'new-move' : 'new-copy');
-            $n_copy = javelin_render_tag(
-              'td',
-              array(
-                'meta' => array(
-                  'msg' => $title,
-                ),
-                'class' => 'copy '.$class,
-              ),
-              '');
-          }
-        }
-        $n_colspan--;
-      }
-      $n_classes .= ' right'.$n_colspan;
-
-
-      if (($o_num && !empty($this->missingOld[$o_num])) ||
-          ($n_num && !empty($this->missingNew[$n_num]))) {
-        $html[] = $context_not_available;
-      }
-
-      if ($o_num && $left_id) {
-        $o_id = ' id="C'.$left_id.$left_char.'L'.$o_num.'"';
-      } else {
-        $o_id = null;
-      }
-
-      if ($n_num && $right_id) {
-        $n_id = ' id="C'.$right_id.$right_char.'L'.$n_num.'"';
-      } else {
-        $n_id = null;
-      }
-
-      // NOTE: The Javascript is sensitive to whitespace changes in this
-      // block!
-
-      $html[] =
-        '<tr>'.
-          '<th'.$o_id.'>'.$o_num.'</th>'.
-          '<td class="'.$o_classes.'">'.$o_text.'</td>'.
-          '<th'.$n_id.'>'.$n_num.'</th>'.
-          $n_copy.
-          // NOTE: This is a unicode zero-width space, which we use as a hint
-          // when intercepting 'copy' events to make sure sensible text ends
-          // up on the clipboard. See the 'phabricator-oncopy' behavior.
-          '<td class="'.$n_classes.'" colspan="'.$n_colspan.'">'.
-            "\xE2\x80\x8B".$n_text.
-          '</td>'.
-          $n_cov.
-        '</tr>';
-
-      if ($context_not_available && ($ii == $rows - 1)) {
-        $html[] = $context_not_available;
-      }
-
-      if ($o_num && isset($old_comments[$o_num])) {
-        foreach ($old_comments[$o_num] as $comment) {
-          $xhp = $this->renderInlineComment($comment);
-          $new = '';
-          if ($n_num && isset($new_comments[$n_num])) {
-            foreach ($new_comments[$n_num] as $key => $new_comment) {
-              if ($comment->isCompatible($new_comment)) {
-                $new = $this->renderInlineComment($new_comment);
-                unset($new_comments[$n_num][$key]);
-              }
-            }
-          }
-          $html[] =
-            '<tr class="inline">'.
-              '<th />'.
-              '<td class="left">'.$xhp.'</td>'.
-              '<th />'.
-              '<td colspan="2">'.$new.'</td>'.
-              '<td class="cov" />'.
-            '</tr>';
-        }
-      }
-      if ($n_num && isset($new_comments[$n_num])) {
-        foreach ($new_comments[$n_num] as $comment) {
-          $xhp = $this->renderInlineComment($comment);
-          $html[] =
-            '<tr class="inline">'.
-              '<th />'.
-              '<td class="left" />'.
-              '<th />'.
-              '<td colspan="2">'.$xhp.'</td>'.
-              '<td class="cov" />'.
-            '</tr>';
-        }
-      }
-    }
-
-    return implode('', $html);
-  }
-
-  private function renderInlineComment(
-    PhabricatorInlineCommentInterface $comment) {
-
-    $user = $this->user;
-    $edit = $user &&
-            ($comment->getAuthorPHID() == $user->getPHID()) &&
-            ($comment->isDraft());
-    $allow_reply = (bool)$this->user;
-
-    $on_right = $this->isCommentOnRightSideWhenDisplayed($comment);
-
-    return id(new DifferentialInlineCommentView())
-      ->setInlineComment($comment)
-      ->setOnRight($on_right)
-      ->setHandles($this->handles)
-      ->setMarkupEngine($this->markupEngine)
-      ->setEditable($edit)
-      ->setAllowReply($allow_reply)
-      ->render();
-  }
-
-  protected function renderPropertyChangeHeader($changeset) {
-    if (!$this->isTopLevel) {
-      // We render properties only at top level; otherwise we get multiple
-      // copies of them when a user clicks "Show More".
-      return null;
-    }
-
-    $old = $changeset->getOldProperties();
-    $new = $changeset->getNewProperties();
-
-    if ($old === $new) {
-      return null;
-    }
-
-    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_ADD &&
-        $new == array('unix:filemode' => '100644')) {
-      return null;
-    }
-
-    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_DELETE &&
-        $old == array('unix:filemode' => '100644')) {
-      return null;
-    }
-
-    $keys = array_keys($old + $new);
-    sort($keys);
-
-    $rows = array();
-    foreach ($keys as $key) {
-      $oval = idx($old, $key);
-      $nval = idx($new, $key);
-      if ($oval !== $nval) {
-        if ($oval === null) {
-          $oval = '<em>null</em>';
-        } else {
-          $oval = nl2br(phutil_escape_html($oval));
-        }
-
-        if ($nval === null) {
-          $nval = '<em>null</em>';
-        } else {
-          $nval = nl2br(phutil_escape_html($nval));
-        }
-
-        $rows[] =
-          '<tr>'.
-            '<th>'.phutil_escape_html($key).'</th>'.
-            '<td class="oval">'.$oval.'</td>'.
-            '<td class="nval">'.$nval.'</td>'.
-          '</tr>';
-      }
-    }
-
-    return
-      '<table class="differential-property-table">'.
-        '<tr class="property-table-header">'.
-          '<th>Property Changes</th>'.
-          '<td class="oval">Old Value</td>'.
-          '<td class="nval">New Value</td>'.
-        '</tr>'.
-        implode('', $rows).
-      '</table>';
-  }
-
-  protected function renderChangesetTable($changeset, $contents) {
-    $props  = $this->renderPropertyChangeHeader($this->changeset);
-    $table = null;
-    if ($contents) {
-      $table = javelin_render_tag(
-        'table',
-        array(
-          'class' => 'differential-diff remarkup-code PhabricatorMonospaced',
-          'sigil' => 'differential-diff',
-        ),
-        $contents);
-    }
-
-    if (!$table && !$props) {
-      $notice = $this->renderChangeTypeHeader($this->changeset, true);
-    } else {
-      $notice = $this->renderChangeTypeHeader($this->changeset, false);
-    }
-
-    $result = implode(
-      "\n",
-      array(
-        $notice,
-        $props,
-        $table,
-      ));
-
-    // TODO: Let the user customize their tab width / display style.
-    $result = str_replace("\t", '  ', $result);
-
-    // TODO: We should possibly post-process "\r" as well.
-
-    return $result;
-  }
-
-  protected function renderChangeTypeHeader($changeset, $force) {
-    $change = $changeset->getChangeType();
-    $file = $changeset->getFileType();
-
-    $message = null;
-    if ($change == DifferentialChangeType::TYPE_CHANGE &&
-        $file   == DifferentialChangeType::FILE_TEXT) {
-      if ($force) {
-        // We have to force something to render because there were no changes
-        // of other kinds.
-        $message = pht('This file was not modified.');
-      } else {
-        // Default case of changes to a text file, no metadata.
-        return null;
-      }
-    } else {
-      switch ($change) {
-
-        case DifferentialChangeType::TYPE_ADD:
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was <strong>added</strong>.');
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_DELETE:
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was <strong>deleted</strong>.');
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_MOVE_HERE:
-          $from =
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was moved from %s.', $from);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_COPY_HERE:
-          $from =
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was copied from %s.', $from);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_MOVE_AWAY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was moved to %s.', $paths);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_COPY_AWAY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was copied to %s.', $paths);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_MULTICOPY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht(
-                'This file was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht(
-                'This image was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht(
-                'This directory was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht(
-                'This binary file was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht(
-                'This symlink was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht(
-                'This submodule was deleted after being copied to %s.',
-                $paths);
-              break;
-          }
-          break;
-
-        default:
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This is a file.');
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This is an image.');
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This is a directory.');
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This is a binary file.');
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This is a symlink.');
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This is a submodule.');
-              break;
-          }
-          break;
-      }
-    }
-
-    return
-      '<div class="differential-meta-notice">'.
-        $message.
-      '</div>';
   }
 
   public function renderForEmail() {

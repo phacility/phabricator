@@ -159,19 +159,19 @@ abstract class PhabricatorController extends AphrontController {
       $view = $nav;
     }
 
-    if ($application) {
-      $view->setCurrentApplication($application);
-    }
-
     $view->setUser($this->getRequest()->getUser());
     $view->setFlexNav(true);
-    $view->setShowApplicationMenu(true);
 
     $page->appendChild($view);
 
     if (idx($options, 'device')) {
       $page->setDeviceReady(true);
       $view->appendChild($page->renderFooter());
+    }
+
+    $application_menu = $this->buildApplicationMenu();
+    if ($application_menu) {
+      $page->setApplicationMenu($application_menu);
     }
 
     $response = new AphrontWebpageResponse();
@@ -241,6 +241,34 @@ abstract class PhabricatorController extends AphrontController {
       $items[] = $this->getHandle($phid)->renderLink();
     }
     return implode('<br />', $items);
+  }
+
+  protected function buildApplicationMenu() {
+    return null;
+  }
+
+  protected function buildApplicationCrumbs() {
+
+    $crumbs = array();
+
+    $application = $this->getCurrentApplication();
+    if ($application) {
+      $sprite = $application->getIconName();
+      if (!$sprite) {
+        $sprite = 'application';
+      }
+
+      $crumbs[] = id(new PhabricatorCrumbView())
+        ->setHref($this->getApplicationURI())
+        ->setIcon($sprite);
+    }
+
+    $view = new PhabricatorCrumbsView();
+    foreach ($crumbs as $crumb) {
+      $view->addCrumb($crumb);
+    }
+
+    return $view;
   }
 
 }

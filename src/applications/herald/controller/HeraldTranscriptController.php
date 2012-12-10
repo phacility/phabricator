@@ -107,23 +107,15 @@ final class HeraldTranscriptController extends HeraldController {
   }
 
   private function buildSideNav() {
-    $nav = new AphrontSideNavView();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/herald/transcript/'.$this->id.'/'));
 
     $items = array();
     $filters = $this->getFilterMap();
     foreach ($filters as $key => $name) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/herald/transcript/'.$this->id.'/'.$key.'/',
-            'class' =>
-              ($key == $this->filter)
-                ? 'aphront-side-nav-selected'
-                : null,
-          ),
-          phutil_escape_html($name)));
+      $nav->addFilter($key, $name);
     }
+    $nav->selectFilter($this->filter, null);
 
     return $nav;
   }

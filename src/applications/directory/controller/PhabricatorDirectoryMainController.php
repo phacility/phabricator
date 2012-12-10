@@ -496,7 +496,7 @@ final class PhabricatorDirectoryMainController
       'Share Files');
     $nav_buttons[] = array(
       'Create Paste',
-      '/paste/',
+      '/paste/create/',
       'create-paste',
       'Share Text');
 

@@ -19,8 +19,8 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $query = new PhabricatorPasteQuery();
     $query->setViewer($user);
 
-    $nav = $this->buildSideNavView();
-    $filter = $nav->selectFilter($this->filter, 'my');
+    $nav = $this->buildSideNavView($this->filter);
+    $filter = $nav->getSelectedFilter();
 
     switch ($filter) {
       case 'my':
@@ -44,6 +44,15 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $list->setNoDataString($nodata);
 
     $nav->appendChild($list);
+
+    $crumbs = $this
+      ->buildApplicationCrumbs($nav)
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($title)
+          ->setHref($this->getApplicationURI('filter/'.$filter.'/')));
+
+    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,

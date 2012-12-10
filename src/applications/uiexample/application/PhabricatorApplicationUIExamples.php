@@ -10,8 +10,8 @@ final class PhabricatorApplicationUIExamples extends PhabricatorApplication {
     return 'Developer UI Examples';
   }
 
-  public function getAutospriteName() {
-    return 'uiexample';
+  public function getIconName() {
+    return 'uiexamples';
   }
 
   public function getTitleGlyph() {

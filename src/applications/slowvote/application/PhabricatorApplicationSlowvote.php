@@ -6,7 +6,7 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     return '/vote/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'slowvote';
   }
 

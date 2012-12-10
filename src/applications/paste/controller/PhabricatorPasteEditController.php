@@ -173,27 +173,35 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
     if (!$is_create) {
       $submit->addCancelButton($paste->getURI());
-      $submit->setValue('Save Paste');
-      $title = 'Edit '.$paste->getFullName();
+      $submit->setValue(pht('Save Paste'));
+      $title = pht('Edit %s', $paste->getFullName());
+      $short = pht('Edit');
     } else {
-      $submit->setValue('Create Paste');
-      $title = 'Create Paste';
+      $submit->setValue(pht('Create Paste'));
+      $title = pht('Create Paste');
+      $short = pht('Create');
     }
 
     $form
       ->appendChild($submit);
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('edit');
-    $nav->appendChild(
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    if (!$is_create) {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName('P'.$paste->getID())
+          ->setHref('/P'.$paste->getID()));
+    }
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())->setName($short));
+
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         id(new PhabricatorHeaderView())->setHeader($title),
         $error_view,
         $form,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'title' => $title,
         'device' => true,

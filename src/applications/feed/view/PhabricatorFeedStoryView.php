@@ -7,6 +7,8 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
   private $phid;
   private $epoch;
   private $viewer;
+  private $viewed;
+  private $href;
 
   private $oneLine;
 
@@ -33,6 +35,45 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
   public function setOneLineStory($one_line) {
     $this->oneLine = $one_line;
     return $this;
+  }
+
+  public function setViewed($viewed) {
+    $this->viewed = $viewed;
+    return $this;
+  }
+
+  public function getViewed() {
+    return $this->viewed;
+  }
+
+  public function setHref($href) {
+    $this->href = $href;
+    return $this;
+  }
+
+  public function getHref() {
+    return $this->href;
+  }
+
+  public function renderNotification() {
+    $classes = array(
+      'phabricator-notification',
+    );
+
+    if (!$this->viewed) {
+      $classes[] = 'phabricator-notification-unread';
+    }
+
+    return javelin_render_tag(
+      'div',
+      array(
+        'class' => implode(' ', $classes),
+        'sigil' => 'notification',
+        'meta' => array(
+          'href' => $this->getHref(),
+        ),
+      ),
+      $this->title);
   }
 
   public function render() {

@@ -191,7 +191,10 @@ return array(
 
 // -- Notifications --------------------------------------------------------- //
 
-  'notification.enabled' => false,
+  // Set this to true to enable real-time notifications. You must also run a
+  // notification server for this to work. Consult the documentation in
+  // "Notifications User Guide: Setup and Configuration" for instructions.
+  'notification.enabled'      => false,
 
   // Client port for the realtime server to listen on, and for realtime clients
   // to connect to. Use "localhost" if you are running the notification server
@@ -312,6 +315,17 @@ return array(
   //  - 'full' - 'gwashington (George Washington) <gwashington@example.com>'
   // The default is 'full'.
   'metamta.user-address-format' => 'full',
+
+  // If you're using PHPMailer to send email, provide the mailer and options
+  // here. PHPMailer is a superior to PHPMailerLite and provides more mailers.
+  // You need it when you want to use SMTP instead of sendmail as the mailer.
+  'phpmailer.mailer'            =>  'smtp',
+  'phpmailer.smtp-host'         =>  '',
+  'phpmailer.smtp-port'         =>  25,
+
+  // Set following if your smtp server requires authentication.
+  'phpmailer.smtp-user'         =>  null,
+  'phpmailer.smtp-password'     =>  null,
 
   // If you're using Amazon SES to send email, provide your AWS access key
   // and AWS secret key here. To set up Amazon SES with Phabricator, you need
@@ -966,18 +980,6 @@ return array(
   // Array for custom remarkup block rules. The array should have a list of
   // class names of classes that extend PhutilRemarkupEngineBlockRule
   'differential.custom-remarkup-block-rules' => null,
-
-  // Set display word-wrap widths for Differential. Specify a dictionary of
-  // regular expressions mapping to column widths. The filename will be matched
-  // against each regexp in order until one matches. The default configuration
-  // uses a width of 100 for Java and 80 for other languages. Note that 80 is
-  // the greatest column width of all time. Changes here will not be immediately
-  // reflected in old revisions unless you purge the changeset render cache
-  // (with `./scripts/util/purge_cache.php --changesets`).
-  'differential.wordwrap' => array(
-    '/\.java$/' => 100,
-    '/.*/'      => 80,
-  ),
 
   // List of file regexps where whitespace is meaningful and should not
   // use 'ignore-all' by default

@@ -1040,6 +1040,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('pholio.sql'),
       ),
+      'owners-exclude.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('owners-exclude.sql'),
+      ),
     );
   }
 

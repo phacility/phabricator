@@ -54,11 +54,6 @@
   overflow: auto;
 }
 
-.differential-comment-core .phabricator-remarkup .remarkup-code-block {
-   width: 88ex;
-   width: 81ch;
-}
-
 .phabricator-transaction-view .differential-comment-action-testplan {
   border-color:     #660099;
 }

@@ -10,7 +10,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     return '/diffusion/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'diffusion';
   }
 

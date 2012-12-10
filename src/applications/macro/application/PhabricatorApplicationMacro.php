@@ -10,7 +10,7 @@ final class PhabricatorApplicationMacro extends PhabricatorApplication {
     return 'Image Macros and Memes';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'macro';
   }
 

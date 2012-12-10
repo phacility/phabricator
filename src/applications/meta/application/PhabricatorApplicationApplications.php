@@ -10,7 +10,7 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
     return 'Manage Applications';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'applications';
   }
 

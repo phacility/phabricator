@@ -62,8 +62,8 @@ abstract class PhabricatorApplication {
     return null;
   }
 
-  public function getAutospriteName() {
-    return 'default';
+  public function getIconName() {
+    return 'application';
   }
 
   public function shouldAppearInLaunchView() {

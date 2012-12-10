@@ -6,7 +6,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     return '/diviner/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'diviner';
   }
 
@@ -40,10 +40,9 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     }
 
     if ($application && $application->getHelpURI()) {
-      $class = 'main-menu-item-icon-help';
-      $item = new PhabricatorMainMenuIconView();
+      $item = new PhabricatorMenuItemView();
       $item->setName(pht('%s Help', $application->getName()));
-      $item->addClass('autosprite main-menu-item-icon '.$class);
+      $item->setIcon('help');
       $item->setHref($application->getHelpURI());
       $item->setSortOrder(0.1);
       $items[] = $item;

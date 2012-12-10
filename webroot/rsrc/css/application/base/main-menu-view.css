@@ -13,47 +13,19 @@
 .phabricator-main-menu {
   background: #2d3236;
   background-image: url(/rsrc/image/main_texture.png);
+  background-repeat: repeat-x;
   position: relative;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
-  height: 44px;
   z-index: 6;
+  min-height: 44px;
+}
+
+.device-desktop .phabricator-main-menu {
+  height: 44px;
 }
 
 .phabricator-main-menu a:hover {
   text-decoration: none;
-}
-
-.device-desktop .phabricator-main-menu {
-  text-align: right;
-  width: 100%;
-}
-
-/* - Main Menu Group -----------------------------------------------------------
-
-  Container representing a single item on the main menu. For desktops these lay
-  out horizontally; on phones they switch to vertical.
-
-*/
-
-.phabricator-main-menu-group {
-  height: 44px;
-  position: relative;
-}
-
-.device-desktop .phabricator-main-menu-group {
-  display: inline-block;
-  text-align: left;
-}
-
-.device-tablet .phabricator-main-menu-group,
-.device-phone .phabricator-main-menu-group {
-  width: 100%;
-  display: block;
-}
-
-.device-tablet .phabricator-main-menu-group + .phabricator-main-menu-group,
-.device-phone .phabricator-main-menu-group + .phabricator-main-menu-group {
-  margin-top: 1px;
 }
 
 
@@ -70,16 +42,28 @@
 
 .phabricator-main-menu-logo {
   display: inline-block;
+  position: relative;
   height: 44px;
-  width: 170px;
-  margin-right: 12px;
-  background: 6px 9px url(/rsrc/image/header_logo.png) no-repeat;
+  width: 139px;
+  margin-right: 6px;
+  padding-right: 6px;
+  padding-left: 6px;
 }
 
-.phabricator-main-menu-logo span {
+.phabricator-main-menu-logo:hover {
+  background-color: #3a4247;
+}
+
+.phabricator-main-menu-logo-image {
+  position: absolute;
+  width: 139px;
+  height: 25px;
+  top: 9px;
+}
+
+.device .phabricator-main-menu-logo {
   display: none;
 }
-
 
 /* - Expand/Collapse Button ----------------------------------------------------
 
@@ -90,13 +74,11 @@
 
 .phabricator-main-menu-expand-button {
   position: absolute;
-  right: 10px;
-  top: 10px;
+  top: 7px;
   display: block;
   width: 40px;
   height: 28px;
-  text-align: center;
-  background: #22292d url(/rsrc/image/lines.png) no-repeat 8px 6px;
+  background-color: #22292d;
   border-radius: 6px;
 
   border: 1px solid #111111;
@@ -104,83 +86,37 @@
                     0 1px 0 rgba(255, 255, 255, 0.075);
 }
 
+.phabricator-menu-button-icon {
+  position: absolute;
+  width: 24px;
+  height: 20px;
+  top: 5px;
+  left: 8px;
+}
+
+.phabricator-expand-core-menu {
+  left: 10px;
+}
+
+.phabricator-expand-application-menu {
+  right: 10px;
+}
+
 .device-desktop .phabricator-main-menu-expand-button {
   display: none;
 }
 
-.device-tablet .phabricator-main-menu-expand-button,
-.device-phone .phabricator-main-menu-expand-button {
+.device .phabricator-main-menu-expand-button {
   display: block;
 }
 
-.phabricator-main-menu-expand-button span {
-  display: none;
-}
-
-.phabricator-main-menu-reveal .phabricator-main-menu-expand-button {
+.phabricator-core-menu-expanded .phabricator-expand-core-menu,
+.phabricator-application-menu-expanded .phabricator-expand-application-menu {
   background-color: #55595d;
 }
 
 
-/* - Icon Menus ----------------------------------------------------------------
 
-  These are the small icons for actions like "Settings" and "Log Out" which
-  appear on the right side of the main menu. On tablets and phones these layout
-  vertically.
-
-*/
-
-.phabricator-main-menu-icon {
-  width: 26px;
-  height: 26px;
-  margin: 9px 6px;
-  display: inline-block;
-}
-
-.device-desktop .phabricator-main-menu-icon-label {
-  display: none;
-}
-
-.device-tablet .phabricator-main-menu-icon-label,
-.device-phone .phabricator-main-menu-icon-label {
-  font-weight: bold;
-  color: #eeeeee;
-  position: absolute;
-  display: block;
-  line-height: 44px;
-  left: 60px;
-  right: 0px;
-  top: 0px;
-}
-
-.device-tablet .phabricator-main-menu-icon,
-.device-phone .phabricator-main-menu-icon {
-  margin-left: 20px;
-  position: absolute;
-}
-
-.main-menu-item-icon-profile {
-  background-repeat: no-repeat;
-  background-size: 26px 26px;
-}
-
-.device-desktop .main-menu-item-icon-profile {
-  background-position: 12px 9px;
-  margin: 0 6px;
-  padding: 0 12px;
-  height: 44px;
-  border-width: 0 1px;
-  border-style: solid;
-  border-color: #44494d;
-}
-
-.main-menu-item-icon-profile-not-selected:hover {
-  background-color: #44494d;
-}
-
-.main-menu-item-icon-profile-selected {
-  background-color: #44494d;
-}
 
 /* - Search --------------------------------------------------------------------
 
@@ -208,8 +144,7 @@
   margin-left: -150px;
 }
 
-.device-tablet .phabricator-main-menu-search-target,
-.device-phone .phabricator-main-menu-search-target {
+.device .phabricator-main-menu-search-target {
   width: 100%;
   margin-left: -25px;
 
@@ -219,8 +154,7 @@
   margin: 0 8px 0 50px;
 }
 
-.device-tablet .phabricator-main-menu-search-container,
-.device-phone .phabricator-main-menu-search-container {
+.device .phabricator-main-menu-search-container {
   margin: 0 18px 0 60px;
 }
 
@@ -309,35 +243,24 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 }
 
 
-
-/* - Collapsible ---------------------------------------------------------------
-
-  By default, groups are collapsible, which means they'll be hidden on phones
-  and respond to the menu toggle button.
-
-*/
-
-.device-tablet .phabricator-main-menu-collapsible,
-.device-phone .phabricator-main-menu-collapsible {
-  background: #44494d;
-  display: none;
-}
-
-.phabricator-main-menu-reveal {
-  height: auto;
-}
-
-.device-tablet .phabricator-main-menu-reveal .phabricator-main-menu-collapsible,
-.device-phone .phabricator-main-menu-reveal .phabricator-main-menu-collapsible {
-  display: block;
-}
-
-
 /* - Alert ---------------------------------------------------------------------
 
   Alert menus are like icon menus but don't obey collapse rules.
 
 */
+
+.device-desktop .phabricator-main-menu-alerts {
+  display: inline-block;
+}
+
+.device .phabricator-main-menu-alerts {
+  position: absolute;
+  left: 60px;
+  right: 60px;
+  top: 10px;
+  height: 34px;
+  text-align: center;
+}
 
 .phabricator-main-menu-alert-bubble {
   display: inline-block;
@@ -355,8 +278,8 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   position: absolute;
   width: 14px;
   height: 14px;
-  top: 4px;
-  left: 5px;
+  top: 5px;
+  left: 6px;
 }
 
 .phabricator-main-menu-alert-count {
@@ -381,3 +304,150 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 .alert-unread .phabricator-main-menu-alert-count {
   display: block;
 }
+
+/* - Dark Menu -----------------------------------------------------------------
+
+  Styles shared between the "core" menu (left button on mobile) and
+  "application" menu (right button on mobile). These styles give the menu a
+  white-on-black appearance.
+
+*/
+
+.device .phabricator-dark-menu,
+.device .phabricator-dark-menu a.phabricator-menu-item-type-link{
+  color: #ffffff;
+}
+
+.device .phabricator-dark-menu .phabricator-menu-item-view {
+  display: block;
+  padding: 4px 0;
+}
+
+.device .phabricator-dark-menu .phabricator-menu-item-type-label {
+  text-transform: uppercase;
+  font-size: 11px;
+  background-color: #151719;
+  padding: 0 0 0 12px;
+  height: 24px;
+}
+
+.device .phabricator-dark-menu .phabricator-menu-item-type-spacer {
+  display: none;
+}
+
+.device .phabricator-dark-menu .phabricator-menu-item-type-label
+  .phabricator-menu-item-name {
+  display: block;
+  padding: 6px 0 0;
+}
+
+.device .phabricator-dark-menu .phabricator-menu-item-type-link {
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #34373b transparent #282c2d;
+  background-image: url(/rsrc/image/texture/dark-menu.png);
+}
+
+
+/* - Core Menu -----------------------------------------------------------------
+
+  Styles unique to the core menu (left button on mobile).
+
+*/
+
+.phabricator-core-menu-icon {
+  position: absolute;
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
+.phabricator-core-menu-profile-image {
+  background-size: 28px 28px;
+}
+
+.device .phabricator-core-menu {
+  display: none;
+}
+
+.device .phabricator-core-menu-expanded .phabricator-core-menu {
+  display: block;
+  padding-top: 44px;
+}
+
+.device .phabricator-core-menu .phabricator-menu-item-type-link {
+  font-size: 15px;
+  min-height: 30px;
+}
+
+.device .phabricator-core-menu
+   .phabricator-menu-item-type-link .phabricator-menu-item-name {
+  margin-left: 40px;
+  line-height: 28px;
+}
+
+.device-desktop .phabricator-core-menu {
+  position: absolute;
+  right: 0;
+  top: 0;
+  vertical-align: top;
+}
+
+.device-desktop .phabricator-core-menu .phabricator-menu-item-name {
+  display: none;
+}
+
+.device-desktop .phabricator-core-menu .phabricator-menu-item-view {
+  display: block;
+  float: left;
+  position: relative;
+  min-width: 38px;
+  height: 44px;
+}
+
+.device-desktop .phabricator-core-menu .phabricator-core-item-device {
+  display: none;
+}
+
+.device-desktop .phabricator-core-menu-icon {
+  top: 9px;
+  left: 6px;
+}
+
+.device .phabricator-core-menu-icon {
+  left: 6px;
+}
+
+.device-desktop .phabricator-core-menu .phabricator-core-menu-item-profile {
+  border-width: 0 1px;
+  border-style: solid;
+  border-color: #44494d;
+  margin: 0 8px;
+}
+
+
+/* - Application Menu ----------------------------------------------------------
+
+  Styles unique to the application menu (right button on mobile).
+
+*/
+
+.device .phabricator-application-menu-expanded .phabricator-application-menu {
+  display: block;
+  padding-top: 44px;
+}
+
+.phabricator-application-menu {
+  display: none;
+}
+
+.phabricator-application-menu .phabricator-menu-item-type-link
+  .phabricator-menu-item-name {
+  padding-left: 12px;
+}
+
+.device .phabricator-application-menu-expanded .phabricator-application-menu {
+  display: block;
+  padding-top: 44px;
+}
+

@@ -15,6 +15,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $disableConsole;
   private $searchDefaultScope;
   private $pageObjects = array();
+  private $applicationMenu;
+
+  public function setApplicationMenu(PhabricatorMenuView $application_menu) {
+    $this->applicationMenu = $application_menu;
+    return $this;
+  }
+
+  public function getApplicationMenu() {
+    return $this->applicationMenu;
+  }
 
   public function setApplicationName($application_name) {
     $this->applicationName = $application_name;
@@ -91,8 +101,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $console = $this->getConsole();
 
     require_celerity_resource('phabricator-core-css');
-    require_celerity_resource('autosprite-css');
     require_celerity_resource('phabricator-core-buttons-css');
+    require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
 
     Javelin::initBehavior('workflow', array());
@@ -142,7 +152,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       require_celerity_resource('javelin-behavior-error-log');
     }
 
-    $this->menuContent = $this->renderMainMenu();
+    $menu = id(new PhabricatorMainMenuView())
+      ->setUser($request->getUser())
+      ->setDefaultSearchScope($this->getSearchDefaultScope());
+
+    if ($this->getController()) {
+      $menu->setController($this->getController());
+    }
+
+    if ($this->getApplicationMenu()) {
+      $menu->setApplicationMenu($this->getApplicationMenu());
+    }
+
+    $this->menuContent = $menu->render();
   }
 
 
@@ -267,10 +289,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     // Try to guess the device resolution based on UA strings to avoid a flash
     // of incorrectly-styled content.
     $device_guess = 'device-desktop';
-    if (preg_match('/iPhone|iPod/', $agent)) {
-      $device_guess = 'device-phone';
-    } else if (preg_match('/iPad/', $agent)) {
-      $device_guess = 'device-tablet';
+    if (preg_match('@iPhone|iPod|(Android.*Chrome/[.0-9]* Mobile)@', $agent)) {
+      $device_guess = 'device-phone device';
+    } else if (preg_match('@iPad|(Android.*Chrome/)@', $agent)) {
+      $device_guess = 'device-tablet device';
     }
 
     $classes = array(
@@ -301,8 +323,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $user = $request->getUser();
 
     $container = null;
-    if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
-        $user->isLoggedIn()) {
+    if ($user->isLoggedIn()) {
 
       $aphlict_object_id = celerity_generate_unique_node_id();
       $aphlict_container_id = celerity_generate_unique_node_id();
@@ -361,46 +382,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return null;
     }
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
-  }
-
-  private function renderMainMenu() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $menu = new PhabricatorMainMenuView();
-    $menu->setUser($user);
-
-    $keyboard_config = array(
-      'helpURI' => '/help/keyboardshortcut/',
-    );
-
-    if ($user->isLoggedIn()) {
-      $search = new PhabricatorMainMenuSearchView();
-      $search->setUser($user);
-      $search->setScope($this->getSearchDefaultScope());
-      $menu->appendChild($search);
-
-      $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
-      if ($user->loadPreferences()->getPreference($pref_shortcut, true)) {
-        $keyboard_config['searchID'] = $search->getID();
-      }
-    }
-
-    Javelin::initBehavior('phabricator-keyboard-shortcuts', $keyboard_config);
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    $icon_views = array();
-    foreach ($applications as $application) {
-      $icon_views[] = $application->buildMainMenuItems(
-        $this->getRequest()->getUser(),
-        $this->getController());
-    }
-    $icon_views = array_mergev($icon_views);
-    $icon_views = msort($icon_views, 'getSortOrder');
-
-    $menu->appendChild($icon_views);
-
-    return $menu->render();
   }
 
   public function renderFooter() {

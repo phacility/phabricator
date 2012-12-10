@@ -1,0 +1,75 @@
+/**
+ * @provides phabricator-crumbs-view-css
+ */
+
+.device .phabricator-crumbs-view {
+  display: none;
+}
+
+.phabricator-crumbs-view {
+  background-color: #d8dce2;
+  height: 31px;
+  overflow: hidden;
+  vertical-align: top;
+
+  box-shadow: 0 1px rgba(0, 0, 0, 0.25);
+
+  /* TODO: Position this over the slider for Differential's file tree view.
+     Remove this once that gets sorted out. */
+  position: relative;
+  z-index: 5;
+}
+
+.phabricator-crumbs-view,
+.phabricator-crumbs-view a.phabricator-crumb-view,
+.phabricator-crumbs-view a.phabricator-crumbs-action {
+  color: #3d3d3d;
+  font-weight: bold;
+  text-decoration: none;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.phabricator-crumbs-view a:hover {
+  text-decoration: underline;
+}
+
+.phabricator-crumb-view {
+  display: inline-block;
+  height: 31px;
+  line-height: 31px;
+}
+
+.phabricator-crumb-icon {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  margin: 2px 2px 0 13px;
+  vertical-align: top;
+}
+
+.phabricator-crumbs-actions {
+  float: right;
+}
+
+.phabricator-crumbs-action {
+  display: inline-block;
+  height: 17px;
+  padding: 8px 14px 8px 24px;
+  position: relative;
+}
+
+.phabricator-crumbs-action .sprite-icon {
+  width: 14px;
+  height: 14px;
+  left: 4px;
+  top: 9px;
+  position: absolute;
+}
+
+.phabricator-crumb-divider {
+  display: inline-block;
+  width: 9px;
+  height: 31px;
+  vertical-align: top;
+  margin: 0 9px;
+}

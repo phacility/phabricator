@@ -1,35 +1,56 @@
 {
   "version" : 1,
   "sprites" : {
+    "app"              : {
+      "name" : "app",
+      "rule" : ".menu-icon-app",
+      "hash" : "a389f99d9c00f688e625da71579ee90a"
+    },
+    "arrow-right"      : {
+      "name" : "arrow-right",
+      "rule" : ".phabricator-crumb-divider",
+      "hash" : "a994209450dc73a80841cdd66bb59925"
+    },
     "bubble"           : {
       "name" : "bubble",
       "rule" : ".phabricator-main-menu-alert-bubble.alert-unread",
-      "hash" : "07bc6fd60e5c2fa14558c9101cba5261"
+      "hash" : "1145ac8a137a2a22517c1945fe22c517"
+    },
+    "eye"              : {
+      "name" : "eye",
+      "rule" : ".menu-icon-eye",
+      "hash" : "d598b1acb1933a86eaed3dea3347f7b0"
+    },
+    "logo"             : {
+      "name" : "logo",
+      "rule" : ".phabricator-main-menu-logo-image",
+      "hash" : "c6c7ab165dce13a51ef329928c7c4aba"
     },
     "round_bubble"     : {
       "name" : "round_bubble",
       "rule" : ".phabricator-main-menu-alert-bubble",
-      "hash" : "02de5b1c1720749a566e7a4cf7c2216c"
+      "hash" : "9be91cc0128997992e9001baf32c8ab8"
     },
     "seen_have_unread" : {
       "name" : "seen_have_unread",
       "rule" : ".alert-notifications:hover .phabricator-main-menu-alert-icon",
-      "hash" : "d0210b3908193ee841db2eeec264a154"
+      "hash" : "a8a7f07caa726d7e61ef3d41f959d94d"
     },
     "seen_read_all"    : {
       "name" : "seen_read_all",
       "rule" : ".alert-notifications .phabricator-main-menu-alert-icon",
-      "hash" : "8d0644ec8fa33330b30b7531272e24f1"
+      "hash" : "4fdd4807d0c41bd4179dd43150c7fc44"
     },
     "unseen_any"       : {
       "name" : "unseen_any",
       "rule" : ".alert-notifications.alert-unread .phabricator-main-menu-alert-icon",
-      "hash" : "0e50bf01f640b2f8231eaef246863f0b"
+      "hash" : "50d946952c73028b34e0c3378ca36b17"
     }
   },
   "scales"  : [
     1,
     2
   ],
-  "header"  : "\/**\n * @provides sprite-menu-css\n * @generated\n *\/\n\n.sprite-menu {\n  background-image: url(\/rsrc\/image\/sprite-menu.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-menu {\n    background-image: url(\/rsrc\/image\/sprite-menu-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}"
+  "header"  : "\/**\n * @provides sprite-menu-css\n * @generated\n *\/\n\n.sprite-menu {\n  background-image: url(\/rsrc\/image\/sprite-menu.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-menu {\n    background-image: url(\/rsrc\/image\/sprite-menu-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type"    : "standard"
 }

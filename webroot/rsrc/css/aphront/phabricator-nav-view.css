@@ -19,11 +19,8 @@
   z-index: 3;
 }
 
-.phabricator-nav-app {
-  width: 149px;
-  background: #262b2e;
-  border-right: 1px solid #222222;
-  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
+.has-crumbs .phabricator-nav-col {
+  top: 76px;
 }
 
 .phabricator-nav-local {
@@ -35,15 +32,14 @@
   background-image: url(/rsrc/image/menu_texture.png);
 }
 
-.device-tablet .phabricator-nav-local,
-.device-phone .phabricator-nav-local {
-  width: 299px;
+.device .phabricator-nav-local {
+  display: none;
 }
 
 .phabricator-nav-drag {
   position: fixed;
   top: 0;
-  left: 217px;
+  left: 179px;
   width: 7px;
   bottom: 0;
   z-index: 4;
@@ -61,38 +57,16 @@
   background-repeat: no-repeat;
 }
 
-.device-tablet .phabricator-nav-drag,
-.device-phone .phabricator-nav-drag {
+.device .phabricator-nav-drag {
   display: none;
 }
 
-.phabricator-nav-col a,
-.phabricator-nav-col span {
-  display: block;
-}
-
-.phabricator-nav-local {
-  left: 150px;
-}
-
-.device-desktop .phabricator-nav-local {
-  left: 38px;
-}
-
-.phabricator-nav-content {
-  margin-left: 150px;
-}
-
 .has-local-nav .phabricator-nav-content {
-  margin-left: 330px;
-}
-
-.device-desktop .phabricator-nav-content {
-  margin-left: 38px;
+  margin-left: 180px;
 }
 
 .device-desktop .has-local-nav .phabricator-nav-content {
-  margin-left: 216px;
+  margin-left: 178px;
 }
 
 .device-desktop .local-nav-collapsed .phabricator-nav-local {
@@ -107,161 +81,25 @@
   margin-left: 2.5em !important;
 }
 
-.phabricator-nav-col span {
-  display: block;
-  font-weight: bold;
-  padding: 6px 6px 6px 12px;
-  color: #222222;
-}
-
-.phabricator-nav-col a {
-  display: block;
-  padding: 3px 6px 3px 24px;
-  font-weight: bold;
-}
-
-.phabricator-nav-col a.aphront-side-nav-selected {
-  background-color: #a1bbe5;
-}
-
-a.phabricator-nav-app-item {
-  color: #e9e9e9;
-  font-weight: normal;
-  padding: 4px;
-  padding-left: 40px;
-  vertical-align: middle;
-  line-height: 30px;
-  height: 30px;
-
-  position: relative;
-}
-
-/**
- * On the desktop, constrain the size of the <a /> so that the tooltip is
- * positioned correctly. Without this rule, it ends up too far to the right.
- */
-.device-desktop a.phabricator-nav-app-item {
-  padding-left: 38px;
-  padding-right: 0px;
-}
-
-span.phabricator-nav-app-item-icon {
-  position: absolute;
-  display: block;
-
-  left: 5px;
-  top: 6px;
-  background-repeat: no-repeat;
-
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  margin: 0;
-}
-
-.device-desktop .phabricator-nav-app {
-  width: 37px;
-}
-
-.device-desktop .phabricator-nav-head {
-  display: none;
-}
-
-.device-tablet .phabricator-nav-col,
-.device-phone .phabricator-nav-col {
+.device .phabricator-nav-col {
   position: absolute;
   top: 0px;
 }
 
-.device-tablet .phabricator-nav-app,
-.device-phone .phabricator-nav-app {
-  left: -450px;
-}
-
-.device-tablet .phabricator-nav-local,
-.device-phone .phabricator-nav-local {
+.device .phabricator-nav-local {
   left: -300px;
 }
 
-.device-phone .phabricator-nav-head-tablet {
-  display: none;
-}
-
-.device-tablet .phabricator-nav-head-phone {
-  display: none;
-}
-
-.device-tablet .phabricator-nav,
-.device-phone .phabricator-nav {
+.device .phabricator-nav {
   overflow-x: hidden;
   position: relative;
 }
 
-.device-tablet .phabricator-nav-content,
-.device-phone .phabricator-nav-content {
+.device .phabricator-nav-content {
   width: 100%;
 }
 
-.device-tablet .phabricator-nav-content,
-.device-phone .phabricator-nav-content {
+.device .phabricator-nav-content {
   margin-left: 0;
   position: relative;
-}
-
-.phabricator-nav-head {
-  display: block;
-  position: relative;
-  height: 43px;
-  background: #fafafa;
-  overflow: hidden;
-  border-bottom: 1px solid #5d5d5d;
-  text-align: center;
-  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.10),
-              0px 1px 2px rgba(0, 0, 0, 0.10);
-}
-
-.nav-button {
-  background-color: #f3f3f3;
-  height: 32px;
-  width: 40px;
-  margin: 5px 0px;
-  display: inline-block;
-  border: 1px solid #999999;
-  box-shadow: inset -1px -1px 3px rgba(0, 0, 0, 0.10);
-  background-repeat: no-repeat;
-}
-
-.nav-button-selected {
-  background-color: #c9c9c9;
-  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.20);
-}
-
-.nav-button + .nav-button {
-  margin-left: -1px;
-}
-
-.nav-button-w {
-  border-radius: 6px 0 0 6px;
-}
-
-.nav-button-e {
-  border-radius: 0 6px 6px 0;
-}
-
-.nav-button-apps {
-  background-image: url(/rsrc/image/button_apps.png);
-  background-size: 24px auto;
-  background-position: center;
-}
-
-.nav-button-menu {
-  background-image: url(/rsrc/image/button_menu.png);
-  background-size: 24px auto;
-  background-position: center;
-}
-
-.nav-button-content {
-  background-image: url(/rsrc/image/button_content.png);
-  background-size: 24px auto;
-  background-position: center;
 }

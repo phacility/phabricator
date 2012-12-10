@@ -411,10 +411,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $page_pane,
       ));
 
+    $object_id = 'D'.$revision->getID();
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($object_id)
+        ->setHref('/'.$object_id));
+    $nav->setCrumbs($crumbs);
+
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'D'.$revision->getID().' '.$revision->getTitle(),
+        'title' => $object_id.' '.$revision->getTitle(),
       ));
   }
 
@@ -979,9 +988,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $nav->setBaseURI(new PhutilURI('/D'.$revision->getID()));
     $nav->setFlexible(true);
 
-    $nav->addFilter('top', 'D'.$revision->getID(), '#top',
-      $relative = false,
-      'phabricator-active-nav-focus');
+    $nav->addFilter('top', 'D'.$revision->getID(), '#top');
 
     $tree = new PhutilFileTree();
     foreach ($changesets as $changeset) {

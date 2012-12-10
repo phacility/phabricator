@@ -3,9 +3,44 @@
 final class PhabricatorMainMenuView extends AphrontView {
 
   private $user;
+  private $defaultSearchScope;
+  private $controller;
+  private $applicationMenu;
+
+  public function setApplicationMenu(PhabricatorMenuView $application_menu) {
+    $this->applicationMenu = $application_menu;
+    return $this;
+  }
+
+  public function getApplicationMenu() {
+    return $this->applicationMenu;
+  }
+
+  public function setController(PhabricatorController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  public function getController() {
+    return $this->controller;
+  }
+
+  public function setDefaultSearchScope($default_search_scope) {
+    $this->defaultSearchScope = $default_search_scope;
+    return $this;
+  }
+
+  public function getDefaultSearchScope() {
+    return $this->defaultSearchScope;
+  }
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->user;
   }
 
   public function render() {
@@ -14,42 +49,31 @@ final class PhabricatorMainMenuView extends AphrontView {
     require_celerity_resource('phabricator-main-menu-view');
 
     $header_id = celerity_generate_unique_node_id();
-    $extra = '';
+    $menus = array();
+    $alerts = array();
 
-    $group = new PhabricatorMainMenuGroupView();
-    $group->addClass('phabricator-main-menu-group-logo');
-    $group->setCollapsible(false);
-
-    $group->appendChild(
-      phutil_render_tag(
-        'a',
-        array(
-          'class' => 'phabricator-main-menu-logo',
-          'href'  => '/',
-        ),
-        '<span>Phabricator</span>'));
-
-    if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
-        $user->isLoggedIn()) {
+    if ($user->isLoggedIn()) {
       list($menu, $dropdown) = $this->renderNotificationMenu();
-      $group->appendChild($menu);
-      $extra .= $dropdown;
+      $alerts[] = $menu;
+      $menus[] = $dropdown;
     }
 
-    $group->appendChild(
-      javelin_render_tag(
-        'a',
+    $phabricator_menu = $this->renderPhabricatorMenu();
+
+    if ($alerts) {
+      $alerts = phutil_render_tag(
+        'div',
         array(
-          'class' => 'phabricator-main-menu-expand-button',
-          'sigil' => 'jx-toggle-class',
-          'meta'  => array(
-            'map' => array(
-              $header_id => 'phabricator-main-menu-reveal',
-            ),
-          ),
+          'class' => 'phabricator-main-menu-alerts',
         ),
-        '<span>Expand</span>'));
-    $logo = $group->render();
+        self::renderSingleView($alerts));
+    }
+
+    $application_menu = $this->getApplicationMenu();
+    if ($application_menu) {
+      $application_menu->addClass('phabricator-dark-menu');
+      $application_menu->addClass('phabricator-application-menu');
+    }
 
     return phutil_render_tag(
       'div',
@@ -57,8 +81,218 @@ final class PhabricatorMainMenuView extends AphrontView {
         'class' => 'phabricator-main-menu',
         'id'    => $header_id,
       ),
-      $logo.$this->renderChildren()).
-      $extra;
+      self::renderSingleView(
+        array(
+          $this->renderPhabricatorMenuButton($header_id),
+          $application_menu
+            ? $this->renderApplicationMenuButton($header_id)
+            : null,
+          $this->renderPhabricatorLogo(),
+          $alerts,
+          $phabricator_menu,
+          $application_menu,
+        ))).
+      self::renderSingleView($menus);
+  }
+
+  private function renderSearch() {
+    $user = $this->user;
+
+    $result = null;
+
+    $keyboard_config = array(
+      'helpURI' => '/help/keyboardshortcut/',
+    );
+
+    if ($user->isLoggedIn()) {
+      $search = new PhabricatorMainMenuSearchView();
+      $search->setUser($user);
+      $search->setScope($this->getDefaultSearchScope());
+      $result = $search;
+
+      $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
+      if ($user->loadPreferences()->getPreference($pref_shortcut, true)) {
+        $keyboard_config['searchID'] = $search->getID();
+      }
+    }
+
+    Javelin::initBehavior('phabricator-keyboard-shortcuts', $keyboard_config);
+
+    if ($result) {
+      $result = id(new PhabricatorMenuItemView())
+        ->addClass('phabricator-main-menu-search')
+        ->appendChild($result);
+    }
+
+    return $result;
+  }
+
+  private function renderPhabricatorMenuButton($header_id) {
+    return javelin_render_tag(
+      'a',
+      array(
+        'class' => 'phabricator-main-menu-expand-button '.
+                   'phabricator-expand-core-menu',
+        'sigil' => 'jx-toggle-class',
+        'meta'  => array(
+          'map' => array(
+            $header_id => 'phabricator-core-menu-expanded',
+          ),
+        ),
+      ),
+      phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-eye',
+        ),
+        ''));
+  }
+
+  public function renderApplicationMenuButton($header_id) {
+    return javelin_render_tag(
+      'a',
+      array(
+        'class' => 'phabricator-main-menu-expand-button '.
+                   'phabricator-expand-application-menu',
+        'sigil' => 'jx-toggle-class',
+        'meta'  => array(
+          'map' => array(
+            $header_id => 'phabricator-application-menu-expanded',
+          ),
+        ),
+      ),
+      phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-app',
+        ),
+        ''));
+  }
+
+  private function renderPhabricatorMenu() {
+    $user = $this->getUser();
+    $controller = $this->getController();
+
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $applications = msort($applications, 'getName');
+
+    $core = array();
+    $more = array();
+    $actions = array();
+
+    require_celerity_resource('sprite-apps-large-css');
+
+    $group_core = PhabricatorApplication::GROUP_CORE;
+    foreach ($applications as $application) {
+      if ($application->shouldAppearInLaunchView()) {
+        $icon = $application->getIconName().'-light-large';
+
+        $item = id(new PhabricatorMenuItemView())
+          ->setName($application->getName())
+          ->setHref($application->getBaseURI())
+          ->appendChild($this->renderMenuIcon($icon));
+        if ($application->getApplicationGroup() == $group_core) {
+          $core[] = $item;
+        } else {
+          $more[] = $item;
+        }
+      }
+
+      $app_actions = $application->buildMainMenuItems($user, $controller);
+      foreach ($app_actions as $action) {
+        $actions[] = $action;
+      }
+    }
+
+
+    $view = new PhabricatorMenuView();
+    $view->addClass('phabricator-dark-menu');
+    $view->addClass('phabricator-core-menu');
+
+    $search = $this->renderSearch();
+    $view->appendChild($search);
+
+    $view
+      ->newLabel(pht('Home'))
+      ->addClass('phabricator-core-item-device');
+    $view->addMenuItem(
+      id(new PhabricatorMenuItemView())
+        ->addClass('phabricator-core-item-device')
+        ->setName(pht('Phabricator Home'))
+        ->setHref('/')
+        ->appendChild($this->renderMenuIcon('logo-light-large')));
+    if ($controller && $controller->getCurrentApplication()) {
+      $application = $controller->getCurrentApplication();
+      $icon = $application->getIconName().'-light-large';
+      $view->addMenuItem(
+        id(new PhabricatorMenuItemView())
+          ->addClass('phabricator-core-item-device')
+          ->setName(pht('%s Home', $application->getName()))
+          ->appendChild($this->renderMenuIcon($icon))
+          ->setHref($controller->getApplicationURI()));
+    }
+
+    if ($core) {
+      $view->addMenuItem(
+        id(new PhabricatorMenuItemView())
+          ->addClass('phabricator-core-item-device')
+          ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+          ->setName(pht('Core Applications')));
+      foreach ($core as $item) {
+        $item->addClass('phabricator-core-item-device');
+        $view->addMenuItem($item);
+      }
+    }
+
+    if ($actions) {
+      $actions = msort($actions, 'getSortOrder');
+      $view->addMenuItem(
+        id(new PhabricatorMenuItemView())
+          ->addClass('phabricator-core-item-device')
+          ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+          ->setName(pht('Actions')));
+      foreach ($actions as $action) {
+        $icon = $action->getIcon();
+        if ($icon) {
+          if ($action->getSelected()) {
+            $action->appendChild($this->renderMenuIcon($icon.'-blue-large'));
+          } else {
+            $action->appendChild($this->renderMenuIcon($icon.'-light-large'));
+          }
+        }
+        $view->addMenuItem($action);
+      }
+    }
+
+    if ($more) {
+      $view->addMenuItem(
+        id(new PhabricatorMenuItemView())
+          ->addClass('phabricator-core-item-device')
+          ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+          ->setName(pht('More Applications')));
+      foreach ($more as $item) {
+        $item->addClass('phabricator-core-item-device');
+        $view->addMenuItem($item);
+      }
+    }
+
+
+    return $view;
+  }
+
+  private function renderPhabricatorLogo() {
+    return phutil_render_tag(
+      'a',
+      array(
+        'class' => 'phabricator-main-menu-logo',
+        'href'  => '/',
+      ),
+      phutil_render_tag(
+        'span',
+        array(
+          'class' => 'sprite-menu phabricator-main-menu-logo-image',
+        ),
+        ''));
   }
 
   private function renderNotificationMenu() {
@@ -131,6 +365,16 @@ final class PhabricatorMainMenuView extends AphrontView {
       '');
 
     return array($bubble_tag, $notification_dropdown);
+  }
+
+  private function renderMenuIcon($name) {
+    return phutil_render_tag(
+      'span',
+      array(
+        'class' => 'phabricator-core-menu-icon '.
+                   'sprite-apps-large app-'.$name,
+      ),
+      '');
   }
 
 }

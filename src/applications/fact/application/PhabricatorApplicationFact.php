@@ -10,7 +10,7 @@ final class PhabricatorApplicationFact extends PhabricatorApplication {
     return '/fact/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'fact';
   }
 
