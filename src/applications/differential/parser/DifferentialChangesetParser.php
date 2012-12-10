@@ -1140,7 +1140,7 @@ final class DifferentialChangesetParser {
         return $output;
     }
 
-    if ($this->originalLeft && $this->originalRight()) {
+    if ($this->originalLeft && $this->originalRight) {
       list($highlight_old, $highlight_new) = $this->diffOriginals();
       $highlight_old = array_flip($highlight_old);
       $highlight_new = array_flip($highlight_new);
