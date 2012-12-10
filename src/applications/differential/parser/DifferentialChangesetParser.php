@@ -989,6 +989,10 @@ final class DifferentialChangesetParser {
       ->setMarkupEngine($this->markupEngine)
       ->setHandles($this->handles);
 
+    if ($this->user) {
+      $renderer->setUser($this->user);
+    }
+
     $shield = null;
     if ($this->isTopLevel && !$this->comments) {
       if ($this->isGenerated()) {
