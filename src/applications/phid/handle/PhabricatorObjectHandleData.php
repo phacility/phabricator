@@ -104,6 +104,28 @@ final class PhabricatorObjectHandleData {
             $objects[$mock->getPHID()] = $mock;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_XACT:
+          $subtypes = array();
+          foreach ($phids as $phid) {
+            $subtypes[phid_get_subtype($phid)][] = $phid;
+          }
+          $xactions = array();
+          foreach ($subtypes as $subtype => $subtype_phids) {
+            // TODO: Do this magically.
+            switch ($subtype) {
+              case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+                $results = id(new PholioTransactionQuery())
+                  ->setViewer($this->viewer)
+                  ->withPHIDs($subtype_phids)
+                  ->execute();
+                $xactions += mpull($results, null, 'getPHID');
+                break;
+            }
+          }
+          foreach ($xactions as $xaction) {
+            $objects[$xaction->getPHID()] = $xaction;
+          }
+          break;
       }
     }
 
@@ -572,7 +594,7 @@ final class PhabricatorObjectHandleData {
             } else {
               $mock = $mocks[$phid];
               $handle->setName($mock->getName());
-              $handle->setFullName($mock->getName());
+              $handle->setFullName('M'.$mock->getID().': '.$mock->getName());
               $handle->setURI('/M'.$mock->getID());
               $handle->setComplete(true);
             }

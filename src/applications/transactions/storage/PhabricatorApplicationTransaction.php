@@ -220,6 +220,39 @@ abstract class PhabricatorApplicationTransaction
     }
   }
 
+  public function getTitleForFeed() {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return pht(
+          '%s added a comment to %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        return pht(
+          '%s changed the visibility for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return pht(
+          '%s changed the edit policy for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        return pht(
+          '%s updated subscribers of %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+    }
+
+    return $this->getTitle();
+  }
+
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:

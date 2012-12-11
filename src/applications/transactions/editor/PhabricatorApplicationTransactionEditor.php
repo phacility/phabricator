@@ -2,6 +2,7 @@
 
 /**
  * @task mail Sending Mail
+ * @task feed Publishing Feed Stories
  */
 abstract class PhabricatorApplicationTransactionEditor
   extends PhabricatorEditor {
@@ -247,7 +248,17 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     // TODO: Index object.
-    // TODO: Publish feed/notifications.
+
+    if ($this->supportsFeed()) {
+      $mailed = array();
+      if ($mail) {
+        $mailed = $mail->buildRecipientList();
+      }
+      $this->publishFeedStory(
+        $object,
+        $xactions,
+        $mailed);
+    }
 
     $this->didApplyTransactions($object, $xactions);
 
@@ -550,7 +561,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $mail_tags = $this->getMailTags($object, $xactions);
 
-    $action = $this->getStrongestAction($object, $xactions);
+    $action = $this->getStrongestAction($object, $xactions)->getActionName();
 
     $template
       ->setFrom($this->requireActor()->getPHID())
@@ -590,7 +601,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function getStrongestAction(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return last(msort($xactions, 'getActionStrength'))->getActionName();
+    return last(msort($xactions, 'getActionStrength'));
   }
 
 
@@ -682,5 +693,96 @@ abstract class PhabricatorApplicationTransactionEditor
     return $body;
   }
 
+
+/* -(  Publishing Feed Stories  )-------------------------------------------- */
+
+
+  /**
+   * @task feed
+   */
+  protected function supportsFeed() {
+    return false;
+  }
+
+
+  /**
+   * @task feed
+   */
+  protected function getFeedStoryType() {
+    return 'PhabricatorApplicationTransactionFeedStory';
+  }
+
+
+  /**
+   * @task feed
+   */
+  protected function getFeedRelatedPHIDs(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return array(
+      $object->getPHID(),
+      $this->requireActor()->getPHID(),
+    );
+  }
+
+
+  /**
+   * @task feed
+   */
+  protected function getFeedNotifyPHIDs(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return array_merge(
+      $this->getMailTo($object),
+      $this->getMailCC($object));
+  }
+
+
+  /**
+   * @task feed
+   */
+  protected function getFeedStoryData(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $xactions = msort($xactions, 'getActionStrength');
+    $xactions = array_reverse($xactions);
+
+    return array(
+      'objectPHID'        => $object->getPHID(),
+      'transactionPHIDs'  => mpull($xactions, 'getPHID'),
+    );
+  }
+
+
+  /**
+   * @task feed
+   */
+  protected function publishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    array $mailed_phids) {
+
+    $related_phids = $this->getFeedRelatedPHIDs($object, $xactions);
+    $subscribed_phids = $this->getFeedNotifyPHIDs($object, $xactions);
+
+    $story_type = $this->getFeedStoryType();
+    $story_data = $this->getFeedStoryData($object, $xactions);
+
+    phlog($subscribed_phids);
+
+    id(new PhabricatorFeedStoryPublisher())
+      ->setStoryType($story_type)
+      ->setStoryData($story_data)
+      ->setStoryTime(time())
+      ->setStoryAuthorPHID($this->requireActor()->getPHID())
+      ->setRelatedPHIDs($related_phids)
+      ->setPrimaryObjectPHID($object->getPHID())
+      ->setSubscribedPHIDs($subscribed_phids)
+      ->setMailRecipientPHIDs($mailed_phids)
+      ->publish();
+  }
 
 }
