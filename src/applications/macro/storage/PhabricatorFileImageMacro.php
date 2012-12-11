@@ -1,14 +1,22 @@
 <?php
 
-final class PhabricatorFileImageMacro extends PhabricatorFileDAO {
+final class PhabricatorFileImageMacro extends PhabricatorFileDAO
+  implements PhabricatorSubscribableInterface {
 
   protected $filePHID;
+  protected $phid;
   protected $name;
+  protected $isDisabled = 0;
 
   public function getConfiguration() {
     return array(
-      self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_AUX_PHID  => true,
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorPHIDConstants::PHID_TYPE_MCRO);
   }
 
   static public function newFromImageURI($uri, $file_name, $image_macro_name) {
@@ -25,5 +33,10 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO {
 
     return $image_macro;
   }
+
+  public function isAutomaticallySubscribed($phid) {
+    return false;
+  }
+
 }
 

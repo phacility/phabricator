@@ -771,8 +771,6 @@ abstract class PhabricatorApplicationTransactionEditor
     $story_type = $this->getFeedStoryType();
     $story_data = $this->getFeedStoryData($object, $xactions);
 
-    phlog($subscribed_phids);
-
     id(new PhabricatorFeedStoryPublisher())
       ->setStoryType($story_type)
       ->setStoryData($story_data)

@@ -29,6 +29,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_QUES    = 'QUES';
   const PHID_TYPE_ANSW    = 'ANSW';
   const PHID_TYPE_MOCK    = 'MOCK';
+  const PHID_TYPE_MCRO    = 'MCRO';
 
   const PHID_TYPE_XACT    = 'XACT';
   const PHID_TYPE_XCMT    = 'XCMT';

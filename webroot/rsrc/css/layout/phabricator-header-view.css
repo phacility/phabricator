@@ -11,3 +11,8 @@
 .device-desktop .phabricator-header-view {
   width: 66%;
 }
+
+.phabricator-header-tags {
+  font-size: 13px;
+  float: right;
+}

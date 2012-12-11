@@ -4,6 +4,8 @@ abstract class PhabricatorApplicationTransactionComment
   extends PhabricatorLiskDAO
   implements PhabricatorMarkupInterface, PhabricatorPolicyInterface {
 
+  const MARKUP_FIELD_COMMENT  = 'markup:comment';
+
   protected $transactionPHID;
   protected $commentVersion;
   protected $authorPHID;

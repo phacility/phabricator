@@ -161,6 +161,11 @@ final class AphrontRequest {
     return array_key_exists($name, $this->requestData);
   }
 
+  final public function getFileExists($name) {
+    return isset($_FILES[$name]) &&
+           (idx($_FILES[$name], 'error') !== UPLOAD_ERR_NO_FILE);
+  }
+
   final public function isHTTPPost() {
     return ($_SERVER['REQUEST_METHOD'] == 'POST');
   }

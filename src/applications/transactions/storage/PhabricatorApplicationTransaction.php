@@ -2,9 +2,7 @@
 
 abstract class PhabricatorApplicationTransaction
   extends PhabricatorLiskDAO
-  implements PhabricatorPolicyInterface{
-
-  const MARKUP_FIELD_COMMENT  = 'markup:comment';
+  implements PhabricatorPolicyInterface {
 
   const TARGET_TEXT = 'text';
   const TARGET_HTML = 'html';
@@ -17,7 +15,6 @@ abstract class PhabricatorApplicationTransaction
 
   protected $commentPHID;
   protected $commentVersion = 0;
-
   protected $transactionType;
   protected $oldValue;
   protected $newValue;
@@ -58,6 +55,10 @@ abstract class PhabricatorApplicationTransaction
 
   public function getContentSource() {
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
+  }
+
+  public function hasComment() {
+    return $this->getComment() && strlen($this->getComment()->getContent());
   }
 
   public function getComment() {
@@ -137,6 +138,16 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getIcon() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return 'comment';
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        return 'message';
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return 'lock';
+    }
+
     return null;
   }
 

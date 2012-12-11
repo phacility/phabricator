@@ -1048,6 +1048,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20121209.pholioxactions.sql'),
       ),
+      '20121209.xmacroadd.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20121209.xmacroadd.sql'),
+      ),
+      '20121209.xmacromigrate.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('20121209.xmacromigrate.php'),
+      ),
+      '20121209.xmacromigratekey.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20121209.xmacromigratekey.sql'),
+      ),
     );
   }
 

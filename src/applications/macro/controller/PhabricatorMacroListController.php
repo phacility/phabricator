@@ -70,8 +70,11 @@ final class PhabricatorMacroListController
     $filter_view = new AphrontListFilterView();
     $filter_view->appendChild($filter_form);
 
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('/');
+    $has_search = strlen($filter);
+    $nav = $this->buildSideNavView(
+      $for_app = false,
+      $has_search);
+    $nav->selectFilter($has_search ? 'search' : '/');
 
     $nav->appendChild($filter_view);
 
@@ -97,7 +100,7 @@ final class PhabricatorMacroListController
               array(),
               'Created on '.$datetime));
         }
-        $item->setURI($this->getApplicationURI('/edit/'.$macro->getID().'/'));
+        $item->setURI($this->getApplicationURI('/view/'.$macro->getID().'/'));
         $item->setHeader($macro->getName());
 
         $pinboard->addItem($item);
@@ -109,10 +112,19 @@ final class PhabricatorMacroListController
       $nav->appendChild($list);
     }
 
-
-    if ($filter === null) {
+    if (!strlen($filter)) {
       $nav->appendChild($pager);
+      $name = pht('All Macros');
+    } else {
+      $name = pht('Search');
     }
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($name)
+        ->setHref($request->getRequestURI()));
+    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,

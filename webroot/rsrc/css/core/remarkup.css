@@ -312,3 +312,8 @@
 .remarkup-assist-right {
   float: right;
 }
+
+.phabricator-image-macro-hero {
+  margin: 2em auto;
+  max-width: 90%;
+}

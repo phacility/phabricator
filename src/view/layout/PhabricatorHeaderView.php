@@ -4,6 +4,7 @@ final class PhabricatorHeaderView extends AphrontView {
 
   private $objectName;
   private $header;
+  private $tags = array();
 
   public function setHeader($header) {
     $this->header = $header;
@@ -12,6 +13,11 @@ final class PhabricatorHeaderView extends AphrontView {
 
   public function setObjectName($object_name) {
     $this->objectName = $object_name;
+    return $this;
+  }
+
+  public function addTag(PhabricatorTagView $tag) {
+    $this->tags[] = $tag;
     return $this;
   }
 
@@ -27,6 +33,15 @@ final class PhabricatorHeaderView extends AphrontView {
           'href' => '/'.$this->objectName,
         ),
         phutil_escape_html($this->objectName)).' '.$header;
+    }
+
+    if ($this->tags) {
+      $header .= phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-header-tags',
+        ),
+        self::renderSingleView($this->tags));
     }
 
     return phutil_render_tag(
