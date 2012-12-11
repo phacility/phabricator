@@ -119,6 +119,14 @@ abstract class PhabricatorApplicationTransaction
     return implode(', ', $links);
   }
 
+  public function getIcon() {
+    return null;
+  }
+
+  public function getColor() {
+    return null;
+  }
+
   public function shouldHide() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:

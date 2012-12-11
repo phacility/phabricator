@@ -201,11 +201,11 @@ final class PholioMockViewController extends PholioController {
         continue;
       }
 
-      $title = $xaction->getTitle();
-
       $event = id(new PhabricatorTimelineEventView())
         ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
-        ->setTitle($title);
+        ->setIcon($xaction->getIcon())
+        ->setColor($xaction->getColor())
+        ->setTitle($xaction->getTitle());
 
       if ($xaction->getComment()) {
         $event->appendChild(

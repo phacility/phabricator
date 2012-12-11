@@ -4,9 +4,9 @@ final class PhabricatorTimelineEventView extends AphrontView {
 
   private $userHandle;
   private $title;
+  private $icon;
+  private $color;
   private $classes = array();
-  private $disableStandardTitleStyle;
-  private $disableStandardContentStyle;
 
   public function setUserHandle(PhabricatorObjectHandle $handle) {
     $this->userHandle = $handle;
@@ -23,13 +23,13 @@ final class PhabricatorTimelineEventView extends AphrontView {
     return $this;
   }
 
-  public function setDisableStandardTitleStyle($disable) {
-    $this->disableStandardTitleStyle = $disable;
+  public function setIcon($icon) {
+    $this->icon = $icon;
     return $this;
   }
 
-  public function setDisableStandardContentStyle($disable) {
-    $this->disableStandardContentStyle = $disable;
+  public function setColor($color) {
+    $this->color = $color;
     return $this;
   }
 
@@ -44,8 +44,23 @@ final class PhabricatorTimelineEventView extends AphrontView {
     if ($title !== null) {
       $title_classes = array();
       $title_classes[] = 'phabricator-timeline-title';
-      if (!$this->disableStandardTitleStyle) {
-        $title_classes[] = 'phabricator-timeline-standard-title';
+
+      $icon = null;
+      if ($this->icon) {
+        $title_classes[] = 'phabricator-timeline-title-with-icon';
+
+        $icon = phutil_render_tag(
+          'span',
+          array(
+            'class' => 'phabricator-timeline-icon-fill',
+          ),
+          phutil_render_tag(
+            'span',
+            array(
+              'class' => 'phabricator-timeline-icon sprite-icon '.
+                         'action-'.$this->icon.'-white',
+            ),
+            ''));
       }
 
       $title = phutil_render_tag(
@@ -53,7 +68,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         array(
           'class' => implode(' ', $title_classes),
         ),
-        $title);
+        $icon.$title);
     }
 
     $wedge = phutil_render_tag(
@@ -74,9 +89,6 @@ final class PhabricatorTimelineEventView extends AphrontView {
 
     $content_classes = array();
     $content_classes[] = 'phabricator-timeline-content';
-    if (!$this->disableStandardContentStyle) {
-      $content_classes[] = 'phabricator-timeline-standard-content';
-    }
 
     $classes = array();
     $classes[] = 'phabricator-timeline-event-view';
@@ -111,10 +123,15 @@ final class PhabricatorTimelineEventView extends AphrontView {
         $image.$wedge.$title);
     }
 
+    $outer_classes = $this->classes;
+    if ($this->color) {
+      $outer_classes[] = 'phabricator-timeline-'.$this->color;
+    }
+
     return phutil_render_tag(
       'div',
       array(
-        'class' => implode(' ', $this->classes),
+        'class' => implode(' ', $outer_classes),
       ),
       phutil_render_tag(
         'div',

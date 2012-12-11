@@ -37,6 +37,7 @@ final class CeleritySpriteGenerator {
 
         if ($color == 'white') {
           $sprite->setTargetCSS(
+            '.action-'.$icon.$suffix.', '.
             '.device-desktop .phabricator-action-view:hover .action-'.$icon);
         } else {
           $sprite->setTargetCSS('.action-'.$icon.$suffix);
