@@ -44,8 +44,10 @@ final class PholioMockCommentController extends PholioController {
       ));
 
     $xaction = id(new PholioTransaction())
-      ->setTransactionType(PholioTransactionType::TYPE_NONE)
-      ->setComment($comment);
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(new PholioTransactionComment())
+          ->setContent($comment));
 
     id(new PholioMockEditor())
       ->setActor($user)

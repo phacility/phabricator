@@ -1044,6 +1044,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('owners-exclude.sql'),
       ),
+      '20121209.pholioxactions.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20121209.pholioxactions.sql'),
+      ),
     );
   }
 

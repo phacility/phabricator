@@ -7,13 +7,21 @@ final class PhabricatorPHID {
   protected $ownerPHID;
   protected $parentPHID;
 
-  public static function generateNewPHID($type) {
+  public static function generateNewPHID($type, $subtype = null) {
     if (!$type) {
       throw new Exception("Can not generate PHID with no type.");
     }
 
-    $uniq = Filesystem::readRandomCharacters(20);
-    return 'PHID-'.$type.'-'.$uniq;
+    if ($subtype === null) {
+      $uniq_len = 20;
+      $type_str = "{$type}";
+    } else {
+      $uniq_len = 15;
+      $type_str = "{$type}-{$subtype}";
+    }
+
+    $uniq = Filesystem::readRandomCharacters($uniq_len);
+    return "PHID-{$type_str}-{$uniq}";
   }
 
   public static function fromObjectName($name) {

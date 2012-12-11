@@ -57,7 +57,7 @@ final class PholioMockEditController extends PholioController {
 
       $type_name = PholioTransactionType::TYPE_NAME;
       $type_desc = PholioTransactionType::TYPE_DESCRIPTION;
-      $type_view = PholioTransactionType::TYPE_VIEW_POLICY;
+      $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
 
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
