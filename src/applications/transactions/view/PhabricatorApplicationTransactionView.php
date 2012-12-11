@@ -9,6 +9,16 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $transactions;
   private $engine;
   private $anchorOffset = 0;
+  private $showEditActions = true;
+
+  public function setShowEditActions($show_edit_actions) {
+    $this->showEditActions = $show_edit_actions;
+    return $this;
+  }
+
+  public function getShowEditActions() {
+    return $this->showEditActions;
+  }
 
   public function setAnchorOffset($anchor_offset) {
     $this->anchorOffset = $anchor_offset;
@@ -49,6 +59,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     $view = new PhabricatorTimelineView();
+    $viewer = $this->viewer;
 
     $anchor = $this->anchorOffset;
     foreach ($this->transactions as $xaction) {
@@ -58,7 +69,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
       $anchor++;
       $event = id(new PhabricatorTimelineEventView())
-        ->setViewer($this->viewer)
+        ->setViewer($viewer)
+        ->setTransactionPHID($xaction->getPHID())
         ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
         ->setIcon($xaction->getIcon())
         ->setColor($xaction->getColor())
@@ -67,9 +79,33 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         ->setContentSource($xaction->getContentSource())
         ->setAnchor($anchor);
 
+      $has_deleted_comment = $xaction->getComment() &&
+        $xaction->getComment()->getIsDeleted();
+
+      if ($this->getShowEditActions()) {
+        if ($xaction->getCommentVersion() > 1) {
+          $event->setIsEdited(true);
+        }
+
+        $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
+
+        if ($xaction->hasComment() || $has_deleted_comment) {
+          $has_edit_capability = PhabricatorPolicyFilter::hasCapability(
+            $viewer,
+            $xaction,
+            $can_edit);
+          if ($has_edit_capability) {
+            $event->setIsEditable(true);
+          }
+        }
+      }
+
       if ($xaction->hasComment()) {
         $event->appendChild(
           $this->engine->getOutput($xaction->getComment(), $field));
+      } else if ($has_deleted_comment) {
+        $event->appendChild(
+          '<em>'.pht('This comment has been deleted.').'</em>');
       }
 
       $view->addEvent($event);

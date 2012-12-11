@@ -19,7 +19,7 @@ final class PhabricatorApplicationTransactionCommentQuery
     return $this;
   }
 
-  public function withTranactionPHIDs(array $transaction_phids) {
+  public function withTransactionPHIDs(array $transaction_phids) {
     $this->transactionPHIDs = $transaction_phids;
     return $this;
   }

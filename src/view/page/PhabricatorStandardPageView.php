@@ -137,7 +137,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'header'    => AphrontRequest::getCSRFHeaderName(),
         'current'   => $current_token,
       ));
-    Javelin::initBehavior('device', array('id' => 'base-page'));
+    Javelin::initBehavior('device');
 
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
@@ -284,29 +284,12 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         '</div>';
     }
 
-    $agent = idx($_SERVER, 'HTTP_USER_AGENT');
-
-    // Try to guess the device resolution based on UA strings to avoid a flash
-    // of incorrectly-styled content.
-    $device_guess = 'device-desktop';
-    if (preg_match('@iPhone|iPod|(Android.*Chrome/[.0-9]* Mobile)@', $agent)) {
-      $device_guess = 'device-phone device';
-    } else if (preg_match('@iPad|(Android.*Chrome/)@', $agent)) {
-      $device_guess = 'device-tablet device';
-    }
-
-    $classes = array(
-      'phabricator-standard-page',
-      $device_guess,
-    );
-    $classes = implode(' ', $classes);
-
     return
       phutil_render_tag(
         'div',
         array(
           'id' => 'base-page',
-          'class' => $classes,
+          'class' => 'phabricator-standard-page',
         ),
         $header_chrome.
         '<div class="phabricator-standard-page-body">'.
@@ -373,6 +356,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if (!$this->getShowChrome()) {
       $classes[] = 'phabricator-chromeless-page';
     }
+
+    $agent = idx($_SERVER, 'HTTP_USER_AGENT');
+
+    // Try to guess the device resolution based on UA strings to avoid a flash
+    // of incorrectly-styled content.
+    $device_guess = 'device-desktop';
+    if (preg_match('@iPhone|iPod|(Android.*Chrome/[.0-9]* Mobile)@', $agent)) {
+      $device_guess = 'device-phone device';
+    } else if (preg_match('@iPad|(Android.*Chrome/)@', $agent)) {
+      $device_guess = 'device-tablet device';
+    }
+
+    $classes[] = $device_guess;
 
     return implode(' ', $classes);
   }

@@ -11,6 +11,37 @@ final class PhabricatorTimelineEventView extends AphrontView {
   private $dateCreated;
   private $viewer;
   private $anchor;
+  private $isEditable;
+  private $isEdited;
+  private $transactionPHID;
+
+  public function setTransactionPHID($transaction_phid) {
+    $this->transactionPHID = $transaction_phid;
+    return $this;
+  }
+
+  public function getTransactionPHID() {
+    return $this->transactionPHID;
+  }
+
+  public function setIsEdited($is_edited) {
+    $this->isEdited = $is_edited;
+    return $this;
+  }
+
+  public function getIsEdited() {
+    return $this->isEdited;
+  }
+
+
+  public function setIsEditable($is_editable) {
+    $this->isEditable = $is_editable;
+    return $this;
+  }
+
+  public function getIsEditable() {
+    return $this->isEditable;
+  }
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -78,6 +109,27 @@ final class PhabricatorTimelineEventView extends AphrontView {
     }
 
     $extra = array();
+    $xaction_phid = $this->getTransactionPHID();
+
+    if ($this->getIsEdited()) {
+      $extra[] = javelin_render_tag(
+        'a',
+        array(
+          'href'  => '/transactions/history/'.$xaction_phid.'/',
+          'sigil' => 'workflow',
+        ),
+        pht('Edited'));
+    }
+
+    if ($this->getIsEditable()) {
+      $extra[] = javelin_render_tag(
+        'a',
+        array(
+          'href'  => '/transactions/edit/'.$xaction_phid.'/',
+          'sigil' => 'workflow',
+        ),
+        pht('Edit'));
+    }
 
     $source = $this->getContentSource();
     if ($source) {

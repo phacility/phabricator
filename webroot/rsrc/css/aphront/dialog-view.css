@@ -21,6 +21,10 @@
   width:        600px;
 }
 
+.aphront-dialog-view-width-full {
+  width: 90%;
+}
+
 .aphront-dialog-body {
   background: #ffffff;
   padding: 16px 12px;
@@ -44,6 +48,7 @@
 .jx-client-dialog {
   position:   absolute;
   z-index:    14;
+  width:      100%;
 }
 
 .jx-mask {

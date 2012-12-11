@@ -16,6 +16,7 @@ final class AphrontDialogView extends AphrontView {
   private $width      = 'default';
   const WIDTH_DEFAULT = 'default';
   const WIDTH_FORM    = 'form';
+  const WIDTH_FULL    = 'full';
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -115,6 +116,7 @@ final class AphrontDialogView extends AphrontView {
 
     switch ($this->width) {
       case self::WIDTH_FORM:
+      case self::WIDTH_FULL:
         $more .= ' aphront-dialog-view-width-'.$this->width;
         break;
       case self::WIDTH_DEFAULT:
