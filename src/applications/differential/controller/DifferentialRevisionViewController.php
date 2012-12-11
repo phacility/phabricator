@@ -226,6 +226,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
+    $revision_detail->setDiff(reset($diffs));
     $revision_detail->setAuxiliaryFields($aux_fields);
 
     $actions = $this->getRevisionActions($revision);
@@ -474,7 +475,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     if ($viewer_is_owner) {
       $links[] = array(
-        'class' => 'revision-edit',
+        'icon'  =>  'edit',
         'href'  => "/differential/revision/edit/{$revision_id}/",
         'name'  => 'Edit Revision',
       );
@@ -482,39 +483,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     if (!$viewer_is_anonymous) {
 
-      require_celerity_resource('phabricator-flag-css');
-
-      $flag = PhabricatorFlagQuery::loadUserFlag($user, $revision_phid);
-      if ($flag) {
-        $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
-        $color = PhabricatorFlagColor::getColorName($flag->getColor());
-        $links[] = array(
-          'class' => 'flag-clear '.$class,
-          'href'  => '/flag/delete/'.$flag->getID().'/',
-          'name'  => phutil_escape_html('Remove '.$color.' Flag'),
-          'sigil' => 'workflow',
-        );
-      } else {
-        $links[] = array(
-          'class' => 'flag-add phabricator-flag-ghost',
-          'href'  => '/flag/edit/'.$revision_phid.'/',
-          'name'  => 'Flag Revision',
-          'sigil' => 'workflow',
-        );
-      }
-
       if (!$viewer_is_owner && !$viewer_is_reviewer) {
         $action = $viewer_is_cc ? 'rem' : 'add';
         $links[] = array(
-          'class'   => $viewer_is_cc ? 'subscribe-rem' : 'subscribe-add',
+          'icon'    => $viewer_is_cc ? 'subscribe-delete' : 'subscribe-add',
           'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
           'name'    => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
           'instant' => true,
         );
       } else {
         $links[] = array(
-          'class' => 'subscribe-rem unavailable',
-          'name'  => 'Automatically Subscribed',
+          'icon'     => 'subscribe-auto',
+          'name'     => 'Automatically Subscribed',
+          'disabled' => true,
         );
       }
 
@@ -522,7 +503,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
       $links[] = array(
-        'class' => 'action-dependencies',
+        'icon'  => 'link',
         'name'  => 'Edit Dependencies',
         'href'  => "/search/attach/{$revision_phid}/DREV/dependencies/",
         'sigil' => 'workflow',
@@ -530,7 +511,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
         $links[] = array(
-          'class' => 'attach-maniphest',
+          'icon'  => 'attach',
           'name'  => 'Edit Maniphest Tasks',
           'href'  => "/search/attach/{$revision_phid}/TASK/",
           'sigil' => 'workflow',
@@ -539,14 +520,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       if ($user->getIsAdmin()) {
         $links[] = array(
-          'class' => 'transcripts-metamta',
+          'icon'  => 'file',
           'name'  => 'MetaMTA Transcripts',
           'href'  => "/mail/?phid={$revision_phid}",
         );
       }
 
       $links[] = array(
-        'class' => 'transcripts-herald',
+        'icon'  => 'file',
         'name'  => 'Herald Transcripts',
         'href'  => "/herald/transcript/?phid={$revision_phid}",
       );
@@ -554,7 +535,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $request_uri = $this->getRequest()->getRequestURI();
     $links[] = array(
-      'class' => 'action-download',
+      'icon'  => 'download',
       'name'  => 'Download Raw Diff',
       'href'  => $request_uri->alter('download', 'true')
     );

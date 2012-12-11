@@ -303,6 +303,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionQuery' => 'applications/differential/query/DifferentialRevisionQuery.php',
     'DifferentialRevisionStatsController' => 'applications/differential/controller/DifferentialRevisionStatsController.php',
     'DifferentialRevisionStatsView' => 'applications/differential/view/DifferentialRevisionStatsView.php',
+    'DifferentialRevisionStatus' => 'applications/differential/constants/DifferentialRevisionStatus.php',
     'DifferentialRevisionStatusFieldSpecification' => 'applications/differential/field/specification/DifferentialRevisionStatusFieldSpecification.php',
     'DifferentialRevisionUpdateHistoryView' => 'applications/differential/view/DifferentialRevisionUpdateHistoryView.php',
     'DifferentialRevisionViewController' => 'applications/differential/controller/DifferentialRevisionViewController.php',

@@ -11,6 +11,19 @@
   margin-top: -1px;
 }
 
+.phabricator-property-list-view .keyboard-shortcuts-available {
+  float: right;
+  height: 16px;
+  margin: 12px 10px -28px 0px;
+  padding: 0px 20px 0px 0px;
+  vertical-align: middle;
+  color: #666666;
+  text-align: right;
+  font-size: 11px;
+  background:
+    url('/rsrc/image/icon/fatcow/key_question.png') right center no-repeat;
+}
+
 .phabricator-property-list-container {
   border-color: #c0c5d1;
   border-style: solid;
