@@ -36,6 +36,19 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
       PhabricatorPHIDConstants::PHID_TYPE_REPO);
   }
 
+  public function toDictionary() {
+    return array(
+      'name'        => $this->getName(),
+      'phid'        => $this->getPHID(),
+      'callsign'    => $this->getCallsign(),
+      'vcs'         => $this->getVersionControlSystem(),
+      'uri'         => PhabricatorEnv::getProductionURI($this->getURI()),
+      'remoteURI'   => (string)$this->getPublicRemoteURI(),
+      'tracking'    => $this->getDetail('tracking-enabled'),
+      'description' => $this->getDetail('description'),
+    );
+  }
+
   public function getDetail($key, $default = null) {
     return idx($this->details, $key, $default);
   }

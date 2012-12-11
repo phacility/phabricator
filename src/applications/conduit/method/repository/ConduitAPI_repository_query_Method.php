@@ -37,7 +37,7 @@ final class ConduitAPI_repository_query_Method
 
     $results = array();
     foreach ($repositories as $repository) {
-      $results[] = $this->buildDictForRepository($repository);
+      $results[] = $repository->toDictionary();
     }
 
     return $results;

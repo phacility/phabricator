@@ -42,10 +42,12 @@ final class ConduitAPI_arcanist_projectinfo_Method
     $repository_phid = null;
     $tracked = false;
     $encoding = null;
+    $dictionary = array();
     if ($repository) {
       $repository_phid = $repository->getPHID();
       $tracked = $repository->isTracked();
       $encoding = $repository->getDetail('encoding');
+      $dictionary = $repository->toDictionary();
     }
 
     return array(
@@ -54,6 +56,7 @@ final class ConduitAPI_arcanist_projectinfo_Method
       'repositoryPHID'  => $repository_phid,
       'tracked'         => $tracked,
       'encoding'        => $encoding,
+      'repository'      => $dictionary,
     );
   }
 
