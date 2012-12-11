@@ -3,6 +3,12 @@
 final class PhabricatorTimelineView extends AphrontView {
 
   private $events = array();
+  private $id;
+
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
 
   public function addEvent(PhabricatorTimelineEventView $event) {
     $this->events[] = $event;
@@ -31,6 +37,7 @@ final class PhabricatorTimelineView extends AphrontView {
       'div',
       array(
         'class' => 'phabricator-timeline-view',
+        'id' => $this->id,
       ),
       implode('', $events));
   }

@@ -8,7 +8,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $viewer;
   private $transactions;
   private $engine;
-  private $anchorOffset = 0;
+  private $anchorOffset = 1;
   private $showEditActions = true;
 
   public function setShowEditActions($show_edit_actions) {
@@ -41,33 +41,19 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  public function buildEvents() {
     $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
+    $engine = $this->getOrBuildEngine();
 
-    if (!$this->engine) {
-      $engine = id(new PhabricatorMarkupEngine())
-        ->setViewer($this->viewer);
-      foreach ($this->transactions as $xaction) {
-        if (!$xaction->hasComment()) {
-          continue;
-        }
-        $engine->addObject($xaction->getComment(), $field);
-      }
-      $engine->process();
-
-      $this->engine = $engine;
-    }
-
-    $view = new PhabricatorTimelineView();
     $viewer = $this->viewer;
 
     $anchor = $this->anchorOffset;
+    $events = array();
     foreach ($this->transactions as $xaction) {
       if ($xaction->shouldHide()) {
         continue;
       }
 
-      $anchor++;
       $event = id(new PhabricatorTimelineEventView())
         ->setViewer($viewer)
         ->setTransactionPHID($xaction->getPHID())
@@ -78,6 +64,9 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         ->setDateCreated($xaction->getDateCreated())
         ->setContentSource($xaction->getContentSource())
         ->setAnchor($anchor);
+
+      $anchor++;
+
 
       $has_deleted_comment = $xaction->getComment() &&
         $xaction->getComment()->getIsDeleted();
@@ -102,16 +91,59 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
       if ($xaction->hasComment()) {
         $event->appendChild(
-          $this->engine->getOutput($xaction->getComment(), $field));
+          $engine->getOutput($xaction->getComment(), $field));
       } else if ($has_deleted_comment) {
         $event->appendChild(
           '<em>'.pht('This comment has been deleted.').'</em>');
       }
 
+      $events[] = $event;
+    }
+
+    return $events;
+  }
+
+  public function render() {
+    $view = new PhabricatorTimelineView();
+    foreach ($this->buildEvents() as $event) {
       $view->addEvent($event);
+    }
+
+    if ($this->getShowEditActions()) {
+      $list_id = celerity_generate_unique_node_id();
+
+      $view->setID($list_id);
+
+      Javelin::initBehavior(
+        'phabricator-transaction-list',
+        array(
+          'listID' => $list_id,
+        ));
     }
 
     return $view->render();
   }
+
+
+  private function getOrBuildEngine() {
+    if ($this->engine) {
+      return $this->engine;
+    }
+
+    $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($this->viewer);
+    foreach ($this->transactions as $xaction) {
+      if (!$xaction->hasComment()) {
+        continue;
+      }
+      $engine->addObject($xaction->getComment(), $field);
+    }
+    $engine->process();
+
+    return $engine;
+  }
+
 }
 

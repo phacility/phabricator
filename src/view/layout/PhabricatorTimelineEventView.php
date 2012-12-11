@@ -126,7 +126,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         'a',
         array(
           'href'  => '/transactions/edit/'.$xaction_phid.'/',
-          'sigil' => 'workflow',
+          'sigil' => 'workflow transaction-edit',
         ),
         pht('Edit'));
     }
@@ -258,11 +258,23 @@ final class PhabricatorTimelineEventView extends AphrontView {
       $outer_classes[] = 'phabricator-timeline-'.$this->color;
     }
 
-    return phutil_render_tag(
+    $sigil = null;
+    $meta = null;
+    if ($this->getTransactionPHID()) {
+      $sigil = 'transaction';
+      $meta = array(
+        'phid' => $this->getTransactionPHID(),
+        'anchor' => $this->anchor,
+      );
+    }
+
+    return javelin_render_tag(
       'div',
       array(
         'class' => implode(' ', $outer_classes),
         'id' => $this->anchor ? 'anchor-'.$this->anchor : null,
+        'sigil' => $sigil,
+        'meta' => $meta,
       ),
       phutil_render_tag(
         'div',

@@ -4,11 +4,9 @@ final class PhabricatorApplicationTransactionCommentEditController
   extends PhabricatorApplicationTransactionController {
 
   private $phid;
-  private $anchor;
 
   public function willProcessRequest(array $data) {
     $this->phid = $data['phid'];
-    $this->anchor = idx($data, 'anchor');
   }
 
   public function processRequest() {
@@ -59,7 +57,26 @@ final class PhabricatorApplicationTransactionCommentEditController
             )))
         ->applyEdit($xaction, $comment);
 
-      return id(new AphrontReloadResponse())->setURI($obj_handle->getURI());
+      if ($request->isAjax()) {
+        $view = id(new PhabricatorApplicationTransactionView())
+          ->setViewer($user)
+          ->setTransactions(array($xaction));
+
+        $anchor = $request->getStr('anchor');
+        if ($anchor) {
+          $view->setAnchorOffset($anchor);
+        }
+
+        return id(new AphrontAjaxResponse())->setContent(
+          array(
+            'xactions' => mpull(
+              $view->buildEvents(),
+              'render',
+              'getTransactionPHID'),
+          ));
+      } else {
+        return id(new AphrontReloadResponse())->setURI($obj_handle->getURI());
+      }
     }
 
     $dialog = id(new AphrontDialogView())
@@ -67,6 +84,7 @@ final class PhabricatorApplicationTransactionCommentEditController
       ->setTitle(pht('Edit Comment'));
 
     $dialog
+      ->addHiddenInput('anchor', $request->getStr('anchor'))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('text')
