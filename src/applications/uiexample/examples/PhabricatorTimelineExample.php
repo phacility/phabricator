@@ -97,6 +97,13 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
         ->setColor($color);
     }
 
+    $anchor = 0;
+    foreach ($events as $event) {
+      $event->setViewer($user);
+      $event->setDateCreated(time() + ($anchor * 60 * 8));
+      $event->setAnchor(++$anchor);
+    }
+
     $timeline = id(new PhabricatorTimelineView());
     foreach ($events as $event) {
       $timeline->addEvent($event);

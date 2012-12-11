@@ -196,16 +196,23 @@ final class PholioMockViewController extends PholioController {
 
     $view = new PhabricatorTimelineView();
 
+    $anchor_name = 0;
     foreach ($xactions as $xaction) {
       if ($xaction->shouldHide()) {
         continue;
       }
 
+      $anchor_name++;
+
       $event = id(new PhabricatorTimelineEventView())
+        ->setViewer($this->getRequest()->getUser())
         ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
         ->setIcon($xaction->getIcon())
         ->setColor($xaction->getColor())
-        ->setTitle($xaction->getTitle());
+        ->setTitle($xaction->getTitle())
+        ->setDateCreated($xaction->getDateCreated())
+        ->setContentSource($xaction->getContentSource())
+        ->setAnchor($anchor_name);
 
       if ($xaction->getComment()) {
         $event->appendChild(

@@ -36,6 +36,7 @@
 }
 
 .phabricator-timeline-content {
+  background: #ffffff;
   border-style: solid;
   border-color: #c0c5d1;
   border-width: 1px 0;
@@ -136,6 +137,21 @@
   width: 14px;
 }
 
+.phabricator-timeline-extra, .phabricator-timeline-extra a {
+  font-size: 11px;
+  color: #888888;
+}
+
+.device-desktop .phabricator-timeline-extra {
+  float: right;
+}
+
+.device .phabricator-timeline-extra {
+  display: block;
+  text-align: right;
+  line-height: 16px;
+}
+
 .phabricator-timeline-red .phabricator-timeline-border {
   border-color: #cc0000;
 }
@@ -176,7 +192,6 @@
   border-color: #333333;
 }
 
-
 .phabricator-timeline-red .phabricator-timeline-icon-fill {
   background-color: #cc0000;
 }
@@ -215,4 +230,9 @@
 
 .phabricator-timeline-black .phabricator-timeline-icon-fill {
   background-color: #333333;
+}
+
+.phabricator-timeline-shell.anchor-target {
+  background: rgba(255, 255, 0, 0.50);
+  box-shadow: 0 0 3px 6px rgba(255, 255, 0, 0.50);
 }
