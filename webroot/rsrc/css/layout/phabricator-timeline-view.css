@@ -43,7 +43,7 @@
 }
 
 .phabricator-timeline-title {
-  line-height: 27px;
+  line-height: 28px;
   min-height: 28px;
   position: relative;
 }
@@ -86,20 +86,27 @@
 
 .phabricator-timeline-major-event .phabricator-timeline-title {
   background: #f7f7f7;
+  min-height: 29px;
 }
 
 .phabricator-timeline-title {
   padding: 0 5px;
+  overflow-x: auto;
 }
 
 .phabricator-timeline-title-with-icon {
-  padding-left: 36px;
+  padding-left: 33px;
 }
 
 .phabricator-timeline-major-event .phabricator-timeline-content
   .phabricator-timeline-core-content {
   padding: 10px 15px;
 }
+
+.phabricator-timeline-core-content {
+  overflow-x: auto;
+}
+
 
 .device .phabricator-timeline-event-view {
   min-height: 23px;
@@ -125,8 +132,9 @@
   width: 30px;
   height: 30px;
   background-color: #c0c5d1;
-  top: -1px;
+  top: 0;
   left: -3px;
+  z-index: 3;
 }
 
 .phabricator-timeline-icon {

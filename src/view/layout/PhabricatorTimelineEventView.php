@@ -197,7 +197,9 @@ final class PhabricatorTimelineEventView extends AphrontView {
         array(
           'class' => implode(' ', $title_classes),
         ),
-        $icon.$title.$extra);
+        $title.$extra);
+
+      $title = $icon.$title;
     }
 
     $wedge = phutil_render_tag(

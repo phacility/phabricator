@@ -71,6 +71,18 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
       ->appendChild('This event is green!')
       ->setColor(PhabricatorTransactions::COLOR_GREEN);
 
+    $events[] = id(new PhabricatorTimelineEventView())
+      ->setUserHandle($handle)
+      ->setTitle(str_repeat('Long Text Title ', 64))
+      ->appendChild(str_repeat('Long Text Body ', 64))
+      ->setColor(PhabricatorTransactions::COLOR_ORANGE);
+
+    $events[] = id(new PhabricatorTimelineEventView())
+      ->setUserHandle($handle)
+      ->setTitle(str_repeat('LongTextEventNoSpaces', 1024))
+      ->appendChild(str_repeat('LongTextNoSpaces', 1024))
+      ->setColor(PhabricatorTransactions::COLOR_RED);
+
     $colors = array(
       PhabricatorTransactions::COLOR_RED,
       PhabricatorTransactions::COLOR_ORANGE,
