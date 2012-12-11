@@ -68,7 +68,7 @@ final class PhabricatorMacroViewController
         id(new PhabricatorTagView())
           ->setType(PhabricatorTagView::TYPE_STATE)
           ->setName(pht('Macro Disabled'))
-          ->setBackgroundColor(PhabricatorTagView::COLOR_RED));
+          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
     }
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
@@ -146,22 +146,6 @@ final class PhabricatorMacroViewController
     array $subscribers) {
 
     $view = new PhabricatorPropertyListView();
-
-    $view->addProperty(
-      pht('Name'),
-      phutil_escape_html($macro->getName()));
-
-    $view->addProperty(
-      pht('Status'),
-      $macro->getIsDisabled()
-        ? pht('Disabled')
-        : pht('Enabled'));
-
-    $view->addProperty(
-      pht('Created'),
-      phabricator_date(
-        $macro->getDateCreated(),
-        $this->getRequest()->getUser()));
 
     if ($subscribers) {
       $sub_view = array();

@@ -3,16 +3,19 @@
  */
 
 .phabricator-property-list-view {
-  border-color: #dbdbdb;
+  border-color: #c0c5d1;
   border-style: solid;
   border-width: 1px 0 0 0;
+
+  box-shadow: 0 0 1px 1px rgba(192, 197, 209, 0.3);
+  margin-top: -1px;
 }
 
 .phabricator-property-list-container {
-  border-color: #dbdbdb;
+  border-color: #c0c5d1;
   border-style: solid;
   border-width: 0 0 1px;
-  background-color: #f9f9f9;
+  background-color: #f6f6f6;
 }
 
 .device-desktop .phabricator-property-list-container {
@@ -75,16 +78,6 @@
   padding: 12px 18px;
   background: #fdfdfd;
   border-bottom: 1px solid #dbdbdb;
-}
-
-/* When we follow an action list view on the Desktop, move down 30px so the
-   action list can start slightly above the property list. This is an unusual
-   case where we have something between the header and the action/property
-   lists and we want to give it space. */
-.device-desktop .phabricator-action-list-view +
-  .phabricator-property-list-view {
-  clear: left;
-  margin-top: 30px;
 }
 
 

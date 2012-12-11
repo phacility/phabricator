@@ -37,7 +37,7 @@ final class PhabricatorHeaderView extends AphrontView {
 
     if ($this->tags) {
       $header .= phutil_render_tag(
-        'div',
+        'span',
         array(
           'class' => 'phabricator-header-tags',
         ),
@@ -45,11 +45,16 @@ final class PhabricatorHeaderView extends AphrontView {
     }
 
     return phutil_render_tag(
-      'h1',
+      'div',
       array(
-        'class' => 'phabricator-header-view',
+        'class' => 'phabricator-header-shell',
       ),
-      $header);
+      phutil_render_tag(
+        'h1',
+        array(
+          'class' => 'phabricator-header-view',
+        ),
+        $header));
   }
 
 

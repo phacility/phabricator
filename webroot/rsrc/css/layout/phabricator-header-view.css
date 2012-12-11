@@ -2,10 +2,21 @@
  * @provides phabricator-header-view-css
  */
 
+.phabricator-header-shell {
+  background: #e0e3ec;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #c0c5d1;
+}
+
+.phabricator-header-shell + .phabricator-form-view {
+  border-top-width: 0;
+}
+
 .phabricator-header-view {
-  padding: 1em 2%;
+  padding: 1.25em 2%;
   font-size: 15px;
-  color: #333333;
+  color: #111111;
 }
 
 .device-desktop .phabricator-header-view {
@@ -13,6 +24,6 @@
 }
 
 .phabricator-header-tags {
+  margin-left: 1em;
   font-size: 13px;
-  float: right;
 }
