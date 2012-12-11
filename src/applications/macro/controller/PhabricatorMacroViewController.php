@@ -82,6 +82,7 @@ final class PhabricatorMacroViewController
     $add_comment_form = id(new AphrontFormView())
       ->setWorkflow(true)
       ->setFlexible(true)
+      ->addSigil('transaction-append')
       ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
       ->setUser($user)
       ->appendChild(

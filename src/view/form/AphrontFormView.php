@@ -11,6 +11,7 @@ final class AphrontFormView extends AphrontView {
   private $workflow;
   private $id;
   private $flexible;
+  private $sigils = array();
 
   public function setFlexible($flexible) {
     $this->flexible = $flexible;
@@ -52,6 +53,11 @@ final class AphrontFormView extends AphrontView {
     return $this;
   }
 
+  public function addSigil($sigil) {
+    $this->sigils[] = $sigil;
+    return $this;
+  }
+
   public function render() {
     if ($this->flexible) {
       require_celerity_resource('phabricator-form-view-css');
@@ -76,6 +82,11 @@ final class AphrontFormView extends AphrontView {
       throw new Exception('You must pass the user to AphrontFormView.');
     }
 
+    $sigils = $this->sigils;
+    if ($this->workflow) {
+      $sigils[] = 'workflow';
+    }
+
     return phabricator_render_form(
       $this->user,
       array(
@@ -83,7 +94,7 @@ final class AphrontFormView extends AphrontView {
         'action'  => $this->action,
         'method'  => $this->method,
         'enctype' => $this->encType,
-        'sigil'   => $this->workflow ? 'workflow' : null,
+        'sigil'   => $sigils ? implode(' ', $sigils) : null,
         'id'      => $this->id,
       ),
       $layout->render());

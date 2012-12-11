@@ -58,22 +58,10 @@ final class PhabricatorApplicationTransactionCommentEditController
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {
-        $view = id(new PhabricatorApplicationTransactionView())
+        return id(new PhabricatorApplicationTransactionResponse())
           ->setViewer($user)
-          ->setTransactions(array($xaction));
-
-        $anchor = $request->getStr('anchor');
-        if ($anchor) {
-          $view->setAnchorOffset($anchor);
-        }
-
-        return id(new AphrontAjaxResponse())->setContent(
-          array(
-            'xactions' => mpull(
-              $view->buildEvents(),
-              'render',
-              'getTransactionPHID'),
-          ));
+          ->setTransactions(array($xaction))
+          ->setAnchorOffset($request->getStr('anchor'));
       } else {
         return id(new AphrontReloadResponse())->setURI($obj_handle->getURI());
       }

@@ -43,7 +43,8 @@ final class PholioMockCommentController extends PholioController {
         'ip' => $request->getRemoteAddr(),
       ));
 
-    $xaction = id(new PholioTransaction())
+    $xactions = array();
+    $xactions[] = id(new PholioTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
       ->attachComment(
         id(new PholioTransactionComment())
@@ -52,9 +53,16 @@ final class PholioMockCommentController extends PholioController {
     id(new PholioMockEditor())
       ->setActor($user)
       ->setContentSource($content_source)
-      ->applyTransactions($mock, array($xaction));
+      ->applyTransactions($mock, $xactions);
 
-    return id(new AphrontRedirectResponse())->setURI($mock_uri);
+    if ($request->isAjax()) {
+      return id(new PhabricatorApplicationTransactionResponse())
+        ->setViewer($user)
+        ->setTransactions($xactions)
+        ->setAnchorOffset($request->getStr('anchor'));
+    } else {
+      return id(new AphrontRedirectResponse())->setURI($mock_uri);
+    }
   }
 
 }

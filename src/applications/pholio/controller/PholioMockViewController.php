@@ -47,7 +47,7 @@ final class PholioMockViewController extends PholioController {
       if ($xaction->getComment()) {
         $engine->addObject(
           $xaction->getComment(),
-          PholioTransaction::MARKUP_FIELD_COMMENT);
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
       }
     }
     $engine->process();
@@ -64,7 +64,10 @@ final class PholioMockViewController extends PholioController {
       '<h1 style="margin: 2em; padding: 1em; border: 1px dashed grey;">'.
         'Carousel Goes Here</h1>';
 
-    $xaction_view = $this->buildTransactionView($xactions, $engine);
+    $xaction_view = id(new PhabricatorApplicationTransactionView())
+      ->setViewer($this->getRequest()->getUser())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
 
     $add_comment = $this->buildAddCommentView($mock);
 
@@ -171,6 +174,7 @@ final class PholioMockViewController extends PholioController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->addSigil('transaction-append')
       ->setAction($this->getApplicationURI('/comment/'.$mock->getID().'/'))
       ->setWorkflow(true)
       ->setFlexible(true)
@@ -187,44 +191,6 @@ final class PholioMockViewController extends PholioController {
       $header,
       $form,
     );
-  }
-
-  private function buildTransactionView(
-    array $xactions,
-    PhabricatorMarkupEngine $engine) {
-    assert_instances_of($xactions, 'PholioTransaction');
-
-    $view = new PhabricatorTimelineView();
-
-    $anchor_name = 0;
-    foreach ($xactions as $xaction) {
-      if ($xaction->shouldHide()) {
-        continue;
-      }
-
-      $anchor_name++;
-
-      $event = id(new PhabricatorTimelineEventView())
-        ->setViewer($this->getRequest()->getUser())
-        ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
-        ->setIcon($xaction->getIcon())
-        ->setColor($xaction->getColor())
-        ->setTitle($xaction->getTitle())
-        ->setDateCreated($xaction->getDateCreated())
-        ->setContentSource($xaction->getContentSource())
-        ->setAnchor($anchor_name);
-
-      if ($xaction->getComment()) {
-        $event->appendChild(
-          $engine->getOutput(
-            $xaction->getComment(),
-            PholioTransaction::MARKUP_FIELD_COMMENT));
-      }
-
-      $view->addEvent($event);
-    }
-
-    return $view;
   }
 
 }

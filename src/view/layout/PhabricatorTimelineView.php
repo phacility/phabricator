@@ -18,13 +18,7 @@ final class PhabricatorTimelineView extends AphrontView {
   public function render() {
     require_celerity_resource('phabricator-timeline-view-css');
 
-    $spacer = phutil_render_tag(
-      'div',
-      array(
-        'class' => 'phabricator-timeline-event-view '.
-                   'phabricator-timeline-spacer',
-      ),
-      '');
+    $spacer = self::renderSpacer();
 
     $events = array();
     foreach ($this->events as $event) {
@@ -42,4 +36,13 @@ final class PhabricatorTimelineView extends AphrontView {
       implode('', $events));
   }
 
+  public static function renderSpacer() {
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => 'phabricator-timeline-event-view '.
+                   'phabricator-timeline-spacer',
+      ),
+      '');
+  }
 }

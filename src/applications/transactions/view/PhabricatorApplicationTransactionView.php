@@ -67,7 +67,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
       $anchor++;
 
-
       $has_deleted_comment = $xaction->getComment() &&
         $xaction->getComment()->getIsDeleted();
 
@@ -105,7 +104,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
   public function render() {
     $view = new PhabricatorTimelineView();
-    foreach ($this->buildEvents() as $event) {
+    $events = $this->buildEvents();
+    foreach ($events as $event) {
       $view->addEvent($event);
     }
 
@@ -117,7 +117,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       Javelin::initBehavior(
         'phabricator-transaction-list',
         array(
-          'listID' => $list_id,
+          'listID'      => $list_id,
+          'nextAnchor'  => $this->anchorOffset + count($events),
         ));
     }
 

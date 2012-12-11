@@ -42,8 +42,15 @@ final class PhabricatorMacroCommentController
           )))
       ->applyTransactions($macro, $xactions);
 
-    return id(new AphrontRedirectResponse())
-      ->setURI($view_uri);
+    if ($request->isAjax()) {
+      return id(new PhabricatorApplicationTransactionResponse())
+        ->setViewer($user)
+        ->setTransactions($xactions)
+        ->setAnchorOffset($request->getStr('anchor'));
+    } else {
+      return id(new AphrontRedirectResponse())
+        ->setURI($view_uri);
+    }
   }
 
 }
