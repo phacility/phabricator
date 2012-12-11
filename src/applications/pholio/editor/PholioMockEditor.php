@@ -19,7 +19,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   protected function didApplyTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
-//    $this->sendMail($object, $xactions);
 //    PholioIndexer::indexMock($mock);
     return;
   }
@@ -84,92 +83,46 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     return parent::mergeTransactions($u, $v);
   }
 
+  protected function supportsMail() {
+    return true;
+  }
 
-  private function sendMail(
-    PholioMock $mock,
-    array $xactions,
-    $is_new,
-    array $mentioned_phids) {
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PholioReplyHandler())
+      ->setMailReceiver($object);
+  }
 
-    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $mock->getPHID());
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $name = $object->getName();
+    $original_name = $object->getOriginalName();
 
-    $email_to = array(
-      $mock->getAuthorPHID(),
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("M{$id}: {$name}")
+      ->addHeader('Thread-Topic', "M{$id}: {$original_name}");
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array(
+      $object->getAuthorPHID(),
       $this->requireActor()->getPHID(),
     );
-    $email_cc = $subscribed_phids;
-
-    $phids = array_merge($email_to, $email_cc);
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($this->requireActor())
-      ->loadHandles();
-
-    $mock_id = $mock->getID();
-    $name = $mock->getName();
-    $original_name = $mock->getOriginalName();
-
-    $thread_id = 'pholio-mock-'.$mock->getPHID();
-
-    $mail_tags = $this->getMailTags($mock, $xactions);
-
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->addRawSection('lorem ipsum');
-
-    $mock_uri = PhabricatorEnv::getProductionURI('/M'.$mock->getID());
-
-    $body->addTextSection(pht('MOCK DETAIL'), $mock_uri);
-
-    $reply_handler = $this->buildReplyHandler($mock);
-
-    $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject("M{$mock_id}: {$name}")
-      ->setSubjectPrefix($this->getMailSubjectPrefix())
-      ->setVarySubjectPrefix('[edit/create?]')
-      ->setFrom($this->requireActor()->getPHID())
-      ->addHeader('Thread-Topic', "M{$mock_id}: {$original_name}")
-      ->setThreadID($thread_id, $is_new)
-      ->setRelatedPHID($mock->getPHID())
-      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setIsBulk(true)
-      ->setMailTags($mail_tags)
-      ->setBody($body->render());
-
-    // TODO
-    //  ->setParentMessageID(...)
-
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      array_select_keys($handles, $email_to),
-      array_select_keys($handles, $email_cc));
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
-
-    $template->addTos($email_to);
-    $template->addCCs($email_cc);
-
-    return $template;
   }
 
-  private function getMailTags(PholioMock $mock, array $xactions) {
-    assert_instances_of($xactions, 'PholioTransaction');
-    $tags = array();
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
 
-    return $tags;
+    $body = parent::buildMailBody($object, $xactions);
+    $body->addTextSection(
+      pht('MOCK DETAIL'),
+      PhabricatorEnv::getProductionURI('/M'.$object->getID()));
+
+    return $body;
   }
 
-  public function buildReplyHandler(PholioMock $mock) {
-    $handler_object = new PholioReplyHandler();
-    $handler_object->setMailReceiver($mock);
-
-    return $handler_object;
-  }
-
-  private function getMailSubjectPrefix() {
+  protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.pholio.subject-prefix');
   }
-
 
 }

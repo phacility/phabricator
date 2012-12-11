@@ -6,6 +6,9 @@ abstract class PhabricatorApplicationTransaction
 
   const MARKUP_FIELD_COMMENT  = 'markup:comment';
 
+  const TARGET_TEXT = 'text';
+  const TARGET_HTML = 'html';
+
   protected $phid;
   protected $objectPHID;
   protected $authorPHID;
@@ -25,6 +28,7 @@ abstract class PhabricatorApplicationTransaction
   private $commentNotLoaded;
 
   private $handles;
+  private $renderingTarget = self::TARGET_HTML;
 
   abstract public function getApplicationTransactionType();
   abstract public function getApplicationTransactionCommentObject();
@@ -77,6 +81,15 @@ abstract class PhabricatorApplicationTransaction
 
 /* -(  Rendering  )---------------------------------------------------------- */
 
+  public function setRenderingTarget($rendering_target) {
+    $this->renderingTarget = $rendering_target;
+    return $this;
+  }
+
+  public function getRenderingTarget() {
+    return $this->renderingTarget;
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = array();
 
@@ -108,7 +121,11 @@ abstract class PhabricatorApplicationTransaction
   }
 
   protected function renderHandleLink($phid) {
-    return $this->getHandle($phid)->renderLink();
+    if ($this->renderingTarget == self::TARGET_HTML) {
+      return $this->getHandle($phid)->renderLink();
+    } else {
+      return $this->getHandle($phid)->getName();
+    }
   }
 
   protected function renderHandleList(array $phids) {
@@ -201,6 +218,32 @@ abstract class PhabricatorApplicationTransaction
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName());
     }
+  }
+
+  public function getActionStrength() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return 0.5;
+    }
+    return 1.0;
+  }
+
+  public function getActionName() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return pht('Commented On');
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return pht('Changed Policy');
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        return pht('Changed Subscribers');
+      default:
+        return pht('Updated');
+    }
+  }
+
+  public function getMailTags() {
+    return array();
   }
 
 

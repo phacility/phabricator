@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task mail Sending Mail
+ */
 abstract class PhabricatorApplicationTransactionEditor
   extends PhabricatorEditor {
 
@@ -202,6 +205,10 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
+    if (!$xactions) {
+      return $this;
+    }
+
     $xactions = $this->sortTransactions($xactions);
 
     $comment_editor = id(new PhabricatorApplicationTransactionCommentEditor())
@@ -230,13 +237,41 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     $object->saveTransaction();
 
-    // TODO: Send mail.
+
+    $this->loadHandles($xactions);
+
+
+    $mail = null;
+    if ($this->supportsMail()) {
+      $mail = $this->sendMail($object, $xactions);
+    }
+
     // TODO: Index object.
     // TODO: Publish feed/notifications.
 
     $this->didApplyTransactions($object, $xactions);
 
     return $this;
+  }
+
+  private function loadHandles(array $xactions) {
+    $phids = array();
+    foreach ($xactions as $xaction) {
+      $phids[$xaction->getPHID()] = $xaction->getRequiredHandlePHIDs();
+    }
+    $handles = array();
+    $merged = array_mergev($phids);
+    if ($merged) {
+      $handles = id(new PhabricatorObjectHandleData($merged))
+        ->setViewer($this->requireActor())
+        ->loadHandles();
+    }
+    foreach ($xactions as $xaction) {
+      $xaction->setHandles(
+        array_select_keys(
+          $handles,
+          $phids[$xaction->getPHID()]));
+    }
   }
 
   private function validateEditParameters(
@@ -481,6 +516,170 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return array_values(array_merge($head, $tail));
+  }
+
+
+/* -(  Sending Mail  )------------------------------------------------------- */
+
+
+  /**
+   * @task mail
+   */
+  protected function supportsMail() {
+    return false;
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function sendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $email_to = $this->getMailTo($object);
+    $email_cc = $this->getMailCC($object);
+
+    $phids = array_merge($email_to, $email_cc);
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->requireActor())
+      ->loadHandles();
+
+    $template = $this->buildMailTemplate($object);
+    $body = $this->buildMailBody($object, $xactions);
+
+    $mail_tags = $this->getMailTags($object, $xactions);
+
+    $action = $this->getStrongestAction($object, $xactions);
+
+    $template
+      ->setFrom($this->requireActor()->getPHID())
+      ->setSubjectPrefix($this->getMailSubjectPrefix())
+      ->setVarySubjectPrefix('['.$action.']')
+      ->setThreadID($object->getPHID(), $this->getIsNewObject())
+      ->setRelatedPHID($object->getPHID())
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
+      ->setMailTags($mail_tags)
+      ->setIsBulk(true)
+      ->setBody($body->render());
+
+    // TODO
+    //  ->setParentMessageID(...)
+
+    $mails = $this
+      ->buildReplyHandler($object)
+      ->multiplexMail(
+        $template,
+        array_select_keys($handles, $email_to),
+        array_select_keys($handles, $email_cc));
+
+    foreach ($mails as $mail) {
+      $mail->saveAndSend();
+    }
+
+    $template->addTos($email_to);
+    $template->addCCs($email_cc);
+
+    return $template;
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function getStrongestAction(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return last(msort($xactions, 'getActionStrength'))->getActionName();
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    throw new Exception("Capability not supported.");
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function getMailSubjectPrefix() {
+    throw new Exception("Capability not supported.");
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function getMailTags(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    $tags = array();
+
+    foreach ($xactions as $xaction) {
+      $tags[] = $xaction->getMailTags();
+    }
+
+    return array_mergev($tags);
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    throw new Exception("Capability not supported.");
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    throw new Exception("Capability not supported.");
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    if ($object instanceof PhabricatorSubscribableInterface) {
+      $phid = $object->getPHID();
+      return PhabricatorSubscribersQuery::loadSubscribersForPHID($phid);
+    }
+    throw new Exception("Capability not supported.");
+  }
+
+
+  /**
+   * @task mail
+   */
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $headers = array();
+    $comments = array();
+
+    foreach ($xactions as $xaction) {
+      $headers[] = id(clone $xaction)->setRenderingTarget('text')->getTitle();
+      $comment = $xaction->getComment();
+      if ($comment && strlen($comment->getContent())) {
+        $comments[] = $comment->getContent();
+      }
+    }
+
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->addRawSection(implode("\n", $headers));
+
+    foreach ($comments as $comment) {
+      $body->addRawSection($comment);
+    }
+
+    return $body;
   }
 
 
