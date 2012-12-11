@@ -451,7 +451,18 @@ final class PhabricatorConduitAPIController
 
     $params_json = $request->getStr('params');
     if (!strlen($params_json)) {
-      $params = array();
+      if ($request->getBool('allowEmptyParams')) {
+        // TODO: This is a bit messy, but otherwise you can't call
+        // "conduit.ping" from the web console.
+        $params = array();
+      } else {
+        throw new Exception(
+          "Request has no 'params' key. This may mean that an extension like ".
+          "Suhosin has dropped data from the request. Check the PHP ".
+          "configuration on your server. If you are developing a Conduit ".
+          "client, you MUST provide a 'params' parameter when making a ".
+          "Conduit request, even if the value is empty (e.g., provide '{}').");
+      }
     } else {
       $params = json_decode($params_json, true);
       if (!is_array($params)) {
