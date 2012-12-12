@@ -26,6 +26,7 @@ final class DifferentialDefaultFieldSelector
       new DifferentialApplyPatchFieldSpecification(),
       new DifferentialRevisionIDFieldSpecification(),
       new DifferentialGitSVNIDFieldSpecification(),
+      new DifferentialConflictsFieldSpecification(),
       new DifferentialDateModifiedFieldSpecification(),
       new DifferentialDateCreatedFieldSpecification(),
       new DifferentialAuditorsFieldSpecification(),
