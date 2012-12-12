@@ -181,6 +181,22 @@ abstract class PhabricatorController extends AphrontController {
   public function didProcessRequest($response) {
     $request = $this->getRequest();
     $response->setRequest($request);
+
+    $seen = array();
+    while ($response instanceof AphrontProxyResponse) {
+
+      $hash = spl_object_hash($response);
+      if (isset($seen[$hash])) {
+        $seen[] = get_class($response);
+        throw new Exception(
+          "Cycle while reducing proxy responses: ".
+          implode(' -> ', $seen));
+      }
+      $seen[$hash] = get_class($response);
+
+      $response = $response->reduceProxyResponse();
+    }
+
     if ($response instanceof AphrontDialogResponse) {
       if (!$request->isAjax()) {
         $view = new PhabricatorStandardPageView();
@@ -235,12 +251,31 @@ abstract class PhabricatorController extends AphrontController {
       ->loadHandles();
   }
 
-  protected function renderHandlesForPHIDs(array $phids) {
+
+  /**
+   * Render a list of links to handles, identified by PHIDs. The handles must
+   * already be loaded.
+   *
+   * @param   list<phid>  List of PHIDs to render links to.
+   * @param   string      Style, one of "\n" (to put each item on its own line)
+   *                      or "," (to list items inline, separated by commas).
+   * @return  string      Rendered list of handle links.
+   */
+  protected function renderHandlesForPHIDs(array $phids, $style = "\n") {
+    $style_map = array(
+      "\n"  => '<br />',
+      ','   => ', ',
+    );
+
+    if (empty($style_map[$style])) {
+      throw new Exception("Unknown handle list style '{$style}'!");
+    }
+
     $items = array();
     foreach ($phids as $phid) {
       $items[] = $this->getHandle($phid)->renderLink();
     }
-    return implode('<br />', $items);
+    return implode($style_map[$style], $items);
   }
 
   protected function buildApplicationMenu() {

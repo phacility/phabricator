@@ -26,8 +26,11 @@ final class PhabricatorApplicationMacro extends PhabricatorApplication {
     return array(
       '/macro/' => array(
         '' => 'PhabricatorMacroListController',
-        'edit/(?:(?P<id>[1-9]\d*)/)?' => 'PhabricatorMacroEditController',
-        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroDeleteController',
+        'create/' => 'PhabricatorMacroEditController',
+        'view/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroViewController',
+        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroCommentController',
+        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroEditController',
+        'disable/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroDisableController',
       ),
     );
   }

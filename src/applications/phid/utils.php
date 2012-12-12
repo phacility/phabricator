@@ -36,3 +36,10 @@ function phid_group_by_type($phids) {
   }
   return $result;
 }
+
+function phid_get_subtype($phid) {
+  if (isset($phid[14]) && ($phid[14] == '-')) {
+    return substr($phid, 10, 4);
+  }
+  return null;
+}

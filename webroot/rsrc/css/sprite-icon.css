@@ -498,243 +498,243 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -105px -120px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-arrow_left {
+.action-arrow_left-white, .device-desktop .phabricator-action-view:hover .action-arrow_left {
   background-position: -120px -120px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-arrow_right {
+.action-arrow_right-white, .device-desktop .phabricator-action-view:hover .action-arrow_right {
   background-position: -135px -120px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-attach {
+.action-attach-white, .device-desktop .phabricator-action-view:hover .action-attach {
   background-position: -150px -120px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-blame {
+.action-blame-white, .device-desktop .phabricator-action-view:hover .action-blame {
   background-position: -165px -120px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-check {
+.action-check-white, .device-desktop .phabricator-action-view:hover .action-check {
   background-position: -180px -120px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-comment {
+.action-comment-white, .device-desktop .phabricator-action-view:hover .action-comment {
   background-position: -195px -120px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-computer {
+.action-computer-white, .device-desktop .phabricator-action-view:hover .action-computer {
   background-position: 0px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-create {
+.action-create-white, .device-desktop .phabricator-action-view:hover .action-create {
   background-position: -15px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-delete {
+.action-delete-white, .device-desktop .phabricator-action-view:hover .action-delete {
   background-position: -30px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-disable {
+.action-disable-white, .device-desktop .phabricator-action-view:hover .action-disable {
   background-position: -45px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-dislike {
+.action-dislike-white, .device-desktop .phabricator-action-view:hover .action-dislike {
   background-position: -60px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-download {
+.action-download-white, .device-desktop .phabricator-action-view:hover .action-download {
   background-position: -75px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-edit {
+.action-edit-white, .device-desktop .phabricator-action-view:hover .action-edit {
   background-position: -90px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-enable {
+.action-enable-white, .device-desktop .phabricator-action-view:hover .action-enable {
   background-position: -105px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-file {
+.action-file-white, .device-desktop .phabricator-action-view:hover .action-file {
   background-position: -120px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-0 {
+.action-flag-0-white, .device-desktop .phabricator-action-view:hover .action-flag-0 {
   background-position: -135px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-1 {
+.action-flag-1-white, .device-desktop .phabricator-action-view:hover .action-flag-1 {
   background-position: -150px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-2 {
+.action-flag-2-white, .device-desktop .phabricator-action-view:hover .action-flag-2 {
   background-position: -165px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-3 {
+.action-flag-3-white, .device-desktop .phabricator-action-view:hover .action-flag-3 {
   background-position: -180px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-4 {
+.action-flag-4-white, .device-desktop .phabricator-action-view:hover .action-flag-4 {
   background-position: -195px -135px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-5 {
+.action-flag-5-white, .device-desktop .phabricator-action-view:hover .action-flag-5 {
   background-position: 0px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-6 {
+.action-flag-6-white, .device-desktop .phabricator-action-view:hover .action-flag-6 {
   background-position: -15px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-7 {
+.action-flag-7-white, .device-desktop .phabricator-action-view:hover .action-flag-7 {
   background-position: -30px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag-ghost {
+.action-flag-ghost-white, .device-desktop .phabricator-action-view:hover .action-flag-ghost {
   background-position: -45px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-flag {
+.action-flag-white, .device-desktop .phabricator-action-view:hover .action-flag {
   background-position: -60px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-folder-open {
+.action-folder-open-white, .device-desktop .phabricator-action-view:hover .action-folder-open {
   background-position: -75px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-fork {
+.action-fork-white, .device-desktop .phabricator-action-view:hover .action-fork {
   background-position: -90px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-herald {
+.action-herald-white, .device-desktop .phabricator-action-view:hover .action-herald {
   background-position: -105px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-highlight {
+.action-highlight-white, .device-desktop .phabricator-action-view:hover .action-highlight {
   background-position: -120px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-history {
+.action-history-white, .device-desktop .phabricator-action-view:hover .action-history {
   background-position: -135px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-image {
+.action-image-white, .device-desktop .phabricator-action-view:hover .action-image {
   background-position: -150px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-like {
+.action-like-white, .device-desktop .phabricator-action-view:hover .action-like {
   background-position: -165px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-link {
+.action-link-white, .device-desktop .phabricator-action-view:hover .action-link {
   background-position: -180px -150px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-lint-info {
+.action-lint-info-white, .device-desktop .phabricator-action-view:hover .action-lint-info {
   background-position: 0px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-lint-ok {
+.action-lint-ok-white, .device-desktop .phabricator-action-view:hover .action-lint-ok {
   background-position: -15px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-lint-warning {
+.action-lint-warning-white, .device-desktop .phabricator-action-view:hover .action-lint-warning {
   background-position: -30px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-lock {
+.action-lock-white, .device-desktop .phabricator-action-view:hover .action-lock {
   background-position: -45px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-love {
+.action-love-white, .device-desktop .phabricator-action-view:hover .action-love {
   background-position: -60px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-merge {
+.action-merge-white, .device-desktop .phabricator-action-view:hover .action-merge {
   background-position: -75px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-message {
+.action-message-white, .device-desktop .phabricator-action-view:hover .action-message {
   background-position: -90px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-meta-mta {
+.action-meta-mta-white, .device-desktop .phabricator-action-view:hover .action-meta-mta {
   background-position: -105px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-move {
+.action-move-white, .device-desktop .phabricator-action-view:hover .action-move {
   background-position: -120px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-new {
+.action-new-white, .device-desktop .phabricator-action-view:hover .action-new {
   background-position: -135px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-perflab {
+.action-perflab-white, .device-desktop .phabricator-action-view:hover .action-perflab {
   background-position: -150px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-preview {
+.action-preview-white, .device-desktop .phabricator-action-view:hover .action-preview {
   background-position: -165px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-refresh {
+.action-refresh-white, .device-desktop .phabricator-action-view:hover .action-refresh {
   background-position: -180px -165px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-remove {
+.action-remove-white, .device-desktop .phabricator-action-view:hover .action-remove {
   background-position: 0px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-search {
+.action-search-white, .device-desktop .phabricator-action-view:hover .action-search {
   background-position: -15px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-start-sandcastle {
+.action-start-sandcastle-white, .device-desktop .phabricator-action-view:hover .action-start-sandcastle {
   background-position: -30px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-subscribe-add {
+.action-subscribe-add-white, .device-desktop .phabricator-action-view:hover .action-subscribe-add {
   background-position: -45px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-subscribe-auto {
+.action-subscribe-auto-white, .device-desktop .phabricator-action-view:hover .action-subscribe-auto {
   background-position: -60px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-subscribe-delete {
+.action-subscribe-delete-white, .device-desktop .phabricator-action-view:hover .action-subscribe-delete {
   background-position: -75px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-tag {
+.action-tag-white, .device-desktop .phabricator-action-view:hover .action-tag {
   background-position: -90px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-transcript {
+.action-transcript-white, .device-desktop .phabricator-action-view:hover .action-transcript {
   background-position: -105px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-undo {
+.action-undo-white, .device-desktop .phabricator-action-view:hover .action-undo {
   background-position: -120px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-unlock {
+.action-unlock-white, .device-desktop .phabricator-action-view:hover .action-unlock {
   background-position: -135px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-unmerge {
+.action-unmerge-white, .device-desktop .phabricator-action-view:hover .action-unmerge {
   background-position: -150px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-unpublish {
+.action-unpublish-white, .device-desktop .phabricator-action-view:hover .action-unpublish {
   background-position: -165px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-warning {
+.action-warning-white, .device-desktop .phabricator-action-view:hover .action-warning {
   background-position: -180px -180px;
 }
 
-.device-desktop .phabricator-action-view:hover .action-world {
+.action-world-white, .device-desktop .phabricator-action-view:hover .action-world {
   background-position: 0px -195px;
 }
 

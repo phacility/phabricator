@@ -10,7 +10,6 @@ abstract class DifferentialChangesetRenderer {
   private $missingNewLines;
   private $oldLines;
   private $newLines;
-  private $visibleLines;
   private $oldComments;
   private $newComments;
   private $oldChangesetID;
@@ -19,7 +18,6 @@ abstract class DifferentialChangesetRenderer {
   private $newAttachesToNewFile;
   private $highlightOld = array();
   private $highlightNew = array();
-  private $linesOfContext;
   private $codeCoverage;
   private $handles;
   private $markupEngine;
@@ -27,6 +25,33 @@ abstract class DifferentialChangesetRenderer {
   private $newRender;
   private $originalOld;
   private $originalNew;
+  private $gaps;
+  private $mask;
+  private $depths;
+
+  public function setDepths($depths) {
+    $this->depths = $depths;
+    return $this;
+  }
+  protected function getDepths() {
+    return $this->depths;
+  }
+
+  public function setMask($mask) {
+    $this->mask = $mask;
+    return $this;
+  }
+  protected function getMask() {
+    return $this->mask;
+  }
+
+  public function setGaps($gaps) {
+    $this->gaps = $gaps;
+    return $this;
+  }
+  protected function getGaps() {
+    return $this->gaps;
+  }
 
   public function setOriginalNew($original_new) {
     $this->originalNew = $original_new;
@@ -83,14 +108,6 @@ abstract class DifferentialChangesetRenderer {
   }
   protected function getCodeCoverage() {
     return $this->codeCoverage;
-  }
-
-  public function setLinesOfContext($lines_of_context) {
-    $this->linesOfContext = $lines_of_context;
-    return $this;
-  }
-  protected function getLinesOfContext() {
-    return $this->linesOfContext;
   }
 
   public function setHighlightNew($highlight_new) {
@@ -163,14 +180,6 @@ abstract class DifferentialChangesetRenderer {
     return $this->oldComments;
   }
 
-  public function setVisibleLines(array $visible_lines) {
-    $this->visibleLines = $visible_lines;
-    return $this;
-  }
-  protected function getVisibleLines() {
-    return $this->visibleLines;
-  }
-
   public function setNewLines(array $new_lines) {
     $this->newLines = $new_lines;
     return $this;
@@ -239,8 +248,7 @@ abstract class DifferentialChangesetRenderer {
   abstract public function renderTextChange(
     $range_start,
     $range_len,
-    $mask_force,
-    $feedback_mask
+    $rows
   );
   abstract public function renderFileChange(
     $old = null, 

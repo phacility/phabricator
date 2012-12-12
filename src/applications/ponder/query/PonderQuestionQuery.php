@@ -1,6 +1,7 @@
 <?php
 
-final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
+final class PonderQuestionQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   const ORDER_CREATED = 'order-created';
   const ORDER_HOTTEST = 'order-hottest';
@@ -36,6 +37,7 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
     }
 
     return idx(id(new PonderQuestionQuery())
+      ->setViewer($viewer)
       ->withIDs(array($id))
       ->execute(), $id);
   }
@@ -47,6 +49,7 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
 
     return array_shift(id(new PonderQuestionQuery())
       ->withPHIDs(array($phid))
+      ->setViewer($viewer)
       ->execute());
   }
 
@@ -65,6 +68,8 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
       $where[] = qsprintf($conn_r, 'q.authorPHID IN (%Ls)', $this->authorPHIDs);
     }
 
+    $where[] = $this->buildPagingClause($conn_r);
+
     return $this->formatWhereClause($where);
   }
 
@@ -79,7 +84,7 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
     }
   }
 
-  public function execute() {
+  public function loadPage() {
     $question = new PonderQuestion();
     $conn_r = $question->establishConnection('r');
 

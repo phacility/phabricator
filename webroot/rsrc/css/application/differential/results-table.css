@@ -28,9 +28,8 @@ table.differential-results-table {
 
 .differential-results-table tr.differential-results-row-star th,
 .differential-results-table tr.differential-results-row-star td {
-  font-size: 12px;
   font-weight: bold;
-  background: #dfdfcf;
+  background: #dfe3ec;
 }
 
 
@@ -75,5 +74,5 @@ table.differential-results-table {
   padding: 4px;
   color: #888888;
   font-weight: bold;
-  background: #dfdfcf;
+  background: #dfe3ec;
 }

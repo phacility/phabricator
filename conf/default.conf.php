@@ -383,12 +383,19 @@ return array(
   // distinguish between testing and development installs, for example.
   'metamta.maniphest.subject-prefix' => '[Maniphest]',
 
-  // See 'metamta.pholio.reply-handler-domain'. This does the same thing, but
+  // See 'metamta.maniphest.reply-handler-domain'. This does the same thing, but
   // affects Pholio.
   'metamta.pholio.reply-handler-domain' => null,
 
   // Prefix prepended to mail sent by Pholio.
   'metamta.pholio.subject-prefix' => '[Pholio]',
+
+  // See 'metamta.maniphest.reply-handler-domain'. This does the same thing, but
+  // affects Macro.
+  'metamta.macro.reply-handler-domain' => null,
+
+  // Prefix prepended to mail sent by Macro.
+  'metamta.macro.subject-prefix' => '[Macro]',
 
   // See 'metamta.maniphest.reply-handler-domain'. This does the same thing,
   // but allows email replies via Differential.

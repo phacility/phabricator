@@ -172,6 +172,27 @@ abstract class PhabricatorBaseEnglishTranslation
         'This is a binary file. It is %2$s bytes in length.',
       ),
 
+      '%d Action(s) Have No Effect' => array(
+        'Action Has No Effect',
+        'Actions Have No Effect',
+      ),
+
+      '%d Action(s) With No Effect' => array(
+        'Action With No Effect',
+        'Actions With No Effect',
+      ),
+
+      '%s added %d subscriber(s): %s.' => array(
+        array(
+          '%s added a subscriber: %3$s.',
+          '%s added subscribers: %3$s.',
+        ),
+        array(
+          '%s added a subscriber: %3$s.',
+          '%s added subscribers: %3$s.',
+        ),
+      ),
+
     );
   }
 

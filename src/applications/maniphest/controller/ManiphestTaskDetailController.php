@@ -51,13 +51,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $e_dep_by,
           $e_rev,
         ));
-    $edges = $query->execute();
-
-    $commit_phids = array_keys($edges[$phid][$e_commit]);
-    $dep_on_tasks = array_keys($edges[$phid][$e_dep_on]);
-    $dep_by_tasks = array_keys($edges[$phid][$e_dep_by]);
-    $revs         = array_keys($edges[$phid][$e_rev]);
-
+    $edges = idx($query->execute(), $phid);
     $phids = array_fill_keys($query->getDestinationPHIDs(), true);
 
     foreach ($transactions as $transaction) {
@@ -88,104 +82,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $phids = array_keys($phids);
-
-    $handles = $this->loadViewerHandles($phids);
-
-    $dict = array();
-    $dict['Status'] =
-      '<strong>'.
-        ManiphestTaskStatus::getTaskStatusFullName($task->getStatus()).
-      '</strong>';
-
-    $dict['Assigned To'] = $task->getOwnerPHID()
-      ? $handles[$task->getOwnerPHID()]->renderLink()
-      : '<em>None</em>';
-
-    $dict['Priority'] = ManiphestTaskPriority::getTaskPriorityName(
-      $task->getPriority());
-
-    $cc = $task->getCCPHIDs();
-    if ($cc) {
-      $cc_links = array();
-      foreach ($cc as $phid) {
-        $cc_links[] = $handles[$phid]->renderLink();
-      }
-      $dict['CC'] = implode(', ', $cc_links);
-    } else {
-      $dict['CC'] = '<em>None</em>';
-    }
-
-    $dict['Author'] = $handles[$task->getAuthorPHID()]->renderLink();
-
-    $source = $task->getOriginalEmailSource();
-    if ($source) {
-      $subject = '[T'.$task->getID().'] '.$task->getTitle();
-      $dict['From Email'] = phutil_render_tag(
-        'a',
-        array(
-          'href' => 'mailto:'.$source.'?subject='.$subject
-        ),
-        phutil_escape_html($source));
-    }
-
-    $projects = $task->getProjectPHIDs();
-    if ($projects) {
-      $project_links = array();
-      foreach ($projects as $phid) {
-        $project_links[] = $handles[$phid]->renderLink();
-      }
-      $dict['Projects'] = implode(', ', $project_links);
-    } else {
-      $dict['Projects'] = '<em>None</em>';
-    }
-
-    $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
-    if ($aux_fields) {
-      $task->loadAndAttachAuxiliaryAttributes();
-      foreach ($aux_fields as $aux_field) {
-        $aux_key = $aux_field->getAuxiliaryKey();
-        $aux_field->setValue($task->getAuxiliaryAttribute($aux_key));
-        $value = $aux_field->renderForDetailView();
-        if (strlen($value)) {
-          $dict[$aux_field->getLabel()] = $value;
-        }
-      }
-    }
-
-    if ($dep_by_tasks) {
-      $dict['Dependent Tasks'] = $this->renderHandleList(
-        array_select_keys($handles, $dep_by_tasks));
-    }
-
-    if ($dep_on_tasks) {
-      $dict['Depends On'] = $this->renderHandleList(
-        array_select_keys($handles, $dep_on_tasks));
-    }
-
-    if ($revs) {
-      $dict['Revisions'] = $this->renderHandleList(
-        array_select_keys($handles, $revs));
-    }
-
-    if ($commit_phids) {
-      $dict['Commits'] = $this->renderHandleList(
-        array_select_keys($handles, $commit_phids));
-    }
-
-    $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
-    if ($file_infos) {
-      $file_phids = array_keys($file_infos);
-
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid IN (%Ls)',
-        $file_phids);
-
-      $view = new PhabricatorFileLinkListView();
-      $view->setFiles($files);
-
-      $dict['Files'] = $view->render();
-    }
+    $this->loadHandles($phids);
 
     $context_bar = null;
 
@@ -201,7 +98,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         'Create Another Subtask'));
       $context_bar->appendChild(
         'Created a subtask of <strong>'.
-        $handles[$parent_task->getPHID()]->renderLink().
+        $this->getHandle($parent_task->getPHID())->renderLink().
         '</strong>');
     } else if ($workflow == 'create') {
       $context_bar = new AphrontContextBarView();
@@ -225,75 +122,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $context_bar->appendChild('New task created.');
     }
 
-    $actions = array();
-
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Edit Task');
-    $action->setURI('/maniphest/task/edit/'.$task->getID().'/');
-    $action->setClass('action-edit');
-    $actions[] = $action;
-
-    require_celerity_resource('phabricator-flag-css');
-    $flag = PhabricatorFlagQuery::loadUserFlag($user, $task->getPHID());
-    if ($flag) {
-      $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
-      $color = PhabricatorFlagColor::getColorName($flag->getColor());
-
-      $action = new AphrontHeadsupActionView();
-      $action->setClass('flag-clear '.$class);
-      $action->setURI('/flag/delete/'.$flag->getID().'/');
-      $action->setName('Remove '.$color.' Flag');
-      $action->setWorkflow(true);
-      $actions[] = $action;
-    } else {
-      $action = new AphrontHeadsupActionView();
-      $action->setClass('phabricator-flag-ghost');
-      $action->setURI('/flag/edit/'.$task->getPHID().'/');
-      $action->setName('Flag Task');
-      $action->setWorkflow(true);
-      $actions[] = $action;
-    }
-
-    require_celerity_resource('phabricator-object-selector-css');
-    require_celerity_resource('javelin-behavior-phabricator-object-selector');
-
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Merge Duplicates');
-    $action->setURI('/search/attach/'.$task->getPHID().'/TASK/merge/');
-    $action->setWorkflow(true);
-    $action->setClass('action-merge');
-    $actions[] = $action;
-
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Create Subtask');
-    $action->setURI('/maniphest/task/create/?parent='.$task->getID());
-    $action->setClass('action-branch');
-    $actions[] = $action;
-
-
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Edit Dependencies');
-    $action->setURI('/search/attach/'.$task->getPHID().'/TASK/dependencies/');
-    $action->setWorkflow(true);
-    $action->setClass('action-dependencies');
-    $actions[] = $action;
-
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Edit Differential Revisions');
-    $action->setURI('/search/attach/'.$task->getPHID().'/DREV/');
-    $action->setWorkflow(true);
-    $action->setClass('action-attach');
-    $actions[] = $action;
-
-    $action_list = new AphrontHeadsupActionListView();
-    $action_list->setActions($actions);
-
-    $headsup_panel = new AphrontHeadsupView();
-    $headsup_panel->setObjectName('T'.$task->getID());
-    $headsup_panel->setHeader($task->getTitle());
-    $headsup_panel->setActionList($action_list);
-    $headsup_panel->setProperties($dict);
-
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
     $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
@@ -304,10 +132,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
     $engine->process();
 
-    $headsup_panel->appendChild(
-      '<div class="phabricator-remarkup">'.
-        $engine->getOutput($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION).
-      '</div>');
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
+    if ($aux_fields) {
+      $task->loadAndAttachAuxiliaryAttributes();
+    }
 
     $transaction_types = ManiphestTransactionType::getTransactionTypeMap();
     $resolution_types = ManiphestTaskStatus::getTaskStatusMap();
@@ -489,7 +318,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $transaction_view = new ManiphestTransactionListView();
     $transaction_view->setTransactions($transactions);
-    $transaction_view->setHandles($handles);
+    $transaction_view->setHandles($this->getLoadedHandles());
     $transaction_view->setUser($user);
     $transaction_view->setAuxiliaryFields($aux_fields);
     $transaction_view->setMarkupEngine($engine);
@@ -497,10 +326,25 @@ final class ManiphestTaskDetailController extends ManiphestController {
     PhabricatorFeedStoryNotification::updateObjectNotificationViews(
       $user, $task->getPHID());
 
-    return $this->buildStandardPageResponse(
+    $object_name = 'T'.$task->getID();
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($object_name)
+        ->setHref('/'.$object_name));
+
+    $header = $this->buildHeaderView($task);
+    $actions = $this->buildActionView($task);
+    $properties = $this->buildPropertyView($task, $aux_fields, $edges, $engine);
+
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         $context_bar,
-        $headsup_panel,
+        $header,
+        $actions,
+        $properties,
         $transaction_view,
         $comment_panel,
         $preview_panel,
@@ -511,12 +355,181 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ));
   }
 
-  private function renderHandleList(array $handles) {
-    $links = array();
-    foreach ($handles as $handle) {
-      $links[] = $handle->renderLink();
-    }
-    return implode('<br />', $links);
+  private function buildHeaderView(ManiphestTask $task) {
+    $view = id(new PhabricatorHeaderView())
+      ->setObjectName('T'.$task->getID())
+      ->setHeader($task->getTitle());
+
+    $status = $task->getStatus();
+    $status_name = ManiphestTaskStatus::getTaskStatusFullName($status);
+    $status_color = ManiphestTaskStatus::getTaskStatusTagColor($status);
+
+    $view->addTag(
+      id(new PhabricatorTagView())
+        ->setType(PhabricatorTagView::TYPE_STATE)
+        ->setName($status_name)
+        ->setBackgroundColor($status_color));
+
+    return $view;
   }
+
+
+  private function buildActionView(ManiphestTask $task) {
+    $viewer = $this->getRequest()->getUser();
+
+    $id = $task->getID();
+    $phid = $task->getPHID();
+
+    $view = new PhabricatorActionListView();
+    $view->setUser($viewer);
+    $view->setObject($task);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Task'))
+        ->setIcon('edit')
+        ->setHref($this->getApplicationURI("/task/edit/{$id}/")));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Merge Duplicates'))
+        ->setHref("/search/attach/{$phid}/TASK/merge/")
+        ->setWorkflow(true)
+        ->setWorkflow(true)
+        ->setIcon('merge'));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Create Subtask'))
+        ->setHref($this->getApplicationURI("/task/create/?parent={$id}"))
+        ->setIcon('fork'));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Dependencies'))
+        ->setHref("/search/attach/{$phid}/TASK/dependencies/")
+        ->setWorkflow(true)
+        ->setIcon('link'));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Differential Revisions'))
+        ->setHref("/search/attach/{$phid}/DREV/")
+        ->setWorkflow(true)
+        ->setIcon('attach'));
+
+    return $view;
+  }
+
+  private function buildPropertyView(
+    ManiphestTask $task,
+    array $aux_fields,
+    array $edges,
+    PhabricatorMarkupEngine $engine) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = new PhabricatorPropertyListView();
+
+    $view->addProperty(
+      pht('Assigned To'),
+      $task->getOwnerPHID()
+        ? $this->getHandle($task->getOwnerPHID())->renderLink()
+        : '<em>'.pht('None').'</em>');
+
+    $view->addProperty(
+      pht('Priority'),
+      phutil_escape_html(
+        ManiphestTaskPriority::getTaskPriorityName($task->getPriority())));
+
+    $view->addProperty(
+      pht('Subscribers'),
+      $task->getCCPHIDs()
+        ? $this->renderHandlesForPHIDs($task->getCCPHIDs(), ',')
+        : '<em>'.pht('None').'</em>');
+
+    $view->addProperty(
+      pht('Author'),
+      $this->getHandle($task->getAuthorPHID())->renderLink());
+
+    $source = $task->getOriginalEmailSource();
+    if ($source) {
+      $subject = '[T'.$task->getID().'] '.$task->getTitle();
+      $view->addProperty(
+        pht('From Email'),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => 'mailto:'.$source.'?subject='.$subject
+            ),
+          phutil_escape_html($source)));
+    }
+
+    $view->addProperty(
+      pht('Projects'),
+      $task->getProjectPHIDs()
+        ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
+        : '<em>'.pht('None').'</em>');
+
+    foreach ($aux_fields as $aux_field) {
+      $aux_key = $aux_field->getAuxiliaryKey();
+      $aux_field->setValue($task->getAuxiliaryAttribute($aux_key));
+      $value = $aux_field->renderForDetailView();
+      if (strlen($value)) {
+        $view->addProperty($aux_field->getLabel(), $value);
+      }
+    }
+
+
+    $edge_types = array(
+      PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
+        => pht('Dependent Tasks'),
+      PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK
+        => pht('Depends On'),
+      PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV
+        => pht('Differential Revisions'),
+      PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT
+        => pht('Commits'),
+    );
+
+    foreach ($edge_types as $edge_type => $edge_name) {
+      if ($edges[$edge_type]) {
+        $view->addProperty(
+          $edge_name,
+          $this->renderHandlesForPHIDs(array_keys($edges[$edge_type])));
+      }
+    }
+
+    $attached = $task->getAttached();
+    $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
+    if ($file_infos) {
+      $file_phids = array_keys($file_infos);
+
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        'phid IN (%Ls)',
+        $file_phids);
+
+      $file_view = new PhabricatorFileLinkListView();
+      $file_view->setFiles($files);
+
+      $view->addProperty(
+        pht('Files'),
+        $file_view->render());
+    }
+
+    if (strlen($task->getDescription())) {
+      $view->addSectionHeader(pht('Description'));
+      $view->addTextContent(
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'phabricator-remarkup',
+          ),
+          $engine->getOutput($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION)));
+    }
+
+    return $view;
+  }
+
 
 }

@@ -6,7 +6,6 @@ final class AphrontHeadsupView extends AphrontView {
   private $header;
   private $properties;
   private $objectName;
-  private $hasKeyboardShortcuts;
 
   public function setActionList(AphrontHeadsupActionListView $action_list) {
     $this->actionList = $action_list;
@@ -28,15 +27,6 @@ final class AphrontHeadsupView extends AphrontView {
     return $this;
   }
 
-  public function setHasKeyboardShortcuts($has_keyboard_shortcuts) {
-    $this->hasKeyboardShortcuts = $has_keyboard_shortcuts;
-    return $this;
-  }
-
-  public function getHasKeyboardShortcuts() {
-    return $this->hasKeyboardShortcuts;
-  }
-
   public function render() {
     $header =
       '<h1>'.
@@ -52,14 +42,6 @@ final class AphrontHeadsupView extends AphrontView {
       '</h1>';
 
     require_celerity_resource('aphront-headsup-view-css');
-
-    $shortcuts = null;
-    if ($this->hasKeyboardShortcuts) {
-      $shortcuts =
-        '<div class="aphront-headsup-keyboard-shortcuts">'.
-          id(new AphrontKeyboardShortcutsAvailableView())->render().
-        '</div>';
-    }
 
     $prop_table = null;
     if ($this->properties) {
@@ -88,7 +70,6 @@ final class AphrontHeadsupView extends AphrontView {
     return
       '<div class="aphront-headsup-panel">'.
         self::renderSingleView($this->actionList).
-        $shortcuts.
         '<div class="aphront-headsup-core">'.
           $header.
           $prop_table.

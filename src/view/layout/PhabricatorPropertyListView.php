@@ -3,9 +3,15 @@
 final class PhabricatorPropertyListView extends AphrontView {
 
   private $parts = array();
+  private $hasKeyboardShortcuts;
 
   protected function canAppendChild() {
     return false;
+  }
+
+  public function setHasKeyboardShortcuts($has_keyboard_shortcuts) {
+    $this->hasKeyboardShortcuts = $has_keyboard_shortcuts;
+    return $this;
   }
 
   public function addProperty($key, $value) {
@@ -102,13 +108,32 @@ final class PhabricatorPropertyListView extends AphrontView {
       ),
       $this->renderSingleView($items));
 
-    return phutil_render_tag(
-      'div',
-      array(
-        'class' => 'phabricator-property-list-container',
-      ),
-      $list.
-      '<div class="phabriator-property-list-view-end"></div>');
+    $content = $this->renderChildren();
+    if (strlen($content)) {
+      $content = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-property-list-content',
+        ),
+        $content);
+    }
+
+    $shortcuts = null;
+    if ($this->hasKeyboardShortcuts) {
+      $shortcuts =
+        id(new AphrontKeyboardShortcutsAvailableView())->render();
+    }
+
+    return
+      $shortcuts.
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-property-list-container',
+        ),
+        $list.
+        '<div class="phabriator-property-list-view-end"></div>'
+      );
   }
 
   private function renderSectionPart(array $part) {

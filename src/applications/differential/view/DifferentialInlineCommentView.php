@@ -251,9 +251,9 @@ final class DifferentialInlineCommentView extends AphrontView {
       '<table>'.
         '<tr class="inline">'.
           '<th></th>'.
-          '<td>'.$left_markup.'</td>'.
+          '<td class="left">'.$left_markup.'</td>'.
           '<th></th>'.
-          '<td colspan="2">'.$right_markup.'</td>'.
+          '<td class="right3" colspan="3">'.$right_markup.'</td>'.
         '</tr>'.
       '</table>';
   }

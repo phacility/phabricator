@@ -3,310 +3,130 @@
 /**
  * @group pholio
  */
-final class PholioMockEditor extends PhabricatorEditor {
+final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
-  private $contentSource;
+  public function getTransactionTypes() {
+    $types = parent::getTransactionTypes();
 
-  public function setContentSource(PhabricatorContentSource $content_source) {
-    $this->contentSource = $content_source;
-    return $this;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+    $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
+
+    $types[] = PholioTransactionType::TYPE_NAME;
+    $types[] = PholioTransactionType::TYPE_DESCRIPTION;
+    return $types;
   }
 
-  public function getContentSource() {
-    return $this->contentSource;
+  protected function didApplyTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+//    PholioIndexer::indexMock($mock);
+    return;
   }
 
-  public function applyTransactions(PholioMock $mock, array $xactions) {
-    assert_instances_of($xactions, 'PholioTransaction');
+  protected function getCustomTransactionOldValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-    $actor = $this->requireActor();
-    if (!$this->contentSource) {
-      throw new Exception(
-        "Call setContentSource() before applyTransactions()!");
-    }
-
-    $is_new = !$mock->getID();
-
-    $comments = array();
-    foreach ($xactions as $xaction) {
-      if (strlen($xaction->getComment())) {
-        $comments[] = $xaction->getComment();
-      }
-      $type = $xaction->getTransactionType();
-      if ($type == PholioTransactionType::TYPE_DESCRIPTION) {
-        $comments[] = $xaction->getNewValue();
-      }
-    }
-
-    $mentioned_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      $comments);
-    $subscribe_phids = $mentioned_phids;
-
-    // Attempt to subscribe the actor.
-    $subscribe_phids[] = $actor->getPHID();
-
-    if ($subscribe_phids) {
-      if ($mock->getID()) {
-        $old_subs = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-          $mock->getPHID());
-      } else {
-        $old_subs = array();
-      }
-
-      $new_subs = array_merge($old_subs, $mentioned_phids);
-      $xaction = id(new PholioTransaction())
-        ->setTransactionType(PholioTransactionType::TYPE_SUBSCRIBERS)
-        ->setOldValue($old_subs)
-        ->setNewValue($new_subs);
-      array_unshift($xactions, $xaction);
-    }
-
-    foreach ($xactions as $xaction) {
-      $xaction->setContentSource($this->contentSource);
-      $xaction->setAuthorPHID($actor->getPHID());
-    }
-
-    foreach ($xactions as $key => $xaction) {
-      $has_effect = $this->applyTransaction($mock, $xaction);
-      if (!$has_effect) {
-        unset($xactions[$key]);
-      }
-    }
-
-    if (!$xactions) {
-      return;
-    }
-
-    $mock->openTransaction();
-      $mock->save();
-
-      foreach ($xactions as $xaction) {
-        $xaction->setMockID($mock->getID());
-        $xaction->save();
-      }
-
-      // Apply ID/PHID-dependent transactions.
-      foreach ($xactions as $xaction) {
-        $type = $xaction->getTransactionType();
-        switch ($type) {
-          case PholioTransactionType::TYPE_SUBSCRIBERS:
-            $subeditor = id(new PhabricatorSubscriptionsEditor())
-              ->setObject($mock)
-              ->setActor($this->requireActor())
-              ->subscribeExplicit($xaction->getNewValue())
-              ->save();
-            break;
-        }
-      }
-
-    $mock->saveTransaction();
-
-    $this->sendMail($mock, $xactions, $is_new, $mentioned_phids);
-
-    PholioIndexer::indexMock($mock);
-
-    return $this;
-  }
-
-  private function sendMail(
-    PholioMock $mock,
-    array $xactions,
-    $is_new,
-    array $mentioned_phids) {
-
-    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $mock->getPHID());
-
-    $email_to = array(
-      $mock->getAuthorPHID(),
-      $this->requireActor()->getPHID(),
-    );
-    $email_cc = $subscribed_phids;
-
-    $phids = array_merge($email_to, $email_cc);
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($this->requireActor())
-      ->loadHandles();
-
-    $mock_id = $mock->getID();
-    $name = $mock->getName();
-    $original_name = $mock->getOriginalName();
-
-    $thread_id = 'pholio-mock-'.$mock->getPHID();
-
-    $mail_tags = $this->getMailTags($mock, $xactions);
-
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->addRawSection('lorem ipsum');
-
-    $mock_uri = PhabricatorEnv::getProductionURI('/M'.$mock->getID());
-
-    $body->addTextSection(pht('MOCK DETAIL'), $mock_uri);
-
-    $reply_handler = $this->buildReplyHandler($mock);
-
-    $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject("M{$mock_id}: {$name}")
-      ->setSubjectPrefix($this->getMailSubjectPrefix())
-      ->setVarySubjectPrefix('[edit/create?]')
-      ->setFrom($this->requireActor()->getPHID())
-      ->addHeader('Thread-Topic', "M{$mock_id}: {$original_name}")
-      ->setThreadID($thread_id, $is_new)
-      ->setRelatedPHID($mock->getPHID())
-      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setIsBulk(true)
-      ->setMailTags($mail_tags)
-      ->setBody($body->render());
-
-    // TODO
-    //  ->setParentMessageID(...)
-
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      array_select_keys($handles, $email_to),
-      array_select_keys($handles, $email_cc));
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
-
-    $template->addTos($email_to);
-    $template->addCCs($email_cc);
-
-    return $template;
-  }
-
-  private function getMailTags(PholioMock $mock, array $xactions) {
-    assert_instances_of($xactions, 'PholioTransaction');
-    $tags = array();
-
-    return $tags;
-  }
-
-  public function buildReplyHandler(PholioMock $mock) {
-    $handler_object = new PholioReplyHandler();
-    $handler_object->setMailReceiver($mock);
-
-    return $handler_object;
-  }
-
-  private function getMailSubjectPrefix() {
-    return PhabricatorEnv::getEnvConfig('metamta.pholio.subject-prefix');
-  }
-
-  private function applyTransaction(
-    PholioMock $mock,
-    PholioTransaction $xaction) {
-
-    $type = $xaction->getTransactionType();
-
-    $old = null;
-    switch ($type) {
-      case PholioTransactionType::TYPE_NONE:
-        $old = null;
-        break;
+    switch ($xaction->getTransactionType()) {
       case PholioTransactionType::TYPE_NAME:
-        $old = $mock->getName();
-        break;
+        return $object->getName();
       case PholioTransactionType::TYPE_DESCRIPTION:
-        $old = $mock->getDescription();
-        break;
-      case PholioTransactionType::TYPE_VIEW_POLICY:
-        $old = $mock->getViewPolicy();
-        break;
-      case PholioTransactionType::TYPE_SUBSCRIBERS:
-        $old = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-          $mock->getPHID());
-        break;
-      default:
-        throw new Exception("Unknown transaction type '{$type}'!");
+        return $object->getDescription();
     }
+  }
 
-    $xaction->setOldValue($old);
+  protected function getCustomTransactionNewValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-    if (!$this->transactionHasEffect($mock, $xaction)) {
-      return false;
-    }
-
-    switch ($type) {
-      case PholioTransactionType::TYPE_NONE:
-        break;
+    switch ($xaction->getTransactionType()) {
       case PholioTransactionType::TYPE_NAME:
-        $mock->setName($xaction->getNewValue());
-        if ($mock->getOriginalName() === null) {
-          $mock->setOriginalName($xaction->getNewValue());
+      case PholioTransactionType::TYPE_DESCRIPTION:
+        return $xaction->getNewValue();
+    }
+  }
+
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PholioTransactionType::TYPE_NAME:
+        $object->setName($xaction->getNewValue());
+        if ($object->getOriginalName() === null) {
+          $object->setOriginalName($xaction->getNewValue());
         }
         break;
       case PholioTransactionType::TYPE_DESCRIPTION:
-        $mock->setDescription($xaction->getNewValue());
+        $object->setDescription($xaction->getNewValue());
         break;
-      case PholioTransactionType::TYPE_VIEW_POLICY:
-        $mock->setViewPolicy($xaction->getNewValue());
-        break;
-      case PholioTransactionType::TYPE_SUBSCRIBERS:
-        // This applies later.
-        break;
-      default:
-        throw new Exception("Unknown transaction type '{$type}'!");
+    }
+  }
+
+  protected function applyCustomExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return;
+  }
+
+  protected function mergeTransactions(
+    PhabricatorApplicationTransaction $u,
+    PhabricatorApplicationTransaction $v) {
+
+    $type = $u->getTransactionType();
+    switch ($type) {
+      case PholioTransactionType::TYPE_NAME:
+      case PholioTransactionType::TYPE_DESCRIPTION:
+        return $v;
     }
 
+    return parent::mergeTransactions($u, $v);
+  }
+
+  protected function supportsMail() {
     return true;
   }
 
-  private function transactionHasEffect(
-    PholioMock $mock,
-    PholioTransaction $xaction) {
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PholioReplyHandler())
+      ->setMailReceiver($object);
+  }
 
-    $effect = false;
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $name = $object->getName();
+    $original_name = $object->getOriginalName();
 
-    $old = $xaction->getOldValue();
-    $new = $xaction->getNewValue();
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("M{$id}: {$name}")
+      ->addHeader('Thread-Topic', "M{$id}: {$original_name}");
+  }
 
-    $type = $xaction->getTransactionType();
-    switch ($type) {
-      case PholioTransactionType::TYPE_NONE:
-      case PholioTransactionType::TYPE_NAME:
-      case PholioTransactionType::TYPE_DESCRIPTION:
-      case PholioTransactionType::TYPE_VIEW_POLICY:
-        $effect = ($old !== $new);
-        break;
-      case PholioTransactionType::TYPE_SUBSCRIBERS:
-        $old = nonempty($old, array());
-        $old_map = array_fill_keys($old, true);
-        $filtered = $old;
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array(
+      $object->getAuthorPHID(),
+      $this->requireActor()->getPHID(),
+    );
+  }
 
-        foreach ($new as $phid) {
-          if ($mock->getAuthorPHID() == $phid) {
-            // The author may not be explicitly subscribed.
-            continue;
-          }
-          if (isset($old_map[$phid])) {
-            // This PHID was already subscribed.
-            continue;
-          }
-          $filtered[] = $phid;
-        }
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
 
-        $old = array_keys($old_map);
-        $new = array_values($filtered);
+    $body = parent::buildMailBody($object, $xactions);
+    $body->addTextSection(
+      pht('MOCK DETAIL'),
+      PhabricatorEnv::getProductionURI('/M'.$object->getID()));
 
-        $xaction->setOldValue($old);
-        $xaction->setNewValue($new);
+    return $body;
+  }
 
-        $effect = ($old !== $new);
-        break;
-      default:
-        throw new Exception("Unknown transaction type '{$type}'!");
-    }
+  protected function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.pholio.subject-prefix');
+  }
 
-    if (!$effect) {
-      if (strlen($xaction->getComment())) {
-        $xaction->setTransactionType(PholioTransactionType::TYPE_NONE);
-        $effect = true;
-      }
-    }
-
-    return $effect;
+  protected function supportsFeed() {
+    return true;
   }
 
 }

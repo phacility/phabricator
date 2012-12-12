@@ -108,6 +108,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_QUES  => 'PonderQuestion',
       PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
       PhabricatorPHIDConstants::PHID_TYPE_MOCK  => 'PholioMock',
+      PhabricatorPHIDConstants::PHID_TYPE_MCRO  => 'PhabricatorFileImageMacro',
 
     );
 

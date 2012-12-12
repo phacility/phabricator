@@ -112,14 +112,16 @@ JX.behavior('phabricator-nav', function(config) {
   // When the user scrolls down on the desktop, we move the local nav up until
   // it hits the top of the page.
 
-  JX.Stratcom.listen(['scroll', 'resize'], null, function(e) {
-    if (JX.Device.getDevice() != 'desktop') {
-      return;
-    }
+  if (local) {
+    JX.Stratcom.listen(['scroll', 'resize'], null, function(e) {
+      if (JX.Device.getDevice() != 'desktop') {
+        return;
+      }
 
-    var y = Math.max(0, config.menuSize - JX.Vector.getScroll().y);
-    local.style.top = y + 'px';
-  });
+      var y = Math.max(0, config.menuSize - JX.Vector.getScroll().y);
+      local.style.top = y + 'px';
+    });
+  }
 
 
 // - Navigation Reset ----------------------------------------------------------

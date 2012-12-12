@@ -35,4 +35,19 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return idx($map, $status, '???');
   }
 
+  public static function getTaskStatusTagColor($status) {
+    $default = PhabricatorTagView::COLOR_GREY;
+
+    $map = array(
+      self::STATUS_OPEN                 => PhabricatorTagView::COLOR_ORANGE,
+      self::STATUS_CLOSED_RESOLVED      => PhabricatorTagView::COLOR_BLUE,
+      self::STATUS_CLOSED_WONTFIX       => PhabricatorTagView::COLOR_BLACK,
+      self::STATUS_CLOSED_INVALID       => PhabricatorTagView::COLOR_BLACK,
+      self::STATUS_CLOSED_DUPLICATE     => PhabricatorTagView::COLOR_BLACK,
+      self::STATUS_CLOSED_SPITE         => PhabricatorTagView::COLOR_MAGENTA,
+    );
+    return idx($map, $status, $default);
+  }
+
+
 }

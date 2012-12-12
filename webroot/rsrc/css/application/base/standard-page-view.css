@@ -52,17 +52,6 @@
   border: 1px solid #999900;
 }
 
-.keyboard-shortcuts-available {
-  height: 16px;
-  vertical-align: middle;
-  color: #666666;
-  text-align: right;
-  padding-right: 24px;
-  font-size: 11px;
-  background:
-    url('/rsrc/image/icon/fatcow/key_question.png') right center no-repeat;
-}
-
 .workflow-header {
   background: #efefef;
   padding: 6px 2em;

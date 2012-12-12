@@ -2,10 +2,15 @@
  * @provides phabricator-timeline-view-css
  */
 
+.phabricator-timeline-view {
+  background: #eeedf0;
+}
+
 .phabricator-timeline-event-view {
   border-width: 0 0 0 3px;
   border-style: solid;
-  border-color: #eaeaea;
+  border-color: #c0c5d1;
+
 }
 
 .device-desktop .phabricator-timeline-event-view {
@@ -15,54 +20,51 @@
 }
 
 .device-desktop .phabricator-timeline-spacer {
-  min-height: 10px;
+  min-height: 20px;
   border-right-width: 0;
 }
 
-.device-desktop .phabricator-timeline-major-event {
+.device-desktop .phabricator-timeline-major-event,
+.device-desktop .phabricator-timeline-minor-event {
   border-right-width: 3px;
 }
 
 .device-desktop .phabricator-timeline-wedge {
-  border-bottom: 3px solid #eaeaea;
+  border-bottom: 3px solid #c0c5d1;
   position: absolute;
-  width: 10px;
+  width: 20px;
 }
 
-.device-desktop .phabricator-timeline-major-event
-  .phabricator-timeline-content {
-  min-height: 70px;
-}
-
-.phabricator-timeline-major-event .phabricator-timeline-content {
+.phabricator-timeline-content {
+  background: #ffffff;
   border-style: solid;
-  border-color: #eaeaea;
+  border-color: #c0c5d1;
   border-width: 1px 0;
 }
 
-.device-desktop .phabricator-timeline-minor-event
-  .phabricator-timeline-content {
-  margin-left: 35px;
-  padding: 5px 0;
-  min-height: 25px;
+.phabricator-timeline-title {
+  line-height: 28px;
+  min-height: 28px;
+  position: relative;
 }
 
-.device-desktop .phabricator-timeline-title {
-  line-height: 25px;
+.phabricator-timeline-title a {
+  font-weight: bold;
 }
 
+.device-desktop .phabricator-timeline-wedge {
+  left: -20px;
+}
 .device-desktop .phabricator-timeline-major-event .phabricator-timeline-wedge {
-  left: -10px;
-  top: 34px;
+  top: 24px;
 }
 
 .device-desktop .phabricator-timeline-minor-event .phabricator-timeline-wedge {
-  left: 0px;
-  top: 17px;
+  top: 12px;
 }
 
 .phabricator-timeline-image {
-  background: #eaeaea;
+  background: #c0c5d1;
   background-repeat: no-repeat;
   position: absolute;
 }
@@ -70,43 +72,44 @@
 .device-desktop .phabricator-timeline-major-event .phabricator-timeline-image {
   width: 50px;
   height: 50px;
-  top: 10px;
-  left: -60px;
+  top: 0px;
+  left: -70px;
 }
 
 .device-desktop .phabricator-timeline-minor-event .phabricator-timeline-image {
-  width: 25px;
-  height: 25px;
-  background-size: 25px auto;
-  top: 5px;
-  left: 10px;
+  width: 30px;
+  height: 30px;
+  background-size: 30px auto;
+  left: -45px;
+  z-index: 2;
 }
 
-.device-desktop .phabricator-timeline-major-event
-  .phabricator-timeline-standard-title {
+.phabricator-timeline-major-event .phabricator-timeline-title {
   background: #f7f7f7;
+  min-height: 29px;
 }
 
-.device-desktop .phabricator-timeline-standard-title {
+.phabricator-timeline-title {
   padding: 0 5px;
+  overflow-x: auto;
 }
 
-.phabricator-timeline-major-event .phabricator-timeline-standard-content
+.phabricator-timeline-title-with-icon {
+  padding-left: 33px;
+}
+
+.phabricator-timeline-major-event .phabricator-timeline-content
   .phabricator-timeline-core-content {
-  padding: 5px;
+  padding: 10px 15px;
 }
 
-
-.phabricator-timeline-red .phabricator-timeline-border {
-  border-color: #dd0000;
+.phabricator-timeline-core-content {
+  overflow-x: auto;
 }
 
-.phabricator-timeline-green .phabricator-timeline-border {
-  border-color: #009966;
-}
 
 .device .phabricator-timeline-event-view {
-  min-height: 25px;
+  min-height: 23px;
   position: relative;
   margin-left: 3px;
   margin-right: 3px;
@@ -119,14 +122,126 @@
   display: none;
 }
 
-.device .phabricator-timeline-title {
-  line-height: 25px;
-  min-height: 25px;
-  background: #f7f7f7;
-  padding: 0 5px;
-}
-
 .device .phabricator-timeline-spacer {
   min-height: 8px;
   border-width: 0;
+}
+
+.phabricator-timeline-icon-fill {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-color: #c0c5d1;
+  top: 0;
+  left: -3px;
+  z-index: 3;
+}
+
+.phabricator-timeline-icon {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  height: 14px;
+  width: 14px;
+}
+
+.phabricator-timeline-extra, .phabricator-timeline-extra a {
+  font-size: 11px;
+  font-weight: normal;
+  color: #888888;
+}
+
+.device-desktop .phabricator-timeline-extra {
+  float: right;
+}
+
+.device .phabricator-timeline-extra {
+  display: block;
+  text-align: right;
+  line-height: 16px;
+}
+
+.phabricator-timeline-red .phabricator-timeline-border {
+  border-color: #cc0000;
+}
+
+.phabricator-timeline-orange .phabricator-timeline-border {
+  border-color: #cc7300;
+}
+
+.phabricator-timeline-yellow .phabricator-timeline-border {
+  border-color: #ccc000;
+}
+
+.phabricator-timeline-green .phabricator-timeline-border {
+  border-color: #009b2d;
+}
+
+.phabricator-timeline-sky .phabricator-timeline-border {
+  border-color: #6498cf;
+}
+
+.phabricator-timeline-blue .phabricator-timeline-border {
+  border-color: #00659a;
+}
+
+.phabricator-timeline-indigo .phabricator-timeline-border {
+  border-color: #3a00cc;
+}
+
+.phabricator-timeline-violet .phabricator-timeline-border {
+  border-color: #67009b;
+}
+
+.phabricator-timeline-grey .phabricator-timeline-border {
+  border-color: #999999;
+}
+
+.phabricator-timeline-black .phabricator-timeline-border {
+  border-color: #333333;
+}
+
+.phabricator-timeline-red .phabricator-timeline-icon-fill {
+  background-color: #cc0000;
+}
+
+.phabricator-timeline-orange .phabricator-timeline-icon-fill {
+  background-color: #cc7300;
+}
+
+.phabricator-timeline-yellow .phabricator-timeline-icon-fill {
+  background-color: #ccc000;
+}
+
+.phabricator-timeline-green .phabricator-timeline-icon-fill {
+  background-color: #009b2d;
+}
+
+.phabricator-timeline-sky .phabricator-timeline-icon-fill {
+  background-color: #6498cf;
+}
+
+.phabricator-timeline-blue .phabricator-timeline-icon-fill {
+  background-color: #00659a;
+}
+
+.phabricator-timeline-indigo .phabricator-timeline-icon-fill {
+  background-color: #3a00cc;
+}
+
+.phabricator-timeline-violet .phabricator-timeline-icon-fill {
+  background-color: #67009b;
+}
+
+.phabricator-timeline-grey .phabricator-timeline-icon-fill {
+  background-color: #999999;
+}
+
+.phabricator-timeline-black .phabricator-timeline-icon-fill {
+  background-color: #333333;
+}
+
+.phabricator-timeline-shell.anchor-target {
+  background: rgba(255, 255, 0, 0.50);
+  box-shadow: 0 0 3px 6px rgba(255, 255, 0, 0.50);
 }

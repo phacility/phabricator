@@ -79,4 +79,56 @@ final class AphrontRequestTestCase extends PhabricatorTestCase {
     }
   }
 
+  public function testFlattenRequestData() {
+    $test_cases = array(
+      array(
+        'a' => 'a',
+        'b' => '1',
+        'c' => '',
+      ),
+      array(
+        'a' => 'a',
+        'b' => '1',
+        'c' => '',
+      ),
+
+      array(
+        'x' => array(
+          0 => 'a',
+          1 => 'b',
+          2 => 'c',
+        ),
+      ),
+      array(
+        'x[0]' => 'a',
+        'x[1]' => 'b',
+        'x[2]' => 'c',
+      ),
+
+      array(
+        'x' => array(
+          'y' => array(
+            'z' => array(
+              40 => 'A',
+              50 => 'B',
+              'C' => 60,
+            ),
+          ),
+        ),
+      ),
+      array(
+        'x[y][z][40]' => 'A',
+        'x[y][z][50]' => 'B',
+        'x[y][z][C]'  => '60',
+      ),
+    );
+
+    for ($ii = 0; $ii < count($test_cases); $ii += 2) {
+      $input  = $test_cases[$ii];
+      $expect = $test_cases[$ii + 1];
+
+      $this->assertEqual($expect, AphrontRequest::flattenData($input));
+    }
+  }
+
 }

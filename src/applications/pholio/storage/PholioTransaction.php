@@ -3,104 +3,60 @@
 /**
  * @group pholio
  */
-final class PholioTransaction extends PholioDAO
-  implements PhabricatorMarkupInterface {
+final class PholioTransaction extends PhabricatorApplicationTransaction {
 
-  const MARKUP_FIELD_COMMENT  = 'markup:comment';
-
-  protected $mockID;
-  protected $authorPHID;
-  protected $transactionType;
-  protected $oldValue;
-  protected $newValue;
-  protected $comment = '';
-  protected $metadata = array();
-  protected $contentSource;
-
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_SERIALIZATION => array(
-        'oldValue' => self::SERIALIZATION_JSON,
-        'newValue' => self::SERIALIZATION_JSON,
-        'metadata' => self::SERIALIZATION_JSON,
-      ),
-    ) + parent::getConfiguration();
+  public function getApplicationName() {
+    return 'pholio';
   }
 
-  public function setContentSource(PhabricatorContentSource $content_source) {
-    $this->contentSource = $content_source->serialize();
-    return $this;
+  public function getApplicationTransactionType() {
+    return PhabricatorPHIDConstants::PHID_TYPE_MOCK;
   }
 
-  public function getContentSource() {
-    return PhabricatorContentSource::newFromSerialized($this->contentSource);
+  public function getApplicationTransactionCommentObject() {
+    return new PholioTransactionComment();
   }
 
-  public function getRequiredHandlePHIDs() {
+  public function getApplicationObjectTypeName() {
+    return pht('mock');
+  }
+
+  public function shouldHide() {
+    $old = $this->getOldValue();
+
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_SUBSCRIBERS:
-        return array_merge(
-          $this->getOldValue(),
-          $this->getNewValue());
-      default:
-        return array();
+      case PholioTransactionType::TYPE_NAME:
+      case PholioTransactionType::TYPE_DESCRIPTION:
+        return ($old === null);
     }
+
+    return parent::shouldHide();
   }
 
+  public function getTitle() {
+    $author_phid = $this->getAuthorPHID();
 
-/* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
 
-
-  public function isAutomaticallySubscribed($phid) {
-    return ($this->authorPHID == $phid);
-  }
-
-
-/* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
-
-
-  public function getCapabilities() {
-    return array(
-      PhabricatorPolicyCapability::CAN_VIEW,
-      PhabricatorPolicyCapability::CAN_EDIT,
-    );
-  }
-
-  public function getPolicy($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_VIEW:
-        return $this->getViewPolicy();
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+    switch ($this->getTransactionType()) {
+      case PholioTransactionType::TYPE_NAME:
+        return pht(
+          '%s renamed this mock from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          phutil_escape_html($old),
+          phutil_escape_html($new));
+        break;
+      case PholioTransactionType::TYPE_DESCRIPTION:
+        return pht(
+          '%s updated the description of this mock. '.
+          'The old description was: %s',
+          $this->renderHandleLink($author_phid),
+          phutil_escape_html($old));
     }
+
+    return parent::getTitle();
   }
 
-  public function hasAutomaticCapbility($capability, PhabricatorUser $viewer) {
-    return ($viewer->getPHID() == $this->getAuthorPHID());
-  }
-
-
-/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
-
-
-  public function getMarkupFieldKey($field) {
-    return 'MX:'.$this->getID();
-  }
-
-  public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
-  }
-
-  public function getMarkupText($field) {
-    return $this->getComment();
-  }
-
-  public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
-    return $output;
-  }
-
-  public function shouldUseMarkupCache($field) {
-    return (bool)$this->getID();
-  }
 
 }

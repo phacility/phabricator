@@ -104,6 +104,41 @@ final class PhabricatorObjectHandleData {
             $objects[$mock->getPHID()] = $mock;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_XACT:
+          $subtypes = array();
+          foreach ($phids as $phid) {
+            $subtypes[phid_get_subtype($phid)][] = $phid;
+          }
+          $xactions = array();
+          foreach ($subtypes as $subtype => $subtype_phids) {
+            // TODO: Do this magically.
+            switch ($subtype) {
+              case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+                $results = id(new PholioTransactionQuery())
+                  ->setViewer($this->viewer)
+                  ->withPHIDs($subtype_phids)
+                  ->execute();
+                $xactions += mpull($results, null, 'getPHID');
+                break;
+              case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+                $results = id(new PhabricatorMacroTransactionQuery())
+                  ->setViewer($this->viewer)
+                  ->withPHIDs($subtype_phids)
+                  ->execute();
+                $xactions += mpull($results, null, 'getPHID');
+                break;
+            }
+          }
+          foreach ($xactions as $xaction) {
+            $objects[$xaction->getPHID()] = $xaction;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+          $macros = id(new PhabricatorFileImageMacro())->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          $objects += mpull($macros, null, 'getPHID');
+          break;
       }
     }
 
@@ -468,6 +503,7 @@ final class PhabricatorObjectHandleData {
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_QUES:
           $questions = id(new PonderQuestionQuery())
+            ->setViewer($this->viewer)
             ->withPHIDs($phids)
             ->execute();
           $questions = mpull($questions, null, 'getPHID');
@@ -572,8 +608,29 @@ final class PhabricatorObjectHandleData {
             } else {
               $mock = $mocks[$phid];
               $handle->setName($mock->getName());
-              $handle->setFullName($mock->getName());
+              $handle->setFullName('M'.$mock->getID().': '.$mock->getName());
               $handle->setURI('/M'.$mock->getID());
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+          $macros = id(new PhabricatorFileImageMacro())->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          $macros = mpull($macros, null, 'getPHID');
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($macros[$phid])) {
+              $handle->setName('Unknown Macro');
+            } else {
+              $macro = $macros[$phid];
+              $handle->setName($macro->getName());
+              $handle->setFullName('Image Macro "'.$macro->getName().'"');
+              $handle->setURI('/macro/view/'.$macro->getID().'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

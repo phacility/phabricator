@@ -43,13 +43,14 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
     $events[] = id(new PhabricatorTimelineEventView())
       ->setUserHandle($handle)
       ->setTitle('Major Red Event')
+      ->setIcon('love')
       ->appendChild('This event is red!')
-      ->addClass('phabricator-timeline-red');
+      ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PhabricatorTimelineEventView())
       ->setUserHandle($handle)
       ->setTitle('Minor Red Event')
-      ->addClass('phabricator-timeline-red');
+      ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PhabricatorTimelineEventView())
       ->setUserHandle($handle)
@@ -58,24 +59,62 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
     $events[] = id(new PhabricatorTimelineEventView())
       ->setUserHandle($handle)
       ->setTitle('Minor Red Event')
-      ->addClass('phabricator-timeline-red');
+      ->setColor(PhabricatorTransactions::COLOR_RED);
 
     $events[] = id(new PhabricatorTimelineEventView())
       ->setUserHandle($handle)
       ->setTitle('Minor Not-Red Event');
-
-    $events[] = id(new PhabricatorTimelineEventView())
-      ->setUserHandle($handle)
-      ->setTitle('Unstyled event')
-      ->appendChild('This event disables standard title and content styling.')
-      ->setDisableStandardTitleStyle(true)
-      ->setDisableStandardContentStyle(true);
 
     $events[] = id(new PhabricatorTimelineEventView())
       ->setUserHandle($handle)
       ->setTitle('Major Green Event')
       ->appendChild('This event is green!')
-      ->addClass('phabricator-timeline-green');
+      ->setColor(PhabricatorTransactions::COLOR_GREEN);
+
+    $events[] = id(new PhabricatorTimelineEventView())
+      ->setUserHandle($handle)
+      ->setTitle(str_repeat('Long Text Title ', 64))
+      ->appendChild(str_repeat('Long Text Body ', 64))
+      ->setColor(PhabricatorTransactions::COLOR_ORANGE);
+
+    $events[] = id(new PhabricatorTimelineEventView())
+      ->setUserHandle($handle)
+      ->setTitle(str_repeat('LongTextEventNoSpaces', 1024))
+      ->appendChild(str_repeat('LongTextNoSpaces', 1024))
+      ->setColor(PhabricatorTransactions::COLOR_RED);
+
+    $colors = array(
+      PhabricatorTransactions::COLOR_RED,
+      PhabricatorTransactions::COLOR_ORANGE,
+      PhabricatorTransactions::COLOR_YELLOW,
+      PhabricatorTransactions::COLOR_GREEN,
+      PhabricatorTransactions::COLOR_SKY,
+      PhabricatorTransactions::COLOR_BLUE,
+      PhabricatorTransactions::COLOR_INDIGO,
+      PhabricatorTransactions::COLOR_VIOLET,
+      PhabricatorTransactions::COLOR_GREY,
+      PhabricatorTransactions::COLOR_BLACK,
+    );
+
+    $events[] = id(new PhabricatorTimelineEventView())
+      ->setUserHandle($handle)
+      ->setTitle(phutil_escape_html("Colorless"))
+      ->setIcon('lock');
+
+    foreach ($colors as $color) {
+      $events[] = id(new PhabricatorTimelineEventView())
+        ->setUserHandle($handle)
+        ->setTitle(phutil_escape_html("Color '{$color}'"))
+        ->setIcon('lock')
+        ->setColor($color);
+    }
+
+    $anchor = 0;
+    foreach ($events as $event) {
+      $event->setViewer($user);
+      $event->setDateCreated(time() + ($anchor * 60 * 8));
+      $event->setAnchor(++$anchor);
+    }
 
     $timeline = id(new PhabricatorTimelineView());
     foreach ($events as $event) {

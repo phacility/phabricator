@@ -16,7 +16,7 @@ JX.install('Device', {
   }
 });
 
-JX.behavior('device', function(config) {
+JX.behavior('device', function() {
 
   function onresize() {
     var v = JX.Vector.getViewport();
@@ -35,7 +35,7 @@ JX.behavior('device', function(config) {
 
     JX.Device._device = device;
 
-    var e = JX.$(config.id);
+    var e = document.body;
     JX.DOM.alterClass(e, 'device-phone', (device == 'phone'));
     JX.DOM.alterClass(e, 'device-tablet', (device == 'tablet'));
     JX.DOM.alterClass(e, 'device-desktop', (device == 'desktop'));

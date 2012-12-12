@@ -1,0 +1,178 @@
+<?php
+
+final class PhabricatorMacroViewController
+  extends PhabricatorMacroController {
+
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = $data['id'];
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $macro = id(new PhabricatorFileImageMacro())->load($this->id);
+    if (!$macro) {
+      return new Aphront404Response();
+    }
+
+    $file = id(new PhabricatorFile())->loadOneWhere(
+      'phid = %s',
+      $macro->getFilePHID());
+
+    $title_short = pht('Macro "%s"', $macro->getName());
+    $title_long  = pht('Image Macro "%s"', $macro->getName());
+
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $macro->getPHID());
+
+    $this->loadHandles($subscribers);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setHref($this->getApplicationURI('/view/'.$macro->getID().'/'))
+        ->setName($title_short));
+
+    $actions = $this->buildActionView($macro);
+    $properties = $this->buildPropertyView($macro, $file, $subscribers);
+
+    $xactions = id(new PhabricatorMacroTransactionQuery())
+      ->setViewer($request->getUser())
+      ->withObjectPHIDs(array($macro->getPHID()))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setViewer($user)
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title_long);
+
+    if ($macro->getIsDisabled()) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setName(pht('Macro Disabled'))
+          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK));
+    }
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = id(new PhabricatorHeaderView())
+      ->setHeader(
+        $is_serious
+          ? pht('Add Comment')
+          : pht('Grovel in Awe'));
+
+    $add_comment_form = id(new AphrontFormView())
+      ->setWorkflow(true)
+      ->setFlexible(true)
+      ->addSigil('transaction-append')
+      ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
+      ->setUser($user)
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+          ->setUser($user)
+          ->setLabel('Comment')
+          ->setName('comment'))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue(
+            $is_serious
+              ? pht('Add Comment')
+              : pht('Lavish Praise')));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $header,
+        $actions,
+        $properties,
+        $timeline,
+        $add_comment_header,
+        $add_comment_form,
+      ),
+      array(
+        'title' => $title_short,
+      ));
+  }
+
+  private function buildActionView(PhabricatorFileImageMacro $macro) {
+    $view = new PhabricatorActionListView();
+    $view->setUser($this->getRequest()->getUser());
+    $view->setObject($macro);
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName('Edit Macro')
+        ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
+        ->setIcon('edit'));
+
+    if ($macro->getIsDisabled()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName('Restore Macro')
+          ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
+          ->setWorkflow(true)
+          ->setIcon('undo'));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName('Disable Macro')
+          ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
+          ->setWorkflow(true)
+          ->setIcon('delete'));
+    }
+
+    return $view;
+  }
+
+  private function buildPropertyView(
+    PhabricatorFileImageMacro $macro,
+    PhabricatorFile $file = null,
+    array $subscribers) {
+
+    $view = new PhabricatorPropertyListView();
+
+    if ($subscribers) {
+      $sub_view = array();
+      foreach ($subscribers as $subscriber) {
+        $sub_view[] = $this->getHandle($subscriber)->renderLink();
+      }
+      $sub_view = implode(', ', $sub_view);
+    } else {
+      $sub_view = '<em>'.pht('None').'</em>';
+    }
+
+    $view->addProperty(
+      pht('Subscribers'),
+      $sub_view);
+
+    if ($file) {
+      $view->addTextContent(
+        phutil_render_tag(
+          'img',
+          array(
+            'src'     => $file->getViewURI(),
+            'class'   => 'phabricator-image-macro-hero',
+          )));
+    }
+
+    return $view;
+  }
+
+}

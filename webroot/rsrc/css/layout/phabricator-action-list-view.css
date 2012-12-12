@@ -7,17 +7,25 @@
 }
 
 .device-desktop .phabricator-action-list-view {
-  border: 1px solid #dcdcdc;
+  border: 1px solid #c0c5d1;
   padding: .5em 0;
 
   float: right;
   margin-top: 0px;
   margin-right: 1%;
   width: 20%;
-  border-radius: 2px;
+  border-radius: 3px;
   font-size: 12px;
 
-  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 0 1px 1px rgba(192, 197, 209, 0.5);
+}
+
+.device-desktop .phabricator-header-shell + .phabricator-action-list-view {
+  margin-top: -28px;
+}
+
+.device .phabricator-header-shell + .phabricator-action-list-view {
+  margin-top: -1px;
 }
 
 .device .phabricator-action-list-view {

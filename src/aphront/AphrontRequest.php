@@ -17,6 +17,7 @@ final class AphrontRequest {
   const TYPE_FORM = '__form__';
   const TYPE_CONDUIT = '__conduit__';
   const TYPE_WORKFLOW = '__wflow__';
+  const TYPE_CONTINUE = '__continue__';
 
   private $host;
   private $path;
@@ -159,6 +160,11 @@ final class AphrontRequest {
    */
   final public function getExists($name) {
     return array_key_exists($name, $this->requestData);
+  }
+
+  final public function getFileExists($name) {
+    return isset($_FILES[$name]) &&
+           (idx($_FILES[$name], 'error') !== UPLOAD_ERR_NO_FILE);
   }
 
   final public function isHTTPPost() {
@@ -328,5 +334,59 @@ final class AphrontRequest {
     }
     return true;
   }
+
+  public function isContinueRequest() {
+    return $this->isFormPost() && $this->getStr('__continue__');
+  }
+
+  /**
+   * Get application request parameters in a flattened form suitable for
+   * inclusion in an HTTP request, excluding parameters with special meanings.
+   * This is primarily useful if you want to ask the user for more input and
+   * then resubmit their request.
+   *
+   * @return  dict<string, string>  Original request parameters.
+   */
+  public function getPassthroughRequestParameters() {
+    $data = self::flattenData($this->getRequestData());
+
+    // Remove magic parameters like __dialog__ and __ajax__.
+    foreach ($data as $key => $value) {
+      if (strncmp($key, '__', 2)) {
+        unset($data[$key]);
+      }
+    }
+
+    return $data;
+  }
+
+
+  /**
+   * Flatten an array of key-value pairs (possibly including arrays as values)
+   * into a list of key-value pairs suitable for submitting via HTTP request
+   * (with arrays flattened).
+   *
+   * @param   dict<string, wild>    Data to flatten.
+   * @return  dict<string, string>  Flat data suitable for inclusion in an HTTP
+   *                                request.
+   */
+  public static function flattenData(array $data) {
+    $result = array();
+    foreach ($data as $key => $value) {
+      if (is_array($value)) {
+        foreach (self::flattenData($value) as $fkey => $fvalue) {
+          $fkey = '['.preg_replace('/(?=\[)|$/', ']', $fkey, $limit = 1);
+          $result[$key.$fkey] = $fvalue;
+        }
+      } else {
+        $result[$key] = (string)$value;
+      }
+    }
+
+    ksort($result);
+
+    return $result;
+  }
+
 
 }
