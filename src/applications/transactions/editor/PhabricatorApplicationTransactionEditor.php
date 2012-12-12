@@ -13,6 +13,30 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private $isNewObject;
   private $mentionedPHIDs;
+  private $continueOnNoEffect;
+
+
+  /**
+   * When the editor tries to apply transactions that have no effect, should
+   * it raise an exception (default) or drop them and continue?
+   *
+   * Generally, you will set this flag for edits coming from "Edit" interfaces,
+   * and leave it cleared for edits coming from "Comment" interfaces, so the
+   * user will get a useful error if they try to submit a comment that does
+   * nothing (e.g., empty comment with a status change that has already been
+   * performed by another user).
+   *
+   * @param bool  True to drop transactions without effect and continue.
+   * @return this
+   */
+  public function setContinueOnNoEffect($continue) {
+    $this->continueOnNoEffect = $continue;
+    return $this;
+  }
+
+  public function getContinueOnNoEffect() {
+    return $this->continueOnNoEffect;
+  }
 
   protected function getIsNewObject() {
     return $this->isNewObject;
@@ -94,6 +118,12 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function transactionHasEffect(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return $xaction->hasComment();
+    }
+
     return ($xaction->getOldValue() !== $xaction->getNewValue());
   }
 
@@ -192,19 +222,7 @@ abstract class PhabricatorApplicationTransactionEditor
       $this->adjustTransactionValues($object, $xaction);
     }
 
-    foreach ($xactions as $key => $xaction) {
-      if (!$this->transactionHasEffect($object, $xaction)) {
-        // TODO: Raise these to the user.
-        if ($xaction->getComment()) {
-          $xaction->setTransactionType(
-            PhabricatorTransactions::TYPE_COMMENT);
-          $xaction->setOldValue(null);
-          $xaction->setNewValue(null);
-        } else {
-          unset($xactions[$key]);
-        }
-      }
-    }
+    $xactions = $this->filterTransactions($object, $xactions);
 
     if (!$xactions) {
       return $this;
@@ -262,7 +280,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $this->didApplyTransactions($object, $xactions);
 
-    return $this;
+    return $xactions;
   }
 
   private function loadHandles(array $xactions) {
@@ -365,6 +383,19 @@ abstract class PhabricatorApplicationTransactionEditor
     $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions($texts);
 
     $this->mentionedPHIDs = $phids;
+
+    if (!$phids) {
+      return null;
+    }
+
+    if ($object->getPHID()) {
+      // Don't try to subscribe already-subscribed mentions: we want to generate
+      // a dialog about an action having no effect if the user explicitly adds
+      // existing CCs, but not if they merely mention existing subscribers.
+      $current = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $object->getPHID());
+      $phids = array_diff($phids, $current);
+    }
 
     if (!$phids) {
       return null;
@@ -528,6 +559,54 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return array_values(array_merge($head, $tail));
   }
+
+
+  protected function filterTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+
+    $no_effect = array();
+    $has_comment = false;
+    $any_effect = false;
+    foreach ($xactions as $key => $xaction) {
+      if ($this->transactionHasEffect($object, $xaction)) {
+        if ($xaction->getTransactionType() != $type_comment) {
+          $any_effect = true;
+        }
+      } else {
+        $no_effect[$key] = $xaction;
+      }
+      if ($xaction->hasComment()) {
+        $has_comment = true;
+      }
+    }
+
+    if (!$no_effect) {
+      return $xactions;
+    }
+
+    if (!$this->getContinueOnNoEffect()) {
+      throw new PhabricatorApplicationTransactionNoEffectException(
+        $no_effect,
+        $any_effect,
+        $has_comment);
+    }
+
+    foreach ($no_effect as $key => $xaction) {
+      if ($xaction->getComment()) {
+        $xaction->setTransactionType($type_comment);
+        $xaction->setOldValue(null);
+        $xaction->setNewValue(null);
+      } else {
+        unset($xactions[$key]);
+      }
+    }
+
+    return $xactions;
+  }
+
 
 
 /* -(  Sending Mail  )------------------------------------------------------- */

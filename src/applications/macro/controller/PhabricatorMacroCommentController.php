@@ -34,13 +34,21 @@ final class PhabricatorMacroCommentController
 
     $editor = id(new PhabricatorMacroEditor())
       ->setActor($user)
+      ->setContinueOnNoEffect($request->isContinueRequest())
       ->setContentSource(
         PhabricatorContentSource::newForSource(
           PhabricatorContentSource::SOURCE_WEB,
           array(
             'ip' => $request->getRemoteAddr(),
-          )))
-      ->applyTransactions($macro, $xactions);
+          )));
+
+    try {
+      $xactions = $editor->applyTransactions($macro, $xactions);
+    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+      return id(new PhabricatorApplicationTransactionNoEffectResponse())
+        ->setCancelURI($view_uri)
+        ->setException($ex);
+    }
 
     if ($request->isAjax()) {
       return id(new PhabricatorApplicationTransactionResponse())

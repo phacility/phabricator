@@ -96,13 +96,15 @@ final class PhabricatorMacroEditController
 
           $editor = id(new PhabricatorMacroEditor())
             ->setActor($user)
+            ->setContinueOnNoEffect(true)
             ->setContentSource(
               PhabricatorContentSource::newForSource(
                 PhabricatorContentSource::SOURCE_WEB,
                 array(
                   'ip' => $request->getRemoteAddr(),
-                )))
-            ->applyTransactions($original, $xactions);
+                )));
+
+          $xactions = $editor->applyTransactions($original, $xactions);
 
           $view_uri = $this->getApplicationURI('/view/'.$original->getID().'/');
           return id(new AphrontRedirectResponse())->setURI($view_uri);

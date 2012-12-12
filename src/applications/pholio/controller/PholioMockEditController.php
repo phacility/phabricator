@@ -120,9 +120,10 @@ final class PholioMockEditController extends PholioController {
         $mock->openTransaction();
           $editor = id(new PholioMockEditor())
             ->setContentSource($content_source)
+            ->setContinueOnException(true)
             ->setActor($user);
 
-          $editor->applyTransactions($mock, $xactions);
+          $xactions = $editor->applyTransactions($mock, $xactions);
 
           if ($images) {
             foreach ($images as $image) {

@@ -32,8 +32,9 @@ final class PhabricatorMacroDisableController
             PhabricatorContentSource::SOURCE_WEB,
             array(
               'ip' => $request->getRemoteAddr(),
-            )))
-        ->applyTransactions($macro, array($xaction));
+            )));
+
+      $xactions = $editor->applyTransactions($macro, array($xaction));
 
       return id(new AphrontRedirectResponse())->setURI($view_uri);
     }

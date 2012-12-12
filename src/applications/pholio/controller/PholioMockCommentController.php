@@ -27,15 +27,6 @@ final class PholioMockCommentController extends PholioController {
     $mock_uri = '/M'.$mock->getID();
 
     $comment = $request->getStr('comment');
-    if (!strlen($comment)) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($user)
-        ->setTitle(pht('Empty Comment'))
-        ->appendChild('You did not provide a comment!')
-        ->addCancelButton($mock_uri);
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
-    }
 
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_WEB,
@@ -50,10 +41,18 @@ final class PholioMockCommentController extends PholioController {
         id(new PholioTransactionComment())
           ->setContent($comment));
 
-    id(new PholioMockEditor())
+    $editor = id(new PholioMockEditor())
       ->setActor($user)
       ->setContentSource($content_source)
-      ->applyTransactions($mock, $xactions);
+      ->setContinueOnException($request->isContinueRequest());
+
+    try {
+      $xactions = $editor->applyTransactions($mock, $xactions);
+    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+      return id(new PhabricatorApplicationTransactionNoEffectResponse())
+        ->setCancelURI($mock_uri)
+        ->setException($ex);
+    }
 
     if ($request->isAjax()) {
       return id(new PhabricatorApplicationTransactionResponse())

@@ -170,6 +170,28 @@ abstract class PhabricatorApplicationTransaction
     return false;
   }
 
+  public function getNoEffectDescription() {
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return pht('You can not post an empty comment.');
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        return pht(
+          'This %s already has that view policy.',
+          $this->getApplicationObjectTypeName());
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return pht(
+          'This %s already has that edit policy.',
+          $this->getApplicationObjectTypeName());
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
+        return pht(
+          'All users are already subscribed to this %s.',
+          $this->getApplicationObjectTypeName());
+    }
+
+    return pht('Transaction has no effect.');
+  }
+
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 
