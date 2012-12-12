@@ -34,7 +34,8 @@ final class PonderFeedController extends PonderController {
         $pager->setOffset($request->getStr('offset'));
         $pager->setURI($request->getRequestURI(), 'offset');
 
-        $query = new PonderQuestionQuery();
+        $query = id(new PonderQuestionQuery())
+          ->setViewer($user);
 
         if ($this->page == 'feed') {
           $query

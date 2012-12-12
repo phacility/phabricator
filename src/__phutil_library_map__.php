@@ -2575,7 +2575,7 @@ phutil_register_library_map(array(
     'PonderQuestionDetailView' => 'AphrontView',
     'PonderQuestionEditor' => 'PhabricatorEditor',
     'PonderQuestionPreviewController' => 'PonderController',
-    'PonderQuestionQuery' => 'PhabricatorOffsetPagedQuery',
+    'PonderQuestionQuery' => 'PhabricatorCursorPagedPolicyQuery',
     'PonderQuestionSummaryView' => 'AphrontView',
     'PonderQuestionViewController' => 'PonderController',
     'PonderReplyHandler' => 'PhabricatorMailReplyHandler',

@@ -503,6 +503,7 @@ final class PhabricatorObjectHandleData {
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_QUES:
           $questions = id(new PonderQuestionQuery())
+            ->setViewer($this->viewer)
             ->withPHIDs($phids)
             ->execute();
           $questions = mpull($questions, null, 'getPHID');
