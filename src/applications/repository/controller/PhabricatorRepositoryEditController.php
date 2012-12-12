@@ -509,6 +509,12 @@ final class PhabricatorRepositoryEditController
     $inset->setTitle('Repository Information');
 
     if ($has_local) {
+      $default_local_path = '';
+      $default =
+        PhabricatorEnv::getEnvConfig('repository.default-local-path');
+      if (!$repository->getDetail('remote-uri') && $default) {
+        $default_local_path = $default.strtolower($repository->getCallsign());
+      }
       $inset->appendChild(
         '<p class="aphront-form-instructions">Select a path on local disk '.
         'which the daemons should <tt>'.$clone_command.'</tt> the repository '.
@@ -519,7 +525,7 @@ final class PhabricatorRepositoryEditController
         id(new AphrontFormTextControl())
           ->setName('path')
           ->setLabel('Local Path')
-          ->setValue($repository->getDetail('local-path'))
+          ->setValue($repository->getDetail('local-path', $default_local_path))
           ->setError($e_path));
     } else if ($is_svn) {
       $inset->appendChild(
