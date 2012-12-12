@@ -93,6 +93,16 @@ final class DrydockResourceViewController extends DrydockController {
       pht('Resource Type'),
       phutil_escape_html($resource->getType()));
 
+    $attributes = $resource->getAttributes();
+    if ($attributes) {
+      $view->addSectionHeader(pht('Attributes'));
+      foreach ($attributes as $key => $value) {
+        $view->addProperty(
+          phutil_escape_html($key),
+          phutil_escape_html($value));
+      }
+    }
+
     return $view;
   }
 

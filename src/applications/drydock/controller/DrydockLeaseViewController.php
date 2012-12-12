@@ -101,6 +101,16 @@ final class DrydockLeaseViewController extends DrydockController {
       pht('Resource'),
       phutil_escape_html($lease->getResourceID()));
 
+    $attributes = $lease->getAttributes();
+    if ($attributes) {
+      $view->addSectionHeader(pht('Attributes'));
+      foreach ($attributes as $key => $value) {
+        $view->addProperty(
+          phutil_escape_html($key),
+          phutil_escape_html($value));
+      }
+    }
+
     return $view;
   }
 
