@@ -1,10 +1,7 @@
 <?php
 
 /**
- * Like an @{class:AphrontSideNavView}, but with a little bit of logic for the
- * common case where you're using the side nav to filter some view of objects.
- *
- * For example:
+ * Provides a navigation sidebar. For example:
  *
  *    $nav = new AphrontSideNavFilterView();
  *    $nav
