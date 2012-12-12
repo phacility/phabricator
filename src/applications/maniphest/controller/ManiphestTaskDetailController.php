@@ -445,7 +445,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view->addProperty(
       pht('Subscribers'),
       $task->getCCPHIDs()
-        ? $this->renderHandlesForPHIDs($task->getCCPHIDs())
+        ? $this->renderHandlesForPHIDs($task->getCCPHIDs(), ',')
         : '<em>'.pht('None').'</em>');
 
     $view->addProperty(
@@ -468,7 +468,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view->addProperty(
       pht('Projects'),
       $task->getProjectPHIDs()
-        ? $this->renderHandlesForPHIDs($task->getProjectPHIDs())
+        ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
         : '<em>'.pht('None').'</em>');
 
     foreach ($aux_fields as $aux_field) {
