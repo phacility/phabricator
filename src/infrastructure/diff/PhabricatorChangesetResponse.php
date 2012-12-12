@@ -19,7 +19,7 @@ final class PhabricatorChangesetResponse extends AphrontProxyResponse {
     return new AphrontAjaxResponse();
   }
 
-  public function buildResponseString() {
+  public function reduceProxyResponse() {
     $content = array(
       'changeset' => $this->renderedChangeset,
     );
@@ -28,7 +28,7 @@ final class PhabricatorChangesetResponse extends AphrontProxyResponse {
       $content['coverage'] = $this->coverage;
     }
 
-    return $this->getProxy()->setContent($content)->buildResponseString();
+    return $this->getProxy()->setContent($content);
   }
 
 }

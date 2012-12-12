@@ -181,6 +181,22 @@ abstract class PhabricatorController extends AphrontController {
   public function didProcessRequest($response) {
     $request = $this->getRequest();
     $response->setRequest($request);
+
+    $seen = array();
+    while ($response instanceof AphrontProxyResponse) {
+
+      $hash = spl_object_hash($response);
+      if (isset($seen[$hash])) {
+        $seen[] = get_class($response);
+        throw new Exception(
+          "Cycle while reducing proxy responses: ".
+          implode(' -> ', $seen));
+      }
+      $seen[$hash] = get_class($response);
+
+      $response = $response->reduceProxyResponse();
+    }
+
     if ($response instanceof AphrontDialogResponse) {
       if (!$request->isAjax()) {
         $view = new PhabricatorStandardPageView();

@@ -5,8 +5,8 @@
  * a response might be substantially an Ajax response, but add structure to the
  * response content. It can do this by extending @{class:AphrontProxyResponse},
  * instantiating an @{class:AphrontAjaxResponse} in @{method:buildProxy}, and
- * then using the proxy to construct the response string in
- * @{method:buildResponseString}.
+ * then constructing a real @{class:AphrontAjaxResponse} in
+ * @{method:reduceProxyResponse}.
  *
  * @group aphront
  */
@@ -63,5 +63,12 @@ abstract class AphrontProxyResponse extends AphrontResponse {
   }
 
   abstract protected function buildProxy();
+  abstract public function reduceProxyResponse();
+
+  final public function buildResponseString() {
+    throw new Exception(
+      "AphrontProxyResponse must implement reduceProxyResponse().");
+  }
+
 
 }

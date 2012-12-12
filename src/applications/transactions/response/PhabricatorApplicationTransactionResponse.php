@@ -40,7 +40,7 @@ final class PhabricatorApplicationTransactionResponse
     return $this->viewer;
   }
 
-  public function buildResponseString() {
+  public function reduceProxyResponse() {
     $view = id(new PhabricatorApplicationTransactionView())
       ->setViewer($this->getViewer())
       ->setTransactions($this->getTransactions());
@@ -56,10 +56,7 @@ final class PhabricatorApplicationTransactionResponse
       'spacer'   => PhabricatorTimelineView::renderSpacer(),
     );
 
-    return $this
-      ->getProxy()
-      ->setContent($content)
-      ->buildResponseString();
+    return $this->getProxy()->setContent($content);
   }
 
 }
