@@ -42,8 +42,7 @@ final class DifferentialChangesetTwoUpRenderer
   public function renderTextChange(
     $range_start,
     $range_len,
-    $mask_force,
-    $feedback_mask) {
+    $rows) {
 
     $missing_old = $this->getMissingOldLines();
     $missing_new = $this->getMissingNewLines();
@@ -69,61 +68,8 @@ final class DifferentialChangesetTwoUpRenderer
     $html = array();
     $old_lines = $this->getOldLines();
     $new_lines = $this->getNewLines();
-
-    $rows = max(
-      count($old_lines),
-      count($new_lines));
-
-    if ($range_start === null) {
-      $range_start = 0;
-    }
-
-    if ($range_len === null) {
-      $range_len = $rows;
-    }
-
-    $range_len = min($range_len, $rows - $range_start);
-
-    // Gaps - compute gaps in the visible display diff, where we will render
-    // "Show more context" spacers. This builds an aggregate $mask of all the
-    // lines we must show (because they are near changed lines, near inline
-    // comments, or the request has explicitly asked for them, i.e. resulting
-    // from the user clicking "show more") and then finds all the gaps between
-    // visible lines. If a gap is smaller than the context size, we just
-    // display it. Otherwise, we record it into $gaps and will render a
-    // "show more context" element instead of diff text below.
-
-    $gaps = array();
-    $gap_start = 0;
-    $in_gap = false;
-    $lines_of_context = $this->getLinesOfContext();
-    $mask = $this->getVisibleLines() + $mask_force + $feedback_mask;
-    $mask[$range_start + $range_len] = true;
-    for ($ii = $range_start; $ii <= $range_start + $range_len; $ii++) {
-      if (isset($mask[$ii])) {
-        if ($in_gap) {
-          $gap_length = $ii - $gap_start;
-          if ($gap_length <= $lines_of_context) {
-            for ($jj = $gap_start; $jj <= $gap_start + $gap_length; $jj++) {
-              $mask[$jj] = true;
-            }
-          } else {
-            $gaps[] = array($gap_start, $gap_length);
-          }
-          $in_gap = false;
-        }
-      } else {
-        if (!$in_gap) {
-          $gap_start = $ii;
-          $in_gap = true;
-        }
-      }
-    }
-
-    $gaps = array_reverse($gaps);
-
+    $gaps = $this->getGaps();
     $reference = $this->getRenderingReference();
-
     $left_id = $this->getOldChangesetID();
     $right_id = $this->getNewChangesetID();
 
@@ -146,36 +92,8 @@ final class DifferentialChangesetTwoUpRenderer
     $new_render = $this->getNewRender();
     $original_left = $this->getOriginalOld();
     $original_right = $this->getOriginalNew();
-
-    // We need to go backwards to properly indent whitespace in this code:
-    //
-    //   0: class C {
-    //   1:
-    //   1:   function f() {
-    //   2:
-    //   2:     return;
-    //   3:
-    //   3:   }
-    //   4:
-    //   4: }
-    //
-    $depths = array();
-    $last_depth = 0;
-    $range_end = $range_start + $range_len;
-    if (!isset($new_lines[$range_end])) {
-      $range_end--;
-    }
-    for ($ii = $range_end; $ii >= $range_start; $ii--) {
-      // We need to expand tabs to process mixed indenting and to round
-      // correctly later.
-      $line = str_replace("\t", "  ", $new_lines[$ii]['text']);
-      $trimmed = ltrim($line);
-      if ($trimmed != '') {
-        // We round down to flatten "/**" and " *".
-        $last_depth = floor((strlen($line) - strlen($trimmed)) / 2);
-      }
-      $depths[$ii] = $last_depth;
-    }
+    $depths = $this->getDepths();
+    $mask = $this->getMask();
 
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
@@ -408,7 +326,8 @@ final class DifferentialChangesetTwoUpRenderer
 
       if ($o_num && isset($old_comments[$o_num])) {
         foreach ($old_comments[$o_num] as $comment) {
-          $xhp = $this->renderInlineComment($comment, $on_right = false);
+          $comment_html = $this->renderInlineComment($comment,
+                                                     $on_right = false);
           $new = '';
           if ($n_num && isset($new_comments[$n_num])) {
             foreach ($new_comments[$n_num] as $key => $new_comment) {
@@ -422,7 +341,7 @@ final class DifferentialChangesetTwoUpRenderer
           $html[] =
             '<tr class="inline">'.
               '<th />'.
-              '<td class="left">'.$xhp.'</td>'.
+              '<td class="left">'.$comment_html.'</td>'.
               '<th />'.
               '<td colspan="3" class="right3">'.$new.'</td>'.
             '</tr>';
@@ -430,13 +349,14 @@ final class DifferentialChangesetTwoUpRenderer
       }
       if ($n_num && isset($new_comments[$n_num])) {
         foreach ($new_comments[$n_num] as $comment) {
-          $xhp = $this->renderInlineComment($comment, $on_right = true);
+          $comment_html = $this->renderInlineComment($comment,
+                                                     $on_right = true);
           $html[] =
             '<tr class="inline">'.
               '<th />'.
               '<td class="left" />'.
               '<th />'.
-              '<td colspan="3" class="right3">'.$xhp.'</td>'.
+              '<td colspan="3" class="right3">'.$comment_html.'</td>'.
             '</tr>';
         }
       }
@@ -484,23 +404,23 @@ final class DifferentialChangesetTwoUpRenderer
     $html_old = array();
     $html_new = array();
     foreach ($this->getOldComments() as $comment) {
-      $xhp = $this->renderInlineComment($comment, $on_right = false);
+      $comment_html = $this->renderInlineComment($comment, $on_right = false);
       $html_old[] =
         '<tr class="inline">'.
         '<th />'.
-        '<td class="left">'.$xhp.'</td>'.
+        '<td class="left">'.$comment_html.'</td>'.
         '<th />'.
         '<td class="right3" colspan="3" />'.
         '</tr>';
     }
     foreach ($this->getNewComments() as $comment) {
-      $xhp = $this->renderInlineComment($comment, $on_right = true);
+      $comment_html = $this->renderInlineComment($comment, $on_right = true);
       $html_new[] =
         '<tr class="inline">'.
         '<th />'.
         '<td class="left" />'.
         '<th />'.
-        '<td class="right3" colspan="3">'.$xhp.'</td>'.
+        '<td class="right3" colspan="3">'.$comment_html.'</td>'.
         '</tr>';
     }
 

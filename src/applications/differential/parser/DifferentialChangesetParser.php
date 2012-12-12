@@ -239,6 +239,9 @@ final class DifferentialChangesetParser {
     $this->coverage = $coverage;
     return $this;
   }
+  private function getCoverage() {
+    return $this->coverage;
+  }
 
   public function parseHunk(DifferentialHunk $hunk) {
     $lines = $hunk->getChanges();
@@ -972,19 +975,15 @@ final class DifferentialChangesetParser {
     $renderer = id(new DifferentialChangesetTwoUpRenderer())
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
-      ->setOldLines($this->old)
-      ->setNewLines($this->new)
       ->setOldRender($this->oldRender)
       ->setNewRender($this->newRender)
       ->setMissingOldLines($this->missingOld)
       ->setMissingNewLines($this->missingNew)
-      ->setVisibleLines($this->visible)
       ->setOldChangesetID($this->leftSideChangesetID)
       ->setNewChangesetID($this->rightSideChangesetID)
       ->setOldAttachesToNewFile($this->leftSideAttachesToNewFile)
       ->setNewAttachesToNewFile($this->rightSideAttachesToNewFile)
-      ->setLinesOfContext(self::LINES_CONTEXT)
-      ->setCodeCoverage($this->coverage)
+      ->setCodeCoverage($this->getCoverage())
       ->setRenderingReference($this->getRenderingReference())
       ->setMarkupEngine($this->markupEngine)
       ->setHandles($this->handles);
@@ -1156,14 +1155,130 @@ final class DifferentialChangesetParser {
       ->setOriginalOld($this->originalLeft)
       ->setOriginalNew($this->originalRight);
 
+    $rows = max(
+      count($this->old),
+      count($this->new));
+    if ($range_start === null) {
+      $range_start = 0;
+    }
+    if ($range_len === null) {
+      $range_len = $rows;
+    }
+    $range_len = min($range_len, $rows - $range_start);
+
+    list($gaps, $mask, $depths) = $this->calculateGapsMaskAndDepths(
+      $mask_force,
+      $feedback_mask,
+      $range_start,
+      $range_len
+    );
+
+    $renderer
+      ->setOldLines($this->old)
+      ->setNewLines($this->new)
+      ->setGaps($gaps)
+      ->setMask($mask)
+      ->setDepths($depths);
+
     $html = $renderer->renderTextChange(
       $range_start,
       $range_len,
-      $mask_force,
-      $feedback_mask
+      $rows
     );
 
     return $renderer->renderChangesetTable($html);
+  }
+
+  /**
+   * This function calculates a lot of stuff we need to know to display
+   * the diff:
+   *
+   * Gaps - compute gaps in the visible display diff, where we will render
+   * "Show more context" spacers. If a gap is smaller than the context size,
+   * we just display it. Otherwise, we record it into $gaps and will render a
+   * "show more context" element instead of diff text below. A given $gap
+   * is a tuple of $gap_line_number_start and $gap_length.
+   *
+   * Mask - compute the actual lines that need to be shown (because they
+   * are near changes lines, near inline comments, or the request has
+   * explicitly asked for them, i.e. resulting from the user clicking
+   * "show more"). The $mask returned is a sparesely populated dictionary
+   * of $visible_line_number => true.
+   *
+   * Depths - compute how indented any given line is. The $depths returned
+   * is a sparesely populated dictionary of $visible_line_number => $depth.
+   *
+   * This function also has the side effect of modifying member variable
+   * new such that tabs are normalized to spaces for each line of the diff.
+   *
+   * @return array($gaps, $mask, $depths)
+   */
+  private function calculateGapsMaskAndDepths($mask_force,
+                                              $feedback_mask,
+                                              $range_start,
+                                              $range_len) {
+
+    // Calculate gaps and mask first
+    $gaps = array();
+    $gap_start = 0;
+    $in_gap = false;
+    $base_mask = $this->visible + $mask_force + $feedback_mask;
+    $base_mask[$range_start + $range_len] = true;
+    for ($ii = $range_start; $ii <= $range_start + $range_len; $ii++) {
+      if (isset($base_mask[$ii])) {
+        if ($in_gap) {
+          $gap_length = $ii - $gap_start;
+          if ($gap_length <= self::LINES_CONTEXT) {
+            for ($jj = $gap_start; $jj <= $gap_start + $gap_length; $jj++) {
+              $base_mask[$jj] = true;
+            }
+          } else {
+            $gaps[] = array($gap_start, $gap_length);
+          }
+          $in_gap = false;
+        }
+      } else {
+        if (!$in_gap) {
+          $gap_start = $ii;
+          $in_gap = true;
+        }
+      }
+    }
+    $gaps = array_reverse($gaps);
+    $mask = $base_mask;
+
+    // Time to calculate depth.
+    // We need to go backwards to properly indent whitespace in this code:
+    //
+    //   0: class C {
+    //   1:
+    //   1:   function f() {
+    //   2:
+    //   2:     return;
+    //   3:
+    //   3:   }
+    //   4:
+    //   4: }
+    //
+    $depths = array();
+    $last_depth = 0;
+    $range_end = $range_start + $range_len;
+    if (!isset($this->new[$range_end])) {
+      $range_end--;
+    }
+    for ($ii = $range_end; $ii >= $range_start; $ii--) {
+      // We need to expand tabs to process mixed indenting and to round
+      // correctly later.
+      $line = str_replace("\t", "  ", $this->new[$ii]['text']);
+      $trimmed = ltrim($line);
+      if ($trimmed != '') {
+        // We round down to flatten "/**" and " *".
+        $last_depth = floor((strlen($line) - strlen($trimmed)) / 2);
+      }
+      $depths[$ii] = $last_depth;
+    }
+
+    return array($gaps, $mask, $depths);
   }
 
   /**
@@ -1314,7 +1429,8 @@ final class DifferentialChangesetParser {
   public function renderModifiedCoverage() {
     $na = '<em>-</em>';
 
-    if (!$this->coverage) {
+    $coverage = $this->getCoverage();
+    if (!$coverage) {
       return $na;
     }
 
@@ -1330,11 +1446,11 @@ final class DifferentialChangesetParser {
         continue;
       }
 
-      if (empty($this->coverage[$new['line'] - 1])) {
+      if (empty($coverage[$new['line'] - 1])) {
         continue;
       }
 
-      switch ($this->coverage[$new['line'] - 1]) {
+      switch ($coverage[$new['line'] - 1]) {
         case 'C':
           $covered++;
           break;
