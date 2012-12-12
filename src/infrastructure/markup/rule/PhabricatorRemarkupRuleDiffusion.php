@@ -4,18 +4,14 @@
  * @group markup
  */
 final class PhabricatorRemarkupRuleDiffusion
-  extends PhutilRemarkupRule {
+  extends PhabricatorRemarkupRuleObjectName {
 
-  public function apply($text) {
-    return preg_replace_callback(
-      '@\br([A-Z]+[a-f0-9]+)\b@',
-      array($this, 'markupDiffusionLink'),
-      $text);
+  protected function getObjectNamePrefix() {
+    return 'r';
   }
 
-  public function markupDiffusionLink($matches) {
-    return $this->getEngine()->storeText(
-      '<a href="/r'.$matches[1].'">r'.$matches[1].'</a>');
+  protected function getObjectIDPattern() {
+    return '[A-Z]+[a-f0-9]+';
   }
 
 }

@@ -8,10 +8,15 @@ abstract class PhabricatorRemarkupRuleObjectName
 
   abstract protected function getObjectNamePrefix();
 
+  protected function getObjectIDPattern() {
+    return '[1-9]\d*';
+  }
+
   public function apply($text) {
     $prefix = $this->getObjectNamePrefix();
+    $id = $this->getObjectIDPattern();
     return preg_replace_callback(
-      "@\b({$prefix})([1-9]\d*)(?:#([-\w\d]+))?\b@",
+      "@\b({$prefix})({$id})(?:#([-\w\d]+))?\b@",
       array($this, 'markupObjectNameLink'),
       $text);
   }
