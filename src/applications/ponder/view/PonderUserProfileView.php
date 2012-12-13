@@ -61,6 +61,7 @@ final class PonderUserProfileView extends AphrontView {
     $answers = $apagebuttons->sliceResults($answers);
 
     $view = new PhabricatorObjectItemListView();
+    $view->setViewer($user);
     $view->setNoDataString(pht('No matching answers.'));
 
     foreach ($answers as $answer) {
@@ -68,6 +69,7 @@ final class PonderUserProfileView extends AphrontView {
       $author_phid = $question->getAuthorPHID();
 
       $item = new PhabricatorObjectItemView();
+      $item->setObject($answer);
       $href = id(new PhutilURI('/Q' . $question->getID()))
         ->setFragment('A' . $answer->getID());
       $item->setHeader(
@@ -75,19 +77,20 @@ final class PonderUserProfileView extends AphrontView {
       );
       $item->setHref($href);
 
-      $item->addDetail(
-        pht('Votes'),
-        $answer->getVoteCount()
-      );
+      $item->addAttribute(
+        pht('Created %s', phabricator_date($answer->getDateCreated(), $user)));
 
-      $item->addDetail(
-        pht('Question'),
-        self::abbreviate($question->getTitle())
-      );
+      $item->addAttribute(pht('%d Vote(s)', $answer->getVoteCount()));
 
       $item->addAttribute(
-        pht('Created %s', phabricator_date($answer->getDateCreated(), $user))
-      );
+        pht(
+          'Answer to %s',
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => '/Q'.$question->getID(),
+            ),
+            self::abbreviate($question->getTitle()))));
 
       $view->addItem($item);
     }

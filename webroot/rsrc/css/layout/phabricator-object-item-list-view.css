@@ -3,100 +3,140 @@
  */
 
 .phabricator-object-item-list-view {
-  padding: 0 2%;
-  margin: 1em 0;
+  padding: 8px 6px;
+  background: #f4f5f6;
 }
-
-.phabricator-object-item-list-header {
-  color: #333333;
-  font-size: 15px;
-  margin-bottom: 12px;
-}
-
 
 .phabricator-object-item {
-  background: #f9f9f9;
-  border: 1px solid #dbdbdb;
-  border-radius: 2px;
-  margin: 6px 0;
+  background: #ffffff;
+  border-style: solid;
+  border-color: #d7d7d7 #e4e3e4 #bcbcbd #d7d7d7;
+  border-width: 1px 1px 1px 3px;
+  margin: 3px 0;
 
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
 }
 
 .phabricator-object-item-name {
   display: block;
-  background: #e9e9e9;
-  padding: 2px 1em;
+  padding: 4px 8px 4px;
+  margin-right: 20px;
   font-weight: bold;
 }
 
-.device-desktop .phabricator-object-item-name {
-
-  border: solid #dbdbdb;
-  border-width: 0 0 1px 0;
-}
-
-/* - Detail List ------------------------------------------------------------
-
-  Object details, used to render things like authors, reviewers, etc.
-
-*/
-
-
-.phabricator-object-detail-list {
-  font-size: 11px;
-  width: 55%;
-  padding: 2px 1%;
-}
-
-.device-desktop .phabricator-object-detail-list,
-.device-tablet .phabricator-object-detail-list {
-  float: left;
-}
-
-.phabricator-object-detail-key {
-  color: #555555;
-  float: left;
-  clear: left;
-  width: 20%;
-  text-align: right;
-  padding: 2px 6px;
-  overflow: hidden;
-}
-
-.phabricator-object-detail-value {
-  color: #444444;
-  float: left;
-
-  padding: 2px 6px;
-}
-
-
-/* - Attribute List ------------------------------------------------------------
+/* - Attribute List ------------------------------
 
   Object attributes, commonly used to render created date, etc.
 
 */
 
+
 .phabricator-object-item-attributes {
+  padding: 0px 8px 4px;
+}
+
+.phabricator-object-item-attribute {
+  display: inline;
   color: #555555;
-  text-align: right;
   font-size: 11px;
-
-  padding: 2px 1%;
 }
 
-.device-desktop .phabricator-object-item-attributes,
-.device-tablet .phabricator-object-item-attributes {
-  width: 40%;
+.phabricator-object-item-attribute-spacer {
+  padding: 0 4px;
+}
+
+
+/* - Attribute List ------------------------------
+
+  Object attributes, commonly used to render created date, etc.
+
+*/
+
+.phabricator-object-item-icons {
   float: right;
+  padding: 2px 4px 0;
 }
 
-.device-phone .phabricator-object-item-attributes {
-  clear: both;
+.device-desktop .phabricator-object-item-icons {
+  width: 120px;
 }
 
-.phabricator-object-item-attributes li {
-  padding: 2px 1%;
+.device .phabricator-object-item-icons {
+  width: 18px;
+}
+
+.device .phabricator-object-item-icon-label {
+  display: none;
+  vertical-align: middle;
+}
+
+.phabricator-object-item-icon {
+  position: relative;
+  font-size: 11px;
+  color: #666666;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+
+  min-height: 18px;
+  line-height: 18px;
+}
+
+.device-desktop .phabricator-object-item-icon {
+  padding-right: 22px;
+}
+
+.phabricator-object-item-icon-image {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 14px;
+  height: 14px;
+}
+
+
+/* - Bar Colors --------------------------------
+
+
+*/
+
+.phabricator-object-item-bar-color-red {
+  border-left-color: #cc0000;
+}
+
+.phabricator-object-item-bar-color-orange {
+  border-left-color: #cc7300;
+}
+
+.phabricator-object-item-bar-color-yellow {
+  border-left-color: #ccc000;
+}
+
+.phabricator-object-item-bar-color-green {
+  border-left-color: #009b2d;
+}
+
+.phabricator-object-item-bar-color-sky {
+  border-left-color: #6498cf;
+}
+
+.phabricator-object-item-bar-color-blue {
+  border-left-color: #00659a;
+}
+
+.phabricator-object-item-bar-color-indigo {
+  border-left-color: #3a00cc;
+}
+
+.phabricator-object-item-bar-color-violet {
+  border-left-color: #67009b;
+}
+
+.phabricator-object-item-bar-color-grey {
+  border-left-color: #999999;
+}
+
+.phabricator-object-item-bar-color-black {
+  border-left-color: #333333;
 }

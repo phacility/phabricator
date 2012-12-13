@@ -39,11 +39,17 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $pastes = $query->executeWithCursorPager($pager);
 
     $list = $this->buildPasteList($pastes);
-    $list->setHeader($title);
     $list->setPager($pager);
     $list->setNoDataString($nodata);
 
-    $nav->appendChild($list);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
+
+    $nav->appendChild(
+      array(
+        $header,
+        $list,
+      ));
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
@@ -71,17 +77,16 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $this->loadHandles(mpull($pastes, 'getAuthorPHID'));
 
     $list = new PhabricatorObjectItemListView();
+    $list->setViewer($user);
     foreach ($pastes as $paste) {
-      $created = phabricator_datetime($paste->getDateCreated(), $user);
+      $created = phabricator_date($paste->getDateCreated(), $user);
+      $author = $this->getHandle($paste->getAuthorPHID())->renderLink();
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($paste->getFullName())
         ->setHref('/P'.$paste->getID())
-        ->addDetail(
-          pht('Author'),
-          $this->getHandle($paste->getAuthorPHID())->renderLink())
-        ->addAttribute(pht('Created %s', $created));
-
+        ->setObject($paste)
+        ->addAttribute(pht('Created %s by %s', $created, $author));
       $list->addItem($item);
     }
 

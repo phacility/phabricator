@@ -41,29 +41,39 @@ abstract class PhameController extends PhabricatorController {
     assert_instances_of($posts, 'PhamePost');
 
     $list = id(new PhabricatorObjectItemListView())
+      ->setViewer($user)
       ->setNoDataString($nodata);
 
     foreach ($posts as $post) {
-      $item = id(new PhabricatorObjectItemView())
-        ->setHeader($post->getTitle())
-        ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/'))
-        ->addDetail(
-          pht('Blogger'),
-          $this->getHandle($post->getBloggerPHID())->renderLink())
-        ->addDetail(
-          pht('Blog'),
-          $post->getBlog()
-            ? $this->getHandle($post->getBlog()->getPHID())->renderLink()
-            : '-');
+      $blogger = $this->getHandle($post->getBloggerPHID())->renderLink();
 
-      if ($post->isDraft()) {
-        $item->addAttribute(pht('Draft'));
-      } else {
-        $date_published = phabricator_datetime(
-          $post->getDatePublished(),
-          $user);
-        $item->addAttribute(pht('Published on %s', $date_published));
+      $blog = null;
+      if ($post->getBlog()) {
+        $blog = $this->getHandle($post->getBlog()->getPHID())->renderLink();
       }
+
+      $published = null;
+      if ($post->getDatePublished()) {
+        $published = phabricator_date($post->getDatePublished(), $user);
+      }
+
+      $draft = $post->isDraft();
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setObject($post)
+        ->setHeader($post->getTitle())
+        ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/'));
+
+      if ($blog) {
+        $item->addAttribute($blog);
+      }
+
+      if ($draft) {
+        $desc = pht('Draft by %s', $blogger);
+      } else {
+        $desc = pht('Published on %s by %s', $published, $blogger);
+      }
+      $item->addAttribute($desc);
 
       $list->addItem($item);
     }
