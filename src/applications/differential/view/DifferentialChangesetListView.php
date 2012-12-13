@@ -188,7 +188,11 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    return phutil_render_tag(
+    return
+      id(new PhabricatorHeaderView())
+        ->setHeader('D'.$this->diff->getID())
+        ->render().
+      phutil_render_tag(
       'div',
       array(
         'class' => 'differential-review-stage',

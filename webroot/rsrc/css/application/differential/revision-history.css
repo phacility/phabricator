@@ -14,7 +14,7 @@
 }
 
 .differential-revision-history-table td {
-  padding: 4px;
+  padding: 4px 0px 4px 0px;
 }
 
 .differential-revision-history-table td {
@@ -22,7 +22,7 @@
 }
 
 .differential-revision-history-table tr.alt {
-  background: #ddddcc;
+  background: #dcdcdc;
 }
 
 
@@ -74,6 +74,7 @@
 .differential-revision-history-table td.diff-differ-submit {
   text-align: right;
   border-bottom: none;
+  padding: 8px 0px 4px 0px;
 }
 
 .differential-revision-history-table td.diff-differ-submit button {

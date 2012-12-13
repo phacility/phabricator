@@ -3,13 +3,17 @@
  */
 
 .differential-review-stage {
-  margin: 0 2em 0 2em;
+  background: #FFFFFF;
+  padding: 0em 1.25em 0em 0em;
 }
 
 .differential-changeset {
   z-index: 2;
   position: relative;
+  margin: 0;
+  padding: 10px 0% 20px 2%;
 }
+
 
 .differential-diff {
   background:         transparent;
@@ -218,11 +222,6 @@ td.cov-X {
   font-size:          14px;
   font-weight:        bold;
   padding:            2px 0 8px;
-}
-
-.differential-changeset {
-  margin:             0.5em 0;
-  padding:            10px 0px 20px;
 }
 
 .differential-reticle {

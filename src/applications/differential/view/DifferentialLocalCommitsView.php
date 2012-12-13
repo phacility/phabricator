@@ -126,8 +126,10 @@ final class DifferentialLocalCommitsView extends AphrontView {
     $headers = '<tr>'.implode('', $headers).'</tr>';
 
     return
+      id(new PhabricatorHeaderView())
+        ->setHeader(pht('Local Commits'))
+        ->render().
       '<div class="differential-panel">'.
-        '<h1>Local Commits</h1>'.
         '<table class="differential-local-commits-table">'.
           $headers.
           implode("\n", $rows).

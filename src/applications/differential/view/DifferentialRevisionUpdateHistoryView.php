@@ -202,8 +202,10 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     $select .= '</select>';
 
     return
+      id(new PhabricatorHeaderView())
+        ->setHeader(pht('Revision Update History'))
+        ->render() .
       '<div class="differential-revision-history differential-panel">'.
-        '<h1>Revision Update History</h1>'.
         '<form action="#toc">'.
           '<table class="differential-revision-history-table">'.
             '<tr>'.
@@ -217,7 +219,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
             '</tr>'.
             implode("\n", $rows).
             '<tr>'.
-              '<td colspan="8" class="diff-differ-submit">'.
+              '<td colspan="9" class="diff-differ-submit">'.
                 '<label>Whitespace Changes: '.$select.'</label>'.
                 '<button>Show Diff</button>'.
               '</td>'.

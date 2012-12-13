@@ -838,8 +838,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $view->setHandles($handles);
 
     return
+      id(new PhabricatorHeaderView())
+        ->setHeader(pht('Open Revisions Affecting These Files'))
+        ->render().
       '<div class="differential-panel">'.
-        '<h1>Open Revisions Affecting These Files</h1>'.
         $view->render().
       '</div>';
   }
