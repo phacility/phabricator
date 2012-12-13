@@ -1082,7 +1082,7 @@ final class DifferentialChangesetParser {
     switch ($this->changeset->getFileType()) {
       case DifferentialChangeType::FILE_IMAGE:
         $old = null;
-        $cur = null;
+        $new = null;
         // TODO: Improve the architectural issue as discussed in D955
         // https://secure.phabricator.com/D955
         $reference = $this->getRenderingReference();
@@ -1136,6 +1136,7 @@ final class DifferentialChangesetParser {
             }
           }
         }
+
         return $renderer->renderFileChange($old, $new, $id, $vs);
       case DifferentialChangeType::FILE_DIRECTORY:
       case DifferentialChangeType::FILE_BINARY:
