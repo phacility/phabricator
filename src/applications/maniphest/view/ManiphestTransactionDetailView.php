@@ -575,6 +575,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $parser = new DifferentialChangesetParser();
         $parser->setChangeset($changeset);
         $parser->setRenderingReference($id);
+        $parser->setMarkupEngine($this->markupEngine);
         $parser->setWhitespaceMode($whitespace_mode);
 
         $spec = $this->getRangeSpecification();
