@@ -69,12 +69,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     // Render the page.
     $content = array();
-    $content[] = $this->buildCrumbs(
-      array(
-        'branch' => true,
-        'path'   => true,
-        'view'   => 'browse',
-      ));
 
     $follow  = $request->getStr('follow');
     if ($follow) {
@@ -114,10 +108,17 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $nav = $this->buildSideNav('browse', true);
     $nav->appendChild($content);
+    $crumbs = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'browse',
+      ));
+    $nav->setCrumbs($crumbs);
 
     $basename = basename($this->getDiffusionRequest()->getPath());
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => $basename,

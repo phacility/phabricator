@@ -78,7 +78,7 @@
 }
 
 .device-desktop .local-nav-collapsed .phabricator-nav-content {
-  margin-left: 2.5em !important;
+  margin-left: 0px !important;
 }
 
 .device .phabricator-nav-col {

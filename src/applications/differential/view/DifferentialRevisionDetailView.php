@@ -83,7 +83,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
       }
     }
     if ($next_step) {
-      $properties->addProperty('Next Step:', $next_step);
+      $properties->addProperty('Next Step', $next_step);
     }
 
     foreach ($this->auxiliaryFields as $field) {

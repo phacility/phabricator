@@ -45,13 +45,6 @@ final class DiffusionChangeController extends DiffusionController {
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
     $changeset_view->setUser($this->getRequest()->getUser());
 
-    $content[] = $this->buildCrumbs(
-      array(
-        'branch' => true,
-        'path'   => true,
-        'view'   => 'change',
-      ));
-
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
@@ -62,8 +55,15 @@ final class DiffusionChangeController extends DiffusionController {
 
     $nav = $this->buildSideNav('change', true);
     $nav->appendChild($content);
+    $crumbs = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'change',
+      ));
+    $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => 'Change',

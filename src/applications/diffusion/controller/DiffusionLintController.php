@@ -10,6 +10,7 @@ final class DiffusionLintController extends DiffusionController {
     if ($request->getStr('lint') !== null) {
       $controller = new DiffusionLintDetailsController($request);
       $controller->setDiffusionRequest($drequest);
+      $controller->setCurrentApplication($this->getCurrentApplication());
       return $this->delegateToController($controller);
     }
 
@@ -93,14 +94,6 @@ final class DiffusionLintController extends DiffusionController {
 
     $content = array();
 
-    $content[] = $this->buildCrumbs(
-      array(
-        'branch' => true,
-        'path'   => true,
-        'view'   => 'lint',
-      ));
-
-
     $link = null;
     if ($this->diffusionRequest) {
       $link = hsprintf(
@@ -134,12 +127,22 @@ final class DiffusionLintController extends DiffusionController {
       ->appendChild($table);
 
     $title = array('Lint');
+    $crumbs = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'lint',
+      ));
     if ($this->diffusionRequest) {
       $title[] = $drequest->getCallsign();
-      $content = $this->buildSideNav('lint', false)->appendChild($content);
+      $content = $this->buildSideNav('lint', false)
+        ->setCrumbs($crumbs)
+        ->appendChild($content);
+    } else {
+      array_unshift($content, $crumbs);
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $content,
       array('title' => $title));
   }

@@ -54,13 +54,6 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $content = array();
 
-    $content[] = $this->buildCrumbs(
-      array(
-        'branch' => true,
-        'path'   => true,
-        'view'   => 'lint',
-      ));
-
     $pager = id(new AphrontPagerView())
       ->setPageSize($limit)
       ->setOffset($offset)
@@ -86,8 +79,15 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $nav = $this->buildSideNav('lint', false);
     $nav->appendChild($content);
+    $crumbs = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'lint',
+      ));
+    $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array('title' => array(
         'Lint',
@@ -107,7 +107,12 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $conn = $branch->establishConnection('r');
 
-    $where = array();
+    $where = array(
+      qsprintf(
+        $conn,
+        'branchID = %d',
+        $branch->getID())
+    );
     if ($drequest->getPath() != '') {
       $is_dir = (substr($drequest->getPath(), -1) == '/');
       $where[] = qsprintf(
@@ -127,12 +132,9 @@ final class DiffusionLintDetailsController extends DiffusionController {
       $conn,
       'SELECT *
         FROM %T
-        WHERE branchID = %d
-        AND %Q
-        ORDER BY path, code, line
-        LIMIT %d OFFSET %d',
+        WHERE %Q
+        ORDER BY path, code, line LIMIT %d OFFSET %d',
       PhabricatorRepository::TABLE_LINTMESSAGE,
-      $branch->getID(),
       implode(' AND ', $where),
       $limit,
       $offset);

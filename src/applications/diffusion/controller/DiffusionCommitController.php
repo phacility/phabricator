@@ -26,10 +26,6 @@ final class DiffusionCommitController extends DiffusionController {
     $callsign = $drequest->getRepository()->getCallsign();
 
     $content = array();
-    $content[] = $this->buildCrumbs(array(
-      'commit' => true,
-    ));
-
     $repository = $drequest->getRepository();
     $commit = $drequest->loadCommit();
 
@@ -51,6 +47,10 @@ final class DiffusionCommitController extends DiffusionController {
     $commit_data = $drequest->loadCommitData();
     $commit->attachCommitData($commit_data);
 
+    $top_anchor = id(new PhabricatorAnchorView())
+      ->setAnchorName('top')
+      ->setNavigationMarker(true);
+
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
     if ($is_foreign) {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
@@ -64,6 +64,7 @@ final class DiffusionCommitController extends DiffusionController {
         "didn't affect the tracked subdirectory ('".
         phutil_escape_html($subpath)."'), so no information is available.");
       $content[] = $error_panel;
+      $content[] = $top_anchor;
     } else {
       $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
@@ -73,22 +74,32 @@ final class DiffusionCommitController extends DiffusionController {
       $parent_query = DiffusionCommitParentsQuery::newFromDiffusionRequest(
         $drequest);
 
-      $headsup_panel = new AphrontHeadsupView();
-      $headsup_panel->setHeader('Commit Detail');
-      $headsup_panel->setActionList(
-        $this->renderHeadsupActionList($commit, $repository));
-      $headsup_panel->setProperties(
-        $this->getCommitProperties(
-          $commit,
-          $commit_data,
-          $parent_query->loadParents()));
+      $headsup_view = id(new PhabricatorHeaderView())
+        ->setHeader('Commit Detail');
 
-      $headsup_panel->appendChild(
+      $headsup_actions = $this->renderHeadsupActionList($commit, $repository);
+
+      $commit_properties = $this->loadCommitProperties(
+        $commit,
+        $commit_data,
+        $parent_query->loadParents()
+      );
+      $property_list = id(new PhabricatorPropertyListView())
+        ->setHasKeyboardShortcuts(true);
+      foreach ($commit_properties as $key => $value) {
+        $property_list->addProperty($key, $value);
+      }
+
+      $property_list->addTextContent(
         '<div class="diffusion-commit-message phabricator-remarkup">'.
-          $engine->markupText($commit_data->getCommitMessage()).
-        '</div>');
+        $engine->markupText($commit_data->getCommitMessage()).
+        '</div>'
+      );
 
-      $content[] = $headsup_panel;
+      $content[] = $top_anchor;
+      $content[] = $headsup_view;
+      $content[] = $headsup_actions;
+      $content[] = $property_list;
     }
 
     $query = new PhabricatorAuditQuery();
@@ -289,19 +300,43 @@ final class DiffusionCommitController extends DiffusionController {
           'id'    => $pane_id
         ),
         $change_list->render().
+        id(new PhabricatorAnchorView())
+        ->setAnchorName('comment')
+        ->setNavigationMarker(true)
+        ->render().
         $add_comment_view);
 
       $content[] = $main_pane;
     }
 
-    return $this->buildStandardPageResponse(
-      $content,
+    $commit_id = 'r'.$callsign.$commit->getCommitIdentifier();
+    $short_name = DiffusionView::nameCommit(
+      $repository,
+      $commit->getCommitIdentifier()
+    );
+    $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
+      ->setAnchorName('top')
+      ->setTitle($short_name)
+      ->setBaseURI(new PhutilURI('/'.$commit_id))
+      ->build($changesets);
+    foreach ($content as $child) {
+      $nav->appendChild($child);
+    }
+
+    $crumbs = $this->buildCrumbs(array(
+      'commit' => true,
+    ));
+    $nav->setCrumbs($crumbs);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
-        'title' => 'r'.$callsign.$commit->getCommitIdentifier(),
-      ));
+        'title' => $commit_id
+      )
+    );
   }
 
-  private function getCommitProperties(
+  private function loadCommitProperties(
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $data,
     array $parents) {
@@ -766,75 +801,54 @@ final class DiffusionCommitController extends DiffusionController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $actions = array();
+    $actions = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObject($commit);
 
     // TODO -- integrate permissions into whether or not this action is shown
     $uri = '/diffusion/'.$repository->getCallSign().'/commit/'.
            $commit->getCommitIdentifier().'/edit/';
-    $action = new AphrontHeadsupActionView();
-    $action->setClass('action-edit');
-    $action->setURI($uri);
-    $action->setName('Edit Commit');
-    $action->setWorkflow(false);
-    $actions[] = $action;
 
-    require_celerity_resource('phabricator-flag-css');
-    $flag = PhabricatorFlagQuery::loadUserFlag($user, $commit->getPHID());
-    if ($flag) {
-      $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
-      $color = PhabricatorFlagColor::getColorName($flag->getColor());
-
-      $action = new AphrontHeadsupActionView();
-      $action->setClass('flag-clear '.$class);
-      $action->setURI('/flag/delete/'.$flag->getID().'/');
-      $action->setName('Remove '.$color.' Flag');
-      $action->setWorkflow(true);
-      $actions[] = $action;
-    } else {
-      $action = new AphrontHeadsupActionView();
-      $action->setClass('phabricator-flag-ghost');
-      $action->setURI('/flag/edit/'.$commit->getPHID().'/');
-      $action->setName('Flag Commit');
-      $action->setWorkflow(true);
-      $actions[] = $action;
-    }
+    $action = id(new PhabricatorActionView())
+      ->setName('Edit Commit')
+      ->setHref($uri)
+      ->setIcon('edit');
+    $actions->addAction($action);
 
     require_celerity_resource('phabricator-object-selector-css');
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
     if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      $action = new AphrontHeadsupActionView();
-      $action->setName('Edit Maniphest Tasks');
-      $action->setURI('/search/attach/'.$commit->getPHID().'/TASK/edge/');
-      $action->setWorkflow(true);
-      $action->setClass('attach-maniphest');
-      $actions[] = $action;
+      $action = id(new PhabricatorActionView())
+        ->setName('Edit Maniphest Tasks')
+        ->setIcon('attach')
+        ->setHref('/search/attach/'.$commit->getPHID().'/TASK/edge/')
+        ->setWorkflow(true);
+      $actions->addAction($action);
     }
 
     if ($user->getIsAdmin()) {
-      $action = new AphrontHeadsupActionView();
-      $action->setName('MetaMTA Transcripts');
-      $action->setURI('/mail/?phid='.$commit->getPHID());
-      $action->setClass('transcripts-metamta');
-      $actions[] = $action;
+      $action = id(new PhabricatorActionView())
+        ->setName('MetaMTA Transcripts')
+        ->setIcon('file')
+        ->setHref('/mail/?phid='.$commit->getPHID());
+      $actions->addAction($action);
     }
 
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Herald Transcripts');
-    $action->setURI('/herald/transcript/?phid='.$commit->getPHID());
-    $action->setClass('transcripts-herald');
-    $actions[] = $action;
+    $action = id(new PhabricatorActionView())
+      ->setName('Herald Transcripts')
+      ->setIcon('file')
+      ->setHref('/herald/transcript/?phid='.$commit->getPHID())
+      ->setWorkflow(true);
+    $actions->addAction($action);
 
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Download Raw Diff');
-    $action->setURI($request->getRequestURI()->alter('diff', true));
-    $action->setClass('action-download');
-    $actions[] = $action;
+    $action = id(new PhabricatorActionView())
+      ->setName('Download Raw Diff')
+      ->setHref($request->getRequestURI()->alter('diff', true))
+      ->setIcon('download');
+    $actions->addAction($action);
 
-    $action_list = new AphrontHeadsupActionListView();
-    $action_list->setActions($actions);
-
-    return $action_list;
+    return $actions;
   }
 
   private function buildRefs(DiffusionRequest $request) {

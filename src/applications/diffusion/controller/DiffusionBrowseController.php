@@ -10,13 +10,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
     $content = array();
 
-    $content[] = $this->buildCrumbs(
-      array(
-        'branch' => true,
-        'path'   => true,
-        'view'   => 'browse',
-      ));
-
     if ($drequest->getTagContent()) {
       $title = 'Tag: '.$drequest->getSymbolicCommit();
 
@@ -34,6 +27,7 @@ final class DiffusionBrowseController extends DiffusionController {
           DiffusionBrowseQuery::REASON_IS_FILE) {
         $controller = new DiffusionBrowseFileController($this->getRequest());
         $controller->setDiffusionRequest($drequest);
+        $controller->setCurrentApplication($this->getCurrentApplication());
         return $this->delegateToController($controller);
       }
 
@@ -85,7 +79,15 @@ final class DiffusionBrowseController extends DiffusionController {
     $nav = $this->buildSideNav('browse', false);
     $nav->appendChild($content);
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'browse',
+      ));
+    $nav->setCrumbs($crumbs);
+
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => array(

@@ -1,0 +1,134 @@
+<?php
+
+final class DifferentialChangesetFileTreeSideNavBuilder {
+
+  private $title;
+  private $baseURI;
+  private $anchorName;
+
+  public function setAnchorName($anchor_name) {
+    $this->anchorName = $anchor_name;
+    return $this;
+  }
+  public function getAnchorName() {
+    return $this->anchorName;
+  }
+
+  public function setBaseURI(PhutilURI $base_uri) {
+    $this->baseURI = $base_uri;
+    return $this;
+  }
+  public function getBaseURI() {
+    return $this->baseURI;
+  }
+
+  public function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+  public function getTitle() {
+    return $this->title;
+  }
+
+  public function build(array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI($this->getBaseURI());
+    $nav->setFlexible(true);
+
+    $anchor = $this->getAnchorName();
+    $nav->addFilter($anchor, $this->getTitle(), '#'.$anchor);
+
+    $tree = new PhutilFileTree();
+    foreach ($changesets as $changeset) {
+      try {
+        $tree->addPath($changeset->getFilename(), $changeset);
+      } catch (Exception $ex) {
+        // TODO: See T1702. When viewing the versus diff of diffs, we may
+        // have files with the same filename. For example, if you have a setup
+        // like this in SVN:
+        //
+        //  a/
+        //    README
+        //  b/
+        //    README
+        //
+        // ...and you run "arc diff" once from a/, and again from b/, you'll
+        // get two diffs with path README. However, in the versus diff view we
+        // will compute their absolute repository paths and detect that they
+        // aren't really the same file. This is correct, but causes us to
+        // throw when inserting them.
+        //
+        // We should probably compute the smallest unique path for each file
+        // and show these as "a/README" and "b/README" when diffed against
+        // one another. However, we get this wrong in a lot of places (the
+        // other TOC shows two "README" files, and we generate the same anchor
+        // hash for both) so I'm just stopping the bleeding until we can get
+        // a proper fix in place.
+      }
+    }
+
+    require_celerity_resource('phabricator-filetree-view-css');
+
+    $filetree = array();
+
+    $path = $tree;
+    while (($path = $path->getNextNode())) {
+      $data = $path->getData();
+
+      $name = $path->getName();
+      $style = 'padding-left: '.(2 + (3 * $path->getDepth())).'px';
+
+      $href = null;
+      if ($data) {
+        $href = '#'.$data->getAnchorName();
+        $title = $name;
+        $icon = 'phabricator-filetree-icon-file';
+      } else {
+        $name .= '/';
+        $title = $path->getFullPath().'/';
+        $icon = 'phabricator-filetree-icon-dir';
+      }
+
+      $icon = phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-filetree-icon '.$icon,
+        ),
+        '');
+
+      $name_element = phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-filetree-name',
+        ),
+        phutil_escape_html($name));
+
+      $filetree[] = javelin_render_tag(
+        $href ? 'a' : 'span',
+        array(
+          'href' => $href,
+          'style' => $style,
+          'title' => $title,
+          'class' => 'phabricator-filetree-item',
+        ),
+        $icon.$name_element);
+    }
+    $tree->destroy();
+
+    $filetree =
+      '<div class="phabricator-filetree">'.
+        implode("\n", $filetree).
+      '</div>';
+    $nav->addFilter('toc', 'Table of Contents', '#toc');
+    $nav->addCustomBlock($filetree);
+    $nav->addFilter('comment', 'Add Comment', '#comment');
+    $nav->setActive(true);
+    $nav->selectFilter('');
+
+    return $nav;
+  }
+
+}
+
