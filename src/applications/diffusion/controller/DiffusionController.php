@@ -157,21 +157,17 @@ abstract class DiffusionController extends PhabricatorController {
       $repository = null;
     }
 
-    $crumb = id(new PhabricatorCrumbView())
-      ->setName('Diffusion')
-      ->setHref('/diffusion/');
-    $crumb_list[] = $crumb;
     if (!$repository) {
       return $crumb_list;
     }
 
     $callsign = $repository->getCallsign();
-    $repository_name = phutil_escape_html($repository->getName()).' Repository';
+    $repository_name = 'r'.$callsign;
 
     if (!$spec['commit'] && !$spec['tags'] && !$spec['branches']) {
       $branch_name = $drequest->getBranch();
       if ($branch_name) {
-        $repository_name .= ' ('.phutil_escape_html($branch_name).')';
+        $repository_name .= ' ('.$branch_name.')';
       }
     }
 

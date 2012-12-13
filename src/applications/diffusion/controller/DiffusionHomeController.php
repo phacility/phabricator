@@ -200,6 +200,10 @@ final class DiffusionHomeController extends DiffusionController {
     $panel->appendChild($table);
 
     $crumbs = $this->buildCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('All Repositories'))
+        ->setHref($this->getApplicationURI()));
 
     return $this->buildStandardPageResponse(
       array(
