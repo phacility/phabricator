@@ -257,7 +257,12 @@ final class DiffusionCommitController extends DiffusionController {
         }
       }
 
+      $change_list_title = DiffusionView::nameCommit(
+        $repository,
+        $commit->getCommitIdentifier()
+      );
       $change_list = new DifferentialChangesetListView();
+      $change_list->setTitle($change_list_title);
       $change_list->setChangesets($changesets);
       $change_list->setVisibleChangesets($visible_changesets);
       $change_list->setRenderingReferences($references);

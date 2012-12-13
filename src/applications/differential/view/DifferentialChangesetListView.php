@@ -20,6 +20,16 @@ final class DifferentialChangesetListView extends AphrontView {
   private $diff;
   private $vsMap = array();
 
+  private $title;
+  
+  public function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+  private function getTitle() {
+    return $this->title;
+  }
+
   public function setBranch($branch) {
     $this->branch = $branch;
     return $this;
@@ -190,7 +200,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
     return
       id(new PhabricatorHeaderView())
-        ->setHeader('D'.$this->diff->getID())
+        ->setHeader($this->getTitle())
         ->render().
       phutil_render_tag(
       'div',

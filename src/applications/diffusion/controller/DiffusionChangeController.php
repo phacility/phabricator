@@ -14,13 +14,16 @@ final class DiffusionChangeController extends DiffusionController {
       // TODO: Refine this.
       return new Aphront404Response();
     }
-
-    $callsign = $drequest->getRepository()->getCallsign();
+    
+    $repository = $drequest->getRepository();
+    $callsign = $repository->getCallsign();
+    $commit = $drequest->getRawCommit();
     $changesets = array(
       0 => $changeset,
     );
 
     $changeset_view = new DifferentialChangesetListView();
+    $changeset_view->setTitle(DiffusionView::nameCommit($repository, $commit));
     $changeset_view->setChangesets($changesets);
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
