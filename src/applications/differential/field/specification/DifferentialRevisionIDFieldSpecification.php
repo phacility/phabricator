@@ -38,7 +38,7 @@ final class DifferentialRevisionIDFieldSpecification
   }
 
   public function parseValueFromCommitMessage($value) {
-    $rev = trim($value);
+    $rev = trim(head(explode("\n", $value)));
 
     if (!strlen($rev)) {
       return null;
