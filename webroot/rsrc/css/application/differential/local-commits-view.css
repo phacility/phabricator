@@ -14,7 +14,7 @@
   padding: 4px 6px;
 }
 
-.differential-local-commits-table tr td {
+.differential-local-commits-table tr.alt td {
   background: #dcdcdc;
 }
 

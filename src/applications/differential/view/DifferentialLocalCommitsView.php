@@ -41,7 +41,16 @@ final class DifferentialLocalCommitsView extends AphrontView {
     }
 
     $rows = array();
+    $highlight = true;
     foreach ($local as $commit) {
+      if ($highlight) {
+        $class = 'alt';
+        $highlight = false;
+      } else {
+        $class = '';
+        $highlight = true;
+      }
+
 
       $row = array();
       if (idx($commit, 'commit')) {
@@ -106,7 +115,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
       }
       $row[] = '<td>'.$date.'</td>';
 
-      $rows[] = '<tr>'.implode('', $row).'</tr>';
+      $rows[] = '<tr class="'.$class.'">'.implode('', $row).'</tr>';
     }
 
 

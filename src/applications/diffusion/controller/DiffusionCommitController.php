@@ -301,7 +301,6 @@ final class DiffusionCommitController extends DiffusionController {
       $main_pane = phutil_render_tag(
         'div',
         array(
-          'class' => 'differential-primary-pane',
           'id'    => $pane_id
         ),
         $change_list->render().

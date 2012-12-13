@@ -51,10 +51,7 @@ final class DiffusionChangeController extends DiffusionController {
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
-    $content[] =
-      '<div class="differential-primary-pane">'.
-        $changeset_view->render().
-      '</div>';
+    $content[] = $changeset_view->render();
 
     $nav = $this->buildSideNav('change', true);
     $nav->appendChild($content);

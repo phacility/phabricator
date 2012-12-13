@@ -9,8 +9,9 @@
 }
 
 .differential-revision-history-table th {
-  padding: 0 .5em;
   color: #666666;
+  font-size: 11px;
+  padding: 0 .5em;
 }
 
 .differential-revision-history-table td {
