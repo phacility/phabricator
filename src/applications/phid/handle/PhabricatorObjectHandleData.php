@@ -86,6 +86,15 @@ final class PhabricatorObjectHandleData {
             $objects[$revision->getPHID()] = $revision;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
+          $document_dao = new PhrictionDocument();
+          $documents = $document_dao->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          foreach ($documents as $document) {
+            $objects[$document->getPHID()] = $document;
+          }
+          break;
         case PhabricatorPHIDConstants::PHID_TYPE_QUES:
           $questions = id(new PonderQuestionQuery())
             ->setViewer($this->viewer)
