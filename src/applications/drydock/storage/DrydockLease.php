@@ -104,7 +104,8 @@ final class DrydockLease extends DrydockDAO {
   }
 
   private function assertActive() {
-    if ($this->status != DrydockLeaseStatus::STATUS_ACTIVE) {
+    if (($this->status != DrydockLeaseStatus::STATUS_ACTIVE) &&
+        ($this->status != DrydockLeaseStatus::STATUS_ACQUIRING)) {
       throw new Exception(
         "Lease is not active! You can not interact with resources through ".
         "an inactive lease.");
@@ -133,6 +134,7 @@ final class DrydockLease extends DrydockDAO {
           case DrydockLeaseStatus::STATUS_BROKEN:
             throw new Exception("Lease has been broken!");
           case DrydockLeaseStatus::STATUS_PENDING:
+          case DrydockLeaseStatus::STATUS_ACQUIRING:
             break;
         }
       }

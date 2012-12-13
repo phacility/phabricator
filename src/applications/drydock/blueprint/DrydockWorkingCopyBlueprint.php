@@ -3,7 +3,25 @@
 final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
 
   public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('drydock.localhost.enabled');
+    return true;
+  }
+
+  protected function canAllocateLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+
+    $resource_repo = $resource->getAttribute('repositoryID');
+    $lease_repo = $lease->getAttribute('repositoryID');
+
+    return ($resource_repo && $lease_repo && $resource_repo == $lease_repo);
+  }
+
+  protected function shouldAllocateLease(
+    DrydockResource $resource,
+    DrydockLease $lease,
+    array $other_leases) {
+
+    return !$other_leases;
   }
 
   protected function executeAllocateResource(DrydockLease $lease) {
@@ -31,13 +49,18 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
       ->setResourceType('host')
       ->waitUntilActive();
 
-    $path = $host_lease->getAttribute('path').'/'.$repository->getCallsign();
+    $path = $host_lease->getAttribute('path').$repository->getCallsign();
+
+    $this->log(
+      pht('Cloning %s into %s....', $repository->getCallsign(), $path));
 
     $cmd = $host_lease->getInterface('command');
     $cmd->execx(
       'git clone --origin origin %s %s',
       $repository->getRemoteURI(),
       $path);
+
+    $this->log(pht('Complete.'));
 
     $resource = $this->newResourceTemplate($repository->getCallsign());
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);

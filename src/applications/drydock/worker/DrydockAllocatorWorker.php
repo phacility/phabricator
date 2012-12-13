@@ -66,30 +66,39 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     $candidates = array();
     foreach ($pool as $key => $candidate) {
       try {
-        $candidate->getBlueprint();
+        $blueprint = $candidate->getBlueprint();
       } catch (Exception $ex) {
         unset($pool[$key]);
+        continue;
       }
 
-      // TODO: Filter candidates according to ability to satisfy the lease.
-
-      $candidates[] = $candidate;
+      if ($blueprint->filterResource($candidate, $lease)) {
+        $candidates[] = $candidate;
+      }
     }
 
-    $this->log(
-      pht('%d Open Resource(s) Remain', count($candidates)));
+    $this->log(pht('%d Open Resource(s) Remain', count($candidates)));
 
+    $resource = null;
     if ($candidates) {
       shuffle($candidates);
-      $resource = head($candidates);
-    } else {
+      foreach ($candidates as $candidate_resource) {
+        $blueprint = $candidate_resource->getBlueprint();
+        if ($blueprint->allocateLease($candidate_resource, $lease)) {
+          $resource = $candidate_resource;
+          break;
+        }
+      }
+    }
+
+    if (!$resource) {
       $blueprints = DrydockBlueprint::getAllBlueprintsForResource($type);
 
       $this->log(
         pht('Found %d Blueprints', count($blueprints)));
 
-      foreach ($blueprints as $key => $blueprint) {
-        if (!$blueprint->isEnabled()) {
+      foreach ($blueprints as $key => $candidate_blueprint) {
+        if (!$candidate_blueprint->isEnabled()) {
           unset($blueprints[$key]);
           continue;
         }
@@ -98,8 +107,8 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       $this->log(
         pht('%d Blueprints Enabled', count($blueprints)));
 
-      foreach ($blueprints as $key => $blueprint) {
-        if (!$blueprint->canAllocateMoreResources($pool)) {
+      foreach ($blueprints as $key => $candidate_blueprint) {
+        if (!$candidate_blueprint->canAllocateMoreResources($pool)) {
           unset($blueprints[$key]);
           continue;
         }
@@ -124,6 +133,24 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
       $blueprint = head($blueprints);
       $resource = $blueprint->allocateResource($lease);
+
+      if (!$blueprint->allocateLease($resource, $lease)) {
+        // TODO: This "should" happen only if we lost a race with another lease,
+        // which happened to acquire this resource immediately after we
+        // allocated it. In this case, the right behavior is to retry
+        // immediately. However, other things like a blueprint allocating a
+        // resource it can't actually allocate the lease on might be happening
+        // too, in which case we'd just allocate infinite resources. Probably
+        // what we should do is test for an active or allocated lease and retry
+        // if we find one (although it might have already been released by now)
+        // and fail really hard ("your configuration is a huge broken mess")
+        // otherwise. But just throw for now since this stuff is all edge-casey.
+        // Alternatively we could bring resources up in a "BESPOKE" status
+        // and then switch them to "OPEN" only after the allocating lease gets
+        // its grubby mitts on the resource. This might make more sense but
+        // is a bit messy.
+        throw new Exception("Lost an allocation race?");
+      }
     }
 
     $blueprint = $resource->getBlueprint();

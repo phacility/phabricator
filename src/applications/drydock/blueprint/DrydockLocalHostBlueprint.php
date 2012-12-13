@@ -36,6 +36,19 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
     return $resource;
   }
 
+  protected function canAllocateLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return true;
+  }
+
+  protected function shouldAllocateLease(
+    DrydockResource $resource,
+    DrydockLease $lease,
+    array $other_leases) {
+    return true;
+  }
+
   protected function executeAcquireLease(
     DrydockResource $resource,
     DrydockLease $lease) {
@@ -45,10 +58,7 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
     $cmd = $lease->getInterface('command');
     $cmd->execx('mkdir %s', $lease_id);
 
-    $lease->setAttribute('path', $resource->getAttribute('path').'/'.$lease_id);
-    $lease->save();
-
-    return;
+    $lease->setAttribute('path', $resource->getAttribute('path').$lease_id.'/');
   }
 
   public function getType() {

@@ -424,6 +424,7 @@ phutil_register_library_map(array(
     'DrydockAllocatorWorker' => 'applications/drydock/worker/DrydockAllocatorWorker.php',
     'DrydockApacheWebrootInterface' => 'applications/drydock/interface/webroot/DrydockApacheWebrootInterface.php',
     'DrydockBlueprint' => 'applications/drydock/blueprint/DrydockBlueprint.php',
+    'DrydockBlueprintScopeGuard' => 'applications/drydock/util/DrydockBlueprintScopeGuard.php',
     'DrydockCommandInterface' => 'applications/drydock/interface/command/DrydockCommandInterface.php',
     'DrydockConstants' => 'applications/drydock/constants/DrydockConstants.php',
     'DrydockController' => 'applications/drydock/controller/DrydockController.php',
