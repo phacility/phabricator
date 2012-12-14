@@ -5,8 +5,15 @@ final class DiffusionBrowseController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->diffusionRequest;
 
-    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-    $results = $browse_query->loadPaths();
+    if ($this->getRequest()->getStr('before')) {
+      $results = array();
+      $is_file = true;
+    } else {
+      $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+      $results = $browse_query->loadPaths();
+      $reason = $browse_query->getReasonForEmptyResultSet();
+      $is_file = ($reason == DiffusionBrowseQuery::REASON_IS_FILE);
+    }
 
     $content = array();
 
@@ -23,8 +30,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
     if (!$results) {
 
-      if ($browse_query->getReasonForEmptyResultSet() ==
-          DiffusionBrowseQuery::REASON_IS_FILE) {
+      if ($is_file) {
         $controller = new DiffusionBrowseFileController($this->getRequest());
         $controller->setDiffusionRequest($drequest);
         $controller->setCurrentApplication($this->getCurrentApplication());
