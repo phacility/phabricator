@@ -219,6 +219,35 @@ abstract class DrydockBlueprint {
     DrydockLease $lease);
 
 
+
+  final public function releaseLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    $scope = $this->pushActiveScope(null, $lease);
+
+    $released = false;
+
+    $lease->openTransaction();
+      $lease->beginReadLocking();
+        $lease->reload();
+
+        if ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE) {
+          $lease->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
+          $lease->save();
+          $released = true;
+        }
+
+      $lease->endReadLocking();
+    $lease->saveTransaction();
+
+    if (!$released) {
+      throw new Exception("Unable to release lease: lease not active!");
+    }
+
+  }
+
+
+
 /* -(  Resource Allocation  )------------------------------------------------ */
 
 

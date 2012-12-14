@@ -55,10 +55,12 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
 
     $lease_id = $lease->getID();
 
-    $cmd = $lease->getInterface('command');
-    $cmd->execx('mkdir %s', $lease_id);
+    $full_path = $resource->getAttribute('path').$lease_id.'/';
 
-    $lease->setAttribute('path', $resource->getAttribute('path').$lease_id.'/');
+    $cmd = $lease->getInterface('command');
+    $cmd->execx('mkdir %s', $full_path);
+
+    $lease->setAttribute('path', $full_path);
   }
 
   public function getType() {
