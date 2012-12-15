@@ -102,10 +102,19 @@ JX.behavior('phabricator-nav', function(config) {
   });
 
 
+  function resetdrag() {
+    local.style.width = '';
+    background.style.width = '';
+    drag.style.left = '';
+    content.style.marginLeft = '';
+  }
+
   var collapsed = false;
   JX.Stratcom.listen('differential-filetree-toggle', null, function(e) {
     collapsed = !collapsed;
     JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
+    resetdrag();
+
   });
 
 
@@ -135,11 +144,7 @@ JX.behavior('phabricator-nav', function(config) {
 // - Navigation Reset ----------------------------------------------------------
 
   JX.Stratcom.listen('phabricator-device-change', null, function(event) {
-    local.style.width = '';
-    background.style.width = '';
-    drag.style.left = '';
-    content.style.marginLeft = '';
-
+    resetdrag();
     onresize();
   });
 
