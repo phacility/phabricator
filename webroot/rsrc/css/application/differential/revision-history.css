@@ -9,13 +9,12 @@
 }
 
 .differential-revision-history-table th {
-  color: #666666;
-  font-size: 11px;
-  padding: 0 .5em;
+  color: #666;
+  padding: 4px 6px;
 }
 
 .differential-revision-history-table td {
-  padding: 4px 0px 4px 0px;
+  padding: 4px 6px;
 }
 
 .differential-revision-history-table td {
@@ -30,13 +29,10 @@
 .differential-revision-history-table td.revhistory-desc {
   width: 100%;
   white-space: normal;
-  padding-left: .5em;
 }
 
 .differential-revision-history-table td.revhistory-name {
   font-weight: bold;
-  padding-right: .5em;
-  padding-left: .5em;
 }
 
 .differential-revision-history-table td.revhistory-age {

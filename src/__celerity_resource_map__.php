@@ -760,7 +760,7 @@ celerity_register_resource_map(array(
   ),
   'differential-local-commits-view-css' =>
   array(
-    'uri' => '/res/86432ba7/rsrc/css/application/differential/local-commits-view.css',
+    'uri' => '/res/224f3703/rsrc/css/application/differential/local-commits-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -805,7 +805,7 @@ celerity_register_resource_map(array(
   ),
   'differential-revision-history-css' =>
   array(
-    'uri' => '/res/71cffe43/rsrc/css/application/differential/revision-history.css',
+    'uri' => '/res/d41bc64c/rsrc/css/application/differential/revision-history.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3300,7 +3300,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/8edbada5/darkconsole.pkg.js',
       'type' => 'js',
     ),
-    '94cb8965' =>
+    '380df740' =>
     array(
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -3320,7 +3320,7 @@ celerity_register_resource_map(array(
         12 => 'differential-local-commits-view-css',
         13 => 'inline-comment-summary-css',
       ),
-      'uri' => '/res/pkg/94cb8965/differential.pkg.css',
+      'uri' => '/res/pkg/380df740/differential.pkg.css',
       'type' => 'css',
     ),
     '7ecd31fa' =>
@@ -3437,7 +3437,7 @@ celerity_register_resource_map(array(
     'aphront-dialog-view-css' => 'a2a7a038',
     'aphront-error-view-css' => 'a2a7a038',
     'aphront-form-view-css' => 'a2a7a038',
-    'aphront-headsup-action-list-view-css' => '94cb8965',
+    'aphront-headsup-action-list-view-css' => '380df740',
     'aphront-headsup-view-css' => 'a2a7a038',
     'aphront-list-filter-view-css' => 'a2a7a038',
     'aphront-pager-view-css' => 'a2a7a038',
@@ -3447,20 +3447,20 @@ celerity_register_resource_map(array(
     'aphront-tokenizer-control-css' => 'a2a7a038',
     'aphront-tooltip-css' => 'a2a7a038',
     'aphront-typeahead-control-css' => 'a2a7a038',
-    'differential-changeset-view-css' => '94cb8965',
-    'differential-core-view-css' => '94cb8965',
+    'differential-changeset-view-css' => '380df740',
+    'differential-core-view-css' => '380df740',
     'differential-inline-comment-editor' => '7ecd31fa',
-    'differential-local-commits-view-css' => '94cb8965',
-    'differential-results-table-css' => '94cb8965',
-    'differential-revision-add-comment-css' => '94cb8965',
-    'differential-revision-comment-css' => '94cb8965',
-    'differential-revision-comment-list-css' => '94cb8965',
-    'differential-revision-history-css' => '94cb8965',
-    'differential-revision-list-css' => '94cb8965',
-    'differential-table-of-contents-css' => '94cb8965',
+    'differential-local-commits-view-css' => '380df740',
+    'differential-results-table-css' => '380df740',
+    'differential-revision-add-comment-css' => '380df740',
+    'differential-revision-comment-css' => '380df740',
+    'differential-revision-comment-list-css' => '380df740',
+    'differential-revision-history-css' => '380df740',
+    'differential-revision-list-css' => '380df740',
+    'differential-table-of-contents-css' => '380df740',
     'diffusion-commit-view-css' => 'c8ce2d88',
     'diffusion-icons-css' => 'c8ce2d88',
-    'inline-comment-summary-css' => '94cb8965',
+    'inline-comment-summary-css' => '380df740',
     'javelin-aphlict' => 'ba3c323b',
     'javelin-behavior' => 'db6d724d',
     'javelin-behavior-aphlict-dropdown' => 'ba3c323b',
@@ -3532,7 +3532,7 @@ celerity_register_resource_map(array(
     'maniphest-transaction-detail-css' => '7839ae2d',
     'phabricator-app-buttons-css' => 'a2a7a038',
     'phabricator-busy' => 'ba3c323b',
-    'phabricator-content-source-view-css' => '94cb8965',
+    'phabricator-content-source-view-css' => '380df740',
     'phabricator-core-buttons-css' => 'a2a7a038',
     'phabricator-core-css' => 'a2a7a038',
     'phabricator-crumbs-view-css' => 'a2a7a038',
@@ -3554,7 +3554,7 @@ celerity_register_resource_map(array(
     'phabricator-notification-css' => 'a2a7a038',
     'phabricator-notification-menu-css' => 'a2a7a038',
     'phabricator-object-item-list-view-css' => 'a2a7a038',
-    'phabricator-object-selector-css' => '94cb8965',
+    'phabricator-object-selector-css' => '380df740',
     'phabricator-paste-file-upload' => 'ba3c323b',
     'phabricator-prefab' => 'ba3c323b',
     'phabricator-project-tag-css' => '7839ae2d',
