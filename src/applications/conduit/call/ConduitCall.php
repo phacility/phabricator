@@ -70,13 +70,13 @@ final class ConduitCall {
       // Discard, we provide a more specific exception below.
     }
     if (!$ok) {
-      throw new Exception(
+      throw new ConduitException(
         "Conduit method '{$method}' does not exist.");
     }
 
     $class_info = new ReflectionClass($method_class);
     if ($class_info->isAbstract()) {
-      throw new Exception(
+      throw new ConduitException(
         "Method '{$method}' is not valid; the implementation is an abstract ".
         "base class.");
     }
