@@ -11,14 +11,22 @@
 final class ConduitCall {
 
   private $method;
-  private $params;
   private $request;
   private $user;
 
   public function __construct($method, array $params) {
     $this->method = $method;
-    $this->params = $params;
     $this->handler = $this->buildMethodHandler($method);
+
+    $invalid_params = array_diff_key(
+      $params,
+      $this->handler->defineParamTypes());
+    if ($invalid_params) {
+      throw new ConduitException(
+        "Method '{$method}' doesn't define these parameters: '" .
+        implode("', '", array_keys($invalid_params)) . "'.");
+    }
+
     $this->request = new ConduitAPIRequest($params);
   }
 
