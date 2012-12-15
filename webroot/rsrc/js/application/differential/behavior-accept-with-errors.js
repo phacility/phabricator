@@ -5,23 +5,21 @@
  */
 
 JX.behavior('differential-accept-with-errors', function(config) {
+  if (config.warnings) {
+    toggleWarning();
+    JX.DOM.listen(
+      JX.$(config.select),
+      'change',
+      null,
+      toggleWarning);
+  }
 
-  function toggleWarning(control) {
-    if (control) {
-      JX.DOM.hide(JX.$(control));
-      JX.DOM.listen(
-        JX.$(config.select),
-        'change',
-        null,
-        function(e) {
-          if (JX.$(config.select).value == 'accept') {
-            JX.DOM.show(JX.$(control));
-          } else {
-            JX.DOM.hide(JX.$(control));
-          }
-        });
+  function toggleWarning() {
+    if (JX.$(config.select).value == 'accept') {
+      JX.DOM.show(JX.$(config.warnings));
+    } else {
+      JX.DOM.hide(JX.$(config.warnings));
     }
   }
 
-  toggleWarning(config.warnings);
 });
