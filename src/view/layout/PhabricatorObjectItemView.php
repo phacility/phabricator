@@ -144,7 +144,7 @@ final class PhabricatorObjectItemView extends AphrontView {
       array(
         'class' => implode(' ', $classes),
       ),
-      $icons.$header.$attrs);
+      $icons.$header.$attrs.$this->renderChildren());
   }
 
 }

@@ -39,4 +39,31 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     return $crumbs;
   }
 
+  public function buildSourceCodeView(
+    PhabricatorPaste $paste,
+    PhabricatorFile $file,
+    $max_lines = null) {
+
+    $language = $paste->getLanguage();
+    $source = $file->loadFileData();
+
+    if (empty($language)) {
+      $source = PhabricatorSyntaxHighlighter::highlightWithFilename(
+        $paste->getTitle(),
+        $source);
+    } else {
+      $source = PhabricatorSyntaxHighlighter::highlightWithLanguage(
+        $language,
+        $source);
+    }
+
+    $lines = explode("\n", $source);
+
+    if ($max_lines) {
+      $lines = array_slice($lines, 0, $max_lines);
+    }
+
+    return id(new PhabricatorSourceCodeView())
+      ->setLines($lines);
+  }
 }

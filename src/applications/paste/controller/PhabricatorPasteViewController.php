@@ -152,27 +152,4 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     return $properties;
   }
 
-  private function buildSourceCodeView(
-    PhabricatorPaste $paste,
-    PhabricatorFile $file) {
-
-    $language = $paste->getLanguage();
-    $source = $file->loadFileData();
-
-    if (empty($language)) {
-      $source = PhabricatorSyntaxHighlighter::highlightWithFilename(
-        $paste->getTitle(),
-        $source);
-    } else {
-      $source = PhabricatorSyntaxHighlighter::highlightWithLanguage(
-        $language,
-        $source);
-    }
-
-    $lines = explode("\n", $source);
-
-    return id(new PhabricatorSourceCodeView())
-      ->setLines($lines);
-  }
-
 }

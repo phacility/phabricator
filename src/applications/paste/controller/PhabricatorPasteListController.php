@@ -76,17 +76,32 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
     $this->loadHandles(mpull($pastes, 'getAuthorPHID'));
 
+    $file_phids = mpull($pastes, 'getFilePHID');
+    $files = array();
+    if ($file_phids) {
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        "phid IN (%Ls)",
+        $file_phids);
+    }
+    $files_map = mpull($files, null, 'getPHID');
+
     $list = new PhabricatorObjectItemListView();
     $list->setViewer($user);
     foreach ($pastes as $paste) {
       $created = phabricator_date($paste->getDateCreated(), $user);
       $author = $this->getHandle($paste->getAuthorPHID())->renderLink();
 
+      $file_phid = $paste->getFilePHID();
+      $file = idx($files_map, $file_phid);
+
+      $source_code = $this->buildSourceCodeView($paste, $file, 5)->render();
+
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($paste->getFullName())
         ->setHref('/P'.$paste->getID())
         ->setObject($paste)
-        ->addAttribute(pht('Created %s by %s', $created, $author));
+        ->addAttribute(pht('Created %s by %s', $created, $author))
+        ->appendChild($source_code);
       $list->addItem($item);
     }
 
