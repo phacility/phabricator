@@ -18,6 +18,7 @@ final class PonderCommentSaveController extends PonderController {
 
     $target = $request->getStr('target');
     $objects = id(new PhabricatorObjectHandleData(array($target)))
+      ->setViewer($user)
       ->loadHandles();
     if (!$objects) {
       return new Aphront404Response();
