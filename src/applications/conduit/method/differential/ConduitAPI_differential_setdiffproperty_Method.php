@@ -77,8 +77,7 @@ final class ConduitAPI_differential_setdiffproperty_Method
       $diff->setLintStatus(DifferentialLintStatus::LINT_WARN);
     } else if (!empty($postponed_linters)) {
       $diff->setLintStatus(DifferentialLintStatus::LINT_POSTPONED);
-    } else if ($results &&
-               $diff->getLintStatus() === DifferentialLintStatus::LINT_NONE) {
+    } else if ($diff->getLintStatus() != DifferentialLintStatus::LINT_SKIP) {
       $diff->setLintStatus(DifferentialLintStatus::LINT_OKAY);
     }
     $diff->save();
