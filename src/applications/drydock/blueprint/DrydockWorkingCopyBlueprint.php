@@ -13,7 +13,7 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
     $resource_repo = $resource->getAttribute('repositoryID');
     $lease_repo = $lease->getAttribute('repositoryID');
 
-    return ($resource_repo && $lease_repo && $resource_repo == $lease_repo);
+    return ($resource_repo && $lease_repo && ($resource_repo == $lease_repo));
   }
 
   protected function shouldAllocateLease(
@@ -66,6 +66,7 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->setAttribute('lease.host', $host_lease->getID());
     $resource->setAttribute('path', $path);
+    $resource->setAttribute('repositoryID', $repository->getID());
     $resource->save();
 
     return $resource;

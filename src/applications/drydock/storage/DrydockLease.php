@@ -123,7 +123,7 @@ final class DrydockLease extends DrydockDAO {
     return $this;
   }
 
-  private function isActive() {
+  public function isActive() {
     switch ($this->status) {
       case DrydockLeaseStatus::STATUS_ACTIVE:
       case DrydockLeaseStatus::STATUS_ACQUIRING:

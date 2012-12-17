@@ -30,6 +30,13 @@ final class DrydockResourceViewController extends DrydockController {
     $resource_uri = 'resource/'.$resource->getID().'/';
     $resource_uri = $this->getApplicationURI($resource_uri);
 
+    $leases = id(new DrydockLeaseQuery())
+      ->withResourceIDs(array($resource->getID()))
+      ->execute();
+
+    $lease_list = $this->buildLeaseListView($leases);
+    $lease_list->setNoDataString(pht('This resource has no leases.'));
+
     $pager = new AphrontPagerView();
     $pager->setURI(new PhutilURI($resource_uri), 'offset');
     $pager->setOffset($request->getInt('offset'));
@@ -46,6 +53,7 @@ final class DrydockResourceViewController extends DrydockController {
         $header,
         $actions,
         $properties,
+        $lease_list,
         $log_table,
       ));
 
@@ -101,6 +109,36 @@ final class DrydockResourceViewController extends DrydockController {
           phutil_escape_html($key),
           phutil_escape_html($value));
       }
+    }
+
+    return $view;
+  }
+
+  private function buildLeaseListView(array $leases) {
+    assert_instances_of($leases, 'DrydockLease');
+
+    $user = $this->getRequest()->getUser();
+
+    $view = new PhabricatorObjectItemListView();
+
+    foreach ($leases as $lease) {
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($lease->getLeaseName())
+        ->setHref($this->getApplicationURI('/lease/'.$lease->getID().'/'));
+
+      $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());
+      $item->addAttribute(phutil_escape_html($status));
+
+      $date_created = phabricator_date($lease->getDateCreated(), $user);
+      $item->addAttribute(pht('Created on %s', $date_created));
+
+      if ($lease->isActive()) {
+        $item->setBarColor('green');
+      } else {
+        $item->setBarColor('red');
+      }
+
+      $view->addItem($item);
     }
 
     return $view;
