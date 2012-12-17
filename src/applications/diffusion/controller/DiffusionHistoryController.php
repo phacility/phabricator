@@ -39,13 +39,6 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $content = array();
 
-    $content[] = $this->buildCrumbs(
-      array(
-        'branch' => true,
-        'path'   => true,
-        'view'   => 'history',
-      ));
-
     if ($request->getBool('copies')) {
       $button_title = 'Hide Copies/Branches';
       $copies_new = null;
@@ -89,8 +82,15 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $nav = $this->buildSideNav('history', false);
     $nav->appendChild($content);
+    $crumbs = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'history',
+      ));
+    $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => 'history',

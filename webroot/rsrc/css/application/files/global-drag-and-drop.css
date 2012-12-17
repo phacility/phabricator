@@ -1,0 +1,22 @@
+/**
+ * @provides global-drag-and-drop-css
+ */
+
+.phabricator-global-upload-instructions {
+  text-align: center;
+  position: fixed;
+  font-size: 36px;
+  font-weight: bold;
+
+  margin: 0 10%;
+  width: 80%;
+  left: 0;
+  top: 30%;
+  padding: 18px 0;
+
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 8;
+  border-radius: 18px;
+
+}

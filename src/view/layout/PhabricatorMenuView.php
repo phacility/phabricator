@@ -3,7 +3,6 @@
 final class PhabricatorMenuView extends AphrontView {
 
   private $items = array();
-  private $map = array();
   private $classes = array();
 
   public function addClass($class) {
@@ -34,14 +33,6 @@ final class PhabricatorMenuView extends AphrontView {
 
   public function addMenuItem(PhabricatorMenuItemView $item) {
     $key = $item->getKey();
-    if ($key !== null) {
-      if (isset($this->map[$key])) {
-        throw new Exception(
-          "Menu contains duplicate items with key '{$key}'!");
-      }
-      $this->map[$key] = $item;
-    }
-
     $this->items[] = $item;
     $this->appendChild($item);
 
@@ -49,7 +40,19 @@ final class PhabricatorMenuView extends AphrontView {
   }
 
   public function getItem($key) {
-    return idx($this->map, (string)$key);
+    $key = (string)$key;
+
+    // NOTE: We could optimize this, but need to update any map when items have
+    // their keys change. Since that's moderately complex, wait for a profile
+    // or use case.
+
+    foreach ($this->items as $item) {
+      if ($item->getKey() == $key) {
+        return $item;
+      }
+    }
+
+    return null;
   }
 
   public function getItems() {
@@ -57,6 +60,18 @@ final class PhabricatorMenuView extends AphrontView {
   }
 
   public function render() {
+    $key_map = array();
+    foreach ($this->items as $item) {
+      $key = $item->getKey();
+      if ($key !== null) {
+        if (isset($key_map[$key])) {
+          throw new Exception(
+            "Menu contains duplicate items with key '{$key}'!");
+        }
+        $key_map[$key] = $item;
+      }
+    }
+
     $classes = $this->classes;
     $classes[] = 'phabricator-menu-view';
 

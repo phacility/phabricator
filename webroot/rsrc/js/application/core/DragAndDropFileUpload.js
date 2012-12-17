@@ -15,12 +15,19 @@ JX.install('PhabricatorDragAndDropFileUpload', {
     this._node = node;
   },
 
-  events : ['willUpload', 'progress', 'didUpload', 'didError'],
+  events : [
+    'didBeginDrag',
+    'didEndDrag',
+    'willUpload',
+    'progress',
+    'didUpload',
+    'didError'],
 
   statics : {
     isSupported : function() {
       // TODO: Is there a better capability test for this? This seems okay in
       // Safari, Firefox and Chrome.
+
       return !!window.FileList;
     }
   },
@@ -29,11 +36,17 @@ JX.install('PhabricatorDragAndDropFileUpload', {
     _node : null,
     _depth : 0,
     _updateDepth : function(delta) {
+      if (this._depth == 0 && delta > 0) {
+        JX.log('begin: ' + this._depth + ' @ ' + delta);
+        this.invoke('didBeginDrag');
+      }
+
       this._depth += delta;
-      JX.DOM.alterClass(
-        this._node,
-        this.getActivatedClass(),
-        (this._depth > 0));
+
+      if (this._depth == 0 && delta < 0) {
+        JX.log('end: ' + this._depth + ' @ ' + delta);
+        this.invoke('didEndDrag');
+      }
     },
 
     start : function() {

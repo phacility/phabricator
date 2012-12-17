@@ -39,7 +39,7 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
     $from        = $request->getValue('fromEpoch');
     $to          = $request->getValue('toEpoch');
     $status      = ucfirst($request->getValue('status'));
-    $description = $request->getValue('description');
+    $description = $request->getValue('description', '');
 
     try {
       id(new PhabricatorUserStatus())

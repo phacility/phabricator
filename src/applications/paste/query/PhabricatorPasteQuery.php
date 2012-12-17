@@ -9,6 +9,7 @@ final class PhabricatorPasteQuery
   private $parentPHIDs;
 
   private $needContent;
+  private $needRawContent;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -35,6 +36,11 @@ final class PhabricatorPasteQuery
     return $this;
   }
 
+  public function needRawContent($need_raw_content) {
+    $this->needRawContent = $need_raw_content;
+    return $this;
+  }
+
   public function loadPage() {
     $table = new PhabricatorPaste();
     $conn_r = $table->establishConnection('r');
@@ -49,20 +55,12 @@ final class PhabricatorPasteQuery
 
     $pastes = $table->loadAllFromArray($data);
 
+    if ($pastes && $this->needRawContent) {
+      $this->loadRawContent($pastes);
+    }
+
     if ($pastes && $this->needContent) {
-      $file_phids = mpull($pastes, 'getFilePHID');
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid IN (%Ls)',
-        $file_phids);
-      $files = mpull($files, null, 'getPHID');
-      foreach ($pastes as $paste) {
-        $file = idx($files, $paste->getFilePHID());
-        if ($file) {
-          $paste->attachContent($file->loadFileData());
-        } else {
-          $paste->attachContent('');
-        }
-      }
+      $this->loadContent($pastes);
     }
 
     return $pastes;
@@ -102,6 +100,84 @@ final class PhabricatorPasteQuery
     }
 
     return $this->formatWhereClause($where);
+  }
+
+  private function getContentCacheKey(PhabricatorPaste $paste) {
+    return 'P'.$paste->getID().':content/'.$paste->getLanguage();
+  }
+
+  private function loadRawContent(array $pastes) {
+    $file_phids = mpull($pastes, 'getFilePHID');
+    $files = id(new PhabricatorFile())->loadAllWhere(
+      'phid IN (%Ls)',
+      $file_phids);
+    $files = mpull($files, null, 'getPHID');
+
+    foreach ($pastes as $paste) {
+      $file = idx($files, $paste->getFilePHID());
+      if ($file) {
+        $paste->attachRawContent($file->loadFileData());
+      } else {
+        $paste->attachRawContent('');
+      }
+    }
+  }
+
+  private function loadContent(array $pastes) {
+    $keys = array();
+    foreach ($pastes as $paste) {
+      $keys[] = $this->getContentCacheKey($paste);
+    }
+
+    // TODO: Move to a more appropriate/general cache once we have one? For
+    // now, this gets automatic GC.
+    $caches = id(new PhabricatorMarkupCache())->loadAllWhere(
+      'cacheKey IN (%Ls)',
+      $keys);
+    $caches = mpull($caches, null, 'getCacheKey');
+
+    $need_raw = array();
+    foreach ($pastes as $paste) {
+      $key = $this->getContentCacheKey($paste);
+      if (isset($caches[$key])) {
+        $paste->attachContent($caches[$key]->getCacheData());
+      } else {
+        $need_raw[] = $paste;
+      }
+    }
+
+    if (!$need_raw) {
+      return;
+    }
+
+    $this->loadRawContent($need_raw);
+    foreach ($need_raw as $paste) {
+      $content = $this->buildContent($paste);
+      $paste->attachContent($content);
+
+      $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
+        id(new PhabricatorMarkupCache())
+          ->setCacheKey($this->getContentCacheKey($paste))
+          ->setCacheData($content)
+          ->replace();
+      unset($guard);
+    }
+  }
+
+
+  private function buildContent(PhabricatorPaste $paste) {
+    $language = $paste->getLanguage();
+    $source = $paste->getRawContent();
+
+    if (empty($language)) {
+      return PhabricatorSyntaxHighlighter::highlightWithFilename(
+        $paste->getTitle(),
+        $source);
+    } else {
+      return PhabricatorSyntaxHighlighter::highlightWithLanguage(
+        $language,
+        $source);
+    }
   }
 
 }

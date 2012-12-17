@@ -39,4 +39,15 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     return $crumbs;
   }
 
+  public function buildSourceCodeView(
+    PhabricatorPaste $paste,
+    $max_lines = null) {
+
+    $lines = explode("\n", rtrim($paste->getContent()));
+
+    return id(new PhabricatorSourceCodeView())
+      ->setLimit($max_lines)
+      ->setLines($lines);
+  }
+
 }

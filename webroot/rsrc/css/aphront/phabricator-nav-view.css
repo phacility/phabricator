@@ -6,42 +6,46 @@
   cursor: col-resize;
 }
 
-.phabricator-nav-col {
+.phabricator-nav-column-background {
   position: fixed;
-  top: 44px;
+  top: 0;
   left: 0;
   bottom: 0;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  white-space: nowrap;
-  z-index: 3;
-}
-
-.has-crumbs .phabricator-nav-col {
-  top: 76px;
-}
-
-.phabricator-nav-local {
   width: 179px;
   background: #ececec;
-
   border-right: 1px solid #999c9e;
   box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.05);
   background-image: url(/rsrc/image/menu_texture.png);
 }
 
-.device .phabricator-nav-local {
+.phabricator-nav-column-background,
+.phabricator-nav-local,
+.phabricator-nav-drag {
   display: none;
+}
+
+.device-desktop .has-local-nav .phabricator-nav-column-background,
+.device-desktop .has-local-nav .phabricator-nav-local,
+.device-desktop .has-local-nav .phabricator-nav-drag {
+  display: block;
+}
+
+.phabricator-nav-local {
+  width: 179px;
+  position: absolute;
+  left: 0;
+  white-space: nowrap;
+
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .phabricator-nav-drag {
   position: fixed;
   top: 0;
+  bottom: 0;
   left: 179px;
   width: 7px;
-  bottom: 0;
   z-index: 4;
 
   cursor: col-resize;
@@ -57,49 +61,7 @@
   background-repeat: no-repeat;
 }
 
-.device .phabricator-nav-drag {
-  display: none;
-}
-
-.has-local-nav .phabricator-nav-content {
+.device-desktop .has-local-nav .phabricator-nav-content {
   margin-left: 180px;
 }
 
-.device-desktop .has-local-nav .phabricator-nav-content {
-  margin-left: 178px;
-}
-
-.device-desktop .local-nav-collapsed .phabricator-nav-local {
-  width: 0px !important;
-}
-
-.device-desktop .local-nav-collapsed .phabricator-nav-drag {
-  display: none;
-}
-
-.device-desktop .local-nav-collapsed .phabricator-nav-content {
-  margin-left: 2.5em !important;
-}
-
-.device .phabricator-nav-col {
-  position: absolute;
-  top: 0px;
-}
-
-.device .phabricator-nav-local {
-  left: -300px;
-}
-
-.device .phabricator-nav {
-  overflow-x: hidden;
-  position: relative;
-}
-
-.device .phabricator-nav-content {
-  width: 100%;
-}
-
-.device .phabricator-nav-content {
-  margin-left: 0;
-  position: relative;
-}

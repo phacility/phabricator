@@ -68,14 +68,19 @@ final class PhabricatorCalendarViewStatusController
       }
       $from = phabricator_datetime($status->getDateFrom(), $user);
       $to   = phabricator_datetime($status->getDateTo(), $user);
+
+      $color = ($status->getStatus() == PhabricatorUserStatus::STATUS_AWAY)
+        ? 'red'
+        : 'yellow';
+
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($status->getTerseSummary($user))
         ->setHref($href)
-        ->addDetail(
-          pht('Description'),
-          phutil_escape_html($status->getDescription()))
-        ->addAttribute(pht('From %s', $from))
-        ->addAttribute(pht('To %s', $to));
+        ->setBarColor($color)
+        ->addAttribute(pht('From %s to %s', $from, $to))
+        ->addAttribute(
+          phutil_escape_html(
+            phutil_utf8_shorten($status->getDescription(), 64)));
 
       $list->addItem($item);
     }

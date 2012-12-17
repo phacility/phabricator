@@ -32,6 +32,13 @@ final class AphrontSideNavFilterView extends AphrontView {
     $this->menu = new PhabricatorMenuView();
   }
 
+  public static function newFromMenu(PhabricatorMenuView $menu) {
+    $object = new AphrontSideNavFilterView();
+    $object->setBaseURI(new PhutilURI('/'));
+    $object->menu = $menu;
+    return $object;
+  }
+
   public function setCrumbs(PhabricatorCrumbsView $crumbs) {
     $this->crumbs = $crumbs;
     return $this;
@@ -128,7 +135,7 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function selectFilter($key, $default = null) {
     $this->selectedFilter = $default;
-    if ($this->menu->getItem($key)) {
+    if ($this->menu->getItem($key) && strlen($key)) {
       $this->selectedFilter = $key;
     }
     return $this->selectedFilter;
@@ -175,6 +182,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $drag_id = null;
     $content_id = celerity_generate_unique_node_id();
     $local_id = null;
+    $background_id = null;
     $local_menu = null;
     $main_id = celerity_generate_unique_node_id();
 
@@ -194,12 +202,21 @@ final class AphrontSideNavFilterView extends AphrontView {
     $nav_menu = null;
     if ($this->menu->getItems()) {
       $local_id = celerity_generate_unique_node_id();
+      $background_id = celerity_generate_unique_node_id();
       $nav_classes[] = 'has-local-nav';
-      $local_menu = phutil_render_tag(
+
+      $menu_background = phutil_render_tag(
         'div',
         array(
-          'class' => 'phabricator-nav-col phabricator-nav-local '.
-                     'phabricator-side-menu',
+          'class' => 'phabricator-nav-column-background',
+          'id'    => $background_id,
+        ),
+        '');
+
+      $local_menu = $menu_background.phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-nav-local phabricator-side-menu',
           'id'    => $local_id,
         ),
         self::renderSingleView($this->menu));
@@ -211,22 +228,24 @@ final class AphrontSideNavFilterView extends AphrontView {
       $nav_classes[] = 'has-crumbs';
     }
 
-    Javelin::initBehavior(
-      'phabricator-nav',
-      array(
-        'mainID'      => $main_id,
-        'localID'     => $local_id,
-        'dragID'      => $drag_id,
-        'contentID'   => $content_id,
-        'menuSize'   => ($crumbs ? 76 : 44),
-      ));
-
-    if ($this->active && $local_id) {
+    if ($this->flexible) {
       Javelin::initBehavior(
-        'phabricator-active-nav',
+        'phabricator-nav',
         array(
-          'localID' => $local_id,
+          'mainID'        => $main_id,
+          'localID'       => $local_id,
+          'dragID'        => $drag_id,
+          'contentID'     => $content_id,
+          'backgroundID'  => $background_id,
         ));
+
+      if ($this->active) {
+        Javelin::initBehavior(
+          'phabricator-active-nav',
+          array(
+            'localID' => $local_id,
+          ));
+      }
     }
 
     return $crumbs.phutil_render_tag(

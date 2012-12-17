@@ -62,6 +62,18 @@ final class DrydockLeaseViewController extends DrydockController {
       ->setUser($this->getRequest()->getUser())
       ->setObject($lease);
 
+    $id = $lease->getID();
+
+    $can_release = ($lease->getStatus() == DrydockLeaseStatus::STATUS_ACTIVE);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Release Lease'))
+        ->setIcon('delete')
+        ->setHref($this->getApplicationURI("/lease/{$id}/release/"))
+        ->setWorkflow(true)
+        ->setDisabled(!$can_release));
+
     return $view;
   }
 

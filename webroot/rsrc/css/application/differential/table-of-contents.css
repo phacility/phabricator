@@ -79,6 +79,10 @@
   color: #666666;
 }
 
+.differential-toc .button {
+  margin: 8px 0px 0px 8px;
+}
+
 .differential-mcoverage-loading {
   color: #888888;
 }

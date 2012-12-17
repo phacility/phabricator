@@ -20,6 +20,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $paste = id(new PhabricatorPasteQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needContent(true)
       ->executeOne();
     if (!$paste) {
       return new Aphront404Response();
@@ -49,7 +50,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($user, $paste, $file);
     $properties = $this->buildPropertyView($paste, $fork_phids);
-    $source_code = $this->buildSourceCodeView($paste, $file);
+    $source_code = $this->buildSourceCodeView($paste);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
       ->addCrumb(
@@ -150,29 +151,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     return $properties;
-  }
-
-  private function buildSourceCodeView(
-    PhabricatorPaste $paste,
-    PhabricatorFile $file) {
-
-    $language = $paste->getLanguage();
-    $source = $file->loadFileData();
-
-    if (empty($language)) {
-      $source = PhabricatorSyntaxHighlighter::highlightWithFilename(
-        $paste->getTitle(),
-        $source);
-    } else {
-      $source = PhabricatorSyntaxHighlighter::highlightWithLanguage(
-        $language,
-        $source);
-    }
-
-    $lines = explode("\n", $source);
-
-    return id(new PhabricatorSourceCodeView())
-      ->setLines($lines);
   }
 
 }

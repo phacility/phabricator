@@ -71,14 +71,13 @@ final class PhameBlogListController extends PhameController {
 
     $view = new PhabricatorObjectItemListView();
     $view->setNoDataString($nodata);
+    $view->setViewer($user);
     foreach ($blogs as $blog) {
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($blog->getName())
         ->setHref($this->getApplicationURI('blog/view/'.$blog->getID().'/'))
-        ->addDetail(
-          pht('Custom Domain'),
-          phutil_escape_html($blog->getDomain()));
+        ->setObject($blog);
 
       $view->addItem($item);
     }

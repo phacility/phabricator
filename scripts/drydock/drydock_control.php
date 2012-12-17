@@ -18,6 +18,7 @@ $workflows = array(
   new DrydockManagementWaitForLeaseWorkflow(),
   new DrydockManagementLeaseWorkflow(),
   new DrydockManagementCloseWorkflow(),
+  new DrydockManagementReleaseWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );
 

@@ -14,13 +14,16 @@ final class DiffusionChangeController extends DiffusionController {
       // TODO: Refine this.
       return new Aphront404Response();
     }
-
-    $callsign = $drequest->getRepository()->getCallsign();
+    
+    $repository = $drequest->getRepository();
+    $callsign = $repository->getCallsign();
+    $commit = $drequest->getRawCommit();
     $changesets = array(
       0 => $changeset,
     );
 
     $changeset_view = new DifferentialChangesetListView();
+    $changeset_view->setTitle(DiffusionView::nameCommit($repository, $commit));
     $changeset_view->setChangesets($changesets);
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
@@ -45,25 +48,22 @@ final class DiffusionChangeController extends DiffusionController {
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
     $changeset_view->setUser($this->getRequest()->getUser());
 
-    $content[] = $this->buildCrumbs(
+    // TODO: This is pretty awkward, unify the CSS between Diffusion and
+    // Differential better.
+    require_celerity_resource('differential-core-view-css');
+    $content[] = $changeset_view->render();
+
+    $nav = $this->buildSideNav('change', true);
+    $nav->appendChild($content);
+    $crumbs = $this->buildCrumbs(
       array(
         'branch' => true,
         'path'   => true,
         'view'   => 'change',
       ));
+    $nav->setCrumbs($crumbs);
 
-    // TODO: This is pretty awkward, unify the CSS between Diffusion and
-    // Differential better.
-    require_celerity_resource('differential-core-view-css');
-    $content[] =
-      '<div class="differential-primary-pane">'.
-        $changeset_view->render().
-      '</div>';
-
-    $nav = $this->buildSideNav('change', true);
-    $nav->appendChild($content);
-
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => 'Change',

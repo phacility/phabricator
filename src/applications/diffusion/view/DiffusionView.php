@@ -95,7 +95,9 @@ abstract class DiffusionView extends AphrontView {
       $text);
   }
 
-  final public static function linkCommit($repository, $commit) {
+  final public static function nameCommit(
+    PhabricatorRepository $repository,
+    $commit) {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -108,7 +110,15 @@ abstract class DiffusionView extends AphrontView {
     }
 
     $callsign = $repository->getCallsign();
-    $commit_name = "r{$callsign}{$commit_name}";
+    return "r{$callsign}{$commit_name}";
+  }
+
+  final public static function linkCommit(
+    PhabricatorRepository $repository,
+    $commit) {
+
+    $commit_name = self::nameCommit($repository, $commit);
+    $callsign = $repository->getCallsign();
 
     return phutil_render_tag(
       'a',

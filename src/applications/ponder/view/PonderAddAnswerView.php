@@ -48,7 +48,7 @@ final class PonderAddAnswerView extends AphrontView {
           ->setUser($this->user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? 'Submit' : 'Make it so.'));
+          ->setValue($is_serious ? 'Submit' : 'Make it so'));
 
     $preview =
       '<div class="aphront-panel-flush">'.

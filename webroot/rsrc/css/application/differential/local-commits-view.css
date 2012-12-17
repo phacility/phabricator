@@ -4,7 +4,6 @@
 
 .differential-local-commits-table {
   width: 100%;
-  font-size: 11px;
   border-collapse: separate;
   border-spacing: 1px 2px;
 }
@@ -14,8 +13,8 @@
   padding: 4px 6px;
 }
 
-.differential-local-commits-table tr td {
-  background: #dcdeca;
+.differential-local-commits-table tr.alt td {
+  background: #dcdcdc;
 }
 
 .differential-local-commits-table td {

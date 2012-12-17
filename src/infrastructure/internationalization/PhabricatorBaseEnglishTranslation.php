@@ -193,6 +193,11 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%s Line(s)' => array(
+        '%s Line',
+        '%s Lines',
+      ),
+
     );
   }
 

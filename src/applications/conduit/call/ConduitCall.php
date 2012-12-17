@@ -81,7 +81,15 @@ final class ConduitCall {
         "base class.");
     }
 
-    return newv($method_class, array());
+    $method = newv($method_class, array());
+
+    if (!($method instanceof ConduitAPIMethod)) {
+      throw new ConduitException(
+        "Method '{$method}' is not valid; the implementation must be ".
+        "a subclass of ConduitAPIMethod.");
+    }
+
+    return $method;
   }
 
 

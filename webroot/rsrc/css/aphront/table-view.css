@@ -44,10 +44,10 @@
 }
 
 .aphront-table-view td {
-  vertical-align:   top;
   padding:          4px 8px;
   font-size:        11px;
   white-space:      nowrap;
+  vertical-align:   middle;
 }
 
 .aphront-table-view td.sorted-column {

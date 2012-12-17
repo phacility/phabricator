@@ -12,6 +12,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $viewPolicy;
 
   private $content;
+  private $rawContent;
 
   public function getURI() {
     return '/P'.$this->getID();
@@ -63,6 +64,18 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function attachContent($content) {
     $this->content = $content;
+    return $this;
+  }
+
+  public function getRawContent() {
+    if ($this->rawContent === null) {
+      throw new Exception("Call attachRawContent() before getRawContent()!");
+    }
+    return $this->rawContent;
+  }
+
+  public function attachRawContent($raw_content) {
+    $this->rawContent = $raw_content;
     return $this;
   }
 

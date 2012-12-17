@@ -56,6 +56,9 @@ JX.behavior('dark-console', function(config) {
       new JX.Request(config.uri, JX.bag)
         .setData({visible: config.visible ? 1 : 0})
         .send();
+
+      // Force resize listeners to take effect.
+      JX.Stratcom.invoke('resize');
     })
     .register();
 

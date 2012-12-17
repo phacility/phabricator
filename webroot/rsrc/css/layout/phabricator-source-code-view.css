@@ -2,6 +2,11 @@
  * @provides phabricator-source-code-view-css
  */
 
+.phabricator-source-code-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .phabricator-source-code {
   white-space: pre-wrap;
   padding: 2px 8px 1px;
@@ -23,4 +28,18 @@
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.phabricator-source-code-summary {
+  margin-bottom: 4px;
+}
+
+/* If a Paste has enormously long lines, truncate them in the summary on the
+   list page. They'll be fully visible on the Paste itself. */
+.phabricator-source-code-summary .phabricator-source-code-container {
+  overflow-x: hidden;
+}
+
+.phabricator-source-code-summary .phabricator-source-code {
+  white-space: nowrap;
 }

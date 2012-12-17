@@ -468,6 +468,12 @@ final class PhabricatorRepositoryPullLocalDaemon
 /* -(  Git Implementation  )------------------------------------------------- */
 
 
+  private function canWrite($path) {
+    $default_path =
+      PhabricatorEnv::getEnvConfig('repository.default-local-path');
+    return Filesystem::isDescendant($path, $default_path);
+  }
+
   /**
    * @task git
    */
@@ -495,6 +501,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     list($err, $stdout) = $repository->execLocalCommand(
       'rev-parse --show-toplevel');
+    $msg = '';
 
     if ($err) {
 
@@ -505,45 +512,74 @@ final class PhabricatorRepositoryPullLocalDaemon
       if (is_dir($path)) {
         $files = Filesystem::listDirectory($path, $include_hidden = true);
         if (!$files) {
-          throw new Exception(
+          $msg =
             "Expected to find a git repository at '{$path}', but there ".
             "is an empty directory there. Remove the directory: the daemon ".
-            "will run 'git clone' for you.");
+            "will run 'git clone' for you.";
         }
-      }
-
-      throw new Exception(
+      } else {
+        $msg =
         "Expected to find a git repository at '{$path}', but there is ".
         "a non-repository directory (with other stuff in it) there. Move or ".
         "remove this directory (or reconfigure the repository to use a ".
         "different directory), and then either clone a repository yourself ".
-        "or let the daemon do it.");
+        "or let the daemon do it.";
+      }
     } else {
       $repo_path = rtrim($stdout, "\n");
 
       if (empty($repo_path)) {
-        throw new Exception(
+        $err = true;
+        $msg =
           "Expected to find a git repository at '{$path}', but ".
           "there was no result from `git rev-parse --show-toplevel`. ".
           "Something is misconfigured or broken. The git repository ".
-          "may be inside a '.git/' directory.");
-      }
-
-      if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
-        throw new Exception(
+          "may be inside a '.git/' directory.";
+      } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
+        $err = true;
+        $msg =
           "Expected to find repo at '{$path}', but the actual ".
           "git repository root for this directory is '{$repo_path}'. ".
           "Something is misconfigured. The repository's 'Local Path' should ".
           "be set to some place where the daemon can check out a working ".
-          "copy, and should not be inside another git repository.");
+          "copy, and should not be inside another git repository.";
       }
     }
 
+    if ($err && $this->canWrite($path)) {
+      phlog("{$path} failed sanity check; recloning. ({$msg})");
+      Filesystem::remove($path);
+      $this->executeGitCreate($repository, $path);
+    } else if ($err) {
+      throw new Exception($msg);
+    }
 
-    // This is a local command, but needs credentials.
-    $future = $repository->getRemoteCommandFuture('fetch --all --prune');
-    $future->setCWD($path);
-    $future->resolvex();
+    $retry = false;
+    do {
+      // This is a local command, but needs credentials.
+      $future = $repository->getRemoteCommandFuture('fetch --all --prune');
+      $future->setCWD($path);
+      list($err, $stdout, $stderr) = $future->resolve();
+
+      if ($err && !$retry && $this->canWrite($path)) {
+        $retry = true;
+        // Fix remote origin url if it doesn't match our configuration
+        $origin_url =
+          $repository->execLocalCommand('config --get remote.origin.url');
+        $remote_uri = $repository->getDetail('remote-uri');
+        if ($origin_url != $remote_uri) {
+          $repository->execLocalCommand('remote set-url origin %s',
+                                        $remote_uri);
+        }
+      } else if ($err) {
+        throw new Exception(
+          "git fetch failed with error #{$err}:\n".
+          "stdout:{$stdout}\n\n".
+          "stderr:{$stderr}\n");
+      } else {
+        $retry = false;
+      }
+    } while ($retry);
   }
 
 

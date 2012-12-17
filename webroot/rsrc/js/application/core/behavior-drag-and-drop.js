@@ -2,7 +2,6 @@
  * @provides javelin-behavior-aphront-drag-and-drop
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-util
  *           phabricator-drag-and-drop-file-upload
  */
 
@@ -23,8 +22,15 @@ JX.behavior('aphront-drag-and-drop', function(config) {
   var list = JX.$(config.list);
 
   var drop = new JX.PhabricatorDragAndDropFileUpload(JX.$(config.list))
-    .setActivatedClass(config.activatedClass)
     .setURI(config.uri);
+
+  drop.listen('didBeginDrag', function(e) {
+    JX.DOM.alterClass(list, config.activatedClass, true);
+  });
+
+  drop.listen('didEndDrag', function(e) {
+    JX.DOM.alterClass(list, config.activatedClass, false);
+  });
 
   drop.listen('willUpload', function(f) {
     pending++;
