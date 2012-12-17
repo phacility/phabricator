@@ -53,7 +53,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($request->getStr('name'))
-          ->setCaption('Optional file display name.'))
+          ->setCaption(pht('Optional file display name.')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Upload'))
@@ -66,12 +66,14 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
         ->setName(pht('Upload'))
         ->setHref($request->getRequestURI()));
 
+    $title = pht('Upload File');
+
     $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Upload File'));
+      ->setHeader($title);
 
     if ($errors) {
       $errors = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 
@@ -87,7 +89,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
         $global_upload,
       ),
       array(
-        'title' => 'Upload File',
+        'title' => $title,
         'device' => true,
       ));
   }
