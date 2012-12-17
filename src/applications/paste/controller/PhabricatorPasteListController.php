@@ -16,8 +16,9 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $query = new PhabricatorPasteQuery();
-    $query->setViewer($user);
+    $query = id(new PhabricatorPasteQuery())
+      ->setViewer($user)
+      ->needContent(true);
 
     $nav = $this->buildSideNavView($this->filter);
     $filter = $nav->getSelectedFilter();
@@ -76,32 +77,37 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
     $this->loadHandles(mpull($pastes, 'getAuthorPHID'));
 
-    $file_phids = mpull($pastes, 'getFilePHID');
-    $files = array();
-    if ($file_phids) {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        "phid IN (%Ls)",
-        $file_phids);
-    }
-    $files_map = mpull($files, null, 'getPHID');
+    $lang_map = PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
     $list = new PhabricatorObjectItemListView();
     $list->setViewer($user);
     foreach ($pastes as $paste) {
       $created = phabricator_date($paste->getDateCreated(), $user);
       $author = $this->getHandle($paste->getAuthorPHID())->renderLink();
+      $source_code = $this->buildSourceCodeView($paste, 5)->render();
+      $source_code = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-source-code-summary',
+        ),
+        $source_code);
 
-      $file_phid = $paste->getFilePHID();
-      $file = idx($files_map, $file_phid);
-
-      $source_code = $this->buildSourceCodeView($paste, $file, 5)->render();
+      $line_count = count(explode("\n", $paste->getContent()));
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($paste->getFullName())
         ->setHref('/P'.$paste->getID())
         ->setObject($paste)
         ->addAttribute(pht('Created %s by %s', $created, $author))
+        ->addIcon('none', pht('%s Line(s)', number_format($line_count)))
         ->appendChild($source_code);
+
+      $lang_name = $paste->getLanguage();
+      if ($lang_name) {
+        $lang_name = idx($lang_map, $lang_name, $lang_name);
+        $item->addIcon('none', phutil_escape_html($lang_name));
+      }
+
       $list->addItem($item);
     }
 

@@ -24,3 +24,7 @@
   -ms-user-select: none;
   user-select: none;
 }
+
+.phabricator-source-code-summary {
+  margin-bottom: 4px;
+}
