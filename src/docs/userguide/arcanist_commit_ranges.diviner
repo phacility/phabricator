@@ -114,6 +114,8 @@ is found. Valid rules are listed below. In this list, "*" means "any string".
   - `arc:empty` Use the empty state (as though the repository were completely
     empty, the range will include every commit that is an ancestor of the
     working copy).
+  - `arc:this` Use the current commit. This means `.` under Mercurial and HEAD
+    under Git.
 
 Rules are also available which change the processing order of rulesets:
 
