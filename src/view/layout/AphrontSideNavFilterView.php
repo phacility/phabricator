@@ -32,6 +32,13 @@ final class AphrontSideNavFilterView extends AphrontView {
     $this->menu = new PhabricatorMenuView();
   }
 
+  public static function newFromMenu(PhabricatorMenuView $menu) {
+    $object = new AphrontSideNavFilterView();
+    $object->setBaseURI(new PhutilURI('/'));
+    $object->menu = $menu;
+    return $object;
+  }
+
   public function setCrumbs(PhabricatorCrumbsView $crumbs) {
     $this->crumbs = $crumbs;
     return $this;
@@ -128,7 +135,7 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function selectFilter($key, $default = null) {
     $this->selectedFilter = $default;
-    if ($this->menu->getItem($key)) {
+    if ($this->menu->getItem($key) && strlen($key)) {
       $this->selectedFilter = $key;
     }
     return $this->selectedFilter;

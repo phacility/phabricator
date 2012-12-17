@@ -1,35 +1,20 @@
 <?php
 
 final class PhabricatorFileListController extends PhabricatorFileController {
+
   private $filter;
-
-  private $useBasicUploader = false;
-
-  private $listAuthor;
-  private $listRows;
-  private $listRowClasses;
 
   private function setFilter($filter) {
     $this->filter = $filter;
     return $this;
   }
+
   private function getFilter() {
     return $this->filter;
   }
 
-  private function useBasicUploader() {
-    return $this->getUseBasicUploader();
-  }
-  private function getUseBasicUploader() {
-    return $this->useBasicUploader;
-  }
-  private function setUseBasicUploader($use_basic_uploader) {
-    $this->useBasicUploader = $use_basic_uploader;
-    return $this;
-  }
-
   public function willProcessRequest(array $data) {
-    $this->setFilter(idx($data, 'filter', 'upload'));
+    $this->setFilter(idx($data, 'filter', 'my'));
   }
 
   public function processRequest() {
@@ -42,26 +27,13 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     $query = id(new PhabricatorFileQuery())
       ->setViewer($user);
 
-    $show_pager = true;
-    $show_upload = false;
-
     switch ($this->getFilter()) {
-      case 'upload':
-      default:
-        $this->setUseBasicUploader($request->getExists('basic_uploader'));
-
-        $query->withAuthorPHIDs(array($user->getPHID()));
-        $pager->setPageSize(10);
-
-        $header = pht('Recently Uploaded Files');
-        $show_pager = false;
-        $show_upload = true;
-        break;
       case 'my':
         $query->withAuthorPHIDs(array($user->getPHID()));
         $header = pht('Files You Uploaded');
         break;
       case 'all':
+      default:
         $header = pht('All Files');
         break;
     }
@@ -74,9 +46,6 @@ final class PhabricatorFileListController extends PhabricatorFileController {
 
     $side_nav = $this->buildSideNavView();
     $side_nav->selectFilter($this->getFilter());
-    if ($show_upload) {
-      $side_nav->appendChild($this->renderUploadPanel());
-    }
 
     $header_view = id(new PhabricatorHeaderView())
       ->setHeader($header);
@@ -85,13 +54,23 @@ final class PhabricatorFileListController extends PhabricatorFileController {
       array(
         $header_view,
         $file_list,
-        $show_pager ? $pager : null,
+        $pager,
+        new PhabricatorGlobalUploadTargetView(),
       ));
+
+    $side_nav->setCrumbs(
+      $this
+        ->buildApplicationCrumbs()
+        ->addCrumb(
+          id(new PhabricatorCrumbView())
+            ->setName($header)
+            ->setHref($request->getRequestURI())));
 
     return $this->buildApplicationPage(
       $side_nav,
       array(
         'title' => 'Files',
+        'device' => true,
       ));
   }
 
@@ -141,66 +120,4 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     return $list_view;
   }
 
-  private function buildSideNavView() {
-    $view = new AphrontSideNavFilterView();
-    $view->setBaseURI(new PhutilURI($this->getApplicationURI('/filter/')));
-
-    $view->addLabel('Files');
-    $view->addFilter('upload', 'Upload File');
-    $view->addFilter('my', 'My Files');
-    $view->addFilter('all', 'All Files');
-
-    return $view;
-  }
-
-  private function renderUploadPanel() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $limit_text = PhabricatorFileUploadView::renderUploadLimit();
-
-    if ($this->useBasicUploader()) {
-
-      $upload_panel = new PhabricatorFileUploadView();
-      $upload_panel->setUser($user);
-
-    } else {
-
-      require_celerity_resource('files-css');
-      $upload_id = celerity_generate_unique_node_id();
-      $panel_id  = celerity_generate_unique_node_id();
-
-      $upload_panel = new AphrontPanelView();
-      $upload_panel->setHeader('Upload Files');
-      $upload_panel->setCaption($limit_text);
-      $upload_panel->setCreateButton('Basic Uploader',
-        $request->getRequestURI()->setQueryParam('basic_uploader', true)
-      );
-
-      $upload_panel->setWidth(AphrontPanelView::WIDTH_FULL);
-      $upload_panel->setID($panel_id);
-
-      $upload_panel->appendChild(
-        phutil_render_tag(
-          'div',
-          array(
-            'id'    => $upload_id,
-            'style' => 'display: none;',
-            'class' => 'files-drag-and-drop',
-          ),
-          ''));
-
-      Javelin::initBehavior(
-        'files-drag-and-drop',
-        array(
-          'uri'             => '/file/dropupload/',
-          'browseURI'       => '/file/filter/my/',
-          'control'         => $upload_id,
-          'target'          => $panel_id,
-          'activatedClass'  => 'aphront-panel-view-drag-and-drop',
-        ));
-    }
-
-    return $upload_panel;
-  }
 }

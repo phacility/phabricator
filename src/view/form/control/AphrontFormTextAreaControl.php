@@ -11,7 +11,6 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
 
   private $height;
   private $readOnly;
-  private $enableDragAndDropFileUploads;
   private $customClass;
 
   public function setHeight($height) {

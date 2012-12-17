@@ -76,6 +76,7 @@ final class PhabricatorDirectoryMainController
     );
 
     $nav->appendChild($content);
+    $nav->appendChild(new PhabricatorGlobalUploadTargetView());
 
     return $this->buildStandardPageResponse(
       $nav,
@@ -491,7 +492,7 @@ final class PhabricatorDirectoryMainController
 
     $nav_buttons[] = array(
       'Upload File',
-      '/file/',
+      '/file/upload/',
       'upload-file',
       'Share Files');
     $nav_buttons[] = array(
