@@ -2753,7 +2753,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-property-list-view-css' =>
   array(
-    'uri' => '/res/90ed3b02/rsrc/css/layout/phabricator-property-list-view.css',
+    'uri' => '/res/9f4d6640/rsrc/css/layout/phabricator-property-list-view.css',
     'type' => 'css',
     'requires' =>
     array(

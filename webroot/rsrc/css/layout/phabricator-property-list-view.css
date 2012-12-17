@@ -106,3 +106,9 @@
   + .phabricator-property-list-view {
   margin-top: 0px;
 }
+
+
+.phabricator-property-list-image {
+  margin: auto;
+  max-width: 95%;
+}

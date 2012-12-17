@@ -9,153 +9,145 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $this->phid);
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
+
     if (!$file) {
       return new Aphront404Response();
     }
 
-    $author_child = null;
-    if ($file->getAuthorPHID()) {
-      $author = id(new PhabricatorUser())->loadOneWhere(
-        'phid = %s',
-        $file->getAuthorPHID());
+    $this->loadHandles(array($file->getAuthorPHID()));
 
-      if ($author) {
-        $author_child = id(new AphrontFormStaticControl())
-          ->setLabel('Author')
-          ->setName('author')
-          ->setValue($author->getUserName());
-      }
-    }
+    $phid = $file->getPHID();
 
-    $form = new AphrontFormView();
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName('F'.$file->getID())
+        ->setHref($this->getApplicationURI("/info/{$phid}/")));
 
-    $submit = new AphrontFormSubmitControl();
+    $header = id(new PhabricatorHeaderView())
+      ->setObjectName('F'.$file->getID())
+      ->setHeader($file->getName());
 
-    $form->setAction($file->getViewURI());
-    if ($file->isViewableInBrowser()) {
-      $submit->setValue('View File');
-    } else {
-      $submit->setValue('Download File');
-    }
+    $actions = $this->buildActionView($file);
+    $properties = $this->buildPropertyView($file);
 
-    if (($user->getPHID() == $file->getAuthorPHID()) ||
-        ($user->getIsAdmin())) {
-      $submit->addCancelButton(
-        '/file/delete/'.$file->getID().'/',
-        'Delete File');
-    }
-
-    $file_id = 'F'.$file->getID();
-
-    $form->setUser($user);
-    $form
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Name')
-          ->setName('name')
-          ->setValue($file->getName()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('ID')
-          ->setName('id')
-          ->setValue($file_id)
-          ->setCaption(
-            'Download this file with: <tt>arc download '.
-            phutil_escape_html($file_id).'</tt>'))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('PHID')
-          ->setName('phid')
-          ->setValue($file->getPHID()))
-      ->appendChild($author_child)
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Created')
-          ->setName('created')
-          ->setValue(phabricator_datetime($file->getDateCreated(), $user)))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Mime Type')
-          ->setName('mime')
-          ->setValue($file->getMimeType()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Size')
-          ->setName('size')
-          ->setValue($file->getByteSize().' bytes'))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Engine')
-          ->setName('storageEngine')
-          ->setValue($file->getStorageEngine()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Format')
-          ->setName('storageFormat')
-          ->setValue($file->getStorageFormat()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Handle')
-          ->setName('storageHandle')
-          ->setValue($file->getStorageHandle()))
-      ->appendChild(
-        id($submit));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('File Info - '.$file->getName());
-
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-
-    $xform_panel = null;
-
-    $transformations = id(new PhabricatorTransformedFile())->loadAllWhere(
-      'originalPHID = %s',
-      $file->getPHID());
-    if ($transformations) {
-      $transformed_phids = mpull($transformations, 'getTransformedPHID');
-      $transformed_files = id(new PhabricatorFile())->loadAllWhere(
-        'phid in (%Ls)',
-        $transformed_phids);
-      $transformed_map = mpull($transformed_files, null, 'getPHID');
-
-      $rows = array();
-      foreach ($transformations as $transformed) {
-        $phid = $transformed->getTransformedPHID();
-        $rows[] = array(
-          phutil_escape_html($transformed->getTransform()),
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => $transformed_map[$phid]->getBestURI(),
-            ),
-            $phid));
-      }
-
-      $table = new AphrontTableView($rows);
-      $table->setHeaders(
-        array(
-          'Transform',
-          'File',
-        ));
-
-      $xform_panel = new AphrontPanelView();
-      $xform_panel->appendChild($table);
-      $xform_panel->setWidth(AphrontPanelView::WIDTH_FORM);
-      $xform_panel->setHeader('Transformations');
-    }
-
-    return $this->buildStandardPageResponse(
-      array($panel, $xform_panel),
+    return $this->buildApplicationPage(
       array(
-        'title' => 'File Info - '.$file->getName(),
+        $crumbs,
+        $header,
+        $actions,
+        $properties,
+      ),
+      array(
+        'title' => $file->getName(),
+        'device'  => true,
       ));
   }
+
+  private function buildActionView(PhabricatorFile $file) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $id = $file->getID();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObject($file);
+
+    if ($file->isViewableInBrowser()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('View File'))
+          ->setIcon('preview')
+          ->setHref($file->getViewURI()));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setUser($user)
+          ->setRenderAsForm(true)
+          ->setName(pht('Download File'))
+          ->setIcon('download')
+          ->setHref($file->getViewURI()));
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Delete File'))
+        ->setIcon('delete')
+        ->setHref($this->getApplicationURI("/delete/{$id}/"))
+        ->setWorkflow(true));
+
+    return $view;
+  }
+
+  private function buildPropertyView(PhabricatorFile $file) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $view = id(new PhabricatorPropertyListView());
+
+    if ($file->getAuthorPHID()) {
+      $view->addProperty(
+        pht('Author'),
+        $this->getHandle($file->getAuthorPHID())->renderLink());
+    }
+
+    $view->addProperty(
+      pht('Created'),
+      phabricator_datetime($file->getDateCreated(), $user));
+
+    $view->addProperty(
+      pht('Size'),
+      phabricator_format_bytes($file->getByteSize()));
+
+    $view->addSectionHeader(pht('Technical Details'));
+
+    $view->addProperty(
+      pht('Mime Type'),
+      phutil_escape_html($file->getMimeType()));
+
+    $view->addProperty(
+      pht('Engine'),
+      phutil_escape_html($file->getStorageEngine()));
+
+    $view->addProperty(
+      pht('Format'),
+      phutil_escape_html($file->getStorageFormat()));
+
+    $view->addProperty(
+      pht('Handle'),
+      phutil_escape_html($file->getStorageHandle()));
+
+    if ($file->isViewableInBrowser()) {
+
+      // TODO: Clean this up after Pholio (dark backgrounds, standardization,
+      // etc.)
+
+      $image = phutil_render_tag(
+        'img',
+        array(
+          'src' => $file->getViewURI(),
+          'class' => 'phabricator-property-list-image',
+        ));
+
+      $linked_image = phutil_render_tag(
+        'a',
+        array(
+          'href' => $file->getViewURI(),
+        ),
+        $image);
+
+      $view->addTextContent($linked_image);
+    }
+
+    return $view;
+  }
+
 }
