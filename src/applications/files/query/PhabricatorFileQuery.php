@@ -5,6 +5,7 @@ final class PhabricatorFileQuery
 
   private $ids;
   private $phids;
+  private $authorPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +14,11 @@ final class PhabricatorFileQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withAuthorPHIDs(array $phids) {
+    $this->authorPHIDs = $phids;
     return $this;
   }
 
@@ -48,6 +54,13 @@ final class PhabricatorFileQuery
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->authorPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'authorPHID IN (%Ls)',
+        $this->authorPHIDs);
     }
 
     return $this->formatWhereClause($where);

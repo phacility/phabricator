@@ -3,17 +3,11 @@
 final class PhabricatorFileListController extends PhabricatorFileController {
   private $filter;
 
-  private $showUploader;
   private $useBasicUploader = false;
 
   private $listAuthor;
   private $listRows;
   private $listRowClasses;
-  private $listHeader;
-  private $showListPager = true;
-  private $listPager;
-  private $pagerOffset;
-  private $pagerPageSize;
 
   private function setFilter($filter) {
     $this->filter = $filter;
@@ -21,17 +15,6 @@ final class PhabricatorFileListController extends PhabricatorFileController {
   }
   private function getFilter() {
     return $this->filter;
-  }
-
-  private function showUploader() {
-    return $this->getShowUploader();
-  }
-  private function getShowUploader() {
-    return $this->showUploader;
-  }
-  private function setShowUploader($show_uploader) {
-    $this->showUploader = $show_uploader;
-    return $this;
   }
 
   private function useBasicUploader() {
@@ -45,73 +28,6 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     return $this;
   }
 
-  private function setListAuthor(PhabricatorUser $list_author) {
-    $this->listAuthor = $list_author;
-    return $this;
-  }
-  private function getListAuthor() {
-    return $this->listAuthor;
-  }
-
-  private function getListRows() {
-    return $this->listRows;
-  }
-  private function setListRows($list_rows) {
-    $this->listRows = $list_rows;
-    return $this;
-  }
-
-  private function getListRowClasses() {
-    return $this->listRowClasses;
-  }
-  private function setListRowClasses($list_row_classes) {
-    $this->listRowClasses = $list_row_classes;
-    return $this;
-  }
-
-  private function getListHeader() {
-    return $this->listHeader;
-  }
-  private function setListHeader($list_header) {
-    $this->listHeader = $list_header;
-    return $this;
-  }
-
-  private function showListPager() {
-    return $this->getShowListPager();
-  }
-  private function getShowListPager() {
-    return $this->showListPager;
-  }
-  private function setShowListPager($show_list_pager) {
-    $this->showListPager = $show_list_pager;
-    return $this;
-  }
-
-  private function getListPager() {
-    return $this->listPager;
-  }
-  private function setListPager($list_pager) {
-    $this->listPager = $list_pager;
-    return $this;
-  }
-
-  private function setPagerOffset($pager_offset) {
-    $this->pagerOffset = $pager_offset;
-    return $this;
-  }
-  private function getPagerOffset() {
-    return $this->pagerOffset;
-  }
-
-  private function setPagerPageSize($pager_page_size) {
-    $this->pagerPageSize = $pager_page_size;
-    return $this;
-  }
-  private function getPagerPageSize() {
-    return $this->pagerPageSize;
-  }
-
   public function willProcessRequest(array $data) {
     $this->setFilter(idx($data, 'filter', 'upload'));
   }
@@ -120,170 +36,121 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
+
+    $query = id(new PhabricatorFileQuery())
+      ->setViewer($user);
+
+    $show_pager = true;
+    $show_upload = false;
+
     switch ($this->getFilter()) {
       case 'upload':
       default:
-        $this->setShowUploader(true);
         $this->setUseBasicUploader($request->getExists('basic_uploader'));
-        $see_all = phutil_render_tag(
-          'a',
-          array(
-            'href' => '/file/filter/all',
-          ),
-          'See all Files');
-        $this->setListHeader("Recently Uploaded Files &middot; {$see_all}");
-        $this->setShowListPager(false);
-        $this->setPagerOffset(0);
-        $this->setPagerPageSize(10);
+
+        $query->withAuthorPHIDs(array($user->getPHID()));
+        $pager->setPageSize(10);
+
+        $header = pht('Recently Uploaded Files');
+        $show_pager = false;
+        $show_upload = true;
         break;
       case 'my':
-        $this->setShowUploader(false);
-        $this->setListHeader('Files You Uploaded');
-        $this->setListAuthor($user);
-        $this->setPagerOffset($request->getInt('page', 0));
+        $query->withAuthorPHIDs(array($user->getPHID()));
+        $header = pht('Files You Uploaded');
         break;
       case 'all':
-        $this->setShowUploader(false);
-        $this->setListHeader('All Files');
-        $this->setPagerOffset($request->getInt('page', 0));
+        $header = pht('All Files');
         break;
     }
-    $this->loadListData();
 
-    $side_nav = new PhabricatorFileSideNavView();
-    $side_nav->setSelectedFilter($this->getFilter());
-    if ($this->showUploader()) {
+    $files = $query->executeWithCursorPager($pager);
+    $this->loadHandles(mpull($files, 'getAuthorPHID'));
+
+    $highlighted = $request->getStrList('h');
+    $file_list = $this->buildFileList($files, $highlighted);
+
+    $side_nav = $this->buildSideNavView();
+    $side_nav->selectFilter($this->getFilter());
+    if ($show_upload) {
       $side_nav->appendChild($this->renderUploadPanel());
     }
-    $side_nav->appendChild($this->renderList());
 
-    return $this->buildStandardPageResponse(
+    $header_view = id(new PhabricatorHeaderView())
+      ->setHeader($header);
+
+    $side_nav->appendChild(
+      array(
+        $header_view,
+        $file_list,
+        $show_pager ? $pager : null,
+      ));
+
+    return $this->buildApplicationPage(
       $side_nav,
       array(
         'title' => 'Files',
       ));
   }
 
-  private function loadListData() {
+  private function buildFileList(array $files, array $highlighted_ids) {
+    assert_instances_of($files, 'PhabricatorFile');
+
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($this->getPagerOffset());
-    if ($this->getPagerPageSize()) {
-      $pager->setPageSize($this->getPagerPageSize());
-    }
+    $highlighted_ids = array_fill_keys($highlighted_ids, true);
 
-    $author = $this->getListAuthor();
-    if ($author) {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'authorPHID = %s ORDER BY id DESC LIMIT %d, %d',
-        $author->getPHID(),
-        $pager->getOffset(),
-        $pager->getPageSize() + 1);
-    } else {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        '1 = 1 ORDER BY id DESC LIMIT %d, %d',
-        $pager->getOffset(),
-        $pager->getPageSize() + 1);
-    }
+    $list_view = id(new PhabricatorObjectItemListView())
+      ->setViewer($user);
 
-    $files = $pager->sliceResults($files);
-    $pager->setURI($request->getRequestURI(), 'page');
-    $this->setListPager($pager);
-
-    $phids = mpull($files, 'getAuthorPHID');
-    $handles = $this->loadViewerHandles($phids);
-
-    $highlighted = $request->getStr('h');
-    $highlighted = explode('-', $highlighted);
-    $highlighted = array_fill_keys($highlighted, true);
-
-    $rows = array();
-    $rowc = array();
     foreach ($files as $file) {
-      if ($file->isViewableInBrowser()) {
-        $view_button = phutil_render_tag(
-          'a',
-          array(
-            'class' => 'small button grey',
-            'href'  => $file->getViewURI(),
-          ),
-          'View');
-      } else {
-        $view_button = null;
-      }
-
-      if (isset($highlighted[$file->getID()])) {
-        $rowc[] = 'highlighted';
-      } else {
-        $rowc[] = '';
-      }
-
+      $id = $file->getID();
+      $phid = $file->getPHID();
       $name = $file->getName();
-      $rows[] = array(
-        phutil_escape_html('F'.$file->getID()),
-        $file->getAuthorPHID()
-          ? $handles[$file->getAuthorPHID()]->renderLink()
-          : null,
-        phutil_render_tag(
-          'a',
-          array(
-            // Don't use $file->getBestURI() to improve discoverability of /F.
-            'href' => '/F'.$file->getID(),
-          ),
-          ($name != '' ? phutil_escape_html($name) : '<em>no name</em>')),
-        phutil_escape_html(number_format($file->getByteSize()).' bytes'),
-        phutil_render_tag(
-          'a',
-          array(
-            'class' => 'small button grey',
-            'href'  => '/file/info/'.$file->getPHID().'/',
-          ),
-          'Info'),
-        $view_button,
-        phabricator_date($file->getDateCreated(), $user),
-        phabricator_time($file->getDateCreated(), $user),
-      );
+
+      $file_name = "F{$id} {$name}";
+      $file_uri = $this->getApplicationURI("/info/{$phid}/");
+
+      $date_created = phabricator_date($file->getDateCreated(), $user);
+
+      $author_phid = $file->getAuthorPHID();
+      if ($author_phid) {
+        $author_link = $this->getHandle($author_phid)->renderLink();
+        $uploaded = pht('Uploaded by %s on %s', $author_link, $date_created);
+      } else {
+        $uploaded = pht('Uploaded on %s', $date_created);
+      }
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setObject($file)
+        ->setHeader($file_name)
+        ->setHref($file_uri)
+        ->addAttribute($uploaded)
+        ->addIcon('none', phabricator_format_bytes($file->getByteSize()));
+
+      if (isset($highlighted_ids[$id])) {
+        $item->setEffect('highlighted');
+      }
+
+      $list_view->addItem($item);
     }
-    $this->setListRows($rows);
-    $this->setListRowClasses($rowc);
+
+    return $list_view;
   }
 
-  private function renderList() {
-    $table = new AphrontTableView($this->getListRows());
-    $table->setRowClasses($this->getListRowClasses());
-    $table->setHeaders(
-      array(
-        'File ID',
-        'Author',
-        'Name',
-        'Size',
-        '',
-        '',
-        'Created',
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        null,
-        '',
-        'wide pri',
-        'right',
-        'action',
-        'action',
-        '',
-        'right',
-      ));
+  private function buildSideNavView() {
+    $view = new AphrontSideNavFilterView();
+    $view->setBaseURI(new PhutilURI($this->getApplicationURI('/filter/')));
 
-    $panel = new AphrontPanelView();
-    $panel->appendChild($table);
-    $panel->setHeader($this->getListHeader());
-    if ($this->showListPager()) {
-      $panel->appendChild($this->getListPager());
-    }
+    $view->addLabel('Files');
+    $view->addFilter('upload', 'Upload File');
+    $view->addFilter('my', 'My Files');
+    $view->addFilter('all', 'All Files');
 
-    return $panel;
+    return $view;
   }
 
   private function renderUploadPanel() {

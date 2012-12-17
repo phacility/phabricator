@@ -96,8 +96,10 @@
 }
 
 
-/* - Bar Colors --------------------------------
+/* - Bar Colors ----------------------------------------------------------------
 
+  Colors for the left-hand border bars, used to indicate object status or other
+  attributes.
 
 */
 
@@ -139,4 +141,15 @@
 
 .phabricator-object-item-bar-color-black {
   border-left-color: #333333;
+}
+
+
+/* - Effects -------------------------------------------------------------------
+
+  Effects like highlighted items.
+
+*/
+
+.phabricator-object-item-highlighted {
+  background: #ffff88;
 }

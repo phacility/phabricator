@@ -44,7 +44,7 @@ JX.behavior('files-drag-and-drop', function(config) {
       for (var ii = 0; ii < files.length; ii++) {
         ids.push(files[ii].getID());
       }
-      uri.setQueryParam('h', ids.join('-'));
+      uri.setQueryParam('h', ids.join(','));
 
       // Reset so if you hit 'back' into the bfcache the page is still in a
       // sensible state.

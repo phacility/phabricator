@@ -10,6 +10,16 @@ final class PhabricatorObjectItemView extends AphrontView {
   private $icons = array();
   private $barColor;
   private $object;
+  private $effect;
+
+  public function setEffect($effect) {
+    $this->effect = $effect;
+    return $this;
+  }
+
+  public function getEffect() {
+    return $this->effect;
+  }
 
   public function setObject($object) {
     $this->object = $object;
@@ -137,6 +147,15 @@ final class PhabricatorObjectItemView extends AphrontView {
     $classes[] = 'phabricator-object-item';
     if ($this->barColor) {
       $classes[] = 'phabricator-object-item-bar-color-'.$this->barColor;
+    }
+    switch ($this->effect) {
+      case 'highlighted':
+        $classes[] = 'phabricator-object-item-highlighted';
+        break;
+      case null:
+        break;
+      default:
+        throw new Exception("Invalid effect!");
     }
 
     return phutil_render_tag(
