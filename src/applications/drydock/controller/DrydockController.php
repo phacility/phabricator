@@ -86,4 +86,88 @@ abstract class DrydockController extends PhabricatorController {
     return $panel;
   }
 
+  protected function buildLeaseListView(array $leases) {
+    assert_instances_of($leases, 'DrydockLease');
+
+    $user = $this->getRequest()->getUser();
+    $view = new PhabricatorObjectItemListView();
+
+    foreach ($leases as $lease) {
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($lease->getLeaseName())
+        ->setHref($this->getApplicationURI('/lease/'.$lease->getID().'/'));
+
+      if ($lease->hasAttachedResource()) {
+        $resource = $lease->getResource();
+
+        $resource_href = '/resource/'.$resource->getID().'/';
+        $resource_href = $this->getApplicationURI($resource_href);
+
+        $resource_name = $resource->getName();
+
+        $item->addAttribute(
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => $resource_href,
+            ),
+            phutil_escape_html($resource_name)));
+      }
+
+      $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());
+      $item->addAttribute(phutil_escape_html($status));
+
+      $date_created = phabricator_date($lease->getDateCreated(), $user);
+      $item->addAttribute(pht('Created on %s', $date_created));
+
+      if ($lease->isActive()) {
+        $item->setBarColor('green');
+      } else {
+        $item->setBarColor('red');
+      }
+
+      $view->addItem($item);
+    }
+
+    return $view;
+  }
+
+  protected function buildResourceListView(array $resources) {
+    assert_instances_of($resources, 'DrydockResource');
+
+    $user = $this->getRequest()->getUser();
+    $view = new PhabricatorObjectItemListView();
+
+    foreach ($resources as $resource) {
+      $name = pht('Resource %d', $resource->getID()).': '.$resource->getName();
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setHref($this->getApplicationURI('/resource/'.$resource->getID().'/'))
+        ->setHeader($name);
+
+      $status = DrydockResourceStatus::getNameForStatus($resource->getStatus());
+      $item->addAttribute($status);
+
+      switch ($resource->getStatus()) {
+        case DrydockResourceStatus::STATUS_PENDING:
+          $item->setBarColor('yellow');
+          break;
+        case DrydockResourceStatus::STATUS_OPEN:
+          $item->setBarColor('green');
+          break;
+        case DrydockResourceStatus::STATUS_DESTROYED:
+          $item->setBarColor('black');
+          break;
+        default:
+          $item->setBarColor('red');
+          break;
+      }
+
+      $view->addItem($item);
+    }
+
+    return $view;
+  }
+
+
 }

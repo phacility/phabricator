@@ -12,8 +12,6 @@ final class DrydockResourceViewController extends DrydockController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildSideNav('resource');
-
     $resource = id(new DrydockResource())->load($this->id);
     if (!$resource) {
       return new Aphront404Response();
@@ -32,7 +30,11 @@ final class DrydockResourceViewController extends DrydockController {
 
     $leases = id(new DrydockLeaseQuery())
       ->withResourceIDs(array($resource->getID()))
+      ->needResources(true)
       ->execute();
+
+    $lease_header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Leases'));
 
     $lease_list = $this->buildLeaseListView($leases);
     $lease_list->setNoDataString(pht('This resource has no leases.'));
@@ -48,17 +50,21 @@ final class DrydockResourceViewController extends DrydockController {
     $log_table = $this->buildLogTableView($logs);
     $log_table->appendChild($pager);
 
-    $nav->appendChild(
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Resource %d', $resource->getID())));
+
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         $header,
         $actions,
         $properties,
+        $lease_header,
         $lease_list,
         $log_table,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'device'  => true,
         'title'   => $title,
@@ -109,36 +115,6 @@ final class DrydockResourceViewController extends DrydockController {
           phutil_escape_html($key),
           phutil_escape_html($value));
       }
-    }
-
-    return $view;
-  }
-
-  private function buildLeaseListView(array $leases) {
-    assert_instances_of($leases, 'DrydockLease');
-
-    $user = $this->getRequest()->getUser();
-
-    $view = new PhabricatorObjectItemListView();
-
-    foreach ($leases as $lease) {
-      $item = id(new PhabricatorObjectItemView())
-        ->setHeader($lease->getLeaseName())
-        ->setHref($this->getApplicationURI('/lease/'.$lease->getID().'/'));
-
-      $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());
-      $item->addAttribute(phutil_escape_html($status));
-
-      $date_created = phabricator_date($lease->getDateCreated(), $user);
-      $item->addAttribute(pht('Created on %s', $date_created));
-
-      if ($lease->isActive()) {
-        $item->setBarColor('green');
-      } else {
-        $item->setBarColor('red');
-      }
-
-      $view->addItem($item);
     }
 
     return $view;

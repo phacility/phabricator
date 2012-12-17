@@ -62,7 +62,8 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
 
     $this->log(pht('Complete.'));
 
-    $resource = $this->newResourceTemplate($repository->getCallsign());
+    $resource = $this->newResourceTemplate(
+      'Working Copy ('.$repository->getCallsign().')');
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->setAttribute('lease.host', $host_lease->getID());
     $resource->setAttribute('path', $path);

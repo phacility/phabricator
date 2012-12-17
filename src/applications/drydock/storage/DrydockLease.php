@@ -64,7 +64,6 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function getResource() {
-    $this->assertActive();
     if ($this->resource === null) {
       throw new Exception("Resource is not yet loaded.");
     }
@@ -72,13 +71,15 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function attachResource(DrydockResource $resource) {
-    $this->assertActive();
     $this->resource = $resource;
     return $this;
   }
 
+  public function hasAttachedResource() {
+    return ($this->resource !== null);
+  }
+
   public function loadResource() {
-    $this->assertActive();
     return id(new DrydockResource())->loadOneWhere(
       'id = %d',
       $this->getResourceID());
@@ -115,6 +116,7 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function release() {
+    $this->assertActive();
     $this->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
     $this->save();
 
