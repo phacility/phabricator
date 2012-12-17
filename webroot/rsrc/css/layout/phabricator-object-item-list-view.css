@@ -21,16 +21,18 @@
 .phabricator-object-item-name {
   display: block;
   padding: 4px 8px 4px;
-  margin-right: 20px;
   font-weight: bold;
 }
 
-/* - Attribute List ------------------------------
+.phabricator-object-item-content {
+  overflow: hidden;
+}
+
+/* - Attribute List ------------------------------------------------------------
 
   Object attributes, commonly used to render created date, etc.
 
 */
-
 
 .phabricator-object-item-attributes {
   padding: 0px 8px 4px;
@@ -47,9 +49,10 @@
 }
 
 
-/* - Attribute List ------------------------------
+/* - Icons ---------------------------------------------------------------------
 
-  Object attributes, commonly used to render created date, etc.
+  Icons, which show object state. On mobile, they are rendered without labels
+  to save space.
 
 */
 
@@ -58,12 +61,25 @@
   padding: 2px 4px 0;
 }
 
+/* NOTE: The main content is an "overflow: hidden" div which we give a right
+   margin so it doesn't overlap the icons. The margin is slightly larger than
+   the width + padding of the icon div, so the icons have some space even if
+   the content is wider than available space. */
+
 .device-desktop .phabricator-object-item-icons {
   width: 120px;
 }
 
+.device-desktop .phabricator-object-item-content {
+  margin-right: 132px;
+}
+
 .device .phabricator-object-item-icons {
   width: 18px;
+}
+
+.device .phabricator-object-item-content {
+  margin-right: 30px;
 }
 
 .device .phabricator-object-item-icon-label {

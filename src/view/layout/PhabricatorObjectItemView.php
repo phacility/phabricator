@@ -158,12 +158,19 @@ final class PhabricatorObjectItemView extends AphrontView {
         throw new Exception("Invalid effect!");
     }
 
+    $content = phutil_render_tag(
+      'div',
+      array(
+        'class' => 'phabricator-object-item-content',
+      ),
+      $header.$attrs.$this->renderChildren());
+
     return phutil_render_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
       ),
-      $icons.$header.$attrs.$this->renderChildren());
+      $icons.$content);
   }
 
 }
