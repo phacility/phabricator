@@ -86,6 +86,13 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
     DrydockLease $lease,
     $type) {
 
+    switch ($type) {
+      case 'command':
+        return $this
+          ->loadLease($resource->getAttribute('lease.host'))
+          ->getInterface($type);
+    }
+
     throw new Exception("No interface of type '{$type}'.");
   }
 

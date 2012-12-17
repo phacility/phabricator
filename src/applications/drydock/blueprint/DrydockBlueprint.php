@@ -22,6 +22,17 @@ abstract class DrydockBlueprint {
     return get_class($this);
   }
 
+  protected function loadLease($lease_id) {
+    $lease = id(new DrydockLease())->load($lease_id);
+    if (!$lease) {
+      throw new Exception("No such lease '{$lease_id}'!");
+    }
+
+    $resource = $lease->loadResource();
+    $lease->attachResource($resource);
+    return $lease;
+  }
+
 
 /* -(  Lease Acquisition  )-------------------------------------------------- */
 

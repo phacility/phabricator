@@ -55,6 +55,10 @@ $args->parse(
                     'delete existing relationship entries between your '.
                     'package and some old commits!)',
     ),
+    array(
+      'name'     => 'harbormaster',
+      'help'     => 'EXPERIMENTAL. Execute Harbormaster.',
+    ),
     // misc options
     array(
       'name'     => 'force',
@@ -73,6 +77,7 @@ $reparse_message = $args->getArg('message');
 $reparse_change = $args->getArg('change');
 $reparse_herald = $args->getArg('herald');
 $reparse_owners = $args->getArg('owners');
+$reparse_harbormaster = $args->getArg('harbormaster');
 $reparse_what = $args->getArg('revision');
 $force = $args->getArg('force');
 $force_local = $args->getArg('force-local');
@@ -83,9 +88,9 @@ if (!$all_from_repo && !$reparse_what) {
 }
 
 if (!$reparse_message && !$reparse_change && !$reparse_herald &&
-    !$reparse_owners) {
+    !$reparse_owners && !$reparse_harbormaster) {
   usage("Specify what information to reparse with --message, --change,  ".
-        "--herald, and/or --owners");
+        "--herald, --harbormaster, and/or --owners");
 }
 if ($reparse_owners && !$force) {
   echo phutil_console_wrap(
@@ -202,6 +207,10 @@ foreach ($commits as $commit) {
     $classes[] = 'PhabricatorRepositoryCommitOwnersWorker';
   }
 
+  if ($reparse_harbormaster) {
+    $classes[] = 'HarbormasterRunnerWorker';
+  }
+
   $spec = array(
     'commitID'  => $commit->getID(),
     'only'      => true,
@@ -218,7 +227,7 @@ foreach ($commits as $commit) {
     foreach ($classes as $class) {
       $worker = newv($class, array($spec));
       echo "Running '{$class}'...\n";
-      $worker->doWork();
+      $worker->executeTask();
     }
   }
 }
