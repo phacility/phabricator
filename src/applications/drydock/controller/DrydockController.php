@@ -2,21 +2,6 @@
 
 abstract class DrydockController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
-
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName('Drydock');
-    $page->setBaseURI('/drydock/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x98\x82");
-
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
-
   final protected function buildSideNav($selected) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/drydock/'));
@@ -30,12 +15,14 @@ abstract class DrydockController extends PhabricatorController {
     return $nav;
   }
 
+  public function buildApplicationMenu() {
+    return $this->buildSideNav(null)->getMenu();
+  }
+
   protected function buildLogTableView(array $logs) {
     assert_instances_of($logs, 'DrydockLog');
 
     $user = $this->getRequest()->getUser();
-
-    // TODO: It's probably a stretch to claim this works on mobile.
 
     $rows = array();
     foreach ($logs as $log) {
@@ -59,17 +46,25 @@ abstract class DrydockController extends PhabricatorController {
           ),
           phutil_escape_html($log->getLeaseID())),
         phutil_escape_html($log->getMessage()),
-        phabricator_datetime($log->getEpoch(), $user),
+        phabricator_date($log->getEpoch(), $user),
       );
     }
 
     $table = new AphrontTableView($rows);
+    $table->setDeviceReadyTable(true);
     $table->setHeaders(
       array(
         'Resource',
         'Lease',
         'Message',
         'Date',
+      ));
+    $table->setShortHeaders(
+      array(
+        'R',
+        'L',
+        'Message',
+        '',
       ));
     $table->setColumnClasses(
       array(
@@ -79,11 +74,7 @@ abstract class DrydockController extends PhabricatorController {
         '',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Logs');
-    $panel->appendChild($table);
-
-    return $panel;
+    return $table;
   }
 
   protected function buildLeaseListView(array $leases) {

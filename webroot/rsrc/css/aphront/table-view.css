@@ -16,7 +16,6 @@
 .aphront-table-view th {
   font-size: 12px;
   font-weight: bold;
-  padding: 4px 8px;
   background: #003366;
   color: white;
   white-space: nowrap;
@@ -44,10 +43,47 @@
 }
 
 .aphront-table-view td {
-  padding:          4px 8px;
   font-size:        11px;
   white-space:      nowrap;
   vertical-align:   middle;
+}
+
+/* - Padding -------------------------------------------------------------------
+
+  On desktops, we have more horizontal space and use it to space columns out.
+
+  On devices, we make each row slightly taller to create a larger hit target
+  for links.
+
+*/
+
+.aphront-table-view th {
+  padding: 4px 8px;
+}
+
+.aphront-table-view td {
+  padding: 4px 8px;
+}
+
+.device-tablet .aphront-table-view td,
+.device-phone .aphront-table-view td {
+  padding: 6px;
+}
+
+.device-tablet .aphront-table-view td + td,
+.device-phone .aphront-table-view td + td {
+  padding-left: 0px;
+}
+
+.device-tablet .aphront-table-view th,
+.device-phone .aphront-table-view th {
+  padding: 6px;
+  overflow: hidden;
+}
+
+.device-tablet .aphront-table-view th + th,
+.device-phone .aphront-table-view th + th {
+  padding-left: 0px;
 }
 
 .aphront-table-view td.sorted-column {
@@ -163,4 +199,28 @@ th a:hover .aphront-table-view-sort-glyph {
 .aphront-table-view-sortable-selected .aphront-table-view-sort-glyph {
   display: block;
   color: white;
+}
+
+.device-desktop .aphront-table-view-device {
+  display: none;
+}
+
+.device-tablet .aphront-table-view-nodevice,
+.device-phone .aphront-table-view-nodevice {
+  display: none;
+}
+
+.aphront-table-view-device-ready {
+  width: 99%;
+  margin: 8px auto;
+}
+
+.aphront-table-view td.link {
+  padding: 0;
+}
+
+.aphront-table-view td.link a {
+  display: block;
+  padding: 6px;
+  font-weight: bold;
 }
