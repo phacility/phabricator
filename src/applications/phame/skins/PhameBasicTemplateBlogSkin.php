@@ -80,18 +80,18 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
   private function getDefaultScope() {
     return array(
-      'skin' => $this,
-      'blog' => $this->getBlog(),
-      'uri'  => $this->getURI(''),
+      'skin'  => $this,
+      'blog'  => $this->getBlog(),
+      'uri'   => $this->getURI(''),
+      'title' => $this->getTitle(),
     );
   }
 
   protected function renderHeader() {
     return $this->renderTemplate(
       'header.php',
-      array(
-        'title' => $this->getBlog()->getName(),
-      ));
+      array()
+    );
   }
 
   protected function renderFooter() {
@@ -115,8 +115,8 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
       'post-list.php',
       array(
         'posts' => $posts,
-        'older' => $this->renderNewerPageLink(),
-        'newer' => $this->renderOlderPageLink(),
+        'older' => $this->renderOlderPageLink(),
+        'newer' => $this->renderNewerPageLink(),
       ));
   }
 

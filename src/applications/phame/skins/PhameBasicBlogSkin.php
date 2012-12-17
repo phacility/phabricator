@@ -8,6 +8,15 @@
 abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
   private $pager;
+  private $title;
+
+  protected function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+  protected function getTitle() {
+    return $this->title;
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -145,7 +154,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
    */
   protected function getNewerPageURI() {
     if ($this->pager) {
-      $next = $this->pager->getNextPageID();
+      $next = $this->pager->getPrevPageID();
       if ($next) {
         return $this->getURI('newer/'.$next.'/');
       }
@@ -183,6 +192,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
     $matches = null;
     $path = $request->getPath();
+    $this->setTitle($this->getBlog()->getName());
     if (preg_match('@^/post/(?P<name>.*)$@', $path, $matches)) {
       $post = id(new PhamePostQuery())
         ->setViewer($user)
@@ -191,6 +201,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
         ->executeOne();
 
       if ($post) {
+        $this->setTitle($post->getTitle());
         $view = head($this->buildPostViews(array($post)));
         return $this->renderPostDetail($view);
       }
@@ -198,9 +209,9 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
       $pager = new AphrontCursorPagerView();
 
       if (preg_match('@^/older/(?P<before>\d+)/$@', $path, $matches)) {
-        $pager->setBeforeID($matches['before']);
+        $pager->setAfterID($matches['before']);
       } else if (preg_match('@^/newer/(?P<after>\d)/$@', $path, $matches)) {
-        $pager->setAfterID($matches['after']);
+        $pager->setBeforeID($matches['after']);
       } else if (preg_match('@^/$@', $path, $matches)) {
         // Just show the first page.
       } else {
