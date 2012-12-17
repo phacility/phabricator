@@ -67,11 +67,16 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $classes[] = 'PhabricatorMonospaced';
 
     return phutil_render_tag(
-      'table',
+      'div',
       array(
-        'class' => implode(' ', $classes),
+        'class' => 'phabricator-source-code-container',
       ),
-      implode('', $rows));
+      phutil_render_tag(
+        'table',
+        array(
+          'class' => implode(' ', $classes),
+        ),
+        implode('', $rows)));
   }
 
 }

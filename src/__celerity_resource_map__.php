@@ -2810,7 +2810,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-source-code-view-css' =>
   array(
-    'uri' => '/res/aa04c202/rsrc/css/layout/phabricator-source-code-view.css',
+    'uri' => '/res/87935c75/rsrc/css/layout/phabricator-source-code-view.css',
     'type' => 'css',
     'requires' =>
     array(
