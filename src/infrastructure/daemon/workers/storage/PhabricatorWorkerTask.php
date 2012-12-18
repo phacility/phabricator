@@ -35,4 +35,21 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
     return ($this instanceof PhabricatorWorkerArchiveTask);
   }
 
+  public function getWorkerInstance() {
+    $id = $this->getID();
+    $class = $this->getTaskClass();
+
+    if (!class_exists($class)) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        "Task class '{$class}' does not exist!");
+    }
+
+    if (!is_subclass_of($class, 'PhabricatorWorker')) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        "Task class '{$class}' does not extend PhabricatorWorker.");
+    }
+
+    return newv($class, array($this->getData()));
+  }
+
 }

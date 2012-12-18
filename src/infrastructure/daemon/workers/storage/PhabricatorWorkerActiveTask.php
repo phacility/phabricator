@@ -99,24 +99,12 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     $this->checkLease();
 
     try {
-      $id = $this->getID();
-      $class = $this->getTaskClass();
-
-      if (!class_exists($class)) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          "Task class '{$class}' does not exist!");
-      }
-
-      if (!is_subclass_of($class, 'PhabricatorWorker')) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          "Task class '{$class}' does not extend PhabricatorWorker.");
-      }
-
-      $worker = newv($class, array($this->getData()));
+      $worker = $this->getWorkerInstance();
 
       $maximum_failures = $worker->getMaximumRetryCount();
       if ($maximum_failures !== null) {
         if ($this->getFailureCount() > $maximum_failures) {
+          $id = $this->getID();
           throw new PhabricatorWorkerPermanentFailureException(
             "Task {$id} has exceeded the maximum number of failures ".
             "({$maximum_failures}).");

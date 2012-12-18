@@ -41,4 +41,11 @@ final class PhabricatorMetaMTAWorker
     return $this->message;
   }
 
+  public function renderForDisplay() {
+    return phutil_render_tag(
+      'a',
+      array('href' => '/mail/view/'.$this->getTaskData().'/'),
+      phutil_escape_html($this->getTaskData()));
+  }
+
 }

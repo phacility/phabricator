@@ -6,23 +6,33 @@ abstract class PhabricatorRepositoryCommitParserWorker
   protected $commit;
   protected $repository;
 
-  final public function doWork() {
+  private function loadCommit() {
+    if ($this->commit) {
+      return $this->commit;
+    }
+
     $commit_id = idx($this->getTaskData(), 'commitID');
     if (!$commit_id) {
-      return;
+      return false;
     }
 
     $commit = id(new PhabricatorRepositoryCommit())->load($commit_id);
 
     if (!$commit) {
       // TODO: Communicate permanent failure?
+      return false;
+    }
+
+    return $this->commit = $commit;
+  }
+
+  final public function doWork() {
+    if (!$this->loadCommit()) {
       return;
     }
 
-    $this->commit = $commit;
-
     $repository = id(new PhabricatorRepository())->load(
-      $commit->getRepositoryID());
+      $this->commit->getRepositoryID());
 
     if (!$repository) {
       return;
@@ -30,7 +40,7 @@ abstract class PhabricatorRepositoryCommitParserWorker
 
     $this->repository = $repository;
 
-    return $this->parseCommit($repository, $commit);
+    return $this->parseCommit($repository, $this->commit);
   }
 
   final protected function shouldQueueFollowupTasks() {
@@ -75,4 +85,17 @@ abstract class PhabricatorRepositoryCommitParserWorker
     return (bool)$bad_commit;
   }
 
+  public function renderForDisplay() {
+    $suffix = parent::renderForDisplay();
+    $commit = $this->loadCommit();
+    if (!$commit) {
+      return $suffix;
+    }
+
+    $repository = id(new PhabricatorRepository())
+      ->load($commit->getRepositoryID());
+    $link = DiffusionView::linkCommit($repository,
+                                      $commit->getCommitIdentifier());
+    return $link.$suffix;
+  }
 }
