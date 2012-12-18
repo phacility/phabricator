@@ -171,6 +171,15 @@ final class PhabricatorWorkerTaskDetailController
       pht('Duration'),
       $duration);
 
+    $data = id(new PhabricatorWorkerTaskData())->load($task->getDataID());
+    $task->setData($data->getData());
+    $worker = $task->getWorkerInstance();
+    $data = $worker->renderForDisplay();
+
+    $view->addProperty(
+      pht('Data'),
+      $data);
+
     return $view;
   }
 

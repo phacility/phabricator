@@ -13,7 +13,7 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
     $resource_repo = $resource->getAttribute('repositoryID');
     $lease_repo = $lease->getAttribute('repositoryID');
 
-    return ($resource_repo && $lease_repo && $resource_repo == $lease_repo);
+    return ($resource_repo && $lease_repo && ($resource_repo == $lease_repo));
   }
 
   protected function shouldAllocateLease(
@@ -62,10 +62,12 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
 
     $this->log(pht('Complete.'));
 
-    $resource = $this->newResourceTemplate($repository->getCallsign());
+    $resource = $this->newResourceTemplate(
+      'Working Copy ('.$repository->getCallsign().')');
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->setAttribute('lease.host', $host_lease->getID());
     $resource->setAttribute('path', $path);
+    $resource->setAttribute('repositoryID', $repository->getID());
     $resource->save();
 
     return $resource;
@@ -85,6 +87,13 @@ final class DrydockWorkingCopyBlueprint extends DrydockBlueprint {
     DrydockResource $resource,
     DrydockLease $lease,
     $type) {
+
+    switch ($type) {
+      case 'command':
+        return $this
+          ->loadLease($resource->getAttribute('lease.host'))
+          ->getInterface($type);
+    }
 
     throw new Exception("No interface of type '{$type}'.");
   }

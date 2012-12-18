@@ -12,6 +12,9 @@ final class ConduitAPI_differential_createrevision_Method
 
   public function defineParamTypes() {
     return array(
+      // TODO: Arcanist passes this; prevent fatals after D4191 until Conduit
+      // version 7 or newer.
+      'user'   => 'ignored',
       'diffid' => 'required diffid',
       'fields' => 'required dict',
     );

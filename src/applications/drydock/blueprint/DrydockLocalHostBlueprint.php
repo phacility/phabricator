@@ -28,7 +28,7 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
     Filesystem::assertIsDirectory($path);
     Filesystem::assertWritable($path);
 
-    $resource = $this->newResourceTemplate('localhost');
+    $resource = $this->newResourceTemplate('Host (localhost)');
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->setAttribute('path', $path);
     $resource->save();

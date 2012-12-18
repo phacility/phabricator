@@ -4,6 +4,8 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
 
   public function getExecFuture($command) {
     $argv = func_get_args();
+    $argv = $this->applyWorkingDirectoryToArgv($argv);
+
     $full_command = call_user_func_array('csprintf', $argv);
 
     // NOTE: The "-t -t" is for psuedo-tty allocation so we can "sudo" on some

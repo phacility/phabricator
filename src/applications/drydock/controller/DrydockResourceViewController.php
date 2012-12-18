@@ -12,8 +12,6 @@ final class DrydockResourceViewController extends DrydockController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildSideNav('resource');
-
     $resource = id(new DrydockResource())->load($this->id);
     if (!$resource) {
       return new Aphront404Response();
@@ -30,6 +28,17 @@ final class DrydockResourceViewController extends DrydockController {
     $resource_uri = 'resource/'.$resource->getID().'/';
     $resource_uri = $this->getApplicationURI($resource_uri);
 
+    $leases = id(new DrydockLeaseQuery())
+      ->withResourceIDs(array($resource->getID()))
+      ->needResources(true)
+      ->execute();
+
+    $lease_header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Leases'));
+
+    $lease_list = $this->buildLeaseListView($leases);
+    $lease_list->setNoDataString(pht('This resource has no leases.'));
+
     $pager = new AphrontPagerView();
     $pager->setURI(new PhutilURI($resource_uri), 'offset');
     $pager->setOffset($request->getInt('offset'));
@@ -41,16 +50,21 @@ final class DrydockResourceViewController extends DrydockController {
     $log_table = $this->buildLogTableView($logs);
     $log_table->appendChild($pager);
 
-    $nav->appendChild(
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Resource %d', $resource->getID())));
+
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         $header,
         $actions,
         $properties,
+        $lease_header,
+        $lease_list,
         $log_table,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'device'  => true,
         'title'   => $title,

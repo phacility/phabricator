@@ -108,7 +108,9 @@ final class PhabricatorConduitAPIController
     } catch (Exception $ex) {
       phlog($ex);
       $result = null;
-      $error_code = 'ERR-CONDUIT-CORE';
+      $error_code = ($ex instanceof ConduitException
+        ? 'ERR-CONDUIT-CALL'
+        : 'ERR-CONDUIT-CORE');
       $error_info = $ex->getMessage();
     }
 

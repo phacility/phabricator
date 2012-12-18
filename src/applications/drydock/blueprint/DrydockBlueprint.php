@@ -22,6 +22,21 @@ abstract class DrydockBlueprint {
     return get_class($this);
   }
 
+  protected function loadLease($lease_id) {
+    $query = id(new DrydockLeaseQuery())
+      ->withIDs(array($lease_id))
+      ->needResources(true)
+      ->execute();
+
+    $lease = idx($query, $lease_id);
+
+    if (!$lease) {
+      throw new Exception("No such lease '{$lease_id}'!");
+    }
+
+    return $lease;
+  }
+
 
 /* -(  Lease Acquisition  )-------------------------------------------------- */
 
@@ -32,6 +47,9 @@ abstract class DrydockBlueprint {
   final public function filterResource(
     DrydockResource $resource,
     DrydockLease $lease) {
+
+    $scope = $this->pushActiveScope($resource, $lease);
+
     return $this->canAllocateLease($resource, $lease);
   }
 

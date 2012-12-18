@@ -11,6 +11,26 @@ final class DrydockLease extends DrydockDAO {
   protected $taskID;
 
   private $resource;
+  private $releaseOnDestruction;
+
+  /**
+   * Flag this lease to be released when its destructor is called. This is
+   * mostly useful if you have a script which acquires, uses, and then releases
+   * a lease, as you don't need to explicitly handle exceptions to properly
+   * release the lease.
+   */
+  public function releaseOnDestruction() {
+    $this->releaseOnDestruction = true;
+    return $this;
+  }
+
+  public function __destruct() {
+    if ($this->releaseOnDestruction) {
+      if ($this->isActive()) {
+        $this->release();
+      }
+    }
+  }
 
   public function getLeaseName() {
     return pht('Lease %d', $this->getID());
@@ -44,7 +64,6 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function getResource() {
-    $this->assertActive();
     if ($this->resource === null) {
       throw new Exception("Resource is not yet loaded.");
     }
@@ -52,13 +71,15 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function attachResource(DrydockResource $resource) {
-    $this->assertActive();
     $this->resource = $resource;
     return $this;
   }
 
+  public function hasAttachedResource() {
+    return ($this->resource !== null);
+  }
+
   public function loadResource() {
-    $this->assertActive();
     return id(new DrydockResource())->loadOneWhere(
       'id = %d',
       $this->getResourceID());
@@ -95,6 +116,7 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function release() {
+    $this->assertActive();
     $this->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
     $this->save();
 
@@ -103,9 +125,17 @@ final class DrydockLease extends DrydockDAO {
     return $this;
   }
 
+  public function isActive() {
+    switch ($this->status) {
+      case DrydockLeaseStatus::STATUS_ACTIVE:
+      case DrydockLeaseStatus::STATUS_ACQUIRING:
+        return true;
+    }
+    return false;
+  }
+
   private function assertActive() {
-    if (($this->status != DrydockLeaseStatus::STATUS_ACTIVE) &&
-        ($this->status != DrydockLeaseStatus::STATUS_ACQUIRING)) {
+    if (!$this->isActive()) {
       throw new Exception(
         "Lease is not active! You can not interact with resources through ".
         "an inactive lease.");

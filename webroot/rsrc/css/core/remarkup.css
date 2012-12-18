@@ -49,6 +49,12 @@
   white-space: pre-wrap;
 }
 
+/* NOTE: You can currently produce this with [[link | `name`]]. Restore the
+   link color. */
+.phabricator-remarkup a tt {
+  color: #18559d;
+}
+
 .phabricator-remarkup ul {
   list-style: disc;
   margin: 1em 0 1em 3em;
