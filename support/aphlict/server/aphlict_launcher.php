@@ -59,6 +59,7 @@ $foreground = $args->getArg('foreground');
 $server_argv = array();
 $server_argv[] = csprintf('--port=%s', $client_uri->getPort());
 $server_argv[] = csprintf('--admin=%s', $server_uri->getPort());
+$server_argv[] = csprintf('--host=%s', $server_uri->getDomain());
 
 if ($user) {
   $server_argv[] = csprintf('--user=%s', $user);
