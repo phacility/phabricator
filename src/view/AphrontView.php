@@ -1,6 +1,6 @@
 <?php
 
-abstract class AphrontView {
+abstract class AphrontView extends Phobject {
 
   protected $children = array();
 
@@ -41,10 +41,5 @@ abstract class AphrontView {
   }
 
   abstract public function render();
-
-  public function __set($name, $value) {
-    phlog('Wrote to undeclared property '.get_class($this).'::$'.$name.'.');
-    $this->$name = $value;
-  }
 
 }
