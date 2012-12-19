@@ -1064,6 +1064,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryMercurialCommitMessageParserWorker' => 'applications/repository/worker/commitmessageparser/PhabricatorRepositoryMercurialCommitMessageParserWorker.php',
     'PhabricatorRepositoryPullLocalDaemon' => 'applications/repository/daemon/PhabricatorRepositoryPullLocalDaemon.php',
     'PhabricatorRepositoryPullLocalDaemonTestCase' => 'applications/repository/daemon/__tests__/PhabricatorRepositoryPullLocalDaemonTestCase.php',
+    'PhabricatorRepositoryQuery' => 'applications/repository/query/PhabricatorRepositoryQuery.php',
     'PhabricatorRepositoryShortcut' => 'applications/repository/storage/PhabricatorRepositoryShortcut.php',
     'PhabricatorRepositorySvnCommitChangeParserWorker' => 'applications/repository/worker/commitchangeparser/PhabricatorRepositorySvnCommitChangeParserWorker.php',
     'PhabricatorRepositorySvnCommitMessageParserWorker' => 'applications/repository/worker/commitmessageparser/PhabricatorRepositorySvnCommitMessageParserWorker.php',
@@ -2295,7 +2296,11 @@ phutil_register_library_map(array(
     'PhabricatorRemarkupRulePaste' => 'PhabricatorRemarkupRuleObjectName',
     'PhabricatorRemarkupRulePhriction' => 'PhutilRemarkupRule',
     'PhabricatorRemarkupRuleYoutube' => 'PhutilRemarkupRule',
-    'PhabricatorRepository' => 'PhabricatorRepositoryDAO',
+    'PhabricatorRepository' =>
+    array(
+      0 => 'PhabricatorRepositoryDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorRepositoryArcanistProject' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositoryArcanistProjectDeleteController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryArcanistProjectEditController' => 'PhabricatorRepositoryController',
@@ -2325,6 +2330,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryMercurialCommitMessageParserWorker' => 'PhabricatorRepositoryCommitMessageParserWorker',
     'PhabricatorRepositoryPullLocalDaemon' => 'PhabricatorDaemon',
     'PhabricatorRepositoryPullLocalDaemonTestCase' => 'PhabricatorTestCase',
+    'PhabricatorRepositoryQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositoryShortcut' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositorySvnCommitChangeParserWorker' => 'PhabricatorRepositoryCommitChangeParserWorker',
     'PhabricatorRepositorySvnCommitMessageParserWorker' => 'PhabricatorRepositoryCommitMessageParserWorker',

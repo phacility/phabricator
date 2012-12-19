@@ -3,7 +3,8 @@
 /**
  * @task uri Repository URI Management
  */
-final class PhabricatorRepository extends PhabricatorRepositoryDAO {
+final class PhabricatorRepository extends PhabricatorRepositoryDAO
+  implements PhabricatorPolicyInterface {
 
   const TABLE_PATH = 'repository_path';
   const TABLE_PATHCHANGE = 'repository_pathchange';
@@ -602,4 +603,45 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     $this->saveTransaction();
     return $result;
   }
+
+  public function isGit() {
+    $vcs = $this->getVersionControlSystem();
+    return ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
+  }
+
+  public function isSVN() {
+    $vcs = $this->getVersionControlSystem();
+    return ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_SVN);
+  }
+
+  public function isHg() {
+    $vcs = $this->getVersionControlSystem();
+    return ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL);
+  }
+
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_ADMIN;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+    return false;
+  }
+
 }

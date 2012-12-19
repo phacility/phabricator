@@ -42,9 +42,10 @@ final class DiffusionHomeController extends DiffusionController {
       $shortcut_panel = null;
     }
 
-    $repository = new PhabricatorRepository();
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($user)
+      ->execute();
 
-    $repositories = $repository->loadAll();
     foreach ($repositories as $key => $repo) {
       if (!$repo->isTracked()) {
         unset($repositories[$key]);
@@ -56,11 +57,11 @@ final class DiffusionHomeController extends DiffusionController {
     $commits = array();
     if ($repository_ids) {
       $summaries = queryfx_all(
-        $repository->establishConnection('r'),
+        id(new PhabricatorRepository())->establishConnection('r'),
         'SELECT * FROM %T WHERE repositoryID IN (%Ld)',
         PhabricatorRepository::TABLE_SUMMARY,
         $repository_ids);
-      $summaries = ipull($summaries, null, 'repositoryID');
+        $summaries = ipull($summaries, null, 'repositoryID');
 
       $commit_ids = array_filter(ipull($summaries, 'lastCommitID'));
       if ($commit_ids) {
