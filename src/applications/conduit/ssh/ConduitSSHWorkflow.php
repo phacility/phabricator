@@ -31,9 +31,10 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
       throw new Exception("Invalid JSON input.");
     }
 
-    $params = $raw_params;
+    $params = idx($raw_params, 'params', array());
+    $params = json_decode($params, true);
+    $metadata = idx($params, '__conduit__', array());
     unset($params['__conduit__']);
-    $metadata = idx($raw_params, '__conduit__', array());
 
     $call = null;
     $error_code = null;

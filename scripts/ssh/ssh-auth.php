@@ -6,28 +6,35 @@ require_once $root.'/scripts/__init_script__.php';
 
 $cert = file_get_contents('php://stdin');
 
-$user = null;
-if ($cert) {
-  $user_dao = new PhabricatorUser();
-  $ssh_dao = new PhabricatorUserSSHKey();
-  $conn = $user_dao->establishConnection('r');
-
-  list($type, $body) = array_merge(
-    explode(' ', $cert),
-    array('', ''));
-
-  $row = queryfx_one(
-    $conn,
-    'SELECT userName FROM %T u JOIN %T ssh ON u.phid = ssh.userPHID
-      WHERE ssh.keyBody = %s AND ssh.keyType = %s',
-    $user_dao->getTableName(),
-    $ssh_dao->getTableName(),
-    $body,
-    $type);
-  if ($row) {
-    $user = idx($row, 'userName');
-  }
+if (!$cert) {
+  exit(1);
 }
+
+$parts = preg_split('/\s+/', $cert);
+if (count($parts) < 2) {
+  exit(1);
+}
+
+list($type, $body) = $parts;
+
+$user_dao = new PhabricatorUser();
+$ssh_dao = new PhabricatorUserSSHKey();
+$conn_r = $user_dao->establishConnection('r');
+
+$row = queryfx_one(
+  $conn_r,
+  'SELECT userName FROM %T u JOIN %T ssh ON u.phid = ssh.userPHID
+    WHERE ssh.keyType = %s AND ssh.keyBody = %s',
+  $user_dao->getTableName(),
+  $ssh_dao->getTableName(),
+  $type,
+  $body);
+
+if (!$row) {
+  exit(1);
+}
+
+$user = idx($row, 'userName');
 
 if (!$user) {
   exit(1);

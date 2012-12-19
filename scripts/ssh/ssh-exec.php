@@ -4,6 +4,10 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
+$original_command = getenv('SSH_ORIGINAL_COMMAND');
+$original_argv = id(new PhutilShellLexer())->splitArguments($original_command);
+$argv = array_merge($argv, $original_argv);
+
 $args = new PhutilArgumentParser($argv);
 $args->setTagline('receive SSH requests');
 $args->setSynopsis(<<<EOSYNOPSIS
@@ -50,7 +54,7 @@ try {
   // concise/relevant exceptions when the client is a remote SSH.
   $remain = $args->getUnconsumedArgumentVector();
   if (empty($remain)) {
-    throw new Exception("No command.");
+    throw new Exception("No interactive logins.");
   } else {
     $command = head($remain);
     $workflow_names = mpull($workflows, 'getName', 'getName');
