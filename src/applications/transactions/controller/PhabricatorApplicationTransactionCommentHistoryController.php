@@ -60,7 +60,7 @@ final class PhabricatorApplicationTransactionCommentHistoryController
     }
 
     $view = id(new PhabricatorApplicationTransactionView())
-      ->setViewer($user)
+      ->setUser($user)
       ->setTransactions($xactions)
       ->setShowEditActions(false);
 

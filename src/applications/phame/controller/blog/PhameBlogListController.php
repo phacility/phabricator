@@ -71,7 +71,7 @@ final class PhameBlogListController extends PhameController {
 
     $view = new PhabricatorObjectItemListView();
     $view->setNoDataString($nodata);
-    $view->setViewer($user);
+    $view->setUser($user);
     foreach ($blogs as $blog) {
 
       $item = id(new PhabricatorObjectItemView())

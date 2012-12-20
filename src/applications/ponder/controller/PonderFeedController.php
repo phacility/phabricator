@@ -90,7 +90,7 @@ final class PonderFeedController extends PonderController {
     $user = $this->getRequest()->getUser();
 
     $view = new PhabricatorObjectItemListView();
-    $view->setViewer($user);
+    $view->setUser($user);
     $view->setNoDataString(pht('No matching questions.'));
     foreach ($questions as $question) {
       $item = new PhabricatorObjectItemView();

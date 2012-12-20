@@ -6,16 +6,6 @@ final class PhabricatorObjectItemListView extends AphrontView {
   private $items;
   private $pager;
   private $noDataString;
-  private $viewer;
-
-  public function setViewer($viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
-  }
 
   public function setHeader($header) {
     $this->header = $header;

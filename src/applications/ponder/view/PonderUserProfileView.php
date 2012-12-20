@@ -55,7 +55,7 @@ final class PonderUserProfileView extends AphrontView {
     $answers = $apagebuttons->sliceResults($answers);
 
     $view = new PhabricatorObjectItemListView();
-    $view->setViewer($user);
+    $view->setUser($user);
     $view->setNoDataString(pht('No matching answers.'));
 
     foreach ($answers as $answer) {

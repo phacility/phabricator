@@ -283,7 +283,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $views = array();
     foreach ($posts as $post) {
       $view = id(new PhamePostView())
-        ->setViewer($user)
+        ->setUser($user)
         ->setSkin($this)
         ->setPost($post)
         ->setBody($engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY))

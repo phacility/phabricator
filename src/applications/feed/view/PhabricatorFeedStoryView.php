@@ -6,16 +6,10 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
   private $image;
   private $phid;
   private $epoch;
-  private $viewer;
   private $viewed;
   private $href;
 
   private $oneLine;
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
 
   public function setTitle($title) {
     $this->title = $title;
@@ -98,7 +92,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
         $this->renderChildren());
 
       if ($this->epoch) {
-        $foot = phabricator_datetime($this->epoch, $this->viewer);
+        $foot = phabricator_datetime($this->epoch, $this->user);
       } else {
         $foot = '';
       }

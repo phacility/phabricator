@@ -80,7 +80,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $lang_map = PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
     $list = new PhabricatorObjectItemListView();
-    $list->setViewer($user);
+    $list->setUser($user);
     foreach ($pastes as $paste) {
       $created = phabricator_date($paste->getDateCreated(), $user);
       $author = $this->getHandle($paste->getAuthorPHID())->renderLink();
