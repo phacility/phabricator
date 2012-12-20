@@ -7,7 +7,6 @@ final class AphrontFormView extends AphrontView {
   private $header;
   private $data = array();
   private $encType;
-  private $user;
   private $workflow;
   private $id;
   private $flexible;
@@ -20,11 +19,6 @@ final class AphrontFormView extends AphrontView {
 
   public function setID($id) {
     $this->id = $id;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

@@ -3,16 +3,10 @@
 final class PhabricatorDaemonLogListView extends AphrontView {
 
   private $daemonLogs;
-  private $user;
 
   public function setDaemonLogs(array $daemon_logs) {
     assert_instances_of($daemon_logs, 'PhabricatorDaemonLog');
     $this->daemonLogs = $daemon_logs;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

@@ -1,18 +1,12 @@
 <?php
 
 final class PonderUserProfileView extends AphrontView {
-  private $user;
   private $questionoffset;
   private $answeroffset;
   private $answers;
   private $pagesize;
   private $uri;
   private $aparam;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setQuestionOffset($offset) {
     $this->questionoffset = $offset;

@@ -5,7 +5,6 @@ final class DifferentialAddCommentView extends AphrontView {
   private $revision;
   private $actions;
   private $actionURI;
-  private $user;
   private $draft;
   private $auxFields;
   private $reviewers = array();
@@ -29,11 +28,6 @@ final class DifferentialAddCommentView extends AphrontView {
 
   public function setActionURI($uri) {
     $this->actionURI = $uri;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

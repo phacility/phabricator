@@ -5,7 +5,6 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
   private $datasource;
   private $disableBehavior;
   private $limit;
-  private $user;
   private $placeholder;
 
   public function setDatasource($datasource) {
@@ -24,11 +23,6 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
 
   public function setLimit($limit) {
     $this->limit = $limit;
-    return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
     return $this;
   }
 

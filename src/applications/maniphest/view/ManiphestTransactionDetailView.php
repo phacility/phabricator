@@ -15,7 +15,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
   private $renderSummaryOnly;
   private $renderFullSummary;
-  private $user;
 
   private $auxiliaryFields;
 
@@ -71,11 +70,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
   public function setCommentNumber($comment_number) {
     $this->commentNumber = $comment_number;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

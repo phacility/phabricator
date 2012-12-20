@@ -4,7 +4,6 @@ final class HeraldRuleEditHistoryView extends AphrontView {
 
   private $edits;
   private $handles;
-  private $user;
 
   public function setEdits(array $edits) {
     $this->edits = $edits;
@@ -18,11 +17,6 @@ final class HeraldRuleEditHistoryView extends AphrontView {
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
-    return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
     return $this;
   }
 

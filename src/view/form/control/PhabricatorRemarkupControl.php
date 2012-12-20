@@ -2,17 +2,6 @@
 
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
-  private $user;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
-  public function getUser() {
-    return $this->user;
-  }
-
   protected function renderInput() {
     $id = $this->getID();
     if (!$id) {

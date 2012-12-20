@@ -10,7 +10,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $changesets;
   private $target;
   private $anchorName;
-  private $user;
   private $versusDiffID;
 
   public function setComment($comment) {
@@ -59,11 +58,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
   public function setAnchorName($anchor_name) {
     $this->anchorName = $anchor_name;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

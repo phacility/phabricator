@@ -3,16 +3,10 @@
 final class PonderQuestionDetailView extends AphrontView {
 
   private $question;
-  private $user;
   private $handles;
 
   public function setQuestion($question) {
     $this->question = $question;
-    return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
     return $this;
   }
 

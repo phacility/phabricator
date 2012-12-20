@@ -1,19 +1,10 @@
 <?php
 
 final class PhortuneStripePaymentFormView extends AphrontView {
-  private $user;
   private $stripeKey;
   private $cardNumberError;
   private $cardCVCError;
   private $cardExpirationError;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-  private function getUser() {
-    return $this->user;
-  }
 
   public function setStripeKey($key) {
     $this->stripeKey = $key;

@@ -2,7 +2,6 @@
 
 final class PhabricatorMainMenuView extends AphrontView {
 
-  private $user;
   private $defaultSearchScope;
   private $controller;
   private $applicationMenu;
@@ -32,15 +31,6 @@ final class PhabricatorMainMenuView extends AphrontView {
 
   public function getDefaultSearchScope() {
     return $this->defaultSearchScope;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
-  public function getUser() {
-    return $this->user;
   }
 
   public function render() {

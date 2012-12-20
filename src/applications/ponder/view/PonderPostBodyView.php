@@ -7,7 +7,6 @@ final class PonderPostBodyView extends AphrontView {
   private $handles;
   private $preview;
   private $anchorName;
-  private $user;
   private $action;
 
   public function setQuestion($question) {
@@ -33,11 +32,6 @@ final class PonderPostBodyView extends AphrontView {
 
   public function setPreview($preview) {
     $this->preview = $preview;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

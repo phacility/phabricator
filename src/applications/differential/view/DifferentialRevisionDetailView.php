@@ -4,7 +4,6 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   private $revision;
   private $actions;
-  private $user;
   private $auxiliaryFields = array();
   private $diff;
 
@@ -27,14 +26,6 @@ final class DifferentialRevisionDetailView extends AphrontView {
   }
   private function getActions() {
     return $this->actions;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-  private function getUser() {
-    return $this->user;
   }
 
   public function setAuxiliaryFields(array $fields) {

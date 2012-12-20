@@ -7,7 +7,6 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   private $references = array();
   private $repository;
   private $diff;
-  private $user;
   private $renderURI = '/differential/changeset/';
   private $revisionID;
   private $whitespace;
@@ -40,11 +39,6 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   public function setUnitTestData($unit_test_data) {
     $this->unitTestData = $unit_test_data;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

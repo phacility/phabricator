@@ -2,7 +2,17 @@
 
 abstract class AphrontView extends Phobject {
 
+  protected $user;
   protected $children = array();
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  protected function getUser() {
+    return $this->user;
+  }
 
   protected function canAppendChild() {
     return true;

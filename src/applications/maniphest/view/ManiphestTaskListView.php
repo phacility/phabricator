@@ -7,7 +7,6 @@ final class ManiphestTaskListView extends ManiphestView {
 
   private $tasks;
   private $handles;
-  private $user;
   private $showBatchControls;
   private $showSubpriorityControls;
 
@@ -20,11 +19,6 @@ final class ManiphestTaskListView extends ManiphestView {
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

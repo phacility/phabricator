@@ -3,14 +3,8 @@
 final class DiffusionTagListView extends DiffusionView {
 
   private $tags;
-  private $user;
   private $commits = array();
   private $handles = array();
-
-  public function setUser($user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setTags($tags) {
     $this->tags = $tags;

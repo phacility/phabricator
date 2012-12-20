@@ -4,7 +4,6 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
 
   private $events;
   private $combinedLog;
-  private $user;
 
   public function setEvents(array $events) {
     assert_instances_of($events, 'PhabricatorDaemonLogEvent');
@@ -14,11 +13,6 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
 
   public function setCombinedLog($is_combined) {
     $this->combinedLog = $is_combined;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

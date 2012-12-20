@@ -2,17 +2,11 @@
 
 final class PhabricatorApplicationLaunchView extends AphrontView {
 
-  private $user;
   private $application;
   private $status;
 
   public function setApplication(PhabricatorApplication $application) {
     $this->application = $application;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

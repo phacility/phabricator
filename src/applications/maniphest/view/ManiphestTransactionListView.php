@@ -7,7 +7,6 @@ final class ManiphestTransactionListView extends ManiphestView {
 
   private $transactions;
   private $handles;
-  private $user;
   private $markupEngine;
   private $preview;
   private $auxiliaryFields;
@@ -21,11 +20,6 @@ final class ManiphestTransactionListView extends ManiphestView {
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

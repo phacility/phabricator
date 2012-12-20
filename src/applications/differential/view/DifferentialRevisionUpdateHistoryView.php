@@ -6,7 +6,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   private $selectedVersusDiffID;
   private $selectedDiffID;
   private $selectedWhitespace;
-  private $user;
 
   public function setDiffs(array $diffs) {
     assert_instances_of($diffs, 'DifferentialDiff');
@@ -27,15 +26,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   public function setSelectedWhitespace($whitespace) {
     $this->selectedWhitespace = $whitespace;
     return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
-    return $this;
-  }
-
-  public function getUser() {
-    return $this->user;
   }
 
   public function render() {

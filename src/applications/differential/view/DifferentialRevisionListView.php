@@ -9,7 +9,6 @@ final class DifferentialRevisionListView extends AphrontView {
   private $flags = array();
   private $drafts = array();
   private $handles;
-  private $user;
   private $fields;
   private $highlightAge;
   const NO_DATA_STRING = 'No revisions found.';
@@ -44,11 +43,6 @@ final class DifferentialRevisionListView extends AphrontView {
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

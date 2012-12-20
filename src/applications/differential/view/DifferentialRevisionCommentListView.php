@@ -6,7 +6,6 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   private $handles;
   private $inlines;
   private $changesets;
-  private $user;
   private $target;
   private $versusDiffID;
   private $id;
@@ -32,11 +31,6 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   public function setChangesets(array $changesets) {
     assert_instances_of($changesets, 'DifferentialChangeset');
     $this->changesets = $changesets;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

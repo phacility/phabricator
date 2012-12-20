@@ -2,7 +2,6 @@
 
 final class PhabricatorTransactionView extends AphrontView {
 
-  private $user;
   private $imageURI;
   private $actions = array();
   private $epoch;
@@ -11,11 +10,6 @@ final class PhabricatorTransactionView extends AphrontView {
   private $anchorText;
   private $isPreview;
   private $classes = array();
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setImageURI($uri) {
     $this->imageURI = $uri;

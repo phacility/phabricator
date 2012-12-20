@@ -2,15 +2,9 @@
 
 final class PhabricatorAuditCommitListView extends AphrontView {
 
-  private $user;
   private $commits;
   private $handles;
   private $noDataString;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;

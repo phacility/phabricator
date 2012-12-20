@@ -3,7 +3,6 @@
 final class DiffusionBranchTableView extends DiffusionView {
 
   private $branches;
-  private $user;
   private $commits = array();
 
   public function setBranches(array $branches) {
@@ -14,11 +13,6 @@ final class DiffusionBranchTableView extends DiffusionView {
 
   public function setCommits(array $commits) {
     $this->commits = mpull($commits, null, 'getCommitIdentifier');
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

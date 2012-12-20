@@ -4,7 +4,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
   private $paths;
   private $handles = array();
-  private $user;
 
   public function setPaths(array $paths) {
     assert_instances_of($paths, 'DiffusionRepositoryPath');
@@ -15,11 +14,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

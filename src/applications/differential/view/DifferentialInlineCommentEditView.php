@@ -2,7 +2,6 @@
 
 final class DifferentialInlineCommentEditView extends AphrontView {
 
-  private $user;
   private $inputs = array();
   private $uri;
   private $title;
@@ -12,11 +11,6 @@ final class DifferentialInlineCommentEditView extends AphrontView {
 
   public function addHiddenInput($key, $value) {
     $this->inputs[] = array($key, $value);
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 
