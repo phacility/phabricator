@@ -51,6 +51,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
 
     $history_table = new DiffusionHistoryTableView();
+    $history_table->setUser($this->getRequest()->getUser());
     $history_table->setDiffusionRequest($drequest);
     $history_table->setHandles($handles);
     $history_table->setHistory($history);

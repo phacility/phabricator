@@ -782,6 +782,7 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $history_table = new DiffusionHistoryTableView();
+    $history_table->setUser($this->getRequest()->getUser());
     $history_table->setDiffusionRequest($drequest);
     $history_table->setHistory($merges);
     $history_table->loadRevisions();

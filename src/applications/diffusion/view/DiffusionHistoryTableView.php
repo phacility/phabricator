@@ -74,8 +74,8 @@ final class DiffusionHistoryTableView extends DiffusionView {
       $epoch = $history->getEpoch();
 
       if ($epoch) {
-        $date = date('M j, Y', $epoch);
-        $time = date('g:i A', $epoch);
+        $date = phabricator_date($epoch, $this->user);
+        $time = phabricator_time($epoch, $this->user);
       } else {
         $date = null;
         $time = null;

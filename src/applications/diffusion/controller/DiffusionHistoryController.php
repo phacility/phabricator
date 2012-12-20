@@ -56,6 +56,7 @@ final class DiffusionHistoryController extends DiffusionController {
       phutil_escape_html($button_title));
 
     $history_table = new DiffusionHistoryTableView();
+    $history_table->setUser($request->getUser());
     $history_table->setDiffusionRequest($drequest);
     $history_table->setHistory($history);
     $history_table->loadRevisions();
