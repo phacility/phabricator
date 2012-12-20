@@ -30,7 +30,7 @@ final class ConduitAPI_paste_query_Method extends ConduitAPI_paste_Method {
   protected function execute(ConduitAPIRequest $request) {
     $query = id(new PhabricatorPasteQuery())
       ->setViewer($request->getUser())
-      ->needContent(true);
+      ->needRawContent(true);
 
     if ($request->getValue('ids')) {
       $query->withIDs($request->getValue('ids'));

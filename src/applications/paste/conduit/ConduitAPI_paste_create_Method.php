@@ -57,7 +57,7 @@ final class ConduitAPI_paste_create_Method extends ConduitAPI_paste_Method {
     $paste->setViewPolicy(PhabricatorPolicies::POLICY_USER);
     $paste->save();
 
-    $paste->attachContent($content);
+    $paste->attachRawContent($content);
 
     return $this->buildPasteInfoDictionary($paste);
   }
