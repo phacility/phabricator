@@ -291,13 +291,12 @@ return array(
   //      mostly never arrive.
   'metamta.can-send-as-user'    => false,
 
-
   // Adapter class to use to transmit mail to the MTA. The default uses
   // PHPMailerLite, which will invoke "sendmail". This is appropriate
   // if sendmail actually works on your host, but if you haven't configured mail
-  // it may not be so great. You can also use Amazon SES, by changing this to
-  // 'PhabricatorMailImplementationAmazonSESAdapter', signing up for SES, and
-  // filling in your 'amazon-ses.access-key' and 'amazon-ses.secret-key' below.
+  // it may not be so great. A number of other mailers are available (e.g., SES,
+  // SendGrid, SMTP, custom mailers), consult "Configuring Outbound Email" in
+  // the documentation for details.
   'metamta.mail-adapter'        =>
     'PhabricatorMailImplementationPHPMailerLiteAdapter',
 
@@ -317,11 +316,17 @@ return array(
   'metamta.user-address-format' => 'full',
 
   // If you're using PHPMailer to send email, provide the mailer and options
-  // here. PHPMailer is a superior to PHPMailerLite and provides more mailers.
-  // You need it when you want to use SMTP instead of sendmail as the mailer.
+  // here. PHPMailer is much more enormous than PHPMailerLite, and provides more
+  // mailers and greater enormity. You need it when you want to use SMTP
+  // instead of sendmail as the mailer.
   'phpmailer.mailer'            =>  'smtp',
   'phpmailer.smtp-host'         =>  '',
   'phpmailer.smtp-port'         =>  25,
+
+  // When using PHPMailer with SMTP, you can set this to one of "tls" or "ssl"
+  // to use TLS or SSL. Leave it blank for vanilla SMTP. If you're sending
+  // via Gmail, set it to "ssl".
+  'phpmailer.smtp-protocol'     => '',
 
   // Set following if your smtp server requires authentication.
   'phpmailer.smtp-user'         =>  null,
