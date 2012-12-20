@@ -17,7 +17,7 @@ abstract class ConduitAPI_paste_Method extends ConduitAPIMethod {
       'language'    => $paste->getLanguage(),
       'uri'         => PhabricatorEnv::getProductionURI('/P'.$paste->getID()),
       'parentPHID'  => $paste->getParentPHID(),
-      'content'     => $paste->getContent(),
+      'content'     => $paste->getRawContent(),
     );
   }
 
