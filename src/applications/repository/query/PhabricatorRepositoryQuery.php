@@ -22,6 +22,10 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
+  protected function getReversePaging() {
+    return true;
+  }
+
   public function loadPage() {
     $table = new PhabricatorRepository();
     $conn_r = $table->establishConnection('r');
