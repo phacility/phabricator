@@ -16,13 +16,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     return $types;
   }
 
-  protected function didApplyTransactions(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-//    PholioIndexer::indexMock($mock);
-    return;
-  }
-
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -126,6 +119,10 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function supportsFeed() {
+    return true;
+  }
+
+  protected function supportsSearch() {
     return true;
   }
 

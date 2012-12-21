@@ -1265,7 +1265,7 @@ phutil_register_library_map(array(
     'PholioMockQuery' => 'applications/pholio/query/PholioMockQuery.php',
     'PholioMockViewController' => 'applications/pholio/controller/PholioMockViewController.php',
     'PholioReplyHandler' => 'applications/pholio/mail/PholioReplyHandler.php',
-    'PholioSearchIndexer' => 'applications/pholio/indexer/PholioSearchIndexer.php',
+    'PholioSearchIndexer' => 'applications/pholio/search/PholioSearchIndexer.php',
     'PholioTransaction' => 'applications/pholio/storage/PholioTransaction.php',
     'PholioTransactionComment' => 'applications/pholio/storage/PholioTransactionComment.php',
     'PholioTransactionQuery' => 'applications/pholio/query/PholioTransactionQuery.php',
