@@ -91,7 +91,7 @@ final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
 
         $view = $story->renderView();
         $view->setEpoch($story->getEpoch());
-        $view->setViewer($user);
+        $view->setUser($user);
 
         switch ($view_type) {
           case 'html':
