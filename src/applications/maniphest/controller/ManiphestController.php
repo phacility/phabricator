@@ -33,6 +33,12 @@ abstract class ManiphestController extends PhabricatorController {
       'userPHID = %s ORDER BY isDefault DESC, name ASC',
       $user->getPHID());
 
+    // TODO: Enforce uniqueness. Currently, it's possible to save the same
+    // query under multiple names, and then SideNavFilterView explodes on
+    // duplicate keys. Generally, we should clean up the custom/saved query
+    // code as it's a bit of a mess.
+    $custom = mpull($custom, null, 'getQueryKey');
+
     if ($custom) {
       $nav->addLabel('Saved Queries');
       foreach ($custom as $query) {
