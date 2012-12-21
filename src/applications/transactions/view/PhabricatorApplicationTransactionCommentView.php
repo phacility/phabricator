@@ -100,8 +100,8 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
           ->setID($this->getCommentID())
           ->setName('comment')
           ->setLabel(pht('Comment'))
-          ->setUser($this->getUser()))
-          ->setValue($draft_comment)
+          ->setUser($this->getUser())
+          ->setValue($draft_comment))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($this->getSubmitButtonName()))
