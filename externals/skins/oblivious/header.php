@@ -9,7 +9,7 @@
   <body>
     <div class="oblivious-info">
       <h1>
-        <a href="<?php echo _e($uri); ?>"><?php
+        <a href="<?php echo _e($home_uri); ?>"><?php
           echo _e($blog->getName());
         ?></a>
       </h1>

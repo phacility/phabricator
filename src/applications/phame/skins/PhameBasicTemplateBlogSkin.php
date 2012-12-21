@@ -82,7 +82,8 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     return array(
       'skin'        => $this,
       'blog'        => $this->getBlog(),
-      'uri'         => $this->getURI(''),
+      'uri'         => $this->getURI($this->getURIPath()),
+      'home_uri'    => $this->getURI(''),
       'title'       => $this->getTitle(),
       'description' => $this->getDescription(),
       'og_type'     => $this->getOGType(),
