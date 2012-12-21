@@ -14,8 +14,18 @@ JX.install('Tooltip', {
 
     show : function(root, scale, align, content) {
       if (__DEV__) {
-        if (align != 'N' && align != 'E') {
-          JX.$E("Only alignments 'N' (north) and 'E' (east) are supported.");
+        switch (align) {
+          case 'N':
+          case 'E':
+          case 'S':
+          case 'W':
+            break;
+          default:
+            JX.$E(
+              "Only alignments 'N' (north), 'E' (east), 'S' (south), " +
+              "and 'W' (west) are supported."
+            );
+            break;
         }
       }
 
@@ -49,6 +59,14 @@ JX.install('Tooltip', {
           break;
         case 'E':
           node.style.left = parseInt(p.x + d.x) + 'px';
+          node.style.top  = parseInt(p.y - ((n.y - d.y) / 2)) + 'px';
+          break;
+        case 'S':
+          node.style.left = parseInt(p.x - ((n.x - d.x) / 2)) + 'px';
+          node.style.top  = parseInt(p.y + d.y + 5) + 'px';
+          break;
+        case 'W':
+          node.style.left = parseInt(p.x - n.x - 5) + 'px';
           node.style.top  = parseInt(p.y - ((n.y - d.y) / 2)) + 'px';
           break;
       }

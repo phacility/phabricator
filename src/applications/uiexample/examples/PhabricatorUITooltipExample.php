@@ -36,14 +36,22 @@ EOTEXT;
       'hi' => array(
         'tip' => 'Hi',
       ),
-      'lorem' => array(
+      'lorem (north)' => array(
         'tip' => $lorem,
       ),
       'lorem (east)' => array(
         'tip' => $lorem,
         'align' => 'E',
       ),
-      'lorem (large)' => array(
+      'lorem (south)' => array(
+        'tip' => $lorem,
+        'align' => 'S',
+      ),
+      'lorem (west)' => array(
+        'tip' => $lorem,
+        'align' => 'W',
+      ),
+      'lorem (large, north)' => array(
         'tip' => $lorem,
         'size' => 300,
       ),
@@ -52,12 +60,30 @@ EOTEXT;
         'size' => 300,
         'align' => 'E',
       ),
+      'lorem (large, west)' => array(
+        'tip' => $lorem,
+        'size' => 300,
+        'align' => 'W',
+      ),
+      'lorem (large, south)' => array(
+        'tip' => $lorem,
+        'size' => 300,
+        'align' => 'S',
+      ),
       'overflow (north)' => array(
         'tip' => $overflow,
       ),
       'overflow (east)' => array(
         'tip' => $overflow,
         'align' => 'E',
+      ),
+      'overflow (south)' => array(
+        'tip' => $overflow,
+        'align' => 'S',
+      ),
+      'overflow (west)' => array(
+        'tip' => $overflow,
+        'align' => 'W',
       ),
     );
 
