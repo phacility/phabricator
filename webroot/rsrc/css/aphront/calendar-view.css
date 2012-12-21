@@ -101,6 +101,7 @@ table.aphront-calendar-view td div.aphront-calendar-day {
 }
 
 .aphront-calendar-event-text {
+  color: #fff;
   overflow: hidden;
   white-space: nowrap;
 }
