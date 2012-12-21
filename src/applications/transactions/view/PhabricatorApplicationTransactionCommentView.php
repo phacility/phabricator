@@ -13,6 +13,17 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $previewToggleID;
   private $formID;
   private $statusID;
+  private $commentID;
+  private $draft;
+
+  public function setDraft(PhabricatorDraft $draft) {
+    $this->draft = $draft;
+    return $this;
+  }
+
+  public function getDraft() {
+    return $this->draft;
+  }
 
   public function setSubmitButtonName($submit_button_name) {
     $this->submitButtonName = $submit_button_name;
@@ -47,12 +58,14 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'timelineID'    => $this->getPreviewTimelineID(),
         'panelID'       => $this->getPreviewPanelID(),
         'statusID'      => $this->getStatusID(),
+        'commentID'     => $this->getCommentID(),
 
         'loadingString' => pht('Loading Preview...'),
         'savingString'  => pht('Saving Draft...'),
         'draftString'   => pht('Saved Draft'),
 
         'actionURI'     => $this->getAction(),
+        'draftKey'      => $this->getDraft()->getDraftKey(),
       ));
 
     return self::renderSingleView(
@@ -70,6 +83,11 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ),
       '');
 
+    $draft_comment = '';
+    if ($this->getDraft()) {
+      $draft_comment = $this->getDraft()->getDraft();
+    }
+
     return id(new AphrontFormView())
       ->setUser($this->getUser())
       ->setFlexible(true)
@@ -79,9 +97,11 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ->setID($this->getFormID())
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setID($this->getCommentID())
           ->setName('comment')
           ->setLabel(pht('Comment'))
           ->setUser($this->getUser()))
+          ->setValue($draft_comment)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($this->getSubmitButtonName()))
@@ -141,6 +161,13 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $this->statusID = celerity_generate_unique_node_id();
     }
     return $this->statusID;
+  }
+
+  private function getCommentID() {
+    if (!$this->commentID) {
+      $this->commentID = celerity_generate_unique_node_id();
+    }
+    return $this->commentID;
   }
 
 }

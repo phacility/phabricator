@@ -10,9 +10,19 @@ JX.behavior('phabricator-transaction-comment-form', function(config) {
 
   var form = JX.$(config.formID);
 
+  JX.DOM.listen(form, 'willClear', null, function(e) {
+    e.kill();
+    JX.$(config.commentID).value = '';
+  });
+
   var getdata = function() {
     var obj = JX.DOM.convertFormToDictionary(form);
     obj.__preview__ = 1;
+
+    if (config.draftKey) {
+      obj.__draft__ = config.draftKey;
+    }
+
     return obj;
   };
 

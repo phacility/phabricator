@@ -81,7 +81,11 @@ JX.behavior('phabricator-transaction-list', function(config) {
     JX.Workflow.newFromForm(form, {anchor: next_anchor})
       .setHandler(function(response) {
         ontransactions(response);
-        form.reset();
+
+        var e = JX.DOM.invoke(form, 'willClear');
+        if (!e.getPrevented()) {
+          form.reset();
+        }
       })
       .start();
 

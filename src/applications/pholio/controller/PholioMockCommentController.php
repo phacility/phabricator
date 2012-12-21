@@ -30,6 +30,8 @@ final class PholioMockCommentController extends PholioController {
 
     $is_preview = $request->isPreviewRequest();
 
+    $draft = PhabricatorDraft::buildFromRequest($request);
+
     $mock_uri = '/M'.$mock->getID();
 
     $comment = $request->getStr('comment');
@@ -59,6 +61,10 @@ final class PholioMockCommentController extends PholioController {
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
         ->setCancelURI($mock_uri)
         ->setException($ex);
+    }
+
+    if ($draft) {
+      $draft->replaceOrDelete();
     }
 
     if ($request->isAjax()) {

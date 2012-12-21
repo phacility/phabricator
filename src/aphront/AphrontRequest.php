@@ -353,7 +353,16 @@ final class AphrontRequest {
    * @return  dict<string, string>  Original request parameters.
    */
   public function getPassthroughRequestParameters() {
-    $data = self::flattenData($this->getRequestData());
+    return self::flattenData($this->getPassthruRequestData());
+  }
+
+  /**
+   * Get request data other than "magic" parameters.
+   *
+   * @return dict<string, wild> Request data, with magic filtered out.
+   */
+  public function getPassthroughRequestData() {
+    $data = $this->getRequestData();
 
     // Remove magic parameters like __dialog__ and __ajax__.
     foreach ($data as $key => $value) {

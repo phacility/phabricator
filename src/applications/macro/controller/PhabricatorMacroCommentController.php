@@ -23,6 +23,7 @@ final class PhabricatorMacroCommentController
     }
 
     $is_preview = $request->isPreviewRequest();
+    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $view_uri = $this->getApplicationURI('/view/'.$macro->getID().'/');
 
@@ -50,6 +51,10 @@ final class PhabricatorMacroCommentController
       return id(new PhabricatorApplicationTransactionNoEffectResponse())
         ->setCancelURI($view_uri)
         ->setException($ex);
+    }
+
+    if ($draft) {
+      $draft->replaceOrDelete();
     }
 
     if ($request->isAjax()) {
