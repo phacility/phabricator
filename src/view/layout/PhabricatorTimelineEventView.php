@@ -9,11 +9,11 @@ final class PhabricatorTimelineEventView extends AphrontView {
   private $classes = array();
   private $contentSource;
   private $dateCreated;
-  private $viewer;
   private $anchor;
   private $isEditable;
   private $isEdited;
   private $transactionPHID;
+  private $isPreview;
 
   public function setTransactionPHID($transaction_phid) {
     $this->transactionPHID = $transaction_phid;
@@ -33,6 +33,14 @@ final class PhabricatorTimelineEventView extends AphrontView {
     return $this->isEdited;
   }
 
+  public function setIsPreview($is_preview) {
+    $this->isPreview = $is_preview;
+    return $this;
+  }
+
+  public function getIsPreview() {
+    return $this->isPreview;
+  }
 
   public function setIsEditable($is_editable) {
     $this->isEditable = $is_editable;
@@ -41,15 +49,6 @@ final class PhabricatorTimelineEventView extends AphrontView {
 
   public function getIsEditable() {
     return $this->isEditable;
-  }
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
   }
 
   public function setDateCreated($date_created) {
@@ -108,67 +107,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       $title = '';
     }
 
-    $extra = array();
-    $xaction_phid = $this->getTransactionPHID();
-
-    if ($this->getIsEdited()) {
-      $extra[] = javelin_render_tag(
-        'a',
-        array(
-          'href'  => '/transactions/history/'.$xaction_phid.'/',
-          'sigil' => 'workflow',
-        ),
-        pht('Edited'));
-    }
-
-    if ($this->getIsEditable()) {
-      $extra[] = javelin_render_tag(
-        'a',
-        array(
-          'href'  => '/transactions/edit/'.$xaction_phid.'/',
-          'sigil' => 'workflow transaction-edit',
-        ),
-        pht('Edit'));
-    }
-
-    $source = $this->getContentSource();
-    if ($source) {
-      $extra[] = id(new PhabricatorContentSourceView())
-        ->setContentSource($source)
-        ->setUser($this->getViewer())
-        ->render();
-    }
-
-    if ($this->getDateCreated()) {
-      $date = phabricator_datetime(
-        $this->getDateCreated(),
-        $this->getViewer());
-      if ($this->anchor) {
-        Javelin::initBehavior('phabricator-watch-anchor');
-
-        $anchor = id(new PhabricatorAnchorView())
-          ->setAnchorName($this->anchor)
-          ->render();
-
-        $date = $anchor.phutil_render_tag(
-            'a',
-            array(
-              'href' => '#'.$this->anchor,
-            ),
-            $date);
-      }
-      $extra[] = $date;
-    }
-
-    $extra = implode(' &middot; ', $extra);
-    if ($extra) {
-      $extra = phutil_render_tag(
-        'span',
-        array(
-          'class' => 'phabricator-timeline-extra',
-        ),
-        $extra);
-    }
+    $extra = $this->renderExtra();
 
     if ($title !== null || $extra !== null) {
       $title_classes = array();
@@ -284,6 +223,78 @@ final class PhabricatorTimelineEventView extends AphrontView {
           'class' => implode(' ', $classes),
         ),
         $content));
+  }
+
+  private function renderExtra() {
+    $extra = array();
+
+    if ($this->getIsPreview()) {
+      $extra[] = pht('PREVIEW');
+    } else {
+      $xaction_phid = $this->getTransactionPHID();
+
+
+      if ($this->getIsEdited()) {
+        $extra[] = javelin_render_tag(
+          'a',
+          array(
+            'href'  => '/transactions/history/'.$xaction_phid.'/',
+            'sigil' => 'workflow',
+          ),
+          pht('Edited'));
+      }
+
+      if ($this->getIsEditable()) {
+        $extra[] = javelin_render_tag(
+          'a',
+          array(
+            'href'  => '/transactions/edit/'.$xaction_phid.'/',
+            'sigil' => 'workflow transaction-edit',
+          ),
+          pht('Edit'));
+      }
+
+      $source = $this->getContentSource();
+      if ($source) {
+        $extra[] = id(new PhabricatorContentSourceView())
+          ->setContentSource($source)
+          ->setUser($this->getUser())
+          ->render();
+      }
+
+      if ($this->getDateCreated()) {
+        $date = phabricator_datetime(
+          $this->getDateCreated(),
+          $this->getUser());
+        if ($this->anchor) {
+          Javelin::initBehavior('phabricator-watch-anchor');
+
+          $anchor = id(new PhabricatorAnchorView())
+            ->setAnchorName($this->anchor)
+            ->render();
+
+          $date = $anchor.phutil_render_tag(
+              'a',
+              array(
+                'href' => '#'.$this->anchor,
+              ),
+              $date);
+        }
+        $extra[] = $date;
+      }
+    }
+
+    $extra = implode(' &middot; ', $extra);
+    if ($extra) {
+      $extra = phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-timeline-extra',
+        ),
+        $extra);
+    }
+
+    return $extra;
   }
 
 }

@@ -18,6 +18,7 @@ final class AphrontRequest {
   const TYPE_CONDUIT = '__conduit__';
   const TYPE_WORKFLOW = '__wflow__';
   const TYPE_CONTINUE = '__continue__';
+  const TYPE_PREVIEW = '__preview__';
 
   private $host;
   private $path;
@@ -337,6 +338,10 @@ final class AphrontRequest {
 
   public function isContinueRequest() {
     return $this->isFormPost() && $this->getStr('__continue__');
+  }
+
+  public function isPreviewRequest() {
+    return $this->isFormPost() && $this->getStr('__preview__');
   }
 
   /**

@@ -65,7 +65,7 @@ final class PholioMockViewController extends PholioController {
         'Carousel Goes Here</h1>';
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setViewer($this->getRequest()->getUser())
+      ->setUser($this->getRequest()->getUser())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
@@ -168,24 +168,14 @@ final class PholioMockViewController extends PholioController {
     $header = id(new PhabricatorHeaderView())
       ->setHeader($title);
 
-    $action = $is_serious
+    $button_name = $is_serious
       ? pht('Add Comment')
       : pht('Answer The Call');
 
-    $form = id(new AphrontFormView())
+    $form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
-      ->addSigil('transaction-append')
-      ->setAction($this->getApplicationURI('/comment/'.$mock->getID().'/'))
-      ->setWorkflow(true)
-      ->setFlexible(true)
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-          ->setName('comment')
-          ->setLabel(pht('Comment'))
-          ->setUser($user))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue($action));
+      ->setSubmitButtonName($button_name)
+      ->setAction($this->getApplicationURI('/comment/'.$mock->getID().'/'));
 
     return array(
       $header,

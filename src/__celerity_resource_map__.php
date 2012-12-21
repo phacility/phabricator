@@ -1676,6 +1676,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-tooltip.js',
   ),
+  'javelin-behavior-phabricator-transaction-comment-form' =>
+  array(
+    'uri' => '/res/bdc362ee/rsrc/js/application/transactions/behavior-transaction-comment-form.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-shaped-request',
+    ),
+    'disk' => '/rsrc/js/application/transactions/behavior-transaction-comment-form.js',
+  ),
   'javelin-behavior-phabricator-transaction-list' =>
   array(
     'uri' => '/res/212f97ba/rsrc/js/application/transactions/behavior-transaction-list.js',
@@ -2847,7 +2860,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-timeline-view-css' =>
   array(
-    'uri' => '/res/1846f7d5/rsrc/css/layout/phabricator-timeline-view.css',
+    'uri' => '/res/9cbeb7f0/rsrc/css/layout/phabricator-timeline-view.css',
     'type' => 'css',
     'requires' =>
     array(

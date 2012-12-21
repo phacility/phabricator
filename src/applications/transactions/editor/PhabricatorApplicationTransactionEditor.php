@@ -15,6 +15,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mentionedPHIDs;
   private $continueOnNoEffect;
 
+  private $isPreview;
 
   /**
    * When the editor tries to apply transactions that have no effect, should
@@ -44,6 +45,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
   protected function getMentionedPHIDs() {
     return $this->mentionedPHIDs;
+  }
+
+  public function setIsPreview($is_preview) {
+    $this->isPreview = $is_preview;
+    return $this;
+  }
+
+  public function getIsPreview() {
+    return $this->isPreview;
   }
 
   public function getTransactionTypes() {
@@ -225,10 +235,15 @@ abstract class PhabricatorApplicationTransactionEditor
     $xactions = $this->filterTransactions($object, $xactions);
 
     if (!$xactions) {
-      return $this;
+      return array();
     }
 
     $xactions = $this->sortTransactions($xactions);
+
+    if ($this->getIsPreview()) {
+      $this->loadHandles($xactions);
+      return $xactions;
+    }
 
     $comment_editor = id(new PhabricatorApplicationTransactionCommentEditor())
       ->setActor($actor)
@@ -256,9 +271,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     $object->saveTransaction();
 
-
     $this->loadHandles($xactions);
-
 
     $mail = null;
     if ($this->supportsMail()) {
@@ -285,8 +298,8 @@ abstract class PhabricatorApplicationTransactionEditor
 
   private function loadHandles(array $xactions) {
     $phids = array();
-    foreach ($xactions as $xaction) {
-      $phids[$xaction->getPHID()] = $xaction->getRequiredHandlePHIDs();
+    foreach ($xactions as $key => $xaction) {
+      $phids[$key] = $xaction->getRequiredHandlePHIDs();
     }
     $handles = array();
     $merged = array_mergev($phids);
@@ -295,11 +308,8 @@ abstract class PhabricatorApplicationTransactionEditor
         ->setViewer($this->requireActor())
         ->loadHandles();
     }
-    foreach ($xactions as $xaction) {
-      $xaction->setHandles(
-        array_select_keys(
-          $handles,
-          $phids[$xaction->getPHID()]));
+    foreach ($xactions as $key => $xaction) {
+      $xaction->setHandles(array_select_keys($handles, $phids[$key]));
     }
   }
 
@@ -587,11 +597,16 @@ abstract class PhabricatorApplicationTransactionEditor
       return $xactions;
     }
 
-    if (!$this->getContinueOnNoEffect()) {
+    if (!$this->getContinueOnNoEffect() && !$this->getIsPreview()) {
       throw new PhabricatorApplicationTransactionNoEffectException(
         $no_effect,
         $any_effect,
         $has_comment);
+    }
+
+    if (!$any_effect && !$has_comment) {
+      // If we only have empty comment transactions, just drop them all.
+      return array();
     }
 
     foreach ($no_effect as $key => $xaction) {

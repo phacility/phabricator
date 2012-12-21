@@ -245,3 +245,10 @@
   background: rgba(255, 255, 0, 0.50);
   box-shadow: 0 0 3px 6px rgba(255, 255, 0, 0.50);
 }
+
+.phabricator-timeline-preview-header {
+  background: #e0e3ec;
+  color: #444444;
+  padding: 4px 1.25%;
+  border: solid #c0c5d1 1px 0;
+}
