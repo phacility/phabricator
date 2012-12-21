@@ -193,9 +193,9 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s Line(s)' => array(
-        '%s Line',
-        '%s Lines',
+      '%2$s Line(s)' => array(
+        '%2$s Line',
+        '%2$s Lines',
       ),
 
       "Indexing %d object(s) of type %s." => array(

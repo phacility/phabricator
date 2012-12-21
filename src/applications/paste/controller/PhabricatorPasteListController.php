@@ -93,13 +93,17 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         $source_code);
 
       $line_count = count(explode("\n", $paste->getContent()));
+      $line_count = pht(
+        '%2$s Line(s)',
+        $line_count,
+        PhutilTranslator::getInstance()->formatNumber($line_count));
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($paste->getFullName())
         ->setHref('/P'.$paste->getID())
         ->setObject($paste)
         ->addAttribute(pht('Created %s by %s', $created, $author))
-        ->addIcon('none', pht('%s Line(s)', number_format($line_count)))
+        ->addIcon('none', $line_count)
         ->appendChild($source_code);
 
       $lang_name = $paste->getLanguage();
