@@ -3,16 +3,10 @@
 final class PhabricatorFlagListView extends AphrontView {
 
   private $flags;
-  private $user;
 
   public function setFlags(array $flags) {
     assert_instances_of($flags, 'PhabricatorFlag');
     $this->flags = $flags;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

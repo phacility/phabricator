@@ -9,6 +9,24 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
   private $pager;
   private $title;
+  private $description;
+  private $oGType;
+
+  protected function setOGType($og_type) {
+    $this->oGType = $og_type;
+    return $this;
+  }
+  protected function getOGType() {
+    return $this->oGType;
+  }
+
+  protected function setDescription($description) {
+    $this->description = $description;
+    return $this;
+  }
+  protected function getDescription() {
+    return $this->description;
+  }
 
   protected function setTitle($title) {
     $this->title = $title;
@@ -192,7 +210,10 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
     $matches = null;
     $path = $request->getPath();
+    // default to the blog-wide values
     $this->setTitle($this->getBlog()->getName());
+    $this->setDescription($this->getBlog()->getDescription());
+    $this->setOGType('website');
     if (preg_match('@^/post/(?P<name>.*)$@', $path, $matches)) {
       $post = id(new PhamePostQuery())
         ->setViewer($user)
@@ -201,7 +222,10 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
         ->executeOne();
 
       if ($post) {
+        $description = $post->getMarkupText(PhamePost::MARKUP_FIELD_SUMMARY);
         $this->setTitle($post->getTitle());
+        $this->setDescription($description);
+        $this->setOGType('article');
         $view = head($this->buildPostViews(array($post)));
         return $this->renderPostDetail($view);
       }

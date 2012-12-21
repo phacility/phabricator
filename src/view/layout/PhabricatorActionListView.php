@@ -4,15 +4,9 @@ final class PhabricatorActionListView extends AphrontView {
 
   private $actions = array();
   private $object;
-  private $user;
 
   public function setObject(PhabricatorLiskDAO $object) {
     $this->object = $object;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

@@ -1,17 +1,11 @@
 <?php
 
 final class PonderCommentListView extends AphrontView {
-  private $user;
   private $handles;
   private $comments;
   private $target;
   private $actionURI;
   private $questionID;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');

@@ -1,7 +1,6 @@
 <?php
 
 final class PonderQuestionSummaryView extends AphrontView {
-  private $user;
   private $question;
   private $handles;
 
@@ -12,11 +11,6 @@ final class PonderQuestionSummaryView extends AphrontView {
 
   public function setHandles($handles) {
     $this->handles = $handles;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

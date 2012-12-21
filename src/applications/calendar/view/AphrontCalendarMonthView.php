@@ -2,7 +2,6 @@
 
 final class AphrontCalendarMonthView extends AphrontView {
 
-  private $user;
   private $month;
   private $year;
   private $holidays = array();
@@ -15,11 +14,6 @@ final class AphrontCalendarMonthView extends AphrontView {
   }
   private function getBrowseURI() {
     return $this->browseURI;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
   }
 
   public function addEvent(AphrontCalendarEventView $event) {

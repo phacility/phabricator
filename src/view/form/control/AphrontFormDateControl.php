@@ -2,7 +2,6 @@
 
 final class AphrontFormDateControl extends AphrontFormControl {
 
-  private $user;
   private $initialTime;
 
   private $valueDay;
@@ -14,11 +13,6 @@ final class AphrontFormDateControl extends AphrontFormControl {
   const TIME_END_OF_DAY           = 'end-of-day';
   const TIME_START_OF_BUSINESS    = 'start-of-business';
   const TIME_END_OF_BUSINESS      = 'end-of-business';
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setInitialTime($time) {
     $this->initialTime = $time;

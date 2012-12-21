@@ -80,10 +80,12 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
   private function getDefaultScope() {
     return array(
-      'skin'  => $this,
-      'blog'  => $this->getBlog(),
-      'uri'   => $this->getURI(''),
-      'title' => $this->getTitle(),
+      'skin'        => $this,
+      'blog'        => $this->getBlog(),
+      'uri'         => $this->getURI(''),
+      'title'       => $this->getTitle(),
+      'description' => $this->getDescription(),
+      'og_type'     => $this->getOGType(),
     );
   }
 

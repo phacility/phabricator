@@ -59,6 +59,7 @@ $foreground = $args->getArg('foreground');
 $server_argv = array();
 $server_argv[] = csprintf('--port=%s', $client_uri->getPort());
 $server_argv[] = csprintf('--admin=%s', $server_uri->getPort());
+$server_argv[] = csprintf('--host=%s', $server_uri->getDomain());
 
 if ($user) {
   $server_argv[] = csprintf('--user=%s', $user);
@@ -88,6 +89,13 @@ if ($foreground) {
   } else if ($pid) {
     exit(0);
   }
+  // When we fork, the child process will inherit its parent's set of open
+  // file descriptors. If the parent process of bin/aphlict is waiting for
+  // bin/aphlict's file descriptors to close, it will be stuck waiting on
+  // the daemonized process. (This happens if e.g. bin/aphlict is started
+  // in another script using passthru().)
+  fclose(STDOUT);
+  fclose(STDERR);
 }
 
 

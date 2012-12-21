@@ -42,10 +42,6 @@
   top: 50%;
 }
 
-.jx-tooltip-align-W {
-  margin-right: 5px;
-}
-
 .jx-tooltip-align-W .jx-tooltip:after {
   margin-top: -5px;
   border-left-color: #000;
@@ -62,10 +58,6 @@
   border-top-color: #000;
   top: 100%;
   left: 50%;
-}
-
-.jx-tooltip-align-S {
-  margin-bottom: -5px;
 }
 
 .jx-tooltip-align-S .jx-tooltip:after {

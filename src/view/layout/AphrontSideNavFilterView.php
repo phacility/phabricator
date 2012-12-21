@@ -23,7 +23,6 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $selectedFilter = false;
   private $flexNav;
   private $flexible;
-  private $user;
   private $active;
   private $menu;
   private $crumbs;
@@ -50,11 +49,6 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function setActive($active) {
     $this->active = $active;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

@@ -86,7 +86,7 @@ JX.behavior('differential-populate', function(config) {
       } else {
         highlight_class = null;
         var msg;
-        var align = 'E';
+        var align = 'W';
         var sibling = 'previousSibling';
         var width = 120;
         if (t.className.match(/cov-C/)) {
@@ -101,7 +101,6 @@ JX.behavior('differential-populate', function(config) {
         } else {
           var match = /new-copy|new-move/.exec(t.className);
           if (match) {
-            align = 'N'; // TODO: 'W'
             sibling = 'nextSibling';
             width = 500;
             msg = JX.Stratcom.getData(t).msg;

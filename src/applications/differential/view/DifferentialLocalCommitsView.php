@@ -3,15 +3,9 @@
 final class DifferentialLocalCommitsView extends AphrontView {
 
   private $localCommits;
-  private $user;
 
   public function setLocalCommits($local_commits) {
     $this->localCommits = $local_commits;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

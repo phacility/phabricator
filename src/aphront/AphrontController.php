@@ -3,7 +3,7 @@
 /**
  * @group aphront
  */
-abstract class AphrontController {
+abstract class AphrontController extends Phobject {
 
   private $request;
   private $currentApplication;
@@ -43,11 +43,6 @@ abstract class AphrontController {
 
   final public function getCurrentApplication() {
     return $this->currentApplication;
-  }
-
-  public function __set($name, $value) {
-    phlog('Wrote to undeclared property '.get_class($this).'::$'.$name.'.');
-    $this->$name = $value;
   }
 
 }

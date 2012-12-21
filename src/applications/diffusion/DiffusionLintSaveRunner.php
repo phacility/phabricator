@@ -38,7 +38,15 @@ final class DiffusionLintSaveRunner {
   public function run($dir) {
     $working_copy = ArcanistWorkingCopyIdentity::newFromPath($dir);
     $api = ArcanistRepositoryAPI::newAPIFromWorkingCopyIdentity($working_copy);
+
     $this->svnRoot = id(new PhutilURI($api->getSourceControlPath()))->getPath();
+    if ($api instanceof ArcanistGitAPI) {
+      $svn_fetch = $api->getGitConfig('svn-remote.svn.fetch');
+      list($this->svnRoot) = explode(':', $svn_fetch);
+      if ($this->svnRoot != '') {
+        $this->svnRoot = '/' . $this->svnRoot;
+      }
+    }
 
     $project_id = $working_copy->getProjectID();
     $project = id(new PhabricatorRepositoryArcanistProject())

@@ -7,7 +7,6 @@ final class PhabricatorAuditListView extends AphrontView {
   private $authorityPHIDs = array();
   private $noDataString;
   private $commits;
-  private $user;
   private $showDescriptions = true;
 
   private $highlightedAudits;
@@ -41,11 +40,6 @@ final class PhabricatorAuditListView extends AphrontView {
   public function setCommits(array $commits) {
     assert_instances_of($commits, 'PhabricatorRepositoryCommit');
     $this->commits = mpull($commits, null, 'getPHID');
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

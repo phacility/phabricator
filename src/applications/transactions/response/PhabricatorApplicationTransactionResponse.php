@@ -6,6 +6,7 @@ final class PhabricatorApplicationTransactionResponse
   private $viewer;
   private $transactions;
   private $anchorOffset;
+  private $isPreview;
 
   protected function buildProxy() {
     return new AphrontAjaxResponse();
@@ -40,16 +41,26 @@ final class PhabricatorApplicationTransactionResponse
     return $this->viewer;
   }
 
+  public function setIsPreview($is_preview) {
+    $this->isPreview = $is_preview;
+    return $this;
+  }
+
   public function reduceProxyResponse() {
     $view = id(new PhabricatorApplicationTransactionView())
-      ->setViewer($this->getViewer())
-      ->setTransactions($this->getTransactions());
+      ->setUser($this->getViewer())
+      ->setTransactions($this->getTransactions())
+      ->setIsPreview($this->isPreview);
 
     if ($this->getAnchorOffset()) {
       $view->setAnchorOffset($this->getAnchorOffset());
     }
 
-    $xactions = mpull($view->buildEvents(), 'render', 'getTransactionPHID');
+    if ($this->isPreview) {
+      $xactions = mpull($view->buildEvents(), 'render');
+    } else {
+      $xactions = mpull($view->buildEvents(), 'render', 'getTransactionPHID');
+    }
 
     $content = array(
       'xactions' => $xactions,

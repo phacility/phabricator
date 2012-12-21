@@ -18,6 +18,7 @@ final class AphrontRequest {
   const TYPE_CONDUIT = '__conduit__';
   const TYPE_WORKFLOW = '__wflow__';
   const TYPE_CONTINUE = '__continue__';
+  const TYPE_PREVIEW = '__preview__';
 
   private $host;
   private $path;
@@ -339,6 +340,10 @@ final class AphrontRequest {
     return $this->isFormPost() && $this->getStr('__continue__');
   }
 
+  public function isPreviewRequest() {
+    return $this->isFormPost() && $this->getStr('__preview__');
+  }
+
   /**
    * Get application request parameters in a flattened form suitable for
    * inclusion in an HTTP request, excluding parameters with special meanings.
@@ -348,7 +353,16 @@ final class AphrontRequest {
    * @return  dict<string, string>  Original request parameters.
    */
   public function getPassthroughRequestParameters() {
-    $data = self::flattenData($this->getRequestData());
+    return self::flattenData($this->getPassthruRequestData());
+  }
+
+  /**
+   * Get request data other than "magic" parameters.
+   *
+   * @return dict<string, wild> Request data, with magic filtered out.
+   */
+  public function getPassthroughRequestData() {
+    $data = $this->getRequestData();
 
     // Remove magic parameters like __dialog__ and __ajax__.
     foreach ($data as $key => $value) {

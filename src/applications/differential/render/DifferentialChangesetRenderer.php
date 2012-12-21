@@ -28,6 +28,15 @@ abstract class DifferentialChangesetRenderer {
   private $gaps;
   private $mask;
   private $depths;
+  private $lineCount;
+
+  public function setLineCount($line_count) {
+    $this->lineCount = $line_count;
+    return $this;
+  }
+  public function getLineCount() {
+    return $this->lineCount;
+  }
 
   public function setDepths($depths) {
     $this->depths = $depths;
@@ -260,10 +269,7 @@ abstract class DifferentialChangesetRenderer {
   public function renderShield($message, $more) {
 
     if ($more) {
-      $end = max(
-        count($this->getOldLines()),
-        count($this->getNewLines())
-      );
+      $end = $this->getLineCount();
       $reference = $this->getRenderingReference();
       $more =
         ' '.

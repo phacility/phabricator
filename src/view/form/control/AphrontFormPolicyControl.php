@@ -2,19 +2,9 @@
 
 final class AphrontFormPolicyControl extends AphrontFormControl {
 
-  private $user;
   private $object;
   private $capability;
   private $policies;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
-  public function getUser() {
-    return $this->user;
-  }
 
   public function setPolicyObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;

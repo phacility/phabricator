@@ -2,7 +2,6 @@
 
 final class DiffusionCommentView extends AphrontView {
 
-  private $user;
   private $comment;
   private $commentNumber;
   private $handles;
@@ -11,11 +10,6 @@ final class DiffusionCommentView extends AphrontView {
 
   private $inlineComments;
   private $markupEngine;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setComment(PhabricatorAuditComment $comment) {
     $this->comment = $comment;

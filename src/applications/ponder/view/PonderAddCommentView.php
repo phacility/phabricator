@@ -3,17 +3,11 @@
 final class PonderAddCommentView extends AphrontView {
 
   private $target;
-  private $user;
   private $actionURI;
   private $questionID;
 
   public function setTarget($target) {
     $this->target = $target;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

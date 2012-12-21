@@ -4,7 +4,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
   private $paths;
   private $handles = array();
-  private $user;
 
   public function setPaths(array $paths) {
     assert_instances_of($paths, 'DiffusionRepositoryPath');
@@ -18,25 +17,21 @@ final class DiffusionBrowseTableView extends DiffusionView {
     return $this;
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
-  public static function renderLastModifiedColumns(
-    DiffusionRequest $drequest,
+  public function renderLastModifiedColumns(
     array $handles,
     PhabricatorRepositoryCommit $commit = null,
     PhabricatorRepositoryCommitData $data = null) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
+
+    $drequest = $this->getDiffusionRequest();
 
     if ($commit) {
       $epoch = $commit->getEpoch();
       $modified = DiffusionView::linkCommit(
         $drequest->getRepository(),
         $commit->getCommitIdentifier());
-      $date = date('M j, Y', $epoch);
-      $time = date('g:i A', $epoch);
+      $date = phabricator_date($epoch, $this->user);
+      $time = phabricator_time($epoch, $this->user);
     } else {
       $modified = '';
       $date = '';
@@ -175,8 +170,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       if ($commit) {
         $drequest = clone $request;
         $drequest->setPath($request->getPath().$path->getPath().$dir_slash);
-        $dict = self::renderLastModifiedColumns(
-          $drequest,
+        $dict = $this->renderLastModifiedColumns(
           $this->handles,
           $commit,
           $path->getLastCommitData());

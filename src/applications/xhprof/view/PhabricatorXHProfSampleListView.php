@@ -3,17 +3,11 @@
 final class PhabricatorXHProfSampleListView extends AphrontView {
 
   private $samples;
-  private $user;
   private $showType = false;
 
   public function setSamples(array $samples) {
     assert_instances_of($samples, 'PhabricatorXHProfSample');
     $this->samples = $samples;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

@@ -304,7 +304,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $changeset_view->setRepository($repository);
     }
     $changeset_view->setSymbolIndexes($symbol_indexes);
-    $changeset_view->setTitle('D'.$target->getID());
+    $changeset_view->setTitle('Diff '.$target->getID());
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);

@@ -3,7 +3,6 @@
 final class PhabricatorActionView extends AphrontView {
 
   private $name;
-  private $user;
   private $icon;
   private $href;
   private $disabled;
@@ -37,11 +36,6 @@ final class PhabricatorActionView extends AphrontView {
 
   public function setRenderAsForm($form) {
     $this->renderAsForm = $form;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

@@ -1,8 +1,18 @@
 <?php
 
-abstract class AphrontView {
+abstract class AphrontView extends Phobject {
 
+  protected $user;
   protected $children = array();
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  protected function getUser() {
+    return $this->user;
+  }
 
   protected function canAppendChild() {
     return true;
@@ -41,10 +51,5 @@ abstract class AphrontView {
   }
 
   abstract public function render();
-
-  public function __set($name, $value) {
-    phlog('Wrote to undeclared property '.get_class($this).'::$'.$name.'.');
-    $this->$name = $value;
-  }
 
 }

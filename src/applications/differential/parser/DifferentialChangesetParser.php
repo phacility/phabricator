@@ -972,9 +972,14 @@ final class DifferentialChangesetParser {
     $this->tryCacheStuff();
     $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);
 
+    $rows = max(
+      count($this->old),
+      count($this->new));
+
     $renderer = id(new DifferentialChangesetTwoUpRenderer())
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
+      ->setLineCount($rows)
       ->setOldRender($this->oldRender)
       ->setNewRender($this->newRender)
       ->setMissingOldLines($this->missingOld)
@@ -1156,9 +1161,6 @@ final class DifferentialChangesetParser {
       ->setOriginalOld($this->originalLeft)
       ->setOriginalNew($this->originalRight);
 
-    $rows = max(
-      count($this->old),
-      count($this->new));
     if ($range_start === null) {
       $range_start = 0;
     }

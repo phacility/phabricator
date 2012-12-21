@@ -30,6 +30,11 @@ final class PhabricatorMailImplementationPHPMailerAdapter
         $this->mailer->Password =
           PhabricatorEnv::getEnvConfig('phpmailer.smtp-password');
       }
+
+      $protocol = PhabricatorEnv::getEnvConfig('phpmailer.smtp-protocol');
+      if ($protocol) {
+        $this->mailer->SMTPSecure = $protocol;
+      }
     } else if ($mailer == 'sendmail') {
       $this->mailer->IsSendmail();
     } else {

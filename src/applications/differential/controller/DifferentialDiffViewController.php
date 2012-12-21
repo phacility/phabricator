@@ -133,7 +133,7 @@ final class DifferentialDiffViewController extends DifferentialController {
       ->setRenderingReferences($refs)
       ->setStandaloneURI('/differential/changeset/')
       ->setDiff($diff)
-      ->setTitle('D'.$diff->getID())
+      ->setTitle('Diff '.$diff->getID())
       ->setUser($request->getUser());
 
     return $this->buildStandardPageResponse(

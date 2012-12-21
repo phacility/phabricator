@@ -7,7 +7,6 @@ final class HeraldRuleListView extends AphrontView {
 
   private $showAuthor;
   private $showRuleType;
-  private $user;
 
   public function setRules(array $rules) {
     assert_instances_of($rules, 'HeraldRule');
@@ -28,11 +27,6 @@ final class HeraldRuleListView extends AphrontView {
 
   public function setShowRuleType($show_rule_type) {
     $this->showRuleType = $show_rule_type;
-    return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
     return $this;
   }
 

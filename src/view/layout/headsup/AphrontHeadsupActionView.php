@@ -7,7 +7,6 @@ final class AphrontHeadsupActionView extends AphrontView {
   private $uri;
   private $workflow;
   private $instant;
-  private $user;
 
   public function setName($name) {
     $this->name = $name;
@@ -31,11 +30,6 @@ final class AphrontHeadsupActionView extends AphrontView {
 
   public function setInstant($instant) {
     $this->instant = $instant;
-    return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
     return $this;
   }
 

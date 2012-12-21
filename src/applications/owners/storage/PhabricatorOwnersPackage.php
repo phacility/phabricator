@@ -268,7 +268,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
           $path->getPath(),
           array()));
         $excluded = $path->getExcluded();
-        if (!$new_path || $new_path['excluded'] != $excluded) {
+        if (!$new_path || idx($new_path, 'excluded') != $excluded) {
           $touched_repos[$repository_phid] = true;
           $remove_paths[$repository_phid][$path->getPath()] = $excluded;
           $path->delete();

@@ -79,23 +79,17 @@ final class PhabricatorMacroViewController
           ? pht('Add Comment')
           : pht('Grovel in Awe'));
 
-    $add_comment_form = id(new AphrontFormView())
-      ->setWorkflow(true)
-      ->setFlexible(true)
-      ->addSigil('transaction-append')
-      ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
+    $submit_button_name = $is_serious
+      ? pht('Add Comment')
+      : pht('Lavish Praise');
+
+    $draft = PhabricatorDraft::newFromUserAndKey($user, $macro->getPHID());
+
+    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
-      ->appendChild(
-        id(new PhabricatorRemarkupControl())
-          ->setUser($user)
-          ->setLabel('Comment')
-          ->setName('comment'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(
-            $is_serious
-              ? pht('Add Comment')
-              : pht('Lavish Praise')));
+      ->setDraft($draft)
+      ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
+      ->setSubmitButtonName($submit_button_name);
 
     return $this->buildApplicationPage(
       array(

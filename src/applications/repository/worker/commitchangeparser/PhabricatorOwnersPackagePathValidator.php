@@ -91,6 +91,7 @@ final class PhabricatorOwnersPackagePathValidator {
     }
 
     if ($new_paths) {
+      $package->attachOldPrimaryOwnerPHID($package->getPrimaryOwnerPHID());
       $package->attachUnsavedPaths($new_paths);
       $package->save(); // save the changes and notify the owners.
     }

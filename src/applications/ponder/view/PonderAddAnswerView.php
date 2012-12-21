@@ -3,17 +3,11 @@
 final class PonderAddAnswerView extends AphrontView {
 
   private $question;
-  private $user;
   private $actionURI;
   private $draft;
 
   public function setQuestion($question) {
     $this->question = $question;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 

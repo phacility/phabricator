@@ -15,6 +15,10 @@ final class PholioMockCommentController extends PholioController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    if (!$request->isFormPost()) {
+      return new Aphront400Response();
+    }
+
     $mock = id(new PholioMockQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
@@ -23,6 +27,10 @@ final class PholioMockCommentController extends PholioController {
     if (!$mock) {
       return new Aphront404Response();
     }
+
+    $is_preview = $request->isPreviewRequest();
+
+    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $mock_uri = '/M'.$mock->getID();
 
@@ -44,7 +52,8 @@ final class PholioMockCommentController extends PholioController {
     $editor = id(new PholioMockEditor())
       ->setActor($user)
       ->setContentSource($content_source)
-      ->setContinueOnException($request->isContinueRequest());
+      ->setContinueOnNoEffect($request->isContinueRequest())
+      ->setIsPreview($is_preview);
 
     try {
       $xactions = $editor->applyTransactions($mock, $xactions);
@@ -54,10 +63,15 @@ final class PholioMockCommentController extends PholioController {
         ->setException($ex);
     }
 
+    if ($draft) {
+      $draft->replaceOrDelete();
+    }
+
     if ($request->isAjax()) {
       return id(new PhabricatorApplicationTransactionResponse())
         ->setViewer($user)
         ->setTransactions($xactions)
+        ->setIsPreview($is_preview)
         ->setAnchorOffset($request->getStr('anchor'));
     } else {
       return id(new AphrontRedirectResponse())->setURI($mock_uri);

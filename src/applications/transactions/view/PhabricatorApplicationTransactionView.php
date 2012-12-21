@@ -5,11 +5,16 @@
  */
 class PhabricatorApplicationTransactionView extends AphrontView {
 
-  private $viewer;
   private $transactions;
   private $engine;
   private $anchorOffset = 1;
   private $showEditActions = true;
+  private $isPreview;
+
+  public function setIsPreview($is_preview) {
+    $this->isPreview = $is_preview;
+    return $this;
+  }
 
   public function setShowEditActions($show_edit_actions) {
     $this->showEditActions = $show_edit_actions;
@@ -36,16 +41,11 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $this;
   }
 
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
   public function buildEvents() {
     $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
     $engine = $this->getOrBuildEngine();
 
-    $viewer = $this->viewer;
+    $user = $this->getUser();
 
     $anchor = $this->anchorOffset;
     $events = array();
@@ -55,22 +55,29 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       }
 
       $event = id(new PhabricatorTimelineEventView())
-        ->setViewer($viewer)
+        ->setUser($user)
         ->setTransactionPHID($xaction->getPHID())
         ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
         ->setIcon($xaction->getIcon())
         ->setColor($xaction->getColor())
-        ->setTitle($xaction->getTitle())
-        ->setDateCreated($xaction->getDateCreated())
-        ->setContentSource($xaction->getContentSource())
-        ->setAnchor($anchor);
+        ->setTitle($xaction->getTitle());
 
-      $anchor++;
+      if ($this->isPreview) {
+        $event->setIsPreview(true);
+      } else {
+        $event
+          ->setDateCreated($xaction->getDateCreated())
+          ->setContentSource($xaction->getContentSource())
+          ->setAnchor($anchor);
+
+        $anchor++;
+      }
+
 
       $has_deleted_comment = $xaction->getComment() &&
         $xaction->getComment()->getIsDeleted();
 
-      if ($this->getShowEditActions()) {
+      if ($this->getShowEditActions() && !$this->isPreview) {
         if ($xaction->getCommentVersion() > 1) {
           $event->setIsEdited(true);
         }
@@ -79,7 +86,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
         if ($xaction->hasComment() || $has_deleted_comment) {
           $has_edit_capability = PhabricatorPolicyFilter::hasCapability(
-            $viewer,
+            $user,
             $xaction,
             $can_edit);
           if ($has_edit_capability) {
@@ -134,7 +141,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
 
     $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($this->viewer);
+      ->setViewer($this->getUser());
     foreach ($this->transactions as $xaction) {
       if (!$xaction->hasComment()) {
         continue;

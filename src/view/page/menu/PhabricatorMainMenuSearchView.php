@@ -2,14 +2,8 @@
 
 final class PhabricatorMainMenuSearchView extends AphrontView {
 
-  private $user;
   private $scope;
   private $id;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setScope($scope) {
     $this->scope = $scope;

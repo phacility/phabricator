@@ -38,7 +38,7 @@ final class ConduitAPI_paste_info_Method extends ConduitAPI_paste_Method {
     $paste = id(new PhabricatorPasteQuery())
       ->setViewer($request->getUser())
       ->withIDs(array($paste_id))
-      ->needContent(true)
+      ->needRawContent(true)
       ->executeOne();
     if (!$paste) {
       throw new ConduitException('ERR_BAD_PASTE');

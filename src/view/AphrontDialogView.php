@@ -7,7 +7,6 @@ final class AphrontDialogView extends AphrontView {
   private $cancelURI;
   private $cancelText = 'Cancel';
   private $submitURI;
-  private $user;
   private $hidden = array();
   private $class;
   private $renderAsForm = true;
@@ -17,11 +16,6 @@ final class AphrontDialogView extends AphrontView {
   const WIDTH_DEFAULT = 'default';
   const WIDTH_FORM    = 'form';
   const WIDTH_FULL    = 'full';
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
   public function setSubmitURI($uri) {
     $this->submitURI = $uri;

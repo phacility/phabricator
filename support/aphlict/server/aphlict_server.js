@@ -3,7 +3,7 @@
  *
  *   sudo node aphlict_server.js --user=aphlict
  *
- * You can also specify `port`, `admin` and `log`.
+ * You can also specify `port`, `admin`, `host` and `log`.
  */
 
 var config = parse_command_line_arguments(process.argv);
@@ -12,6 +12,7 @@ function parse_command_line_arguments(argv) {
   var config = {
     port : 22280,
     admin : 22281,
+    host : '127.0.0.1',
     user : null,
     log: '/var/log/aphlict.log'
   };
@@ -200,7 +201,7 @@ var receive_server = http.createServer(function(request, response) {
     response.end();
   }
 
-}).listen(config.admin, '127.0.0.1');
+}).listen(config.admin, config.host);
 
 function broadcast(data) {
   for (var client_id in clients) {

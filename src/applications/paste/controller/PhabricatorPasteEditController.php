@@ -28,6 +28,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           ->setViewer($user)
           ->withIDs(array($parent_id))
           ->needContent(true)
+          ->needRawContent(true)
           ->execute();
         $parent = head($parent);
 
@@ -95,7 +96,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       if ($is_create && $parent) {
         $paste->setTitle('Fork of '.$parent->getFullName());
         $paste->setLanguage($parent->getLanguage());
-        $text = $parent->getContent();
+        $text = $parent->getRawContent();
       }
     }
 

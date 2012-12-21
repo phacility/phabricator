@@ -1,17 +1,8 @@
 <?php
 
 final class PhortuneMonthYearExpiryControl extends AphrontFormControl {
-  private $user;
   private $monthValue;
   private $yearValue;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-  private function getUser() {
-    return $this->user;
-  }
 
   public function setMonthInputValue($value) {
     $this->monthValue = $value;

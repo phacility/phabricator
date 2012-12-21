@@ -7,7 +7,6 @@ final class DifferentialRevisionStatsView extends AphrontView {
   private $comments;
   private $revisions;
   private $diffs;
-  private $user;
   private $filter;
 
   public function setRevisions(array $revisions) {
@@ -30,11 +29,6 @@ final class DifferentialRevisionStatsView extends AphrontView {
 
   public function setFilter($filter) {
     $this->filter = $filter;
-    return $this;
-  }
-
-  public function setUser($user) {
-    $this->user = $user;
     return $this;
   }
 
