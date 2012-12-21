@@ -1130,6 +1130,13 @@ return array(
   'remarkup.enable-embedded-youtube' => false,
 
 
+// -- Cache ----------------------------------------------------------------- //
+
+  // Set this to false to disable the use of gzdeflate()-based compression in
+  // some caches. This may give you less performant (but more debuggable)
+  // caching.
+  'cache.enable-deflate' => true,
+
 // -- Garbage Collection ---------------------------------------------------- //
 
   // Phabricator generates various logs and caches in the database which can
@@ -1160,6 +1167,7 @@ return array(
   'gcdaemon.ttl.differential-parse-cache'   => 14 * (24 * 60 * 60),
   'gcdaemon.ttl.markup-cache'               => 30 * (24 * 60 * 60),
   'gcdaemon.ttl.task-archive'               => 14 * (24 * 60 * 60),
+  'gcdaemon.ttl.general-cache'              => 30 * (24 * 60 * 60),
 
 
 // -- Feed ------------------------------------------------------------------ //

@@ -1060,6 +1060,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20121209.xmacromigratekey.sql'),
       ),
+      '20121220.generalcache.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20121220.generalcache.sql'),
+      ),
     );
   }
 
