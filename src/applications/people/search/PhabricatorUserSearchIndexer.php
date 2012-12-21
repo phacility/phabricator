@@ -1,12 +1,15 @@
 <?php
 
-/**
- * @group search
- */
-final class PhabricatorSearchUserIndexer
+final class PhabricatorUserSearchIndexer
   extends PhabricatorSearchDocumentIndexer {
 
-  public static function indexUser(PhabricatorUser $user) {
+  public function getIndexableObject() {
+    return new PhabricatorUser();
+  }
+
+  protected function buildAbstractDocumentByPHID($phid) {
+    $user = $this->loadDocumentByPHID($phid);
+
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($user->getPHID());
     $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_USER);
@@ -25,6 +28,6 @@ final class PhabricatorSearchUserIndexer
         time());
     }
 
-    self::reindexAbstractDocument($doc);
+    return $doc;
   }
 }

@@ -104,7 +104,9 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
     $result = parent::save();
 
     $this->updateNameTokens();
-    PhabricatorSearchUserIndexer::indexUser($this);
+
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($this->getPHID());
 
     return $result;
   }

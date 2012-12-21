@@ -44,7 +44,8 @@ final class DiffusionCommitEditController extends DiffusionController {
       }
       $editor->save();
 
-      PhabricatorSearchCommitIndexer::indexCommit($commit);
+      id(new PhabricatorSearchIndexer())
+        ->indexDocumentByPHID($commit->getPHID());
 
       return id(new AphrontRedirectResponse())
       ->setURI('/r'.$callsign.$commit->getCommitIdentifier());

@@ -1,12 +1,15 @@
 <?php
 
-/**
- * @group search
- */
-final class PhabricatorSearchCommitIndexer
+final class PhabricatorRepositoryCommitSearchIndexer
   extends PhabricatorSearchDocumentIndexer {
 
-  public static function indexCommit(PhabricatorRepositoryCommit $commit) {
+  public function getIndexableObject() {
+    return new PhabricatorRepositoryCommit();
+  }
+
+  protected function buildAbstractDocumentByPHID($phid) {
+    $commit = $this->loadDocumentByPHID($phid);
+
     $commit_data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
@@ -19,7 +22,7 @@ final class PhabricatorSearchCommitIndexer
       $commit->getRepositoryID());
 
     if (!$repository) {
-      return;
+      throw new Exception("No such repository!");
     }
 
     $title = 'r'.$repository->getCallsign().$commit->getCommitIdentifier().
@@ -75,7 +78,7 @@ final class PhabricatorSearchCommitIndexer
       }
     }
 
-    self::reindexAbstractDocument($doc);
+    return $doc;
   }
 }
 

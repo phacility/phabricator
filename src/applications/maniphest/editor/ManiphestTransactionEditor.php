@@ -199,9 +199,8 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
       $transactions,
       $mail->buildRecipientList());
 
-    // TODO: Do this offline via workers
-    PhabricatorSearchManiphestIndexer::indexTask($task);
-
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($task->getPHID());
   }
 
   protected function getSubjectPrefix() {

@@ -3,9 +3,15 @@
 /**
  * @group pholio
  */
-final class PholioIndexer extends PhabricatorSearchDocumentIndexer {
+final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
-  public static function indexMock(PholioMock $mock) {
+  public function getIndexableObject() {
+    return new PholioMock();
+  }
+
+  protected function buildAbstractDocumentByPHID($phid) {
+    $mock = $this->loadDocumentByPHID($phid);
+
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($mock->getPHID());
     $doc->setDocumentType(phid_get_type($mock->getPHID()));
@@ -23,6 +29,6 @@ final class PholioIndexer extends PhabricatorSearchDocumentIndexer {
       PhabricatorPHIDConstants::PHID_TYPE_USER,
       $mock->getDateCreated());
 
-    self::reindexAbstractDocument($doc);
+    return $doc;
   }
 }

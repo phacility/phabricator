@@ -39,8 +39,8 @@ final class PonderCommentEditor extends PhabricatorEditor {
     $target   = $this->targetPHID;
     $comment->save();
 
-    $question->attachRelated();
-    PhabricatorSearchPonderIndexer::indexQuestion($question);
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($question->getPHID());
 
     // subscribe author and @mentions
     $subeditor = id(new PhabricatorSubscriptionsEditor())

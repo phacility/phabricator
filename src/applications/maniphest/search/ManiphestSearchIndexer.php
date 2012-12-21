@@ -1,12 +1,18 @@
 <?php
 
 /**
- * @group search
+ * @group maniphest
  */
-final class PhabricatorSearchManiphestIndexer
+final class ManiphestSearchIndexer
   extends PhabricatorSearchDocumentIndexer {
 
-  public static function indexTask(ManiphestTask $task) {
+  public function getIndexableObject() {
+    return new ManiphestTask();
+  }
+
+  protected function buildAbstractDocumentByPHID($phid) {
+    $task = $this->loadDocumentByPHID($phid);
+
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($task->getPHID());
     $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_TASK);
@@ -114,6 +120,6 @@ final class PhabricatorSearchManiphestIndexer
         $time);
     }
 
-    self::reindexAbstractDocument($doc);
+    return $doc;
   }
 }

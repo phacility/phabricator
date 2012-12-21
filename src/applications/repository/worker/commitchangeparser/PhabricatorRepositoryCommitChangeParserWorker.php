@@ -57,7 +57,9 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
 
   protected function finishParse() {
     $commit = $this->commit;
-    PhabricatorSearchCommitIndexer::indexCommit($commit);
+
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($commit->getPHID());
 
     PhabricatorOwnersPackagePathValidator::updateOwnersPackagePaths($commit);
     if ($this->shouldQueueFollowupTasks()) {

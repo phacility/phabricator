@@ -1,12 +1,18 @@
 <?php
 
 /**
- * @group search
+ * @group differential
  */
-final class PhabricatorSearchDifferentialIndexer
+final class DifferentialSearchIndexer
   extends PhabricatorSearchDocumentIndexer {
 
-  public static function indexRevision(DifferentialRevision $rev) {
+  public function getIndexableObject() {
+    return new DifferentialRevision();
+  }
+
+  protected function buildAbstractDocumentByPHID($phid) {
+    $rev = $this->loadDocumentByPHID($phid);
+
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($rev->getPHID());
     $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_DREV);
@@ -108,6 +114,6 @@ final class PhabricatorSearchDifferentialIndexer
         $rev->getDateModified()); // Bogus timestamp.
     }
 
-    self::reindexAbstractDocument($doc);
+    return $doc;
   }
 }

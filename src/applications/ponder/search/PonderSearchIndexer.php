@@ -1,10 +1,16 @@
 <?php
 
-final class PhabricatorSearchPonderIndexer
+final class PonderSearchIndexer
   extends PhabricatorSearchDocumentIndexer {
 
-  public static function indexQuestion(PonderQuestion $question) {
-    // note: we assume someone's already called attachrelated on $question
+  public function getIndexableObject() {
+    return new PonderQuestion();
+  }
+
+  protected function buildAbstractDocumentByPHID($phid) {
+    $question = $this->loadDocumentByPHID($phid);
+
+    $question->attachRelated();
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($question->getPHID());
@@ -61,6 +67,6 @@ final class PhabricatorSearchPonderIndexer
         $question->getDateModified()); // Bogus timestamp.
     }
 
-    self::reindexAbstractDocument($doc);
+    return $doc;
   }
 }

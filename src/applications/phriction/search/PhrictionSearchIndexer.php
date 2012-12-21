@@ -1,12 +1,21 @@
 <?php
 
 /**
- * @group search
+ * @group phriction
  */
-final class PhabricatorSearchPhrictionIndexer
+final class PhrictionSearchIndexer
   extends PhabricatorSearchDocumentIndexer {
 
-  public static function indexDocument(PhrictionDocument $document) {
+  public function getIndexableObject() {
+    return new PhrictionDocument();
+  }
+
+  protected function buildAbstractDocumentByPHID($phid) {
+    $document = $this->loadDocumentByPHID($phid);
+
+    $content = id(new PhrictionContent())->load($document->getContentID());
+    $document->attachContent($content);
+
     $content = $document->getContent();
 
     $doc = new PhabricatorSearchAbstractDocument();
@@ -28,6 +37,6 @@ final class PhabricatorSearchPhrictionIndexer
       PhabricatorPHIDConstants::PHID_TYPE_USER,
       $content->getDateCreated());
 
-    self::reindexAbstractDocument($doc);
+    return $doc;
   }
 }

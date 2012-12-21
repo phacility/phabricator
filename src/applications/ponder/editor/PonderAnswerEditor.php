@@ -47,7 +47,8 @@ final class PonderAnswerEditor extends PhabricatorEditor {
     $trans->saveTransaction();
 
     $question->attachRelated();
-    PhabricatorSearchPonderIndexer::indexQuestion($question);
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($question->getPHID());
 
     // subscribe author and @mentions
     $subeditor = id(new PhabricatorSubscriptionsEditor())
