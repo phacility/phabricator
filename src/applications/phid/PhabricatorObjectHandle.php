@@ -12,6 +12,7 @@ final class PhabricatorObjectHandle {
   private $timestamp;
   private $alternateID;
   private $status = PhabricatorObjectHandleStatus::STATUS_OPEN;
+  private $title;
   private $complete;
   private $disabled;
 
@@ -49,6 +50,11 @@ final class PhabricatorObjectHandle {
 
   public function getStatus() {
     return $this->status;
+  }
+
+  public function setTitle($title) {
+    $this->title = $title;
+    return $this;
   }
 
   public function setFullName($full_name) {
@@ -176,7 +182,7 @@ final class PhabricatorObjectHandle {
 
     if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
       $class .= ' handle-status-'.$this->status;
-      $title = $this->status;
+      $title = (isset($this->title) ? $this->title : $this->status);
     }
 
     if ($this->disabled) {

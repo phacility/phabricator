@@ -38,7 +38,7 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
     $user_phid   = $request->getUser()->getPHID();
     $from        = $request->getValue('fromEpoch');
     $to          = $request->getValue('toEpoch');
-    $status      = ucfirst($request->getValue('status'));
+    $status      = $request->getValue('status');
     $description = $request->getValue('description', '');
 
     try {

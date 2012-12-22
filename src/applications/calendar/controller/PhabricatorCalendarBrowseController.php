@@ -36,7 +36,7 @@ final class PhabricatorCalendarBrowseController
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
 
       $name_text = $handles[$status->getUserPHID()]->getName();
-      $status_text = $status->getTextStatus();
+      $status_text = $status->getHumanStatus();
       $event->setUserPHID($status->getUserPHID());
       $event->setName("{$name_text} ({$status_text})");
       $details = '';
