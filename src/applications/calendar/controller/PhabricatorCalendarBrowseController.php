@@ -41,7 +41,7 @@ final class PhabricatorCalendarBrowseController
       $event->setName("{$name_text} ({$status_text})");
       $details = '';
       if ($status->getDescription()) {
-        $details = "\n\n".rtrim(phutil_escape_html($status->getDescription()));
+        $details = "\n\n".rtrim($status->getDescription());
       }
       $event->setDescription(
         $status->getTerseSummary($user).$details
