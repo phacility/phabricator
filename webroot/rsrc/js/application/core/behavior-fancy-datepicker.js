@@ -80,9 +80,9 @@ JX.behavior('fancy-datepicker', function(config) {
 
   var read_date = function() {
     var i = get_inputs();
-    value_y = i.y.value;
-    value_m = i.m.value;
-    value_d = i.d.value;
+    value_y = +i.y.value;
+    value_m = +i.m.value;
+    value_d = +i.d.value;
   };
 
   var write_date = function() {
@@ -216,16 +216,14 @@ JX.behavior('fancy-datepicker', function(config) {
       switch (p[0]) {
         case 'm':
           // User clicked left or right month selection buttons.
-          value_m = value_m - 1;
           value_m = value_m + parseInt(p[1]);
-          if (value_m >= 12) {
+          if (value_m > 12) {
             value_m -= 12;
-            value_y += 1;
-          } else if (value_m < 0) {
+            value_y++;
+          } else if (value_m <= 0) {
             value_m += 12;
-            value_y -= 1;
+            value_y--;
           }
-          value_m = value_m + 1;
           break;
         case 'd':
           // User clicked a day.

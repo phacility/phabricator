@@ -1350,7 +1350,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-fancy-datepicker' =>
   array(
-    'uri' => '/res/ae843244/rsrc/js/application/core/behavior-fancy-datepicker.js',
+    'uri' => '/res/0a1bc610/rsrc/js/application/core/behavior-fancy-datepicker.js',
     'type' => 'js',
     'requires' =>
     array(
