@@ -19,6 +19,8 @@ final class PhabricatorRequestOverseer {
    * to the documentation the stream isn't available for "multipart/form-data"
    * (on nginx + php-fpm it appears that it is available, though, at least) so
    * any attempt to generate $_POST would be fragile.
+   *
+   * @phutil-external-symbol class PhabricatorStartup
    */
   private function detectPostMaxSizeTriggered() {
     // If this wasn't a POST, we're fine.
@@ -83,7 +85,7 @@ final class PhabricatorRequestOverseer {
     // populated into $_POST, but it wasn't.
 
     $config = ini_get('post_max_size');
-    $this->fatal(
+    PhabricatorStartup::didFatal(
       "As received by the server, this request had a nonzero content length ".
       "but no POST data.\n\n".
       "Normally, this indicates that it exceeds the 'post_max_size' setting ".
@@ -91,16 +93,6 @@ final class PhabricatorRequestOverseer {
       "setting or reduce the size of the request.\n\n".
       "Request size according to 'Content-Length' was '{$length}', ".
       "'post_max_size' is set to '{$config}'.");
-  }
-
-  /**
-   * Defined in webroot/index.php.
-   * TODO: Move here.
-   *
-   * @phutil-external-symbol function phabricator_fatal
-   */
-  public function fatal($message) {
-    phabricator_fatal('FATAL ERROR: '.$message);
   }
 
 }

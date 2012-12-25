@@ -1,19 +1,9 @@
 <?php
 
-$__start__ = microtime(true);
+require_once dirname(dirname(__FILE__)).'/support/PhabricatorStartup.php';
+PhabricatorStartup::didStartup();
+
 $access_log = null;
-
-error_reporting(E_ALL | E_STRICT);
-
-$required_version = '5.2.3';
-if (version_compare(PHP_VERSION, $required_version) < 0) {
-  phabricator_fatal_config_error(
-    "You are running PHP version '".PHP_VERSION."', which is older than ".
-    "the minimum version, '{$required_version}'. Update to at least ".
-    "'{$required_version}'.");
-}
-
-ini_set('memory_limit', -1);
 
 $env = getenv('PHABRICATOR_ENV'); // Apache
 if (!$env) {
@@ -23,31 +13,12 @@ if (!$env) {
 }
 
 if (!$env) {
-  phabricator_fatal_config_error(
+  PhabricatorStartup::didFatal(
     "The 'PHABRICATOR_ENV' environmental variable is not defined. Modify ".
     "your httpd.conf to include 'SetEnv PHABRICATOR_ENV <env>', where '<env>' ".
     "is one of 'development', 'production', or a custom environment.");
 }
 
-if (!isset($_REQUEST['__path__'])) {
-  if (php_sapi_name() == 'cli-server') {
-    // Compatibility with PHP 5.4+ built-in web server.
-    $url = parse_url($_SERVER['REQUEST_URI']);
-    $_REQUEST['__path__'] = $url['path'];
-  } else {
-    phabricator_fatal_config_error(
-      "__path__ is not set. Your rewrite rules are not configured correctly.");
-  }
-}
-
-if (get_magic_quotes_gpc()) {
-  phabricator_fatal_config_error(
-    "Your server is configured with PHP 'magic_quotes_gpc' enabled. This ".
-    "feature is 'highly discouraged' by PHP's developers and you must ".
-    "disable it to run Phabricator. Consult the PHP manual for instructions.");
-}
-
-register_shutdown_function('phabricator_shutdown');
 
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
@@ -81,6 +52,7 @@ try {
   PhabricatorAccessLog::init();
   $access_log = PhabricatorAccessLog::getLog();
   if ($access_log) {
+    PhabricatorStartup::setGlobal('log.access', $access_log);
     $access_log->setData(
       array(
         'R' => idx($_SERVER, 'HTTP_REFERER', '-'),
@@ -193,7 +165,7 @@ try {
           $ex,
         ));
     }
-    phabricator_fatal('[Rendering Exception] '.$ex->getMessage());
+    PhabricatorStartup::didFatal('[Rendering Exception] '.$ex->getMessage());
   }
 
   $write_guard->dispose();
@@ -211,10 +183,11 @@ try {
   $sink->writeData($response_string);
 
   if ($access_log) {
+    $request_start = PhabricatorStartup::getStartTime();
     $access_log->setData(
       array(
         'c' => $response->getHTTPResponseCode(),
-        'T' => (int)(1000000 * (microtime(true) - $__start__)),
+        'T' => (int)(1000000 * (microtime(true) - $request_start)),
       ));
     $access_log->write();
   }
@@ -240,7 +213,7 @@ try {
   }
 
 } catch (Exception $ex) {
-  phabricator_fatal("[Exception] ".$ex->getMessage());
+  PhabricatorStartup::didFatal("[Exception] ".$ex->getMessage());
 }
 
 
@@ -275,10 +248,6 @@ function setup_aphront_basics() {
 
 }
 
-function phabricator_fatal_config_error($msg) {
-  phabricator_fatal("CONFIG ERROR: ".$msg."\n");
-}
-
 function phabricator_detect_bad_base_uri() {
   $conf = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
   $uri = new PhutilURI($conf);
@@ -287,13 +256,14 @@ function phabricator_detect_bad_base_uri() {
     case 'https':
       break;
     default:
-      return phabricator_fatal_config_error(
+      PhabricatorStartup::didFatal(
         "'phabricator.base-uri' is set to '{$conf}', which is invalid. ".
         "The URI must start with 'http://' or 'https://'.");
+      return;
   }
 
   if (strpos($uri->getDomain(), '.') === false) {
-    phabricator_fatal_config_error(
+    PhabricatorStartup::didFatal(
       "'phabricator.base-uri' is set to '{$conf}', which is invalid. The URI ".
       "must contain a dot ('.'), like 'http://example.com/', not just ".
       "'http://example/'. Some web browsers will not set cookies on domains ".
@@ -302,65 +272,5 @@ function phabricator_detect_bad_base_uri() {
       "'127.0.0.1 example.com', and access the localhost with ".
       "'http://example.com/'.");
   }
-}
-
-function phabricator_shutdown() {
-  $event = error_get_last();
-
-  if (!$event) {
-    return;
-  }
-
-  switch ($event['type']) {
-    case E_ERROR:
-    case E_PARSE:
-    case E_COMPILE_ERROR:
-      break;
-    default:
-      return;
-  }
-
-  $msg = ">>> UNRECOVERABLE FATAL ERROR <<<\n\n";
-  if ($event) {
-    // Even though we should be emitting this as text-plain, escape things just
-    // to be sure since we can't really be sure what the program state is when
-    // we get here.
-    $msg .= phutil_escape_html($event['message'])."\n\n";
-    $msg .= phutil_escape_html($event['file'].':'.$event['line']);
-  }
-
-  // flip dem tables
-  $msg .= "\n\n\n";
-  $msg .= "\xe2\x94\xbb\xe2\x94\x81\xe2\x94\xbb\x20\xef\xb8\xb5\x20\xc2\xaf".
-          "\x5c\x5f\x28\xe3\x83\x84\x29\x5f\x2f\xc2\xaf\x20\xef\xb8\xb5\x20".
-          "\xe2\x94\xbb\xe2\x94\x81\xe2\x94\xbb";
-
-  phabricator_fatal($msg);
-}
-
-function phabricator_fatal($msg) {
-
-  global $access_log;
-  if ($access_log) {
-    try {
-      $access_log->setData(
-        array(
-          'c' => 500,
-        ));
-      $access_log->write();
-    } catch (Exception $ex) {
-      $msg .= "\nMoreover unable to write to access log.";
-    }
-  }
-
-  header(
-    'Content-Type: text/plain; charset=utf-8',
-    $replace = true,
-    $http_error = 500);
-
-  error_log($msg);
-  echo $msg;
-
-  exit(1);
 }
 

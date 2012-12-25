@@ -15,6 +15,9 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     return 'Information about services.';
   }
 
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
   public function generateData() {
 
     $log = PhutilServiceProfiler::getInstance()->getServiceCallLog();
@@ -130,7 +133,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     }
 
     return array(
-      'start' => $GLOBALS['__start__'],
+      'start' => PhabricatorStartup::getStartTime(),
       'end'   => microtime(true),
       'log'   => $log,
     );
