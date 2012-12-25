@@ -651,6 +651,7 @@ phutil_register_library_map(array(
     'PhabricatorBuiltinPatchList' => 'infrastructure/storage/patch/PhabricatorBuiltinPatchList.php',
     'PhabricatorButtonsExample' => 'applications/uiexample/examples/PhabricatorButtonsExample.php',
     'PhabricatorCacheDAO' => 'applications/cache/storage/PhabricatorCacheDAO.php',
+    'PhabricatorCaches' => 'applications/cache/PhabricatorCaches.php',
     'PhabricatorCalendarBrowseController' => 'applications/calendar/controller/PhabricatorCalendarBrowseController.php',
     'PhabricatorCalendarController' => 'applications/calendar/controller/PhabricatorCalendarController.php',
     'PhabricatorCalendarDAO' => 'applications/calendar/storage/PhabricatorCalendarDAO.php',
