@@ -24,7 +24,7 @@ final class PhabricatorScopedEnv {
    * @task override
    */
   public function overrideEnvConfig($key, $value) {
-    PhabricatorEnv::overrideEnvConfig(
+    PhabricatorEnv::overrideTestEnvConfig(
       $this->key,
       $key,
       $value);
@@ -36,7 +36,6 @@ final class PhabricatorScopedEnv {
 
 
   /**
-   *
    * @task internal
    */
   public function __construct($stack_key) {
@@ -52,7 +51,7 @@ final class PhabricatorScopedEnv {
    */
   public function __destruct() {
     if (!$this->isPopped) {
-      PhabricatorEnv::popEnvironment($this->key);
+      PhabricatorEnv::popTestEnvironment($this->key);
       $this->isPopped = true;
     }
   }

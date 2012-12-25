@@ -38,8 +38,78 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
     }
   }
 
+  public function testDictionarySource() {
+    $source = new PhabricatorConfigDictionarySource(array('x' => 1));
+
+    $this->assertEqual(
+      array(
+        'x' => 1,
+      ),
+      $source->getKeys(array('x', 'z')));
+
+    $source->setKeys(array('z' => 2));
+
+    $this->assertEqual(
+      array(
+        'x' => 1,
+        'z' => 2,
+      ),
+      $source->getKeys(array('x', 'z')));
+
+    $source->setKeys(array('x' => 3));
+
+    $this->assertEqual(
+      array(
+        'x' => 3,
+        'z' => 2,
+      ),
+      $source->getKeys(array('x', 'z')));
+
+    $source->deleteKeys(array('x'));
+
+    $this->assertEqual(
+      array(
+        'z' => 2,
+      ),
+      $source->getKeys(array('x', 'z')));
+  }
+
+  public function testStackSource() {
+    $s1 = new PhabricatorConfigDictionarySource(array('x' => 1));
+    $s2 = new PhabricatorConfigDictionarySource(array('x' => 2));
+
+    $stack = new PhabricatorConfigStackSource();
+
+    $this->assertEqual(array(), $stack->getKeys(array('x')));
+
+    $stack->pushSource($s1);
+    $this->assertEqual(array('x' => 1), $stack->getKeys(array('x')));
+
+    $stack->pushSource($s2);
+    $this->assertEqual(array('x' => 2), $stack->getKeys(array('x')));
+
+    $stack->setKeys(array('x' => 3));
+    $this->assertEqual(array('x' => 3), $stack->getKeys(array('x')));
+
+    $stack->popSource();
+    $this->assertEqual(array('x' => 1), $stack->getKeys(array('x')));
+
+    $stack->popSource();
+    $this->assertEqual(array(), $stack->getKeys(array('x')));
+
+    $caught = null;
+    try {
+      $stack->popSource();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertEqual(true, ($caught instanceof Exception));
+  }
+
   public function testOverrides() {
     $outer = PhabricatorEnv::beginScopedEnv();
+
       $outer->overrideEnvConfig('test.value', 1);
       $this->assertEqual(1, PhabricatorEnv::getEnvConfig('test.value'));
 

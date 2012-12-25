@@ -50,8 +50,7 @@
  */
 final class PhabricatorEnv {
 
-  private static $env;
-  private static $stack = array();
+  private static $sourceStack;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -93,18 +92,12 @@ final class PhabricatorEnv {
     AphrontWriteGuard::allowDangerousUnguardedWrites(true);
   }
 
-  /**
-   * @phutil-external-symbol function phabricator_read_config_file
-   */
+
   private static function initializeCommonEnvironment() {
     $env = self::getSelectedEnvironmentName();
 
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/conf/__init_conf__.php';
-    $conf = phabricator_read_config_file($env);
-    $conf['phabricator.env'] = $env;
-
-    PhabricatorEnv::setEnvConfig($conf);
+    self::$sourceStack = new PhabricatorConfigStackSource();
+    self::$sourceStack->pushSource(new PhabricatorConfigFileSource($env));
 
     PhutilErrorHandler::initialize();
 
@@ -159,18 +152,8 @@ final class PhabricatorEnv {
    * @task read
    */
   public static function getEnvConfig($key, $default = null) {
-
-    // If we have environment overrides via beginScopedEnv(), check them for
-    // the key first.
-    if (self::$stack) {
-      foreach (array_reverse(self::$stack) as $override) {
-        if (array_key_exists($key, $override)) {
-          return $override[$key];
-        }
-      }
-    }
-
-    return idx(self::$env, $key, $default);
+    $result = self::$sourceStack->getKeys(array($key));
+    return idx($result, $key, $default);
   }
 
 
@@ -256,27 +239,26 @@ final class PhabricatorEnv {
    * @task test
    */
   public static function beginScopedEnv() {
-    return new PhabricatorScopedEnv(self::pushEnvironment());
+    return new PhabricatorScopedEnv(self::pushTestEnvironment());
   }
 
 
   /**
    * @task test
    */
-  private static function pushEnvironment() {
-    self::$stack[] = array();
-    return last_key(self::$stack);
+  private static function pushTestEnvironment() {
+    $source = new PhabricatorConfigDictionarySource(array());
+    self::$sourceStack->pushSource($source);
+    return spl_object_hash($source);
   }
 
 
   /**
    * @task test
    */
-  public static function popEnvironment($key) {
-    $stack_key = last_key(self::$stack);
-
-    array_pop(self::$stack);
-
+  public static function popTestEnvironment($key) {
+    $source = self::$sourceStack->popSource();
+    $stack_key = spl_object_hash($source);
     if ($stack_key !== $key) {
       throw new Exception(
         "Scoped environments were destroyed in a diffent order than they ".
@@ -369,14 +351,6 @@ final class PhabricatorEnv {
   /**
    * @task internal
    */
-  public static function setEnvConfig(array $config) {
-    self::$env = $config;
-  }
-
-
-  /**
-   * @task internal
-   */
   public static function getRequiredClasses() {
     return array(
       'translation.provider' => 'PhabricatorTranslation',
@@ -405,7 +379,7 @@ final class PhabricatorEnv {
    * @task internal
    */
   public static function envConfigExists($key) {
-    return array_key_exists($key, self::$env);
+    return array_key_exists($key, self::$sourceStack->getKeys(array($key)));
   }
 
 
@@ -413,15 +387,30 @@ final class PhabricatorEnv {
    * @task internal
    */
   public static function getAllConfigKeys() {
-    return self::$env;
+    return self::$sourceStack->getAllKeys();
   }
 
 
   /**
    * @task internal
    */
-  public static function overrideEnvConfig($stack_key, $key, $value) {
-    self::$stack[$stack_key][$key] = $value;
+  public static function overrideTestEnvConfig($stack_key, $key, $value) {
+    $tmp = array();
+
+    // If we don't have the right key, we'll throw when popping the last
+    // source off the stack.
+    do {
+      $source = self::$sourceStack->popSource();
+      array_unshift($tmp, $source);
+      if (spl_object_hash($source) == $stack_key) {
+        $source->setKeys(array($key => $value));
+        break;
+      }
+    } while (true);
+
+    foreach ($tmp as $source) {
+      self::$sourceStack->pushSource($source);
+    }
   }
 
 }
