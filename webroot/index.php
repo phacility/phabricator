@@ -3,50 +3,10 @@
 require_once dirname(dirname(__FILE__)).'/support/PhabricatorStartup.php';
 PhabricatorStartup::didStartup();
 
-$access_log = null;
-
-$env = getenv('PHABRICATOR_ENV'); // Apache
-if (!$env) {
-  if (isset($_ENV['PHABRICATOR_ENV'])) {
-    $env = $_ENV['PHABRICATOR_ENV'];
-  }
-}
-
-if (!$env) {
-  PhabricatorStartup::didFatal(
-    "The 'PHABRICATOR_ENV' environmental variable is not defined. Modify ".
-    "your httpd.conf to include 'SetEnv PHABRICATOR_ENV <env>', where '<env>' ".
-    "is one of 'development', 'production', or a custom environment.");
-}
-
-
-require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
-
 try {
-  setup_aphront_basics();
+  PhabricatorStartup::loadCoreLibraries();
 
-  $overseer = new PhabricatorRequestOverseer();
-  $overseer->didStartup();
-
-  $conf = phabricator_read_config_file($env);
-  $conf['phabricator.env'] = $env;
-
-  PhabricatorEnv::setEnvConfig($conf);
-
-  // This needs to be done before we create the log, because
-  // PhabricatorAccessLog::getLog() calls date()
-  $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
-  if ($tz) {
-    date_default_timezone_set($tz);
-  }
-
-  // Append any paths to $PATH if we need to.
-  $paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
-  if (!empty($paths)) {
-    $current_env_path = getenv('PATH');
-    $new_env_paths = implode(':', $paths);
-    putenv('PATH='.$current_env_path.':'.$new_env_paths);
-  }
+  PhabricatorEnv::initializeWebEnvironment();
 
   // This is the earliest we can get away with this, we need env config first.
   PhabricatorAccessLog::init();
@@ -63,14 +23,8 @@ try {
 
   DarkConsoleXHProfPluginAPI::hookProfiler();
 
-  PhutilErrorHandler::initialize();
-
   PhutilErrorHandler::setErrorListener(
     array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
-
-  foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
-    phutil_load_library($library);
-  }
 
   if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
     try {
@@ -83,11 +37,6 @@ try {
   }
 
   phabricator_detect_bad_base_uri();
-
-  $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
-  PhutilTranslator::getInstance()
-    ->setLanguage($translation->getLanguage())
-    ->addTranslations($translation->getTranslations());
 
   $host = $_SERVER['HTTP_HOST'];
   $path = $_REQUEST['__path__'];
@@ -214,38 +163,6 @@ try {
 
 } catch (Exception $ex) {
   PhabricatorStartup::didFatal("[Exception] ".$ex->getMessage());
-}
-
-
-/**
- * @group aphront
- */
-function setup_aphront_basics() {
-  $aphront_root   = dirname(dirname(__FILE__));
-  $libraries_root = dirname($aphront_root);
-
-  $root = null;
-  if (!empty($_SERVER['PHUTIL_LIBRARY_ROOT'])) {
-    $root = $_SERVER['PHUTIL_LIBRARY_ROOT'];
-  }
-
-  ini_set(
-    'include_path',
-    $libraries_root.PATH_SEPARATOR.ini_get('include_path'));
-  @include_once $root.'libphutil/src/__phutil_library_init__.php';
-  if (!@constant('__LIBPHUTIL__')) {
-    echo "ERROR: Unable to load libphutil. Put libphutil/ next to ".
-         "phabricator/, or update your PHP 'include_path' to include ".
-         "the parent directory of libphutil/.\n";
-    exit(1);
-  }
-
-  // Load Phabricator itself using the absolute path, so we never end up doing
-  // anything surprising (loading index.php and libraries from different
-  // directories).
-  phutil_load_library($aphront_root.'/src');
-  phutil_load_library('arcanist/src');
-
 }
 
 function phabricator_detect_bad_base_uri() {

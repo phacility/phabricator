@@ -1080,7 +1080,6 @@ phutil_register_library_map(array(
     'PhabricatorRepositorySymbol' => 'applications/repository/storage/PhabricatorRepositorySymbol.php',
     'PhabricatorRepositoryTestCase' => 'applications/repository/storage/__tests__/PhabricatorRepositoryTestCase.php',
     'PhabricatorRepositoryType' => 'applications/repository/constants/PhabricatorRepositoryType.php',
-    'PhabricatorRequestOverseer' => 'infrastructure/PhabricatorRequestOverseer.php',
     'PhabricatorS3FileStorageEngine' => 'applications/files/engine/PhabricatorS3FileStorageEngine.php',
     'PhabricatorSQLPatchList' => 'infrastructure/storage/patch/PhabricatorSQLPatchList.php',
     'PhabricatorSSHWorkflow' => 'infrastructure/ssh/PhabricatorSSHWorkflow.php',

@@ -53,6 +53,102 @@ final class PhabricatorEnv {
   private static $env;
   private static $stack = array();
 
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
+  public static function initializeWebEnvironment() {
+    $env = self::getSelectedEnvironmentName();
+    if (!$env) {
+      PhabricatorStartup::didFatal(
+        "The 'PHABRICATOR_ENV' environmental variable is not defined. Modify ".
+        "your httpd.conf to include 'SetEnv PHABRICATOR_ENV <env>', where ".
+        "'<env>' is one of 'development', 'production', or a custom ".
+        "environment.");
+    }
+
+    self::initializeCommonEnvironment();
+  }
+
+  public static function initializeScriptEnvironment() {
+    $env = self::getSelectedEnvironmentName();
+    if (!$env) {
+      echo phutil_console_wrap(
+        phutil_console_format(
+          "**ERROR**: PHABRICATOR_ENV Not Set\n\n".
+          "Define the __PHABRICATOR_ENV__ environment variable before ".
+          "running this script. You can do it on the command line like ".
+          "this:\n\n".
+          "  $ PHABRICATOR_ENV=__custom/myconfig__ %s ...\n\n".
+          "Replace __custom/myconfig__ with the path to your configuration ".
+          "file. For more information, see the 'Configuration Guide' in the ".
+          "Phabricator documentation.\n\n",
+          $GLOBALS['argv'][0]));
+      exit(1);
+    }
+
+    self::initializeCommonEnvironment();
+
+    // NOTE: This is dangerous in general, but we know we're in a script context
+    // and are not vulnerable to CSRF.
+    AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+  }
+
+  /**
+   * @phutil-external-symbol function phabricator_read_config_file
+   */
+  private static function initializeCommonEnvironment() {
+    $env = self::getSelectedEnvironmentName();
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/conf/__init_conf__.php';
+    $conf = phabricator_read_config_file($env);
+    $conf['phabricator.env'] = $env;
+
+    PhabricatorEnv::setEnvConfig($conf);
+
+    PhutilErrorHandler::initialize();
+
+    $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
+    if ($tz) {
+      date_default_timezone_set($tz);
+    }
+
+    // Append any paths to $PATH if we need to.
+    $paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
+    if (!empty($paths)) {
+      $current_env_path = getenv('PATH');
+      $new_env_paths = implode(PATH_SEPARATOR, $paths);
+      putenv('PATH='.$current_env_path.PATH_SEPARATOR.$new_env_paths);
+    }
+
+    foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+      phutil_load_library($library);
+    }
+
+    PhabricatorEventEngine::initialize();
+
+    $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
+    PhutilTranslator::getInstance()
+      ->setLanguage($translation->getLanguage())
+      ->addTranslations($translation->getTranslations());
+  }
+
+  public static function getSelectedEnvironmentName() {
+    $env_var = 'PHABRICATOR_ENV';
+
+    $env = idx($_SERVER, $env_var);
+
+    if (!$env) {
+      $env = getenv($env_var);
+    }
+
+    if (!$env) {
+      $env = idx($_ENV, $env_var);
+    }
+
+    return $env;
+  }
+
 
 /* -(  Reading Configuration  )---------------------------------------------- */
 
