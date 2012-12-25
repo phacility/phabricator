@@ -96,13 +96,16 @@ abstract class AphrontHTTPSink {
    * @return void
    */
   final public function writeResponse(AphrontResponse $response) {
+    // Do this first, in case it throws.
+    $response_string = $response->buildResponseString();
+
     $all_headers = array_merge(
       $response->getHeaders(),
       $response->getCacheHeaders());
 
     $this->writeHTTPStatus($response->getHTTPResponseCode());
     $this->writeHeaders($all_headers);
-    $this->writeData($response->buildResponseString());
+    $this->writeData($response_string);
   }
 
 

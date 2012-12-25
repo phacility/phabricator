@@ -26,6 +26,8 @@ try {
   PhutilErrorHandler::setErrorListener(
     array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
 
+  $sink = new AphrontPHPHTTPSink();
+
   if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
     try {
       PhabricatorSetup::runSetup();
@@ -47,7 +49,6 @@ try {
       $application = PhabricatorEnv::newObjectFromConfig($config_key);
       break;
   }
-
 
   $application->setHost($host);
   $application->setPath($path);
@@ -100,7 +101,9 @@ try {
     $response = $controller->didProcessRequest($response);
     $response = $application->willSendResponse($response, $controller);
     $response->setRequest($request);
-    $response_string = $response->buildResponseString();
+
+    $sink->writeResponse($response);
+
   } catch (Exception $ex) {
     $write_guard->dispose();
     if ($access_log) {
@@ -118,18 +121,6 @@ try {
   }
 
   $write_guard->dispose();
-
-  // TODO: Share the $sink->writeResponse() pathway here?
-
-  $sink = new AphrontPHPHTTPSink();
-  $sink->writeHTTPStatus($response->getHTTPResponseCode());
-
-  $headers = $response->getCacheHeaders();
-  $headers = array_merge($headers, $response->getHeaders());
-
-  $sink->writeHeaders($headers);
-
-  $sink->writeData($response_string);
 
   if ($access_log) {
     $request_start = PhabricatorStartup::getStartTime();
