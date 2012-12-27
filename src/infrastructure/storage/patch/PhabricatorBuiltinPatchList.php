@@ -1064,6 +1064,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20121220.generalcache.sql'),
       ),
+      'db.config' => array(
+        'type'    => 'db',
+        'name'    => 'config',
+      ),
+      '20121226.config.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20121226.config.sql'),
+      ),
     );
   }
 
