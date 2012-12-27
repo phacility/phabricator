@@ -37,6 +37,14 @@ final class PhrictionSearchIndexer
       PhabricatorPHIDConstants::PHID_TYPE_USER,
       $content->getDateCreated());
 
+    if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+        $document->getPHID(),
+        PhabricatorPHIDConstants::PHID_TYPE_WIKI,
+        time());
+    }
+
     return $doc;
   }
 }

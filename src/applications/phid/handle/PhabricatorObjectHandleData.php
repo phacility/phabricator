@@ -505,6 +505,10 @@ final class PhabricatorObjectHandleData {
               $handle->setName($info['title']);
               $handle->setURI(PhrictionDocument::getSlugURI($info['slug']));
               $handle->setComplete(true);
+              if ($info['status'] != PhrictionDocumentStatus::STATUS_EXISTS) {
+                $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+                $handle->setStatus($closed);
+              }
             }
             $handles[$phid] = $handle;
           }
