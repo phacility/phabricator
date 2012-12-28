@@ -19,6 +19,8 @@ final class PhabricatorConfigEditController
       return new Aphront404Response();
     }
 
+    $default = $this->prettyPrintJSON($config[$this->key]);
+
     // Check if the config key is already stored in the database.
     // Grab the value if it is.
     $value = null;
@@ -72,14 +74,7 @@ final class PhabricatorConfigEditController
         ->setTitle('You broke everything!')
         ->setErrors($errors);
     } else {
-      // Check not only that it's an array, but that it's an "unnatural" array
-      // meaning that the keys aren't 0 -> size_of_array.
-      if (is_array($value) &&
-        array_keys($value) != range(0, count($value) - 1)) {
-        $value = id(new PhutilJSON())->encodeFormatted($value);
-      } else {
-        $value = json_encode($value);
-      }
+      $value = $this->prettyPrintJSON($value);
     }
 
     $form
@@ -91,11 +86,26 @@ final class PhabricatorConfigEditController
           ->setValue($value)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setCustomClass('PhabricatorMonospaced')
-          ->setName('value'))
+        ->setName('value'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($config_entry->getURI())
-          ->setValue(pht('Save Config Entry')));
+          ->setValue(pht('Save Config Entry')))
+      ->appendChild(
+        phutil_render_tag(
+          'p',
+          array(
+            'class' => 'aphront-form-input',
+          ),
+          'If left blank, the setting will return to its default value. '.
+          'Its default value is:'))
+      ->appendChild(
+          phutil_render_tag(
+            'pre',
+            array(
+              'class' => 'aphront-form-input',
+            ),
+            phutil_escape_html($default)));
 
       $title = pht('Edit %s', $this->key);
       $short = pht('Edit');
