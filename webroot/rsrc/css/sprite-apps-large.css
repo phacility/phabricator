@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-apps-large {
     background-image: url(/rsrc/image/sprite-apps-large-X2.png);
-    background-size: 348px 348px;
+    background-size: 348px 377px;
   }
 }
 
@@ -562,34 +562,50 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -87px -319px;
 }
 
-.app-slowvote-light-large {
+.app-setup-light-large {
   background-position: -116px -319px;
 }
 
-.app-slowvote-dark-large {
+.app-setup-dark-large {
   background-position: -145px -319px;
 }
 
-.app-slowvote-blue-large, .phabricator-crumb-view:hover .app-slowvote-dark-large {
+.app-setup-blue-large, .phabricator-crumb-view:hover .app-setup-dark-large {
   background-position: -174px -319px;
 }
 
-.app-slowvote-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-slowvote-light-large {
+.app-setup-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-setup-light-large {
   background-position: -203px -319px;
 }
 
-.app-uiexamples-light-large {
+.app-slowvote-light-large {
   background-position: -232px -319px;
 }
 
-.app-uiexamples-dark-large {
+.app-slowvote-dark-large {
   background-position: -261px -319px;
 }
 
-.app-uiexamples-blue-large, .phabricator-crumb-view:hover .app-uiexamples-dark-large {
+.app-slowvote-blue-large, .phabricator-crumb-view:hover .app-slowvote-dark-large {
   background-position: -290px -319px;
 }
 
-.app-uiexamples-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-uiexamples-light-large {
+.app-slowvote-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-slowvote-light-large {
   background-position: -319px -319px;
+}
+
+.app-uiexamples-light-large {
+  background-position: 0px -348px;
+}
+
+.app-uiexamples-dark-large {
+  background-position: -29px -348px;
+}
+
+.app-uiexamples-blue-large, .phabricator-crumb-view:hover .app-uiexamples-dark-large {
+  background-position: -58px -348px;
+}
+
+.app-uiexamples-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-uiexamples-light-large {
+  background-position: -87px -348px;
 }

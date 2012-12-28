@@ -147,10 +147,14 @@
   background-position: -171px -285px;
 }
 
-.app-slowvote-dark-xlarge {
+.app-setup-dark-xlarge {
   background-position: -228px -285px;
 }
 
-.app-uiexamples-dark-xlarge {
+.app-slowvote-dark-xlarge {
   background-position: -285px -285px;
+}
+
+.app-uiexamples-dark-xlarge {
+  background-position: 0px -342px;
 }
