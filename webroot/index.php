@@ -38,6 +38,8 @@ try {
     return;
   }
 
+  PhabricatorSetupCheck::willProcessRequest();
+
   phabricator_detect_bad_base_uri();
 
   $host = $_SERVER['HTTP_HOST'];

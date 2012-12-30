@@ -25,8 +25,12 @@ final class PhabricatorApplicationConfig extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/config/' => array(
-        ''                        => 'PhabricatorConfigListController',
+        ''                          => 'PhabricatorConfigListController',
         'edit/(?P<key>[\w\.\-]+)/'  => 'PhabricatorConfigEditController',
+        'issue/' => array(
+          '' => 'PhabricatorConfigIssueListController',
+          '(?P<key>[^/]+)/' => 'PhabricatorConfigIssueViewController',
+        ),
       ),
     );
   }
