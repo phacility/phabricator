@@ -121,9 +121,7 @@ button.link:hover {
   text-decoration: underline;
 }
 
-
 .dropdown-menu-frame {
-  z-index: 32;
   position: absolute;
   width: 240px;
   background: #f6f6f6;

@@ -60,6 +60,7 @@ $package_spec = array(
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
+    'phabricator-zindex-css',
     'phabricator-core-buttons-css',
     'phabricator-standard-page-view',
     'aphront-dialog-view-css',

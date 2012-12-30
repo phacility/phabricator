@@ -47,7 +47,6 @@
 
 .jx-client-dialog {
   position:   absolute;
-  z-index:    14;
   width:      100%;
 }
 
@@ -55,7 +54,6 @@
   opacity:    .37;
   background: #222;
   position:   fixed;
-  z-index:    10;
   top:        0;
   left:       0;
   right:      0;

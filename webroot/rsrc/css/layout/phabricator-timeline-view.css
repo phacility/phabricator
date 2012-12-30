@@ -81,7 +81,6 @@
   height: 30px;
   background-size: 30px auto;
   left: -45px;
-  z-index: 2;
 }
 
 .phabricator-timeline-major-event .phabricator-timeline-title {
@@ -134,7 +133,6 @@
   background-color: #c0c5d1;
   top: 0;
   left: -3px;
-  z-index: 3;
 }
 
 .phabricator-timeline-icon {
