@@ -60,7 +60,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       // on the current system.
       $install_commands = array(
         "$ sudo apt-get install php5-<em>extname</em>  # Debian / Ubuntu",
-        "$ sudo yum install php5-<em>extname</em>      # Red Hat / Derivatives",
+        "$ sudo yum install php-<em>extname</em>       # Red Hat / Derivatives",
       );
       $install_commands = implode("\n", $install_commands);
 
