@@ -88,7 +88,7 @@ final class DifferentialChangeset extends DifferentialDAO {
       foreach ($this->loadHunks() as $hunk) {
         $hunk->delete();
       }
-      $this->_hunks = array();
+      $this->unsavedHunks = array();
 
       queryfx(
         $this->establishConnection('w'),
