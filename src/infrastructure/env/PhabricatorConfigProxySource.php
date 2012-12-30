@@ -29,15 +29,15 @@ abstract class PhabricatorConfigProxySource
   }
 
   public function canWrite() {
-    return $this->getSource->canWrite();
+    return $this->getSource()->canWrite();
   }
 
   public function setKeys(array $keys) {
-    return $this->getSource->setKeys();
+    return $this->getSource()->setKeys($keys);
   }
 
   public function deleteKeys(array $keys) {
-    return $this->getSource->deleteKeys();
+    return $this->getSource()->deleteKeys();
   }
 
 }

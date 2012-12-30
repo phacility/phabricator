@@ -1,10 +1,6 @@
 .DS_Store
 ._*
-/docs/
-/src/.phutil_module_cache
-/conf/custom/*
 /webroot/rsrc/custom
-/.divinercache
 .#*
 *#
 *~
@@ -15,3 +11,15 @@
 
 # Arcanist scratch directory
 /.arc
+
+# Diviner
+/docs/
+/.divinercache
+
+# libphutil
+/src/.phutil_module_cache
+
+# Configuration
+/conf/custom/*
+/conf/local/local.json
+/conf/local/ENVIRONMENT

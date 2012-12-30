@@ -139,6 +139,14 @@ final class PhabricatorEnv {
       $env = idx($_ENV, $env_var);
     }
 
+    if (!$env) {
+      $root = dirname(phutil_get_library_root('phabricator'));
+      $path = $root.'/conf/local/ENVIRONMENT';
+      if (Filesystem::pathExists($path)) {
+        $env = trim(Filesystem::readFile($path));
+      }
+    }
+
     return $env;
   }
 
