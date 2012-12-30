@@ -42,7 +42,7 @@ final class PhabricatorConfigEditController
       $new_value = $request->getStr('value');
       if (strlen($new_value)) {
         $json = json_decode($new_value, true);
-        if ($json === null && strtolower($value) != 'null') {
+        if ($json === null && strtolower($new_value) != 'null') {
           $e_value = 'Invalid';
           $errors[] = 'The given value must be valid JSON. This means, among '.
             'other things, that you must wrap strings in double-quotes.';
@@ -53,6 +53,8 @@ final class PhabricatorConfigEditController
       } else {
         // TODO: When we do Transactions, make this just set isDeleted = 1
         $config_entry->delete();
+        return id(new AphrontRedirectResponse())
+          ->setURI($config_entry->getURI());
       }
 
       $config_entry->setValue($value);
