@@ -26,6 +26,10 @@
   z-index: 3;
 }
 
+.phabricator-nav-local {
+  z-index: 4;
+}
+
 .phabricator-nav-drag {
   z-index: 4;
 }
