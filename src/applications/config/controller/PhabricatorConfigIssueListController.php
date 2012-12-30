@@ -8,6 +8,7 @@ final class PhabricatorConfigIssueListController
     $user = $request->getUser();
 
     $nav = $this->buildSideNavView();
+    $nav->selectFilter('issue/');
 
     $issues = PhabricatorSetupCheck::runAllChecks();
     PhabricatorSetupCheck::setOpenSetupIssueCount(count($issues));
@@ -30,7 +31,7 @@ final class PhabricatorConfigIssueListController
       ->buildApplicationCrumbs($nav)
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName($title)
+          ->setName(pht('Setup'))
           ->setHref($this->getApplicationURI('issue/')));
 
     $nav->setCrumbs($crumbs);

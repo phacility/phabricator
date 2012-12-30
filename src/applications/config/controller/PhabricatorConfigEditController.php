@@ -6,27 +6,35 @@ final class PhabricatorConfigEditController
   private $key;
 
   public function willProcessRequest(array $data) {
-    $this->key = idx($data, 'key');
+    $this->key = $data['key'];
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $config = id(new PhabricatorConfigFileSource('default'))
-      ->getAllKeys();
-    if (!$this->key || !array_key_exists($this->key, $config)) {
+
+    $options = PhabricatorApplicationConfigOptions::loadAllOptions();
+    if (empty($options[$this->key])) {
       return new Aphront404Response();
     }
+    $option = $options[$this->key];
+    $group = $option->getGroup();
+    $group_uri = $this->getApplicationURI('group/'.$group->getKey().'/');
 
-    $default = $this->prettyPrintJSON($config[$this->key]);
+    // TODO: This isn't quite correct -- we should read from the entire
+    // configuration stack, ignoring database configuration. For now, though,
+    // it's a reasonable approximation.
+    $default_value = $option->getDefault();
+
+    $default = $this->prettyPrintJSON($default_value);
 
     // Check if the config key is already stored in the database.
     // Grab the value if it is.
     $value = null;
     $config_entry = id(new PhabricatorConfigEntry())
       ->loadOneWhere(
-        'configKey = %s AND namespace=%s',
+        'configKey = %s AND namespace = %s',
         $this->key,
         'default');
     if ($config_entry) {
@@ -39,6 +47,7 @@ final class PhabricatorConfigEditController
     $e_value = null;
     $errors = array();
     if ($request->isFormPost()) {
+
       $new_value = $request->getStr('value');
       if (strlen($new_value)) {
         $json = json_decode($new_value, true);
@@ -53,8 +62,7 @@ final class PhabricatorConfigEditController
       } else {
         // TODO: When we do Transactions, make this just set isDeleted = 1
         $config_entry->delete();
-        return id(new AphrontRedirectResponse())
-          ->setURI($config_entry->getURI());
+        return id(new AphrontRedirectResponse())->setURI($group_uri);
       }
 
       $config_entry->setValue($value);
@@ -62,8 +70,7 @@ final class PhabricatorConfigEditController
 
       if (!$errors) {
         $config_entry->save();
-        return id(new AphrontRedirectResponse())
-          ->setURI($config_entry->getURI());
+        return id(new AphrontRedirectResponse())->setURI($group_uri);
       }
     }
 
@@ -91,7 +98,7 @@ final class PhabricatorConfigEditController
         ->setName('value'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($config_entry->getURI())
+          ->addCancelButton($group_uri)
           ->setValue(pht('Save Config Entry')))
       ->appendChild(
         phutil_render_tag(
@@ -112,13 +119,20 @@ final class PhabricatorConfigEditController
       $title = pht('Edit %s', $this->key);
       $short = pht('Edit');
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($this->key)
-        ->setHref('/config/edit/'.$this->key));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())->setName($short));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Config'))
+          ->setHref($this->getApplicationURI()))
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($group->getName())
+          ->setHref($group_uri))
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($this->key)
+          ->setHref('/config/edit/'.$this->key));
 
     return $this->buildApplicationPage(
       array(

@@ -7,7 +7,7 @@ final class PhabricatorApplicationConfig extends PhabricatorApplication {
   }
 
   public function getIconName() {
-    return 'config';
+    return 'setup';
   }
 
   public function getTitleGlyph() {
@@ -27,6 +27,7 @@ final class PhabricatorApplicationConfig extends PhabricatorApplication {
       '/config/' => array(
         ''                          => 'PhabricatorConfigListController',
         'edit/(?P<key>[\w\.\-]+)/'  => 'PhabricatorConfigEditController',
+        'group/(?P<key>[^/]+)/'     => 'PhabricatorConfigGroupController',
         'issue/' => array(
           '' => 'PhabricatorConfigIssueListController',
           '(?P<key>[^/]+)/' => 'PhabricatorConfigIssueViewController',

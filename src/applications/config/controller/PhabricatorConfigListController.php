@@ -8,18 +8,15 @@ final class PhabricatorConfigListController
     $user = $request->getUser();
 
     $nav = $this->buildSideNavView();
+    $nav->selectFilter('/');
 
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
+    $groups = PhabricatorApplicationConfigOptions::loadAll();
+    $list = $this->buildConfigOptionsList($groups);
 
-    $config = new PhabricatorConfigFileSource('default');
-    $list = $this->buildConfigList(array_keys($config->getAllKeys()));
-    $list->setPager($pager);
-    $list->setNoDataString(
-      'No data. Something probably went wrong in reading the default config.');
+    $title = pht('Phabricator Configuration');
 
     $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Configuration'));
+      ->setHeader($title);
 
     $nav->appendChild(
       array(
@@ -28,31 +25,32 @@ final class PhabricatorConfigListController
       ));
 
     $crumbs = $this
-      ->buildApplicationCrumbs($nav)
+      ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName(pht('Configuration'))
-          ->setHref($this->getApplicationURI('filter/')));
+          ->setName(pht('Config'))
+          ->setHref($this->getApplicationURI()));
 
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => pht('Configuration'),
+        'title' => $title,
         'device' => true,
       )
     );
   }
 
-  private function buildConfigList(array $keys) {
-    $list = new PhabricatorObjectItemListView();
+  private function buildConfigOptionsList(array $groups) {
+    assert_instances_of($groups, 'PhabricatorApplicationConfigOptions');
 
-    foreach ($keys as $key) {
+    $list = new PhabricatorObjectItemListView();
+    foreach ($groups as $group) {
       $item = id(new PhabricatorObjectItemView())
-        ->setHeader($key)
-        ->setHref('/config/edit/'.$key)
-        ->setObject($key);
+        ->setHeader($group->getName())
+        ->setHref('/config/group/'.$group->getKey().'/')
+        ->addAttribute(phutil_escape_html($group->getDescription()));
       $list->addItem($item);
     }
 

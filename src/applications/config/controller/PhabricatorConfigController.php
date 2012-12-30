@@ -10,18 +10,15 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI('filter/')));
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+    $nav->addFilter('/', pht('Configuration'));
+    $nav->addFilter('issue/', pht('Setup Issues'));
 
     return $nav;
   }
 
   public function buildApplicationMenu() {
     return $this->buildSideNavView(null, true)->getMenu();
-  }
-
-  public function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-    return $crumbs;
   }
 
   /**
