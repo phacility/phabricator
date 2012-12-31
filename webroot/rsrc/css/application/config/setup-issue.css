@@ -84,3 +84,9 @@
   margin: 15px 0;
   padding: 0 20px;
 }
+
+.setup-issue ul {
+  width: 90%;
+  margin: 1em auto;
+  list-style: circle;
+}

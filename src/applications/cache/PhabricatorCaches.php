@@ -28,9 +28,9 @@ final class PhabricatorCaches {
     static $cache;
     if (!$cache) {
       $caches = self::buildSetupCaches();
+      $caches = self::addProfilerToCaches($caches);
       $cache = id(new PhutilKeyValueCacheStack())
-        ->setCaches($caches)
-        ->setProfiler(PhutilServiceProfiler::getInstance());
+        ->setCaches($caches);
     }
     return $cache;
   }
@@ -158,6 +158,15 @@ final class PhabricatorCaches {
     }
 
     return true;
+  }
+
+  private static function addProfilerToCaches(array $caches) {
+    foreach ($caches as $key => $cache) {
+      $pcache = new PhutilKeyValueCacheProfiler($cache);
+      $pcache->setProfiler(PhutilServiceProfiler::getInstance());
+      $caches[$key] = $pcache;
+    }
+    return $caches;
   }
 
 }

@@ -124,8 +124,10 @@ final class PhabricatorPasteQuery
   }
 
   private function loadContent(array $pastes) {
-    $cache = id(new PhabricatorKeyValueDatabaseCache())
-      ->setProfiler(PhutilServiceProfiler::getInstance());
+    $cache = new PhabricatorKeyValueDatabaseCache();
+
+    $cache = new PhutilKeyValueCacheProfiler($cache);
+    $cache->setProfiler(PhutilServiceProfiler::getInstance());
 
     $keys = array();
     foreach ($pastes as $paste) {

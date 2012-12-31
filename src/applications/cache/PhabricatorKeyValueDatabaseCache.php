@@ -7,17 +7,6 @@ final class PhabricatorKeyValueDatabaseCache
   const CACHE_FORMAT_DEFLATE    = 'deflate';
 
   public function setKeys(array $keys, $ttl = null) {
-    $call_id = null;
-    if ($this->getProfiler()) {
-      $call_id = $this->getProfiler()->beginServiceCall(
-        array(
-          'type' => 'kvcache-set',
-          'name' => 'phabricator-db',
-          'keys' => array_keys($keys),
-          'ttl'  => $ttl,
-        ));
-    }
-
     if ($keys) {
       $map = $this->digestKeys(array_keys($keys));
       $conn_w = $this->establishConnection('w');
@@ -58,24 +47,10 @@ final class PhabricatorKeyValueDatabaseCache
       unset($guard);
     }
 
-    if ($call_id) {
-      $this->getProfiler()->endServiceCall($call_id, array());
-    }
-
     return $this;
   }
 
   public function getKeys(array $keys) {
-    $call_id = null;
-    if ($this->getProfiler()) {
-      $call_id = $this->getProfiler()->beginServiceCall(
-        array(
-          'type' => 'kvcache-get',
-          'name' => 'phabricator-db',
-          'keys' => $keys,
-        ));
-    }
-
     $results = array();
     if ($keys) {
       $map = $this->digestKeys($keys);
@@ -109,28 +84,10 @@ final class PhabricatorKeyValueDatabaseCache
       }
     }
 
-    if ($call_id) {
-      $this->getProfiler()->endServiceCall(
-        $call_id,
-        array(
-          'hits' => array_keys($results),
-        ));
-    }
-
     return $results;
   }
 
   public function deleteKeys(array $keys) {
-    $call_id = null;
-    if ($this->getProfiler()) {
-      $call_id = $this->getProfiler()->beginServiceCall(
-        array(
-          'type' => 'kvcache-del',
-          'name' => 'phabricator-db',
-          'keys' => $keys,
-        ));
-    }
-
     if ($keys) {
       $map = $this->digestKeys($keys);
       queryfx(
@@ -138,10 +95,6 @@ final class PhabricatorKeyValueDatabaseCache
         'DELETE FROM %T WHERE cacheKeyHash IN (%Ls)',
         $this->getTableName(),
         $keys);
-    }
-
-    if ($call_id) {
-      $this->getProfiler()->endServiceCall($call_id, array());
     }
 
     return $this;

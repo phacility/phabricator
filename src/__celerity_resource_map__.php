@@ -3141,7 +3141,7 @@ celerity_register_resource_map(array(
   ),
   'setup-issue-css' =>
   array(
-    'uri' => '/res/4214704f/rsrc/css/application/config/setup-issue.css',
+    'uri' => '/res/d642d4e5/rsrc/css/application/config/setup-issue.css',
     'type' => 'css',
     'requires' =>
     array(

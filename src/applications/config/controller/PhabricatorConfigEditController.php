@@ -22,6 +22,14 @@ final class PhabricatorConfigEditController
     $group = $option->getGroup();
     $group_uri = $this->getApplicationURI('group/'.$group->getKey().'/');
 
+    $issue = $request->getStr('issue');
+    if ($issue) {
+      // If the user came here from an open setup issue, send them back.
+      $done_uri = $this->getApplicationURI('issue/'.$issue.'/');
+    } else {
+      $done_uri = $group_uri;
+    }
+
     // TODO: This isn't quite correct -- we should read from the entire
     // configuration stack, ignoring database configuration. For now, though,
     // it's a reasonable approximation.
@@ -62,7 +70,7 @@ final class PhabricatorConfigEditController
       } else {
         // TODO: When we do Transactions, make this just set isDeleted = 1
         $config_entry->delete();
-        return id(new AphrontRedirectResponse())->setURI($group_uri);
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
 
       $config_entry->setValue($value);
@@ -70,7 +78,7 @@ final class PhabricatorConfigEditController
 
       if (!$errors) {
         $config_entry->save();
-        return id(new AphrontRedirectResponse())->setURI($group_uri);
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
     }
 
@@ -88,6 +96,7 @@ final class PhabricatorConfigEditController
 
     $form
       ->setUser($user)
+      ->addHiddenInput('issue', $request->getStr('issue'))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('JSON Value')
@@ -98,7 +107,7 @@ final class PhabricatorConfigEditController
         ->setName('value'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton($group_uri)
+          ->addCancelButton($done_uri)
           ->setValue(pht('Save Config Entry')))
       ->appendChild(
         phutil_render_tag(

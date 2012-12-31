@@ -23,14 +23,14 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       nl2br(phutil_escape_html($issue->getMessage())));
 
-    $configs = $issue->getPhabricatorConfig();
-    if ($configs) {
-      $description .= $this->renderPhabricatorConfig($configs);
-    }
-
     $configs = $issue->getPHPConfig();
     if ($configs) {
       $description .= $this->renderPHPConfig($configs);
+    }
+
+    $configs = $issue->getPhabricatorConfig();
+    if ($configs) {
+      $description .= $this->renderPhabricatorConfig($configs);
     }
 
     $commands = $issue->getCommands();
@@ -111,6 +111,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
   }
 
   private function renderPhabricatorConfig(array $configs) {
+    $issue = $this->getIssue();
+
     $table_info = phutil_render_tag(
       'p',
       array(),
@@ -141,26 +143,43 @@ final class PhabricatorSetupIssueView extends AphrontView {
     $table = phutil_render_tag(
       'table',
       array(
-
       ),
       implode("\n", $table));
 
-    $update_info = phutil_render_tag(
-      'p',
-      array(),
-      pht(
-        "To update these %d value(s), run these command(s) from the command ".
-        "line:",
-        count($configs)));
+    if ($this->getIssue()->getIsFatal()) {
+      $update_info = phutil_render_tag(
+        'p',
+        array(),
+        pht(
+          "To update these %d value(s), run these command(s) from the command ".
+          "line:",
+          count($configs)));
 
-    $update = array();
-    foreach ($configs as $key) {
-      $cmd = '<tt>phabricator/ $</tt> ./bin/config set '.
-              phutil_escape_html($key).' '.
-             '<em>value</em>';
-      $update[] = $cmd;
+      $update = array();
+      foreach ($configs as $key) {
+        $cmd = '<tt>phabricator/ $</tt> ./bin/config set '.
+                phutil_escape_html($key).' '.
+               '<em>value</em>';
+        $update[] = $cmd;
+      }
+      $update = phutil_render_tag('pre', array(), implode("\n", $update));
+    } else {
+      $update_info = phutil_render_tag(
+        'p',
+        array(),
+        pht("You can update these %d value(s) here:", count($configs)));
+      $update = array();
+      foreach ($configs as $config) {
+        $link = phutil_render_tag(
+          'a',
+          array(
+            'href' => '/config/edit/'.$config.'/?issue='.$issue->getIssueKey(),
+          ),
+          pht('Edit %s', phutil_escape_html($config)));
+        $update[] = '<li>'.$link.'</li>';
+      }
+      $update = '<ul>'.implode("\n", $update).'</ul>';
     }
-    $update = phutil_render_tag('pre', array(), implode("\n", $update));
 
     return phutil_render_tag(
       'div',
@@ -276,8 +295,21 @@ final class PhabricatorSetupIssueView extends AphrontView {
       'p',
       array(),
       pht(
-        "After editing the PHP configuration, <strong>restart your webserver ".
-        "for the changes to take effect</strong>."));
+        "You can find more information about PHP configuration values in the ".
+        "%s.",
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => 'http://php.net/manual/ini.list.php',
+          ),
+          pht('PHP Documentation'))));
+
+    $info .= phutil_render_tag(
+      'p',
+      array(),
+      pht(
+        "After editing the PHP configuration, <strong>restart your ".
+        "webserver for the changes to take effect</strong>."));
 
     return phutil_render_tag(
       'div',
