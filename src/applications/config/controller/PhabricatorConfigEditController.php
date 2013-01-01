@@ -30,56 +30,37 @@ final class PhabricatorConfigEditController
       $done_uri = $group_uri;
     }
 
-    // TODO: This isn't quite correct -- we should read from the entire
-    // configuration stack, ignoring database configuration. For now, though,
-    // it's a reasonable approximation.
-    $default_value = $option->getDefault();
-
-    $default = $this->prettyPrintJSON($default_value);
-
     // Check if the config key is already stored in the database.
     // Grab the value if it is.
-    $value = null;
     $config_entry = id(new PhabricatorConfigEntry())
       ->loadOneWhere(
         'configKey = %s AND namespace = %s',
         $this->key,
         'default');
-    if ($config_entry) {
-      $value = $config_entry->getValue();
-    } else {
+    if (!$config_entry) {
       $config_entry = id(new PhabricatorConfigEntry())
-        ->setConfigKey($this->key);
+        ->setConfigKey($this->key)
+        ->setNamespace('default')
+        ->setIsDeleted(true);
     }
 
     $e_value = null;
     $errors = array();
     if ($request->isFormPost()) {
 
-      $new_value = $request->getStr('value');
-      if (strlen($new_value)) {
-        $json = json_decode($new_value, true);
-        if ($json === null && strtolower($new_value) != 'null') {
-          $e_value = 'Invalid';
-          $errors[] = 'The given value must be valid JSON. This means, among '.
-            'other things, that you must wrap strings in double-quotes.';
-          $value = $new_value;
-        } else {
-          $value = $json;
-        }
-      } else {
-        // TODO: When we do Transactions, make this just set isDeleted = 1
-        $config_entry->delete();
-        return id(new AphrontRedirectResponse())->setURI($done_uri);
-      }
+      list($e_value, $value_errors, $display_value) = $this->readRequest(
+        $option,
+        $config_entry,
+        $request);
 
-      $config_entry->setValue($value);
-      $config_entry->setNamespace('default');
+      $errors = array_merge($errors, $value_errors);
 
       if (!$errors) {
         $config_entry->save();
         return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
+    } else {
+      $display_value = $this->getDisplayValue($option, $config_entry);
     }
 
     $form = new AphrontFormView();
@@ -88,27 +69,44 @@ final class PhabricatorConfigEditController
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('You broke everything!')
+        ->setTitle(pht('You broke everything!'))
         ->setErrors($errors);
-    } else {
-      $value = $this->prettyPrintJSON($value);
     }
+
+    $control = $this->renderControl(
+      $option,
+      $display_value,
+      $e_value);
+
+    $engine = new PhabricatorMarkupEngine();
+    $engine->addObject($option, 'description');
+    $engine->process();
+    $description = phutil_render_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $engine->getOutput($option, 'description'));
 
     $form
       ->setUser($user)
       ->addHiddenInput('issue', $request->getStr('issue'))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('JSON Value')
-          ->setError($e_value)
-          ->setValue($value)
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-          ->setCustomClass('PhabricatorMonospaced')
-        ->setName('value'))
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Description')
+          ->setValue($description))
+      ->appendChild($control)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($done_uri)
-          ->setValue(pht('Save Config Entry')))
+          ->setValue(pht('Save Config Entry')));
+
+
+    // TODO: This isn't quite correct -- we should read from the entire
+    // configuration stack, ignoring database configuration. For now, though,
+    // it's a reasonable approximation.
+    $default = $this->prettyPrintJSON($option->getDefault());
+    $form
       ->appendChild(
         phutil_render_tag(
           'p',
@@ -154,6 +152,123 @@ final class PhabricatorConfigEditController
         'title' => $title,
         'device' => true,
       ));
+  }
+
+  private function readRequest(
+    PhabricatorConfigOption $option,
+    PhabricatorConfigEntry $entry,
+    AphrontRequest $request) {
+
+    $e_value = null;
+    $errors = array();
+
+    $value = $request->getStr('value');
+    if (!strlen($value)) {
+      $value = null;
+      $entry->setValue($value);
+      $entry->setIsDeleted(true);
+      return array($e_value, $errors, $value);
+    } else {
+      $entry->setIsDeleted(false);
+    }
+
+    $type = $option->getType();
+    switch ($type) {
+      case 'int':
+        if (preg_match('/^-?[0-9]+$/', trim($value))) {
+          $entry->setValue((int)$value);
+        } else {
+          $e_value = pht('Invalid');
+          $errors[] = pht('Value must be an integer.');
+        }
+        break;
+      case 'string':
+        break;
+      case 'bool':
+        switch ($value) {
+          case 'true':
+            $entry->setValue(true);
+            break;
+          case 'false':
+            $entry->setValue(false);
+            break;
+          default:
+            $e_value = pht('Invalid');
+            $errors[] = pht('Value must be boolean, "true" or "false".');
+            break;
+        }
+        break;
+      default:
+        $json = json_decode($value, true);
+        if ($json === null && strtolower($value) != 'null') {
+          $e_value = pht('Invalid');
+          $errors[] = pht(
+            'The given value must be valid JSON. This means, among '.
+            'other things, that you must wrap strings in double-quotes.');
+          $entry->setValue($json);
+        }
+        break;
+    }
+
+    return array($e_value, $errors, $value);
+  }
+
+  private function getDisplayValue(
+    PhabricatorConfigOption $option,
+    PhabricatorConfigEntry $entry) {
+
+    if ($entry->getIsDeleted()) {
+      return null;
+    }
+
+    $type = $option->getType();
+    $value = $entry->getValue();
+    switch ($type) {
+      case 'int':
+      case 'string':
+        return $value;
+      case 'bool':
+        return $value ? 'true' : 'false';
+      default:
+        return $this->prettyPrintJSON($value);
+    }
+  }
+
+  private function renderControl(
+    PhabricatorConfigOption $option,
+    $display_value,
+    $e_value) {
+
+    $type = $option->getType();
+    switch ($type) {
+      case 'int':
+      case 'string':
+        $control = id(new AphrontFormTextControl());
+        break;
+      case 'bool':
+        $control = id(new AphrontFormSelectControl())
+          ->setOptions(
+            array(
+              ''      => '(Use Default)',
+              'true'  => idx($option->getOptions(), 0),
+              'false' => idx($option->getOptions(), 1),
+            ));
+        break;
+      default:
+        $control = id(new AphrontFormTextAreaControl())
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+          ->setCustomClass('PhabricatorMonospaced')
+          ->setCaption(pht('Enter value in JSON.'));
+        break;
+    }
+
+    $control
+      ->setLabel('Value')
+      ->setError($e_value)
+      ->setValue($display_value)
+      ->setName('value');
+
+    return $control;
   }
 
 }

@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorConfigOption extends Phobject {
+final class PhabricatorConfigOption
+  extends Phobject
+  implements PhabricatorMarkupInterface{
 
   private $key;
   private $default;
@@ -9,7 +11,16 @@ final class PhabricatorConfigOption extends Phobject {
   private $type;
   private $options;
   private $group;
+  private $examples;
 
+  public function addExample($value, $description) {
+    $this->examples[] = array($value, $description);
+    return $this;
+  }
+
+  public function getExamples() {
+    return $this->examples;
+  }
 
   public function setGroup(PhabricatorApplicationConfigOptions $group) {
     $this->group = $group;
@@ -72,6 +83,28 @@ final class PhabricatorConfigOption extends Phobject {
 
   public function getType() {
     return $this->type;
+  }
+
+/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
+
+  public function getMarkupFieldKey($field) {
+    return $this->getKey().':'.$field;
+  }
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newMarkupEngine(array());
+  }
+
+  public function getMarkupText($field) {
+    return $this->getDescription();
+  }
+
+  public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+  public function shouldUseMarkupCache($field) {
+    return false;
   }
 
 }
