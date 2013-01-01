@@ -1370,14 +1370,6 @@ return array(
   // a large number (to sample only a few requests).
   'debug.profile-rate' => 0,
 
-
-// -- Previews  ------------------------------------------------------------- //
-
-  // Turn on to enable the "viewport" meta tag. This is a preview feature which
-  // will improve the usability of Phabricator on phones and tablets once it
-  // is ready.
-  'preview.viewport-meta-tag' => false,
-
 // -- Environment  ---------------------------------------------------------- //
 
   // Phabricator occasionally shells out to other binaries on the server.
