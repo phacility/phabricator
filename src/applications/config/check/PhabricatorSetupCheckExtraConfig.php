@@ -15,9 +15,10 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       }
       $summary = pht("This option is not recognized. It may be misspelled.");
       $message = pht(
-        "This configuration option is not recognized. It may be misspelled, ".
-        "or it might have existed in an older version of Phabricator. It has ".
-        "no effect, and should be corrected or deleted.");
+        "The configuration option '%s' is not recognized. It may be ".
+        "misspelled, or it might have existed in an older version of ".
+        "Phabricator. It has no effect, and should be corrected or deleted.",
+        $key);
 
       $this
         ->newIssue('config.unknown.'.$key)

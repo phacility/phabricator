@@ -13,8 +13,6 @@ final class PhabricatorConfigIssueViewController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildSideNavView();
-
     $issues = PhabricatorSetupCheck::runAllChecks();
     PhabricatorSetupCheck::setOpenSetupIssueCount(count($issues));
 
@@ -37,10 +35,8 @@ final class PhabricatorConfigIssueViewController
       $title = $issue->getShortName();
     }
 
-    $nav->appendChild($content);
-
     $crumbs = $this
-      ->buildApplicationCrumbs($nav)
+      ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName(pht('Setup Issues'))
@@ -50,10 +46,11 @@ final class PhabricatorConfigIssueViewController
           ->setName($title)
           ->setHref($request->getRequestURI()));
 
-    $nav->setCrumbs($crumbs);
-
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $content,
+      ),
       array(
         'title' => $title,
         'device' => true,

@@ -64,6 +64,9 @@ final class PhabricatorConfigOption
   }
 
   public function getSummary() {
+    if (empty($this->summary)) {
+      return $this->getDescription();
+    }
     return $this->summary;
   }
 

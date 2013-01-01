@@ -7,13 +7,7 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO {
   protected $namespace;
   protected $configKey;
   protected $value;
-
-  // TODO: Remove this default when implementing Transactions.
-  protected $isDeleted = 0;
-
-  public function getURI() {
-    return '/config/edit/'.$this->configKey;
-  }
+  protected $isDeleted;
 
   public function getConfiguration() {
     return array(

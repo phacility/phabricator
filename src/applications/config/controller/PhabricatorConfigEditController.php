@@ -16,11 +16,24 @@ final class PhabricatorConfigEditController
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$this->key])) {
-      return new Aphront404Response();
+      // This may be a dead config entry, which existed in the past but no
+      // longer exists. Allow it to be edited so it can be reviewed and
+      // deleted.
+      $option = id(new PhabricatorConfigOption())
+        ->setKey($this->key)
+        ->setType('wild')
+        ->setDefault(null)
+        ->setDescription(
+          pht(
+            "This configuration option is unknown. It may be misspelled, ".
+            "or have existed in a previous version of Phabricator."));
+      $group = null;
+      $group_uri = $this->getApplicationURI();
+    } else {
+      $option = $options[$this->key];
+      $group = $option->getGroup();
+      $group_uri = $this->getApplicationURI('group/'.$group->getKey().'/');
     }
-    $option = $options[$this->key];
-    $group = $option->getGroup();
-    $group_uri = $this->getApplicationURI('group/'.$group->getKey().'/');
 
     $issue = $request->getStr('issue');
     if ($issue) {
@@ -127,19 +140,22 @@ final class PhabricatorConfigEditController
       $short = pht('Edit');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Config'))
-          ->setHref($this->getApplicationURI()))
-      ->addCrumb(
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Config'))
+        ->setHref($this->getApplicationURI()));
+
+    if ($group) {
+      $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName($group->getName())
-          ->setHref($group_uri))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($this->key)
-          ->setHref('/config/edit/'.$this->key));
+          ->setHref($group_uri));
+    }
+
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($this->key)
+        ->setHref('/config/edit/'.$this->key));
 
     return $this->buildApplicationPage(
       array(
