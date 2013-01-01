@@ -725,6 +725,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/typeahead.css',
   ),
+  'config-options-css' =>
+  array(
+    'uri' => '/res/c67b0cbf/rsrc/css/application/config/config-options.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/config/config-options.css',
+  ),
   'differential-changeset-view-css' =>
   array(
     'uri' => '/res/ea694162/rsrc/css/application/differential/changeset-view.css',

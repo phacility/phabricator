@@ -106,13 +106,21 @@ final class PhabricatorConfigEditController
       ->addHiddenInput('issue', $request->getStr('issue'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel('Description')
+          ->setLabel(pht('Description'))
           ->setValue($description))
       ->appendChild($control)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($done_uri)
           ->setValue(pht('Save Config Entry')));
+
+    $examples = $this->renderExamples($option);
+    if ($examples) {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Examples'))
+          ->setValue($examples));
+    }
 
 
     // TODO: This isn't quite correct -- we should read from the entire
@@ -285,6 +293,38 @@ final class PhabricatorConfigEditController
       ->setName('value');
 
     return $control;
+  }
+
+  private function renderExamples(PhabricatorConfigOption $option) {
+    $examples = $option->getExamples();
+    if (!$examples) {
+      return null;
+    }
+
+    $table = array();
+    foreach ($examples as $example) {
+      list($value, $description) = $example;
+
+      if ($value === null) {
+        $value = '<em>(empty)</em>';
+      } else {
+        $value = phutil_escape_html($value);
+      }
+
+      $table[] = '<tr>';
+      $table[] = '<th>'.$value.'</th>';
+      $table[] = '<td>'.phutil_escape_html($description).'</td>';
+      $table[] = '</tr>';
+    }
+
+    require_celerity_resource('config-options-css');
+
+    return phutil_render_tag(
+      'table',
+      array(
+        'class' => 'config-option-examples',
+      ),
+      implode("\n", $table));
   }
 
 }

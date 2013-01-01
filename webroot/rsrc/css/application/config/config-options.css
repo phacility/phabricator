@@ -1,0 +1,32 @@
+/**
+ * @provides config-options-css
+ */
+
+.config-option-examples {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #cccccc;
+}
+
+.config-option-examples th,
+.config-option-examples td {
+  padding: 4px 6px;
+  border: 1px solid #cccccc;
+}
+
+.config-option-examples th {
+  background: #dfdfdf;
+  text-align: right;
+  font-weight: bold;
+}
+
+.config-option-examples th em {
+  font-weight: normal;
+  color: #666666;
+}
+
+.config-option-examples td {
+  color: #333333;
+}
+
+
