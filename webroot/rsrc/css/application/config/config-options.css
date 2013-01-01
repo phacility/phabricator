@@ -2,31 +2,39 @@
  * @provides config-options-css
  */
 
-.config-option-examples {
+.config-option-table {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid #cccccc;
 }
 
-.config-option-examples th,
-.config-option-examples td {
-  padding: 4px 6px;
+.config-option-table th,
+.config-option-table td {
+  padding: 4px 12px;
   border: 1px solid #cccccc;
 }
 
-.config-option-examples th {
-  background: #dfdfdf;
+.config-option-table th {
+  background: #e9e9e9;
   text-align: right;
-  font-weight: bold;
+  white-space: nowrap;
 }
 
-.config-option-examples th em {
+.config-option-table th em {
   font-weight: normal;
   color: #666666;
 }
 
-.config-option-examples td {
+.config-option-table td {
   color: #333333;
+  width: 100%;
+}
+
+.config-option-table .column-labels th {
+  font-weight: bold;
+  color: #333333;
+  text-align: center;
+  background: #e0e0e0;
 }
 
 

@@ -33,11 +33,22 @@ abstract class PhabricatorConfigProxySource
   }
 
   public function setKeys(array $keys) {
-    return $this->getSource()->setKeys($keys);
+    $this->getSource()->setKeys($keys);
+    return $this;
   }
 
   public function deleteKeys(array $keys) {
-    return $this->getSource()->deleteKeys();
+    $this->getSource()->deleteKeys();
+    return $this;
+  }
+
+  public function setName($name) {
+    $this->getSource()->setName($name);
+    return $this;
+  }
+
+  public function getName() {
+    return $this->getSource()->getName();
   }
 
 }

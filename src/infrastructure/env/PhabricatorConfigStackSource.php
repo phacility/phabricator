@@ -24,6 +24,10 @@ final class PhabricatorConfigStackSource
     return array_shift($this->stack);
   }
 
+  public function getStack() {
+    return $this->stack;
+  }
+
   public function getKeys(array $keys) {
     $result = array();
     foreach ($this->stack as $source) {

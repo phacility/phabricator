@@ -122,30 +122,13 @@ final class PhabricatorConfigEditController
           ->setValue($examples));
     }
 
+    $form->appendChild(
+      id(new AphrontFormMarkupControl())
+        ->setLabel(pht('Default'))
+        ->setValue($this->renderDefaults($option)));
 
-    // TODO: This isn't quite correct -- we should read from the entire
-    // configuration stack, ignoring database configuration. For now, though,
-    // it's a reasonable approximation.
-    $default = $this->prettyPrintJSON($option->getDefault());
-    $form
-      ->appendChild(
-        phutil_render_tag(
-          'p',
-          array(
-            'class' => 'aphront-form-input',
-          ),
-          'If left blank, the setting will return to its default value. '.
-          'Its default value is:'))
-      ->appendChild(
-          phutil_render_tag(
-            'pre',
-            array(
-              'class' => 'aphront-form-input',
-            ),
-            phutil_escape_html($default)));
-
-      $title = pht('Edit %s', $this->key);
-      $short = pht('Edit');
+    $title = pht('Edit %s', $this->key);
+    $short = pht('Edit');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -302,18 +285,22 @@ final class PhabricatorConfigEditController
     }
 
     $table = array();
+    $table[] = '<tr class="column-labels">';
+    $table[] = '<th>'.pht('Example').'</th>';
+    $table[] = '<th>'.pht('Value').'</th>';
+    $table[] = '</tr>';
     foreach ($examples as $example) {
       list($value, $description) = $example;
 
       if ($value === null) {
-        $value = '<em>(empty)</em>';
+        $value = '<em>'.pht('(empty)').'</em>';
       } else {
         $value = phutil_escape_html($value);
       }
 
       $table[] = '<tr>';
-      $table[] = '<th>'.$value.'</th>';
-      $table[] = '<td>'.phutil_escape_html($description).'</td>';
+      $table[] = '<th>'.phutil_escape_html($description).'</th>';
+      $table[] = '<td>'.$value.'</td>';
       $table[] = '</tr>';
     }
 
@@ -322,7 +309,58 @@ final class PhabricatorConfigEditController
     return phutil_render_tag(
       'table',
       array(
-        'class' => 'config-option-examples',
+        'class' => 'config-option-table',
+      ),
+      implode("\n", $table));
+  }
+
+  private function renderDefaults(PhabricatorConfigOption $option) {
+    $stack = PhabricatorEnv::getConfigSourceStack();
+    $stack = $stack->getStack();
+
+    /*
+
+      TODO: Once DatabaseSource lands, do this:
+
+      foreach ($stack as $key => $source) {
+        unset($stack[$key]);
+        if ($source instanceof PhabricatorConfigDatabaseSource) {
+          break;
+        }
+      }
+
+    */
+
+
+    $table = array();
+    $table[] = '<tr class="column-labels">';
+    $table[] = '<th>'.pht('Source').'</th>';
+    $table[] = '<th>'.pht('Value').'</th>';
+    $table[] = '</tr>';
+    foreach ($stack as $key => $source) {
+      $value = $source->getKeys(
+        array(
+          $option->getKey(),
+        ));
+
+      if (!array_key_exists($option->getKey(), $value)) {
+        $value = '<em>'.pht('(empty)').'</em>';
+      } else {
+        $value = $this->prettyPrintJSON($value[$option->getKey()]);
+      }
+
+      $table[] = '<tr>';
+      $table[] = '<th>'.phutil_escape_html($source->getName()).'</th>';
+      $table[] = '<td>'.$value.'</td>';
+      $table[] = '</tr>';
+    }
+
+    require_celerity_resource('config-options-css');
+
+    return phutil_render_tag(
+      'table',
+      array(
+        'class' => 'config-option-table',
       ),
       implode("\n", $table));
   }

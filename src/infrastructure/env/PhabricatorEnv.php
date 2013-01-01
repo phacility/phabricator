@@ -96,8 +96,7 @@ final class PhabricatorEnv {
   private static function initializeCommonEnvironment() {
     $env = self::getSelectedEnvironmentName();
 
-    self::$sourceStack = new PhabricatorConfigStackSource();
-    self::$sourceStack->pushSource(new PhabricatorConfigFileSource($env));
+    self::buildConfigurationSourceStack();
 
     PhutilErrorHandler::initialize();
 
@@ -124,6 +123,24 @@ final class PhabricatorEnv {
     PhutilTranslator::getInstance()
       ->setLanguage($translation->getLanguage())
       ->addTranslations($translation->getTranslations());
+  }
+
+  private static function buildConfigurationSourceStack() {
+    $stack = new PhabricatorConfigStackSource();
+    self::$sourceStack = $stack;
+
+    $stack->pushSource(
+      id(new PhabricatorConfigDefaultSource())
+        ->setName(pht('Global Default')));
+
+    $env = self::getSelectedEnvironmentName();
+    $stack->pushSource(
+      id(new PhabricatorConfigFileSource($env))
+        ->setName(pht("File '%s'", $env)));
+
+    $stack->pushSource(
+      id(new PhabricatorConfigLocalSource())
+        ->setName(pht("Local Config")));
   }
 
   public static function getSelectedEnvironmentName() {
@@ -398,6 +415,9 @@ final class PhabricatorEnv {
     return self::$sourceStack->getAllKeys();
   }
 
+  public static function getConfigSourceStack() {
+    return self::$sourceStack;
+  }
 
   /**
    * @task internal
