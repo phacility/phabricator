@@ -1144,20 +1144,6 @@ return array(
   // manageable. To run garbage collection, launch a
   // PhabricatorGarbageCollector daemon.
 
-  // Since the GC daemon can issue large writes and table scans, you may want to
-  // run it only during off hours or make sure it is scheduled so it doesn't
-  // overlap with backups. This determines when the daemon can start running
-  // each day.
-  'gcdaemon.run-at'    => '12 AM',
-
-  // How many seconds after 'gcdaemon.run-at' the daemon may collect garbage
-  // for. By default it runs continuously, but you can set it to run for a
-  // limited period of time. For instance, if you do backups at 3 AM, you might
-  // run garbage collection for an hour beforehand. This is not a high-precision
-  // limit so you may want to leave some room for the GC to actually stop, and
-  // if you set it to something like 3 seconds you're on your own.
-  'gcdaemon.run-for'   => 24 * 60 * 60,
-
   // These 'ttl' keys configure how much old data the GC daemon keeps around.
   // Objects older than the ttl will be collected. Set any value to 0 to store
   // data indefinitely.
