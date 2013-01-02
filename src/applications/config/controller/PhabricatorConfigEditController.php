@@ -78,10 +78,15 @@ final class PhabricatorConfigEditController
               PhabricatorContentSource::SOURCE_WEB,
               array(
                 'ip' => $request->getRemoteAddr(),
-              )))
-          ->applyTransactions($config_entry, array($xaction));
+              )));
 
-        return id(new AphrontRedirectResponse())->setURI($done_uri);
+        try {
+          $editor->applyTransactions($config_entry, array($xaction));
+          return id(new AphrontRedirectResponse())->setURI($done_uri);
+        } catch (PhabricatorConfigValidationException $ex) {
+          $e_value = pht('Invalid');
+          $errors[] = $ex->getMessage();
+        }
       }
     } else {
       $display_value = $this->getDisplayValue($option, $config_entry);

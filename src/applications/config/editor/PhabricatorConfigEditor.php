@@ -42,6 +42,18 @@ final class PhabricatorConfigEditor
       case PhabricatorConfigTransaction::TYPE_EDIT:
         $v = $xaction->getNewValue();
 
+        // If this is a defined configuration option (vs a straggler from an
+        // old version of Phabricator or a configuration file misspelling)
+        // submit it to the validation gauntlet.
+        $key = $object->getConfigKey();
+        $all_options = PhabricatorApplicationConfigOptions::loadAllOptions();
+        $option = idx($all_options, $key);
+        if ($option) {
+          $option->getGroup()->validateOption(
+            $option,
+            $v['value']);
+        }
+
         $object->setIsDeleted($v['deleted']);
         $object->setValue($v['value']);
         break;

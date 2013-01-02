@@ -6,6 +6,56 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
   abstract public function getDescription();
   abstract public function getOptions();
 
+  public function validateOption(PhabricatorConfigOption $option, $value) {
+    if ($value === $option->getDefault()) {
+      return;
+    }
+
+    if ($value === null) {
+      return;
+    }
+
+    switch ($option->getType()) {
+      case 'bool':
+        if ($value !== true &&
+            $value !== false) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' is of type bool, but value is not true or false.",
+              $option->getKey()));
+        }
+        break;
+      case 'int':
+        if (!is_int($value)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' is of type int, but value is not an integer.",
+              $option->getKey()));
+        }
+        break;
+      case 'string':
+        if (!is_string($value)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' is of type string, but value is not a string.",
+              $option->getKey()));
+        }
+        break;
+      case 'wild':
+      default:
+        break;
+    }
+
+    $this->didValidateOption($option, $value);
+  }
+
+  protected function didValidateOption(
+    PhabricatorConfigOption $option,
+    $value) {
+    // Hook for subclasses to do complex validation.
+    return;
+  }
+
   public function getKey() {
     $class = get_class($this);
     $matches = null;
