@@ -630,9 +630,11 @@ EOBODY;
   public function loadProfileImageURI() {
     $src_phid = $this->getProfileImagePHID();
 
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-    if ($file) {
-      return $file->getBestURI();
+    if ($src_phid) {
+      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
+      if ($file) {
+        return $file->getBestURI();
+      }
     }
 
     return self::getDefaultProfileImageURI();
