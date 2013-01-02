@@ -35,7 +35,59 @@ final class PhabricatorCoreConfigOptions
             "production environment. If unset, defaults to ".
             "{{phabricator.base-uri}}. Most installs do not need to set ".
             "this option."))
-        ->addExample('http://phabricator.example.com/', 'Valid Setting')
+        ->addExample('http://phabricator.example.com/', 'Valid Setting'),
+      $this->newOption('phabricator.timezone', 'string', null)
+        ->setSummary(
+          pht("The timezone Phabricator should use."))
+        ->setDescription(
+          pht(
+            "PHP requires that you set a timezone in your php.ini before ".
+            "using date functions, or it will emit a warning. If this isn't ".
+            "possible (for instance, because you are using HPHP) you can set ".
+            "some valid constant for date_default_timezone_set() here and ".
+            "Phabricator will set it on your behalf, silencing the warning."))
+        ->addExample('America/New_York', 'Valid Setting'),
+      $this->newOption('phabricator.serious-business', 'bool', false)
+        ->setOptions(
+          array(
+            pht('Shenanigans'), // That should be interesting to translate. :P
+            pht('Serious business'),
+          ))
+        ->setSummary(
+          pht("Should Phabricator be serious?"))
+        ->setDescription(
+          pht(
+            "By default, Phabricator includes some silly nonsense in the UI, ".
+            "such as a submit button called 'Clowncopterize' in Differential ".
+            "and a call to 'Leap Into Action'. If you'd prefer more ".
+            "traditional UI strings like 'Submit', you can set this flag to ".
+            "disable most of the jokes and easter eggs.")),
+       $this->newOption('storage.default-namespace', 'string', 'phabricator')
+        ->setSummary(
+          pht("The namespace that Phabricator databases should use."))
+        ->setDescription(
+          pht(
+            "Phabricator puts databases in a namespace, which defualts to ".
+            "'phabricator' -- for instance, the Differential database is ".
+            "named 'phabricator_differential' by default. You can change ".
+            "this namespace if you want. Normally, you should not do this ".
+            "unless you are developing Phabricator and using namespaces to ".
+            "separate multiple sandbox datasets."))
+        ->addExample('phabricator', 'Valid Setting'),
+       $this->newOption('environment.append-paths', 'list<string>', null)
+        ->setSummary(
+          pht("These paths get appended to your \$PATH envrionment variable."))
+        ->setDescription(
+          pht(
+            "Phabricator occasionally shells out to other binaries on the ".
+            "server. An example of this is the \"pygmentize\" command, used ".
+            "to syntax-highlight code written in languages other than PHP. ".
+            "By default, it is assumed that these binaries are in the \$PATH ".
+            "of the user running Phabricator (normally 'apache', 'httpd', or ".
+            "'nobody'). Here you can add extra directories to the \$PATH ".
+            "environment variable, for when these binaries are in ".
+            "non-standard locations."))
+        ->addExample('/usr/local/bin', 'Valid Setting'),
     );
   }
 
