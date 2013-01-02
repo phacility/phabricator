@@ -226,6 +226,9 @@ final class PhabricatorConfigEditController
       case 'string':
         $set_value = (string)$value;
         break;
+      case 'list<string>':
+        $set_value = $request->getStrList('value');
+        break;
       case 'bool':
         switch ($value) {
           case 'true':
@@ -281,6 +284,8 @@ final class PhabricatorConfigEditController
         return $value;
       case 'bool':
         return $value ? 'true' : 'false';
+      case 'list<string>':
+        return implode("\n", nonempty($value, array()));
       default:
         return $this->prettyPrintJSON($value);
     }
@@ -305,6 +310,10 @@ final class PhabricatorConfigEditController
               'true'  => idx($option->getOptions(), 0),
               'false' => idx($option->getOptions(), 1),
             ));
+        break;
+      case 'list<string>':
+        $control = id(new AphrontFormTextAreaControl())
+          ->setCaption(pht('Separate values with newlines or commas.'));
         break;
       default:
         $control = id(new AphrontFormTextAreaControl())
@@ -340,7 +349,7 @@ final class PhabricatorConfigEditController
       if ($value === null) {
         $value = '<em>'.pht('(empty)').'</em>';
       } else {
-        $value = phutil_escape_html($value);
+        $value = nl2br(phutil_escape_html($value));
       }
 
       $table[] = '<tr>';

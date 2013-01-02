@@ -90,7 +90,8 @@ final class PhabricatorCoreConfigOptions
             "'nobody'). Here you can add extra directories to the \$PATH ".
             "environment variable, for when these binaries are in ".
             "non-standard locations."))
-        ->addExample('/usr/local/bin', 'Valid Setting'),
+        ->addExample('/usr/local/bin', pht('Add One Path'))
+        ->addExample("/usr/bin\n/usr/local/bin", pht('Add Multiple Paths')),
     );
   }
 

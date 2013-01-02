@@ -41,6 +41,32 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
               $option->getKey()));
         }
         break;
+      case 'list<string>':
+        $valid = true;
+        if (!is_array($value)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' must be a list of strings, but value is not a ".
+              "an array.",
+              $option->getKey()));
+        }
+        if ($value && array_keys($value) != range(0, count($value) - 1)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' must be a list of strings, but the value is a ".
+              "map with unnatural keys.",
+              $option->getKey()));
+        }
+        foreach ($value as $v) {
+          if (!is_string($v)) {
+            throw new PhabricatorConfigValidationException(
+              pht(
+                "Option '%s' must be a list of strings, but it contains one ".
+                "or more non-strings.",
+                $option->getKey()));
+          }
+        }
+        break;
       case 'wild':
       default:
         break;
