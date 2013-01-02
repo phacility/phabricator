@@ -1,0 +1,94 @@
+<?php
+
+final class PhabricatorConfigTransaction
+  extends PhabricatorApplicationTransaction {
+
+  const TYPE_EDIT = 'config:edit';
+
+  public function getApplicationName() {
+    return 'config';
+  }
+
+  public function getApplicationTransactionType() {
+    return PhabricatorPHIDConstants::PHID_TYPE_CONF;
+  }
+
+  public function getApplicationTransactionCommentObject() {
+    return null;
+  }
+
+  public function getApplicationObjectTypeName() {
+    return pht('config');
+  }
+
+
+  public function getTitle() {
+    $author_phid = $this->getAuthorPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_EDIT:
+
+        // TODO: After T2213 show the actual values too; for now, we don't
+        // have the tools to do it without making a bit of a mess of it.
+
+        $old_del = idx($old, 'deleted');
+        $new_del = idx($new, 'deleted');
+        if ($old_del && !$new_del) {
+          return pht(
+            '%s created this configuration entry.',
+            $this->renderHandleLink($author_phid));
+        } else if (!$old_del && $new_del) {
+          return pht(
+            '%s deleted this configuration entry.',
+            $this->renderHandleLink($author_phid));
+        } else if ($old_del && $new_del) {
+          // This is a bug.
+          return pht(
+            '%s deleted this configuration entry (again?).',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s edited this configuration entry.',
+            $this->renderHandleLink($author_phid));
+        }
+        break;
+    }
+
+    return parent::getTitle();
+  }
+
+
+  public function getIcon() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_EDIT:
+        return 'edit';
+    }
+
+    return parent::getIcon();
+  }
+
+  public function getColor() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_EDIT:
+        $old_del = idx($old, 'deleted');
+        $new_del = idx($new, 'deleted');
+
+        if ($old_del && !$new_del) {
+          return PhabricatorTransactions::COLOR_GREEN;
+        } else if (!$old_del && $new_del) {
+          return PhabricatorTransactions::COLOR_RED;
+        } else {
+          return PhabricatorTransactions::COLOR_BLUE;
+        }
+        break;
+    }
+  }
+
+}
+

@@ -58,9 +58,7 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
   public function getTransactionTypes() {
-    $types = array(
-      PhabricatorTransactions::TYPE_COMMENT,
-    );
+    $types = array();
 
     if ($this->object instanceof PhabricatorSubscribableInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;

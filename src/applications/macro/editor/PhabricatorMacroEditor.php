@@ -6,6 +6,7 @@ final class PhabricatorMacroEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorMacroTransactionType::TYPE_NAME;
     $types[] = PhabricatorMacroTransactionType::TYPE_DISABLED;
     $types[] = PhabricatorMacroTransactionType::TYPE_FILE;

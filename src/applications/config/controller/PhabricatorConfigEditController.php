@@ -61,15 +61,26 @@ final class PhabricatorConfigEditController
     $errors = array();
     if ($request->isFormPost()) {
 
-      list($e_value, $value_errors, $display_value) = $this->readRequest(
+      $result = $this->readRequest(
         $option,
-        $config_entry,
         $request);
 
+      list($e_value, $value_errors, $display_value, $xaction) = $result;
       $errors = array_merge($errors, $value_errors);
 
       if (!$errors) {
-        $config_entry->save();
+
+        $editor = id(new PhabricatorConfigEditor())
+          ->setActor($user)
+          ->setContinueOnNoEffect(true)
+          ->setContentSource(
+            PhabricatorContentSource::newForSource(
+              PhabricatorContentSource::SOURCE_WEB,
+              array(
+                'ip' => $request->getRemoteAddr(),
+              )))
+          ->applyTransactions($config_entry, array($xaction));
+
         return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
     } else {
@@ -148,12 +159,23 @@ final class PhabricatorConfigEditController
         ->setName($this->key)
         ->setHref('/config/edit/'.$this->key));
 
+
+    $xactions = id(new PhabricatorConfigTransactionQuery())
+      ->withObjectPHIDs(array($config_entry->getPHID()))
+      ->setViewer($user)
+      ->execute();
+
+    $xaction_view = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setTransactions($xactions);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         id(new PhabricatorHeaderView())->setHeader($title),
         $error_view,
         $form,
+        $xaction_view,
       ),
       array(
         'title' => $title,
@@ -163,8 +185,10 @@ final class PhabricatorConfigEditController
 
   private function readRequest(
     PhabricatorConfigOption $option,
-    PhabricatorConfigEntry $entry,
     AphrontRequest $request) {
+
+    $xaction = new PhabricatorConfigTransaction();
+    $xaction->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT);
 
     $e_value = null;
     $errors = array();
@@ -172,32 +196,38 @@ final class PhabricatorConfigEditController
     $value = $request->getStr('value');
     if (!strlen($value)) {
       $value = null;
-      $entry->setValue($value);
-      $entry->setIsDeleted(true);
-      return array($e_value, $errors, $value);
-    } else {
-      $entry->setIsDeleted(false);
+
+      $xaction->setNewValue(
+        array(
+          'deleted' => true,
+          'value'   => null,
+        ));
+
+      return array($e_value, $errors, $value, $xaction);
     }
 
     $type = $option->getType();
+    $set_value = null;
+
     switch ($type) {
       case 'int':
         if (preg_match('/^-?[0-9]+$/', trim($value))) {
-          $entry->setValue((int)$value);
+          $set_value = (int)$value;
         } else {
           $e_value = pht('Invalid');
           $errors[] = pht('Value must be an integer.');
         }
         break;
       case 'string':
+        $set_value = (string)$value;
         break;
       case 'bool':
         switch ($value) {
           case 'true':
-            $entry->setValue(true);
+            $set_value = true;
             break;
           case 'false':
-            $entry->setValue(false);
+            $set_value = false;
             break;
           default:
             $e_value = pht('Invalid');
@@ -212,12 +242,22 @@ final class PhabricatorConfigEditController
           $errors[] = pht(
             'The given value must be valid JSON. This means, among '.
             'other things, that you must wrap strings in double-quotes.');
-          $entry->setValue($json);
+          $set_value = $json;
         }
         break;
     }
 
-    return array($e_value, $errors, $value);
+    if (!$errors) {
+      $xaction->setNewValue(
+        array(
+          'deleted' => false,
+          'value'   => $set_value,
+        ));
+    } else {
+      $xaction = null;
+    }
+
+    return array($e_value, $errors, $value, $xaction);
   }
 
   private function getDisplayValue(
