@@ -12,6 +12,16 @@ final class PhabricatorConfigOption
   private $options;
   private $group;
   private $examples;
+  private $locked;
+
+  public function setLocked($locked) {
+    $this->locked = $locked;
+    return $this;
+  }
+
+  public function getLocked() {
+    return $this->locked;
+  }
 
   public function addExample($value, $description) {
     $this->examples[] = array($value, $description);

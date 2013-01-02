@@ -91,6 +91,10 @@ final class PhabricatorConfigGroupController
         $item->addIcon('edit-grey', pht('Default'));
       }
 
+      if ($option->getLocked()) {
+        $item->addIcon('lock', pht('Locked'));
+      }
+
       $list->addItem($item);
     }
 

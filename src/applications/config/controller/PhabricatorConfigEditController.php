@@ -59,7 +59,7 @@ final class PhabricatorConfigEditController
 
     $e_value = null;
     $errors = array();
-    if ($request->isFormPost()) {
+    if ($request->isFormPost() && !$option->getLocked()) {
 
       $result = $this->readRequest(
         $option,
@@ -100,6 +100,15 @@ final class PhabricatorConfigEditController
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('You broke everything!'))
         ->setErrors($errors);
+    } else if ($option->getLocked()) {
+      $msg = pht(
+        "This configuration is locked and can not be edited from the web ".
+        "interface.");
+
+      $error_view = id(new AphrontErrorView())
+        ->setTitle(pht('Configuration Locked'))
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->appendChild('<p>'.phutil_escape_html($msg).'</p>');
     }
 
     $control = $this->renderControl(
@@ -124,11 +133,15 @@ final class PhabricatorConfigEditController
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Description'))
           ->setValue($description))
-      ->appendChild($control)
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($done_uri)
-          ->setValue(pht('Save Config Entry')));
+      ->appendChild($control);
+
+    if (!$option->getLocked()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->addCancelButton($done_uri)
+            ->setValue(pht('Save Config Entry')));
+    }
 
     $examples = $this->renderExamples($option);
     if ($examples) {
@@ -328,6 +341,10 @@ final class PhabricatorConfigEditController
       ->setError($e_value)
       ->setValue($display_value)
       ->setName('value');
+
+    if ($option->getLocked()) {
+      $control->setDisabled(true);
+    }
 
     return $control;
   }

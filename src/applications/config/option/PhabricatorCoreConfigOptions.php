@@ -66,6 +66,8 @@ final class PhabricatorCoreConfigOptions
             "traditional UI strings like 'Submit', you can set this flag to ".
             "disable most of the jokes and easter eggs.")),
        $this->newOption('storage.default-namespace', 'string', 'phabricator')
+        // NOTE: Lock this, since editing it from the web torpedoes an install.
+        ->setLocked(true)
         ->setSummary(
           pht("The namespace that Phabricator databases should use."))
         ->setDescription(
@@ -75,8 +77,7 @@ final class PhabricatorCoreConfigOptions
             "named 'phabricator_differential' by default. You can change ".
             "this namespace if you want. Normally, you should not do this ".
             "unless you are developing Phabricator and using namespaces to ".
-            "separate multiple sandbox datasets."))
-        ->addExample('phabricator', 'Valid Setting'),
+            "separate multiple sandbox datasets.")),
        $this->newOption('environment.append-paths', 'list<string>', null)
         ->setSummary(
           pht("These paths get appended to your \$PATH envrionment variable."))
