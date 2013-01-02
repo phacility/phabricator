@@ -21,7 +21,7 @@ final class PhabricatorCoreConfigOptions
             "improves security by preventing cookies from being set on other ".
             "domains, and allows daemons to send emails with links that have ".
             "the correct domain."))
-        ->addExample('http://phabricator.example.com/', 'Valid Setting'),
+        ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.production-uri', 'string', null)
         ->setSummary(
           pht("Primary install URI, for multi-environment installs."))
@@ -35,7 +35,7 @@ final class PhabricatorCoreConfigOptions
             "production environment. If unset, defaults to ".
             "{{phabricator.base-uri}}. Most installs do not need to set ".
             "this option."))
-        ->addExample('http://phabricator.example.com/', 'Valid Setting'),
+        ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
           pht("The timezone Phabricator should use."))
