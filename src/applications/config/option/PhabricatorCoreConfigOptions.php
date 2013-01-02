@@ -46,7 +46,10 @@ final class PhabricatorCoreConfigOptions
             "possible (for instance, because you are using HPHP) you can set ".
             "some valid constant for date_default_timezone_set() here and ".
             "Phabricator will set it on your behalf, silencing the warning."))
-        ->addExample('America/New_York', 'Valid Setting'),
+        ->addExample('America/New_York', pht('US East (EDT)'))
+        ->addExample('America/Chicago', pht('US Central (CDT)'))
+        ->addExample('America/Boise', pht('US Mountain (MDT)'))
+        ->addExample('America/Los_Angeles', pht('US West (PDT)')),
       $this->newOption('phabricator.serious-business', 'bool', false)
         ->setOptions(
           array(
@@ -132,6 +135,27 @@ final class PhabricatorCoreConfigOptions
             $key));
       }
     }
+
+
+    if ($key === 'phabricator.timezone') {
+      $old = date_default_timezone_get();
+      $ok = @date_default_timezone_set($value);
+      @date_default_timezone_set($old);
+
+      if (!$ok) {
+        throw new PhabricatorConfigValidationException(
+          pht(
+            "Config option '%s' is invalid. The timezone identifier must ".
+            "be a valid timezone identifier recognized by PHP, like ".
+            "'America/Los_Angeles'. You can find a list of valid identifiers ".
+            "here: %s",
+            $key,
+            'http://php.net/manual/timezones.php'));
+      }
+    }
+
+
+
   }
 
 
