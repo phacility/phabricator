@@ -727,7 +727,7 @@ celerity_register_resource_map(array(
   ),
   'config-options-css' =>
   array(
-    'uri' => '/res/c67b0cbf/rsrc/css/application/config/config-options.css',
+    'uri' => '/res/6f7f64e8/rsrc/css/application/config/config-options.css',
     'type' => 'css',
     'requires' =>
     array(

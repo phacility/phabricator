@@ -683,16 +683,16 @@ return array(
   'ldap.auth-enabled'         => false,
 
   // The LDAP server hostname
-  'ldap.hostname' => '',
+  'ldap.hostname' => null,
 
   // The LDAP server port
   'ldap.port' => 389,
 
   // The LDAP base domain name
-  'ldap.base_dn' => '',
+  'ldap.base_dn' => null,
 
   // The attribute to be regarded as 'username'. Has to be unique
-  'ldap.search_attribute' => '',
+  'ldap.search_attribute' => null,
 
   // Perform a search to find a user
   // Many LDAP installations do not have the username in the dn, if this is
@@ -700,7 +700,7 @@ return array(
   'ldap.search-first'         => false,
 
   // The attribute to search for if you have to search for a user
-  'ldap.username-attribute' => '',
+  'ldap.username-attribute' => null,
 
   // The attribute(s) to be regarded as 'real name'.
   // If more then one attribute is supplied the values of the attributes in
@@ -709,7 +709,7 @@ return array(
 
   // A domain name to use when authenticating against Active Directory
   // (e.g. 'example.com')
-  'ldap.activedirectory_domain' => '',
+  'ldap.activedirectory_domain' => null,
 
   // The LDAP version
   'ldap.version' => 3,
@@ -717,15 +717,15 @@ return array(
   // LDAP Referrals Option
   // Whether referrals should be followed by the client
   // Should be set to 0 if you use Windows 2003 AD
-  'ldap.referrals' => 1,
+  'ldap.referrals' => true,
 
   // The anonymous user name to use before searching a user.
   // Many LDAP installations require login even before searching a user, set
   // this option to enable it.
-  'ldap.anonymous-user-name'     => '',
+  'ldap.anonymous-user-name'     => null,
 
   // The password of the LDAP anonymous user.
-  'ldap.anonymous-user-password' => '',
+  'ldap.anonymous-user-password' => null,
 
 
 // -- Disqus OAuth ---------------------------------------------------------- //

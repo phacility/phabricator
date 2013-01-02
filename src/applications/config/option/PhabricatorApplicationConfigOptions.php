@@ -46,7 +46,7 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
         if (!is_array($value)) {
           throw new PhabricatorConfigValidationException(
             pht(
-              "Option '%s' must be a list of strings, but value is not a ".
+              "Option '%s' must be a list of strings, but value is not ".
               "an array.",
               $option->getKey()));
         }
