@@ -53,6 +53,9 @@ final class PhabricatorStorageManagementDestroyWorkflow
     } else {
       $databases = $api->getDatabaseList($patches);
       $databases[] = $api->getDatabaseName('meta_data');
+      // These are legacy databases that were dropped long ago. See T2237.
+      $databases[] = $api->getDatabaseName('phid');
+      $databases[] = $api->getDatabaseName('directory');
     }
 
     foreach ($databases as $database) {
