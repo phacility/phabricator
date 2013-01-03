@@ -86,7 +86,60 @@ final class PhabricatorDeveloperConfigOptions
             "data to look at eventually). In development, it may be useful to ".
             "set it to 1 in order to debug performance problems.\n\n".
             "NOTE: You must install XHProf for profiling to work.")),
+      $this->newOption('phabricator.show-stack-traces', 'bool', false)
+        ->setOptions(
+          array(
+            pht('Hide stack traces'),
+            pht('Show stack traces'),
+          ))
+        ->setSummary(pht("Show stack traces when unhandled exceptions occur."))
+        ->setDescription(
+          pht(
+            "When unhandled exceptions occur, stack traces are hidden by ".
+            "default. You can enable traces for development to make it easier ".
+            "to debug problems.")),
+      $this->newOption('phabricator.show-error-callout', 'bool', false)
+        ->setOptions(
+          array(
+            pht('Hide error callout'),
+            pht('Show error callout'),
+          ))
+        ->setSummary(pht("Show error callout."))
+        ->setDescription(
+          pht(
+            "Shows an error callout if a page generated PHP errors, warnings ".
+            "or notices. This makes it harder to miss problems while ".
+            "developing Phabricator. A callout is simply a red error at the ".
+            "top of the page.")),
+      $this->newOption('celerity.force-disk-reads', 'bool', false)
+        ->setOptions(
+          array(
+            pht("Don't force disk reads"),
+            pht('Force disk reads'),
+          ))
+        ->setSummary(pht("Force Celerity to read from disk on every request."))
+        ->setDescription(
+          pht(
+            "In a development environment, it is desirable to force static ".
+            "resources (CSS and JS) to be read from disk on every request, so ".
+            "that edits to them appear when you reload the page even if you ".
+            "haven't updated the resource maps. This setting ensures requests ".
+            "will be verified against the state on disk. Generally, you ".
+            "should leave this off in production (caching behavior and ".
+            "performance improve with it off) but turn it on in development. ".
+            "(These settings are the defaults.)")),
+      $this->newOption('celerity.minify', 'bool', false)
+        ->setOptions(
+          array(
+            pht("Don't minify static resources."),
+            pht('Minify static resources.'),
+          ))
+        ->setSummary(pht("Minify static Celerity resources."))
+        ->setDescription(
+          pht(
+            "Minify static resources by removing whitespace and comments. You ".
+            "should enable this in production, but disable it in ".
+            "development.")),
     );
   }
-
 }
