@@ -100,6 +100,15 @@ final class PhabricatorConfigEditController
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('You broke everything!'))
         ->setErrors($errors);
+    } else if ($option->getHidden()) {
+      $msg = pht(
+        "This configuration is hidden and can not be edited or viewed from ".
+        "the web interface.");
+
+      $error_view = id(new AphrontErrorView())
+        ->setTitle(pht('Configuration Hidden'))
+        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        ->appendChild('<p>'.phutil_escape_html($msg).'</p>');
     } else if ($option->getLocked()) {
       $msg = pht(
         "This configuration is locked and can not be edited from the web ".
@@ -111,10 +120,14 @@ final class PhabricatorConfigEditController
         ->appendChild('<p>'.phutil_escape_html($msg).'</p>');
     }
 
-    $control = $this->renderControl(
-      $option,
-      $display_value,
-      $e_value);
+    if ($option->getHidden()) {
+      $control = null;
+    } else {
+      $control = $this->renderControl(
+        $option,
+        $display_value,
+        $e_value);
+    }
 
     $engine = new PhabricatorMarkupEngine();
     $engine->addObject($option, 'description');
@@ -135,13 +148,14 @@ final class PhabricatorConfigEditController
           ->setValue($description))
       ->appendChild($control);
 
+    $submit_control = id(new AphrontFormSubmitControl())
+      ->addCancelButton($done_uri);
+
     if (!$option->getLocked()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->addCancelButton($done_uri)
-            ->setValue(pht('Save Config Entry')));
+      $submit_control->setValue(pht('Save Config Entry'));
     }
+
+    $form->appendChild($submit_control);
 
     $examples = $this->renderExamples($option);
     if ($examples) {
@@ -151,10 +165,12 @@ final class PhabricatorConfigEditController
           ->setValue($examples));
     }
 
-    $form->appendChild(
-      id(new AphrontFormMarkupControl())
-        ->setLabel(pht('Default'))
-        ->setValue($this->renderDefaults($option)));
+    if (!$option->getHidden()) {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Default'))
+          ->setValue($this->renderDefaults($option)));
+    }
 
     $title = pht('Edit %s', $this->key);
     $short = pht('Edit');
@@ -256,6 +272,20 @@ final class PhabricatorConfigEditController
             break;
         }
         break;
+      case 'class':
+        if (!class_exists($value)) {
+          $e_value = pht('Invalid');
+          $errors[] = pht('Class does not exist.');
+        } else {
+          $base = $option->getBaseClass();
+          if (!is_subclass_of($value, $base)) {
+            $e_value = pht('Invalid');
+            $errors[] = pht('Class is not of valid type.');
+          } else {
+            $set_value = $value;
+          }
+        }
+        break;
       default:
         $json = json_decode($value, true);
         if ($json === null && strtolower($value) != 'null') {
@@ -319,10 +349,25 @@ final class PhabricatorConfigEditController
         $control = id(new AphrontFormSelectControl())
           ->setOptions(
             array(
-              ''      => '(Use Default)',
+              ''      => pht('(Use Default)'),
               'true'  => idx($option->getOptions(), 0),
               'false' => idx($option->getOptions(), 1),
             ));
+        break;
+      case 'class':
+        $symbols = id(new PhutilSymbolLoader())
+          ->setType('class')
+          ->setAncestorClass($option->getBaseClass())
+          ->setConcreteOnly(true)
+          ->selectSymbolsWithoutLoading();
+        $names = ipull($symbols, 'name', 'name');
+        sort($names);
+        $names = array(
+          '' => pht('(Use Default)'),
+        ) + $names;
+
+        $control = id(new AphrontFormSelectControl())
+          ->setOptions($names);
         break;
       case 'list<string>':
         $control = id(new AphrontFormTextAreaControl())

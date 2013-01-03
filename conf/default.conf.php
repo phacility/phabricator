@@ -180,9 +180,6 @@ return array(
   // (e.g., db.example.com:1234).
   'mysql.host' => 'localhost',
 
-  // The number of times to try reconnecting to the MySQL database
-  'mysql.connection-retries' => 3,
-
   // Phabricator supports PHP extensions MySQL and MySQLi. It is possible to
   // implement also other access mechanism (e.g. PDO_MySQL). The class must
   // extend AphrontMySQLDatabaseConnectionBase.

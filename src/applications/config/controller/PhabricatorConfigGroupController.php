@@ -67,22 +67,24 @@ final class PhabricatorConfigGroupController
 
     $list = new PhabricatorObjectItemListView();
     foreach ($options as $option) {
-      $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
-      $current_value = $this->prettyPrintJSON($current_value);
-      $current_value = phutil_render_tag(
-        'div',
-        array(
-          'class' => 'config-options-current-value',
-        ),
-        '<span>'.pht('Current Value:').'</span> '.
-        phutil_escape_html($current_value));
-
-
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($option->getKey())
         ->setHref('/config/edit/'.$option->getKey().'/')
-        ->addAttribute(phutil_escape_html($option->getSummary()))
-        ->appendChild($current_value);
+        ->addAttribute(phutil_escape_html($option->getSummary()));
+
+      if (!$option->getHidden()) {
+        $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
+        $current_value = $this->prettyPrintJSON($current_value);
+        $current_value = phutil_render_tag(
+          'div',
+          array(
+            'class' => 'config-options-current-value',
+          ),
+          '<span>'.pht('Current Value:').'</span> '.
+          phutil_escape_html($current_value));
+
+        $item->appendChild($current_value);
+      }
 
       $db_value = idx($db_values, $option->getKey());
       if ($db_value && !$db_value->getIsDeleted()) {
@@ -91,7 +93,9 @@ final class PhabricatorConfigGroupController
         $item->addIcon('edit-grey', pht('Default'));
       }
 
-      if ($option->getLocked()) {
+      if ($option->getHidden()) {
+        $item->addIcon('unpublish', pht('Hidden'));
+      } else if ($option->getLocked()) {
         $item->addIcon('lock', pht('Locked'));
       }
 

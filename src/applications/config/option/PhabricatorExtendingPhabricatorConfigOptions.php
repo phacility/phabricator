@@ -15,7 +15,7 @@ final class PhabricatorExtendingPhabricatorConfigOptions
     return array(
       $this->newOption('load-libraries', 'list<string>', null)
         ->setSummary(pht("Paths to additional phutil libraries to load."))
-        ->addExample('/srv/our-sekrit-libs/sekrit-phutil', 'Valid Setting'),
+        ->addExample('/srv/our-libs/sekrit-phutil', pht('Valid Setting')),
       $this->newOption('events.listeners', 'list<string>', null)
         ->setSummary(
           pht("Listeners receive callbacks when interesting things occur."))
@@ -25,7 +25,7 @@ final class PhabricatorExtendingPhabricatorConfigOptions
             "listeners, which will receive callbacks when interesting things ".
             "occur. Specify a list of classes which extend ".
             "PhabricatorEventListener here."))
-        ->addExample('MyEventListener', 'Valid Setting'),
+        ->addExample('MyEventListener', pht('Valid Setting')),
       $this->newOption(
         'celerity.resource-path',
         'string',
@@ -36,7 +36,7 @@ final class PhabricatorExtendingPhabricatorConfigOptions
           pht(
             "Path to custom celerity resource map relative to ".
             "'phabricator/src'. See also `scripts/celerity_mapper.php`."))
-        ->addExample('local/my_celerity_map.php', 'Valid Setting'),
+        ->addExample('local/my_celerity_map.php', pht('Valid Setting')),
     );
   }
 

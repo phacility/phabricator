@@ -13,6 +13,39 @@ final class PhabricatorConfigOption
   private $group;
   private $examples;
   private $locked;
+  private $hidden;
+  private $masked;
+  private $baseClass;
+
+  public function setBaseClass($base_class) {
+    $this->baseClass = $base_class;
+    return $this;
+  }
+
+  public function getBaseClass() {
+    return $this->baseClass;
+  }
+
+  public function setMasked($masked) {
+    $this->masked = $masked;
+    return $this;
+  }
+
+  public function getMasked() {
+    if ($this->getHidden()) {
+      return true;
+    }
+    return $this->masked;
+  }
+
+  public function setHidden($hidden) {
+    $this->hidden = $hidden;
+    return $this;
+  }
+
+  public function getHidden() {
+    return $this->hidden;
+  }
 
   public function setLocked($locked) {
     $this->locked = $locked;
@@ -20,6 +53,9 @@ final class PhabricatorConfigOption
   }
 
   public function getLocked() {
+    if ($this->getHidden()) {
+      return true;
+    }
     return $this->locked;
   }
 
