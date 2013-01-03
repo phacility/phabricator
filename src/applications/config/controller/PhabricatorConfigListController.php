@@ -46,6 +46,7 @@ final class PhabricatorConfigListController
     assert_instances_of($groups, 'PhabricatorApplicationConfigOptions');
 
     $list = new PhabricatorObjectItemListView();
+    $groups = msort($groups, 'getName');
     foreach ($groups as $group) {
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($group->getName())
