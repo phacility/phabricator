@@ -34,6 +34,9 @@ $received->setBodies(array(
   'text' => $text_body,
   'html' => $parser->getMessageBody('html'),
 ));
+$received->setMessageIDHash(
+  PhabricatorHash::digestForIndex($received->getMessageID())
+);
 
 $attachments = array();
 foreach ($parser->getAttachments() as $attachment) {
