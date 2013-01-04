@@ -32,7 +32,8 @@ If you are installing on Ubuntu or an RedHat derivative, there are install
 scripts available which should handle most of the things discussed in this
 document for you:
 
-  - **RedHat Derivatives**: <http://www.phabricator.com/rsrc/install/install_rhel-derivs.sh>
+  - **RedHat Derivatives**:
+    <http://www.phabricator.com/rsrc/install/install_rhel-derivs.sh>
   - **Ubuntu**: <http://www.phabricator.com/rsrc/install/install_ubuntu.sh>
 
 If those work for you, you can skip directly to the
@@ -45,8 +46,8 @@ Otherwise, here's a general description of what you need to install:
   - Apache (usually "httpd" or "apache2") (or nginx)
   - MySQL Server (usually "mysqld" or "mysql-server")
   - PHP (usually "php")
-  - Required PHP extensions: mbstring, iconv, mysql, curl, pcntl (these might be
-    something like "php-mysql" or "php5-mysql")
+  - Required PHP extensions: mbstring, iconv, mysql (or mysqli), curl, pcntl
+    (these might be something like "php-mysql" or "php5-mysql")
   - Optional PHP extensions: gd, apc (special instructions for APC are available
     below if you have difficulty installing it), xhprof (instructions below,
     you only need this if you are developing Phabricator)
