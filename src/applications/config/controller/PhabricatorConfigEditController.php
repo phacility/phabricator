@@ -361,7 +361,7 @@ final class PhabricatorConfigEditController
           ->setConcreteOnly(true)
           ->selectSymbolsWithoutLoading();
         $names = ipull($symbols, 'name', 'name');
-        sort($names);
+        asort($names);
         $names = array(
           '' => pht('(Use Default)'),
         ) + $names;
