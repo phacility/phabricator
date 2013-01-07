@@ -1081,6 +1081,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'name'    =>
           $this->getPatchPath('20130102.metamtareceivedmailmessageidhash.sql'),
       ),
+      '20130103.filemetadata.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130103.filemetadata.sql'),
+      ),
     );
   }
 

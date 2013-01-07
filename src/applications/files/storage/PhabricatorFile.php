@@ -5,6 +5,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   const STORAGE_FORMAT_RAW  = 'raw';
 
+  const METADATA_IMAGE_WIDTH  = 'width';
+  const METADATA_IMAGE_HEIGHT = 'height';
+
   protected $phid;
   protected $name;
   protected $mimeType;
@@ -12,6 +15,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $authorPHID;
   protected $secretKey;
   protected $contentHash;
+  protected $metadata = array();
 
   protected $storageEngine;
   protected $storageFormat;
@@ -20,6 +24,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'metadata' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -194,6 +201,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $tmp = new TempFile();
       Filesystem::writeFile($tmp, $data);
       $file->setMimeType(Filesystem::getMimeType($tmp));
+    }
+
+    try {
+      $file->updateDimensions(false);
+    } catch (Exception $ex) {
+      // Do nothing
     }
 
     $file->save();
@@ -483,6 +496,51 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function generateSecretKey() {
     return Filesystem::readRandomCharacters(20);
+  }
+
+  public function updateDimensions($save = true) {
+    if (!$this->isViewableImage()) {
+      throw new Exception(
+        "This file is not a viewable image.");
+    }
+
+    if (!function_exists("imagecreatefromstring")) {
+      throw new Exception(
+        "Cannot retrieve image information.");
+    }
+
+    $data = $this->loadFileData();
+
+    $img = imagecreatefromstring($data);
+    if ($img === false) {
+      throw new Exception(
+        "Error when decoding image.");
+    }
+
+    $this->metadata[self::METADATA_IMAGE_WIDTH] = imagesx($img);
+    $this->metadata[self::METADATA_IMAGE_HEIGHT] = imagesy($img);
+
+    if ($save) {
+      $this->save();
+    }
+
+    return $this;
+  }
+
+  public static function getMetadataName($metadata) {
+    switch ($metadata) {
+      case self::METADATA_IMAGE_WIDTH:
+        $name = pht('Width');
+        break;
+      case self::METADATA_IMAGE_HEIGHT:
+        $name = pht('Height');
+        break;
+      default:
+        $name = ucfirst($metadata);
+        break;
+    }
+
+    return $name;
   }
 
 

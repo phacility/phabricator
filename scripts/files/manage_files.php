@@ -18,6 +18,7 @@ $workflows = array(
   new PhabricatorFilesManagementEnginesWorkflow(),
   new PhabricatorFilesManagementMigrateWorkflow(),
   new PhutilHelpArgumentWorkflow(),
+  new PhabricatorFilesManagementMetadataWorkflow(),
 );
 
 $args->parseWorkflows($workflows);
