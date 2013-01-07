@@ -75,8 +75,8 @@ final class PhabricatorSecurityConfigOptions
             "\$_SERVER['HTTPS'] to the correct value."))
         ->setOptions(
           array(
-            pht('Allow HTTP'),
             pht('Force HTTPS'),
+            pht('Allow HTTP'),
           )),
       $this->newOption(
         'phabricator.csrf-key',

@@ -16,8 +16,8 @@ final class PhabricatorLDAPConfigOptions
       $this->newOption('ldap.auth-enabled', 'bool', false)
         ->setOptions(
           array(
-            pht("Disable LDAP Authentication"),
             pht("Enable LDAP Authentication"),
+            pht("Disable LDAP Authentication"),
           ))
         ->setDescription(
           pht('Enable LDAP for authentication and registration.')),
@@ -41,8 +41,8 @@ final class PhabricatorLDAPConfigOptions
       $this->newOption('ldap.search-first', 'bool', false)
         ->setOptions(
           array(
-            pht("Disabled"),
             pht("Enabled"),
+            pht("Disabled"),
           )),
       $this->newOption('ldap.username-attribute', 'string', null),
       $this->newOption('ldap.real_name_attributes', 'list<string>', array())
@@ -56,8 +56,8 @@ final class PhabricatorLDAPConfigOptions
       $this->newOption('ldap.referrals', 'bool', true)
         ->setOptions(
           array(
-            pht("Do Not Follow Referrals"),
             pht("Follow Referrals"),
+            pht("Do Not Follow Referrals"),
           ))
         ->setDescription(
           pht("You may need to disable this if you use Windows 2003 ".

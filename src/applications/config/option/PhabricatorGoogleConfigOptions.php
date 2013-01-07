@@ -16,8 +16,8 @@ final class PhabricatorGoogleConfigOptions
       $this->newOption('google.auth-enabled', 'bool', false)
         ->setOptions(
           array(
-            pht("Disable Google Authentication"),
             pht("Enable Google Authentication"),
+            pht("Disable Google Authentication"),
           ))
         ->setDescription(
           pht(
@@ -25,8 +25,8 @@ final class PhabricatorGoogleConfigOptions
       $this->newOption('google.registration-enabled', 'bool', true)
         ->setOptions(
           array(
-            pht("Disable Google Registration"),
             pht("Enable Google Registration"),
+            pht("Disable Google Registration"),
           ))
         ->setDescription(
           pht(
@@ -35,8 +35,8 @@ final class PhabricatorGoogleConfigOptions
       $this->newOption('google.auth-permanent', 'bool', false)
         ->setOptions(
           array(
-            pht("Allow Google Account Unlinking"),
             pht("Permanently Bind Google Accounts"),
+            pht("Allow Google Account Unlinking"),
           ))
         ->setDescription(
           pht(

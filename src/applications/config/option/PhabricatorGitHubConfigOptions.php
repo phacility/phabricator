@@ -16,8 +16,8 @@ final class PhabricatorGitHubConfigOptions
       $this->newOption('github.auth-enabled', 'bool', false)
         ->setOptions(
           array(
-            pht("Disable GitHub Authentication"),
             pht("Enable GitHub Authentication"),
+            pht("Disable GitHub Authentication"),
           ))
         ->setDescription(
           pht(
@@ -25,8 +25,8 @@ final class PhabricatorGitHubConfigOptions
       $this->newOption('github.registration-enabled', 'bool', true)
         ->setOptions(
           array(
-            pht("Disable GitHub Registration"),
             pht("Enable GitHub Registration"),
+            pht("Disable GitHub Registration"),
           ))
         ->setDescription(
           pht(
@@ -35,8 +35,8 @@ final class PhabricatorGitHubConfigOptions
       $this->newOption('github.auth-permanent', 'bool', false)
         ->setOptions(
           array(
-            pht("Allow GitHub Account Unlinking"),
             pht("Permanently Bind GitHub Accounts"),
+            pht("Allow GitHub Account Unlinking"),
           ))
         ->setDescription(
           pht(

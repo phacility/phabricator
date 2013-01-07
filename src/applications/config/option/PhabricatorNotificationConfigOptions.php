@@ -16,8 +16,8 @@ final class PhabricatorNotificationConfigOptions
       $this->newOption('notification.enabled', 'bool', false)
         ->setOptions(
           array(
-            pht("Disable Real-Time Notifications"),
             pht("Enable Real-Time Notifications"),
+            pht("Disable Real-Time Notifications"),
           ))
         ->setSummary(pht('Enable real-time notifications.'))
         ->setDescription(

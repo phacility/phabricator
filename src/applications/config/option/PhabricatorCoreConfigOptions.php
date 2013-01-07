@@ -53,8 +53,8 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('phabricator.serious-business', 'bool', false)
         ->setOptions(
           array(
-            pht('Shenanigans'), // That should be interesting to translate. :P
             pht('Serious business'),
+            pht('Shenanigans'), // That should be interesting to translate. :P
           ))
         ->setSummary(
           pht("Should Phabricator be serious?"))

@@ -16,8 +16,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('darkconsole.enabled', 'bool', false)
         ->setOptions(
           array(
-            pht("Disable DarkConsole"),
             pht("Enable DarkConsole"),
+            pht("Disable DarkConsole"),
           ))
         ->setSummary(pht("Enable Phabricator's debugging console."))
         ->setDescription(
@@ -35,8 +35,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('darkconsole.always-on', 'bool', false)
         ->setOptions(
           array(
-            pht("Require DarkConsole Activation"),
             pht("Always Activate DarkConsole"),
+            pht("Require DarkConsole Activation"),
           ))
         ->setSummary(pht("Activate DarkConsole on every page."))
         ->setDescription(
@@ -50,8 +50,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('debug.stop-on-redirect', 'bool', false)
         ->setOptions(
           array(
-            pht("Use Normal HTTP Redirects"),
             pht("Stop Before HTTP Redirect"),
+            pht("Use Normal HTTP Redirects"),
           ))
         ->setSummary(
           pht(
@@ -89,8 +89,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('phabricator.show-stack-traces', 'bool', false)
         ->setOptions(
           array(
-            pht('Hide stack traces'),
             pht('Show stack traces'),
+            pht('Hide stack traces'),
           ))
         ->setSummary(pht("Show stack traces when unhandled exceptions occur."))
         ->setDescription(
@@ -101,8 +101,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('phabricator.show-error-callout', 'bool', false)
         ->setOptions(
           array(
-            pht('Hide error callout'),
             pht('Show error callout'),
+            pht('Hide error callout'),
           ))
         ->setSummary(pht("Show error callout."))
         ->setDescription(
@@ -114,8 +114,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('celerity.force-disk-reads', 'bool', false)
         ->setOptions(
           array(
-            pht("Don't force disk reads"),
             pht('Force disk reads'),
+            pht("Don't force disk reads"),
           ))
         ->setSummary(pht("Force Celerity to read from disk on every request."))
         ->setDescription(
@@ -131,8 +131,8 @@ final class PhabricatorDeveloperConfigOptions
       $this->newOption('celerity.minify', 'bool', false)
         ->setOptions(
           array(
-            pht("Don't minify static resources."),
             pht('Minify static resources.'),
+            pht("Don't minify static resources."),
           ))
         ->setSummary(pht("Minify static Celerity resources."))
         ->setDescription(

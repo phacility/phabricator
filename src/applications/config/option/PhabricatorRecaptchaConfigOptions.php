@@ -17,8 +17,8 @@ final class PhabricatorRecaptchaConfigOptions
       $this->newOption('recaptcha.enabled', 'bool', false)
         ->setOptions(
           array(
-            pht("Disable Recaptcha"),
             pht("Enable Recaptcha"),
+            pht("Disable Recaptcha"),
           ))
         ->setSummary(pht('Enable captchas with Recaptcha.'))
         ->setDescription(

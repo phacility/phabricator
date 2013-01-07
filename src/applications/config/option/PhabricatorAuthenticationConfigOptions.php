@@ -18,7 +18,8 @@ final class PhabricatorAuthenticationConfigOptions
         ->setOptions(
           array(
             pht("Allow password authentication"),
-            pht("Don't allow password authentication")))
+            pht("Don't allow password authentication")
+          ))
         ->setSummary(pht("Enables password-based authentication."))
         ->setDescription(
           pht(
@@ -60,7 +61,8 @@ final class PhabricatorAuthenticationConfigOptions
         ->setOptions(
           array(
             pht("Require email verification"),
-            pht("Don't require email verification")))
+            pht("Don't require email verification")
+          ))
         ->setSummary(
           pht("Require email verification before a user can log in."))
         ->setDescription(
@@ -96,7 +98,8 @@ final class PhabricatorAuthenticationConfigOptions
         ->setOptions(
           array(
             pht("Allow editing"),
-            pht("Prevent editing")))
+            pht("Prevent editing")
+          ))
         ->setSummary(
           pht(
             "Determines whether or not basic account information is ".

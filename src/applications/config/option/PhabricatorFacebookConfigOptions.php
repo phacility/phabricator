@@ -16,8 +16,8 @@ final class PhabricatorFacebookConfigOptions
       $this->newOption('facebook.auth-enabled', 'bool', false)
         ->setOptions(
           array(
-            pht("Disable Facebook Authentication"),
             pht("Enable Facebook Authentication"),
+            pht("Disable Facebook Authentication"),
           ))
         ->setDescription(
           pht(
@@ -25,8 +25,8 @@ final class PhabricatorFacebookConfigOptions
       $this->newOption('facebook.registration-enabled', 'bool', true)
         ->setOptions(
           array(
-            pht("Disable Facebook Registration"),
             pht("Enable Facebook Registration"),
+            pht("Disable Facebook Registration"),
           ))
         ->setDescription(
           pht(
@@ -35,8 +35,8 @@ final class PhabricatorFacebookConfigOptions
       $this->newOption('facebook.auth-permanent', 'bool', false)
         ->setOptions(
           array(
-            pht("Allow Facebook Account Unlinking"),
             pht("Permanently Bind Facebook Accounts"),
+            pht("Allow Facebook Account Unlinking"),
           ))
         ->setDescription(
           pht(
@@ -53,8 +53,8 @@ final class PhabricatorFacebookConfigOptions
       $this->newOption('facebook.require-https-auth', 'bool', false)
         ->setOptions(
           array(
-            pht("Do Not Require HTTPS"),
             pht("Require HTTPS"),
+            pht("Do Not Require HTTPS"),
           ))
         ->setSummary(
           pht(
