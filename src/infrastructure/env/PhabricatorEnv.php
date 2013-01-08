@@ -90,6 +90,14 @@ final class PhabricatorEnv {
     // NOTE: This is dangerous in general, but we know we're in a script context
     // and are not vulnerable to CSRF.
     AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+
+    // There are several places where we log information (about errors, events,
+    // service calls, etc.) for analysis via DarkConsole or similar. These are
+    // useful for web requests, but grow unboundedly in long-running scripts and
+    // daemons. Discard data as it arrives in these cases.
+    PhutilServiceProfiler::getInstance()->enableDiscardMode();
+    DarkConsoleErrorLogPluginAPI::enableDiscardMode();
+    DarkConsoleEventPluginAPI::enableDiscardMode();
   }
 
 
