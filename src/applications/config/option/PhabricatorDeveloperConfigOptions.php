@@ -14,7 +14,7 @@ final class PhabricatorDeveloperConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('darkconsole.enabled', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable DarkConsole"),
             pht("Disable DarkConsole"),
@@ -33,7 +33,7 @@ final class PhabricatorDeveloperConfigOptions
             "stack traces, and configuration) so you generally should not ".
             "turn it on in production.")),
       $this->newOption('darkconsole.always-on', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Always Activate DarkConsole"),
             pht("Require DarkConsole Activation"),
@@ -48,7 +48,7 @@ final class PhabricatorDeveloperConfigOptions
             "You must enable DarkConsole by setting {{darkconsole.enabled}} ".
             "before this option will have any effect.")),
       $this->newOption('debug.stop-on-redirect', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Stop Before HTTP Redirect"),
             pht("Use Normal HTTP Redirects"),
@@ -87,7 +87,7 @@ final class PhabricatorDeveloperConfigOptions
             "set it to 1 in order to debug performance problems.\n\n".
             "NOTE: You must install XHProf for profiling to work.")),
       $this->newOption('phabricator.show-stack-traces', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Show stack traces'),
             pht('Hide stack traces'),
@@ -99,7 +99,7 @@ final class PhabricatorDeveloperConfigOptions
             "default. You can enable traces for development to make it easier ".
             "to debug problems.")),
       $this->newOption('phabricator.show-error-callout', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Show error callout'),
             pht('Hide error callout'),
@@ -112,7 +112,7 @@ final class PhabricatorDeveloperConfigOptions
             "developing Phabricator. A callout is simply a red error at the ".
             "top of the page.")),
       $this->newOption('celerity.force-disk-reads', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Force disk reads'),
             pht("Don't force disk reads"),
@@ -129,7 +129,7 @@ final class PhabricatorDeveloperConfigOptions
             "performance improve with it off) but turn it on in development. ".
             "(These settings are the defaults.)")),
       $this->newOption('celerity.minify', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Minify static resources.'),
             pht("Don't minify static resources."),

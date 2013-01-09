@@ -14,7 +14,7 @@ final class PhabricatorLDAPConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('ldap.auth-enabled', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable LDAP Authentication"),
             pht("Disable LDAP Authentication"),
@@ -39,7 +39,7 @@ final class PhabricatorLDAPConfigOptions
         ->setDescription(pht('LDAP base domain name.')),
       $this->newOption('ldap.search_attribute', 'string', null),
       $this->newOption('ldap.search-first', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enabled"),
             pht("Disabled"),
@@ -54,7 +54,7 @@ final class PhabricatorLDAPConfigOptions
       $this->newOption('ldap.activedirectory_domain', 'string', null),
       $this->newOption('ldap.version', 'int', 3),
       $this->newOption('ldap.referrals', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Follow Referrals"),
             pht("Do Not Follow Referrals"),

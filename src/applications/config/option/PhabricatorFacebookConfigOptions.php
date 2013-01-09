@@ -14,7 +14,7 @@ final class PhabricatorFacebookConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('facebook.auth-enabled', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable Facebook Authentication"),
             pht("Disable Facebook Authentication"),
@@ -23,7 +23,7 @@ final class PhabricatorFacebookConfigOptions
           pht(
             'Allow users to login to Phabricator using Facebook credentials.')),
       $this->newOption('facebook.registration-enabled', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable Facebook Registration"),
             pht("Disable Facebook Registration"),
@@ -33,7 +33,7 @@ final class PhabricatorFacebookConfigOptions
             'Allow users to create new Phabricator accounts using Facebook '.
             'credentials.')),
       $this->newOption('facebook.auth-permanent', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Permanently Bind Facebook Accounts"),
             pht("Allow Facebook Account Unlinking"),
@@ -51,7 +51,7 @@ final class PhabricatorFacebookConfigOptions
           pht(
             'Facebook "Application Secret" to use for Facebook API access.')),
       $this->newOption('facebook.require-https-auth', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Require HTTPS"),
             pht("Do Not Require HTTPS"),

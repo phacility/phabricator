@@ -51,7 +51,7 @@ final class PhabricatorCoreConfigOptions
         ->addExample('America/Boise', pht('US Mountain (MDT)'))
         ->addExample('America/Los_Angeles', pht('US West (PDT)')),
       $this->newOption('phabricator.serious-business', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Serious business'),
             pht('Shenanigans'), // That should be interesting to translate. :P

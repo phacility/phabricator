@@ -14,7 +14,7 @@ final class PhabricatorGitHubConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('github.auth-enabled', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable GitHub Authentication"),
             pht("Disable GitHub Authentication"),
@@ -23,7 +23,7 @@ final class PhabricatorGitHubConfigOptions
           pht(
             'Allow users to login to Phabricator using GitHub credentials.')),
       $this->newOption('github.registration-enabled', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable GitHub Registration"),
             pht("Disable GitHub Registration"),
@@ -33,7 +33,7 @@ final class PhabricatorGitHubConfigOptions
             'Allow users to create new Phabricator accounts using GitHub '.
             'credentials.')),
       $this->newOption('github.auth-permanent', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Permanently Bind GitHub Accounts"),
             pht("Allow GitHub Account Unlinking"),

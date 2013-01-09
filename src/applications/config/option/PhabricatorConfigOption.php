@@ -9,7 +9,7 @@ final class PhabricatorConfigOption
   private $summary;
   private $description;
   private $type;
-  private $options;
+  private $boolOptions;
   private $group;
   private $examples;
   private $locked;
@@ -77,13 +77,19 @@ final class PhabricatorConfigOption
     return $this->group;
   }
 
-  public function setOptions(array $options) {
-    $this->options = $options;
+  public function setBoolOptions(array $options) {
+    $this->boolOptions = $options;
     return $this;
   }
 
-  public function getOptions() {
-    return $this->options;
+  public function getBoolOptions() {
+    if ($this->boolOptions) {
+      return $this->boolOptions;
+    }
+    return array(
+      pht('True'),
+      pht('False'),
+    );
   }
 
   public function setKey($key) {

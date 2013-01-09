@@ -14,7 +14,7 @@ final class PhabricatorDifferentialConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('differential.show-host-field', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Disable "Host" Fields'),
             pht('Show "Host" Fields'),
@@ -30,7 +30,7 @@ final class PhabricatorDifferentialConfigOptions
             'development machines. You can set this option to true to enable '.
             'these fields.')),
       $this->newOption('differential.show-test-plan-field', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Hide "Test Plan" Field'),
             pht('Show "Test Plan" Field'),
@@ -45,7 +45,7 @@ final class PhabricatorDifferentialConfigOptions
             'here. You can also make it optional (instead of required) by '.
             'setting {{differential.require-test-plan-field}}.')),
       $this->newOption('differential.enable-email-accept', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Disable Email "!accept" Action'),
             pht('Enable Email "!accept" Action'),

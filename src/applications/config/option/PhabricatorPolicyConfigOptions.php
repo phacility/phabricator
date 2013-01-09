@@ -14,7 +14,7 @@ final class PhabricatorPolicyConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('policy.allow-public', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Allow Public Visibility'),
             pht('Require Login')))

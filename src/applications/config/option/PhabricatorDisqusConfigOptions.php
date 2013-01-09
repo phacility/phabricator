@@ -14,7 +14,7 @@ final class PhabricatorDisqusConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('disqus.auth-enabled', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable Disqus Authentication"),
             pht("Disable Disqus Authentication"),
@@ -23,7 +23,7 @@ final class PhabricatorDisqusConfigOptions
           pht(
             'Allow users to login to Phabricator using Disqus credentials.')),
       $this->newOption('disqus.registration-enabled', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable Disqus Registration"),
             pht("Disable Disqus Registration"),
@@ -33,7 +33,7 @@ final class PhabricatorDisqusConfigOptions
             'Allow users to create new Phabricator accounts using Disqus '.
             'credentials.')),
       $this->newOption('disqus.auth-permanent', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Permanently Bind Disqus Accounts"),
             pht("Allow Disqus Account Unlinking"),

@@ -14,7 +14,7 @@ final class PhabricatorGoogleConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('google.auth-enabled', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable Google Authentication"),
             pht("Disable Google Authentication"),
@@ -23,7 +23,7 @@ final class PhabricatorGoogleConfigOptions
           pht(
             'Allow users to login to Phabricator using Google credentials.')),
       $this->newOption('google.registration-enabled', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable Google Registration"),
             pht("Disable Google Registration"),
@@ -33,7 +33,7 @@ final class PhabricatorGoogleConfigOptions
             'Allow users to create new Phabricator accounts using Google '.
             'credentials.')),
       $this->newOption('google.auth-permanent', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Permanently Bind Google Accounts"),
             pht("Allow Google Account Unlinking"),

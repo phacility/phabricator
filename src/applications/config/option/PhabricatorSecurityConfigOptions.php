@@ -73,7 +73,7 @@ final class PhabricatorSecurityConfigOptions
             "connection type. Alternatively, you can add a PHP snippet to ".
             "the top of this configuration file to directly set ".
             "\$_SERVER['HTTPS'] to the correct value."))
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht('Force HTTPS'),
             pht('Allow HTTP'),

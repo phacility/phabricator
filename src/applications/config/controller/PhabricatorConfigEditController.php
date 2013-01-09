@@ -350,8 +350,8 @@ final class PhabricatorConfigEditController
           ->setOptions(
             array(
               ''      => pht('(Use Default)'),
-              'true'  => idx($option->getOptions(), 0),
-              'false' => idx($option->getOptions(), 1),
+              'true'  => idx($option->getBoolOptions(), 0),
+              'false' => idx($option->getBoolOptions(), 1),
             ));
         break;
       case 'class':

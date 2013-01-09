@@ -15,7 +15,7 @@ final class PhabricatorAuthenticationConfigOptions
     return array(
       $this->newOption(
         'auth.password-auth-enabled', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Allow password authentication"),
             pht("Don't allow password authentication")
@@ -43,7 +43,7 @@ final class PhabricatorAuthenticationConfigOptions
             "Maximum number of simultaneous Conduit sessions each user is ".
             "permitted to have.")),
      $this->newOption('auth.sshkeys.enabled', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Enable SSH key storage"),
             pht("Disable SSH key storage")))
@@ -58,7 +58,7 @@ final class PhabricatorAuthenticationConfigOptions
             "authentication; in most situations you can leave this ".
             "disabled.")),
      $this->newOption('auth.require-email-verification', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Require email verification"),
             pht("Don't require email verification")
@@ -95,7 +95,7 @@ final class PhabricatorAuthenticationConfigOptions
             "appear on the login screen. Normally, you'd use this to provide ".
             "login or registration instructions to users.")),
      $this->newOption('account.editable', 'bool', true)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Allow editing"),
             pht("Prevent editing")
