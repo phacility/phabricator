@@ -10,6 +10,7 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $bloggerPHIDs;
   private $phameTitles;
   private $visibility;
+  private $publishedAfter;
   private $phids;
 
   public function withIDs(array $ids) {
@@ -39,6 +40,11 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withVisibility($visibility) {
     $this->visibility = $visibility;
+    return $this;
+  }
+
+  public function withPublishedAfter($time) {
+    $this->publishedAfter = $time;
     return $this;
   }
 
@@ -114,6 +120,13 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn_r,
         'p.visibility = %d',
         $this->visibility);
+    }
+
+    if ($this->publishedAfter !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'p.datePublished > %d',
+        $this->publishedAfter);
     }
 
     if ($this->blogPHIDs) {

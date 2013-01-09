@@ -178,26 +178,6 @@ final class PhameBlog extends PhameDAO
     return ipull($classes, 'name', 'name');
   }
 
-  public function getPostListURI() {
-    return $this->getActionURI('posts');
-  }
-
-  public function getEditURI() {
-    return $this->getActionURI('edit');
-  }
-
-  public function getEditFilter() {
-    return 'blog/edit/'.$this->getPHID();
-  }
-
-  public function getDeleteURI() {
-    return $this->getActionURI('delete');
-  }
-
-  private function getActionURI($action) {
-    return '/phame/blog/'.$action.'/'.$this->getPHID().'/';
-  }
-
   public static function setRequestBlog(PhameBlog $blog) {
     self::$requestBlog = $blog;
   }
