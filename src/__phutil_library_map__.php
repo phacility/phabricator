@@ -221,7 +221,6 @@ phutil_register_library_map(array(
     'DifferentialBranchFieldSpecification' => 'applications/differential/field/specification/DifferentialBranchFieldSpecification.php',
     'DifferentialCCWelcomeMail' => 'applications/differential/mail/DifferentialCCWelcomeMail.php',
     'DifferentialCCsFieldSpecification' => 'applications/differential/field/specification/DifferentialCCsFieldSpecification.php',
-    'DifferentialChangeSetTestCase' => 'applications/differential/storage/__tests__/DifferentialChangesetTestCase.php',
     'DifferentialChangeType' => 'applications/differential/constants/DifferentialChangeType.php',
     'DifferentialChangeset' => 'applications/differential/storage/DifferentialChangeset.php',
     'DifferentialChangesetDetailView' => 'applications/differential/view/DifferentialChangesetDetailView.php',
@@ -266,6 +265,8 @@ phutil_register_library_map(array(
     'DifferentialGitSVNIDFieldSpecification' => 'applications/differential/field/specification/DifferentialGitSVNIDFieldSpecification.php',
     'DifferentialHostFieldSpecification' => 'applications/differential/field/specification/DifferentialHostFieldSpecification.php',
     'DifferentialHunk' => 'applications/differential/storage/DifferentialHunk.php',
+    'DifferentialHunkParser' => 'applications/differential/parser/DifferentialHunkParser.php',
+    'DifferentialHunkParserTestCase' => 'applications/differential/parser/__tests__/DifferentialHunkParserTestCase.php',
     'DifferentialHunkTestCase' => 'applications/differential/storage/__tests__/DifferentialHunkTestCase.php',
     'DifferentialInlineComment' => 'applications/differential/storage/DifferentialInlineComment.php',
     'DifferentialInlineCommentEditController' => 'applications/differential/controller/DifferentialInlineCommentEditController.php',
@@ -1614,7 +1615,6 @@ phutil_register_library_map(array(
     'DifferentialBranchFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialCCWelcomeMail' => 'DifferentialReviewRequestMail',
     'DifferentialCCsFieldSpecification' => 'DifferentialFieldSpecification',
-    'DifferentialChangeSetTestCase' => 'PhabricatorTestCase',
     'DifferentialChangeset' => 'DifferentialDAO',
     'DifferentialChangesetDetailView' => 'AphrontView',
     'DifferentialChangesetListView' => 'AphrontView',
@@ -1657,6 +1657,7 @@ phutil_register_library_map(array(
     'DifferentialGitSVNIDFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialHostFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialHunk' => 'DifferentialDAO',
+    'DifferentialHunkParserTestCase' => 'PhabricatorTestCase',
     'DifferentialHunkTestCase' => 'ArcanistPhutilTestCase',
     'DifferentialInlineComment' =>
     array(
