@@ -8,9 +8,10 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     if ($request->isFormPost()) {
       $diff = null;
-      try {
+
+      if ($request->getFileExists('diff-file')) {
         $diff = PhabricatorFile::readUploadedFileData($_FILES['diff-file']);
-      } catch (Exception $ex) {
+      } else {
         $diff = $request->getStr('diff');
       }
 

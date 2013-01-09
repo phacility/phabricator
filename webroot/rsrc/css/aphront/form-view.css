@@ -48,7 +48,6 @@
 
 .aphront-form-input input,
 .aphront-form-input textarea {
-  font-size: 12px;
   display: block;
   width: 100%;
   box-sizing: border-box;
@@ -200,7 +199,6 @@ table.aphront-form-control-checkbox-layout th {
   padding: 8px 12px;
   margin: 2px 8px 2px 2px;
   position: relative;
-  z-index: 8;
   border: 1px solid transparent;
 }
 
@@ -222,7 +220,6 @@ table.aphront-form-control-checkbox-layout th {
 .fancy-datepicker {
   position: absolute;
   width: 240px;
-  z-index: 7;
 }
 
 .fancy-datepicker-core {

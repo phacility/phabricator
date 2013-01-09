@@ -2,7 +2,6 @@
  * @provides phabricator-core-css
  */
 
-
 body {
   /* Always show the vertical scrollbar so that going from a page without a
      scrollbar to a page with a scrollbar doesn't make content jump a few
@@ -117,7 +116,6 @@ img {
   width: 64px;
   height: 64px;
   opacity: 0.5;
-  z-index: 40;
 
   border: 1px solid #444444;
   border-radius: 8px;

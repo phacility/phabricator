@@ -77,6 +77,15 @@ final class PhabricatorObjectHandleData {
             $objects[$task->getPHID()] = $task;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_CONF:
+          $config_dao = new PhabricatorConfigEntry();
+          $entries = $config_dao->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          foreach ($entries as $entry) {
+            $objects[$entry->getPHID()] = $entry;
+          }
+          break;
         case PhabricatorPHIDConstants::PHID_TYPE_DREV:
           $revision_dao = new DifferentialRevision();
           $revisions = $revision_dao->loadAllWhere(
@@ -223,12 +232,11 @@ final class PhabricatorObjectHandleData {
               $handle->setAlternateID($user->getID());
               $handle->setComplete(true);
               if (isset($statuses[$phid])) {
-                $status = $statuses[$phid]->getTextStatus();
+                $handle->setStatus($statuses[$phid]->getTextStatus());
                 if ($this->viewer) {
-                  $date = $statuses[$phid]->getDateTo();
-                  $status .= ' until '.phabricator_date($date, $this->viewer);
+                  $handle->setTitle(
+                    $statuses[$phid]->getTerseSummary($this->viewer));
                 }
-                $handle->setStatus($status);
               }
               $handle->setDisabled($user->getIsDisabled());
 
@@ -363,6 +371,28 @@ final class PhabricatorObjectHandleData {
                 $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
                 $handle->setStatus($closed);
               }
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_CONF:
+          $object = new PhabricatorConfigEntry();
+
+          $entries = $object->loadAllWhere('phid in (%Ls)', $phids);
+          $entries = mpull($entries, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($entries[$phid])) {
+              $handle->setName('Unknown Config Entry');
+            } else {
+              $entry = $entry[$phid];
+              $handle->setName($entry->getKey());
+              $handle->setURI('/config/edit/'.$entry->getKey());
+              $handle->setFullName($entry->getKey());
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -506,6 +536,10 @@ final class PhabricatorObjectHandleData {
               $handle->setName($info['title']);
               $handle->setURI(PhrictionDocument::getSlugURI($info['slug']));
               $handle->setComplete(true);
+              if ($info['status'] != PhrictionDocumentStatus::STATUS_EXISTS) {
+                $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+                $handle->setStatus($closed);
+              }
             }
             $handles[$phid] = $handle;
           }

@@ -50,7 +50,7 @@ final class PhabricatorRemarkupRuleEmbedFile
     $options['name'] = $file_name;
 
     $attrs = array();
-    switch ($options['size']) {
+    switch ((string)$options['size']) {
       case 'full':
         $attrs['src'] = $file->getBestURI();
         $options['image_class'] = null;

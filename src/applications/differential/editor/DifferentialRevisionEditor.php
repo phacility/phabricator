@@ -489,8 +489,8 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       ->setMailRecipientPHIDs($mailed_phids)
       ->publish();
 
-    //  TODO: Move this into a worker task thing.
-    PhabricatorSearchDifferentialIndexer::indexRevision($revision);
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($revision->getPHID());
   }
 
   public static function addCCAndUpdateRevision(

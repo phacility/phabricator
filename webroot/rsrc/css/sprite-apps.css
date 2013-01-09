@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-apps {
     background-image: url(/rsrc/image/sprite-apps-X2.png);
-    background-size: 90px 90px;
+    background-size: 90px 105px;
   }
 }
 
@@ -154,10 +154,14 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -45px -75px;
 }
 
-.app-slowvote-dark {
+.app-setup-dark {
   background-position: -60px -75px;
 }
 
-.app-uiexamples-dark {
+.app-slowvote-dark {
   background-position: -75px -75px;
+}
+
+.app-uiexamples-dark {
+  background-position: 0px -90px;
 }

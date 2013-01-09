@@ -19,8 +19,6 @@ final class DifferentialChangesetParser {
   protected $changeset;
   protected $whitespaceMode = null;
 
-  protected $subparser;
-
   protected $renderCacheKey = null;
 
   private $handles = array();
@@ -60,6 +58,41 @@ final class DifferentialChangesetParser {
   const WHITESPACE_IGNORE_ALL       = 'ignore-all';
 
   const WHITESPACE_IGNORE_FORCE     = 'ignore-force';
+
+  public function setOldLines(array $lines) {
+    $this->old = $lines;
+    return $this;
+  }
+
+  public function setNewLines(array $lines) {
+    $this->new = $lines;
+    return $this;
+  }
+
+  public function setSpecialAttributes(array $attributes) {
+    $this->specialAttributes = $attributes;
+    return $this;
+  }
+
+  public function setMissingNewLineMarkerMap(array $map) {
+    $this->missingNew = $map;
+    return $this;
+  }
+
+  public function setMissingOldLineMarkerMap(array $map) {
+    $this->missingOld = $map;
+    return $this;
+  }
+
+  public function setIntraLineDiffs(array $diffs) {
+    $this->intra = $diffs;
+    return $this;
+  }
+
+  public function setVisibileLinesMask(array $mask) {
+    $this->visible = $mask;
+    return $this;
+  }
 
   /**
    * Configure which Changeset comments added to the right side of the visible
@@ -109,61 +142,13 @@ final class DifferentialChangesetParser {
       implode('', mpull($this->originalLeft->getHunks(), 'getChanges')),
       implode('', mpull($this->originalRight->getHunks(), 'getChanges')));
 
-    // Put changes side by side.
-    $olds = array();
-    $news = array();
-    foreach ($changeset->getHunks() as $hunk) {
-      $n_old = $hunk->getOldOffset();
-      $n_new = $hunk->getNewOffset();
-      $changes = phutil_split_lines($hunk->getChanges());
-      foreach ($changes as $line) {
-        $diff_type = $line[0]; // Change type in diff of diffs.
-        $orig_type = $line[1]; // Change type in the original diff.
-        if ($diff_type == ' ') {
-          // Use the same key for lines that are next to each other.
-          $key = max(last_key($olds), last_key($news)) + 1;
-          $olds[$key] = null;
-          $news[$key] = null;
-        } else if ($diff_type == '-') {
-          $olds[] = array($n_old, $orig_type);
-        } else if ($diff_type == '+') {
-          $news[] = array($n_new, $orig_type);
-        }
-        if (($diff_type == '-' || $diff_type == ' ') && $orig_type != '-') {
-          $n_old++;
-        }
-        if (($diff_type == '+' || $diff_type == ' ') && $orig_type != '-') {
-          $n_new++;
-        }
-      }
-    }
+    $parser = new DifferentialHunkParser();
 
-    $offsets_old = $this->originalLeft->computeOffsets();
-    $offsets_new = $this->originalRight->computeOffsets();
-
-    // Highlight lines that were added on each side or removed on the other
-    // side.
-    $highlight_old = array();
-    $highlight_new = array();
-    $last = max(last_key($olds), last_key($news));
-    for ($i = 0; $i <= $last; $i++) {
-      if (isset($olds[$i])) {
-        list($n, $type) = $olds[$i];
-        if ($type == '+' ||
-            ($type == ' ' && isset($news[$i]) && $news[$i][1] != ' ')) {
-          $highlight_old[] = $offsets_old[$n];
-        }
-      }
-      if (isset($news[$i])) {
-        list($n, $type) = $news[$i];
-        if ($type == '+' ||
-            ($type == ' ' && isset($olds[$i]) && $olds[$i][1] != ' ')) {
-          $highlight_new[] = $offsets_new[$n];
-        }
-      }
-    }
-
-    return array($highlight_old, $highlight_new);
+    return $parser->parseHunksForHighlightMasks(
+      $changeset->getHunks(),
+      $this->originalLeft->getHunks(),
+      $this->originalRight->getHunks()
+    );
   }
 
   /**
@@ -243,66 +228,6 @@ final class DifferentialChangesetParser {
     return $this->coverage;
   }
 
-  public function parseHunk(DifferentialHunk $hunk) {
-    $lines = $hunk->getChanges();
-    $lines = phutil_split_lines($lines);
-
-    $types = array();
-    foreach ($lines as $line_index => $line) {
-      if (isset($line[0])) {
-        $char = $line[0];
-        if ($char == ' ') {
-          $types[$line_index] = null;
-        } else {
-          $types[$line_index] = $char;
-        }
-      } else {
-        $types[$line_index] = null;
-      }
-    }
-
-    $old_line = $hunk->getOldOffset();
-    $new_line = $hunk->getNewOffset();
-    $num_lines = count($lines);
-
-    if ($old_line > 1) {
-      $this->missingOld[$old_line] = true;
-    } else if ($new_line > 1) {
-      $this->missingNew[$new_line] = true;
-    }
-
-    for ($cursor = 0; $cursor < $num_lines; $cursor++) {
-      $type = $types[$cursor];
-      $data = array(
-        'type'  => $type,
-        'text'  => (string)substr($lines[$cursor], 1),
-        'line'  => $new_line,
-      );
-      if ($type == '\\') {
-        $type = $types[$cursor - 1];
-        $data['text'] = ltrim($data['text']);
-      }
-      switch ($type) {
-        case '+':
-          $this->new[] = $data;
-          ++$new_line;
-          break;
-        case '-':
-          $data['line'] = $old_line;
-          $this->old[] = $data;
-          ++$old_line;
-          break;
-        default:
-          $this->new[] = $data;
-          $data['line'] = $old_line;
-          $this->old[] = $data;
-          ++$new_line;
-          ++$old_line;
-          break;
-      }
-    }
-  }
-
   public function parseInlineComment(
     PhabricatorInlineCommentInterface $comment) {
 
@@ -313,317 +238,7 @@ final class DifferentialChangesetParser {
     return $this;
   }
 
-  public function process() {
-
-    $old = array();
-    $new = array();
-
-    $this->old = array_reverse($this->old);
-    $this->new = array_reverse($this->new);
-
-    $whitelines = false;
-    $changed = false;
-
-    $skip_intra = array();
-    while (count($this->old) || count($this->new)) {
-      $o_desc = array_pop($this->old);
-      $n_desc = array_pop($this->new);
-
-      if ($o_desc) {
-        $o_type = $o_desc['type'];
-      } else {
-        $o_type = null;
-      }
-
-      if ($n_desc) {
-        $n_type = $n_desc['type'];
-      } else {
-        $n_type = null;
-      }
-
-      if (($o_type != null) && ($n_type == null)) {
-        $old[] = $o_desc;
-        $new[] = null;
-        if ($n_desc) {
-          array_push($this->new, $n_desc);
-        }
-        $changed = true;
-        continue;
-      }
-
-      if (($n_type != null) && ($o_type == null)) {
-        $old[] = null;
-        $new[] = $n_desc;
-        if ($o_desc) {
-          array_push($this->old, $o_desc);
-        }
-        $changed = true;
-        continue;
-      }
-
-      if ($this->whitespaceMode != self::WHITESPACE_SHOW_ALL) {
-        $similar = false;
-        switch ($this->whitespaceMode) {
-          case self::WHITESPACE_IGNORE_TRAILING:
-            if (rtrim($o_desc['text']) == rtrim($n_desc['text'])) {
-              if ($o_desc['type']) {
-                // If we're converting this into an unchanged line because of
-                // a trailing whitespace difference, mark it as a whitespace
-                // change so we can show "This file was modified only by
-                // adding or removing trailing whitespace." instead of
-                // "This file was not modified.".
-                $whitelines = true;
-              }
-              $similar = true;
-            }
-            break;
-          default:
-            // In this case, the lines are similar if there is no change type
-            // (that is, just trust the diff algorithm).
-            if (!$o_desc['type']) {
-              $similar = true;
-            }
-            break;
-        }
-        if ($similar) {
-          if ($o_desc['type'] == '\\') {
-            // These are similar because they're "No newline at end of file"
-            // comments.
-          } else {
-            $o_desc['type'] = null;
-            $n_desc['type'] = null;
-            $skip_intra[count($old)] = true;
-          }
-        } else {
-          $changed = true;
-        }
-      } else {
-        $changed = true;
-      }
-
-      $old[] = $o_desc;
-      $new[] = $n_desc;
-    }
-
-    $this->old = $old;
-    $this->new = $new;
-
-    $unchanged = false;
-    if ($this->subparser) {
-      $unchanged = $this->subparser->isUnchanged();
-      $whitelines = $this->subparser->isWhitespaceOnly();
-    } else if (!$changed) {
-      $filetype = $this->changeset->getFileType();
-      if ($filetype == DifferentialChangeType::FILE_TEXT ||
-          $filetype == DifferentialChangeType::FILE_SYMLINK) {
-        $unchanged = true;
-      }
-    }
-    $changetype = $this->changeset->getChangeType();
-    if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
-      // sometimes we show moved files as unchanged, sometimes deleted,
-      // and sometimes inconsistent with what actually happened at the
-      // destination of the move.  Rather than make a false claim,
-      // omit the 'not changed' notice if this is the source of a move
-      $unchanged = false;
-    }
-
-    $this->specialAttributes = array(
-      self::ATTR_UNCHANGED  => $unchanged,
-      self::ATTR_DELETED    => array_filter($this->old) &&
-                               !array_filter($this->new),
-      self::ATTR_WHITELINES => $whitelines
-    );
-
-    if ($this->isSubparser) {
-      // The rest of this function deals with formatting the diff for display;
-      // we can exit early if we're a subparser and avoid doing extra work.
-      return;
-    }
-
-    if ($this->subparser) {
-
-      // Use this parser's side-by-side line information -- notably, the
-      // change types -- but replace all the line text with the subparser's.
-      // This lets us render whitespace-only changes without marking them as
-      // different.
-
-      $old = $this->old;
-      $new = $this->new;
-      $old_text = ipull($this->subparser->old, 'text', 'line');
-      $new_text = ipull($this->subparser->new, 'text', 'line');
-
-      foreach ($old as $k => $desc) {
-        if (empty($desc)) {
-          continue;
-        }
-        $old[$k]['text'] = idx($old_text, $desc['line']);
-      }
-      foreach ($new as $k => $desc) {
-        if (empty($desc)) {
-          continue;
-        }
-        $new[$k]['text'] = idx($new_text, $desc['line']);
-
-        if ($this->whitespaceMode == self::WHITESPACE_IGNORE_FORCE) {
-          // Under forced ignore mode, ignore even internal whitespace
-          // changes.
-          continue;
-        }
-
-        // If there's a corresponding "old" text and the line is marked as
-        // unchanged, test if there are internal whitespace changes between
-        // non-whitespace characters, e.g. spaces added to a string or spaces
-        // added around operators. If we find internal spaces, mark the line
-        // as changed.
-        //
-        // We only need to do this for "new" lines because any line that is
-        // missing either "old" or "new" text certainly can not have internal
-        // whitespace changes without also having non-whitespace changes,
-        // because characters had to be either added or removed to create the
-        // possibility of internal whitespace.
-        if (isset($old[$k]['text']) && empty($new[$k]['type'])) {
-          if (trim($old[$k]['text']) != trim($new[$k]['text'])) {
-            // The strings aren't the same when trimmed, so there are internal
-            // whitespace changes. Mark this line changed.
-            $old[$k]['type'] = '-';
-            $new[$k]['type'] = '+';
-
-            // Re-mark this line for intraline diffing.
-            unset($skip_intra[$k]);
-          }
-        }
-      }
-
-      $this->old = $old;
-      $this->new = $new;
-    }
-
-    $min_length = min(count($this->old), count($this->new));
-    for ($ii = 0; $ii < $min_length; $ii++) {
-      if ($this->old[$ii] || $this->new[$ii]) {
-        if (isset($this->old[$ii]['text'])) {
-          $otext = $this->old[$ii]['text'];
-        } else {
-          $otext = '';
-        }
-        if (isset($this->new[$ii]['text'])) {
-          $ntext = $this->new[$ii]['text'];
-        } else {
-          $ntext = '';
-        }
-        if ($otext != $ntext && empty($skip_intra[$ii])) {
-          $this->intra[$ii] = ArcanistDiffUtils::generateIntralineDiff(
-            $otext,
-            $ntext);
-        }
-      }
-    }
-
-    $lines_context = self::LINES_CONTEXT;
-    $max_length = max(count($this->old), count($this->new));
-    $old = $this->old;
-    $new = $this->new;
-    $visible = false;
-    $last = 0;
-    for ($cursor = -$lines_context; $cursor < $max_length; $cursor++) {
-      $offset = $cursor + $lines_context;
-      if ((isset($old[$offset]) && $old[$offset]['type']) ||
-          (isset($new[$offset]) && $new[$offset]['type'])) {
-        $visible = true;
-        $last = $offset;
-      } else if ($cursor > $last + $lines_context) {
-        $visible = false;
-      }
-      if ($visible && $cursor > 0) {
-        $this->visible[$cursor] = 1;
-      }
-    }
-
-    $old_corpus = array();
-    foreach ($this->old as $o) {
-      if ($o['type'] != '\\') {
-        if ($o['text'] === null) {
-          // There's no text on this side of the diff, but insert a placeholder
-          // newline so the highlighted line numbers match up.
-          $old_corpus[] = "\n";
-        } else {
-          $old_corpus[] = $o['text'];
-        }
-      }
-    }
-    $old_corpus_block = implode('', $old_corpus);
-
-    $new_corpus = array();
-    foreach ($this->new as $n) {
-      if ($n['type'] != '\\') {
-        if ($n['text'] === null) {
-          $new_corpus[] = "\n";
-        } else {
-          $new_corpus[] = $n['text'];
-        }
-      }
-    }
-    $new_corpus_block = implode('', $new_corpus);
-
-    $this->markGenerated($new_corpus_block);
-
-    if ($this->isTopLevel && !$this->comments &&
-        ($this->isGenerated() || $this->isUnchanged() || $this->isDeleted())) {
-      return;
-    }
-
-    $old_future = $this->getHighlightFuture($old_corpus_block);
-    $new_future = $this->getHighlightFuture($new_corpus_block);
-    $futures = array(
-      'old' => $old_future,
-      'new' => $new_future,
-    );
-    $corpus_blocks = array(
-      'old' => $old_corpus_block,
-      'new' => $new_corpus_block,
-    );
-
-    $this->highlightErrors = false;
-    foreach (Futures($futures) as $key => $future) {
-      try {
-        try {
-          $highlighted = $future->resolve();
-        } catch (PhutilSyntaxHighlighterException $ex) {
-          $this->highlightErrors = true;
-          $highlighted = id(new PhutilDefaultSyntaxHighlighter())
-            ->getHighlightFuture($corpus_blocks[$key])
-            ->resolve();
-        }
-        switch ($key) {
-          case 'old':
-            $this->oldRender = $this->processHighlightedSource(
-              $this->old,
-              $highlighted);
-            break;
-          case 'new':
-            $this->newRender = $this->processHighlightedSource(
-              $this->new,
-              $highlighted);
-            break;
-        }
-      } catch (Exception $ex) {
-        phlog($ex);
-        throw $ex;
-      }
-    }
-
-    $this->applyIntraline(
-      $this->oldRender,
-      ipull($this->intra, 0),
-      $old_corpus);
-    $this->applyIntraline(
-      $this->newRender,
-      ipull($this->intra, 1),
-      $new_corpus);
-  }
-
-  public function loadCache() {
+  private function loadCache() {
     $render_cache_key = $this->getRenderCacheKey();
     if (!$render_cache_key) {
       return false;
@@ -782,7 +397,7 @@ final class DifferentialChangesetParser {
     return idx($this->specialAttributes, self::ATTR_WHITELINES, false);
   }
 
-  protected function applyIntraline(&$render, $intra, $corpus) {
+  private function applyIntraline(&$render, $intra, $corpus) {
 
     foreach ($render as $key => $text) {
       if (isset($intra[$key])) {
@@ -793,7 +408,7 @@ final class DifferentialChangesetParser {
     }
   }
 
-  protected function getHighlightFuture($corpus) {
+  private function getHighlightFuture($corpus) {
     if (preg_match('/\r(?!\n)/', $corpus)) {
       // TODO: Pygments converts "\r" newlines into "\n" newlines, so we can't
       // use it on files with "\r" newlines. If we have "\r" not followed by
@@ -837,98 +452,210 @@ final class DifferentialChangesetParser {
 
     if ($changeset->getFileType() != DifferentialChangeType::FILE_TEXT &&
         $changeset->getFileType() != DifferentialChangeType::FILE_SYMLINK) {
+
       $this->markGenerated();
 
     } else {
       if ($skip_cache || !$this->loadCache()) {
-
-        $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_ALL) ||
-                       ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE));
-
-        $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE);
-
-        if (!$force_ignore) {
-          if ($ignore_all && $changeset->getWhitespaceMatters()) {
-            $ignore_all = false;
-          }
-        }
-
-        // The "ignore all whitespace" algorithm depends on rediffing the
-        // files, and we currently need complete representations of both
-        // files to do anything reasonable. If we only have parts of the files,
-        // don't use the "ignore all" algorithm.
-        if ($ignore_all) {
-          $hunks = $changeset->getHunks();
-          if (count($hunks) !== 1) {
-            $ignore_all = false;
-          } else {
-            $first_hunk = reset($hunks);
-            if ($first_hunk->getOldOffset() != 1 ||
-                $first_hunk->getNewOffset() != 1) {
-              $ignore_all = false;
-            }
-          }
-        }
-
-        if ($ignore_all) {
-          $old_file = $changeset->makeOldFile();
-          $new_file = $changeset->makeNewFile();
-          if ($old_file == $new_file) {
-            // If the old and new files are exactly identical, the synthetic
-            // diff below will give us nonsense and whitespace modes are
-            // irrelevant anyway. This occurs when you, e.g., copy a file onto
-            // itself in Subversion (see T271).
-            $ignore_all = false;
-          }
-        }
-
-        if ($ignore_all) {
-
-          // Huge mess. Generate a "-bw" (ignore all whitespace changes) diff,
-          // parse it out, and then play a shell game with the parsed format
-          // in process() so we highlight only changed lines but render
-          // whitespace differences. If we don't do this, we either fail to
-          // render whitespace changes (which is incredibly confusing,
-          // especially for python) or often produce a much larger set of
-          // differences than necessary.
-
-          $engine = new PhabricatorDifferenceEngine();
-          $engine->setIgnoreWhitespace(true);
-          $no_whitespace_changeset = $engine->generateChangesetFromFileContent(
-            $old_file,
-            $new_file);
-
-          // subparser takes over the current non-whitespace-ignoring changeset
-          $subparser = new DifferentialChangesetParser();
-          $subparser->isSubparser = true;
-          $subparser->setChangeset($changeset);
-          foreach ($changeset->getHunks() as $hunk) {
-            $subparser->parseHunk($hunk);
-          }
-          // We need to call process() so that the subparser's values for
-          // metadata (like 'unchanged') is correct.
-          $subparser->process();
-
-          $this->subparser = $subparser;
-
-          // While we aren't updating $this->changeset (since it has a bunch
-          // of metadata we need to preserve, so that headers like "this file
-          // was moved" render correctly), we're overwriting the local
-          // $changeset so that the block below will choose the synthetic
-          // hunks we've built instead of the original hunks.
-          $changeset = $no_whitespace_changeset;
-        }
-
-        // This either uses the real hunks, or synthetic hunks we built above.
-        foreach ($changeset->getHunks() as $hunk) {
-          $this->parseHunk($hunk);
-        }
         $this->process();
         if (!$skip_cache) {
           $this->saveCache();
         }
       }
     }
+  }
+
+  private function process() {
+    $whitespace_mode = $this->whitespaceMode;
+    $changeset = $this->changeset;
+
+    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_ALL) ||
+                  ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE));
+
+    $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE);
+
+    if (!$force_ignore) {
+      if ($ignore_all && $changeset->getWhitespaceMatters()) {
+        $ignore_all = false;
+      }
+    }
+
+    // The "ignore all whitespace" algorithm depends on rediffing the
+    // files, and we currently need complete representations of both
+    // files to do anything reasonable. If we only have parts of the files,
+    // don't use the "ignore all" algorithm.
+    if ($ignore_all) {
+      $hunks = $changeset->getHunks();
+      if (count($hunks) !== 1) {
+        $ignore_all = false;
+      } else {
+        $first_hunk = reset($hunks);
+        if ($first_hunk->getOldOffset() != 1 ||
+            $first_hunk->getNewOffset() != 1) {
+            $ignore_all = false;
+        }
+      }
+    }
+
+    if ($ignore_all) {
+      $old_file = $changeset->makeOldFile();
+      $new_file = $changeset->makeNewFile();
+      if ($old_file == $new_file) {
+        // If the old and new files are exactly identical, the synthetic
+        // diff below will give us nonsense and whitespace modes are
+        // irrelevant anyway. This occurs when you, e.g., copy a file onto
+        // itself in Subversion (see T271).
+        $ignore_all = false;
+      }
+    }
+
+    $old_text = array();
+    $new_text = array();
+    $is_unchanged = null;
+    $whitelines = null;
+    if ($ignore_all) {
+
+      // Huge mess. Generate a "-bw" (ignore all whitespace changes) diff,
+      // parse it out, and then play a shell game with the parsed format
+      // later so we highlight only changed lines but render
+      // whitespace differences. If we don't do this, we either fail to
+      // render whitespace changes (which is incredibly confusing,
+      // especially for python) or often produce a much larger set of
+      // differences than necessary.
+
+      $engine = new PhabricatorDifferenceEngine();
+      $engine->setIgnoreWhitespace(true);
+      $no_whitespace_changeset = $engine->generateChangesetFromFileContent(
+        $old_file,
+        $new_file);
+
+      $hunk_parser = new DifferentialHunkParser();
+      $hunk_parser->setWhitespaceMode($this->whitespaceMode);
+      $hunk_parser->parseHunksForLineData($changeset->getHunks());
+      $hunk_parser->reparseHunksForSpecialAttributes();
+      $is_unchanged = $hunk_parser->getIsUnchanged();
+      $whitelines = $hunk_parser->getHasWhiteLines();
+
+      // While we aren't updating $this->changeset (since it has a bunch
+      // of metadata we need to preserve, so that headers like "this file
+      // was moved" render correctly), we're overwriting the local
+      // $changeset so that the block below will choose the synthetic
+      // hunks we've built instead of the original hunks.
+      $changeset = $no_whitespace_changeset;
+
+      // let the games continue - pull out the proper text so we can
+      // later accurately display the diff
+      $old_text = ipull($hunk_parser->getOldLines(), 'text', 'line');
+      $new_text = ipull($hunk_parser->getNewLines(), 'text', 'line');
+    }
+
+    // This either uses the real hunks, or synthetic hunks we built above.
+    // $is_unchanged, $whitelines, $old_text and $new_text are populated
+    // for synthetic hunks, otherwise they are default values.
+    $hunk_parser = new DifferentialHunkParser();
+    $hunk_parser->setWhitespaceMode($this->whitespaceMode);
+    $hunk_parser->parseHunksForLineData($changeset->getHunks());
+    $hunk_parser->reparseHunksForSpecialAttributes();
+
+    $unchanged = false;
+    // i.e. if we didn't have to play horrendous games above
+    if ($is_unchanged === null) {
+      if ($hunk_parser->getIsUnchanged()) {
+        $filetype = $this->changeset->getFileType();
+        if ($filetype == DifferentialChangeType::FILE_TEXT ||
+            $filetype == DifferentialChangeType::FILE_SYMLINK) {
+          $unchanged = true;
+        }
+      }
+      $whitelines = $hunk_parser->getHasWhiteLines();
+    } else {
+      $unchanged = $is_unchanged;
+    }
+    $changetype = $this->changeset->getChangeType();
+    if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
+      // sometimes we show moved files as unchanged, sometimes deleted,
+      // and sometimes inconsistent with what actually happened at the
+      // destination of the move.  Rather than make a false claim,
+      // omit the 'not changed' notice if this is the source of a move
+      $unchanged = false;
+    }
+    $this->setSpecialAttributes(array(
+      self::ATTR_UNCHANGED  => $unchanged,
+      self::ATTR_DELETED    => $hunk_parser->getIsDeleted(),
+      self::ATTR_WHITELINES => $whitelines
+    ));
+
+    $hunk_parser->updateParsedHunksText($old_text, $new_text);
+    $hunk_parser->generateIntraLineDiffs();
+    $hunk_parser->generateVisibileLinesMask();
+
+    $this->setOldLines($hunk_parser->getOldLines());
+    $this->setNewLines($hunk_parser->getNewLines());
+    $this->setIntraLineDiffs($hunk_parser->getIntraLineDiffs());
+    $this->setVisibileLinesMask($hunk_parser->getVisibleLinesMask());
+
+    $new_corpus = $hunk_parser->getNewCorpus();
+    $new_corpus_block = implode('', $new_corpus);
+    $this->markGenerated($new_corpus_block);
+
+    if ($this->isTopLevel &&
+        !$this->comments &&
+          ($this->isGenerated() ||
+           $this->isUnchanged() ||
+           $this->isDeleted())) {
+      return;
+    }
+
+    $old_corpus = $hunk_parser->getOldCorpus();
+    $old_corpus_block = implode('', $old_corpus);
+    $old_future = $this->getHighlightFuture($old_corpus_block);
+    $new_future = $this->getHighlightFuture($new_corpus_block);
+    $futures = array(
+      'old' => $old_future,
+      'new' => $new_future,
+    );
+    $corpus_blocks = array(
+      'old' => $old_corpus_block,
+      'new' => $new_corpus_block,
+    );
+
+    $this->highlightErrors = false;
+    foreach (Futures($futures) as $key => $future) {
+      try {
+        try {
+          $highlighted = $future->resolve();
+        } catch (PhutilSyntaxHighlighterException $ex) {
+          $this->highlightErrors = true;
+          $highlighted = id(new PhutilDefaultSyntaxHighlighter())
+            ->getHighlightFuture($corpus_blocks[$key])
+            ->resolve();
+        }
+        switch ($key) {
+        case 'old':
+          $this->oldRender = $this->processHighlightedSource(
+            $this->old,
+            $highlighted);
+          break;
+        case 'new':
+          $this->newRender = $this->processHighlightedSource(
+            $this->new,
+            $highlighted);
+          break;
+        }
+      } catch (Exception $ex) {
+        phlog($ex);
+        throw $ex;
+      }
+    }
+
+    $this->applyIntraline(
+      $this->oldRender,
+      ipull($this->intra, 0),
+      $old_corpus);
+    $this->applyIntraline(
+      $this->newRender,
+      ipull($this->intra, 1),
+      $new_corpus);
   }
 
   private function shouldRenderPropertyChangeHeader($changeset) {
@@ -1339,53 +1066,6 @@ final class DifferentialChangesetParser {
     return false;
   }
 
-  public function renderForEmail() {
-    $ret = '';
-
-    $min = min(count($this->old), count($this->new));
-    for ($i = 0; $i < $min; $i++) {
-      $o = $this->old[$i];
-      $n = $this->new[$i];
-
-      if (!isset($this->visible[$i])) {
-        continue;
-      }
-
-      if ($o['line'] && $n['line']) {
-        // It is quite possible there are better ways to achieve this. For
-        // example, "white-space: pre;" can do a better job, WERE IT NOT for
-        // broken email clients like OWA which use newlines to do weird
-        // wrapping. So dont give them newlines.
-        if (isset($this->intra[$i])) {
-          $ret .= sprintf(
-            "<font color=\"red\">-&nbsp;%s</font><br/>",
-            str_replace(" ", "&nbsp;", phutil_escape_html($o['text']))
-          );
-          $ret .= sprintf(
-            "<font color=\"green\">+&nbsp;%s</font><br/>",
-            str_replace(" ", "&nbsp;", phutil_escape_html($n['text']))
-          );
-        } else {
-          $ret .= sprintf("&nbsp;&nbsp;%s<br/>",
-            str_replace(" ", "&nbsp;", phutil_escape_html($n['text']))
-          );
-        }
-      } else if ($o['line'] && !$n['line']) {
-        $ret .= sprintf(
-          "<font color=\"red\">-&nbsp;%s</font><br/>",
-          str_replace(" ", "&nbsp;", phutil_escape_html($o['text']))
-        );
-      } else {
-        $ret .= sprintf(
-          "<font color=\"green\">+&nbsp;%s</font><br/>",
-          str_replace(" ", "&nbsp;", phutil_escape_html($n['text']))
-        );
-      }
-    }
-
-    return $ret;
-  }
-
   /**
    * Parse the 'range' specification that this class and the client-side JS
    * emit to indicate that a user clicked "Show more..." on a diff. Generally,
@@ -1468,6 +1148,89 @@ final class DifferentialChangesetParser {
     }
 
     return sprintf('%d%%', 100 * ($covered / ($covered + $not_covered)));
+  }
+
+  public function detectCopiedCode(
+    array $changesets,
+    $min_width = 30,
+    $min_lines = 3) {
+
+    assert_instances_of($changesets, 'DifferentialChangeset');
+
+    $map = array();
+    $files = array();
+    $types = array();
+    foreach ($changesets as $changeset) {
+      $file = $changeset->getFilename();
+      foreach ($changeset->getHunks() as $hunk) {
+        $line = $hunk->getOldOffset();
+        foreach (explode("\n", $hunk->getChanges()) as $code) {
+          $type = (isset($code[0]) ? $code[0] : '');
+          if ($type == '-' || $type == ' ') {
+            $code = trim(substr($code, 1));
+            $files[$file][$line] = $code;
+            $types[$file][$line] = $type;
+            if (strlen($code) >= $min_width) {
+              $map[$code][] = array($file, $line);
+            }
+            $line++;
+          }
+        }
+      }
+    }
+
+    foreach ($changesets as $changeset) {
+      $copies = array();
+      foreach ($changeset->getHunks() as $hunk) {
+        $added = array_map('trim', $hunk->getAddedLines());
+        for (reset($added); list($line, $code) = each($added); ) {
+          if (isset($map[$code])) { // We found a long matching line.
+            $best_length = 0;
+            foreach ($map[$code] as $val) { // Explore all candidates.
+              list($file, $orig_line) = $val;
+              $length = 1;
+              // Search also backwards for short lines.
+              foreach (array(-1, 1) as $direction) {
+                $offset = $direction;
+                while (!isset($copies[$line + $offset]) &&
+                    isset($added[$line + $offset]) &&
+                    idx($files[$file], $orig_line + $offset) ===
+                      $added[$line + $offset]) {
+                  $length++;
+                  $offset += $direction;
+                }
+              }
+              if ($length > $best_length ||
+                  ($length == $best_length && // Prefer moves.
+                   idx($types[$file], $orig_line) == '-')) {
+                $best_length = $length;
+                // ($offset - 1) contains number of forward matching lines.
+                $best_offset = $offset - 1;
+                $best_file = $file;
+                $best_line = $orig_line;
+              }
+            }
+            $file = ($best_file == $changeset->getFilename() ? '' : $best_file);
+            for ($i = $best_length; $i--; ) {
+              $type = idx($types[$best_file], $best_line + $best_offset - $i);
+              $copies[$line + $best_offset - $i] = ($best_length < $min_lines
+                ? array() // Ignore short blocks.
+                : array($file, $best_line + $best_offset - $i, $type));
+            }
+            for ($i = 0; $i < $best_offset; $i++) {
+              next($added);
+            }
+          }
+        }
+      }
+      $copies = array_filter($copies);
+      if ($copies) {
+        $metadata = $changeset->getMetadata();
+        $metadata['copy:lines'] = $copies;
+        $changeset->setMetadata($metadata);
+      }
+    }
+    return $changesets;
   }
 
 }

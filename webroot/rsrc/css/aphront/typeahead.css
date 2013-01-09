@@ -8,7 +8,6 @@ div.jx-typeahead-hardpoint {
 }
 
 div.jx-typeahead-results {
-  z-index: 8;
   position: absolute;
   border-bottom: 1px solid #203b75;
   padding: 0;

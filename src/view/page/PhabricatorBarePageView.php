@@ -65,8 +65,7 @@ class PhabricatorBarePageView extends AphrontPageView {
     }
 
     $viewport_tag = null;
-    if (PhabricatorEnv::getEnvConfig('preview.viewport-meta-tag') ||
-        $this->getDeviceReady()) {
+    if ($this->getDeviceReady()) {
       $viewport_tag = phutil_render_tag(
         'meta',
         array(

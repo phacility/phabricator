@@ -180,9 +180,6 @@ return array(
   // (e.g., db.example.com:1234).
   'mysql.host' => 'localhost',
 
-  // The number of times to try reconnecting to the MySQL database
-  'mysql.connection-retries' => 3,
-
   // Phabricator supports PHP extensions MySQL and MySQLi. It is possible to
   // implement also other access mechanism (e.g. PDO_MySQL). The class must
   // extend AphrontMySQLDatabaseConnectionBase.
@@ -683,16 +680,16 @@ return array(
   'ldap.auth-enabled'         => false,
 
   // The LDAP server hostname
-  'ldap.hostname' => '',
+  'ldap.hostname' => null,
 
   // The LDAP server port
   'ldap.port' => 389,
 
   // The LDAP base domain name
-  'ldap.base_dn' => '',
+  'ldap.base_dn' => null,
 
   // The attribute to be regarded as 'username'. Has to be unique
-  'ldap.search_attribute' => '',
+  'ldap.search_attribute' => null,
 
   // Perform a search to find a user
   // Many LDAP installations do not have the username in the dn, if this is
@@ -700,7 +697,7 @@ return array(
   'ldap.search-first'         => false,
 
   // The attribute to search for if you have to search for a user
-  'ldap.username-attribute' => '',
+  'ldap.username-attribute' => null,
 
   // The attribute(s) to be regarded as 'real name'.
   // If more then one attribute is supplied the values of the attributes in
@@ -709,7 +706,7 @@ return array(
 
   // A domain name to use when authenticating against Active Directory
   // (e.g. 'example.com')
-  'ldap.activedirectory_domain' => '',
+  'ldap.activedirectory_domain' => null,
 
   // The LDAP version
   'ldap.version' => 3,
@@ -717,15 +714,15 @@ return array(
   // LDAP Referrals Option
   // Whether referrals should be followed by the client
   // Should be set to 0 if you use Windows 2003 AD
-  'ldap.referrals' => 1,
+  'ldap.referrals' => true,
 
   // The anonymous user name to use before searching a user.
   // Many LDAP installations require login even before searching a user, set
   // this option to enable it.
-  'ldap.anonymous-user-name'     => '',
+  'ldap.anonymous-user-name'     => null,
 
   // The password of the LDAP anonymous user.
-  'ldap.anonymous-user-password' => '',
+  'ldap.anonymous-user-password' => null,
 
 
 // -- Disqus OAuth ---------------------------------------------------------- //
@@ -1130,26 +1127,19 @@ return array(
   'remarkup.enable-embedded-youtube' => false,
 
 
+// -- Cache ----------------------------------------------------------------- //
+
+  // Set this to false to disable the use of gzdeflate()-based compression in
+  // some caches. This may give you less performant (but more debuggable)
+  // caching.
+  'cache.enable-deflate' => true,
+
 // -- Garbage Collection ---------------------------------------------------- //
 
   // Phabricator generates various logs and caches in the database which can
   // be garbage collected after a while to make the total data size more
   // manageable. To run garbage collection, launch a
   // PhabricatorGarbageCollector daemon.
-
-  // Since the GC daemon can issue large writes and table scans, you may want to
-  // run it only during off hours or make sure it is scheduled so it doesn't
-  // overlap with backups. This determines when the daemon can start running
-  // each day.
-  'gcdaemon.run-at'    => '12 AM',
-
-  // How many seconds after 'gcdaemon.run-at' the daemon may collect garbage
-  // for. By default it runs continuously, but you can set it to run for a
-  // limited period of time. For instance, if you do backups at 3 AM, you might
-  // run garbage collection for an hour beforehand. This is not a high-precision
-  // limit so you may want to leave some room for the GC to actually stop, and
-  // if you set it to something like 3 seconds you're on your own.
-  'gcdaemon.run-for'   => 24 * 60 * 60,
 
   // These 'ttl' keys configure how much old data the GC daemon keeps around.
   // Objects older than the ttl will be collected. Set any value to 0 to store
@@ -1160,6 +1150,7 @@ return array(
   'gcdaemon.ttl.differential-parse-cache'   => 14 * (24 * 60 * 60),
   'gcdaemon.ttl.markup-cache'               => 30 * (24 * 60 * 60),
   'gcdaemon.ttl.task-archive'               => 14 * (24 * 60 * 60),
+  'gcdaemon.ttl.general-cache'              => 30 * (24 * 60 * 60),
 
 
 // -- Feed ------------------------------------------------------------------ //
@@ -1361,14 +1352,6 @@ return array(
   // environment, this value should either be set to 0 (to disable) or to
   // a large number (to sample only a few requests).
   'debug.profile-rate' => 0,
-
-
-// -- Previews  ------------------------------------------------------------- //
-
-  // Turn on to enable the "viewport" meta tag. This is a preview feature which
-  // will improve the usability of Phabricator on phones and tablets once it
-  // is ready.
-  'preview.viewport-meta-tag' => false,
 
 // -- Environment  ---------------------------------------------------------- //
 

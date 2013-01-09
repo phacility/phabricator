@@ -598,8 +598,8 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       ->setMailRecipientPHIDs($mailed_phids)
       ->publish();
 
-    // TODO: Move to workers
-    PhabricatorSearchDifferentialIndexer::indexRevision($revision);
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($revision->getPHID());
 
     return $comment;
   }

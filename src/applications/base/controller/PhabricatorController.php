@@ -160,7 +160,6 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     $view->setUser($this->getRequest()->getUser());
-    $view->setFlexNav(true);
 
     $page->appendChild($view);
 

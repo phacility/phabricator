@@ -33,7 +33,6 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
           '(D|T|P|V|F)(\d+)'.
           '(?:\b|$)'.
           '@';
-        $pattern_override = '/(^[^\s]+)[,:] [DTPVF]\d+/';
 
         $revision_ids = array();
         $task_ids = array();
@@ -41,12 +40,8 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $commit_names = array();
         $vote_ids = array();
         $file_ids = array();
-        $matches_override = array();
 
         if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
-          if (preg_match($pattern_override, $message, $matches_override)) {
-            $reply_to = $matches_override[1];
-          }
           foreach ($matches as $match) {
             switch ($match[1]) {
               case 'D':
@@ -180,27 +175,23 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
 
           // Don't mention the same object more than once every 10 minutes
           // in public channels, so we avoid spamming the chat over and over
-          // again for discsussions of a specific revision, for example. In
-          // direct-to-bot chat, respond to every object reference.
+          // again for discsussions of a specific revision, for example.
 
-          if ($this->isChannelName($reply_to)) {
-            if (empty($this->recentlyMentioned[$reply_to])) {
-              $this->recentlyMentioned[$reply_to] = array();
-            }
-
-            $quiet_until = idx(
-              $this->recentlyMentioned[$reply_to],
-              $phid,
-              0) + (60 * 10);
-
-            if (time() < $quiet_until) {
-              // Remain quiet on this channel.
-              continue;
-            }
-
-            $this->recentlyMentioned[$reply_to][$phid] = time();
+          if (empty($this->recentlyMentioned[$reply_to])) {
+            $this->recentlyMentioned[$reply_to] = array();
           }
 
+          $quiet_until = idx(
+            $this->recentlyMentioned[$reply_to],
+            $phid,
+            0) + (60 * 10);
+
+          if (time() < $quiet_until) {
+            // Remain quiet on this channel.
+            continue;
+          }
+
+          $this->recentlyMentioned[$reply_to][$phid] = time();
           $this->write('PRIVMSG', "{$reply_to} :{$description}");
         }
         break;

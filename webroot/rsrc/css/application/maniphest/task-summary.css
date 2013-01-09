@@ -204,5 +204,4 @@ td.maniphest-active-handle {
 .maniphest-task-dragging {
   position: relative;
   opacity: 0.5;
-  z-index: 5;
 }

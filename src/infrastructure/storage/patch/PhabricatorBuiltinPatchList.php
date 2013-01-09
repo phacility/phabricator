@@ -1060,6 +1060,31 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20121209.xmacromigratekey.sql'),
       ),
+      '20121220.generalcache.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20121220.generalcache.sql'),
+      ),
+      'db.config' => array(
+        'type'    => 'db',
+        'name'    => 'config',
+      ),
+      '20121226.config.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20121226.config.sql'),
+      ),
+      '20130101.confxaction.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130101.confxaction.sql'),
+      ),
+      '20130102.metamtareceivedmailmessageidhash.sql' => array(
+        'type'    => 'sql',
+        'name'    =>
+          $this->getPatchPath('20130102.metamtareceivedmailmessageidhash.sql'),
+      ),
+      '20130103.filemetadata.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130103.filemetadata.sql'),
+      ),
     );
   }
 

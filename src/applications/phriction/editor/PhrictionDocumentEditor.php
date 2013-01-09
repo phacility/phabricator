@@ -172,7 +172,9 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     $document->save();
 
     $document->attachContent($new_content);
-    PhabricatorSearchPhrictionIndexer::indexDocument($document);
+
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($document->getPHID());
 
     $project_phid = null;
     $slug = $document->getSlug();

@@ -41,7 +41,7 @@ abstract class PhameController extends PhabricatorController {
     assert_instances_of($posts, 'PhamePost');
 
     $list = id(new PhabricatorObjectItemListView())
-      ->setViewer($user)
+      ->setUser($user)
       ->setNoDataString($nodata);
 
     foreach ($posts as $post) {

@@ -46,7 +46,6 @@
 }
 
 .keyboard-focus-focus-reticle {
-  z-index: 1;
   background: #ffffd3;
   position: absolute;
   border: 1px solid #999900;

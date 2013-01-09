@@ -247,7 +247,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
                       'rawPath'         => $full_to,
                       'rawTargetPath'   => $full_from,
                       'rawTargetCommit' => $copy_rev,
-                      'rawDirect'       => false,
+                      'rawDirect'       => true,
 
                       'changeType'      => $type,
                       'fileType'        => $from_file_type,
@@ -270,7 +270,7 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
                         'rawPath'         => $full_from,
                         'rawTargetPath'   => null,
                         'rawTargetCommit' => null,
-                        'rawDirect'       => false,
+                        'rawDirect'       => true,
 
                         'changeType'      => $other_type,
                         'fileType'        => $from_file_type,

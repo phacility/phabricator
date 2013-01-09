@@ -124,23 +124,24 @@ final class PhabricatorPasteQuery
   }
 
   private function loadContent(array $pastes) {
+    $cache = new PhabricatorKeyValueDatabaseCache();
+
+    $cache = new PhutilKeyValueCacheProfiler($cache);
+    $cache->setProfiler(PhutilServiceProfiler::getInstance());
+
     $keys = array();
     foreach ($pastes as $paste) {
       $keys[] = $this->getContentCacheKey($paste);
     }
 
-    // TODO: Move to a more appropriate/general cache once we have one? For
-    // now, this gets automatic GC.
-    $caches = id(new PhabricatorMarkupCache())->loadAllWhere(
-      'cacheKey IN (%Ls)',
-      $keys);
-    $caches = mpull($caches, null, 'getCacheKey');
+
+    $caches = $cache->getKeys($keys);
 
     $need_raw = array();
     foreach ($pastes as $paste) {
       $key = $this->getContentCacheKey($paste);
       if (isset($caches[$key])) {
-        $paste->attachContent($caches[$key]->getCacheData());
+        $paste->attachContent($caches[$key]);
       } else {
         $need_raw[] = $paste;
       }
@@ -150,18 +151,17 @@ final class PhabricatorPasteQuery
       return;
     }
 
+    $write_data = array();
+
     $this->loadRawContent($need_raw);
     foreach ($need_raw as $paste) {
       $content = $this->buildContent($paste);
       $paste->attachContent($content);
 
-      $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-        id(new PhabricatorMarkupCache())
-          ->setCacheKey($this->getContentCacheKey($paste))
-          ->setCacheData($content)
-          ->replace();
-      unset($guard);
+      $write_data[$this->getContentCacheKey($paste)] = (string)$content;
     }
+
+    $cache->setKeys($write_data);
   }
 
 

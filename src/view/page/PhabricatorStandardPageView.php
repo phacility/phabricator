@@ -101,6 +101,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $console = $this->getConsole();
 
     require_celerity_resource('phabricator-core-css');
+    require_celerity_resource('phabricator-zindex-css');
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
@@ -279,8 +280,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         DarkConsoleErrorLogPluginAPI::getErrors()) {
       $developer_warning =
         '<div class="aphront-developer-error-callout">'.
-          'This page raised PHP errors. Find them in DarkConsole '.
-          'or the error log.'.
+          pht(
+            'This page raised PHP errors. Find them in DarkConsole '.
+            'or the error log.').
         '</div>';
     }
 

@@ -125,6 +125,17 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       pht('Handle'),
       phutil_escape_html($file->getStorageHandle()));
 
+    $metadata = $file->getMetadata();
+    if (!empty($metadata)) {
+      $view->addSectionHeader(pht('Metadata'));
+
+      foreach ($metadata as $key => $value) {
+        $view->addProperty(
+          PhabricatorFile::getMetadataName($key),
+          phutil_escape_html($value));
+      }
+    }
+
     if ($file->isViewableInBrowser()) {
 
       // TODO: Clean this up after Pholio (dark backgrounds, standardization,

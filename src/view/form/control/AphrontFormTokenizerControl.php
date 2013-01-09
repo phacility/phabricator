@@ -41,9 +41,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $id = celerity_generate_unique_node_id();
     }
 
-    $placeholder = null;
     if (!$this->placeholder) {
-      $placeholder = $this->getDefaultPlaceholder();
+      $this->placeholder = $this->getDefaultPlaceholder();
     }
 
     $template = new AphrontTokenizerTemplateView();
@@ -64,7 +63,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         'limit'       => $this->limit,
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         'username'    => $username,
-        'placeholder' => $placeholder,
+        'placeholder' => $this->placeholder,
       ));
     }
 

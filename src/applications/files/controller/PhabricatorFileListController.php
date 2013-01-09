@@ -83,7 +83,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     $highlighted_ids = array_fill_keys($highlighted_ids, true);
 
     $list_view = id(new PhabricatorObjectItemListView())
-      ->setViewer($user);
+      ->setUser($user);
 
     foreach ($files as $file) {
       $id = $file->getID();

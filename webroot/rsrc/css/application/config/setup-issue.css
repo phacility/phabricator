@@ -1,0 +1,92 @@
+/**
+ * @provides setup-issue-css
+ */
+
+
+.setup-issue-background {
+  background-color: #edecef;
+  padding: 1em 0;
+}
+
+.setup-issue {
+  border: 1px solid #35393d;
+  margin: 15px auto;
+  max-width: 760px;
+  background: #ffffff;
+  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.setup-issue p {
+  margin: 1em 0;
+}
+
+.setup-issue table {
+  width: 90%;
+  margin: auto;
+  border-collapse: collapse;
+  border: 1px solid #dfdfdf;
+}
+
+.setup-issue table th {
+  text-align: right;
+  width: 30%;
+  background: #efefef;
+  border: 1px solid #dfdfdf;
+  padding: 8px;
+}
+
+.setup-issue table td {
+  border: 1px solid #dfdfdf;
+  padding: 8px;
+}
+
+.setup-issue pre {
+  width: 84%;
+  margin: auto;
+  border: 1px solid #dfdfdf;
+  padding: 10px 3%;
+  background: #efefef;
+}
+
+.setup-issue tt {
+  color: #666666;
+}
+
+.setup-issue em {
+  font-weight: bold;
+}
+
+.setup-issue-instructions {
+  font-size: 15px;
+  padding: 20px;
+  line-height: 1.4em;
+  background: #efefef;
+  border-bottom: 1px solid #bfbfbf;
+}
+
+.setup-issue-name {
+  padding: 15px;
+  background: #35393d;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.setup-issue-next {
+  padding: 15px;
+  background: #35393d;
+  text-align: center;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.setup-issue-config {
+  margin: 15px 0;
+  padding: 0 20px;
+}
+
+.setup-issue ul {
+  width: 90%;
+  margin: 1em auto;
+  list-style: circle;
+}

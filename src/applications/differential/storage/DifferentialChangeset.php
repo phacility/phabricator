@@ -88,7 +88,7 @@ final class DifferentialChangeset extends DifferentialDAO {
       foreach ($this->loadHunks() as $hunk) {
         $hunk->delete();
       }
-      $this->_hunks = array();
+      $this->unsavedHunks = array();
 
       queryfx(
         $this->establishConnection('w'),
@@ -117,18 +117,6 @@ final class DifferentialChangeset extends DifferentialDAO {
   public function makeOldFile() {
     $file = mpull($this->getHunks(), 'makeOldFile');
     return implode('', $file);
-  }
-
-  public function computeOffsets() {
-    $offsets = array();
-    $n = 1;
-    foreach ($this->getHunks() as $hunk) {
-      for ($i = 0; $i < $hunk->getNewLen(); $i++) {
-        $offsets[$n] = $hunk->getNewOffset() + $i;
-        $n++;
-      }
-    }
-    return $offsets;
   }
 
   public function makeChangesWithContext($num_lines = 3) {
@@ -187,90 +175,4 @@ final class DifferentialChangeset extends DifferentialDAO {
     return false;
   }
 
-  public function makeContextDiff($inline, $add_context) {
-    $context = array();
-    $debug = false;
-    if ($debug) {
-      $context[] = 'Inline: '.$inline->getIsNewFile().' '.
-        $inline->getLineNumber().' '.$inline->getLineLength();
-      foreach ($this->getHunks() as $hunk) {
-        $context[] = 'hunk: '.$hunk->getOldOffset().'-'.
-          $hunk->getOldLen().'; '.$hunk->getNewOffset().'-'.$hunk->getNewLen();
-        $context[] = $hunk->getChanges();
-      }
-    }
-
-    if ($inline->getIsNewFile()) {
-      $prefix = '+';
-    } else {
-      $prefix = '-';
-    }
-    foreach ($this->getHunks() as $hunk) {
-      if ($inline->getIsNewFile()) {
-        $offset = $hunk->getNewOffset();
-        $length = $hunk->getNewLen();
-      } else {
-        $offset = $hunk->getOldOffset();
-        $length = $hunk->getOldLen();
-      }
-      $start = $inline->getLineNumber() - $offset;
-      $end = $start + $inline->getLineLength();
-      // We need to go in if $start == $length, because the last line
-      // might be a "\No newline at end of file" marker, which we want
-      // to show if the additional context is > 0.
-      if ($start <= $length && $end >= 0) {
-        $start = $start - $add_context;
-        $end = $end + $add_context;
-        $hunk_content = array();
-        $hunk_pos = array( "-" => 0, "+" => 0 );
-        $hunk_offset = array( "-" => NULL, "+" => NULL );
-        $hunk_last = array( "-" => NULL, "+" => NULL );
-        foreach (explode("\n", $hunk->getChanges()) as $line) {
-          $in_common = strncmp($line, " ", 1) === 0;
-          $in_old = strncmp($line, "-", 1) === 0 || $in_common;
-          $in_new = strncmp($line, "+", 1) === 0 || $in_common;
-          $in_selected = strncmp($line, $prefix, 1) === 0;
-          $skip = !$in_selected && !$in_common;
-          if ($hunk_pos[$prefix] <= $end) {
-            if ($start <= $hunk_pos[$prefix]) {
-              if (!$skip || ($hunk_pos[$prefix] != $start &&
-                             $hunk_pos[$prefix] != $end)) {
-                if ($in_old) {
-                  if ($hunk_offset["-"] === NULL) {
-                    $hunk_offset["-"] = $hunk_pos["-"];
-                  }
-                  $hunk_last["-"] = $hunk_pos["-"];
-                }
-                if ($in_new) {
-                  if ($hunk_offset["+"] === NULL) {
-                    $hunk_offset["+"] = $hunk_pos["+"];
-                  }
-                  $hunk_last["+"] = $hunk_pos["+"];
-                }
-
-                $hunk_content[] = $line;
-              }
-            }
-            if ($in_old) { ++$hunk_pos["-"]; }
-            if ($in_new) { ++$hunk_pos["+"]; }
-          }
-        }
-        if ($hunk_offset["-"] !== NULL || $hunk_offset["+"] !== NULL) {
-          $header = "@@";
-          if ($hunk_offset["-"] !== NULL) {
-            $header .= " -" . ($hunk->getOldOffset() + $hunk_offset["-"]) .
-              "," . ($hunk_last["-"]-$hunk_offset["-"]+1);
-          }
-          if ($hunk_offset["+"] !== NULL) {
-            $header .= " +" . ($hunk->getNewOffset() + $hunk_offset["+"]) .
-              "," . ($hunk_last["+"]-$hunk_offset["+"]+1);
-          }
-          $header .= " @@";
-          $context[] = $header;
-          $context[] = implode("\n", $hunk_content);
-        }
-      }
-    }
-    return implode("\n", $context);
-  }
 }

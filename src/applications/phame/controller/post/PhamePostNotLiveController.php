@@ -54,10 +54,7 @@ final class PhamePostNotLiveController extends PhameController {
 
     // No reason this can't go live, maybe an old link. Kick them live and see
     // what happens.
-
-    $blog = $post->getBlog();
-    $live_uri = 'http://'.$blog->getDomain().'/'.$post->getPhameTitle();
-
+    $live_uri = $post->getViewURI();
     return id(new AphrontRedirectResponse())->setURI($live_uri);
   }
 }

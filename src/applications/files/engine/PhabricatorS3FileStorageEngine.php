@@ -31,7 +31,17 @@ final class PhabricatorS3FileStorageEngine
   public function writeFile($data, array $params) {
     $s3 = $this->newS3API();
 
-    $name = 'phabricator/'.Filesystem::readRandomCharacters(20);
+    // Generate a random name for this file. We add some directories to it
+    // (e.g. 'abcdef123456' becomes 'ab/cd/ef123456') to make large numbers of
+    // files more browsable with web/debugging tools like the S3 administration
+    // tool.
+    $seed = Filesystem::readRandomCharacters(20);
+    $parts = array(
+      substr($seed, 0, 2),
+      substr($seed, 2, 2),
+      substr($seed, 4),
+    );
+    $name = 'phabricator/'.implode('/', $parts);
 
     AphrontWriteGuard::willWrite();
     $s3->putObject(
@@ -52,7 +62,14 @@ final class PhabricatorS3FileStorageEngine
     $result = $this->newS3API()->getObject(
       $this->getBucketName(),
       $handle);
-    return $result->body;
+
+    // NOTE: The implementation of the API that we're using may respond with
+    // a successful result that has length 0 and no body property.
+    if (isset($result->body)) {
+      return $result->body;
+    } else {
+      return '';
+    }
   }
 
 
@@ -61,7 +78,6 @@ final class PhabricatorS3FileStorageEngine
    * @task impl
    */
   public function deleteFile($handle) {
-
     AphrontWriteGuard::willWrite();
     $this->newS3API()->deleteObject(
       $this->getBucketName(),

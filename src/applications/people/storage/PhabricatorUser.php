@@ -104,7 +104,9 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
     $result = parent::save();
 
     $this->updateNameTokens();
-    PhabricatorSearchUserIndexer::indexUser($this);
+
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($this->getPHID());
 
     return $result;
   }
@@ -628,9 +630,11 @@ EOBODY;
   public function loadProfileImageURI() {
     $src_phid = $this->getProfileImagePHID();
 
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-    if ($file) {
-      return $file->getBestURI();
+    if ($src_phid) {
+      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
+      if ($file) {
+        return $file->getBestURI();
+      }
     }
 
     return self::getDefaultProfileImageURI();

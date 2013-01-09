@@ -11,6 +11,15 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
   private $title;
   private $description;
   private $oGType;
+  private $uriPath;
+
+  public function setURIPath($uri_path) {
+    $this->uriPath = $uri_path;
+    return $this;
+  }
+  public function getURIPath() {
+    return $this->uriPath;
+  }
 
   protected function setOGType($og_type) {
     $this->oGType = $og_type;
@@ -214,6 +223,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $this->setTitle($this->getBlog()->getName());
     $this->setDescription($this->getBlog()->getDescription());
     $this->setOGType('website');
+    $this->setURIPath('');
     if (preg_match('@^/post/(?P<name>.*)$@', $path, $matches)) {
       $post = id(new PhamePostQuery())
         ->setViewer($user)
@@ -226,6 +236,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
         $this->setTitle($post->getTitle());
         $this->setDescription($description);
         $this->setOGType('article');
+        $this->setURIPath('post/'.$post->getPhameTitle());
         $view = head($this->buildPostViews(array($post)));
         return $this->renderPostDetail($view);
       }
@@ -283,7 +294,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $views = array();
     foreach ($posts as $post) {
       $view = id(new PhamePostView())
-        ->setViewer($user)
+        ->setUser($user)
         ->setSkin($this)
         ->setPost($post)
         ->setBody($engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY))

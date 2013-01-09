@@ -403,25 +403,29 @@ final class DifferentialChangesetTwoUpRenderer
 
     $html_old = array();
     $html_new = array();
-    foreach ($this->getOldComments() as $comment) {
-      $comment_html = $this->renderInlineComment($comment, $on_right = false);
-      $html_old[] =
-        '<tr class="inline">'.
-        '<th />'.
-        '<td class="left">'.$comment_html.'</td>'.
-        '<th />'.
-        '<td class="right3" colspan="3" />'.
-        '</tr>';
+    foreach ($this->getOldComments() as $on_line => $comment_group) {
+      foreach ($comment_group as $comment) {
+        $comment_html = $this->renderInlineComment($comment, $on_right = false);
+        $html_old[] =
+          '<tr class="inline">'.
+          '<th />'.
+          '<td class="left">'.$comment_html.'</td>'.
+          '<th />'.
+          '<td class="right3" colspan="3" />'.
+          '</tr>';
+      }
     }
-    foreach ($this->getNewComments() as $comment) {
-      $comment_html = $this->renderInlineComment($comment, $on_right = true);
-      $html_new[] =
-        '<tr class="inline">'.
-        '<th />'.
-        '<td class="left" />'.
-        '<th />'.
-        '<td class="right3" colspan="3">'.$comment_html.'</td>'.
-        '</tr>';
+    foreach ($this->getNewComments() as $lin_line => $comment_group) {
+      foreach ($comment_group as $comment) {
+        $comment_html = $this->renderInlineComment($comment, $on_right = true);
+        $html_new[] =
+          '<tr class="inline">'.
+          '<th />'.
+          '<td class="left" />'.
+          '<th />'.
+          '<td class="right3" colspan="3">'.$comment_html.'</td>'.
+          '</tr>';
+      }
     }
 
     if (!$old) {

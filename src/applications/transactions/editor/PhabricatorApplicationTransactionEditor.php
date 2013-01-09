@@ -1,8 +1,9 @@
 <?php
 
 /**
- * @task mail Sending Mail
- * @task feed Publishing Feed Stories
+ * @task mail   Sending Mail
+ * @task feed   Publishing Feed Stories
+ * @task search Search Index
  */
 abstract class PhabricatorApplicationTransactionEditor
   extends PhabricatorEditor {
@@ -57,9 +58,7 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
   public function getTransactionTypes() {
-    $types = array(
-      PhabricatorTransactions::TYPE_COMMENT,
-    );
+    $types = array();
 
     if ($this->object instanceof PhabricatorSubscribableInterface) {
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;
@@ -193,12 +192,6 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->contentSource;
   }
 
-  protected function didApplyTransactions(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return;
-  }
-
   final public function applyTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -278,7 +271,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $mail = $this->sendMail($object, $xactions);
     }
 
-    // TODO: Index object.
+    if ($this->supportsSearch()) {
+      id(new PhabricatorSearchIndexer())
+        ->indexDocumentByPHID($object->getPHID());
+    }
 
     if ($this->supportsFeed()) {
       $mailed = array();
@@ -290,8 +286,6 @@ abstract class PhabricatorApplicationTransactionEditor
         $xactions,
         $mailed);
     }
-
-    $this->didApplyTransactions($object, $xactions);
 
     return $xactions;
   }
@@ -875,6 +869,17 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setSubscribedPHIDs($subscribed_phids)
       ->setMailRecipientPHIDs($mailed_phids)
       ->publish();
+  }
+
+
+/* -(  Search Index  )------------------------------------------------------- */
+
+
+  /**
+   * @task search
+   */
+  protected function supportsSearch() {
+    return false;
   }
 
 }

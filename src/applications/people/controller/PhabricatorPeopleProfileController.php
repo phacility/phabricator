@@ -130,9 +130,10 @@ final class PhabricatorPeopleProfileController
       }
     }
 
-    $header->appendChild($nav);
-    $nav->appendChild(
-      '<div style="padding: 1em;">'.$content.'</div>');
+    $nav->appendChild($header);
+
+    $content = '<div style="padding: 1em;">'.$content.'</div>';
+    $header->appendChild($content);
 
     if ($user->getPHID() == $viewer->getPHID()) {
       $nav->addSpacer();
@@ -148,7 +149,7 @@ final class PhabricatorPeopleProfileController
     }
 
     return $this->buildApplicationPage(
-      $header,
+      $nav,
       array(
         'title' => $user->getUsername(),
       ));

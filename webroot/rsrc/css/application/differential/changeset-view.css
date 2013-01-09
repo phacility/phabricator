@@ -8,7 +8,6 @@
 }
 
 .differential-changeset {
-  z-index: 2;
   position: relative;
   margin: 0;
   padding: 10px 0% 20px 2%;
@@ -228,7 +227,6 @@ td.cov-X {
   background: #ffeeaa;
   border:     1px solid #ffcc00;
   position:   absolute;
-  z-index:    2;
   opacity:    0.5;
   top:        0px;
   left:       0px;

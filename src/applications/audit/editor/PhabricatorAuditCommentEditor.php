@@ -289,7 +289,10 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $feed_phids = array_diff($requests_phids, $feed_dont_publish_phids);
     $this->publishFeedStory($comment, $feed_phids);
-    PhabricatorSearchCommitIndexer::indexCommit($commit);
+
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($commit->getPHID());
+
     $this->sendMail($comment, $other_comments, $inline_comments, $requests);
   }
 

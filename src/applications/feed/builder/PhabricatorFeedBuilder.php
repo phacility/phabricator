@@ -54,7 +54,7 @@ final class PhabricatorFeedBuilder {
       }
 
       $view = $story->renderView();
-      $view->setViewer($user);
+      $view->setUser($user);
 
       $null_view->appendChild($view);
     }

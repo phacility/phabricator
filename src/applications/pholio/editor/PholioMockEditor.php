@@ -8,19 +8,13 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
     $types[] = PholioTransactionType::TYPE_NAME;
     $types[] = PholioTransactionType::TYPE_DESCRIPTION;
     return $types;
-  }
-
-  protected function didApplyTransactions(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-//    PholioIndexer::indexMock($mock);
-    return;
   }
 
   protected function getCustomTransactionOldValue(
@@ -126,6 +120,10 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function supportsFeed() {
+    return true;
+  }
+
+  protected function supportsSearch() {
     return true;
   }
 

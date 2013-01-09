@@ -72,6 +72,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       'time'      => $time,
       'author'    => $author,
       'details'   => $details,
+      'lint'      => null,
     );
 
     $lint = self::loadLintMessagesCount($drequest);

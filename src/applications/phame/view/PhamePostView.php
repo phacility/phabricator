@@ -7,7 +7,6 @@ final class PhamePostView extends AphrontView {
 
   private $post;
   private $author;
-  private $viewer;
   private $body;
   private $skin;
   private $summary;
@@ -20,15 +19,6 @@ final class PhamePostView extends AphrontView {
 
   public function getSkin() {
     return $this->skin;
-  }
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
   }
 
   public function setAuthor(PhabricatorObjectHandle $author) {
@@ -93,7 +83,7 @@ final class PhamePostView extends AphrontView {
           'Published on %s by %s',
           phabricator_datetime(
             $this->getPost()->getDatePublished(),
-            $this->getViewer()),
+            $this->getUser()),
           $this->getAuthor()->getName())));
   }
 

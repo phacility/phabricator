@@ -103,7 +103,6 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       'mysql.configuration-provider',
       array($this, $mode, $namespace));
 
-    $retries = PhabricatorEnv::getEnvConfig('mysql.connection-retries');
     return PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
       array(
@@ -112,7 +111,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
           'pass'      => $conf->getPassword(),
           'host'      => $conf->getHost(),
           'database'  => $conf->getDatabase(),
-          'retries'   => $retries,
+          'retries'   => 3,
         ),
       ));
   }
@@ -148,4 +147,63 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   protected function getConnectionNamespace() {
     return self::getStorageNamespace().'_'.$this->getApplicationName();
   }
+
+
+  /**
+   * Break a list of escaped SQL statement fragments (e.g., VALUES lists for
+   * INSERT, previously built with @{function:qsprintf}) into chunks which will
+   * fit under the MySQL 'max_allowed_packet' limit.
+   *
+   * Chunks are glued together with `$glue`, by default ", ".
+   *
+   * If a statement is too large to fit within the limit, it is broken into
+   * its own chunk (but might fail when the query executes).
+   */
+  public static function chunkSQL(
+    array $fragments,
+    $glue = ', ',
+    $limit = null) {
+
+    if ($limit === null) {
+      // NOTE: Hard-code this at 1MB for now, minus a 10% safety buffer.
+      // Eventually we could query MySQL or let the user configure it.
+      $limit = (int)((1024 * 1024) * 0.90);
+    }
+
+    $result = array();
+
+    $chunk = array();
+    $len = 0;
+    $glue_len = strlen($glue);
+    foreach ($fragments as $fragment) {
+      $this_len = strlen($fragment);
+
+      if ($chunk) {
+        // Chunks after the first also imply glue.
+        $this_len += $glue_len;
+      }
+
+      if ($len + $this_len <= $limit) {
+        $len += $this_len;
+        $chunk[] = $fragment;
+      } else {
+        if ($chunk) {
+          $result[] = $chunk;
+        }
+        $len = strlen($fragment);
+        $chunk = array($fragment);
+      }
+    }
+
+    if ($chunk) {
+      $result[] = $chunk;
+    }
+
+    foreach ($result as $key => $fragment_list) {
+      $result[$key] = implode($glue, $fragment_list);
+    }
+
+    return $result;
+  }
+
 }

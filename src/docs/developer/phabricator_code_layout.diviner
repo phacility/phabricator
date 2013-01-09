@@ -40,6 +40,7 @@ containing the file ##DerpController.php## with the class
 If ##Derp## were (relatively) complex, one could reasonably expect to see
 the following directory layout:
 
+  phabricator/src/applications/derp/conduit/
   phabricator/src/applications/derp/constants/
   phabricator/src/applications/derp/controller/
   phabricator/src/applications/derp/editor/
@@ -48,7 +49,6 @@ the following directory layout:
   phabricator/src/applications/derp/replyhandler/
   phabricator/src/applications/derp/storage/
   phabricator/src/applications/derp/view/
-  phabricator/src/applications/conduit/method/derp/
 
 (The following two folders are also likely to be included for JavaScript and
 CSS respectively. However, static resources are largely outside the scope of

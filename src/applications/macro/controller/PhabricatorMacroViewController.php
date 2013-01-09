@@ -56,7 +56,7 @@ final class PhabricatorMacroViewController
     $engine->process();
 
     $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setViewer($user)
+      ->setUser($user)
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 

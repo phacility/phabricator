@@ -34,31 +34,15 @@ final class PhamePost extends PhameDAO
     return $this->blog;
   }
 
-  public function getViewURI($blogger_name = '') {
+  public function getViewURI() {
     // go for the pretty uri if we can
-    if ($blogger_name) {
+    $domain = ($this->blog ? $this->blog->getDomain() : '');
+    if ($domain) {
       $phame_title = PhabricatorSlug::normalize($this->getPhameTitle());
-      $uri = phutil_escape_uri('/phame/posts/'.$blogger_name.'/'.$phame_title);
-    } else {
-      $uri = $this->getActionURI('view');
+      return 'http://'.$domain.'/post/'.$phame_title;
     }
-    return $uri;
-  }
-
-  public function getEditURI() {
-    return $this->getActionURI('edit');
-  }
-
-  public function getDeleteURI() {
-    return $this->getActionURI('delete');
-  }
-
-  public function getChangeVisibilityURI() {
-    return $this->getActionURI('changevisibility');
-  }
-
-  private function getActionURI($action) {
-    return '/phame/post/'.$action.'/'.$this->getPHID().'/';
+    $uri = '/phame/post/view/'.$this->getID().'/';
+    return PhabricatorEnv::getProductionURI($uri);
   }
 
   public function isDraft() {

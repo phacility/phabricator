@@ -31,11 +31,6 @@ final class PhabricatorIRCMessage {
         if ($target[0] == '#') {
           return $target;
         }
-
-        $matches = null;
-        if (preg_match('/^:([^!]+)!/', $this->sender, $matches)) {
-          return $matches[1];
-        }
         break;
     }
     return null;
