@@ -29,7 +29,7 @@ final class PhabricatorPHDConfigOptions
             "You can raise this if you have a task backlog, or explicitly ".
             "launch more with 'phd launch <N> taskmaster'.")),
       $this->newOption('phd.verbose', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Verbose mode"),
             pht("Normal mode"),
@@ -42,7 +42,7 @@ final class PhabricatorPHDConfigOptions
             "mode with 'phd debug' are always launched in verbose mode. See ".
             "also 'phd.trace'.")),
       $this->newOption('phd.trace', 'bool', false)
-        ->setOptions(
+        ->setBoolOptions(
           array(
             pht("Trace mode"),
             pht("Normal mode"),
