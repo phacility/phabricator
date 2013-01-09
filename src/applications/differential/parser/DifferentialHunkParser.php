@@ -45,6 +45,11 @@ final class DifferentialHunkParser {
     return $this;
   }
   private function getWhitespaceMode() {
+    if ($this->whitespaceMode === null) {
+      throw new Exception(
+        'You must setWhitespaceMode before accessing this data.'
+      );
+    }
     return $this->whitespaceMode;
   }
 
@@ -155,6 +160,7 @@ final class DifferentialHunkParser {
    *
    * NOTE: this function must be called after
    * @{method:parseHunksForLineData}.
+   * NOTE: you must @{method:setWhitespaceMode} before calling this method.
    */
   public function reparseHunksForSpecialAttributes() {
     $rebuild_old = array();

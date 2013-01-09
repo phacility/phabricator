@@ -530,6 +530,7 @@ final class DifferentialChangesetParser {
         $new_file);
 
       $hunk_parser = new DifferentialHunkParser();
+      $hunk_parser->setWhitespaceMode($this->whitespaceMode);
       $hunk_parser->parseHunksForLineData($changeset->getHunks());
       $hunk_parser->reparseHunksForSpecialAttributes();
       $is_unchanged = $hunk_parser->getIsUnchanged();
@@ -552,6 +553,7 @@ final class DifferentialChangesetParser {
     // $is_unchanged, $whitelines, $old_text and $new_text are populated
     // for synthetic hunks, otherwise they are default values.
     $hunk_parser = new DifferentialHunkParser();
+    $hunk_parser->setWhitespaceMode($this->whitespaceMode);
     $hunk_parser->parseHunksForLineData($changeset->getHunks());
     $hunk_parser->reparseHunksForSpecialAttributes();
 
