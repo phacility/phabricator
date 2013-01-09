@@ -1019,6 +1019,7 @@ phutil_register_library_map(array(
     'PhabricatorOwnersPackageQuery' => 'applications/owners/query/PhabricatorOwnersPackageQuery.php',
     'PhabricatorOwnersPackageTestCase' => 'applications/owners/storage/__tests__/PhabricatorOwnersPackageTestCase.php',
     'PhabricatorOwnersPath' => 'applications/owners/storage/PhabricatorOwnersPath.php',
+    'PhabricatorPHDConfigOptions' => 'applications/config/option/PhabricatorPHDConfigOptions.php',
     'PhabricatorPHID' => 'applications/phid/storage/PhabricatorPHID.php',
     'PhabricatorPHIDConstants' => 'applications/phid/PhabricatorPHIDConstants.php',
     'PhabricatorPHIDController' => 'applications/phid/controller/PhabricatorPHIDController.php',
@@ -2349,6 +2350,7 @@ phutil_register_library_map(array(
     'PhabricatorOwnersPackageQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorOwnersPackageTestCase' => 'PhabricatorTestCase',
     'PhabricatorOwnersPath' => 'PhabricatorOwnersDAO',
+    'PhabricatorPHDConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorPHIDController' => 'PhabricatorController',
     'PhabricatorPHIDLookupController' => 'PhabricatorPHIDController',
     'PhabricatorPaste' =>
