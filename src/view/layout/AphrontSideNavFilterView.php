@@ -21,7 +21,6 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $items = array();
   private $baseURI;
   private $selectedFilter = false;
-  private $flexNav;
   private $flexible;
   private $active;
   private $menu;
@@ -49,11 +48,6 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function setActive($active) {
     $this->active = $active;
-    return $this;
-  }
-
-  public function setFlexNav($flex_nav) {
-    $this->flexNav = $flex_nav;
     return $this;
   }
 
@@ -156,11 +150,7 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     require_celerity_resource('phabricator-side-menu-view-css');
 
-    if ($this->flexNav) {
-      return $this->renderFlexNav();
-    } else {
-      return $this->renderLegacyNav();
-    }
+    return $this->renderFlexNav();
   }
 
   private function renderFlexNav() {
@@ -257,22 +247,6 @@ final class AphrontSideNavFilterView extends AphrontView {
           'id' => $content_id,
         ),
         $this->renderChildren()));
-  }
-
-  public function renderLegacyNav() {
-    require_celerity_resource('aphront-side-nav-view-css');
-
-    return
-      '<table class="aphront-side-nav-view phabricator-side-menu">'.
-        '<tr>'.
-          '<th class="aphront-side-nav-navigation">'.
-            self::renderSingleView($this->menu).
-          '</th>'.
-          '<td class="aphront-side-nav-content">'.
-            $this->renderChildren().
-          '</td>'.
-        '</tr>'.
-      '</table>';
   }
 
 }

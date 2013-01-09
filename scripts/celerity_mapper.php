@@ -66,7 +66,6 @@ $package_spec = array(
     'aphront-dialog-view-css',
     'aphront-form-view-css',
     'aphront-panel-view-css',
-    'aphront-side-nav-view-css',
     'aphront-table-view-css',
     'aphront-crumbs-view-css',
     'aphront-tokenizer-control-css',
