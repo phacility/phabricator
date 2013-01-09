@@ -68,8 +68,6 @@ final class PhabricatorProjectProfileController
         throw new Exception("Unimplemented filter '{$this->page}'.");
     }
 
-    $content = '<div style="padding: 1em;">'.$content.'</div>';
-    $nav_view->appendChild($content);
 
     $header = new PhabricatorProfileHeaderView();
     $header->setName($project->getName());
@@ -112,10 +110,13 @@ final class PhabricatorProjectProfileController
 
     $header->addAction($action);
 
-    $header->appendChild($nav_view);
+    $nav_view->appendChild($header);
+
+    $content = '<div style="padding: 1em;">'.$content.'</div>';
+    $header->appendChild($content);
 
     return $this->buildStandardPageResponse(
-      $header,
+      $nav_view,
       array(
         'title' => $project->getName().' Project',
       ));
