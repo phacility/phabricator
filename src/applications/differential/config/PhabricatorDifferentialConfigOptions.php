@@ -16,8 +16,8 @@ final class PhabricatorDifferentialConfigOptions
       $this->newOption('differential.show-host-field', 'bool', false)
         ->setBoolOptions(
           array(
-            pht('Disable "Host" Fields'),
             pht('Show "Host" Fields'),
+            pht('Disable "Host" Fields'),
           ))
         ->setSummary(pht('Show or hide the "Host" and "Path" fields.'))
         ->setDescription(
@@ -32,8 +32,8 @@ final class PhabricatorDifferentialConfigOptions
       $this->newOption('differential.show-test-plan-field', 'bool', true)
         ->setBoolOptions(
           array(
-            pht('Hide "Test Plan" Field'),
             pht('Show "Test Plan" Field'),
+            pht('Hide "Test Plan" Field'),
           ))
         ->setSummary(pht('Show or hide the "Test Plan" field.'))
         ->setDescription(
@@ -47,8 +47,8 @@ final class PhabricatorDifferentialConfigOptions
       $this->newOption('differential.enable-email-accept', 'bool', false)
         ->setBoolOptions(
           array(
-            pht('Disable Email "!accept" Action'),
             pht('Enable Email "!accept" Action'),
+            pht('Disable Email "!accept" Action'),
           ))
         ->setSummary(pht('Enable or disable "!accept" action via email.'))
         ->setDescription(
