@@ -82,6 +82,44 @@ final class PhabricatorFeedStoryManiphest
     return $one_line;
   }
 
+  public function renderText() {
+    $actor_phid = $this->getAuthorPHID();
+    $author_name = $this->getHandle($actor_phid)->getLinkName();
+
+    $owner_phid = $this->getValue('ownerPHID');
+    $owner_name = $this->getHandle($owner_phid)->getLinkName();
+
+    $task_phid = $this->getPrimaryObjectPHID();
+    $task_handle = $this->getHandle($task_phid);
+    $task_title = $task_handle->getLinkName();
+    $task_uri = PhabricatorEnv::getURI($task_handle->getURI());
+
+    $action = $this->getValue('action');
+    $verb = ManiphestAction::getActionPastTenseVerb($action);
+
+    switch ($action) {
+      case ManiphestAction::ACTION_ASSIGN:
+      case ManiphestAction::ACTION_REASSIGN:
+        if ($owner_phid) {
+          if ($owner_phid == $actor_phid) {
+            $text = "{$author_name} claimed {$task_title}";
+          } else {
+            $text = "{$author_name} {$verb} {$task_title} to {$owner_name}";
+          }
+        } else {
+          $text = "{$author_name} placed {$task_title} up for grabs";
+        }
+        break;
+      default:
+        $text = "{$author_name} {$verb} {$task_title}";
+        break;
+    }
+
+    $text .= " {$task_uri}";
+
+    return $text;
+  }
+
   public function getNotificationAggregations() {
     $class = get_class($this);
     $phid  = $this->getStoryData()->getValue('taskPHID');

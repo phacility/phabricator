@@ -57,4 +57,39 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
     return $view;
   }
 
+  public function renderText() {
+    $author = null;
+    if ($this->getAuthorPHID()) {
+      $author = $this->getHandle($this->getAuthorPHID())->getLinkName();
+    } else {
+      $author = $this->getValue('authorName');
+    }
+
+    $committer = null;
+    if ($this->getValue('committerPHID')) {
+      $committer_handle = $this->getHandle($this->getValue('committerPHID'));
+      $committer = $committer_handle->getLinkName();
+    } else if ($this->getValue('committerName')) {
+      $committer = $this->getValue('committerName');
+    }
+
+    $commit_handle = $this->getHandle($this->getPrimaryObjectPHID());
+    $commit_uri = PhabricatorEnv::getURI($commit_handle->getURI());
+    $commit_name = $commit_handle->getLinkName();
+
+    if (!$committer) {
+      $committer = $author;
+      $author = null;
+    }
+
+    if ($author) {
+      $text = "{$committer} (authored by {$author})".
+              "committed {$commit_name} {$commit_uri}";
+    } else {
+      $text = "{$committer} committed {$commit_name} {$commit_uri}";
+    }
+
+    return $text;
+  }
+
 }
