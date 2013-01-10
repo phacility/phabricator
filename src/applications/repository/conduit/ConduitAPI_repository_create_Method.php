@@ -123,7 +123,7 @@ final class ConduitAPI_repository_create_Method
       throw new ConduitException('ERR-DUPLICATE');
     }
 
-    return $this->buildDictForRepository($repository);
+    return $repository->toDictionary();
   }
 
 
