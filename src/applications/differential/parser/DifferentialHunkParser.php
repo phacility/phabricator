@@ -444,9 +444,9 @@ final class DifferentialHunkParser {
       $old_line = $hunk->getOldOffset();
       $new_line = $hunk->getNewOffset();
       if ($old_line > 1) {
-        $old_line_marker_map[] = $old_line;
+        $old_line_marker_map[$old_line] = true;
       } else if ($new_line > 1) {
-        $new_line_marker_map[] = $new_line;
+        $new_line_marker_map[$new_line] = true;
       }
 
       $num_lines = count($lines);

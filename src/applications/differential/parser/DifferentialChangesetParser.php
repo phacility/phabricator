@@ -593,6 +593,8 @@ final class DifferentialChangesetParser {
     $this->setNewLines($hunk_parser->getNewLines());
     $this->setIntraLineDiffs($hunk_parser->getIntraLineDiffs());
     $this->setVisibileLinesMask($hunk_parser->getVisibleLinesMask());
+    $this->setMissingOldLineMarkerMap($hunk_parser->getOldLineMarkerMap());
+    $this->setMissingNewLineMarkerMap($hunk_parser->getNewLineMarkerMap());
 
     $new_corpus = $hunk_parser->getNewCorpus();
     $new_corpus_block = implode('', $new_corpus);
