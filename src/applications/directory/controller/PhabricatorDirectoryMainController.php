@@ -241,7 +241,7 @@ final class PhabricatorDirectoryMainController
 
     list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
       $revisions,
-      $user_phid);
+      array($user_phid));
 
     if (!$active) {
       return $this->renderMiniPanel(
