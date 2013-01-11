@@ -690,28 +690,35 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht(
             'This file contains generated code, which does not normally '.
-            'need to be reviewed.'),
-          true);
+            'need to be reviewed.'));
       } else if ($this->isUnchanged()) {
-          $shield = $renderer->renderShield(
-            pht("The contents of this file were not changed."),
-            false);
+        $type = 'text';
+        if (!$rows) {
+          // NOTE: Normally, diffs which don't change files do not include
+          // file content (for example, if you "chmod +x" a file and then
+          // run "git show", the file content is not available). Similarly,
+          // if you move a file from A to B without changing it, diffs normally
+          // do not show the file content. In some cases `arc` is able to
+          // synthetically generate content for these diffs, but for raw diffs
+          // we'll never have it so we need to be prepared to not render a link.
+          $type = 'none';
+        }
+        $shield = $renderer->renderShield(
+          pht('The contents of this file were not changed.'),
+          $type);
       } else if ($this->isWhitespaceOnly()) {
         $shield = $renderer->renderShield(
-          pht(
-            'This file was changed only by adding or removing whitespace.'),
-          false);
+          pht('This file was changed only by adding or removing whitespace.'),
+          'whitespace');
       } else if ($this->isDeleted()) {
         $shield = $renderer->renderShield(
-          pht("This file was completely deleted."),
-          true);
+          pht('This file was completely deleted.'));
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
         $lines = number_format($this->changeset->getAffectedLineCount());
         $shield = $renderer->renderShield(
           pht(
             'This file has a very large number of changes ({%s} lines).',
-            $lines),
-          true);
+            $lines));
       }
     }
 

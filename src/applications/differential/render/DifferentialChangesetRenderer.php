@@ -258,28 +258,69 @@ abstract class DifferentialChangesetRenderer {
     $vs = 0
   );
 
-  public function renderShield($message, $more) {
+  /**
+   * Render a "shield" over the diff, with a message like "This file is
+   * generated and does not need to be reviewed." or "This file was completely
+   * deleted." This UI element hides unimportant text so the reviewer doesn't
+   * need to scroll past it.
+   *
+   * The shield includes a link to view the underlying content. This link
+   * may force certain rendering modes when the link is clicked:
+   *
+   *    - `"default"`: Render the diff normally, as though it was not
+   *      shielded. This is the default and appropriate if the underlying
+   *      diff is a normal change, but was hidden for reasons of not being
+   *      important (e.g., generated code).
+   *    - `"text"`: Force the text to be shown. This is probably only relevant
+   *      when a file is not changed.
+   *    - `"whitespace"`: Force the text to be shown, and the diff to be
+   *      rendered with all whitespace shown. This is probably only relevant
+   *      when a file is changed only by altering whitespace.
+   *    - `"none"`: Don't show the link (e.g., text not available).
+   *
+   * @param   string        Message explaining why the diff is hidden.
+   * @param   string|null   Force mode, see above.
+   * @return  string        Shield markup.
+   */
+  public function renderShield($message, $force = 'default') {
 
-    if ($more) {
-      $end = $this->getLineCount();
-      $reference = $this->getRenderingReference();
-      $more =
-        ' '.
-        javelin_render_tag(
-          'a',
-          array(
-            'mustcapture' => true,
-            'sigil'       => 'show-more',
-            'class'       => 'complete',
-            'href'        => '#',
-            'meta'        => array(
-              'ref'         => $reference,
-              'range'       => "0-{$end}",
-            ),
-          ),
-          'Show File Contents');
-    } else {
-      $more = null;
+    $end = $this->getLineCount();
+    $reference = $this->getRenderingReference();
+
+    if ($force !== 'text' &&
+        $force !== 'whitespace' &&
+        $force !== 'none' &&
+        $force !== 'default') {
+      throw new Exception("Invalid 'force' parameter '{$force}'!");
+    }
+
+    $range = "0-{$end}";
+    if ($force == 'text') {
+      // If we're forcing text, force the whole file to be rendered.
+      $range = "{$range}/0-{$end}";
+    }
+
+    $meta = array(
+      'ref'   => $reference,
+      'range' => $range,
+    );
+
+    if ($force == 'whitespace') {
+      $meta['whitespace'] = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
+    }
+
+    $more = null;
+    if ($force !== 'none') {
+      $more = ' '.javelin_render_tag(
+        'a',
+        array(
+          'mustcapture' => true,
+          'sigil'       => 'show-more',
+          'class'       => 'complete',
+          'href'        => '#',
+          'meta'        => $meta,
+        ),
+        'Show File Contents');
     }
 
     return javelin_render_tag(

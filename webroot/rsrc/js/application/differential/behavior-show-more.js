@@ -39,7 +39,11 @@ JX.behavior('differential-show-more', function(config) {
       var container = JX.DOM.scry(context, 'td')[0];
       JX.DOM.setContent(container, 'Loading...');
       JX.DOM.alterClass(context, 'differential-show-more-loading', true);
-      data['whitespace'] = config.whitespace;
+
+      if (!data['whitespace']) {
+        data['whitespace'] = config.whitespace;
+      }
+
       new JX.Workflow(config.uri, data)
         .setHandler(JX.bind(null, onresponse, context))
         .start();

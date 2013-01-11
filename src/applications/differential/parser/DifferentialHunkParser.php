@@ -249,6 +249,7 @@ final class DifferentialHunkParser {
         $n_type = null;
       }
 
+      // This line does not exist in the new file.
       if (($o_type != null) && ($n_type == null)) {
         $rebuild_old[] = $old_line_data;
         $rebuild_new[] = null;
@@ -258,6 +259,7 @@ final class DifferentialHunkParser {
         continue;
       }
 
+      // This line does not exist in the old file.
       if (($n_type != null) && ($o_type == null)) {
         $rebuild_old[] = null;
         $rebuild_new[] = $new_line_data;
