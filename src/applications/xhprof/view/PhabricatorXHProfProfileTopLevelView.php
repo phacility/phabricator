@@ -90,7 +90,7 @@ final class PhabricatorXHProfProfileTopLevelView
             'sigil' => 'has-tooltip',
             'meta'  => array(
               'tip' => 'Total wall time spent in this function and all of '.
-                       'its children (chilren are other functions it called '.
+                       'its children (children are other functions it called '.
                        'while executing).',
               'size' => 200,
             ),
