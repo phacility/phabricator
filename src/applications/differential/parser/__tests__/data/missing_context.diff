@@ -1,0 +1,11 @@
+diff --git a/fruit b/fruit
+index a1f7255..b5fb7b8 100644
+--- a/fruit
++++ b/fruit
+@@ -4,6 +4,5 @@ cherry
+ date
+ elderberry
+ fig
+-grape
+ honeydew
+

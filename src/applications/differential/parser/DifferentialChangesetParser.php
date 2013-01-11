@@ -10,8 +10,7 @@ final class DifferentialChangesetParser {
   protected $oldRender    = null;
 
   protected $filename     = null;
-  protected $missingOld   = array();
-  protected $missingNew   = array();
+  protected $hunkStartLines = array();
 
   protected $comments     = array();
   protected $specialAttributes = array();
@@ -41,7 +40,7 @@ final class DifferentialChangesetParser {
   private $markupEngine;
   private $highlightErrors;
 
-  const CACHE_VERSION = 8;
+  const CACHE_VERSION = 9;
   const CACHE_MAX_SIZE = 8e6;
 
   const ATTR_GENERATED  = 'attr:generated';
@@ -71,16 +70,6 @@ final class DifferentialChangesetParser {
 
   public function setSpecialAttributes(array $attributes) {
     $this->specialAttributes = $attributes;
-    return $this;
-  }
-
-  public function setMissingNewLineMarkerMap(array $map) {
-    $this->missingNew = $map;
-    return $this;
-  }
-
-  public function setMissingOldLineMarkerMap(array $map) {
-    $this->missingOld = $map;
     return $this;
   }
 
@@ -298,8 +287,7 @@ final class DifferentialChangesetParser {
       'newRender',
       'oldRender',
       'specialAttributes',
-      'missingOld',
-      'missingNew',
+      'hunkStartLines',
       'cacheVersion',
       'cacheHost',
     );
@@ -593,8 +581,8 @@ final class DifferentialChangesetParser {
     $this->setNewLines($hunk_parser->getNewLines());
     $this->setIntraLineDiffs($hunk_parser->getIntraLineDiffs());
     $this->setVisibileLinesMask($hunk_parser->getVisibleLinesMask());
-    $this->setMissingOldLineMarkerMap($hunk_parser->getOldLineMarkerMap());
-    $this->setMissingNewLineMarkerMap($hunk_parser->getNewLineMarkerMap());
+    $this->hunkStartLines = $hunk_parser->getHunkStartLines(
+      $changeset->getHunks());
 
     $new_corpus = $hunk_parser->getNewCorpus();
     $new_corpus_block = implode('', $new_corpus);
@@ -711,8 +699,7 @@ final class DifferentialChangesetParser {
       ->setLineCount($rows)
       ->setOldRender($this->oldRender)
       ->setNewRender($this->newRender)
-      ->setMissingOldLines($this->missingOld)
-      ->setMissingNewLines($this->missingNew)
+      ->setHunkStartLines($this->hunkStartLines)
       ->setOldChangesetID($this->leftSideChangesetID)
       ->setNewChangesetID($this->rightSideChangesetID)
       ->setOldAttachesToNewFile($this->leftSideAttachesToNewFile)

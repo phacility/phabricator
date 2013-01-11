@@ -44,11 +44,10 @@ final class DifferentialChangesetTwoUpRenderer
     $range_len,
     $rows) {
 
-    $missing_old = $this->getMissingOldLines();
-    $missing_new = $this->getMissingNewLines();
+    $hunk_starts = $this->getHunkStartLines();
 
     $context_not_available = null;
-    if ($missing_old || $missing_new) {
+    if ($hunk_starts) {
       $context_not_available = javelin_render_tag(
         'tr',
         array(
@@ -282,8 +281,7 @@ final class DifferentialChangesetTwoUpRenderer
       }
       $n_classes .= ' right'.$n_colspan;
 
-      if (($o_num && !empty($missing_old[$o_num])) ||
-          ($n_num && !empty($missing_new[$n_num]))) {
+      if (isset($hunk_starts[$o_num])) {
         $html[] = $context_not_available;
       }
 

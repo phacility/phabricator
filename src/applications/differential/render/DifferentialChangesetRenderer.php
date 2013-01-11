@@ -6,8 +6,7 @@ abstract class DifferentialChangesetRenderer {
   private $changeset;
   private $renderingReference;
   private $renderPropertyChangeHeader;
-  private $missingOldLines;
-  private $missingNewLines;
+  private $hunkStartLines;
   private $oldLines;
   private $newLines;
   private $oldComments;
@@ -205,20 +204,13 @@ abstract class DifferentialChangesetRenderer {
     return $this->oldLines;
   }
 
-  public function setMissingNewLines(array $missing_new_lines) {
-    $this->missingNewLines = $missing_new_lines;
+  public function setHunkStartLines(array $hunk_start_lines) {
+    $this->hunkStartLines = $hunk_start_lines;
     return $this;
-  }
-  protected function getMissingNewLines() {
-    return $this->missingNewLines;
   }
 
-  public function setMissingOldLines(array $missing_old_lines) {
-    $this->missingOldLines = $missing_old_lines;
-    return $this;
-  }
-  protected function getMissingOldLines() {
-    return $this->missingOldLines;
+  protected function getHunkStartLines() {
+    return $this->hunkStartLines;
   }
 
   public function setUser(PhabricatorUser $user) {
@@ -260,9 +252,9 @@ abstract class DifferentialChangesetRenderer {
     $rows
   );
   abstract public function renderFileChange(
-    $old = null, 
-    $new = null, 
-    $id = 0, 
+    $old = null,
+    $new = null,
+    $id = 0,
     $vs = 0
   );
 
