@@ -61,6 +61,7 @@
 
 .aphront-form-input input,
 .aphront-form-input textarea {
+  font-size: 13px;
   display: block;
   width: 100%;
   box-sizing: border-box;
