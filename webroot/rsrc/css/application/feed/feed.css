@@ -4,7 +4,7 @@
 
 .phabricator-feed-frame {
   width: 640px;
-  padding: 1em;
+  padding: 20px;
 }
 
 .phabricator-chromeless-page .phabricator-feed-frame {
@@ -20,8 +20,7 @@
 
 .phabricator-feed-story-one-line {
   min-height: 0;
-  font-size: 11px;
-  color: #444444;
+  color: #555;
 }
 
 .phabricator-feed-story-head {
@@ -38,8 +37,8 @@
 }
 
 .phabricator-feed-story-date {
-  color: #666666;
-  font-size: 11px;
+  color: #555;
+  font-weight: bold;
   border-bottom: 1px solid #eeeeee;
   padding: .5em 0;
 }
