@@ -133,7 +133,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
       } else if ($value === true) {
         $value = '<em>true</em>';
       } else {
-        $value = phutil_escape_html($value);
+        $value = phutil_escape_html(
+          PhabricatorConfigJSON::prettyPrintJSON($value));
       }
 
       $table[] = '<td>'.$value.'</td>';

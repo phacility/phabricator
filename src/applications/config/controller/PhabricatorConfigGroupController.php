@@ -74,7 +74,8 @@ final class PhabricatorConfigGroupController
 
       if (!$option->getHidden()) {
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
-        $current_value = $this->prettyPrintJSON($current_value);
+        $current_value = PhabricatorConfigJSON::prettyPrintJSON(
+          $current_value);
         $current_value = phutil_render_tag(
           'div',
           array(

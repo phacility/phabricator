@@ -706,6 +706,7 @@ phutil_register_library_map(array(
     'PhabricatorConfigGroupController' => 'applications/config/controller/PhabricatorConfigGroupController.php',
     'PhabricatorConfigIssueListController' => 'applications/config/controller/PhabricatorConfigIssueListController.php',
     'PhabricatorConfigIssueViewController' => 'applications/config/controller/PhabricatorConfigIssueViewController.php',
+    'PhabricatorConfigJSON' => 'applications/config/json/PhabricatorConfigJSON.php',
     'PhabricatorConfigListController' => 'applications/config/controller/PhabricatorConfigListController.php',
     'PhabricatorConfigLocalSource' => 'infrastructure/env/PhabricatorConfigLocalSource.php',
     'PhabricatorConfigManagementSetWorkflow' => 'infrastructure/env/management/PhabricatorConfigManagementSetWorkflow.php',
