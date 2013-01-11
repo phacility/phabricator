@@ -3,49 +3,78 @@
  */
 
 .aphront-table-view {
-  width:            100%;
+  width: 100%;
   border-collapse:  collapse;
-  background:       #fdfdfd;
-  border:           1px solid #003366;
+  background: #fff;
+  border: 1px solid #d5dae0;
 }
 
 .aphront-table-view tr.alt {
-  background:       #efefef;
+  background: #f1f3f8;
 }
 
 .aphront-table-view th {
-  font-size: 12px;
   font-weight: bold;
-  background: #003366;
-  color: white;
   white-space: nowrap;
+  color: #525252;
+  text-shadow: 0 1px 0 white;
+  font-weight: bold;
+  background-image: url(/rsrc/image/texture/table_header.png);
+  background-repeat: repeat-x;
+}
+
+th.aphront-table-view-sortable-selected {
+  background-image: url(/rsrc/image/texture/table_header_hover.png);
 }
 
 .aphront-table-view th a,
 .aphront-table-view th a:hover,
 .aphront-table-view th a:link {
-  padding: 4px 8px;
-  color: white;
+  color: #525252;
+  text-shadow: 0 1px 0 white;
   display: block;
   text-decoration: none;
 }
 
 .aphront-table-view th a:hover {
-  background: #3366aa;
+  text-decoration: underline;
 }
 
 .aphront-table-view td.header {
-  padding:          4px 8px;
-  background:       #3b5998;
-  color:            white;
-  white-space:      nowrap;
-  text-align:       right;
+  padding: 4px 8px;
+  white-space: nowrap;
+  text-align: right;
+  color: #525252;
+  font-weight: bold;
 }
 
 .aphront-table-view td {
-  font-size:        11px;
-  white-space:      nowrap;
-  vertical-align:   middle;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.aphront-table-down-sort {
+  display: inline-block;
+  margin-top: 5px;
+  width: 0;
+  height: 0;
+  vertical-align: top;
+  border-top: 4px solid black;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  content: "";
+}
+
+.aphront-table-up-sort {
+  display: inline-block;
+  margin-top: 5px;
+  width: 0;
+  height: 0;
+  vertical-align: top;
+  border-bottom: 4px solid black;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  content: "";
 }
 
 /* - Padding -------------------------------------------------------------------
@@ -58,11 +87,13 @@
 */
 
 .aphront-table-view th {
-  padding: 4px 8px;
+  padding: 8px 10px;
+  font-size: 12px;
 }
 
 .aphront-table-view td {
-  padding: 4px 8px;
+  padding: 6px 10px;
+  font-size: 12px;
 }
 
 .device-tablet .aphront-table-view td,
@@ -87,11 +118,11 @@
 }
 
 .aphront-table-view td.sorted-column {
-  background: #f6f6fd;
+  background: #f1f3f8;
 }
 
 .aphront-table-view tr.alt td.sorted-column {
-  background: #e0e0ef;
+  background: #e4e6eb;
 }
 
 .aphront-table-view td.action {
@@ -100,31 +131,31 @@
 }
 
 .aphront-table-view td.larger {
-  font-size:        14px;
+  font-size: 14px;
 }
 
 .aphront-table-view td.pri {
-  font-weight:      bold;
+  font-weight: bold;
 }
 
 .aphront-table-view td.wide {
-  white-space:      normal;
-  width:            100%;
+  white-space: normal;
+  width: 100%;
 }
 
 .aphront-table-view td.right {
-  text-align:       right;
+  text-align: right;
 }
 
 .aphront-table-view td.mono {
-  font-family:      "Monaco", monospace;
-  font-size:        10px;
+  font-family: "Monaco", monospace;
+  font-size: 11px;
 }
 
 .aphront-table-view td.n {
-  font-family:      "Monaco", monospace;
-  font-size:        10px;
-  text-align:       right;
+  font-family: "Monaco", monospace;
+  font-size: 11px;
+  text-align: right;
 }
 
 .aphront-table-view td.wrap {
@@ -147,13 +178,12 @@ span.single-display-line-content {
 }
 
 .aphront-table-view tr.highlighted {
-  background: #ffff99;
+  background: #fcf8e2;
 }
 
 .aphront-table-view tr.alt-highlighted {
-  background: #f3f399;
+  background: #fcf2bb;
 }
-
 
 .aphront-table-view tr.no-data td {
   padding:    1em;
@@ -182,25 +212,6 @@ span.single-display-line-content {
   padding: 2px 4px 0px;
 }
 
-.aphront-table-view th.aphront-table-view-sortable {
-  padding: 0;
-}
-
-.aphront-table-view-sort-glyph {
-  float: right;
-  padding-left: 8px;
-  color: #6677bb;
-}
-
-th a:hover .aphront-table-view-sort-glyph {
-  color: #ffffff;
-}
-
-.aphront-table-view-sortable-selected .aphront-table-view-sort-glyph {
-  display: block;
-  color: white;
-}
-
 .device-desktop .aphront-table-view-device {
   display: none;
 }
@@ -221,6 +232,6 @@ th a:hover .aphront-table-view-sort-glyph {
 
 .aphront-table-view td.link a {
   display: block;
-  padding: 6px;
+  padding: 6px 8px;
   font-weight: bold;
 }
