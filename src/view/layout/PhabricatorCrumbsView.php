@@ -37,11 +37,12 @@ final class PhabricatorCrumbsView extends AphrontView {
             ),
             '');
         }
-        $actions[] = phutil_render_tag(
+        $actions[] = javelin_render_tag(
           'a',
           array(
             'href' => $action->getHref(),
             'class' => 'phabricator-crumbs-action',
+            'sigil' => $action->getWorkflow() ? 'workflow' : null,
           ),
           $icon.phutil_escape_html($action->getName()));
       }

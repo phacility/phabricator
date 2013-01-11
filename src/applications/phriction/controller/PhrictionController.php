@@ -53,6 +53,7 @@ abstract class PhrictionController extends PhabricatorController {
       id(new PhabricatorMenuItemView())
         ->setName(pht('Create Document'))
         ->setHref('/phriction/new/')
+        ->setWorkflow(true)
         ->setIcon('create'));
 
     return $crumbs;

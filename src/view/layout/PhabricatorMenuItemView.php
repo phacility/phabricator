@@ -90,6 +90,10 @@ final class PhabricatorMenuItemView extends AphrontView {
     return $this;
   }
 
+  public function getWorkflow() {
+    return $this->workflow;
+  }
+
   public function setSortOrder($order) {
     $this->sortOrder = $order;
     return $this;

@@ -30,7 +30,7 @@ final class PhrictionNewController extends PhrictionController {
       pht('Create a new document at')))
       ->appendChild($view)
       ->addSubmitButton(pht('Create'))
-      ->addCancelButton($request->getRequestURI());
+      ->addCancelButton('/w/');
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
