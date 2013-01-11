@@ -724,6 +724,9 @@ return array(
   // The password of the LDAP anonymous user.
   'ldap.anonymous-user-password' => null,
 
+  // Whether to use STARTTLS
+  'ldap.start-tls' => false,
+
 
 // -- Disqus OAuth ---------------------------------------------------------- //
 
