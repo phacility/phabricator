@@ -21,7 +21,6 @@ final class PhabricatorDirectoryMainController
       case 'jump':
         break;
       case 'home':
-      case 'feed':
         $project_query = new PhabricatorProjectQuery();
         $project_query->setViewer($user);
         $project_query->withMemberPHIDs(array($user->getPHID()));
@@ -32,8 +31,6 @@ final class PhabricatorDirectoryMainController
     }
 
     switch ($this->filter) {
-      case 'feed':
-        return $this->buildFeedResponse($nav, $projects);
       case 'jump':
         return $this->buildJumpResponse($nav);
       default:
@@ -108,46 +105,6 @@ final class PhabricatorDirectoryMainController
       $nav,
       array(
         'title' => 'Jump Nav',
-      ));
-  }
-
-  private function buildFeedResponse($nav, array $projects) {
-    assert_instances_of($projects, 'PhabricatorProject');
-
-    $subnav = new AphrontSideNavFilterView();
-    $subnav->setBaseURI(new PhutilURI('/feed/'));
-
-    $subnav->addFilter('all',       'All Activity', '/feed/');
-    $subnav->addFilter('projects',  'My Projects');
-
-    $nav->appendChild($subnav);
-
-    $filter = $subnav->selectFilter($this->subfilter, 'all');
-
-    $view = null;
-    switch ($filter) {
-      case 'all':
-        $view = $this->buildFeedView(array());
-        break;
-      case 'projects':
-        if ($projects) {
-          $phids = mpull($projects, 'getPHID');
-          $view = $this->buildFeedView($phids);
-        } else {
-          $view = new AphrontErrorView();
-          $view->setSeverity(AphrontErrorView::SEVERITY_NODATA);
-          $view->setTitle('No Projects');
-          $view->appendChild('You have not joined any projects.');
-        }
-        break;
-    }
-
-    $subnav->appendChild($view);
-
-    return $this->buildStandardPageResponse(
-      $nav,
-      array(
-        'title' => 'Feed',
       ));
   }
 
@@ -375,41 +332,6 @@ final class PhabricatorDirectoryMainController
     $view->setHandles($handles);
 
     return $view;
-  }
-
-  private function buildFeedView(array $phids) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-    $user_phid = $user->getPHID();
-
-    $feed_query = new PhabricatorFeedQuery();
-    $feed_query->setViewer($user);
-    if ($phids) {
-      $feed_query->setFilterPHIDs($phids);
-    }
-
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-    $pager->setPageSize(200);
-
-    $feed = $feed_query->executeWithCursorPager($pager);
-
-    $builder = new PhabricatorFeedBuilder($feed);
-    $builder->setUser($user);
-    $feed_view = $builder->buildView();
-
-    return
-      '<div style="padding: 1em 3em;">'.
-        '<div style="margin: 0 1em;">'.
-          '<h1 style="font-size: 18px; '.
-                     'border-bottom: 1px solid #aaaaaa; '.
-                     'padding: 0;">Feed</h1>'.
-        '</div>'.
-        $feed_view->render().
-        '<div class="phabricator-feed-frame">'.
-          $pager->render().
-        '</div>'.
-      '</div>';
   }
 
   private function buildJumpPanel($query=null) {
