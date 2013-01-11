@@ -1143,6 +1143,7 @@ phutil_register_library_map(array(
     'PhabricatorSearchAbstractDocument' => 'applications/search/index/PhabricatorSearchAbstractDocument.php',
     'PhabricatorSearchAttachController' => 'applications/search/controller/PhabricatorSearchAttachController.php',
     'PhabricatorSearchBaseController' => 'applications/search/controller/PhabricatorSearchBaseController.php',
+    'PhabricatorSearchConfigOptions' => 'applications/search/config/PhabricatorSearchConfigOptions.php',
     'PhabricatorSearchController' => 'applications/search/controller/PhabricatorSearchController.php',
     'PhabricatorSearchDAO' => 'applications/search/storage/PhabricatorSearchDAO.php',
     'PhabricatorSearchDocument' => 'applications/search/storage/document/PhabricatorSearchDocument.php',
@@ -2478,6 +2479,7 @@ phutil_register_library_map(array(
     'PhabricatorSSHWorkflow' => 'PhutilArgumentWorkflow',
     'PhabricatorSearchAttachController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchBaseController' => 'PhabricatorController',
+    'PhabricatorSearchConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorSearchController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchDAO' => 'PhabricatorLiskDAO',
     'PhabricatorSearchDocument' => 'PhabricatorSearchDAO',
@@ -2687,7 +2689,11 @@ phutil_register_library_map(array(
     'PhrictionDAO' => 'PhabricatorLiskDAO',
     'PhrictionDeleteController' => 'PhrictionController',
     'PhrictionDiffController' => 'PhrictionController',
-    'PhrictionDocument' => 'PhrictionDAO',
+    'PhrictionDocument' =>
+    array(
+      0 => 'PhrictionDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhrictionDocumentController' => 'PhrictionController',
     'PhrictionDocumentEditor' => 'PhabricatorEditor',
     'PhrictionDocumentPreviewController' => 'PhrictionController',
