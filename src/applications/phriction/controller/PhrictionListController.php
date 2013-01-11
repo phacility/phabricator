@@ -18,21 +18,24 @@ final class PhrictionListController
     $user = $request->getUser();
 
     $views = array(
-      'active'  => 'Active Documents',
-      'all'     => 'All Documents',
-      'updates' => 'Recently Updated',
+      'active'  => pht('Active Documents'),
+      'all'     => pht('All Documents'),
+      'updates' => pht('Recently Updated'),
     );
 
     if (empty($views[$this->view])) {
       $this->view = 'active';
     }
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/phriction/list/'));
-    foreach ($views as $view => $name) {
-      $nav->addFilter($view, $name);
-    }
-    $nav->selectFilter($this->view, null);
+    $nav = $this->buildSideNavView($this->view);
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($views[$this->view]);
+
+    $nav->appendChild(
+      array(
+        $header,
+      ));
 
     $pager = new AphrontPagerView();
     $pager->setURI($request->getRequestURI(), 'page');
@@ -44,7 +47,6 @@ final class PhrictionListController
     $phids = mpull($content, 'getAuthorPHID');
 
     $handles = $this->loadViewerHandles($phids);
-
 
     $rows = array();
     foreach ($documents as $document) {
@@ -79,24 +81,19 @@ final class PhrictionListController
         'right',
       ));
 
-    $view_headers = array(
-      'active'    => 'Active Documents',
-      'all'       => 'All Documents',
-      'updates'   => 'Recently Updated Documents',
-    );
-    $view_header = $view_headers[$this->view];
+    $view_header = $views[$this->view];
 
     $panel = new AphrontPanelView();
-    $panel->setHeader($view_header);
     $panel->appendChild($document_table);
     $panel->appendChild($pager);
 
     $nav->appendChild($panel);
 
-    return $this->buildStandardPageResponse($nav,
-        array(
-          'title' => 'Phriction Main'
-        ));
+    return $this->buildApplicationPage(
+      $nav,
+      array(
+        'title' => pht('Phriction Main'),
+      ));
   }
 
   private function loadDocuments(AphrontPagerView $pager) {

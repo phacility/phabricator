@@ -3,7 +3,8 @@
 /**
  * @group phriction
  */
-final class PhrictionDocument extends PhrictionDAO {
+final class PhrictionDocument extends PhrictionDAO
+  implements PhabricatorPolicyInterface {
 
   protected $id;
   protected $phid;
@@ -83,4 +84,19 @@ final class PhrictionDocument extends PhrictionDAO {
     return $parts[1].'/';
   }
 
+  // TODO: Customize this? Copypasta from PhabricatorPaste.
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+    return false;
+  }
 }

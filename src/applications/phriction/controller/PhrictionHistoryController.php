@@ -96,21 +96,6 @@ final class PhrictionHistoryController
       );
     }
 
-    $crumbs = new AphrontCrumbsView();
-    $crumbs->setCrumbs(
-      array(
-        'Phriction',
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => PhrictionDocument::getSlugURI($document->getSlug()),
-          ),
-          phutil_escape_html($current->getTitle())
-        ),
-        'History',
-      ));
-
-
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
@@ -135,18 +120,30 @@ final class PhrictionHistoryController
         '',
       ));
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumb_views = $this->renderBreadcrumbs($document->getSlug());
+    foreach ($crumb_views as $view) {
+      $crumbs->addCrumb($view);
+    }
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('History'))
+        ->setHref(
+          PhrictionDocument::getSlugURI($document->getSlug(), 'history')));
+
     $panel = new AphrontPanelView();
     $panel->setHeader('Document History');
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $panel,
       ),
       array(
         'title'     => 'Document History',
+        'device'    => true,
       ));
 
   }

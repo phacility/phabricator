@@ -30,10 +30,11 @@ final class PhrictionDocumentController
       'slug = %s',
       $slug);
 
-    $breadcrumbs = $this->renderBreadcrumbs($slug);
     $version_note = null;
 
     if (!$document) {
+
+      $document = new PhrictionDocument();
 
       if (PhrictionDocument::isProjectSlug($slug)) {
         $project = id(new PhabricatorProject())->loadOneWhere(
@@ -130,7 +131,12 @@ final class PhrictionDocumentController
           $handles[$project_phid]->renderLink().'.';
       }
 
-
+      $index_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/phriction/',
+        ),
+        pht('Document Index'));
 
       $byline =
         '<div class="phriction-byline">'.
@@ -157,34 +163,10 @@ final class PhrictionDocumentController
 
       $page_content =
         '<div class="phriction-content">'.
+          $index_link.
           $byline.
           $core_content.
           '</div>';
-
-      $create_button = javelin_render_tag(
-        'a',
-        array(
-          'href'  => '/phriction/new/',
-          'class' => 'button green',
-          'sigil' => 'workflow',
-        ),
-        pht('New Document'));
-      $edit_button = phutil_render_tag(
-        'a',
-        array(
-          'href'  => '/phriction/edit/'.$document->getID().'/',
-          'class' => 'button',
-        ),
-        pht('Edit Document'));
-      $history_button = phutil_render_tag(
-        'a',
-        array(
-          'href'  => PhrictionDocument::getSlugURI($slug, 'history'),
-          'class' => 'button grey',
-        ),
-        pht('View History'));
-      // these float right so history_button which is right most goes first
-      $buttons = $history_button.$edit_button.$create_button;
     }
 
     if ($version_note) {
@@ -193,74 +175,59 @@ final class PhrictionDocumentController
 
     $children = $this->renderChildren($slug);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumb_views = $this->renderBreadcrumbs($slug);
+    foreach ($crumb_views as $view) {
+      $crumbs->addCrumb($view);
+    }
+
+    $actions = $this->buildActionView($user, $document);
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($page_title);
+
     $page =
-      '<div class="phriction-header">'.
-        $buttons.
-        '<h1>'.phutil_escape_html($page_title).'</h1>'.
-        $breadcrumbs.
-      '</div>'.
+      $crumbs->render().
+      $header->render().
+      $actions->render().
       $version_note.
       $page_content.
       $children;
 
-    return $this->buildStandardPageResponse(
-      $page,
+    return $this->buildApplicationPage(
       array(
-        'title'   => 'Phriction - '.$page_title,
+        $page,
+      ),
+      array(
+        'title'   => $page_title,
+        'device'  => true,
       ));
 
   }
 
-  private function renderBreadcrumbs($slug) {
+  private function buildActionView(
+    PhabricatorUser $user,
+    PhrictionDocument $document) {
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $document,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
-    $ancestor_handles = array();
-    $ancestral_slugs = PhabricatorSlug::getAncestry($slug);
-    $ancestral_slugs[] = $slug;
-    if ($ancestral_slugs) {
-      $empty_slugs = array_fill_keys($ancestral_slugs, null);
-      $ancestors = id(new PhrictionDocument())->loadAllWhere(
-        'slug IN (%Ls)',
-        $ancestral_slugs);
-      $ancestors = mpull($ancestors, null, 'getSlug');
+    $slug = PhabricatorSlug::normalize($this->slug);
 
-      $ancestor_phids = mpull($ancestors, 'getPHID');
-      $handles = array();
-      if ($ancestor_phids) {
-        $handles = $this->loadViewerHandles($ancestor_phids);
-      }
-
-      $ancestor_handles = array();
-      foreach ($ancestral_slugs as $slug) {
-        if (isset($ancestors[$slug])) {
-          $ancestor_handles[] = $handles[$ancestors[$slug]->getPHID()];
-        } else {
-          $handle = new PhabricatorObjectHandle();
-          $handle->setName(PhabricatorSlug::getDefaultTitle($slug));
-          $handle->setURI(PhrictionDocument::getSlugURI($slug));
-          $ancestor_handles[] = $handle;
-        }
-      }
-    }
-
-    $breadcrumbs = array();
-    foreach ($ancestor_handles as $ancestor_handle) {
-      $breadcrumbs[] = $ancestor_handle->renderLink();
-    }
-
-    $list = phutil_render_tag(
-      'a',
-      array(
-        'href' => '/phriction/',
-      ),
-      'Document Index');
-
-    return
-      '<div class="phriction-breadcrumbs">'.
-        $list.' &middot; '.
-        '<span class="phriction-document-crumbs">'.
-          implode(" \xC2\xBB ", $breadcrumbs).
-        '</span>'.
-      '</div>';
+    return id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObject($document)
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit Document'))
+          ->setIcon('edit')
+          ->setHref('/phriction/edit/'.$document->getID().'/'))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('View History'))
+          ->setIcon('history')
+          ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
   }
 
   private function renderChildren($slug) {
