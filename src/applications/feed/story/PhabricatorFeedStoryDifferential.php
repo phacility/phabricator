@@ -56,6 +56,21 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     return $one_line;
   }
 
+  public function renderText() {
+    $author_name = $this->getHandle($this->getAuthorPHID())->getLinkName();
+
+    $revision_handle = $this->getHandle($this->getPrimaryObjectPHID());
+    $revision_title = $revision_handle->getLinkName();
+    $revision_uri = PhabricatorEnv::getURI($revision_handle->getURI());
+
+    $action = $this->getValue('action');
+    $verb = DifferentialAction::getActionPastTenseVerb($action);
+
+    $text = "{$author_name} {$verb} revision {$revision_title} {$revision_uri}";
+
+    return $text;
+  }
+
   public function getNotificationAggregations() {
     $class = get_class($this);
     $phid  = $this->getStoryData()->getValue('revision_phid');

@@ -23,4 +23,14 @@ final class PhabricatorFeedStoryStatus extends PhabricatorFeedStory {
     return $view;
   }
 
+  public function renderText() {
+    $author_handle = $this->getHandle($this->getPrimaryObjectPHID());
+    $author_name = $author_handle->getLinkName();
+    $author_uri = PhabricatorEnv::getURI($author_handle->getURI());
+
+    $text = "{$author_name} updated their status {$author_url}";
+
+    return $text;
+  }
+
 }

@@ -221,6 +221,26 @@
       "rule" : ".app-fact-light-large",
       "hash" : "8253f813361ba065866ee6e6e2077320"
     },
+    "app-feed-blue-large"          : {
+      "name" : "app-feed-blue-large",
+      "rule" : ".app-feed-blue-large, .phabricator-crumb-view:hover .app-feed-dark-large",
+      "hash" : "462246f99422c86301b7d4faa67d9488"
+    },
+    "app-feed-dark-large"          : {
+      "name" : "app-feed-dark-large",
+      "rule" : ".app-feed-dark-large",
+      "hash" : "0eecff752dc5dde55e7feaa52b7ee7d0"
+    },
+    "app-feed-glow-large"          : {
+      "name" : "app-feed-glow-large",
+      "rule" : ".app-feed-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-feed-light-large",
+      "hash" : "45fe559a997e540933c184ae570a6ddc"
+    },
+    "app-feed-light-large"         : {
+      "name" : "app-feed-light-large",
+      "rule" : ".app-feed-light-large",
+      "hash" : "2ec6e12956fe1e1b746261bb3d0a0d36"
+    },
     "app-files-blue-large"         : {
       "name" : "app-files-blue-large",
       "rule" : ".app-files-blue-large, .phabricator-crumb-view:hover .app-files-dark-large",

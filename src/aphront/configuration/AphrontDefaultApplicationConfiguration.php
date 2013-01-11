@@ -18,11 +18,6 @@ class AphrontDefaultApplicationConfiguration
     return $this->getResourceURIMapRules() + array(
       '/(?:(?P<filter>(?:jump))/)?' =>
         'PhabricatorDirectoryMainController',
-      '/(?:(?P<filter>feed)/)' => array(
-        'public/' => 'PhabricatorFeedPublicStreamController',
-        '(?:(?P<subfilter>[^/]+)/)?' =>
-          'PhabricatorDirectoryMainController',
-      ),
 
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'

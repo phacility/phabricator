@@ -39,6 +39,19 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     );
   }
 
+  private function createHunksFromFile($name) {
+    $data = Filesystem::readFile(dirname(__FILE__).'/data/'.$name);
+
+    $parser = new ArcanistDiffParser();
+    $changes = $parser->parseDiff($data);
+    if (count($changes) !== 1) {
+      throw new Exception("Expected 1 changeset for '{$name}'!");
+    }
+
+    $diff = DifferentialDiff::newFromRawChanges($changes);
+    return head($diff->getChangesets())->getHunks();
+  }
+
   public function testOneLineOldComment() {
     $parser = new DifferentialHunkParser();
     $hunks = $this->createSingleChange(1, 0, "-a");
@@ -68,7 +81,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
       0);
     $this->assertEqual("", $context);
   }
-  
+
   public function testOverlapFromStartOfHunk() {
     $parser = new DifferentialHunkParser();
     $hunks = array(
@@ -232,5 +245,30 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
         "-o3\n".
         "+n2", $context);
   }
+
+  public function testMissingContext() {
+    $tests = array(
+      'missing_context.diff' => array(
+        4 => true,
+      ),
+      'missing_context_2.diff' => array(
+        5 => true,
+      ),
+      'missing_context_3.diff' => array(
+        4 => true,
+        13 => true,
+      ),
+    );
+
+    foreach ($tests as $name => $expect) {
+      $hunks = $this->createHunksFromFile($name);
+
+      $parser = new DifferentialHunkParser();
+      $actual = $parser->getHunkStartLines($hunks);
+
+      $this->assertEqual($expect, $actual, $name);
+    }
+  }
+
 }
 

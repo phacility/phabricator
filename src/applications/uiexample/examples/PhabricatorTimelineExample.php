@@ -111,7 +111,7 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
 
     $anchor = 0;
     foreach ($events as $event) {
-      $event->setViewer($user);
+      $event->setUser($user);
       $event->setDateCreated(time() + ($anchor * 60 * 8));
       $event->setAnchor(++$anchor);
     }

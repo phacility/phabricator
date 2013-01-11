@@ -56,6 +56,11 @@
       "rule" : ".app-fact-dark-xlarge",
       "hash" : "b19d394e7eec7e622d2bc1f071537414"
     },
+    "app-feed-dark-xlarge"         : {
+      "name" : "app-feed-dark-xlarge",
+      "rule" : ".app-feed-dark-xlarge",
+      "hash" : "971f49bc0b7a5ddf4943cdfcbace0b7c"
+    },
     "app-files-dark-xlarge"        : {
       "name" : "app-files-dark-xlarge",
       "rule" : ".app-files-dark-xlarge",

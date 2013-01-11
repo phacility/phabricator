@@ -7,12 +7,31 @@ final class DifferentialHunkParser {
   private $isDeleted;
   private $oldLines;
   private $newLines;
-  private $oldLineMarkerMap;
-  private $newLineMarkerMap;
   private $skipIntraLines;
   private $whitespaceMode;
   private $intraLineDiffs;
   private $visibleLinesMask;
+
+  /**
+   * Get a map of lines on which hunks start, other than line 1. This
+   * datastructure is used to determine when to render "Context not available."
+   * in diffs with multiple hunks.
+   *
+   * @return dict<int, bool>  Map of lines where hunks start, other than line 1.
+   */
+  public function getHunkStartLines(array $hunks) {
+    assert_instances_of($hunks, 'DifferentialHunk');
+
+    $map = array();
+    foreach ($hunks as $hunk) {
+      $line = $hunk->getOldOffset();
+      if ($line > 1) {
+        $map[$line] = true;
+      }
+    }
+
+    return $map;
+  }
 
   private function setVisibleLinesMask($mask) {
     $this->visibleLinesMask = $mask;
@@ -64,32 +83,6 @@ final class DifferentialHunkParser {
       );
     }
     return $this->skipIntraLines;
-  }
-
-  private function setNewLineMarkerMap($new_line_marker_map) {
-    $this->newLineMarkerMap = $new_line_marker_map;
-    return $this;
-  }
-  public function getNewLineMarkerMap() {
-    if ($this->newLineMarkerMap === null) {
-      throw new Exception(
-        'You must parseHunksForLineData before accessing this data.'
-      );
-    }
-    return $this->newLineMarkerMap;
-  }
-
-  private function setOldLineMarkerMap($old_line_marker_map) {
-    $this->oldLineMarkerMap = $old_line_marker_map;
-    return $this;
-  }
-  public function getOldLineMarkerMap() {
-    if ($this->oldLineMarkerMap === null) {
-      throw new Exception(
-        'You must parseHunksForLineData before accessing this data.'
-      );
-    }
-    return $this->oldLineMarkerMap;
   }
 
   private function setNewLines($new_lines) {
@@ -419,9 +412,6 @@ final class DifferentialHunkParser {
 
     $old_lines = array();
     $new_lines = array();
-    $old_line_marker_map = array();
-    $new_line_marker_map = array();
-
     foreach ($hunks as $hunk) {
 
       $lines = $hunk->getChanges();
@@ -443,11 +433,6 @@ final class DifferentialHunkParser {
 
       $old_line = $hunk->getOldOffset();
       $new_line = $hunk->getNewOffset();
-      if ($old_line > 1) {
-        $old_line_marker_map[] = $old_line;
-      } else if ($new_line > 1) {
-        $new_line_marker_map[] = $new_line;
-      }
 
       $num_lines = count($lines);
       for ($cursor = 0; $cursor < $num_lines; $cursor++) {
@@ -484,8 +469,6 @@ final class DifferentialHunkParser {
 
     $this->setOldLines($old_lines);
     $this->setNewLines($new_lines);
-    $this->setOldLineMarkerMap($old_line_marker_map);
-    $this->setNewLineMarkerMap($new_line_marker_map);
 
     return $this;
   }

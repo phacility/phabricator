@@ -77,13 +77,7 @@ final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
     $stories = $query->execute();
 
     if ($stories) {
-      $handle_phids = array_mergev(mpull($stories, 'getRequiredHandlePHIDs'));
-      $handles = id(new PhabricatorObjectHandleData($handle_phids))
-        ->loadHandles();
-
       foreach ($stories as $story) {
-
-        $story->setHandles($handles);
 
         $story_data = $story->getStoryData();
 
@@ -108,6 +102,15 @@ final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
               'authorPHID' => $story_data->getAuthorPHID(),
               'chronologicalKey' => $story_data->getChronologicalKey(),
               'data' => $story_data->getStoryData(),
+            );
+          break;
+          case 'text':
+            $data = array(
+              'class' => $story_data->getStoryType(),
+              'epoch' => $story_data->getEpoch(),
+              'authorPHID' => $story_data->getAuthorPHID(),
+              'chronologicalKey' => $story_data->getChronologicalKey(),
+              'text' => $story->renderText()
             );
           break;
           default:
