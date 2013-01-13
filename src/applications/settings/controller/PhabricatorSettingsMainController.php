@@ -73,9 +73,6 @@ final class PhabricatorSettingsMainController
     $group = null;
     foreach ($panels as $panel) {
       if ($panel->getPanelGroup() != $group) {
-        if ($group !== null) {
-          $nav->addSpacer();
-        }
         $group = $panel->getPanelGroup();
         $nav->addLabel($group);
       }

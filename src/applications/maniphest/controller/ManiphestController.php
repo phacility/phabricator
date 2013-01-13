@@ -51,7 +51,6 @@ abstract class ManiphestController extends PhabricatorController {
           '/maniphest/view/custom/?key='.$query->getQueryKey());
       }
       $nav->addFilter('saved',  'Edit...', '/maniphest/custom/');
-      $nav->addSpacer();
     }
 
     $nav->addLabel('User Tasks');
@@ -59,18 +58,14 @@ abstract class ManiphestController extends PhabricatorController {
     $nav->addFilter('created',      'Created');
     $nav->addFilter('subscribed',   'Subscribed');
     $nav->addFilter('triage',       'Need Triage');
-    $nav->addSpacer();
     $nav->addLabel('User Projects');
     $nav->addFilter('projecttriage','Need Triage');
     $nav->addFilter('projectall',   'All Tasks');
-    $nav->addSpacer();
     $nav->addLabel('All Tasks');
     $nav->addFilter('alltriage',    'Need Triage');
     $nav->addFilter('all',          'All Tasks');
-    $nav->addSpacer();
     $nav->addLabel('Custom');
     $nav->addFilter('custom',       'Custom Query');
-    $nav->addSpacer();
     $nav->addLabel('Reports');
     $nav->addFilter('report',       'Reports', '/maniphest/report/');
 

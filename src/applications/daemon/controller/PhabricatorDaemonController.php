@@ -12,7 +12,6 @@ abstract class PhabricatorDaemonController extends PhabricatorController {
     $nav->addFilter('log', 'All Daemons');
     $nav->addFilter('log/combined', 'Combined Log');
 
-    $nav->addSpacer();
     $nav->addLabel('Event Timeline');
     $nav->addFilter('timeline', 'Timeline');
 

@@ -14,14 +14,12 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
       if (PhabricatorEnv::getEnvConfig('ldap.auth-enabled') === true) {
         $nav->addFilter('ldap', 'Import from LDAP');
       }
-      $nav->addSpacer();
     }
 
     $nav->addLabel('Directory');
     $nav->addFilter('people', 'User Directory', $this->getApplicationURI());
 
     if ($is_admin) {
-      $nav->addSpacer();
       $nav->addLabel('Logs');
       $nav->addFilter('logs', 'Activity Logs');
     }

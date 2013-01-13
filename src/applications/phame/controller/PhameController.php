@@ -16,14 +16,10 @@ abstract class PhameController extends PhabricatorController {
     $nav->addFilter('post/new',   'New Post');
     $nav->addFilter('blog/new',   'New Blog');
 
-    $nav->addSpacer();
-
     $nav->addLabel('Posts');
     $nav->addFilter('post/draft', 'My Drafts');
     $nav->addFilter('post',       'My Posts');
     $nav->addFilter('post/all',   'All Posts');
-
-    $nav->addSpacer();
 
     $nav->addLabel('Blogs');
     $nav->addFilter('blog/user',  'Joinable Blogs');

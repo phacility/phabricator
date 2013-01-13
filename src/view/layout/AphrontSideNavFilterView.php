@@ -9,7 +9,6 @@
  *      ->addLabel('Cats')
  *      ->addFilter('meow', 'Meow')
  *      ->addFilter('purr', 'Purr')
- *      ->addSpacer()
  *      ->addLabel('Dogs')
  *      ->addFilter('woof', 'Woof')
  *      ->addFilter('bark', 'Bark');
@@ -104,12 +103,6 @@ final class AphrontSideNavFilterView extends AphrontView {
       id(new PhabricatorMenuItemView())
         ->setType(PhabricatorMenuItemView::TYPE_LABEL)
         ->setName($name));
-  }
-
-  public function addSpacer() {
-    return $this->addMenuItem(
-      id(new PhabricatorMenuItemView())
-        ->setType(PhabricatorMenuItemView::TYPE_SPACER));
   }
 
   public function setBaseURI(PhutilURI $uri) {

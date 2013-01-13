@@ -38,7 +38,6 @@ final class PhabricatorPeopleEditController
     $nav->addFilter('role',  'Edit Roles');
     $nav->addFilter('cert',  'Conduit Certificate');
     $nav->addFilter('profile', 'View Profile', '/p/'.$user->getUsername().'/');
-    $nav->addSpacer();
     $nav->addLabel('Special');
     $nav->addFilter('rename', 'Change Username');
     $nav->addFilter('delete', 'Delete User');
