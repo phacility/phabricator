@@ -51,6 +51,9 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $document_title = $document_handle->getLinkName();
     $document_uri = PhabricatorEnv::getURI($document_handle->getURI());
 
+    $action = $this->getValue('action');
+    $verb = PhrictionActionConstants::getActionPastTenseVerb($action);
+
     $text = "{$author_name} {$verb} the document".
             "{$document_title} {$document_uri}";
 
