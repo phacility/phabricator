@@ -694,7 +694,6 @@ final class DifferentialChangesetParser {
     $renderer = $this->getRenderer()
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
-      ->setLineCount($rows)
       ->setOldRender($this->oldRender)
       ->setNewRender($this->newRender)
       ->setHunkStartLines($this->hunkStartLines)
