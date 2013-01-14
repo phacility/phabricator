@@ -136,9 +136,11 @@ final class AphrontSideNavFilterView extends AphrontView {
       }
     }
 
-    $selected_item = $this->menu->getItem($this->selectedFilter);
-    if ($selected_item) {
-      $selected_item->addClass('phabricator-menu-item-selected');
+    if ($this->selectedFilter !== null) {
+      $selected_item = $this->menu->getItem($this->selectedFilter);
+      if ($selected_item) {
+        $selected_item->addClass('phabricator-menu-item-selected');
+      }
     }
 
     require_celerity_resource('phabricator-side-menu-view-css');
