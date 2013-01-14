@@ -116,6 +116,17 @@ final class DifferentialLintFieldSpecification
             'show'  => $show,
           );
 
+          if (isset($message['locations'])) {
+            $locations = array();
+            foreach ($message['locations'] as $location) {
+              $other_line = idx($location, 'line');
+              $locations[] =
+                idx($location, 'path', $path).
+                ($other_line ? ":{$other_line}" : "");
+            }
+            $description .= "\nOther locations: ".implode(", ", $locations);
+          }
+
           if (strlen($description)) {
             $rows[] = array(
               'style' => 'details',

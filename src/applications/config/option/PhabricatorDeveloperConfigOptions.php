@@ -140,6 +140,19 @@ final class PhabricatorDeveloperConfigOptions
             "Minify static resources by removing whitespace and comments. You ".
             "should enable this in production, but disable it in ".
             "development.")),
+      $this->newOption('cache.enable-deflate', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Enable deflate compression"),
+            pht("Disable deflate compression"),
+          ))
+        ->setSummary(
+          pht("Toggle gzdeflate()-based compression for some caches."))
+        ->setDescription(
+          pht(
+            "Set this to false to disable the use of gzdeflate()-based ".
+            "compression in some caches. This may give you less performant ".
+            "(but more debuggable) caching.")),
     );
   }
 }

@@ -133,6 +133,20 @@ final class PhabricatorSecurityConfigOptions
             "to something else and rebuild the Celerity map to break user ".
             "caches. Unless you are doing Celerity development, it is ".
             "exceptionally unlikely that you need to modify this.")),
+       $this->newOption('remarkup.enable-embedded-youtube', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht("Embed YouTube videos"),
+            pht("Don't embed YouTube videos"),
+          ))
+        ->setSummary(
+          pht("Determines whether or not YouTube videos get embedded."))
+        ->setDescription(
+          pht(
+            "If you enable this, linked YouTube videos will be embeded ".
+            "inline. This has mild security implications (you'll leak ".
+            "referrers to YouTube) and is pretty silly (but sort of ".
+            "awesome).")),
     );
   }
 

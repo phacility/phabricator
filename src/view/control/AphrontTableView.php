@@ -171,10 +171,10 @@ final class AphrontTableView extends AphrontView {
           $classes[] = 'aphront-table-view-sortable';
 
           $sort_value = $sort_values[$col_num];
-          $sort_glyph = "\xE2\x86\x93";
+          $sort_glyph_class = 'aphront-table-down-sort';
           if ($sort_value == $this->sortSelected) {
             if ($this->sortReverse) {
-              $sort_glyph = "\xE2\x86\x91";
+              $sort_glyph_class = 'aphront-table-up-sort';
             } else if (!$this->sortReverse) {
               $sort_value = '-'.$sort_value;
             }
@@ -184,9 +184,9 @@ final class AphrontTableView extends AphrontView {
           $sort_glyph = phutil_render_tag(
             'span',
             array(
-              'class' => 'aphront-table-view-sort-glyph',
+              'class' => $sort_glyph_class,
             ),
-            $sort_glyph);
+            '');
 
           $header = phutil_render_tag(
             'a',
@@ -194,7 +194,7 @@ final class AphrontTableView extends AphrontView {
               'href'  => $this->sortURI->alter($this->sortParam, $sort_value),
               'class' => 'aphront-table-view-sort-link',
             ),
-            $sort_glyph.' '.$header);
+            $header.' '.$sort_glyph);
         }
 
         if ($classes) {

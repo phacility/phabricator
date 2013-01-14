@@ -43,8 +43,6 @@ final class PhabricatorPeopleProfileController
     $nav->setBaseURI(new PhutilURI('/p/'.$username.'/'));
     $nav->addFilter('feed', 'Feed');
     $nav->addFilter('about', 'About');
-
-    $nav->addSpacer();
     $nav->addLabel('Activity');
 
     $external_arrow = "\xE2\x86\x97";
@@ -74,7 +72,7 @@ final class PhabricatorPeopleProfileController
     $oauths = mpull($oauths, null, 'getOAuthProvider');
 
     $providers = PhabricatorOAuthProvider::getAllProviders();
-    $added_spacer = false;
+    $added_label = false;
     foreach ($providers as $provider) {
       if (!$provider->isProviderEnabled()) {
         continue;
@@ -90,10 +88,9 @@ final class PhabricatorPeopleProfileController
       $href = $oauths[$provider_key]->getAccountURI();
 
       if ($href) {
-        if (!$added_spacer) {
-          $nav->addSpacer();
+        if (!$added_label) {
           $nav->addLabel('Linked Accounts');
-          $added_spacer = true;
+          $added_label = true;
         }
         $nav->addFilter(null, $name.' '.$external_arrow, $href);
       }
@@ -136,12 +133,10 @@ final class PhabricatorPeopleProfileController
     $header->appendChild($content);
 
     if ($user->getPHID() == $viewer->getPHID()) {
-      $nav->addSpacer();
       $nav->addFilter(null, 'Edit Profile...', '/settings/panel/profile/');
     }
 
     if ($viewer->getIsAdmin()) {
-      $nav->addSpacer();
       $nav->addFilter(
         null,
         'Administrate User...',

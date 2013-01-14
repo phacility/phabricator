@@ -330,7 +330,7 @@ final class PhabricatorConfigEditController
       case 'list<string>':
         return implode("\n", nonempty($value, array()));
       default:
-        return $this->prettyPrintJSON($value);
+        return PhabricatorConfigJSON::prettyPrintJSON($value);
     }
   }
 
@@ -462,7 +462,8 @@ final class PhabricatorConfigEditController
       if (!array_key_exists($option->getKey(), $value)) {
         $value = '<em>'.pht('(empty)').'</em>';
       } else {
-        $value = $this->prettyPrintJSON($value[$option->getKey()]);
+        $value = PhabricatorConfigJSON::prettyPrintJSON(
+          $value[$option->getKey()]);
       }
 
       $table[] = '<tr>';

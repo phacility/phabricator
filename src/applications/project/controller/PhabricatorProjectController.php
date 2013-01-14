@@ -31,7 +31,6 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $members_uri = '/project/members/'.$id.'/';
 
     $nav_view->addFilter('dashboard', 'Dashboard');
-    $nav_view->addSpacer();
     $nav_view->addFilter('feed', 'Feed');
     $nav_view->addFilter(null, 'Tasks '.$external_arrow, $tasks_uri);
     $nav_view->addFilter(null, 'Wiki '.$external_arrow, $phriction_uri);
@@ -41,7 +40,6 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $user = $this->getRequest()->getUser();
     $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
 
-    $nav_view->addSpacer();
     if (PhabricatorPolicyFilter::hasCapability($user, $project, $can_edit)) {
       $nav_view->addFilter('edit', "Edit Project\xE2\x80\xA6", $edit_uri);
       $nav_view->addFilter('members', "Edit Members\xE2\x80\xA6", $members_uri);

@@ -71,7 +71,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
 
     list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
       $revisions,
-      $user->getPHID());
+      array($user->getPHID()));
 
     $status = array();
 

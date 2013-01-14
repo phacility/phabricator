@@ -7,7 +7,6 @@ abstract class DrydockController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI('/drydock/'));
     $nav->addFilter('resource', 'Resources');
     $nav->addFilter('lease',    'Leases');
-    $nav->addSpacer();
     $nav->addFilter('log',      'Logs');
 
     $nav->selectFilter($selected, 'resource');

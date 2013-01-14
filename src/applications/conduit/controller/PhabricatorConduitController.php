@@ -36,7 +36,6 @@ abstract class PhabricatorConduitController extends PhabricatorController {
           $nav->addFilter('method/'.$method_name,
             $display_name);
         }
-        $nav->addSpacer();
       }
       $nav->selectFilter($this->getFilter());
       $nav->appendChild($view);

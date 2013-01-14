@@ -34,9 +34,7 @@
 .aphront-form-control-text .aphront-form-input input,
 .aphront-form-control-password .aphront-form-input input {
   font-size: 13px;
-  height: 26px;
-  padding: 4px 6px;
-  line-height: 20px;
+  padding: 4px 4px;
   color: #333;
   vertical-align: middle;
   background-color: #ffffff;

@@ -2,15 +2,11 @@
 
 final class DifferentialHunkParser {
 
-  private $isUnchanged;
-  private $hasWhiteLines;
-  private $isDeleted;
   private $oldLines;
   private $newLines;
-  private $skipIntraLines;
-  private $whitespaceMode;
   private $intraLineDiffs;
   private $visibleLinesMask;
+  private $whitespaceMode;
 
   /**
    * Get a map of lines on which hunks start, other than line 1. This
@@ -59,32 +55,6 @@ final class DifferentialHunkParser {
     return $this->intraLineDiffs;
   }
 
-  public function setWhitespaceMode($white_space_mode) {
-    $this->whitespaceMode = $white_space_mode;
-    return $this;
-  }
-  private function getWhitespaceMode() {
-    if ($this->whitespaceMode === null) {
-      throw new Exception(
-        'You must setWhitespaceMode before accessing this data.'
-      );
-    }
-    return $this->whitespaceMode;
-  }
-
-  private function setSkipIntraLines($skip_intra_lines) {
-    $this->skipIntraLines = $skip_intra_lines;
-    return $this;
-  }
-  public function getSkipIntraLines() {
-    if ($this->skipIntraLines === null) {
-      throw new Exception(
-        'You must reparseHunksForSpecialAttributes before accessing this data.'
-      );
-    }
-    return $this->skipIntraLines;
-  }
-
   private function setNewLines($new_lines) {
     $this->newLines = $new_lines;
     return $this;
@@ -111,29 +81,136 @@ final class DifferentialHunkParser {
     return $this->oldLines;
   }
 
-  private function setIsDeleted($is_deleted) {
-    $this->isDeleted = $is_deleted;
+  public function getOldLineTypeMap() {
+    $map = array();
+    $old = $this->getOldLines();
+    foreach ($old as $o) {
+      if (!$o) {
+        continue;
+      }
+      $map[$o['line']] = $o['type'];
+    }
+    return $map;
+  }
+
+  public function setOldLineTypeMap(array $map) {
+    $lines = $this->getOldLines();
+    foreach ($lines as $key => $data) {
+      $lines[$key]['type'] = $map[$data['line']];
+    }
+    $this->oldLines = $lines;
     return $this;
   }
+
+  public function getNewLineTypeMap() {
+    $map = array();
+    $new = $this->getNewLines();
+    foreach ($new as $n) {
+      if (!$n) {
+        continue;
+      }
+      $map[$n['line']] = $n['type'];
+    }
+    return $map;
+  }
+
+  public function setNewLineTypeMap(array $map) {
+    $lines = $this->getNewLines();
+    foreach ($lines as $key => $data) {
+      $lines[$key]['type'] = $map[$data['line']];
+    }
+    $this->newLines = $lines;
+    return $this;
+  }
+
+
+  public function setWhitespaceMode($white_space_mode) {
+    $this->whitespaceMode = $white_space_mode;
+    return $this;
+  }
+
+  private function getWhitespaceMode() {
+    if ($this->whitespaceMode === null) {
+      throw new Exception(
+        'You must setWhitespaceMode before accessing this data.'
+      );
+    }
+    return $this->whitespaceMode;
+  }
+
   public function getIsDeleted() {
-    return $this->isDeleted;
+    foreach ($this->getNewLines() as $line) {
+      if ($line) {
+        // At least one new line, so the entire file wasn't deleted.
+        return false;
+      }
+    }
+
+    foreach ($this->getOldLines() as $line) {
+      if ($line) {
+        // No new lines, at least one old line; the entire file was deleted.
+        return true;
+      }
+    }
+
+    // This is an empty file.
+    return false;
   }
 
-  private function setHasWhiteLines($has_white_lines) {
-    $this->hasWhiteLines = $has_white_lines;
-    return $this;
-  }
-  public function getHasWhiteLines() {
-    return $this->hasWhiteLines;
+  /**
+   * Returns true if the hunks change any text, not just whitespace.
+   */
+  public function getHasTextChanges() {
+    return $this->getHasChanges('text');
   }
 
-  public function setIsUnchanged($is_unchanged) {
-    $this->isUnchanged = $is_unchanged;
-    return $this;
+  /**
+   * Returns true if the hunks change anything, including whitespace.
+   */
+  public function getHasAnyChanges() {
+    return $this->getHasChanges('any');
   }
-  public function getIsUnchanged() {
-    return $this->isUnchanged;
+
+  private function getHasChanges($filter) {
+    if ($filter !== 'any' && $filter !== 'text') {
+      throw new Exception("Unknown change filter '{$filter}'.");
+    }
+
+    $old = $this->getOldLines();
+    $new = $this->getNewLines();
+
+    $is_any = ($filter === 'any');
+
+    foreach ($old as $key => $o) {
+      $n = $new[$key];
+      if ($o === null || $n === null) {
+        // One side is missing, and it's impossible for both sides to be null,
+        // so the other side must have something, and thus the two sides are
+        // different and the file has been changed under any type of filter.
+        return true;
+      }
+
+      if ($o['type'] !== $n['type']) {
+        // The types are different, so either the underlying text is actually
+        // different or whatever whitespace rules we're using consider them
+        // different.
+        return true;
+      }
+
+      if ($o['text'] !== $n['text']) {
+        if ($is_any) {
+          // The text is different, so there's a change.
+          return true;
+        } else if (trim($o['text']) !== trim($n['text'])) {
+          return true;
+        }
+      }
+    }
+
+    // No changes anywhere in the file.
+    return false;
   }
+
 
   /**
    * This function takes advantage of the parsing work done in
@@ -142,29 +219,19 @@ final class DifferentialHunkParser {
    *
    * In particular, this function re-parses the hunks to make them equivalent
    * in length for easy rendering, adding `null` as necessary to pad the
-   * length. Further, this re-parsing stage figures out various special
-   * properties about the changes such as if the change is a delete, has any
-   * whitelines, or has any changes whatsoever. Finally, this function
-   * calculates what lines - if any - should be skipped within a diff display,
-   * ostensibly because they don't have anything to do with the current set
-   * of changes with respect to display options.
+   * length.
    *
    * Anyhoo, this function is not particularly well-named but I try.
    *
    * NOTE: this function must be called after
    * @{method:parseHunksForLineData}.
-   * NOTE: you must @{method:setWhitespaceMode} before calling this method.
    */
   public function reparseHunksForSpecialAttributes() {
     $rebuild_old = array();
     $rebuild_new = array();
-    $skip_intra = array();
 
     $old_lines = array_reverse($this->getOldLines());
     $new_lines = array_reverse($this->getNewLines());
-
-    $whitelines = false;
-    $changed = false;
 
     while (count($old_lines) || count($new_lines)) {
       $old_line_data = array_pop($old_lines);
@@ -182,66 +249,24 @@ final class DifferentialHunkParser {
         $n_type = null;
       }
 
+      // This line does not exist in the new file.
       if (($o_type != null) && ($n_type == null)) {
         $rebuild_old[] = $old_line_data;
         $rebuild_new[] = null;
         if ($new_line_data) {
           array_push($new_lines, $new_line_data);
         }
-        $changed = true;
         continue;
       }
 
+      // This line does not exist in the old file.
       if (($n_type != null) && ($o_type == null)) {
         $rebuild_old[] = null;
         $rebuild_new[] = $new_line_data;
         if ($old_line_data) {
           array_push($old_lines, $old_line_data);
         }
-        $changed = true;
         continue;
-      }
-
-      if ($this->getWhitespaceMode() !=
-          DifferentialChangesetParser::WHITESPACE_SHOW_ALL) {
-        $similar = false;
-        switch ($this->getWhitespaceMode()) {
-          case DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING:
-            if (rtrim($old_line_data['text']) ==
-                rtrim($new_line_data['text'])) {
-              if ($old_line_data['type']) {
-                // If we're converting this into an unchanged line because of
-                // a trailing whitespace difference, mark it as a whitespace
-                // change so we can show "This file was modified only by
-                // adding or removing trailing whitespace." instead of
-                // "This file was not modified.".
-                $whitelines = true;
-              }
-              $similar = true;
-            }
-            break;
-          default:
-            // In this case, the lines are similar if there is no change type
-            // (that is, just trust the diff algorithm).
-            if (!$old_line_data['type']) {
-              $similar = true;
-            }
-            break;
-        }
-        if ($similar) {
-          if ($old_line_data['type'] == '\\') {
-            // These are similar because they're "No newline at end of file"
-            // comments.
-          } else {
-            $old_line_data['type'] = null;
-            $new_line_data['type'] = null;
-            $skip_intra[count($rebuild_old)] = true;
-          }
-        } else {
-          $changed = true;
-        }
-      } else {
-        $changed = true;
       }
 
       $rebuild_old[] = $old_line_data;
@@ -251,74 +276,62 @@ final class DifferentialHunkParser {
     $this->setOldLines($rebuild_old);
     $this->setNewLines($rebuild_new);
 
-    $this->setIsUnchanged(!$changed);
-    $this->setHasWhiteLines($whitelines);
-    $this->setIsDeleted(array_filter($this->getOldLines()) &&
-                        !array_filter($this->getNewLines()));
-    $this->setSkipIntraLines($skip_intra);
+    $this->updateChangeTypesForWhitespaceMode();
 
     return $this;
   }
 
-  public function updateParsedHunksText($old_text, $new_text) {
-    if ($old_text || $new_text) {
+  private function updateChangeTypesForWhitespaceMode() {
+    $mode = $this->getWhitespaceMode();
 
-      // Use this parser's side-by-side line information -- notably, the
-      // change types -- but replace all the line text.
-      // This lets us render whitespace-only changes without marking them as
-      // different.
+    $mode_show_all = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
+    if ($mode === $mode_show_all) {
+      // If we're showing all whitespace, we don't need to perform any updates.
+      return;
+    }
 
-      $old = $this->getOldLines();
-      $new = $this->getNewLines();
+    $mode_trailing = DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING;
+    $is_trailing = ($mode === $mode_trailing);
 
-      foreach ($old as $k => $desc) {
-        if (empty($desc)) {
-          continue;
-        }
-        $old[$k]['text'] = idx($old_text, $desc['line']);
+    $new = $this->getNewLines();
+    $old = $this->getOldLines();
+    foreach ($old as $key => $o) {
+      $n = $new[$key];
+
+      if (!$o || !$n) {
+        continue;
       }
-      $skip_intra = $this->getSkipIntraLines();
-      foreach ($new as $k => $desc) {
-        if (empty($desc)) {
-          continue;
+
+      if ($is_trailing) {
+        // In "trailing" mode, we need to identify lines which are marked
+        // changed but differ only by trailing whitespace. We mark these lines
+        // unchanged.
+        if ($o['type'] != $n['type']) {
+          if (rtrim($o['text']) === rtrim($n['text'])) {
+            $old[$key]['type'] = null;
+            $new[$key]['type'] = null;
+          }
         }
-        $new[$k]['text'] = idx($new_text, $desc['line']);
-
-        if ($this->whitespaceMode ==
-            DifferentialChangesetParser::WHITESPACE_IGNORE_FORCE) {
-          // Under forced ignore mode, ignore even internal whitespace
-          // changes.
-          continue;
-        }
-
-        // If there's a corresponding "old" text and the line is marked as
-        // unchanged, test if there are internal whitespace changes between
-        // non-whitespace characters, e.g. spaces added to a string or spaces
-        // added around operators. If we find internal spaces, mark the line
-        // as changed.
-        //
-        // We only need to do this for "new" lines because any line that is
-        // missing either "old" or "new" text certainly can not have internal
-        // whitespace changes without also having non-whitespace changes,
-        // because characters had to be either added or removed to create the
-        // possibility of internal whitespace.
-        if (isset($old[$k]['text']) && empty($new[$k]['type'])) {
-          if (trim($old[$k]['text']) != trim($new[$k]['text'])) {
-            // The strings aren't the same when trimmed, so there are internal
-            // whitespace changes. Mark this line changed.
-            $old[$k]['type'] = '-';
-            $new[$k]['type'] = '+';
-
-            // Re-mark this line for intraline diffing.
-            unset($skip_intra[$k]);
+      } else {
+        // In "ignore most" and "ignore all" modes, we need to identify lines
+        // which are marked unchanged but have internal whitespace changes.
+        // We want to ignore leading and trailing whitespace changes only, not
+        // internal whitespace changes (`diff` doesn't have a mode for this, so
+        // we have to fix it here). If the text is marked unchanged but the
+        // old and new text differs by internal space, mark the lines changed.
+        if ($o['type'] === null && $n['type'] === null) {
+          if ($o['text'] !== $n['text']) {
+            if (trim($o['text']) !== trim($n['text'])) {
+              $old[$key]['type'] = '-';
+              $new[$key]['type'] = '+';
+            }
           }
         }
       }
-
-      $this->setSkipIntraLines($skip_intra);
-      $this->setOldLines($old);
-      $this->setNewLines($new);
     }
+
+    $this->setOldLines($old);
+    $this->setNewLines($new);
 
     return $this;
   }
@@ -326,31 +339,23 @@ final class DifferentialHunkParser {
   public function generateIntraLineDiffs() {
     $old = $this->getOldLines();
     $new = $this->getNewLines();
-    $skip_intra = $this->getSkipIntraLines();
-    $intra_line_diffs = array();
 
-    $min_length = min(count($old), count($new));
-    for ($ii = 0; $ii < $min_length; $ii++) {
-      if ($old[$ii] || $new[$ii]) {
-        if (isset($old[$ii]['text'])) {
-          $otext = $old[$ii]['text'];
-        } else {
-          $otext = '';
-        }
-        if (isset($new[$ii]['text'])) {
-          $ntext = $new[$ii]['text'];
-        } else {
-          $ntext = '';
-        }
-        if ($otext != $ntext && empty($skip_intra[$ii])) {
-          $intra_line_diffs[$ii] = ArcanistDiffUtils::generateIntralineDiff(
-            $otext,
-            $ntext);
-        }
+    $diffs = array();
+    foreach ($old as $key => $o) {
+      $n = $new[$key];
+
+      if (!$o || !$n) {
+        continue;
+      }
+
+      if ($o['type'] != $n['type']) {
+        $diffs[$key] = ArcanistDiffUtils::generateIntralineDiff(
+          $o['text'],
+          $n['text']);
       }
     }
 
-    $this->setIntraLineDiffs($intra_line_diffs);
+    $this->setIntraLineDiffs($diffs);
 
     return $this;
   }

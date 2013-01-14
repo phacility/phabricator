@@ -15,7 +15,6 @@ extends PhabricatorController {
     $nav->addLabel('Client Authorizations');
     $nav->addFilter('clientauthorization',
                     'My Authorizations');
-    $nav->addSpacer();
     $nav->addLabel('Clients');
     $nav->addFilter('client/create',
                     'Create Client');

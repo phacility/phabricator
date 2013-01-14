@@ -206,7 +206,9 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       $xaction_view->setEpoch($any_transaction->getDateCreated());
       if ($this->commentNumber) {
         $anchor_name = 'comment-'.$this->commentNumber;
-        $anchor_text = 'T'.$any_transaction->getTaskID().'#'.$anchor_name;
+        $anchor_text =
+          'T'.$any_transaction->getTaskID().
+          '#'.$this->commentNumber;
 
         $xaction_view->setAnchor($anchor_name, $anchor_text);
       }

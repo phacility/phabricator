@@ -24,6 +24,7 @@ final class DifferentialRevisionListController extends DifferentialController {
         'status' => $request->getStr('status'),
         'order' => $request->getStr('order'),
       ));
+    $params['participants'] = $request->getArr('participants');
 
     $default_filter = ($viewer_is_anonymous ? 'all' : 'active');
     $filters = $this->getFilters();
@@ -33,25 +34,21 @@ final class DifferentialRevisionListController extends DifferentialController {
       $default_filter);
 
     // Redirect from search to canonical URL.
-    $phid_arr = $request->getArr('view_user');
+    $phid_arr = $request->getArr('view_users');
     if ($phid_arr) {
-      $view_user = id(new PhabricatorUser())
-        ->loadOneWhere('phid = %s', head($phid_arr));
+      $view_users = id(new PhabricatorUser())
+        ->loadAllWhere('phid IN (%Ls)', $phid_arr);
 
-      $base_uri = '/differential/filter/'.$this->filter.'/';
-      if ($view_user) {
-        // This is a user, so generate a pretty URI.
-        $uri = $base_uri.phutil_escape_uri($view_user->getUserName()).'/';
-      } else {
-        // We're assuming this is a mailing list, generate an ugly URI.
-        $uri = $base_uri;
-        $params['phid'] = head($phid_arr);
+      if (count($view_users) == 1) {
+        // This is a single user, so generate a pretty URI.
+        $uri = new PhutilURI(
+          '/differential/filter/'.$this->filter.'/'.
+          phutil_escape_uri(reset($view_users)->getUserName()).'/');
+        $uri->setQueryParams($params);
+
+        return id(new AphrontRedirectResponse())->setURI($uri);
       }
 
-      $uri = new PhutilURI($uri);
-      $uri->setQueryParams($params);
-
-      return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
     $uri = new PhutilURI('/differential/filter/'.$this->filter.'/');
@@ -66,18 +63,19 @@ final class DifferentialRevisionListController extends DifferentialController {
       }
       $username = phutil_escape_uri($this->username).'/';
       $uri->setPath('/differential/filter/'.$this->filter.'/'.$username);
-      $params['phid'] = $view_user->getPHID();
+      $params['view_users'] = array($view_user->getPHID());
     } else {
-      $phid = $request->getStr('phid');
-      if (strlen($phid)) {
-        $params['phid'] = $phid;
+      $phids = $request->getArr('view_users');
+      if ($phids) {
+        $params['view_users'] = $phids;
+        $uri->setQueryParams($params);
       }
     }
 
     // Fill in the defaults we'll actually use for calculations if any
     // parameters are missing.
     $params += array(
-      'phid' => $user->getPHID(),
+      'view_users' => array($user->getPHID()),
       'status' => 'all',
       'order' => 'modified',
     );
@@ -97,7 +95,7 @@ final class DifferentialRevisionListController extends DifferentialController {
     $panels = array();
     $handles = array();
     $controls = $this->getFilterControls($this->filter);
-    if ($this->getFilterRequiresUser($this->filter) && !$params['phid']) {
+    if ($this->getFilterRequiresUser($this->filter) && !$params['view_users']) {
       // In the anonymous case, we still want to let you see some user's
       // list, but we don't have a default PHID to provide (normally, we use
       // the viewing user's). Show a warning instead.
@@ -108,7 +106,7 @@ final class DifferentialRevisionListController extends DifferentialController {
         'This filter requires that a user be specified above.');
       $panels[] = $warning;
     } else {
-      $query = $this->buildQuery($this->filter, $params['phid']);
+      $query = $this->buildQuery($this->filter, $params);
 
       $pager = null;
       if ($this->getFilterAllowsPaging($this->filter)) {
@@ -131,7 +129,10 @@ final class DifferentialRevisionListController extends DifferentialController {
         $revisions = $pager->sliceResults($revisions);
       }
 
-      $views = $this->buildViews($this->filter, $params['phid'], $revisions);
+      $views = $this->buildViews(
+        $this->filter,
+        $params['view_users'],
+        $revisions);
 
       $view_objects = array();
       foreach ($views as $view) {
@@ -139,8 +140,9 @@ final class DifferentialRevisionListController extends DifferentialController {
           $view_objects[] = $view['view'];
         }
       }
-      $phids = array_mergev(mpull($view_objects, 'getRequiredHandlePHIDs'));
-      $phids[] = $params['phid'];
+      $phids = mpull($view_objects, 'getRequiredHandlePHIDs');
+      $phids[] = $params['view_users'];
+      $phids = array_mergev($phids);
       $handles = $this->loadViewerHandles($phids);
 
       foreach ($views as $view) {
@@ -263,8 +265,8 @@ final class DifferentialRevisionListController extends DifferentialController {
   private function getFilterControls($filter) {
     static $controls = array(
       'active'      => array('phid'),
-      'revisions'   => array('phid', 'status', 'order'),
-      'reviews'     => array('phid', 'status', 'order'),
+      'revisions'   => array('phid', 'participants', 'status', 'order'),
+      'reviews'     => array('phid', 'participants', 'status', 'order'),
       'subscribed'  => array('subscriber', 'status', 'order'),
       'drafts'      => array('phid', 'status', 'order'),
       'all'         => array('status', 'order'),
@@ -275,28 +277,31 @@ final class DifferentialRevisionListController extends DifferentialController {
     return $controls[$filter];
   }
 
-  private function buildQuery($filter, $user_phid) {
+  private function buildQuery($filter, array $params) {
+    $user_phids = $params['view_users'];
     $query = new DifferentialRevisionQuery();
 
     $query->needRelationships(true);
 
     switch ($filter) {
       case 'active':
-        $query->withResponsibleUsers(array($user_phid));
+        $query->withResponsibleUsers($user_phids);
         $query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
         $query->setLimit(null);
         break;
       case 'revisions':
-        $query->withAuthors(array($user_phid));
+        $query->withAuthors($user_phids);
+        $query->withReviewers($params['participants']);
         break;
       case 'reviews':
-        $query->withReviewers(array($user_phid));
+        $query->withReviewers($user_phids);
+        $query->withAuthors($params['participants']);
         break;
       case 'subscribed':
-        $query->withSubscribers(array($user_phid));
+        $query->withSubscribers($user_phids);
         break;
       case 'drafts':
-        $query->withDraftRepliesByAuthors(array($user_phid));
+        $query->withDraftRepliesByAuthors($user_phids);
         break;
       case 'all':
         break;
@@ -312,31 +317,56 @@ final class DifferentialRevisionListController extends DifferentialController {
     PhutilURI $uri,
     array $params) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
+
     switch ($control) {
       case 'subscriber':
       case 'phid':
-        $view_phid = $params['phid'];
-        $value = array();
-        if ($view_phid) {
-          $value = array(
-            $view_phid => $handles[$view_phid]->getFullName(),
-          );
-        }
+        $value = mpull(
+          array_select_keys($handles, $params['view_users']),
+          'getFullName');
 
         if ($control == 'subscriber') {
           $source = '/typeahead/common/allmailable/';
-          $label = 'View Subscriber';
+          $label = 'View Subscribers';
         } else {
           $source = '/typeahead/common/accounts/';
-          $label  = 'View User';
+          switch ($this->filter) {
+            case 'revisions':
+              $label = 'Authors';
+              break;
+            case 'reviews':
+              $label = 'Reviewers';
+              break;
+            default:
+              $label  = 'View Users';
+              break;
+          }
         }
 
         return id(new AphrontFormTokenizerControl())
           ->setDatasource($source)
           ->setLabel($label)
-          ->setName('view_user')
-          ->setValue($value)
-          ->setLimit(1);
+          ->setName('view_users')
+          ->setValue($value);
+
+      case 'participants':
+        switch ($this->filter) {
+          case 'revisions':
+            $label = 'Reviewers';
+            break;
+          case 'reviews':
+            $label = 'Authors';
+            break;
+        }
+        $value = mpull(
+          array_select_keys($handles, $params['participants']),
+          'getFullName');
+        return id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/allmailable/')
+          ->setLabel($label)
+          ->setName('participants')
+          ->setValue($value);
+
       case 'status':
         return id(new AphrontFormToggleButtonsControl())
           ->setLabel('Status')
@@ -349,6 +379,7 @@ final class DifferentialRevisionListController extends DifferentialController {
               'closed'    => pht('Closed'),
               'abandoned' => 'Abandoned',
             ));
+
       case 'order':
         return id(new AphrontFormToggleButtonsControl())
           ->setLabel('Order')
@@ -359,6 +390,7 @@ final class DifferentialRevisionListController extends DifferentialController {
               'modified'  => 'Updated',
               'created'   => 'Created',
             ));
+
       default:
         throw new Exception("Unknown control '{$control}'!");
     }
@@ -368,6 +400,7 @@ final class DifferentialRevisionListController extends DifferentialController {
     switch ($control) {
       case 'phid':
       case 'subscriber':
+      case 'participants':
         // Already applied by query construction.
         break;
       case 'status':
@@ -389,7 +422,7 @@ final class DifferentialRevisionListController extends DifferentialController {
     }
   }
 
-  private function buildViews($filter, $user_phid, array $revisions) {
+  private function buildViews($filter, array $user_phids, array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
 
     $user = $this->getRequest()->getUser();
@@ -403,7 +436,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       case 'active':
         list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
           $revisions,
-          $user_phid);
+          $user_phids);
 
         $view = id(clone $template)
           ->setHighlightAge(true)
@@ -416,9 +449,9 @@ final class DifferentialRevisionListController extends DifferentialController {
 
         // Flags are sort of private, so only show the flag panel if you're
         // looking at your own requests.
-        if ($user_phid == $user->getPHID()) {
+        if (in_array($user->getPHID(), $user_phids)) {
           $flags = id(new PhabricatorFlagQuery())
-            ->withOwnerPHIDs(array($user_phid))
+            ->withOwnerPHIDs(array($user->getPHID()))
             ->withTypes(array(PhabricatorPHIDConstants::PHID_TYPE_DREV))
             ->needHandles(true)
             ->execute();

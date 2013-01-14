@@ -27,25 +27,20 @@ abstract class HeraldController extends PhabricatorController {
       $nav->addFilter("view/{$key}/personal", $value);
     }
 
-    $nav
-      ->addSpacer()
-      ->addLabel('Global Rules');
+    $nav->addLabel('Global Rules');
 
     foreach ($rules_map as $key => $value) {
       $nav->addFilter("view/{$key}/global", $value);
     }
 
     $nav
-      ->addSpacer()
       ->addLabel('Utilities')
       ->addFilter('test',       'Test Console')
       ->addFilter('transcript', 'Transcripts')
       ->addFilter('history',    'Edit Log');
 
     if ($this->getRequest()->getUser()->getIsAdmin()) {
-      $nav
-        ->addSpacer()
-        ->addLabel('Admin');
+      $nav->addLabel('Admin');
       foreach ($rules_map as $key => $value) {
         $nav->addFilter("view/{$key}/all", $value);
       }

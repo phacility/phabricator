@@ -17,7 +17,6 @@ final class PhabricatorProjectListController
       ->setBaseURI(new PhutilURI('/project/filter/'))
       ->addLabel('User')
       ->addFilter('active',   'Active')
-      ->addSpacer()
       ->addLabel('All')
       ->addFilter('all',      'All Projects')
       ->addFilter('allactive','Active Projects');

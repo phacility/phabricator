@@ -40,7 +40,7 @@ final class DifferentialChangesetParser {
   private $markupEngine;
   private $highlightErrors;
 
-  const CACHE_VERSION = 9;
+  const CACHE_VERSION = 10;
   const CACHE_MAX_SIZE = 8e6;
 
   const ATTR_GENERATED  = 'attr:generated';
@@ -497,68 +497,39 @@ final class DifferentialChangesetParser {
       }
     }
 
-    $old_text = array();
-    $new_text = array();
-    $is_unchanged = null;
-    $whitelines = null;
+    $hunk_parser = new DifferentialHunkParser();
+    $hunk_parser->setWhitespaceMode($whitespace_mode);
+    $hunk_parser->parseHunksForLineData($changeset->getHunks());
+
+    // Depending on the whitespace mode, we may need to compute a different
+    // set of changes than the set of changes in the hunk data (specificaly,
+    // we might want to consider changed lines which have only whitespace
+    // changes as unchanged).
     if ($ignore_all) {
-
-      // Huge mess. Generate a "-bw" (ignore all whitespace changes) diff,
-      // parse it out, and then play a shell game with the parsed format
-      // later so we highlight only changed lines but render
-      // whitespace differences. If we don't do this, we either fail to
-      // render whitespace changes (which is incredibly confusing,
-      // especially for python) or often produce a much larger set of
-      // differences than necessary.
-
       $engine = new PhabricatorDifferenceEngine();
       $engine->setIgnoreWhitespace(true);
       $no_whitespace_changeset = $engine->generateChangesetFromFileContent(
         $old_file,
         $new_file);
 
-      $hunk_parser = new DifferentialHunkParser();
-      $hunk_parser->setWhitespaceMode($this->whitespaceMode);
-      $hunk_parser->parseHunksForLineData($changeset->getHunks());
-      $hunk_parser->reparseHunksForSpecialAttributes();
-      $is_unchanged = $hunk_parser->getIsUnchanged();
-      $whitelines = $hunk_parser->getHasWhiteLines();
+      $type_parser = new DifferentialHunkParser();
+      $type_parser->parseHunksForLineData($no_whitespace_changeset->getHunks());
 
-      // While we aren't updating $this->changeset (since it has a bunch
-      // of metadata we need to preserve, so that headers like "this file
-      // was moved" render correctly), we're overwriting the local
-      // $changeset so that the block below will choose the synthetic
-      // hunks we've built instead of the original hunks.
-      $changeset = $no_whitespace_changeset;
-
-      // let the games continue - pull out the proper text so we can
-      // later accurately display the diff
-      $old_text = ipull($hunk_parser->getOldLines(), 'text', 'line');
-      $new_text = ipull($hunk_parser->getNewLines(), 'text', 'line');
+      $hunk_parser->setOldLineTypeMap($type_parser->getOldLineTypeMap());
+      $hunk_parser->setNewLineTypeMap($type_parser->getNewLineTypeMap());
     }
 
-    // This either uses the real hunks, or synthetic hunks we built above.
-    // $is_unchanged, $whitelines, $old_text and $new_text are populated
-    // for synthetic hunks, otherwise they are default values.
-    $hunk_parser = new DifferentialHunkParser();
-    $hunk_parser->setWhitespaceMode($this->whitespaceMode);
-    $hunk_parser->parseHunksForLineData($changeset->getHunks());
     $hunk_parser->reparseHunksForSpecialAttributes();
 
     $unchanged = false;
-    // i.e. if we didn't have to play horrendous games above
-    if ($is_unchanged === null) {
-      if ($hunk_parser->getIsUnchanged()) {
-        $filetype = $this->changeset->getFileType();
-        if ($filetype == DifferentialChangeType::FILE_TEXT ||
-            $filetype == DifferentialChangeType::FILE_SYMLINK) {
-          $unchanged = true;
-        }
+    if (!$hunk_parser->getHasAnyChanges()) {
+      $filetype = $this->changeset->getFileType();
+      if ($filetype == DifferentialChangeType::FILE_TEXT ||
+          $filetype == DifferentialChangeType::FILE_SYMLINK) {
+        $unchanged = true;
       }
-      $whitelines = $hunk_parser->getHasWhiteLines();
-    } else {
-      $unchanged = $is_unchanged;
     }
+
     $changetype = $this->changeset->getChangeType();
     if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
       // sometimes we show moved files as unchanged, sometimes deleted,
@@ -567,13 +538,13 @@ final class DifferentialChangesetParser {
       // omit the 'not changed' notice if this is the source of a move
       $unchanged = false;
     }
+
     $this->setSpecialAttributes(array(
       self::ATTR_UNCHANGED  => $unchanged,
       self::ATTR_DELETED    => $hunk_parser->getIsDeleted(),
-      self::ATTR_WHITELINES => $whitelines
+      self::ATTR_WHITELINES => !$hunk_parser->getHasTextChanges(),
     ));
 
-    $hunk_parser->updateParsedHunksText($old_text, $new_text);
     $hunk_parser->generateIntraLineDiffs();
     $hunk_parser->generateVisibileLinesMask();
 
@@ -719,31 +690,35 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht(
             'This file contains generated code, which does not normally '.
-            'need to be reviewed.'),
-          true);
+            'need to be reviewed.'));
       } else if ($this->isUnchanged()) {
-        if ($this->isWhitespaceOnly()) {
-          $shield = $renderer->renderShield(
-            pht(
-              'This file was changed only by adding or removing trailing '.
-              'whitespace.'),
-            false);
-        } else {
-          $shield = $renderer->renderShield(
-            pht("The contents of this file were not changed."),
-            false);
+        $type = 'text';
+        if (!$rows) {
+          // NOTE: Normally, diffs which don't change files do not include
+          // file content (for example, if you "chmod +x" a file and then
+          // run "git show", the file content is not available). Similarly,
+          // if you move a file from A to B without changing it, diffs normally
+          // do not show the file content. In some cases `arc` is able to
+          // synthetically generate content for these diffs, but for raw diffs
+          // we'll never have it so we need to be prepared to not render a link.
+          $type = 'none';
         }
+        $shield = $renderer->renderShield(
+          pht('The contents of this file were not changed.'),
+          $type);
+      } else if ($this->isWhitespaceOnly()) {
+        $shield = $renderer->renderShield(
+          pht('This file was changed only by adding or removing whitespace.'),
+          'whitespace');
       } else if ($this->isDeleted()) {
         $shield = $renderer->renderShield(
-          pht("This file was completely deleted."),
-          true);
+          pht('This file was completely deleted.'));
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
         $lines = number_format($this->changeset->getAffectedLineCount());
         $shield = $renderer->renderShield(
           pht(
             'This file has a very large number of changes ({%s} lines).',
-            $lines),
-          true);
+            $lines));
       }
     }
 

@@ -11,10 +11,6 @@ final class DifferentialDateCreatedFieldSpecification
     return 'Created';
   }
 
-  public function getColumnClassForRevisionList() {
-    return 'right';
-  }
-
   public function renderValueForRevisionList(DifferentialRevision $revision) {
     return phabricator_date($revision->getDateCreated(), $this->getUser());
   }

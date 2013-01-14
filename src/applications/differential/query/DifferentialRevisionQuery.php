@@ -891,7 +891,7 @@ final class DifferentialRevisionQuery {
     }
   }
 
-  public static function splitResponsible(array $revisions, $user_phid) {
+  public static function splitResponsible(array $revisions, array $user_phids) {
     $active = array();
     $waiting = array();
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
@@ -901,7 +901,7 @@ final class DifferentialRevisionQuery {
     // something about).
     foreach ($revisions as $revision) {
       $needs_review = ($revision->getStatus() == $status_review);
-      $filter_is_author = ($revision->getAuthorPHID() == $user_phid);
+      $filter_is_author = in_array($revision->getAuthorPHID(), $user_phids);
 
       // If exactly one of "needs review" and "the user is the author" is
       // true, the user needs to act on it. Otherwise, they're waiting on

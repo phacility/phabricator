@@ -37,7 +37,6 @@ final class ManiphestReportController extends ManiphestController {
     $nav->addLabel('Open Tasks');
     $nav->addFilter('user',           'By User');
     $nav->addFilter('project',        'By Project');
-    $nav->addSpacer();
     $nav->addLabel('Burnup');
     $nav->addFilter('burn',           'Burnup Rate');
 

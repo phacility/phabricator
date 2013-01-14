@@ -37,6 +37,19 @@ final class PhabricatorExtendingPhabricatorConfigOptions
             "Path to custom celerity resource map relative to ".
             "'phabricator/src'. See also `scripts/celerity_mapper.php`."))
         ->addExample('local/my_celerity_map.php', pht('Valid Setting')),
+       $this->newOption(
+         'aphront.default-application-configuration-class',
+         'class',
+         'AphrontDefaultApplicationConfiguration')
+        ->setBaseClass('AphrontApplicationConfiguration')
+        // TODO: This could probably use some better documentation.
+        ->setDescription(pht("Application configuration class.")),
+       $this->newOption(
+         'controller.oauth-registration',
+         'class',
+         'PhabricatorOAuthDefaultRegistrationController')
+        ->setBaseClass('PhabricatorOAuthRegistrationController')
+        ->setDescription(pht("OAuth registration controller.")),
     );
   }
 

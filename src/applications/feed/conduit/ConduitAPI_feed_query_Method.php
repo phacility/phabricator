@@ -22,7 +22,7 @@ final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
       'filterPHIDs' => 'optional list <phid>',
       'limit' => 'optional int (default '.$this->getDefaultLimit().')',
       'after' => 'optional int',
-      'view' => 'optional string (data, html, html-summary)',
+      'view' => 'optional string (data, html, html-summary, text)',
     );
   }
 
@@ -31,6 +31,7 @@ final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
         'html' => 'Full HTML presentation of story',
         'data' => 'Dictionary with various data of the story',
         'html-summary' => 'Story contains only the title of the story',
+        'text' => 'Simple one-line plain text representation of story',
     );
   }
 
