@@ -39,6 +39,29 @@ final class DifferentialChangesetParser {
   private $coverage;
   private $markupEngine;
   private $highlightErrors;
+  private $disableCache;
+  private $renderer;
+
+  public function setRenderer($renderer) {
+    $this->renderer = $renderer;
+    return $this;
+  }
+
+  public function getRenderer() {
+    if (!$this->renderer) {
+      return new DifferentialChangesetTwoUpRenderer();
+    }
+    return $this->renderer;
+  }
+
+  public function setDisableCache($disable_cache) {
+    $this->disableCache = $disable_cache;
+    return $this;
+  }
+
+  public function getDisableCache() {
+    return $this->disableCache;
+  }
 
   const CACHE_VERSION = 10;
   const CACHE_MAX_SIZE = 8e6;
@@ -434,6 +457,10 @@ final class DifferentialChangesetParser {
     }
 
     $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_ALL);
+    if ($this->disableCache) {
+      $skip_cache = true;
+    }
+
     $this->whitespaceMode = $whitespace_mode;
 
     $changeset = $this->changeset;
@@ -664,7 +691,7 @@ final class DifferentialChangesetParser {
       count($this->old),
       count($this->new));
 
-    $renderer = id(new DifferentialChangesetTwoUpRenderer())
+    $renderer = $this->getRenderer()
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
       ->setLineCount($rows)

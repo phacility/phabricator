@@ -1,42 +1,10 @@
 <?php
 
 final class DifferentialChangesetTwoUpRenderer
-  extends DifferentialChangesetRenderer {
+  extends DifferentialChangesetHTMLRenderer {
 
-  public function renderChangesetTable($contents) {
-    $changeset = $this->getChangeset();
-    $props = $this->renderPropertyChangeHeader($changeset);
-    $table = null;
-    if ($contents) {
-      $table = javelin_render_tag(
-        'table',
-        array(
-          'class' => 'differential-diff remarkup-code PhabricatorMonospaced',
-          'sigil' => 'differential-diff',
-        ),
-        $contents);
-    }
-
-    if (!$table && !$props) {
-      $notice = $this->renderChangeTypeHeader($changeset, true);
-    } else {
-      $notice = $this->renderChangeTypeHeader($changeset, false);
-    }
-
-    $result = implode(
-      "\n",
-      array(
-        $notice,
-        $props,
-        $table,
-      ));
-
-    // TODO: Let the user customize their tab width / display style.
-    $result = str_replace("\t", '  ', $result);
-
-    // TODO: We should possibly post-process "\r" as well.
-
-    return $result;
+  public function isOneUpRenderer() {
+    return false;
   }
 
   public function renderTextChange(
@@ -360,7 +328,7 @@ final class DifferentialChangesetTwoUpRenderer
       }
     }
 
-    return implode('', $html);
+    return $this->wrapChangeInTable(implode('', $html));
   }
 
   public function renderFileChange($old_file = null,
@@ -450,7 +418,7 @@ final class DifferentialChangesetTwoUpRenderer
       implode('', $html_old).
       implode('', $html_new));
 
-    return $output;
+    return $this->wrapChangeInTable($output);
   }
 
 }
