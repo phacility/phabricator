@@ -10,40 +10,44 @@
 JX.install('Device', {
   statics : {
     _device : null,
+    recalculate: function() {
+      var v = JX.Vector.getViewport();
+      var self = JX.Device;
+
+      var device = 'desktop';
+      if (v.x <= 768) {
+        device = 'tablet';
+      }
+      if (v.x <= 480) {
+        device = 'phone';
+      }
+
+      if (device == self._device) {
+        return;
+      }
+
+      self._device = device;
+
+      var e = document.body;
+      JX.DOM.alterClass(e, 'device-phone', (device == 'phone'));
+      JX.DOM.alterClass(e, 'device-tablet', (device == 'tablet'));
+      JX.DOM.alterClass(e, 'device-desktop', (device == 'desktop'));
+      JX.DOM.alterClass(e, 'device', (device != 'desktop'));
+
+      JX.Stratcom.invoke('phabricator-device-change', null, device);
+    },
+
     getDevice : function() {
-      return JX.Device._device;
+      var self = JX.Device;
+      if (self._device === null) {
+        self.recalculate();
+      }
+      return self._device;
     }
   }
 });
 
 JX.behavior('device', function() {
-
-  function onresize() {
-    var v = JX.Vector.getViewport();
-
-    var device = 'desktop';
-    if (v.x <= 768) {
-      device = 'tablet';
-    }
-    if (v.x <= 480) {
-      device = 'phone';
-    }
-
-    if (device == JX.Device.getDevice()) {
-      return;
-    }
-
-    JX.Device._device = device;
-
-    var e = document.body;
-    JX.DOM.alterClass(e, 'device-phone', (device == 'phone'));
-    JX.DOM.alterClass(e, 'device-tablet', (device == 'tablet'));
-    JX.DOM.alterClass(e, 'device-desktop', (device == 'desktop'));
-    JX.DOM.alterClass(e, 'device', (device != 'desktop'));
-
-    JX.Stratcom.invoke('phabricator-device-change', null, device);
-  }
-
-  JX.Stratcom.listen('resize', null, onresize);
-  onresize();
+  JX.Stratcom.listen('resize', null, JX.Device.recalculate);
+  JX.Device.recalculate();
 });

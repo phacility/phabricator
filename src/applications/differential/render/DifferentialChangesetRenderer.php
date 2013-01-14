@@ -356,6 +356,7 @@ abstract class DifferentialChangesetRenderer {
         'htype' => null,
         'cursor' => $ii,
         'line' => null,
+        'oline' => null,
         'render' => null,
       );
 
@@ -364,13 +365,15 @@ abstract class DifferentialChangesetRenderer {
         'htype' => null,
         'cursor' => $ii,
         'line' => null,
+        'oline' => null,
         'render' => null,
         'copy' => null,
         'coverage' => null,
       );
 
       if (isset($old[$ii])) {
-        $ospec['line'] = $old[$ii]['line'];
+        $ospec['line'] = (int)$old[$ii]['line'];
+        $nspec['oline'] = (int)$old[$ii]['line'];
         $ospec['htype'] = $old[$ii]['type'];
         if (isset($old_render[$ii])) {
           $ospec['render'] = $old_render[$ii];
@@ -378,7 +381,8 @@ abstract class DifferentialChangesetRenderer {
       }
 
       if (isset($new[$ii])) {
-        $nspec['line'] = $new[$ii]['line'];
+        $nspec['line'] = (int)$new[$ii]['line'];
+        $ospec['oline'] = (int)$new[$ii]['line'];
         $nspec['htype'] = $new[$ii]['type'];
         if (isset($new_render[$ii])) {
           $nspec['render'] = $new_render[$ii];
@@ -408,7 +412,7 @@ abstract class DifferentialChangesetRenderer {
         foreach ($new_comments[$nspec['line']] as $comment) {
           $primitives[] = array(
             'type' => 'inline',
-            'comment' => 'comment',
+            'comment' => $comment,
             'right' => true,
           );
         }
@@ -445,6 +449,7 @@ abstract class DifferentialChangesetRenderer {
     $new_buf = array();
     foreach ($primitives as $primitive) {
       $type = $primitive['type'];
+
       if ($type == 'old') {
         if (!$primitive['htype']) {
           // This is a line which appears in both the old file and the new
@@ -475,11 +480,12 @@ abstract class DifferentialChangesetRenderer {
         $new_buf = array();
         $out[] = array($primitive);
       } else if ($type == 'inline') {
-        if ($primitive['right']) {
-          $new_buf[] = $primitive;
-        } else {
-          $old_buf[] = $primitive;
-        }
+        $out[] = $old_buf;
+        $out[] = $new_buf;
+        $old_buf = array();
+        $new_buf = array();
+
+        $out[] = array($primitive);
       } else {
         throw new Exception("Unknown primitive type '{$primitive}'!");
       }

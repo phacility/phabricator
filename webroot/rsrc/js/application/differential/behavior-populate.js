@@ -5,6 +5,7 @@
  *           javelin-util
  *           javelin-dom
  *           javelin-stratcom
+ *           javelin-behavior-device
  *           phabricator-tooltip
  */
 
@@ -23,10 +24,16 @@ JX.behavior('differential-populate', function(config) {
     }
   }
 
+  // NOTE: If you load the page at one device resolution and then resize to
+  // a different one we don't re-render the diffs, because it's a complicated
+  // mess and you could lose inline comments, cursor positions, etc.
+  var renderer = (JX.Device.getDevice() == 'desktop') ? '2up' : '1up';
+
   for (var k in config.registry) {
     var data = {
       ref : config.registry[k],
-      whitespace: config.whitespace
+      whitespace: config.whitespace,
+      renderer: renderer
     };
 
     new JX.Workflow(config.uri, data)

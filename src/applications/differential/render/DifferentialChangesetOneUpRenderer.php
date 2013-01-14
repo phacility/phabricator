@@ -7,15 +7,61 @@ final class DifferentialChangesetOneUpRenderer
     return true;
   }
 
-  public function renderChangesetTable($contents) {
-    throw new Exception("Not implemented!");
-  }
-
   public function renderTextChange(
     $range_start,
     $range_len,
     $rows) {
-    throw new Exception("Not implemented!");
+
+    $primitives = $this->buildPrimitives($range_start, $range_len);
+
+    $out = array();
+    foreach ($primitives as $p) {
+      $type = $p['type'];
+      switch ($type) {
+        case 'old':
+        case 'new':
+          $out[] = '<tr>';
+          if ($type == 'old') {
+            if ($p['htype']) {
+              $class = 'left old';
+            } else {
+              $class = 'left';
+            }
+            $out[] = '<th>'.$p['line'].'</th>';
+            $out[] = '<th></th>';
+            $out[] = '<td class="'.$class.'">'.$p['render'].'</td>';
+          } else if ($type == 'new') {
+            if ($p['htype']) {
+              $class = 'right new';
+              $out[] = '<th />';
+            } else {
+              $class = 'right';
+              $out[] = '<th>'.$p['oline'].'</th>';
+            }
+            $out[] = '<th>'.$p['line'].'</th>';
+            $out[] = '<td class="'.$class.'">'.$p['render'].'</td>';
+          }
+          $out[] = '</tr>';
+          break;
+        case 'inline':
+          $out[] = '<tr><th /><th />';
+          $out[] = '<td style="background: #ddd; color: #888;">';
+
+          $out[] = 'INLINE COMMENT<br />';
+          $out[] = phutil_escape_html($p['comment']->getContent());
+
+          $out[] = '</td></tr>';
+          break;
+        default:
+          $out[] = '<tr><th /><th /><td>'.$type.'</td></tr>';
+          break;
+      }
+    }
+
+    if ($out) {
+      return $this->wrapChangeInTable(implode('', $out));
+    }
+    return null;
   }
 
   public function renderFileChange($old_file = null,
