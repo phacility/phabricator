@@ -11,9 +11,8 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 179px;
+  width: 205px;
   background: #ececec;
-  border-right: 1px solid #999c9e;
   box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.05);
   background-image: url(/rsrc/image/menu_texture.png);
 }
@@ -31,7 +30,7 @@
 }
 
 .phabricator-nav-local {
-  width: 179px;
+  width: 205px;
   position: absolute;
   left: 0;
   white-space: nowrap;
@@ -44,7 +43,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 179px;
+  left: 205px;
   width: 7px;
 
   cursor: col-resize;
@@ -61,6 +60,6 @@
 }
 
 .device-desktop .has-local-nav .phabricator-nav-content {
-  margin-left: 180px;
+  margin-left: 205px;
 }
 

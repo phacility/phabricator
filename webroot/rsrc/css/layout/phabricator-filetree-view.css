@@ -3,10 +3,6 @@
  */
 
 .phabricator-filetree {
-  background: #fcfcfc;
-  border-style: solid;
-  border-width: 1px 0;
-  border-color: #a0a0a0;
   padding: 4px 0;
 }
 
@@ -40,12 +36,18 @@
 
 .phabricator-filetree span.phabricator-filetree-item
   .phabricator-filetree-name {
-  color: #666666;
+  color: #a0a0a0;
 }
 
 .phabricator-filetree a.phabricator-filetree-item
   .phabricator-filetree-name {
-  color: #3b5998;
+  color: #fff;
+}
+
+.phabricator-filetree a.phabricator-filetree-item:hover {
+  background-image: url(/rsrc/image/menu_hover.png);
+  background-repeat: repeat-x;
+  text-decoration: none;
 }
 
 .phabricator-filetree-icon-file {
@@ -58,5 +60,6 @@
 
 .phabricator-nav-local
   a.phabricator-active-nav-focus {
-  background: #9caccf;
+  background-image: url(/rsrc/image/menu_selected.png);
+  background-repeat: repeat-x;
 }
