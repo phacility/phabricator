@@ -45,10 +45,13 @@ final class DifferentialChangesetOneUpRenderer
           break;
         case 'inline':
           $out[] = '<tr><th /><th />';
-          $out[] = '<td style="background: #ddd; color: #888;">';
+          $out[] = '<td>';
 
-          $out[] = 'INLINE COMMENT<br />';
-          $out[] = phutil_escape_html($p['comment']->getContent());
+          $inline = $this->buildInlineComment(
+            $p['comment'],
+            $p['right']);
+          $inline->setBuildScaffolding(false);
+          $out[] = $inline->render();
 
           $out[] = '</td></tr>';
           break;

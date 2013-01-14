@@ -298,29 +298,9 @@ abstract class DifferentialChangesetRenderer {
    * @param   string|null   Force mode, see above.
    * @return  string        Shield markup.
    */
-  abstract protected function renderShield($message, $force = 'default');
+  abstract public function renderShield($message, $force = 'default');
 
   abstract protected function renderPropertyChangeHeader();
-
-  protected function renderInlineComment(
-    PhabricatorInlineCommentInterface $comment,
-    $on_right = false) {
-
-    $user = $this->getUser();
-    $edit = $user &&
-            ($comment->getAuthorPHID() == $user->getPHID()) &&
-            ($comment->isDraft());
-    $allow_reply = (bool)$user;
-
-    return id(new DifferentialInlineCommentView())
-      ->setInlineComment($comment)
-      ->setOnRight($on_right)
-      ->setHandles($this->getHandles())
-      ->setMarkupEngine($this->getMarkupEngine())
-      ->setEditable($edit)
-      ->setAllowReply($allow_reply)
-      ->render();
-  }
 
   protected function buildPrimitives($range_start, $range_len) {
     $primitives = array();

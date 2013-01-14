@@ -293,7 +293,7 @@ abstract class DifferentialChangesetHTMLRenderer
       '</table>';
   }
 
-  protected function renderShield($message, $force = 'default') {
+  public function renderShield($message, $force = 'default') {
     $end = count($this->getOldLines());
     $reference = $this->getRenderingReference();
 
@@ -333,15 +333,16 @@ abstract class DifferentialChangesetHTMLRenderer
         'Show File Contents');
     }
 
-    return javelin_render_tag(
-      'tr',
-      array(
-        'sigil' => 'context-target',
-      ),
-      '<td class="differential-shield" colspan="6">'.
-        phutil_escape_html($message).
-        $more.
-      '</td>');
+    return $this->wrapChangeInTable(
+      javelin_render_tag(
+        'tr',
+        array(
+          'sigil' => 'context-target',
+        ),
+        '<td class="differential-shield" colspan="6">'.
+          phutil_escape_html($message).
+          $more.
+        '</td>'));
   }
 
   protected function wrapChangeInTable($content) {
@@ -358,5 +359,30 @@ abstract class DifferentialChangesetHTMLRenderer
       $content);
   }
 
+  protected function renderInlineComment(
+    PhabricatorInlineCommentInterface $comment,
+    $on_right = false) {
+
+    return $this->buildInlineComment($comment, $on_right)->render();
+  }
+
+  protected function buildInlineComment(
+    PhabricatorInlineCommentInterface $comment,
+    $on_right = false) {
+
+    $user = $this->getUser();
+    $edit = $user &&
+            ($comment->getAuthorPHID() == $user->getPHID()) &&
+            ($comment->isDraft());
+    $allow_reply = (bool)$user;
+
+    return id(new DifferentialInlineCommentView())
+      ->setInlineComment($comment)
+      ->setOnRight($on_right)
+      ->setHandles($this->getHandles())
+      ->setMarkupEngine($this->getMarkupEngine())
+      ->setEditable($edit)
+      ->setAllowReply($allow_reply);
+  }
 
 }

@@ -17,7 +17,7 @@ abstract class DifferentialChangesetTestRenderer
            "{$away}\n";
   }
 
-  protected function renderShield($message, $force = 'default') {
+  public function renderShield($message, $force = 'default') {
     return "SHIELD ({$force}) {$message}\n";
   }
 
