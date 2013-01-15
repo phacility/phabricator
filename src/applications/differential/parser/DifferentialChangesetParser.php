@@ -704,7 +704,9 @@ final class DifferentialChangesetParser {
       ->setCodeCoverage($this->getCoverage())
       ->setRenderingReference($this->getRenderingReference())
       ->setMarkupEngine($this->markupEngine)
-      ->setHandles($this->handles);
+      ->setHandles($this->handles)
+      ->setOldLines($this->old)
+      ->setNewLines($this->new);
 
     if ($this->user) {
       $renderer->setUser($this->user);
@@ -894,8 +896,6 @@ final class DifferentialChangesetParser {
     );
 
     $renderer
-      ->setOldLines($this->old)
-      ->setNewLines($this->new)
       ->setGaps($gaps)
       ->setMask($mask)
       ->setDepths($depths);

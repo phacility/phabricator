@@ -406,7 +406,7 @@ final class DifferentialChangesetTwoUpRenderer
       $th_new = '<th id="C'.$id.'NL1">1</th>';
     }
 
-    $output = $this->renderChangesetTable(
+    $output =
       '<tr class="differential-image-diff">'.
       $th_old.
       '<td class="left differential-old-image">'.$old.'</td>'.
@@ -416,9 +416,11 @@ final class DifferentialChangesetTwoUpRenderer
       '</td>'.
       '</tr>'.
       implode('', $html_old).
-      implode('', $html_new));
+      implode('', $html_new);
 
-    return $this->wrapChangeInTable($output);
+    $output = $this->wrapChangeInTable($output);
+
+    return $this->renderChangesetTable($output);
   }
 
 }
