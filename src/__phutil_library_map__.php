@@ -1037,6 +1037,7 @@ phutil_register_library_map(array(
     'PhabricatorPHIDConstants' => 'applications/phid/PhabricatorPHIDConstants.php',
     'PhabricatorPHIDController' => 'applications/phid/controller/PhabricatorPHIDController.php',
     'PhabricatorPHIDLookupController' => 'applications/phid/controller/PhabricatorPHIDLookupController.php',
+    'PhabricatorPHPMailerConfigOptions' => 'applications/config/option/PhabricatorPHPMailerConfigOptions.php',
     'PhabricatorPaste' => 'applications/paste/storage/PhabricatorPaste.php',
     'PhabricatorPasteController' => 'applications/paste/controller/PhabricatorPasteController.php',
     'PhabricatorPasteDAO' => 'applications/paste/storage/PhabricatorPasteDAO.php',
@@ -2381,6 +2382,7 @@ phutil_register_library_map(array(
     'PhabricatorPHDConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorPHIDController' => 'PhabricatorController',
     'PhabricatorPHIDLookupController' => 'PhabricatorPHIDController',
+    'PhabricatorPHPMailerConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorPaste' =>
     array(
       0 => 'PhabricatorPasteDAO',

@@ -72,7 +72,7 @@ final class PhabricatorConfigGroupController
         ->setHref('/config/edit/'.$option->getKey().'/')
         ->addAttribute(phutil_escape_html($option->getSummary()));
 
-      if (!$option->getHidden()) {
+      if (!$option->getHidden() && !$option->getMasked()) {
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
         $current_value = PhabricatorConfigJSON::prettyPrintJSON(
           $current_value);
@@ -90,12 +90,12 @@ final class PhabricatorConfigGroupController
       $db_value = idx($db_values, $option->getKey());
       if ($db_value && !$db_value->getIsDeleted()) {
         $item->addIcon('edit', pht('Customized'));
-      } else {
-        $item->addIcon('edit-grey', pht('Default'));
       }
 
       if ($option->getHidden()) {
         $item->addIcon('unpublish', pht('Hidden'));
+      } else if ($option->getMasked()) {
+        $item->addIcon('unpublish-grey', pht('Masked'));
       } else if ($option->getLocked()) {
         $item->addIcon('lock', pht('Locked'));
       }
