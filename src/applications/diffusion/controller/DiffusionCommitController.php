@@ -195,6 +195,7 @@ final class DiffusionCommitController extends DiffusionController {
       }
 
       $change_panel->appendChild($change_table);
+      $change_panel->setNoBackground();
 
       $content[] = $change_panel;
 
@@ -498,6 +499,7 @@ final class DiffusionCommitController extends DiffusionController {
     $panel->setHeader('Audits');
     $panel->setCaption('Audits you are responsible for are highlighted.');
     $panel->appendChild($view);
+    $panel->setNoBackground();
 
     return $panel;
   }
@@ -795,6 +797,7 @@ final class DiffusionCommitController extends DiffusionController {
     $panel->setHeader('Merged Changes');
     $panel->setCaption($caption);
     $panel->appendChild($history_table);
+    $panel->setNoBackground();
 
     return $panel;
   }
