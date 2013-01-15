@@ -227,7 +227,7 @@ final class AphrontSideNavFilterView extends AphrontView {
       }
     }
 
-    return $crumbs.phutil_render_tag(
+    return phutil_render_tag(
       'div',
       array(
         'class' => implode(' ', $nav_classes),
@@ -241,7 +241,7 @@ final class AphrontSideNavFilterView extends AphrontView {
           'class' => 'phabricator-nav-content',
           'id' => $content_id,
         ),
-        $this->renderChildren()));
+        $crumbs.$this->renderChildren()));
   }
 
 }
