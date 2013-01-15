@@ -160,17 +160,26 @@ final class PhabricatorSettingsPanelOAuth
       }
 
       $status = $oauth_info->getTokenStatus();
-      $status = PhabricatorUserOAuthInfo::getReadableTokenStatus($status);
+      $readable_status = PhabricatorUserOAuthInfo::getReadableTokenStatus(
+        $status);
+      $rappable_status = PhabricatorUserOAuthInfo::getRappableTokenStatus(
+        $status);
+      $rap = 'Yo yo yo<br />'.
+        'My name\'s DJ Token and I\'m here to say<br />'.
+        // pronounce as "dollar rappable status" for meter to work
+        "$rappable_status, hey hey hey hey<br />".
+        'I rap \'bout tokens, that might be why<br />'.
+        'I\'m such a cool and popular guy';
 
       $token_form = new AphrontFormView();
       $token_form
         ->setUser($user)
         ->appendChild(
-          '<p class="aphront-from-instructions">insert rap about tokens</p>')
+          '<p class="aphront-from-instructions">'.$rap.'</p>')
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel('Token Status')
-            ->setValue($status))
+            ->setValue($readable_status))
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel('Expires')
