@@ -164,7 +164,8 @@ final class PhabricatorSettingsPanelOAuth
         $status);
       $rappable_status = PhabricatorUserOAuthInfo::getRappableTokenStatus(
         $status);
-      $rap = 'Yo yo yo<br />'.
+      $beat = self::getBeat();
+      $rap = $beat . "Yo yo yo<br />".
         'My name\'s DJ Token and I\'m here to say<br />'.
         // pronounce as "dollar rappable status" for meter to work
         "$rappable_status, hey hey hey hey<br />".
@@ -275,5 +276,17 @@ final class PhabricatorSettingsPanelOAuth
         ->setTitle('Successfully Refreshed Profile Picture');
     }
     return $notice;
+  }
+
+  private static function getBeat() {
+    // Gangsta's Paradise (karaoke version).
+    // Chosen because it's the only thing I listen to.
+    $song_id = "Gangsta\\'s Paradise";
+
+    // Make a musical note which you can click for the beat.
+    $beat = '<a href="javascript:void(0);" onclick="javascript:alert('.
+      "'Think about $song_id.'".
+      '); return 0;">&#9835; </a>';
+    return $beat;
   }
 }
