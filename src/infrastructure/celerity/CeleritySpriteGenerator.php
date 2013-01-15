@@ -169,6 +169,9 @@ final class CeleritySpriteGenerator {
     $unusual_heights = array(
       'dark-menu-label' => 25,
       'breadcrumbs'     => 31,
+      'menu-hover'      => 28,
+      'menu-label'      => 24,
+      'menu-selected'   => 28,
     );
 
     // Reorder the sprites so less-specific rules generate earlier in the sheet.
@@ -193,8 +196,17 @@ final class CeleritySpriteGenerator {
                         'button.grey_active, a.dropdown-open',
       'green-dark' => ', button.green, a.green, a.green:visited',
       'green-light' => ', button.green:active, a.green:active',
-      'dark-menu-label'
-        => ', .phabricator-dark-menu .phabricator-menu-item-type-label',
+      'dark-menu-label' =>
+        ', .phabricator-dark-menu .phabricator-menu-item-type-label',
+      'menu-label' =>
+        ', .phabricator-side-menu .phabricator-menu-item-type-label',
+      'menu-hover' =>
+        ', .device-desktop .phabricator-side-menu '.
+        'a.phabricator-menu-item-type-link:hover',
+      'menu-selected' =>
+        ', .phabricator-side-menu .phabricator-menu-item-selected, '.
+        '.device-desktop .phabricator-side-menu '.
+        'a.phabricator-menu-item-selected:hover',
     );
 
     $sprites = array();
@@ -215,7 +227,13 @@ final class CeleritySpriteGenerator {
       false,
       PhutilSpriteSheet::TYPE_REPEAT_X,
       ', button, a.button, a.button:visited, input.inputsubmit, '.
-      '.phabricator-dark-menu .phabricator-menu-item-type-label');
+      '.phabricator-dark-menu .phabricator-menu-item-type-label, '.
+      '.phabricator-side-menu .phabricator-menu-item-type-label, '.
+      '.device-desktop .phabricator-side-menu '.
+        'a.phabricator-menu-item-type-link:hover, '.
+      '.phabricator-side-menu .phabricator-menu-item-selected, '.
+      '.device-desktop .phabricator-side-menu '.
+        'a.phabricator-menu-item-selected:hover ');
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }
