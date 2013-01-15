@@ -383,6 +383,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $panel = new AphrontPanelView();
     $panel->setHeader($header);
     $panel->appendChild($view);
+    $panel->setNoBackground();
 
     if ($use_pager) {
       $panel->appendChild($pager);
@@ -476,6 +477,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $panel = new AphrontPanelView();
     $panel->setHeader($header);
     $panel->appendChild($view);
+    $panel->setNoBackground();
 
     if ($use_pager) {
       $panel->appendChild($pager);
