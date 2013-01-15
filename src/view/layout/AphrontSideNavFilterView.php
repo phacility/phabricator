@@ -166,6 +166,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $main_id = celerity_generate_unique_node_id();
 
     if ($this->flexible) {
+      $nav_classes[] = 'has-drag-nav';
       $drag_id = celerity_generate_unique_node_id();
       $flex_bar = phutil_render_tag(
         'div',

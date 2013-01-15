@@ -43,7 +43,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 198px;
+  left: 205px;
   width: 7px;
 
   cursor: col-resize;
@@ -59,7 +59,10 @@
   background-repeat: no-repeat;
 }
 
+.device-desktop .phabricator-standard-page-body .has-drag-nav .phabricator-nav-content {
+  margin-left: 212px;
+}
+
 .device-desktop .has-local-nav .phabricator-nav-content {
   margin-left: 205px;
 }
-
