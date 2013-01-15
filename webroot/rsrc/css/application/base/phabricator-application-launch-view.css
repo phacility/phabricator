@@ -36,6 +36,11 @@ div.phabricator-application-launch-container {
 
 }
 
+a.application-tile-full {
+  width: 100%;
+  height: 52px;
+}
+
 a.phabricator-application-launch-container:hover {
   text-decoration: none;
 }
@@ -56,6 +61,12 @@ a.phabricator-application-launch-container:hover {
   height: 28px;
 }
 
+.application-tile-full .phabricator-application-launch-icon {
+  top: 12px;
+  left: 12px;
+}
+
+
 .phabricator-application-launch-name {
   display: block;
   margin-top: 50px;
@@ -64,6 +75,20 @@ a.phabricator-application-launch-container:hover {
   text-align: center;
   color: #ffffff;
   text-shadow: 0px 1px 1px #000000;
+}
+
+.application-tile-full .phabricator-application-launch-name {
+  margin-top: 12px;
+  text-align: left;
+  margin-left: 52px;
+
+}
+
+.application-tile-full .phabricator-application-launch-description {
+  color: #bfbfbf;
+  font-size: 11px;
+  margin-top: 24px;
+  margin-left: 52px;
 }
 
 .phabricator-application-launch-attention {
@@ -77,4 +102,9 @@ a.phabricator-application-launch-container:hover {
   padding: 1px 6px 2px;
   border: 1px solid #aa0000;
   font-size: 12px;
+}
+
+.application-tile-full .phabricator-application-launch-attention {
+  top: 16px;
+  right: 12px;
 }

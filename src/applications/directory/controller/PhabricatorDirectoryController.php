@@ -44,10 +44,16 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
 
       $views = array();
       foreach ($application_list as $key => $application) {
-        $views[] = id(new PhabricatorApplicationLaunchView())
+        $tile = id(new PhabricatorApplicationLaunchView())
           ->setApplication($application)
           ->setApplicationStatus(idx($status, $key, array()))
           ->setUser($user);
+
+        if ($group == PhabricatorApplication::GROUP_CORE) {
+          $tile->setFullWidth(true);
+        }
+
+        $views[] = $tile;
       }
 
       while (count($views) % 4) {

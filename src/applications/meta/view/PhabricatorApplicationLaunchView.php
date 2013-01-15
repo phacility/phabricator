@@ -4,6 +4,12 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
 
   private $application;
   private $status;
+  private $fullWidth;
+
+  public function setFullWidth($full_width) {
+    $this->fullWidth = $full_width;
+    return $this;
+  }
 
   public function setApplication(PhabricatorApplication $application) {
     $this->application = $application;
@@ -30,6 +36,15 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
           'class' => 'phabricator-application-launch-name',
         ),
         phutil_escape_html($application->getName()));
+
+      if ($this->fullWidth) {
+        $content[] = phutil_render_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-launch-description',
+          ),
+          phutil_escape_html($application->getShortDescription()));
+      }
 
       $count = 0;
       if ($this->status) {
@@ -68,10 +83,16 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         '');
     }
 
+    $classes = array();
+    $classes[] = 'phabricator-application-launch-container';
+    if ($this->fullWidth) {
+      $classes[] = 'application-tile-full';
+    }
+
     return phutil_render_tag(
       $application ? 'a' : 'div',
       array(
-        'class' => 'phabricator-application-launch-container',
+        'class' => implode(' ', $classes),
         'href'  => $application ? $application->getBaseURI() : null,
       ),
       $icon.
