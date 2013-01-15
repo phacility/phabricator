@@ -81,7 +81,7 @@ final class PhabricatorOwnersDetailController
 
     $path_links = array();
     foreach ($paths as $path) {
-      $repo = $repositories[$path->getRepositoryPHID()];
+      $repo = idx($repositories, $path->getRepositoryPHID());
       if (!$repo) {
         continue;
       }

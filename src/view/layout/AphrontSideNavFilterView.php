@@ -209,6 +209,8 @@ final class AphrontSideNavFilterView extends AphrontView {
     }
 
     if ($this->flexible) {
+      $nav_classes[] = 'has-drag-nav';
+
       Javelin::initBehavior(
         'phabricator-nav',
         array(
