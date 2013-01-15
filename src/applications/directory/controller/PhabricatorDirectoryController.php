@@ -21,11 +21,51 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/'));
 
-    $nav->addLabel('Phabricator');
-    $nav->addFilter('home', 'Tactical Command', '/');
-    $nav->addFilter('jump', 'Jump Nav');
-    $nav->addFilter('feed', 'Feed');
-    $nav->addFilter('applications', 'More Stuff');
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+
+    foreach ($applications as $key => $application) {
+      if (!$application->shouldAppearInLaunchView()) {
+        unset($applications[$key]);
+      }
+    }
+
+    $groups = PhabricatorApplication::getApplicationGroups();
+
+    $applications = msort($applications, 'getApplicationOrder');
+    $applications = mgroup($applications, 'getApplicationGroup');
+    $applications = array_select_keys($applications, array_keys($groups));
+
+    $view = array();
+    foreach ($applications as $group => $application_list) {
+      $status = array();
+      foreach ($application_list as $key => $application) {
+        $status[$key] = $application->loadStatus($user);
+      }
+
+      $views = array();
+      foreach ($application_list as $key => $application) {
+        $views[] = id(new PhabricatorApplicationLaunchView())
+          ->setApplication($application)
+          ->setApplicationStatus(idx($status, $key, array()))
+          ->setUser($user);
+      }
+
+      while (count($views) % 4) {
+        $views[] = id(new PhabricatorApplicationLaunchView());
+      }
+
+      $nav->addLabel($groups[$group]);
+      $nav->addCustomBlock(
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'application-tile-group',
+          ),
+          id(new AphrontNullView())->appendChild($views)->render()));
+    }
+
+    $nav->addClass('phabricator-side-menu-home');
+    $nav->selectFilter(null);
 
     return $nav;
   }

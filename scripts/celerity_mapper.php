@@ -74,7 +74,6 @@ $package_spec = array(
 
     'phabricator-directory-css',
     'phabricator-jump-nav',
-    'phabricator-app-buttons-css',
 
     'phabricator-remarkup-css',
     'syntax-highlighting-css',

@@ -3,7 +3,7 @@
 final class PhabricatorApplicationPHID extends PhabricatorApplication {
 
   public function getName() {
-    return 'PHID Manager';
+    return 'PHIDs';
   }
 
   public function getBaseURI() {

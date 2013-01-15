@@ -24,6 +24,12 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $active;
   private $menu;
   private $crumbs;
+  private $classes = array();
+
+  public function addClass($class) {
+    $this->classes[] = $class;
+    return $this;
+  }
 
   public function __construct() {
     $this->menu = new PhabricatorMenuView();
@@ -229,6 +235,8 @@ final class AphrontSideNavFilterView extends AphrontView {
           ));
       }
     }
+
+    $nav_classes = array_merge($nav_classes, $this->classes);
 
     return phutil_render_tag(
       'div',
