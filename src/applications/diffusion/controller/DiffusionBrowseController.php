@@ -66,6 +66,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $browse_panel = new AphrontPanelView();
       $browse_panel->appendChild($browse_table);
+      $browse_panel->setNoBackground();
 
       $content[] = $browse_panel;
     }

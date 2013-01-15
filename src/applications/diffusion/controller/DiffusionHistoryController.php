@@ -75,6 +75,7 @@ final class DiffusionHistoryController extends DiffusionController {
     $history_panel->addButton($button);
     $history_panel->appendChild($history_table);
     $history_panel->appendChild($pager);
+    $history_panel->setNoBackground();
 
     $content[] = $history_panel;
 

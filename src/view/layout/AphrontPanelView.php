@@ -56,6 +56,11 @@ final class AphrontPanelView extends AphrontView {
     return $this;
   }
 
+  public function setNoBackground() {
+    $this->classes[] = 'aphront-panel-plain';
+    return $this;
+  }
+
   public function render() {
     if ($this->header !== null) {
       $header = '<h1>'.$this->header.'</h1>';

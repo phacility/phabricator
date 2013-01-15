@@ -199,6 +199,7 @@ final class DiffusionHomeController extends DiffusionController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Browse Repositories');
     $panel->appendChild($table);
+    $panel->setNoBackground();
 
     $crumbs = $this->buildCrumbs();
     $crumbs->addCrumb(
