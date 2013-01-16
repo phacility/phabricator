@@ -39,8 +39,6 @@ final class PhabricatorDirectoryMainController
       $tasks_panel = null;
     }
 
-    $flagged_panel = $this->buildFlaggedPanel();
-
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
     $audit_panel = $this->buildAuditPanel();
@@ -52,7 +50,6 @@ final class PhabricatorDirectoryMainController
       $triage_panel,
       $revision_panel,
       $tasks_panel,
-      $flagged_panel,
       $audit_panel,
       $commit_panel,
     );
@@ -117,44 +114,6 @@ final class PhabricatorDirectoryMainController
         "View All Unbreak Now \xC2\xBB"));
 
     $panel->appendChild($this->buildTaskListView($tasks));
-
-    return $panel;
-  }
-
-  private function buildFlaggedPanel() {
-    $user = $this->getRequest()->getUser();
-
-    $flag_query = id(new PhabricatorFlagQuery())
-      ->setViewer($user)
-      ->withOwnerPHIDs(array($user->getPHID()))
-      ->needHandles(true)
-      ->setLimit(10);
-
-    $flags = $flag_query->execute();
-
-    if (!$flags) {
-      return $this->renderMiniPanel(
-        'No Flags',
-        "You haven't flagged anything.");
-    }
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Flagged Objects');
-    $panel->setCaption("Objects you've flagged.");
-
-    $flag_view = new PhabricatorFlagListView();
-    $flag_view->setFlags($flags);
-    $flag_view->setUser($user);
-    $panel->appendChild($flag_view);
-
-    $panel->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href'  => '/flag/',
-          'class' => 'grey button',
-        ),
-        "View All Flags \xC2\xBB"));
 
     return $panel;
   }
