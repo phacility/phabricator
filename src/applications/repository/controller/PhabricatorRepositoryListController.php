@@ -89,6 +89,7 @@ final class PhabricatorRepositoryListController
       $panel->setCreateButton('Create New Repository', '/repository/create/');
     }
     $panel->appendChild($table);
+    $panel->setNoBackground();
 
     $projects = id(new PhabricatorRepositoryArcanistProject())->loadAll();
 
@@ -150,6 +151,7 @@ final class PhabricatorRepositoryListController
     $project_panel = new AphrontPanelView();
     $project_panel->setHeader('Arcanist Projects');
     $project_panel->appendChild($project_table);
+    $project_panel->setNoBackground();
 
     return $this->buildStandardPageResponse(
       array(
