@@ -106,13 +106,13 @@ final class PhabricatorCoreConfigOptions
             "then playing with a user tokenizer (like the user selectors in ".
             "Maniphest or Differential) and seeing which setting loads ".
             "faster and feels better.")),
-      $this->newOption('config.lock', 'wild', array())
+      $this->newOption('config.lock', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Additional configuration options to lock.')),
-      $this->newOption('config.hide', 'wild', array())
+      $this->newOption('config.hide', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Additional configuration options to hide.')),
-      $this->newOption('config.mask', 'wild', array())
+      $this->newOption('config.mask', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Additional configuration options to mask.')),
     );

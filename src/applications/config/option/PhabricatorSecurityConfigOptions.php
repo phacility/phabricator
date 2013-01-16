@@ -40,6 +40,7 @@ final class PhabricatorSecurityConfigOptions
         'security.hmac-key',
         'string',
         '[D\t~Y7eNmnQGJ;rnH6aF;m2!vJ8@v8C=Cs:aQS\.Qw')
+        ->setMasked(true)
         ->setSummary(
           pht("Key for HMAC digests."))
         ->setDescription(
@@ -82,6 +83,7 @@ final class PhabricatorSecurityConfigOptions
         'phabricator.csrf-key',
         'string',
         '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3')
+        ->setMasked(true)
         ->setSummary(
           pht("Hashed with other inputs to generate CSRF tokens."))
         ->setDescription(
@@ -96,6 +98,7 @@ final class PhabricatorSecurityConfigOptions
          'phabricator.mail-key',
          'string',
          '5ce3e7e8787f6e40dfae861da315a5cdf1018f12')
+        ->setMasked(true)
         ->setSummary(
           pht("Hashed with other inputs to generate mail tokens."))
         ->setDescription(
@@ -105,9 +108,7 @@ final class PhabricatorSecurityConfigOptions
             "unique to your install. In particular, you will want to do ".
             "this if you accidentally send a bunch of mail somewhere you ".
             "shouldn't have, to invalidate all old reply-to addresses.")),
-       // TODO: This should really be dict<string,bool> but that doesn't exist
-       // yet.
-       $this->newOption('uri.allowed-protocols', 'wild', null)
+       $this->newOption('uri.allowed-protocols', 'set', null)
         ->setSummary(
           pht("Determines which URI protocols are auto-linked."))
         ->setDescription(
