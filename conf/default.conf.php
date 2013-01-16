@@ -142,26 +142,6 @@ return array(
   // 'darkconsole.enabled' to use this option.
   'darkconsole.always-on'       => false,
 
-
-  // Allows you to mask certain configuration values from appearing in the
-  // "Config" tab of DarkConsole.
-  'darkconsole.config-mask'     => array(
-    'mysql.pass',
-    'amazon-ses.secret-key',
-    'amazon-s3.secret-key',
-    'sendgrid.api-key',
-    'recaptcha.private-key',
-    'phabricator.csrf-key',
-    'facebook.application-secret',
-    'github.application-secret',
-    'google.application-secret',
-    'phabricator.application-secret',
-    'disqus.application-secret',
-    'phabricator.mail-key',
-    'security.hmac-key',
-    'ldap.anonymous-user-password',
-  ),
-
   // Map of additional configuration values to lock.
   'config.lock' => array(),
 
@@ -170,7 +150,6 @@ return array(
 
   // Map of additional configuration values to mask.
   'config.mask' => array(),
-
 
 // --  MySQL  --------------------------------------------------------------- //
 
