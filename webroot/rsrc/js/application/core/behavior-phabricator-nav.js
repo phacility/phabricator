@@ -113,8 +113,8 @@ JX.behavior('phabricator-nav', function(config) {
   JX.Stratcom.listen('differential-filetree-toggle', null, function(e) {
     collapsed = !collapsed;
     JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
+    JX.DOM.alterClass(main, 'has-drag-nav', !collapsed);
     resetdrag();
-
   });
 
 
