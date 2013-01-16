@@ -25,11 +25,9 @@ final class PonderMentionMail extends PonderMail {
     $targetkind = "somewhere";
     if ($target instanceof PonderQuestion) {
       $targetkind = "in a question";
-    }
-    else if ($target instanceof PonderAnswer) {
+    } else if ($target instanceof PonderAnswer) {
       $targetkind = "in an answer";
-    }
-    else if ($target instanceof PonderComment) {
+    } else if ($target instanceof PonderComment) {
       $targetkind = "in a comment";
     }
 

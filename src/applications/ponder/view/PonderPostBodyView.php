@@ -72,8 +72,7 @@ final class PonderPostBodyView extends AphrontView {
 
     if ($this->target instanceof PonderAnswer) {
       $xaction_view->addClass("ponder-answer");
-    }
-    else {
+    } else {
       $xaction_view->addClass("ponder-question");
     }
 
@@ -104,8 +103,7 @@ final class PonderPostBodyView extends AphrontView {
 
       if ($this->target instanceof PonderAnswer) {
         $outerview->setURI('/ponder/answer/vote/');
-      }
-      else {
+      } else {
         $outerview->setURI('/ponder/question/vote/');
       }
 

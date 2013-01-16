@@ -55,8 +55,7 @@ final class PonderQuestion extends PonderDAO
         ->execute();
 
       $comments = mgroup($comments, 'getTargetPHID');
-    }
-    else {
+    } else {
       $comments = array();
     }
 
