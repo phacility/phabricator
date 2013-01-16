@@ -70,7 +70,8 @@ final class PhabricatorSettingsPanelLDAP
 
     $panel = new AphrontPanelView();
     $panel->setHeader('LDAP Account Settings');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
+
     foreach ($forms as $name => $form) {
       if ($name) {
         $panel->appendChild('<br /><h1>'.$name.'</h1><br />');

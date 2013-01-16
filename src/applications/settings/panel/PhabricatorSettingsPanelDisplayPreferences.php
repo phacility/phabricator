@@ -145,9 +145,9 @@ EXAMPLE;
           ->setValue('Save Preferences'));
 
     $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
     $panel->setHeader('Display Preferences');
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     $error_view = null;
     if ($request->getStr('saved') === 'true') {

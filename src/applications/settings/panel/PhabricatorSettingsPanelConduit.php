@@ -78,7 +78,7 @@ final class PhabricatorSettingsPanelConduit
     $cert = new AphrontPanelView();
     $cert->setHeader('Arcanist Certificate');
     $cert->appendChild($cert_form);
-    $cert->setWidth(AphrontPanelView::WIDTH_FORM);
+    $cert->setNoBackground();
 
     $regen_form = new AphrontFormView();
     $regen_form
@@ -96,7 +96,7 @@ final class PhabricatorSettingsPanelConduit
     $regen = new AphrontPanelView();
     $regen->setHeader('Regenerate Certificate');
     $regen->appendChild($regen_form);
-    $regen->setWidth(AphrontPanelView::WIDTH_FORM);
+    $regen->setNoBackground();
 
     return array(
       $notice,

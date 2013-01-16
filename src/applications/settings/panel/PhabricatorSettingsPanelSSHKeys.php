@@ -154,8 +154,8 @@ final class PhabricatorSettingsPanelSSHKeys
 
     $panel = new AphrontPanelView();
     $panel->setHeader($header);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     return id(new AphrontNullView())
       ->appendChild(
@@ -229,6 +229,7 @@ final class PhabricatorSettingsPanelSSHKeys
         'Add New Public Key'));
     $panel->setHeader('SSH Public Keys');
     $panel->appendChild($table);
+    $panel->setNoBackground();
 
     return $panel;
   }

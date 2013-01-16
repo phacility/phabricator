@@ -198,7 +198,7 @@ final class PhabricatorSettingsPanelProfile
     $panel = new AphrontPanelView();
     $panel->setHeader('Edit Profile Details');
     $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
 
     return array(
       $error_view,
