@@ -47,8 +47,7 @@ a.phabricator-application-launch-container:hover {
 
 /* The hover effect looks awful on phones/tablets when scrolling. */
 .device-desktop a.phabricator-application-launch-container:hover {
-  background-color: #638ed3;
-  border-color: #0a1d59;
+  background-image: url('/rsrc/image/texture/dark-menu-hover.png');
   color: #fff;
 }
 
@@ -71,7 +70,7 @@ a.phabricator-application-launch-container:hover {
   display: block;
   margin-top: 50px;
   font-weight: bold;
-  font-size: 11px;
+  font-size: 12px;
   text-align: center;
   color: #ffffff;
   text-shadow: 0px 1px 1px #000000;
