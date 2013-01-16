@@ -9,6 +9,7 @@ final class PhabricatorConfigAllController
 
     $rows = array();
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
+    ksort($options);
     foreach ($options as $option) {
       $key = $option->getKey();
 
