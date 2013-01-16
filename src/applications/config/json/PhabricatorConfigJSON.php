@@ -13,7 +13,13 @@ final class PhabricatorConfigJSON {
     if (is_array($value) && array_keys($value) != range(0, count($value) - 1)) {
       return id(new PhutilJSON())->encodeFormatted($value);
     } else {
-      return json_encode($value);
+      $result = json_encode($value);
+      // For readability, unescape forward slashes. These are normally escaped
+      // to prevent the string "</script>" from appearing in a JSON literal,
+      // but it's irrelevant here and makes reading paths more difficult than
+      // necessary.
+      $result = str_replace('\\/', '/', $result);
+      return $result;
     }
   }
 }

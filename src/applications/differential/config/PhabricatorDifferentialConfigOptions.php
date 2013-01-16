@@ -201,6 +201,72 @@ final class PhabricatorDifferentialConfigOptions
           pht(
             "Similar to `differential.days-fresh` but marks stale revisions. ".
             "If the revision is even older than it is when marked as 'old'.")),
+      $this->newOption(
+        'metamta.differential.reply-handler-domain',
+        'string',
+        null)
+        ->setDescription(
+          pht('Inbound email domain for Differential replies.')),
+      $this->newOption(
+        'metamta.differential.reply-handler',
+        'class',
+        'DifferentialReplyHandler')
+        ->setBaseClass('PhabricatorMailReplyHandler')
+        ->setDescription(pht('Alternate reply handler class.')),
+      $this->newOption(
+        'metamta.differential.subject-prefix',
+        'string',
+        '[Differential]')
+        ->setDescription(pht('Subject prefix for Differential mail.')),
+      $this->newOption(
+        'metamta.differential.attach-patches',
+        'bool',
+        false)
+        ->setBoolOptions(
+          array(
+            pht("Attach Patches"),
+            pht("Do Not Attach Patches"),
+          ))
+        ->setSummary(pht("Attach patches to email, as text attachments."))
+        ->setDescription(
+          pht(
+            "If you set this to true, Phabricator will attach patches to ".
+            "Differential mail (as text attachments). This will not work if ".
+            "you are using SendGrid as your mail adapter.")),
+      $this->newOption(
+        'metamta.differential.inline-patches',
+        'int',
+        0)
+        ->setSummary(pht("Inline patches in email, as body text."))
+        ->setDescription(
+          pht(
+            "To include patches inline in email bodies, set this to a ".
+            "positive integer. Patches will be inlined if they are at most ".
+            "that many lines. For instance, a value of 100 means 'inline ".
+            "patches if they are no longer than 100 lines'. By default, ".
+            "patches are not inlined.")),
+      // TODO: Implement 'enum'? Options are 'unified' or 'git'.
+      $this->newOption(
+        'metamta.differential.patch-format',
+        'string',
+        'unified')
+        ->setDescription(
+          pht("Format for inlined or attached patches: 'git' or 'unified'.")),
+      $this->newOption(
+        'metamta.differential.unified-comment-context',
+        'bool',
+        false)
+        ->setBoolOptions(
+          array(
+            pht("Do not show context"),
+            pht("Show context"),
+          ))
+        ->setSummary(pht("Show diff context around inline comments in email."))
+        ->setDescription(
+          pht(
+            "Normally, inline comments in emails are shown with a file and ".
+            "line but without any diff context. Enabling this option adds ".
+            "diff context.")),
     );
   }
 
