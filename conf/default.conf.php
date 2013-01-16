@@ -162,6 +162,15 @@ return array(
     'ldap.anonymous-user-password',
   ),
 
+  // Map of additional configuration values to lock.
+  'config.lock' => array(),
+
+  // Map of additional configuration values to hide.
+  'config.hide' => array(),
+
+  // Map of additional configuration values to mask.
+  'config.mask' => array(),
+
 
 // --  MySQL  --------------------------------------------------------------- //
 

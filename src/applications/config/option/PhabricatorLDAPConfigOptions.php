@@ -29,6 +29,7 @@ final class PhabricatorLDAPConfigOptions
         ->setDescription(
           pht('Username to login to LDAP server with.')),
       $this->newOption('ldap.anonymous-user-password', 'string', null)
+        ->setMasked(true)
         ->setDescription(
           pht('Password to login to LDAP server with.')),
 

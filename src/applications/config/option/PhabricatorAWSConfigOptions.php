@@ -16,10 +16,12 @@ final class PhabricatorAWSConfigOptions
       $this->newOption('amazon-ses.access-key', 'string', null)
         ->setDescription(pht('Access key for Amazon SES.')),
       $this->newOption('amazon-ses.secret-key', 'string', null)
+        ->setMasked(true)
         ->setDescription(pht('Secret key for Amazon SES.')),
       $this->newOption('amazon-s3.access-key', 'string', null)
         ->setDescription(pht('Access key for Amazon S3.')),
       $this->newOption('amazon-s3.secret-key', 'string', null)
+        ->setMasked(true)
         ->setDescription(pht('Secret key for Amazon S3.')),
       $this->newOption('amazon-s3.endpoint', 'string', null)
         ->setDescription(
@@ -31,6 +33,7 @@ final class PhabricatorAWSConfigOptions
       $this->newOption('amazon-ec2.access-key', 'string', null)
         ->setDescription(pht('Access key for Amazon EC2.')),
       $this->newOption('amazon-ec2.secret-key', 'string', null)
+        ->setMasked(true)
         ->setDescription(pht('Secret key for Amazon EC2.')),
     );
   }

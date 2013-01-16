@@ -32,10 +32,18 @@ final class PhabricatorConfigOption
   }
 
   public function getMasked() {
+    if ($this->masked) {
+      return true;
+    }
+
     if ($this->getHidden()) {
       return true;
     }
-    return $this->masked;
+
+    return idx(
+      PhabricatorEnv::getEnvConfig('config.mask', array()),
+      $this->getKey(),
+      false);
   }
 
   public function setHidden($hidden) {
@@ -44,7 +52,14 @@ final class PhabricatorConfigOption
   }
 
   public function getHidden() {
-    return $this->hidden;
+    if ($this->hidden) {
+      return true;
+    }
+
+    return idx(
+      PhabricatorEnv::getEnvConfig('config.hide', array()),
+      $this->getKey(),
+      false);
   }
 
   public function setLocked($locked) {
@@ -53,10 +68,18 @@ final class PhabricatorConfigOption
   }
 
   public function getLocked() {
+    if ($this->locked) {
+      return true;
+    }
+
     if ($this->getHidden()) {
       return true;
     }
-    return $this->locked;
+
+    return idx(
+      PhabricatorEnv::getEnvConfig('config.lock', array()),
+      $this->getKey(),
+      false);
   }
 
   public function addExample($value, $description) {
