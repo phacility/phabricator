@@ -4,7 +4,7 @@ final class PhabricatorPHDConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Phabricator Daemons");
+    return pht("Daemons");
   }
 
   public function getDescription() {
