@@ -16,6 +16,33 @@ final class PhabricatorMenuItemView extends AphrontView {
   private $sortOrder = 1.0;
   private $icon;
   private $selected;
+  private $sigils = array();
+  private $metadata;
+  private $id;
+
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  public function setProperty($property) {
+    $this->property = $property;
+    return $this;
+  }
+
+  public function getProperty() {
+    return $this->property;
+  }
+
+  public function setMetadata($metadata) {
+    $this->metadata = $metadata;
+    return $this;
+  }
+
+  public function addSigil($sigil) {
+    $this->sigils[] = $sigil;
+    return $this;
+  }
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -125,12 +152,24 @@ final class PhabricatorMenuItemView extends AphrontView {
         phutil_escape_html($this->name.$external));
     }
 
+    $sigils = $this->sigils;
+    if ($this->workflow) {
+      $sigils[] = 'workflow';
+    }
+    if ($sigils) {
+      $sigils = implode(' ', $sigils);
+    } else {
+      $sigils = null;
+    }
+
     return javelin_render_tag(
       $this->href ? 'a' : 'div',
       array(
-        'class'     => implode(' ', $classes),
-        'href'      => $this->href,
-        'sigil'     => $this->workflow ? 'workflow' : null,
+        'class' => implode(' ', $classes),
+        'href'  => $this->href,
+        'sigil' => $sigils,
+        'meta'  => $this->metadata,
+        'id'    => $this->id,
       ),
       $this->renderChildren().
       $name);

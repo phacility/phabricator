@@ -20,6 +20,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_DIFFUSION_SYMBOLS    = 'diffusion-symbols';
 
   const PREFERENCE_NAV_WIDTH            = 'nav-width';
+  const PREFERENCE_APP_TILES            = 'app-tiles';
 
   protected $userPHID;
   protected $preferences = array();
