@@ -745,7 +745,7 @@ final class DifferentialChangesetParser {
         $lines = number_format($this->changeset->getAffectedLineCount());
         $shield = $renderer->renderShield(
           pht(
-            'This file has a very large number of changes ({%s} lines).',
+            'This file has a very large number of changes (%s lines).',
             $lines));
       }
     }
