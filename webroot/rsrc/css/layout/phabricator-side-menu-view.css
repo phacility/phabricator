@@ -22,6 +22,7 @@
   font-size: 12px;
   font-weight: bold;
   border-style: solid;
+  background-color: #000;
 }
 
 .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover {
