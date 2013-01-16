@@ -51,6 +51,7 @@ final class DiffusionHomeController extends DiffusionController {
         unset($repositories[$key]);
       }
     }
+    $repositories = msort($repositories, 'getName');
 
     $repository_ids = mpull($repositories, 'getID');
     $summaries = array();

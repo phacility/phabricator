@@ -14,6 +14,7 @@ final class PhabricatorRepositoryListController
     $is_admin = $user->getIsAdmin();
 
     $repos = id(new PhabricatorRepository())->loadAll();
+    $repos = msort($repos, 'getName');
 
     $rows = array();
     foreach ($repos as $repo) {
