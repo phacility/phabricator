@@ -175,5 +175,12 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     return $options;
   }
 
+  /**
+   * Deformat a HEREDOC for use in remarkup by converting line breaks to
+   * spaces.
+   */
+  final protected function deformat($string) {
+    return preg_replace('/(?<=\S)\n(?=\S)/', ' ', $string);
+  }
 
 }

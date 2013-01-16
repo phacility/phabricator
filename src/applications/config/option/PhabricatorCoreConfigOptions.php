@@ -115,6 +115,15 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('config.mask', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Additional configuration options to mask.')),
+      $this->newOption('phabricator.env', 'string', null)
+        ->setLocked(true)
+        ->setDescription(pht('Internal.')),
+      $this->newOption('phabricator.version', 'string', null)
+        ->setLocked(true)
+        ->setDescription(pht('Internal / deprecated.')),
+      $this->newOption('phabricator.setup', 'bool', false)
+        ->setLocked(true)
+        ->setDescription(pht('Internal / deprecated.')),
     );
   }
 
