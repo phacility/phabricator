@@ -50,7 +50,7 @@ final class PhabricatorDifferentialConfigOptions
         'differential.field-selector',
         'class',
         'DifferentialDefaultFieldSelector')
-        ->setBaseClass('DifferentialDefaultFieldSelector')
+        ->setBaseClass('DifferentialFieldSelector')
         ->setDescription(pht('Field selector class')),
       $this->newOption('differential.show-host-field', 'bool', false)
         ->setBoolOptions(
