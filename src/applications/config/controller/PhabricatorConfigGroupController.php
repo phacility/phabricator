@@ -64,13 +64,21 @@ final class PhabricatorConfigGroupController
       $db_values = mpull($db_values, null, 'getConfigKey');
     }
 
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($this->getRequest()->getUser());
+    foreach ($options as $option) {
+      $engine->addObject($option, 'summary');
+    }
+    $engine->process();
 
     $list = new PhabricatorObjectItemListView();
     foreach ($options as $option) {
+      $summary = $engine->getOutput($option, 'summary');
+
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($option->getKey())
         ->setHref('/config/edit/'.$option->getKey().'/')
-        ->addAttribute(phutil_escape_html($option->getSummary()));
+        ->addAttribute($summary);
 
       if (!$option->getHidden() && !$option->getMasked()) {
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
