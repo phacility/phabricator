@@ -1,14 +1,8 @@
 <?php
 
-final class PhabricatorMenuView extends AphrontView {
+final class PhabricatorMenuView extends AphrontTagView {
 
   private $items = array();
-  private $classes = array();
-
-  public function addClass($class) {
-    $this->classes[] = $class;
-    return $this;
-  }
 
   public function newLabel($name) {
     $item = id(new PhabricatorMenuItemView())
@@ -59,7 +53,7 @@ final class PhabricatorMenuView extends AphrontView {
     return $this->items;
   }
 
-  public function render() {
+  protected function willRender() {
     $key_map = array();
     foreach ($this->items as $item) {
       $key = $item->getKey();
@@ -71,16 +65,11 @@ final class PhabricatorMenuView extends AphrontView {
         $key_map[$key] = $item;
       }
     }
-
-    $classes = $this->classes;
-    $classes[] = 'phabricator-menu-view';
-
-    return phutil_render_tag(
-      'div',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      $this->renderChildren());
   }
 
+  protected function getTagAttributes() {
+    return array(
+      'class' => 'phabricator-menu-view',
+    );
+  }
 }
