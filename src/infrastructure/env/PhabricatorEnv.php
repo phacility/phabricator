@@ -293,6 +293,7 @@ final class PhabricatorEnv {
     $source = self::$sourceStack->popSource();
     $stack_key = spl_object_hash($source);
     if ($stack_key !== $key) {
+      self::$sourceStack->pushSource($source);
       throw new Exception(
         "Scoped environments were destroyed in a diffent order than they ".
         "were initialized.");

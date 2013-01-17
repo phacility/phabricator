@@ -130,15 +130,11 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
 
   public function testOverrideOrder() {
     $outer = PhabricatorEnv::beginScopedEnv();
-    $middle = PhabricatorEnv::beginScopedEnv();
     $inner = PhabricatorEnv::beginScopedEnv();
 
     $caught = null;
     try {
-      if (phutil_is_hiphop_runtime()) {
-        $middle->__destruct();
-      }
-      unset($middle);
+      $outer->__destruct();
     } catch (Exception $ex) {
       $caught = $ex;
     }
@@ -149,25 +145,11 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
       "Destroying a scoped environment which is not on the top of the stack ".
       "should throw.");
 
-    $caught = null;
-    try {
-      if (phutil_is_hiphop_runtime()) {
-        $inner->__destruct();
-      }
-      unset($inner);
-    } catch (Exception $ex) {
-      $caught = $ex;
+    if (phutil_is_hiphop_runtime()) {
+      $inner->__destruct();
     }
+    unset($inner);
 
-    $this->assertEqual(
-      true,
-      $caught instanceof Exception,
-      "Destroying a scoped environment which is not on the top of the stack ".
-      "should throw.");
-
-    // Although we popped the other two out-of-order, we still expect to end
-    // up in the right state after handling the exceptions, so this should
-    // execute without issues.
     if (phutil_is_hiphop_runtime()) {
       $outer->__destruct();
     }
