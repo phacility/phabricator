@@ -42,7 +42,7 @@ final class PhabricatorStorageManagementDestroyWorkflow
     $patches = $this->getPatches();
 
     if ($args->getArg('unittest-fixtures')) {
-      $conn = $api->getConn(null, false);
+      $conn = $api->getConn(null);
       $databases = queryfx_all(
         $conn,
         'SELECT DISTINCT(TABLE_SCHEMA) AS db '.
@@ -64,7 +64,7 @@ final class PhabricatorStorageManagementDestroyWorkflow
       } else {
         echo "Dropping database '{$database}'...\n";
         queryfx(
-          $api->getConn('meta_data', $select_database = false),
+          $api->getConn(null),
           'DROP DATABASE IF EXISTS %T',
           $database);
       }
