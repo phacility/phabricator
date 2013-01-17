@@ -393,7 +393,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
     $title = pht('Task List');
 
-    $crumbs = $this->buildApplicationCrumbs($nav)
+    $crumbs = $this->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName($title))
