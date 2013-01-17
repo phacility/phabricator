@@ -1,7 +1,10 @@
 <?php
 
 echo "Giving image macros PHIDs";
-foreach (new LiskMigrationIterator(new PhabricatorFileImageMacro()) as $macro) {
+$table = new PhabricatorFileImageMacro();
+$table->openTransaction();
+
+foreach (new LiskMigrationIterator($table) as $macro) {
   if ($macro->getPHID()) {
     continue;
   }
@@ -9,10 +12,12 @@ foreach (new LiskMigrationIterator(new PhabricatorFileImageMacro()) as $macro) {
   echo ".";
 
   queryfx(
-    $macro->establishConnection('r'),
+    $macro->establishConnection('w'),
     'UPDATE %T SET phid = %s WHERE id = %d',
     $macro->getTableName(),
     $macro->generatePHID(),
     $macro->getID());
 }
+
+$table->saveTransaction();
 echo "\nDone.\n";

@@ -1,7 +1,11 @@
 <?php
 
 echo "Ensuring project names are unique enough...\n";
-$projects = id(new PhabricatorProject())->loadAll();
+$table = new PhabricatorProject();
+$table->openTransaction();
+$table->beginReadLocking();
+
+$projects = $table->loadAll();
 
 $slug_map = array();
 
@@ -66,6 +70,8 @@ while ($update) {
   }
 }
 
+$table->endReadLocking();
+$table->saveTransaction();
 echo "Done.\n";
 
 

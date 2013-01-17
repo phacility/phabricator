@@ -1,15 +1,17 @@
 <?php
 
 echo "Updating old commit authors...\n";
-
 $table = new PhabricatorRepositoryCommit();
+$table->openTransaction();
+
 $conn = $table->establishConnection('w');
 $data = new PhabricatorRepositoryCommitData();
 $commits = queryfx_all(
   $conn,
   'SELECT c.id id, c.authorPHID authorPHID, d.commitDetails details
     FROM %T c JOIN %T d ON d.commitID = c.id
-    WHERE c.authorPHID IS NULL',
+    WHERE c.authorPHID IS NULL
+    FOR UPDATE',
   $table->getTableName(),
   $data->getTableName());
 
@@ -28,16 +30,16 @@ foreach ($commits as $commit) {
   }
 }
 
+$table->saveTransaction();
 echo "Done.\n";
 
 
 echo "Updating old commit mailKeys...\n";
+$table->openTransaction();
 
-$table = new PhabricatorRepositoryCommit();
-$conn = $table->establishConnection('w');
 $commits = queryfx_all(
   $conn,
-  'SELECT id FROM %T WHERE mailKey = %s',
+  'SELECT id FROM %T WHERE mailKey = %s FOR UPDATE',
   $table->getTableName(),
   '');
 
@@ -52,4 +54,5 @@ foreach ($commits as $commit) {
   echo "#{$id}\n";
 }
 
+$table->saveTransaction();
 echo "Done.\n";

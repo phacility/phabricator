@@ -1,12 +1,13 @@
 <?php
 
 $table = new DifferentialRevision();
+$table->openTransaction();
+$table->beginReadLocking();
 $conn_w = $table->establishConnection('w');
 
 echo "Migrating revisions";
 do {
-  $revisions = id(new DifferentialRevision())
-    ->loadAllWhere('branchName IS NULL LIMIT 1000');
+  $revisions = $table->loadAllWhere('branchName IS NULL LIMIT 1000');
 
   foreach ($revisions as $revision) {
     echo ".";
@@ -28,4 +29,7 @@ do {
       $revision->getID());
   }
 } while (count($revisions) == 1000);
+
+$table->endReadLocking();
+$table->saveTransaction();
 echo "\nDone.\n";

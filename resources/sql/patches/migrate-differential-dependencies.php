@@ -1,7 +1,10 @@
 <?php
 
 echo "Migrating differential dependencies to edges...\n";
-foreach (new LiskMigrationIterator(new DifferentialRevision()) as $rev) {
+$table = new DifferentialRevision();
+$table->openTransaction();
+
+foreach (new LiskMigrationIterator($table) as $rev) {
   $id = $rev->getID();
   echo "Revision {$id}: ";
 
@@ -23,4 +26,5 @@ foreach (new LiskMigrationIterator(new DifferentialRevision()) as $rev) {
   echo "OKAY\n";
 }
 
+$table->saveTransaction();
 echo "Done.\n";

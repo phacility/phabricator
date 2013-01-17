@@ -1,7 +1,10 @@
 <?php
 
 echo "Migrating task dependencies to edges...\n";
-foreach (new LiskMigrationIterator(new ManiphestTask()) as $task) {
+$table = new ManiphestTask();
+$table->openTransaction();
+
+foreach (new LiskMigrationIterator($table) as $task) {
   $id = $task->getID();
   echo "Task {$id}: ";
 
@@ -23,4 +26,5 @@ foreach (new LiskMigrationIterator(new ManiphestTask()) as $task) {
   echo "OKAY\n";
 }
 
+$table->saveTransaction();
 echo "Done.\n";

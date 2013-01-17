@@ -3,11 +3,12 @@
 echo "Stripping remotes from repository default branches...\n";
 
 $table = new PhabricatorRepository();
+$table->openTransaction();
 $conn_w = $table->establishConnection('w');
 
 $repos = queryfx_all(
   $conn_w,
-  'SELECT id, name, details FROM %T WHERE versionControlSystem = %s',
+  'SELECT id, name, details FROM %T WHERE versionControlSystem = %s FOR UPDATE',
   $table->getTableName(),
   'git');
 
@@ -39,4 +40,5 @@ foreach ($repos as $repo) {
     $id);
 }
 
+$table->saveTransaction();
 echo "Done.\n";
