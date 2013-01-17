@@ -102,8 +102,6 @@ final class PhabricatorEnv {
 
 
   private static function initializeCommonEnvironment() {
-    $env = self::getSelectedEnvironmentName();
-
     self::buildConfigurationSourceStack();
 
     PhutilErrorHandler::initialize();
@@ -149,6 +147,12 @@ final class PhabricatorEnv {
     $stack->pushSource(
       id(new PhabricatorConfigLocalSource())
         ->setName(pht("Local Config")));
+
+    // NOTE: This must happen after the other sources are pushed, because it
+    // will draw from lower-level config to bootstrap itself.
+    $stack->pushSource(
+      id(new PhabricatorConfigDatabaseSource('default'))
+        ->setName(pht("Database")));
   }
 
   public static function getSelectedEnvironmentName() {
