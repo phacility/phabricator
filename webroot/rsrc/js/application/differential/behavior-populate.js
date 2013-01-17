@@ -29,6 +29,9 @@ JX.behavior('differential-populate', function(config) {
   // mess and you could lose inline comments, cursor positions, etc.
   var renderer = (JX.Device.getDevice() == 'desktop') ? '2up' : '1up';
 
+  // TODO: Once 1up works better, figure out when to show it.
+  renderer = '2up';
+
   for (var k in config.registry) {
     var data = {
       ref : config.registry[k],
