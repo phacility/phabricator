@@ -22,6 +22,10 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return PhabricatorEnv::getEnvConfig('phriction.enabled');
   }
 
+  public function getTitleGlyph() {
+    return "\xE2\x9A\xA1";
+  }
+
   public function getRoutes() {
     return array(
       // Match "/w/" with slug "/".
