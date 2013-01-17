@@ -3,7 +3,7 @@
 final class PhabricatorApplicationDaemons extends PhabricatorApplication {
 
   public function getName() {
-    return 'Daemon Console';
+    return 'Daemons';
   }
 
   public function getShortDescription() {

@@ -52,7 +52,7 @@ final class PhabricatorFilesConfigOptions
             'The keys in this map are vieweable MIME types; the values are '.
             'the MIME type sthey are delivered as when they are viewed in '.
             'the browser.')),
-      $this->newOption('files.image-mime-types', 'wild', $image_default)
+      $this->newOption('files.image-mime-types', 'set', $image_default)
         ->setSummary(pht('Configure which MIME types are images.'))
         ->setDescription(
           pht(

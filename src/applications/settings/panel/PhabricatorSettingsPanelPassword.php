@@ -160,8 +160,8 @@ final class PhabricatorSettingsPanelPassword
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Change Password');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     return array(
       $notice,

@@ -4,47 +4,47 @@
     "app"              : {
       "name" : "app",
       "rule" : ".menu-icon-app",
-      "hash" : "fc525b5b3e3ecaeda3baccc18ace5a0a"
+      "hash" : "a389f99d9c00f688e625da71579ee90a"
     },
     "arrow-right"      : {
       "name" : "arrow-right",
       "rule" : ".phabricator-crumb-divider",
-      "hash" : "50180da0aed206c9db2bc1547c1a158c"
+      "hash" : "a994209450dc73a80841cdd66bb59925"
     },
     "bubble"           : {
       "name" : "bubble",
       "rule" : ".phabricator-main-menu-alert-bubble.alert-unread",
-      "hash" : "42f6a2337a584ce99c964021ff3450ca"
+      "hash" : "1145ac8a137a2a22517c1945fe22c517"
     },
     "eye"              : {
       "name" : "eye",
       "rule" : ".menu-icon-eye",
-      "hash" : "553eb617c19b74b428558e606ff9b066"
+      "hash" : "d598b1acb1933a86eaed3dea3347f7b0"
     },
     "logo"             : {
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo-image",
-      "hash" : "6eadea2c3dd2ada989eba22b6769b3eb"
+      "hash" : "c6c7ab165dce13a51ef329928c7c4aba"
     },
     "round_bubble"     : {
       "name" : "round_bubble",
       "rule" : ".phabricator-main-menu-alert-bubble",
-      "hash" : "9710a3fa4a5fbfde3d81ad66863cdde0"
+      "hash" : "9be91cc0128997992e9001baf32c8ab8"
     },
     "seen_have_unread" : {
       "name" : "seen_have_unread",
       "rule" : ".alert-notifications:hover .phabricator-main-menu-alert-icon",
-      "hash" : "03a02951857811c722732dcfff9d458e"
+      "hash" : "a8a7f07caa726d7e61ef3d41f959d94d"
     },
     "seen_read_all"    : {
       "name" : "seen_read_all",
       "rule" : ".alert-notifications .phabricator-main-menu-alert-icon",
-      "hash" : "f166fc60ed7a7a8ec2f41ab1af2cb3ec"
+      "hash" : "4fdd4807d0c41bd4179dd43150c7fc44"
     },
     "unseen_any"       : {
       "name" : "unseen_any",
       "rule" : ".alert-notifications.alert-unread .phabricator-main-menu-alert-icon",
-      "hash" : "a8643b150166a076e81a42e5893a899f"
+      "hash" : "50d946952c73028b34e0c3378ca36b17"
     }
   },
   "scales"  : [

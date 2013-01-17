@@ -258,6 +258,9 @@ final class PhabricatorConfigEditController
       case 'list<string>':
         $set_value = $request->getStrList('value');
         break;
+      case 'set':
+        $set_value = array_fill_keys($request->getStrList('value'), true);
+        break;
       case 'bool':
         switch ($value) {
           case 'true':
@@ -329,6 +332,8 @@ final class PhabricatorConfigEditController
         return $value ? 'true' : 'false';
       case 'list<string>':
         return implode("\n", nonempty($value, array()));
+      case 'set':
+        return implode("\n", nonempty(array_keys($value), array()));
       default:
         return PhabricatorConfigJSON::prettyPrintJSON($value);
     }
@@ -370,6 +375,7 @@ final class PhabricatorConfigEditController
           ->setOptions($names);
         break;
       case 'list<string>':
+      case 'set':
         $control = id(new AphrontFormTextAreaControl())
           ->setCaption(pht('Separate values with newlines or commas.'));
         break;

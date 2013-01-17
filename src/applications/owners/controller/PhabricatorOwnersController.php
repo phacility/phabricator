@@ -23,6 +23,32 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     $nav->appendChild($view);
     $page->appendChild($nav);
 
+    $filter = $nav->getSelectedFilter();
+    switch ($filter) {
+      case 'view/owned':
+      case 'view/all':
+        $crumbs = $this->buildApplicationCrumbs();
+
+        if ($filter == 'view/owned') {
+          $title = pht('Owned Packages');
+        } else {
+          $title = pht('All Packages');
+        }
+
+        $crumbs->addCrumb(
+          id(new PhabricatorCrumbView())
+            ->setName($title));
+
+        $crumbs->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setName(pht('Create Package'))
+            ->setHref('/owners/new/')
+            ->setIcon('create'));
+
+        $nav->setCrumbs($crumbs);
+        break;
+    }
+
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
   }

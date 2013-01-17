@@ -106,6 +106,24 @@ final class PhabricatorCoreConfigOptions
             "then playing with a user tokenizer (like the user selectors in ".
             "Maniphest or Differential) and seeing which setting loads ".
             "faster and feels better.")),
+      $this->newOption('config.lock', 'set', array())
+        ->setLocked(true)
+        ->setDescription(pht('Additional configuration options to lock.')),
+      $this->newOption('config.hide', 'set', array())
+        ->setLocked(true)
+        ->setDescription(pht('Additional configuration options to hide.')),
+      $this->newOption('config.mask', 'set', array())
+        ->setLocked(true)
+        ->setDescription(pht('Additional configuration options to mask.')),
+      $this->newOption('phabricator.env', 'string', null)
+        ->setLocked(true)
+        ->setDescription(pht('Internal.')),
+      $this->newOption('phabricator.version', 'string', null)
+        ->setLocked(true)
+        ->setDescription(pht('Internal / deprecated.')),
+      $this->newOption('phabricator.setup', 'bool', false)
+        ->setLocked(true)
+        ->setDescription(pht('Internal / deprecated.')),
     );
   }
 

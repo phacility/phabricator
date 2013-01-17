@@ -142,26 +142,14 @@ return array(
   // 'darkconsole.enabled' to use this option.
   'darkconsole.always-on'       => false,
 
+  // Map of additional configuration values to lock.
+  'config.lock' => array(),
 
-  // Allows you to mask certain configuration values from appearing in the
-  // "Config" tab of DarkConsole.
-  'darkconsole.config-mask'     => array(
-    'mysql.pass',
-    'amazon-ses.secret-key',
-    'amazon-s3.secret-key',
-    'sendgrid.api-key',
-    'recaptcha.private-key',
-    'phabricator.csrf-key',
-    'facebook.application-secret',
-    'github.application-secret',
-    'google.application-secret',
-    'phabricator.application-secret',
-    'disqus.application-secret',
-    'phabricator.mail-key',
-    'security.hmac-key',
-    'ldap.anonymous-user-password',
-  ),
+  // Map of additional configuration values to hide.
+  'config.hide' => array(),
 
+  // Map of additional configuration values to mask.
+  'config.mask' => array(),
 
 // --  MySQL  --------------------------------------------------------------- //
 
@@ -724,6 +712,9 @@ return array(
   // The password of the LDAP anonymous user.
   'ldap.anonymous-user-password' => null,
 
+  // Whether to use STARTTLS
+  'ldap.start-tls' => false,
+
 
 // -- Disqus OAuth ---------------------------------------------------------- //
 
@@ -1175,22 +1166,6 @@ return array(
   'feed.http-hooks' => array(),
 
 // -- Drydock --------------------------------------------------------------- //
-
-  // Drydock is used to allocate various software resources. For example, it
-  // allocates working copies so continuous integration tests can be executed.
-  // It needs at least one host to allocate these resources on.
-  //
-  // Set this option to true to let Drydock use the localhost for allocations.
-  // This is the simplest configuration, but the least scalable. You MUST
-  // disable this if you run daemons on more than one machine -- if you do not,
-  // a daemon on machine A may allocate a resource locally, and then a daemon
-  // on machine B may try to access it.
-  'drydock.localhost.enabled' => true,
-
-  // If the localhost is available to Drydock, specify the path on disk where
-  // Drydock should write files. You should create this directory and make sure
-  // the user that the daemons run as has permission to write to it.
-  'drydock.localhost.path'    => '/var/drydock/',
 
   // If you want to use Drydock's builtin EC2 Blueprints, configure your AWS
   // EC2 credentials here.

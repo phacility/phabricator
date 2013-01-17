@@ -1,0 +1,15 @@
+diff --git a/fruit b/fruit
+new file mode 100644
+index 0000000..a1f7255
+--- /dev/null
++++ b/fruit
+@@ -0,0 +1,9 @@
++apple
++banana
++cherry
++date
++elderberry
++fig
++grape
++honeydew
++

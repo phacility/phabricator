@@ -106,6 +106,7 @@ final class PhabricatorRepositoryCreateController
     $panel->setHeader('Create Repository');
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
 
     return $this->buildStandardPageResponse(
       array(

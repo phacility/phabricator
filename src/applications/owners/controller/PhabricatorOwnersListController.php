@@ -122,14 +122,6 @@ final class PhabricatorOwnersListController
       $nodata);
 
     $filter = new AphrontListFilterView();
-    $filter->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/owners/new/',
-          'class' => 'green button',
-        ),
-        'Create New Package'));
 
     $owners_search_value = array();
     if ($request->getArr('owner')) {
@@ -250,7 +242,7 @@ final class PhabricatorOwnersListController
 
       $pkg_paths = idx($paths, $package->getID(), array());
       foreach ($pkg_paths as $key => $path) {
-        $repo = $repositories[$path->getRepositoryPHID()];
+        $repo = idx($repositories, $path->getRepositoryPHID());
         if ($repo) {
           $href = DiffusionRequest::generateDiffusionURI(
             array(

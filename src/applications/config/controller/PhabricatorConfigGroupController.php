@@ -64,15 +64,23 @@ final class PhabricatorConfigGroupController
       $db_values = mpull($db_values, null, 'getConfigKey');
     }
 
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($this->getRequest()->getUser());
+    foreach ($options as $option) {
+      $engine->addObject($option, 'summary');
+    }
+    $engine->process();
 
     $list = new PhabricatorObjectItemListView();
     foreach ($options as $option) {
+      $summary = $engine->getOutput($option, 'summary');
+
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($option->getKey())
         ->setHref('/config/edit/'.$option->getKey().'/')
-        ->addAttribute(phutil_escape_html($option->getSummary()));
+        ->addAttribute($summary);
 
-      if (!$option->getHidden()) {
+      if (!$option->getHidden() && !$option->getMasked()) {
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
         $current_value = PhabricatorConfigJSON::prettyPrintJSON(
           $current_value);
@@ -90,12 +98,12 @@ final class PhabricatorConfigGroupController
       $db_value = idx($db_values, $option->getKey());
       if ($db_value && !$db_value->getIsDeleted()) {
         $item->addIcon('edit', pht('Customized'));
-      } else {
-        $item->addIcon('edit-grey', pht('Default'));
       }
 
       if ($option->getHidden()) {
         $item->addIcon('unpublish', pht('Hidden'));
+      } else if ($option->getMasked()) {
+        $item->addIcon('unpublish-grey', pht('Masked'));
       } else if ($option->getLocked()) {
         $item->addIcon('lock', pht('Locked'));
       }

@@ -41,4 +41,14 @@ final class PhabricatorUserOAuthInfo extends PhabricatorUserDAO {
     return idx($map, $status, 'Unknown');
   }
 
+  public static function getRappableTokenStatus($status) {
+    static $map = array(
+      self::TOKEN_STATUS_NONE     => 'There is no token',
+      self::TOKEN_STATUS_GOOD     => 'Your token is good',
+      self::TOKEN_STATUS_FAIL     => 'Your token has failed',
+      self::TOKEN_STATUS_EXPIRED  => 'Your token is old',
+    );
+    return idx($map, $status, 'This code\'s got bugs');
+  }
+
 }

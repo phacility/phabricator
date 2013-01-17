@@ -3,7 +3,7 @@
  * @generated
  */
 
-.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {
+.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover  {
   background-image: url(/rsrc/image/sprite-gradient.png);
   background-repeat: repeat-x;
 }
@@ -12,41 +12,53 @@
 
 
 .gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit {
-  background-position: 0px -26px;
+  background-position: 0px -51px;
 }
 
 .gradient-blue-light, button:active, a.button:active {
-  background-position: 0px -53px;
+  background-position: 0px -78px;
 }
 
 .gradient-black-dark, button.black, a.black, a.black:visited {
-  background-position: 0px -80px;
+  background-position: 0px -105px;
 }
 
 .gradient-black-light, button.black:active, a.black:active {
-  background-position: 0px -107px;
+  background-position: 0px -132px;
 }
 
 .gradient-breadcrumbs {
-  background-position: 0px -242px;
+  background-position: 0px -325px;
 }
 
 .gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label {
-  background-position: 0px 0px;
+  background-position: 0px -25px;
 }
 
 .gradient-green-dark, button.green, a.green, a.green:visited {
-  background-position: 0px -134px;
+  background-position: 0px -159px;
 }
 
 .gradient-green-light, button.green:active, a.green:active {
-  background-position: 0px -161px;
+  background-position: 0px -186px;
 }
 
 .gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled {
-  background-position: 0px -188px;
+  background-position: 0px -213px;
 }
 
 .gradient-grey-light, button.grey:active, a.grey:active, button.grey_active, a.dropdown-open {
-  background-position: 0px -215px;
+  background-position: 0px -240px;
+}
+
+.gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover {
+  background-position: 0px -267px;
+}
+
+.gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label {
+  background-position: 0px 0px;
+}
+
+.gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover {
+  background-position: 0px -296px;
 }

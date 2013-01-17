@@ -9,16 +9,9 @@
 
 */
 
-/* On desktops, put some space around the whole grid. */
-.device-desktop .phabricator-application-list {
-  padding: 0 0 20px 20px;
-}
 
-/* On tablets, show two columns in the center. */
-.device-tablet .phabricator-application-list {
-  width: 660px;
-  margin: auto;
-  padding: .5em 0;
+.application-tile-group {
+  overflow: hidden;
 }
 
 
@@ -28,124 +21,89 @@
 
 */
 
-a.phabricator-application-launch-container {
-  display: inline-block;
-  width: 220px;
-  min-height: 90px;
-  padding: 12px 15px 10px 75px;
-  margin: 3px 6px;
+a.phabricator-application-launch-container,
+div.phabricator-application-launch-container {
+  display: block;
+  float: left;
+  width: 78px;
+  height: 78px;
   overflow: hidden;
   position: relative;
 
   text-decoration: none;
-  border: 1px solid #a7a8aa;
-  background-color: #f3f3f3;
 
-  border-radius: 3px;
-  box-shadow: 0px 1px 2px #ccc;
+  border: 1px solid #080909;
+
+}
+
+a.application-tile-full {
+  width: 100%;
+  height: 52px;
 }
 
 a.phabricator-application-launch-container:hover {
   text-decoration: none;
 }
 
-a.phabricator-application-launch-container:active {
-  box-shadow: inset 0 0px 3px rgba(0, 0, 0, 0.9);
-}
-
 /* The hover effect looks awful on phones/tablets when scrolling. */
 .device-desktop a.phabricator-application-launch-container:hover {
-  background-color: #638ed3;
-  border-color: #0a1d59;
+  background-image: url('/rsrc/image/texture/dark-menu-hover.png');
   color: #fff;
-}
-
-.phabricator-application-launch-name,
-.phabricator-application-launch-description,
-.phabricator-application-launch-status {
-  display: block;
 }
 
 .phabricator-application-launch-icon {
   display: block;
   position: absolute;
-  left: 10px;
-  top: 10px;
-  width: 56px;
-  height: 56px;
-  background-repeat: no-repeat;
+  left: 25px;
+  top: 15px;
+  width: 28px;
+  height: 28px;
 }
+
+.application-tile-full .phabricator-application-launch-icon {
+  top: 12px;
+  left: 12px;
+}
+
 
 .phabricator-application-launch-name {
+  display: block;
+  margin-top: 50px;
   font-weight: bold;
-  font-size: 14px;
-  padding-bottom: 2px
+  font-size: 12px;
+  text-align: center;
+  color: #ffffff;
+  text-shadow: 0px 1px 1px #000000;
 }
 
-.phabricator-application-launch-description {
-  color: #888;
-  font-size: 12px
+.application-tile-full .phabricator-application-launch-name {
+  margin-top: 12px;
+  text-align: left;
+  margin-left: 52px;
+
 }
 
-.device-desktop a.phabricator-application-launch-container:hover
-  .phabricator-application-launch-description {
-  color: #dddddd;
+.application-tile-full .phabricator-application-launch-description {
+  color: #bfbfbf;
+  font-size: 11px;
+  margin-top: 24px;
+  margin-left: 52px;
 }
 
 .phabricator-application-launch-attention {
   position: absolute;
-  left: 45px;
-  top: 10px;
+  right: 4px;
+  top: 4px;
   background: #ff0000;
   border-radius: 10px;
   color: white;
-  font-weight: normal;
-  padding: 2px 6px;
+  font-weight: bold;
+  padding: 1px 6px 2px;
   border: 1px solid #aa0000;
-  box-shadow: 0px 0px 3px rgba(255, 255, 255, 0.5),
-              inset 0 0 3px #aa0000;
+  font-size: 12px;
 }
 
-.phabricator-application-status-block {
-  margin-top: 0.5em;
-  padding-top: 0.5em;
-  border-top: 1px solid #dfdfdf;
-  display: block;
-}
-
-.phabricator-application-flavor-text,
-.phabricator-application-status {
-  float: left;
-  display: block;
-  position: relative;
-  font-size: 11px;
-  color: #666666;
-}
-
-.phabricator-application-status {
-  height: 20px;
-  padding-left: 22px;
-
-  background-repeat: no-repeat;
-  background-size: 16px auto;
-  padding-top: 1px;
-}
-
-.device-desktop a.phabricator-application-launch-container:hover
-  .phabricator-application-status,
-.device-desktop a.phabricator-application-launch-container:hover
-  .phabricator-application-flavor-text {
-    color: #eeeeee;
-}
-
-.phabricator-application-status-type-needs {
-  background-image: url(/rsrc/image/appstatus_needs.png);
-}
-
-.phabricator-application-status-type-empty {
-  background-image: url(/rsrc/image/appstatus_empty.png);
-}
-
-.phabricator-application-status-type-info {
-  background-image: url(/rsrc/image/appstatus_info.png);
+.application-tile-full .phabricator-application-launch-attention {
+  top: 16px;
+  right: 12px;
 }

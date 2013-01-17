@@ -4,39 +4,26 @@ final class PhabricatorDirectoryMainController
   extends PhabricatorDirectoryController {
 
   private $filter;
-  private $subfilter;
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
-    $this->subfilter = idx($data, 'subfilter');
   }
 
   public function processRequest() {
     $user = $this->getRequest()->getUser();
 
+    if ($this->filter == 'jump') {
+      return $this->buildJumpResponse();
+    }
+
     $nav = $this->buildNav();
-    $this->filter = $nav->selectFilter($this->filter, 'home');
 
-    switch ($this->filter) {
-      case 'jump':
-        break;
-      case 'home':
-        $project_query = new PhabricatorProjectQuery();
-        $project_query->setViewer($user);
-        $project_query->withMemberPHIDs(array($user->getPHID()));
-        $projects = $project_query->execute();
-        break;
-      default:
-        throw new Exception("Unknown filter '{$this->filter}'!");
-    }
+    $project_query = new PhabricatorProjectQuery();
+    $project_query->setViewer($user);
+    $project_query->withMemberPHIDs(array($user->getPHID()));
+    $projects = $project_query->execute();
 
-    switch ($this->filter) {
-      case 'jump':
-        return $this->buildJumpResponse($nav);
-      default:
-        return $this->buildMainResponse($nav, $projects);
-    }
-
+    return $this->buildMainResponse($nav, $projects);
   }
 
   private function buildMainResponse($nav, array $projects) {
@@ -52,22 +39,17 @@ final class PhabricatorDirectoryMainController
       $tasks_panel = null;
     }
 
-    $flagged_panel = $this->buildFlaggedPanel();
-
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
-    $app_panel = $this->buildAppPanel();
     $audit_panel = $this->buildAuditPanel();
     $commit_panel = $this->buildCommitPanel();
 
     $content = array(
-      $app_panel,
       $jump_panel,
       $unbreak_panel,
       $triage_panel,
       $revision_panel,
       $tasks_panel,
-      $flagged_panel,
       $audit_panel,
       $commit_panel,
     );
@@ -82,7 +64,7 @@ final class PhabricatorDirectoryMainController
       ));
   }
 
-  private function buildJumpResponse($nav) {
+  private function buildJumpResponse() {
     $request = $this->getRequest();
 
     $jump = $request->getStr('jump');
@@ -97,15 +79,9 @@ final class PhabricatorDirectoryMainController
 
       return id(new AphrontRedirectResponse())
         ->setURI('/search/'.$query->getQueryKey().'/');
+    } else {
+      return id(new AphrontRedirectResponse())->setURI('/');
     }
-
-
-    $nav->appendChild($this->buildJumpPanel($jump));
-    return $this->buildStandardPageResponse(
-      $nav,
-      array(
-        'title' => 'Jump Nav',
-      ));
   }
 
   private function buildUnbreakNowPanel() {
@@ -138,44 +114,6 @@ final class PhabricatorDirectoryMainController
         "View All Unbreak Now \xC2\xBB"));
 
     $panel->appendChild($this->buildTaskListView($tasks));
-
-    return $panel;
-  }
-
-  private function buildFlaggedPanel() {
-    $user = $this->getRequest()->getUser();
-
-    $flag_query = id(new PhabricatorFlagQuery())
-      ->setViewer($user)
-      ->withOwnerPHIDs(array($user->getPHID()))
-      ->needHandles(true)
-      ->setLimit(10);
-
-    $flags = $flag_query->execute();
-
-    if (!$flags) {
-      return $this->renderMiniPanel(
-        'No Flags',
-        "You haven't flagged anything.");
-    }
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Flagged Objects');
-    $panel->setCaption("Objects you've flagged.");
-
-    $flag_view = new PhabricatorFlagListView();
-    $flag_view->setFlags($flags);
-    $flag_view->setUser($user);
-    $panel->appendChild($flag_view);
-
-    $panel->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href'  => '/flag/',
-          'class' => 'grey button',
-        ),
-        "View All Flags \xC2\xBB"));
 
     return $panel;
   }
@@ -387,105 +325,6 @@ final class PhabricatorDirectoryMainController
         $jump_caption));
 
     return $panel;
-  }
-
-  private function buildAppPanel() {
-    require_celerity_resource('phabricator-app-buttons-css');
-
-    $nav_buttons = array();
-
-    $nav_buttons[] = array(
-      'Differential',
-      '/differential/',
-      'differential',
-      'Code Reviews');
-
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      $nav_buttons[] = array(
-        'Maniphest',
-        '/maniphest/',
-        'maniphest',
-        'Tasks');
-      $nav_buttons[] = array(
-        'Create Task',
-        '/maniphest/task/create/',
-        'create-task');
-    }
-
-    $nav_buttons[] = array(
-      'Upload File',
-      '/file/upload/',
-      'upload-file',
-      'Share Files');
-    $nav_buttons[] = array(
-      'Create Paste',
-      '/paste/create/',
-      'create-paste',
-      'Share Text');
-
-
-    if (PhabricatorEnv::getEnvConfig('phriction.enabled')) {
-      $nav_buttons[] = array(
-        'Phriction',
-        '/w/',
-        'phriction',
-        'Browse Wiki');
-    }
-
-    $nav_buttons[] = array(
-      'Diffusion',
-      '/diffusion/',
-      'diffusion',
-      'Browse Code');
-
-    $nav_buttons[] = array(
-      'Audit',
-      '/audit/',
-      'audit',
-      'Audit Code');
-
-    $view = new AphrontNullView();
-    $view->appendChild('<div class="phabricator-app-buttons">');
-    foreach ($nav_buttons as $info) {
-      // Subtitle is optional.
-      list($name, $uri, $icon, $subtitle) = array_merge($info, array(null));
-
-      if ($subtitle) {
-        $subtitle =
-          '<div class="phabricator-app-subtitle">'.
-            phutil_escape_html($subtitle).
-          '</div>';
-      }
-
-      $button = phutil_render_tag(
-        'a',
-        array(
-          'href'  => $uri,
-          'class' => 'app-button icon-'.$icon,
-        ),
-        phutil_render_tag(
-          'div',
-          array(
-            'class' => 'app-icon icon-'.$icon,
-          ),
-          ''));
-      $caption = phutil_render_tag(
-        'a',
-        array(
-          'href' => $uri,
-          'class' => 'phabricator-button-caption',
-        ),
-        phutil_escape_html($name).$subtitle);
-
-      $view->appendChild(
-        '<div class="phabricator-app-button">'.
-          $button.
-          $caption.
-        '</div>');
-    }
-    $view->appendChild('<div style="clear: both;"></div></div>');
-
-    return $view;
   }
 
   private function renderMiniPanel($title, $body) {

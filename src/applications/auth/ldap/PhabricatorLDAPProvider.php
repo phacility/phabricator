@@ -50,6 +50,10 @@ final class PhabricatorLDAPProvider {
     return PhabricatorEnv::getEnvConfig('ldap.referrals');
   }
 
+  public function getLDAPStartTLS() {
+    return PhabricatorEnv::getEnvConfig('ldap.start-tls');
+  }
+
   public function bindAnonymousUserEnabled() {
     return strlen(trim($this->getAnonymousUserName())) > 0;
   }
@@ -114,6 +118,13 @@ final class PhabricatorLDAPProvider {
         $this->getLDAPVersion());
       ldap_set_option($this->connection, LDAP_OPT_REFERRALS,
        $this->getLDAPReferrals());
+
+      if ($this->getLDAPStartTLS()) {
+        if (!ldap_start_tls($this->getConnection())) {
+          throw new Exception('Unabled to initialize STARTTLS for LDAP host at '.
+            $this->getHostname().':'.$this->getPort());
+        }
+      }
     }
 
     return $this->connection;

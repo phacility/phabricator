@@ -155,6 +155,7 @@ final class DifferentialRevisionListController extends DifferentialController {
         if ($pager) {
           $panel->appendChild($pager);
         }
+        $panel->setNoBackground();
         $panels[] = $panel;
       }
     }

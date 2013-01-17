@@ -8,11 +8,17 @@
   border: 1px solid #c0c0c0;
   border-width: 1px 0 0;
   padding: 1em 2em;
-  margin: 1em 2em;
+  margin: 20px 20px 40px 20px;
 }
 
 .aphront-unpadded-panel-view {
-  padding: 0px;
+  padding: 0;
+}
+
+.aphront-panel-view.aphront-panel-plain {
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .aphront-panel-view .aphront-panel-header {
@@ -20,9 +26,14 @@
 }
 
 .aphront-panel-view h1 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: bold;
+  color: #555;
   padding: 4px 0 0 0;
+}
+
+.aphront-panel-plain h1 {
+  padding: 0 0 4px 0;
 }
 
 .aphront-panel-view-caption {

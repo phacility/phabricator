@@ -14,10 +14,18 @@ final class PhabricatorApplicationCalendar extends PhabricatorApplication {
     return '/calendar/';
   }
 
+  public function getIconName() {
+    return 'calendar';
+  }
+
   public function getTitleGlyph() {
     // Unicode has a calendar character but it's in some distant code plane,
     // use "keyboard" since it looks vaguely similar.
     return "\xE2\x8C\xA8";
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_COMMUNICATION;
   }
 
   public function getRoutes() {

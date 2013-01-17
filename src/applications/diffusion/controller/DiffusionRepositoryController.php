@@ -70,6 +70,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $panel = new AphrontPanelView();
     $panel->setHeader("Recent Commits &middot; {$all}");
     $panel->appendChild($history_table);
+    $panel->setNoBackground();
 
     $content[] = $panel;
 
@@ -83,6 +84,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_panel = new AphrontPanelView();
     $browse_panel->setHeader('Browse Repository');
     $browse_panel->appendChild($browse_table);
+    $browse_panel->setNoBackground();
 
     $content[] = $browse_panel;
 
@@ -138,6 +140,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Repository Properties');
     $panel->appendChild($table);
+    $panel->setNoBackground();
 
     return $panel;
   }
@@ -172,6 +175,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
       $panel = new AphrontPanelView();
       $panel->setHeader('Branches');
+      $panel->setNoBackground();
 
       if ($more_branches) {
         $panel->setCaption('Showing ' . $limit . ' branches.');

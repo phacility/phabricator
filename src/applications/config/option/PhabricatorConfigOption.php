@@ -32,10 +32,18 @@ final class PhabricatorConfigOption
   }
 
   public function getMasked() {
+    if ($this->masked) {
+      return true;
+    }
+
     if ($this->getHidden()) {
       return true;
     }
-    return $this->masked;
+
+    return idx(
+      PhabricatorEnv::getEnvConfig('config.mask', array()),
+      $this->getKey(),
+      false);
   }
 
   public function setHidden($hidden) {
@@ -44,7 +52,14 @@ final class PhabricatorConfigOption
   }
 
   public function getHidden() {
-    return $this->hidden;
+    if ($this->hidden) {
+      return true;
+    }
+
+    return idx(
+      PhabricatorEnv::getEnvConfig('config.hide', array()),
+      $this->getKey(),
+      false);
   }
 
   public function setLocked($locked) {
@@ -53,10 +68,18 @@ final class PhabricatorConfigOption
   }
 
   public function getLocked() {
+    if ($this->locked) {
+      return true;
+    }
+
     if ($this->getHidden()) {
       return true;
     }
-    return $this->locked;
+
+    return idx(
+      PhabricatorEnv::getEnvConfig('config.lock', array()),
+      $this->getKey(),
+      false);
   }
 
   public function addExample($value, $description) {
@@ -151,7 +174,24 @@ final class PhabricatorConfigOption
   }
 
   public function getMarkupText($field) {
-    return $this->getDescription();
+    switch ($field) {
+      case 'description':
+        $text = $this->getDescription();
+        break;
+      case 'summary':
+        $text = $this->getSummary();
+        break;
+    }
+
+    // TODO: We should probably implement this as a real Markup rule, but
+    // markup rules are a bit of a mess right now and it doesn't hurt us to
+    // fake this.
+    $text = preg_replace(
+      '/{{([^}]+)}}/',
+      '[[/config/edit/\\1/ | \\1]]',
+      $text);
+
+    return $text;
   }
 
   public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {

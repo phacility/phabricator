@@ -15,11 +15,7 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
   }
 
   public function getRoutes() {
-    return array(
-      '/applications/' => array(
-        '' => 'PhabricatorApplicationsListController'
-      ),
-    );
+    return array();
   }
 
   public function getTitleGlyph() {

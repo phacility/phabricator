@@ -39,6 +39,29 @@ final class DifferentialChangesetParser {
   private $coverage;
   private $markupEngine;
   private $highlightErrors;
+  private $disableCache;
+  private $renderer;
+
+  public function setRenderer($renderer) {
+    $this->renderer = $renderer;
+    return $this;
+  }
+
+  public function getRenderer() {
+    if (!$this->renderer) {
+      return new DifferentialChangesetTwoUpRenderer();
+    }
+    return $this->renderer;
+  }
+
+  public function setDisableCache($disable_cache) {
+    $this->disableCache = $disable_cache;
+    return $this;
+  }
+
+  public function getDisableCache() {
+    return $this->disableCache;
+  }
 
   const CACHE_VERSION = 10;
   const CACHE_MAX_SIZE = 8e6;
@@ -346,8 +369,9 @@ final class DifferentialChangesetParser {
     $generated_guess = (strpos($new_corpus_block, '@'.'generated') !== false);
 
     if (!$generated_guess) {
-      $config_key = 'differential.generated-paths';
-      $generated_path_regexps = PhabricatorEnv::getEnvConfig($config_key);
+      $generated_path_regexps = PhabricatorEnv::getEnvConfig(
+        'differential.generated-paths',
+        array());
       foreach ($generated_path_regexps as $regexp) {
         if (preg_match($regexp, $this->changeset->getFilename())) {
           $generated_guess = true;
@@ -434,6 +458,10 @@ final class DifferentialChangesetParser {
     }
 
     $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_ALL);
+    if ($this->disableCache) {
+      $skip_cache = true;
+    }
+
     $this->whitespaceMode = $whitespace_mode;
 
     $changeset = $this->changeset;
@@ -664,10 +692,9 @@ final class DifferentialChangesetParser {
       count($this->old),
       count($this->new));
 
-    $renderer = id(new DifferentialChangesetTwoUpRenderer())
+    $renderer = $this->getRenderer()
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
-      ->setLineCount($rows)
       ->setOldRender($this->oldRender)
       ->setNewRender($this->newRender)
       ->setHunkStartLines($this->hunkStartLines)
@@ -678,7 +705,9 @@ final class DifferentialChangesetParser {
       ->setCodeCoverage($this->getCoverage())
       ->setRenderingReference($this->getRenderingReference())
       ->setMarkupEngine($this->markupEngine)
-      ->setHandles($this->handles);
+      ->setHandles($this->handles)
+      ->setOldLines($this->old)
+      ->setNewLines($this->new);
 
     if ($this->user) {
       $renderer->setUser($this->user);
@@ -717,7 +746,7 @@ final class DifferentialChangesetParser {
         $lines = number_format($this->changeset->getAffectedLineCount());
         $shield = $renderer->renderShield(
           pht(
-            'This file has a very large number of changes ({%s} lines).',
+            'This file has a very large number of changes (%s lines).',
             $lines));
       }
     }
@@ -868,8 +897,6 @@ final class DifferentialChangesetParser {
     );
 
     $renderer
-      ->setOldLines($this->old)
-      ->setNewLines($this->new)
       ->setGaps($gaps)
       ->setMask($mask)
       ->setDepths($depths);

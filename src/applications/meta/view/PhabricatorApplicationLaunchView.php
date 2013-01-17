@@ -4,6 +4,12 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
 
   private $application;
   private $status;
+  private $fullWidth;
+
+  public function setFullWidth($full_width) {
+    $this->fullWidth = $full_width;
+    return $this;
+  }
 
   public function setApplication(PhabricatorApplication $application) {
     $this->application = $application;
@@ -19,79 +25,75 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
     $application = $this->application;
 
     require_celerity_resource('phabricator-application-launch-view-css');
-    require_celerity_resource('sprite-apps-xlarge-css');
+    require_celerity_resource('sprite-apps-large-css');
 
     $content = array();
-    $content[] = phutil_render_tag(
-      'span',
-      array(
-        'class' => 'phabricator-application-launch-name',
-      ),
-      phutil_escape_html($application->getName()));
-    $content[] = phutil_render_tag(
-      'span',
-      array(
-        'class' => 'phabricator-application-launch-description',
-      ),
-      phutil_escape_html($application->getShortDescription()));
-
-
-    $count = 0;
-    $content[] = '<span class="phabricator-application-status-block">';
-
-    if ($this->status) {
-      foreach ($this->status as $status) {
-        $count += $status->getCount();
-        $content[] = $status;
-      }
-    } else {
-      $flavor = $application->getFlavorText();
-      if ($flavor !== null) {
-        $content[] = phutil_render_tag(
-          'span',
-          array(
-            'class' => 'phabricator-application-flavor-text',
-          ),
-          phutil_escape_html($flavor));
-      }
-    }
-
-    $content[] = '</span>';
-
-    if ($count) {
+    $icon = null;
+    if ($application) {
       $content[] = phutil_render_tag(
         'span',
         array(
-          'class' => 'phabricator-application-launch-attention',
+          'class' => 'phabricator-application-launch-name',
         ),
-        phutil_escape_html($count));
+        phutil_escape_html($application->getName()));
+
+      if ($this->fullWidth) {
+        $content[] = phutil_render_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-launch-description',
+          ),
+          phutil_escape_html($application->getShortDescription()));
+      }
+
+      $count = 0;
+      if ($this->status) {
+        foreach ($this->status as $status) {
+          $count += $status->getCount();
+        }
+      }
+
+      if ($count) {
+        $content[] = phutil_render_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-launch-attention',
+          ),
+          phutil_escape_html($count));
+      }
+
+      $classes = array();
+      $classes[] = 'phabricator-application-launch-icon';
+      $styles = array();
+
+      if ($application->getIconURI()) {
+        $styles[] = 'background-image: url('.$application->getIconURI().')';
+      } else {
+        $icon = $application->getIconName();
+        $classes[] = 'sprite-apps-large';
+        $classes[] = 'app-'.$icon.'-light-large';
+      }
+
+      $icon = phutil_render_tag(
+        'span',
+        array(
+          'class' => implode(' ', $classes),
+          'style' => nonempty(implode('; ', $styles), null),
+        ),
+        '');
     }
 
     $classes = array();
-    $classes[] = 'phabricator-application-launch-icon';
-    $styles = array();
-
-    if ($application->getIconURI()) {
-      $styles[] = 'background-image: url('.$application->getIconURI().')';
-    } else {
-      $icon = $application->getIconName();
-      $classes[] = 'sprite-apps-xlarge';
-      $classes[] = 'app-'.$icon.'-dark-xlarge';
+    $classes[] = 'phabricator-application-launch-container';
+    if ($this->fullWidth) {
+      $classes[] = 'application-tile-full';
     }
 
-    $icon = phutil_render_tag(
-      'span',
+    return phutil_render_tag(
+      $application ? 'a' : 'div',
       array(
         'class' => implode(' ', $classes),
-        'style' => nonempty(implode('; ', $styles), null),
-      ),
-      '');
-
-    return phutil_render_tag(
-      'a',
-      array(
-        'class' => 'phabricator-application-launch-container',
-        'href'  => $application->getBaseURI(),
+        'href'  => $application ? $application->getBaseURI() : null,
       ),
       $icon.
       $this->renderSingleView($content));

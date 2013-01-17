@@ -73,8 +73,7 @@ final class PonderCommentEditor extends PhabricatorEditor {
 
       if ($target === $question->getPHID()) {
         $target = $question;
-      }
-      else {
+      } else {
         $answers_by_phid = mgroup($question->getAnswers(), 'getPHID');
         $target = head($answers_by_phid[$target]);
       }

@@ -31,7 +31,8 @@ $sheets = array(
   'menu' => $generator->buildMenuSheet(),
   'apps' => $generator->buildAppsSheet(),
   'apps-large' => $generator->buildAppsLargeSheet(),
-  'apps-xlarge' => $generator->buildAppsXLargeSheet(),
+// TODO: @chad: should we actually remove this?
+//  'apps-xlarge' => $generator->buildAppsXLargeSheet(),
   'gradient' => $generator->buildGradientSheet(),
 );
 

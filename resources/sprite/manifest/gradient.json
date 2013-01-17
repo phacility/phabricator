@@ -4,57 +4,72 @@
     "gradient-black-dark"      : {
       "name" : "gradient-black-dark",
       "rule" : ".gradient-black-dark, button.black, a.black, a.black:visited",
-      "hash" : "17425d8c9c53672ab2edbd236e6efd7a"
+      "hash" : "b9faf8505427bb14a8c51324e13e2f81"
     },
     "gradient-black-light"     : {
       "name" : "gradient-black-light",
       "rule" : ".gradient-black-light, button.black:active, a.black:active",
-      "hash" : "c4fb2231553d2894fd2c97beaa8bfe39"
+      "hash" : "812c3375d00ccc93c36c6df2eb565df4"
     },
     "gradient-blue-dark"       : {
       "name" : "gradient-blue-dark",
       "rule" : ".gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit",
-      "hash" : "f467612edcdbf984672287c6086492c4"
+      "hash" : "adc2d0f7397374936384014c5d78550d"
     },
     "gradient-blue-light"      : {
       "name" : "gradient-blue-light",
       "rule" : ".gradient-blue-light, button:active, a.button:active",
-      "hash" : "471d47c102def6db46b345310aac5a03"
+      "hash" : "91b841067a63e543a4dcd9d41e0a2e5c"
     },
     "gradient-breadcrumbs"     : {
       "name" : "gradient-breadcrumbs",
       "rule" : ".gradient-breadcrumbs",
-      "hash" : "3d0f8634df5bc29eaf2a5a01bae79cf1"
+      "hash" : "688ab77f50cfbc17ec30d798efb1b39e"
     },
     "gradient-dark-menu-label" : {
       "name" : "gradient-dark-menu-label",
       "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label",
-      "hash" : "e0d4a455142f9c4745d36ad8b7dd3f78"
+      "hash" : "89a908596142d38fbe61a706694cd321"
     },
     "gradient-green-dark"      : {
       "name" : "gradient-green-dark",
       "rule" : ".gradient-green-dark, button.green, a.green, a.green:visited",
-      "hash" : "a6719fe55b2b0e527ed32985691eab34"
+      "hash" : "0d19ab593772b6b406c0db309b3a14fb"
     },
     "gradient-green-light"     : {
       "name" : "gradient-green-light",
       "rule" : ".gradient-green-light, button.green:active, a.green:active",
-      "hash" : "124969cc7805bbd754005bc702e24c54"
+      "hash" : "71c67916327ec7fc65149ab72c3a2924"
     },
     "gradient-grey-dark"       : {
       "name" : "gradient-grey-dark",
       "rule" : ".gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled",
-      "hash" : "fac28a773098fc62bf571e12b843f71a"
+      "hash" : "32651902d28d37dca01cf067072c39c0"
     },
     "gradient-grey-light"      : {
       "name" : "gradient-grey-light",
       "rule" : ".gradient-grey-light, button.grey:active, a.grey:active, button.grey_active, a.dropdown-open",
-      "hash" : "83c6128f59fc2e426c912c2f73f5b92b"
+      "hash" : "c3c9ee1ed6f800a4ac86910b94687877"
+    },
+    "gradient-menu-hover"      : {
+      "name" : "gradient-menu-hover",
+      "rule" : ".gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover",
+      "hash" : "856380207ac8c5cb6770d44dceb245a8"
+    },
+    "gradient-menu-label"      : {
+      "name" : "gradient-menu-label",
+      "rule" : ".gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label",
+      "hash" : "8ad8352b077ae02820ebbbae26dc669b"
+    },
+    "gradient-menu-selected"   : {
+      "name" : "gradient-menu-selected",
+      "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover",
+      "hash" : "815bafb94e11c23e1a419ea85dcae113"
     }
   },
   "scales"  : [
     1
   ],
-  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
+  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover  {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
   "type"    : "repeat-x"
 }

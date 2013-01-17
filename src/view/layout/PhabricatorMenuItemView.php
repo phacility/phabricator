@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorMenuItemView extends AphrontView {
+final class PhabricatorMenuItemView extends AphrontTagView {
 
   const TYPE_LINK     = 'type-link';
   const TYPE_SPACER   = 'type-spacer';
@@ -11,11 +11,18 @@ final class PhabricatorMenuItemView extends AphrontView {
   private $type = self::TYPE_LINK;
   private $isExternal;
   private $key;
-  private $classes = array();
-  private $workflow;
   private $sortOrder = 1.0;
   private $icon;
   private $selected;
+
+  public function setProperty($property) {
+    $this->property = $property;
+    return $this;
+  }
+
+  public function getProperty() {
+    return $this->property;
+  }
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -80,20 +87,6 @@ final class PhabricatorMenuItemView extends AphrontView {
     return $this->isExternal;
   }
 
-  public function addClass($class) {
-    $this->classes[] = $class;
-    return $this;
-  }
-
-  public function setWorkflow($workflow) {
-    $this->workflow = $workflow;
-    return $this;
-  }
-
-  public function getWorkflow() {
-    return $this->workflow;
-  }
-
   public function setSortOrder($order) {
     $this->sortOrder = $order;
     return $this;
@@ -103,14 +96,21 @@ final class PhabricatorMenuItemView extends AphrontView {
     return $this->sortOrder;
   }
 
-  public function render() {
-    $classes = array(
-      'phabricator-menu-item-view',
-      'phabricator-menu-item-'.$this->type,
+  protected function getTagName() {
+    return $this->href ? 'a' : 'div';
+  }
+
+  protected function getTagAttributes() {
+    return array(
+      'class' => array(
+        'phabricator-menu-item-view',
+        'phabricator-menu-item-'.$this->type,
+      ),
+      'href' => $this->href,
     );
+  }
 
-    $classes = array_merge($classes, $this->classes);
-
+  protected function getTagContent() {
     $name = null;
     if ($this->name) {
       $external = null;
@@ -125,15 +125,7 @@ final class PhabricatorMenuItemView extends AphrontView {
         phutil_escape_html($this->name.$external));
     }
 
-    return javelin_render_tag(
-      $this->href ? 'a' : 'div',
-      array(
-        'class'     => implode(' ', $classes),
-        'href'      => $this->href,
-        'sigil'     => $this->workflow ? 'workflow' : null,
-      ),
-      $this->renderChildren().
-      $name);
+    return $this->renderChildren().$name;
   }
 
 }

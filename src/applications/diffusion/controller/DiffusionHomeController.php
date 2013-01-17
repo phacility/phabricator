@@ -51,6 +51,7 @@ final class DiffusionHomeController extends DiffusionController {
         unset($repositories[$key]);
       }
     }
+    $repositories = msort($repositories, 'getName');
 
     $repository_ids = mpull($repositories, 'getID');
     $summaries = array();
@@ -199,6 +200,7 @@ final class DiffusionHomeController extends DiffusionController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Browse Repositories');
     $panel->appendChild($table);
+    $panel->setNoBackground();
 
     $crumbs = $this->buildCrumbs();
     $crumbs->addCrumb(

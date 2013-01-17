@@ -144,6 +144,7 @@ final class PhabricatorSettingsPanelEmailAddresses
     }
     $view->setHeader('Email Addresses');
     $view->appendChild($table);
+    $view->setNoBackground();
 
     return $view;
   }

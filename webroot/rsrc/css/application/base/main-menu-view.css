@@ -313,8 +313,8 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 */
 
 .device .phabricator-dark-menu,
-.device .phabricator-dark-menu a.phabricator-menu-item-type-link{
-  color: #ffffff;
+.device .phabricator-dark-menu a.phabricator-menu-item-type-link {
+  color: #fff;
 }
 
 .device .phabricator-dark-menu .phabricator-menu-item-view {

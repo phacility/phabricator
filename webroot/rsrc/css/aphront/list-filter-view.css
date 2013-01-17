@@ -3,24 +3,14 @@
  */
 
 .aphront-list-filter-view {
-  background: #f6f6f6;
-  border-bottom: 1px solid #bbbbbb;
+  background: #f4f5f8;
+  border-bottom: 1px solid #d4dae0;
   width: 100%;
   margin-bottom: 1em;
 }
 
-.aphront-list-filter-view-buttons {
-  padding: 10px 20px;
-}
-
-.aphront-list-filter-view-buttons a.button {
-  width: 200px;
-  display: block;
-}
-
 .aphront-list-filter-view-controls {
   width: 100%;
-  border-right: 1px solid #bbbbbb;
 }
 
 .aphront-list-filter-view-controls .aphront-form-view {

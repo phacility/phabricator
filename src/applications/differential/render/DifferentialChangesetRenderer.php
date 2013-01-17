@@ -27,15 +27,6 @@ abstract class DifferentialChangesetRenderer {
   private $gaps;
   private $mask;
   private $depths;
-  private $lineCount;
-
-  public function setLineCount($line_count) {
-    $this->lineCount = $line_count;
-    return $this;
-  }
-  public function getLineCount() {
-    return $this->lineCount;
-  }
 
   public function setDepths($depths) {
     $this->depths = $depths;
@@ -245,7 +236,26 @@ abstract class DifferentialChangesetRenderer {
     return $this->renderPropertyChangeHeader;
   }
 
-  abstract public function renderChangesetTable($contents);
+  final public function renderChangesetTable($content) {
+    $props = null;
+    if ($this->shouldRenderPropertyChangeHeader()) {
+      $props = $this->renderPropertyChangeHeader();
+    }
+
+    $force = (!$content && !$props);
+    $notice = $this->renderChangeTypeHeader($force);
+
+    $result = $notice.$props.$content;
+
+    // TODO: Let the user customize their tab width / display style.
+    // TODO: We should possibly post-process "\r" as well.
+    // TODO: Both these steps should happen earlier.
+    $result = str_replace("\t", '  ', $result);
+
+    return $result;
+  }
+
+  abstract public function isOneUpRenderer();
   abstract public function renderTextChange(
     $range_start,
     $range_len,
@@ -257,6 +267,12 @@ abstract class DifferentialChangesetRenderer {
     $id = 0,
     $vs = 0
   );
+
+  abstract protected function renderChangeTypeHeader($force);
+
+  protected function didRenderChangesetTableContents($contents) {
+    return $contents;
+  }
 
   /**
    * Render a "shield" over the diff, with a message like "This file is
@@ -282,367 +298,184 @@ abstract class DifferentialChangesetRenderer {
    * @param   string|null   Force mode, see above.
    * @return  string        Shield markup.
    */
-  public function renderShield($message, $force = 'default') {
+  abstract public function renderShield($message, $force = 'default');
 
-    $end = $this->getLineCount();
-    $reference = $this->getRenderingReference();
+  abstract protected function renderPropertyChangeHeader();
 
-    if ($force !== 'text' &&
-        $force !== 'whitespace' &&
-        $force !== 'none' &&
-        $force !== 'default') {
-      throw new Exception("Invalid 'force' parameter '{$force}'!");
-    }
+  protected function buildPrimitives($range_start, $range_len) {
+    $primitives = array();
 
-    $range = "0-{$end}";
-    if ($force == 'text') {
-      // If we're forcing text, force the whole file to be rendered.
-      $range = "{$range}/0-{$end}";
-    }
+    $hunk_starts = $this->getHunkStartLines();
 
-    $meta = array(
-      'ref'   => $reference,
-      'range' => $range,
-    );
+    $mask = $this->getMask();
+    $gaps = $this->getGaps();
 
-    if ($force == 'whitespace') {
-      $meta['whitespace'] = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
-    }
+    $old = $this->getOldLines();
+    $new = $this->getNewLines();
+    $old_render = $this->getOldRender();
+    $new_render = $this->getNewRender();
+    $old_comments = $this->getOldComments();
+    $new_comments = $this->getNewComments();
 
-    $more = null;
-    if ($force !== 'none') {
-      $more = ' '.javelin_render_tag(
-        'a',
-        array(
-          'mustcapture' => true,
-          'sigil'       => 'show-more',
-          'class'       => 'complete',
-          'href'        => '#',
-          'meta'        => $meta,
-        ),
-        'Show File Contents');
-    }
+    $size = count($old);
+    for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
+      if (empty($mask[$ii])) {
+        list($top, $len) = array_pop($gaps);
+        $primitives[] = array(
+          'type' => 'context',
+          'top' => $top,
+          'len' => $len,
+        );
 
-    return javelin_render_tag(
-      'tr',
-      array(
-        'sigil' => 'context-target',
-      ),
-      '<td class="differential-shield" colspan="6">'.
-        phutil_escape_html($message).
-        $more.
-      '</td>');
-  }
+        $ii += ($len - 1);
+        continue;
+      }
 
+      $ospec = array(
+        'type' => 'old',
+        'htype' => null,
+        'cursor' => $ii,
+        'line' => null,
+        'oline' => null,
+        'render' => null,
+      );
 
-  protected function renderPropertyChangeHeader($changeset) {
-    if (!$this->shouldRenderPropertyChangeHeader()) {
-      return null;
-    }
+      $nspec = array(
+        'type' => 'new',
+        'htype' => null,
+        'cursor' => $ii,
+        'line' => null,
+        'oline' => null,
+        'render' => null,
+        'copy' => null,
+        'coverage' => null,
+      );
 
-    $old = $changeset->getOldProperties();
-    $new = $changeset->getNewProperties();
-
-    $keys = array_keys($old + $new);
-    sort($keys);
-
-    $rows = array();
-    foreach ($keys as $key) {
-      $oval = idx($old, $key);
-      $nval = idx($new, $key);
-      if ($oval !== $nval) {
-        if ($oval === null) {
-          $oval = '<em>null</em>';
-        } else {
-          $oval = nl2br(phutil_escape_html($oval));
+      if (isset($old[$ii])) {
+        $ospec['line'] = (int)$old[$ii]['line'];
+        $nspec['oline'] = (int)$old[$ii]['line'];
+        $ospec['htype'] = $old[$ii]['type'];
+        if (isset($old_render[$ii])) {
+          $ospec['render'] = $old_render[$ii];
         }
+      }
 
-        if ($nval === null) {
-          $nval = '<em>null</em>';
-        } else {
-          $nval = nl2br(phutil_escape_html($nval));
+      if (isset($new[$ii])) {
+        $nspec['line'] = (int)$new[$ii]['line'];
+        $ospec['oline'] = (int)$new[$ii]['line'];
+        $nspec['htype'] = $new[$ii]['type'];
+        if (isset($new_render[$ii])) {
+          $nspec['render'] = $new_render[$ii];
         }
+      }
 
-        $rows[] =
-          '<tr>'.
-            '<th>'.phutil_escape_html($key).'</th>'.
-            '<td class="oval">'.$oval.'</td>'.
-            '<td class="nval">'.$nval.'</td>'.
-          '</tr>';
+      if (isset($hunk_starts[$ospec['line']])) {
+        $primitives[] = array(
+          'type' => 'no-context',
+        );
+      }
+
+      $primitives[] = $ospec;
+      $primitives[] = $nspec;
+
+      if ($ospec['line'] !== null && isset($old_comments[$ospec['line']])) {
+        foreach ($old_comments[$ospec['line']] as $comment) {
+          $primitives[] = array(
+            'type' => 'inline',
+            'comment' => $comment,
+            'right' => false,
+          );
+        }
+      }
+
+      if ($nspec['line'] !== null && isset($new_comments[$nspec['line']])) {
+        foreach ($new_comments[$nspec['line']] as $comment) {
+          $primitives[] = array(
+            'type' => 'inline',
+            'comment' => $comment,
+            'right' => true,
+          );
+        }
+      }
+
+      if ($hunk_starts && ($ii == $size - 1)) {
+        $primitives[] = array(
+          'type' => 'no-context',
+        );
       }
     }
 
-    return
-      '<table class="differential-property-table">'.
-        '<tr class="property-table-header">'.
-          '<th>Property Changes</th>'.
-          '<td class="oval">Old Value</td>'.
-          '<td class="nval">New Value</td>'.
-        '</tr>'.
-        implode('', $rows).
-      '</table>';
+    if ($this->isOneUpRenderer()) {
+      $primitives = $this->processPrimitivesForOneUp($primitives);
+    }
+
+    return $primitives;
   }
 
-  protected function renderChangeTypeHeader($changeset, $force) {
-    $change = $changeset->getChangeType();
-    $file = $changeset->getFileType();
+  private function processPrimitivesForOneUp(array $primitives) {
+    // Primitives come out of buildPrimitives() in two-up format, because it
+    // is the most general, flexible format. To put them into one-up format,
+    // we need to filter and reorder them. In particular:
+    //
+    //   - We discard unchanged lines in the old file; in one-up format, we
+    //     render them only once.
+    //   - We group contiguous blocks of old-modified and new-modified lines, so
+    //     they render in "block of old, block of new" order instead of
+    //     alternating old and new lines.
 
-    $message = null;
-    if ($change == DifferentialChangeType::TYPE_CHANGE &&
-        $file   == DifferentialChangeType::FILE_TEXT) {
-      if ($force) {
-        // We have to force something to render because there were no changes
-        // of other kinds.
-        $message = pht('This file was not modified.');
+    $out = array();
+
+    $old_buf = array();
+    $new_buf = array();
+    foreach ($primitives as $primitive) {
+      $type = $primitive['type'];
+
+      if ($type == 'old') {
+        if (!$primitive['htype']) {
+          // This is a line which appears in both the old file and the new
+          // file, or the spacer corresponding to a line added in the new file.
+          // Ignore it when rendering a one-up diff.
+          continue;
+        }
+        if ($new_buf) {
+          $out[] = $new_buf;
+          $new_buf = array();
+        }
+        $old_buf[] = $primitive;
+      } else if ($type == 'new') {
+        if ($primitive['line'] === null) {
+          // This is an empty spacer corresponding to a line removed from the
+          // old file. Ignore it when rendering a one-up diff.
+          continue;
+        }
+        if ($old_buf) {
+          $out[] = $old_buf;
+          $old_buf = array();
+        }
+        $new_buf[] = $primitive;
+      } else if ($type == 'context' || $type == 'no-context') {
+        $out[] = $old_buf;
+        $out[] = $new_buf;
+        $old_buf = array();
+        $new_buf = array();
+        $out[] = array($primitive);
+      } else if ($type == 'inline') {
+        $out[] = $old_buf;
+        $out[] = $new_buf;
+        $old_buf = array();
+        $new_buf = array();
+
+        $out[] = array($primitive);
       } else {
-        // Default case of changes to a text file, no metadata.
-        return null;
-      }
-    } else {
-      switch ($change) {
-
-        case DifferentialChangeType::TYPE_ADD:
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was <strong>added</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was <strong>added</strong>.');
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_DELETE:
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was <strong>deleted</strong>.');
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was <strong>deleted</strong>.');
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_MOVE_HERE:
-          $from =
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was moved from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was moved from %s.', $from);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_COPY_HERE:
-          $from =
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was copied from %s.', $from);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was copied from %s.', $from);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_MOVE_AWAY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was moved to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was moved to %s.', $paths);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_COPY_AWAY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was copied to %s.', $paths);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was copied to %s.', $paths);
-              break;
-          }
-          break;
-
-        case DifferentialChangeType::TYPE_MULTICOPY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht(
-                'This file was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht(
-                'This image was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht(
-                'This directory was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht(
-                'This binary file was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht(
-                'This symlink was deleted after being copied to %s.',
-                $paths);
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht(
-                'This submodule was deleted after being copied to %s.',
-                $paths);
-              break;
-          }
-          break;
-
-        default:
-          switch ($file) {
-            case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This is a file.');
-              break;
-            case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This is an image.');
-              break;
-            case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This is a directory.');
-              break;
-            case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This is a binary file.');
-              break;
-            case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This is a symlink.');
-              break;
-            case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This is a submodule.');
-              break;
-          }
-          break;
+        throw new Exception("Unknown primitive type '{$primitive}'!");
       }
     }
 
-    return
-      '<div class="differential-meta-notice">'.
-        $message.
-      '</div>';
-  }
+    $out[] = $old_buf;
+    $out[] = $new_buf;
+    $out = array_mergev($out);
 
-  protected function renderInlineComment(
-    PhabricatorInlineCommentInterface $comment,
-    $on_right = false) {
-
-    $user = $this->getUser();
-    $edit = $user &&
-            ($comment->getAuthorPHID() == $user->getPHID()) &&
-            ($comment->isDraft());
-    $allow_reply = (bool)$user;
-
-    return id(new DifferentialInlineCommentView())
-      ->setInlineComment($comment)
-      ->setOnRight($on_right)
-      ->setHandles($this->getHandles())
-      ->setMarkupEngine($this->getMarkupEngine())
-      ->setEditable($edit)
-      ->setAllowReply($allow_reply)
-      ->render();
+    return $out;
   }
 
 }

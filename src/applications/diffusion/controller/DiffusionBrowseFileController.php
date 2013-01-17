@@ -133,25 +133,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
       return;
     }
 
-    $file_history = DiffusionHistoryQuery::newFromDiffusionRequest(
-      $drequest)->setLimit(1)->loadHistory();
-
-    $lint_request = clone $drequest;
-    $lint_request->setCommit($branch->getLintCommit());
-    try {
-      $lint_history = DiffusionHistoryQuery::newFromDiffusionRequest(
-        $lint_request)->setLimit(1)->loadHistory();
-    } catch (Exception $ex) {
-      // This can happen if lintCommit is invalid.
-      $lint_history = null;
-    }
-
-    $this->lintCommit = '';
-    if (!$file_history || !$lint_history ||
-        reset($file_history)->getCommitIdentifier() !=
-        reset($lint_history)->getCommitIdentifier()) {
-      $this->lintCommit = $branch->getLintCommit();
-    }
+    $this->lintCommit = $branch->getLintCommit();
 
     $conn = id(new PhabricatorRepository())->establishConnection('r');
 
@@ -355,21 +337,14 @@ final class DiffusionBrowseFileController extends DiffusionController {
     } else if ($this->lintCommit === null) {
       $lint_text = pht('Lint not Available');
 
-    } else if ($this->lintCommit) {
+    } else {
       $lint_text = pht(
-        'Switch for %d Lint Message(s)',
+        'Show %d Lint Message(s)',
         count($this->lintMessages));
       $href = $this->getDiffusionRequest()->generateURI(array(
         'action' => 'browse',
         'commit' => $this->lintCommit,
       ))->alter('lint', '');
-
-    } else if (!$this->lintMessages) {
-      $lint_text = pht('No Lint Messages');
-
-    } else {
-      $lint_text = pht('Show %d Lint Message(s)', count($this->lintMessages));
-      $href = $base_uri->alter('lint', '');
     }
 
     $lint_button = $this->createViewAction(

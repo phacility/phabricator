@@ -38,7 +38,6 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
     $nav->setFlexible(true);
 
     $anchor = $this->getAnchorName();
-    $nav->addFilter($anchor, $this->getTitle(), '#'.$anchor);
 
     $tree = new PhutilFileTree();
     foreach ($changesets as $changeset) {
@@ -121,12 +120,10 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
       '<div class="phabricator-filetree">'.
         implode("\n", $filetree).
       '</div>';
-    $nav->addFilter('toc', 'Table of Contents', '#toc');
+    $nav->addLabel('Changed Files');
     $nav->addCustomBlock($filetree);
-    $nav->addFilter('comment', 'Add Comment', '#comment');
     $nav->setActive(true);
-    $nav->selectFilter('');
-
+    $nav->selectFilter(null);
     return $nav;
   }
 

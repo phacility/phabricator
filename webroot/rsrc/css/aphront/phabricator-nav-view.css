@@ -6,14 +6,21 @@
   cursor: col-resize;
 }
 
+.phabricator-nav {
+  /* Force top margins in page content not to collapse with the top margin of
+     the navigation container by giving it padding. Then put it in the right
+     position by undoing the padding with a margin. */
+  padding-top: 1px;
+  margin-top: -1px;
+}
+
 .phabricator-nav-column-background {
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  width: 179px;
-  background: #ececec;
-  border-right: 1px solid #999c9e;
+  width: 205px;
+  background: #33383b;
   box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.05);
   background-image: url(/rsrc/image/menu_texture.png);
 }
@@ -31,7 +38,7 @@
 }
 
 .phabricator-nav-local {
-  width: 179px;
+  width: 205px;
   position: absolute;
   left: 0;
   white-space: nowrap;
@@ -44,7 +51,7 @@
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 179px;
+  left: 205px;
   width: 7px;
 
   cursor: col-resize;
@@ -60,7 +67,19 @@
   background-repeat: no-repeat;
 }
 
-.device-desktop .has-local-nav .phabricator-nav-content {
-  margin-left: 180px;
+.device-desktop .phabricator-standard-page-body .has-drag-nav .phabricator-nav-content {
+  margin-left: 212px;
 }
 
+.device-desktop .has-local-nav .phabricator-nav-content {
+  margin-left: 205px;
+}
+
+.phabricator-side-menu-home .phabricator-nav-column-background,
+.phabricator-side-menu-home .phabricator-nav-local {
+  width: 320px;
+}
+
+.device-desktop .phabricator-side-menu-home .phabricator-nav-content {
+  margin-left: 320px;
+}

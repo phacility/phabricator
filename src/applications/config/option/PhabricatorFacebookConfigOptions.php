@@ -47,6 +47,7 @@ final class PhabricatorFacebookConfigOptions
           pht(
             'Facebook "Application ID" to use for Facebook API access.')),
       $this->newOption('facebook.application-secret', 'string', null)
+        ->setMasked(true)
         ->setDescription(
           pht(
             'Facebook "Application Secret" to use for Facebook API access.')),

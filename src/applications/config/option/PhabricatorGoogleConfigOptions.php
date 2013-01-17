@@ -47,6 +47,7 @@ final class PhabricatorGoogleConfigOptions
           pht(
             'Google "Client ID" to use for Google API access.')),
       $this->newOption('google.application-secret', 'string', null)
+        ->setMasked(true)
         ->setDescription(
           pht(
             'Google "Secret" to use for Google API access.')),

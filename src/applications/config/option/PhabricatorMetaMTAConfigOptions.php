@@ -1,0 +1,327 @@
+<?php
+
+final class PhabricatorMetaMTAConfigOptions
+  extends PhabricatorApplicationConfigOptions {
+
+  public function getName() {
+    return pht("Mail");
+  }
+
+  public function getDescription() {
+    return pht("Configure Mail.");
+  }
+
+  public function getOptions() {
+    $send_as_user_desc = $this->deformat(pht(<<<EODOC
+When a user takes an action which generates an email notification (like
+commenting on a Differential revision), Phabricator can either send that mail
+"From" the user's email address (like "alincoln@logcabin.com") or "From" the
+'metamta.default-address' address.
+
+The user experience is generally better if Phabricator uses the user's real
+address as the "From" since the messages are easier to organize when they appear
+in mail clients, but this will only work if the server is authorized to send
+email on behalf of the "From" domain. Practically, this means:
+
+  - If you are doing an install for Example Corp and all the users will have
+    corporate @corp.example.com addresses and any hosts Phabricator is running
+    on are authorized to send email from corp.example.com, you can enable this
+    to make the user experience a little better.
+  - If you are doing an install for an open source project and your users will
+    be registering via Facebook and using personal email addresses, you probably
+    should not enable this or all of your outgoing email might vanish into SFP
+    blackholes.
+  - If your install is anything else, you're safer leaving this off, at least
+    initially, since the risk in turning it on is that your outgoing mail will
+    never arrive.
+EODOC
+));
+
+    $one_mail_per_recipient_desc = $this->deformat(pht(<<<EODOC
+When a message is sent to multiple recipients (for example, several reviewers on
+a code review), Phabricator can either deliver one email to everyone (e.g., "To:
+alincoln, usgrant, htaft") or separate emails to each user (e.g., "To:
+alincoln", "To: usgrant", "To: htaft"). The major advantages and disadvantages
+of each approach are:
+
+  - One mail to everyone:
+    - Recipients can see To/Cc at a glance.
+    - If you use mailing lists, you won't get duplicate mail if you're
+      a normal recipient and also Cc'd on a mailing list.
+    - Getting threading to work properly is harder, and probably requires
+      making mail less useful by turning off options.
+    - Sometimes people will "Reply All" and everyone will get two mails,
+      one from the user and one from Phabricator turning their mail into
+      a comment.
+    - Not supported with a private reply-to address.
+    - Mails are sent in the server default translation.
+  - One mail to each user:
+    - Recipients need to look in the mail body to see To/Cc.
+    - If you use mailing lists, recipients may sometimes get duplicate
+      mail.
+    - Getting threading to work properly is easier, and threading settings
+      can be customzied by each user.
+    - "Reply All" no longer spams all other users.
+    - Required if private reply-to addresses are configured.
+    - Mails are sent in the language of user preference.
+
+In the code, splitting one outbound email into one-per-recipient is sometimes
+referred to as "multiplexing".
+EODOC
+));
+
+    $herald_hints_description = $this->deformat(pht(<<<EODOC
+You can disable the Herald hints in email if users prefer smaller messages.
+These are the links under the headers "MANAGE HERALD RULES" and "WHY DID I GET
+THIS EMAIL?". If you set this to true, they will not appear in any mail. Users
+can still navigate to the links via the web interface.
+EODOC
+));
+
+    $reply_hints_description = $this->deformat(pht(<<<EODOC
+You can disable the hints under "REPLY HANDLER ACTIONS" if users prefer
+smaller messages. The actions themselves will still work properly.
+EODOC
+));
+
+    $recipient_hints_description = $this->deformat(pht(<<<EODOC
+You can disable the "To:" and "Cc:" footers in mail if users prefer smaller
+messages.
+EODOC
+));
+
+    $bulk_description = $this->deformat(pht(<<<EODOC
+If this option is enabled, Phabricator will add a "Precedence: bulk" header to
+transactional mail (e.g., Differential, Maniphest and Herald notifications).
+This may improve the behavior of some auto-responder software and prevent it
+from replying. However, it may also cause deliverability issues -- notably, you
+currently can not send this header via Amazon SES, and enabling this option with
+SES will prevent delivery of any affected mail.
+EODOC
+));
+
+    $re_prefix_description = $this->deformat(pht(<<<EODOC
+Mail.app on OS X Lion won't respect threading headers unless the subject is
+prefixed with "Re:". If you enable this option, Phabricator will add "Re:" to
+the subject line of all mail which is expected to thread. If you've set
+'metamta.one-mail-per-recipient', users can override this setting in their
+preferences.
+EODOC
+));
+
+    $vary_subjects_description = $this->deformat(pht(<<<EODOC
+If true, allow MetaMTA to change mail subjects to put text like '[Accepted]' and
+'[Commented]' in them. This makes subjects more useful, but might break
+threading on some clients. If you've set 'metamta.one-mail-per-recipient', users
+can override this setting in their preferences.
+EODOC
+));
+
+    $reply_to_description = $this->deformat(pht(<<<EODOC
+If you enable {{metamta.public-replies}}, Phabricator uses "From" to
+authenticate users. You can additionally enable this setting to try to
+authenticate with 'Reply-To'. Note that this is completely spoofable and
+insecure (any user can set any 'Reply-To' address) but depending on the nature
+of your install or other deliverability conditions this might be okay.
+Generally, you can't do much more by spoofing Reply-To than be annoying (you can
+write but not read content). But this is still **COMPLETELY INSECURE**.
+EODOC
+));
+
+    $adapter_description = $this->deformat(pht(<<<EODOC
+Adapter class to use to transmit mail to the MTA. The default uses
+PHPMailerLite, which will invoke "sendmail". This is appropriate if sendmail
+actually works on your host, but if you haven't configured mail it may not be so
+great. A number of other mailers are available (e.g., SES, SendGrid, SMTP,
+custom mailers), consult "Configuring Outbound Email" in the documentation for
+details.
+EODOC
+));
+
+    $immediately_description = $this->deformat(pht(<<<EODOC
+When email is sent, try to hand it off to the MTA immediately instead of
+queueing it for delivery by the daemons. If you are running the Phabricator
+daemons with "phd start", you should disable this to provide a (sometimes
+substantial) performance boost. It's on by default to make setup and
+configuration a little easier.
+EODOC
+));
+
+    $placeholder_description = $this->deformat(pht(<<<EODOC
+When sending a message that has no To recipient (i.e. all recipients are CC'd,
+for example when multiplexing mail), set the To field to the following value. If
+no value is set, messages with no To will have their CCs upgraded to To.
+EODOC
+));
+
+    $public_replies_description = $this->deformat(pht(<<<EODOC
+By default, Phabricator generates unique reply-to addresses and sends a separate
+email to each recipient when you enable reply handling. This is more secure than
+using "From" to establish user identity, but can mean users may receive multiple
+emails when they are on mailing lists. Instead, you can use a single, non-unique
+reply to address and authenticate users based on the "From" address by setting
+this to 'true'. This trades away a little bit of security for convenience, but
+it's reasonable in many installs. Object interactions are still protected using
+hashes in the single public email address, so objects can not be replied to
+blindly.
+EODOC
+));
+
+    $single_description = $this->deformat(pht(<<<EODOC
+If you want to use a single mailbox for Phabricator reply mail, you can use this
+and set a common prefix for reply addresses generated by Phabricator. It will
+make use of the fact that a mail-address such as
+`phabricator+D123+1hjk213h@example.com` will be delivered to the `phabricator`
+user's mailbox. Set this to the left part of the email address and it will be
+prepended to all generated reply addresses.
+
+For example, if you want to use `phabricator@example.com`, this should be set
+to `phabricator`.
+EODOC
+));
+
+    $address_description = $this->deformat(pht(<<<EODOC
+When email is sent, what format should Phabricator use for user's email
+addresses? Valid values are:
+
+ - `short`: 'gwashington <gwashington@example.com>'
+ - `real`:  'George Washington <gwashington@example.com>'
+ - `full`: 'gwashington (George Washington) <gwashington@example.com>'
+
+The default is `full`.
+EODOC
+));
+
+    return array(
+      $this->newOption(
+        'metamta.default-address',
+        'string',
+        'noreply@phabricator.example.com')
+        ->setDescription(pht('Default "From" address.')),
+      $this->newOption(
+        'metamta.domain',
+        'string',
+        'phabricator.example.com')
+        ->setDescription(pht('Domain used to generate Message-IDs.')),
+      $this->newOption(
+        'metamta.mail-adapter',
+        'class',
+        'PhabricatorMailImplementationPHPMailerLiteAdapter')
+        ->setBaseClass('PhabricatorMailImplementationAdapter')
+        ->setSummary(pht('Control how mail is sent.'))
+        ->setDescription($adapter_description),
+      $this->newOption(
+        'metamta.one-mail-per-recipient',
+        'bool',
+        true)
+        ->setBoolOptions(
+          array(
+            pht("Send Mail To Each Recipient"),
+            pht("Send Mail To All Recipients"),
+          ))
+        ->setSummary(
+          pht(
+            'Controls whether Phabricator sends one email with multiple '.
+            'recipients in the "To:" line, or multiple emails, each with a '.
+            'single recipient in the "To:" line.'))
+        ->setDescription($one_mail_per_recipient_desc),
+      $this->newOption('metamta.can-send-as-user', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht("Send as User Taking Action"),
+            pht("Send as Phabricator"),
+          ))
+        ->setSummary(
+          pht(
+            'Controls whether Phabricator sends email "From" users.'))
+        ->setDescription($send_as_user_desc),
+      $this->newOption('metamta.reply.show-hints', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Show Reply Handler Hints"),
+            pht("No Reply Handler Hints"),
+          ))
+        ->setSummary(pht('Show hints about Herald rules in email.'))
+        ->setDescription($herald_hints_description),
+      $this->newOption('metamta.herald.show-hints', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Show Herald Hints"),
+            pht("No Herald Hints"),
+          ))
+        ->setSummary(pht('Show hints about reply handler actions in email.'))
+        ->setDescription($reply_hints_description),
+      $this->newOption('metamta.recipients.show-hints', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Show Recipient Hints"),
+            pht("No Recipient Hints"),
+          ))
+        ->setSummary(pht('Show "To:" and "Cc:" footer hints in email.'))
+        ->setDescription($recipient_hints_description),
+      $this->newOption('metamta.precedence-bulk', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Add "Precedence: bulk" Header'),
+            pht('No "Precedence: bulk" Header'),
+          ))
+        ->setSummary(pht('Control the "Precedence: bulk" header.'))
+        ->setDescription($bulk_description),
+      $this->newOption('metamta.re-prefix', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Force "Re:" Subject Prefix'),
+            pht('No "Re:" Subject Prefix'),
+          ))
+        ->setSummary(pht('Control "Re:" subject prefix, for Mail.app.'))
+        ->setDescription($re_prefix_description),
+      $this->newOption('metamta.vary-subjects', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht('Allow Varied Subjects'),
+            pht('Always Use the Same Thread Subject'),
+          ))
+        ->setSummary(pht('Control subject variance, for some mail clients.'))
+        ->setDescription($vary_subjects_description),
+      $this->newOption('metamta.insecure-auth-with-reply-to', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Allow Insecure Reply-To Auth'),
+            pht('Disallow Reply-To Auth'),
+          ))
+        ->setSummary(pht('Trust "Reply-To" headers for authentication.'))
+        ->setDescription($reply_to_description),
+      $this->newOption('metamta.send-immediately', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht('Send Immediately (Slow)'),
+            pht('Send Via Daemons (Must Run Daemons)'),
+          ))
+        ->setSummary(pht('Improve performance by sending email via daemons.'))
+        ->setDescription($immediately_description),
+      $this->newOption('metamta.placeholder-to-recipient', 'string', null)
+        ->setSummary(pht('Placeholder for mail with only CCs.'))
+        ->setDescription($placeholder_description),
+      $this->newOption('metamta.public-replies', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Use Public Replies (Less Secure)'),
+            pht('Use Private Replies (More Secure)'),
+          ))
+        ->setSummary(
+          pht(
+            'Phabricator can use less-secure but mailing list friendly public '.
+            'reply addresses.'))
+        ->setDescription($public_replies_description),
+      $this->newOption('metamta.single-reply-handler-prefix', 'string', null)
+        ->setSummary(
+          pht('Allow Phabricator to use a single mailbox for all replies.'))
+        ->setDescription($single_description),
+      // TODO: 'enum'
+      $this->newOption('metamta.user-address-format', 'string', 'full')
+        ->setSummary(pht('Control how Phabricator renders user names in mail.'))
+        ->setDescription($address_description),
+    );
+  }
+
+}

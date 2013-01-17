@@ -47,6 +47,7 @@ final class PhabricatorDisqusConfigOptions
           pht(
             'Disqus "Client ID" to use for Disqus API access.')),
       $this->newOption('disqus.application-secret', 'string', null)
+        ->setMasked(true)
         ->setDescription(
           pht(
             'Disqus "Secret" to use for Diqsus API access.')),

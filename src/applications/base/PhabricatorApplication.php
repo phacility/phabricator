@@ -18,6 +18,11 @@ abstract class PhabricatorApplication {
   const GROUP_DEVELOPER       = 'developer';
   const GROUP_MISC            = 'misc';
 
+  const TILE_INVISIBLE        = 'invisible';
+  const TILE_HIDE             = 'hide';
+  const TILE_SHOW             = 'show';
+  const TILE_FULL             = 'full';
+
   public static function getApplicationGroups() {
     return array(
       self::GROUP_CORE          => pht('Core Applications'),
@@ -29,6 +34,17 @@ abstract class PhabricatorApplication {
       self::GROUP_MISC          => pht('Miscellaneous Applications'),
     );
   }
+
+  public static function getTileDisplayName($constant) {
+    $names = array(
+      self::TILE_INVISIBLE => pht('Invisible'),
+      self::TILE_HIDE => pht('Hidden'),
+      self::TILE_SHOW => pht('Show Small Tile'),
+      self::TILE_FULL => pht('Show Large Tile'),
+    );
+    return idx($names, $constant);
+  }
+
 
 
 /* -(  Application Information  )-------------------------------------------- */
@@ -94,6 +110,25 @@ abstract class PhabricatorApplication {
 
   public function getEventListeners() {
     return array();
+  }
+
+  public function getDefaultTileDisplay(PhabricatorUser $user) {
+    switch ($this->getApplicationGroup()) {
+      case self::GROUP_CORE:
+        return self::TILE_FULL;
+      case self::GROUP_UTILITIES:
+      case self::GROUP_DEVELOPER:
+        return self::TILE_HIDE;
+      case self::GROUP_ADMIN:
+        if ($user->getIsAdmin()) {
+          return self::TILE_SHOW;
+        } else {
+          return self::TILE_INVISIBLE;
+        }
+        break;
+      default:
+        return self::TILE_SHOW;
+    }
   }
 
 

@@ -90,8 +90,8 @@ final class PhabricatorSettingsPanelAccount
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Account Settings');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     return array(
       $notice,

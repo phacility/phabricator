@@ -52,9 +52,9 @@ final class PhabricatorSettingsPanelSearchPreferences
           ->setValue('Save'));
 
     $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->setHeader('Search Preferences');
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     $error_view = null;
     if ($request->getStr('saved') === 'true') {

@@ -11,13 +11,13 @@
 }
 
 .revision-age-fresh {
-  background: #b4e3b2;
+  background: #dff1d8;
 }
 
 .revision-age-stale {
-  background: #f3e782;
+  background: #fcf9e2;
 }
 
 .revision-age-old {
-  background: #f0acac;
+  background: #f3dede;
 }

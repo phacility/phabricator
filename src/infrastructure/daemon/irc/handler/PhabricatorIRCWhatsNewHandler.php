@@ -44,8 +44,7 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
     foreach ($latest as $action) {
       if (isset($action['data']['actor_phid'])) {
         $uid = $action['data']['actor_phid'];
-      }
-      else {
+      } else {
         $uid = $action['authorPHID'];
       }
 
@@ -78,8 +77,7 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
     foreach ($latest as $action) {
       if (isset($action['data']['actor_phid'])) {
         $uid = $action['data']['actor_phid'];
-      }
-      else {
+      } else {
         $uid = $action['authorPHID'];
       }
       switch ($action['class']) {

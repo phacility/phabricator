@@ -3,7 +3,8 @@
 final class DrydockLocalHostBlueprint extends DrydockBlueprint {
 
   public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('drydock.localhost.enabled');
+    // TODO: Figure this out.
+    return true;
   }
 
   public function canAllocateMoreResources(array $pool) {
@@ -20,7 +21,9 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
   }
 
   protected function executeAllocateResource(DrydockLease $lease) {
-    $path = PhabricatorEnv::getEnvConfig('drydock.localhost.path');
+    // TODO: Don't hard-code this.
+    $path = '/var/drydock/';
+
     if (!Filesystem::pathExists($path)) {
       throw new Exception(
         "Path '{$path}' does not exist!");

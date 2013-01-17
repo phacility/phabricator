@@ -56,6 +56,24 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
               $option->getBaseClass()));
         }
         break;
+      case 'set':
+        $valid = true;
+        if (!is_array($value)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' must be a set, but value is not an array.",
+              $option->getKey()));
+        }
+        foreach ($value as $v) {
+          if ($v !== true) {
+            throw new PhabricatorConfigValidationException(
+              pht(
+                "Option '%s' must be a set, but array contains values other ".
+                "than 'true'.",
+                $option->getKey()));
+          }
+        }
+        break;
       case 'list<string>':
         $valid = true;
         if (!is_array($value)) {
@@ -157,5 +175,12 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     return $options;
   }
 
+  /**
+   * Deformat a HEREDOC for use in remarkup by converting line breaks to
+   * spaces.
+   */
+  final protected function deformat($string) {
+    return preg_replace('/(?<=\S)\n(?=\S)/', ' ', $string);
+  }
 
 }

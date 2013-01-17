@@ -29,6 +29,7 @@ final class PhabricatorLDAPConfigOptions
         ->setDescription(
           pht('Username to login to LDAP server with.')),
       $this->newOption('ldap.anonymous-user-password', 'string', null)
+        ->setMasked(true)
         ->setDescription(
           pht('Password to login to LDAP server with.')),
 
@@ -56,12 +57,19 @@ final class PhabricatorLDAPConfigOptions
       $this->newOption('ldap.referrals', 'bool', true)
         ->setBoolOptions(
           array(
-            pht("Follow Referrals"),
-            pht("Do Not Follow Referrals"),
+            pht("Follow referrals"),
+            pht("Do not follow referrals"),
           ))
         ->setDescription(
           pht("You may need to disable this if you use Windows 2003 ".
               "Active Directory.")),
+      $this->newOption('ldap.start-tls', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht("Use STARTTLS"),
+            pht("Do not use STARTTLS"),
+          ))
+        ->setDescription(pht("Should LDAP use STARTTLS?"))
     );
   }
 

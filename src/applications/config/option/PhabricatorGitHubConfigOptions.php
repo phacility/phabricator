@@ -47,6 +47,7 @@ final class PhabricatorGitHubConfigOptions
           pht(
             'GitHub "Client ID" to use for GitHub API access.')),
       $this->newOption('github.application-secret', 'string', null)
+        ->setMasked(true)
         ->setDescription(
           pht(
             'GitHub "Secret" to use for GitHub API access.')),

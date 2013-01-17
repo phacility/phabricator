@@ -201,8 +201,8 @@ final class PhabricatorSettingsPanelEmailPreferences
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Email Preferences');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     return id(new AphrontNullView())
       ->appendChild(

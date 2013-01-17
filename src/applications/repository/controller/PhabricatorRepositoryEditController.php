@@ -159,7 +159,7 @@ final class PhabricatorRepositoryEditController
     $panel->setHeader('Edit Repository');
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-
+    $panel->setNoBackground();
 
     $nav = $this->sideNav;
 
@@ -665,6 +665,7 @@ final class PhabricatorRepositoryEditController
     $panel->setHeader('Repository Tracking');
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+    $panel->setNoBackground();
 
     $nav = $this->sideNav;
     $nav->appendChild($error_view);
