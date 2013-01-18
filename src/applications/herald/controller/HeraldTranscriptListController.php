@@ -58,7 +58,7 @@ final class HeraldTranscriptListController extends HeraldController {
         $handles[$xscript['objectPHID']]->renderLink(),
         $xscript['dryRun'] ? 'Yes' : '',
         number_format((int)(1000 * $xscript['duration'])).' ms',
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/herald/transcript/'.$xscript['id'].'/',

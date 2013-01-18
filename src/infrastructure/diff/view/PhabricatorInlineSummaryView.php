@@ -19,7 +19,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
   }
 
   private function renderHeader() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-inline-summary',

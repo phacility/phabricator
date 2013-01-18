@@ -53,7 +53,7 @@ final class PhabricatorMustVerifyEmailController
             'action' => '/login/mustverify/',
             'method' => 'POST',
           ),
-          phutil_render_tag(
+          phutil_tag(
             'button',
             array(
             ),

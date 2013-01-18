@@ -47,14 +47,14 @@ final class PhrictionDocumentController
       $create_uri = '/phriction/edit/?slug='.$slug;
       $create_sentence =
         'You can <strong>'.
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $create_uri,
           ),
           'create a new document').
           '</strong>.';
-      $button = phutil_render_tag(
+      $button = phutil_tag(
         'a',
         array(
           'href' => $create_uri,

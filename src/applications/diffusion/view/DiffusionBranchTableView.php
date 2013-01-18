@@ -36,7 +36,7 @@ final class DiffusionBranchTableView extends DiffusionView {
       }
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $drequest->generateURI(

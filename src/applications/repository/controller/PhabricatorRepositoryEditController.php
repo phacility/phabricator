@@ -348,7 +348,7 @@ final class PhabricatorRepositoryEditController
     }
 
     $doc_href = PhabricatorEnv::getDoclink('article/Diffusion_User_Guide.html');
-    $user_guide_link = phutil_render_tag(
+    $user_guide_link = phutil_tag(
       'a',
       array(
         'href' => $doc_href,

@@ -38,7 +38,7 @@ final class PhabricatorProfileHeaderView extends AphrontView {
 
     $image = null;
     if ($this->profilePicture) {
-      $image = phutil_render_tag(
+      $image = phutil_tag(
         'div',
         array(
           'class' => 'profile-header-picture-frame',

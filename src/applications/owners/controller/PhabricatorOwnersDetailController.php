@@ -129,7 +129,7 @@ final class PhabricatorOwnersDetailController
         ),
         'Delete Package'));
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => '/owners/edit/'.$package->getID().'/',
@@ -164,7 +164,7 @@ final class PhabricatorOwnersDetailController
       $commit_views[] = array(
         'view'    => $view,
         'header'  => 'Commits in this Package that Need Attention',
-        'button'  => phutil_render_tag(
+        'button'  => phutil_tag(
           'a',
           array(
             'href'  => $commit_uri->alter('status', 'open'),
@@ -189,7 +189,7 @@ final class PhabricatorOwnersDetailController
     $commit_views[] = array(
       'view'    => $view,
       'header'  => 'Recent Commits in Package',
-      'button'  => phutil_render_tag(
+      'button'  => phutil_tag(
         'a',
         array(
           'href'  => $commit_uri,

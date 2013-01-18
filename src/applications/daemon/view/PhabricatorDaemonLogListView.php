@@ -81,7 +81,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
         $log->getPID(),
         phabricator_date($epoch, $this->user),
         phabricator_time($epoch, $this->user),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/daemon/log/'.$log->getID().'/',

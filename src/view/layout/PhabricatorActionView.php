@@ -50,7 +50,7 @@ final class PhabricatorActionView extends AphrontView {
       }
 
       require_celerity_resource('sprite-icon-css');
-      $icon = phutil_render_tag(
+      $icon = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-action-view-icon sprite-icon '.

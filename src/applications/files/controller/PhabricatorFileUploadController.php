@@ -104,7 +104,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
 
     $doc_href = PhabricatorEnv::getDocLink(
       'article/Configuring_File_Upload_Limits.html');
-    $doc_link = phutil_render_tag(
+    $doc_link = phutil_tag(
       'a',
       array(
         'href'    => $doc_href,

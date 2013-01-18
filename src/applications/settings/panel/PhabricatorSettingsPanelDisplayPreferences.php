@@ -63,7 +63,7 @@ function helloWorld() {
 }
 EXAMPLE;
 
-    $editor_doc_link = phutil_render_tag(
+    $editor_doc_link = phutil_tag(
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(

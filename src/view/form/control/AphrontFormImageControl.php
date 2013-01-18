@@ -26,7 +26,7 @@ final class AphrontFormImageControl extends AphrontFormControl {
           'class' => 'default-image',
           'id'    => $id,
         )).
-      phutil_render_tag(
+      phutil_tag(
         'label',
         array(
           'for' => $id,

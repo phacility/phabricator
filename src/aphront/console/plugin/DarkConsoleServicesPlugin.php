@@ -146,7 +146,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
 
     $results[] =
       '<div class="dark-console-panel-header">'.
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href'  => $this->getRequestURI()->alter('__analyze__', true),

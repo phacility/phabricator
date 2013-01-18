@@ -146,7 +146,7 @@ final class DiffusionHomeController extends DiffusionController {
     }
 
     $repository_tool_uri = PhabricatorEnv::getProductionURI('/repository/');
-    $repository_tool     = phutil_render_tag('a',
+    $repository_tool     = phutil_tag('a',
                                              array(
                                                'href' => $repository_tool_uri,
                                              ),

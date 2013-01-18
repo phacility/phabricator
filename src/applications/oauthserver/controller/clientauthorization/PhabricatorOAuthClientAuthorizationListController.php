@@ -72,7 +72,7 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
           $authorization->getDateModified(),
           $current_user
         ),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'class' => 'small button grey',

@@ -109,7 +109,7 @@ final class PhabricatorDirectoryMainController
     $panel->setHeader('Unbreak Now!');
     $panel->setCaption('Open tasks with "Unbreak Now!" priority.');
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => '/maniphest/view/all/',
@@ -154,7 +154,7 @@ final class PhabricatorDirectoryMainController
       '<a href="/project/">projects you are a member of</a>.');
 
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           // TODO: This should filter to just your projects' need-triage
@@ -198,7 +198,7 @@ final class PhabricatorDirectoryMainController
     $panel->setCaption('Revisions waiting for you for review or commit.');
 
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => '/differential/',
@@ -248,7 +248,7 @@ final class PhabricatorDirectoryMainController
     $panel->setHeader('Assigned Tasks');
 
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => '/maniphest/',
@@ -294,7 +294,7 @@ final class PhabricatorDirectoryMainController
     require_celerity_resource('phabricator-jump-nav');
 
     $doc_href = PhabricatorEnv::getDocLink('article/Jump_Nav_User_Guide.html');
-    $doc_link = phutil_render_tag(
+    $doc_link = phutil_tag(
       'a',
       array(
         'href' => $doc_href,
@@ -381,7 +381,7 @@ final class PhabricatorDirectoryMainController
     $panel->setCaption('Commits awaiting your audit.');
     $panel->appendChild($view);
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => '/audit/',
@@ -426,7 +426,7 @@ final class PhabricatorDirectoryMainController
     $panel->setCaption('Commits which auditors have raised concerns about.');
     $panel->appendChild($view);
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => '/audit/',

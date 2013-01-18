@@ -159,7 +159,7 @@ final class PhrictionEditController
       $panel_header = 'Edit Phriction Document';
       $submit_button = 'Save Changes';
       if ($document->getStatus() != PhrictionDocumentStatus::STATUS_DELETED) {
-        $delete_button = phutil_render_tag(
+        $delete_button = phutil_tag(
           'a',
           array(
             'href' => '/phriction/delete/'.$document->getID().'/',
@@ -183,7 +183,7 @@ final class PhrictionEditController
         ($draft->getDraft() != $content->getContent())) {
       $content_text = $draft->getDraft();
 
-      $discard = phutil_render_tag(
+      $discard = phutil_tag(
         'a',
         array(
           'href' => $request->getRequestURI()->alter('nodraft', true),

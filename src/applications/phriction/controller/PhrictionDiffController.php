@@ -110,7 +110,7 @@ final class PhrictionDiffController
             'href' => PhrictionDocument::getSlugURI($slug),
           ),
           $current->getTitle()),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/phriction/history/'.$document->getSlug().'/',
@@ -133,7 +133,7 @@ final class PhrictionDiffController
       $uri = $request->getRequestURI();
 
       if ($nav_l) {
-        $link_l = phutil_render_tag(
+        $link_l = phutil_tag(
           'a',
           array(
             'href' => $uri->alter('l', $l - 1)->alter('r', $r - 1),
@@ -145,7 +145,7 @@ final class PhrictionDiffController
 
       $link_r = null;
       if ($nav_r) {
-        $link_r = phutil_render_tag(
+        $link_r = phutil_tag(
           'a',
           array(
             'href' => $uri->alter('l', $l + 1)->alter('r', $r + 1),
@@ -202,7 +202,7 @@ final class PhrictionDiffController
     }
 
     if ($content->getID() == $current->getID()) {
-      return phutil_render_tag(
+      return phutil_tag(
         'a',
         array(
           'href'  => '/phriction/edit/'.$document_id.'/',

@@ -24,7 +24,7 @@ final class PhabricatorEmailVerificationController
       $user->getPHID(),
       $this->code);
 
-    $home_link = phutil_render_tag(
+    $home_link = phutil_tag(
       'a',
       array(
         'href' => '/',
@@ -32,7 +32,7 @@ final class PhabricatorEmailVerificationController
       'Continue to Phabricator');
     $home_link = '<br /><p><strong>'.$home_link.'</strong></p>';
 
-    $settings_link = phutil_render_tag(
+    $settings_link = phutil_tag(
       'a',
       array(
         'href' => '/settings/panel/email/',

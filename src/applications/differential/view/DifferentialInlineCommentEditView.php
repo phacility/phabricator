@@ -104,7 +104,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
 
     $buttons = implode('', $buttons);
 
-    $formatting = phutil_render_tag(
+    $formatting = phutil_tag(
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(

@@ -271,7 +271,7 @@ final class ManiphestReportController extends ManiphestController {
     $filter = $this->renderReportFilters($tokens, $has_window = false);
 
     $id = celerity_generate_unique_node_id();
-    $chart = phutil_render_tag(
+    $chart = phutil_tag(
       'div',
       array(
         'id' => $id,
@@ -409,12 +409,12 @@ final class ManiphestReportController extends ManiphestController {
         unset($result_closed['']);
 
         $base_link = '/maniphest/?users=';
-        $leftover_name = phutil_render_tag(
+        $leftover_name = phutil_tag(
           'a',
           array(
             'href' => $base_link.ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
           ),
-          '<em>(Up For Grabs)</em>');
+          phutil_render_html('em', array(), '(Up For Grabs)'));
         $col_header = 'User';
         $header = 'Open Tasks by User and Priority ('.$date.')';
         break;
@@ -446,12 +446,12 @@ final class ManiphestReportController extends ManiphestController {
         }
 
         $base_link = '/maniphest/view/all/?projects=';
-        $leftover_name = phutil_render_tag(
+        $leftover_name = phutil_tag(
           'a',
           array(
             'href' => $base_link.ManiphestTaskOwner::PROJECT_NO_PROJECT,
           ),
-          '<em>(No Project)</em>');
+          phutil_render_html('em', array(), '(No Project)'));
         $col_header = 'Project';
         $header = 'Open Tasks by Project and Priority ('.$date.')';
         break;

@@ -79,7 +79,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         ),
         'Remove');
 
-      $button_primary = phutil_render_tag(
+      $button_primary = phutil_tag(
         'a',
         array(
           'class' => 'button small disabled',

@@ -33,7 +33,7 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
   }
 
   protected function renderDaemonNotice() {
-    $documentation = phutil_render_tag(
+    $documentation = phutil_tag(
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(

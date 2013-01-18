@@ -51,7 +51,7 @@ final class HeraldRuleListView extends AphrontView {
         ),
         $rule->getName());
 
-      $edit_log = phutil_render_tag(
+      $edit_log = phutil_tag(
         'a',
         array(
           'href' => '/herald/history/'.$rule->getID().'/',

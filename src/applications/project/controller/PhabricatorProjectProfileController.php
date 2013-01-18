@@ -91,7 +91,7 @@ final class PhabricatorProjectProfileController
           'action' => '/project/update/'.$project->getID().'/join/',
           'method' => 'post',
         ),
-        phutil_render_tag(
+        phutil_tag(
           'button',
           array(
             'class' => $class,
@@ -261,7 +261,7 @@ final class PhabricatorProjectProfileController
 
     $open = number_format($count);
 
-    $more_link = phutil_render_tag(
+    $more_link = phutil_tag(
       'a',
       array(
         'href' => '/maniphest/view/all/?projects='.$project->getPHID(),

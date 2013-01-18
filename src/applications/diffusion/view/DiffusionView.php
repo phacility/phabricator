@@ -47,7 +47,7 @@ abstract class DiffusionView extends AphrontView {
         'path'   => $path,
       ));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => $href,

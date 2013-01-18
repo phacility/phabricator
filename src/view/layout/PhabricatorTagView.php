@@ -99,7 +99,7 @@ final class PhabricatorTagView extends AphrontView {
 
     if ($this->dotColor) {
       $dotcolor = 'phabricator-tag-color-'.$this->dotColor;
-      $dot = phutil_render_tag(
+      $dot = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-tag-dot '.$dotcolor,
@@ -118,7 +118,7 @@ final class PhabricatorTagView extends AphrontView {
 
     if ($this->barColor) {
       $barcolor = 'phabricator-tag-color-'.$this->barColor;
-      $bar = phutil_render_tag(
+      $bar = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-tag-bar '.$barcolor,

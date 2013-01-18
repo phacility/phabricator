@@ -54,7 +54,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
             'href' => '/maniphest/view/custom/?key='.$query->getQueryKey(),
           ),
           $query->getName()),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href'  => '/maniphest/custom/edit/'.$query->getID().'/',
@@ -105,7 +105,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Saved Custom Queries');
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'button',
         array(),
         'Save Default Query'));

@@ -220,7 +220,7 @@ final class PhabricatorSettingsPanelSSHKeys
 
     $panel = new AphrontPanelView();
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => $this->getPanelURI('?edit=true'),

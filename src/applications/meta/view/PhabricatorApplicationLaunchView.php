@@ -84,7 +84,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $classes[] = 'app-'.$icon.'-light-large';
       }
 
-      $icon = phutil_render_tag(
+      $icon = phutil_tag(
         'span',
         array(
           'class' => implode(' ', $classes),

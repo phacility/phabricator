@@ -28,7 +28,7 @@ final class PhabricatorCountdownListController
       $delete_button = null;
       if ($user->getIsAdmin() ||
           ($user->getPHID() == $timer->getAuthorPHID())) {
-        $edit_button = phutil_render_tag(
+        $edit_button = phutil_tag(
           'a',
           array(
             'class' => 'small button grey',

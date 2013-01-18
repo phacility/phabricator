@@ -126,7 +126,7 @@ final class PhabricatorXHProfProfileTopLevelView
 
     if ($this->file) {
       $panel->addButton(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $this->file->getBestURI(),

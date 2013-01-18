@@ -181,7 +181,7 @@ final class AphrontTableView extends AphrontView {
             $classes[] = 'aphront-table-view-sortable-selected';
           }
 
-          $sort_glyph = phutil_render_tag(
+          $sort_glyph = phutil_tag(
             'span',
             array(
               'class' => $sort_glyph_class,

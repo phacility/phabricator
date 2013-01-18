@@ -48,7 +48,7 @@ final class PhabricatorMetaMTASendController
     $doclink_href = PhabricatorEnv::getDoclink(
       'article/Configuring_Outbound_Email.html');
 
-    $doclink = phutil_render_tag(
+    $doclink = phutil_tag(
       'a',
       array(
         'href' => $doclink_href,
@@ -77,7 +77,7 @@ final class PhabricatorMetaMTASendController
     $phdlink_href = PhabricatorEnv::getDoclink(
       'article/Managing_Daemons_with_phd.html');
 
-    $phdlink = phutil_render_tag(
+    $phdlink = phutil_tag(
       'a',
       array(
         'href' => $phdlink_href,

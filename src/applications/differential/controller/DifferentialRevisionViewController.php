@@ -184,7 +184,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         '<p>'.pht('This diff is very large and affects %d files. Load '.
         'each file individually. ', $count).
         "<strong>".
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $request_uri

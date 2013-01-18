@@ -76,7 +76,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   }
 
   private function renderCommentPanel() {
-    $status = phutil_render_tag(
+    $status = phutil_tag(
       'div',
       array(
         'id' => $this->getStatusID(),

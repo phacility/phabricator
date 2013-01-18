@@ -153,7 +153,7 @@ final class PhabricatorPeopleLdapController
 
   private function renderUserInputs($user) {
     $username = $user[0];
-    $inputs =  phutil_render_tag(
+    $inputs =  phutil_tag(
       'input',
       array(
         'type' => 'checkbox',
@@ -162,7 +162,7 @@ final class PhabricatorPeopleLdapController
       ),
       '');
 
-    $inputs .=  phutil_render_tag(
+    $inputs .=  phutil_tag(
       'input',
       array(
         'type' => 'hidden',
@@ -171,7 +171,7 @@ final class PhabricatorPeopleLdapController
       ),
       '');
 
-    $inputs .=  phutil_render_tag(
+    $inputs .=  phutil_tag(
       'input',
       array(
         'type' => 'hidden',

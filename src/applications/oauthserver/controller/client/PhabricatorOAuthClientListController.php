@@ -47,7 +47,7 @@ extends PhabricatorOAuthClientBaseController {
           ),
           $client->getRedirectURI()
         ),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'class' => 'small button grey',

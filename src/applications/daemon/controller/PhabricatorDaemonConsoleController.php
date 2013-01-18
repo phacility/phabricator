@@ -81,7 +81,7 @@ final class PhabricatorDaemonConsoleController
         $task->getLeaseOwner(),
         $task->getLeaseExpires() - time(),
         $task->getFailureCount(),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/daemon/task/'.$task->getID().'/',

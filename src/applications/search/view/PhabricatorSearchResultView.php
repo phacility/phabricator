@@ -44,7 +44,7 @@ final class PhabricatorSearchResultView extends AphrontView {
     $img = $handle->getImageURI();
 
     if ($img) {
-      $img = phutil_render_tag(
+      $img = phutil_tag(
         'div',
         array(
           'class' => 'result-image',

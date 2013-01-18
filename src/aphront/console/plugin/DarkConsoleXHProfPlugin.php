@@ -32,7 +32,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
   public function render() {
     if (!DarkConsoleXHProfPluginAPI::isProfilerAvailable()) {
       $href = PhabricatorEnv::getDoclink('article/Installation_Guide.html');
-      $install_guide = phutil_render_tag(
+      $install_guide = phutil_tag(
         'a',
         array(
           'href' => $href,
@@ -53,7 +53,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
     $header =
       '<div class="dark-console-panel-header">'.
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href'  => $this->getRequestURI()->alter('__profile__', 'page'),

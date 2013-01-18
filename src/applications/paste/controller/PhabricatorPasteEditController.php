@@ -153,7 +153,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
             ->setCustomClass('PhabricatorMonospaced')
             ->setName('text'));
     } else {
-      $fork_link = phutil_render_tag(
+      $fork_link = phutil_tag(
         'a',
         array(
           'href' => $this->getApplicationURI('?parent='.$paste->getID())

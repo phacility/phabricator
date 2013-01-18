@@ -309,7 +309,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           'debug'        => $enable_debug,
           'pageObjects'  => array_fill_keys($this->pageObjects, true),
         ));
-      $container = phutil_render_tag(
+      $container = phutil_tag(
         'div',
         array(
           'id' => $aphlict_container_id,

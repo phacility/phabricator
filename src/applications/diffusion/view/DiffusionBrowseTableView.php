@@ -204,7 +204,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
           $request->getRepository()->getCallsign());
         if ($editor_link) {
           $show_edit = true;
-          $editor_button = phutil_render_tag(
+          $editor_button = phutil_tag(
             'a',
             array(
               'href' => $editor_link,

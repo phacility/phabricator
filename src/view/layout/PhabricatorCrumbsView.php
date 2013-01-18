@@ -30,7 +30,7 @@ final class PhabricatorCrumbsView extends AphrontView {
       foreach ($this->actions as $action) {
         $icon = null;
         if ($action->getIcon()) {
-          $icon = phutil_render_tag(
+          $icon = phutil_tag(
             'span',
             array(
               'class' => 'sprite-icon action-'.$action->getIcon(),

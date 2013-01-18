@@ -37,7 +37,7 @@ final class PhabricatorTimelineView extends AphrontView {
   }
 
   public static function renderSpacer() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-timeline-event-view '.

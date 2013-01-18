@@ -299,7 +299,7 @@ abstract class DiffusionController extends PhabricatorController {
     $last_crumb = array_pop($crumb_list);
 
     if ($raw_commit) {
-      $jump_link = phutil_render_tag(
+      $jump_link = phutil_tag(
         'a',
         array(
           'href' => $drequest->generateURI(

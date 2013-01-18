@@ -90,7 +90,7 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
         $icon = 'phabricator-filetree-icon-dir';
       }
 
-      $icon = phutil_render_tag(
+      $icon = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-filetree-icon '.$icon,

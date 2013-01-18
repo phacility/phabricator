@@ -54,7 +54,7 @@ final class PhabricatorCrumbView extends AphrontView {
     $icon = null;
     if ($this->icon) {
       $classes[] = 'phabricator-crumb-has-icon';
-      $icon = phutil_render_tag(
+      $icon = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-crumb-icon '.
@@ -72,7 +72,7 @@ final class PhabricatorCrumbView extends AphrontView {
 
     $divider = null;
     if (!$this->isLastCrumb) {
-      $divider = phutil_render_tag(
+      $divider = phutil_tag(
         'span',
         array(
           'class' => 'sprite-menu phabricator-crumb-divider',

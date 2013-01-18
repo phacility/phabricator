@@ -660,7 +660,7 @@ final class PhabricatorPeopleEditController
   }
 
   private function getRoleInstructions() {
-    $roles_link = phutil_render_tag(
+    $roles_link = phutil_tag(
       'a',
       array(
         'href'   => PhabricatorEnv::getDoclink(

@@ -114,7 +114,7 @@ final class CelerityStaticResourceResponse {
             'href'  => $uri,
           ));
       case 'js':
-        return phutil_render_tag(
+        return phutil_tag(
           'script',
           array(
             'type'  => 'text/javascript',

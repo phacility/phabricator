@@ -133,7 +133,7 @@ final class PhabricatorProjectMembersEditController
       ->setHandles($handles);
 
     foreach ($handles as $handle) {
-      $hidden_input = phutil_render_tag(
+      $hidden_input = phutil_tag(
         'input',
         array(
           'type' => 'hidden',

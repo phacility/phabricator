@@ -85,7 +85,7 @@ final class PhabricatorObjectItemView extends AphrontView {
       foreach ($this->icons as $spec) {
         $icon = $spec['icon'];
 
-        $icon = phutil_render_tag(
+        $icon = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-object-item-icon-image '.
@@ -119,12 +119,12 @@ final class PhabricatorObjectItemView extends AphrontView {
     $attrs = null;
     if ($this->attributes) {
       $attrs = array();
-      $spacer = phutil_render_tag(
+      $spacer = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-object-item-attribute-spacer',
         ),
-        '&middot;');
+        "\xC2\xB7");
       $first = true;
       foreach ($this->attributes as $attribute) {
         $attrs[] = phutil_render_tag(

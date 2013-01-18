@@ -183,7 +183,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     if ($this->flexible) {
       $nav_classes[] = 'has-drag-nav';
       $drag_id = celerity_generate_unique_node_id();
-      $flex_bar = phutil_render_tag(
+      $flex_bar = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-nav-drag',
@@ -200,7 +200,7 @@ final class AphrontSideNavFilterView extends AphrontView {
       $background_id = celerity_generate_unique_node_id();
       $nav_classes[] = 'has-local-nav';
 
-      $menu_background = phutil_render_tag(
+      $menu_background = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-nav-column-background',

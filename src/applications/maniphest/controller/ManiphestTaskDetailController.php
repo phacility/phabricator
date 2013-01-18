@@ -89,7 +89,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if ($parent_task) {
       $context_bar = new AphrontContextBarView();
       $context_bar->addButton(
-         phutil_render_tag(
+         phutil_tag(
          'a',
          array(
            'href' => '/maniphest/task/create/?parent='.$parent_task->getID(),
@@ -104,7 +104,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $context_bar = new AphrontContextBarView();
       $context_bar->addButton('<label>Create Another:</label>');
       $context_bar->addButton(
-         phutil_render_tag(
+         phutil_tag(
          'a',
          array(
            'href' => '/maniphest/task/create/?template='.$task->getID(),
@@ -112,7 +112,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
          ),
         'Similar Task'));
       $context_bar->addButton(
-         phutil_render_tag(
+         phutil_tag(
          'a',
          array(
            'href' => '/maniphest/task/create/',

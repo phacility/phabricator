@@ -130,7 +130,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           ),
         ),
       ),
-      phutil_render_tag(
+      phutil_tag(
         'span',
         array(
           'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-eye',
@@ -151,7 +151,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           ),
         ),
       ),
-      phutil_render_tag(
+      phutil_tag(
         'span',
         array(
           'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-app',
@@ -277,7 +277,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'class' => 'phabricator-main-menu-logo',
         'href'  => '/',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'span',
         array(
           'class' => 'sprite-menu phabricator-main-menu-logo-image',
@@ -311,7 +311,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       ),
       $count_number);
 
-    $icon_tag = phutil_render_tag(
+    $icon_tag = phutil_tag(
       'span',
       array(
         'class' => 'sprite-menu phabricator-main-menu-alert-icon',
@@ -358,7 +358,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderMenuIcon($name) {
-    return phutil_render_tag(
+    return phutil_tag(
       'span',
       array(
         'class' => 'phabricator-core-menu-icon '.

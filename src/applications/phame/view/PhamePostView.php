@@ -151,7 +151,7 @@ final class PhamePostView extends AphrontView {
       return null;
     }
 
-    $fb_root = phutil_render_tag('div',
+    $fb_root = phutil_tag('div',
       array(
         'id' => 'fb-root',
       ),
@@ -173,7 +173,7 @@ final class PhamePostView extends AphrontView {
 
     $uri = $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle());
 
-    $fb_comments = phutil_render_tag('div',
+    $fb_comments = phutil_tag('div',
       array(
         'class'            => 'fb-comments',
         'data-href'        => $uri,

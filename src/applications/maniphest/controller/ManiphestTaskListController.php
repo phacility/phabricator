@@ -661,14 +661,14 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       'Clear Selection');
 
-    $submit = phutil_render_tag(
+    $submit = phutil_tag(
       'button',
       array(
         'id'          => 'batch-select-submit',
         'disabled'    => 'disabled',
         'class'       => 'disabled',
       ),
-      'Batch Edit Selected Tasks &raquo;');
+      "Batch Edit Selected Tasks \xC2\xBB");
 
     $export = javelin_render_tag(
       'a',

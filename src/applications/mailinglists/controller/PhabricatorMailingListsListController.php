@@ -33,7 +33,7 @@ final class PhabricatorMailingListsListController
       $rows[] = array(
         phutil_escape_html($list->getName()),
         phutil_escape_html($list->getEmail()),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'class' => 'button grey small',

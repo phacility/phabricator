@@ -190,7 +190,7 @@ final class DifferentialInlineCommentView extends AphrontView {
     if ($this->preview) {
       $anchor = null;
     } else {
-      $anchor = phutil_render_tag(
+      $anchor = phutil_tag(
         'a',
         array(
           'name'    => $anchor_name,

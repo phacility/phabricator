@@ -122,7 +122,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
           array(
             'class' => 'phabricator-timeline-icon-fill',
           ),
-          phutil_render_tag(
+          phutil_tag(
             'span',
             array(
               'class' => 'phabricator-timeline-icon sprite-icon '.
@@ -141,7 +141,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       $title = $icon.$title;
     }
 
-    $wedge = phutil_render_tag(
+    $wedge = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-timeline-wedge phabricator-timeline-border',
@@ -149,7 +149,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       '');
 
     $image_uri = $this->userHandle->getImageURI();
-    $image = phutil_render_tag(
+    $image = phutil_tag(
       'div',
       array(
         'style' => 'background-image: url('.$image_uri.')',

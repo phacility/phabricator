@@ -32,7 +32,7 @@ final class DiffusionCommitTagsController extends DiffusionController {
     }
 
     if ($has_more_tags) {
-      $tag_links[] = phutil_render_tag(
+      $tag_links[] = phutil_tag(
         'a',
         array(
           'href' => $request->generateURI(

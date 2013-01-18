@@ -234,7 +234,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       '');
 
-    $time_sel = phutil_render_tag(
+    $time_sel = phutil_tag(
       'input',
       array(
         'name'  => $this->getTimeInputName(),

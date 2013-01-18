@@ -30,7 +30,7 @@ final class PhabricatorAnchorView extends AphrontView {
         '');
     }
 
-    $anchor = phutil_render_tag(
+    $anchor = phutil_tag(
       'a',
       array(
         'name'  => $this->anchorName,
