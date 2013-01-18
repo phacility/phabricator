@@ -63,7 +63,6 @@ final class PhabricatorConfigIssueViewController
 
     $view = new PhabricatorSetupIssueView();
     $view->setIssue($issue);
-    $view;
 
     $container = phutil_render_tag(
       'div',
