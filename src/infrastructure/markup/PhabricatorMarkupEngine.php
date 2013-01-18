@@ -188,10 +188,14 @@ final class PhabricatorMarkupEngine {
     }
 
     if ($use_cache) {
-      $blocks = id(new PhabricatorMarkupCache())->loadAllWhere(
-        'cacheKey IN (%Ls)',
-        array_keys($use_cache));
-      $blocks = mpull($blocks, null, 'getCacheKey');
+      try {
+        $blocks = id(new PhabricatorMarkupCache())->loadAllWhere(
+          'cacheKey IN (%Ls)',
+          array_keys($use_cache));
+        $blocks = mpull($blocks, null, 'getCacheKey');
+      } catch (Exception $ex) {
+        phlog($ex);
+      }
     }
 
     foreach ($objects as $key => $info) {
@@ -220,11 +224,7 @@ final class PhabricatorMarkupEngine {
       if (isset($use_cache[$key])) {
         // This is just filling a cache and always safe, even on a read pathway.
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-          try {
-            $blocks[$key]->save();
-          } catch (AphrontQueryDuplicateKeyException $ex) {
-            // Ignore this, we just raced to write the cache.
-          }
+          $blocks[$key]->replace();
         unset($unguarded);
       }
     }
