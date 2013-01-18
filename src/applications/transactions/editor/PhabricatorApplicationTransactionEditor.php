@@ -287,7 +287,14 @@ abstract class PhabricatorApplicationTransactionEditor
         $mailed);
     }
 
+    $this->didApplyTransactions($xactions);
+
     return $xactions;
+  }
+
+  protected function didApplyTransactions(array $xactions) {
+    // Hook for subclasses.
+    return;
   }
 
   private function loadHandles(array $xactions) {

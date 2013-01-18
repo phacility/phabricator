@@ -51,6 +51,7 @@
 final class PhabricatorEnv {
 
   private static $sourceStack;
+  private static $repairSource;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -153,6 +154,28 @@ final class PhabricatorEnv {
     $stack->pushSource(
       id(new PhabricatorConfigDatabaseSource('default'))
         ->setName(pht("Database")));
+  }
+
+  public static function repairConfig($key, $value) {
+    if (!self::$repairSource) {
+      self::$repairSource = id(new PhabricatorConfigDictionarySource(array()))
+        ->setName(pht("Repaired Config"));
+      self::$sourceStack->pushSource(self::$repairSource);
+    }
+    self::$repairSource->setKeys(array($key => $value));
+  }
+
+  public static function getUnrepairedEnvConfig($key, $default = null) {
+    foreach (self::$sourceStack->getStack() as $source) {
+      if ($source === self::$repairSource) {
+        continue;
+      }
+      $result = $source->getKeys(array($key));
+      if ($result) {
+        return $result[$key];
+      }
+    }
+    return $default;
   }
 
   public static function getSelectedEnvironmentName() {
@@ -259,13 +282,7 @@ final class PhabricatorEnv {
    */
   public static function newObjectFromConfig($key, $args = array()) {
     $class = self::getEnvConfig($key);
-    $object = newv($class, $args);
-    $instanceof = idx(self::getRequiredClasses(), $key);
-    if (!($object instanceof $instanceof)) {
-      throw new Exception("Config setting '$key' must be an instance of ".
-        "'$instanceof', is '".get_class($object)."'.");
-    }
-    return $object;
+    return newv($class, $args);
   }
 
 
@@ -384,33 +401,6 @@ final class PhabricatorEnv {
 
 
 /* -(  Internals  )---------------------------------------------------------- */
-
-
-  /**
-   * @task internal
-   */
-  public static function getRequiredClasses() {
-    return array(
-      'translation.provider' => 'PhabricatorTranslation',
-      'metamta.mail-adapter' => 'PhabricatorMailImplementationAdapter',
-      'metamta.maniphest.reply-handler' => 'PhabricatorMailReplyHandler',
-      'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',
-      'metamta.diffusion.reply-handler' => 'PhabricatorMailReplyHandler',
-      'metamta.package.reply-handler' => 'PhabricatorMailReplyHandler',
-      'storage.engine-selector' => 'PhabricatorFileStorageEngineSelector',
-      'search.engine-selector' => 'PhabricatorSearchEngineSelector',
-      'differential.field-selector' => 'DifferentialFieldSelector',
-      'maniphest.custom-task-extensions-class' => 'ManiphestTaskExtensions',
-      'aphront.default-application-configuration-class' =>
-        'AphrontApplicationConfiguration',
-      'controller.oauth-registration' =>
-        'PhabricatorOAuthRegistrationController',
-      'mysql.implementation' => 'AphrontMySQLDatabaseConnectionBase',
-      'differential.attach-task-class' => 'DifferentialTasksAttacher',
-      'mysql.configuration-provider' => 'DatabaseConfigurationProvider',
-      'syntax-highlighter.engine' => 'PhutilSyntaxHighlighterEngine',
-    );
-  }
 
 
   /**
