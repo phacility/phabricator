@@ -42,7 +42,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
         $header);
     }
 
-    $image = phutil_render_tag(
+    $image = phutil_tag(
       'a',
       array(
         'href' => $this->uri,

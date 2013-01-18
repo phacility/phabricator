@@ -70,7 +70,7 @@ final class PhamePostPublishController extends PhameController {
 
     // TODO: Clean up this CSS.
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'style' => 'text-align: center; padding: 1em;',

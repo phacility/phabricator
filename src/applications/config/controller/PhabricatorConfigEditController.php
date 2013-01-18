@@ -137,7 +137,7 @@ final class PhabricatorConfigEditController
       array(
         'class' => 'phabricator-remarkup',
       ),
-      $engine->getOutput($option, 'description'));
+      phutil_safe_html($engine->getOutput($option, 'description')));
 
     $form
       ->setUser($user)

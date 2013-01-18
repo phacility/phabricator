@@ -59,7 +59,7 @@ final class PhamePostView extends AphrontView {
 
   public function renderTitle() {
     $href = $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle());
-    return phutil_render_tag(
+    return phutil_tag(
       'h2',
       array(
         'class' => 'phame-post-title',

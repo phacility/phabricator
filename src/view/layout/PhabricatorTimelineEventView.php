@@ -117,7 +117,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       if ($this->icon) {
         $title_classes[] = 'phabricator-timeline-title-with-icon';
 
-        $icon = phutil_render_tag(
+        $icon = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-timeline-icon-fill',

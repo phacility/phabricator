@@ -271,7 +271,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderPhabricatorLogo() {
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'class' => 'phabricator-main-menu-logo',

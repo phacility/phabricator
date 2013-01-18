@@ -401,7 +401,7 @@ final class PhabricatorSlowvotePollController
 
           $profile_image = $handle->getImageURI();
 
-          $user_markup[] = phutil_render_tag(
+          $user_markup[] = phutil_tag(
             'a',
             array(
               'href'  => $handle->getURI(),
