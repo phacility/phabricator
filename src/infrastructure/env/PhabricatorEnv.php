@@ -103,9 +103,9 @@ final class PhabricatorEnv {
 
 
   private static function initializeCommonEnvironment() {
-    self::buildConfigurationSourceStack();
-
     PhutilErrorHandler::initialize();
+
+    self::buildConfigurationSourceStack();
 
     $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
     if ($tz) {
@@ -156,7 +156,7 @@ final class PhabricatorEnv {
       $stack->pushSource(
         id(new PhabricatorConfigDatabaseSource('default'))
           ->setName(pht("Database")));
-    } catch (AphrontQueryException $recoverable) {
+    } catch (AphrontQueryException $exception) {
       // If the database is not available, just skip this configuration
       // source. This happens during `bin/storage upgrade`, `bin/conf` before
       // schema setup, etc.
