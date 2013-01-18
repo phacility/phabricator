@@ -120,10 +120,6 @@ final class PhabricatorEnv {
       putenv('PATH='.$current_env_path.PATH_SEPARATOR.$new_env_paths);
     }
 
-    foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
-      phutil_load_library($library);
-    }
-
     PhabricatorEventEngine::initialize();
 
     $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
@@ -148,6 +144,13 @@ final class PhabricatorEnv {
     $stack->pushSource(
       id(new PhabricatorConfigLocalSource())
         ->setName(pht("Local Config")));
+
+    // If the install overrides the database adapter, we might need to load
+    // the database adapter class before we can push on the database config.
+    // This config is locked and can't be edited from the web UI anyway.
+    foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+      phutil_load_library($library);
+    }
 
     // NOTE: This must happen after the other sources are pushed, because it
     // will draw from lower-level config to bootstrap itself.
