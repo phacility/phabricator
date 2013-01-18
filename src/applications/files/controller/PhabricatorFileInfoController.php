@@ -136,7 +136,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       }
     }
 
-    if ($file->isViewableInBrowser()) {
+    if ($file->isViewableImage()) {
 
       // TODO: Clean this up after Pholio (dark backgrounds, standardization,
       // etc.)

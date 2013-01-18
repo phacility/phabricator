@@ -26,7 +26,7 @@
 }
 
 .aphront-panel-view h1 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
   color: #555;
   padding: 4px 0 0 0;
@@ -111,13 +111,13 @@
 
 .aphront-mini-panel-view {
   background: #f3f3f3;
-  padding: 4px 2em;
-  margin: 2px 2em;
+  padding: 10px;
+  margin: 5px 20px;
   border: 1px solid #e6e6e6;
 }
 
 .aphront-mini-panel-view p {
-  font-size: 11px;
+  font-size: 12px;
   color: #666666;
 }
 

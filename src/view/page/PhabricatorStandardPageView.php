@@ -222,47 +222,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   protected function getBody() {
     $console = $this->getConsole();
 
-    $login_stuff = null;
-    $request = $this->getRequest();
     $user = null;
+    $request = $this->getRequest();
     if ($request) {
       $user = $request->getUser();
-      // NOTE: user may not be set here if we caught an exception early
-      // in the execution workflow.
-      if ($user && $user->getPHID()) {
-        $login_stuff =
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => '/p/'.$user->getUsername().'/',
-            ),
-            phutil_escape_html($user->getUsername())).
-          ' &middot; '.
-          '<a href="/settings/">Settings</a>'.
-          ' &middot; '.
-          phabricator_render_form(
-            $user,
-            array(
-              'action' => '/search/',
-              'method' => 'post',
-              'style'  => 'display: inline',
-            ),
-            '<div class="menu-section menu-section-search">'.
-              '<div class="menu-search-container">'.
-                '<input type="text" name="query" id="standard-search-box" />'.
-                '<button id="standard-search-button">Search</button>'.
-              '</div>'.
-            '</div>'.
-            ' in '.
-            AphrontFormSelectControl::renderSelectTag(
-              $this->getSearchDefaultScope(),
-              PhabricatorSearchScope::getScopeOptions(),
-              array(
-                'name' => 'scope',
-              )).
-            ' '.
-            '<button>Search</button>');
-      }
     }
 
     $header_chrome = null;
@@ -286,6 +249,34 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         '</div>';
     }
 
+    // Render the "you have unresolved setup issues..." warning.
+    $setup_warning = null;
+    if ($user && $user->getIsAdmin()) {
+      $application = null;
+      $controller = $this->getController();
+      if ($controller) {
+        $application = $controller->getCurrentApplication();
+      }
+
+      // Don't show the banner inside the config application itself.
+      if (!($application instanceof PhabricatorApplicationConfig)) {
+        $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
+        if ($open) {
+          $setup_warning = phutil_render_tag(
+            'div',
+            array(
+              'class' => 'setup-warning-callout',
+            ),
+            phutil_render_tag(
+              'a',
+              array(
+                'href' => '/config/issue/',
+              ),
+              pht('You have %d unresolved setup issue(s)...', $open)));
+        }
+      }
+    }
+
     return
       phutil_render_tag(
         'div',
@@ -293,10 +284,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           'id' => 'base-page',
           'class' => 'phabricator-standard-page',
         ),
+        $developer_warning.
+        $setup_warning.
         $header_chrome.
         '<div class="phabricator-standard-page-body">'.
           ($console ? '<darkconsole />' : null).
-          $developer_warning.
           parent::getBody().
           '<div style="clear: both;"></div>'.
         '</div>').

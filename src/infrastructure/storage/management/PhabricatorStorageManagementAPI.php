@@ -6,6 +6,7 @@ final class PhabricatorStorageManagementAPI {
   private $user;
   private $password;
   private $namespace;
+  private $conns = array();
 
   public function setNamespace($namespace) {
     $this->namespace = $namespace;
@@ -62,19 +63,24 @@ final class PhabricatorStorageManagementAPI {
     return $list;
   }
 
-  public function getConn($fragment, $select_database = true) {
-    return PhabricatorEnv::newObjectFromConfig(
+  public function getConn($fragment) {
+    $database = $this->getDatabaseName($fragment);
+    $return = &$this->conns[$this->host][$this->user][$database];
+    if (!$return) {
+      $return = PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
       array(
         array(
           'user'      => $this->user,
           'pass'      => $this->password,
           'host'      => $this->host,
-          'database'  => $select_database
-            ? $this->getDatabaseName($fragment)
+          'database'  => $fragment
+            ? $database
             : null,
         ),
       ));
+    }
+    return $return;
   }
 
   public function getAppliedPatches() {
@@ -90,7 +96,7 @@ final class PhabricatorStorageManagementAPI {
 
   public function createDatabase($fragment) {
     queryfx(
-      $this->getConn($fragment, $select_database = false),
+      $this->getConn(null),
       'CREATE DATABASE IF NOT EXISTS %T COLLATE utf8_general_ci',
       $this->getDatabaseName($fragment));
   }
@@ -160,7 +166,7 @@ final class PhabricatorStorageManagementAPI {
     $queries = preg_split('/;\s+/', $sql);
     $queries = array_filter($queries);
 
-    $conn = $this->getConn('meta_data', $select_database = false);
+    $conn = $this->getConn(null);
 
     foreach ($queries as $query) {
       $query = str_replace('{$NAMESPACE}', $this->namespace, $query);
@@ -172,7 +178,7 @@ final class PhabricatorStorageManagementAPI {
   }
 
   public function applyPatchPHP($script) {
-    $schema_conn = $this->getConn('meta_data', $select_database = false);
+    $schema_conn = $this->getConn(null);
     require_once $script;
   }
 

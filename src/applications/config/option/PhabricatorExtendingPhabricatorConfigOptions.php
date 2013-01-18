@@ -14,9 +14,11 @@ final class PhabricatorExtendingPhabricatorConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('load-libraries', 'list<string>', null)
+        ->setLocked(true)
         ->setSummary(pht("Paths to additional phutil libraries to load."))
         ->addExample('/srv/our-libs/sekrit-phutil', pht('Valid Setting')),
       $this->newOption('events.listeners', 'list<string>', null)
+        ->setLocked(true)
         ->setSummary(
           pht("Listeners receive callbacks when interesting things occur."))
         ->setDescription(
@@ -30,6 +32,7 @@ final class PhabricatorExtendingPhabricatorConfigOptions
         'celerity.resource-path',
         'string',
         '__celerity_resource_map__.php')
+        ->setLocked(true)
         ->setSummary(
           pht("Custom celerity resource map."))
         ->setDescription(

@@ -252,6 +252,11 @@ abstract class PhabricatorBaseEnglishTranslation
         'PHP also loaded these configuration files:',
       ),
 
+      'You have %d unresolved setup issue(s)...' => array(
+        'You have %d unresolved setup issue...',
+        'You have %d unresolved setup issues...',
+      ),
+
     );
   }
 

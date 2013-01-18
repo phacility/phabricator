@@ -125,7 +125,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       $table[] = '<tr>';
       $table[] = '<th>'.phutil_escape_html($key).'</th>';
 
-      $value = PhabricatorEnv::getEnvConfig($key);
+      $value = PhabricatorEnv::getUnrepairedEnvConfig($key);
       if ($value === null) {
         $value = '<em>null</em>';
       } else if ($value === false) {

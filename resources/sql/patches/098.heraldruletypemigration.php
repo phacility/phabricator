@@ -1,8 +1,11 @@
 <?php
 
 echo "Checking for rules that can be converted to 'personal'. ";
+$table = new HeraldRule();
+$table->openTransaction();
+$table->beginReadLocking();
 
-$rules = id(new HeraldRule())->loadAll();
+$rules = $table->loadAll();
 
 foreach ($rules as $rule) {
   if ($rule->getRuleType() !== HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
@@ -43,4 +46,6 @@ foreach ($rules as $rule) {
   }
 }
 
-echo "Done. ";
+$table->endReadLocking();
+$table->saveTransaction();
+echo "Done.\n";

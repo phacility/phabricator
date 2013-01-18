@@ -716,29 +716,6 @@ final class PhabricatorSetup {
       self::write("[OKAY] Mail configuration OKAY\n");
     }
 
-    self::writeHeader('CONFIG CLASSES');
-    foreach (PhabricatorEnv::getRequiredClasses() as $key => $instanceof) {
-      $config = PhabricatorEnv::getEnvConfig($key);
-      if (!$config) {
-        self::writeNote("'$key' is not set.");
-      } else {
-        try {
-          $r = new ReflectionClass($config);
-          if (!$r->isSubclassOf($instanceof)) {
-            throw new Exception(
-              "Config setting '$key' must be an instance of '$instanceof'.");
-          } else if (!$r->isInstantiable()) {
-            throw new Exception("Config setting '$key' must be instantiable.");
-          }
-        } catch (Exception $ex) {
-          self::writeFailure();
-          self::write("Setup failure! ".$ex->getMessage());
-          return;
-        }
-      }
-    }
-    self::write("[OKAY] Config classes OKAY\n");
-
     self::writeHeader('SUCCESS!');
     self::write(
       "Congratulations! Your setup seems mostly correct, or at least fairly ".

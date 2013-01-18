@@ -5,11 +5,10 @@
 .phabricator-jump-nav-form {
   text-align: center;
   padding: 0px;
-  margin: 0 2em;
+  margin: 0;
 }
 
 .phabricator-jump-nav {
-  margin-top: -8px;
   font-size: 16px;
   width: 100%;
   padding: 2px 0;

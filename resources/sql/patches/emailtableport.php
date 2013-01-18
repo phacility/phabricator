@@ -3,16 +3,16 @@
 echo "Migrating user emails...\n";
 
 $table  = new PhabricatorUser();
-$conn   = $table->establishConnection('r');
+$table->openTransaction();
+$conn   = $table->establishConnection('w');
 
 $emails = queryfx_all(
   $conn,
-  'SELECT phid, email FROM %T',
+  'SELECT phid, email FROM %T LOCK IN SHARE MODE',
   $table->getTableName());
 $emails = ipull($emails, 'email', 'phid');
 
 $etable = new PhabricatorUserEmail();
-$econn  = $etable->establishConnection('w');
 
 foreach ($emails as $phid => $email) {
 
@@ -21,7 +21,7 @@ foreach ($emails as $phid => $email) {
 
   echo "Migrating '{$phid}'...\n";
   queryfx(
-    $econn,
+    $conn,
     'INSERT INTO %T (userPHID, address, verificationCode, isVerified, isPrimary)
       VALUES (%s, %s, %s, 1, 1)',
     $etable->getTableName(),
@@ -30,4 +30,5 @@ foreach ($emails as $phid => $email) {
     Filesystem::readRandomCharacters(24));
 }
 
+$table->saveTransaction();
 echo "Done.\n";

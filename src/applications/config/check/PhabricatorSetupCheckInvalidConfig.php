@@ -10,14 +10,15 @@ final class PhabricatorSetupCheckInvalidConfig extends PhabricatorSetupCheck {
         try {
           $group->validateOption(
             $option,
-            PhabricatorEnv::getEnvConfig($option->getKey()));
+            PhabricatorEnv::getUnrepairedEnvConfig($option->getKey()));
         } catch (PhabricatorConfigValidationException $ex) {
           $this
             ->newIssue('config.invalid.'.$option->getKey())
             ->setName(pht("Config '%s' Invalid", $option->getKey()))
             ->setMessage(
               pht(
-                "Configuration option '%s' has invalid value: %s",
+                "Configuration option '%s' has invalid value and ".
+                "was restored to the default: %s",
                 $option->getKey(),
                 $ex->getMessage()))
             ->addPhabricatorConfig($option->getKey());

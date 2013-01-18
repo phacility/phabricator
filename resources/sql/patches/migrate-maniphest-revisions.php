@@ -1,7 +1,10 @@
 <?php
 
 echo "Migrating task revisions to edges...\n";
-foreach (new LiskMigrationIterator(new ManiphestTask()) as $task) {
+$table = new ManiphestTask();
+$table->establishConnection('w');
+
+foreach (new LiskMigrationIterator($table) as $task) {
   $id = $task->getID();
   echo "Task {$id}: ";
 

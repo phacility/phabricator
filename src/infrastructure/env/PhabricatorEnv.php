@@ -51,6 +51,7 @@
 final class PhabricatorEnv {
 
   private static $sourceStack;
+  private static $repairSource;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -102,8 +103,6 @@ final class PhabricatorEnv {
 
 
   private static function initializeCommonEnvironment() {
-    $env = self::getSelectedEnvironmentName();
-
     self::buildConfigurationSourceStack();
 
     PhutilErrorHandler::initialize();
@@ -119,10 +118,6 @@ final class PhabricatorEnv {
       $current_env_path = getenv('PATH');
       $new_env_paths = implode(PATH_SEPARATOR, $paths);
       putenv('PATH='.$current_env_path.PATH_SEPARATOR.$new_env_paths);
-    }
-
-    foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
-      phutil_load_library($library);
     }
 
     PhabricatorEventEngine::initialize();
@@ -149,6 +144,45 @@ final class PhabricatorEnv {
     $stack->pushSource(
       id(new PhabricatorConfigLocalSource())
         ->setName(pht("Local Config")));
+
+    // If the install overrides the database adapter, we might need to load
+    // the database adapter class before we can push on the database config.
+    // This config is locked and can't be edited from the web UI anyway.
+    foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+      phutil_load_library($library);
+    }
+
+    try {
+      $stack->pushSource(
+        id(new PhabricatorConfigDatabaseSource('default'))
+          ->setName(pht("Database")));
+    } catch (AphrontQueryException $recoverable) {
+      // If the database is not available, just skip this configuration
+      // source. This happens during `bin/storage upgrade`, `bin/conf` before
+      // schema setup, etc.
+    }
+  }
+
+  public static function repairConfig($key, $value) {
+    if (!self::$repairSource) {
+      self::$repairSource = id(new PhabricatorConfigDictionarySource(array()))
+        ->setName(pht("Repaired Config"));
+      self::$sourceStack->pushSource(self::$repairSource);
+    }
+    self::$repairSource->setKeys(array($key => $value));
+  }
+
+  public static function getUnrepairedEnvConfig($key, $default = null) {
+    foreach (self::$sourceStack->getStack() as $source) {
+      if ($source === self::$repairSource) {
+        continue;
+      }
+      $result = $source->getKeys(array($key));
+      if ($result) {
+        return $result[$key];
+      }
+    }
+    return $default;
   }
 
   public static function getSelectedEnvironmentName() {
@@ -255,13 +289,7 @@ final class PhabricatorEnv {
    */
   public static function newObjectFromConfig($key, $args = array()) {
     $class = self::getEnvConfig($key);
-    $object = newv($class, $args);
-    $instanceof = idx(self::getRequiredClasses(), $key);
-    if (!($object instanceof $instanceof)) {
-      throw new Exception("Config setting '$key' must be an instance of ".
-        "'$instanceof', is '".get_class($object)."'.");
-    }
-    return $object;
+    return newv($class, $args);
   }
 
 
@@ -293,6 +321,7 @@ final class PhabricatorEnv {
     $source = self::$sourceStack->popSource();
     $stack_key = spl_object_hash($source);
     if ($stack_key !== $key) {
+      self::$sourceStack->pushSource($source);
       throw new Exception(
         "Scoped environments were destroyed in a diffent order than they ".
         "were initialized.");
@@ -379,33 +408,6 @@ final class PhabricatorEnv {
 
 
 /* -(  Internals  )---------------------------------------------------------- */
-
-
-  /**
-   * @task internal
-   */
-  public static function getRequiredClasses() {
-    return array(
-      'translation.provider' => 'PhabricatorTranslation',
-      'metamta.mail-adapter' => 'PhabricatorMailImplementationAdapter',
-      'metamta.maniphest.reply-handler' => 'PhabricatorMailReplyHandler',
-      'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',
-      'metamta.diffusion.reply-handler' => 'PhabricatorMailReplyHandler',
-      'metamta.package.reply-handler' => 'PhabricatorMailReplyHandler',
-      'storage.engine-selector' => 'PhabricatorFileStorageEngineSelector',
-      'search.engine-selector' => 'PhabricatorSearchEngineSelector',
-      'differential.field-selector' => 'DifferentialFieldSelector',
-      'maniphest.custom-task-extensions-class' => 'ManiphestTaskExtensions',
-      'aphront.default-application-configuration-class' =>
-        'AphrontApplicationConfiguration',
-      'controller.oauth-registration' =>
-        'PhabricatorOAuthRegistrationController',
-      'mysql.implementation' => 'AphrontMySQLDatabaseConnectionBase',
-      'differential.attach-task-class' => 'DifferentialTasksAttacher',
-      'mysql.configuration-provider' => 'DatabaseConfigurationProvider',
-      'syntax-highlighter.engine' => 'PhutilSyntaxHighlighterEngine',
-    );
-  }
 
 
   /**

@@ -1,7 +1,10 @@
 <?php
 
 echo "Populating Questions with mail keys...\n";
-foreach (new LiskMigrationIterator(new PonderQuestion()) as $question) {
+$table = new PonderQuestion();
+$table->openTransaction();
+
+foreach (new LiskMigrationIterator($table) as $question) {
   $id = $question->getID();
 
   echo "Question {$id}: ";
@@ -18,4 +21,5 @@ foreach (new LiskMigrationIterator(new PonderQuestion()) as $question) {
   }
 }
 
+$table->saveTransaction();
 echo "Done.\n";

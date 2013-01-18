@@ -1,8 +1,11 @@
 <?php
 
 echo "Cleaning up old Herald rule applied rows...\n";
+$table = new HeraldRule();
+$table->openTransaction();
+$table->beginReadLocking();
 
-$rules = id(new HeraldRule())->loadAll();
+$rules = $table->loadAll();
 foreach ($rules as $key => $rule) {
   $first_policy = HeraldRepetitionPolicyConfig::toInt(
     HeraldRepetitionPolicyConfig::FIRST);
@@ -11,7 +14,7 @@ foreach ($rules as $key => $rule) {
   }
 }
 
-$conn_w = id(new HeraldRule())->establishConnection('w');
+$conn_w = $table->establishConnection('w');
 
 $clause = '';
 if ($rules) {
@@ -31,5 +34,6 @@ do {
   echo ".";
 } while ($conn_w->getAffectedRows());
 
-echo "\n";
-echo "Done.\n";
+$table->endReadLocking();
+$table->saveTransaction();
+echo "\nDone.\n";

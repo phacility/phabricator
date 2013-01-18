@@ -99,4 +99,9 @@ final class PhabricatorConfigEditor
     return parent::transactionHasEffect($object, $xaction);
   }
 
+  protected function didApplyTransactions(array $xactions) {
+    // Force all the setup checks to run on the next page load.
+    PhabricatorSetupCheck::deleteSetupCheckCache();
+  }
+
 }

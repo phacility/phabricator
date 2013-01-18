@@ -91,6 +91,9 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     }
 
     try {
+      if (phutil_is_hiphop_runtime()) {
+        $this->env->__destruct();
+      }
       unset($this->env);
     } catch (Exception $ex) {
       throw new Exception(

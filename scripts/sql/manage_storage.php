@@ -85,7 +85,7 @@ $api->setNamespace($args->getArg('namespace'));
 
 try {
   queryfx(
-    $api->getConn('meta_data', $select_database = false),
+    $api->getConn(null),
     'SELECT 1');
 } catch (AphrontQueryException $ex) {
   echo phutil_console_format(

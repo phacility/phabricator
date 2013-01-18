@@ -25,8 +25,8 @@ a.phabricator-application-launch-container,
 div.phabricator-application-launch-container {
   display: block;
   float: left;
-  width: 78px;
-  height: 78px;
+  width: 73px;
+  height: 70px;
   overflow: hidden;
   position: relative;
 
@@ -54,8 +54,8 @@ a.phabricator-application-launch-container:hover {
 .phabricator-application-launch-icon {
   display: block;
   position: absolute;
-  left: 25px;
-  top: 15px;
+  left: 23px;
+  top: 13px;
   width: 28px;
   height: 28px;
 }
@@ -65,18 +65,18 @@ a.phabricator-application-launch-container:hover {
   left: 12px;
 }
 
-
 .phabricator-application-launch-name {
   display: block;
-  margin-top: 50px;
+  margin-top: 46px;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
   color: #ffffff;
   text-shadow: 0px 1px 1px #000000;
 }
 
 .application-tile-full .phabricator-application-launch-name {
+  font-size: 12px;
   margin-top: 12px;
   text-align: left;
   margin-left: 52px;

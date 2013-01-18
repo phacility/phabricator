@@ -8,17 +8,17 @@
   border-collapse: separate;
 
   font-size: 12px;
-  color: #222222;
+  color: #333;
 }
 
 .maniphest-task-summary td {
-  padding: 5px 3px;
-  background: #f9f9f9;
+  padding: 6px 4px;
+  background: #fff;
   white-space: nowrap;
 
   border-style: solid;
-  border-top-color: #888888;
-  border-bottom-color: #666666;
+  border-top-color: #d5dadf;
+  border-bottom-color: #d5dadf;
   border-width: 1px 0;
 }
 
@@ -27,15 +27,15 @@
 }
 
 .maniphest-batch-selected td {
-  background: #f6ff88;
+  background: #fff;
 }
 
 .maniphest-task-summary td.maniphest-task-handle {
-  padding: 0 6px;
+  padding: 0 4px;
   width: 1px;
 
   border-right-width: 1px;
-  border-right-color: #787878;
+  border-right-color: #d5dadf;
 }
 
 .maniphest-task-summary td.maniphest-task-batch {
@@ -56,8 +56,8 @@
 
 .maniphest-task-summary td.maniphest-task-number {
   font-weight: bold;
-  color: #444444;
-  width: 70px;
+  color: #333;
+  width: 50px;
   text-align: right;
 }
 
@@ -88,7 +88,7 @@
   padding-right: 8px;
   border-right-width: 1px;
   border-right-style: solid;
-  border-right-color: #787878;
+  border-right-color: #d5dadf;
 }
 
 .maniphest-task-summary .pri-bullet {
@@ -125,9 +125,10 @@
 }
 
 .maniphest-task-group-header {
-  font-size: 18px;
-  margin: 1em 0;
-  border-bottom: 1px solid #dddddd;
+  font-size: 16px;
+  font-weight: bold;
+  color: #555;
+  padding: 5px 0;
 }
 
 .maniphest-total-result-count {
@@ -138,9 +139,9 @@
 }
 
 .batch-editor-header {
-  font-size: 11px;
-  color: #666666;
-  padding: 4px 0px;
+  font-size: 16px;
+  color: #555;
+  padding: 8px 0px;
   font-weight: bold;
 }
 
@@ -150,12 +151,12 @@
 
 .maniphest-batch-editor-layout {
   width: 100%;
-  border-top: 1px solid #bbbbbb;
-  background: #efefef;
+  border-top: 1px solid #d5dadf;
+  background: #f4f5f8;
 }
 
 .maniphest-batch-editor-layout td {
-  padding: 6px 8px;
+  padding: 10px 8px;
   white-space: nowrap;
 }
 

@@ -4,6 +4,7 @@ final class PhabricatorDirectoryMainController
   extends PhabricatorDirectoryController {
 
   private $filter;
+  private $minipanels = array();
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
@@ -52,6 +53,7 @@ final class PhabricatorDirectoryMainController
       $tasks_panel,
       $audit_panel,
       $commit_panel,
+      $this->minipanels,
     );
 
     $nav->appendChild($content);
@@ -114,6 +116,7 @@ final class PhabricatorDirectoryMainController
         "View All Unbreak Now \xC2\xBB"));
 
     $panel->appendChild($this->buildTaskListView($tasks));
+    $panel->setNoBackground();
 
     return $panel;
   }
@@ -159,6 +162,7 @@ final class PhabricatorDirectoryMainController
         ),
         "View All Triage \xC2\xBB"));
     $panel->appendChild($this->buildTaskListView($tasks));
+    $panel->setNoBackground();
 
     return $panel;
   }
@@ -214,6 +218,7 @@ final class PhabricatorDirectoryMainController
     $revision_view->setHandles($handles);
 
     $panel->appendChild($revision_view);
+    $panel->setNoBackground();
 
     return $panel;
   }
@@ -239,7 +244,6 @@ final class PhabricatorDirectoryMainController
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Assigned Tasks');
-    $panel->setCaption('Tasks assigned to you.');
 
     $panel->addButton(
       phutil_render_tag(
@@ -250,6 +254,7 @@ final class PhabricatorDirectoryMainController
         ),
         "View Active Tasks \xC2\xBB"));
     $panel->appendChild($this->buildTaskListView($tasks));
+    $panel->setNoBackground();
 
     return $panel;
   }
@@ -312,7 +317,7 @@ final class PhabricatorDirectoryMainController
       'it. See '.$doc_link.' or type <tt>help</tt>.');
 
     $panel = new AphrontPanelView();
-    $panel->addClass('aphront-unpadded-panel-view');
+    $panel->setHeader('Jump Nav');
     $panel->appendChild(
       phabricator_render_form(
         $user,
@@ -335,7 +340,7 @@ final class PhabricatorDirectoryMainController
         array(
         ),
         '<strong>'.$title.':</strong> '.$body));
-    return $panel;
+    $this->minipanels[] = $panel;
   }
 
   public function buildAuditPanel() {
@@ -373,14 +378,15 @@ final class PhabricatorDirectoryMainController
     $panel->setHeader('Audits');
     $panel->setCaption('Commits awaiting your audit.');
     $panel->appendChild($view);
-      $panel->addButton(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/audit/',
-            'class' => 'button grey',
-          ),
-          "View Active Audits \xC2\xBB"));
+    $panel->addButton(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/audit/',
+          'class' => 'button grey',
+        ),
+        "View Active Audits \xC2\xBB"));
+    $panel->setNoBackground();
 
     return $panel;
   }
@@ -417,14 +423,15 @@ final class PhabricatorDirectoryMainController
     $panel->setHeader('Problem Commits');
     $panel->setCaption('Commits which auditors have raised concerns about.');
     $panel->appendChild($view);
-      $panel->addButton(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/audit/',
-            'class' => 'button grey',
-          ),
-          "View Problem Commits \xC2\xBB"));
+    $panel->addButton(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/audit/',
+          'class' => 'button grey',
+        ),
+        "View Problem Commits \xC2\xBB"));
+    $panel->setNoBackground();
 
     return $panel;
   }
