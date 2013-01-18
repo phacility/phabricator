@@ -77,9 +77,9 @@
 
 .phabricator-side-menu-home .phabricator-nav-column-background,
 .phabricator-side-menu-home .phabricator-nav-local {
-  width: 320px;
+  width: 300px;
 }
 
 .device-desktop .phabricator-side-menu-home .phabricator-nav-content {
-  margin-left: 320px;
+  margin-left: 300px;
 }
