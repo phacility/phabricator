@@ -94,13 +94,14 @@ a.phabricator-application-launch-container:hover {
   position: absolute;
   right: 4px;
   top: 4px;
-  background: #ff0000;
+  background: rgb(0, 122, 255);
   border-radius: 10px;
   color: white;
   font-weight: bold;
   padding: 1px 6px 2px;
-  border: 1px solid #aa0000;
-  font-size: 12px;
+  border: 2px solid #333;
+  font-size: 11px;
+  box-shadow: 0 0px 2px #000;
 }
 
 .application-tile-full .phabricator-application-launch-attention {
