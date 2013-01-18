@@ -296,6 +296,7 @@ final class PhabricatorConfigEditController
           $errors[] = pht(
             'The given value must be valid JSON. This means, among '.
             'other things, that you must wrap strings in double-quotes.');
+        } else {
           $set_value = $json;
         }
         break;
