@@ -141,7 +141,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       // TODO: Clean this up after Pholio (dark backgrounds, standardization,
       // etc.)
 
-      $image = phutil_render_tag(
+      $image = phutil_tag(
         'img',
         array(
           'src' => $file->getViewURI(),

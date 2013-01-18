@@ -15,7 +15,7 @@ final class AphrontAttachedFileView extends AphrontView {
     $file = $this->file;
     $phid = $file->getPHID();
 
-    $thumb = phutil_render_tag(
+    $thumb = phutil_tag(
       'img',
       array(
         'src'     => $file->getThumb60x45URI(),

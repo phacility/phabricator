@@ -158,7 +158,7 @@ final class PhabricatorMacroViewController
 
     if ($file) {
       $view->addTextContent(
-        phutil_render_tag(
+        phutil_tag(
           'img',
           array(
             'src'     => $file->getViewURI(),

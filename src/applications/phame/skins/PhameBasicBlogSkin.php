@@ -104,7 +104,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
     $pager = $this->renderOlderPageLink().$this->renderNewerPageLink();
     if ($pager) {
-      $pager = phutil_render_tag(
+      $pager = phutil_tag(
         'div',
         array(
           'class' => 'phame-pager',

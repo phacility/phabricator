@@ -48,7 +48,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
         'href' => $this->uri,
         'class' => 'phabricator-pinboard-item-image-link',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'img',
         array(
           'src'     => $this->imageURI,

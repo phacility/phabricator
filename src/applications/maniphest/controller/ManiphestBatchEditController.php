@@ -79,25 +79,23 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     foreach ($tasks as $task) {
       $form->appendChild(
-        phutil_render_tag(
+        phutil_tag(
           'input',
           array(
             'type' => 'hidden',
             'name' => 'batch[]',
             'value' => $task->getID(),
-          ),
-          null));
+          )));
     }
 
     $form->appendChild(
-      phutil_render_tag(
+      phutil_tag(
         'input',
         array(
           'type' => 'hidden',
           'name' => 'actions',
           'id'   => 'batch-form-actions',
-        ),
-        null));
+        )));
     $form->appendChild('<p>These tasks will be edited:</p>');
     $form->appendChild($list);
     $form->appendChild(

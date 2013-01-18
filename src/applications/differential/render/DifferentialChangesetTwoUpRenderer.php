@@ -342,7 +342,7 @@ final class DifferentialChangesetTwoUpRenderer
         array(
           'class' => 'differential-image-stage'
         ),
-        phutil_render_tag(
+        phutil_tag(
           'img',
           array(
             'src' => $old_file->getBestURI(),
@@ -358,7 +358,7 @@ final class DifferentialChangesetTwoUpRenderer
         array(
           'class' => 'differential-image-stage'
         ),
-        phutil_render_tag(
+        phutil_tag(
           'img',
           array(
             'src' => $new_file->getBestURI(),

@@ -79,14 +79,13 @@ final class DifferentialInlineCommentEditView extends AphrontView {
     $out = array();
     foreach ($this->inputs as $input) {
       list($name, $value) = $input;
-      $out[] = phutil_render_tag(
+      $out[] = phutil_tag(
         'input',
         array(
           'type'  => 'hidden',
           'name'  => $name,
           'value' => $value,
-        ),
-        null);
+        ));
     }
     return implode('', $out);
   }

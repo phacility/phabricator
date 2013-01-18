@@ -46,14 +46,14 @@ function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
 
 function phabricator_render_form_magic(PhabricatorUser $user) {
   return
-    phutil_render_tag(
+    phutil_tag(
       'input',
       array(
         'type' => 'hidden',
         'name' => AphrontRequest::getCSRFTokenName(),
         'value' => $user->getCSRFToken(),
       )).
-    phutil_render_tag(
+    phutil_tag(
       'input',
       array(
         'type' => 'hidden',

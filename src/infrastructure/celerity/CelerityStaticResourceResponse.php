@@ -106,7 +106,7 @@ final class CelerityStaticResourceResponse {
     $uri = PhabricatorEnv::getCDNURI($resource['uri']);
     switch ($resource['type']) {
       case 'css':
-        return phutil_render_tag(
+        return phutil_tag(
           'link',
           array(
             'rel'   => 'stylesheet',

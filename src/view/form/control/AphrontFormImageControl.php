@@ -10,7 +10,7 @@ final class AphrontFormImageControl extends AphrontFormControl {
     $id = celerity_generate_unique_node_id();
 
     return
-      phutil_render_tag(
+      phutil_tag(
         'input',
         array(
           'type'  => 'file',
@@ -18,7 +18,7 @@ final class AphrontFormImageControl extends AphrontFormControl {
           'class' => 'image',
         )).
       '<div style="clear: both;">'.
-      phutil_render_tag(
+      phutil_tag(
         'input',
         array(
           'type'  => 'checkbox',

@@ -179,7 +179,7 @@ final class PhabricatorSettingsPanelProfile
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile Image')
           ->setValue(
-            phutil_render_tag(
+            phutil_tag(
               'img',
               array(
                 'src' => $img_src,

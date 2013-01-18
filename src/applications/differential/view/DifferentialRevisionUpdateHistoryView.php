@@ -92,7 +92,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       if ($max_id != $id) {
         $uniq = celerity_generate_unique_node_id();
         $old_checked = ($this->selectedVersusDiffID == $id);
-        $old = phutil_render_tag(
+        $old = phutil_tag(
           'input',
           array(
             'type' => 'radio',

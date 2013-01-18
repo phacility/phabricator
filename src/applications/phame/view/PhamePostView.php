@@ -201,7 +201,7 @@ final class PhamePostView extends AphrontView {
 
     $post = $this->getPost();
 
-    $disqus_thread = phutil_render_tag('div',
+    $disqus_thread = phutil_tag('div',
       array(
         'id' => 'disqus_thread'
       )

@@ -261,7 +261,7 @@ final class PhabricatorSlowvotePollController
           $checked = null;
         }
 
-        $input = phutil_render_tag(
+        $input = phutil_tag(
           'input',
           array(
             'type'      => 'radio',
@@ -282,7 +282,7 @@ final class PhabricatorSlowvotePollController
           }
         }
 
-        $input = phutil_render_tag(
+        $input = phutil_tag(
           'input',
           array(
             'type'    => 'checkbox',
@@ -407,7 +407,7 @@ final class PhabricatorSlowvotePollController
               'href'  => $handle->getURI(),
               'class' => 'phabricator-slowvote-facepile',
             ),
-            phutil_render_tag(
+            phutil_tag(
               'img',
               array(
                 'src' => $profile_image,

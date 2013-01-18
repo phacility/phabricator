@@ -40,7 +40,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
         $default = $query;
       }
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'input',
           array(
             'type'      => 'radio',
@@ -73,7 +73,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
     }
 
     $rows[] = array(
-      phutil_render_tag(
+      phutil_tag(
         'input',
         array(
           'type'      => 'radio',

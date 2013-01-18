@@ -789,7 +789,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $properties->addProperty(
       pht('Image'),
-      phutil_render_tag(
+      phutil_tag(
         'img',
         array(
           'src' => $file_uri,

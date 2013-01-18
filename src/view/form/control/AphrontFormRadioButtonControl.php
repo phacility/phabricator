@@ -22,7 +22,7 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
     $rows = array();
     foreach ($this->buttons as $button) {
       $id = celerity_generate_unique_node_id();
-      $radio = phutil_render_tag(
+      $radio = phutil_tag(
         'input',
         array(
           'id' => $id,

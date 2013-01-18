@@ -106,7 +106,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
         )
       )
       ->appendChild(
-        phutil_render_tag(
+        phutil_tag(
           'input',
           array(
             'hidden' => true,

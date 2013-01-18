@@ -100,7 +100,7 @@ final class AphrontFormView extends AphrontView {
       if ($value === null) {
         continue;
       }
-      $inputs[] = phutil_render_tag(
+      $inputs[] = phutil_tag(
         'input',
         array(
           'type'  => 'hidden',

@@ -301,7 +301,7 @@ final class PhabricatorDirectoryMainController
       ),
       'Jump Nav User Guide');
 
-    $jump_input = phutil_render_tag(
+    $jump_input = phutil_tag(
       'input',
       array(
         'type'  => 'text',

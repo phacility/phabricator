@@ -75,7 +75,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
         'class' => 'jx-tokenizer-token',
       ),
       phutil_escape_html($value).
-      phutil_render_tag(
+      phutil_tag(
         'input',
         array(
           'type'  => 'hidden',

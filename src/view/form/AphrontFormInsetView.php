@@ -57,7 +57,7 @@ final class AphrontFormInsetView extends AphrontView {
     $hidden_inputs = array();
     foreach ($this->hidden as $inp) {
       list($key, $value) = $inp;
-      $hidden_inputs[] = phutil_render_tag(
+      $hidden_inputs[] = phutil_tag(
         'input',
         array(
           'type' => 'hidden',

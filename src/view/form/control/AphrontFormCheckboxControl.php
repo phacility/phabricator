@@ -22,7 +22,7 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
     $rows = array();
     foreach ($this->boxes as $box) {
       $id = celerity_generate_unique_node_id();
-      $checkbox = phutil_render_tag(
+      $checkbox = phutil_tag(
         'input',
         array(
           'id' => $id,
