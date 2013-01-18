@@ -773,60 +773,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
     return $rows;
   }
 
-  private static function renderRevision(DiffusionRequest $drequest,
-    $revision) {
-
-    $callsign = $drequest->getCallsign();
-
-    $name = 'r'.$callsign.$revision;
-    return phutil_render_tag(
-      'a',
-      array(
-           'href' => '/'.$name,
-      ),
-      $name
-    );
-  }
-
-
-  private static function renderBrowse(
-    DiffusionRequest $drequest,
-    $path,
-    $name = null,
-    $rev = null,
-    $line = null,
-    $view = null,
-    $title = null) {
-
-    $callsign = $drequest->getCallsign();
-
-    if ($name === null) {
-      $name = $path;
-    }
-
-    $at = null;
-    if ($rev) {
-      $at = ';'.$rev;
-    }
-
-    if ($view) {
-      $view = '?view='.$view;
-    }
-
-    if ($line) {
-      $line = '$'.$line;
-    }
-
-    return phutil_render_tag(
-      'a',
-      array(
-        'href' => "/diffusion/{$callsign}/browse/{$path}{$at}{$line}{$view}",
-        'title' => $title,
-      ),
-      $name
-    );
-  }
-
   private function loadFileForData($path, $data) {
     return PhabricatorFile::buildFromFileDataOrHash(
       $data,
