@@ -210,12 +210,12 @@ final class AphrontTableView extends AphrontView {
               'class' => 'aphront-table-view-nodevice',
             ),
             $header);
-          $header_device = phutil_render_tag(
+          $header_device = phutil_tag(
             'span',
             array(
               'class' => 'aphront-table-view-device',
             ),
-            phutil_escape_html($short_headers[$col_num]));
+            $short_headers[$col_num]);
 
           $header = $header_nodevice.$header_device;
         }

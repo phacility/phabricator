@@ -457,12 +457,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $subject = '[T'.$task->getID().'] '.$task->getTitle();
       $view->addProperty(
         pht('From Email'),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => 'mailto:'.$source.'?subject='.$subject
             ),
-          phutil_escape_html($source)));
+          $source));
     }
 
     $view->addProperty(

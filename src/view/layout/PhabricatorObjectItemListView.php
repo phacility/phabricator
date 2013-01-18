@@ -32,12 +32,12 @@ final class PhabricatorObjectItemListView extends AphrontView {
 
     $header = null;
     if (strlen($this->header)) {
-      $header = phutil_render_tag(
+      $header = phutil_tag(
         'h1',
         array(
           'class' => 'phabricator-object-item-list-header',
         ),
-        phutil_escape_html($this->header));
+        $this->header);
     }
 
     if ($this->items) {

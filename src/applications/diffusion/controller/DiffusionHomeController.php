@@ -13,12 +13,12 @@ final class DiffusionHomeController extends DiffusionController {
       $rows = array();
       foreach ($shortcuts as $shortcut) {
         $rows[] = array(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $shortcut->getHref(),
             ),
-            phutil_escape_html($shortcut->getName())),
+            $shortcut->getName()),
           phutil_escape_html($shortcut->getDescription()),
         );
       }
@@ -124,12 +124,12 @@ final class DiffusionHomeController extends DiffusionController {
       }
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/diffusion/'.$repository->getCallsign().'/',
           ),
-          phutil_escape_html($repository->getName())),
+          $repository->getName()),
         phutil_escape_html($repository->getDetail('description')),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),

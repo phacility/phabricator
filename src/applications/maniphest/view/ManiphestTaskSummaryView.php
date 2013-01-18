@@ -119,12 +119,12 @@ final class ManiphestTaskSummaryView extends ManiphestView {
             : '<em>None</em>').
         '</td>'.
         '<td class="maniphest-task-name">'.
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/T'.$task->getID(),
             ),
-            phutil_escape_html($task->getTitle())).
+            $task->getTitle()).
         '</td>'.
         '<td class="maniphest-task-projects">'.
           $projects_view->render().

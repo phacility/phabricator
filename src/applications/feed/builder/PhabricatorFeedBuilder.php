@@ -45,12 +45,12 @@ final class PhabricatorFeedBuilder {
         }
         $last_date = $date;
         $null_view->appendChild(
-          phutil_render_tag(
+          phutil_tag(
             'div',
             array(
               'class' => 'phabricator-feed-story-date',
             ),
-            phutil_escape_html($date)));
+            $date));
       }
 
       $view = $story->renderView();

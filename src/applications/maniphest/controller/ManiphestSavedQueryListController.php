@@ -48,12 +48,12 @@ final class ManiphestSavedQueryListController extends ManiphestController {
             'value'     => $query->getID(),
             'checked'   => ($query->getIsDefault() ? 'checked' : null),
           )),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/maniphest/view/custom/?key='.$query->getQueryKey(),
           ),
-          phutil_escape_html($query->getName())),
+          $query->getName()),
         phutil_render_tag(
           'a',
           array(

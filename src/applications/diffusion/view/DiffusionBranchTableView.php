@@ -47,7 +47,7 @@ final class DiffusionBranchTableView extends DiffusionView {
           ),
           'History'
         ),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $drequest->generateURI(
@@ -56,7 +56,7 @@ final class DiffusionBranchTableView extends DiffusionView {
                 'branch' => $branch->getName(),
               )),
           ),
-          phutil_escape_html($branch->getName())),
+          $branch->getName()),
         self::linkCommit(
           $drequest->getRepository(),
           $branch->getHeadCommitIdentifier()),

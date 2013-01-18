@@ -49,12 +49,12 @@ final class PhabricatorPeopleListController
       $rows[] = array(
         phabricator_date($user->getDateCreated(), $viewer),
         phabricator_time($user->getDateCreated(), $viewer),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/p/'.$user->getUsername().'/',
           ),
-          phutil_escape_html($user->getUserName())),
+          $user->getUserName()),
         phutil_escape_html($user->getRealName()),
         $status,
         $email,

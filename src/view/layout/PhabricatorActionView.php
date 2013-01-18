@@ -92,12 +92,12 @@ final class PhabricatorActionView extends AphrontView {
           phutil_escape_html($this->name));
       }
     } else {
-      $item = phutil_render_tag(
+      $item = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-action-view-item',
         ),
-        phutil_escape_html($this->name));
+        $this->name);
     }
 
     $classes = array();

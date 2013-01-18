@@ -178,13 +178,13 @@ final class DiffusionCommitController extends DiffusionController {
       $change_panel->setID('toc');
 
       if ($count > self::CHANGES_LIMIT) {
-        $show_all_button = phutil_render_tag(
+        $show_all_button = phutil_tag(
           'a',
           array(
             'class'   => 'button green',
             'href'    => '?show_all=true',
           ),
-          phutil_escape_html('Show All Changes'));
+          'Show All Changes');
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
@@ -399,10 +399,10 @@ final class DiffusionCommitController extends DiffusionController {
     if ($commit->getAuditStatus()) {
       $status = PhabricatorAuditCommitStatusConstants::getStatusName(
         $commit->getAuditStatus());
-      $props['Status'] = phutil_render_tag(
+      $props['Status'] = phutil_tag(
         'strong',
         array(),
-        phutil_escape_html($status));
+        $status);
     }
 
     $props['Committed'] = phabricator_datetime($commit->getEpoch(), $user);
@@ -892,7 +892,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $ref_links = array();
     foreach ($refs as $ref) {
-      $ref_links[] = phutil_render_tag(
+      $ref_links[] = phutil_tag(
         'a',
         array(
           'href' => $request->generateURI(
@@ -901,7 +901,7 @@ final class DiffusionCommitController extends DiffusionController {
               'branch'  => $ref,
             )),
         ),
-        phutil_escape_html($ref));
+        $ref);
     }
     $ref_links = implode(', ', $ref_links);
     return $ref_links;

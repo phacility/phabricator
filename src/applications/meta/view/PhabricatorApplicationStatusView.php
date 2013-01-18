@@ -37,12 +37,12 @@ final class PhabricatorApplicationStatusView extends AphrontView {
       'phabricator-application-status-type-'.$this->type,
     );
 
-    return phutil_render_tag(
+    return phutil_tag(
       'span',
       array(
         'class' => implode(' ', $classes),
       ),
-      phutil_escape_html($this->text));
+      $this->text);
   }
 
 }

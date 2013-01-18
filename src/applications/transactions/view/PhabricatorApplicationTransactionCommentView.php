@@ -115,12 +115,12 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $preview = id(new PhabricatorTimelineView())
       ->setID($this->getPreviewTimelineID());
 
-    $header = phutil_render_tag(
+    $header = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-timeline-preview-header',
       ),
-      phutil_escape_html(pht('Preview')));
+      pht('Preview'));
 
     return phutil_render_tag(
       'div',

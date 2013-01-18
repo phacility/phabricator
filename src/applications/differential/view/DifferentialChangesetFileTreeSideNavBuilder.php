@@ -97,12 +97,12 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
         ),
         '');
 
-      $name_element = phutil_render_tag(
+      $name_element = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-filetree-name',
         ),
-        phutil_escape_html($name));
+        $name);
 
       $filetree[] = javelin_render_tag(
         $href ? 'a' : 'span',

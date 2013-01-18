@@ -14,7 +14,7 @@ final class DiffusionCommitBranchesController extends DiffusionController {
 
     $branch_links = array();
     foreach ($branches as $branch => $commit) {
-      $branch_links[] = phutil_render_tag(
+      $branch_links[] = phutil_tag(
         'a',
         array(
           'href' => $request->generateURI(
@@ -23,7 +23,7 @@ final class DiffusionCommitBranchesController extends DiffusionController {
               'branch'  => $branch,
             )),
         ),
-        phutil_escape_html($branch));
+        $branch);
     }
 
     return id(new AphrontAjaxResponse())

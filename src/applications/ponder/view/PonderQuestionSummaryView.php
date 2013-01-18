@@ -48,15 +48,13 @@ final class PonderQuestionSummaryView extends AphrontView {
 
     $title =
       '<h2 class="ponder-question-title">'.
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             "href" => '/Q' . $question->getID(),
           ),
-          phutil_escape_html(
             'Q' . $question->getID() .
             ' ' . $question->getTitle()
-          )
         ) .
       '</h2>';
 

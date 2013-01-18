@@ -52,13 +52,13 @@ final class AphrontFormSelectControl extends AphrontFormControl {
           ),
           implode("\n", self::renderOptions($selected, $thing)));
       } else {
-        $tags[] = phutil_render_tag(
+        $tags[] = phutil_tag(
           'option',
           array(
             'selected' => ($value == $selected) ? 'selected' : null,
             'value'    => $value,
           ),
-          phutil_escape_html($thing));
+          $thing);
       }
     }
     return $tags;

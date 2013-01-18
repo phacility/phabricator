@@ -278,7 +278,7 @@ abstract class DiffusionController extends PhabricatorController {
       $thus_far = '';
       foreach ($path_parts as $path_part) {
         $thus_far .= $path_part.'/';
-        $path_sections[] = phutil_render_tag(
+        $path_sections[] = phutil_tag(
           'a',
           array(
             'href' => $drequest->generateURI(
@@ -286,7 +286,7 @@ abstract class DiffusionController extends PhabricatorController {
                 'path' => $thus_far,
               ) + $uri_params),
           ),
-          phutil_escape_html($path_part));
+          $path_part);
       }
 
       $path_sections[] = phutil_escape_html($last);

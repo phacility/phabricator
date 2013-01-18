@@ -16,13 +16,13 @@ abstract class PhabricatorXHProfProfileView extends AphrontView {
   }
 
   protected function renderSymbolLink($symbol) {
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href'    => $this->baseURI.'?symbol='.$symbol,
         'target'  => $this->isFramed ? '_top' : null,
       ),
-      phutil_escape_html($symbol));
+      $symbol);
   }
 
 }

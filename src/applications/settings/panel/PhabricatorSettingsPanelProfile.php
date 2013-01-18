@@ -160,12 +160,12 @@ final class PhabricatorSettingsPanelProfile
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile URI')
           ->setValue(
-            phutil_render_tag(
+            phutil_tag(
               'a',
               array(
                 'href' => $profile_uri,
               ),
-              phutil_escape_html($profile_uri))))
+              $profile_uri)))
       ->appendChild(
         '<p class="aphront-form-instructions">Write something about yourself! '.
         'Make sure to include <strong>important information</strong> like '.

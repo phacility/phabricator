@@ -32,12 +32,12 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
           'checked' => $box['checked'] ? 'checked' : null,
           'disabled' => $this->getDisabled() ? 'disabled' : null,
         ));
-      $label = phutil_render_tag(
+      $label = phutil_tag(
         'label',
         array(
           'for' => $id,
         ),
-        phutil_escape_html($box['label']));
+        $box['label']);
       $rows[] =
         '<tr>'.
           '<td>'.$checkbox.'</td>'.

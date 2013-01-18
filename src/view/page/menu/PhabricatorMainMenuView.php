@@ -303,13 +303,13 @@ final class PhabricatorMainMenuView extends AphrontView {
       $count_number = "\xE2\x88\x9E";
     }
 
-    $count_tag = phutil_render_tag(
+    $count_tag = phutil_tag(
       'span',
       array(
         'id'    => $count_id,
         'class' => 'phabricator-main-menu-alert-count'
       ),
-      phutil_escape_html($count_number));
+      $count_number);
 
     $icon_tag = phutil_render_tag(
       'span',

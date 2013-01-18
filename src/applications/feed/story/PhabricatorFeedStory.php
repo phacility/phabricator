@@ -233,13 +233,13 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     // NOTE: We render our own link here to customize the styling and add
     // the '_top' target for framed feeds.
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href'    => $handle->getURI(),
         'target'  => $this->framed ? '_top' : null,
       ),
-      phutil_escape_html($handle->getLinkName()));
+      $handle->getLinkName());
   }
 
   final protected function renderString($str) {

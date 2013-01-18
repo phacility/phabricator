@@ -95,13 +95,12 @@ final class DiffusionExternalController extends DiffusionController {
             'commit'    => $commit->getCommitIdentifier(),
           ));
         $rows[] = array(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $href,
             ),
-            phutil_escape_html(
-              'r'.$repo->getCallsign().$commit->getCommitIdentifier())),
+              'r'.$repo->getCallsign().$commit->getCommitIdentifier()),
           phutil_escape_html($commit->loadCommitData()->getSummary()),
         );
       }

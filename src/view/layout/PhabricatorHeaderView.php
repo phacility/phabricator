@@ -27,12 +27,12 @@ final class PhabricatorHeaderView extends AphrontView {
     $header = phutil_escape_html($this->header);
 
     if ($this->objectName) {
-      $header = phutil_render_tag(
+      $header = phutil_tag(
         'a',
         array(
           'href' => '/'.$this->objectName,
         ),
-        phutil_escape_html($this->objectName)).' '.$header;
+        $this->objectName).' '.$header;
     }
 
     if ($this->tags) {

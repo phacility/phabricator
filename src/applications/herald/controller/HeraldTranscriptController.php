@@ -481,12 +481,12 @@ final class HeraldTranscriptController extends HeraldController {
       }
 
       if (strlen($value) > 256) {
-        $value = phutil_render_tag(
+        $value = phutil_tag(
           'textarea',
           array(
             'class' => 'herald-field-value-transcript',
           ),
-          phutil_escape_html($value));
+          $value);
       } else if ($name === 'Object Link') {
         // The link cannot be escaped
       } else {

@@ -71,13 +71,13 @@ final class PhabricatorObjectItemView extends AphrontView {
   }
 
   public function render() {
-    $header = phutil_render_tag(
+    $header = phutil_tag(
       'a',
       array(
         'href' => $this->href,
         'class' => 'phabricator-object-item-name',
       ),
-      phutil_escape_html($this->header));
+      $this->header);
 
     $icons = null;
     if ($this->icons) {
@@ -93,12 +93,12 @@ final class PhabricatorObjectItemView extends AphrontView {
           ),
           '');
 
-        $label = phutil_render_tag(
+        $label = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-object-item-icon-label',
           ),
-          phutil_escape_html($spec['label']));
+          $spec['label']);
 
         $icon_list[] = phutil_render_tag(
           'li',

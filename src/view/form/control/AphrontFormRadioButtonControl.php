@@ -34,13 +34,13 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
             : null,
           'disabled' => $this->getDisabled() ? 'disabled' : null,
         ));
-      $label = phutil_render_tag(
+      $label = phutil_tag(
         'label',
         array(
           'for' => $id,
           'class' => $button['class'],
         ),
-        phutil_escape_html($button['label']));
+        $button['label']);
 
       if (strlen($button['caption'])) {
         $label .=

@@ -178,12 +178,12 @@ final class DiffusionBrowseFileController extends DiffusionController {
       case 'plain':
         $style =
           "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
-        $corpus = phutil_render_tag(
+        $corpus = phutil_tag(
           'textarea',
           array(
             'style' => $style,
           ),
-          phutil_escape_html($file_query->getRawData()));
+          $file_query->getRawData());
 
           break;
 
@@ -205,12 +205,12 @@ final class DiffusionBrowseFileController extends DiffusionController {
             sprintf("%-10s %-20s %s", substr($rev, 0, 7), $author, $line);
         }
 
-        $corpus = phutil_render_tag(
+        $corpus = phutil_tag(
           'textarea',
           array(
             'style' => $style,
           ),
-          phutil_escape_html(implode("\n", $rows)));
+          implode("\n", $rows));
 
         break;
 
@@ -493,11 +493,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
           if (isset($blame['handle'])) {
             $author_link = $blame['handle']->renderLink();
           } else {
-            $author_link = phutil_render_tag(
+            $author_link = phutil_tag(
               'span',
               array(
               ),
-              phutil_escape_html($blame['author']));
+              $blame['author']);
           }
           $display_line['author'] = $author_link;
 
@@ -699,12 +699,12 @@ final class DiffusionBrowseFileController extends DiffusionController {
           idx($line, 'author'));
       }
 
-      $line_link = phutil_render_tag(
+      $line_link = phutil_tag(
         'a',
         array(
           'href' => $line_href,
         ),
-        phutil_escape_html($line['line']));
+        $line['line']);
 
       $blame[] = javelin_render_tag(
         'th',

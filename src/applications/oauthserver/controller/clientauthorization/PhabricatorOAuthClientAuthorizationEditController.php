@@ -61,12 +61,12 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
         id(new AphrontFormMarkupControl())
         ->setLabel('Client')
         ->setValue(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $client->getViewURI(),
             ),
-            phutil_escape_html($client->getName())))
+            $client->getName()))
       )
       ->appendChild(
         id(new AphrontFormStaticControl())

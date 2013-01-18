@@ -64,27 +64,26 @@ final class PhamePostView extends AphrontView {
       array(
         'class' => 'phame-post-title',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => $href,
         ),
-        phutil_escape_html($this->getPost()->getTitle())));
+        $this->getPost()->getTitle()));
   }
 
   public function renderDatePublished() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post-date',
       ),
-      phutil_escape_html(
         pht(
           'Published on %s by %s',
           phabricator_datetime(
             $this->getPost()->getDatePublished(),
             $this->getUser()),
-          $this->getAuthor()->getName())));
+          $this->getAuthor()->getName()));
   }
 
   public function renderBody() {

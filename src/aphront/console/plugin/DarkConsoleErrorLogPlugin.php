@@ -39,12 +39,12 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
       $file = $row['file'];
       $line = $row['line'];
 
-      $tag = phutil_render_tag(
+      $tag = phutil_tag(
         'a',
         array(
           'onclick' => jsprintf('show_details(%d)', $index),
         ),
-        phutil_escape_html($row['str'].' at ['.basename($file).':'.$line.']'));
+        $row['str'].' at ['.basename($file).':'.$line.']');
       $rows[] = array($tag);
 
       $details .=
@@ -70,12 +70,12 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
           }
         }
 
-        $details .= phutil_render_tag(
+        $details .= phutil_tag(
           'a',
           array(
             'href' => $href,
           ),
-          phutil_escape_html($line));
+          $line);
         $details .= "\n";
       }
 

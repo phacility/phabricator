@@ -145,10 +145,10 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
       $last_base = $base;
 
-      $id_link = phutil_render_tag(
+      $id_link = phutil_tag(
         'a',
         array('href' => '/differential/diff/'.$id.'/'),
-        phutil_escape_html($id));
+        $id);
       $rows[] =
         '<tr'.$class.'>'.
           '<td class="revhistory-name">'.phutil_escape_html($name).'</td>'.
@@ -179,7 +179,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
     $select = '<select name="whitespace">';
     foreach ($options as $value => $label) {
-      $select .= phutil_render_tag(
+      $select .= phutil_tag(
         'option',
         array(
           'value' => $value,
@@ -187,7 +187,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           ? 'selected'
           : null,
         ),
-        phutil_escape_html($label));
+        $label);
     }
     $select .= '</select>';
 

@@ -254,12 +254,12 @@ final class PhabricatorOwnersListController
           $pkg_paths[$key] =
             ($path->getExcluded() ? '&ndash;' : '+').' '.
             '<strong>'.phutil_escape_html($repo->getName()).'</strong> '.
-            phutil_render_tag(
+            phutil_tag(
               'a',
               array(
                 'href' => (string) $href,
               ),
-              phutil_escape_html($path->getPath()));
+              $path->getPath());
         } else {
           $pkg_paths[$key] = phutil_escape_html($path->getPath());
         }
@@ -267,20 +267,20 @@ final class PhabricatorOwnersListController
       $pkg_paths = implode('<br />', $pkg_paths);
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/owners/package/'.$package->getID().'/',
           ),
-          phutil_escape_html($package->getName())),
+          $package->getName()),
         $pkg_owners,
         $pkg_paths,
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/audit/view/packagecommits/?phid='.$package->getPHID(),
           ),
-          phutil_escape_html('Related Commits'))
+          'Related Commits')
       );
     }
 

@@ -478,12 +478,12 @@ final class ManiphestReportController extends ManiphestController {
         }
 
         $tasks = idx($result, $handle->getPHID(), array());
-        $name = phutil_render_tag(
+        $name = phutil_tag(
           'a',
           array(
             'href' => $base_link.$handle->getPHID(),
           ),
-          phutil_escape_html($handle->getName()));
+          $handle->getName());
         $closed = idx($result_closed, $handle->getPHID(), array());
       } else {
         $tasks = $leftover;
@@ -524,13 +524,13 @@ final class ManiphestReportController extends ManiphestController {
 
       if ($closed) {
         $task_ids = implode(',', mpull($closed, 'getID'));
-        $row[] = phutil_render_tag(
+        $row[] = phutil_tag(
           'a',
           array(
             'href' => '/maniphest/view/custom/?s=oc&tasks='.$task_ids,
             'target' => '_blank',
           ),
-          phutil_escape_html(number_format(count($closed))));
+          number_format(count($closed)));
       } else {
         $row[] = '-';
       }

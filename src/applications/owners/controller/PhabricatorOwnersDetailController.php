@@ -94,12 +94,12 @@ final class PhabricatorOwnersDetailController
         ));
       $repo_name = '<strong>'.phutil_escape_html($repo->getName()).
                    '</strong>';
-      $path_link = phutil_render_tag(
+      $path_link = phutil_tag(
         'a',
         array(
           'href' => (string) $href,
         ),
-        phutil_escape_html($path->getPath()));
+        $path->getPath());
       $path_links[] =
         ($path->getExcluded() ? '&ndash;' : '+').' '.
         $repo_name.' '.$path_link;

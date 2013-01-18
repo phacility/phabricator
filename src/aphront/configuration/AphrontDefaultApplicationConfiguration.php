@@ -333,17 +333,17 @@ class AphrontDefaultApplicationConfiguration
               '$'.$part['line'];
             $attrs['target'] = '_blank';
           }
-          $file_name = phutil_render_tag(
+          $file_name = phutil_tag(
             'a',
             $attrs,
-            phutil_escape_html($relative));
+            $relative);
         } else {
-          $file_name = phutil_render_tag(
+          $file_name = phutil_tag(
             'span',
             array(
               'title' => $file,
             ),
-            phutil_escape_html($relative));
+            $relative);
         }
         $file_name = $file_name.' : '.(int)$part['line'];
       } else {

@@ -94,12 +94,12 @@ final class DiffusionSymbolController extends DiffusionController {
           return id(new AphrontRedirectResponse())->setURI($href);
         }
 
-        $location = phutil_render_tag(
+        $location = phutil_tag(
           'a',
           array(
             'href' => $href,
           ),
-          phutil_escape_html($file.':'.$line));
+          $file.':'.$line);
       } else if ($file) {
         $location = phutil_escape_html($file.':'.$line);
       } else {

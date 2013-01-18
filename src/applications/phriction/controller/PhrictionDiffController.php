@@ -104,12 +104,12 @@ final class PhrictionDiffController
     $crumbs->setCrumbs(
       array(
         'Phriction',
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => PhrictionDocument::getSlugURI($slug),
           ),
-          phutil_escape_html($current->getTitle())),
+          $current->getTitle()),
         phutil_render_tag(
           'a',
           array(

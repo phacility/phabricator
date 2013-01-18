@@ -341,12 +341,12 @@ final class PhrictionDocumentController
 
   private function renderChildDocumentLink(array $info) {
     $title = nonempty($info['title'], '(Untitled Document)');
-    $item = phutil_render_tag(
+    $item = phutil_tag(
       'a',
       array(
         'href' => PhrictionDocument::getSlugURI($info['slug']),
       ),
-      phutil_escape_html($title));
+      $title);
 
     if (isset($info['empty'])) {
       $item = '<em>'.$item.'</em>';

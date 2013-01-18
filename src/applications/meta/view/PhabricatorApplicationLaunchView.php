@@ -31,12 +31,12 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
     $icon = null;
     $create_button = null;
     if ($application) {
-      $content[] = phutil_render_tag(
+      $content[] = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-application-launch-name',
         ),
-        phutil_escape_html($application->getName()));
+        $application->getName());
 
       if ($application->isBeta()) {
         $content[] = phutil_render_tag(
@@ -48,12 +48,12 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       }
 
       if ($this->fullWidth) {
-        $content[] = phutil_render_tag(
+        $content[] = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-application-launch-description',
           ),
-          phutil_escape_html($application->getShortDescription()));
+          $application->getShortDescription());
       }
 
       $count = 0;
@@ -64,12 +64,12 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       }
 
       if ($count) {
-        $content[] = phutil_render_tag(
+        $content[] = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-application-launch-attention',
           ),
-          phutil_escape_html($count));
+          $count);
       }
 
       $classes = array();

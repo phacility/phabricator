@@ -23,13 +23,13 @@ final class AphrontAttachedFileView extends AphrontView {
         'height'  => 45,
       ));
 
-    $name = phutil_render_tag(
+    $name = phutil_tag(
       'a',
       array(
         'href'    => $file->getViewURI(),
         'target'  => '_blank',
       ),
-      phutil_escape_html($file->getName()));
+      $file->getName());
     $size = number_format($file->getByteSize()).' bytes';
 
     $remove = javelin_render_tag(

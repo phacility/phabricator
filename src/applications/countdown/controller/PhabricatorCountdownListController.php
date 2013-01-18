@@ -48,12 +48,12 @@ final class PhabricatorCountdownListController
       $rows[] = array(
         phutil_escape_html($timer->getID()),
         $handles[$timer->getAuthorPHID()]->renderLink(),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/countdown/'.$timer->getID().'/',
           ),
-          phutil_escape_html($timer->getTitle())),
+          $timer->getTitle()),
         phabricator_datetime($timer->getDatepoint(), $user),
         $edit_button,
         $delete_button,

@@ -190,14 +190,14 @@ final class PhabricatorObjectHandle {
       $title = 'disabled'; // Overwrite status.
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href'  => $this->getURI(),
         'class' => $class,
         'title' => $title,
       ),
-      phutil_escape_html($name));
+      $name);
   }
 
   public function getLinkName() {

@@ -24,12 +24,12 @@ final class PhabricatorConfigAllController
       }
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $this->getApplicationURI('edit/'.$key.'/'),
           ),
-          phutil_escape_html($key)),
+          $key),
         $value,
       );
     }

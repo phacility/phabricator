@@ -87,12 +87,12 @@ final class PhabricatorPropertyListView extends AphrontView {
       $key = $spec['key'];
       $value = $spec['value'];
 
-      $items[] = phutil_render_tag(
+      $items[] = phutil_tag(
         'dt',
         array(
           'class' => 'phabricator-property-list-key',
         ),
-        phutil_escape_html($key));
+        $key);
       $items[] = phutil_render_tag(
         'dd',
         array(
@@ -137,12 +137,12 @@ final class PhabricatorPropertyListView extends AphrontView {
   }
 
   private function renderSectionPart(array $part) {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-property-list-section-header',
       ),
-      phutil_escape_html($part['name']));
+      $part['name']);
   }
 
   private function renderTextPart(array $part) {

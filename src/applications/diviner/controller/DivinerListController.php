@@ -33,13 +33,13 @@ final class DivinerListController extends PhabricatorController {
       $name = $link['name'];
       $flavor = $link['flavor'];
 
-      $link = phutil_render_tag(
+      $link = phutil_tag(
         'a',
         array(
           'href'    => $href,
           'target'  => '_blank',
         ),
-        phutil_escape_html($name));
+        $name);
 
       $out[] =
         '<div class="aphront-directory-item">'.

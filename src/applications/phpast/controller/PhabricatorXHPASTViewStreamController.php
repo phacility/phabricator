@@ -18,13 +18,13 @@ final class PhabricatorXHPASTViewStreamController
       $name = $token->getTypeName();
       $title = "Token {$seq}: {$name}";
 
-      $tokens[] = phutil_render_tag(
+      $tokens[] = phutil_tag(
         'span',
         array(
           'title' => $title,
           'class' => 'token',
         ),
-        phutil_escape_html($token->getValue()));
+        $token->getValue());
     }
 
     return $this->buildXHPASTViewPanelResponse(implode('', $tokens));

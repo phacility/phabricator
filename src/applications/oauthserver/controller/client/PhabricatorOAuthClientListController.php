@@ -31,21 +31,21 @@ extends PhabricatorOAuthClientBaseController {
     $highlight = $this->getHighlightPHIDs();
     foreach ($clients as $client) {
       $row = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $client->getViewURI(),
           ),
-          phutil_escape_html($client->getName())
+          $client->getName()
         ),
         $client->getPHID(),
         $client->getSecret(),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $client->getRedirectURI(),
           ),
-          phutil_escape_html($client->getRedirectURI())
+          $client->getRedirectURI()
         ),
         phutil_render_tag(
           'a',

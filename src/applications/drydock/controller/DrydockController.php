@@ -32,18 +32,18 @@ abstract class DrydockController extends PhabricatorController {
       $lease_uri = $this->getApplicationURI($lease_uri);
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $resource_uri,
           ),
-          phutil_escape_html($log->getResourceID())),
-        phutil_render_tag(
+          $log->getResourceID()),
+        phutil_tag(
           'a',
           array(
             'href' => $lease_uri,
           ),
-          phutil_escape_html($log->getLeaseID())),
+          $log->getLeaseID()),
         phutil_escape_html($log->getMessage()),
         phabricator_date($log->getEpoch(), $user),
       );
@@ -96,12 +96,12 @@ abstract class DrydockController extends PhabricatorController {
         $resource_name = $resource->getName();
 
         $item->addAttribute(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $resource_href,
             ),
-            phutil_escape_html($resource_name)));
+            $resource_name));
       }
 
       $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());

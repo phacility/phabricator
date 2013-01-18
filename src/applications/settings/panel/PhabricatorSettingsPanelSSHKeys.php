@@ -176,12 +176,12 @@ final class PhabricatorSettingsPanelSSHKeys
     $rows = array();
     foreach ($keys as $key) {
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $this->getPanelURI('?edit='.$key->getID()),
           ),
-          phutil_escape_html($key->getName())),
+          $key->getName()),
         phutil_escape_html($key->getKeyComment()),
         phutil_escape_html($key->getKeyType()),
         phabricator_date($key->getDateCreated(), $user),

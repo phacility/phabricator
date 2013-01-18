@@ -53,12 +53,12 @@ final class PhrictionListController
       $content = $document->getContent();
       $rows[] = array(
         $handles[$content->getAuthorPHID()]->renderLink(),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => PhrictionDocument::getSlugURI($document->getSlug()),
           ),
-          phutil_escape_html($content->getTitle())),
+          $content->getTitle()),
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
       );

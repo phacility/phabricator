@@ -28,12 +28,12 @@ final class PhabricatorButtonsExample extends PhabricatorUIExample {
             $class .= ' button';
           }
 
-          $view[] = phutil_render_tag(
+          $view[] = phutil_tag(
             $tag,
             array(
               'class' => $class,
             ),
-            phutil_escape_html(ucwords($size.' '.$color.' '.$tag)));
+            ucwords($size.' '.$color.' '.$tag));
 
           $view[] = '<br /><br />';
         }

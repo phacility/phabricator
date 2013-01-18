@@ -30,13 +30,13 @@ final class AphrontHeadsupView extends AphrontView {
   public function render() {
     $header =
       '<h1>'.
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/'.$this->objectName,
             'class' => 'aphront-headsup-object-name',
           ),
-          phutil_escape_html($this->objectName)).
+          $this->objectName).
         ' '.
         phutil_escape_html($this->header).
       '</h1>';

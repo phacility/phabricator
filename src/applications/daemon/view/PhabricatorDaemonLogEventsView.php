@@ -69,12 +69,12 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
       if ($this->combinedLog) {
         array_unshift(
           $row,
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/daemon/log/'.$event->getLogID().'/',
             ),
-            phutil_escape_html('Daemon '.$event->getLogID())));
+            'Daemon '.$event->getLogID()));
       }
 
       $rows[] = $row;

@@ -278,12 +278,12 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     require_celerity_resource('diffusion-icons-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'span',
       array(
         'class' => 'diffusion-path-icon diffusion-path-icon-'.$type,
       ),
-      phutil_escape_html($text));
+      $text);
   }
 
 }

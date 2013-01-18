@@ -25,10 +25,10 @@ final class HeraldRuleEditHistoryView extends AphrontView {
 
     foreach ($this->edits as $edit) {
       $name = nonempty($edit->getRuleName(), 'Unknown Rule');
-      $rule_name = phutil_render_tag(
+      $rule_name = phutil_tag(
         'strong',
         array(),
-        phutil_escape_html($name));
+        $name);
 
       switch ($edit->getAction()) {
         case 'create':

@@ -25,12 +25,12 @@ final class PhabricatorConduitListController
 
         $rows[] = array(
           $group,
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/conduit/method/'.$info['full_name'],
             ),
-            phutil_escape_html($info['full_name'])),
+            $info['full_name']),
           $info['description'],
           $status,
         );

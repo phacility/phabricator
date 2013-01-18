@@ -95,12 +95,12 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       pht('To continue, resolve this problem and reload the page.'));
 
-    $name = phutil_render_tag(
+    $name = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-name',
       ),
-      phutil_escape_html($issue->getName()));
+      $issue->getName());
 
     return phutil_render_tag(
       'div',
@@ -283,10 +283,10 @@ final class PhabricatorSetupIssueView extends AphrontView {
           "To update these %d value(s), edit your PHP configuration file, ".
           "located here:",
           count($configs)));
-      $info .= phutil_render_tag(
+      $info .= phutil_tag(
         'pre',
         array(),
-        phutil_escape_html($ini_loc));
+        $ini_loc);
     }
 
     if ($more_loc) {
@@ -296,10 +296,10 @@ final class PhabricatorSetupIssueView extends AphrontView {
         pht(
           "PHP also loaded these configuration file(s):",
           count($more_loc)));
-      $info .= phutil_render_tag(
+      $info .= phutil_tag(
         'pre',
         array(),
-        phutil_escape_html(implode("\n", $more_loc)));
+        implode("\n", $more_loc));
     }
 
     $info .= phutil_render_tag(
