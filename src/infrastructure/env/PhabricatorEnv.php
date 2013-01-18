@@ -152,11 +152,15 @@ final class PhabricatorEnv {
       phutil_load_library($library);
     }
 
-    // NOTE: This must happen after the other sources are pushed, because it
-    // will draw from lower-level config to bootstrap itself.
-    $stack->pushSource(
-      id(new PhabricatorConfigDatabaseSource('default'))
-        ->setName(pht("Database")));
+    try {
+      $stack->pushSource(
+        id(new PhabricatorConfigDatabaseSource('default'))
+          ->setName(pht("Database")));
+    } catch (AphrontQueryException $recoverable) {
+      // If the database is not available, just skip this configuration
+      // source. This happens during `bin/storage upgrade`, `bin/conf` before
+      // schema setup, etc.
+    }
   }
 
   public static function repairConfig($key, $value) {
