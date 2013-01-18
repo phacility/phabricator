@@ -132,7 +132,7 @@ final class PhabricatorConfigEditController
     $engine = new PhabricatorMarkupEngine();
     $engine->addObject($option, 'description');
     $engine->process();
-    $description = phutil_render_tag(
+    $description = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-remarkup',
@@ -440,12 +440,12 @@ final class PhabricatorConfigEditController
 
     require_celerity_resource('config-options-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'table',
       array(
         'class' => 'config-option-table',
       ),
-      implode("\n", $table));
+      new PhutilSafeHTML(implode("\n", $table)));
   }
 
   private function renderDefaults(PhabricatorConfigOption $option) {
@@ -492,12 +492,12 @@ final class PhabricatorConfigEditController
 
     require_celerity_resource('config-options-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'table',
       array(
         'class' => 'config-option-table',
       ),
-      implode("\n", $table));
+      new PhutilSafeHTML(implode("\n", $table)));
   }
 
 }

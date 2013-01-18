@@ -87,7 +87,7 @@ final class DifferentialLintFieldSpecification
             if ($diff->getID() != $this->getDiff()->getID()) {
               $href = '/D'.$diff->getRevisionID().'?id='.$diff->getID().$href;
             }
-            $line_link = phutil_render_tag(
+            $line_link = phutil_tag(
               'a',
               array(
                 'href' => $href,

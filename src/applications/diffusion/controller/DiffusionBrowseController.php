@@ -108,7 +108,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
     $text = $engine->markupText($text);
 
-    $text = phutil_render_tag(
+    $text = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-remarkup',

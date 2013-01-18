@@ -212,13 +212,13 @@ final class PhrictionDiffController
     }
 
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href'  => '/phriction/edit/'.$document_id.'/?revert='.$version,
         'class' => 'button',
       ),
-      'Revert to Version '.phutil_escape_html($version).'...');
+      'Revert to Version '.$version.'...');
   }
 
   private function renderComparisonTable(array $content) {

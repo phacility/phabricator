@@ -271,7 +271,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
             'sigil' => 'diffusion-source',
           ),
           implode("\n", $rows));
-        $corpus = phutil_render_tag(
+        $corpus = phutil_tag(
           'div',
           array(
             'style' => 'padding: 0 2em;',
@@ -666,7 +666,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
             "\xC2\xAB");
         }
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-blame-link',
@@ -674,7 +674,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           ),
           $before_link);
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-rev-link',
@@ -682,7 +682,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           ),
           $commit_link);
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-rev-link',
@@ -690,7 +690,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           ),
           $revision_link);
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-author-link',
@@ -717,8 +717,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
       Javelin::initBehavior('diffusion-line-linker');
 
-      $blame = implode('', $blame);
-
       if ($line['target']) {
         Javelin::initBehavior(
           'diffusion-jump-to',
@@ -730,7 +728,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $anchor_text = null;
       }
 
-      $line_text = phutil_render_tag(
+      $blame[] = phutil_render_tag(
         'td',
         array(
         ),
@@ -738,13 +736,12 @@ final class DiffusionBrowseFileController extends DiffusionController {
         "\xE2\x80\x8B". // NOTE: See phabricator-oncopy behavior.
         $line['data']);
 
-      $rows[] = phutil_render_tag(
+      $rows[] = phutil_tag(
         'tr',
         array(
           'class' => ($line['highlighted'] ? 'highlighted' : null),
         ),
-        $blame.
-        $line_text);
+        $blame);
 
       $rows = array_merge($rows, $this->renderInlines(
         idx($inlines, $line['line'], array()),

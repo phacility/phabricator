@@ -34,7 +34,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
     $header = null;
     if ($this->header) {
       $header = hsprintf('<a href="%s">%s</a>', $this->uri, $this->header);
-      $header = phutil_render_tag(
+      $header = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-pinboard-item-header',
@@ -66,14 +66,12 @@ final class PhabricatorPinboardItemView extends AphrontView {
         $content);
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-pinboard-item-view',
       ),
-      $header.
-      $image.
-      $content);
+      array($header, $image, $content));
   }
 
 }

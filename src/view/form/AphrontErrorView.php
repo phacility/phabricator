@@ -45,12 +45,12 @@ final class AphrontErrorView extends AphrontView {
           array(),
           $error);
       }
-      $list = phutil_render_tag(
+      $list = phutil_tag(
         'ul',
         array(
           'class' => 'aphront-error-view-list',
         ),
-        implode("\n", $list));
+        $list);
     } else {
       $list = null;
     }
@@ -79,13 +79,15 @@ final class AphrontErrorView extends AphrontView {
         'id' => $this->id,
         'class' => 'aphront-error-view '.$more_classes,
       ),
-      $title.
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'aphront-error-view-body',
-        ),
-        $this->renderChildren().
-        $list));
+      array(
+        $title,
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'aphront-error-view-body',
+          ),
+          $this->renderChildren().
+          $list),
+      ));
   }
 }

@@ -34,7 +34,7 @@ final class PhabricatorSearchResultView extends AphrontView {
 
     require_celerity_resource('phabricator-search-results-css');
 
-    $link = phutil_render_tag(
+    $link = phutil_tag(
       'a',
       array(
         'href' => $handle->getURI(),
@@ -73,7 +73,7 @@ final class PhabricatorSearchResultView extends AphrontView {
       '<div class="phabricator-search-result">'.
         $img.
         '<div class="result-desc">'.
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'class' => 'result-name',
@@ -112,7 +112,7 @@ final class PhabricatorSearchResultView extends AphrontView {
         '<strong>\1</strong>',
         $str);
     }
-    return $str;
+    return phutil_safe_html($str);
   }
 
 }

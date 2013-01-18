@@ -118,12 +118,12 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           ''));
     }
 
-    $buttons = phutil_render_tag(
+    $buttons = phutil_tag(
       'div',
       array(
         'class' => 'remarkup-assist-bar',
       ),
-      implode('', $buttons));
+      $buttons);
 
     $monospaced_textareas = null;
     $monospaced_textareas_class = null;

@@ -16,12 +16,12 @@ final class PhabricatorSetupIssueView extends AphrontView {
   public function render() {
     $issue = $this->getIssue();
 
-    $description = phutil_render_tag(
+    $description = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-instructions',
       ),
-      nl2br(phutil_escape_html($issue->getMessage())));
+      new PhutilSafeHTML(nl2br(phutil_escape_html($issue->getMessage()))));
 
     $configs = $issue->getPHPConfig();
     if ($configs) {
@@ -36,13 +36,15 @@ final class PhabricatorSetupIssueView extends AphrontView {
     $commands = $issue->getCommands();
     if ($commands) {
       $run_these = pht("Run these %d command(s):", count($commands));
-      $description .= phutil_render_tag(
+      $description .= phutil_tag(
         'div',
         array(
           'class' => 'setup-issue-config',
         ),
-        phutil_render_tag('p', array(), $run_these).
-        phutil_render_tag('pre', array(), implode("\n", $commands)));
+        array(
+          phutil_render_tag('p', array(), $run_these),
+          phutil_render_tag('pre', array(), implode("\n", $commands)),
+        ));
     }
 
     $extensions = $issue->getPHPExtensions();
@@ -74,17 +76,19 @@ final class PhabricatorSetupIssueView extends AphrontView {
         "After installing new PHP extensions, <strong>restart your webserver ".
         "for the changes to take effect</strong>.");
 
-      $description .= phutil_render_tag(
+      $description .= phutil_tag(
         'div',
         array(
           'class' => 'setup-issue-config',
         ),
-        phutil_render_tag('p', array(), $install_these).
-        phutil_render_tag('pre', array(), implode("\n", $extensions)).
-        phutil_render_tag('p', array(), $install_info).
-        phutil_render_tag('pre', array(), $install_commands).
-        phutil_render_tag('p', array(), $fallback_info).
-        phutil_render_tag('p', array(), $restart_info));
+        array(
+          phutil_render_tag('p', array(), $install_these),
+          phutil_render_tag('pre', array(), implode("\n", $extensions)),
+          phutil_render_tag('p', array(), $install_info),
+          phutil_render_tag('pre', array(), $install_commands),
+          phutil_render_tag('p', array(), $fallback_info),
+          phutil_render_tag('p', array(), $restart_info),
+        ));
 
     }
 
@@ -102,18 +106,18 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       $issue->getName());
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'setup-issue',
       ),
-      $name.$description.$next);
+      array($name, $description, $next));
   }
 
   private function renderPhabricatorConfig(array $configs) {
     $issue = $this->getIssue();
 
-    $table_info = phutil_render_tag(
+    $table_info = phutil_tag(
       'p',
       array(),
       pht(
@@ -141,16 +145,16 @@ final class PhabricatorSetupIssueView extends AphrontView {
       $table[] = '</tr>';
     }
 
-    $table = phutil_render_tag(
+    $table = phutil_tag(
       'table',
       array(
       ),
-      implode("\n", $table));
+      new PhutilSafeHTML(implode("\n", $table)));
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
 
     if ($this->getIssue()->getIsFatal()) {
-      $update_info = phutil_render_tag(
+      $update_info = phutil_tag(
         'p',
         array(),
         pht(
@@ -172,12 +176,12 @@ final class PhabricatorSetupIssueView extends AphrontView {
         if (!idx($options, $config) || $options[$config]->getLocked()) {
           continue;
         }
-        $link = phutil_render_tag(
+        $link = phutil_tag(
           'a',
           array(
             'href' => '/config/edit/'.$config.'/?issue='.$issue->getIssueKey(),
           ),
-          pht('Edit %s', phutil_escape_html($config)));
+          pht('Edit %s', $config));
         $update[] = '<li>'.$link.'</li>';
       }
       if ($update) {
@@ -207,7 +211,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
   }
 
   private function renderPHPConfig(array $configs) {
-    $table_info = phutil_render_tag(
+    $table_info = phutil_tag(
       'p',
       array(),
       pht(
@@ -236,12 +240,10 @@ final class PhabricatorSetupIssueView extends AphrontView {
       $table[] = '</tr>';
     }
 
-    $table = phutil_render_tag(
+    $table = phutil_tag(
       'table',
-      array(
-
-      ),
-      implode("\n", $table));
+      array(),
+      new PhutilSafeHTML(implode("\n", $table)));
 
     ob_start();
       phpinfo();
@@ -269,14 +271,14 @@ final class PhabricatorSetupIssueView extends AphrontView {
     }
 
     if (!$ini_loc) {
-      $info = phutil_render_tag(
+      $info = phutil_tag(
         'p',
         array(),
         pht(
           "To update these %d value(s), edit your PHP configuration file.",
           count($configs)));
     } else {
-      $info = phutil_render_tag(
+      $info = phutil_tag(
         'p',
         array(),
         pht(
@@ -290,7 +292,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
     }
 
     if ($more_loc) {
-      $info .= phutil_render_tag(
+      $info .= phutil_tag(
         'p',
         array(),
         pht(
@@ -302,32 +304,27 @@ final class PhabricatorSetupIssueView extends AphrontView {
         implode("\n", $more_loc));
     }
 
-    $info .= phutil_render_tag(
+    $info .= phutil_tag(
       'p',
       array(),
-      pht(
-        "You can find more information about PHP configuration values in the ".
-        "%s.",
-        phutil_tag(
-          'a',
-          array(
-            'href' => 'http://php.net/manual/ini.list.php',
-          ),
-          pht('PHP Documentation'))));
+      phutil_safe_html(pht(
+        'You can find more information about PHP configuration values in the '.
+        '<a href="%s">PHP Documentation</a>.',
+        'http://php.net/manual/ini.list.php')));
 
-    $info .= phutil_render_tag(
+    $info .= phutil_tag(
       'p',
       array(),
-      pht(
+      phutil_safe_html(pht(
         "After editing the PHP configuration, <strong>restart your ".
-        "webserver for the changes to take effect</strong>."));
+        "webserver for the changes to take effect</strong>.")));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-config',
       ),
-      $table_info.$table.$info);
+      array($table_info, $table, $info));
   }
 
 }

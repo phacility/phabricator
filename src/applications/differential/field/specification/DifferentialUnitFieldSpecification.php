@@ -93,9 +93,9 @@ final class DifferentialUnitFieldSpecification
           $hidden[$result]++;
         }
 
-        $value = phutil_escape_html(idx($test, 'name'));
+        $value = idx($test, 'name');
         if (!empty($test['link'])) {
-          $value = phutil_render_tag(
+          $value = phutil_tag(
             'a',
             array(
               'href' => $test['link'],

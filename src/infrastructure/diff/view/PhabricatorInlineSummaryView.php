@@ -100,12 +100,12 @@ final class PhabricatorInlineSummaryView extends AphrontView {
       }
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'table',
       array(
         'class' => 'phabricator-inline-summary-table',
       ),
-      implode("\n", $rows));
+      new PhutilSafeHTML(implode("\n", $rows)));
   }
 
 }

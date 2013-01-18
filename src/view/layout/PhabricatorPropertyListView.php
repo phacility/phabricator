@@ -131,9 +131,13 @@ final class PhabricatorPropertyListView extends AphrontView {
         array(
           'class' => 'phabricator-property-list-container',
         ),
-        $list.
-        '<div class="phabriator-property-list-view-end"></div>'
-      );
+        array(
+          $list,
+          phutil_tag(
+            'div',
+            array('class' => 'phabriator-property-list-view-end'),
+            ''),
+        ));
   }
 
   private function renderSectionPart(array $part) {

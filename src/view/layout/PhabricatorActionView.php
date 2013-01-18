@@ -106,12 +106,12 @@ final class PhabricatorActionView extends AphrontView {
       $classes[] = 'phabricator-action-view-disabled';
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'li',
       array(
         'class' => implode(' ', $classes),
       ),
-      $icon.$item);
+      array($icon, $item));
   }
 
   public static function getAvailableIcons() {

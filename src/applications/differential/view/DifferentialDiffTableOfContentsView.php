@@ -137,7 +137,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       if ($cov === null) {
         $mcov = $cov = '<em>-</em>';
       } else {
-        $mcov = phutil_render_tag(
+        $mcov = phutil_tag(
           'div',
           array(
             'id' => 'differential-mcoverage-'.md5($fname),

@@ -66,7 +66,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
           $symbol = '?';
       }
 
-      $running = phutil_render_tag(
+      $running = phutil_tag(
         'span',
         array(
           'style' => $style,

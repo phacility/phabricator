@@ -223,12 +223,12 @@ final class PhabricatorSlowvotePollController
     }
 
     if ($comment_markup) {
-      $comment_markup = phutil_render_tag(
+      $comment_markup = phutil_tag(
         'table',
         array(
           'class' => 'phabricator-slowvote-comments',
         ),
-        implode("\n", $comment_markup));
+        new PhutilSafeHTML(implode("\n", $comment_markup)));
     } else {
       $comment_markup = null;
     }
@@ -301,12 +301,12 @@ final class PhabricatorSlowvotePollController
       $checked_class = null;
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'label',
       array(
         'class' => 'phabricator-slowvote-label '.$checked_class,
       ),
-      $input.phutil_escape_html($option->getName()));
+      array($input, $option->getName()));
   }
 
   private function renderVoteCount(

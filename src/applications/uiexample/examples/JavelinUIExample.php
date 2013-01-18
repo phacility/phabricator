@@ -53,13 +53,13 @@ final class JavelinUIExample extends PhabricatorUIExample {
       ),
       'Toggle Blue Background');
 
-    $div = phutil_render_tag(
+    $div = phutil_tag(
       'div',
       array(
         'id' => $container_id,
         'class' => 'jxui-example-container jxui-blue-background',
       ),
-      $button_red.$button_blue);
+      array($button_red, $button_blue));
 
     return array($div);
   }

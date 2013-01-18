@@ -82,7 +82,7 @@ final class PhrictionHistoryController
       $rows[] = array(
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $slug_uri.'?v='.$version,

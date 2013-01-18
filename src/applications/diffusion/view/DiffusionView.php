@@ -32,7 +32,7 @@ abstract class DiffusionView extends AphrontView {
         'commit'  => $commit_identifier,
       ));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => $href,
@@ -63,15 +63,13 @@ abstract class DiffusionView extends AphrontView {
         'path'   => $path,
       ));
 
-    if (isset($details['html'])) {
-      $text = $details['html'];
-    } else if (isset($details['text'])) {
-      $text = phutil_escape_html($details['text']);
+    if (isset($details['text'])) {
+      $text = $details['text'];
     } else {
       $text = 'Browse';
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => $href,
@@ -87,7 +85,7 @@ abstract class DiffusionView extends AphrontView {
           'id'  => $hash,
         ));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => $href,
@@ -120,7 +118,7 @@ abstract class DiffusionView extends AphrontView {
     $commit_name = self::nameCommit($repository, $commit);
     $callsign = $repository->getCallsign();
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => "/r{$callsign}{$commit}",
@@ -133,7 +131,7 @@ abstract class DiffusionView extends AphrontView {
       return null;
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => "/D{$id}",

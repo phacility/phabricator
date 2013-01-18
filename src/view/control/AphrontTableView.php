@@ -302,7 +302,7 @@ final class AphrontTableView extends AphrontView {
     // (alternatively, we could hard-code the line height). This is gross but
     // it's not clear that there's a better appraoch.
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'single-display-line-bounds',

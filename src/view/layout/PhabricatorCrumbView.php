@@ -80,13 +80,13 @@ final class PhabricatorCrumbView extends AphrontView {
         '');
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       $this->href ? 'a' : 'span',
       array(
         'href'  => $this->href,
         'class' => implode(' ', $classes),
       ),
-      $icon.$name.$divider);
+      array($icon, $name, $divider));
   }
 
 

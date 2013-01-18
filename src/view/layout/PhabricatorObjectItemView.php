@@ -100,20 +100,20 @@ final class PhabricatorObjectItemView extends AphrontView {
           ),
           $spec['label']);
 
-        $icon_list[] = phutil_render_tag(
+        $icon_list[] = phutil_tag(
           'li',
           array(
             'class' => 'phabricator-object-item-icon',
           ),
-          $label.$icon);
+          array($label, $icon));
       }
 
-      $icons = phutil_render_tag(
+      $icons = phutil_tag(
         'ul',
         array(
           'class' => 'phabricator-object-item-icons',
         ),
-        implode('', $icon_list));
+        $icon_list);
     }
 
     $attrs = null;
@@ -135,12 +135,12 @@ final class PhabricatorObjectItemView extends AphrontView {
           ($first ? null : $spacer).$attribute);
         $first = false;
       }
-      $attrs = phutil_render_tag(
+      $attrs = phutil_tag(
         'ul',
         array(
           'class' => 'phabricator-object-item-attributes',
         ),
-        implode('', $attrs));
+        $attrs);
     }
 
     $classes = array();
@@ -165,12 +165,12 @@ final class PhabricatorObjectItemView extends AphrontView {
       ),
       $header.$attrs.$this->renderChildren());
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
       ),
-      $icons.$content);
+      array($icons, $content));
   }
 
 }

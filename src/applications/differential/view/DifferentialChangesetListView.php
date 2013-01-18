@@ -158,12 +158,12 @@ final class DifferentialChangesetListView extends AphrontView {
           'Load');
       }
       $detail->appendChild(
-        phutil_render_tag(
+        phutil_tag(
           'div',
           array(
             'id' => $uniq_id,
           ),
-          '<div class="differential-loading">'.$load.'</div>'));
+          phutil_tag('div', array('class' => 'differential-loading'), $load)));
       $output[] = $detail->render();
     }
 
@@ -217,12 +217,12 @@ final class DifferentialChangesetListView extends AphrontView {
       ),
       'Undo');
 
-    $div = phutil_render_tag(
+    $div = phutil_tag(
       'div',
       array(
         'class' => 'differential-inline-undo',
       ),
-      'Changes discarded. '.$link);
+      array('Changes discarded. ', $link));
 
     $template =
       '<table><tr>'.

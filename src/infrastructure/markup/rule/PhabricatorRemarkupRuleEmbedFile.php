@@ -151,7 +151,7 @@ final class PhabricatorRemarkupRuleEmbedFile
         }
 
         if ($layout_class) {
-          $embed = phutil_render_tag(
+          $embed = phutil_tag(
             'div',
             array(
               'class' => $layout_class,

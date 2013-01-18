@@ -137,7 +137,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $browse_link = '<strong>'.$this->linkBrowse(
           $base_path.$path->getPath().$dir_slash,
           array(
-            'html' => $this->renderPathIcon(
+            'text' => $this->renderPathIcon(
               'dir',
               $browse_text),
           )).'</strong>';
@@ -162,7 +162,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $browse_link = $this->linkBrowse(
           $base_path.$path->getPath(),
           array(
-            'html' => $this->renderPathIcon($type, $browse_text),
+            'text' => $this->renderPathIcon($type, $browse_text),
           ));
       }
 

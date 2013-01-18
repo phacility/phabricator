@@ -83,12 +83,12 @@ final class PonderCommentListView extends AphrontView {
        '<td>'.$addview->render().'</td>'.
       '</tr>';
 
-    $comment_markup = phutil_render_tag(
+    $comment_markup = phutil_tag(
       'table',
       array(
         'class' => 'ponder-comments',
       ),
-      implode("\n", $comment_markup)
+      new PhutilSafeHTML(implode("\n", $comment_markup))
     );
 
 

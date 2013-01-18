@@ -273,7 +273,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
             ->setAnchorName($this->anchor)
             ->render();
 
-          $date = $anchor.phutil_render_tag(
+          $date = $anchor.phutil_tag(
               'a',
               array(
                 'href' => '#'.$this->anchor,

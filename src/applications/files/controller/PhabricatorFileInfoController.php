@@ -148,7 +148,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
           'class' => 'phabricator-property-list-image',
         ));
 
-      $linked_image = phutil_render_tag(
+      $linked_image = phutil_tag(
         'a',
         array(
           'href' => $file->getViewURI(),

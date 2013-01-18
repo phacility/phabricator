@@ -57,7 +57,7 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
           ),
           $client->getName()
         ),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $scope_doc_href,

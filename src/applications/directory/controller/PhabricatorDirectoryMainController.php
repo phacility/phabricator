@@ -310,13 +310,14 @@ final class PhabricatorDirectoryMainController
         'id'    => $uniq_id,
         'value' => $query,
       ));
-    $jump_caption = phutil_render_tag(
+    $jump_caption = phutil_tag(
       'p',
       array(
         'class' => 'phabricator-jump-nav-caption',
       ),
-      'Enter the name of an object like <tt>D123</tt> to quickly jump to '.
-      'it. See '.$doc_link.' or type <tt>help</tt>.');
+      new PhutilSafeHTML(
+        'Enter the name of an object like <tt>D123</tt> to quickly jump to '.
+        'it. See '.$doc_link.' or type <tt>help</tt>.'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Jump Nav');

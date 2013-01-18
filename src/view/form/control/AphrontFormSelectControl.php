@@ -45,12 +45,12 @@ final class AphrontFormSelectControl extends AphrontFormControl {
     $tags = array();
     foreach ($options as $value => $thing) {
       if (is_array($thing)) {
-        $tags[] = phutil_render_tag(
+        $tags[] = phutil_tag(
           'optgroup',
           array(
             'label' => $value,
           ),
-          implode("\n", self::renderOptions($selected, $thing)));
+          self::renderOptions($selected, $thing));
       } else {
         $tags[] = phutil_tag(
           'option',

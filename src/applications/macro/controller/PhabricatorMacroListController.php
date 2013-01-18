@@ -129,7 +129,7 @@ final class PhabricatorMacroListController
         }
         $datetime = phabricator_date($file->getDateCreated(), $viewer);
         $item->appendChild(
-          phutil_render_tag(
+          phutil_tag(
             'div',
             array(),
             pht('Created on %s', $datetime)));

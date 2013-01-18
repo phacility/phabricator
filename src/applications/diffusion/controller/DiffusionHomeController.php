@@ -105,7 +105,7 @@ final class DiffusionHomeController extends DiffusionController {
       $branch = $repository->getDefaultArcanistBranch();
       if (isset($lint_branches[$branch])) {
         $show_lint = true;
-        $lint_count = phutil_render_tag(
+        $lint_count = phutil_tag(
           'a',
           array(
             'href' => DiffusionRequest::generateDiffusionURI(array(

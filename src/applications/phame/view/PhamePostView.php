@@ -123,26 +123,30 @@ final class PhamePostView extends AphrontView {
   }
 
   public function render() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post',
       ),
-      $this->renderTitle().
-      $this->renderDatePublished().
-      $this->renderBody().
-      $this->renderComments());
+      array(
+        $this->renderTitle(),
+        $this->renderDatePublished(),
+        $this->renderBody(),
+        $this->renderComments(),
+      ));
   }
 
   public function renderWithSummary() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post',
       ),
-      $this->renderTitle().
-      $this->renderDatePublished().
-      $this->renderSummary());
+      array(
+        $this->renderTitle(),
+        $this->renderDatePublished(),
+        $this->renderSummary(),
+      ));
   }
 
   private function renderFacebookComments() {

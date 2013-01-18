@@ -327,14 +327,14 @@ final class PhabricatorMainMenuView extends AphrontView {
       $container_classes[] = 'alert-unread';
     }
 
-    $bubble_tag = phutil_render_tag(
+    $bubble_tag = phutil_tag(
       'a',
       array(
         'href'  => '/notification/',
         'class' => implode(' ', $container_classes),
         'id'    => $bubble_id,
       ),
-      $icon_tag.$count_tag);
+      array($icon_tag, $count_tag));
 
     Javelin::initBehavior(
       'aphlict-dropdown',
