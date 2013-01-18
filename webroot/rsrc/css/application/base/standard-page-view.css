@@ -88,10 +88,17 @@ a.handle-disabled {
 }
 
 .aphront-developer-error-callout {
+  position: relative;
   padding: 2em;
   background: #aa0000;
   color: white;
   text-align: center;
   font-size: 11px;
   font-family: "Verdana";
+}
+
+.setup-warning-callout {
+  position: relative;
+  padding: 0.75em 1em;
+  background: #ffffbb;
 }

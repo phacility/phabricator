@@ -50,6 +50,11 @@
   z-index: 6;
 }
 
+.setup-warning-callout,
+.aphront-developer-error-callout {
+  z-index: 6;
+}
+
 .jx-notification-container {
   z-index: 7;
 }
