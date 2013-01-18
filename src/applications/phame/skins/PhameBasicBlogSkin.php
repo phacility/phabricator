@@ -166,7 +166,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     if (!$uri) {
       return null;
     }
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'class' => 'phame-page-link phame-page-older',
@@ -198,7 +198,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     if (!$uri) {
       return null;
     }
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'class' => 'phame-page-link phame-page-newer',

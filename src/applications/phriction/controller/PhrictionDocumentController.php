@@ -131,7 +131,7 @@ final class PhrictionDocumentController
           $handles[$project_phid]->renderLink().'.';
       }
 
-      $index_link = phutil_render_tag(
+      $index_link = phutil_tag(
         'a',
         array(
           'href' => '/phriction/',

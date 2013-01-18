@@ -21,7 +21,7 @@ final class DifferentialChangesetTwoUpRenderer
         array(
           'sigil' => 'context-target',
         ),
-        phutil_render_tag(
+        phutil_tag(
           'td',
           array(
             'colspan' => 6,

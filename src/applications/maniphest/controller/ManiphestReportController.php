@@ -414,7 +414,7 @@ final class ManiphestReportController extends ManiphestController {
           array(
             'href' => $base_link.ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
           ),
-          phutil_render_html('em', array(), '(Up For Grabs)'));
+          phutil_tag('em', array(), '(Up For Grabs)'));
         $col_header = 'User';
         $header = 'Open Tasks by User and Priority ('.$date.')';
         break;
@@ -451,7 +451,7 @@ final class ManiphestReportController extends ManiphestController {
           array(
             'href' => $base_link.ManiphestTaskOwner::PROJECT_NO_PROJECT,
           ),
-          phutil_render_html('em', array(), '(No Project)'));
+          phutil_tag('em', array(), '(No Project)'));
         $col_header = 'Project';
         $header = 'Open Tasks by Project and Priority ('.$date.')';
         break;

@@ -88,7 +88,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
     }
 
-    $next = phutil_render_tag(
+    $next = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-next',
@@ -308,7 +308,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       pht(
         "You can find more information about PHP configuration values in the ".
         "%s.",
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => 'http://php.net/manual/ini.list.php',

@@ -153,7 +153,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $reviewer_warning->setTitle(pht('No Active Reviewers'));
         if ($revision->getReviewers()) {
           $reviewer_warning->appendChild(
-            phutil_render_tag(
+            phutil_tag(
               'p',
               array(),
               pht('All specified reviewers are disabled and this revision '.
@@ -161,7 +161,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
             ));
         } else {
           $reviewer_warning->appendChild(
-            phutil_render_tag(
+            phutil_tag(
               'p',
               array(),
               pht('This revision has no specified reviewers and needs '.

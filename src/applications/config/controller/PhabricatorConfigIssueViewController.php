@@ -22,7 +22,7 @@ final class PhabricatorConfigIssueViewController
         ->setTitle(pht('Issue Resolved'))
         ->appendChild(pht('This setup issue has been resolved. '))
         ->appendChild(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $this->getApplicationURI('issue/'),

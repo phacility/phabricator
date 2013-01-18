@@ -31,7 +31,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
       if ($hit_limit) {
         $content_number = '';
-        $content_line = phutil_render_tag(
+        $content_line = phutil_tag(
           'span',
           array(
             'class' => 'c',
