@@ -31,8 +31,9 @@ final class HeraldRuleEditHistoryController extends HeraldController {
       ->setUser($this->getRequest()->getUser());
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Edit History');
+    $panel->setHeader(pht('Edit History'));
     $panel->appendChild($list_view);
+    $panel->setNoBackground();
 
     $nav = $this->renderNav();
     $nav->selectFilter('history');

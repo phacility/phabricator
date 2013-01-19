@@ -90,9 +90,10 @@ final class HeraldTranscriptListController extends HeraldController {
 
     // Render the whole page.
     $panel = new AphrontPanelView();
-    $panel->setHeader('Herald Transcripts');
+    $panel->setHeader(pht('Herald Transcripts'));
     $panel->appendChild($table);
     $panel->appendChild($pager);
+    $panel->setNoBackground();
 
     $nav = $this->renderNav();
     $nav->selectFilter('transcript');

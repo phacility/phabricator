@@ -323,8 +323,9 @@ final class HeraldTranscriptController extends HeraldController {
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Actions Taken');
+    $panel->setHeader(pht('Actions Taken'));
     $panel->appendChild($table);
+    $panel->setNoBackground();
 
     return $panel;
   }

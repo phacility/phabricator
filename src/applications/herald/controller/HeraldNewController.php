@@ -59,20 +59,21 @@ final class HeraldNewController extends HeraldController {
       ->setAction('/herald/rule/')
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('New rule for')
+          ->setLabel(pht('New rule for'))
           ->setName('content_type')
           ->setValue($this->contentType)
           ->setOptions($content_type_map))
       ->appendChild($radio)
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Create Rule')
+          ->setValue(pht('Create Rule'))
           ->addCancelButton('/herald/view/'.$this->contentType.'/'));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Create New Herald Rule');
+    $panel->setHeader(pht('Create New Herald Rule'));
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     $nav = $this->renderNav();
     $nav->selectFilter('new');
