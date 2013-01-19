@@ -360,39 +360,6 @@ final class PhabricatorSetup {
 
     self::write("[OKAY] Basic configuration OKAY\n");
 
-
-    self::writeHeader('FACEBOOK INTEGRATION');
-    $fb_auth = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
-    if (!$fb_auth) {
-      self::write(" skip  'facebook.auth-enabled' not enabled.\n");
-    } else {
-      self::write(" okay  'facebook.auth-enabled' is enabled.\n");
-      $app_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
-      $app_secret = PhabricatorEnv::getEnvConfig('facebook.application-secret');
-
-      if (!$app_id) {
-        self::writeFailure();
-        self::write(
-          "Setup failure! 'facebook.auth-enabled' is true but there is no ".
-          "setting for 'facebook.application-id'.\n");
-        return;
-      } else {
-        self::write(" okay  'facebook.application-id' is set.\n");
-      }
-
-      if (!$app_secret) {
-        self::writeFailure();
-        self::write(
-          "Setup failure! 'facebook.auth-enabled' is true but there is no ".
-          "setting for 'facebook.application-secret'.");
-        return;
-      } else {
-        self::write(" okay  'facebook.application-secret is set.\n");
-      }
-
-      self::write("[OKAY] Facebook integration OKAY\n");
-    }
-
     self::writeHeader("MySQL DATABASE & STORAGE CONFIGURATION");
 
     $conf = PhabricatorEnv::newObjectFromConfig('mysql.configuration-provider');
@@ -494,12 +461,6 @@ final class PhabricatorSetup {
 
     // This, uh, makes it look cool. -_-
     usleep(20000);
-  }
-
-  private static function writeNote($note) {
-    $note = "*** NOTE: ".wordwrap($note, 75, "\n", true);
-    $note = "\n".str_replace("\n", "\n          ", $note)."\n\n";
-    self::write($note);
   }
 
   public static function writeHeader($header) {
