@@ -54,10 +54,14 @@ final class PhabricatorConfigAllController
         id(new PhabricatorCrumbView())
           ->setName($title));
 
+    $panel = new AphrontPanelView();
+    $panel->appendChild($table);
+    $panel->setNoBackground();
+
     $nav = $this->buildSideNavView();
     $nav->selectFilter('all/');
     $nav->setCrumbs($crumbs);
-    $nav->appendChild($table);
+    $nav->appendChild($panel);
 
     return $this->buildApplicationPage(
       $nav,
