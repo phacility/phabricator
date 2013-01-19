@@ -27,3 +27,9 @@
   margin-left: 13%;
   margin-right: 17%;
 }
+
+.device-phone .aphront-list-filter-view-controls .aphront-form-view .aphront-form-input {
+  width: 98%;
+  margin-left: 0%;
+  margin-right: 0%;
+}

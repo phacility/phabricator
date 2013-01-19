@@ -282,6 +282,7 @@ final class PhabricatorLoginController
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
     foreach ($forms as $name => $form) {
       $panel->appendChild('<h1>'.$name.'</h1>');
       $panel->appendChild($form);
@@ -290,7 +291,7 @@ final class PhabricatorLoginController
 
     $login_message = PhabricatorEnv::getEnvConfig('auth.login-message');
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $error_view,
         $login_message,
@@ -298,6 +299,7 @@ final class PhabricatorLoginController
       ),
       array(
         'title' => 'Login',
+        'device' => true
       ));
   }
 

@@ -175,7 +175,6 @@ final class HeraldRuleController extends HeraldController {
       $rule->getID()
         ? pht('Edit Herald Rule')
         : pht('Create Herald Rule'));
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
     $panel->appendChild($form);
     $panel->setNoBackground();
 

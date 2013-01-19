@@ -358,7 +358,6 @@ JX.install('HeraldRuleEditor', {
     },
     _renderSelect : function(map, selected, sigil) {
       var attrs = {
-        style : {width: '250px', margin: '0 .5em 0 0'},
         sigil : sigil
       };
       return JX.Prefab.renderSelect(map, selected, attrs);

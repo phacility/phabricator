@@ -8,7 +8,11 @@
 }
 
 .herald-condition-table select {
-  width: 250px;
+  width: 160px;
+}
+
+.device-phone .herald-condition-table select {
+  width: 90px;
 }
 
 .herald-action-table td,
@@ -23,7 +27,9 @@
 
 .herald-action-table td input,
 .herald-condition-table td input {
-  width: 460px;
+  width: 95%;
+  max-width: 460px;
+  padding: 2px 4px;
 }
 
 .herald-action-table td.target {

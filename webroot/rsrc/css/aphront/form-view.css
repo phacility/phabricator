@@ -25,10 +25,23 @@
   color: #666666;
 }
 
+.device-phone .aphront-form-view label.aphront-form-label {
+  display: block;
+  float: none;
+  text-align: left;
+  width: 100%;
+}
+
 .aphront-form-input {
   margin-left: 20%;
   margin-right: 25%;
   width: 55%;
+}
+
+.device-phone .aphront-form-input {
+  margin-left: 0%;
+  margin-right: 0%;
+  width: 100%;
 }
 
 .aphront-form-control-text .aphront-form-input input,
@@ -49,6 +62,15 @@
   color: #aa0000;
   font-weight: bold;
   padding-top: 4px;
+}
+
+.device-phone .aphront-form-error {
+  float: none;
+  width: 100%;
+}
+
+.device-phone .aphront-form-drag-and-drop-upload {
+  display: none;
 }
 
 .aphront-form-required {
@@ -103,6 +125,10 @@
   text-align: right;
   margin-right: 25%;
   margin-left: 20%;
+}
+
+.device-phone .aphront-form-view .aphront-form-caption {
+  margin-right: 0%;
 }
 
 /* override for when inside an aphront-panel-view */
