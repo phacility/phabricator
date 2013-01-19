@@ -361,38 +361,6 @@ final class PhabricatorSetup {
     self::write("[OKAY] Basic configuration OKAY\n");
 
 
-    $issue_gd_warning = false;
-    self::writeHeader('GD LIBRARY');
-    if (extension_loaded('gd')) {
-      self::write(" okay  Extension 'gd' is loaded.\n");
-      $image_type_map = array(
-        'imagepng'  => 'PNG',
-        'imagegif'  => 'GIF',
-        'imagejpeg' => 'JPEG',
-      );
-      foreach ($image_type_map as $function => $image_type) {
-        if (function_exists($function)) {
-          self::write(" okay  Support for '{$image_type}' is available.\n");
-        } else {
-          self::write(" warn  Support for '{$image_type}' is not available!\n");
-          $issue_gd_warning = true;
-        }
-      }
-    } else {
-      self::write(" warn  Extension 'gd' is not loaded.\n");
-      $issue_gd_warning = true;
-    }
-
-    if ($issue_gd_warning) {
-      self::write(
-        "[WARN] The 'gd' library is missing or lacks full support. ".
-        "Phabricator will not be able to generate image thumbnails without ".
-        "gd.\n");
-    } else {
-      self::write("[OKAY] 'gd' loaded and has full image type support.\n");
-    }
-
-
     self::writeHeader('FACEBOOK INTEGRATION');
     $fb_auth = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
     if (!$fb_auth) {
@@ -431,14 +399,6 @@ final class PhabricatorSetup {
     $conn_user = $conf->getUser();
     $conn_pass = $conf->getPassword();
     $conn_host = $conf->getHost();
-
-    $timeout = ini_get('mysql.connect_timeout');
-    if ($timeout > 5) {
-      self::writeNote(
-        "Your MySQL connect timeout is very high ({$timeout} seconds). ".
-        "Consider reducing it to 5 or below by setting ".
-        "'mysql.connect_timeout' in your php.ini.");
-    }
 
     self::write(" okay  Trying to connect to MySQL database ".
                 "{$conn_user}@{$conn_host}...\n");
@@ -499,43 +459,6 @@ final class PhabricatorSetup {
       return;
     } else {
       self::write(" okay  Databases have been initialized.\n");
-    }
-
-    $index_min_length = queryfx_one(
-      $conn_raw,
-      'SHOW VARIABLES LIKE %s',
-      'ft_min_word_len');
-    $index_min_length = idx($index_min_length, 'Value', 4);
-    if ($index_min_length >= 4) {
-      self::writeNote(
-        "MySQL is configured with a 'ft_min_word_len' of 4 or greater, which ".
-        "means you will not be able to search for 3-letter terms. Consider ".
-        "setting this in your configuration:\n".
-        "\n".
-        "    [mysqld]\n".
-        "        ft_min_word_len=3\n".
-        "\n".
-        "Then optionally run:\n".
-        "\n".
-        "    REPAIR TABLE {$namespace}_search.search_documentfield QUICK;\n".
-        "\n".
-        "...to reindex existing documents.");
-    }
-
-    $max_allowed_packet = queryfx_one(
-      $conn_raw,
-      'SHOW VARIABLES LIKE %s',
-      'max_allowed_packet');
-    $max_allowed_packet = idx($max_allowed_packet, 'Value', PHP_INT_MAX);
-
-    $recommended_minimum = 1024 * 1024;
-    if ($max_allowed_packet < $recommended_minimum) {
-      self::writeNote(
-        "MySQL is configured with a small 'max_allowed_packet' ".
-        "('{$max_allowed_packet}'), which may cause some large writes to ".
-        "fail. Consider raising this to at least {$recommended_minimum}.");
-    } else {
-      self::write(" okay  max_allowed_packet = {$max_allowed_packet}.\n");
     }
 
     self::write("[OKAY] Database and storage configuration OKAY\n");
