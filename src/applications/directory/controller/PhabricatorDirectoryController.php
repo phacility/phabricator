@@ -22,8 +22,13 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI('/'));
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
+    $show_beta =
+      PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
 
     foreach ($applications as $key => $application) {
+      if (!$show_beta && $application->isBeta()) {
+        unset($applications[$key]);
+      }
       if (!$application->shouldAppearInLaunchView()) {
         // Remove hidden applications (usually internal stuff).
         unset($applications[$key]);

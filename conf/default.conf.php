@@ -836,6 +836,8 @@ return array(
   // eggs.
   'phabricator.serious-business' => false,
 
+  // Should Phabricator show beta applications on the homepage
+  'phabricator.show-beta-applications' => false,
 
 // -- Files ----------------------------------------------------------------- //
 

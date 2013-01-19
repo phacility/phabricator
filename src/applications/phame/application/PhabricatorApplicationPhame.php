@@ -26,6 +26,10 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
     return self::GROUP_COMMUNICATION;
   }
 
+  public function isBeta() {
+    return true;
+  }
+
   public function getRoutes() {
     return array(
      '/phame/' => array(

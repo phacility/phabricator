@@ -35,6 +35,10 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return self::GROUP_COMMUNICATION;
   }
 
+  public function isBeta() {
+    return true;
+  }
+
   public function getRoutes() {
     return array(
       '/M(?P<id>[1-9]\d*)' => 'PholioMockViewController',

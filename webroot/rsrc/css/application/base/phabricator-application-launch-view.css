@@ -90,11 +90,10 @@ a.phabricator-application-launch-container:hover {
   margin-left: 52px;
 }
 
+.phabricator-application-beta,
 .phabricator-application-launch-attention {
   position: absolute;
-  right: 4px;
   top: 4px;
-  background: rgb(0, 122, 255);
   border-radius: 10px;
   color: white;
   font-weight: bold;
@@ -104,7 +103,18 @@ a.phabricator-application-launch-container:hover {
   box-shadow: 0 0px 2px #000;
 }
 
+.phabricator-application-launch-attention {
+  right: 4px;
+  background-color: rgb(0, 122, 255);
+}
+
+.phabricator-application-beta {
+  left: 4px;
+  background-color: #ff8f00;
+}
+
 .application-tile-full .phabricator-application-launch-attention {
   top: 16px;
   right: 12px;
 }
+

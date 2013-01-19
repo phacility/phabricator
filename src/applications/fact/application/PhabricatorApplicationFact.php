@@ -18,6 +18,10 @@ final class PhabricatorApplicationFact extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function isBeta() {
+    return true;
+  }
+
   public function getRoutes() {
     return array(
       '/fact/' => array(

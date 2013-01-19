@@ -50,6 +50,12 @@ final class PhabricatorCoreConfigOptions
         ->addExample('America/Chicago', pht('US Central (CDT)'))
         ->addExample('America/Boise', pht('US Mountain (MDT)'))
         ->addExample('America/Los_Angeles', pht('US West (PDT)')),
+      $this->newOption('phabricator.show-beta-applications', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Visible'),
+            pht('Invisible')
+          ))->setDescription(pht('Show beta applications on the home page.')),
       $this->newOption('phabricator.serious-business', 'bool', false)
         ->setBoolOptions(
           array(

@@ -62,6 +62,10 @@ abstract class PhabricatorApplication {
     return true;
   }
 
+  public function isBeta() {
+    return false;
+  }
+
   public function getPHID() {
     return 'PHID-APPS-'.get_class($this);
   }

@@ -26,6 +26,10 @@ final class PhabricatorApplicationDrydock extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function isBeta() {
+    return true;
+  }
+
   public function getRoutes() {
     return array(
       '/drydock/' => array(
