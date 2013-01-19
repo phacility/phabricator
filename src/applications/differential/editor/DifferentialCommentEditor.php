@@ -102,6 +102,8 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       'differential.allow-self-accept', false);
     $always_allow_close = PhabricatorEnv::getEnvConfig(
       'differential.always-allow-close', false);
+    $allow_reopen = PhabricatorEnv::getEnvConfig(
+      'differential.allow-reopen', false);
     $revision_status    = $revision->getStatus();
 
     $revision->loadRelationships();
@@ -358,6 +360,21 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         }
 
         $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
+        break;
+
+      case DifferentialAction::ACTION_REOPEN:
+        if (!$allow_reopen) {
+          throw new Exception(
+            "You cannot reopen a revision when this action is disabled.");
+        }
+
+        if ($revision_status != ArcanistDifferentialRevisionStatus::CLOSED) {
+          throw new Exception(
+            "You cannot reopen a revision that is not currently closed.");
+        }
+
+        $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+
         break;
 
       case DifferentialAction::ACTION_ADDREVIEWERS:

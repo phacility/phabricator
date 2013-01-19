@@ -1052,6 +1052,12 @@ return array(
   // only the submitter can close a revision.
   'differential.always-allow-close' => false,
 
+  // If you set this to true, any user can reopen a revision so long as it has
+  // been closed.  This can be useful if a revision is accidentally closed or
+  // if a developer changes his or her mind after closing a revision.  If it is
+  // false, reopening is not allowed.
+  'differential.allow-reopen' => false,
+
   // Revisions newer than this number of days are marked as fresh in Action
   // Required and Revisions Waiting on You views. Only work days (not weekends
   // and holidays) are included. Set to 0 to disable this feature.

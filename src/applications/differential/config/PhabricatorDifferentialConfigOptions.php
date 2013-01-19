@@ -183,6 +183,19 @@ final class PhabricatorDifferentialConfigOptions
             "where the reviewer is often the actual committer can benefit ".
             "from turning this option to true. If false, only the submitter ".
             "can close a revision.")),
+      $this->newOption('differential.allow-reopen', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht("Enable reopen"),
+            pht("Disable reopen"),
+          ))
+        ->setSummary(pht("Allows any user to reopen a closed revision."))
+        ->setDescription(
+          pht("If you set this to true, any user can reopen a revision so ".
+              "long as it has been closed.  This can be useful if a revision ".
+              "is accidentally closed or if a developer changes his or her ".
+              "mind after closing a revision.  If it is false, reopening ".
+              "is not allowed.")),
       $this->newOption('differential.days-fresh', 'int', 1)
         ->setSummary(
           pht(
