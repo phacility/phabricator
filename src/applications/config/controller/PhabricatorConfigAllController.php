@@ -58,10 +58,26 @@ final class PhabricatorConfigAllController
     $panel->appendChild($table);
     $panel->setNoBackground();
 
+    $phabricator_root = dirname(phutil_get_library_root('phabricator'));
+    $future = id(new ExecFuture('git log --format=%%H -n 1 --'))
+      ->setCWD($phabricator_root);
+    list($err, $stdout) = $future->resolve();
+    if (!$err) {
+      $display_version = trim($stdout);
+    } else {
+      $display_version = pht('Unknown');
+    }
+    $version_property_list = id(new PhabricatorPropertyListView());
+    $version_property_list->addProperty('Version', $display_version);
+
+
     $nav = $this->buildSideNavView();
     $nav->selectFilter('all/');
     $nav->setCrumbs($crumbs);
+    $nav->appendChild($version_property_list);
     $nav->appendChild($panel);
+
+
 
     return $this->buildApplicationPage(
       $nav,

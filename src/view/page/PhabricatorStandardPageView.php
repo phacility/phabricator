@@ -370,11 +370,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $foot_links = array();
 
-    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
-    $foot_links[] =
-      '<a href="http://phabricator.org/">Phabricator</a> '.
-      phutil_escape_html($version);
-
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
        !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
       if ($console) {

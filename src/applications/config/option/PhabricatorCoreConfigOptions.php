@@ -118,9 +118,6 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('phabricator.env', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Internal.')),
-      $this->newOption('phabricator.version', 'string', null)
-        ->setLocked(true)
-        ->setDescription(pht('Internal / deprecated.')),
       $this->newOption('phabricator.setup', 'bool', false)
         ->setLocked(true)
         ->setDescription(pht('Internal / deprecated.')),
