@@ -5,11 +5,6 @@
  */
 final class PhabricatorApplicationPholio extends PhabricatorApplication {
 
-  public function shouldAppearInLaunchView() {
-    // TODO: See getApplicationGroup().
-    return false;
-  }
-
   public function getBaseURI() {
     return '/pholio/';
   }
