@@ -13,4 +13,10 @@ final class PhabricatorConfigDefaultSource
     $this->setSource(new PhabricatorConfigDictionarySource($options));
   }
 
+  public function loadExternalOptions() {
+    $options = PhabricatorApplicationConfigOptions::loadAllOptions(true);
+    $options = mpull($options, 'getDefault');
+    $this->setKeys($options);
+  }
+
 }

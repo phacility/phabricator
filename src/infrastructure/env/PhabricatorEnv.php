@@ -132,9 +132,9 @@ final class PhabricatorEnv {
     $stack = new PhabricatorConfigStackSource();
     self::$sourceStack = $stack;
 
-    $stack->pushSource(
-      id(new PhabricatorConfigDefaultSource())
-        ->setName(pht('Global Default')));
+    $defaultSource = id(new PhabricatorConfigDefaultSource())
+      ->setName(pht('Global Default'));
+    $stack->pushSource($defaultSource);
 
     $env = self::getSelectedEnvironmentName();
     $stack->pushSource(
@@ -151,6 +151,11 @@ final class PhabricatorEnv {
     foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
       phutil_load_library($library);
     }
+
+    // If custom libraries specify config options, they won't get default
+    // values as the Default source has already been loaded, so we get it to
+    // pull in all options from non-phabricator libraries now they are loaded.
+    $defaultSource->loadExternalOptions();
 
     try {
       $stack->pushSource(

@@ -132,7 +132,7 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
       ->setGroup($this);
   }
 
-  final public static function loadAll() {
+  final public static function loadAll($external_only = false) {
     $symbols = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorApplicationConfigOptions')
       ->setConcreteOnly(true)
@@ -140,6 +140,10 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
 
     $groups = array();
     foreach ($symbols as $symbol) {
+      if ($external_only && $symbol['library'] == 'phabricator') {
+        continue;
+      }
+
       $obj = newv($symbol['name'], array());
       $key = $obj->getKey();
       if (isset($groups[$key])) {
@@ -156,8 +160,8 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     return $groups;
   }
 
-  final public static function loadAllOptions() {
-    $groups = self::loadAll();
+  final public static function loadAllOptions($external_only = false) {
+    $groups = self::loadAll($external_only);
 
     $options = array();
     foreach ($groups as $group) {
