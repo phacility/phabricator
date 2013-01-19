@@ -104,7 +104,7 @@ final class PhabricatorFeedStoryPublisher {
       $this->sendNotification($chrono_key);
     }
 
-    $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks', array());
+    $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks');
     foreach ($uris as $uri) {
       $task = PhabricatorWorker::scheduleTask(
         'FeedPublisherWorker',

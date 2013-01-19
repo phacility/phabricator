@@ -127,6 +127,9 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('phabricator.setup', 'bool', false)
         ->setLocked(true)
         ->setDescription(pht('Internal / deprecated.')),
+      $this->newOption('test.value', 'wild', null)
+        ->setLocked(true)
+        ->setDescription(pht('Unit test value.')),
     );
   }
 

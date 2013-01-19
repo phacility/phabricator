@@ -41,7 +41,7 @@ final class PhabricatorConfigOption
     }
 
     return idx(
-      PhabricatorEnv::getEnvConfig('config.mask', array()),
+      PhabricatorEnv::getEnvConfig('config.mask'),
       $this->getKey(),
       false);
   }
@@ -57,7 +57,7 @@ final class PhabricatorConfigOption
     }
 
     return idx(
-      PhabricatorEnv::getEnvConfig('config.hide', array()),
+      PhabricatorEnv::getEnvConfig('config.hide'),
       $this->getKey(),
       false);
   }
@@ -77,7 +77,7 @@ final class PhabricatorConfigOption
     }
 
     return idx(
-      PhabricatorEnv::getEnvConfig('config.lock', array()),
+      PhabricatorEnv::getEnvConfig('config.lock'),
       $this->getKey(),
       false);
   }

@@ -227,11 +227,17 @@ final class PhabricatorEnv {
   /**
    * Get the current configuration setting for a given key.
    *
+   * If the key is not found, then throw an Exception.
+   *
    * @task read
    */
-  public static function getEnvConfig($key, $default = null) {
+  public static function getEnvConfig($key) {
     $result = self::$sourceStack->getKeys(array($key));
-    return idx($result, $key, $default);
+    if (array_key_exists($key, $result)) {
+      return $result[$key];
+    } else {
+      throw new Exception("No config value specified for key '{$key}'.");
+    }
   }
 
 

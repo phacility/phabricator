@@ -370,8 +370,7 @@ final class DifferentialChangesetParser {
 
     if (!$generated_guess) {
       $generated_path_regexps = PhabricatorEnv::getEnvConfig(
-        'differential.generated-paths',
-        array());
+        'differential.generated-paths');
       foreach ($generated_path_regexps as $regexp) {
         if (preg_match($regexp, $this->changeset->getFilename())) {
           $generated_guess = true;

@@ -562,11 +562,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $status = $revision->getStatus();
 
     $allow_self_accept = PhabricatorEnv::getEnvConfig(
-      'differential.allow-self-accept', false);
+      'differential.allow-self-accept');
     $always_allow_close = PhabricatorEnv::getEnvConfig(
-      'differential.always-allow-close', false);
+      'differential.always-allow-close');
     $allow_reopen = PhabricatorEnv::getEnvConfig(
-      'differential.allow-reopen', false);
+      'differential.allow-reopen');
 
     if ($viewer_is_owner) {
       switch ($status) {

@@ -84,9 +84,7 @@ final class ManiphestTaskPriority extends ManiphestConstants {
    */
   public static function getDefaultPriority() {
     return PhabricatorEnv::getEnvConfig(
-      'maniphest.default-priority',
-      self::PRIORITY_TRIAGE
-    );
+      'maniphest.default-priority');
   }
 
   /**
