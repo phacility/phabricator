@@ -3,8 +3,10 @@
 final class PhabricatorSetupCheckStorage extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
-    $local_key = 'storage.local-disk.path';
-    $local_path = PhabricatorEnv::getEnvConfig($local_key);
+    $local_path = PhabricatorEnv::getEnvConfig('storage.local-disk.path');
+    if (!$local_path) {
+      return;
+    }
 
     if (!Filesystem::pathExists($local_path) ||
         !is_readable($local_path) ||
