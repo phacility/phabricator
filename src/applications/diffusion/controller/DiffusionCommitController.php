@@ -748,8 +748,9 @@ final class DiffusionCommitController extends DiffusionController {
 
     $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
     $concern_raised = ($commit->getAuditStatus() == $status_concern);
-
-    if ($user_is_author && $concern_raised) {
+    $can_close_option = PhabricatorEnv::getEnvConfig(
+      'audit.can-author-close-audit');
+    if ($can_close_option && $user_is_author && $concern_raised) {
       $actions[PhabricatorAuditActionConstants::CLOSE] = true;
     }
 

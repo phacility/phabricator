@@ -109,6 +109,10 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $actor_is_author = ($actor->getPHID() == $commit->getAuthorPHID());
 
     if ($action == PhabricatorAuditActionConstants::CLOSE) {
+      if (!PhabricatorEnv::getEnvConfig('audit.can-author-close-audit')) {
+          throw new Exception('Cannot Close Audit without enabling'.
+          'audit.can-author-close-audit');
+      }
       // "Close" means wipe out all the concerns.
       $concerned_status = PhabricatorAuditStatusConstants::CONCERNED;
       foreach ($requests as $request) {

@@ -1338,4 +1338,9 @@ return array(
   // the $PATH environment variable, for when these binaries are in non-standard
   // locations.
   'environment.append-paths' => array(),
+
+// -- Audit  ---------------------------------------------------------- //
+
+  // Controls whether or not task creator can Close Audits
+  'audit.can-author-close-audit' => false,
 );

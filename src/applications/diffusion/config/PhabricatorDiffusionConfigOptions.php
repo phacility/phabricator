@@ -55,6 +55,16 @@ final class PhabricatorDiffusionConfigOptions
         ->setDescription(pht('Hard byte limit on including patches in email.')),
       $this->newOption('metamta.diffusion.time-limit', 'int', 60)
         ->setDescription(pht('Hard time limit on generating patches.')),
+      $this->newOption(
+        'audit.can-author-close-audit',
+        'bool',
+        false)
+        ->setBoolOptions(
+          array(
+            pht("Enable Closing Audits"),
+            pht("Disable Closing Audits"),
+          ))
+        ->setDescription(pht('Controls whether Author can Close Audits.')),
     );
   }
 
