@@ -146,7 +146,7 @@
 }
 
 .maniphest-batch-editor {
-  margin: 1em 1em;
+  margin: 20px;
 }
 
 .maniphest-batch-editor-layout {
@@ -175,14 +175,6 @@
   font-size: 11px;
   vertical-align: middle;
   width: 100%;
-}
-
-.maniphest-list-container {
-  padding: 0 1em;
-}
-
-.maniphest-group-container {
-  padding: 0 1em 1em;
 }
 
 td.maniphest-active-handle {

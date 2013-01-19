@@ -2321,7 +2321,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/13a9468b/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/466c0026/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3432,7 +3432,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/fbeded59/javelin.pkg.js',
       'type' => 'js',
     ),
-    'a88951d1' =>
+    '2a1ed97f' =>
     array(
       'name' => 'maniphest.pkg.css',
       'symbols' =>
@@ -3442,7 +3442,7 @@ celerity_register_resource_map(array(
         2 => 'aphront-attached-file-view-css',
         3 => 'phabricator-project-tag-css',
       ),
-      'uri' => '/res/pkg/a88951d1/maniphest.pkg.css',
+      'uri' => '/res/pkg/2a1ed97f/maniphest.pkg.css',
       'type' => 'css',
     ),
     '7707de41' =>
@@ -3462,7 +3462,7 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-attached-file-view-css' => 'a88951d1',
+    'aphront-attached-file-view-css' => '2a1ed97f',
     'aphront-crumbs-view-css' => '7e7a7582',
     'aphront-dialog-view-css' => '7e7a7582',
     'aphront-error-view-css' => '7e7a7582',
@@ -3560,8 +3560,8 @@ celerity_register_resource_map(array(
     'javelin-vector' => 'fbeded59',
     'javelin-workflow' => 'fbeded59',
     'lightbox-attachment-css' => '7e7a7582',
-    'maniphest-task-summary-css' => 'a88951d1',
-    'maniphest-transaction-detail-css' => 'a88951d1',
+    'maniphest-task-summary-css' => '2a1ed97f',
+    'maniphest-transaction-detail-css' => '2a1ed97f',
     'phabricator-busy' => 'c90b892e',
     'phabricator-content-source-view-css' => 'ec01d039',
     'phabricator-core-buttons-css' => '7e7a7582',
@@ -3588,7 +3588,7 @@ celerity_register_resource_map(array(
     'phabricator-object-selector-css' => 'ec01d039',
     'phabricator-paste-file-upload' => 'c90b892e',
     'phabricator-prefab' => 'c90b892e',
-    'phabricator-project-tag-css' => 'a88951d1',
+    'phabricator-project-tag-css' => '2a1ed97f',
     'phabricator-remarkup-css' => '7e7a7582',
     'phabricator-shaped-request' => 'ac53d36a',
     'phabricator-side-menu-view-css' => '7e7a7582',
