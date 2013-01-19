@@ -648,6 +648,8 @@ phutil_register_library_map(array(
     'PhabricatorApplicationTransactionView' => 'applications/transactions/view/PhabricatorApplicationTransactionView.php',
     'PhabricatorApplicationTransactions' => 'applications/transactions/application/PhabricatorApplicationTransactions.php',
     'PhabricatorApplicationUIExamples' => 'applications/uiexample/application/PhabricatorApplicationUIExamples.php',
+    'PhabricatorApplicationsController' => 'applications/meta/controller/PhabricatorApplicationsController.php',
+    'PhabricatorApplicationsListController' => 'applications/meta/controller/PhabricatorApplicationsListController.php',
     'PhabricatorAuditActionConstants' => 'applications/audit/constants/PhabricatorAuditActionConstants.php',
     'PhabricatorAuditAddCommentController' => 'applications/audit/controller/PhabricatorAuditAddCommentController.php',
     'PhabricatorAuditComment' => 'applications/audit/storage/PhabricatorAuditComment.php',
@@ -2037,6 +2039,8 @@ phutil_register_library_map(array(
     'PhabricatorApplicationTransactionView' => 'AphrontView',
     'PhabricatorApplicationTransactions' => 'PhabricatorApplication',
     'PhabricatorApplicationUIExamples' => 'PhabricatorApplication',
+    'PhabricatorApplicationsController' => 'PhabricatorController',
+    'PhabricatorApplicationsListController' => 'PhabricatorApplicationsController',
     'PhabricatorAuditAddCommentController' => 'PhabricatorAuditController',
     'PhabricatorAuditComment' =>
     array(
