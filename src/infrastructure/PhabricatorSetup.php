@@ -358,22 +358,6 @@ final class PhabricatorSetup {
       }
     }
 
-    $timezone = nonempty(
-      PhabricatorEnv::getEnvConfig('phabricator.timezone'),
-      ini_get('date.timezone'));
-    if (!$timezone) {
-      self::writeFailure();
-      self::write(
-        "Setup failure! Your configuration fails to specify a server ".
-        "timezone. Either set 'date.timezone' in your php.ini or ".
-        "'phabricator.timezone' in your Phabricator configuration. See the ".
-        "PHP documentation for a list of supported timezones:\n\n".
-        "http://www.php.net/manual/en/timezones.php\n");
-      return;
-    } else {
-      self::write(" okay  Timezone '{$timezone}' configured.\n");
-    }
-
     self::write("[OKAY] Basic configuration OKAY\n");
 
 
@@ -585,24 +569,6 @@ final class PhabricatorSetup {
       }
     } else {
       self::write(" skip  Not configured for local disk storage.\n");
-    }
-
-    $selector = PhabricatorEnv::getEnvConfig('storage.engine-selector');
-
-    try {
-      $storage_selector_exists = class_exists($selector);
-    } catch (Exception $ex) {
-      $storage_selector_exists = false;
-    }
-
-    if ($storage_selector_exists) {
-      self::write(" okay  Using '{$selector}' as a storage engine selector.\n");
-    } else {
-      self::writeFailure();
-      self::write(
-        "Setup failure! You have configured '{$selector}' as a storage engine ".
-        "selector but it does not exist or could not be loaded.\n");
-      return;
     }
 
     self::write("[OKAY] Database and storage configuration OKAY\n");

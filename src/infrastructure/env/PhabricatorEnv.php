@@ -107,9 +107,15 @@ final class PhabricatorEnv {
 
     self::buildConfigurationSourceStack();
 
+    // Force a valid timezone. If both PHP and Phabricator configuration are
+    // invalid, use UTC.
     $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
     if ($tz) {
-      date_default_timezone_set($tz);
+      @date_default_timezone_set($tz);
+    }
+    $ok = @date_default_timezone_set(date_default_timezone_get());
+    if (!$ok) {
+      date_default_timezone_set('UTC');
     }
 
     // Append any paths to $PATH if we need to.

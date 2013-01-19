@@ -3,6 +3,26 @@
 final class PhabricatorSetupCheckTimezone extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
+    $php_value = ini_get('date.timezone');
+    if ($php_value) {
+      $old = date_default_timezone_get();
+      $ok = @date_default_timezone_set($php_value);
+      date_default_timezone_set($old);
+
+      if (!$ok) {
+        $message = pht(
+          'Your PHP configuration configuration selects an invalid timezone. '.
+          'Select a valid timezone.');
+
+        $this
+          ->newIssue('php.date.timezone')
+          ->setShortName(pht('PHP Timezone'))
+          ->setName(pht('PHP Timezone Invalid'))
+          ->setMessage($message)
+          ->addPHPConfig('date.timezone');
+      }
+    }
+
     $timezone = nonempty(
       PhabricatorEnv::getEnvConfig('phabricator.timezone'),
       ini_get('date.timezone'));
