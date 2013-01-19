@@ -252,28 +252,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     // Render the "you have unresolved setup issues..." warning.
     $setup_warning = null;
     if ($user && $user->getIsAdmin()) {
-      $application = null;
-      $controller = $this->getController();
-      if ($controller) {
-        $application = $controller->getCurrentApplication();
-      }
-
-      // Don't show the banner inside the config application itself.
-      if (!($application instanceof PhabricatorApplicationConfig)) {
-        $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
-        if ($open) {
-          $setup_warning = phutil_render_tag(
-            'div',
+      $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
+      if ($open) {
+        $setup_warning = phutil_render_tag(
+          'div',
+          array(
+            'class' => 'setup-warning-callout',
+          ),
+          phutil_render_tag(
+            'a',
             array(
-              'class' => 'setup-warning-callout',
+              'href' => '/config/issue/',
             ),
-            phutil_render_tag(
-              'a',
-              array(
-                'href' => '/config/issue/',
-              ),
-              pht('You have %d unresolved setup issue(s)...', $open)));
-        }
+            pht('You have %d unresolved setup issue(s)...', $open)));
       }
     }
 

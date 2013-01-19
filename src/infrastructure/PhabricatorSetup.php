@@ -412,15 +412,6 @@ final class PhabricatorSetup {
         self::write(" okay  'facebook.application-id' is set.\n");
       }
 
-      if (!is_string($app_id)) {
-        self::writeFailure();
-        self::write(
-          "Setup failure! 'facebook.application-id' should be a string.");
-        return;
-      } else {
-        self::write(" okay  'facebook.application-id' is string.\n");
-      }
-
       if (!$app_secret) {
         self::writeFailure();
         self::write(
@@ -545,30 +536,6 @@ final class PhabricatorSetup {
         "fail. Consider raising this to at least {$recommended_minimum}.");
     } else {
       self::write(" okay  max_allowed_packet = {$max_allowed_packet}.\n");
-    }
-
-    $local_key = 'storage.local-disk.path';
-    $local_path = PhabricatorEnv::getEnvConfig($local_key);
-    if ($local_path) {
-      if (!Filesystem::pathExists($local_path) ||
-          !is_readable($local_path) ||
-          !is_writable($local_path)) {
-        self::writeFailure();
-        self::write(
-          "Setup failure! You have configured local disk storage but the ".
-          "path you specified ('{$local_path}') does not exist or is not ".
-          "readable or writable.\n");
-        if ($open_basedir) {
-          self::write(
-            "You have an 'open_basedir' setting -- make sure Phabricator is ".
-            "allowed to open files in the local storage directory.\n");
-        }
-        return;
-      } else {
-        self::write(" okay  Local disk storage exists and is writable.\n");
-      }
-    } else {
-      self::write(" skip  Not configured for local disk storage.\n");
     }
 
     self::write("[OKAY] Database and storage configuration OKAY\n");
