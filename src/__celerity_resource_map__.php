@@ -3055,6 +3055,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/phame/phame.css',
   ),
+  'pholio-css' =>
+  array(
+    'uri' => '/res/e454c33f/rsrc/css/application/pholio/pholio.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/pholio/pholio.css',
+  ),
   'phriction-document-css' =>
   array(
     'uri' => '/res/8d09bd7f/rsrc/css/application/phriction/phriction-document-css.css',

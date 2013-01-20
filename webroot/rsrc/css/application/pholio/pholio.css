@@ -1,0 +1,12 @@
+/**
+ * @provides pholio-css
+ */
+.pholio-mock-image-container {
+  background-color: #282828;
+  text-align: center;
+}
+
+.pholio-mock-image {
+    margin: 10px 0px;
+    display: inline-block;
+}

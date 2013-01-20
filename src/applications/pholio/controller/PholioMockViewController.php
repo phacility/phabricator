@@ -60,9 +60,12 @@ final class PholioMockViewController extends PholioController {
     $actions = $this->buildActionView($mock);
     $properties = $this->buildPropertyView($mock, $engine, $subscribers);
 
-    $carousel =
-      '<h1 style="margin: 2em; padding: 1em; border: 1px dashed grey;">'.
-        'Carousel Goes Here</h1>';
+    require_celerity_resource('pholio-css');
+
+    $output = new PholioMockImagesView();
+    $output->setMock($mock);
+
+    $carousel = $output->render();
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($this->getRequest()->getUser())
