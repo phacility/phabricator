@@ -168,7 +168,6 @@ abstract class PhabricatorController extends AphrontController {
 
     if (idx($options, 'device')) {
       $page->setDeviceReady(true);
-      $view->appendChild($page->renderFooter());
     }
 
     $application_menu = $this->buildApplicationMenu();
