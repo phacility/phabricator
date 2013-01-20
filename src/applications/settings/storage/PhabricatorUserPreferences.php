@@ -3,6 +3,7 @@
 final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_MONOSPACED           = 'monospaced';
+  const PREFERENCE_DARK_CONSOLE         = 'dark_console';
   const PREFERENCE_EDITOR               = 'editor';
   const PREFERENCE_MULTIEDIT            = 'multiedit';
   const PREFERENCE_TITLES               = 'titles';

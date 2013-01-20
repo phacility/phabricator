@@ -370,27 +370,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $foot_links = array();
 
-    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
-       !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
-      if ($console) {
-        $link = javelin_render_tag(
-          'a',
-          array(
-            'href' => '/~/',
-            'sigil' => 'workflow',
-          ),
-          'Disable DarkConsole');
-      } else {
-        $link = javelin_render_tag(
-          'a',
-          array(
-            'href' => '/~/',
-            'sigil' => 'workflow',
-          ),
-          'Enable DarkConsole');
-      }
-      $foot_links[] = $link;
-    }
 
     $foot_links = implode(' &middot; ', $foot_links);
 

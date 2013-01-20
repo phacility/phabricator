@@ -440,7 +440,8 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
       $default_dict = array(
         PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
         PhabricatorUserPreferences::PREFERENCE_EDITOR => '',
-        PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '');
+        PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '',
+        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0);
 
       $preferences->setPreferences($default_dict);
     }
