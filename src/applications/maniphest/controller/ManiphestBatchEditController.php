@@ -37,7 +37,8 @@ final class ManiphestBatchEditController extends ManiphestController {
     }
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Maniphest Batch Editor');
+    $panel->setHeader(pht('Maniphest Batch Editor'));
+    $panel->setNoBackground();
 
     $handle_phids = mpull($tasks, 'getOwnerPHID');
     $handles = $this->loadViewerHandles($handle_phids);
