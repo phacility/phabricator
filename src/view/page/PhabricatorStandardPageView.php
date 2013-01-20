@@ -229,13 +229,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     $header_chrome = null;
-    $footer_chrome = null;
     if ($this->getShowChrome()) {
       $header_chrome = $this->menuContent;
-
-      if (!$this->getDeviceReady()) {
-        $footer_chrome = $this->renderFooter();
-      }
     }
 
     $developer_warning = null;
@@ -282,8 +277,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           ($console ? '<darkconsole />' : null).
           parent::getBody().
           '<div style="clear: both;"></div>'.
-        '</div>').
-      $footer_chrome;
+        '</div>');
   }
 
   protected function getTail() {
@@ -363,20 +357,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return null;
     }
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
-  }
-
-  public function renderFooter() {
-    $console = $this->getConsole();
-
-    $foot_links = array();
-
-
-    $foot_links = implode(' &middot; ', $foot_links);
-
-    return
-      '<div class="phabricator-page-foot">'.
-        $foot_links.
-      '</div>';
   }
 
 }

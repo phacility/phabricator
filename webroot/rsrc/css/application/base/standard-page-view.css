@@ -17,15 +17,6 @@
   border-width:         0px;
 }
 
-.phabricator-page-foot {
-  text-align: right;
-  margin: 4em 2em;
-  border-top: 1px solid #dfdfdf;
-  padding: .5em 1em;
-  font-size: 11px;
-  color: #666666;
-}
-
 .keyboard-shortcut-help td,
 .keyboard-shortcut-help th {
   padding: 8px;
