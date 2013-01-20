@@ -2,6 +2,18 @@
 
 final class PhabricatorImageTransformer {
 
+  public function executeMemeTransform(
+    PhabricatorFile $file,
+    $upper_text,
+    $lower_text) {
+    $image = $this->applyMemeTo($file, $upper_text, $lower_text);
+    return PhabricatorFile::newFromFileData(
+      $image,
+      array(
+        'name' => 'meme-'.$file->getName(),
+      ));
+  }
+
   public function executeThumbTransform(
     PhabricatorFile $file,
     $x,
@@ -132,6 +144,97 @@ final class PhabricatorImageTransformer {
       $x, $y);
 
     return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
+  }
+
+  private function applyMemeTo(
+    PhabricatorFile $file,
+    $upper_text,
+    $lower_text) {
+    $data = $file->loadFileData();
+    $img = imagecreatefromstring($data);
+    $phabricator_root = dirname(phutil_get_library_root('phabricator'));
+    $font_path = $phabricator_root.'/resources/font/tuffy.ttf';
+    $white = imagecolorallocate($img, 255, 255, 255);
+    $black = imagecolorallocate($img, 0, 0, 0);
+    $border_width = 3;
+    $font_max = 200;
+    $font_min = 5;
+    for ($i = $font_max; $i > $font_min; $i--) {
+      $fit = $this->doesTextBoundingBoxFitInImage(
+        $img,
+        $upper_text,
+        $i,
+        $font_path);
+      if ($fit['doesfit']) {
+        $x = ($fit['imgwidth'] - $fit['txtwidth']) / 2;
+        $y = $fit['txtheight'] + 10;
+        $this->makeImageWithTextBorder($img,
+          $i,
+          $x,
+          $y,
+          $white,
+          $black,
+          $border_width,
+          $font_path,
+          $upper_text);
+        break;
+      }
+    }
+    for ($i = $font_max; $i > $font_min; $i--) {
+      $fit = $this->doesTextBoundingBoxFitInImage($img,
+        $lower_text, $i, $font_path);
+      if ($fit['doesfit']) {
+        $x = ($fit['imgwidth'] - $fit['txtwidth']) / 2;
+        $y = $fit['imgheight'] - 10;
+        $this->makeImageWithTextBorder(
+          $img,
+          $i,
+          $x,
+          $y,
+          $white,
+          $black,
+          $border_width,
+          $font_path,
+          $lower_text);
+        break;
+      }
+    }
+    return $this->saveImageDataInAnyFormat($img, $file->getMimeType());
+  }
+
+  private function makeImageWithTextBorder($img, $font_size, $x, $y,
+    $color, $stroke_color, $bw, $font, $text) {
+    $angle = 0;
+    $bw = abs($bw);
+    for ($c1 = $x - $bw; $c1 <= $x + $bw; $c1++) {
+      for ($c2 = $y - $bw; $c2 <= $y + $bw; $c2++) {
+        if (!(($c1 == $x - $bw || $x + $bw) &&
+          $c2 == $y - $bw || $c2 == $y + $bw)) {
+          $bg = imagettftext($img, $font_size,
+            $angle, $c1, $c2, $stroke_color, $font, $text);
+          }
+        }
+      }
+    imagettftext($img, $font_size, $angle,
+            $x , $y, $color , $font, $text);
+  }
+
+  private function doesTextBoundingBoxFitInImage($img,
+    $text, $font_size, $font_path) {
+    // Default Angle = 0
+    $angle = 0;
+
+    $bbox = imagettfbbox($font_size, $angle, $font_path, $text);
+    $text_height = abs($bbox[3] - $bbox[5]);
+    $text_width = abs($bbox[0] - $bbox[2]);
+    return array(
+      "doesfit" => ($text_height * 1.05 <= imagesy($img)
+        && $text_width * 1.05 <= imagesx($img)),
+      "txtwidth" => $text_width,
+      "txtheight" => $text_height,
+      "imgwidth" => imagesx($img),
+      "imgheight" => imagesy($img),
+    );
   }
 
   private function saveImageDataInAnyFormat($data, $preferred_mime = '') {
