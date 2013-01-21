@@ -38,7 +38,7 @@ abstract class PhabricatorConfigProxySource
   }
 
   public function deleteKeys(array $keys) {
-    $this->getSource()->deleteKeys();
+    $this->getSource()->deleteKeys($keys);
     return $this;
   }
 
