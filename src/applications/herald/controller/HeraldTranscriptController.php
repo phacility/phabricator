@@ -70,12 +70,18 @@ final class HeraldTranscriptController extends HeraldController {
       $nav->appendChild($object_xscript_panel);
     }
 
-    $main_nav = $this->renderNav();
-    $main_nav->selectFilter('transcript');
-    $main_nav->appendChild($nav);
+    $crumbs = id($this->buildApplicationCrumbs())
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Transcripts'))
+          ->setHref($this->getApplicationURI('/transcript/')))
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($xscript->getID()));
+    $nav->setCrumbs($crumbs);
 
     return $this->buildStandardPageResponse(
-      $main_nav,
+      $nav,
       array(
         'title' => 'Transcript',
       ));

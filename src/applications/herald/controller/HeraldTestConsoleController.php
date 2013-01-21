@@ -125,6 +125,16 @@ final class HeraldTestConsoleController extends HeraldController {
         $panel,
       ));
 
+    $crumbs = id($this->buildApplicationCrumbs())
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Transcripts'))
+          ->setHref($this->getApplicationURI('/transcript/')))
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Test Console')));
+    $nav->setCrumbs($crumbs);
+
     return $this->buildStandardPageResponse(
       $nav,
       array(

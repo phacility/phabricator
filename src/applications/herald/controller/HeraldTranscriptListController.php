@@ -99,6 +99,12 @@ final class HeraldTranscriptListController extends HeraldController {
     $nav->selectFilter('transcript');
     $nav->appendChild($panel);
 
+    $crumbs = id($this->buildApplicationCrumbs())
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Transcripts')));
+    $nav->setCrumbs($crumbs);
+
     return $this->buildStandardPageResponse(
       $nav,
       array(
