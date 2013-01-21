@@ -156,4 +156,22 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
     unset($outer);
   }
 
+  public function testGetEnvExceptions() {
+    $caught = null;
+    try {
+      PhabricatorEnv::getEnvConfig("not.a.real.config.option");
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertEqual(true, $caught instanceof Exception);
+
+    $caught = null;
+    try {
+      PhabricatorEnv::getEnvConfig("test.value");
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertEqual(false, $caught instanceof Exception);
+  }
+
 }

@@ -19,11 +19,13 @@ final class PhabricatorSettingsPanelDisplayPreferences
     $user = $request->getUser();
     $preferences = $user->loadPreferences();
 
-    $pref_monospaced = PhabricatorUserPreferences::PREFERENCE_MONOSPACED;
-    $pref_editor     = PhabricatorUserPreferences::PREFERENCE_EDITOR;
-    $pref_multiedit  = PhabricatorUserPreferences::PREFERENCE_MULTIEDIT;
-    $pref_titles     = PhabricatorUserPreferences::PREFERENCE_TITLES;
-    $pref_symbols    = PhabricatorUserPreferences::PREFERENCE_DIFFUSION_SYMBOLS;
+    $pref_monospaced   = PhabricatorUserPreferences::PREFERENCE_MONOSPACED;
+    $pref_dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
+    $pref_editor       = PhabricatorUserPreferences::PREFERENCE_EDITOR;
+    $pref_multiedit    = PhabricatorUserPreferences::PREFERENCE_MULTIEDIT;
+    $pref_titles       = PhabricatorUserPreferences::PREFERENCE_TITLES;
+    $pref_symbols      =
+      PhabricatorUserPreferences::PREFERENCE_DIFFUSION_SYMBOLS;
     $pref_monospaced_textareas =
       PhabricatorUserPreferences::PREFERENCE_MONOSPACED_TEXTAREAS;
 
@@ -45,6 +47,9 @@ final class PhabricatorSettingsPanelDisplayPreferences
       $preferences->setPreference(
         $pref_monospaced_textareas,
         $request->getStr($pref_monospaced_textareas));
+      $preferences->setPreference(
+        $pref_dark_console,
+        $request->getBool($pref_dark_console));
 
       $preferences->save();
       return id(new AphrontRedirectResponse())
@@ -74,6 +79,10 @@ EXAMPLE;
       ->getPreference($pref_monospaced_textareas);
     if (!$pref_monospaced_textareas_value) {
       $pref_monospaced_textareas_value = 'disabled';
+    }
+    $pref_dark_console_value = $preferences->getPreference($pref_dark_console);
+    if (!$pref_dark_console_value) {
+        $pref_dark_console_value = 0;
     }
 
     $form = id(new AphrontFormView())
@@ -141,8 +150,18 @@ EXAMPLE;
           'Show all textareas using the monospaced font defined above.')
         ->addButton('disabled', 'Disabled', null))
       ->appendChild(
+        id(new AphrontFormRadioButtonControl())
+        ->setLabel('Dark Console')
+        ->setName($pref_dark_console)
+        ->setValue($pref_dark_console_value ?
+            $pref_dark_console_value : 0)
+        ->addButton(1, 'Enabled',
+          'Enabling and using the built-in debugging console.')
+        ->addButton(0, 'Disabled', null))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save Preferences'));
+
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Display Preferences');

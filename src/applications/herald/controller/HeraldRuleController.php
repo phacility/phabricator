@@ -173,10 +173,10 @@ final class HeraldRuleController extends HeraldController {
     $panel = new AphrontPanelView();
     $panel->setHeader(
       $rule->getID()
-        ? 'Edit Herald Rule'
-        : 'Create Herald Rule');
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+        ? pht('Edit Herald Rule')
+        : pht('Create Herald Rule'));
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     $nav = $this->renderNav();
     $nav->selectFilter(

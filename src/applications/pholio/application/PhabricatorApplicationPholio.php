@@ -5,11 +5,6 @@
  */
 final class PhabricatorApplicationPholio extends PhabricatorApplication {
 
-  public function shouldAppearInLaunchView() {
-    // TODO: See getApplicationGroup().
-    return false;
-  }
-
   public function getBaseURI() {
     return '/pholio/';
   }
@@ -33,6 +28,10 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
   public function getApplicationGroup() {
     // TODO: Move to CORE, this just keeps it out of the side menu.
     return self::GROUP_COMMUNICATION;
+  }
+
+  public function isBeta() {
+    return true;
   }
 
   public function getRoutes() {

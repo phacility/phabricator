@@ -284,11 +284,6 @@ class AphrontDefaultApplicationConfiguration
 
     $libraries = PhutilBootloader::getInstance()->getAllLibraries();
 
-    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
-    if (preg_match('/[^a-f0-9]/i', $version)) {
-      $version = '';
-    }
-
     // TODO: Make this configurable?
     $path = 'https://secure.phabricator.com/diffusion/%s/browse/master/src/';
 
@@ -335,7 +330,6 @@ class AphrontDefaultApplicationConfiguration
           if (empty($attrs['href'])) {
             $attrs['href'] = sprintf($path, $callsigns[$lib]).
               str_replace(DIRECTORY_SEPARATOR, '/', $relative).
-              ($version && $lib == 'phabricator' ? ';'.$version : '').
               '$'.$part['line'];
             $attrs['target'] = '_blank';
           }

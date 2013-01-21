@@ -16,6 +16,7 @@ final class ManiphestExportController extends ManiphestController {
    * @phutil-external-symbol class PHPExcel
    * @phutil-external-symbol class PHPExcel_IOFactory
    * @phutil-external-symbol class PHPExcel_Style_NumberFormat
+   * @phutil-external-symbol class PHPExcel_Cell_DataType
    */
   public function processRequest() {
     $request = $this->getRequest();
@@ -42,6 +43,9 @@ final class ManiphestExportController extends ManiphestController {
       $dialog->addCancelButton('/maniphest/');
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
+
+    // TODO: PHPExcel has a dependency on the PHP zip extension. We should test
+    // for that here, since it fatals if we don't have the ZipArchive class.
 
     $query = id(new PhabricatorSearchQuery())->loadOneWhere(
       'queryKey = %s',
@@ -78,7 +82,6 @@ final class ManiphestExportController extends ManiphestController {
     $handles += $project_handles;
 
     $workbook = new PHPExcel();
-
     $sheet = $workbook->setActiveSheetIndex(0);
     $sheet->setTitle('Tasks');
 
@@ -168,7 +171,9 @@ final class ManiphestExportController extends ManiphestController {
     foreach ($rows as $row => $cols) {
       foreach ($cols as $col => $spec) {
         $cell_name = $this->col($col).($row + 1);
-        $sheet->setCellValue($cell_name, $spec);
+        $sheet
+          ->setCellValue($cell_name, $spec, $return_cell = true)
+          ->setDataType(PHPExcel_Cell_DataType::TYPE_STRING);
 
         if ($row == 0) {
           $sheet->getStyle($cell_name)->applyFromArray($header_format);

@@ -72,7 +72,9 @@ final class PhabricatorDirectoryMainController
     $jump = $request->getStr('jump');
 
     $response = PhabricatorJumpNavHandler::jumpPostResponse($jump);
+
     if ($response) {
+
       return $response;
     } else if ($request->isFormPost()) {
       $query = new PhabricatorSearchQuery();

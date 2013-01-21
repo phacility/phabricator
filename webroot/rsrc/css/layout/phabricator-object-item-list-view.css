@@ -7,6 +7,10 @@
   background: #f4f5f6;
 }
 
+.device-desktop .phabricator-object-item-list-view {
+  padding: 20px;
+}
+
 .phabricator-object-item {
   background: #ffffff;
   border-style: solid;
@@ -16,6 +20,10 @@
 
   overflow: hidden;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
+}
+
+.device-desktop .phabricator-object-item {
+  margin: 0 0 5px 0;
 }
 
 .phabricator-object-item-name {

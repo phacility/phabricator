@@ -99,9 +99,11 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $actor_phid         = $actor->getPHID();
     $actor_is_author    = ($actor_phid == $revision->getAuthorPHID());
     $allow_self_accept  = PhabricatorEnv::getEnvConfig(
-      'differential.allow-self-accept', false);
+      'differential.allow-self-accept');
     $always_allow_close = PhabricatorEnv::getEnvConfig(
-      'differential.always-allow-close', false);
+      'differential.always-allow-close');
+    $allow_reopen = PhabricatorEnv::getEnvConfig(
+      'differential.allow-reopen');
     $revision_status    = $revision->getStatus();
 
     $revision->loadRelationships();
@@ -358,6 +360,21 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         }
 
         $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
+        break;
+
+      case DifferentialAction::ACTION_REOPEN:
+        if (!$allow_reopen) {
+          throw new Exception(
+            "You cannot reopen a revision when this action is disabled.");
+        }
+
+        if ($revision_status != ArcanistDifferentialRevisionStatus::CLOSED) {
+          throw new Exception(
+            "You cannot reopen a revision that is not currently closed.");
+        }
+
+        $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+
         break;
 
       case DifferentialAction::ACTION_ADDREVIEWERS:
@@ -635,7 +652,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $removed_reviewers = $this->getRemovedReviewers();
     $reviewer_phids    = $revision->getReviewers();
     $allow_self_accept = PhabricatorEnv::getEnvConfig(
-      'differential.allow-self-accept', false);
+      'differential.allow-self-accept');
 
     $reviewer_phids_map = array_fill_keys($reviewer_phids, true);
     foreach ($added_reviewers as $k => $user_phid) {

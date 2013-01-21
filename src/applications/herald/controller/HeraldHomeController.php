@@ -92,6 +92,7 @@ final class HeraldHomeController extends HeraldController {
     $panel = new AphrontPanelView();
     $panel->appendChild($list_view);
     $panel->appendChild($pager);
+    $panel->setNoBackground();
 
     $panel->setHeader("Herald: {$rule_desc} Rules for {$content_desc}");
 

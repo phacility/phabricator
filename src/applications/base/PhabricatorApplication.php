@@ -62,6 +62,10 @@ abstract class PhabricatorApplication {
     return true;
   }
 
+  public function isBeta() {
+    return false;
+  }
+
   public function getPHID() {
     return 'PHID-APPS-'.get_class($this);
   }
@@ -200,6 +204,9 @@ abstract class PhabricatorApplication {
   public static function getAllInstalledApplications() {
     static $applications;
 
+    $show_beta =
+      PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
+
     if (empty($applications)) {
       $classes = id(new PhutilSymbolLoader())
         ->setAncestorClass(__CLASS__)
@@ -212,6 +219,11 @@ abstract class PhabricatorApplication {
         if (!$app->isEnabled()) {
           continue;
         }
+
+        if (!$show_beta && $app->isBeta()) {
+          continue;
+        }
+
         $apps[] = $app;
       }
       $applications = $apps;

@@ -738,10 +738,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
    * specified by the `metamta.user-address-format` configuration value.
    */
   private function getUserName($user) {
-    $format = PhabricatorEnv::getEnvConfig(
-      'metamta.user-address-format',
-      'full'
-    );
+    $format = PhabricatorEnv::getEnvConfig('metamta.user-address-format');
 
     switch ($format) {
       case 'short':

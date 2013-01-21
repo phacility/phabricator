@@ -129,6 +129,7 @@
   font-weight: bold;
   color: #555;
   padding: 5px 0;
+  margin-left: 20px;
 }
 
 .maniphest-total-result-count {
@@ -146,7 +147,7 @@
 }
 
 .maniphest-batch-editor {
-  margin: 1em 1em;
+  margin: 20px;
 }
 
 .maniphest-batch-editor-layout {
@@ -175,14 +176,6 @@
   font-size: 11px;
   vertical-align: middle;
   width: 100%;
-}
-
-.maniphest-list-container {
-  padding: 0 1em;
-}
-
-.maniphest-group-container {
-  padding: 0 1em 1em;
 }
 
 td.maniphest-active-handle {

@@ -790,16 +790,6 @@ return array(
   // addresses.
   'phabricator.mail-key'        => '5ce3e7e8787f6e40dfae861da315a5cdf1018f12',
 
-  // Version string displayed in the footer. You can generate this value from
-  // Git log or from the current date in the deploy with a script like this:
-  //
-  // git log -n1 --pretty=%h > version.txt
-  //
-  // You can then use this generated value like this:
-  //
-  // 'phabricator.version' =>
-  //   file_get_contents(dirname(__FILE__).'/version.txt'),
-  'phabricator.version'         => 'UNSTABLE',
 
   // PHP requires that you set a timezone in your php.ini before using date
   // functions, or it will emit a warning. If this isn't possible (for instance,
@@ -846,6 +836,8 @@ return array(
   // eggs.
   'phabricator.serious-business' => false,
 
+  // Should Phabricator show beta applications on the homepage
+  'phabricator.show-beta-applications' => false,
 
 // -- Files ----------------------------------------------------------------- //
 
@@ -1051,6 +1043,12 @@ return array(
   // actual committer can benefit from turning this option to true. If false,
   // only the submitter can close a revision.
   'differential.always-allow-close' => false,
+
+  // If you set this to true, any user can reopen a revision so long as it has
+  // been closed.  This can be useful if a revision is accidentally closed or
+  // if a developer changes his or her mind after closing a revision.  If it is
+  // false, reopening is not allowed.
+  'differential.allow-reopen' => false,
 
   // Revisions newer than this number of days are marked as fresh in Action
   // Required and Revisions Waiting on You views. Only work days (not weekends
@@ -1338,4 +1336,9 @@ return array(
   // the $PATH environment variable, for when these binaries are in non-standard
   // locations.
   'environment.append-paths' => array(),
+
+// -- Audit  ---------------------------------------------------------- //
+
+  // Controls whether or not task creator can Close Audits
+  'audit.can-author-close-audit' => false,
 );

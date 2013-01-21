@@ -347,7 +347,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
         $count = number_format(count($list));
 
-        $lists->appendChild(
+        $header =
           javelin_render_tag(
             'h1',
             array(
@@ -357,9 +357,15 @@ final class ManiphestTaskListController extends ManiphestController {
                 'priority' => head($list)->getPriority(),
               ),
             ),
-            phutil_escape_html($group).' ('.$count.')'));
+            phutil_escape_html($group).' ('.$count.')');
 
-        $lists->appendChild($task_list);
+
+        $panel = new AphrontPanelView();
+        $panel->appendChild($header);
+        $panel->appendChild($task_list);
+        $panel->setNoBackground();
+
+        $lists->appendChild($panel);
       }
       $lists->appendChild('</div>');
       $selector->appendChild($lists);

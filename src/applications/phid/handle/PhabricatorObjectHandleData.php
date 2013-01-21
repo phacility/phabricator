@@ -689,6 +689,7 @@ final class PhabricatorObjectHandleData {
 
           if ($loader) {
             $object = newv($loader, array());
+            assert_instances_of(array($type => $object), 'ObjectHandleLoader');
             $handles += $object->loadHandles($phids);
             break;
           }

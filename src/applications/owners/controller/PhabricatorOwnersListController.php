@@ -303,6 +303,7 @@ final class PhabricatorOwnersListController
     $panel = new AphrontPanelView();
     $panel->setHeader($header);
     $panel->appendChild($table);
+    $panel->setNoBackground();
 
     return $panel;
   }

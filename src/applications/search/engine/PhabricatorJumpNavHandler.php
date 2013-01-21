@@ -19,6 +19,7 @@ final class PhabricatorJumpNavHandler {
       '/^r([A-Z]+)(\S+)$/'        => 'commit',
       '/^d(\d+)$/i'               => 'revision',
       '/^t(\d+)$/i'               => 'task',
+      '/^p(\d+)$/i'               => 'paste',
       '/^p\s+(.+)$/i'             => 'project',
       '/^u\s+(\S+)$/i'            => 'user',
       '/^task:\s*(.+)/i'          => 'create-task',
@@ -49,6 +50,9 @@ final class PhabricatorJumpNavHandler {
             case 'user':
               return id(new AphrontRedirectResponse())
                 ->setURI('/p/'.$matches[1].'/');
+            case 'paste':
+              return id(new AphrontRedirectResponse())
+                ->setURI('/P'.$matches[1]);
             case 'project':
               $project = self::findCloselyNamedProject($matches[1]);
               if ($project) {

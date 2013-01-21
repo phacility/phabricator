@@ -11,6 +11,10 @@
   margin: 20px 20px 40px 20px;
 }
 
+.device-phone .aphront-panel-view {
+  margin: 20px 10px 40px 10px;
+}
+
 .aphront-unpadded-panel-view {
   padding: 0;
 }
@@ -52,13 +56,13 @@
   font-size: 13px;
 }
 
-.aphront-panel-width-form {
+.device-desktop .aphront-panel-width-form {
   width: 720px;
   margin-right: auto;
   margin-left: auto;
 }
 
-.aphront-panel-width-wide {
+.device-desktop .aphront-panel-width-wide {
   width: 1080px;
   margin-right: auto;
   margin-left: auto;

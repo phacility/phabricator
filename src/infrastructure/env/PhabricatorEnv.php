@@ -103,13 +103,19 @@ final class PhabricatorEnv {
 
 
   private static function initializeCommonEnvironment() {
-    self::buildConfigurationSourceStack();
-
     PhutilErrorHandler::initialize();
 
+    self::buildConfigurationSourceStack();
+
+    // Force a valid timezone. If both PHP and Phabricator configuration are
+    // invalid, use UTC.
     $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
     if ($tz) {
-      date_default_timezone_set($tz);
+      @date_default_timezone_set($tz);
+    }
+    $ok = @date_default_timezone_set(date_default_timezone_get());
+    if (!$ok) {
+      date_default_timezone_set('UTC');
     }
 
     // Append any paths to $PATH if we need to.
@@ -132,9 +138,9 @@ final class PhabricatorEnv {
     $stack = new PhabricatorConfigStackSource();
     self::$sourceStack = $stack;
 
-    $stack->pushSource(
-      id(new PhabricatorConfigDefaultSource())
-        ->setName(pht('Global Default')));
+    $defaultSource = id(new PhabricatorConfigDefaultSource())
+      ->setName(pht('Global Default'));
+    $stack->pushSource($defaultSource);
 
     $env = self::getSelectedEnvironmentName();
     $stack->pushSource(
@@ -152,11 +158,16 @@ final class PhabricatorEnv {
       phutil_load_library($library);
     }
 
+    // If custom libraries specify config options, they won't get default
+    // values as the Default source has already been loaded, so we get it to
+    // pull in all options from non-phabricator libraries now they are loaded.
+    $defaultSource->loadExternalOptions();
+
     try {
       $stack->pushSource(
         id(new PhabricatorConfigDatabaseSource('default'))
           ->setName(pht("Database")));
-    } catch (AphrontQueryException $recoverable) {
+    } catch (AphrontQueryException $exception) {
       // If the database is not available, just skip this configuration
       // source. This happens during `bin/storage upgrade`, `bin/conf` before
       // schema setup, etc.
@@ -216,11 +227,17 @@ final class PhabricatorEnv {
   /**
    * Get the current configuration setting for a given key.
    *
+   * If the key is not found, then throw an Exception.
+   *
    * @task read
    */
-  public static function getEnvConfig($key, $default = null) {
+  public static function getEnvConfig($key) {
     $result = self::$sourceStack->getKeys(array($key));
-    return idx($result, $key, $default);
+    if (array_key_exists($key, $result)) {
+      return $result[$key];
+    } else {
+      throw new Exception("No config value specified for key '{$key}'.");
+    }
   }
 
 

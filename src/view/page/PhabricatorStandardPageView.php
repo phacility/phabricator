@@ -229,13 +229,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     $header_chrome = null;
-    $footer_chrome = null;
     if ($this->getShowChrome()) {
       $header_chrome = $this->menuContent;
-
-      if (!$this->getDeviceReady()) {
-        $footer_chrome = $this->renderFooter();
-      }
     }
 
     $developer_warning = null;
@@ -252,28 +247,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     // Render the "you have unresolved setup issues..." warning.
     $setup_warning = null;
     if ($user && $user->getIsAdmin()) {
-      $application = null;
-      $controller = $this->getController();
-      if ($controller) {
-        $application = $controller->getCurrentApplication();
-      }
-
-      // Don't show the banner inside the config application itself.
-      if (!($application instanceof PhabricatorApplicationConfig)) {
-        $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
-        if ($open) {
-          $setup_warning = phutil_render_tag(
-            'div',
+      $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
+      if ($open) {
+        $setup_warning = phutil_render_tag(
+          'div',
+          array(
+            'class' => 'setup-warning-callout',
+          ),
+          phutil_render_tag(
+            'a',
             array(
-              'class' => 'setup-warning-callout',
+              'href' => '/config/issue/',
             ),
-            phutil_render_tag(
-              'a',
-              array(
-                'href' => '/config/issue/',
-              ),
-              pht('You have %d unresolved setup issue(s)...', $open)));
-        }
+            pht('You have %d unresolved setup issue(s)...', $open)));
       }
     }
 
@@ -291,8 +277,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           ($console ? '<darkconsole />' : null).
           parent::getBody().
           '<div style="clear: both;"></div>'.
-        '</div>').
-      $footer_chrome;
+        '</div>');
   }
 
   protected function getTail() {
@@ -372,51 +357,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return null;
     }
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
-  }
-
-  public function renderFooter() {
-    $console = $this->getConsole();
-
-    $foot_links = array();
-
-    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
-    $foot_links[] =
-      '<a href="http://phabricator.org/">Phabricator</a> '.
-      phutil_escape_html($version);
-
-    $foot_links[] =
-      '<a href="https://secure.phabricator.com/maniphest/task/create/">'.
-        'Report a Bug'.
-      '</a>';
-
-    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
-       !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
-      if ($console) {
-        $link = javelin_render_tag(
-          'a',
-          array(
-            'href' => '/~/',
-            'sigil' => 'workflow',
-          ),
-          'Disable DarkConsole');
-      } else {
-        $link = javelin_render_tag(
-          'a',
-          array(
-            'href' => '/~/',
-            'sigil' => 'workflow',
-          ),
-          'Enable DarkConsole');
-      }
-      $foot_links[] = $link;
-    }
-
-    $foot_links = implode(' &middot; ', $foot_links);
-
-    return
-      '<div class="phabricator-page-foot">'.
-        $foot_links.
-      '</div>';
   }
 
 }

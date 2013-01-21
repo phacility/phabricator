@@ -187,7 +187,6 @@ abstract class LiskDAO {
   private $__missingFields          = array();
   private static $processIsolationLevel       = 0;
   private static $transactionIsolationLevel   = 0;
-  private static $__checkedClasses = array();
 
   private $__ephemeral = false;
 
@@ -213,30 +212,6 @@ abstract class LiskDAO {
 
     if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
       $this->resetDirtyFields();
-
-      $this_class = get_class($this);
-      if (empty(self::$__checkedClasses[$this_class])) {
-        self::$__checkedClasses = true;
-
-        if (PhabricatorEnv::getEnvConfig('lisk.check_property_methods')) {
-          $class = new ReflectionClass(get_class($this));
-          $methods = $class->getMethods();
-          $properties = $this->getProperties();
-          foreach ($methods as $method) {
-            $name = strtolower($method->getName());
-            if (!(strncmp($name, 'get', 3) && strncmp($name, 'set', 3))) {
-              $name = substr($name, 3);
-              $declaring_class_name = $method->getDeclaringClass()->getName();
-              if (isset($properties[$name]) &&
-                  $declaring_class_name !== 'LiskDAO') {
-                throw new Exception(
-                  "Cannot implement method {$method->getName()} in ".
-                  "{$declaring_class_name}.");
-              }
-            }
-          }
-        }
-      }
     }
   }
 

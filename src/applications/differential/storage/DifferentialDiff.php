@@ -258,8 +258,7 @@ final class DifferentialDiff extends DifferentialDAO {
       ->loadOneWhere('phid = %s', $this->getAuthorPHID());
 
     $use_emails =
-      PhabricatorEnv::getEnvConfig('differential.expose-emails-prudently',
-                                   false);
+      PhabricatorEnv::getEnvConfig('differential.expose-emails-prudently');
 
     switch ($this->getSourceControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:

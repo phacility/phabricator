@@ -512,6 +512,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->setHeader($header_name);
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
     $description_preview_panel =
       '<div class="aphront-panel-preview aphront-panel-preview-full">

@@ -562,9 +562,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $status = $revision->getStatus();
 
     $allow_self_accept = PhabricatorEnv::getEnvConfig(
-      'differential.allow-self-accept', false);
+      'differential.allow-self-accept');
     $always_allow_close = PhabricatorEnv::getEnvConfig(
-      'differential.always-allow-close', false);
+      'differential.always-allow-close');
+    $allow_reopen = PhabricatorEnv::getEnvConfig(
+      'differential.allow-reopen');
 
     if ($viewer_is_owner) {
       switch ($status) {
@@ -618,6 +620,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $actions[DifferentialAction::ACTION_ADDREVIEWERS] = true;
     $actions[DifferentialAction::ACTION_ADDCCS] = true;
+    $actions[DifferentialAction::ACTION_REOPEN] = $allow_reopen &&
+      ($status == ArcanistDifferentialRevisionStatus::CLOSED);
 
     $actions = array_keys(array_filter($actions));
     $actions_dict = array();

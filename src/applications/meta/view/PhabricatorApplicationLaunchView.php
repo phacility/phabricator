@@ -37,6 +37,15 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         ),
         phutil_escape_html($application->getName()));
 
+      if ($application->isBeta()) {
+        $content[] = phutil_render_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-beta',
+          ),
+          "\xCE\xB2");
+      }
+
       if ($this->fullWidth) {
         $content[] = phutil_render_tag(
           'span',

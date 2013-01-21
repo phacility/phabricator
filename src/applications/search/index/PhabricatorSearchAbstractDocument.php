@@ -14,7 +14,6 @@ final class PhabricatorSearchAbstractDocument {
   private $relationships = array();
 
   public static function getSupportedTypes() {
-    $more = PhabricatorEnv::getEnvConfig('search.more-document-types', array());
     return array(
       PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
       PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
@@ -22,7 +21,7 @@ final class PhabricatorSearchAbstractDocument {
       PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
       PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Ponder Questions',
-    ) + $more;
+    );
   }
 
   public function setPHID($phid) {

@@ -18,10 +18,6 @@ final class PhabricatorApplicationConfig extends PhabricatorApplication {
     return self::GROUP_ADMIN;
   }
 
-  public function shouldAppearInLaunchView() {
-    return false;
-  }
-
   public function getRoutes() {
     return array(
       '/config/' => array(

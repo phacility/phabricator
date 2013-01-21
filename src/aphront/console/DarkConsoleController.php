@@ -26,19 +26,7 @@ final class DarkConsoleController extends PhabricatorController {
       return id(new AphrontAjaxResponse())->setDisableConsole(true);
     }
 
-    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
-      $user->setConsoleEnabled(!$user->getConsoleEnabled());
-      if ($user->getConsoleEnabled()) {
-        $user->setConsoleVisible(true);
-      }
-      $user->save();
-      if ($request->isAjax()) {
-        return new AphrontRedirectResponse();
-      } else {
-        return id(new AphrontRedirectResponse())->setURI('/');
-      }
-    }
-
+    return new Aphront404Response();
   }
 
 }

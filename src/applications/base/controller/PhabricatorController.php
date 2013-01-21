@@ -88,9 +88,12 @@ abstract class PhabricatorController extends AphrontController {
       return $this->delegateToController($checker_controller);
     }
 
+    $preferences = $user->loadPreferences();
+
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
-      if ($user->getConsoleEnabled() ||
-          PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
+      $dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
+      if ($preferences->getPreference($dark_console) ||
+         PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
         $console = new DarkConsoleCore();
         $request->getApplicationConfiguration()->setConsole($console);
       }
@@ -165,7 +168,6 @@ abstract class PhabricatorController extends AphrontController {
 
     if (idx($options, 'device')) {
       $page->setDeviceReady(true);
-      $view->appendChild($page->renderFooter());
     }
 
     $application_menu = $this->buildApplicationMenu();
