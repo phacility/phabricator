@@ -51,11 +51,11 @@ final class PhabricatorCalendarBrowseController
     }
 
     $nav = $this->buildSideNavView();
-    $nav->selectFilter('edit');
+    $nav->selectFilter('/');
     $nav->appendChild(
       array(
         $this->getNoticeView(),
-        '<div style="padding: 2em;">',
+        '<div style="padding: 20px;">',
           $month_view,
         '</div>',
       ));

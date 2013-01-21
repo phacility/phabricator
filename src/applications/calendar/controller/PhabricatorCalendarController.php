@@ -7,12 +7,10 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav->addFilter('', pht('Calendar'), $this->getApplicationURI());
-
-    $nav->addLabel(pht('Create Events'));
+    $nav->addLabel(pht('Calendar'));
+    $nav->addFilter('/', pht('View All'));
     $nav->addFilter('status/create/', pht('New Status'));
 
-    $nav->addLabel(pht('Your Events'));
     if ($status && $status->getID()) {
       $nav->addFilter('status/edit/'.$status->getID().'/', pht('Edit Status'));
     }
