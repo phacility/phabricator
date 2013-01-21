@@ -52,6 +52,7 @@ final class DiffusionCommitController extends DiffusionController {
       ->setNavigationMarker(true);
 
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
+    $changesets = null;
     if ($is_foreign) {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
 
@@ -319,22 +320,26 @@ final class DiffusionCommitController extends DiffusionController {
       $repository,
       $commit->getCommitIdentifier()
     );
-    $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-      ->setAnchorName('top')
-      ->setTitle($short_name)
-      ->setBaseURI(new PhutilURI('/'.$commit_id))
-      ->build($changesets);
-    foreach ($content as $child) {
-      $nav->appendChild($child);
-    }
 
     $crumbs = $this->buildCrumbs(array(
       'commit' => true,
     ));
-    $nav->setCrumbs($crumbs);
+
+    if ($changesets) {
+      $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
+        ->setAnchorName('top')
+        ->setTitle($short_name)
+        ->setBaseURI(new PhutilURI('/'.$commit_id))
+        ->build($changesets)
+        ->setCrumbs($crumbs)
+        ->appendChild($content);
+      $content = $nav;
+    } else {
+      $content = array($crumbs, $content);
+    }
 
     return $this->buildApplicationPage(
-      $nav,
+      $content,
       array(
         'title' => $commit_id
       )
