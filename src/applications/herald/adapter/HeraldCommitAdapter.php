@@ -103,6 +103,25 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
     return $this->affectedRevision;
   }
 
+  private function loadCommitDiff() {
+    $drequest = DiffusionRequest::newFromDictionary(
+      array(
+        'repository' => $this->repository,
+        'commit' => $this->commit->getCommitIdentifier(),
+      ));
+
+    $raw = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
+      ->setTimeout(60 * 60 * 15)
+      ->setLinesOfContext(0)
+      ->loadRawDiff();
+
+    $parser = new ArcanistDiffParser();
+    $changes = $parser->parseDiff($raw);
+
+    $diff = DifferentialDiff::newFromRawChanges($changes);
+    return $diff;
+  }
+
   public function getHeraldField($field) {
     $data = $this->commitData;
     switch ($field) {
@@ -117,30 +136,24 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
       case HeraldFieldConfig::FIELD_REPOSITORY:
         return $this->repository->getPHID();
       case HeraldFieldConfig::FIELD_DIFF_CONTENT:
-        // TODO!
-        return null;
-/*
         try {
-          $diff = $this->loadDiff();
+          $diff = $this->loadCommitDiff();
         } catch (Exception $ex) {
-          // See rE280053 for an example.
           return array(
-            '<<< Failed to load diff, this usually means the change committed '.
-            'a binary file as text. >>>',
-          );
+            '<<< Failed to load diff, this may mean the change was '.
+            'unimaginably enormous. >>>');
         }
         $dict = array();
-        $changes = $diff->getChangesets();
         $lines = array();
+        $changes = $diff->getChangesets();
         foreach ($changes as $change) {
           $lines = array();
           foreach ($change->getHunks() as $hunk) {
             $lines[] = $hunk->makeChanges();
           }
-          $dict[$change->getTrueFilename()] = implode("\n", $lines);
+          $dict[$change->getFilename()] = implode("\n", $lines);
         }
         return $dict;
-*/
       case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
