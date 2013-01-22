@@ -45,8 +45,6 @@
 }
 
 .phabricator-filetree a.phabricator-filetree-item:hover {
-  background-image: url(/rsrc/image/menu_hover.png);
-  background-repeat: repeat-x;
   text-decoration: none;
 }
 
@@ -56,10 +54,4 @@
 
 .phabricator-filetree-icon-dir {
   background-image: url(/rsrc/image/icon/fatcow/folder.png);
-}
-
-.phabricator-nav-local
-  a.phabricator-active-nav-focus {
-  background-image: url(/rsrc/image/menu_selected.png);
-  background-repeat: repeat-x;
 }

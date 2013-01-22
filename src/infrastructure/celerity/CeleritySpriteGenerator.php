@@ -35,13 +35,19 @@ final class CeleritySpriteGenerator {
         $sprite = id(clone $template)
           ->setName('action-'.$icon.$suffix);
 
+        $tcss = array();
+        $tcss[] = '.action-'.$icon.$suffix;
         if ($color == 'white') {
-          $sprite->setTargetCSS(
-            '.action-'.$icon.$suffix.', '.
-            '.device-desktop .phabricator-action-view:hover .action-'.$icon);
-        } else {
-          $sprite->setTargetCSS('.action-'.$icon.$suffix);
+          $tcss[] = '.device-desktop .phabricator-action-view:hover '.
+            '.action-'.$icon;
+          if ($icon == 'new') {
+            // Hover state for the "+" icons on homepage tiles.
+            $tcss[] = '.phabricator-application-launch-create:hover '.
+                      '.phabricator-application-create-icon.action-new-grey';
+          }
         }
+
+        $sprite->setTargetCSS(implode(', ', $tcss));
 
         foreach ($scales as $scale_key => $scale) {
           $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
@@ -202,11 +208,13 @@ final class CeleritySpriteGenerator {
         ', .phabricator-side-menu .phabricator-menu-item-type-label',
       'menu-hover' =>
         ', .device-desktop .phabricator-side-menu '.
-        'a.phabricator-menu-item-type-link:hover',
+        'a.phabricator-menu-item-type-link:hover, '.
+        '.phabricator-filetree a.phabricator-filetree-item:hover',
       'menu-selected' =>
         ', .phabricator-side-menu .phabricator-menu-item-selected, '.
         '.device-desktop .phabricator-side-menu '.
-        'a.phabricator-menu-item-selected:hover',
+        'a.phabricator-menu-item-selected:hover, '.
+        '.phabricator-nav-local a.phabricator-active-nav-focus',
     );
 
     $sprites = array();
@@ -233,7 +241,9 @@ final class CeleritySpriteGenerator {
         'a.phabricator-menu-item-type-link:hover, '.
       '.phabricator-side-menu .phabricator-menu-item-selected, '.
       '.device-desktop .phabricator-side-menu '.
-        'a.phabricator-menu-item-selected:hover ');
+        'a.phabricator-menu-item-selected:hover, '.
+      '.phabricator-filetree a.phabricator-filetree-item:hover, '.
+      '.phabricator-filetree a.phabricator-active-nav-focus');
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }

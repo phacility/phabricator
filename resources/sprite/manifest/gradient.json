@@ -53,7 +53,7 @@
     },
     "gradient-menu-hover"      : {
       "name" : "gradient-menu-hover",
-      "rule" : ".gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover",
+      "rule" : ".gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover",
       "hash" : "856380207ac8c5cb6770d44dceb245a8"
     },
     "gradient-menu-label"      : {
@@ -63,13 +63,13 @@
     },
     "gradient-menu-selected"   : {
       "name" : "gradient-menu-selected",
-      "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover",
+      "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus",
       "hash" : "815bafb94e11c23e1a419ea85dcae113"
     }
   },
   "scales"  : [
     1
   ],
-  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover  {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
+  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-filetree a.phabricator-filetree-item:hover, .phabricator-filetree a.phabricator-active-nav-focus {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
   "type"    : "repeat-x"
 }

@@ -125,7 +125,7 @@ final class PhabricatorCalendarEditStatusController
     } else {
       $submit->addCancelButton(
         $this->getApplicationURI('status/delete/'.$status->getID().'/'),
-        'Delete Status'
+        pht('Delete Status')
       );
     }
     $form->appendChild($submit);

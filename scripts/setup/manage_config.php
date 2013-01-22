@@ -15,7 +15,10 @@ EOSYNOPSIS
 $args->parseStandardArguments();
 
 $workflows = array(
+  new PhabricatorConfigManagementListWorkflow(),
   new PhabricatorConfigManagementSetWorkflow(),
+  new PhabricatorConfigManagementGetWorkflow(),
+  new PhabricatorConfigManagementDeleteWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );
 

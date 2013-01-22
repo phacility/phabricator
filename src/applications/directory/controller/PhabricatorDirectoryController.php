@@ -123,7 +123,7 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
         }
 
         if ($is_small_tiles) {
-          while (count($tiles) % 4) {
+          while (count($tiles) % 3) {
             $tiles[] = id(new PhabricatorApplicationLaunchView());
           }
           $nav->addLabel($groups[$group]);
