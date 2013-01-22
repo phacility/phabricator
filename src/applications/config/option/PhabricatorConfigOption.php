@@ -10,6 +10,7 @@ final class PhabricatorConfigOption
   private $description;
   private $type;
   private $boolOptions;
+  private $enumOptions;
   private $group;
   private $examples;
   private $locked;
@@ -113,6 +114,20 @@ final class PhabricatorConfigOption
       pht('True'),
       pht('False'),
     );
+  }
+
+  public function setEnumOptions(array $options) {
+    $this->enumOptions = $options;
+    return $this;
+  }
+
+  public function getEnumOptions() {
+    if ($this->enumOptions) {
+      return $this->enumOptions;
+    }
+
+    throw new Exception(
+      'Call setEnumOptions() before trying to access them!');
   }
 
   public function setKey($key) {

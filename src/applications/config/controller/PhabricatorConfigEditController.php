@@ -253,6 +253,7 @@ final class PhabricatorConfigEditController
         }
         break;
       case 'string':
+      case 'enum':
         $set_value = (string)$value;
         break;
       case 'list<string>':
@@ -328,6 +329,7 @@ final class PhabricatorConfigEditController
     switch ($type) {
       case 'int':
       case 'string':
+      case 'enum':
         return $value;
       case 'bool':
         return $value ? 'true' : 'false';
@@ -359,6 +361,15 @@ final class PhabricatorConfigEditController
               'true'  => idx($option->getBoolOptions(), 0),
               'false' => idx($option->getBoolOptions(), 1),
             ));
+        break;
+      case 'enum':
+        $options = array_mergev(
+          array(
+            array('' => pht('(Use Default)')),
+            $option->getEnumOptions(),
+          ));
+        $control = id(new AphrontFormSelectControl())
+          ->setOptions($options);
         break;
       case 'class':
         $symbols = id(new PhutilSymbolLoader())

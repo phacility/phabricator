@@ -53,6 +53,7 @@ final class PhabricatorConfigManagementSetWorkflow
     switch ($type) {
       case 'string':
       case 'class':
+      case 'enum':
         $value = (string)$value;
         break;
       case 'int':

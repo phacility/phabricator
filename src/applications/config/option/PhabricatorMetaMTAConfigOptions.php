@@ -317,10 +317,20 @@ EODOC
         ->setSummary(
           pht('Allow Phabricator to use a single mailbox for all replies.'))
         ->setDescription($single_description),
-      // TODO: 'enum'
-      $this->newOption('metamta.user-address-format', 'string', 'full')
+      $this->newOption('metamta.user-address-format', 'enum', 'full')
+        ->setEnumOptions(
+          array(
+            'short' => 'short',
+            'real' => 'real',
+            'full' => 'full',
+          ))
         ->setSummary(pht('Control how Phabricator renders user names in mail.'))
-        ->setDescription($address_description),
+        ->setDescription($address_description)
+        ->addExample('gwashington <gwashington@example.com>', 'short')
+        ->addExample('George Washington <gwashington@example.com>', 'real')
+        ->addExample(
+          'gwashington (George Washington) <gwashington@example.com>',
+          'full'),
     );
   }
 
