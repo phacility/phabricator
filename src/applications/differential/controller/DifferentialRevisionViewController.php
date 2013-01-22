@@ -60,10 +60,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $repository);
 
     if ($request->getExists('download')) {
-      return $this->buildRawDiffResponse($changesets,
-                                         $vs_changesets,
-                                         $vs_map,
-                                         $repository);
+      return $this->buildRawDiffResponse(
+        $changesets,
+        $vs_changesets,
+        $vs_map,
+        $repository);
     }
 
     $props = id(new DifferentialDiffProperty())->loadAllWhere(
@@ -163,8 +164,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
             phutil_render_tag(
               'p',
               array(),
-              pht('This revision has no specified reviewers and needs review.'.
-                  ' You may want to add some reviewers.')
+              pht('This revision has no specified reviewers and needs '.
+                  'review. You may want to add some reviewers.')
             ));
         }
       }
@@ -495,6 +496,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
           'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
           'name'    => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
           'instant' => true,
+          'sigil' => 'workflow',
         );
       } else {
         $links[] = array(
