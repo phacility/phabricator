@@ -38,7 +38,11 @@ try {
     return;
   }
 
-  PhabricatorSetupCheck::willProcessRequest();
+  $response = PhabricatorSetupCheck::willProcessRequest();
+  if ($response) {
+    $sink->writeResponse($response);
+    return;
+  }
 
   $host = $_SERVER['HTTP_HOST'];
   $path = $_REQUEST['__path__'];

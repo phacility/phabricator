@@ -109,31 +109,7 @@ final class PhabricatorSetup {
 
     self::write("[OKAY] Core configuration OKAY.\n");
 
-    self::writeHeader("REQUIRED PHP EXTENSIONS");
-    $extensions = array(
-      'mysql',
-      'hash',
-      'json',
-      'openssl',
-      'mbstring',
-      'iconv',
-
-      // There is a chance we might not need this, but some configurations (like
-      // OAuth or Amazon SES) will require it. Just mark it 'required' since
-      // it's widely available and relatively core.
-      'curl',
-    );
-    foreach ($extensions as $extension) {
-      $ok = self::requireExtension($extension);
-      if (!$ok) {
-        self::writeFailure();
-        self::write("Setup failure! Install PHP extension '{$extension}'.");
-        return;
-      }
-    }
-
     $root = dirname(phutil_get_library_root('phabricator'));
-
 
     self::writeHeader("BASIC CONFIGURATION");
 
@@ -229,16 +205,6 @@ final class PhabricatorSetup {
       "Edit your configuration file (conf/{$env}.conf.php) and remove the ".
       "'phabricator.setup' line to finish installation.");
 
-  }
-
-  public static function requireExtension($extension) {
-    if (extension_loaded($extension)) {
-      self::write(" okay  Extension '{$extension}' installed.\n");
-      return true;
-    } else {
-      self::write("[FAIL] Extension '{$extension}' is NOT INSTALLED!\n");
-      return false;
-    }
   }
 
   private static function writeFailure() {

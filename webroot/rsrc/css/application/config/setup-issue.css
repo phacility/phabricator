@@ -65,6 +65,10 @@
   border-bottom: 1px solid #bfbfbf;
 }
 
+.setup-fatal .setup-issue-instructions {
+  background: #ffdfdf;
+}
+
 .setup-issue-name {
   padding: 15px;
   background: #35393d;
