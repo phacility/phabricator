@@ -35,13 +35,19 @@ final class CeleritySpriteGenerator {
         $sprite = id(clone $template)
           ->setName('action-'.$icon.$suffix);
 
+        $tcss = array();
+        $tcss[] = '.action-'.$icon.$suffix;
         if ($color == 'white') {
-          $sprite->setTargetCSS(
-            '.action-'.$icon.$suffix.', '.
-            '.device-desktop .phabricator-action-view:hover .action-'.$icon);
-        } else {
-          $sprite->setTargetCSS('.action-'.$icon.$suffix);
+          $tcss[] = '.device-desktop .phabricator-action-view:hover '.
+            '.action-'.$icon;
+          if ($icon == 'new') {
+            // Hover state for the "+" icons on homepage tiles.
+            $tcss[] = '.phabricator-application-launch-create:hover '.
+                      '.phabricator-application-create-icon.action-new-grey';
+          }
         }
+
+        $sprite->setTargetCSS(implode(', ', $tcss));
 
         foreach ($scales as $scale_key => $scale) {
           $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');

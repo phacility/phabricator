@@ -694,7 +694,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -180px;
 }
 
-.action-new-white, .device-desktop .phabricator-action-view:hover .action-new {
+.action-new-white, .device-desktop .phabricator-action-view:hover .action-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.action-new-grey {
   background-position: -15px -180px;
 }
 
