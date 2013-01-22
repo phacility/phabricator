@@ -32,6 +32,10 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     );
   }
 
+  public function getQuickCreateURI() {
+    return $this->getBaseURI().'task/create/';
+  }
+
   public function getRoutes() {
     return array(
       '/T(?P<id>[1-9]\d*)' => 'ManiphestTaskDetailController',

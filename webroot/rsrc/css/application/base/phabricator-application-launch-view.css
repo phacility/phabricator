@@ -25,8 +25,8 @@ a.phabricator-application-launch-container,
 div.phabricator-application-launch-container {
   display: block;
   float: left;
-  width: 73px;
-  height: 70px;
+  width: 78px;
+  height: 66px;
   overflow: hidden;
   position: relative;
 
@@ -37,8 +37,31 @@ div.phabricator-application-launch-container {
 }
 
 a.application-tile-full {
-  width: 100%;
+  width: 240px;
   height: 52px;
+}
+
+a.application-tile-full.application-tile-create {
+  width: 210px;
+  height: 52px;
+  border-right: none;
+}
+
+.application-tile-full + .phabricator-application-launch-create {
+  display: block;
+  float: right;
+  width: 28px;
+  border-top: 1px solid #080909;
+  border-bottom: 1px solid #080909;
+  border-left: 1px solid #080909;
+  height: 52px;
+  position: relative;
+}
+
+a.phabricator-application-launch-create:hover {
+  background-image: url('/rsrc/image/texture/dark-menu-hover.png');
+  color: #fff;
+  text-decoration: none;
 }
 
 a.phabricator-application-launch-container:hover {
@@ -54,20 +77,29 @@ a.phabricator-application-launch-container:hover {
 .phabricator-application-launch-icon {
   display: block;
   position: absolute;
-  left: 23px;
-  top: 13px;
+  left: 25px;
+  top: 10px;
   width: 28px;
   height: 28px;
 }
 
+.phabricator-application-create-icon {
+  display: block;
+  position: absolute;
+  right: 7px;
+  top: 20px;
+  width: 14px;
+  height: 14px;
+}
+
 .application-tile-full .phabricator-application-launch-icon {
   top: 12px;
-  left: 12px;
+  left: 10px;
 }
 
 .phabricator-application-launch-name {
   display: block;
-  margin-top: 46px;
+  margin-top: 42px;
   font-weight: bold;
   font-size: 11px;
   text-align: center;
@@ -76,10 +108,10 @@ a.phabricator-application-launch-container:hover {
 }
 
 .application-tile-full .phabricator-application-launch-name {
-  font-size: 12px;
-  margin-top: 12px;
+  font-size: 13px;
+  margin-top: 11px;
   text-align: left;
-  margin-left: 52px;
+  margin-left: 48px;
 
 }
 
@@ -87,7 +119,7 @@ a.phabricator-application-launch-container:hover {
   color: #bfbfbf;
   font-size: 11px;
   margin-top: 24px;
-  margin-left: 52px;
+  margin-left: 48px;
 }
 
 .phabricator-application-beta,
@@ -110,11 +142,27 @@ a.phabricator-application-launch-container:hover {
 
 .phabricator-application-beta {
   left: 4px;
-  background-color: #ff8f00;
+  background-color: rgb(109, 92, 41);
 }
 
 .application-tile-full .phabricator-application-launch-attention {
   top: 16px;
-  right: 12px;
+  right: 8px;
 }
 
+.application-tile-full .phabricator-application-launch-create {
+  display: inline-block;
+  float: right;
+  background: rgb(0, 122, 255);
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  padding: 1px 6px 2px;
+  border: 2px solid #333;
+  font-size: 11px;
+  box-shadow: 0 0px 2px #000;
+}
+
+.phabricator-application-launch-create {
+  display: none;
+}
