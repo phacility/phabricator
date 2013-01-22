@@ -1,0 +1,191 @@
+@title Concepts: Event Delegation
+@group concepts
+
+Explains Javelin event delegation with @{class:JX.Stratcom}.
+
+= Overview =
+
+Javelin provides event delegation as a core feature of the library, orchestrated
+with @{class:JX.Stratcom}. Event delegation means that the library listens to
+every event in the document and then delegates them to handlers you install,
+as opposed to you installing handlers on specific nodes for specific events you
+are interested in.
+
+Event delegation can greatly simplify event handling for many types of user
+interactions, and can also be used to do more traditional event listening for
+specific events on specific nodes. The goal is to provide a strictly more
+powerful event model, which gives you a very general delegation toolkit for
+interactions where delegation makes sense but refines into a very specific
+toolkit when you need less generality.
+
+Beyond DOM events, Stratcom provides a general event delegation framework which
+Javelin classes integrate with.
+
+= Event Delegation Basics =
+
+Javelin routes events based on the **event type** and **sigil set**.
+
+The **event type** is a string with a general description of the event, and
+includes the DOM event types like 'click' and 'keydown'. It may also be a
+class-specific event (JX.Duck might emit 'quack').
+
+The **sigil set** is a list of sigils (see @{article:Concepts: Sigils and
+Metadata}) for the event. If the event is a DOM event, Javelin builds the
+sigil set by walking up the DOM tree from the event target and collecting all
+the sigils on nodes (it also collects some other data into the sigil set,
+see "Magic Sigils" below). If the event is a class event, Javelin walks up
+the class hierarchy collecting class names. If the event is a raw event invoked
+with @{method:JX.Stratcom.invoke}, the caller must provide the sigil set.
+
+When you install an event handler, you specify the event type and the (possibly
+empty) sigil set you want to listen for.
+
+When an event is invoked, Javelin finds all the listeners for that event type
+and compares their sigil sets with the event's sigil set. If all of the sigils
+in a callback's sigil set appear in the event's sigil set, the callback is
+invoked. Generally, this mechanism allows you to ignore events you are not
+interested in.
+
+= Listening to General DOM Events =
+
+You can listen to general DOM events with @{method:JX.Stratcom.listen}. This
+method allows you to select which types of events you want to receive, and
+which elements must be involved in the event:
+
+  lang=js
+  JX.Stratcom.listen(
+    'click',          // Node
+    null,             // Sigil set
+    function(e) {     // Callback
+      // ...
+    });
+
+This listens to all clicks on all elements in the document. More likely, you
+want to listen only to some clicks. You accomplish this by annotating your
+document with Javelin sigils (see @{article:Concepts: Sigils and Metadata})
+and specifying a set of sigils which must be present between the target node
+and the document root. For instance, your document might look like this:
+
+  lang=html
+  <a href="#" data-sigil="important">Important!</a>
+  <a href="#">Some Other Link</a>
+
+If you install a handler like the one above, you'll get callbacks for every
+click, no matter which link it is or even if it's on the document itself. If
+you just want clicks on the "Important!" link, you can install a more specific
+handler:
+
+  lang=js
+  JX.Stratcom.listen(
+    'click',
+    'important',    // Listen only to this sigil set
+    function(e) {
+      // ...
+    });
+
+Now you will receive a callback only when the event target or some ancestor of
+it has the "important" sigil, i.e., only when the user clicks on the
+"Important!" link. You can also specify multiple sigils; ancestors must have
+all of the sigils for you to get a callback:
+
+  lang=js
+  JX.Stratcom.listen(
+    'click',
+    ['menu', 'item'], // Listen only for clicks on menu items.
+    function(e) {
+      // ...
+    });
+
+= Listening to Specific DOM Events =
+
+You can listen to specific DOM events with @{method:JX.DOM.listen}. This method
+works like @{method:JX.Stratcom.listen} but takes a DOM node as the first
+parameter and listens only for events within that node:
+
+  lang=js
+  JX.DOM.listen(
+    node,             // Node
+    'click',          // Event type(s)
+    null,             // Sigil set
+    function(e) {     // Callback
+      // ...
+    });
+
+This is similar to setting ##node.onclick## or ##node.addEventListener##, but
+uses the Javelin delegation core. You can also provide a sigil set, which works
+just like @{method:JX.Stratcom.listen} general events. This is useful if your
+node is a container, like a ##<div />##, with a lot of stuff in it.
+
+
+= DOM Event Flow =
+
+Events dispatched within the DOM propagate using a bubbling method, as detailed
+by http://www.w3.org/TR/DOM-Level-3-Events/#event-flow
+Listeners assigned using @{method:JX.Stratcom.listen} or @{method:JX.DOM.listen}
+are called in order of the deepest node in the DOM of the nodes which match the
+sigil set listened to.
+
+In this example the second listener, subscribed to 'inner', will be called
+before the listener subscribed to 'outer'
+
+  lang=html
+  <div data-sigil="outer">
+    <div data-sigil="inner">
+      Click Me
+    </div>
+  </div>
+
+  <script type="text/javascript">
+  JX.Stratcom.listen('click', ['outer'], function(e) { ... });
+  JX.Stratcom.listen('click', ['inner'], function(e) { ... });
+  </script>
+
+
+= Listening to Class Events =
+
+Beyond DOM events, you can also listen to class events. Every class installed
+by Javelin has static and instance methods called ##listen## (see
+@{method:JX.Base.listen}). The static method allows you to listen for all events
+emitted by every instance of a class and its descendants:
+
+  lang=js
+  JX.Animal.listen(
+    'meow',
+    function(e) {
+      // Listen for ANY 'meow' from any JX.Animal instance or instance which
+      // extends JX.Animal.
+    });
+
+The instance method allows you to listen for all events emitted by that
+specific instance:
+
+  lang=js
+  var cat = new JX.Cat();
+  cat.listen(
+    'meow',
+    function(e) {
+      // Listen for 'meow' from only this cat.
+    });
+
+= Magic Sigils =
+
+Javelin implements general delegation by building and comparing sigil sets. Some
+of these sigils are not DOM sigils, but derived from other things:
+
+  - ##id:*## ID sigils are generated when an examined node has an "id" property.
+  - ##obj:*## Object sigils are generated when an event affects a class
+    instance.
+  - ##class:*## Class sigils are generated while walking an affected instance's
+    class chain.
+  - ##tag:*## Tag sigils are generated by examining the tag names of DOM nodes.
+
+For instance, you can listen to all clicks on ##<a />## tags in a document like
+this:
+
+  lang=js
+  JX.Stratcom.listen(
+    'click',
+    'tag:a',
+    function(e) {
+      // ...
+    });

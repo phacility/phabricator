@@ -154,51 +154,6 @@ final class PhabricatorSetup {
 
     $root = dirname(phutil_get_library_root('phabricator'));
 
-    self::writeHeader("GIT SUBMODULES");
-    if (!Filesystem::pathExists($root.'/.git')) {
-      self::write(" skip  Not a git clone.\n\n");
-    } else {
-      list($info) = execx(
-        '(cd %s && git submodule status)',
-        $root);
-      foreach (explode("\n", rtrim($info)) as $line) {
-        $matches = null;
-        if (!preg_match('/^(.)([0-9a-f]{40}) (\S+)(?: |$)/', $line, $matches)) {
-          self::writeFailure();
-          self::write(
-            "Setup failure! 'git submodule' produced unexpected output:\n".
-            $line);
-          return;
-        }
-
-        $status = $matches[1];
-        $module = $matches[3];
-
-        switch ($status) {
-          case '-':
-          case '+':
-          case 'U':
-            self::writeFailure();
-            self::write(
-              "Setup failure! Git submodule '{$module}' is not up to date. ".
-              "Run:\n\n".
-              "  cd {$root} && git submodule update --init\n\n".
-              "...to update submodules.");
-            return;
-          case ' ':
-            self::write(" okay  Git submodule '{$module}' up to date.\n");
-            break;
-          default:
-            self::writeFailure();
-            self::write(
-              "Setup failure! 'git submodule' reported unknown status ".
-              "'{$status}' for submodule '{$module}'. This is a bug; report ".
-              "it to the Phabricator maintainers.");
-            return;
-        }
-      }
-    }
-    self::write("[OKAY] All submodules OKAY.\n");
 
     self::writeHeader("BASIC CONFIGURATION");
 

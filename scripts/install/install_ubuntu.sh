@@ -81,8 +81,6 @@ else
   (cd phabricator && git pull --rebase)
 fi
 
-(cd phabricator && git submodule update --init)
-
 echo
 echo
 echo "Install probably worked mostly correctly. Continue with the 'Configuration Guide':";
