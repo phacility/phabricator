@@ -75,35 +75,6 @@ switch ($command) {
     echo "Done.\n";
     break;
 
-  case 'repository-launch-readonly':
-  case 'repository-launch-master':
-    if ($command == 'repository-launch-readonly') {
-      $daemon_args = array(
-        '--',
-        '--no-discovery',
-      );
-    } else {
-      $daemon_args = array();
-    }
-
-    $need_launch = phd_load_tracked_repositories();
-    if (!$need_launch) {
-      echo "There are no repositories with tracking enabled.\n";
-      exit(1);
-    }
-
-    will_launch($control);
-
-    echo "Launching PullLocal daemon...\n";
-    $control->launchDaemon(
-      'PhabricatorRepositoryPullLocalDaemon',
-      $daemon_args);
-
-    echo "NOTE: '{$command}' is deprecated. Consult the documentation.\n";
-
-    echo "Done.\n";
-    break;
-
   case 'launch':
   case 'debug':
     $is_debug = ($argv[1] == 'debug');
@@ -192,17 +163,6 @@ switch ($command) {
   default:
     $err = $control->executeHelpCommand();
     exit($err);
-}
-
-function phd_load_tracked_repositories() {
-  $repositories = id(new PhabricatorRepository())->loadAll();
-  foreach ($repositories as $key => $repository) {
-    if (!$repository->isTracked()) {
-      unset($repositories[$key]);
-    }
-  }
-
-  return $repositories;
 }
 
 function will_launch($control, $with_logs = true) {
