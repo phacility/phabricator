@@ -2,6 +2,11 @@
  * @provides aphront-table-view-css
  */
 
+.device-phone .aphront-table-wrap,
+.device-tablet .aphront-table-wrap {
+  overflow-x: auto;
+}
+
 .aphront-table-view {
   width: 100%;
   border-collapse:  collapse;
