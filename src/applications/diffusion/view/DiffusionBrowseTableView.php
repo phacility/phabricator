@@ -72,7 +72,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
       'time'      => $time,
       'author'    => $author,
       'details'   => $details,
-      'lint'      => null,
     );
 
     $lint = self::loadLintMessagesCount($drequest);
@@ -218,7 +217,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $this->linkHistory($base_path.$path->getPath().$dir_slash),
         $editor_button,
         $browse_link,
-        $dict['lint'],
+        idx($dict, 'lint'),
         $dict['commit'],
         $dict['date'],
         $dict['time'],
