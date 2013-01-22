@@ -28,6 +28,7 @@ final class PhabricatorDaemonCombinedLogController
     $log_panel->setHeader('Combined Daemon Logs');
     $log_panel->appendChild($event_view);
     $log_panel->appendChild($pager);
+    $log_panel->setNoBackground();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('log/combined');
