@@ -267,28 +267,35 @@ final class AphrontRequest {
 
   final public function setCookie($name, $value, $expire = null) {
 
-    // Ensure cookies are only set on the configured domain.
+    $is_secure = false;
 
+    // If a base URI has been configured, ensure cookies are only set on that
+    // domain. Also, use the URI protocol to control SSL-only cookies.
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-    $base_uri = new PhutilURI($base_uri);
+    if ($base_uri) {
+      $base_uri = new PhutilURI($base_uri);
 
-    $base_domain = $base_uri->getDomain();
-    $base_protocol = $base_uri->getProtocol();
+      $base_domain = $base_uri->getDomain();
+      $base_protocol = $base_uri->getProtocol();
 
-    $host = $this->getHost();
+      $host = $this->getHost();
 
-    if ($base_domain != $host) {
-      throw new Exception(
-        "This install of Phabricator is configured as '{$base_domain}' but ".
-        "you are accessing it via '{$host}'. Access Phabricator via ".
-        "the primary configured domain.");
+      if ($base_domain != $host) {
+        throw new Exception(
+          "This install of Phabricator is configured as '{$base_domain}' but ".
+          "you are accessing it via '{$host}'. Access Phabricator via ".
+          "the primary configured domain.");
+      }
+
+      $is_secure = ($base_protocol == 'https');
+    } else {
+      $base_uri = new PhutilURI(PhabricatorEnv::getRequestBaseURI());
+      $base_domain = $base_uri->getDomain();
     }
 
     if ($expire === null) {
       $expire = time() + (60 * 60 * 24 * 365 * 5);
     }
-
-    $is_secure = ($base_protocol == 'https');
 
     setcookie(
       $name,

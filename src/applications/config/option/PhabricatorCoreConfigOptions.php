@@ -14,6 +14,7 @@ final class PhabricatorCoreConfigOptions
   public function getOptions() {
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
+        ->setLocked(true)
         ->setSummary(pht("URI where Phabricator is installed."))
         ->setDescription(
           pht(

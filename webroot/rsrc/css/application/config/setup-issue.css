@@ -41,11 +41,12 @@
 }
 
 .setup-issue pre {
-  width: 84%;
+  width: 95%;
   margin: auto;
   border: 1px solid #dfdfdf;
-  padding: 10px 3%;
+  padding: 10px 2%;
   background: #efefef;
+  overflow-x: auto;
 }
 
 .setup-issue tt {

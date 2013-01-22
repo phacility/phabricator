@@ -167,65 +167,6 @@ final class PhabricatorSetup {
         "directly. See this document for instructions:\n");
         self::writeDoc('article/Configuration_Guide.html');
       return;
-    } else {
-      $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-      $host_uri = new PhutilURI($host);
-      $protocol = $host_uri->getProtocol();
-      $allowed_protocols = array(
-        'http'  => true,
-        'https' => true,
-      );
-      if (empty($allowed_protocols[$protocol])) {
-        self::writeFailure();
-        self::write(
-          "You must specify the protocol over which your host works (e.g.: ".
-          "\"http:// or https://\")\nin your custom config file.\nRefer to ".
-          "'default.conf.php' for documentation on configuration options.\n");
-        return;
-      }
-      if (preg_match('/.*\/$/', $host)) {
-        self::write(" okay  phabricator.base-uri protocol\n");
-      } else {
-        self::writeFailure();
-        self::write(
-          "You must add a trailing slash at the end of the host\n(e.g.: ".
-          "\"http://phabricator.example.com/ instead of ".
-          "http://phabricator.example.com\")\nin your custom config file.".
-          "\nRefer to 'default.conf.php' for documentation on configuration ".
-          "options.\n");
-        return;
-      }
-
-      $host_domain = $host_uri->getDomain();
-      if (strpos($host_domain, '.') !== false) {
-        self::write(" okay  phabricator.base-uri domain\n");
-      } else {
-        self::writeFailure();
-        self::write(
-          "You must host Phabricator on a domain that contains a dot ('.'). ".
-          "The current domain, '{$host_domain}', does not have a dot, so some ".
-          "browsers will not set cookies on it. For instance, ".
-          "'http://example.com/ is OK, but 'http://example/' won't work. ".
-          "If you are using localhost, create an entry in the hosts file like ".
-          "'127.0.0.1 example.com', and access the localhost with ".
-          "'http://example.com/'.");
-        return;
-      }
-
-      $host_path = $host_uri->getPath();
-      if ($host_path == '/') {
-        self::write(" okay  phabricator.base-uri path\n");
-      } else {
-        self::writeFailure();
-        self::write(
-          "Your 'phabricator.base-uri' setting includes a path, but should ".
-          "not (e.g., 'http://phabricator.example.com/' is OK, but ".
-          "'http://example.com/phabricator/' is not). Phabricator must be ".
-          "installed on an entire domain, it can not be installed on a ".
-          "path alongside other applications. Consult the documentation ".
-          "for more details.");
-        return;
-      }
     }
 
     self::write("[OKAY] Basic configuration OKAY\n");

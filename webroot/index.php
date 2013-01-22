@@ -40,8 +40,6 @@ try {
 
   PhabricatorSetupCheck::willProcessRequest();
 
-  phabricator_detect_bad_base_uri();
-
   $host = $_SERVER['HTTP_HOST'];
   $path = $_REQUEST['__path__'];
 
@@ -56,6 +54,13 @@ try {
   $application->setPath($path);
   $application->willBuildRequest();
   $request = $application->buildRequest();
+
+  // Until an administrator sets "phabricator.base-uri", assume it is the same
+  // as the request URI. This will work fine in most cases, it just breaks down
+  // when daemons need to do things.
+  $request_protocol = ($request->isHTTPS() ? 'https' : 'http');
+  $request_base_uri = "{$request_protocol}://{$host}/";
+  PhabricatorEnv::setRequestBaseURI($request_base_uri);
 
   $write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
 
@@ -155,31 +160,5 @@ try {
 
 } catch (Exception $ex) {
   PhabricatorStartup::didFatal("[Exception] ".$ex->getMessage());
-}
-
-function phabricator_detect_bad_base_uri() {
-  $conf = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-  $uri = new PhutilURI($conf);
-  switch ($uri->getProtocol()) {
-    case 'http':
-    case 'https':
-      break;
-    default:
-      PhabricatorStartup::didFatal(
-        "'phabricator.base-uri' is set to '{$conf}', which is invalid. ".
-        "The URI must start with 'http://' or 'https://'.");
-      return;
-  }
-
-  if (strpos($uri->getDomain(), '.') === false) {
-    PhabricatorStartup::didFatal(
-      "'phabricator.base-uri' is set to '{$conf}', which is invalid. The URI ".
-      "must contain a dot ('.'), like 'http://example.com/', not just ".
-      "'http://example/'. Some web browsers will not set cookies on domains ".
-      "with no TLD, and Phabricator requires cookies for login. ".
-      "If you are using localhost, create an entry in the hosts file like ".
-      "'127.0.0.1 example.com', and access the localhost with ".
-      "'http://example.com/'.");
-  }
 }
 
