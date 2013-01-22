@@ -107,26 +107,6 @@ final class PhabricatorSetup {
         "consequences of leaving it unconfigured.\n");
     }
 
-    $path = getenv('PATH');
-    if (empty($path)) {
-      self::writeFailure();
-      self::write(
-        "Setup failure! The environmental \$PATH variable is empty. ".
-        "Phabricator needs to execute system commands like 'svn', 'git', ".
-        "'hg', and 'diff'. Set up your webserver so that it passes a valid ".
-        "\$PATH to the PHP process.\n\n");
-      if (php_sapi_name() == 'fpm-fcgi') {
-        self::write(
-          "You're running php-fpm, so the easiest way to do this is to add ".
-          "this line to your php-fpm.conf:\n\n".
-          "  env[PATH] = /usr/local/bin:/usr/bin:/bin\n\n".
-          "Then restart php-fpm.\n");
-      }
-      return;
-    } else {
-      self::write(" okay  \$PATH is nonempty.\n");
-    }
-
     self::write("[OKAY] Core configuration OKAY.\n");
 
     self::writeHeader("REQUIRED PHP EXTENSIONS");
