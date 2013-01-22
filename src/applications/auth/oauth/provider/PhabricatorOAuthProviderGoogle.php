@@ -95,13 +95,15 @@ final class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
   }
 
   public function retrieveUserProfileImage() {
-    // No apparent API access to Plus yet.
+    $uri = idx($this->userData, 'picture');
+    if ($uri) {
+      return HTTPSFuture::loadContent($uri);
+    }
     return null;
   }
 
   public function retrieveUserAccountURI() {
-    // No apparent API access to Plus yet.
-    return null;
+    return 'https://plus.google.com/'.$this->userData['id'];
   }
 
   public function retrieveUserRealName() {
