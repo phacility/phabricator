@@ -26,6 +26,10 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getQuickCreateURI() {
+    return $this->getBaseURI().'upload/';
+  }
+
   public function getRoutes() {
     return array(
       '/F(?P<id>[1-9]\d*)' => 'PhabricatorFileShortcutController',
