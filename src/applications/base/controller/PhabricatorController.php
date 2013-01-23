@@ -79,12 +79,12 @@ abstract class PhabricatorController extends AphrontController {
       PhabricatorEventType::TYPE_CONTROLLER_CHECKREQUEST,
       array(
         'request' => $request,
-        'controller' => get_class($this),
+        'controller' => $this,
       ));
     $event->setUser($user);
     PhutilEventEngine::dispatchEvent($event);
     $checker_controller = $event->getValue('controller');
-    if ($checker_controller != get_class($this)) {
+    if ($checker_controller != $this) {
       return $this->delegateToController($checker_controller);
     }
 
