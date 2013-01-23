@@ -72,7 +72,7 @@ final class PhabricatorCoreConfigOptions
             "and a call to 'Leap Into Action'. If you'd prefer more ".
             "traditional UI strings like 'Submit', you can set this flag to ".
             "disable most of the jokes and easter eggs.")),
-       $this->newOption('environment.append-paths', 'list<string>', null)
+       $this->newOption('environment.append-paths', 'list<string>', array())
         ->setSummary(
           pht("These paths get appended to your \$PATH envrionment variable."))
         ->setDescription(
