@@ -83,10 +83,6 @@
   width: 95%;
 }
 
-.aphront-exception-dialog .aphront-dialog-head {
-  background: #aa0000;
-}
-
 .aphront-exception-dialog .exception-message {
   font-size: 14px;
   background: #efefef;
@@ -95,8 +91,7 @@
 }
 
 .aphront-exception-dialog .exception-trace {
-  margin-top: 1em;
-  padding: .5em 1em;
+  margin-top: 15px;
 }
 
 .aphront-exception-dialog .exception-trace-header {
