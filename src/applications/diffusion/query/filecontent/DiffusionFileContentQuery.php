@@ -30,17 +30,17 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
   }
 
   final public function getBlameData() {
-    $raw_data = $this->getRawData();
+    $raw_data = preg_replace('/\n$/', '', $this->getRawData());
 
     $text_list = array();
     $rev_list = array();
     $blame_dict = array();
 
     if (!$this->getNeedsBlame()) {
-      $text_list = explode("\n", rtrim($raw_data));
-    } else {
+      $text_list = explode("\n", $raw_data);
+    } else if ($raw_data != '') {
       $lines = array();
-      foreach (explode("\n", rtrim($raw_data)) as $k => $line) {
+      foreach (explode("\n", $raw_data) as $k => $line) {
         $lines[$k] = $this->tokenizeLine($line);
 
         list($rev_id, $author, $text) = $lines[$k];

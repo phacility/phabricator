@@ -467,8 +467,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
         // with same color; otherwise generate blame info. The newer a change
         // is, the more saturated the color.
 
-        // TODO: SVN doesn't always give us blame for the last line, if empty?
-        // Bug with our stuff or with SVN?
         $rev = idx($rev_list, $k, $last_rev);
 
         if ($last_rev == $rev) {
