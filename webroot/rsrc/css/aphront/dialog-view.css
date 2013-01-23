@@ -4,21 +4,32 @@
 
 .aphront-dialog-view {
   width: 480px;
-  padding: 8px;
-  background: #666;
   margin: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5);
+}
+
+.device-phone .aphront-dialog-view {
+  width: 300px;
 }
 
 .aphront-dialog-head {
-  background:   #003366;
-  border:       none;
-  font-size:    15px;
-  padding:      5px 12px 6px;
-  color:        #ffffff;
+  border: 1px solid #d4dadf;
+  font-size: 15px;
+  padding: 10px 15px;
+  font-weight: bold;
+  white-space: nowrap;
+  color: #525252;
+  text-shadow: 0 1px 0 white;
+  font-weight: bold;
+  background-image: url(/rsrc/image/texture/table_header_tall.png);
+  background-repeat: repeat-x;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 
 .aphront-dialog-view-width-form {
-  width:        600px;
+  width: 600px;
 }
 
 .aphront-dialog-view-width-full {
@@ -27,15 +38,18 @@
 
 .aphront-dialog-body {
   background: #ffffff;
-  padding: 16px 12px;
+  padding: 20px 15px;
   border: none;
   overflow: hidden;
 }
 
 .aphront-dialog-tail {
   border: none;
-  background: #ededed;
-  padding: 0.5em;
+  background: #fff;
+  padding: 8px 10px;
+  border-top: 1px solid #d4dadf;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
   text-align: right;
 }
 
@@ -69,10 +83,6 @@
   width: 95%;
 }
 
-.aphront-exception-dialog .aphront-dialog-head {
-  background: #aa0000;
-}
-
 .aphront-exception-dialog .exception-message {
   font-size: 14px;
   background: #efefef;
@@ -81,8 +91,7 @@
 }
 
 .aphront-exception-dialog .exception-trace {
-  margin-top: 1em;
-  padding: .5em 1em;
+  margin-top: 15px;
 }
 
 .aphront-exception-dialog .exception-trace-header {

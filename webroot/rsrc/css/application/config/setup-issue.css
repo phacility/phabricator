@@ -41,11 +41,12 @@
 }
 
 .setup-issue pre {
-  width: 84%;
+  width: 95%;
   margin: auto;
   border: 1px solid #dfdfdf;
-  padding: 10px 3%;
+  padding: 10px 2%;
   background: #efefef;
+  overflow-x: auto;
 }
 
 .setup-issue tt {
@@ -62,6 +63,10 @@
   line-height: 1.4em;
   background: #efefef;
   border-bottom: 1px solid #bfbfbf;
+}
+
+.setup-fatal .setup-issue-instructions {
+  background: #ffdfdf;
 }
 
 .setup-issue-name {

@@ -19,8 +19,8 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
     require_once $root.'/scripts/__init_script__.php';
 
     if ($this->haveSymbolsBinary === null) {
-      $binary = $this->getSymbolsBinaryPath();
-      $this->haveSymbolsBinary = Filesystem::pathExists($binary);
+      list($err) = exec_manual('which javelinsymbols');
+      $this->haveSymbolsBinary = !$err;
       if (!$this->haveSymbolsBinary) {
         return;
       }
@@ -28,6 +28,10 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
 
     $futures = array();
     foreach ($paths as $path) {
+      if ($this->shouldIgnorePath($path)) {
+        continue;
+      }
+
       $future = $this->newSymbolsFuture($path);
       $futures[$path] = $future;
     }
@@ -53,11 +57,18 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
       self::LINT_MISSING_DEPENDENCY => 'Missing Javelin Dependency',
       self::LINT_UNNECESSARY_DEPENDENCY => 'Unnecessary Javelin Dependency',
       self::LINT_UNKNOWN_DEPENDENCY => 'Unknown Javelin Dependency',
-      self::LINT_MISSING_BINARY => '`javelinsymbols` Binary Not Built',
+      self::LINT_MISSING_BINARY => '`javelinsymbols` Not In Path',
     );
   }
 
+  private function shouldIgnorePath($path) {
+    return preg_match('@/__tests__/|externals/javelinjs/src/docs/@', $path);
+  }
+
   public function lintPath($path) {
+    if ($this->shouldIgnorePath($path)) {
+      return;
+    }
 
     if (!$this->haveSymbolsBinary) {
       if (!$this->haveWarnedAboutBinary) {
@@ -68,9 +79,10 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
           1,
           0,
           self::LINT_MISSING_BINARY,
-          "The 'javelinsymbols' binary in the Javelin project has not been ".
-          "built, so the Javelin linter can't run. This isn't a big concern, ".
-          "but means some Javelin problems can't be automatically detected.");
+          "The 'javelinsymbols' binary in the Javelin project is not ".
+          "available in \$PATH, so the Javelin linter can't run. This ".
+          "isn't a big concern, but means some Javelin problems can't be ".
+          "automatically detected.");
       }
       return;
     }
@@ -114,7 +126,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
     $celerity = CelerityResourceMap::getInstance();
 
     $path = preg_replace(
-      '@^externals/javelin/src/@',
+      '@^externals/javelinjs/src/@',
       'webroot/rsrc/js/javelin/',
       $path);
     $need = $external_classes;
@@ -175,18 +187,11 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
   }
 
   private function newSymbolsFuture($path) {
-    $javelinsymbols = $this->getSymbolsBinaryPath();
+    $javelinsymbols = 'javelinsymbols';
 
     $future = new ExecFuture($javelinsymbols.' # '.escapeshellarg($path));
     $future->write($this->getData($path));
     return $future;
-  }
-
-  private function getSymbolsBinaryPath() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-
-    $support = $root.'/externals/javelin/support';
-    return $support.'/javelinsymbols/javelinsymbols';
   }
 
   private function getUsedAndInstalledSymbolsForPath($path) {

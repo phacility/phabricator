@@ -11,8 +11,7 @@ final class PhabricatorCaches {
 
   /**
    * Highly specialized cache for performing setup checks. We use this cache
-   * to determine if we need to run expensive setup checks (e.g., verifying
-   * submodule versions, PATH, the presence of binaries, etc.) when the page
+   * to determine if we need to run expensive setup checks when the page
    * loads. Without it, we would need to run these checks every time.
    *
    * Normally, this cache is just APC. In the absence of APC, this cache

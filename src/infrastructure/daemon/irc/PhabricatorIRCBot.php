@@ -211,6 +211,11 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
   }
 
   private function routeMessage(PhabricatorIRCMessage $message) {
+    $ignore = $this->getConfig('ignore');
+    if ($ignore && in_array($message->getSenderNickName(), $ignore)) {
+        return;
+    }
+
     foreach ($this->handlers as $handler) {
       try {
         $handler->receiveMessage($message);

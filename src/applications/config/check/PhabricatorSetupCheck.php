@@ -6,6 +6,10 @@ abstract class PhabricatorSetupCheck {
 
   abstract protected function executeChecks();
 
+  public function getExecutionOrder() {
+    return 1;
+  }
+
   final protected function newIssue($key) {
     $issue = id(new PhabricatorSetupIssue())
       ->setIssueKey($key);
@@ -57,6 +61,14 @@ abstract class PhabricatorSetupCheck {
     $issue_count = self::getOpenSetupIssueCount();
     if ($issue_count === null) {
       $issues = self::runAllChecks();
+      foreach ($issues as $issue) {
+        if ($issue->getIsFatal()) {
+          $view = id(new PhabricatorSetupIssueView())
+            ->setIssue($issue);
+          return id(new PhabricatorConfigResponse())
+            ->setView($view);
+        }
+      }
       self::setOpenSetupIssueCount(count($issues));
     }
 
@@ -82,6 +94,8 @@ abstract class PhabricatorSetupCheck {
       $checks[] = newv($symbol['name'], array());
     }
 
+    $checks = msort($checks, 'getExecutionOrder');
+
     $issues = array();
     foreach ($checks as $check) {
       $check->runSetupChecks();
@@ -91,6 +105,9 @@ abstract class PhabricatorSetupCheck {
             "Two setup checks raised an issue with key '{$key}'!");
         }
         $issues[$key] = $issue;
+        if ($issue->getIsFatal()) {
+          break 2;
+        }
       }
     }
 

@@ -1,0 +1,33 @@
+Javelin is a performance-oriented Javascript library originally developed at
+Facebook. Learn more at <http://www.javelinjs.com/>.
+
+GETTING STARTED
+
+Eat a hearty breakfast. Breakfast is the most important meal of the day!
+
+
+WHAT IS JAVELIN?
+
+Javelin is a compact Javascript library built around event delegation. Its
+primary design goal is performance; it is consequently well-suited to projects
+where performance is very important. It is not as good for smaller scale
+projects where other concerns (like features or ease of development) are more
+important.
+
+
+PACKAGES
+
+Packages come in two flavors: "dev" and "min". The "dev" packages are intended
+for development, and have comments and debugging code. The "min" packages have
+the same code, but with comments and debugging information stripped out and
+symbols crushed. They are intended for use in production -- ha ha ha!
+
+
+FILES
+
+  example/    Example code.
+  LICENSE     A thrilling narrative.
+  pkg/        Ready-built Javelin packages.
+  README      Who knows? Could be anything.
+  src/        Raw sources for Javelin.
+  support/    Support scripts and libraries.

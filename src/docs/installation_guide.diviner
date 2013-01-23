@@ -63,8 +63,6 @@ dependencies:
   somewhere/ $ git clone git://github.com/facebook/libphutil.git
   somewhere/ $ git clone git://github.com/facebook/arcanist.git
   somewhere/ $ git clone git://github.com/facebook/phabricator.git
-  somewhere/ $ cd phabricator
-  somewhere/phabricator/ $ git submodule update --init
 
 = Installing APC (Optional) =
 
@@ -124,8 +122,7 @@ Since Phabricator is under active development, you should update frequently. To
 update Phabricator:
 
   - Stop the webserver.
-  - Run `git pull && git submodule update --init` in `libphutil/`,
-    `arcanist/` and `phabricator/`.
+  - Run `git pull` in `libphutil/`, `arcanist/` and `phabricator/`.
   - Run `phabricator/bin/storage upgrade`.
   - Restart the webserver.
 

@@ -52,6 +52,7 @@ final class PhabricatorEnv {
 
   private static $sourceStack;
   private static $repairSource;
+  private static $requestBaseURI;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -247,7 +248,7 @@ final class PhabricatorEnv {
    * @task read
    */
   public static function getURI($path) {
-    return rtrim(self::getEnvConfig('phabricator.base-uri'), '/').$path;
+    return rtrim(self::getAnyBaseURI(), '/').$path;
   }
 
 
@@ -267,7 +268,7 @@ final class PhabricatorEnv {
 
     $production_domain = self::getEnvConfig('phabricator.production-uri');
     if (!$production_domain) {
-      $production_domain = self::getEnvConfig('phabricator.base-uri');
+      $production_domain = self::getAnyBaseURI();
     }
     return rtrim($production_domain, '/').$path;
   }
@@ -281,7 +282,7 @@ final class PhabricatorEnv {
   public static function getCDNURI($path) {
     $alt = self::getEnvConfig('security.alternate-file-domain');
     if (!$alt) {
-      $alt = self::getEnvConfig('phabricator.base-uri');
+      $alt = self::getAnyBaseURI();
     }
     $uri = new PhutilURI($alt);
     $uri->setPath($path);
@@ -309,6 +310,28 @@ final class PhabricatorEnv {
     return newv($class, $args);
   }
 
+  public static function getAnyBaseURI() {
+    $base_uri = self::getEnvConfig('phabricator.base-uri');
+
+    if (!$base_uri) {
+      $base_uri = self::getRequestBaseURI();
+    }
+
+    if (!$base_uri) {
+      throw new Exception(
+        "Define 'phabricator.base-uri' in your configuration to continue.");
+    }
+
+    return $base_uri;
+  }
+
+  public static function getRequestBaseURI() {
+    return self::$requestBaseURI;
+  }
+
+  public static function setRequestBaseURI($uri) {
+    self::$requestBaseURI = $uri;
+  }
 
 /* -(  Unit Test Support  )-------------------------------------------------- */
 

@@ -118,7 +118,11 @@ abstract class AphrontApplicationConfiguration {
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
     $prod_uri = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
     $file_uri = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
-    if ($host != id(new PhutilURI($base_uri))->getDomain() &&
+
+    // NOTE: If the base URI isn't defined yet, don't activate alternate
+    // domains.
+    if ($base_uri &&
+        $host != id(new PhutilURI($base_uri))->getDomain() &&
         $host != id(new PhutilURI($prod_uri))->getDomain() &&
         $host != id(new PhutilURI($file_uri))->getDomain()) {
 

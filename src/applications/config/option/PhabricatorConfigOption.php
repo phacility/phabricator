@@ -2,7 +2,7 @@
 
 final class PhabricatorConfigOption
   extends Phobject
-  implements PhabricatorMarkupInterface{
+  implements PhabricatorMarkupInterface {
 
   private $key;
   private $default;

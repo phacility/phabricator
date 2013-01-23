@@ -1,0 +1,129 @@
+@title Concepts: Sigils and Metadata
+@group concepts
+
+Explains Javelin's sigils and metadata.
+
+= Overview =
+
+Javelin introduces two major concepts, "sigils" and "metadata", which are core
+parts of the library but don't generally exist in other Javascript libraries.
+Both sigils and metadata are extra information you add to the DOM which Javelin
+can access. This document explains what they are, why they exist, and how you
+use them.
+
+= Sigils =
+
+Sigils are names attached to nodes in the DOM. They behave almost exactly like
+CSS class names: sigils are strings, each node may have zero or more sigils, and
+sigils are not unique within a document. Sigils convey semantic information
+about the structure of the document.
+
+It is reasonable to think of sigils as being CSS class names in a different,
+semantic namespace.
+
+If you're emitting raw tags, you specify sigils by adding a ##data-sigil##
+attribute to a node:
+
+  lang=html
+  <div data-sigil="newsfeed">
+    <div data-sigil="story">
+      ...
+    </div>
+    <div data-sigil="story">
+      ...
+    </div>
+  </div>
+
+However, this should be considered an implementation detail and you should not
+rely on it excessively. In Javelin, use @{method:JX.Stratcom.hasSigil} to test
+if a node has a given sigil, and @{method:JX.Stratcom.addSigil} to add a sigil
+to a node.
+
+Javelin uses sigils instead of CSS classes to rigidly enforce the difference
+between semantic information and style information in the document. While CSS
+classes can theoretically handle both, the conflation between semantic and style
+information in a realistic engineering environment caused a number of problems
+at Facebook, including a few silly, preventable, and unfortunately severe bugs.
+
+Javelin separates this information into different namespaces, so developers and
+designers can be confident that changing CSS classes and presentation of a
+document will never change its semantic meaning. This is also why Javelin does
+not have a method to test whether a node has a CSS class, and does not have CSS
+selectors. Unless you cheat, Javelin makes it very difficult to use CSS class
+names semantically.
+
+This is an unusual decision for a library, and quite possibly the wrong tradeoff
+in many environments. But this was a continual source of problems at Facebook's
+scale and in its culture, such that it seemed to justify the measures Javelin
+takes to prevent accidents with style information having inadvertent or
+unrealized semantic value.
+
+= Metadata =
+
+Metadata is arbitrary pieces of data attached to nodes in the DOM. Metadata can
+be (and generally is) specified on the server, when the document is constructed.
+The value of metadata is that it allows handlers which use event delegation to
+distinguish between events which occur on similar nodes. For instance, if you
+have newsfeed with several "Like" links in it, your document might look like
+this:
+
+  lang=html
+  <div data-sigil="newsfeed">
+    <div data-sigil="story">
+      ...
+      <a href="..." data-sigil="like">Like</a>
+    </div>
+    <div data-sigil="story">
+      ...
+      <a href="..." data-sigil="like">Like</a>
+    </div>
+  </div>
+
+You can install a listener using Javelin event delegation (see @{article:
+Concepts: Event Delegation} for more information) like this:
+
+  lang=js
+  JX.Stratcom.listen(
+    'click',
+    ['newsfeed', 'story', 'like'],
+    function(e) {
+      // ...
+    });
+
+This calls the function you provide when the user clicks on a "like" link, but
+you need to be able to distinguish between the different links so you can know
+which story the user is trying to like. Javelin allows you to do this by
+attaching **metadata** to each node. Metadata is attached to a node by adding a
+##data-meta## attribute which has an index into data later provided to
+@{method:JX.Stratcom.mergeData}:
+
+  lang=html
+  <div data-sigil="newsfeed">
+    <div data-sigil="story" data-meta="0_0">
+      ...
+      <a href="..." data-sigil="like">Like</a>
+    </div>
+    <div data-sigil="story" data-meta="0_1">
+      ...
+      <a href="..." data-sigil="like">Like</a>
+    </div>
+  </div>
+  ...
+  <script type="text/javascript">
+    JX.Stratcom.mergeData(0, [{"storyID" : 12345}, {"storyID" : 23456}]);
+  </script>
+
+This data can now be accessed with @{method:JX.Stratcom.getData}, or with
+@{method:JX.Event.getNodeData} in an event handler:
+
+  lang=js
+  JX.Stratcom.listen(
+    'click',
+    ['newsfeed', 'story', 'like'],
+    function(e) {
+      var id = e.getNodeData('story').storyID;
+      // ...
+    });
+
+You can also add data to a node programmatically in Javascript with
+@{method:JX.Stratcom.addData}.

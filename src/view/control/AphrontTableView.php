@@ -289,7 +289,8 @@ final class AphrontTableView extends AphrontView {
         '</td></tr>';
     }
     $table[] = '</table>';
-    return implode('', $table);
+    $html = implode('', $table);
+    return '<div class="aphront-table-wrap">'.$html.'</div>';
   }
 
   public static function renderSingleDisplayLine($line) {

@@ -1,0 +1,82 @@
+@title Javelin at Facebook
+@group facebook
+
+Information specific to Javelin at Facebook.
+
+= Building Support Scripts =
+
+Javelin now ships with the source to build several libfbjs-based binaries, which
+serve to completely sever its dependencies on trunk:
+
+  - ##javelinsymbols##: used for lint
+  - ##jsast##: used for documentation generation
+  - ##jsxmin##: used to crush packages
+
+To build these, first build libfbjs:
+
+  javelin/ $ cd externals/libfbjs
+  javelin/externals/libfbjs/ $ CXX=/usr/bin/g++ make
+
+Note that **you must specify CXX explicitly because the default CXX is broken**.
+
+Now you should be able to build the individual binaries:
+
+  javelin/ $ cd support/javelinsymbols
+  javelin/support/javelinsymbols $ CXX=/usr/bin/g++ make
+
+  javelin/ $ cd support/jsast
+  javelin/support/jsast $ CXX=/usr/bin/g++ make
+
+  javelin/ $ cd support/jsxmin
+  javelin/support/jsxmin $ CXX=/usr/bin/g++ make
+
+= Synchronizing Javelin =
+
+To synchronize Javelin **from** Facebook trunk, run the synchronize script:
+
+  javelin/ $ ./scripts/sync-from-facebook.php ~/www
+
+...where ##~/www## is the root you want to pull Javelin files from. The script
+will copy files out of ##html/js/javelin## and build packages, and leave the
+results in your working copy. From there you can review changes and commit, and
+then push, diff, or send a pull request.
+
+To synchronize Javelin **to** Facebook trunk, run the, uh, reverse-synchronize
+script:
+
+  javelin/ $ ./scripts/sync-to-facebook.php ~/www
+
+...where ##~/www## is the root you want to push Javelin files to. The script
+will copy files out of the working copy into your ##www## and leave you with a
+dirty ##www##. From there you can review changes.
+
+Once Facebook moves to pure git for ##www## we can probably just submodule
+Javelin into it and get rid of all this nonsense, but the mixed SVN/git
+environment makes that difficult until then.
+
+= Building Documentation =
+
+Check out ##diviner## and ##libphutil## from Facebook github, and put them in a
+directory with ##javelin##:
+
+  somewhere/ $ ls
+  diviner/
+  javelin/
+  libphutil/
+  somewhere/ $
+
+Now run ##diviner## on ##javelin##:
+
+  somewhere/ $ cd javelin
+  somewhere/javelin/ $ ../diviner/bin/diviner .
+  [DivinerArticleEngine] Generating documentation for 48 files...
+  [JavelinDivinerEngine] Generating documentation for 74 files...
+  somewhere/javelin/ $
+
+Documentation is now available in ##javelin/docs/##.
+
+= Editing javelinjs.com =
+
+The source for javelinjs.com lives in ##javelin/support/webroot/##. The site
+itself is served off the phabricator.com host. You need access to that host to
+push it.

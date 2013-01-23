@@ -28,7 +28,6 @@ git pull
 
 cd $ROOT/phabricator
 git pull
-git submodule update --init
 
 
 ### RUN TESTS ##################################################################

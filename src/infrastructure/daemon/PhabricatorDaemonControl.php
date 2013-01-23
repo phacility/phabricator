@@ -165,12 +165,6 @@ final class PhabricatorDaemonControl {
         **help**
             Show this help.
 
-        **repository-launch-master**
-            DEPRECATED. Use 'phd start'.
-
-        **repository-launch-readonly**
-            DEPRECATED. Use 'phd launch pulllocal -- --no-discovery'.
-
 EOHELP
     );
     return 1;

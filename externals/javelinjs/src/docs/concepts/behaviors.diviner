@@ -1,0 +1,182 @@
+@title Concepts: Behaviors
+@group concepts
+
+Javelin behaviors help you glue pieces of code together.
+
+= Overview =
+
+Javelin behaviors provide a place for you to put glue code. For instance, when
+a page loads, you often need to instantiate objects, or set up event listeners,
+or alert the user that they've won a hog, or create a dependency between two
+objects, or modify the DOM, etc.
+
+Sometimes there's enough code involved here or a particular setup step happens
+often enough that it makes sense to write a class, but sometimes it's just a
+few lines of one-off glue. Behaviors give you a structured place to put this
+glue so that it's consistently organized and can benefit from Javelin
+infrastructure.
+
+= Behavior Basics =
+
+Behaviors are defined with @{function:JX.behavior}:
+
+  lang=js
+  JX.behavior('win-a-hog', function(config, statics) {
+    alert("YOU WON A HOG NAMED " + config.hogName + "!");
+  });
+
+They are called with @{function:JX.initBehaviors}:
+
+  lang=js
+  JX.initBehaviors({
+    "win-a-hog" : [{hogName : "Ethel"}]
+  });
+
+Normally, you don't construct the @{function:JX.initBehaviors} call yourself,
+but instead use a server-side library which manages behavior initialization for
+you. For example, using the PHP library:
+
+  lang=php
+  $config = array('hogName' => 'Ethel');
+  JavelinHelper::initBehaviors('win-a-hog', $config);
+
+Regardless, this will alert the user that they've won a hog (named Ethel, which
+is a good name for a hog) when they load the page.
+
+The callback you pass to @{function:JX.behavior} should have this signature:
+
+  lang=js
+  function(config, statics) {
+    // ...
+  }
+
+The function will be invoked once for each configuration dictionary passed to
+@{function:JX.initBehaviors}, and the dictionary will be passed as the
+##config## parameter. For example, to alert the user that they've won two hogs:
+
+  lang=js
+  JX.initBehaviors({
+    "win-a-hog" : [{hogName : "Ethel"}, {hogName: "Beatrice"}]
+  });
+
+This will invoke the function twice, once for each ##config## dictionary.
+Usually, you invoke a behavior multiple times if you have several similar
+controls on a page, like multiple @{class:JX.Tokenizer}s.
+
+An initially empty object will be passed in the ##statics## parameter, but
+changes to this object will persist across invocations of the behavior. For
+example:
+
+  lang=js
+  JX.initBehaviors('win-a-hog', function(config, statics) {
+    statics.hogsWon = (statics.hogsWon || 0) + 1;
+
+    if (statics.hogsWon == 1) {
+      alert("YOU WON A HOG! YOUR HOG IS NAMED " + config.hogName + "!");
+    } else {
+      alert("YOU WON ANOTHER HOG!!! THIS ONE IS NAMED " + config.hogName + "!");
+    }
+  }
+
+One way to think about behaviors are that they take the anonymous function
+passed to @{function:JX.behavior} and put it in a private Javelin namespace,
+which you access with @{function:JX.initBehavior}.
+
+Another way to think about them is that you are defining methods which represent
+the entirety of the API exposed by the document. The recommended approach to
+glue code is that the server interact with Javascript on the client //only// by
+invoking behaviors, so the set of available behaviors represent the complete set
+of legal interactions available to the server.
+
+= History and Rationale =
+
+This section explains why behaviors exist and how they came about. You can
+understand and use them without knowing any of this, but it may be useful or
+interesting.
+
+In early 2007, Facebook often solved the "glue code" problem through the use
+of global functions and DOM Level 0 event handlers, by manually building HTML
+tags in PHP:
+
+  lang=php
+  echo '<a href="#" '.
+       'onclick="win_a_hog('.escape_js_string($hog_name).'); return false;">'.
+       'Click here to win!'.
+       '</a>';
+
+(This example produces a link which the user can click to be alerted they have
+won a hog, which is slightly different from the automatic alert in the other
+examples in this document. Some subtle distinctions are ignored or glossed
+over here because they are not important to understanding behaviors.)
+
+This has a wide array of technical and architectural problems:
+
+  - Correctly escaping parameters is cumbersome and difficult.
+  - It resists static analysis, and is difficult to even grep for. You can't
+    easily package, minify, or determine dependencies for the piece of JS in
+    the result string.
+  - DOM Level 0 events have a host of issues in a complex application
+    environment.
+  - The JS global namespace becomes polluted with application glue functions.
+  - The server and client are tightly and relatively arbitrarily coupled, since
+    many of these handlers called multiple functions or had logic in the
+    strings. There is no structure to the coupling, so many callers relied on
+    the full power of arbitrary JS execution.
+  - It's utterly hideous.
+
+In 2007/2008, we introduced @{function@libphutil:jsprintf} and a function called
+onloadRegister() to solve some of the obvious problems:
+
+  lang=php
+  onloadRegister('win_a_hog(%s);', $hog_name);
+
+This registers the snippet for invocation after DOMContentReady fires. This API
+makes escaping manageable, and was combined with recommendations to structure
+code like this in order to address some of the other problems:
+
+  lang=php
+  $id = uniq_id();
+  echo '<a href="#" id="'.$id.'">Click here to win!</a>';
+  onloadRegister('new WinAHogController(%s, %s);', $id, $hog_name);
+
+By 2010 (particularly with the introduction of XHP) the API had become more
+sophisticated, but this is basically how most of Facebook's glue code still
+works as of mid-2011. If you view the source of any page, you'll see a bunch
+of ##onloadRegister()## calls in the markup which are generated like this.
+
+This mitigates many of the problems but is still fairly awkward. Escaping is
+easier, but still possible to get wrong. Stuff is a bit easier to grep for, but
+not much. You can't get very far with static analysis unless you get very
+complex. Coupling between the languages has been reduced but not eliminated. And
+now you have a bunch of classes which only really have glue code in them.
+
+Javelin behaviors provide a more structured solution to some of these problems:
+
+  - All your Javascript code is in Javascript files, not embedded in strings in
+    in some host language on the server side.
+  - You can use static analysis and minification tools normally.
+  - Provided you use a reasonable server-side library, you can't get escaping
+    wrong.
+  - Coupling is reduced because server only passes data to the client, never
+    code.
+  - The server declares client dependencies explicitly, not implicitly inside
+    a string literal. Behaviors are also relatively easy to grep for.
+  - Behaviors exist in a private, structured namespace instead of the global
+    namespace.
+  - Separation between the document's layout and behavior is a consequence of
+    the structure of behaviors.
+  - The entire interface the server may invoke against can be readily inferred.
+
+Note that Javelin does provide @{function:JX.onload}, which behaves like
+##onloadRegister()##. However, its use is discouraged.
+
+The two major downsides to the behavior design appear to be:
+
+  - They have a higher setup cost than the ad-hoc methods, but Javelin
+    philosophically places a very low value on this.
+  - Because there's a further setup cost to migrate an existing behavior into a
+    class, behaviors sometimes grow little by little until they are too big,
+    have more than just glue code, and should have been refactored into a
+    real class some time ago. This is a pretty high-level drawback and is
+    manageable through awareness of the risk and code review.
+

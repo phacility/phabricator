@@ -221,7 +221,7 @@ final class PhabricatorStartup {
    * @task valiation
    */
   private static function verifyRewriteRules() {
-    if (isset($_REQUEST['__path__'])) {
+    if (isset($_REQUEST['__path__']) && strlen($_REQUEST['__path__'])) {
       return;
     }
 
@@ -229,10 +229,20 @@ final class PhabricatorStartup {
       // Compatibility with PHP 5.4+ built-in web server.
       $url = parse_url($_SERVER['REQUEST_URI']);
       $_REQUEST['__path__'] = $url['path'];
-    } else {
+      return;
+    }
+
+    if (!isset($_REQUEST['__path__'])) {
       self::didFatal(
         "Request parameter '__path__' is not set. Your rewrite rules ".
         "are not configured correctly.");
+    }
+
+    if (!strlen($_REQUEST['__path__'])) {
+      self::didFatal(
+        "Request parameter '__path__' is set, but empty. Your rewrite rules ".
+        "are not configured correctly. The '__path__' should always ".
+        "begin with a '/'.");
     }
   }
 
