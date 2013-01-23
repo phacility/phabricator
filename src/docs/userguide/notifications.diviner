@@ -28,12 +28,6 @@ Phabricator implements realtime notifications using a Node.js server called
   - Install node.js.
   - Run `bin/aphlict` (this script must be run as root).
 
-Since the script needs `PHABRICATOR_ENV` to be defined, you may need to use
-the `-E` flag to `sudo` to preserve the environment if you have
-`PHABRICATOR_ENV` defined in your `.bashrc` or similar:
-
-  phabricator/ $ sudo -E ./bin/aphlict
-
 The server must be able to listen on port **843** and port **22280** for Aphlict
 to work. You can change the latter port in the `notification.client-uri` config,
 but port 843 is used by Flash and can not be changed. In particular, if you're

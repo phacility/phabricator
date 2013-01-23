@@ -8,84 +8,16 @@ This document contains basic configuration instructions for Phabricator.
 This document assumes you've already installed all the components you need.
 If you haven't, see @{article:Installation Guide}.
 
-= Configuring Phabricator =
+The next steps are:
 
-Create a new file here:
-
-  path/to/phabricator/conf/custom/myconfig.conf.php
-
-...where ##myconfig## is some name which identifies your installation. Put this
-in the file:
-
-  name=myconfig.conf.php, lang=php
-  <?php
-
-  return array(
-
-    // Important! This will put Phabricator into setup mode to help you
-    // configure things.
-    'phabricator.setup' => true,
-
-    // This will be the base domain for your install, and must be configured.
-    // Use "https://" if you have SSL. See below for some notes.
-    'phabricator.base-uri' => 'http://phabricator.example.com/',
-
-    // Connection information for MySQL.
-    'mysql.host' => 'localhost',
-    'mysql.user' => 'root',
-    'mysql.pass' => 'trustno1hunter2',
-
-    // Basic email domain configuration.
-    'metamta.default-address' => 'noreply@phabricator.example.com',
-    'metamta.domain'          => 'phabricator.example.com',
-
-    // NOTE: Check default.conf.php for detailed explanations of all the
-    // configuration options, including these.
-
-  ) + phabricator_read_config_file('production');
-
-For the last line, you can also use ##'development'## instead of
-##'production'## if you are planning to develop Phabricator itself. This will
-turn on some debugging features.
-
-= PHABRICATOR_ENV Environment Variable =
-
-When running Phabricator scripts, they will ask you to set the `PHABRICATOR_ENV`
-environment variable to point at your config. If you put your script in
-`custom/myconfig.conf.php`, you can identify the config with
-`custom/myconfig`, like this:
-
-  $ PHABRICATOR_ENV=custom/myconfig ./some_phabricator_command
-
-NOTE: Make sure you put 'PHABRICATOR_ENV=...' at the beginning of the line, not
-in the middle. The shell won't parse environmental variables declared after the
-command. You can also ##export PHABRICATOR_ENV=...## in your ~/.bashrc or
-~/.profile or similar, depending on which shell you use and how your system is
-configured.
-
-= Storage: Configuring MySQL =
-
-Get MySQL running and verify you can connect to it. Consult the MySQL
-documentation for help. When MySQL works, you need to load the Phabricator
-schemata into it. To do this, run:
-
-  phabricator/ $ ./bin/storage upgrade
-
-If your configuration uses an unprivileged user to connect to the database, you
-may have to override the default user so the schema changes can be applied with
-root or some other admin user:
-
-  phabricator/ $ ./bin/storage upgrade --user <user> --password <password>
-
-You can avoid the prompt the script issues by passing the ##--force## flag (for
-example, if you are scripting the upgrade process).
-
-  phabricator/ $ ./bin/storage upgrade --force
-
-NOTE: When you update Phabricator, run `storage upgrade` again to apply any
-new updates.
+  - Configure your webserver (Apache, nginx, or lighttpd).
+  - Access Phabricator with your browser.
+  - Follow the instructions to complete setup.
 
 = Webserver: Configuring Apache =
+
+NOTE: Follow these instructions to use Apache. To use nginx or lighttpd, scroll
+down to their sections.
 
 Get Apache running and verify it's serving a test page. Consult the Apache
 documentation for help. Make sure ##mod_php## and ##mod_rewrite## are enabled,
@@ -104,27 +36,35 @@ this:
 
   name=httpd.conf
   <VirtualHost *>
-    # Change this to the domain which points to your host, i.e. the domain
-    # you set as "phabricator.base-uri".
+    # Change this to the domain which points to your host.
     ServerName phabricator.example.com
 
     # Change this to the path where you put 'phabricator' when you checked it
-    # out from github when following the Installation Guide.
+    # out from GitHub when following the Installation Guide.
+    #
+    # Make sure you include "/webroot" at the end!
     DocumentRoot /path/to/phabricator/webroot
 
     RewriteEngine on
     RewriteRule ^/rsrc/(.*)     -                       [L,QSA]
     RewriteRule ^/favicon.ico   -                       [L,QSA]
     RewriteRule ^(.*)$          /index.php?__path__=$1  [B,L,QSA]
-
-    # This will use the config file you set up in the previous step. If you
-    # called it something other than 'myconfig', put that here.
-    SetEnv PHABRICATOR_ENV custom/myconfig
   </VirtualHost>
 
-Continue to "Setup" below.
+If Apache isn't currently configured to serve documents out of the directory
+where you put Phabricator, you may also need to add a section like this:
+
+  <Directory "/path/to/phabricator/webroot">
+    Order allow,deny
+    Allow from all
+  </Directory>
+
+After making your edits, restart Apache, then continue to "Setup" below.
 
 = Webserver: Configuring nginx =
+
+NOTE: Follow these instructions to use nginx. To use Apache or lighttpd, scroll
+to their sections.
 
 For nginx, use a configuration like this:
 
@@ -149,9 +89,6 @@ For nginx, use a configuration like this:
       fastcgi_pass   localhost:9000;
       fastcgi_index   index.php;
 
-      #custom environment variable
-      fastcgi_param PHABRICATOR_ENV     "custom/myconfig";
-
       #required if PHP was built with --enable-force-cgi-redirect
       fastcgi_param  REDIRECT_STATUS    200;
 
@@ -171,7 +108,12 @@ For nginx, use a configuration like this:
     }
   }
 
+Restart nginx after making your edits, then continue to "Setup" below.
+
 = Webserver: Configuring lighttpd =
+
+NOTE: Follow these instructions to use lighttpd. To use Apache or niginx, scroll
+up to their sections.
 
 For lighttpd, add a section like this to your lighttpd.conf:
 
@@ -184,9 +126,6 @@ For lighttpd, add a section like this to your lighttpd.conf:
           "^(/[^?]*)\?(.*)" => "/index.php?__path__=$1&$2",
           "^(/.*)$" => "/index.php?__path__=$1",
       )
-      setenv.add-environment = (
-         "PHABRICATOR_ENV" => "custom/myconfig",
-      )
   }
 
 You should also ensure the following modules are listed in your
@@ -194,57 +133,44 @@ server.modules list:
 
   mod_fastcgi
   mod_rewrite
-  mod_setenv
 
 Finally, you should run the following commands to enable php support:
 
   $ sudo apt-get install php5-cgi  # for ubuntu; other distros should be similar
   $ sudo lighty-enable-mod fastcgi-php
 
+Restart lighttpd after making your edits, then continue below.
+
 = Setup =
 
-Now, restart your webserver and navigate to whichever subdomain you set up. You
-should either see the Phabricator setup screen, which is a simple text page that
-looks something like this:
+Now, navigate to whichever subdomain you set up. You should see instructions to
+continue setup. The rest of this document contains additional instructions for
+specific setup steps.
 
-  PHABRICATOR SETUP
+When you see the login screen, continue with @{article:Configuring Accounts and
+Registration}.
 
-  This setup mode will guide you through setting up your Phabricator
-  configuration.
+= Storage: Configuring MySQL =
 
-  >>>  REQUIRED PHP EXTENSIONS  ------------------------------------------------
-  ...
+During setup, you'll need to configure MySQL. To do this, get MySQL running and
+verify you can connect to it. Consult the MySQL documentation for help. When
+MySQL works, you need to load the Phabricator schemata into it. To do this, run:
 
-If you see this, you're in good shape. Follow the instructions and correct any
-problems setup detects. If you don't see it but you do see a useful error
-message, try to fix that. If neither of these cover you, something is wrong.
-If you can't figure it out, come get help in IRC or on the mailing list (see
-http://phabricator.org/ for links).
+  phabricator/ $ ./bin/storage upgrade
 
-= Configuring Phabricator =
+If your configuration uses an unprivileged user to connect to the database, you
+may have to override the default user so the schema changes can be applied with
+root or some other admin user:
 
-Now that basic setup is complete, you should configure Phabricator for your
-installation. Phabricator configuration options which control how the
-applications behave are documented here:
+  phabricator/ $ ./bin/storage upgrade --user <user> --password <password>
 
-  /path/to/phabricator/conf/default.conf.php
+You can avoid the prompt the script issues by passing the ##--force## flag (for
+example, if you are scripting the upgrade process).
 
-There are several builtin configurations:
+  phabricator/ $ ./bin/storage upgrade --force
 
-  - ##default.conf.php##: root configuration, lists every configuration option
-    and sets some default for it. Look in this file to figure out what you can
-    configure.
-  - ##development.conf.php##: pulls in ##default.conf.php##, but overrides some
-    configuration options to better values for doing development on Phabricator.
-    You probably don't need to even look at this file unless you're making
-    changes to Phabricator itself.
-  - ##production.conf.php##: pulls in ##default.conf.php##, but overrides some
-    configuration options to provide better values for a production install.
-
-To actually configure your install, edit your ##custom/myconfig.conf.php## file
-and override values from either the ##'production'## or ##'development'##
-configurations. You should not edit the builtin configurations directly because
-that will make upgrading Phabricator more difficult in the future.
+NOTE: When you update Phabricator, run `storage upgrade` again to apply any
+new updates.
 
 = Next Steps =
 
@@ -252,6 +178,8 @@ Continue by:
 
   - setting up your admin account and login/registration with
     @{article:Configuring Accounts and Registration}; or
+  - understanding advanced configuration topics with
+    @{article:Configuration User Guide: Advanced Configuration}; or
   - configuring where uploaded files and attachments will be stored with
     @{article:Configuring File Storage}; or
   - configuring Phabricator so it can send mail with

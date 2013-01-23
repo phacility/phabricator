@@ -28,16 +28,6 @@ try {
 
   $sink = new AphrontPHPHTTPSink();
 
-  if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
-    try {
-      PhabricatorSetup::runSetup();
-    } catch (Exception $ex) {
-      echo "EXCEPTION!\n";
-      echo $ex;
-    }
-    return;
-  }
-
   $response = PhabricatorSetupCheck::willProcessRequest();
   if ($response) {
     $sink->writeResponse($response);
