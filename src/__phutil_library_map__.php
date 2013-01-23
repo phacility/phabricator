@@ -1210,7 +1210,6 @@ phutil_register_library_map(array(
     'PhabricatorSettingsPanelProfile' => 'applications/settings/panel/PhabricatorSettingsPanelProfile.php',
     'PhabricatorSettingsPanelSSHKeys' => 'applications/settings/panel/PhabricatorSettingsPanelSSHKeys.php',
     'PhabricatorSettingsPanelSearchPreferences' => 'applications/settings/panel/PhabricatorSettingsPanelSearchPreferences.php',
-    'PhabricatorSetup' => 'infrastructure/PhabricatorSetup.php',
     'PhabricatorSetupCheck' => 'applications/config/check/PhabricatorSetupCheck.php',
     'PhabricatorSetupCheckAPC' => 'applications/config/check/PhabricatorSetupCheckAPC.php',
     'PhabricatorSetupCheckBaseURI' => 'applications/config/check/PhabricatorSetupCheckBaseURI.php',

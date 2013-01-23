@@ -23,3 +23,4 @@
 /conf/custom/*
 /conf/local/local.json
 /conf/local/ENVIRONMENT
+/conf/local/VERSION

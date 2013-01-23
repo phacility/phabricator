@@ -58,35 +58,10 @@ final class PhabricatorEnv {
    * @phutil-external-symbol class PhabricatorStartup
    */
   public static function initializeWebEnvironment() {
-    $env = self::getSelectedEnvironmentName();
-    if (!$env) {
-      PhabricatorStartup::didFatal(
-        "The 'PHABRICATOR_ENV' environmental variable is not defined. Modify ".
-        "your httpd.conf to include 'SetEnv PHABRICATOR_ENV <env>', where ".
-        "'<env>' is one of 'development', 'production', or a custom ".
-        "environment.");
-    }
-
     self::initializeCommonEnvironment();
   }
 
   public static function initializeScriptEnvironment() {
-    $env = self::getSelectedEnvironmentName();
-    if (!$env) {
-      echo phutil_console_wrap(
-        phutil_console_format(
-          "**ERROR**: PHABRICATOR_ENV Not Set\n\n".
-          "Define the __PHABRICATOR_ENV__ environment variable before ".
-          "running this script. You can do it on the command line like ".
-          "this:\n\n".
-          "  $ PHABRICATOR_ENV=__custom/myconfig__ %s ...\n\n".
-          "Replace __custom/myconfig__ with the path to your configuration ".
-          "file. For more information, see the 'Configuration Guide' in the ".
-          "Phabricator documentation.\n\n",
-          $GLOBALS['argv'][0]));
-      exit(1);
-    }
-
     self::initializeCommonEnvironment();
 
     // NOTE: This is dangerous in general, but we know we're in a script context
@@ -139,14 +114,16 @@ final class PhabricatorEnv {
     $stack = new PhabricatorConfigStackSource();
     self::$sourceStack = $stack;
 
-    $defaultSource = id(new PhabricatorConfigDefaultSource())
+    $default_source = id(new PhabricatorConfigDefaultSource())
       ->setName(pht('Global Default'));
-    $stack->pushSource($defaultSource);
+    $stack->pushSource($default_source);
 
     $env = self::getSelectedEnvironmentName();
-    $stack->pushSource(
-      id(new PhabricatorConfigFileSource($env))
-        ->setName(pht("File '%s'", $env)));
+    if ($env) {
+      $stack->pushSource(
+        id(new PhabricatorConfigFileSource($env))
+          ->setName(pht("File '%s'", $env)));
+    }
 
     $stack->pushSource(
       id(new PhabricatorConfigLocalSource())
@@ -162,7 +139,7 @@ final class PhabricatorEnv {
     // If custom libraries specify config options, they won't get default
     // values as the Default source has already been loaded, so we get it to
     // pull in all options from non-phabricator libraries now they are loaded.
-    $defaultSource->loadExternalOptions();
+    $default_source->loadExternalOptions();
 
     try {
       $stack->pushSource(
