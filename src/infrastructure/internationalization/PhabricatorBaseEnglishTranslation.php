@@ -204,8 +204,8 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       'Run these %d command(s):' => array(
-        'Run this %d command:',
-        'Run these %d commands:',
+        'Run this command:',
+        'Run these commands:',
       ),
 
       'Install these %d PHP extension(s):' => array(
