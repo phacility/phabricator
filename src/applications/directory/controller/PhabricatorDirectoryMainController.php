@@ -183,11 +183,11 @@ final class PhabricatorDirectoryMainController
     $revision_query->setLimit(null);
     $revisions = $revision_query->execute();
 
-    list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
-      $revisions,
-      array($user_phid));
+    list($blocking, $active, ) = DifferentialRevisionQuery::splitResponsible(
+        $revisions,
+        array($user_phid));
 
-    if (!$active) {
+    if (!$blocking && !$active) {
       return $this->renderMiniPanel(
         'No Waiting Revisions',
         'No revisions are waiting on you.');
@@ -208,7 +208,7 @@ final class PhabricatorDirectoryMainController
 
     $revision_view = id(new DifferentialRevisionListView())
       ->setHighlightAge(true)
-      ->setRevisions($active)
+      ->setRevisions(array_merge($blocking, $active))
       ->setFields(DifferentialRevisionListView::getDefaultFields())
       ->setUser($user)
       ->loadAssets();

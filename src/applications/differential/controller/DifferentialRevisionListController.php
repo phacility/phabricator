@@ -435,9 +435,19 @@ final class DifferentialRevisionListController extends DifferentialController {
     $views = array();
     switch ($filter) {
       case 'active':
-        list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
-          $revisions,
-          $user_phids);
+        list($blocking, $active, $waiting) =
+          DifferentialRevisionQuery::splitResponsible(
+            $revisions,
+            $user_phids);
+
+        $view = id(clone $template)
+          ->setHighlightAge(true)
+          ->setRevisions($blocking)
+          ->loadAssets();
+        $views[] = array(
+          'title' => pht('Blocking Others'),
+          'view'  => $view,
+        );
 
         $view = id(clone $template)
           ->setHighlightAge(true)
