@@ -59,6 +59,17 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       case 'table':
         update(area, (r.start == 0 ? '' : '\n\n') + '| ', sel || 'data', ' |');
         break;
+      case 'meme':
+        new JX.Workflow('/macro/meme/create/')
+          .setHandler(function(response) {
+            update(
+              area,
+              '',
+              sel,
+              (r.start == 0 ? '' : '\n\n') + response.text + '\n\n');
+          })
+          .start();
+        break;
     }
   }
 
