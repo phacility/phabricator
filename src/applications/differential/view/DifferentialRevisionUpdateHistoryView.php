@@ -199,19 +199,19 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         '<form action="#toc">'.
           '<table class="differential-revision-history-table">'.
             '<tr>'.
-              '<th>Diff</th>'.
-              '<th>ID</th>'.
-              '<th>Base</th>'.
-              '<th>Description</th>'.
-              '<th>Created</th>'.
-              '<th>Lint</th>'.
-              '<th>Unit</th>'.
+              '<th>'.pht('Diff').'</th>'.
+              '<th>'.pht('ID').'</th>'.
+              '<th>'.pht('Base').'</th>'.
+              '<th>'.pht('Description').'</th>'.
+              '<th>'.pht('Created').'</th>'.
+              '<th>'.pht('Lint').'</th>'.
+              '<th>'.pht('Unit').'</th>'.
             '</tr>'.
             implode("\n", $rows).
             '<tr>'.
               '<td colspan="9" class="diff-differ-submit">'.
-                '<label>Whitespace Changes: '.$select.'</label>'.
-                '<button>Show Diff</button>'.
+                '<label>'.pht('Whitespace Changes: %s', $select).'</label>'.
+                '<button>'.pht('Show Diff').'</button>'.
               '</td>'.
             '</tr>'.
           '</table>'.

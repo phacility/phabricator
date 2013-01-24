@@ -46,7 +46,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
     $comment_command_printed = false;
     if (in_array(DifferentialAction::ACTION_COMMENT, $supported_commands)) {
-      $text .= 'Reply to comment';
+      $text .= pht('Reply to comment');
       $comment_command_printed = true;
 
       $supported_commands = array_diff(

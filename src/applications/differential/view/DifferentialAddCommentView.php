@@ -86,14 +86,14 @@ final class DifferentialAddCommentView extends AphrontView {
       ->addHiddenInput('revision_id', $revision->getID())
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Action')
+          ->setLabel(pht('Action'))
           ->setName('action')
           ->setValue($action)
           ->setID('comment-action')
           ->setOptions($this->actions))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Add Reviewers')
+          ->setLabel(pht('Add Reviewers'))
           ->setName('reviewers')
           ->setControlID('add-reviewers')
           ->setControlStyle($enable_reviewers ? null : 'display: none')
@@ -101,7 +101,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setDisableBehavior(true))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Add CCs')
+          ->setLabel(pht('Add CCs'))
           ->setName('ccs')
           ->setControlID('add-ccs')
           ->setControlStyle($enable_ccs ? null : 'display: none')
@@ -111,12 +111,12 @@ final class DifferentialAddCommentView extends AphrontView {
         id(new PhabricatorRemarkupControl())
           ->setName('comment')
           ->setID('comment-content')
-          ->setLabel('Comment')
+          ->setLabel(pht('Comment'))
           ->setValue($this->draft ? $this->draft->getDraft() : null)
           ->setUser($this->user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? 'Submit' : 'Clowncopterize'));
+          ->setValue($is_serious ? pht('Submit') : pht('Clowncopterize')));
 
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',
@@ -128,7 +128,7 @@ final class DifferentialAddCommentView extends AphrontView {
             'value' => $this->reviewers,
             'row' => 'add-reviewers',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-            'placeholder' => 'Type a user name...',
+            'placeholder' => pht('Type a user name...'),
           ),
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),
@@ -136,7 +136,7 @@ final class DifferentialAddCommentView extends AphrontView {
             'value' => $this->ccs,
             'row' => 'add-ccs',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-            'placeholder' => 'Type a user or mailing list...',
+            'placeholder' => pht('Type a user or mailing list...'),
           ),
         ),
         'select' => 'comment-action',
@@ -179,7 +179,7 @@ final class DifferentialAddCommentView extends AphrontView {
     $warning_container .= '</div>';
 
     $header = id(new PhabricatorHeaderView())
-      ->setHeader($is_serious ? 'Add Comment' : 'Leap Into Action');
+      ->setHeader($is_serious ? pht('Add Comment') : pht('Leap Into Action'));
 
     return
       id(new PhabricatorAnchorView())
@@ -193,7 +193,7 @@ final class DifferentialAddCommentView extends AphrontView {
         '<div class="aphront-panel-preview aphront-panel-flush">'.
           '<div id="comment-preview">'.
             '<span class="aphront-panel-preview-loading-text">'.
-              'Loading comment preview...'.
+              pht('Loading comment preview...').
             '</span>'.
           '</div>'.
           '<div id="inline-comment-preview">'.

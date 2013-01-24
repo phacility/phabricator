@@ -90,7 +90,7 @@ final class DifferentialInlineCommentView extends AphrontView {
 
     $is_draft = false;
     if ($inline->isDraft() && !$is_synthetic) {
-      $links[] = 'Not Submitted Yet';
+      $links[] = pht('Not Submitted Yet');
       $is_draft = true;
     }
 
@@ -102,7 +102,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           'mustcapture' => true,
           'sigil' => 'differential-inline-prev',
         ),
-        'Previous');
+        pht('Previous'));
 
       $links[] = javelin_render_tag(
         'a',
@@ -111,7 +111,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           'mustcapture' => true,
           'sigil' => 'differential-inline-next',
         ),
-        'Next');
+        pht('Next'));
 
       if ($this->allowReply) {
 
@@ -129,7 +129,7 @@ final class DifferentialInlineCommentView extends AphrontView {
               'mustcapture' => true,
               'sigil'       => 'differential-inline-reply',
             ),
-            'Reply');
+            pht('Reply'));
         }
 
       }
@@ -145,7 +145,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           'mustcapture' => true,
           'sigil'       => 'differential-inline-edit',
         ),
-        'Edit');
+        pht('Edit'));
       $links[] = javelin_render_tag(
         'a',
         array(
@@ -153,7 +153,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           'mustcapture' => true,
           'sigil'       => 'differential-inline-delete',
         ),
-        'Delete');
+        pht('Delete'));
     } else if ($this->preview) {
       $links[] = javelin_render_tag(
         'a',
@@ -163,7 +163,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           ),
           'sigil'       => 'differential-inline-preview-jump',
         ),
-        'Not Visible');
+        pht('Not Visible'));
       $links[] = javelin_render_tag(
         'a',
         array(
@@ -171,7 +171,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           'mustcapture' => true,
           'sigil'       => 'differential-inline-delete',
         ),
-        'Delete');
+        pht('Delete'));
     }
 
     if ($links) {

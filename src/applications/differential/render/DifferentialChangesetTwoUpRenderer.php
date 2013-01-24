@@ -95,8 +95,8 @@ final class DifferentialChangesetTwoUpRenderer
               ),
             ),
             $is_first_block
-              ? "Show First 20 Lines"
-              : "\xE2\x96\xB2 Show 20 Lines");
+              ? pht("Show First 20 Lines")
+              : pht("\xE2\x96\xB2 Show 20 Lines"));
         }
 
         $contents[] = javelin_render_tag(
@@ -111,7 +111,7 @@ final class DifferentialChangesetTwoUpRenderer
               'range'  => "{$top}-{$len}/{$top}-{$len}",
             ),
           ),
-          'Show All '.$len.' Lines');
+          pht('Show All %d Lines', $len));
 
         $is_last_block = false;
         if ($ii + $len >= $rows) {
@@ -131,8 +131,8 @@ final class DifferentialChangesetTwoUpRenderer
               ),
             ),
             $is_last_block
-              ? "Show Last 20 Lines"
-              : "\xE2\x96\xBC Show 20 Lines");
+              ? pht("Show Last 20 Lines")
+              : pht("\xE2\x96\xBC Show 20 Lines"));
         }
 
         $context = null;

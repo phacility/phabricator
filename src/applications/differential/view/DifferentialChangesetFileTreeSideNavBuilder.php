@@ -120,7 +120,7 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
       '<div class="phabricator-filetree">'.
         implode("\n", $filetree).
       '</div>';
-    $nav->addLabel('Changed Files');
+    $nav->addLabel(pht('Changed Files'));
     $nav->addCustomBlock($filetree);
     $nav->setActive(true);
     $nav->selectFilter(null);

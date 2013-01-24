@@ -285,9 +285,9 @@ abstract class DifferentialChangesetHTMLRenderer
     return
       '<table class="differential-property-table">'.
         '<tr class="property-table-header">'.
-          '<th>Property Changes</th>'.
-          '<td class="oval">Old Value</td>'.
-          '<td class="nval">New Value</td>'.
+          '<th>'.pht('Property Changes').'</th>'.
+          '<td class="oval">'.pht('Old Value').'</td>'.
+          '<td class="nval">'.pht('New Value').'</td>'.
         '</tr>'.
         implode('', $rows).
       '</table>';
@@ -330,7 +330,7 @@ abstract class DifferentialChangesetHTMLRenderer
           'href'        => '#',
           'meta'        => $meta,
         ),
-        'Show File Contents');
+        pht('Show File Contents'));
     }
 
     return $this->wrapChangeInTable(

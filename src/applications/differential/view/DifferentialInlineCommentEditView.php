@@ -101,7 +101,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'sigil' => 'inline-edit-cancel',
         'class' => 'grey',
       ),
-      'Cancel');
+      pht('Cancel'));
 
     $buttons = implode('', $buttons);
 
@@ -113,7 +113,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'tabindex' => '-1',
         'target' => '_blank',
       ),
-      'Formatting Reference');
+      pht('Formatting Reference'));
 
     return javelin_render_tag(
       'div',
