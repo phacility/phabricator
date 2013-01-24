@@ -95,7 +95,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 
@@ -103,13 +103,13 @@ final class DifferentialRevisionEditController extends DifferentialController {
       $form
         ->appendChild(
           id(new AphrontFormTextAreaControl())
-            ->setLabel('Comments')
+            ->setLabel(pht('Comments'))
             ->setName('comments')
-            ->setCaption("Explain what's new in this diff.")
+            ->setCaption(pht("Explain what's new in this diff."))
             ->setValue($request->getStr('comments')))
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Save'))
+            ->setValue(pht('Save')))
         ->appendChild(
           id(new AphrontFormDividerControl()));
     }
@@ -134,21 +134,22 @@ final class DifferentialRevisionEditController extends DifferentialController {
     $panel = new AphrontPanelView();
     if ($revision->getID()) {
       if ($diff) {
-        $panel->setHeader('Update Differential Revision');
+        $panel->setHeader(pht('Update Differential Revision'));
       } else {
-        $panel->setHeader('Edit Differential Revision');
+        $panel->setHeader(pht('Edit Differential Revision'));
       }
     } else {
-      $panel->setHeader('Create New Differential Revision');
+      $panel->setHeader(pht('Create New Differential Revision'));
     }
 
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
 
     return $this->buildStandardPageResponse(
       array($error_view, $panel),
       array(
-        'title' => 'Edit Differential Revision',
+        'title' => pht('Edit Differential Revision'),
       ));
   }
 
