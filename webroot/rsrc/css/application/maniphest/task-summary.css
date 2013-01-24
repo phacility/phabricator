@@ -132,6 +132,10 @@
   margin-left: 20px;
 }
 
+.aphront-panel-view .maniphest-task-group-header {
+  margin-left: 0;
+}
+
 .maniphest-total-result-count {
   text-align: right;
   padding-right: 2em;
