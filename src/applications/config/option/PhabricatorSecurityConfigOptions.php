@@ -108,7 +108,7 @@ final class PhabricatorSecurityConfigOptions
             "unique to your install. In particular, you will want to do ".
             "this if you accidentally send a bunch of mail somewhere you ".
             "shouldn't have, to invalidate all old reply-to addresses.")),
-       $this->newOption('uri.allowed-protocols', 'set', null)
+       $this->newOption('uri.allowed-protocols', 'set', array())
         ->setSummary(
           pht("Determines which URI protocols are auto-linked."))
         ->setDescription(
