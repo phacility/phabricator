@@ -45,16 +45,16 @@ final class PhabricatorApplicationsListController
 
 
   private function buildInstalledApplicationsList(array $applications) {
+    $list = new PhabricatorObjectItemListView();
 
-     $list = new PhabricatorObjectItemListView();
-     foreach ($applications as $applications) {
+    foreach ($applications as $application) {
         $item = id(new PhabricatorObjectItemView())
-          ->setHeader($applications->getName())
+          ->setHeader($application->getName())
+          ->setHref('/applications/view/'.get_class($application).'/')
           ->addAttribute(
-            phutil_escape_html($applications->getShortDescription()));
+            phutil_escape_html($application->getShortDescription()));
         $list->addItem($item);
       }
-
     return $list;
    }
 
