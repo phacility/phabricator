@@ -79,10 +79,11 @@ abstract class DiffusionController extends PhabricatorController {
     // TODO: URI encoding might need to be sorted out for this link.
 
     $nav->addFilter(
+      '',
+      "Search Owners \xE2\x86\x97",
       '/owners/view/search/'.
         '?repository='.phutil_escape_uri($drequest->getCallsign()).
-        '&path='.phutil_escape_uri('/'.$drequest->getPath()),
-      "Search Owners \xE2\x86\x97");
+        '&path='.phutil_escape_uri('/'.$drequest->getPath()));
 
     return $nav;
   }
