@@ -64,7 +64,11 @@ final class PhabricatorMacroListController
       $nodata = pht('There are no image macros yet.');
     }
 
-    $author_phids = array_combine($authors, $authors);
+    if ($authors) {
+      $author_phids = array_combine($authors, $authors);
+    } else {
+      $author_phids = array();
+    }
 
     $file_phids = mpull($macros, 'getFilePHID');
 
