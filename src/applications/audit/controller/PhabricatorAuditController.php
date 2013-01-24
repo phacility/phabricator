@@ -6,7 +6,7 @@ abstract class PhabricatorAuditController extends PhabricatorController {
 
     $page = $this->buildStandardPageView();
 
-    $page->setApplicationName('Audit');
+    $page->setApplicationName(pht('Audit'));
     $page->setBaseURI('/audit/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9C\x8D");
