@@ -93,17 +93,17 @@ final class DifferentialChangeType {
   }
 
   public static function getFullNameForChangeType($type) {
-    static $types = array(
-      self::TYPE_ADD        => 'Added',
-      self::TYPE_CHANGE     => 'Modified',
-      self::TYPE_DELETE     => 'Deleted',
-      self::TYPE_MOVE_AWAY  => 'Moved Away',
-      self::TYPE_COPY_AWAY  => 'Copied Away',
-      self::TYPE_MOVE_HERE  => 'Moved Here',
-      self::TYPE_COPY_HERE  => 'Copied Here',
-      self::TYPE_MULTICOPY  => 'Deleted After Multiple Copy',
-      self::TYPE_MESSAGE    => 'Commit Message',
-      self::TYPE_CHILD      => 'Contents Modified',
+    $types = array(
+      self::TYPE_ADD        => pht('Added'),
+      self::TYPE_CHANGE     => pht('Modified'),
+      self::TYPE_DELETE     => pht('Deleted'),
+      self::TYPE_MOVE_AWAY  => pht('Moved Away'),
+      self::TYPE_COPY_AWAY  => pht('Copied Away'),
+      self::TYPE_MOVE_HERE  => pht('Moved Here'),
+      self::TYPE_COPY_HERE  => pht('Copied Here'),
+      self::TYPE_MULTICOPY  => pht('Deleted After Multiple Copy'),
+      self::TYPE_MESSAGE    => pht('Commit Message'),
+      self::TYPE_CHILD      => pht('Contents Modified'),
     );
     return idx($types, coalesce($type, '?'), 'Unknown');
   }

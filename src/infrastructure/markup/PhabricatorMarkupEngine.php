@@ -419,6 +419,7 @@ final class PhabricatorMarkupEngine {
 
     if ($options['macros']) {
       $rules[] = new PhabricatorRemarkupRuleImageMacro();
+      $rules[] = new PhabricatorRemarkupRuleMeme();
     }
 
     $rules[] = new PhabricatorRemarkupRuleMention();

@@ -37,13 +37,13 @@ final class PhabricatorMacroEditController
         $macro->setName($new_name);
 
         if (!strlen($macro->getName())) {
-          $errors[] = 'Macro name is required.';
-          $e_name = 'Required';
+          $errors[] = pht('Macro name is required.');
+          $e_name = pht('Required');
         } else if (!preg_match('/^[a-z0-9_-]{3,}$/', $macro->getName())) {
-          $errors[] = 'Macro must be at least three characters long and '.
+          $errors[] = pht('Macro must be at least three characters long and '.
                       'contain only lowercase letters, digits, hyphen and '.
-                      'underscore.';
-          $e_name = 'Invalid';
+                      'underscore.');
+          $e_name = pht('Invalid');
         } else {
           $e_name = null;
         }
@@ -74,7 +74,7 @@ final class PhabricatorMacroEditController
       }
 
       if (!$macro->getID() && !$file) {
-        $errors[] = 'You must upload an image to create a macro.';
+        $errors[] = pht('You must upload an image to create a macro.');
         $e_file = pht('Required');
       }
 
@@ -110,15 +110,15 @@ final class PhabricatorMacroEditController
           return id(new AphrontRedirectResponse())->setURI($view_uri);
         } catch (AphrontQueryDuplicateKeyException $ex) {
           throw $ex;
-          $errors[] = 'Macro name is not unique!';
-          $e_name = 'Duplicate';
+          $errors[] = pht('Macro name is not unique!');
+          $e_name = pht('Duplicate');
         }
       }
     }
 
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     } else {
       $error_view = null;
@@ -141,10 +141,11 @@ final class PhabricatorMacroEditController
       ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($macro->getName())
-          ->setCaption('This word or phrase will be replaced with the image.')
+          ->setCaption(
+            pht('This word or phrase will be replaced with the image.'))
           ->setError($e_name));
 
     if (!$macro->getID()) {
@@ -158,7 +159,7 @@ final class PhabricatorMacroEditController
         $form->addHiddenInput('phid', $current_file->getPHID());
         $form->appendChild(
           id(new AphrontFormMarkupControl())
-            ->setLabel('Selected File')
+            ->setLabel(pht('Selected File'))
             ->setValue($current_file_view));
 
         $other_label = pht('Change File');
@@ -223,11 +224,11 @@ final class PhabricatorMacroEditController
         ->setUser($request->getUser())
         ->appendChild(
           id(new AphrontFormFileControl())
-            ->setLabel('File')
+            ->setLabel(pht('File'))
             ->setName('file'))
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Upload File'));
+            ->setValue(pht('Upload File')));
 
       $upload = array($upload_header, $upload_form);
     }

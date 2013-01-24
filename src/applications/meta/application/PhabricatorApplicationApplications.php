@@ -26,6 +26,8 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
     return array(
       '/applications/' => array(
         ''                          => 'PhabricatorApplicationsListController',
+        'view/(?P<application>\w+)/' =>
+          'PhabricatorApplicationDetailViewController',
 
         ),
 

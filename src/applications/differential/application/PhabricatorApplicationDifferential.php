@@ -7,7 +7,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Review Code';
+    return pht('Review Code');
   }
 
   public function getIconName() {

@@ -27,7 +27,7 @@ final class DifferentialAction {
       self::ACTION_REJECT         => 'requested changes to',
       self::ACTION_RETHINK        => 'planned changes to',
       self::ACTION_ABANDON        => 'abandoned',
-      self::ACTION_CLOSE          => pht('closed'),
+      self::ACTION_CLOSE          => 'closed',
       self::ACTION_REQUEST        => 'requested a review of',
       self::ACTION_RECLAIM        => 'reclaimed',
       self::ACTION_UPDATE         => 'updated',
@@ -49,20 +49,20 @@ final class DifferentialAction {
   }
 
   public static function getActionVerb($action) {
-    static $verbs = array(
-      self::ACTION_COMMENT        => 'Comment',
-      self::ACTION_ACCEPT         => "Accept Revision \xE2\x9C\x94",
-      self::ACTION_REJECT         => "Request Changes \xE2\x9C\x98",
-      self::ACTION_RETHINK        => "Plan Changes \xE2\x9C\x98",
-      self::ACTION_ABANDON        => 'Abandon Revision',
-      self::ACTION_REQUEST        => 'Request Review',
-      self::ACTION_RECLAIM        => 'Reclaim Revision',
-      self::ACTION_RESIGN         => 'Resign as Reviewer',
-      self::ACTION_ADDREVIEWERS   => 'Add Reviewers',
-      self::ACTION_ADDCCS         => 'Add CCs',
-      self::ACTION_CLOSE          => 'Close Revision',
-      self::ACTION_CLAIM          => 'Commandeer Revision',
-      self::ACTION_REOPEN         => 'Reopen',
+    $verbs = array(
+      self::ACTION_COMMENT        => pht('Comment'),
+      self::ACTION_ACCEPT         => pht("Accept Revision \xE2\x9C\x94"),
+      self::ACTION_REJECT         => pht("Request Changes \xE2\x9C\x98"),
+      self::ACTION_RETHINK        => pht("Plan Changes \xE2\x9C\x98"),
+      self::ACTION_ABANDON        => pht('Abandon Revision'),
+      self::ACTION_REQUEST        => pht('Request Review'),
+      self::ACTION_RECLAIM        => pht('Reclaim Revision'),
+      self::ACTION_RESIGN         => pht('Resign as Reviewer'),
+      self::ACTION_ADDREVIEWERS   => pht('Add Reviewers'),
+      self::ACTION_ADDCCS         => pht('Add CCs'),
+      self::ACTION_CLOSE          => pht('Close Revision'),
+      self::ACTION_CLAIM          => pht('Commandeer Revision'),
+      self::ACTION_REOPEN         => pht('Reopen'),
     );
 
     if (!empty($verbs[$action])) {

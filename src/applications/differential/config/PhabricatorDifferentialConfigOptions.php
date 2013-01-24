@@ -41,7 +41,10 @@ final class PhabricatorDifferentialConfigOptions
       $this->newOption(
         'differential.whitespace-matters',
         'list<string>',
-        array())
+        array(
+          '/\.py$/',
+          '/\.l?hs$/',
+        ))
         ->setDescription(
           pht(
             "List of file regexps where whitespace is meaningful and should ".

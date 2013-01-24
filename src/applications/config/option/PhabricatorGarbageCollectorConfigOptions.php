@@ -18,7 +18,7 @@ final class PhabricatorGarbageCollectorConfigOptions
         30,
         pht('Number of seconds to retain Herald transcripts for.')),
       'gcdaemon.ttl.daemon-logs' => array(
-        14,
+        7,
         pht('Number of seconds to retain Daemon logs for.')),
       'gcdaemon.ttl.differential-parse-cache' => array(
         14,

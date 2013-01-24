@@ -54,16 +54,16 @@ final class DifferentialCommentSaveController extends DifferentialController {
       $dialog->addHiddenInput('ccs',          $ccs);
       $dialog->addHiddenInput('comment',      $comment);
 
-      $dialog->setTitle('Action Has No Effect');
+      $dialog->setTitle(pht('Action Has No Effect'));
       $dialog->appendChild(
         '<p>'.phutil_escape_html($no_effect->getMessage()).'</p>');
 
       if (strlen($comment) || $has_inlines) {
-        $dialog->addSubmitButton('Post as Comment');
+        $dialog->addSubmitButton(pht('Post as Comment'));
         $dialog->appendChild('<br />');
         $dialog->appendChild(
-          '<p>Do you want to post your feedback anyway, as a normal '.
-          'comment?</p>');
+          '<p>'.pht('Do you want to post your feedback anyway, as a normal '.
+          'comment?').'</p>');
       }
 
       return id(new AphrontDialogResponse())->setDialog($dialog);

@@ -49,6 +49,12 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'table' => array(
         'tip' => pht('Table'),
       ),
+      array(
+        'spacer' => true,
+      ),
+      'meme' => array(
+        'tip' => pht('Meme'),
+      ),
       'help'  => array(
         'tip' => pht('Help'),
         'align' => 'right',
