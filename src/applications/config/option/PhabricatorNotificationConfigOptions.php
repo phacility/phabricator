@@ -29,12 +29,12 @@ final class PhabricatorNotificationConfigOptions
       $this->newOption(
         'notification.client-uri',
         'string',
-        'http://localhost:22280')
+        'http://localhost:22280/')
         ->setDescription(pht('Location of the client server.')),
       $this->newOption(
         'notification.server-uri',
         'string',
-        'http://localhost:22281')
+        'http://localhost:22281/')
         ->setDescription(pht('Location of the notification receiver server.')),
       $this->newOption('notification.user', 'string', null)
         ->setSummary(pht('Drop permissions to a less-privileged user.'))
