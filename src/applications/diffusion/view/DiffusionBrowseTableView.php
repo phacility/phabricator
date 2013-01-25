@@ -240,7 +240,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         'History',
         'Edit',
         'Path',
-        ($lint ? phutil_escape_html($lint) : 'Lint'),
+        ($lint ? $lint : 'Lint'),
         'Modified',
         'Date',
         'Time',
