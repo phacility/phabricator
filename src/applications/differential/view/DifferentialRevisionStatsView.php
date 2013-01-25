@@ -124,15 +124,15 @@ final class DifferentialRevisionStatsView extends AphrontView {
       $old_count = $counts[$age];
 
       $row_array[$age] = array(
-        'Revisions per week' => number_format($counts[$age] / $weeks, 2),
-        'Lines per week' => number_format($lines[$age] / $weeks, 1),
-        'Active days per week' =>
+        pht('Revisions per week') => number_format($counts[$age] / $weeks, 2),
+        pht('Lines per week') => number_format($lines[$age] / $weeks, 1),
+        pht('Active days per week') =>
           number_format($count_active[$age] / $weeks, 1),
-        'Revisions' => number_format($counts[$age]),
-        'Lines' => number_format($lines[$age]),
-        'Lines per diff' => number_format($lines[$age] /
+        pht('Revisions') => number_format($counts[$age]),
+        pht('Lines') => number_format($lines[$age]),
+        pht('Lines per diff') => number_format($lines[$age] /
                                           ($counts[$age] + 0.0001)),
-        'Active days' => number_format($count_active[$age]),
+        pht('Active days') => number_format($count_active[$age]),
       );
 
       switch ($this->filter) {

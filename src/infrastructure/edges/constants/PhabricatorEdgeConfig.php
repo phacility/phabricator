@@ -39,6 +39,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_UNSUBSCRIBER    = 23;
   const TYPE_UNSUBSCRIBED_FROM_OBJECT   = 24;
 
+  const TYPE_OBJECT_HAS_FILE            = 25;
+  const TYPE_FILE_HAS_OBJECT            = 26;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
@@ -78,6 +81,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_OBJECT_HAS_UNSUBSCRIBER => self::TYPE_UNSUBSCRIBED_FROM_OBJECT,
       self::TYPE_UNSUBSCRIBED_FROM_OBJECT => self::TYPE_OBJECT_HAS_UNSUBSCRIBER,
+
+      self::TYPE_OBJECT_HAS_FILE => self::TYPE_FILE_HAS_OBJECT,
+      self::TYPE_FILE_HAS_OBJECT => self::TYPE_OBJECT_HAS_FILE,
     );
 
     return idx($map, $edge_type);
@@ -109,6 +115,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
       PhabricatorPHIDConstants::PHID_TYPE_MOCK  => 'PholioMock',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO  => 'PhabricatorFileImageMacro',
+      PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
 
     );
 

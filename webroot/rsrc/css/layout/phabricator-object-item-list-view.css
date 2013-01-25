@@ -7,6 +7,10 @@
   background: #f4f5f6;
 }
 
+.phabricator-object-item-list-view.phabricator-object-list-stackable .phabricator-object-item {
+  margin: -1px 0 0 0;
+}
+
 .device-desktop .phabricator-object-item-list-view {
   padding: 20px;
 }
@@ -14,12 +18,16 @@
 .phabricator-object-item {
   background: #ffffff;
   border-style: solid;
-  border-color: #d7d7d7 #e4e3e4 #bcbcbd #d7d7d7;
+  border-color: #c0c5d1;
   border-width: 1px 1px 1px 3px;
-  margin: 3px 0;
+  margin: 5px 0;
 
   overflow: hidden;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
+}
+
+.phabricator-object-list-stackable .phabricator-object-item {
+  border-width: 1px;
 }
 
 .device-desktop .phabricator-object-item {
@@ -28,8 +36,9 @@
 
 .phabricator-object-item-name {
   display: block;
-  padding: 4px 8px 4px;
+  padding: 10px 10px 5px;
   font-weight: bold;
+  font-size: 14px;
 }
 
 .phabricator-object-item-content {
@@ -43,13 +52,13 @@
 */
 
 .phabricator-object-item-attributes {
-  padding: 0px 8px 4px;
+  padding: 0px 10px 10px;
 }
 
 .phabricator-object-item-attribute {
   display: inline;
-  color: #555555;
-  font-size: 11px;
+  color: #777;
+  font-size: 13px;
 }
 
 .phabricator-object-item-attribute-spacer {
@@ -66,7 +75,7 @@
 
 .phabricator-object-item-icons {
   float: right;
-  padding: 2px 4px 0;
+  padding: 10px 10px 0;
 }
 
 /* NOTE: The main content is an "overflow: hidden" div which we give a right

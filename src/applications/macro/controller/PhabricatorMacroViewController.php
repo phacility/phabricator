@@ -112,21 +112,21 @@ final class PhabricatorMacroViewController
     $view->setObject($macro);
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName('Edit Macro')
+        ->setName(pht('Edit Macro'))
         ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
         ->setIcon('edit'));
 
     if ($macro->getIsDisabled()) {
       $view->addAction(
         id(new PhabricatorActionView())
-          ->setName('Restore Macro')
+          ->setName(pht('Restore Macro'))
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
           ->setWorkflow(true)
           ->setIcon('undo'));
     } else {
       $view->addAction(
         id(new PhabricatorActionView())
-          ->setName('Disable Macro')
+          ->setName(pht('Disable Macro'))
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
           ->setWorkflow(true)
           ->setIcon('delete'));

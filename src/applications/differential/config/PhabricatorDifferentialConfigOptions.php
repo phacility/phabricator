@@ -22,7 +22,7 @@ final class PhabricatorDifferentialConfigOptions
       $this->newOption(
         'differential.custom-remarkup-rules',
         'list<string>',
-        null)
+        array())
         ->setSummary(pht('Custom remarkup rules.'))
         ->setDescription(
           pht(
@@ -31,7 +31,7 @@ final class PhabricatorDifferentialConfigOptions
       $this->newOption(
         'differential.custom-remarkup-block-rules',
         'list<string>',
-        null)
+        array())
         ->setSummary(pht('Custom remarkup block rules.'))
         ->setDescription(
           pht(
@@ -41,7 +41,10 @@ final class PhabricatorDifferentialConfigOptions
       $this->newOption(
         'differential.whitespace-matters',
         'list<string>',
-        array())
+        array(
+          '/\.py$/',
+          '/\.l?hs$/',
+        ))
         ->setDescription(
           pht(
             "List of file regexps where whitespace is meaningful and should ".
@@ -146,7 +149,7 @@ final class PhabricatorDifferentialConfigOptions
             "revision. If this option is false, Differential defaults to the ".
             "best it can, something like 'George Washington' or ".
             "'gwashington'.")),
-      $this->newOption('differential.generated-paths', 'list<string>', null)
+      $this->newOption('differential.generated-paths', 'list<string>', array())
         ->setSummary(pht("File regexps to treat as automatically generated."))
         ->setDescription(
           pht(

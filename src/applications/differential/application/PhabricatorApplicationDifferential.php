@@ -7,7 +7,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Review Code';
+    return pht('Review Code');
   }
 
   public function getIconName() {
@@ -73,13 +73,14 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->execute();
 
-    list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
-      $revisions,
-      array($user->getPHID()));
+    list($blocking, $active, $waiting) =
+      DifferentialRevisionQuery::splitResponsible(
+        $revisions,
+        array($user->getPHID()));
 
     $status = array();
 
-    $active = count($active);
+    $active = count($blocking) + count($active);
     $type = $active
       ? PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION
       : PhabricatorApplicationStatusView::TYPE_EMPTY;

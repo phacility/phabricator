@@ -252,7 +252,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
         $panel
       ),
       array(
-        'title' => 'Changeset View',
+        'title' => pht('Changeset View'),
       ));
   }
 

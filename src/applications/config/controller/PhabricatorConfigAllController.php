@@ -84,7 +84,6 @@ final class PhabricatorConfigAllController
     $nav->appendChild($panel);
 
 
-
     return $this->buildApplicationPage(
       $nav,
       array(

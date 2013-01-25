@@ -892,13 +892,14 @@ final class DifferentialRevisionQuery {
   }
 
   public static function splitResponsible(array $revisions, array $user_phids) {
+    $blocking = array();
     $active = array();
     $waiting = array();
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
 
-    // Bucket revisions into $active (revisions you need to do something
-    // about) and $waiting (revisions you're waiting on someone else to do
-    // something about).
+    // Bucket revisions into $blocking (revisions where you are blocking
+    // others), $active (revisions you need to do something about) and $waiting
+    // (revisions you're waiting on someone else to do something about).
     foreach ($revisions as $revision) {
       $needs_review = ($revision->getStatus() == $status_review);
       $filter_is_author = in_array($revision->getAuthorPHID(), $user_phids);
@@ -907,13 +908,17 @@ final class DifferentialRevisionQuery {
       // true, the user needs to act on it. Otherwise, they're waiting on
       // it.
       if ($needs_review ^ $filter_is_author) {
-        $active[] = $revision;
+        if ($needs_review) {
+          array_unshift($blocking, $revision);
+        } else {
+          $active[] = $revision;
+        }
       } else {
         $waiting[] = $revision;
       }
     }
 
-    return array($active, $waiting);
+    return array($blocking, $active, $waiting);
   }
 
 

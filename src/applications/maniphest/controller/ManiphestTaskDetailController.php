@@ -302,16 +302,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
       'tokenizers' => $tokenizer_map,
     ));
 
-    $comment_panel = new AphrontPanelView();
-    $comment_panel->appendChild($comment_form);
-    $comment_panel->addClass('aphront-panel-accent');
-    $comment_panel->setHeader($is_serious ? 'Add Comment' : 'Weigh In');
+    $comment_header = id(new PhabricatorHeaderView())
+      ->setHeader($is_serious ? pht('Add Comment') : pht('Weigh In'));
 
     $preview_panel =
       '<div class="aphront-panel-preview">
         <div id="transaction-preview">
           <div class="aphront-panel-preview-loading-text">
-            Loading preview...
+            '.pht('Loading preview...').'
           </div>
         </div>
       </div>';
@@ -346,12 +344,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $actions,
         $properties,
         $transaction_view,
-        $comment_panel,
+        $comment_header,
+        $comment_form,
         $preview_panel,
       ),
       array(
         'title' => 'T'.$task->getID().' '.$task->getTitle(),
         'pageObjects' => array($task->getPHID()),
+        'device' => true,
       ));
   }
 

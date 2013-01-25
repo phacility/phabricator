@@ -13,11 +13,11 @@ final class PhabricatorExtendingPhabricatorConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('load-libraries', 'list<string>', null)
+      $this->newOption('load-libraries', 'list<string>', array())
         ->setLocked(true)
         ->setSummary(pht("Paths to additional phutil libraries to load."))
         ->addExample('/srv/our-libs/sekrit-phutil', pht('Valid Setting')),
-      $this->newOption('events.listeners', 'list<string>', null)
+      $this->newOption('events.listeners', 'list<string>', array())
         ->setLocked(true)
         ->setSummary(
           pht("Listeners receive callbacks when interesting things occur."))

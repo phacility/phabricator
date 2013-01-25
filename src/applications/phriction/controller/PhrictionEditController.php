@@ -154,19 +154,9 @@ final class PhrictionEditController
         ->setErrors($errors);
     }
 
-    $delete_button = null;
     if ($document->getID()) {
       $panel_header = 'Edit Phriction Document';
       $submit_button = 'Save Changes';
-      if ($document->getStatus() != PhrictionDocumentStatus::STATUS_DELETED) {
-        $delete_button = phutil_render_tag(
-          'a',
-          array(
-            'href' => '/phriction/delete/'.$document->getID().'/',
-            'class' => 'grey button',
-          ),
-          'Delete Document');
-      }
     } else {
       $panel_header = 'Create New Phriction Document';
       $submit_button = 'Create Document';
@@ -239,10 +229,6 @@ final class PhrictionEditController
       ->setWidth(AphrontPanelView::WIDTH_WIDE)
       ->setHeader($panel_header)
       ->appendChild($form);
-
-    if ($delete_button) {
-      $panel->addButton($delete_button);
-    }
 
     $preview_panel =
       '<div class="aphront-panel-preview aphront-panel-preview-wide">

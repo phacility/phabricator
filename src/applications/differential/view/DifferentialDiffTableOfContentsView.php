@@ -89,9 +89,9 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         if (count($away) > 1) {
           $meta = array();
           if ($type == DifferentialChangeType::TYPE_MULTICOPY) {
-            $meta[] = 'Deleted after being copied to multiple locations:';
+            $meta[] = pht('Deleted after being copied to multiple locations:');
           } else {
-            $meta[] = 'Copied to multiple locations:';
+            $meta[] = pht('Copied to multiple locations:');
           }
           foreach ($away as $path) {
             $meta[] = phutil_escape_html($path);
@@ -99,15 +99,17 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           $meta = implode('<br />', $meta);
         } else {
           if ($type == DifferentialChangeType::TYPE_MOVE_AWAY) {
-            $meta = 'Moved to '.phutil_escape_html(reset($away));
+            $meta = pht('Moved to %s', phutil_escape_html(reset($away)));
           } else {
-            $meta = 'Copied to '.phutil_escape_html(reset($away));
+            $meta = pht('Copied to %s', phutil_escape_html(reset($away)));
           }
         }
       } else if ($type == DifferentialChangeType::TYPE_MOVE_HERE) {
-        $meta = 'Moved from '.phutil_escape_html($changeset->getOldFile());
+        $meta = pht('Moved from %s',
+          phutil_escape_html($changeset->getOldFile()));
       } else if ($type == DifferentialChangeType::TYPE_COPY_HERE) {
-        $meta = 'Copied from '.phutil_escape_html($changeset->getOldFile());
+        $meta = pht('Copied from %s',
+          phutil_escape_html($changeset->getOldFile()));
       } else {
         $meta = null;
       }
@@ -128,7 +130,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $pchar =
         ($changeset->getOldProperties() === $changeset->getNewProperties())
           ? null
-          : '<span title="Properties Changed">M</span>';
+          : '<span title="'.pht('Properties Changed').'">M</span>';
 
       $fname = $changeset->getFilename();
       $cov  = $this->renderCoverage($coverage, $fname);
@@ -186,7 +188,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
               'href' => $editor_link,
               'class' => 'button differential-toc-edit-all',
             ),
-            'Open All in Editor');
+            pht('Open All in Editor'));
       }
     }
 
@@ -198,7 +200,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           'mustcapture' => true,
           'class' => 'button differential-toc-reveal-all',
         ),
-        'Show All Context'
+        pht('Show All Context')
       );
 
     $buttons =
@@ -221,8 +223,12 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             '<th></th>'.
             '<th></th>'.
             '<th>Path</th>'.
-            '<th class="differential-toc-cov">Coverage (All)</th>'.
-            '<th class="differential-toc-mcov">Coverage (Touched)</th>'.
+            '<th class="differential-toc-cov">'.
+              pht('Coverage (All)').
+            '</th>'.
+            '<th class="differential-toc-mcov">'.
+              pht('Coverage (Touched)').
+            '</th>'.
           '</tr>'.
           implode("\n", $rows).
           $buttons.

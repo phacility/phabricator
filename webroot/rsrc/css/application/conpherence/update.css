@@ -1,0 +1,7 @@
+/**
+ * @provides conpherence-update-css
+ */
+
+.phabricator-standard-page-body .aphront-dialog-view {
+  margin: 20px auto 0px auto;
+}

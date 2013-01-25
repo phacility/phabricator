@@ -119,6 +119,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $verb = phutil_escape_html($verb);
 
     $actions = array();
+    // TODO: i18n
     switch ($comment->getAction()) {
       case DifferentialAction::ACTION_ADDCCS:
         $actions[] = "{$author_link} added CCs: ".

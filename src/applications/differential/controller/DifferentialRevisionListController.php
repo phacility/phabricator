@@ -101,9 +101,9 @@ final class DifferentialRevisionListController extends DifferentialController {
       // the viewing user's). Show a warning instead.
       $warning = new AphrontErrorView();
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $warning->setTitle('User Required');
+      $warning->setTitle(pht('User Required'));
       $warning->appendChild(
-        'This filter requires that a user be specified above.');
+        pht('This filter requires that a user be specified above.'));
       $panels[] = $warning;
     } else {
       $query = $this->buildQuery($this->filter, $params);
@@ -173,7 +173,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       ->addHiddenInput('order', $params['order'])
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Filter Revisions'));
+          ->setValue(pht('Filter Revisions')));
 
     $filter_view = new AphrontListFilterView();
     $filter_view->appendChild($filter_form);
@@ -198,20 +198,20 @@ final class DifferentialRevisionListController extends DifferentialController {
     return $this->buildApplicationPage(
       $side_nav,
       array(
-        'title' => 'Differential Home',
+        'title' => pht('Differential Home'),
       ));
   }
 
   private function getFilters() {
     return array(
-      array(null,         'User Revisions'),
-      array('active',     'Active'),
-      array('revisions',  'Revisions'),
-      array('reviews',    'Reviews'),
-      array('subscribed', 'Subscribed'),
-      array('drafts',     'Draft Reviews'),
-      array(null,         'All Revisions'),
-      array('all',        'All'),
+      array(null, pht('User Revisions')),
+      array('active', pht('Active')),
+      array('revisions', pht('Revisions')),
+      array('reviews', pht('Reviews')),
+      array('subscribed', pht('Subscribed')),
+      array('drafts', pht('Draft Reviews')),
+      array(null, pht('All Revisions')),
+      array('all', pht('All')),
     );
   }
 
@@ -328,18 +328,18 @@ final class DifferentialRevisionListController extends DifferentialController {
 
         if ($control == 'subscriber') {
           $source = '/typeahead/common/allmailable/';
-          $label = 'View Subscribers';
+          $label = pht('View Subscribers');
         } else {
           $source = '/typeahead/common/accounts/';
           switch ($this->filter) {
             case 'revisions':
-              $label = 'Authors';
+              $label = pht('Authors');
               break;
             case 'reviews':
-              $label = 'Reviewers';
+              $label = pht('Reviewers');
               break;
             default:
-              $label  = 'View Users';
+              $label = pht('View Users');
               break;
           }
         }
@@ -353,10 +353,10 @@ final class DifferentialRevisionListController extends DifferentialController {
       case 'participants':
         switch ($this->filter) {
           case 'revisions':
-            $label = 'Reviewers';
+            $label = pht('Reviewers');
             break;
           case 'reviews':
-            $label = 'Authors';
+            $label = pht('Authors');
             break;
         }
         $value = mpull(
@@ -370,26 +370,26 @@ final class DifferentialRevisionListController extends DifferentialController {
 
       case 'status':
         return id(new AphrontFormToggleButtonsControl())
-          ->setLabel('Status')
+          ->setLabel(pht('Status'))
           ->setValue($params['status'])
           ->setBaseURI($uri, 'status')
           ->setButtons(
             array(
-              'all'       => 'All',
-              'open'      => 'Open',
+              'all'       => pht('All'),
+              'open'      => pht('Open'),
               'closed'    => pht('Closed'),
-              'abandoned' => 'Abandoned',
+              'abandoned' => pht('Abandoned'),
             ));
 
       case 'order':
         return id(new AphrontFormToggleButtonsControl())
-          ->setLabel('Order')
+          ->setLabel(pht('Order'))
           ->setValue($params['order'])
           ->setBaseURI($uri, 'order')
           ->setButtons(
             array(
-              'modified'  => 'Updated',
-              'created'   => 'Created',
+              'modified'  => pht('Updated'),
+              'created'   => pht('Created'),
             ));
 
       default:
@@ -435,16 +435,26 @@ final class DifferentialRevisionListController extends DifferentialController {
     $views = array();
     switch ($filter) {
       case 'active':
-        list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
-          $revisions,
-          $user_phids);
+        list($blocking, $active, $waiting) =
+          DifferentialRevisionQuery::splitResponsible(
+            $revisions,
+            $user_phids);
+
+        $view = id(clone $template)
+          ->setHighlightAge(true)
+          ->setRevisions($blocking)
+          ->loadAssets();
+        $views[] = array(
+          'title' => pht('Blocking Others'),
+          'view'  => $view,
+        );
 
         $view = id(clone $template)
           ->setHighlightAge(true)
           ->setRevisions($active)
           ->loadAssets();
         $views[] = array(
-          'title' => 'Action Required',
+          'title' => pht('Action Required'),
           'view'  => $view,
         );
 
@@ -463,7 +473,7 @@ final class DifferentialRevisionListController extends DifferentialController {
               ->setUser($user);
 
             $views[] = array(
-              'title'   => 'Flagged Revisions',
+              'title'   => pht('Flagged Revisions'),
               'view'    => $view,
               'special' => true,
             );
@@ -474,7 +484,7 @@ final class DifferentialRevisionListController extends DifferentialController {
           ->setRevisions($waiting)
           ->loadAssets();
         $views[] = array(
-          'title' => 'Waiting On Others',
+          'title' => pht('Waiting On Others'),
           'view'  => $view,
         );
         break;
@@ -484,10 +494,10 @@ final class DifferentialRevisionListController extends DifferentialController {
       case 'drafts':
       case 'all':
         $titles = array(
-          'revisions'   => 'Revisions by Author',
-          'reviews'     => 'Revisions by Reviewer',
-          'subscribed'  => 'Revisions by Subscriber',
-          'all'         => 'Revisions',
+          'revisions'   => pht('Revisions by Author'),
+          'reviews'     => pht('Revisions by Reviewer'),
+          'subscribed'  => pht('Revisions by Subscriber'),
+          'all'         => pht('Revisions'),
         );
         $view = id(clone $template)
           ->setRevisions($revisions)
@@ -503,6 +513,5 @@ final class DifferentialRevisionListController extends DifferentialController {
 
     return $views;
   }
-
 
 }

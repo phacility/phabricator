@@ -64,7 +64,11 @@ final class PhabricatorMacroListController
       $nodata = pht('There are no image macros yet.');
     }
 
-    $author_phids = array_combine($authors, $authors);
+    if ($authors) {
+      $author_phids = array_combine($authors, $authors);
+    } else {
+      $author_phids = array();
+    }
 
     $file_phids = mpull($macros, 'getFilePHID');
 
@@ -86,7 +90,7 @@ final class PhabricatorMacroListController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setValue($filter))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -96,7 +100,7 @@ final class PhabricatorMacroListController
           ->setValue(mpull($author_handles, 'getFullName')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Filter Image Macros'));
+          ->setValue(pht('Filter Image Macros')));
 
     $filter_view = new AphrontListFilterView();
     $filter_view->appendChild($filter_form);
@@ -128,7 +132,7 @@ final class PhabricatorMacroListController
           phutil_render_tag(
             'div',
             array(),
-            'Created on '.$datetime));
+            pht('Created on %s', $datetime)));
       }
       $item->setURI($this->getApplicationURI('/view/'.$macro->getID().'/'));
       $item->setHeader($macro->getName());
@@ -155,7 +159,7 @@ final class PhabricatorMacroListController
       $nav,
       array(
         'device' => true,
-        'title' => 'Image Macros',
+        'title' => pht('Image Macros'),
       ));
   }
 }

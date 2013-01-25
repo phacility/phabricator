@@ -159,6 +159,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'pholio',
       ),
+      'db.conpherence' => array(
+        'type'    => 'db',
+        'name'    => 'conpherence',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1084,6 +1088,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130103.filemetadata.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130103.filemetadata.sql'),
+      ),
+      '20130111.conpherence.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130111.conpherence.sql'),
       ),
     );
   }

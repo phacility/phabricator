@@ -8,14 +8,18 @@ abstract class PhabricatorMacroController
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addLabel('Create');
-      $nav->addFilter('', 'Create Macro', $this->getApplicationURI('/create/'));
+      $nav->addLabel(pht('Create'));
+      $nav->addFilter('',
+        pht('Create Macro'),
+        $this->getApplicationURI('/create/'));
     }
 
-    $nav->addLabel('Macros');
-    $nav->addFilter('/', 'All Macros');
+    $nav->addLabel(pht('Macros'));
+    $nav->addFilter('/', pht('All Macros'));
     if ($has_search) {
-      $nav->addFilter('search', 'Search', $this->getRequest()->getRequestURI());
+      $nav->addFilter('search',
+        pht('Search'),
+        $this->getRequest()->getRequestURI());
     }
 
 

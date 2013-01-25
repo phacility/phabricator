@@ -20,7 +20,7 @@ final class PhabricatorMacroMemeController
 
     $upper_text = strtoupper($upper_text);
     $lower_text = strtoupper($lower_text);
-    $mixed_text = $upper_text.":".$lower_text;
+    $mixed_text = md5($upper_text).":".md5($lower_text);
     $hash = "meme".hash("sha256", $mixed_text);
     $xform = id(new PhabricatorTransformedFile())
       ->loadOneWhere('originalphid=%s and transform=%s',

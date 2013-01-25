@@ -150,7 +150,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       if (!$has_live_reviewer) {
         $reviewer_warning = new AphrontErrorView();
         $reviewer_warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-        $reviewer_warning->setTitle('No Active Reviewers');
+        $reviewer_warning->setTitle(pht('No Active Reviewers'));
         if ($revision->getReviewers()) {
           $reviewer_warning->appendChild(
             phutil_render_tag(
@@ -181,8 +181,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning->setTitle('Very Large Diff');
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
       $warning->appendChild(
-        "<p>This diff is very large and affects {$count} files. Load ".
-        "each file individually. ".
+        '<p>'.pht('This diff is very large and affects %d files. Load '.
+        'each file individually. ', $count).
         "<strong>".
           phutil_render_tag(
             'a',
@@ -191,7 +191,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
                 ->alter('large', 'true')
                 ->setFragment('toc'),
             ),
-            'Show All Files Inline').
+            pht('Show All Files Inline')).
         "</strong>");
       $warning = $warning->render();
 
@@ -483,7 +483,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $links[] = array(
         'icon'  =>  'edit',
         'href'  => "/differential/revision/edit/{$revision_id}/",
-        'name'  => 'Edit Revision',
+        'name'  => pht('Edit Revision'),
       );
     }
 
@@ -494,14 +494,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $links[] = array(
           'icon'    => $viewer_is_cc ? 'subscribe-delete' : 'subscribe-add',
           'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
-          'name'    => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
+          'name'    => $viewer_is_cc ? pht('Unsubscribe') : pht('Subscribe'),
           'instant' => true,
           'sigil' => 'workflow',
         );
       } else {
         $links[] = array(
           'icon'     => 'subscribe-auto',
-          'name'     => 'Automatically Subscribed',
+          'name'     => pht('Automatically Subscribed'),
           'disabled' => true,
         );
       }
@@ -511,7 +511,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $links[] = array(
         'icon'  => 'link',
-        'name'  => 'Edit Dependencies',
+        'name'  => pht('Edit Dependencies'),
         'href'  => "/search/attach/{$revision_phid}/DREV/dependencies/",
         'sigil' => 'workflow',
       );
@@ -519,7 +519,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
         $links[] = array(
           'icon'  => 'attach',
-          'name'  => 'Edit Maniphest Tasks',
+          'name'  => pht('Edit Maniphest Tasks'),
           'href'  => "/search/attach/{$revision_phid}/TASK/",
           'sigil' => 'workflow',
         );
@@ -528,14 +528,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
       if ($user->getIsAdmin()) {
         $links[] = array(
           'icon'  => 'file',
-          'name'  => 'MetaMTA Transcripts',
+          'name'  => pht('MetaMTA Transcripts'),
           'href'  => "/mail/?phid={$revision_phid}",
         );
       }
 
       $links[] = array(
         'icon'  => 'file',
-        'name'  => 'Herald Transcripts',
+        'name'  => pht('Herald Transcripts'),
         'href'  => "/herald/transcript/?phid={$revision_phid}",
       );
     }
@@ -543,7 +543,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $request_uri = $this->getRequest()->getRequestURI();
     $links[] = array(
       'icon'  => 'download',
-      'name'  => 'Download Raw Diff',
+      'name'  => pht('Download Raw Diff'),
       'href'  => $request_uri->alter('download', 'true')
     );
 

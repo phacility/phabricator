@@ -13,8 +13,8 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
 
     try {
       list($corpus) = $repository->execxRemoteCommand(
-        '%s %s%s@%s',
-        $this->getNeedsBlame() ? 'blame' : 'cat',
+        '%C %s%s@%s',
+        $this->getNeedsBlame() ? 'blame --force' : 'cat',
         $remote_uri,
         $path,
         $commit);

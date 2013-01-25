@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMailingListsListController
-  extends PhabricatorController {
+  extends PhabricatorMailingListsController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -24,6 +24,8 @@ final class PhabricatorMailingListsListController
         $pager->getOffset(), $pager->getPageSize() + 1);
     $data = $pager->sliceResults($data);
 
+    $nav = $this->buildSideNavView('all');
+
     $lists = $list->loadAllFromArray($data);
 
     $rows = array();
@@ -37,15 +39,15 @@ final class PhabricatorMailingListsListController
             'class' => 'button grey small',
             'href'  => $this->getApplicationURI('/edit/'.$list->getID().'/'),
           ),
-          'Edit'),
+          pht('Edit')),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Name',
-        'Email',
+        pht('Name'),
+        pht('Email'),
         '',
       ));
     $table->setColumnClasses(
@@ -55,16 +57,29 @@ final class PhabricatorMailingListsListController
         'action',
       ));
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('All Lists'))
+        ->setHref($this->getApplicationURI())
+      );
+    $nav->setCrumbs($crumbs);
+
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
-    $panel->setHeader('Mailing Lists');
-    $panel->setCreateButton('Add New List', $this->getApplicationURI('/edit/'));
+    $panel->setHeader(pht('Mailing Lists'));
     $panel->appendChild($pager);
+    $panel->setNoBackground();
+
+    $nav->appendChild($panel);
 
     return $this->buildApplicationPage(
-      $panel,
       array(
-        'title' => 'Mailing Lists',
+        $nav,
+      ),
+      array(
+        'title' => pht('Mailing Lists'),
+        'device' => true,
       ));
   }
 }

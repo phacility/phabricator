@@ -39,13 +39,21 @@ final class PhabricatorPeopleProfileController
     }
     $username = phutil_escape_uri($user->getUserName());
 
+    $external_arrow = "\xE2\x86\x97";
+
+    $conpherence_uri =
+      new PhutilURI('/conpherence/new/?participant='.$user->getPHID());
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/p/'.$username.'/'));
     $nav->addFilter('feed', 'Feed');
+    $nav->addMenuItem(
+      id(new PhabricatorMenuItemView())
+      ->setName(pht('Conpherence').' '.$external_arrow)
+      ->setHref($conpherence_uri)
+    );
     $nav->addFilter('about', 'About');
     $nav->addLabel('Activity');
 
-    $external_arrow = "\xE2\x86\x97";
     $nav->addFilter(
       null,
       "Revisions {$external_arrow}",

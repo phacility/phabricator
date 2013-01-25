@@ -3,7 +3,11 @@
  */
 
 .maniphest-transaction-list-view {
-  padding: 0 2em;
+  padding: 0 20px;;
+}
+
+.device-phone .maniphest-transaction-list-view {
+  padding: 0 10px;
 }
 
 .maniphest-transaction-list-view .anchor-target {

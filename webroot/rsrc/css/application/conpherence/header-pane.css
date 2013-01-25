@@ -1,0 +1,41 @@
+/**
+ * @provides conpherence-header-pane-css
+ */
+
+.conpherence-header-pane {
+  border-bottom: 1px solid #ccc;
+  background: #fff;
+  height: 50px;
+  width: 100%;
+}
+
+.conpherence-header-pane .edit {
+  position: relative;
+  float: right;
+  margin: 16px 16px 0px 0px;
+}
+
+.conpherence-header-pane .header-image {
+  position: absolute;
+  height: 50px;
+  width: 50px;
+}
+
+.conpherence-header-pane .title {
+  position: relative;
+  font-size: 16px;
+  left: 62px;
+  top: 6px;
+  max-width: 80%;
+  overflow-x: auto;
+}
+
+.conpherence-header-pane .subtitle {
+  position: relative;
+  left: 62px;
+  top: 6px;
+  color: #bfbfbf;
+  max-width: 80%;
+}
+
+

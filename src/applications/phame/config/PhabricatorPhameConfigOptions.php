@@ -17,7 +17,7 @@ final class PhabricatorPhameConfigOptions
         'phame.skins',
         'list<string>',
         array(
-          'exterals/skins/',
+          'externals/skins/',
         ))
         ->setDescription(
           pht('List of directories where Phame will look for skins.')),

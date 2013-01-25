@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMailingListsEditController
-  extends PhabricatorController {
+  extends PhabricatorMailingListsController {
 
   private $id;
 
@@ -25,6 +25,8 @@ final class PhabricatorMailingListsEditController
     $e_name = true;
     $errors = array();
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+
     $request = $this->getRequest();
     if ($request->isFormPost()) {
       $list->setName($request->getStr('name'));
@@ -35,22 +37,22 @@ final class PhabricatorMailingListsEditController
       $e_name = null;
 
       if (!strlen($list->getEmail())) {
-        $e_email = 'Required';
-        $errors[] = 'Email is required.';
+        $e_email = pht('Required');
+        $errors[] = pht('Email is required.');
       }
 
       if (!strlen($list->getName())) {
-        $e_name = 'Required';
-        $errors[] = 'Name is required.';
+        $e_name = pht('Required');
+        $errors[] = pht('Name is required.');
       } else if (preg_match('/[ ,]/', $list->getName())) {
-        $e_name = 'Invalid';
-        $errors[] = 'Name must not contain spaces or commas.';
+        $e_name = pht('Invalid');
+        $errors[] = pht('Name must not contain spaces or commas.');
       }
 
       if ($list->getURI()) {
         if (!PhabricatorEnv::isValidWebResource($list->getURI())) {
-          $e_uri = 'Invalid';
-          $errors[] = 'Mailing list URI must point to a valid web page.';
+          $e_uri = pht('Invalid');
+          $errors[] = pht('Mailing list URI must point to a valid web page.');
         }
       }
 
@@ -60,8 +62,8 @@ final class PhabricatorMailingListsEditController
           return id(new AphrontRedirectResponse())
             ->setURI($this->getApplicationURI());
         } catch (AphrontQueryDuplicateKeyException $ex) {
-          $e_email = 'Duplicate';
-          $errors[] = 'Another mailing list already uses that address.';
+          $e_email = pht('Duplicate');
+          $errors[] = pht('Another mailing list already uses that address.');
         }
       }
     }
@@ -69,7 +71,7 @@ final class PhabricatorMailingListsEditController
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 
@@ -84,24 +86,24 @@ final class PhabricatorMailingListsEditController
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Email')
+          ->setLabel(pht('Email'))
           ->setName('email')
           ->setValue($list->getEmail())
-          ->setCaption('Email will be delivered to this address.')
+          ->setCaption(pht('Email will be delivered to this address.'))
           ->setError($e_email))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setError($e_name)
-          ->setCaption('Human-readable display and autocomplete name.')
+          ->setCaption(pht('Human-readable display and autocomplete name.'))
           ->setValue($list->getName()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('URI')
+          ->setLabel(pht('URI'))
           ->setName('uri')
           ->setError($e_uri)
-          ->setCaption('Optional link to mailing list archives or info.')
+          ->setCaption(pht('Optional link to mailing list archives or info.'))
           ->setValue($list->getURI()))
       ->appendChild(
         id(new AphrontFormStaticControl())
@@ -109,26 +111,39 @@ final class PhabricatorMailingListsEditController
           ->setValue(nonempty($list->getPHID(), '-')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save')
+          ->setValue(pht('Save'))
           ->addCancelButton($this->getApplicationURI()));
 
     $panel = new AphrontPanelView();
     if ($list->getID()) {
-      $panel->setHeader('Edit Mailing List');
+      $panel->setHeader(pht('Edit Mailing List'));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Edit Mailing List'))
+          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/'))
+        );
     } else {
-      $panel->setHeader('Create New Mailing List');
+      $panel->setHeader(pht('Create Mailing List'));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Create Mailing List'))
+          ->setHref($this->getApplicationURI('/edit/'))
+        );
     }
 
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
 
     return $this->buildApplicationPage(
       array(
+        $crumbs,
         $error_view,
         $panel,
       ),
       array(
-        'title' => 'Edit Mailing List',
+        'title' => pht('Edit Mailing List'),
+        'device' => true,
       ));
   }
 
