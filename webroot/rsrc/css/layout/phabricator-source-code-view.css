@@ -31,7 +31,7 @@
 }
 
 .phabricator-source-code-summary {
-  margin-bottom: 4px;
+  padding-bottom: 8px;
 }
 
 /* If a Paste has enormously long lines, truncate them in the summary on the
