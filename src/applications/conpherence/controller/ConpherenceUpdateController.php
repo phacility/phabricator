@@ -207,7 +207,6 @@ final class ConpherenceUpdateController extends
         ->setTitle(pht('Update Conpherence'))
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setSubmitURI($this->getApplicationURI('update/'.$conpherence_id.'/'))
-        ->setEncType('multipart/form-data')
         ->addHiddenInput('action', 'metadata')
         ->appendChild($form)
         ->addSubmitButton()
