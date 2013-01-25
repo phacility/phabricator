@@ -25,14 +25,23 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $menu;
   private $crumbs;
   private $classes = array();
+  private $menuID;
 
-  public function addClass($class) {
-    $this->classes[] = $class;
+  public function setMenuID($menu_id) {
+    $this->menuID = $menu_id;
     return $this;
+  }
+  public function getMenuID() {
+    return $this->menuID;
   }
 
   public function __construct() {
     $this->menu = new PhabricatorMenuView();
+  }
+
+  public function addClass($class) {
+    $this->classes[] = $class;
+    return $this;
   }
 
   public static function newFromMenu(PhabricatorMenuView $menu) {
@@ -205,7 +214,8 @@ final class AphrontSideNavFilterView extends AphrontView {
           'class' => 'phabricator-nav-local phabricator-side-menu',
           'id'    => $local_id,
         ),
-        self::renderSingleView($this->menu));
+        self::renderSingleView($this->menu->setID($this->getMenuID()))
+      );
     }
 
     $crumbs = null;

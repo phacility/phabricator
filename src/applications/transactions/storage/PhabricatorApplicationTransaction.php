@@ -121,6 +121,15 @@ abstract class PhabricatorApplicationTransaction
     return $this->handles[$phid];
   }
 
+  public function getHandles() {
+    if ($this->handles === null) {
+      throw new Exception(
+        'Transaction requires handles and it did not load them.'
+      );
+    }
+    return $this->handles;
+  }
+
   protected function renderHandleLink($phid) {
     if ($this->renderingTarget == self::TARGET_HTML) {
       return $this->getHandle($phid)->renderLink();

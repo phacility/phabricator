@@ -193,6 +193,39 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%s removed %d subscriber(s): %s.' => array(
+        array(
+          '%s removed a subscriber: %3$s.',
+          '%s removed subscribers: %3$s.',
+        ),
+        array(
+          '%s removed a subscriber: %3$s.',
+          '%s removed subscribers: %3$s.',
+        ),
+      ),
+
+      '%s added %d participant(s): %s.' => array(
+        array(
+          '%s added a participant: %3$s.',
+          '%s added participants: %3$s.',
+        ),
+        array(
+          '%s added a participant: %3$s.',
+          '%s added participants: %3$s.',
+        ),
+      ),
+
+      '%s removed %d participant(s): %s.' => array(
+        array(
+          '%s removed a participant: %3$s.',
+          '%s removed participants: %3$s.',
+        ),
+        array(
+          '%s removed a participant: %3$s.',
+          '%s removed participants: %3$s.',
+        ),
+      ),
+
       '%2$s Line(s)' => array(
         '%2$s Line',
         '%2$s Lines',

@@ -196,6 +196,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .aphront-form-control-image .default-image {
+  display: inline;
   width: 12px;
 }
 

@@ -480,6 +480,22 @@ final class PhabricatorMarkupEngine {
     return $mentions;
   }
 
+  public static function extractFilePHIDsFromEmbeddedFiles(
+    array $content_blocks) {
+    $files = array();
+
+    $engine = self::newDifferentialMarkupEngine();
+
+    foreach ($content_blocks as $content_block) {
+      $engine->markupText($content_block);
+      $ids = $engine->getTextMetadata(
+        PhabricatorRemarkupRuleEmbedFile::KEY_EMBED_FILE_PHIDS,
+        array());
+      $files += $ids;
+    }
+
+    return $files;
+  }
 
   /**
    * Produce a corpus summary, in a way that shortens the underlying text

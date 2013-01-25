@@ -128,6 +128,7 @@ final class AphrontDialogView extends AphrontView {
       'action'  => $this->submitURI,
       'method'  => 'post',
       'id'      => $this->formID,
+      'enctype' => $this->encType,
     );
 
     $hidden_inputs = array();

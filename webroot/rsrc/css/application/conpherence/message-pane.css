@@ -1,0 +1,95 @@
+/**
+ * @provides conpherence-message-pane-css
+ */
+.conpherence-message-pane {
+  position: fixed;
+  left: 320px;
+  top: 94px;
+  min-width: 320px;
+  width: auto;
+  height: 100%;
+  margin: 0px 320px 0px 0px;
+}
+
+.conpherence-message-pane .conpherence-messages {
+  position: fixed;
+  left: 320px;
+  right: 321px;
+  top: 94px;
+  bottom: 225px;
+  overflow-y: scroll;
+}
+
+.conpherence-message-pane .phabricator-form-view {
+  border-width: 0;
+  background: none;
+  height: 224px;
+  padding: 0;
+  position: fixed;
+  bottom: 0;
+  left: 320px;
+  right: 321px;
+}
+
+.device-tablet
+.conpherence-message-pane .phabricator-form-view,
+.device-tablet
+.conpherence-message-pane .conpherence-messages,
+.device-tablet
+.conpherence-message-pane {
+  left: 0px;
+}
+
+.conpherence-message-pane .aphront-form-input {
+  margin: 0;
+  width: 100%;
+}
+
+.conpherence-message-pane .phabricator-transaction-view {
+  margin: 1em 1.25em 1em 1.25em;
+  display: block;
+}
+
+.conpherence-message-pane .phabricator-transaction-detail {
+  border-width: 0;
+}
+
+.conpherence-message-pane .phabricator-transaction-header {
+  background: none;
+}
+
+.conpherence-message-pane .phabricator-transaction-info {
+  background: none;
+}
+
+.conpherence-message-pane .phabricator-transaction-content {
+  background: none;
+}
+
+.conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
+  font-size: 12px;
+  padding: 0em 1em 0em 1em;
+  margin-top: -4px;
+}
+
+.conpherence-message-pane .aphront-form-control {
+  padding: 0;
+}
+
+.conpherence-message-pane .aphront-form-control-submit {
+  margin-right: 8px;
+}
+.conpherence-message-pane .remarkup-assist-bar {
+  border-width: 1px 0 0;
+  border-color: #CCC;
+}
+
+.conpherence-message-pane .remarkup-assist-textarea {
+  border-width: 1px 0 1px 0;
+  border-color: #CCC;
+}
+
+.conpherence-message-pane .remarkup-assist-textarea:focus {
+  outline: none;
+}
+
