@@ -27,7 +27,7 @@
   left: 62px;
   top: 6px;
   max-width: 80%;
-  overflow-x: scroll;
+  overflow-x: auto;
 }
 
 .conpherence-header-pane .subtitle {

@@ -27,7 +27,7 @@
 
 .conpherence-menu .phabricator-menu-view {
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
   margin-bottom: 0;
 }
 

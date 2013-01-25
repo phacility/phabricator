@@ -17,7 +17,7 @@
   right: 321px;
   top: 94px;
   bottom: 225px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .conpherence-message-pane .phabricator-form-view {
