@@ -36,9 +36,9 @@ final class PhabricatorMacroListController
     if ($has_search) {
       $macros = queryfx_all(
         $conn,
-        'SELECT m.*
-          FROM '.implode(' JOIN ', $join).'
-          WHERE '.implode(' AND ', $where));
+        'SELECT m.* FROM  %Q WHERE %Q',
+        implode(' JOIN ', $join),
+        implode(' AND ', $where));
       $macros = $macro_table->loadAllFromArray($macros);
       $nodata = pht('There are no macros matching the filter.');
     } else {
