@@ -34,15 +34,12 @@ final class PhabricatorRepositoryArcanistProject
 
   public function delete() {
     $this->openTransaction();
-      $conn_w = $this->establishConnection('w');
 
-      $symbols = id(new PhabricatorRepositorySymbol())->loadAllWhere(
-        'arcanistProjectID = %d',
-        $this->getID()
-      );
-      foreach ($symbols as $symbol) {
-        $symbol->delete();
-      }
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE arcanistProjectID = %d',
+        id(new PhabricatorRepositorySymbol())->getTableName(),
+        $this->getID());
 
       $result = parent::delete();
     $this->saveTransaction();
