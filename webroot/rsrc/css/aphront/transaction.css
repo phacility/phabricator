@@ -16,6 +16,10 @@
   margin-left: 54px;
 }
 
+.device-phone .phabricator-transaction-detail {
+  margin: 0;
+}
+
 .phabricator-transaction-header {
   background: #f3f3f3;
   padding: 4px 1em;
