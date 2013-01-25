@@ -75,7 +75,7 @@ final class ConpherenceViewController extends
         'class' => 'edit',
         'href' => $edit_href,
       ),
-      pht('edit...')
+      ''
     ).
     phutil_render_tag(
       'div',

@@ -3,9 +3,12 @@
  */
 
 .no-conpherences-menu-item {
-  color: #ffffff;
+  color: #a1a5a9;
   border-top: solid 1px #3B3D3E;
-  padding: 20px 0px 20px 66px;
+  padding: 20px 0;
+  margin: 0px auto;
+  width: 320px;
+  text-align: center;
 }
 
 .conpherence-menu .phabricator-nav-column-background,

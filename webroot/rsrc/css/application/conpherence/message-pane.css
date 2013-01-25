@@ -15,9 +15,10 @@
   position: fixed;
   left: 320px;
   right: 321px;
-  top: 94px;
+  top: 124px;
   bottom: 225px;
   overflow-y: auto;
+  box-shadow: inset 1px 5px 5px rgba(0,0,0,0.1);
 }
 
 .conpherence-message-pane .phabricator-form-view {
@@ -46,8 +47,7 @@
 }
 
 .conpherence-message-pane .phabricator-transaction-view {
-  margin: 1em 1.25em 1em 1.25em;
-  display: block;
+  margin: 10px 0 10px 15px;
 }
 
 .conpherence-message-pane .phabricator-transaction-detail {
@@ -67,8 +67,7 @@
 }
 
 .conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
-  font-size: 12px;
-  padding: 0em 1em 0em 1em;
+  padding: 0 1em 0 1em;
   margin-top: -4px;
 }
 
