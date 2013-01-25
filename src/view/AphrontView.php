@@ -50,6 +50,22 @@ abstract class AphrontView extends Phobject {
     }
   }
 
+  final protected function renderHTMLView($child) {
+    if ($child instanceof AphrontView) {
+      return phutil_safe_html($child->render());
+    } else if ($child instanceof PhutilSafeHTML) {
+      return $child;
+    } else if (is_array($child)) {
+      $out = array();
+      foreach ($child as $element) {
+        $out[] = $this->renderHTMLView($element);
+      }
+      return phutil_safe_html(implode('', $out));
+    } else {
+      return phutil_safe_html(phutil_escape_html($child));
+    }
+  }
+
   abstract public function render();
 
 }

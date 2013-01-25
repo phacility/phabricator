@@ -39,12 +39,12 @@ final class PhabricatorHeaderView extends AphrontView {
     }
 
     if ($this->tags) {
-      $header[] = phutil_render_tag(
+      $header[] = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-header-tags',
         ),
-        self::renderSingleView($this->tags));
+        $this->renderHTMLView($this->tags));
     }
 
     return phutil_tag(
