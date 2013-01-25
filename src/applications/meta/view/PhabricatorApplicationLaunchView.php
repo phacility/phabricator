@@ -125,6 +125,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       array(
         'class' => implode(' ', $classes),
         'href'  => $application ? $application->getBaseURI() : null,
+        'title' => $application ? $application->getShortDescription() : null,
       ),
       $icon.
       $this->renderSingleView($content));
