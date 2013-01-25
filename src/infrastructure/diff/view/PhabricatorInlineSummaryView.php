@@ -68,16 +68,18 @@ final class PhabricatorInlineSummaryView extends AphrontView {
           $tail = null;
         }
 
-        $lines = phutil_escape_html($lines);
         if ($href) {
-          $lines = phutil_render_tag(
+          $lines = phutil_tag(
             'a',
             array(
               'href'    => $href,
               'target'  => $target,
               'class'   => 'num',
             ),
-            $lines.$tail);
+            array(
+              $lines,
+              $tail,
+            ));
         }
 
         $where = idx($item, 'where');

@@ -91,7 +91,7 @@ final class PhabricatorObjectSelectorDialog {
 
     $options = array();
     foreach ($this->filters as $key => $label) {
-      $options[] = phutil_render_tag(
+      $options[] = phutil_tag(
         'option',
         array(
           'value' => $key,

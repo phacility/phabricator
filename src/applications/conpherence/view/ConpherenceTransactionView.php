@@ -47,12 +47,11 @@ final class ConpherenceTransactionView extends AphrontView {
       case ConpherenceTransactionType::TYPE_PICTURE:
         $img = $transaction->getHandle($transaction->getNewValue());
         $content = $transaction->getTitle() .
-          phutil_render_tag(
+          phutil_tag(
             'img',
             array(
               'src' => $img->getImageURI()
-            )
-          );
+            ));
         $transaction_view->addClass('conpherence-edited');
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:

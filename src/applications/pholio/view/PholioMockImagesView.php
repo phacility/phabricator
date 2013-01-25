@@ -21,7 +21,7 @@ final class PholioMockImagesView extends AphrontView {
       "phid=%s",
       $image->getFilePHID());
 
-    $image_tag = phutil_render_tag(
+    $image_tag = phutil_tag(
       'img',
         array(
           'src' => $file->getBestURI(),
@@ -29,7 +29,7 @@ final class PholioMockImagesView extends AphrontView {
         ),
       '');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
         array(
           'class' => 'pholio-mock-image-container',

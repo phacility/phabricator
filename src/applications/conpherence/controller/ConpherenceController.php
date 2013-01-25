@@ -166,14 +166,12 @@ abstract class ConpherenceController extends PhabricatorController {
   }
 
   private function getNoConpherencesBlock() {
-
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'no-conpherences-menu-item'
       ),
-      pht('No more conpherences.')
-    );
+      pht('No more conpherences.'));
   }
 
   public function buildApplicationMenu() {

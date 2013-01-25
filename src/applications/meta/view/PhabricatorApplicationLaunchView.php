@@ -39,7 +39,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $application->getName());
 
       if ($application->isBeta()) {
-        $content[] = phutil_render_tag(
+        $content[] = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-application-beta',
@@ -97,13 +97,13 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $classes[] = 'phabricator-application-create-icon';
         $classes[] = 'sprite-icon';
         $classes[] = 'action-new-grey';
-        $plus_icon = phutil_render_tag(
+        $plus_icon = phutil_tag(
           'span',
           array(
             'class' => implode(' ', $classes),
           ));
 
-        $create_button = phutil_render_tag(
+        $create_button = phutil_tag(
           'a',
           array(
             'href' => $application->getQuickCreateURI(),

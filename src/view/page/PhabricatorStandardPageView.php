@@ -249,12 +249,12 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($user && $user->getIsAdmin()) {
       $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
       if ($open) {
-        $setup_warning = phutil_render_tag(
+        $setup_warning = phutil_tag(
           'div',
           array(
             'class' => 'setup-warning-callout',
           ),
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/config/issue/',

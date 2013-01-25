@@ -23,13 +23,13 @@ final class PhabricatorCountdownViewController
 
     $chrome_visible = $request->getBool('chrome', true);
     $chrome_new = $chrome_visible ? false : null;
-    $chrome_link = phutil_render_tag(
+    $chrome_link = phutil_tag(
       'a',
       array(
         'href' => $request->getRequestURI()->alter('chrome', $chrome_new),
         'class' => 'phabricator-timer-chrome-link',
       ),
-      $chrome_visible ? 'Disable Chrome' : 'Enable Chrome');
+      $chrome_visible ? pht('Disable Chrome') : pht('Enable Chrome'));
 
     $container = celerity_generate_unique_node_id();
     $content =

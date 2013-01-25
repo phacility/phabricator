@@ -182,7 +182,7 @@ final class ConpherenceUpdateController extends
       ->appendChild(
         id(new AphrontFormMarkupControl())
         ->setLabel(pht('Image'))
-        ->setValue(phutil_render_tag(
+        ->setValue(phutil_tag(
           'img',
           array(
             'src' => $conpherence->loadImageURI(),

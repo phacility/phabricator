@@ -188,13 +188,17 @@ final class AphrontTableView extends AphrontView {
             ),
             '');
 
-          $header = phutil_render_tag(
+          $header = phutil_tag(
             'a',
             array(
               'href'  => $this->sortURI->alter($this->sortParam, $sort_value),
               'class' => 'aphront-table-view-sort-link',
             ),
-            $header.' '.$sort_glyph);
+            array(
+              $header,
+              ' ',
+              $sort_glyph,
+            ));
         }
 
         if ($classes) {
@@ -204,7 +208,7 @@ final class AphrontTableView extends AphrontView {
         }
 
         if ($short_headers[$col_num] !== null) {
-          $header_nodevice = phutil_render_tag(
+          $header_nodevice = phutil_tag(
             'span',
             array(
               'class' => 'aphront-table-view-nodevice',

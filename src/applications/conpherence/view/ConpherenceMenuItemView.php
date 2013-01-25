@@ -85,7 +85,7 @@ final class ConpherenceMenuItemView extends AphrontTagView {
   protected function getTagContent() {
     $image = null;
     if ($this->imageURI) {
-      $image = phutil_render_tag(
+      $image = phutil_tag(
         'span',
         array(
           'class' => 'conpherence-menu-item-image',
@@ -95,34 +95,34 @@ final class ConpherenceMenuItemView extends AphrontTagView {
     }
     $title = null;
     if ($this->title) {
-      $title = phutil_render_tag(
+      $title = phutil_tag(
         'span',
         array(
           'class' => 'conpherence-menu-item-title',
         ),
-        phutil_escape_html($this->title));
+        $this->title);
     }
     $subtitle = null;
     if ($this->subtitle) {
-      $subtitle = phutil_render_tag(
+      $subtitle = phutil_tag(
         'span',
         array(
           'class' => 'conpherence-menu-item-subtitle',
         ),
-        phutil_escape_html($this->subtitle));
+        $this->subtitle);
     }
     $message = null;
     if ($this->messageText) {
-      $message = phutil_render_tag(
+      $message = phutil_tag(
         'span',
         array(
           'class' => 'conpherence-menu-item-message-text'
         ),
-        phutil_escape_html($this->messageText));
+        $this->messageText);
     }
     $epoch = null;
     if ($this->epoch) {
-      $epoch = phutil_render_tag(
+      $epoch = phutil_tag(
         'span',
         array(
           'class' => 'conpherence-menu-item-date',
@@ -131,12 +131,12 @@ final class ConpherenceMenuItemView extends AphrontTagView {
     }
     $unread_count = null;
     if ($this->unreadCount) {
-      $unread_count = phutil_render_tag(
+      $unread_count = phutil_tag(
         'span',
         array(
           'class' => 'conpherence-menu-item-unread-count'
         ),
-        $this->unreadCount);
+        (int)$this->unreadCount);
     }
 
     return $image.$title.$subtitle.$message.$epoch.$unread_count;
