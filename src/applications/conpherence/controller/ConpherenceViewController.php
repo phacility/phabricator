@@ -112,6 +112,9 @@ final class ConpherenceViewController extends
 
     $transactions = $conpherence->getTransactions();
     foreach ($transactions as $transaction) {
+      if ($transaction->shouldHide()) {
+        continue;
+      }
       $rendered_transactions[] = id(new ConpherenceTransactionView())
         ->setUser($user)
         ->setConpherenceTransaction($transaction)
