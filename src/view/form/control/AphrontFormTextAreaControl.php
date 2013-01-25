@@ -72,7 +72,9 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
         'id'          => $this->getID(),
         'placeholder' => $this->getPlaceHolder(),
       ),
-      $this->getValue());
+      // NOTE: This needs to be string cast, because if we pass `null` the
+      // tag will be self-closed and some browsers aren't thrilled about that.
+      (string)$this->getValue());
   }
 
 }
