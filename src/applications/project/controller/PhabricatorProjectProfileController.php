@@ -98,7 +98,7 @@ final class PhabricatorProjectProfileController
           ),
           'Join Project'));
     } else {
-      $action = javelin_render_tag(
+      $action = javelin_tag(
         'a',
         array(
           'href'  => '/project/update/'.$project->getID().'/leave/',

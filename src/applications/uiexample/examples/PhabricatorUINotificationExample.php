@@ -15,7 +15,7 @@ final class PhabricatorUINotificationExample extends PhabricatorUIExample {
     require_celerity_resource('phabricator-notification-css');
     Javelin::initBehavior('phabricator-notification-example');
 
-    $content = javelin_render_tag(
+    $content = javelin_tag(
       'a',
       array(
         'sigil' => 'notification-example',

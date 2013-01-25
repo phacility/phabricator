@@ -97,7 +97,7 @@ final class DarkConsoleCore {
         $tabclass = null;
       }
 
-      $tabs_markup[] = javelin_render_tag(
+      $tabs_markup[] = javelin_tag(
         'a',
         array(
           'class' => "dark-console-tab {$tabclass}",
@@ -173,7 +173,7 @@ final class DarkConsoleCore {
         ),
         '<tr>'.
           '<th class="dark-console-tabs">'.
-            javelin_render_tag(
+            phutil_tag(
               'a',
               array(
                 'class' => 'dark-console-tab dark-console-tab-selected',

@@ -144,7 +144,7 @@ abstract class DiffusionView extends AphrontView {
     if ($email->getDisplayName() && $email->getDomainName()) {
       Javelin::initBehavior('phabricator-tooltips', array());
       require_celerity_resource('aphront-tooltip-css');
-      return javelin_render_tag(
+      return javelin_tag(
         'span',
         array(
           'sigil' => 'has-tooltip',
@@ -154,7 +154,7 @@ abstract class DiffusionView extends AphrontView {
             'size'  => 'auto',
           ),
         ),
-        phutil_escape_html($email->getDisplayName()));
+        $email->getDisplayName());
     }
     return phutil_escape_html($name);
   }

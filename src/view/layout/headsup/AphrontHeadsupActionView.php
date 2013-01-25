@@ -64,10 +64,10 @@ final class AphrontHeadsupActionView extends AphrontView {
       $attrs['sigil'] = 'workflow';
     }
 
-    return javelin_render_tag(
+    return javelin_tag(
       $tag,
       $attrs,
-      phutil_escape_html($this->name));
+      $this->name);
   }
 
 }

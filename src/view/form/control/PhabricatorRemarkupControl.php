@@ -99,7 +99,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
       require_celerity_resource('sprite-icon-css');
 
-      $buttons[] = javelin_render_tag(
+      $buttons[] = javelin_tag(
         'a',
         array(
           'class'       => implode(' ', $classes),

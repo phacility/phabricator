@@ -142,7 +142,7 @@ final class PhabricatorProjectMembersEditController
         ),
         '');
 
-      $button = javelin_render_tag(
+      $button = javelin_tag(
         'button',
         array(
           'class' => 'grey',

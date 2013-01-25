@@ -118,7 +118,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderPhabricatorMenuButton($header_id) {
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'class' => 'phabricator-main-menu-expand-button '.
@@ -139,7 +139,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   public function renderApplicationMenuButton($header_id) {
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'class' => 'phabricator-main-menu-expand-button '.
@@ -344,7 +344,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'dropdownID'  => $dropdown_id,
       ));
 
-    $notification_dropdown = javelin_render_tag(
+    $notification_dropdown = javelin_tag(
       'div',
       array(
         'id'    => $dropdown_id,

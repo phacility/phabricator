@@ -43,7 +43,7 @@ final class PhabricatorRepositoryListController
             'href'  => '/repository/edit/'.$repo->getID().'/',
           ),
           'Edit'),
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'class' => 'button small grey',

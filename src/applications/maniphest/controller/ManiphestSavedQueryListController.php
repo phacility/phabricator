@@ -61,7 +61,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
             'class' => 'grey small button',
           ),
           'Edit'),
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'href'  => '/maniphest/custom/delete/'.$query->getID().'/',

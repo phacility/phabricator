@@ -61,7 +61,7 @@ final class PhabricatorNotificationListController
     $panel->setHeader($header);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->addButton(
-      javelin_render_tag(
+      javelin_tag(
         'a',
         array(
           'href'  => '/notification/clear/',

@@ -58,7 +58,7 @@ final class HeraldRuleListView extends AphrontView {
         ),
         'View Edit Log');
 
-      $delete = javelin_render_tag(
+      $delete = javelin_tag(
         'a',
         array(
           'href' => '/herald/delete/'.$rule->getID().'/',

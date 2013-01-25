@@ -18,7 +18,7 @@ final class PhabricatorAnchorView extends AphrontView {
   public function render() {
     $marker = null;
     if ($this->navigationMarker) {
-      $marker = javelin_render_tag(
+      $marker = javelin_tag(
         'legend',
         array(
           'class' => 'phabricator-anchor-navigation-marker',

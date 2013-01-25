@@ -16,7 +16,7 @@ final class DifferentialChangesetTwoUpRenderer
 
     $context_not_available = null;
     if ($hunk_starts) {
-      $context_not_available = javelin_render_tag(
+      $context_not_available = javelin_tag(
         'tr',
         array(
           'sigil' => 'context-target',
@@ -83,7 +83,7 @@ final class DifferentialChangesetTwoUpRenderer
             $is_first_block = true;
           }
 
-          $contents[] = javelin_render_tag(
+          $contents[] = javelin_tag(
             'a',
             array(
               'href' => '#',
@@ -99,7 +99,7 @@ final class DifferentialChangesetTwoUpRenderer
               : pht("\xE2\x96\xB2 Show 20 Lines"));
         }
 
-        $contents[] = javelin_render_tag(
+        $contents[] = javelin_tag(
           'a',
           array(
             'href' => '#',
@@ -119,7 +119,7 @@ final class DifferentialChangesetTwoUpRenderer
         }
 
         if ($len > 40) {
-          $contents[] = javelin_render_tag(
+          $contents[] = javelin_tag(
             'a',
             array(
               'href' => '#',
@@ -235,7 +235,7 @@ final class DifferentialChangesetTwoUpRenderer
                 dirname('/'.$orig_file);
             }
             $class = ($orig_type == '-' ? 'new-move' : 'new-copy');
-            $n_copy = javelin_render_tag(
+            $n_copy = javelin_tag(
               'td',
               array(
                 'meta' => array(

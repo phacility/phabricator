@@ -72,7 +72,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
       if ($id) {
         $new_checked = ($this->selectedDiffID == $id);
-        $new = javelin_render_tag(
+        $new = javelin_tag(
           'input',
           array(
             'type' => 'radio',

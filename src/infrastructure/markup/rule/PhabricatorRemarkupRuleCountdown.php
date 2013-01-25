@@ -52,13 +52,13 @@ final class PhabricatorRemarkupRuleCountdown extends PhutilRemarkupRule {
           'id' => $id,
         ),
         array(
-          javelin_render_tag('span',
+          javelin_tag('span',
             array('sigil' => 'phabricator-timer-days'), '').'d',
-          javelin_render_tag('span',
+          javelin_tag('span',
             array('sigil' => 'phabricator-timer-hours'), '').'h',
-          javelin_render_tag('span',
+          javelin_tag('span',
             array('sigil' => 'phabricator-timer-minutes'), '').'m',
-          javelin_render_tag('span',
+          javelin_tag('span',
             array('sigil' => 'phabricator-timer-seconds'), '').'s',
         ));
       Javelin::initBehavior('countdown-timer', array(

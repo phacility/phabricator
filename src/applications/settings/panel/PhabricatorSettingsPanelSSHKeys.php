@@ -186,7 +186,7 @@ final class PhabricatorSettingsPanelSSHKeys
         phutil_escape_html($key->getKeyType()),
         phabricator_date($key->getDateCreated(), $user),
         phabricator_time($key->getDateCreated(), $user),
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'href' => $this->getPanelURI('?delete='.$key->getID()),

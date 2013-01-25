@@ -35,7 +35,7 @@ final class PonderVotableView extends AphrontView {
 
     $uri = id(new PhutilURI($this->uri))->alter('phid', $this->phid);
 
-    $up = javelin_render_tag(
+    $up = javelin_tag(
       'a',
       array(
         'href'        => (string)$uri,
@@ -45,7 +45,7 @@ final class PonderVotableView extends AphrontView {
       ),
       "\xE2\x96\xB2");
 
-    $down = javelin_render_tag(
+    $down = javelin_tag(
       'a',
       array(
         'href'        => (string)$uri,
@@ -55,13 +55,13 @@ final class PonderVotableView extends AphrontView {
       ),
       "\xE2\x96\xBC");
 
-    $count = javelin_render_tag(
+    $count = javelin_tag(
       'div',
       array(
         'class'       => 'ponder-vote-count',
         'sigil'       => 'ponder-vote-count',
       ),
-      phutil_escape_html($this->count));
+      $this->count);
 
     return javelin_render_tag(
       'div',

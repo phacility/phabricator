@@ -41,7 +41,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       $tokens[] = $this->renderToken($key, $value);
     }
 
-    $input = javelin_render_tag(
+    $input = javelin_tag(
       'input',
       array(
         'mustcapture' => true,

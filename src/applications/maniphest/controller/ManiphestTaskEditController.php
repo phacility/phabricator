@@ -425,7 +425,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setValue($projects_value)
           ->setID($project_tokenizer_id)
           ->setCaption(
-            javelin_render_tag(
+            javelin_tag(
               'a',
               array(
                 'href'        => '/project/create/',

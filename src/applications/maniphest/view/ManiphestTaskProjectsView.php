@@ -27,7 +27,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
           'href'  => $handle->getURI(),
           'class' => 'phabricator-project-tag',
         ),
-          phutil_utf8_shorten($handle->getName(), 24));
+        phutil_utf8_shorten($handle->getName(), 24));
     }
 
     if (count($this->handles) > 2) {
@@ -39,7 +39,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
         $all[] = $handle->getName();
       }
 
-      $tags[] = javelin_render_tag(
+      $tags[] = javelin_tag(
         'span',
         array(
           'class' => 'phabricator-project-tag',

@@ -52,7 +52,7 @@ final class PhabricatorSettingsPanelEmailAddresses
     $rows = array();
     foreach ($emails as $email) {
 
-      $button_verify = javelin_render_tag(
+      $button_verify = javelin_tag(
         'a',
         array(
           'class' => 'button small grey',
@@ -61,7 +61,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         ),
         'Verify');
 
-      $button_make_primary = javelin_render_tag(
+      $button_make_primary = javelin_tag(
         'a',
         array(
           'class' => 'button small grey',
@@ -70,7 +70,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         ),
         'Make Primary');
 
-      $button_remove = javelin_render_tag(
+      $button_remove = javelin_tag(
         'a',
         array(
           'class'   => 'button small grey',
@@ -133,7 +133,7 @@ final class PhabricatorSettingsPanelEmailAddresses
     $view = new AphrontPanelView();
     if ($editable) {
       $view->addButton(
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'href'      => $uri->alter('new', 'true'),

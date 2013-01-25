@@ -94,7 +94,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
     $buttons = array();
 
     $buttons[] = '<button>Ready</button>';
-    $buttons[] = javelin_render_tag(
+    $buttons[] = javelin_tag(
       'button',
       array(
         'sigil' => 'inline-edit-cancel',

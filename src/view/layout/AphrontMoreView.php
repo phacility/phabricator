@@ -32,7 +32,7 @@ final class AphrontMoreView extends AphrontView {
     $link = null;
     if ($this->more && $this->more != $this->some) {
       Javelin::initBehavior('aphront-more');
-      $link = ' '.javelin_render_tag(
+      $link = ' '.javelin_tag(
         'a',
         array(
           'sigil'       => 'aphront-more-view-show-more',

@@ -590,7 +590,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
     Javelin::initBehavior('maniphest-transaction-expand');
 
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'href'          => '/maniphest/task/descriptionchange/'.$id.'/',

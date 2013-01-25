@@ -110,7 +110,7 @@ final class PhabricatorRemarkupRuleEmbedFile
         require_celerity_resource('lightbox-attachment-css');
         $img = phutil_tag('img', $data['attrs']);
 
-        $embed = javelin_render_tag(
+        $embed = javelin_tag(
           'a',
           array(
             'href'        => $meta['uri'],

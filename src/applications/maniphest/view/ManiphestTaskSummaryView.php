@@ -62,15 +62,14 @@ final class ManiphestTaskSummaryView extends ManiphestView {
     if ($this->showBatchControls) {
       $batch =
         '<td class="maniphest-task-batch">'.
-          javelin_render_tag(
+          javelin_tag(
             'input',
             array(
               'type'  => 'checkbox',
               'name'  => 'batch[]',
               'value' => $task->getID(),
               'sigil' => 'maniphest-batch',
-            ),
-            null).
+            )).
         '</td>';
     }
 
@@ -87,7 +86,7 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       $control_sigil = 'maniphest-task-handle';
     }
 
-    $handle = javelin_render_tag(
+    $handle = javelin_tag(
       'td',
       array(
         'class' => 'maniphest-task-handle '.$pri_class.' '.$control_class,

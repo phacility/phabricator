@@ -143,7 +143,7 @@ final class DifferentialChangesetListView extends AphrontView {
         $load = 'Loading...';
         $mapping[$uniq_id] = $ref;
       } else {
-        $load = javelin_render_tag(
+        $load = javelin_tag(
           'a',
           array(
             'href' => '#'.$uniq_id,
@@ -155,7 +155,7 @@ final class DifferentialChangesetListView extends AphrontView {
             'sigil' => 'differential-load',
             'mustcapture' => true,
           ),
-          'Load');
+          pht('Load'));
       }
       $detail->appendChild(
         phutil_tag(
@@ -209,13 +209,13 @@ final class DifferentialChangesetListView extends AphrontView {
    * Render the "Undo" markup for the inline comment undo feature.
    */
   private function renderUndoTemplates() {
-    $link = javelin_render_tag(
+    $link = javelin_tag(
       'a',
       array(
         'href'  => '#',
         'sigil' => 'differential-inline-comment-undo',
       ),
-      'Undo');
+      pht('Undo'));
 
     $div = phutil_tag(
       'div',
@@ -302,7 +302,7 @@ final class DifferentialChangesetListView extends AphrontView {
       'differential-dropdown-menus',
       array());
 
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'class'   => 'button small grey',
@@ -311,7 +311,7 @@ final class DifferentialChangesetListView extends AphrontView {
         'target'  => '_blank',
         'sigil'   => 'differential-view-options',
       ),
-      "View Options \xE2\x96\xBC");
+      pht("View Options \xE2\x96\xBC"));
   }
 
 }

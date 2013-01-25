@@ -163,29 +163,33 @@ final class ConpherenceViewController extends
       array(
         'class' => 'widgets-header'
       ),
-      javelin_render_tag(
-        'a',
-        array(
-          'sigil' => 'conpherence-change-widget',
-          'meta'  => array('widget' => 'widgets-files')
+      array(
+        javelin_tag(
+          'a',
+          array(
+            'sigil' => 'conpherence-change-widget',
+            'meta'  => array('widget' => 'widgets-files')
+          ),
+          pht('Files')
         ),
-        pht('Files')
-      ).' | '.
-      javelin_render_tag(
-        'a',
-        array(
-          'sigil' => 'conpherence-change-widget',
-          'meta'  => array('widget' => 'widgets-tasks')
+        ' | ',
+        javelin_tag(
+          'a',
+          array(
+            'sigil' => 'conpherence-change-widget',
+            'meta'  => array('widget' => 'widgets-tasks')
+          ),
+          pht('Tasks')
         ),
-        pht('Tasks')
-      ).' | '.
-      javelin_render_tag(
-        'a',
-        array(
-          'sigil' => 'conpherence-change-widget',
-          'meta'  => array('widget' => 'widgets-calendar')
+        ' | ',
+        javelin_tag(
+          'a',
+          array(
+            'sigil' => 'conpherence-change-widget',
+            'meta'  => array('widget' => 'widgets-calendar')
+          ),
+          pht('Calendar')
         ),
-        pht('Calendar')
       )
     ).
     phutil_render_tag(

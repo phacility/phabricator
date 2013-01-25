@@ -120,7 +120,7 @@ final class PhabricatorOwnersDetailController
     $panel->setHeader(
       'Package Details for "'.phutil_escape_html($package->getName()).'"');
     $panel->addButton(
-      javelin_render_tag(
+      javelin_tag(
         'a',
         array(
           'href' => '/owners/delete/'.$package->getID().'/',

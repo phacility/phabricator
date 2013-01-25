@@ -34,7 +34,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
 
     $scope = $this->scope;
 
-    $target = javelin_render_tag(
+    $target = javelin_tag(
       'div',
       array(
         'id'    => $target_id,

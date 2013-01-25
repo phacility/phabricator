@@ -235,7 +235,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
 
 
       if ($this->getIsEdited()) {
-        $extra[] = javelin_render_tag(
+        $extra[] = javelin_tag(
           'a',
           array(
             'href'  => '/transactions/history/'.$xaction_phid.'/',
@@ -245,7 +245,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       }
 
       if ($this->getIsEditable()) {
-        $extra[] = javelin_render_tag(
+        $extra[] = javelin_tag(
           'a',
           array(
             'href'  => '/transactions/edit/'.$xaction_phid.'/',

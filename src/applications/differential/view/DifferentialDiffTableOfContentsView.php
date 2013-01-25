@@ -192,16 +192,14 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       }
     }
 
-    $reveal_link =
-      javelin_render_tag(
+    $reveal_link = javelin_tag(
         'a',
         array(
           'sigil' => 'differential-reveal-all',
           'mustcapture' => true,
           'class' => 'button differential-toc-reveal-all',
         ),
-        pht('Show All Context')
-      );
+        pht('Show All Context'));
 
     $buttons =
       '<tr><td colspan="7">'.
@@ -256,7 +254,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   private function renderChangesetLink(DifferentialChangeset $changeset, $ref) {
     $display_file = $changeset->getDisplayFilename();
 
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'href' => '#'.$changeset->getAnchorName(),
@@ -266,7 +264,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ),
         'sigil' => 'differential-load',
       ),
-      phutil_escape_html($display_file));
+      $display_file);
   }
 
 }

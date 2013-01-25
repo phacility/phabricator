@@ -101,7 +101,7 @@ final class ManiphestBatchEditController extends ManiphestController {
     $form->appendChild(
       id(new AphrontFormInsetView())
         ->setTitle('Actions')
-        ->setRightButton(javelin_render_tag(
+        ->setRightButton(javelin_tag(
             'a',
             array(
               'href' => '#',
@@ -110,7 +110,7 @@ final class ManiphestBatchEditController extends ManiphestController {
               'mustcapture' => true,
             ),
             'Add Another Action'))
-        ->setContent(javelin_render_tag(
+        ->setContent(javelin_tag(
           'table',
           array(
             'sigil' => 'maniphest-batch-actions',

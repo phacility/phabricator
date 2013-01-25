@@ -36,7 +36,7 @@ final class PhabricatorCountdownListController
           ),
           'Edit');
 
-        $delete_button = javelin_render_tag(
+        $delete_button = javelin_tag(
           'a',
           array(
             'class' => 'small button grey',

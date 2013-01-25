@@ -225,7 +225,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'sigil' => 'year-input',
       ));
 
-    $cal_icon = javelin_render_tag(
+    $cal_icon = javelin_tag(
       'a',
       array(
         'href'  => '#',

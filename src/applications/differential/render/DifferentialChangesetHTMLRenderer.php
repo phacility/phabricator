@@ -321,7 +321,7 @@ abstract class DifferentialChangesetHTMLRenderer
 
     $more = null;
     if ($force !== 'none') {
-      $more = ' '.javelin_render_tag(
+      $more = ' '.javelin_tag(
         'a',
         array(
           'mustcapture' => true,

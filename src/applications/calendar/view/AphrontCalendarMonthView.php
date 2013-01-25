@@ -291,7 +291,7 @@ final class AphrontCalendarMonthView extends AphrontView {
       $href = null;
     }
 
-    $text_div = javelin_render_tag(
+    $text_div = javelin_tag(
       $tag,
       array(
         'sigil' => 'has-tooltip',
@@ -302,9 +302,9 @@ final class AphrontCalendarMonthView extends AphrontView {
         'class' => 'aphront-calendar-event-text',
         'href'  => $href,
       ),
-      phutil_escape_html(phutil_utf8_shorten($event->getName(), 32)));
+      phutil_utf8_shorten($event->getName(), 32));
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'class' => implode(' ', $classes),

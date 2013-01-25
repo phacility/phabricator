@@ -5,6 +5,19 @@ function javelin_render_tag(
   array $attributes = array(),
   $content = null) {
 
+  if (is_array($content)) {
+    $content = implode('', $content);
+  }
+
+  $html = javelin_tag($tag, $attributes, phutil_safe_html($content));
+  return $html->getHTMLContent();
+}
+
+function javelin_tag(
+  $tag,
+  array $attributes = array(),
+  $content = null) {
+
   if (isset($attributes['sigil']) ||
       isset($attributes['meta'])  ||
       isset($attributes['mustcapture'])) {
@@ -32,9 +45,8 @@ function javelin_render_tag(
     }
   }
 
-  return phutil_render_tag($tag, $attributes, $content);
+  return phutil_tag($tag, $attributes, $content);
 }
-
 
 function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
   if (strcasecmp(idx($attributes, 'method'), 'POST') == 0 &&

@@ -32,7 +32,7 @@ final class AphrontAttachedFileView extends AphrontView {
       $file->getName());
     $size = number_format($file->getByteSize()).' bytes';
 
-    $remove = javelin_render_tag(
+    $remove = javelin_tag(
       'a',
       array(
         'class' => 'button grey',

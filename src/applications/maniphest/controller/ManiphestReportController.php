@@ -574,7 +574,7 @@ final class ManiphestReportController extends ManiphestController {
     }
     $cname[] = 'Total';
     $cclass[] = 'n';
-    $cname[] = javelin_render_tag(
+    $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
@@ -585,7 +585,7 @@ final class ManiphestReportController extends ManiphestController {
       ),
       'Oldest (All)');
     $cclass[] = 'n';
-    $cname[] = javelin_render_tag(
+    $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
@@ -599,7 +599,7 @@ final class ManiphestReportController extends ManiphestController {
     $cclass[] = 'n';
 
     list($ignored, $window_epoch) = $this->getWindow();
-    $cname[] = javelin_render_tag(
+    $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
@@ -745,7 +745,7 @@ final class ManiphestReportController extends ManiphestController {
     $raw_age = (time() - $oldest->getDateCreated());
     $age = number_format($raw_age / (24 * 60 * 60)).' d';
 
-    $link = javelin_render_tag(
+    $link = javelin_tag(
       'a',
       array(
         'href'  => '/T'.$oldest->getID(),
@@ -755,7 +755,7 @@ final class ManiphestReportController extends ManiphestController {
         ),
         'target' => '_blank',
       ),
-      phutil_escape_html($age));
+      $age);
 
     return array($link, $raw_age);
   }

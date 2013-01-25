@@ -312,7 +312,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
     // Render into tags for the behavior.
 
     foreach ($graph as $k => $meta) {
-      $graph[$k] = javelin_render_tag(
+      $graph[$k] = javelin_tag(
         'div',
         array(
           'sigil' => 'commit-graph',

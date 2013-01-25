@@ -95,7 +95,7 @@ final class DifferentialInlineCommentView extends AphrontView {
     }
 
     if (!$this->preview) {
-      $links[] = javelin_render_tag(
+      $links[] = javelin_tag(
         'a',
         array(
           'href'  => '#',
@@ -104,7 +104,7 @@ final class DifferentialInlineCommentView extends AphrontView {
         ),
         pht('Previous'));
 
-      $links[] = javelin_render_tag(
+      $links[] = javelin_tag(
         'a',
         array(
           'href'  => '#',
@@ -122,7 +122,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           // file/line information, and synthetic comments don't have an inline
           // comment ID.
 
-          $links[] = javelin_render_tag(
+          $links[] = javelin_tag(
             'a',
             array(
               'href'        => '#',
@@ -138,7 +138,7 @@ final class DifferentialInlineCommentView extends AphrontView {
     $anchor_name = 'inline-'.$inline->getID();
 
     if ($this->editable && !$this->preview) {
-      $links[] = javelin_render_tag(
+      $links[] = javelin_tag(
         'a',
         array(
           'href'        => '#',
@@ -146,7 +146,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           'sigil'       => 'differential-inline-edit',
         ),
         pht('Edit'));
-      $links[] = javelin_render_tag(
+      $links[] = javelin_tag(
         'a',
         array(
           'href'        => '#',
@@ -155,7 +155,7 @@ final class DifferentialInlineCommentView extends AphrontView {
         ),
         pht('Delete'));
     } else if ($this->preview) {
-      $links[] = javelin_render_tag(
+      $links[] = javelin_tag(
         'a',
         array(
           'meta'        => array(
@@ -164,7 +164,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           'sigil'       => 'differential-inline-preview-jump',
         ),
         pht('Not Visible'));
-      $links[] = javelin_render_tag(
+      $links[] = javelin_tag(
         'a',
         array(
           'href'        => '#',

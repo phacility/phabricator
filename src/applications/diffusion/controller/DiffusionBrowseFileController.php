@@ -605,7 +605,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           Javelin::initBehavior('phabricator-tooltips', array());
           require_celerity_resource('aphront-tooltip-css');
 
-          $commit_link = javelin_render_tag(
+          $commit_link = javelin_tag(
             'a',
             array(
               'href' => $drequest->generateURI(
@@ -620,7 +620,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
                 'size'  => 600,
               ),
             ),
-            phutil_escape_html(phutil_utf8_shorten($line['commit'], 9, '')));
+            phutil_utf8_shorten($line['commit'], 9, ''));
 
           $revision_id = null;
           if (idx($commits, $commit)) {
@@ -637,7 +637,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
                 " \xC2\xB7 ".
                 $revision->getTitle();
             }
-            $revision_link = javelin_render_tag(
+            $revision_link = javelin_tag(
               'a',
               array(
                 'href' => '/D'.$revision_id,
@@ -652,7 +652,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           }
 
           $uri = $line_href->alter('before', $commit);
-          $before_link = javelin_render_tag(
+          $before_link = javelin_tag(
             'a',
             array(
               'href'  => $uri->setQueryParam('view', 'blame'),
@@ -706,7 +706,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         ),
         $line['line']);
 
-      $blame[] = javelin_render_tag(
+      $blame[] = javelin_tag(
         'th',
         array(
           'class' => 'diffusion-line-link',

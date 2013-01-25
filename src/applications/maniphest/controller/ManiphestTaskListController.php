@@ -641,7 +641,7 @@ final class ManiphestTaskListController extends ManiphestController {
         'status'      => 'batch-select-status-cell',
       ));
 
-    $select_all = javelin_render_tag(
+    $select_all = javelin_tag(
       'a',
       array(
         'href'        => '#',
@@ -651,7 +651,7 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       'Select All');
 
-    $select_none = javelin_render_tag(
+    $select_none = javelin_tag(
       'a',
       array(
         'href'        => '#',
@@ -670,7 +670,7 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       "Batch Edit Selected Tasks \xC2\xBB");
 
-    $export = javelin_render_tag(
+    $export = javelin_tag(
       'a',
       array(
         'href' => '/maniphest/export/'.$search_query->getQueryKey().'/',

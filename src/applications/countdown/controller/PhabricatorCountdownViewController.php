@@ -47,13 +47,13 @@ final class PhabricatorCountdownViewController
               <th>Seconds</th>
             </tr>
             <tr>'.
-              javelin_render_tag('td',
+              javelin_tag('td',
                 array('sigil' => 'phabricator-timer-days'), '').
-              javelin_render_tag('td',
+              javelin_tag('td',
                 array('sigil' => 'phabricator-timer-hours'), '').
-              javelin_render_tag('td',
+              javelin_tag('td',
                 array('sigil' => 'phabricator-timer-minutes'), '').
-              javelin_render_tag('td',
+              javelin_tag('td',
                 array('sigil' => 'phabricator-timer-seconds'), '').
             '</tr>
           </table>

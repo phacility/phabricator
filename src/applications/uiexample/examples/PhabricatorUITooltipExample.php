@@ -89,14 +89,14 @@ EOTEXT;
 
     $content = array();
     foreach ($metas as $key => $meta) {
-      $content[] = javelin_render_tag(
+      $content[] = javelin_tag(
         'div',
         array(
           'sigil' => 'has-tooltip',
           'meta'  => $meta,
           'style' => $style,
         ),
-        phutil_escape_html($key));
+        $key);
     }
 
     return $content;

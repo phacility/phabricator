@@ -104,7 +104,7 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
         ),
         $name);
 
-      $filetree[] = javelin_render_tag(
+      $filetree[] = javelin_tag(
         $href ? 'a' : 'span',
         array(
           'href' => $href,
@@ -112,7 +112,7 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
           'title' => $title,
           'class' => 'phabricator-filetree-item',
         ),
-        $icon.$name_element);
+        array($icon, $name_element));
     }
     $tree->destroy();
 

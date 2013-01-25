@@ -66,12 +66,12 @@ final class PhabricatorActionView extends AphrontView {
             'Call setUser() when rendering an action as a form.');
         }
 
-        $item = javelin_render_tag(
+        $item = javelin_tag(
           'button',
           array(
             'class' => 'phabricator-action-view-item',
           ),
-          phutil_escape_html($this->name));
+          $this->name);
 
         $item = phabricator_render_form(
           $this->user,
@@ -82,14 +82,14 @@ final class PhabricatorActionView extends AphrontView {
           ),
           $item);
       } else {
-        $item = javelin_render_tag(
+        $item = javelin_tag(
           'a',
           array(
             'href'  => $this->href,
             'class' => 'phabricator-action-view-item',
             'sigil' => $this->workflow ? 'workflow' : null,
           ),
-          phutil_escape_html($this->name));
+          $this->name);
       }
     } else {
       $item = phutil_tag(
