@@ -909,7 +909,7 @@ final class DifferentialRevisionQuery {
       // it.
       if ($needs_review ^ $filter_is_author) {
         if ($needs_review) {
-          $blocking[] = $revision;
+          array_unshift($blocking, $revision);
         } else {
           $active[] = $revision;
         }
