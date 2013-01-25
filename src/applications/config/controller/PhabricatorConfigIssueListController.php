@@ -48,6 +48,7 @@ final class PhabricatorConfigIssueListController
   private function buildIssueList(array $issues) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PhabricatorObjectItemListView();
+    $list->setStackable();
 
     foreach ($issues as $issue) {
       $href = $this->getApplicationURI('/issue/'.$issue->getIssueKey().'/');
