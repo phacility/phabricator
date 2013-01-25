@@ -36,7 +36,7 @@
 
 .phabricator-object-item-name {
   display: block;
-  padding: 10px 10px 5px;
+  padding: 10px 10px 2px;
   font-weight: bold;
   font-size: 14px;
 }
@@ -52,7 +52,7 @@
 */
 
 .phabricator-object-item-attributes {
-  padding: 0px 10px 10px;
+  padding: 0px 10px 5px;
 }
 
 .phabricator-object-item-attribute {
