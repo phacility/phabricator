@@ -276,10 +276,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
     $expect_hash = self::computeMailHash($receiver->getMailKey(), $check_phid);
 
-    // See note at computeOldMailHash().
-    $old_hash = self::computeOldMailHash($receiver->getMailKey(), $check_phid);
-
-    if ($expect_hash != $hash && $old_hash != $hash) {
+    if ($expect_hash != $hash) {
       return $this->setMessage("Invalid mail hash!")->save();
     }
 
@@ -345,20 +342,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $global_mail_key = PhabricatorEnv::getEnvConfig('phabricator.mail-key');
 
     $hash = PhabricatorHash::digest($mail_key.$global_mail_key.$phid);
-    return substr($hash, 0, 16);
-  }
-
-  public static function computeOldMailHash($mail_key, $phid) {
-
-    // TODO: Remove this method entirely in a couple of months. We've moved from
-    // plain sha1 to sha1+hmac to make the codebase more auditable for good uses
-    // of hash functions, but still accept the old hashes on email replies to
-    // avoid breaking things. Once we've been sending only hmac hashes for a
-    // while, remove this and start rejecting old hashes. See T547.
-
-    $global_mail_key = PhabricatorEnv::getEnvConfig('phabricator.mail-key');
-
-    $hash = sha1($mail_key.$global_mail_key.$phid);
     return substr($hash, 0, 16);
   }
 
