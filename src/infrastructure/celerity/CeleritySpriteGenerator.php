@@ -183,7 +183,7 @@ final class CeleritySpriteGenerator {
     // Reorder the sprites so less-specific rules generate earlier in the sheet.
     // Otherwise we end up with blue "a.black" buttons because the blue rules
     // have the same specificity but appear later.
-    $gradients = array_combine($gradients, $gradients);
+    $gradients = array_fuse($gradients);
     $gradients = array_select_keys(
       $gradients,
       array(

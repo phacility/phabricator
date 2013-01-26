@@ -65,7 +65,7 @@ final class PhabricatorMacroListController
     }
 
     if ($authors) {
-      $author_phids = array_combine($authors, $authors);
+      $author_phids = array_fuse($authors);
     } else {
       $author_phids = array();
     }

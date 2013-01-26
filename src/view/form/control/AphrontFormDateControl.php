@@ -181,7 +181,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
     $max_year = $this->getMaxYear();
 
     $days = range(1, 31);
-    $days = array_combine($days, $days);
+    $days = array_fuse($days);
 
     $months = array(
       1 => 'Jan',
@@ -199,7 +199,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
     );
 
     $years = range($this->getMinYear(), $this->getMaxYear());
-    $years = array_combine($years, $years);
+    $years = array_fuse($years);
 
     $days_sel = AphrontFormSelectControl::renderSelectTag(
       $this->getDayInputValue(),
