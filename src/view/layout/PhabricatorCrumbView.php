@@ -6,25 +6,14 @@ final class PhabricatorCrumbView extends AphrontView {
   private $href;
   private $icon;
   private $isLastCrumb;
-  private $rawName;
-
-  /**
-   * Allows for custom HTML inside the name field.
-   *
-   * NOTE: you must handle escaping user text if you use this method.
-   */
-  public function setRawName($raw_name) {
-    $this->rawName = $raw_name;
-    return $this;
-  }
 
   public function setName($name) {
     $this->name = $name;
     return $this;
   }
 
-  public function getNameForRender() {
-    return nonempty($this->rawName, phutil_escape_html($this->name));
+  public function getName() {
+    return $this->name;
   }
 
   public function setHref($href) {
@@ -63,12 +52,12 @@ final class PhabricatorCrumbView extends AphrontView {
         '');
     }
 
-    $name = phutil_render_tag(
+    $name = phutil_tag(
       'span',
       array(
         'class' => 'phabricator-crumb-name',
       ),
-      $this->getNameForRender());
+      $this->name);
 
     $divider = null;
     if (!$this->isLastCrumb) {
