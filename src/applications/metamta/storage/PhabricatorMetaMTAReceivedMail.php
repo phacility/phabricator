@@ -93,7 +93,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $prefixPattern = ($single_handle_prefix)
       ? preg_quote($single_handle_prefix, '/') . '\+'
       : '';
-    $pattern = "/^{$prefixPattern}((?:D|T|C)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
+    $pattern = "/^{$prefixPattern}((?:D|T|C|E)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
 
     $phabricator_address = null;
     $receiver_name       = null;
