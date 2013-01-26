@@ -28,6 +28,12 @@ final class PhabricatorMetaMTAReceiveController
         array(
           'text' => $request->getStr('body'),
         ));
+
+      // Make up some unique value, since this column isn't nullable.
+      $received->setMessageIDHash(
+        PhabricatorHash::digestForIndex(
+          Filesystem::readRandomBytes(12)));
+
       $received->save();
 
       $received->processReceivedMail();
