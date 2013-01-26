@@ -1093,6 +1093,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130111.conpherence.sql'),
       ),
+      '20130127.altheraldtranscript.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130127.altheraldtranscript.sql'),
+      ),
     );
   }
 
