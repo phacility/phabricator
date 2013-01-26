@@ -290,9 +290,8 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
         $receiver);
     } else if ($receiver instanceof ConpherenceThread) {
-      $handler = id(new ConpherenceEditor())
-        ->setActor($user)
-        ->buildReplyHandler($receiver);
+      $handler = id(new ConpherenceReplyHandler())
+        ->setMailReceiver($receiver);
     }
 
     $handler->setActor($user);
