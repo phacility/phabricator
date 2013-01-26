@@ -195,6 +195,7 @@ phutil_register_library_map(array(
     'ConduitCallTestCase' => 'applications/conduit/call/__tests__/ConduitCallTestCase.php',
     'ConduitException' => 'applications/conduit/protocol/ConduitException.php',
     'ConduitSSHWorkflow' => 'applications/conduit/ssh/ConduitSSHWorkflow.php',
+    'ConpherenceConfigOptions' => 'applications/conpherence/config/ConpherenceConfigOptions.php',
     'ConpherenceConstants' => 'applications/conpherence/constants/ConpherenceConstants.php',
     'ConpherenceController' => 'applications/conpherence/controller/ConpherenceController.php',
     'ConpherenceDAO' => 'applications/conpherence/storage/ConpherenceDAO.php',
@@ -205,6 +206,7 @@ phutil_register_library_map(array(
     'ConpherenceParticipant' => 'applications/conpherence/storage/ConpherenceParticipant.php',
     'ConpherenceParticipantQuery' => 'applications/conpherence/query/ConpherenceParticipantQuery.php',
     'ConpherenceParticipationStatus' => 'applications/conpherence/constants/ConpherenceParticipationStatus.php',
+    'ConpherenceReplyHandler' => 'applications/conpherence/mail/ConpherenceReplyHandler.php',
     'ConpherenceThread' => 'applications/conpherence/storage/ConpherenceThread.php',
     'ConpherenceThreadQuery' => 'applications/conpherence/query/ConpherenceThreadQuery.php',
     'ConpherenceTransaction' => 'applications/conpherence/storage/ConpherenceTransaction.php',
@@ -1666,6 +1668,7 @@ phutil_register_library_map(array(
     'ConduitCallTestCase' => 'PhabricatorTestCase',
     'ConduitException' => 'Exception',
     'ConduitSSHWorkflow' => 'PhabricatorSSHWorkflow',
+    'ConpherenceConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'ConpherenceController' => 'PhabricatorController',
     'ConpherenceDAO' => 'PhabricatorLiskDAO',
     'ConpherenceEditor' => 'PhabricatorApplicationTransactionEditor',
@@ -1675,6 +1678,7 @@ phutil_register_library_map(array(
     'ConpherenceParticipant' => 'ConpherenceDAO',
     'ConpherenceParticipantQuery' => 'PhabricatorOffsetPagedQuery',
     'ConpherenceParticipationStatus' => 'ConpherenceConstants',
+    'ConpherenceReplyHandler' => 'PhabricatorMailReplyHandler',
     'ConpherenceThread' =>
     array(
       0 => 'ConpherenceDAO',

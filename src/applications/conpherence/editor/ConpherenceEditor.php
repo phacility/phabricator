@@ -120,31 +120,38 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function supportsMail() {
-    return false;
+    return true;
   }
-
-  /* TODO
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new ConpherenceReplyHandler())
+      ->setActor($this->getActor())
       ->setMailReceiver($object);
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $title = $object->getTitle();
+    if (!$title) {
+      $title = pht(
+        '%s sent you a message.',
+        $this->getActor()->getUserName()
+      );
+    }
     $phid = $object->getPHID();
-    $original_name = $object->getOriginalName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("C{$id}: {$title}")
-      ->addHeader('Thread-Topic', "C{$id}: {$phid}");
+      ->setSubject("E{$id}: {$title}")
+      ->addHeader('Thread-Topic', "E{$id}: {$phid}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $participants = $object->getParticipants();
-    $participants[$this->requireActor()->getPHID()] = true;
     return array_keys($participants);
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    return array();
   }
 
   protected function buildMailBody(
@@ -162,7 +169,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.conpherence.subject-prefix');
   }
-   */
 
   protected function supportsFeed() {
     return false;

@@ -235,6 +235,13 @@ EODOC
           pht(
             'Controls whether Phabricator sends email "From" users.'))
         ->setDescription($send_as_user_desc),
+      $this->newOption(
+        'metamta.reply-handler-domain',
+        'string',
+        'phabricator.example.com')
+        ->setDescription(pht(
+          'Domain used for reply email addresses. Some applications can '.
+          'configure this domain.')),
       $this->newOption('metamta.reply.show-hints', 'bool', true)
         ->setBoolOptions(
           array(

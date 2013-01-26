@@ -289,6 +289,10 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     } else if ($receiver instanceof PhabricatorRepositoryCommit) {
       $handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
         $receiver);
+    } else if ($receiver instanceof ConpherenceThread) {
+      $handler = id(new ConpherenceEditor())
+        ->setActor($user)
+        ->buildReplyHandler($receiver);
     }
 
     $handler->setActor($user);
@@ -330,6 +334,9 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         break;
       case 'C':
         $class_obj = new PhabricatorRepositoryCommit();
+        break;
+      case 'E':
+        $class_obj = new ConpherenceThread();
         break;
       default:
         return null;
