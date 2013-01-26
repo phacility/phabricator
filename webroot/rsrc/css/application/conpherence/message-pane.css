@@ -16,7 +16,7 @@
   left: 320px;
   right: 321px;
   top: 124px;
-  bottom: 225px;
+  bottom: 142px;
   overflow-y: auto;
   box-shadow: inset 1px 5px 5px rgba(0,0,0,0.1);
 }
@@ -24,7 +24,7 @@
 .conpherence-message-pane .phabricator-form-view {
   border-width: 0;
   background: none;
-  height: 224px;
+  height: 143px;
   padding: 0;
   position: fixed;
   bottom: 0;
@@ -81,14 +81,19 @@
 .conpherence-message-pane .remarkup-assist-bar {
   border-width: 1px 0 0;
   border-color: #CCC;
+  border-bottom: transparent;
 }
 
 .conpherence-message-pane .remarkup-assist-textarea {
-  border-width: 1px 0 1px 0;
-  border-color: #CCC;
+  border-width: 0 0 1px 0;
+  border-color: #e7e7e7;
 }
 
 .conpherence-message-pane .remarkup-assist-textarea:focus {
   outline: none;
 }
 
+.conpherence-message-pane .aphront-form-input textarea {
+  padding: 6px;
+  height: 6em;
+}

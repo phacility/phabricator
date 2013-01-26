@@ -752,7 +752,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-message-pane-css' =>
   array(
-    'uri' => '/res/cbae8840/rsrc/css/application/conpherence/message-pane.css',
+    'uri' => '/res/88b1927c/rsrc/css/application/conpherence/message-pane.css',
     'type' => 'css',
     'requires' =>
     array(
