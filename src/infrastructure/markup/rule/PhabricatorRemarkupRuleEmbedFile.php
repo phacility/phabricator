@@ -56,11 +56,11 @@ final class PhabricatorRemarkupRuleEmbedFile
         $attrs['src'] = $file->getBestURI();
         $options['image_class'] = null;
         $file_data = $file->getMetadata();
-        $height = $file_data[PhabricatorFile::METADATA_IMAGE_HEIGHT];
+        $height = idx($file_data, PhabricatorFile::METADATA_IMAGE_HEIGHT);
         if ($height) {
           $attrs['height'] = $height;
         }
-        $width = $file_data[PhabricatorFile::METADATA_IMAGE_WIDTH];
+        $width = idx($file_data, PhabricatorFile::METADATA_IMAGE_WIDTH);
         if ($width) {
           $attrs['width'] = $width;
         }

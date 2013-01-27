@@ -34,8 +34,8 @@ final class PhabricatorRemarkupRuleImageMacro
       if ($file) {
         $src_uri = $file->getBestURI();
         $file_data = $file->getMetadata();
-        $height = $file_data[PhabricatorFile::METADATA_IMAGE_HEIGHT];
-        $width = $file_data[PhabricatorFile::METADATA_IMAGE_WIDTH];
+        $height = idx($file_data,PhabricatorFile::METADATA_IMAGE_HEIGHT);
+        $width = idx($file_data, PhabricatorFile::METADATA_IMAGE_WIDTH);
         if ($height && $width) {
           $style = sprintf(
             'height: %dpx; width: %dpx;',
