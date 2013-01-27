@@ -49,8 +49,10 @@ final class ConpherenceViewController extends
     $this->setConpherence($conpherence);
 
     $participant = $conpherence->getParticipant($user->getPHID());
+    $transactions = $conpherence->getTransactions();
+    $latest_transaction = end($transactions);
     $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $participant->markUpToDate();
+    $participant->markUpToDate($latest_transaction);
     unset($write_guard);
 
     $header = $this->renderHeaderPaneContent();
