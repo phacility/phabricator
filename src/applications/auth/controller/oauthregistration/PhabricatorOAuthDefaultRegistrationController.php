@@ -45,10 +45,10 @@ final class PhabricatorOAuthDefaultRegistrationController
       $user->setUsername($request->getStr('username'));
       $username = $user->getUsername();
       if (!strlen($user->getUsername())) {
-        $e_username = 'Required';
-        $errors[] = 'Username is required.';
+        $e_username = pht('Required');
+        $errors[] = pht('Username is required.');
       } else if (!PhabricatorUser::validateUsername($username)) {
-        $e_username = 'Invalid';
+        $e_username = pht('Invalid');
         $errors[] = PhabricatorUser::describeValidUsername();
       } else {
         $e_username = null;
@@ -57,8 +57,8 @@ final class PhabricatorOAuthDefaultRegistrationController
       if (!$new_email) {
         $new_email = trim($request->getStr('email'));
         if (!$new_email) {
-          $e_email = 'Required';
-          $errors[] = 'Email is required.';
+          $e_email = pht('Required');
+          $errors[] = pht('Email is required.');
         } else {
           $e_email = null;
         }
@@ -67,7 +67,7 @@ final class PhabricatorOAuthDefaultRegistrationController
       if ($new_email) {
         $email_ok = PhabricatorUserEmail::isAllowedAddress($new_email);
         if (!$email_ok) {
-          $e_email = 'Invalid';
+          $e_email = pht('Invalid');
           $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
         }
       }
@@ -75,8 +75,8 @@ final class PhabricatorOAuthDefaultRegistrationController
       if (!strlen($user->getRealName())) {
         $user->setRealName($request->getStr('realname'));
         if (!strlen($user->getRealName())) {
-          $e_realname = 'Required';
-          $errors[] = 'Real name is required.';
+          $e_realname = pht('Required');
+          $errors[] = pht('Real name is required.');
         } else {
           $e_realname = null;
         }
@@ -142,11 +142,11 @@ final class PhabricatorOAuthDefaultRegistrationController
             $new_email);
 
           if ($same_username) {
-            $e_username = 'Duplicate';
-            $errors[] = 'That username or email is not unique.';
+            $e_username = pht('Duplicate');
+            $errors[] = pht('That username or email is not unique.');
           } else if ($same_email) {
-            $e_email = 'Duplicate';
-            $errors[] = 'That email is not unique.';
+            $e_email = pht('Duplicate');
+            $errors[] = pht('That email is not unique.');
           } else {
             throw $exception;
           }
@@ -157,7 +157,7 @@ final class PhabricatorOAuthDefaultRegistrationController
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Registration Failed');
+      $error_view->setTitle(pht('Registration Failed'));
       $error_view->setErrors($errors);
     }
 
@@ -176,7 +176,7 @@ final class PhabricatorOAuthDefaultRegistrationController
       ->setAction($action_path)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Username')
+          ->setLabel(pht('Username'))
           ->setName('username')
           ->setValue($user->getUsername())
           ->setError($e_username));
@@ -184,7 +184,7 @@ final class PhabricatorOAuthDefaultRegistrationController
     if ($show_email_input) {
       $form->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Email')
+          ->setLabel(pht('Email'))
           ->setName('email')
           ->setValue($request->getStr('email'))
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
@@ -194,7 +194,7 @@ final class PhabricatorOAuthDefaultRegistrationController
     if ($provider->retrieveUserRealName() === null) {
       $form->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Real Name')
+          ->setLabel(pht('Real Name'))
           ->setName('realname')
           ->setValue($request->getStr('realname'))
           ->setError($e_realname));
@@ -203,20 +203,22 @@ final class PhabricatorOAuthDefaultRegistrationController
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Create Account'));
+          ->setValue(pht('Create Account')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Create New Account');
+    $panel->setHeader(pht('Create New Account'));
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
+    $panel->setNoBackground();
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $error_view,
         $panel,
       ),
       array(
-        'title' => 'Create New Account',
+        'title' => pht('Create New Account'),
+        'device' => true
       ));
   }
 
