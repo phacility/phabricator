@@ -11,10 +11,20 @@
       "rule" : ".phabricator-crumb-divider",
       "hash" : "50180da0aed206c9db2bc1547c1a158c"
     },
-    "bubble"           : {
-      "name" : "bubble",
-      "rule" : ".phabricator-main-menu-alert-bubble.alert-unread",
-      "hash" : "42f6a2337a584ce99c964021ff3450ca"
+    "conf-hover"       : {
+      "name" : "conf-hover",
+      "rule" : ".alert-notifications:hover .phabricator-main-menu-message-icon",
+      "hash" : "febc4135b2821ae2d3f0b06aa295ca0d"
+    },
+    "conf-off"         : {
+      "name" : "conf-off",
+      "rule" : ".alert-notifications .phabricator-main-menu-message-icon",
+      "hash" : "dc1b05cb611eaef76a09e8cff698c99d"
+    },
+    "conf-unseen"      : {
+      "name" : "conf-unseen",
+      "rule" : ".alert-notifications.message-unread .phabricator-main-menu-message-icon",
+      "hash" : "1f7d54b2b9781099f867b100ebdd6c6a"
     },
     "eye"              : {
       "name" : "eye",
@@ -25,11 +35,6 @@
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo-image",
       "hash" : "6eadea2c3dd2ada989eba22b6769b3eb"
-    },
-    "round_bubble"     : {
-      "name" : "round_bubble",
-      "rule" : ".phabricator-main-menu-alert-bubble",
-      "hash" : "9710a3fa4a5fbfde3d81ad66863cdde0"
     },
     "seen_have_unread" : {
       "name" : "seen_have_unread",

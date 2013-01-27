@@ -41,8 +41,6 @@
 
 .phabricator-main-menu-logo {
   display: inline-block;
-  position: relative;
-  height: 44px;
   width: 139px;
   margin-right: 6px;
   padding-right: 6px;
@@ -248,59 +246,45 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 */
 
-.device-desktop .phabricator-main-menu-alerts {
-  display: inline-block;
-}
-
 .device .phabricator-main-menu-alerts {
-  position: absolute;
-  left: 60px;
-  right: 60px;
-  top: 10px;
-  height: 34px;
-  text-align: center;
+  margin-left: 60px;
 }
 
-.phabricator-main-menu-alert-bubble {
+.phabricator-main-menu-alerts {
   display: inline-block;
-  position: relative;
-  width: 26px;
-  height: 26px;
-  margin-bottom: 9px;
+  border-radius: 15px;
+  background: rgba(0,0,0,.2);
+  height: 20px;
+  padding: 3px 10px;
+  margin-top: 9px;
 }
 
-.phabricator-main-menu-alert-bubble.alert-unread {
-  width: 46px;
-}
-
-.phabricator-main-menu-alert-icon {
-  position: absolute;
+.phabricator-main-menu-alert-icon,
+.phabricator-main-menu-message-icon {
   width: 14px;
   height: 14px;
-  top: 5px;
-  left: 6px;
+  display: block;
+  float: left;
+  margin: 2px 0 0 0;
 }
 
-.phabricator-main-menu-alert-count {
-  position: absolute;
+.alert-notifications .phabricator-main-menu-message-icon {
+  margin: 3px 0 0 8px;
+}
+
+.phabricator-main-menu-alert-count,
+.phabricator-main-menu-message-count {
   font-weight: bold;
-  line-height: 22px;
-  top: 1px;
-  right: 8px;
-  left: 20px;
+  line-height: 20px;
   color: #ffffff;
   text-align: center;
   display: none;
+  float: left;
+  margin-left: 3px;
 }
 
-.phabricator-main-menu-alert-item {
-  width: 26px;
-  height: 26px;
-  margin: 9px;
-  display: block;
-}
-
-.alert-unread .phabricator-main-menu-alert-count {
+.alert-unread .phabricator-main-menu-alert-count,
+.message-unread .phabricator-main-menu-message-count  {
   display: block;
 }
 

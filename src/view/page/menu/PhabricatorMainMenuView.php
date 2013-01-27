@@ -292,6 +292,59 @@ final class PhabricatorMainMenuView extends AphrontView {
     require_celerity_resource('phabricator-notification-menu-css');
     require_celerity_resource('sprite-menu-css');
 
+    $container_classes = array(
+      'sprite-menu',
+      'alert-notifications',
+    );
+
+    $conpherence = id(new PhabricatorApplicationConpherence())->isBeta();
+    $allow_beta =
+      PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
+    $message_tag = '';
+
+    if (!$conpherence || $allow_beta) {
+      $message_id = celerity_generate_unique_node_id();
+      $message_count_id = celerity_generate_unique_node_id();
+
+      $unread_status = ConpherenceParticipationStatus::BEHIND;
+      $unread = id(new ConpherenceParticipantQuery())
+        ->withParticipantPHIDs(array($user->getPHID()))
+        ->withParticipationStatus($unread_status)
+        ->execute();
+      $message_count_number = count($unread);
+      if ($message_count_number > 999) {
+        $message_count_number = "\xE2\x88\x9E";
+      }
+
+      $message_count_tag = phutil_render_tag(
+        'span',
+        array(
+          'id'    => $message_count_id,
+          'class' => 'phabricator-main-menu-message-count'
+        ),
+        phutil_escape_html($message_count_number));
+
+      $message_icon_tag = phutil_render_tag(
+        'span',
+        array(
+          'class' => 'sprite-menu phabricator-main-menu-message-icon',
+        ),
+        '');
+
+      if ($message_count_number) {
+        $container_classes[] = 'message-unread';
+      }
+
+      $message_tag = phutil_render_tag(
+        'a',
+        array(
+          'href'  => '/conpherence/',
+          'class' => implode(' ', $container_classes),
+          'id'    => $message_id,
+        ),
+        $message_icon_tag.$message_count_tag);
+    }
+
     $count_id = celerity_generate_unique_node_id();
     $dropdown_id = celerity_generate_unique_node_id();
     $bubble_id = celerity_generate_unique_node_id();
@@ -318,11 +371,6 @@ final class PhabricatorMainMenuView extends AphrontView {
       ),
       '');
 
-    $container_classes = array(
-      'phabricator-main-menu-alert-bubble',
-      'sprite-menu',
-      'alert-notifications',
-    );
     if ($count_number) {
       $container_classes[] = 'alert-unread';
     }
@@ -354,7 +402,8 @@ final class PhabricatorMainMenuView extends AphrontView {
       ),
       '');
 
-    return array($bubble_tag, $notification_dropdown);
+    return array(
+      $bubble_tag.$message_tag, $notification_dropdown);
   }
 
   private function renderMenuIcon($name) {
