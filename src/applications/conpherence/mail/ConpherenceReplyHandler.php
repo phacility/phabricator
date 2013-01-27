@@ -31,6 +31,22 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $conpherence = $this->getMailReceiver();
     $user = $this->getActor();
+    if (!$conpherence->getPHID()) {
+      $conpherence
+        ->attachParticipants(array())
+        ->attachFilePHIDs(array());
+    } else {
+      $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+      $file_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $conpherence->getPHID(),
+        $edge_type
+      );
+      $conpherence->attachFilePHIDs($file_phids);
+      $participants = id(new ConpherenceParticipant())
+        ->loadAllWhere('conpherencePHID = %s', $conpherence->getPHID());
+      $participants = mpull($participants, null, 'getParticipantPHID');
+      $conpherence->attachParticipants($participants);
+    }
 
     $body = $mail->getCleanTextBody();
     $body = trim($body);
