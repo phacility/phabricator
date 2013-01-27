@@ -5,6 +5,42 @@
  */
 final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
+  public function generateTransactionsFromText(
+    ConpherenceThread $conpherence,
+    $text) {
+
+    $files = array();
+    $file_phids =
+      PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+        array($text)
+      );
+    // Since these are extracted from text, we might be re-including the
+    // same file -- e.g. a mock under discussion. Filter files we
+    // already have.
+    $existing_file_phids = $conpherence->getFilePHIDs();
+    $file_phids = array_diff($file_phids, $existing_file_phids);
+    if ($file_phids) {
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($file_phids)
+        ->execute();
+    }
+    $xactions = array();
+    if ($files) {
+      $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
+        ->setNewValue(array('+' => mpull($files, 'getPHID')));
+    }
+    $xactions[] = id(new ConpherenceTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(new ConpherenceTransactionComment())
+        ->setContent($text)
+        ->setConpherencePHID($conpherence->getPHID())
+      );
+    return $xactions;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

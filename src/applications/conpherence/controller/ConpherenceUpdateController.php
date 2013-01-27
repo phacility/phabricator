@@ -43,41 +43,21 @@ final class ConpherenceUpdateController extends
         array(
           'ip' => $request->getRemoteAddr()
         ));
+      $editor = id(new ConpherenceEditor())
+        ->setContentSource($content_source)
+        ->setActor($user);
 
       $action = $request->getStr('action');
       switch ($action) {
         case 'message':
           $message = $request->getStr('text');
-          $files = array();
-          $file_phids =
-            PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-              array($message)
-            );
-          if ($file_phids) {
-            $files = id(new PhabricatorFileQuery())
-              ->setViewer($user)
-              ->withPHIDs($file_phids)
-              ->execute();
-          }
-          $xactions = array();
-          if ($files) {
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
-              ->setNewValue(array('+' => mpull($files, 'getPHID')));
-          }
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-            ->attachComment(
-              id(new ConpherenceTransactionComment())
-              ->setContent($message)
-              ->setConpherencePHID($conpherence->getPHID())
-            );
+          $xactions = $editor->generateTransactionsFromText(
+            $conpherence,
+            $message
+          );
           $time = time();
           $conpherence->openTransaction();
-          $xactions = id(new ConpherenceEditor())
-            ->setContentSource($content_source)
-            ->setActor($user)
-            ->applyTransactions($conpherence, $xactions);
+          $xactions = $editor->applyTransactions($conpherence, $xactions);
           $last_xaction = end($xactions);
           $xaction_phid = $last_xaction->getPHID();
           $behind = ConpherenceParticipationStatus::BEHIND;
@@ -135,9 +115,7 @@ final class ConpherenceUpdateController extends
 
           if ($xactions) {
             $conpherence->openTransaction();
-            $xactions = id(new ConpherenceEditor())
-              ->setContentSource($content_source)
-              ->setActor($user)
+            $xactions = $editor
               ->setContinueOnNoEffect(true)
               ->applyTransactions($conpherence, $xactions);
             $updated = $conpherence->saveTransaction();
