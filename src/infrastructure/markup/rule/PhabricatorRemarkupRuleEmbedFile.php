@@ -55,10 +55,20 @@ final class PhabricatorRemarkupRuleEmbedFile
       case 'full':
         $attrs['src'] = $file->getBestURI();
         $options['image_class'] = null;
+        $file_data = $file->getMetadata();
+        $height = $file_data[PhabricatorFile::METADATA_IMAGE_HEIGHT];
+        if ($height) {
+          $attrs['height'] = $height;
+        }
+        $width = $file_data[PhabricatorFile::METADATA_IMAGE_WIDTH];
+        if ($width) {
+          $attrs['width'] = $width;
+        }
         break;
       case 'thumb':
       default:
         $attrs['src'] = $file->getPreview220URI();
+        $attrs['width'] = '220';
         $options['image_class'] = 'phabricator-remarkup-embed-image';
         break;
     }
