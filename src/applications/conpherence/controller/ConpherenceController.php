@@ -65,9 +65,8 @@ abstract class ConpherenceController extends PhabricatorController {
     }
 
     $unread_status = ConpherenceParticipationStatus::BEHIND;
-    $unread_participant_query = id(new ConpherenceParticipantQuery())
-      ->withParticipantPHIDs(array($user->getPHID()));
-    $unread = $unread_participant_query
+    $unread = id(new ConpherenceParticipantQuery())
+      ->withParticipantPHIDs(array($user->getPHID()))
       ->withParticipationStatus($unread_status)
       ->execute();
 

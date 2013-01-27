@@ -35,7 +35,7 @@ final class ConpherenceUpdateController extends
 
     $updated = false;
     $error_view = null;
-    $e_image = null;
+    $e_file = array();
     $errors = array();
     if ($request->isFormPost()) {
       $content_source = PhabricatorContentSource::newForSource(
@@ -100,37 +100,30 @@ final class ConpherenceUpdateController extends
           break;
         case 'metadata':
           $xactions = array();
-          $default_image = $request->getExists('default_image');
-          if ($default_image) {
-            $image_phid = null;
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(ConpherenceTransactionType::TYPE_PICTURE)
-              ->setNewValue($image_phid);
-          } else if (!empty($_FILES['image'])) {
-            $err = idx($_FILES['image'], 'error');
-            if ($err != UPLOAD_ERR_NO_FILE) {
-              $file = PhabricatorFile::newFromPHPUpload(
-                $_FILES['image'],
-                array(
-                  'authorPHID' => $user->getPHID(),
-                ));
-              $okay = $file->isTransformableImage();
-              if ($okay) {
-                $xformer = new PhabricatorImageTransformer();
-                $xformed = $xformer->executeThumbTransform(
-                  $file,
-                  $x = 50,
-                  $y = 50);
-                $image_phid = $xformed->getPHID();
-                $xactions[] = id(new ConpherenceTransaction())
-                  ->setTransactionType(ConpherenceTransactionType::TYPE_PICTURE)
-                  ->setNewValue($image_phid);
-              } else {
-                $e_image = pht('Not Supported');
-                $errors[] =
-                  pht('This server only supports these image formats: %s.',
+          $images = $request->getArr('image');
+          if ($images) {
+            // just take the first one
+            $file_phid = reset($images);
+            $file = id(new PhabricatorFileQuery())
+              ->setViewer($user)
+              ->withPHIDs(array($file_phid))
+              ->executeOne();
+            $okay = $file->isTransformableImage();
+            if ($okay) {
+              $xformer = new PhabricatorImageTransformer();
+              $xformed = $xformer->executeThumbTransform(
+                $file,
+                $x = 50,
+                $y = 50);
+              $image_phid = $xformed->getPHID();
+              $xactions[] = id(new ConpherenceTransaction())
+                ->setTransactionType(ConpherenceTransactionType::TYPE_PICTURE)
+                ->setNewValue($image_phid);
+            } else {
+              $e_file[] = $file;
+              $errors[] =
+                pht('This server only supports these image formats: %s.',
                   implode(', ', $supported_formats));
-              }
             }
           }
           $title = $request->getStr('title');
@@ -169,6 +162,7 @@ final class ConpherenceUpdateController extends
     if ($errors) {
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Errors editing conpherence.'))
+        ->setInsideDialogue(true)
         ->setErrors($errors);
     }
 
@@ -190,29 +184,26 @@ final class ConpherenceUpdateController extends
         )
       )
       ->appendChild(
-        id(new AphrontFormImageControl())
+        id(new AphrontFormDragAndDropUploadControl())
         ->setLabel(pht('Change Image'))
         ->setName('image')
+        ->setValue($e_file)
         ->setCaption('Supported formats: '.implode(', ', $supported_formats))
-        ->setError($e_image)
-      );
+        );
 
-    // TODO -- fix javelin so we can upload files from a workflow
     require_celerity_resource('conpherence-update-css');
-    return $this->buildStandardPageResponse(
-      array(
-        $error_view,
+    return id(new AphrontDialogResponse())
+      ->setDialog(
         id(new AphrontDialogView())
         ->setUser($user)
         ->setTitle(pht('Update Conpherence'))
         ->setWidth(AphrontDialogView::WIDTH_FORM)
         ->setSubmitURI($this->getApplicationURI('update/'.$conpherence_id.'/'))
         ->addHiddenInput('action', 'metadata')
+        ->appendChild($error_view)
         ->appendChild($form)
         ->addSubmitButton()
-        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')),
-      ),
-      array()
-    );
+        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/'))
+      );
   }
 }

@@ -11,6 +11,15 @@ final class AphrontErrorView extends AphrontView {
   private $errors;
   private $severity;
   private $id;
+  private $insideDialogue;
+
+  public function setInsideDialogue($inside_dialogue) {
+    $this->insideDialogue = $inside_dialogue;
+    return $this;
+  }
+  public function getInsideDialogue() {
+    return $this->insideDialogue;
+  }
 
   public function setTitle($title) {
     $this->title = $title;
@@ -30,6 +39,15 @@ final class AphrontErrorView extends AphrontView {
   public function setID($id) {
     $this->id = $id;
     return $this;
+  }
+
+  private function getBaseClass() {
+    if ($this->getInsideDialogue()) {
+      $class = 'aphront-error-view-dialogue';
+    } else {
+      $class = 'aphront-error-view';
+    }
+    return $class;
   }
 
   final public function render() {
@@ -69,15 +87,16 @@ final class AphrontErrorView extends AphrontView {
 
     $this->severity = nonempty($this->severity, self::SEVERITY_ERROR);
 
-    $more_classes = array();
-    $more_classes[] = 'aphront-error-severity-'.$this->severity;
-    $more_classes = implode(' ', $more_classes);
+    $classes = array();
+    $classes[] = $this->getBaseClass();
+    $classes[] = 'aphront-error-severity-'.$this->severity;
+    $classes = implode(' ', $classes);
 
     return phutil_render_tag(
       'div',
       array(
         'id' => $this->id,
-        'class' => 'aphront-error-view '.$more_classes,
+        'class' => $classes,
       ),
       $title.
       phutil_render_tag(

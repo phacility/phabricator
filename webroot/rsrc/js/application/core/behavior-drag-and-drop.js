@@ -2,6 +2,7 @@
  * @provides javelin-behavior-aphront-drag-and-drop
  * @requires javelin-behavior
  *           javelin-dom
+ *           phabricator-file-upload
  *           phabricator-drag-and-drop-file-upload
  */
 
@@ -16,7 +17,15 @@ JX.behavior('aphront-drag-and-drop', function(config) {
   // Show the control, since we have browser support.
   JX.$(config.control).style.display = '';
 
-  var files = config.value || {};
+  var files = {};
+  if (config.value) {
+    for (var k in config.value) {
+      var file = config.value[k];
+      files[k] = new JX.PhabricatorFileUpload()
+        .setPHID(file.phid)
+        .setMarkup(file.html);
+    }
+  }
   var pending = 0;
 
   var list = JX.$(config.list);

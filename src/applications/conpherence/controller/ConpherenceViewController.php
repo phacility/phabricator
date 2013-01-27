@@ -69,11 +69,12 @@ final class ConpherenceViewController extends
     $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
     $header =
-    phutil_render_tag(
+    javelin_render_tag(
       'a',
       array(
         'class' => 'edit',
         'href' => $edit_href,
+        'sigil' => 'workflow',
       ),
       ''
     ).
