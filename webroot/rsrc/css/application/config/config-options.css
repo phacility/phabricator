@@ -38,10 +38,10 @@
 }
 
 .config-options-current-value {
-  padding: 0 6px 2px;
+  padding: 0 10px 8px;
   white-space: pre-wrap;
 }
 
 .config-options-current-value span {
-  color: #666666;
+  color: #777;
 }

@@ -91,19 +91,21 @@ involved but may be easier in some deployment environments. Note that this needs
 to be set in your webserver environment, and also in your shell whenever you
 run a script:
 
-  # Shell
-  export PHABRICATOR_ENV=custom/exampleconfig
+```
+# Shell
+export PHABRICATOR_ENV=custom/exampleconfig
 
-  # Apache
-  SetEnv PHABRICATOR_ENV custom/exampleconfig
+# Apache
+SetEnv PHABRICATOR_ENV custom/exampleconfig
 
-  # nginx
-  fastcgi_param PHABRICATOR_ENV "custom/exampleconfig";
+# nginx
+fastcgi_param PHABRICATOR_ENV "custom/exampleconfig";
 
-  # lighttpd
-  setenv.add-environment = (
-     "PHABRICATOR_ENV" => "custom/exampleconfig",
-  )
+# lighttpd
+setenv.add-environment = (
+   "PHABRICATOR_ENV" => "custom/exampleconfig",
+)
+```
 
 After creating and selecting a configuration file, restart your webserver. Any
 configuration you set should take effect immediately, and your file should be

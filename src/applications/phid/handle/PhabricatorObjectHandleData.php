@@ -388,7 +388,7 @@ final class PhabricatorObjectHandleData {
             if (empty($entries[$phid])) {
               $handle->setName('Unknown Config Entry');
             } else {
-              $entry = $entry[$phid];
+              $entry = $entries[$phid];
               $handle->setName($entry->getKey());
               $handle->setURI('/config/edit/'.$entry->getKey());
               $handle->setFullName($entry->getKey());

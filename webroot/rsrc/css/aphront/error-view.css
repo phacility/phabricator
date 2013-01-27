@@ -2,10 +2,17 @@
  * @provides aphront-error-view-css
  */
 
-.aphront-error-view {
-  margin: 20px;
+.aphront-error-view,
+.aphront-error-view-dialogue {
   border-style: solid;
   border-width: 1px;
+}
+
+.aphront-error-view {
+  margin: 20px;
+}
+.aphront-error-view-dialogue {
+  margin: 0px 0px 16px 0px;
 }
 
 .device-phone .aphront-error-view {

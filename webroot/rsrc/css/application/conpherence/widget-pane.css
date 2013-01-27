@@ -5,12 +5,13 @@
 .conpherence-widget-pane {
   position: fixed;
   right: 0px;
-  top: 94px;
+  top: 125px;
   width: 320px;
   height: 100%;
   border-width: 0 0 0 1px;
   border-color: #CCC;
   border-style: solid;
+  background: url('/rsrc/image/texture/dust_background.jpg');
 }
 
 .conpherence-widget-pane .aphront-form-input {

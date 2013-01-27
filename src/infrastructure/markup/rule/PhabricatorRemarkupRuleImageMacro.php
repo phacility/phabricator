@@ -29,10 +29,20 @@ final class PhabricatorRemarkupRuleImageMacro
       $phid = $this->images[$matches[1]];
 
       $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
+      $style = null;
+      $src_uri = null;
       if ($file) {
         $src_uri = $file->getBestURI();
-      } else {
-        $src_uri = null;
+        $file_data = $file->getMetadata();
+        $height = idx($file_data,PhabricatorFile::METADATA_IMAGE_HEIGHT);
+        $width = idx($file_data, PhabricatorFile::METADATA_IMAGE_WIDTH);
+        if ($height && $width) {
+          $style = sprintf(
+            'height: %dpx; width: %dpx;',
+            $height,
+            $width
+          );
+        }
       }
 
       $img = phutil_tag(
@@ -41,6 +51,7 @@ final class PhabricatorRemarkupRuleImageMacro
           'src'   => $src_uri,
           'alt'   => $matches[1],
           'title' => $matches[1],
+          'style' => $style,
         ));
       return $this->getEngine()->storeText($img);
     } else {

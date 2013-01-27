@@ -17,11 +17,11 @@ final class PhabricatorLDAPUnlinkController extends PhabricatorAuthController {
     if (!$request->isDialogFormPost()) {
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
-      $dialog->setTitle('Really unlink account?');
+      $dialog->setTitle(pht('Really unlink account?'));
       $dialog->appendChild(
-        '<p><strong>You will not be able to login</strong> using this account '.
-        'once you unlink it. Continue?</p>');
-      $dialog->addSubmitButton('Unlink Account');
+        '<p>'.pht('You will not be able to login using this account '.
+        'once you unlink it. Continue?').'</p>');
+      $dialog->addSubmitButton(pht('Unlink Account'));
       $dialog->addCancelButton('/settings/panel/ldap/');
 
       return id(new AphrontDialogResponse())->setDialog($dialog);

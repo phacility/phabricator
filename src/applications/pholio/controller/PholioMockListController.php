@@ -16,7 +16,8 @@ final class PholioMockListController extends PholioController {
     $user = $request->getUser();
 
     $query = id(new PholioMockQuery())
-      ->setViewer($user);
+      ->setViewer($user)
+      ->needCoverFiles(true);
 
     $nav = $this->buildSideNav();
     $filter = $nav->selectFilter('view/'.$this->view, 'view/all');
@@ -38,7 +39,8 @@ final class PholioMockListController extends PholioController {
       $board->addItem(
         id(new PhabricatorPinboardItemView())
           ->setHeader($mock->getName())
-          ->setURI('/M'.$mock->getID()));
+          ->setURI('/M'.$mock->getID())
+          ->setImageURI($mock->getCoverFile()->getThumb160x120URI()));
     }
 
     $header = id(new PhabricatorHeaderView())

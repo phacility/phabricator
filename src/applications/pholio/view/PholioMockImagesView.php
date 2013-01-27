@@ -13,13 +13,7 @@ final class PholioMockImagesView extends AphrontView {
       throw new Exception("Call setMock() before render()!");
     }
 
-    $image = id(new PholioImage())->loadOneWhere(
-      "mockid=%d",
-      $this->mock->getID());
-
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      "phid=%s",
-      $image->getFilePHID());
+    $file = head($this->mock->getImages())->getFile();
 
     $image_tag = phutil_tag(
       'img',

@@ -41,11 +41,7 @@ final class ConpherenceListController extends
       }
       $this->setSelectedConpherencePHID($conpherence->getPHID());
 
-      $read_status =  ConpherenceParticipationStatus::UP_TO_DATE;
       $participant = $conpherence->getParticipant($user->getPHID());
-      $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $participant->markUpToDate();
-      unset($write_guard);
       $current_selection_epoch = $participant->getDateTouched();
     }
 

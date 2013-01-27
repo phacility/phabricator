@@ -166,7 +166,7 @@ final class PhabricatorObjectItemView extends AphrontView {
       $header.$attrs.$this->renderChildren());
 
     return phutil_tag(
-      'div',
+      'li',
       array(
         'class' => implode(' ', $classes),
       ),

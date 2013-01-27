@@ -72,6 +72,7 @@ final class PhabricatorConfigGroupController
     $engine->process();
 
     $list = new PhabricatorObjectItemListView();
+    $list->setStackable();
     foreach ($options as $option) {
       $summary = $engine->getOutput($option, 'summary');
 

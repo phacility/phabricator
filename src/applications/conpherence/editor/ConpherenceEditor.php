@@ -5,6 +5,42 @@
  */
 final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
+  public function generateTransactionsFromText(
+    ConpherenceThread $conpherence,
+    $text) {
+
+    $files = array();
+    $file_phids =
+      PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+        array($text)
+      );
+    // Since these are extracted from text, we might be re-including the
+    // same file -- e.g. a mock under discussion. Filter files we
+    // already have.
+    $existing_file_phids = $conpherence->getFilePHIDs();
+    $file_phids = array_diff($file_phids, $existing_file_phids);
+    if ($file_phids) {
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($file_phids)
+        ->execute();
+    }
+    $xactions = array();
+    if ($files) {
+      $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
+        ->setNewValue(array('+' => mpull($files, 'getPHID')));
+    }
+    $xactions[] = id(new ConpherenceTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(new ConpherenceTransactionComment())
+        ->setContent($text)
+        ->setConpherencePHID($conpherence->getPHID())
+      );
+    return $xactions;
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -120,31 +156,38 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function supportsMail() {
-    return false;
+    return true;
   }
-
-  /* TODO
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new ConpherenceReplyHandler())
+      ->setActor($this->getActor())
       ->setMailReceiver($object);
   }
 
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
     $id = $object->getID();
     $title = $object->getTitle();
+    if (!$title) {
+      $title = pht(
+        '%s sent you a message.',
+        $this->getActor()->getUserName()
+      );
+    }
     $phid = $object->getPHID();
-    $original_name = $object->getOriginalName();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("C{$id}: {$title}")
-      ->addHeader('Thread-Topic', "C{$id}: {$phid}");
+      ->setSubject("E{$id}: {$title}")
+      ->addHeader('Thread-Topic', "E{$id}: {$phid}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $participants = $object->getParticipants();
-    $participants[$this->requireActor()->getPHID()] = true;
     return array_keys($participants);
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    return array();
   }
 
   protected function buildMailBody(
@@ -162,7 +205,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.conpherence.subject-prefix');
   }
-   */
 
   protected function supportsFeed() {
     return false;

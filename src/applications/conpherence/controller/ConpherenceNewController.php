@@ -60,6 +60,11 @@ final class ConpherenceNewController extends ConpherenceController {
         $xactions[] = id(new ConpherenceTransaction())
           ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
           ->setNewValue(array('+' => $participants));
+        if ($files) {
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
+            ->setNewValue(array('+' => mpull($files, 'getPHID')));
+        }
         $xactions[] = id(new ConpherenceTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
           ->attachComment(
@@ -67,11 +72,6 @@ final class ConpherenceNewController extends ConpherenceController {
             ->setContent($message)
             ->setConpherencePHID($conpherence->getPHID())
           );
-        if ($files) {
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
-            ->setNewValue(array('+' => mpull($files, 'getPHID')));
-        }
         $content_source = PhabricatorContentSource::newForSource(
           PhabricatorContentSource::SOURCE_WEB,
           array(

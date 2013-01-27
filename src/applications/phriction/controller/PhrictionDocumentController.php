@@ -215,19 +215,30 @@ final class PhrictionDocumentController
 
     $slug = PhabricatorSlug::normalize($this->slug);
 
-    return id(new PhabricatorActionListView())
+    $action_view = id(new PhabricatorActionListView())
       ->setUser($user)
       ->setObject($document)
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Document'))
           ->setIcon('edit')
-          ->setHref('/phriction/edit/'.$document->getID().'/'))
-      ->addAction(
+          ->setHref('/phriction/edit/'.$document->getID().'/'));
+
+    if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
+      $action_view->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('View History'))
-          ->setIcon('history')
-          ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
+          ->setName(pht('Delete Document'))
+          ->setIcon('delete')
+          ->setHref('/phriction/delete/'.$document->getID().'/')
+          ->setWorkflow(true));
+    }
+
+    return
+      $action_view->addAction(
+        id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setIcon('history')
+        ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
   }
 
   private function renderChildren($slug) {

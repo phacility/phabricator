@@ -87,16 +87,6 @@ final class CeleritySpriteGenerator {
     $sprites = array();
 
     $sources = array(
-      'round_bubble' => array(
-        'x' => 26,
-        'y' => 26,
-        'css' => '.phabricator-main-menu-alert-bubble'
-      ),
-      'bubble' => array(
-        'x' => 46,
-        'y' => 26,
-        'css' => '.phabricator-main-menu-alert-bubble.alert-unread'
-      ),
       'seen_read_all' => array(
         'x' => 14,
         'y' => 14,
@@ -134,6 +124,25 @@ final class CeleritySpriteGenerator {
         'x' => 139,
         'y' => 25,
         'css' => '.phabricator-main-menu-logo-image',
+      ),
+      'conf-off' => array(
+        'x' => 14,
+        'y' => 14,
+        'css' =>
+          '.alert-notifications .phabricator-main-menu-message-icon',
+      ),
+      'conf-hover' => array(
+        'x' => 14,
+        'y' => 14,
+        'css' =>
+          '.alert-notifications:hover .phabricator-main-menu-message-icon',
+      ),
+      'conf-unseen' => array(
+        'x' => 14,
+        'y' => 14,
+        'css' =>
+          '.alert-notifications.message-unread '.
+          '.phabricator-main-menu-message-icon',
       ),
     );
 
@@ -183,7 +192,7 @@ final class CeleritySpriteGenerator {
     // Reorder the sprites so less-specific rules generate earlier in the sheet.
     // Otherwise we end up with blue "a.black" buttons because the blue rules
     // have the same specificity but appear later.
-    $gradients = array_combine($gradients, $gradients);
+    $gradients = array_fuse($gradients);
     $gradients = array_select_keys(
       $gradients,
       array(

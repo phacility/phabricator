@@ -14,6 +14,7 @@ final class PholioImage extends PholioDAO
   protected $description = '';
   protected $sequence;
 
+  private $file;
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 
@@ -37,6 +38,18 @@ final class PholioImage extends PholioDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getID();
+  }
+
+  public function attachFile(PhabricatorFile $file) {
+    $this->file = $file;
+    return $this;
+  }
+
+  public function getFile() {
+    if ($this->file === null) {
+      throw new Exception("Call attachFile() before getFile()!");
+    }
+    return $this->file;
   }
 
 }

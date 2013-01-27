@@ -804,7 +804,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       return array();
     }
 
-    $phids = array_combine($phids, $phids);
+    $phids = array_fuse($phids);
 
 
     // Exclude PHIDs explicitly marked for exclusion. We use this to prevent

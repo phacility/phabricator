@@ -20,6 +20,9 @@ final class PholioMock extends PholioDAO
   protected $coverPHID;
   protected $mailKey;
 
+  private $images;
+  private $coverFile;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -35,6 +38,31 @@ final class PholioMock extends PholioDAO
       $this->setMailKey(Filesystem::readRandomCharacters(20));
     }
     return parent::save();
+  }
+
+  public function attachImages(array $images) {
+    assert_instances_of($images, 'PholioImage');
+    $this->images = $images;
+    return $this;
+  }
+
+  public function getImages() {
+    if ($this->images === null) {
+      throw new Exception("Call attachImages() before getImages()!");
+    }
+    return $this->images;
+  }
+
+  public function attachCoverFile(PhabricatorFile $file) {
+    $this->coverFile = $file;
+    return $this;
+  }
+
+  public function getCoverFile() {
+    if ($this->coverFile === null) {
+      throw new Exception("Call attachCoverFile() before getCoverFile()!");
+    }
+    return $this->coverFile;
   }
 
 

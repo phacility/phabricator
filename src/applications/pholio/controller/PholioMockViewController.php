@@ -18,6 +18,8 @@ final class PholioMockViewController extends PholioController {
     $mock = id(new PholioMockQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needImages(true)
+      ->needCoverFiles(true)
       ->executeOne();
 
     if (!$mock) {
