@@ -7,7 +7,7 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'View Mail Logs';
+    return pht('View Mail Logs');
   }
 
   public function getIconName() {
