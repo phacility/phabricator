@@ -42,6 +42,8 @@
 .phabricator-main-menu-logo {
   display: inline-block;
   width: 139px;
+  height: 44px;
+  float: left;
   margin-right: 6px;
   padding-right: 6px;
   padding-left: 6px;
@@ -265,6 +267,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 .phabricator-main-menu-alerts {
   display: inline-block;
   border-radius: 15px;
+  float: left;
   background: rgba(0,0,0,.2);
   height: 20px;
   padding: 3px 10px;
@@ -362,7 +365,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 .device .phabricator-core-menu-expanded .phabricator-core-menu {
   display: block;
-  padding-top: 4px;
+  padding-top: 44px;
 }
 
 .device .phabricator-dark-menu .phabricator-menu-item-type-link {
@@ -424,7 +427,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 .device .phabricator-application-menu-expanded .phabricator-application-menu {
   display: block;
-  padding-top: 4px;
+  padding-top: 44px;
 }
 
 .phabricator-application-menu {
