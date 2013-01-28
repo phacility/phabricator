@@ -6,7 +6,17 @@
   text-align: center;
 }
 
+.pholio-mock-carousel {
+  background-color: #282828;
+  text-align: center;
+}
+
+.pholio-mock-carousel-thumbnail {
+  margin-right: 5px;
+  display: inline-block;
+}
+
 .pholio-mock-image {
-    margin: 10px 0px;
-    display: inline-block;
+  margin: 10px 0px;
+  display: inline-block;
 }

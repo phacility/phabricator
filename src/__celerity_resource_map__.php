@@ -1834,6 +1834,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/phame/phame-post-preview.js',
   ),
+  'javelin-behavior-pholio-mock-view' =>
+  array(
+    'uri' => '/res/10fbdca1/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+    ),
+    'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+  ),
   'javelin-behavior-phriction-document-preview' =>
   array(
     'uri' => '/res/f1665ecd/rsrc/js/application/phriction/phriction-document-preview.js',
@@ -3165,7 +3176,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/e454c33f/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/8d8d99c1/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(
