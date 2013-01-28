@@ -176,6 +176,42 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildConpherenceSheet() {
+    $icons = $this->getDirectoryList('conpher_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(32, 32);
+
+    $sprites = array();
+      foreach ($icons as $icon) {
+      $color = preg_match('/_on/', $icon) ? 'on' : 'off';
+
+      $prefix = 'conpher_';
+
+      $sprite = id(clone $template)
+        ->setName($prefix.$icon);
+
+      $sprite->setTargetCSS($prefix.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('conpher', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
   public function buildGradientSheet() {
     $gradients = $this->getDirectoryList('gradients');
 
