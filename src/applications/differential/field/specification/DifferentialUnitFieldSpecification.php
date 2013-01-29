@@ -37,7 +37,7 @@ final class DifferentialUnitFieldSpecification
 
     $rows[] = array(
       'style' => 'star',
-      'name'  => $ustar,
+      'name'  => phutil_safe_html($ustar),
       'value' => $umsg,
       'show'  => true,
     );
@@ -47,7 +47,7 @@ final class DifferentialUnitFieldSpecification
       $rows[] = array(
         'style' => 'excuse',
         'name'  => 'Excuse',
-        'value' => nl2br(phutil_escape_html($excuse)),
+        'value' => phutil_safe_html(nl2br(phutil_escape_html($excuse))),
         'show'  => true,
       );
     }
@@ -105,7 +105,7 @@ final class DifferentialUnitFieldSpecification
         }
         $rows[] = array(
           'style' => $this->getResultStyle($result),
-          'name'  => phutil_escape_html(ucwords($result)),
+          'name'  => ucwords($result),
           'value' => $value,
           'show'  => $show,
         );

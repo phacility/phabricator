@@ -43,7 +43,7 @@ final class DifferentialLintFieldSpecification
 
     $rows[] = array(
       'style'     => 'star',
-      'name'      => $lstar,
+      'name'      => phutil_safe_html($lstar),
       'value'     => $lmsg,
       'show'      => true,
     );
@@ -53,7 +53,7 @@ final class DifferentialLintFieldSpecification
       $rows[] = array(
         'style'   => 'excuse',
         'name'    => 'Excuse',
-        'value'   => nl2br(phutil_escape_html($excuse)),
+        'value'   => phutil_safe_html(nl2br(phutil_escape_html($excuse))),
         'show'    => true,
       );
     }
@@ -67,7 +67,7 @@ final class DifferentialLintFieldSpecification
 
         $rows[] = array(
           'style' => 'section',
-          'name'  => phutil_escape_html($path),
+          'name'  => $path,
           'show'  => $show_limit,
         );
 
@@ -108,7 +108,7 @@ final class DifferentialLintFieldSpecification
 
           $rows[] = array(
             'style' => $this->getSeverityStyle($severity),
-            'name'  => phutil_escape_html(ucwords($severity)),
+            'name'  => ucwords($severity),
             'value' => hsprintf(
               "(%s) %s at {$line_link}",
               $code,
@@ -130,7 +130,10 @@ final class DifferentialLintFieldSpecification
           if (strlen($description)) {
             $rows[] = array(
               'style' => 'details',
-              'value' => nl2br(phutil_escape_html($description)),
+              'value' =>
+                phutil_safe_html(
+                  nl2br(
+                    phutil_escape_html($description))),
               'show'  => false,
             );
             if (empty($hidden['details'])) {
@@ -148,7 +151,7 @@ final class DifferentialLintFieldSpecification
         $rows[] = array(
           'style' => $this->getPostponedStyle(),
           'name' => 'Postponed',
-          'value' => phutil_escape_html($linter),
+          'value' => $linter,
           'show'  => false,
           );
         if (empty($hidden['postponed'])) {
