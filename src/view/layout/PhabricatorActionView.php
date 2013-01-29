@@ -8,6 +8,16 @@ final class PhabricatorActionView extends AphrontView {
   private $disabled;
   private $workflow;
   private $renderAsForm;
+  private $download;
+
+  public function setDownload($download) {
+    $this->download = $download;
+    return $this;
+  }
+
+  public function getDownload() {
+    return $this->download;
+  }
 
   public function setHref($href) {
     $this->href = $href;
@@ -73,12 +83,20 @@ final class PhabricatorActionView extends AphrontView {
           ),
           $this->name);
 
+        $sigils = array();
+        if ($this->workflow) {
+          $sigils[] = 'workflow';
+        }
+        if ($this->download) {
+          $sigils[] = 'download';
+        }
+
         $item = phabricator_render_form(
           $this->user,
           array(
             'action'    => $this->href,
             'method'    => 'POST',
-            'sigil'     => $this->workflow ? 'workflow' : null,
+            'sigil'     => implode(' ', $sigils),
           ),
           $item);
       } else {

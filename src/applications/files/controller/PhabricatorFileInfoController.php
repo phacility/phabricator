@@ -72,6 +72,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         id(new PhabricatorActionView())
           ->setUser($user)
           ->setRenderAsForm(true)
+          ->setDownload(true)
           ->setName(pht('Download File'))
           ->setIcon('download')
           ->setHref($file->getViewURI()));

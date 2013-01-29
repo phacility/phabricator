@@ -58,8 +58,6 @@ final class AphrontFormView extends AphrontView {
     }
     require_celerity_resource('aphront-form-view-css');
 
-    Javelin::initBehavior('aphront-form-disable-on-submit');
-
     $layout = new AphrontFormLayoutView();
 
     if (!$this->flexible) {

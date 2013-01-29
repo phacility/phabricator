@@ -15,7 +15,7 @@ JX.behavior('lightbox-attachments', function (config) {
   var next         = null;
   var x_margin     = 40;
   var y_margin     = 100;
-  var downloadForm = JX.$H(config.downloadForm);
+  var downloadForm = JX.$H(config.downloadForm).getFragment().firstChild;
 
   function loadLightBox(e) {
     if (!e.isNormalClick()) {
@@ -133,33 +133,11 @@ JX.behavior('lightbox-attachments', function (config) {
                            },
                            'Image '+current+' of '+total+'.'+extra_status
                            );
-    var form = JX.$N('form',
-                     {
-                       action     : target_data.dUri,
-                       method     : 'POST',
-                       className  : 'lightbox-download-form'
-                     },
-                     downloadForm
-                    );
-    JX.DOM.appendContent(form, JX.$N('button', {}, 'Download'));
-    JX.DOM.listen(form,
-                  'click',
-                  null,
-                  function (e) {
-                    e.prevent();
-                    form.submit();
-                    // Firefox and probably IE need this trick to work.
-                    // Removing a form from the DOM while its submitting is
-                    // tricky business.
-                    setTimeout(JX.bind(null, closeLightBox, e), 0);
-                  }
-                 );
+
     var downloadSpan = JX.$N('span',
                             {
                               className : 'lightbox-download'
-                            },
-                            form
-                            );
+                            });
     var statusHTML = JX.$N('div',
                            {
                              className : 'lightbox-status'
@@ -169,6 +147,10 @@ JX.behavior('lightbox-attachments', function (config) {
     JX.DOM.appendContent(lightbox, statusHTML);
     JX.DOM.alterClass(document.body, 'lightbox-attached', true);
     JX.Mask.show('jx-dark-mask');
+
+    downloadForm.action = target_data.dUri;
+    downloadSpan.appendChild(downloadForm);
+
     document.body.appendChild(lightbox);
 
     JX.Busy.start();

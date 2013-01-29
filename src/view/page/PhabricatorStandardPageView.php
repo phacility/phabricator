@@ -108,29 +108,47 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     Javelin::initBehavior('workflow', array());
 
-    $current_token = null;
     $request = $this->getRequest();
+    $user = null;
     if ($request) {
       $user = $request->getUser();
-      if ($user) {
-        $current_token = $user->getCSRFToken();
-        $download_form = phabricator_render_form_magic($user);
-        $default_img_uri =
-          PhabricatorEnv::getCDNURI(
-            '/rsrc/image/icon/fatcow/document_black.png'
-          );
-
-        Javelin::initBehavior(
-          'lightbox-attachments',
-          array(
-            'defaultImageUri' => $default_img_uri,
-            'downloadForm'    => $download_form,
-          ));
-      }
     }
 
+    if ($user) {
+      $default_img_uri =
+        PhabricatorEnv::getCDNURI(
+          '/rsrc/image/icon/fatcow/document_black.png'
+        );
+      $download_form = phabricator_render_form(
+        $user,
+        array(
+          'action' => '#',
+          'method' => 'POST',
+          'class'  => 'lightbox-download-form',
+          'sigil'  => 'download',
+        ),
+        phutil_tag(
+          'button',
+          array(),
+          pht('Download')));
+
+      Javelin::initBehavior(
+        'lightbox-attachments',
+        array(
+          'defaultImageUri' => $default_img_uri,
+          'downloadForm'    => $download_form,
+        ));
+    }
+
+    Javelin::initBehavior('aphront-form-disable-on-submit');
     Javelin::initBehavior('toggle-class', array());
     Javelin::initBehavior('konami', array());
+
+    $current_token = null;
+    if ($user) {
+      $current_token = $user->getCSRFToken();
+    }
+
     Javelin::initBehavior(
       'refresh-csrf',
       array(
@@ -138,6 +156,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'header'    => AphrontRequest::getCSRFHeaderName(),
         'current'   => $current_token,
       ));
+
     Javelin::initBehavior('device');
 
     if ($console) {
