@@ -105,7 +105,7 @@ abstract class DrydockController extends PhabricatorController {
       }
 
       $status = DrydockLeaseStatus::getNameForStatus($lease->getStatus());
-      $item->addAttribute(phutil_escape_html($status));
+      $item->addAttribute($status);
 
       $date_created = phabricator_date($lease->getDateCreated(), $user);
       $item->addAttribute(pht('Created on %s', $date_created));

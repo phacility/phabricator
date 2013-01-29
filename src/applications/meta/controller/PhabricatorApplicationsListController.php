@@ -51,8 +51,7 @@ final class PhabricatorApplicationsListController
         $item = id(new PhabricatorObjectItemView())
           ->setHeader($application->getName())
           ->setHref('/applications/view/'.get_class($application).'/')
-          ->addAttribute(
-            phutil_escape_html($application->getShortDescription()));
+          ->addAttribute($application->getShortDescription());
         $list->addItem($item);
       }
     return $list;

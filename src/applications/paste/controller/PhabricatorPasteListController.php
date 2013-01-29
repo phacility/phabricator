@@ -85,7 +85,8 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       $created = phabricator_date($paste->getDateCreated(), $user);
       $author = $this->getHandle($paste->getAuthorPHID())->renderLink();
       $source_code = $this->buildSourceCodeView($paste, 5)->render();
-      $source_code = phutil_render_tag(
+
+      $source_code = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-source-code-summary',

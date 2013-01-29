@@ -127,12 +127,15 @@ final class PhabricatorObjectItemView extends AphrontView {
         "\xC2\xB7");
       $first = true;
       foreach ($this->attributes as $attribute) {
-        $attrs[] = phutil_render_tag(
+        $attrs[] = phutil_tag(
           'li',
           array(
             'class' => 'phabricator-object-item-attribute',
           ),
-          ($first ? null : $spacer).$attribute);
+          array(
+            ($first ? null : $spacer),
+            $attribute,
+          ));
         $first = false;
       }
       $attrs = phutil_tag(
@@ -158,12 +161,17 @@ final class PhabricatorObjectItemView extends AphrontView {
         throw new Exception("Invalid effect!");
     }
 
-    $content = phutil_render_tag(
+    $content = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-object-item-content',
       ),
-      $header.$attrs.$this->renderChildren());
+      $this->renderHTMLView(
+        array(
+          $header,
+          $attrs,
+          $this->renderHTMLChildren(),
+        )));
 
     return phutil_tag(
       'li',

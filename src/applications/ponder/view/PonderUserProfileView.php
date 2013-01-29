@@ -84,7 +84,7 @@ final class PonderUserProfileView extends AphrontView {
             array(
               'href' => '/Q'.$question->getID(),
             ),
-            phutil_escape_html(self::abbreviate($question->getTitle())))));
+            self::abbreviate($question->getTitle()))));
 
       $view->addItem($item);
     }

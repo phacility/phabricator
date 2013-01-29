@@ -36,6 +36,14 @@ abstract class AphrontView extends Phobject {
     return implode('', $out);
   }
 
+  final protected function renderHTMLChildren() {
+    $out = array();
+    foreach ($this->children as $child) {
+      $out[] = $this->renderHTMLView($child);
+    }
+    return $out;
+  }
+
   final protected function renderSingleView($child) {
     if ($child instanceof AphrontView) {
       return $child->render();

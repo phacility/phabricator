@@ -48,7 +48,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
     }
 
     if ($this->items) {
-      $items = $this->renderSingleView($this->items);
+      $items = $this->renderHTMLView($this->items);
     } else {
       $string = nonempty($this->noDataString, pht('No data.'));
       $items = id(new AphrontErrorView())
@@ -59,7 +59,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
 
     $pager = null;
     if ($this->pager) {
-      $pager = $this->renderSingleView($this->pager);
+      $pager = $this->renderHTMLView($this->pager);
     }
 
     $classes[] = 'phabricator-object-item-list-view';
@@ -67,12 +67,17 @@ final class PhabricatorObjectItemListView extends AphrontView {
       $classes[] = 'phabricator-object-list-stackable';
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'ul',
       array(
         'class' => implode(' ', $classes),
       ),
-      $header.$items.$pager);
+      $this->renderHTMLView(
+        array(
+          $header,
+          $items,
+          $pager,
+        )));
   }
 
 }
