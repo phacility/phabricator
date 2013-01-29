@@ -39,10 +39,10 @@ final class PhabricatorMacroEditController
         if (!strlen($macro->getName())) {
           $errors[] = pht('Macro name is required.');
           $e_name = pht('Required');
-        } else if (!preg_match('/^[a-z0-9_-]{3,}$/', $macro->getName())) {
-          $errors[] = pht('Macro must be at least three characters long and '.
-                      'contain only lowercase letters, digits, hyphen and '.
-                      'underscore.');
+        } else if (!preg_match('/^[a-z0-9:_-]{3,}$/', $macro->getName())) {
+          $errors[] = pht(
+            'Macro must be at least three characters long and contain only '.
+            'lowercase letters, digits, hyphens, colons and underscores.');
           $e_name = pht('Invalid');
         } else {
           $e_name = null;
