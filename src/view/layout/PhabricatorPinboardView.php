@@ -26,12 +26,12 @@ final class PhabricatorPinboardView extends AphrontView {
         ->render();
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-pinboard-view',
       ),
-      $this->renderSingleView($this->items));
+      $this->renderHTMLView($this->items));
   }
 
 }
