@@ -86,6 +86,10 @@
   padding: 15px 20px;
 }
 
+.device-phone .aphront-panel-preview {
+  display: none;
+}
+
 .aphront-panel-preview-wide {
   width: 1080px;
   margin-left: auto;

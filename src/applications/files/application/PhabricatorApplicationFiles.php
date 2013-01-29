@@ -30,6 +30,10 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return $this->getBaseURI().'upload/';
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       '/F(?P<id>[1-9]\d*)' => 'PhabricatorFileShortcutController',

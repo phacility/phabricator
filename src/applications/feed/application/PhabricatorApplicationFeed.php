@@ -14,6 +14,10 @@ final class PhabricatorApplicationFeed extends PhabricatorApplication {
     return 'feed';
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       '/feed/' => array(

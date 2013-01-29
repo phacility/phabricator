@@ -25,6 +25,17 @@ final class PhabricatorMenuView extends AphrontTagView {
     return $item;
   }
 
+  public function newButton($name, $href) {
+    $item = id(new PhabricatorMenuItemView())
+      ->setType(PhabricatorMenuItemView::TYPE_BUTTON)
+      ->setName($name)
+      ->setHref($href);
+
+    $this->addMenuItem($item);
+
+    return $item;
+  }
+
   public function addMenuItem(PhabricatorMenuItemView $item) {
     $key = $item->getKey();
     $this->items[] = $item;

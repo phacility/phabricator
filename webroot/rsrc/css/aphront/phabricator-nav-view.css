@@ -83,9 +83,3 @@
 .device-desktop .phabricator-side-menu-home .phabricator-nav-content {
   margin-left: 240px;
 }
-
-/* Chrome annoyingly has a url display over the nav
-   if the nav is the tallest page (home) */
-.phabricator-menu-view {
-  margin-bottom: 40px;
-}

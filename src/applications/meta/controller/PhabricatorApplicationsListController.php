@@ -10,7 +10,7 @@ final class PhabricatorApplicationsListController
     $nav = $this->buildSideNavView();
     $nav->selectFilter('/');
 
-    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $applications = PhabricatorApplication::getAllApplications();
 
     $list = $this->buildInstalledApplicationsList($applications);
 

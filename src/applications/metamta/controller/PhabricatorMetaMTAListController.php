@@ -74,19 +74,19 @@ final class PhabricatorMetaMTAListController
             'class' => 'button small grey',
             'href'  => $this->getApplicationURI('/view/'.$mail->getID().'/'),
           ),
-          'View'),
+          pht('View')),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Status',
-        'Retry',
-        'Next',
-        'Created',
-        'Updated',
-        'Subject',
+        pht('Status'),
+        pht('Retry'),
+        pht('Next'),
+        pht('Created'),
+        pht('Updated'),
+        pht('Subject'),
         '',
       ));
     $table->setColumnClasses(
@@ -103,8 +103,9 @@ final class PhabricatorMetaMTAListController
     // Render the whole page.
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
-    $panel->setHeader('MetaMTA Messages');
+    $panel->setHeader(pht('MetaMTA Messages'));
     $panel->appendChild($pager);
+    $panel->setNoBackground();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('sent');
@@ -113,7 +114,8 @@ final class PhabricatorMetaMTAListController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Sent Mail',
+        'title' => pht('Sent Mail'),
+        'device' => true,
       ));
   }
 }

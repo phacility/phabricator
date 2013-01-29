@@ -119,7 +119,11 @@ JX.install('DifferentialInlineCommentEditor', {
 
         JX.DOM.alterClass(drawn[0], 'differential-inline-loading', true);
       });
-      JX.DOM.listen(drawn[0], 'submit', 'inline-edit-form', onsubmit);
+      JX.DOM.listen(
+        drawn[0],
+        ['submit', 'didSyntheticSubmit'],
+        'inline-edit-form',
+        onsubmit);
     },
     _didCompleteWorkflow : function(response) {
       var op = this.getOperation();

@@ -107,9 +107,9 @@ abstract class ConpherenceController extends PhabricatorController {
     $nav->addClass('conpherence-menu');
     $nav->setMenuID('conpherence-menu');
 
-    $nav->addFilter(
+    $nav->addButton(
       'new',
-      pht('New Conpherence'),
+      pht('New Conversation'),
       $this->getApplicationURI('new/')
     );
     $nav->addLabel(pht('Unread'));
@@ -183,7 +183,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $crumbs
       ->addAction(
         id(new PhabricatorMenuItemView())
-          ->setName(pht('New Conpherence'))
+          ->setName(pht('New Conversation'))
           ->setHref($this->getApplicationURI('new/'))
           ->setIcon('create')
       )

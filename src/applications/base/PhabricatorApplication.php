@@ -62,8 +62,23 @@ abstract class PhabricatorApplication {
     return true;
   }
 
+  public function isInstalled() {
+    $uninstalled =
+      PhabricatorEnv::getEnvConfig('phabricator.uninstalled-applications');
+
+      if (isset($uninstalled[get_class($this)])) {
+        return false;
+      } else {
+        return true;
+      }
+  }
+
   public function isBeta() {
     return false;
+  }
+
+  public function canUninstall() {
+    return true;
   }
 
   public function getPHID() {
@@ -212,12 +227,33 @@ abstract class PhabricatorApplication {
 
 /* -(  Application Management  )--------------------------------------------- */
 
+  public static function getAllApplications() {
+
+    $classes = id(new PhutilSymbolLoader())
+            ->setAncestorClass(__CLASS__)
+            ->setConcreteOnly(true)
+            ->selectAndLoadSymbols();
+
+    $apps = array();
+
+    foreach ($classes as $class) {
+      $app = newv($class['name'], array());
+      $apps[] = $app;
+    }
+
+    return $apps;
+  }
 
   public static function getAllInstalledApplications() {
     static $applications;
 
     $show_beta =
       PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
+
+    $uninstalled =
+      PhabricatorEnv::getEnvConfig('phabricator.uninstalled-applications');
+
+
 
     if (empty($applications)) {
       $classes = id(new PhutilSymbolLoader())
@@ -227,22 +263,29 @@ abstract class PhabricatorApplication {
 
       $apps = array();
       foreach ($classes as $class) {
-        $app = newv($class['name'], array());
-        if (!$app->isEnabled()) {
-          continue;
-        }
 
-        if (!$show_beta && $app->isBeta()) {
-          continue;
-        }
-
-        $apps[] = $app;
+      if (isset($uninstalled[$class['name']])) {
+        continue;
       }
+
+      $app = newv($class['name'], array());
+
+      if (!$app->isEnabled()) {
+          continue;
+      }
+
+      if (!$show_beta && $app->isBeta()) {
+          continue;
+      }
+
+      $apps[] = $app;
+      }
+
       $applications = $apps;
     }
 
     return $applications;
   }
 
-
 }
+

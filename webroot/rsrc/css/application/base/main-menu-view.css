@@ -42,6 +42,8 @@
 .phabricator-main-menu-logo {
   display: inline-block;
   width: 139px;
+  height: 44px;
+  float: left;
   margin-right: 6px;
   padding-right: 6px;
   padding-left: 6px;
@@ -152,6 +154,7 @@
 }
 
 .device .phabricator-main-menu-search-container {
+  padding: 0;
   margin: 0 18px 0 60px;
 }
 
@@ -170,6 +173,12 @@
   line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
   padding: 6px 32px 6px 10px;
+}
+
+.device .phabricator-main-menu-search input {
+  height: 16px;
+  font-size: 15px;
+  border-radius: 15px;
 }
 
 .phabricator-main-menu-search input:focus {
@@ -195,6 +204,11 @@
   top: 11px;
   right: 6px;
 }
+
+.device .phabricator-main-menu-search button {
+  top: 3px;
+}
+
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
   border-radius: 4px;
@@ -253,6 +267,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 .phabricator-main-menu-alerts {
   display: inline-block;
   border-radius: 15px;
+  float: left;
   background: rgba(0,0,0,.2);
   height: 20px;
   padding: 3px 10px;
@@ -299,23 +314,16 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 .device .phabricator-dark-menu,
 .device .phabricator-dark-menu a.phabricator-menu-item-type-link {
   color: #fff;
-}
 
-.device .phabricator-dark-menu .phabricator-menu-item-view {
-  display: block;
-  padding: 4px 0;
 }
 
 .device .phabricator-dark-menu .phabricator-menu-item-type-label {
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 12px;
   background-color: #151719;
   padding: 0 0 0 12px;
-  height: 24px;
-}
-
-.device .phabricator-dark-menu .phabricator-menu-item-type-spacer {
-  display: none;
+  height: 25px;
+  font-weight: bold;
 }
 
 .device .phabricator-dark-menu .phabricator-menu-item-type-label
@@ -329,6 +337,8 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   border-style: solid;
   border-color: #34373b transparent #282c2d;
   background-image: url(/rsrc/image/texture/dark-menu.png);
+  padding: 4px 0;
+  display: block;
 }
 
 
@@ -358,15 +368,15 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   padding-top: 44px;
 }
 
-.device .phabricator-core-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phabricator-menu-item-type-link {
   font-size: 15px;
   min-height: 30px;
+  line-height: 28px;
 }
 
 .device .phabricator-core-menu
    .phabricator-menu-item-type-link .phabricator-menu-item-name {
   margin-left: 40px;
-  line-height: 28px;
 }
 
 .device-desktop .phabricator-core-menu {
@@ -428,9 +438,3 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   .phabricator-menu-item-name {
   padding-left: 12px;
 }
-
-.device .phabricator-application-menu-expanded .phabricator-application-menu {
-  display: block;
-  padding-top: 44px;
-}
-

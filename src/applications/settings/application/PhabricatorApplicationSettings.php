@@ -14,6 +14,10 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
     return 'settings';
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       '/settings/' => array(

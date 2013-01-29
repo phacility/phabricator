@@ -5,6 +5,7 @@ final class PhabricatorMenuItemView extends AphrontTagView {
   const TYPE_LINK     = 'type-link';
   const TYPE_SPACER   = 'type-spacer';
   const TYPE_LABEL    = 'type-label';
+  const TYPE_BUTTON   = 'type-button';
 
   private $name;
   private $href;

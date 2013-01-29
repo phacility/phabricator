@@ -9,6 +9,12 @@
   overflow-y: auto;
 }
 
+.phabricator-notification-menu-loading {
+  text-align: center;
+  padding: 10px 0;
+  color: #888888;
+}
+
 .device-desktop .phabricator-notification-menu {
   position: fixed;
   width: 360px;

@@ -12,7 +12,7 @@ final class ConpherenceNewController extends ConpherenceController {
     $conpherence = id(new ConpherenceThread())
       ->attachParticipants(array())
       ->attachFilePHIDs(array());
-    $title = pht('New Conpherence');
+    $title = pht('New Conversation');
     $participants = array();
     $message = '';
     $files = array();

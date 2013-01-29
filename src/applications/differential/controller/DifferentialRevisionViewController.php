@@ -176,14 +176,17 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $limit = 100;
     $large = $request->getStr('large');
     if (count($changesets) > $limit && !$large) {
-      $count = number_format(count($changesets));
+      $count = count($changesets);
       $warning = new AphrontErrorView();
       $warning->setTitle('Very Large Diff');
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
       $warning->appendChild(
-        '<p>'.pht('This diff is very large and affects %d files. Load '.
-        'each file individually. ', $count).
-        "<strong>".
+        pht(
+          'This diff is very large and affects %2$s files. Load each file '.
+            'individually.',
+          $count,
+          PhutilTranslator::getInstance()->formatNumber($count)).
+        " <strong>".
           phutil_tag(
             'a',
             array(
