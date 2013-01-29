@@ -68,7 +68,7 @@ final class AphrontFormInsetView extends AphrontView {
     $hidden_inputs = implode("\n", $hidden_inputs);
 
     if ($this->rightButton) {
-      $right_button = phutil_render_tag(
+      $right_button = phutil_tag(
         'div',
         array(
           'style' => 'float: right;',
@@ -77,7 +77,7 @@ final class AphrontFormInsetView extends AphrontView {
     }
 
     if ($this->description) {
-      $desc = phutil_render_tag(
+      $desc = phutil_tag(
         'p',
         array(),
         $this->description);

@@ -255,12 +255,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $developer_warning = null;
     if (PhabricatorEnv::getEnvConfig('phabricator.show-error-callout') &&
         DarkConsoleErrorLogPluginAPI::getErrors()) {
-      $developer_warning =
-        '<div class="aphront-developer-error-callout">'.
-          pht(
-            'This page raised PHP errors. Find them in DarkConsole '.
-            'or the error log.').
-        '</div>';
+      $developer_warning = phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-developer-error-callout',
+        ),
+        pht(
+          'This page raised PHP errors. Find them in DarkConsole '.
+          'or the error log.'));
     }
 
     // Render the "you have unresolved setup issues..." warning.

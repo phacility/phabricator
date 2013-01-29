@@ -316,15 +316,15 @@ final class PhabricatorMainMenuView extends AphrontView {
         $message_count_number = "\xE2\x88\x9E";
       }
 
-      $message_count_tag = phutil_render_tag(
+      $message_count_tag = phutil_tag(
         'span',
         array(
           'id'    => $message_count_id,
           'class' => 'phabricator-main-menu-message-count'
         ),
-        phutil_escape_html($message_count_number));
+        $message_count_number);
 
-      $message_icon_tag = phutil_render_tag(
+      $message_icon_tag = phutil_tag(
         'span',
         array(
           'class' => 'sprite-menu phabricator-main-menu-message-icon',
@@ -335,14 +335,17 @@ final class PhabricatorMainMenuView extends AphrontView {
         $container_classes[] = 'message-unread';
       }
 
-      $message_tag = phutil_render_tag(
+      $message_tag = phutil_tag(
         'a',
         array(
           'href'  => '/conpherence/',
           'class' => implode(' ', $container_classes),
           'id'    => $message_id,
         ),
-        $message_icon_tag.$message_count_tag);
+        array(
+          $message_icon_tag,
+          $message_count_tag,
+        ));
     }
 
     $count_id = celerity_generate_unique_node_id();

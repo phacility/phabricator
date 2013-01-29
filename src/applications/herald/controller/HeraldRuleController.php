@@ -133,8 +133,8 @@ final class HeraldRuleController extends HeraldController {
             ),
             'Create New Condition'))
           ->setDescription(
-            'When '.$must_match_selector .
-            ' these conditions are met:')
+            phutil_safe_html(
+              'When '.$must_match_selector.' these conditions are met:'))
           ->setContent(javelin_tag(
             'table',
             array(
@@ -154,8 +154,9 @@ final class HeraldRuleController extends HeraldController {
               'mustcapture' => true,
             ),
             'Create New Action'))
-          ->setDescription('Take these actions '.$repetition_selector.
-            ' this rule matches:')
+          ->setDescription(
+            phutil_safe_html(
+              'Take these actions '.$repetition_selector.' this rule matches:'))
           ->setContent(javelin_tag(
               'table',
               array(
