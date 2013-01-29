@@ -39,7 +39,7 @@ final class PhabricatorAnchorView extends AphrontView {
       ),
       '');
 
-    return $marker.$anchor;
+    return $this->renderHTMLView(array($marker, $anchor));
   }
 
 }

@@ -100,10 +100,10 @@ final class PhabricatorTimelineEventView extends AphrontView {
   }
 
   public function render() {
-    $content = $this->renderChildren();
+    $content = $this->renderHTMLChildren();
 
     $title = $this->title;
-    if (($title === null) && !strlen($content)) {
+    if (($title === null) && $this->isEmptyContent($content)) {
       $title = '';
     }
 
@@ -131,14 +131,14 @@ final class PhabricatorTimelineEventView extends AphrontView {
             ''));
       }
 
-      $title = phutil_render_tag(
+      $title = phutil_tag(
         'div',
         array(
           'class' => implode(' ', $title_classes),
         ),
-        $title.$extra);
+        array($title, $extra));
 
-      $title = $icon.$title;
+      $title = $this->renderHTMLView(array($icon, $title));
     }
 
     $wedge = phutil_tag(
@@ -165,32 +165,34 @@ final class PhabricatorTimelineEventView extends AphrontView {
     $classes[] = 'phabricator-timeline-border';
     if ($content) {
       $classes[] = 'phabricator-timeline-major-event';
-      $content = phutil_render_tag(
+      $content = phutil_tag(
         'div',
         array(
           'class' => implode(' ', $content_classes),
         ),
-        phutil_render_tag(
+        phutil_tag(
           'div',
           array(
             'class' => 'phabricator-timeline-inner-content',
           ),
-          $title.
-          phutil_render_tag(
-            'div',
-            array(
-              'class' => 'phabricator-timeline-core-content',
-            ),
-            $content)));
-      $content = $image.$wedge.$content;
+          array(
+            $title,
+            phutil_tag(
+              'div',
+              array(
+                'class' => 'phabricator-timeline-core-content',
+              ),
+              $content),
+          )));
+      $content = array($image, $wedge, $content);
     } else {
       $classes[] = 'phabricator-timeline-minor-event';
-      $content = phutil_render_tag(
+      $content = phutil_tag(
         'div',
         array(
           'class' => implode(' ', $content_classes),
         ),
-        $image.$wedge.$title);
+        array($image, $wedge, $title));
     }
 
     $outer_classes = $this->classes;
@@ -209,7 +211,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
       );
     }
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'class' => implode(' ', $outer_classes),
@@ -217,7 +219,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         'sigil' => $sigil,
         'meta' => $meta,
       ),
-      phutil_render_tag(
+      phutil_tag(
         'div',
         array(
           'class' => implode(' ', $classes),
@@ -273,25 +275,28 @@ final class PhabricatorTimelineEventView extends AphrontView {
             ->setAnchorName($this->anchor)
             ->render();
 
-          $date = $anchor.phutil_tag(
-              'a',
-              array(
-                'href' => '#'.$this->anchor,
-              ),
-              $date);
+          $date = $this->renderHTMLView(
+            array(
+              $anchor,
+              phutil_tag(
+                'a',
+                array(
+                  'href' => '#'.$this->anchor,
+                ),
+                $date),
+            ));
         }
         $extra[] = $date;
       }
     }
 
-    $extra = implode(' &middot; ', $extra);
     if ($extra) {
-      $extra = phutil_render_tag(
+      $extra = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-timeline-extra',
         ),
-        $extra);
+        array_interleave(" \xC2\xB7 ", $extra));
     }
 
     return $extra;

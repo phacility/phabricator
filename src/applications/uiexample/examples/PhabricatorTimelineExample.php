@@ -98,13 +98,13 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
 
     $events[] = id(new PhabricatorTimelineEventView())
       ->setUserHandle($handle)
-      ->setTitle(phutil_escape_html("Colorless"))
+      ->setTitle("Colorless")
       ->setIcon('lock');
 
     foreach ($colors as $color) {
       $events[] = id(new PhabricatorTimelineEventView())
         ->setUserHandle($handle)
-        ->setTitle(phutil_escape_html("Color '{$color}'"))
+        ->setTitle("Color '{$color}'")
         ->setIcon('lock')
         ->setColor($color);
     }

@@ -74,6 +74,19 @@ abstract class AphrontView extends Phobject {
     }
   }
 
+  final protected function isEmptyContent($content) {
+    if (is_array($content)) {
+      foreach ($content as $element) {
+        if (!$this->isEmptyContent($element)) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return !strlen((string)$content);
+    }
+  }
+
   abstract public function render();
 
 }
