@@ -113,7 +113,7 @@ final class DifferentialUnitFieldSpecification
         $userdata = idx($test, 'userdata');
         if ($userdata) {
           $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
-          $userdata = $engine->markupText($userdata);
+          $userdata = phutil_safe_html($engine->markupText($userdata));
           $rows[] = array(
             'style' => 'details',
             'value' => $userdata,

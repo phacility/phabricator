@@ -93,7 +93,8 @@ final class DiffusionCommitController extends DiffusionController {
 
       $property_list->addTextContent(
         '<div class="diffusion-commit-message phabricator-remarkup">'.
-        $engine->markupText($commit_data->getCommitMessage()).
+          phutil_safe_html(
+            $engine->markupText($commit_data->getCommitMessage())).
         '</div>'
       );
 

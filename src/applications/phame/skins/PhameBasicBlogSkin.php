@@ -70,6 +70,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
       $view->setFrameable(true);
     }
 
+
     $view->appendChild($content);
 
     $response = new AphrontWebpageResponse();
@@ -95,23 +96,30 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
       $summaries[] = $post->renderWithSummary();
     }
 
-    $list = phutil_render_tag(
+    $list = phutil_tag(
       'div',
       array(
         'class' => 'phame-post-list',
       ),
       id(new AphrontNullView())->appendChild($summaries)->render());
 
-    $pager = $this->renderOlderPageLink().$this->renderNewerPageLink();
-    if ($pager) {
+    $pager = null;
+    if ($this->renderOlderPageLink() || $this->renderNewerPageLink()) {
       $pager = phutil_tag(
         'div',
         array(
           'class' => 'phame-pager',
+        ),
+        array(
+          $this->renderOlderPageLink(),
+          $this->renderNewerPageLink(),
         ));
     }
 
-    return $list.$pager;
+    return array(
+      $list,
+      $pager,
+    );
   }
 
   protected function render404Page() {

@@ -165,7 +165,7 @@ final class PhabricatorPeopleProfileController
       '//Nothing is known about this rare specimen.//');
 
     $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
-    $blurb = $engine->markupText($blurb);
+    $blurb = phutil_safe_html($engine->markupText($blurb));
 
     $viewer = $this->getRequest()->getUser();
 
