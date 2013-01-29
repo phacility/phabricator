@@ -83,13 +83,25 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->menu;
   }
 
-  public function addFilter(
+  public function addFilter($key, $name, $uri = null) {
+    return $this->addThing(
+      $key, $name, $uri, PhabricatorMenuItemView::TYPE_LINK);
+  }
+
+  public function addButton($key, $name, $uri = null) {
+    return $this->addThing(
+      $key, $name, $uri, PhabricatorMenuItemView::TYPE_BUTTON);
+  }
+
+  private function addThing(
     $key,
     $name,
-    $uri = null) {
+    $uri = null,
+    $type) {
 
     $item = id(new PhabricatorMenuItemView())
-      ->setName($name);
+      ->setName($name)
+      ->setType($type);
 
     if (strlen($key)) {
       $item->setKey($key);

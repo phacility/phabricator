@@ -25,6 +25,25 @@
   background-color: #000;
 }
 
+.phabricator-dark-menu .phabricator-menu-item-type-button,
+.phabricator-side-menu .phabricator-menu-item-type-button {
+  width: 50%;
+  padding: 5px 8px;
+  display: block;
+  border-radius: 4px;
+  border: 2px solid #000;
+  margin: 10px auto;
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 0px 1px 1px #000000;
+  font-weight: bold;
+  text-align: center;
+}
+
+.phabricator-side-menu .phabricator-menu-item-type-button:hover {
+  background-image: url(/rsrc/image/texture/dark-menu-hover.png);
+}
+
 .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover {
   text-decoration: none;
 }
