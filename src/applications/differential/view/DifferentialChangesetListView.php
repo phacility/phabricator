@@ -227,7 +227,7 @@ final class DifferentialChangesetListView extends AphrontView {
     $template =
       '<table><tr>'.
       '<th></th><td>%s</td>'.
-      '<th></th><td colspan="2">%s</td>'.
+      '<th></th><td colspan="3">%s</td>'.
       '</tr></table>';
 
     return array(
