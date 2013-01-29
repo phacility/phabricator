@@ -128,6 +128,11 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('test.value', 'wild', null)
         ->setLocked(true)
         ->setDescription(pht('Unit test value.')),
+      $this->newOption('phabricator.uninstalled-applications', 'set', array())
+        ->setLocked(true)
+        ->setDescription(
+          pht('Array containing list of Uninstalled applications.')
+          ),
     );
   }
 

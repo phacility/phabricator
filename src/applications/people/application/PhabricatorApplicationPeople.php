@@ -26,6 +26,10 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return self::GROUP_ADMIN;
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       '/people/' => array(

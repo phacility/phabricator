@@ -6,6 +6,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return false;
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {

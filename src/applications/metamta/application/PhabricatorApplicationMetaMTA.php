@@ -22,6 +22,10 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
     return self::GROUP_ADMIN;
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       $this->getBaseURI() => array(

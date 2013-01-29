@@ -2,6 +2,10 @@
 
 final class PhabricatorApplicationApplications extends PhabricatorApplication {
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getBaseURI() {
     return '/applications/';
   }
@@ -28,7 +32,8 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
         ''                          => 'PhabricatorApplicationsListController',
         'view/(?P<application>\w+)/' =>
           'PhabricatorApplicationDetailViewController',
-
+        '(?P<application>\w+)/(?P<action>install|uninstall)/' =>
+          'PhabricatorApplicationUninstallController',
         ),
 
     );

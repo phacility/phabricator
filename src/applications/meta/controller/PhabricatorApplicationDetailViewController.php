@@ -14,12 +14,12 @@ final class PhabricatorApplicationDetailViewController
     $user = $request->getUser();
 
     $selected = null;
-    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $applications = PhabricatorApplication::getAllApplications();
 
     foreach ($applications as $application) {
       if (get_class($application) == $this->application) {
-        $selected = $application;
-        break;
+      $selected = $application;
+      break;
       }
     }
 
@@ -35,27 +35,33 @@ final class PhabricatorApplicationDetailViewController
         ->setName(pht('Applications'))
         ->setHref($this->getApplicationURI()));
 
-    $properties = $this->buildPropertyView($selected);
-    $actions = $this->buildActionView($user);
+   $properties = $this->buildPropertyView($selected);
+   $actions = $this->buildActionView($user, $selected);
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        id(new PhabricatorHeaderView())->setHeader($title),
-        $actions,
-        $properties,
-      ),
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
+   return $this->buildApplicationPage(
+    array(
+      $crumbs,
+      id(new PhabricatorHeaderView())->setHeader($title),
+      $actions,
+      $properties,
+    ),
+    array(
+      'title' => $title,
+      'device' => true,
+    ));
   }
 
   private function buildPropertyView(PhabricatorApplication $selected) {
     $properties = new PhabricatorPropertyListView();
 
-    $properties->addProperty(
-      pht('Status'), pht('Installed'));
+    if ($selected->isInstalled()) {
+      $properties->addProperty(
+        pht('Status'), pht('Installed'));
+
+    } else {
+      $properties->addProperty(
+        pht('Status'), pht('Uninstalled'));
+    }
 
     $properties->addProperty(
       pht('Description'), $selected->getShortDescription());
@@ -63,15 +69,33 @@ final class PhabricatorApplicationDetailViewController
     return $properties;
   }
 
-  private function buildActionView(PhabricatorUser $user) {
+  private function buildActionView(
+    PhabricatorUser $user, PhabricatorApplication $selected) {
 
-    return id(new PhabricatorActionListView())
-      ->setUser($user)
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Uninstall'))
-          ->setIcon('delete')
-     );
+    if ($selected->canUninstall()) {
+      if ($selected->isInstalled()) {
+
+        return id(new PhabricatorActionListView())
+          ->setUser($user)
+          ->addAction(
+            id(new PhabricatorActionView())
+              ->setName(pht('Uninstall'))
+              ->setIcon('delete')
+              ->setHref(
+                $this->getApplicationURI(get_class($selected).'/uninstall/'))
+              );
+      } else {
+          return id(new PhabricatorActionListView())
+            ->setUser($user)
+            ->addAction(
+              id(new PhabricatorActionView())
+              ->setName(pht('Install'))
+              ->setIcon('new')
+              ->setHref(
+                $this->getApplicationURI(get_class($selected).'/install/'))
+              );
+      }
+    }
   }
 
 }

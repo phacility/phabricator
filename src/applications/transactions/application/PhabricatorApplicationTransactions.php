@@ -6,6 +6,10 @@ final class PhabricatorApplicationTransactions extends PhabricatorApplication {
     return false;
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       '/transactions/' => array(

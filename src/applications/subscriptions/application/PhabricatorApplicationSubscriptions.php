@@ -6,6 +6,10 @@ final class PhabricatorApplicationSubscriptions extends PhabricatorApplication {
     return false;
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getEventListeners() {
     return array(
       new PhabricatorSubscriptionsUIEventListener(),
