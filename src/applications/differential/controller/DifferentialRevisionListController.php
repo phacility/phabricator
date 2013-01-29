@@ -363,7 +363,7 @@ final class DifferentialRevisionListController extends DifferentialController {
           array_select_keys($handles, $params['participants']),
           'getFullName');
         return id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/allmailable/')
+          ->setDatasource('/typeahead/common/accounts/')
           ->setLabel($label)
           ->setName('participants')
           ->setValue($value);
