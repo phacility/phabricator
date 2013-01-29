@@ -13,7 +13,7 @@ final class DifferentialLinesFieldSpecification
 
   public function renderValueForRevisionView() {
     $diff = $this->getDiff();
-    return phutil_escape_html(number_format($diff->getLineCount()));
+    return number_format($diff->getLineCount());
   }
 
   public function shouldAppearOnRevisionList() {

@@ -102,13 +102,13 @@ final class DifferentialResultsTableView extends AphrontView {
 
     require_celerity_resource('differential-results-table-css');
 
-    return javelin_render_tag(
+    return javelin_tag(
       'table',
       array(
         'class' => 'differential-results-table',
         'sigil' => 'differential-results-table',
       ),
-      implode("\n", $rows));
+      $rows);
   }
 
 

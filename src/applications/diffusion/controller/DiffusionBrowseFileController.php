@@ -805,17 +805,17 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $size = strlen($data);
     $properties->addTextContent(
       pht('This is a binary file. It is %2$s byte(s) in length.',
-          $size,
-          PhutilTranslator::getInstance()->formatNumber($size))
-    );
+        $size,
+        PhutilTranslator::getInstance()->formatNumber($size)));
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($this->getRequest()->getUser())
       ->addAction($this->createEditAction())
-      ->addAction(id(new PhabricatorActionView())
-                    ->setName(pht('Download Binary File...'))
-                    ->setIcon('download')
-                    ->setHref($file_uri));
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Download Binary File...'))
+          ->setIcon('download')
+          ->setHref($file_uri));
 
     return array($actions, $properties);
 

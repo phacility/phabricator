@@ -17,7 +17,7 @@ final class DifferentialHostFieldSpecification
     if (!$host) {
       return null;
     }
-    return phutil_escape_html($host);
+    return $host;
   }
 
 }

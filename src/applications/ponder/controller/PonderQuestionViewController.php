@@ -117,15 +117,12 @@ final class PonderQuestionViewController extends PonderController {
       phabricator_datetime($question->getDateCreated(), $viewer));
 
     if ($subscribers) {
-      foreach ($subscribers as $key => $subscriber) {
-        $subscribers[$key] = $this->getHandle($subscriber)->renderLink();
-      }
-      $subscribers = implode(', ', $subscribers);
+      $subscribers = $this->renderHandlesForPHIDs($subscribers);
     }
 
     $view->addProperty(
       pht('Subscribers'),
-      nonempty($subscribers, '<em>'.pht('None').'</em>'));
+      nonempty($subscribers, phutil_tag('em', array(), pht('None'))));
 
     return $view;
   }

@@ -148,7 +148,7 @@ final class PholioMockViewController extends PholioController {
       }
       $sub_view = implode(', ', $sub_view);
     } else {
-      $sub_view = '<em>'.pht('None').'</em>';
+      $sub_view = phutil_tag('em', array(), pht('None'));
     }
 
     $properties->addProperty(

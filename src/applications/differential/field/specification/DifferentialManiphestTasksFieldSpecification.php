@@ -29,7 +29,7 @@ final class DifferentialManiphestTasksFieldSpecification
       $links[] = $this->getHandle($task_phid)->renderLink();
     }
 
-    return implode('<br />', $links);
+    return phutil_safe_html(implode('<br />', $links));
   }
 
   private function getManiphestTaskPHIDs() {

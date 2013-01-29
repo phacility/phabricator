@@ -92,11 +92,13 @@ final class DiffusionCommitController extends DiffusionController {
       }
 
       $property_list->addTextContent(
-        '<div class="diffusion-commit-message phabricator-remarkup">'.
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'diffusion-commit-message phabricator-remarkup',
+          ),
           phutil_safe_html(
-            $engine->markupText($commit_data->getCommitMessage())).
-        '</div>'
-      );
+            $engine->markupText($commit_data->getCommitMessage()))));
 
       $content[] = $top_anchor;
       $content[] = $headsup_view;
@@ -412,7 +414,7 @@ final class DiffusionCommitController extends DiffusionController {
     if ($data->getCommitDetail('authorPHID')) {
       $props['Author'] = $handles[$author_phid]->renderLink();
     } else {
-      $props['Author'] = phutil_escape_html($data->getAuthorName());
+      $props['Author'] = $data->getAuthorName();
     }
 
     $reviewer_phid = $data->getCommitDetail('reviewerPHID');
@@ -426,7 +428,7 @@ final class DiffusionCommitController extends DiffusionController {
       if ($data->getCommitDetail('committerPHID')) {
         $props['Committer'] = $handles[$committer_phid]->renderLink();
       } else {
-        $props['Committer'] = phutil_escape_html($committer);
+        $props['Committer'] = $committer;
       }
     }
 
@@ -467,7 +469,7 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($task_phids as $phid) {
         $task_list[] = $handles[$phid]->renderLink();
       }
-      $task_list = implode('<br />', $task_list);
+      $task_list = array_interleave(phutil_tag('br'), $task_list);
       $props['Tasks'] = $task_list;
     }
 
@@ -476,7 +478,7 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($proj_phids as $phid) {
         $proj_list[] = $handles[$phid]->renderLink();
       }
-      $proj_list = implode('<br />', $proj_list);
+      $proj_list = array_interleave(phutil_tag('br'), $proj_list);
       $props['Projects'] = $proj_list;
     }
 

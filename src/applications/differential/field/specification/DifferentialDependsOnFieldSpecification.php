@@ -26,7 +26,7 @@ final class DifferentialDependsOnFieldSpecification
       $links[] = $this->getHandle($revision_phids)->renderLink();
     }
 
-    return implode('<br />', $links);
+    return phutil_safe_html(implode('<br />', $links));
   }
 
   private function getDependentRevisionPHIDs() {

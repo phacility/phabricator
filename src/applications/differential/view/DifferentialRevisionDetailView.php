@@ -66,10 +66,10 @@ final class DifferentialRevisionDetailView extends AphrontView {
       switch ($local_vcs) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $next_step = '<tt>arc land</tt>';
+          $next_step = phutil_tag('tt', array(), 'arc land');
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $next_step = '<tt>arc commit</tt>';
+          $next_step = phutil_tag('tt', array(), 'arc commit');
           break;
       }
     }

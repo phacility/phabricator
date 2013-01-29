@@ -13,7 +13,7 @@ final class DifferentialApplyPatchFieldSpecification
 
   public function renderValueForRevisionView() {
     $revision = $this->getRevision();
-    return '<tt>arc patch D'.$revision->getID().'</tt>';
+    return phutil_tag('tt', array(), 'arc patch D'.$revision->getID());
   }
 
 }

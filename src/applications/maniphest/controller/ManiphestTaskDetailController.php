@@ -435,18 +435,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
       pht('Assigned To'),
       $task->getOwnerPHID()
         ? $this->getHandle($task->getOwnerPHID())->renderLink()
-        : '<em>'.pht('None').'</em>');
+        : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Priority'),
-      phutil_escape_html(
-        ManiphestTaskPriority::getTaskPriorityName($task->getPriority())));
+      ManiphestTaskPriority::getTaskPriorityName($task->getPriority()));
 
     $view->addProperty(
       pht('Subscribers'),
       $task->getCCPHIDs()
         ? $this->renderHandlesForPHIDs($task->getCCPHIDs(), ',')
-        : '<em>'.pht('None').'</em>');
+        : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Author'),
@@ -469,7 +468,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       pht('Projects'),
       $task->getProjectPHIDs()
         ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
-        : '<em>'.pht('None').'</em>');
+        : phutil_tag('em', array(), pht('None')));
 
     foreach ($aux_fields as $aux_field) {
       $aux_key = $aux_field->getAuxiliaryKey();

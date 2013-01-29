@@ -26,7 +26,7 @@ final class DifferentialBranchFieldSpecification
       return null;
     }
 
-    return phutil_escape_html($branch);
+    return $branch;
   }
 
   public function renderValueForMail($phase) {

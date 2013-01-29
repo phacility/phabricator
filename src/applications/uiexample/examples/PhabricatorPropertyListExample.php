@@ -49,9 +49,10 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
     $view->addSectionHeader('Haiku About Pasta');
 
     $view->addTextContent(
-      'this is a pasta<br />'.
-      'haiku. it is very bad.<br />'.
-      'what did you expect?');
+      phutil_safe_html(
+        'this is a pasta<br />'.
+        'haiku. it is very bad.<br />'.
+        'what did you expect?'));
 
     $edge_cases_header = id(new PhabricatorHeaderView())
       ->setHeader(pht('Edge Cases'));

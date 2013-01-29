@@ -274,7 +274,7 @@ abstract class DifferentialFieldSpecification {
    */
   public function renderUserList(array $user_phids) {
     if (!$user_phids) {
-      return '<em>None</em>';
+      return phutil_tag('em', array(), pht('None'));
     }
 
     $links = array();
@@ -283,7 +283,7 @@ abstract class DifferentialFieldSpecification {
       $links[] = $handle->renderLink();
     }
 
-    return implode(', ', $links);
+    return phutil_safe_html(implode(', ', $links));
   }
 
 

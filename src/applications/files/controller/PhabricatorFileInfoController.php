@@ -112,19 +112,19 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $view->addProperty(
       pht('Mime Type'),
-      phutil_escape_html($file->getMimeType()));
+      $file->getMimeType());
 
     $view->addProperty(
       pht('Engine'),
-      phutil_escape_html($file->getStorageEngine()));
+      $file->getStorageEngine());
 
     $view->addProperty(
       pht('Format'),
-      phutil_escape_html($file->getStorageFormat()));
+      $file->getStorageFormat());
 
     $view->addProperty(
       pht('Handle'),
-      phutil_escape_html($file->getStorageHandle()));
+      $file->getStorageHandle());
 
     $metadata = $file->getMetadata();
     if (!empty($metadata)) {
@@ -133,7 +133,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       foreach ($metadata as $key => $value) {
         $view->addProperty(
           PhabricatorFile::getMetadataName($key),
-          phutil_escape_html($value));
+          $value);
       }
     }
 
