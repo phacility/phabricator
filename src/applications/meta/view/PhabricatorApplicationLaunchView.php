@@ -120,16 +120,23 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       $classes[] = 'application-tile-full';
     }
 
-    $app_button = phutil_render_tag(
+    $app_button = phutil_tag(
       $application ? 'a' : 'div',
       array(
         'class' => implode(' ', $classes),
         'href'  => $application ? $application->getBaseURI() : null,
         'title' => $application ? $application->getShortDescription() : null,
       ),
-      $icon.
-      $this->renderSingleView($content));
+      $this->renderHTMLView(
+        array(
+          $icon,
+          $content,
+        )));
 
-    return $app_button.$create_button;
+    return $this->renderHTMLView(
+      array(
+        $app_button,
+        $create_button,
+      ));
   }
 }

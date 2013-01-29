@@ -520,7 +520,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if (strlen($task->getDescription())) {
       $view->addSectionHeader(pht('Description'));
       $view->addTextContent(
-        phutil_render_tag(
+        phutil_tag(
           'div',
           array(
             'class' => 'phabricator-remarkup',

@@ -348,7 +348,7 @@ final class ManiphestTaskListController extends ManiphestController {
         $count = number_format(count($list));
 
         $header =
-          javelin_render_tag(
+          javelin_tag(
             'h1',
             array(
               'class' => 'maniphest-task-group-header',
@@ -357,7 +357,7 @@ final class ManiphestTaskListController extends ManiphestController {
                 'priority' => head($list)->getPriority(),
               ),
             ),
-            phutil_escape_html($group).' ('.$count.')');
+            $group.' ('.$count.')');
 
 
         $panel = new AphrontPanelView();

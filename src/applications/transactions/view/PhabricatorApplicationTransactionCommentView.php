@@ -122,13 +122,13 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       ),
       pht('Preview'));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'id'    => $this->getPreviewPanelID(),
         'style' => 'display: none',
       ),
-      self::renderSingleView(
+      self::renderHTMLView(
         array(
           $header,
           $preview,
