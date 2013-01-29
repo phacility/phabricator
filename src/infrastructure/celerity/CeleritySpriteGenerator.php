@@ -194,7 +194,14 @@ final class CeleritySpriteGenerator {
       $sprite = id(clone $template)
         ->setName($prefix.$icon);
 
-      $sprite->setTargetCSS($prefix.$icon);
+      $tcss = array();
+      $tcss[] = '.'.$prefix.$icon;
+      if ($color == 'on') {
+        $class = str_replace('_on', '_off', $prefix.$icon);
+        $tcss[] = '.device-desktop .'.$class.':hover ';
+      }
+
+      $sprite->setTargetCSS(implode(', ', $tcss));
 
       foreach ($scales as $scale_key => $scale) {
         $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');

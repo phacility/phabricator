@@ -478,15 +478,15 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/sprite-conph-X2.png' =>
   array(
-    'hash' => 'c80e0b09360be71addfeaee622ac4bf0',
-    'uri' => '/res/c80e0b09/rsrc/image/sprite-conph-X2.png',
+    'hash' => '8f79b9888577dab95d6019d1b7f2a204',
+    'uri' => '/res/8f79b988/rsrc/image/sprite-conph-X2.png',
     'disk' => '/rsrc/image/sprite-conph-X2.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-conph.png' =>
   array(
-    'hash' => '0b1d46b6c7369e09dc4b9e26010b74d6',
-    'uri' => '/res/0b1d46b6/rsrc/image/sprite-conph.png',
+    'hash' => 'a6329b4baa648b57c00de65f6758cbd2',
+    'uri' => '/res/a6329b4b/rsrc/image/sprite-conph.png',
     'disk' => '/rsrc/image/sprite-conph.png',
     'type' => 'png',
   ),
@@ -3316,7 +3316,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-conpher-css' =>
   array(
-    'uri' => '/res/14e5d74c/rsrc/css/sprite-conph.css',
+    'uri' => '/res/f640f0c5/rsrc/css/sprite-conph.css',
     'type' => 'css',
     'requires' =>
     array(
