@@ -59,9 +59,10 @@ final class PhabricatorSetupCheckBaseURI extends PhabricatorSetupCheck {
       ->setSummary($summary)
       ->setMessage($message)
       ->addCommand(
-        csprintf(
-          '<tt>phabricator/ $</tt> '.
-          './bin/config set phabricator.base-uri %s',
-          $base_uri_guess));
+        hsprintf(
+          '<tt>phabricator/ $</tt> %s',
+          csprintf(
+            './bin/config set phabricator.base-uri %s',
+            $base_uri_guess)));
   }
 }
