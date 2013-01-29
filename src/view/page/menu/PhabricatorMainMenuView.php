@@ -390,6 +390,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'bubbleID'    => $bubble_id,
         'countID'     => $count_id,
         'dropdownID'  => $dropdown_id,
+        'loadingText' => pht('Loading...'),
       ));
 
     $notification_dropdown = javelin_render_tag(

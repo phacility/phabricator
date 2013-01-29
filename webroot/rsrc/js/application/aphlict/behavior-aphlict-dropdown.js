@@ -14,8 +14,17 @@ JX.behavior('aphlict-dropdown', function(config) {
   var bubble = JX.$(config.bubbleID);
   var visible = false;
   var request = null;
+  var dirty = true;
 
   function refresh() {
+    if (dirty) {
+      JX.DOM.setContent(dropdown, config.loadingText);
+      JX.DOM.alterClass(
+        dropdown,
+        'phabricator-notification-menu-loading',
+        true);
+    }
+
     if (request) { //already fetching
       return;
     }
@@ -30,6 +39,11 @@ JX.behavior('aphlict-dropdown', function(config) {
       } else {
         JX.DOM.alterClass(bubble, 'alert-unread', true);
       }
+      dirty = false;
+      JX.DOM.alterClass(
+        dropdown,
+        'phabricator-notification-menu-loading',
+        false);
       JX.DOM.setContent(dropdown, JX.$H(response.content));
       request = null;
     });
@@ -74,7 +88,9 @@ JX.behavior('aphlict-dropdown', function(config) {
       if (visible) {
         JX.DOM.hide(dropdown);
       } else {
-        refresh();
+        if (dirty) {
+          refresh();
+        }
 
         var p = JX.$V(bubble);
         p.y = null;
@@ -88,5 +104,8 @@ JX.behavior('aphlict-dropdown', function(config) {
     }
   )
 
-  JX.Stratcom.listen('notification-panel-update', null, refresh);
+  JX.Stratcom.listen('notification-panel-update', null, function() {
+    dirty = true;
+    refresh();
+  });
 });
