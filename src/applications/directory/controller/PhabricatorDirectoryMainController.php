@@ -338,11 +338,14 @@ final class PhabricatorDirectoryMainController
   private function renderMiniPanel($title, $body) {
     $panel = new AphrontMiniPanelView();
     $panel->appendChild(
-      phutil_render_tag(
+      phutil_tag(
         'p',
         array(
         ),
-        '<strong>'.$title.':</strong> '.$body));
+        array(
+          phutil_tag('strong', array(), $title.':'),
+          $body
+        )));
     $this->minipanels[] = $panel;
   }
 

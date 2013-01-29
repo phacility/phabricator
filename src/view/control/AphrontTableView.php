@@ -311,12 +311,15 @@ final class AphrontTableView extends AphrontView {
       array(
         'class' => 'single-display-line-bounds',
       ),
-      phutil_render_tag(
-        'span',
-        array(
-          'class' => 'single-display-line-content',
-        ),
-        $line).'&nbsp;');
+      array(
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'single-display-line-content',
+          ),
+          $line),
+        "\xC2\xA0",
+      ));
   }
 
 

@@ -73,18 +73,20 @@ final class PonderVotableView extends AphrontView {
           'vote'  => (int)$this->vote,
         ),
       ),
-      javelin_render_tag(
-        'div',
-        array(
-          'class' => 'ponder-votebox',
-        ),
-        $up.$count.$down).
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'ponder-votebox-content',
-        ),
-        $this->renderChildren()));
+      array(
+        javelin_tag(
+          'div',
+          array(
+            'class' => 'ponder-votebox',
+          ),
+          array($up, $count, $down)),
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'ponder-votebox-content',
+          ),
+          $this->renderChildren()),
+      ));
   }
 
 }

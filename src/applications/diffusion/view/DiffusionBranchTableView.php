@@ -61,8 +61,7 @@ final class DiffusionBranchTableView extends DiffusionView {
           $drequest->getRepository(),
           $branch->getHeadCommitIdentifier()),
         $datetime,
-        AphrontTableView::renderSingleDisplayLine(
-          phutil_escape_html($details))
+        AphrontTableView::renderSingleDisplayLine($details),
         // TODO: etc etc
       );
       if ($branch->getName() == $current_branch) {

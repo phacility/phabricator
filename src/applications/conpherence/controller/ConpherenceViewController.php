@@ -237,14 +237,13 @@ final class ConpherenceViewController extends
     foreach ($files as $file) {
       $thumb = $file->getThumb60x45URI();
       $table_data[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'img',
           array(
             'src' => $thumb
           ),
-          ''
-        ),
-        $file->getName()
+          ''),
+        phutil_escape_html($file->getName()),
       );
     }
     $header = id(new PhabricatorHeaderView())
@@ -274,13 +273,12 @@ final class ConpherenceViewController extends
       foreach ($actual_tasks as $task) {
         $data[] = array(
           idx($priority_map, $task->getPriority(), pht('???')),
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/T'.$task->getID()
             ),
-            phutil_escape_html($task->getTitle())
-          )
+            $task->getTitle()),
         );
       }
       $table = id(new AphrontTableView($data))

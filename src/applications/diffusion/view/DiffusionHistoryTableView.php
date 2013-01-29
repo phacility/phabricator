@@ -138,8 +138,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $date,
         $time,
         $author,
-        AphrontTableView::renderSingleDisplayLine(
-          phutil_escape_html($history->getSummary())),
+        AphrontTableView::renderSingleDisplayLine($history->getSummary()),
         // TODO: etc etc
       );
     }
