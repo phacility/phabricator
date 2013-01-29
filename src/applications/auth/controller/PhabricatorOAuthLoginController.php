@@ -68,15 +68,15 @@ final class PhabricatorOAuthLoginController
         if ($oauth_info->getUserID() != $current_user->getID()) {
           $dialog = new AphrontDialogView();
           $dialog->setUser($current_user);
-          $dialog->setTitle('Already Linked to Another Account');
-          $dialog->appendChild(
-            hsprintf(
-              '<p>The %s account you just authorized is already linked to '.
+          $dialog->setTitle(pht('Already Linked to Another Account'));
+          $dialog->appendChild('<p>'.
+            pht(
+              'The %s account you just authorized is already linked to '.
               'another Phabricator account. Before you can associate your %s '.
               'account with this Phabriactor account, you must unlink it from '.
               'the Phabricator account it is currently linked to.</p>',
-              $provider_name,
-              $provider_name));
+              phutil_escape_html($provider_name),
+              phutil_escape_html($provider_name))).'</p>';
           $dialog->addCancelButton($provider->getSettingsPanelURI());
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -95,14 +95,15 @@ final class PhabricatorOAuthLoginController
       if ($existing_oauth) {
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
-        $dialog->setTitle('Already Linked to an Account From This Provider');
-        $dialog->appendChild(
-          hsprintf(
-            '<p>The account you are logged in with is already linked to a %s '.
+        $dialog->setTitle(
+          pht('Already Linked to an Account From This Provider'));
+        $dialog->appendChild('<p>'.
+          pht(
+            'The account you are logged in with is already linked to a %s '.
             'account. Before you can link it to a different %s account, you '.
             'must unlink the old account.</p>',
-            $provider_name,
-            $provider_name));
+            phutil_escape_html($provider_name),
+            phutil_escape_html($provider_name))).'</p>';
         $dialog->addCancelButton($provider->getSettingsPanelURI());
         return id(new AphrontDialogResponse())->setDialog($dialog);
       }
@@ -110,11 +111,11 @@ final class PhabricatorOAuthLoginController
       if (!$request->isDialogFormPost()) {
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
-        $dialog->setTitle('Link '.$provider_name.' Account');
+        $dialog->setTitle(pht('Link %s Account', $provider_name));
         $dialog->appendChild(
-          hsprintf(
+          pht(
             '<p>Link your %s account to your Phabricator account?</p>',
-            $provider_name));
+            phutil_escape_html($provider_name)));
         $dialog->addHiddenInput('confirm_token', $provider->getAccessToken());
         $dialog->addHiddenInput('expires', $oauth_info->getTokenExpires());
         $dialog->addHiddenInput('state', $this->oauthState);
@@ -168,14 +169,14 @@ final class PhabricatorOAuthLoginController
       if ($known_email) {
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
-        $dialog->setTitle('Already Linked to Another Account');
-        $dialog->appendChild(
-          hsprintf(
-            '<p>The %s account you just authorized has an email address which '.
+        $dialog->setTitle(pht('Already Linked to Another Account'));
+        $dialog->appendChild('<p>'.
+          pht(
+            'The %s account you just authorized has an email address which '.
             'is already in use by another Phabricator account. To link the '.
             'accounts, log in to your Phabricator account and then go to '.
-            'Settings.</p>',
-            $provider_name));
+            'Settings.',
+            phutil_escape_html($provider_name))).'</p>';
 
         $user = id(new PhabricatorUser())
           ->loadOneWhere('phid = %s', $known_email->getUserPHID());
@@ -189,9 +190,9 @@ final class PhabricatorOAuthLoginController
               ->getProviderName();
           }
           $dialog->appendChild(
-            hsprintf(
+            pht(
               '<p>The account is associated with: %s.</p>',
-              implode(', ', $providers)));
+              implode(', ', phutil_escape_html($providers))));
         }
 
         $dialog->addCancelButton('/login/');
@@ -203,14 +204,14 @@ final class PhabricatorOAuthLoginController
     if (!$provider->isProviderRegistrationEnabled()) {
       $dialog = new AphrontDialogView();
       $dialog->setUser($current_user);
-      $dialog->setTitle('No Account Registration With '.$provider_name);
-      $dialog->appendChild(
-        hsprintf(
-          '<p>You can not register a new account using %s; you can only use '.
+      $dialog->setTitle(pht('No Account Registration with %s', $provider_name));
+      $dialog->appendChild('<p>'.
+        pht(
+          'You can not register a new account using %s; you can only use '.
           'your %s account to log into an existing Phabricator account which '.
-          'you have registered through other means.</p>',
-          $provider_name,
-          $provider_name));
+          'you have registered through other means.',
+          phutil_escape_html($provider_name),
+          phutil_escape_html($provider_name))).'</p>';
       $dialog->addCancelButton('/login/');
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -242,7 +243,7 @@ final class PhabricatorOAuthLoginController
     return $this->buildStandardPageResponse(
       $view,
       array(
-        'title' => $provider_name.' Auth Failed',
+        'title' => pht('Auth Failed'),
       ));
   }
 

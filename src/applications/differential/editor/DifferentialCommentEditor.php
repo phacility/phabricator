@@ -109,7 +109,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $revision->loadRelationships();
     $reviewer_phids = $revision->getReviewers();
     if ($reviewer_phids) {
-      $reviewer_phids = array_combine($reviewer_phids, $reviewer_phids);
+      $reviewer_phids = array_fuse($reviewer_phids);
     }
 
     $metadata = array();

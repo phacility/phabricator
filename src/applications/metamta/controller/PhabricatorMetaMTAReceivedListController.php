@@ -45,12 +45,12 @@ final class PhabricatorMetaMTAReceivedListController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'ID',
-        'Date',
-        'Time',
-        'Author',
-        'Object',
-        'Message',
+        pht('ID'),
+        pht('Date'),
+        pht('Time'),
+        pht('Author'),
+        pht('Object'),
+        pht('Message'),
       ));
     $table->setColumnClasses(
       array(
@@ -63,9 +63,10 @@ final class PhabricatorMetaMTAReceivedListController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Received Mail');
+    $panel->setHeader(pht('Received Mail'));
     $panel->appendChild($table);
     $panel->appendChild($pager);
+    $panel->setNoBackground();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('received');
@@ -74,7 +75,8 @@ final class PhabricatorMetaMTAReceivedListController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Received Mail',
+        'title' => pht('Received Mail'),
+        'device' => true,
       ));
   }
 }

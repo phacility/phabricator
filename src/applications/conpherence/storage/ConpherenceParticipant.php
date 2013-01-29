@@ -11,9 +11,10 @@ final class ConpherenceParticipant extends ConpherenceDAO {
   protected $behindTransactionPHID;
   protected $dateTouched;
 
-  public function markUpToDate() {
+  public function markUpToDate(ConpherenceTransaction $xaction) {
     if (!$this->isUpToDate()) {
       $this->setParticipationStatus(ConpherenceParticipationStatus::UP_TO_DATE);
+      $this->setBehindTransactionPHID($xaction->getPHID());
       $this->save();
     }
     return $this;

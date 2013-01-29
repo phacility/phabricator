@@ -7,7 +7,7 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'View Mail Logs';
+    return pht('View Mail Logs');
   }
 
   public function getIconName() {
@@ -20,6 +20,10 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
 
   public function getApplicationGroup() {
     return self::GROUP_ADMIN;
+  }
+
+  public function canUninstall() {
+    return false;
   }
 
   public function getRoutes() {

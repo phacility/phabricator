@@ -15,6 +15,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $isNewObject;
   private $mentionedPHIDs;
   private $continueOnNoEffect;
+  private $parentMessageID;
 
   private $isPreview;
 
@@ -38,6 +39,18 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getContinueOnNoEffect() {
     return $this->continueOnNoEffect;
+  }
+
+  /**
+   * Not strictly necessary, but reply handlers ideally set this value to
+   * make email threading work better.
+   */
+  public function setParentMessageID($parent_message_id) {
+    $this->parentMessageID = $parent_message_id;
+    return $this;
+  }
+  public function getParentMessageID() {
+    return $this->parentMessageID;
   }
 
   protected function getIsNewObject() {
@@ -509,7 +522,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function getPHIDTransactionNewValue(
     PhabricatorApplicationTransaction $xaction) {
 
-    $old = array_combine($xaction->getOldValue(), $xaction->getOldValue());
+    $old = array_fuse($xaction->getOldValue());
 
     $new = $xaction->getNewValue();
     $new_add = idx($new, '+', array());
@@ -518,7 +531,7 @@ abstract class PhabricatorApplicationTransactionEditor
     unset($new['-']);
     $new_set = idx($new, '=', null);
     if ($new_set !== null) {
-      $new_set = array_combine($new_set, $new_set);
+      $new_set = array_fuse($new_set);
     }
     unset($new['=']);
 
@@ -669,8 +682,9 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setIsBulk(true)
       ->setBody($body->render());
 
-    // TODO
-    //  ->setParentMessageID(...)
+    if ($this->getParentMessageID()) {
+      $template->setParentMessageID($this->getParentMessageID());
+    }
 
     $mails = $this
       ->buildReplyHandler($object)

@@ -29,7 +29,7 @@ final class PhabricatorOAuthFailureView extends AphrontView {
     $diagnose = null;
 
     $view = new AphrontRequestFailureView();
-    $view->setHeader($provider_name.' Auth Failed');
+    $view->setHeader(pht('%s Auth Failed', $provider_name));
     if ($this->request) {
       $view->appendChild(
         hsprintf(
@@ -79,7 +79,7 @@ final class PhabricatorOAuthFailureView extends AphrontView {
     $view->appendChild(
       '<div class="aphront-failure-continue">'.
         $diagnose.
-        '<a href="/login/" class="button">Continue</a>'.
+        '<a href="/login/" class="button">'.pht('Continue').'</a>'.
       '</div>');
 
     return $view->render();

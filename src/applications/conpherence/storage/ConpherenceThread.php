@@ -189,15 +189,18 @@ final class ConpherenceThread extends ConpherenceDAO
           }
           // fallthrough intentionally here
         case ConpherenceTransactionType::TYPE_FILES:
-        default:
-          if ($behind_transaction_phid &&
-            $transaction->getPHID() != $behind_transaction_phid) {
-              $unread_count++;
+          if ($behind_transaction_phid) {
+            $unread_count++;
+            if ($transaction->getPHID() == $behind_transaction_phid) {
+              break 2;
             }
+          }
           if ($unread_count > $max_count) {
             break 2;
           }
           break;
+        default:
+          continue 2;
       }
       if ($snippet && !$behind_transaction_phid) {
         break;

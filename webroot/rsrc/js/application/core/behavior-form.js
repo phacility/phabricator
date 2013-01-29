@@ -14,6 +14,39 @@ JX.behavior('aphront-form-disable-on-submit', function(config) {
     new_tab = (raw.altKey || raw.ctrlKey || raw.metaKey || raw.shiftKey);
   });
 
+
+  JX.Stratcom.listen('keypress', ['tag:form', 'tag:textarea'], function(e) {
+    var raw = e.getRawEvent();
+    if (e.getSpecialKey() != 'return' || !raw.ctrlKey) {
+      return;
+    }
+
+    e.kill();
+
+    var form = e.getNode('tag:form');
+
+    // This allows 'workflow' and similar actions to take effect.
+    var r = JX.DOM.invoke(form, 'didSyntheticSubmit');
+    if (r.getPrevented()) {
+      return;
+    }
+
+    // If nothing handled the synthetic submit, submit normally.
+    form.submit();
+  });
+
+  function will_submit(root) {
+    root._disabled = true;
+    var buttons = JX.DOM.scry(root, 'button');
+    for (var ii = 0; ii < buttons.length; ii++) {
+      if (!buttons[ii].disabled) {
+        buttons[ii].disabled = 'disabled';
+        JX.DOM.alterClass(buttons[ii], 'disabled', true);
+        restore.push(buttons[ii]);
+      }
+    }
+  }
+
   JX.Stratcom.listen('submit', 'tag:form', function(e) {
     if (e.getNode('workflow')) {
       // Don't activate for forms with workflow, the workflow behavior will
@@ -34,15 +67,8 @@ JX.behavior('aphront-form-disable-on-submit', function(config) {
     if (root._disabled) {
       e.kill();
     }
-    root._disabled = true;
-    var buttons = JX.DOM.scry(root, 'button');
-    for (var ii = 0; ii < buttons.length; ii++) {
-      if (!buttons[ii].disabled) {
-        buttons[ii].disabled = 'disabled';
-        JX.DOM.alterClass(buttons[ii], 'disabled', true);
-        restore.push(buttons[ii]);
-      }
-    }
+
+    will_submit(root);
   });
 
   JX.Stratcom.listen('unload', null, function(e) {

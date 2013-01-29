@@ -39,6 +39,8 @@ final class PhabricatorMetaMTASendGridReceiveController
       'text' => $request->getStr('text'),
       'html' => $request->getStr('from'),
     ));
+    $received->setMessageIDHash(
+      PhabricatorHash::digestForIndex($received->getMessageID()));
 
     $file_phids = array();
     foreach ($_FILES as $file_raw) {
@@ -59,7 +61,7 @@ final class PhabricatorMetaMTASendGridReceiveController
     $received->processReceivedMail();
 
     $response = new AphrontWebpageResponse();
-    $response->setContent("Got it! Thanks, SendGrid!\n");
+    $response->setContent(pht("Got it! Thanks, SendGrid!\n"));
     return $response;
   }
 

@@ -49,8 +49,10 @@ final class ConpherenceViewController extends
     $this->setConpherence($conpherence);
 
     $participant = $conpherence->getParticipant($user->getPHID());
+    $transactions = $conpherence->getTransactions();
+    $latest_transaction = end($transactions);
     $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $participant->markUpToDate();
+    $participant->markUpToDate($latest_transaction);
     unset($write_guard);
 
     $header = $this->renderHeaderPaneContent();
@@ -69,13 +71,14 @@ final class ConpherenceViewController extends
     $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
     $header =
-    phutil_render_tag(
+    javelin_render_tag(
       'a',
       array(
         'class' => 'edit',
         'href' => $edit_href,
+        'sigil' => 'workflow',
       ),
-      pht('edit...')
+      ''
     ).
     phutil_render_tag(
       'div',
@@ -112,6 +115,9 @@ final class ConpherenceViewController extends
 
     $transactions = $conpherence->getTransactions();
     foreach ($transactions as $transaction) {
+      if ($transaction->shouldHide()) {
+        continue;
+      }
       $rendered_transactions[] = id(new ConpherenceTransactionView())
         ->setUser($user)
         ->setConpherenceTransaction($transaction)

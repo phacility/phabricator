@@ -4,6 +4,26 @@ final class PhabricatorSetupCheckBaseURI extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+
+    if (strpos($_SERVER['HTTP_HOST'], '.') === false) {
+      $summary = pht(
+        'The domain does not contain a dot. This is necessary for some web '.
+        'browsers to be able to set cookies.');
+
+      $message = pht(
+        'The domain in the base URI must contain a dot ("."), e.g. '.
+        '"http://example.com", not just a bare name like "http://example/". '.
+        'Some web browsers will not set cookies on domains with no TLD.');
+
+      $this
+        ->newIssue('config.phabricator.domain')
+        ->setShortName(pht('Dotless Domain'))
+        ->setName(pht('No Dot Character in Domain'))
+        ->setSummary($summary)
+        ->setMessage($message)
+        ->setIsFatal(true);
+    }
+
     if ($base_uri) {
       return;
     }

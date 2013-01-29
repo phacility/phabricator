@@ -75,21 +75,24 @@ JX.behavior('phabricator-transaction-list', function(config) {
     e.kill();
   });
 
-  JX.Stratcom.listen('submit', 'transaction-append', function(e) {
-    var form = e.getTarget();
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
+    'transaction-append',
+    function(e) {
+      var form = e.getTarget();
 
-    JX.Workflow.newFromForm(form, {anchor: next_anchor})
-      .setHandler(function(response) {
-        ontransactions(response);
+      JX.Workflow.newFromForm(form, {anchor: next_anchor})
+        .setHandler(function(response) {
+          ontransactions(response);
 
-        var e = JX.DOM.invoke(form, 'willClear');
-        if (!e.getPrevented()) {
-          form.reset();
-        }
-      })
-      .start();
+          var e = JX.DOM.invoke(form, 'willClear');
+          if (!e.getPrevented()) {
+            form.reset();
+          }
+        })
+        .start();
 
-    e.kill();
-  });
+      e.kill();
+    });
 
 });

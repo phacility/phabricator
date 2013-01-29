@@ -29,8 +29,9 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
         return ($old === null);
       case ConpherenceTransactionType::TYPE_TITLE:
       case ConpherenceTransactionType::TYPE_PICTURE:
-      case ConpherenceTransactionType::TYPE_FILES:
         return false;
+      case ConpherenceTransactionType::TYPE_FILES:
+        return true;
     }
 
     return parent::shouldHide();

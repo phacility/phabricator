@@ -18,6 +18,8 @@ final class PholioMockViewController extends PholioController {
     $mock = id(new PholioMockQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needImages(true)
+      ->needCoverFiles(true)
       ->executeOne();
 
     if (!$mock) {
@@ -65,8 +67,6 @@ final class PholioMockViewController extends PholioController {
     $output = new PholioMockImagesView();
     $output->setMock($mock);
 
-    $carousel = $output->render();
-
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($this->getRequest()->getUser())
       ->setTransactions($xactions)
@@ -78,10 +78,11 @@ final class PholioMockViewController extends PholioController {
       $header,
       $actions,
       $properties,
-      $carousel,
+      $output->render(),
       $xaction_view,
       $add_comment,
     );
+
 
     return $this->buildApplicationPage(
       $content,

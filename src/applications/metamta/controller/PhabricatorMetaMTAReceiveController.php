@@ -12,7 +12,7 @@ final class PhabricatorMetaMTAReceiveController
       $receiver = PhabricatorMetaMTAReceivedMail::loadReceiverObject(
         $request->getStr('obj'));
       if (!$receiver) {
-        throw new Exception("No such task or revision!");
+        throw new Exception(pht("No such task or revision!"));
       }
 
       $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
@@ -28,6 +28,12 @@ final class PhabricatorMetaMTAReceiveController
         array(
           'text' => $request->getStr('body'),
         ));
+
+      // Make up some unique value, since this column isn't nullable.
+      $received->setMessageIDHash(
+        PhabricatorHash::digestForIndex(
+          Filesystem::readRandomBytes(12)));
+
       $received->save();
 
       $received->processReceivedMail();
@@ -44,25 +50,26 @@ final class PhabricatorMetaMTAReceiveController
     $form->setAction($this->getApplicationURI('/receive/'));
     $form
       ->appendChild(
-        '<p class="aphront-form-instructions">This form will simulate '.
-        'sending mail to an object.</p>')
+        '<p class="aphront-form-instructions">'.
+          pht('This form will simulate sending mail to an object.').
+        '</p>')
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('To')
+          ->setLabel(pht('To'))
           ->setName('obj')
-          ->setCaption('e.g. <tt>D1234</tt> or <tt>T1234</tt>'))
+          ->setCaption(pht('e.g. <tt>D1234</tt> or <tt>T1234</tt>')))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Body')
+          ->setLabel(pht('Body'))
           ->setName('body'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Receive Mail'));
+          ->setValue(pht('Receive Mail')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Receive Email');
+    $panel->setHeader(pht('Receive Email'));
     $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('receive');
@@ -71,7 +78,8 @@ final class PhabricatorMetaMTAReceiveController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Receive Test',
+        'title' => pht('Receive Test'),
+        'device' => true,
       ));
   }
 

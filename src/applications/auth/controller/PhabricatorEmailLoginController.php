@@ -22,18 +22,18 @@ final class PhabricatorEmailLoginController
 
     if ($request->isFormPost()) {
       $e_email = null;
-      $e_captcha = 'Again';
+      $e_captcha = pht('Again');
 
       $captcha_ok = AphrontFormRecaptchaControl::processCaptcha($request);
       if (!$captcha_ok) {
-        $errors[] = "Captcha response is incorrect, try again.";
-        $e_captcha = 'Invalid';
+        $errors[] = pht("Captcha response is incorrect, try again.");
+        $e_captcha = pht('Invalid');
       }
 
       $email = $request->getStr('email');
       if (!strlen($email)) {
-       $errors[] = "You must provide an email address.";
-       $e_email = 'Required';
+       $errors[] = pht("You must provide an email address.");
+       $e_email = pht('Required');
       }
 
       if (!$errors) {
@@ -53,8 +53,9 @@ final class PhabricatorEmailLoginController
         }
 
         if (!$target_user) {
-          $errors[] = "There is no account associated with that email address.";
-          $e_email = "Invalid";
+          $errors[] =
+            pht("There is no account associated with that email address.");
+          $e_email = pht("Invalid");
         }
 
         if (!$errors) {
@@ -96,13 +97,15 @@ EOBODY;
           $mail->saveAndSend();
 
           $view = new AphrontRequestFailureView();
-          $view->setHeader('Check Your Email');
+          $view->setHeader(pht('Check Your Email'));
           $view->appendChild(
-            '<p>An email has been sent with a link you can use to login.</p>');
+            '<p>'.pht(
+              'An email has been sent with a link you can use to login.'
+            ).'</p>');
           return $this->buildStandardPageResponse(
             $view,
             array(
-              'title' => 'Email Sent',
+              'title' => pht('Email Sent'),
             ));
         }
       }
@@ -115,38 +118,41 @@ EOBODY;
       ->setUser($request->getUser())
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Email')
+          ->setLabel(pht('Email'))
           ->setName('email')
           ->setValue($request->getStr('email'))
           ->setError($e_email))
       ->appendChild(
         id(new AphrontFormRecaptchaControl())
-          ->setLabel('Captcha')
+          ->setLabel(pht('Captcha'))
           ->setError($e_captcha))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Send Email'));
+          ->setValue(pht('Send Email')));
 
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Login Error');
+      $error_view->setTitle(pht('Login Error'));
       $error_view->setErrors($errors);
     }
 
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild('<h1>Forgot Password / Email Login</h1>');
+    $panel->appendChild('
+      <h1>'.pht('Forgot Password / Email Login').'</h1>');
     $panel->appendChild($email_auth);
+    $panel->setNoBackground();
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $error_view,
         $panel,
       ),
       array(
-        'title' => 'Create New Account',
+        'title' => pht('Forgot Password'),
+        'device' => true,
       ));
   }
 

@@ -26,6 +26,10 @@ final class PhabricatorApplicationDaemons extends PhabricatorApplication {
     return self::GROUP_ADMIN;
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       '/daemon/' => array(

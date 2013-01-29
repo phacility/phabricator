@@ -59,7 +59,7 @@ final class PhortuneMonthYearExpiryControl extends AphrontFormControl {
 
     $current_year = $this->getCurrentYear();
     $years = range($current_year, $current_year + 20);
-    $years = array_combine($years, $years);
+    $years = array_fuse($years);
 
     if ($this->getMonthInputValue()) {
       $selected_month = $this->getMonthInputValue();

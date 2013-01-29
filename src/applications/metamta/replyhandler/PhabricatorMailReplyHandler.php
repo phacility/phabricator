@@ -37,7 +37,11 @@ abstract class PhabricatorMailReplyHandler {
   abstract public function validateMailReceiver($mail_receiver);
   abstract public function getPrivateReplyHandlerEmailAddress(
     PhabricatorObjectHandle $handle);
-  abstract public function getReplyHandlerDomain();
+  public function getReplyHandlerDomain() {
+    return PhabricatorEnv::getEnvConfig(
+      'metamta.reply-handler-domain'
+    );
+  }
   abstract public function getReplyHandlerInstructions();
   abstract protected function receiveEmail(
     PhabricatorMetaMTAReceivedMail $mail);
@@ -291,8 +295,10 @@ EOBODY;
     return $this->getSingleReplyHandlerPrefix($address);
   }
 
-  final protected function enhanceBodyWithAttachments($body,
-                                                      array $attachments) {
+  final protected function enhanceBodyWithAttachments(
+    $body,
+    array $attachments,
+    $format = '- {F%d, layout=link}') {
     if (!$attachments) {
       return $body;
     }
@@ -306,7 +312,7 @@ EOBODY;
     }
 
     foreach ($files as $file) {
-      $file_str = sprintf('- {F%d, layout=link}', $file->getID());
+      $file_str = sprintf($format, $file->getID());
       $body .= $file_str."\n";
     }
 

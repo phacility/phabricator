@@ -7,8 +7,10 @@
  */
 
 JX.behavior('workflow', function() {
+
+  // Listen for both real
   JX.Stratcom.listen(
-    'submit',
+    ['submit', 'didSyntheticSubmit'],
     ['workflow', 'tag:form'],
     function(e) {
       if (JX.Stratcom.pass()) {
@@ -18,6 +20,7 @@ JX.behavior('workflow', function() {
       e.prevent();
       JX.Workflow.newFromForm(target).start();
     });
+
   JX.Stratcom.listen(
     'click',
     ['workflow', 'tag:a'],
@@ -40,4 +43,5 @@ JX.behavior('workflow', function() {
       e.prevent();
       JX.Workflow.newFromLink(target).start();
     });
+
 });
