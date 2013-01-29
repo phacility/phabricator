@@ -73,7 +73,10 @@ class AphrontDefaultApplicationConfiguration
         'profile/(?P<phid>[^/]+)/' => 'PhabricatorXHProfProfileController',
       ),
 
-      '/~/' => 'DarkConsoleController',
+      '/~/' => array(
+        '' => 'DarkConsoleController',
+        'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
+      ),
 
       '/search/' => array(
         '' => 'PhabricatorSearchController',

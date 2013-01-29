@@ -166,7 +166,6 @@ $package_spec = array(
     'javelin-behavior-maniphest-subpriority-editor',
   ),
   'darkconsole.pkg.js' => array(
-    'javelin-behavior-dark-console-ajax',
     'javelin-behavior-dark-console',
     'javelin-behavior-error-log',
   ),

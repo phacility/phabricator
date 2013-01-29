@@ -20,8 +20,7 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
     );
   }
 
-  public function render() {
-
+  public function renderPanel() {
     $data = $this->getData();
 
     $sections = array(

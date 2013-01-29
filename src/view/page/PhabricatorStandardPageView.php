@@ -164,8 +164,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       Javelin::initBehavior(
         'dark-console',
         array(
-          'uri'         => '/~/',
-          'request_uri' => $request ? (string) $request->getRequestURI() : '/',
+          'uri' => $request ? (string)$request->getRequestURI() : '?',
+          'selected' => $user ? $user->getConsoleTab() : null,
+          'visible'  => $user ? (int)$user->getConsoleVisible() : true,
         ));
 
       // Change this to initBehavior when there is some behavior to initialize
@@ -225,13 +226,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   protected function willSendResponse($response) {
+    $request = $this->getRequest();
     $response = parent::willSendResponse($response);
 
-    $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
+    $console = $request->getApplicationConfiguration()->getConsole();
+
     if ($console) {
       $response = str_replace(
         '<darkconsole />',
-        $console->render($this->getRequest()),
+        $console->render($request),
         $response);
     }
 

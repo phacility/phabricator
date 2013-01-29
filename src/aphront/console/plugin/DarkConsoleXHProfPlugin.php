@@ -8,13 +8,15 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
   protected $xhprofID;
 
   public function getName() {
-    $run = $this->getData();
-
-    if ($run) {
-      return '<span style="color: #ff00ff;">&bull;</span> XHProf';
-    }
-
     return 'XHProf';
+  }
+
+  public function getColor() {
+    $data = $this->getData();
+    if ($data['xhprofID']) {
+      return '#ff00ff';
+    }
+    return null;
   }
 
   public function getDescription() {
@@ -22,14 +24,24 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
   }
 
   public function generateData() {
-    return $this->xhprofID;
+    return array(
+      'xhprofID' => $this->xhprofID,
+      'profileURI' => (string)$this
+        ->getRequestURI()
+        ->alter('__profile__', 'page'),
+    );
   }
 
   public function getXHProfRunID() {
     return $this->xhprofID;
   }
 
-  public function render() {
+  public function renderPanel() {
+    $data = $this->getData();
+
+    $run = $data['xhprofID'];
+    $profile_uri = $data['profileURI'];
+
     if (!DarkConsoleXHProfPluginAPI::isProfilerAvailable()) {
       $href = PhabricatorEnv::getDoclink('article/Installation_Guide.html');
       $install_guide = phutil_tag(
@@ -49,14 +61,12 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
     $result = array();
 
-    $run = $this->getXHProfRunID();
-
     $header =
       '<div class="dark-console-panel-header">'.
         phutil_tag(
           'a',
           array(
-            'href'  => $this->getRequestURI()->alter('__profile__', 'page'),
+            'href'  => $profile_uri,
             'class' => $run
               ? 'disabled button'
               : 'green button',

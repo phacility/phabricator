@@ -3,7 +3,7 @@
  */
 
 .dark-console {
-  background:     #555555;
+  background:     #444444;
   color:          #eeeeee;
   width:          100%;
   font-family:    "Verdana";
@@ -11,52 +11,99 @@
   position:       relative;
 }
 
-.dark-console a:link {
-  color: inherit;
+.dark-console-requests,
+.dark-console-tabs {
+  position: absolute;
+  overflow-y: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 15%;
+  padding: 8px 0;
+}
+
+.dark-console-requests,
+.dark-console-tabs,
+.dark-console-panel,
+.dark-console-load {
+  border-left: 1px solid #111111;
+  box-shadow: -2px 0px 2px rgba(0, 0, 0, 0.25);
+}
+
+.dark-console-requests {
+  background: #222222;
 }
 
 .dark-console-tabs {
-  width:        180px;
-  background:   #222222;
-  border-right: 1px solid #888888;
-  padding:      2.5em 0em;
+  background: #333333;
+  left: 15%;
 }
 
+.dark-console-panel,
+.dark-console-load {
+  position: relative;
+  min-height: 320px;
+}
 
-a.dark-console-tab {
-  padding:      .75em 12px;
-  text-align:   right;
-  background:   #444444;
-  position:     relative;
-  border:       1px solid #666666;
+.dark-console-panel {
+  margin-left: 30%;
+  background: #444444;
+}
+
+.dark-console-requests a.dark-console-request,
+.dark-console-tabs a.dark-console-tab {
+  display: block;
+  padding: 6px;
+  overflow: hidden;
+  background: #444444;
+  margin: 3px 0;
+  color: #cccccc;
+  border-color: #666666;
   border-width: 1px 0;
-  border-right-color: #888888;
-  margin-bottom: 2px;
-  display:        block;
-  color:          #cccccc;
+  border-style: solid;
 }
 
-a.dark-console-tab-selected {
-  margin-right:       -1px;
-  padding-right:      13px;
-  background:         #555555;
-  border-color:       #888888;
-  border-right-color: #555555;
-  color:              #eeeeee;
+.dark-console-requests a.dark-selected,
+.dark-console-tabs a.dark-selected {
+  background: #0066aa;
 }
 
+.dark-console-requests a.dark-console-request:hover,
+.dark-console-tabs a.dark-console-tab:hover {
+  background: #1188cc;
+}
+
+.dark-console-tabs a.dark-console-tab {
+  text-align: right;
+}
+
+.dark-console-load {
+  background-image: url(/rsrc/image/darkload.gif);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #000;
+  margin-left: 15%;
+}
 
 .dark-console .aphront-table-view {
+  font-size: 11px;
   background: #888888;
   color: #eeeeee;
-  margin: 1em 1%;
-  width: 98%;
+  width: 100%;
   border-color: #333333;
+  margin: 8px 0;
 }
 
 .dark-console .aphront-table-view th {
+  text-shadow: none;
+  font-family: "Verdana";
+  font-size: 11px;
   background: #333333;
   color: #ffffff;
+}
+
+.dark-console .aphront-table-view td {
+  font-size: 11px;
 }
 
 .dark-console .aphront-table-view td.header {
@@ -77,13 +124,8 @@ a.dark-console-tab-selected {
   color: #dddddd;
 }
 
-.dark-console-panel-ErrorLog {
-  max-height:       500px;
-  overflow:         auto;
-}
-
-.dark-console-panel-error-details {
-  display: none;
+.dark-console-panel-core {
+  padding: 12px;
 }
 
 .explain-sev-1 {
@@ -119,15 +161,11 @@ a.dark-console-tab-selected {
 }
 
 .dark-console-panel-header {
-  background: #606060;
-  border-bottom: 1px solid #505050;
-  padding: .25em 1em .25em 0;
+  padding: 8px 4px 0;
 }
 
 .dark-console-panel-header h1 {
-  padding: 1em;
-  font-size: 12px;
-  font-weight: normal;
+  font-size: 15px;
 }
 
 .dark-console-panel-header .button {
@@ -168,4 +206,11 @@ a.dark-console-tab-selected {
     height: 2px;
 }
 
+.dark-console-panel-ErrorLog {
+  max-height:       500px;
+  overflow:         auto;
+}
 
+.dark-console-panel-error-details {
+  display: none;
+}

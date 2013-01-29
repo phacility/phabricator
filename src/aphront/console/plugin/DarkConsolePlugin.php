@@ -11,10 +11,25 @@ abstract class DarkConsolePlugin {
 
   abstract public function getName();
   abstract public function getDescription();
-  abstract public function render();
+  abstract public function renderPanel();
 
   public function __construct() {
 
+  }
+
+  public function getColor() {
+    return null;
+  }
+
+  final public function getOrderKey() {
+    return sprintf(
+      '%09d%s',
+      (int)(999999999 * $this->getOrder()),
+      $this->getName());
+  }
+
+  public function getOrder() {
+    return 1.0;
   }
 
   public function setConsoleCore(DarkConsoleCore $core) {
@@ -50,10 +65,6 @@ abstract class DarkConsolePlugin {
 
   public function getRequestURI() {
     return $this->getRequest()->getRequestURI();
-  }
-
-  public function isPermanent() {
-    return false;
   }
 
   public function shouldStartup() {

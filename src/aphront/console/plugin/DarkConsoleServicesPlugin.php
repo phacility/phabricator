@@ -136,11 +136,16 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       'start' => PhabricatorStartup::getStartTime(),
       'end'   => microtime(true),
       'log'   => $log,
+      'analyzeURI' => (string)$this
+        ->getRequestURI()
+        ->alter('__analyze__', true),
+      'didAnalyze' => isset($_REQUEST['__analyze__']),
     );
   }
 
-  public function render() {
+  public function renderPanel() {
     $data = $this->getData();
+
     $log = $data['log'];
     $results = array();
 
@@ -149,8 +154,8 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
         phutil_tag(
           'a',
           array(
-            'href'  => $this->getRequestURI()->alter('__analyze__', true),
-            'class' => isset($_REQUEST['__analyze__'])
+            'href'  => $data['analyzeURI'],
+            'class' => $data['didAnalyze']
               ? 'disabled button'
               : 'green button',
           ),
