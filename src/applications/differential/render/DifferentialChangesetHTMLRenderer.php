@@ -319,9 +319,11 @@ abstract class DifferentialChangesetHTMLRenderer
       $meta['whitespace'] = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
     }
 
-    $more = null;
+    $content = array();
+    $content[] = $message;
     if ($force !== 'none') {
-      $more = ' '.javelin_tag(
+      $content[] = ' ';
+      $content[] = javelin_tag(
         'a',
         array(
           'mustcapture' => true,
@@ -334,15 +336,18 @@ abstract class DifferentialChangesetHTMLRenderer
     }
 
     return $this->wrapChangeInTable(
-      javelin_render_tag(
+      javelin_tag(
         'tr',
         array(
           'sigil' => 'context-target',
         ),
-        '<td class="differential-shield" colspan="6">'.
-          phutil_escape_html($message).
-          $more.
-        '</td>'));
+        phutil_tag(
+          'td',
+          array(
+            'class' => 'differential-shield',
+            'colspan' => 6,
+          ),
+          $content)));
   }
 
   protected function wrapChangeInTable($content) {
@@ -350,7 +355,10 @@ abstract class DifferentialChangesetHTMLRenderer
       return null;
     }
 
-    return javelin_render_tag(
+    // TODO: [HTML] After TwoUpRenderer gets refactored, fix this.
+    $content = phutil_safe_html($content);
+
+    return javelin_tag(
       'table',
       array(
         'class' => 'differential-diff remarkup-code PhabricatorMonospaced',

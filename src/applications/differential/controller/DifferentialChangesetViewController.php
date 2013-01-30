@@ -234,6 +234,10 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     Javelin::initBehavior('differential-comment-jump', array());
 
+    // TODO: [HTML] Clean up DifferentialChangesetParser output, but it's
+    // undergoing like six kinds of refactoring anyway.
+    $output = phutil_safe_html($output);
+
     $detail = new DifferentialChangesetDetailView();
     $detail->setChangeset($changeset);
     $detail->appendChild($output);

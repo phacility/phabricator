@@ -81,7 +81,6 @@ JX.behavior('dark-console', function(config, statics) {
     JX.DOM.alterClass(req.all[req.current], 'dark-selected', true);
 
     if (statics.visible) {
-      JX.log('visible!');
       draw_request(key);
     }
   }

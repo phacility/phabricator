@@ -148,16 +148,36 @@ final class DifferentialChangesetTwoUpRenderer
           }
         }
 
-        $container = javelin_render_tag(
+        $container = javelin_tag(
           'tr',
           array(
             'sigil' => 'context-target',
           ),
-          '<td colspan="2" class="show-more">'.
-            implode(' &bull; ', $contents).
-          '</td>'.
-          '<th class="show-context-line">'.$context_line.'</td>'.
-          '<td colspan="3" class="show-context">'.$context.'</td>');
+          array(
+            phutil_tag(
+              'td',
+              array(
+                'colspan' => 2,
+                'class' => 'show-more',
+              ),
+              array_interleave(
+                " \xE2\x80\xA2 ", // Bullet
+                $contents)),
+            phutil_tag(
+              'th',
+              array(
+                'class' => 'show-context-line',
+              ),
+              $context_line ? (int)$context_line : null),
+            phutil_tag(
+              'td',
+              array(
+                'colspan' => 3,
+                'class' => 'show-context',
+              ),
+              // TODO: [HTML] Escaping model here isn't ideal.
+              phutil_safe_html($context)),
+          ));
 
         $html[] = $container;
 
