@@ -64,30 +64,38 @@ final class PhabricatorApplicationDetailViewController
   private function buildActionView(
     PhabricatorUser $user, PhabricatorApplication $selected) {
 
+    $view = id(new PhabricatorActionListView())
+          ->setUser($user);
+
     if ($selected->canUninstall()) {
       if ($selected->isInstalled()) {
-
-        return id(new PhabricatorActionListView())
-          ->setUser($user)
-          ->addAction(
-            id(new PhabricatorActionView())
-              ->setName(pht('Uninstall'))
-              ->setIcon('delete')
-              ->setHref(
+        $view->addAction(
+               id(new PhabricatorActionView())
+               ->setName(pht('Uninstall'))
+               ->setIcon('delete')
+               ->setHref(
                 $this->getApplicationURI(get_class($selected).'/uninstall/'))
-              );
+               );
       } else {
-          return id(new PhabricatorActionListView())
-            ->setUser($user)
-            ->addAction(
-              id(new PhabricatorActionView())
-              ->setName(pht('Install'))
-              ->setIcon('new')
-              ->setHref(
-                $this->getApplicationURI(get_class($selected).'/install/'))
-              );
+        $view->addAction(
+               id(new PhabricatorActionView())
+               ->setName(pht('Install'))
+               ->setIcon('new')
+               ->setHref(
+                 $this->getApplicationURI(get_class($selected).'/install/'))
+               );
       }
+    } else {
+      $view->addAction(
+             id(new PhabricatorActionView())
+             ->setName(pht('Uninstall'))
+             ->setIcon('delete')
+             ->setDisabled(true)
+             ->setHref(
+               $this->getApplicationURI(get_class($selected).'/uninstall/'))
+             );
     }
+    return $view;
   }
 
 }
