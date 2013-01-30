@@ -227,6 +227,20 @@ abstract class PhabricatorApplication {
 
 /* -(  Application Management  )--------------------------------------------- */
 
+  public static function getByClass($class_name) {
+
+    $selected = null;
+    $applications = PhabricatorApplication::getAllApplications();
+
+    foreach ($applications as $application) {
+      if (get_class($application) == $class_name) {
+        $selected = $application;
+        break;
+      }
+    }
+    return $selected;
+  }
+
   public static function getAllApplications() {
 
     $classes = id(new PhutilSymbolLoader())
