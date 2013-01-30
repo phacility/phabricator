@@ -113,9 +113,17 @@ final class DiffusionCommitController extends DiffusionController {
     $content[] = $this->buildAuditTable($commit, $audit_requests);
     $content[] = $this->buildComments($commit);
 
+    $hard_limit = 1000;
+
     $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);
+    $change_query->setLimit($hard_limit + 1);
     $changes = $change_query->loadChanges();
+
+    $was_limited = (count($changes) > $hard_limit);
+    if ($was_limited) {
+      $changes = array_slice($changes, 0, $hard_limit);
+    }
 
     $content[] = $this->buildMergesTable($commit);
 
@@ -171,11 +179,20 @@ final class DiffusionCommitController extends DiffusionController {
         "This commit hasn't been fully parsed yet (or doesn't affect any ".
         "paths).");
       $content[] = $no_changes;
+    } else if ($was_limited) {
+      $huge_commit = new AphrontErrorView();
+      $huge_commit->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $huge_commit->setTitle(pht('Enormous Commit'));
+      $huge_commit->appendChild(
+        pht(
+          'This commit is enormous, and affects more than %d files. '.
+          'Changes are not shown.',
+          $hard_limit));
+      $content[] = $huge_commit;
     } else {
       $change_panel = new AphrontPanelView();
       $change_panel->setHeader("Changes (".number_format($count).")");
       $change_panel->setID('toc');
-
       if ($count > self::CHANGES_LIMIT) {
         $show_all_button = phutil_render_tag(
           'a',
@@ -306,7 +323,6 @@ final class DiffusionCommitController extends DiffusionController {
     $crumbs = $this->buildCrumbs(array(
       'commit' => true,
     ));
-
 
     if ($changesets) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
