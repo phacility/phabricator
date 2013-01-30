@@ -52,7 +52,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
         "\xE2\x80\xA6");
     }
 
-    return implode("\n", $tags);
+    return $this->renderHTMLView($tags);
   }
 
 }

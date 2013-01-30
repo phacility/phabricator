@@ -64,7 +64,7 @@ final class PhabricatorConfigIssueViewController
     $view = new PhabricatorSetupIssueView();
     $view->setIssue($issue);
 
-    $container = phutil_render_tag(
+    $container = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-background',
