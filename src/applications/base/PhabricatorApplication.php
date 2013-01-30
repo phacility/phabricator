@@ -66,7 +66,9 @@ abstract class PhabricatorApplication {
     $uninstalled =
       PhabricatorEnv::getEnvConfig('phabricator.uninstalled-applications');
 
-      if (isset($uninstalled[get_class($this)])) {
+      if (!$this->canUninstall()) {
+        return true;
+      } else if (isset($uninstalled[get_class($this)])) {
         return false;
       } else {
         return true;

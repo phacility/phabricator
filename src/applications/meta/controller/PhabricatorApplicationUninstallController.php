@@ -17,7 +17,7 @@ final class PhabricatorApplicationUninstallController
 
     $selected = PhabricatorApplication::getByClass($this->application);
 
-    if (!$selected) {
+    if (!$selected || !$selected->canUninstall()) {
       return new Aphront404Response();
     }
 
