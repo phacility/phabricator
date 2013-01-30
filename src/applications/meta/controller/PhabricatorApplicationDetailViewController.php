@@ -13,15 +13,7 @@ final class PhabricatorApplicationDetailViewController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $selected = null;
-    $applications = PhabricatorApplication::getAllApplications();
-
-    foreach ($applications as $application) {
-      if (get_class($application) == $this->application) {
-      $selected = $application;
-      break;
-      }
-    }
+    $selected = PhabricatorApplication::getByClass($this->application);
 
     if (!$selected) {
       return new Aphront404Response();

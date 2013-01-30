@@ -128,6 +128,7 @@ final class ConpherenceViewController extends
 
     $form =
       id(new AphrontFormView())
+      ->setWorkflow(true)
       ->setAction($this->getApplicationURI('update/'.$conpherence->getID().'/'))
       ->setFlexible(true)
       ->setUser($user)

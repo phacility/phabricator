@@ -14,7 +14,12 @@ final class PhabricatorApplicationUninstallController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
-    $app_name = substr($this->application, strlen('PhabricatorApplication'));
+
+    $selected = PhabricatorApplication::getByClass($this->application);
+
+    if (!$selected) {
+      return new Aphront404Response();
+    }
 
     if ($request->isDialogFormPost()) {
       $this->manageApplication();
@@ -26,14 +31,18 @@ final class PhabricatorApplicationUninstallController
       $dialog = id(new AphrontDialogView())
              ->setUser($user)
              ->setTitle('Confirmation')
-             ->appendChild('Install '. $app_name. ' application ?')
+             ->appendChild(
+               'Install '. $selected->getName(). ' application ?'
+               )
              ->addSubmitButton('Install')
              ->addCancelButton('/applications/view/'.$this->application);
     } else {
       $dialog = id(new AphrontDialogView())
              ->setUser($user)
              ->setTitle('Confirmation')
-             ->appendChild('Really Uninstall '. $app_name. ' application ?')
+             ->appendChild(
+               'Really Uninstall '. $selected->getName(). ' application ?'
+               )
              ->addSubmitButton('Uninstall')
              ->addCancelButton('/applications/view/'.$this->application);
     }
