@@ -148,7 +148,6 @@ final class DiffusionCommitController extends DiffusionController {
         'r'.$callsign.$commit->getCommitIdentifier());
     }
 
-    $pane_id = null;
     if ($bad_commit) {
       $error_panel = new AphrontErrorView();
       $error_panel->setTitle('Bad Commit');
@@ -293,27 +292,10 @@ final class DiffusionCommitController extends DiffusionController {
       }
       $change_table->setRenderingReferences($change_references);
 
-      // TODO: This is pretty awkward, unify the CSS between Diffusion and
-      // Differential better.
-      require_celerity_resource('differential-core-view-css');
-      $pane_id = celerity_generate_unique_node_id();
-      $add_comment_view = $this->renderAddCommentPanel($commit,
-                                                       $audit_requests,
-                                                       $pane_id);
-      $main_pane = phutil_render_tag(
-        'div',
-        array(
-          'id'    => $pane_id
-        ),
-        $change_list->render().
-        id(new PhabricatorAnchorView())
-        ->setAnchorName('comment')
-        ->setNavigationMarker(true)
-        ->render().
-        $add_comment_view);
-
-      $content[] = $main_pane;
+      $content[] = $change_list->render();
     }
+
+    $content[] = $this->renderAddCommentPanel($commit, $audit_requests);
 
     $commit_id = 'r'.$callsign.$commit->getCommitIdentifier();
     $short_name = DiffusionView::nameCommit(
@@ -324,6 +306,7 @@ final class DiffusionCommitController extends DiffusionController {
     $crumbs = $this->buildCrumbs(array(
       'commit' => true,
     ));
+
 
     if ($changesets) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
@@ -562,13 +545,13 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function renderAddCommentPanel(
     PhabricatorRepositoryCommit $commit,
-    array $audit_requests,
-    $pane_id = null) {
+    array $audit_requests) {
     assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
     $user = $this->getRequest()->getUser();
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
+    $pane_id = celerity_generate_unique_node_id();
     Javelin::initBehavior(
       'differential-keyboard-navigation',
       array(
@@ -678,14 +661,26 @@ final class DiffusionCommitController extends DiffusionController {
         </div>
       </div>';
 
-    return
+    // TODO: This is pretty awkward, unify the CSS between Diffusion and
+    // Differential better.
+    require_celerity_resource('differential-core-view-css');
+
+    return phutil_render_tag(
+      'div',
+      array(
+        'id' => $pane_id,
+      ),
       phutil_render_tag(
         'div',
         array(
           'class' => 'differential-add-comment-panel',
         ),
+        id(new PhabricatorAnchorView())
+          ->setAnchorName('comment')
+          ->setNavigationMarker(true)
+          ->render().
         $panel->render().
-        $preview_panel);
+        $preview_panel));
   }
 
   /**
