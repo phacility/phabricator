@@ -85,7 +85,7 @@ final class PhabricatorProjectProfileController
         $class = 'grey disabled';
       }
 
-      $action = phabricator_render_form(
+      $action = phabricator_form(
         $user,
         array(
           'action' => '/project/update/'.$project->getID().'/join/',

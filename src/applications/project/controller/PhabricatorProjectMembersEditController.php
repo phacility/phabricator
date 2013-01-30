@@ -151,13 +151,13 @@ final class PhabricatorProjectMembersEditController
 
       $list->addButton(
         $handle,
-        phabricator_render_form(
+        phabricator_form(
           $user,
           array(
             'method' => 'POST',
             'action' => $request->getRequestURI(),
           ),
-          $hidden_input.$button));
+          array($hidden_input, $button)));
     }
 
     return $list;

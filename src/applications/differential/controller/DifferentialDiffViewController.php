@@ -113,9 +113,10 @@ final class DifferentialDiffViewController extends DifferentialController {
       }
     }
 
-    $action_panel = new AphrontHeadsupView();
-    $action_panel->setProperties($dict);
-    $action_panel->setHeader(pht('Diff Properties'));
+    $property_view = new PhabricatorPropertyListView();
+    foreach ($dict as $key => $value) {
+      $property_view->addProperty($key, $value);
+    }
 
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
@@ -144,7 +145,7 @@ final class DifferentialDiffViewController extends DifferentialController {
         ->appendChild(
           array(
             $top_panel->render(),
-            $action_panel->render(),
+            $property_view,
             $table_of_contents->render(),
             $details->render(),
           )),

@@ -29,7 +29,7 @@ final class PhabricatorFlagListView extends AphrontView {
         $flag->getHandle()->renderLink(),
         phutil_escape_html($flag->getNote()),
         phabricator_datetime($flag->getDateCreated(), $user),
-        phabricator_render_form(
+        phabricator_form(
           $user,
           array(
             'method' => 'POST',
@@ -42,7 +42,7 @@ final class PhabricatorFlagListView extends AphrontView {
               'class' => 'small grey',
             ),
             'Edit Flag')),
-        phabricator_render_form(
+        phabricator_form(
           $user,
           array(
             'method' => 'POST',

@@ -322,15 +322,17 @@ final class PhabricatorDirectoryMainController
     $panel = new AphrontPanelView();
     $panel->setHeader('Jump Nav');
     $panel->appendChild(
-      phabricator_render_form(
+      phabricator_form(
         $user,
         array(
           'action' => '/jump/',
           'method' => 'POST',
           'class'  => 'phabricator-jump-nav-form',
         ),
-        $jump_input.
-        $jump_caption));
+        array(
+          $jump_input,
+          $jump_caption,
+        )));
 
     return $panel;
   }

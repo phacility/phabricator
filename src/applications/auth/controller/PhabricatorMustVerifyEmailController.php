@@ -51,7 +51,7 @@ final class PhabricatorMustVerifyEmailController
       '</p>');
     $error_view->appendChild(
       '<div class="aphront-failure-continue">'.
-        phabricator_render_form(
+        phabricator_form(
           $user,
           array(
             'action' => '/login/mustverify/',

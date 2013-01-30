@@ -91,7 +91,7 @@ final class PhabricatorActionView extends AphrontView {
           $sigils[] = 'download';
         }
 
-        $item = phabricator_render_form(
+        $item = phabricator_form(
           $this->user,
           array(
             'action'    => $this->href,
