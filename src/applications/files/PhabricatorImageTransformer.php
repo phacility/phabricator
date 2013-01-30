@@ -116,7 +116,7 @@ final class PhabricatorImageTransformer {
     return $dst;
   }
 
-  private function generatePreview(PhabricatorFile $file, $size) {
+  public static function getPreviewDimensions(PhabricatorFile $file, $size) {
     $data = $file->loadFileData();
     $src = imagecreatefromstring($data);
 
@@ -128,12 +128,34 @@ final class PhabricatorImageTransformer {
     $dx = max($size / 4, $scale * $x);
     $dy = max($size / 4, $scale * $y);
 
+    $sdx = $scale * $x;
+    $sdy = $scale * $y;
+
+    return array(
+      'x' => $x,
+      'y' => $y,
+      'dx' => $dx,
+      'dy' => $dy,
+      'sdx' => $sdx,
+      'sdy' => $sdy
+    );
+  }
+
+  private function generatePreview(PhabricatorFile $file, $size) {
+    $data = $file->loadFileData();
+    $src = imagecreatefromstring($data);
+
+    $dimensions = self::getPreviewDimensions($file, $size);
+    $x = $dimensions['x'];
+    $y = $dimensions['y'];
+    $dx = $dimensions['dx'];
+    $dy = $dimensions['dy'];
+    $sdx = $dimensions['sdx'];
+    $sdy = $dimensions['sdy'];
+
     $dst = imagecreatetruecolor($dx, $dy);
     imagesavealpha($dst, true);
     imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
-
-    $sdx = $scale * $x;
-    $sdy = $scale * $y;
 
     imagecopyresampled(
       $dst,
