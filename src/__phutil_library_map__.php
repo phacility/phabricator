@@ -1478,6 +1478,7 @@ phutil_register_library_map(array(
     'celerity_get_resource_uri' => 'infrastructure/celerity/api.php',
     'celerity_register_resource_map' => 'infrastructure/celerity/map.php',
     'javelin_render_tag' => 'infrastructure/javelin/markup.php',
+    'javelin_tag' => 'infrastructure/javelin/markup.php',
     'phabricator_date' => 'view/viewutils.php',
     'phabricator_datetime' => 'view/viewutils.php',
     'phabricator_format_bytes' => 'view/viewutils.php',
