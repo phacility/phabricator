@@ -50,26 +50,29 @@ final class PhabricatorCrumbsView extends AphrontView {
           ));
       }
 
-      $action_view = phutil_render_tag(
+      $action_view = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-crumbs-actions',
         ),
-        self::renderSingleView($actions));
+        $this->renderHTMLView($actions));
     }
 
     if ($this->crumbs) {
       last($this->crumbs)->setIsLastCrumb(true);
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-crumbs-view '.
                    'sprite-gradient gradient-breadcrumbs',
       ),
-      $action_view.
-      self::renderSingleView($this->crumbs));
+      $this->renderHTMLView(
+        array(
+          $action_view,
+          $this->crumbs,
+        )));
   }
 
 }
