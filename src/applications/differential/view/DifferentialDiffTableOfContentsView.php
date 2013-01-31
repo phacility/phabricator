@@ -148,7 +148,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
       $rows[] =
         '<tr>'.
-          phutil_render_tag(
+          phutil_tag(
             'td',
             array(
               'class' => 'differential-toc-char',

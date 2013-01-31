@@ -244,12 +244,14 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $detail->setVsChangesetID($left_source);
 
     $panel = new DifferentialPrimaryPaneView();
-    $panel->appendChild(phutil_render_tag('div',
+    $panel->appendChild(
+      phutil_tag(
+      'div',
       array(
         'class' => 'differential-review-stage',
         'id'    => 'differential-review-stage',
-      ), $detail->render())
-    );
+      ),
+      $detail->render()));
 
     return $this->buildStandardPageResponse(
       array(

@@ -44,8 +44,8 @@ final class PonderAddCommentView extends AphrontView {
           ->setValue($is_serious ? 'Submit' : 'Editorialize'));
 
     $view = id(new AphrontMoreView())
-      ->setSome(id(new AphrontNullView())->render())
-      ->setMore($form->render())
+      ->setSome('')
+      ->setMore(phutil_safe_html($form->render()))
       ->setExpandText('Add Comment');
 
     return $view->render();

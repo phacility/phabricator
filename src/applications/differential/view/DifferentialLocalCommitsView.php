@@ -88,13 +88,13 @@ final class DifferentialLocalCommitsView extends AphrontView {
       $summary = phutil_utf8_shorten($summary, 80);
 
       $view = new AphrontMoreView();
-      $view->setSome(phutil_escape_html($summary));
+      $view->setSome($summary);
 
       if ($message && (trim($summary) != trim($message))) {
-        $view->setMore(nl2br(phutil_escape_html($message)));
+        $view->setMore(phutil_escape_html_newlines($message));
       }
 
-      $row[] = phutil_render_tag(
+      $row[] = phutil_tag(
         'td',
         array(
           'class' => 'summary',

@@ -271,6 +271,10 @@ final class DiffusionBrowseFileController extends DiffusionController {
             'sigil' => 'diffusion-source',
           ),
           implode("\n", $rows));
+
+        // TODO: [HTML] Major cheating here.
+        $corpus_table = phutil_safe_html($corpus_table);
+
         $corpus = phutil_tag(
           'div',
           array(
@@ -723,18 +727,29 @@ final class DiffusionBrowseFileController extends DiffusionController {
           array(
             'target' => 'scroll_target',
           ));
-        $anchor_text = '<a id="scroll_target"></a>';
+        $anchor_text = phutil_tag(
+          'a',
+          array(
+            'id' => 'scroll_target',
+          ),
+          '');
       } else {
         $anchor_text = null;
       }
 
-      $blame[] = phutil_render_tag(
+      $blame[] = phutil_tag(
         'td',
         array(
         ),
-        $anchor_text.
-        "\xE2\x80\x8B". // NOTE: See phabricator-oncopy behavior.
-        $line['data']);
+        array(
+          $anchor_text,
+
+          // NOTE: See phabricator-oncopy behavior.
+          "\xE2\x80\x8B",
+
+          // TODO: [HTML] Not ideal.
+          phutil_safe_html($line['data']),
+        ));
 
       $rows[] = phutil_tag(
         'tr',

@@ -442,13 +442,25 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($parents as $parent) {
         $parent_links[] = $handles[$parent->getPHID()]->renderLink();
       }
-      $props['Parents'] = implode(' &middot; ', $parent_links);
+      $props['Parents'] = array_interleave(
+        " \xC2\xB7 ",
+        $parent_links);
     }
 
     $request = $this->getDiffusionRequest();
 
-    $props['Branches'] = '<span id="commit-branches">Unknown</span>';
-    $props['Tags'] = '<span id="commit-tags">Unknown</span>';
+    $props['Branches'] = phutil_tag(
+      'span',
+      array(
+        'id' => 'commit-branches',
+      ),
+      'Unknown');
+    $props['Tags'] = phutil_tag(
+      'span',
+      array(
+        'id' => 'commit-tags',
+      ),
+      'Unknown');
 
     $callsign = $request->getRepository()->getCallsign();
     $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
@@ -906,8 +918,8 @@ final class DiffusionCommitController extends DiffusionController {
         ),
         $ref);
     }
-    $ref_links = implode(', ', $ref_links);
-    return $ref_links;
+
+    return array_interleave(', ', $ref_links);
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
