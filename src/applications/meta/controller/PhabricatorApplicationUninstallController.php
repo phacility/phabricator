@@ -21,14 +21,16 @@ final class PhabricatorApplicationUninstallController
       return new Aphront404Response();
     }
 
+    $view_uri = $this->getApplicationURI('view/'.$this->application);
+
     if ($request->isDialogFormPost()) {
       $this->manageApplication();
-     return id(new AphrontRedirectResponse())->setURI('/applications/');
+      return id(new AphrontRedirectResponse())->setURI($view_uri);
     }
 
     $dialog = id(new AphrontDialogView())
                ->setUser($user)
-               ->addCancelButton('/applications/view/'.$this->application);
+               ->addCancelButton($view_uri);
 
     if ($this->action == 'install') {
       if ($selected->canUninstall()) {

@@ -90,6 +90,7 @@ final class PhabricatorApplicationDetailViewController
                id(new PhabricatorActionView())
                ->setName(pht('Uninstall'))
                ->setIcon('delete')
+               ->setWorkflow(true)
                ->setHref(
                 $this->getApplicationURI(get_class($selected).'/uninstall/'))
                );
@@ -98,6 +99,7 @@ final class PhabricatorApplicationDetailViewController
                id(new PhabricatorActionView())
                ->setName(pht('Install'))
                ->setIcon('new')
+               ->setWorkflow(true)
                ->setHref(
                  $this->getApplicationURI(get_class($selected).'/install/'))
                );
@@ -107,6 +109,7 @@ final class PhabricatorApplicationDetailViewController
              id(new PhabricatorActionView())
              ->setName(pht('Uninstall'))
              ->setIcon('delete')
+             ->setWorkflow(true)
              ->setDisabled(true)
              ->setHref(
                $this->getApplicationURI(get_class($selected).'/uninstall/'))
