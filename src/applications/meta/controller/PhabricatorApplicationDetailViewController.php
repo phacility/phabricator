@@ -27,36 +27,53 @@ final class PhabricatorApplicationDetailViewController
         ->setName(pht('Applications'))
         ->setHref($this->getApplicationURI()));
 
-   $properties = $this->buildPropertyView($selected);
-   $actions = $this->buildActionView($user, $selected);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
 
-   return $this->buildApplicationPage(
-    array(
-      $crumbs,
-      id(new PhabricatorHeaderView())->setHeader($title),
-      $actions,
-      $properties,
-    ),
-    array(
-      'title' => $title,
-      'device' => true,
-    ));
+    $status_tag = id(new PhabricatorTagView())
+            ->setType(PhabricatorTagView::TYPE_STATE);
+
+    if ($selected->isInstalled()) {
+      $status_tag->setName(pht('Installed'));
+      $status_tag->setBackgroundColor(PhabricatorTagView::COLOR_GREEN);
+
+    } else {
+      $status_tag->setName(pht('Uninstalled'));
+      $status_tag->setBackgroundColor(PhabricatorTagView::COLOR_RED);
+    }
+
+    if ($selected->isBeta()) {
+      $beta_tag = id(new PhabricatorTagView())
+              ->setType(PhabricatorTagView::TYPE_STATE)
+              ->setName(pht('Beta'))
+              ->setBackgroundColor(PhabricatorTagView::COLOR_GREY);
+      $header->addTag($beta_tag);
+    }
+
+
+    $header->addTag($status_tag);
+
+    $properties = $this->buildPropertyView($selected);
+    $actions = $this->buildActionView($user, $selected);
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $header,
+        $actions,
+        $properties,
+      ),
+      array(
+        'title' => $title,
+        'device' => true,
+      ));
   }
 
   private function buildPropertyView(PhabricatorApplication $selected) {
-    $properties = new PhabricatorPropertyListView();
-
-    if ($selected->isInstalled()) {
-      $properties->addProperty(
-        pht('Status'), pht('Installed'));
-
-    } else {
-      $properties->addProperty(
-        pht('Status'), pht('Uninstalled'));
-    }
-
-    $properties->addProperty(
-      pht('Description'), $selected->getShortDescription());
+    $properties = id(new PhabricatorPropertyListView())
+              ->addProperty(
+                pht('Description'), $selected->getShortDescription()
+                );
 
     return $properties;
   }
