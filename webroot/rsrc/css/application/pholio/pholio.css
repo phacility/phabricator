@@ -18,6 +18,19 @@
 }
 
 .pholio-mock-image {
-  margin: 10px 0px;
   display: inline-block;
 }
+
+.pholio-mock-select {
+    border: 1px solid #FF0000;
+    position: absolute;
+}
+
+.pholio-mock-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: crosshair;
+  padding: 0px;
+  margin: 10px 0px;
+}
+
