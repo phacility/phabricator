@@ -171,8 +171,9 @@ final class DifferentialRevisionCommentListView extends AphrontView {
           ),
           array(
             pht(
-              '%d older comments are hidden. ',
-              number_format(count($hidden))),
+              '%s older comments are hidden.',
+              new PhutilNumber(count($hidden))),
+            ' ',
             javelin_tag(
               'a',
               array(
