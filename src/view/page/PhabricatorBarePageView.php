@@ -83,7 +83,9 @@ class PhabricatorBarePageView extends AphrontPageView {
 
       '<script type="text/javascript">'.
         $framebust.
-        'window.__DEV__=1;'.
+        'window.__DEV__='.
+        PhabricatorEnv::getEnvConfig('phabricator.developer-mode') ? '1' : '0'.
+        ';'.
       '</script>',
 
       $response->renderResourcesOfType('css'),

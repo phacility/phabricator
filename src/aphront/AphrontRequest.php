@@ -228,6 +228,26 @@ final class AphrontRequest {
         $more_info = "(This was a web request, {$token_info}.)";
       }
 
+      // Give a more detailed explanation of how to avoid the exception
+      // in developer mode.
+      if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+        $more_info = $more_info .
+          "To avoid this error, use phabricator_form() to construct forms. " .
+          "If you are already using phabricator_form(), make sure the form " .
+          "'action' uses a relative URI (i.e., begins with a '/'). Forms " .
+          "using absolute URIs do not include CSRF tokens, to prevent " .
+          "leaking tokens to external sites.\n\n" .
+          "If this page performs writes which do not require CSRF " .
+          "protection (usually, filling caches or logging), you can use " .
+          "AphrontWriteGuard::beginScopedUnguardedWrites() to temporarily " .
+          "bypass CSRF protection while writing. You should use this only " .
+          "for writes which can not be protected with normal CSRF " .
+          "mechanisms.\n\n" .
+          "Some UI elements (like PhabricatorActionListView) also have " .
+          "methods which will allow you to render links as forms (like " .
+          "setRenderAsForm(true)).";
+      }
+
       // This should only be able to happen if you load a form, pull your
       // internet for 6 hours, and then reconnect and immediately submit,
       // but give the user some indication of what happened since the workflow
