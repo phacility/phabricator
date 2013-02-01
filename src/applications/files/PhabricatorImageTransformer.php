@@ -180,9 +180,9 @@ final class PhabricatorImageTransformer {
     if (Filesystem::pathExists($font_root.'impact.ttf')) {
       $font_path = $font_root.'impact.ttf';
     }
-    $white = imagecolorallocate($img, 255, 255, 255);
-    $black = imagecolorallocate($img, 0, 0, 0);
-    $border_width = 3;
+    $text_color = imagecolorallocate($img, 255, 255, 255);
+    $border_color = imagecolorallocatealpha($img, 0, 0, 0, 110);
+    $border_width = 4;
     $font_max = 200;
     $font_min = 5;
     for ($i = $font_max; $i > $font_min; $i--) {
@@ -198,8 +198,8 @@ final class PhabricatorImageTransformer {
           $i,
           $x,
           $y,
-          $white,
-          $black,
+          $text_color,
+          $border_color,
           $border_width,
           $font_path,
           $upper_text);
@@ -217,8 +217,8 @@ final class PhabricatorImageTransformer {
           $i,
           $x,
           $y,
-          $white,
-          $black,
+          $text_color,
+          $border_color,
           $border_width,
           $font_path,
           $lower_text);
