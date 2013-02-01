@@ -175,7 +175,11 @@ final class PhabricatorImageTransformer {
     $data = $file->loadFileData();
     $img = imagecreatefromstring($data);
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
-    $font_path = $phabricator_root.'/resources/font/tuffy.ttf';
+    $font_root = $phabricator_root.'/resources/font/';
+    $font_path = $font_root.'tuffy.ttf';
+    if (Filesystem::pathExists($font_root.'impact.ttf')) {
+      $font_path = $font_root.'impact.ttf';
+    }
     $white = imagecolorallocate($img, 255, 255, 255);
     $black = imagecolorallocate($img, 0, 0, 0);
     $border_width = 3;
