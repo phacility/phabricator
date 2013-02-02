@@ -96,9 +96,9 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
 
         $nav->addMenuItem($show_item);
         $nav->addCustomBlock(
-          '<div '.
-          'id="'.phutil_escape_html($show_tiles_id).'"'.
-          'style="display: none;">');
+          hsprintf(
+            '<div id="%s" style="display: none;">',
+            $show_tiles_id));
 
         Javelin::initBehavior('phabricator-home-reveal-tiles', array(
           'tilesID' => $show_tiles_id,
@@ -128,19 +128,20 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
           }
           $nav->addLabel($groups[$group]);
         }
+
         $nav->addCustomBlock(
-          phutil_render_tag(
+          phutil_tag(
             'div',
             array(
               'class' => 'application-tile-group',
             ),
-            id(new AphrontNullView())->appendChild($tiles)->render()));
+            mpull($tiles, 'render')));
       }
 
       $is_hide = ($tile_display == PhabricatorApplication::TILE_HIDE);
       if ($is_hide) {
         $nav->addMenuItem($hide_item);
-        $nav->addCustomBlock('</div>');
+        $nav->addCustomBlock(hsprintf('</div>'));
       }
     }
 

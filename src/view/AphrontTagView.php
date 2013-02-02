@@ -87,7 +87,7 @@ abstract class AphrontTagView extends AphrontView {
   }
 
   protected function getTagContent() {
-    return $this->renderChildren();
+    return $this->renderHTMLChildren();
   }
 
   protected function willRender() {
@@ -150,7 +150,7 @@ abstract class AphrontTagView extends AphrontView {
       }
     }
 
-    return javelin_render_tag(
+    return javelin_tag(
       $this->getTagName(),
       $attributes,
       $this->getTagContent());
