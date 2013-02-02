@@ -18,7 +18,6 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_SEARCH_SHORTCUT      = 'search-shortcut';
 
   const PREFERENCE_DIFFUSION_VIEW       = 'diffusion-view';
-  const PREFERENCE_DIFFUSION_SYMBOLS    = 'diffusion-symbols';
 
   const PREFERENCE_NAV_WIDTH            = 'nav-width';
   const PREFERENCE_APP_TILES            = 'app-tiles';
