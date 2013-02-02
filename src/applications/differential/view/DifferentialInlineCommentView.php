@@ -175,10 +175,10 @@ final class DifferentialInlineCommentView extends AphrontView {
     }
 
     if ($links) {
-      $links =
-        '<span class="differential-inline-comment-links">'.
-          implode(' &middot; ', $links).
-        '</span>';
+      $links = phutil_tag(
+        'span',
+        array('class' => 'differential-inline-comment-links'),
+        array_interleave(" \xC2\xB7 ", $links));
     } else {
       $links = null;
     }
@@ -217,24 +217,25 @@ final class DifferentialInlineCommentView extends AphrontView {
       $author = $handles[$inline->getAuthorPHID()]->getName();
     }
 
-    $markup = javelin_render_tag(
+    $markup = javelin_tag(
       'div',
       array(
         'class' => $classes,
         'sigil' => $sigil,
         'meta'  => $metadata,
       ),
-      '<div class="differential-inline-comment-head">'.
-        $anchor.
-        $links.
-        ' <span class="differential-inline-comment-line">'.$line.'</span> '.
-        phutil_escape_html($author).
-      '</div>'.
-      '<div class="differential-inline-comment-content">'.
-        '<div class="phabricator-remarkup">'.
-          $content.
+      hsprintf(
+        '<div class="differential-inline-comment-head">'.
+          '%s%s <span class="differential-inline-comment-line">%s</span> %s'.
         '</div>'.
-      '</div>');
+        '<div class="differential-inline-comment-content">'.
+          '<div class="phabricator-remarkup">%s</div>'.
+        '</div>',
+        $anchor,
+        $links,
+        $line,
+        $author,
+        $content));
 
     return $this->scaffoldMarkup($markup);
   }
@@ -247,15 +248,17 @@ final class DifferentialInlineCommentView extends AphrontView {
     $left_markup = !$this->onRight ? $markup : '';
     $right_markup = $this->onRight ? $markup : '';
 
-    return
+    return hsprintf(
       '<table>'.
         '<tr class="inline">'.
           '<th></th>'.
-          '<td class="left">'.$left_markup.'</td>'.
+          '<td class="left">%s</td>'.
           '<th></th>'.
-          '<td class="right3" colspan="3">'.$right_markup.'</td>'.
+          '<td class="right3" colspan="3">%s</td>'.
         '</tr>'.
-      '</table>';
+      '</table>',
+      $left_markup,
+      $right_markup);
   }
 
 }

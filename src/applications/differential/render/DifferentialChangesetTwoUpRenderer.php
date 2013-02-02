@@ -324,26 +324,29 @@ final class DifferentialChangesetTwoUpRenderer
               }
             }
           }
-          $html[] =
+          $html[] = hsprintf(
             '<tr class="inline">'.
               '<th />'.
-              '<td class="left">'.$comment_html.'</td>'.
+              '<td class="left">%s</td>'.
               '<th />'.
-              '<td colspan="3" class="right3">'.$new.'</td>'.
-            '</tr>';
+              '<td colspan="3" class="right3">%s</td>'.
+            '</tr>',
+            $comment_html,
+            $new);
         }
       }
       if ($n_num && isset($new_comments[$n_num])) {
         foreach ($new_comments[$n_num] as $comment) {
           $comment_html = $this->renderInlineComment($comment,
                                                      $on_right = true);
-          $html[] =
+          $html[] = hsprintf(
             '<tr class="inline">'.
               '<th />'.
               '<td class="left" />'.
               '<th />'.
-              '<td colspan="3" class="right3">'.$comment_html.'</td>'.
-            '</tr>';
+              '<td colspan="3" class="right3">%s</td>'.
+            '</tr>',
+            $comment_html);
         }
       }
     }

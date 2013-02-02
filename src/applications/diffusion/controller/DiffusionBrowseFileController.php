@@ -264,16 +264,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
             ));
         }
 
-        $corpus_table = javelin_render_tag(
+        $corpus_table = javelin_tag(
           'table',
           array(
             'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
             'sigil' => 'diffusion-source',
           ),
-          implode("\n", $rows));
-
-        // TODO: [HTML] Major cheating here.
-        $corpus_table = phutil_safe_html($corpus_table);
+          $rows);
 
         $corpus = phutil_tag(
           'div',
@@ -774,11 +771,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
         ->setMarkupEngine($engine)
         ->setInlineComment($inline)
         ->render();
-      $rows[] =
-        '<tr class="inline">'.
-          str_repeat('<th></th>', ($needs_blame ? 5 : 1)).
-          '<td>'.$inline_view.'</td>'.
-        '</tr>';
+      $row = array_fill(0, ($needs_blame ? 5 : 1), phutil_tag('th'));
+      $row[] = phutil_tag('td', array(), $inline_view);
+      $rows[] = phutil_tag('tr', array('class' => 'inline'), $row);
     }
     return $rows;
   }
