@@ -110,9 +110,10 @@ final class DifferentialLintFieldSpecification
             'style' => $this->getSeverityStyle($severity),
             'name'  => ucwords($severity),
             'value' => hsprintf(
-              "(%s) %s at {$line_link}",
+              '(%s) %s at %s',
               $code,
-              $name),
+              $name,
+              $line_link),
             'show'  => $show,
           );
 
