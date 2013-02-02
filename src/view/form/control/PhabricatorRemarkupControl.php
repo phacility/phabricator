@@ -142,13 +142,16 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     $this->setCustomClass(
       'remarkup-assist-textarea '.$monospaced_textareas_class);
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'sigil' => 'remarkup-assist-control',
       ),
-      $buttons.
-      parent::renderInput());
+      $this->renderHTMLView(
+        array(
+          $buttons,
+          parent::renderInput(),
+        )));
   }
 
 }

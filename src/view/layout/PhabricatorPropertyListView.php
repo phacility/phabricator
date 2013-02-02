@@ -73,12 +73,12 @@ final class PhabricatorPropertyListView extends AphrontView {
       }
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-property-list-view',
       ),
-      $this->renderSingleView($items));
+      $this->renderHTMLView($items));
   }
 
   private function renderPropertyPart(array $part) {

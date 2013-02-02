@@ -247,20 +247,19 @@ final class AphrontFormDateControl extends AphrontFormControl {
 
     Javelin::initBehavior('fancy-datepicker', array());
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'class' => 'aphront-form-date-container',
         'sigil' => 'phabricator-date-control',
       ),
-      self::renderSingleView(
-        array(
-          $days_sel,
-          $months_sel,
-          $years_sel,
-          $cal_icon,
-          $time_sel,
-        )));
+      array(
+        $days_sel,
+        $months_sel,
+        $years_sel,
+        $cal_icon,
+        $time_sel,
+      ));
   }
 
 }
