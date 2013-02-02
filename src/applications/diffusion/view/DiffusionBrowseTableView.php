@@ -96,22 +96,21 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     $conn = $drequest->getRepository()->establishConnection('r');
 
-    $where = '';
+    $path = '/'.$drequest->getPath();
+    $where = (substr($path, -1) == '/'
+      ? qsprintf($conn, 'AND path LIKE %>', $path)
+      : qsprintf($conn, 'AND path = %s', $path));
+
     if ($drequest->getLint()) {
-      $where = qsprintf(
-        $conn,
-        'AND code = %s',
-        $drequest->getLint());
+      $where .= qsprintf($conn, ' AND code = %s', $drequest->getLint());
     }
 
-    $like = (substr($drequest->getPath(), -1) == '/' ? 'LIKE %>' : '= %s');
     return head(queryfx_one(
       $conn,
-      'SELECT COUNT(*) FROM %T WHERE branchID = %d %Q AND path '.$like,
+      'SELECT COUNT(*) FROM %T WHERE branchID = %d %Q',
       PhabricatorRepository::TABLE_LINTMESSAGE,
       $branch->getID(),
-      $where,
-      '/'.$drequest->getPath()));
+      $where));
   }
 
   public function render() {
