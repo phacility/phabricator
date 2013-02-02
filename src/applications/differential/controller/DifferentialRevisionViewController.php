@@ -498,7 +498,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
           'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
           'name'    => $viewer_is_cc ? pht('Unsubscribe') : pht('Subscribe'),
           'instant' => true,
-          'sigil' => 'workflow',
         );
       } else {
         $links[] = array(
