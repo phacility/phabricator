@@ -65,8 +65,6 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
         continue;
       }
 
-      $tile_group = msort($tile_group, 'getApplicationOrder');
-
       $is_small_tiles = ($tile_display == PhabricatorApplication::TILE_SHOW) ||
                         ($tile_display == PhabricatorApplication::TILE_HIDE);
 

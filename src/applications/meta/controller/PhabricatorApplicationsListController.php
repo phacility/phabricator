@@ -47,6 +47,8 @@ final class PhabricatorApplicationsListController
   private function buildInstalledApplicationsList(array $applications) {
     $list = new PhabricatorObjectItemListView();
 
+    $applications = msort($applications, 'getName');
+
     foreach ($applications as $application) {
         $item = id(new PhabricatorObjectItemView())
           ->setHeader($application->getName())
