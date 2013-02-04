@@ -113,7 +113,7 @@ final class PhabricatorRepositoryListController
             'class' => 'button grey small',
           ),
           'Edit'),
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'href' => '/repository/project/delete/'.$project->getID().'/',

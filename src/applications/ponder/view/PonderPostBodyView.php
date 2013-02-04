@@ -56,10 +56,12 @@ final class PonderPostBodyView extends AphrontView {
       $target->getMarkupField(),
       $this->user);
 
-    $content =
-      '<div class="phabricator-remarkup">'.
-        $content.
-      '</div>';
+    $content = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $content);
 
     $author = $this->handles[$target->getAuthorPHID()];
     $actions = array($author->renderLink().' '.$this->action);
@@ -88,10 +90,12 @@ final class PonderPostBodyView extends AphrontView {
     }
 
     $xaction_view->appendChild(
-      '<div class="ponder-post-core">'.
-      $content.
-      '</div>'
-    );
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'ponder-post-core',
+        ),
+        $content));
 
     $outerview = $xaction_view;
     if (!$this->preview) {
@@ -112,15 +116,5 @@ final class PonderPostBodyView extends AphrontView {
 
     return $outerview->render();
   }
-
-  private function renderHandleList(array $phids) {
-    $result = array();
-    foreach ($phids as $phid) {
-      $result[] = $this->handles[$phid]->renderLink();
-    }
-    return implode(', ', $result);
-  }
-
-
 
 }

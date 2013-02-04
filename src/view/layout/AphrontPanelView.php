@@ -15,7 +15,7 @@ final class AphrontPanelView extends AphrontView {
 
   public function setCreateButton($create_button, $href) {
     $this->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => $href,
