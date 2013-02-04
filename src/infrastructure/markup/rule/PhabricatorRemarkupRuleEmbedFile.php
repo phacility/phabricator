@@ -68,7 +68,10 @@ final class PhabricatorRemarkupRuleEmbedFile
       case 'thumb':
       default:
         $attrs['src'] = $file->getPreview220URI();
-        $attrs['width'] = '220';
+        $dimensions =
+          PhabricatorImageTransformer::getPreviewDimensions($file, 220);
+        $attrs['width'] = $dimensions['sdx'];
+        $attrs['height'] = $dimensions['sdy'];
         $options['image_class'] = 'phabricator-remarkup-embed-image';
         break;
     }

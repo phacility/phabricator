@@ -798,13 +798,11 @@ return array(
   // behalf, silencing the warning.
   'phabricator.timezone'        => null,
 
-  // When unhandled exceptions occur, stack traces are hidden by default.
-  // You can enable traces for development to make it easier to debug problems.
-  'phabricator.show-stack-traces' => false,
-
-  // Shows an error callout if a page generated PHP errors, warnings or notices.
-  // This makes it harder to miss problems while developing Phabricator.
-  'phabricator.show-error-callout' => false,
+  // Show stack traces when unhandled exceptions occur, force reloading of
+  // static resources (skipping the cache), show an error callout if a page
+  // generated PHP errors, warnings, or notices, force disk reads when
+  // reloading. This option should not be enabled in production.
+  'phabricator.developer-mode' => false,
 
   // When users write comments which have URIs, they'll be automatically linked
   // if the protocol appears in this set. This whitelist is primarily to prevent
@@ -1219,15 +1217,6 @@ return array(
   // caches. Unless you are doing Celerity development, it is exceptionally
   // unlikely that you need to modify this.
   'celerity.resource-hash' => 'd9455ea150622ee044f7931dabfa52aa',
-
-  // In a development environment, it is desirable to force static resources
-  // (CSS and JS) to be read from disk on every request, so that edits to them
-  // appear when you reload the page even if you haven't updated the resource
-  // maps. This setting ensures requests will be verified against the state on
-  // disk. Generally, you should leave this off in production (caching behavior
-  // and performance improve with it off) but turn it on in development. (These
-  // settings are the defaults.)
-  'celerity.force-disk-reads' => false,
 
   // Minify static resources by removing whitespace and comments. You should
   // enable this in production, but disable it in development.

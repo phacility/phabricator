@@ -161,7 +161,8 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     if (strlen($q)) {
      $join[] = qsprintf(
         $conn_r,
-        "{$t_field} field ON field.phid = document.phid");
+        '%T field ON field.phid = document.phid',
+        $t_field);
       $where[] = qsprintf(
         $conn_r,
         'MATCH(corpus) AGAINST (%s IN BOOLEAN MODE)',

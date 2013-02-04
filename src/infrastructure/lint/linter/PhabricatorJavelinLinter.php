@@ -187,9 +187,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
   }
 
   private function newSymbolsFuture($path) {
-    $javelinsymbols = 'javelinsymbols';
-
-    $future = new ExecFuture($javelinsymbols.' # '.escapeshellarg($path));
+    $future = new ExecFuture('javelinsymbols # %s', $path);
     $future->write($this->getData($path));
     return $future;
   }

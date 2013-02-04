@@ -13,19 +13,37 @@ final class PholioMockImagesView extends AphrontView {
       throw new Exception("Call setMock() before render()!");
     }
 
-    $mockview = array();
-
-    $file = head($this->mock->getImages())->getFile();
-
     $main_image_id = celerity_generate_unique_node_id();
+    require_celerity_resource('javelin-behavior-pholio-mock-view');
+    $config = array('mainID' => $main_image_id);
+    Javelin::initBehavior('pholio-mock-view', $config);
 
-    $main_image_tag = phutil_tag(
+    $mockview = "";
+
+    $main_image = head($this->mock->getImages());
+
+    $main_image_tag = javelin_tag(
       'img',
       array(
-        'src' => $file->getBestURI(),
-        'class' => 'pholio-mock-image',
         'id' => $main_image_id,
-      ));
+        'src' => $main_image->getFile()->getBestURI(),
+        'sigil' => 'mock-image',
+        'class' => 'pholio-mock-image',
+        'meta' => array(
+          'fullSizeURI' => $main_image->getFile()->getBestURI(),
+          'imageID' => $main_image->getID(),
+        ),
+    ));
+
+    $main_image_tag = javelin_tag(
+      'div',
+      array(
+        'id' => 'mock-wrapper',
+        'sigil' => 'mock-wrapper',
+        'class' => 'pholio-mock-wrapper'
+      ),
+      $main_image_tag
+    );
 
     $mockview[] = phutil_tag(
       'div',
@@ -35,10 +53,6 @@ final class PholioMockImagesView extends AphrontView {
       $main_image_tag);
 
     if (count($this->mock->getImages()) > 1) {
-      require_celerity_resource('javelin-behavior-pholio-mock-view');
-      $config = array('mainID' => $main_image_id);
-      Javelin::initBehavior('pholio-mock-view', $config);
-
       $thumbnails = array();
       foreach ($this->mock->getImages() as $image) {
         $thumbfile = $image->getFile();
@@ -51,7 +65,7 @@ final class PholioMockImagesView extends AphrontView {
             'class' => 'pholio-mock-carousel-thumbnail',
             'meta' => array(
               'fullSizeURI' => $thumbfile->getBestURI(),
-              'imageID' => $image->getID(),
+              'imageID' => $image->getID()
             ),
         ));
         $thumbnails[] = $tag;
@@ -67,5 +81,4 @@ final class PholioMockImagesView extends AphrontView {
 
     return $this->renderHTMLView($mockview);
   }
-
 }

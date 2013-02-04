@@ -10,6 +10,15 @@ final class PhabricatorConfigResponse extends AphrontHTMLResponse {
   }
 
   public function buildResponseString() {
+    // Check to make sure we aren't requesting this via ajax or conduit
+    if (isset($_REQUEST['__ajax__']) || isset($_REQUEST['__conduit__'])) {
+      // We don't want to flood the console with html, just return a simple
+      // message for now.
+      return pht(
+        "This install has a fatal setup error, access the internet web ".
+        "version to view details and resolve it.");
+    }
+
     $resources = $this->buildResources();
 
     $view = $this->view->render();

@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @deprecated Use javelin_tag().
+ */
 function javelin_render_tag(
   $tag,
   array $attributes = array(),

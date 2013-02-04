@@ -24,3 +24,6 @@
 /conf/local/local.json
 /conf/local/ENVIRONMENT
 /conf/local/VERSION
+
+# Impact Font
+/resources/font/impact.ttf

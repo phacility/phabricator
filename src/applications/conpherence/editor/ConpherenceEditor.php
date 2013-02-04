@@ -118,6 +118,27 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           );
         }
         $editor->save();
+        // fallthrough
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $xaction_phid = $xaction->getPHID();
+        $behind = ConpherenceParticipationStatus::BEHIND;
+        $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
+        $participants = $object->getParticipants();
+        $user = $this->getActor();
+        $time = time();
+        foreach ($participants as $phid => $participant) {
+          if ($phid != $user->getPHID()) {
+            if ($participant->getParticipationStatus() != $behind) {
+              $participant->setBehindTransactionPHID($xaction_phid);
+            }
+            $participant->setParticipationStatus($behind);
+            $participant->setDateTouched($time);
+          } else {
+            $participant->setParticipationStatus($up_to_date);
+            $participant->setDateTouched($time);
+          }
+          $participant->save();
+        }
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         foreach ($xaction->getNewValue() as $participant) {

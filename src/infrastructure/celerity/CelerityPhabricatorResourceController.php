@@ -35,7 +35,9 @@ final class CelerityPhabricatorResourceController
 
   protected function buildResourceTransformer() {
     $xformer = new CelerityResourceTransformer();
-    $xformer->setMinify(PhabricatorEnv::getEnvConfig('celerity.minify'));
+    $xformer->setMinify(
+      !PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
+      PhabricatorEnv::getEnvConfig('celerity.minify'));
     $xformer->setCelerityMap(CelerityResourceMap::getInstance());
     return $xformer;
   }

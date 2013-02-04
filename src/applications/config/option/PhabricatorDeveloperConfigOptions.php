@@ -86,48 +86,18 @@ final class PhabricatorDeveloperConfigOptions
             "data to look at eventually). In development, it may be useful to ".
             "set it to 1 in order to debug performance problems.\n\n".
             "NOTE: You must install XHProf for profiling to work.")),
-      $this->newOption('phabricator.show-stack-traces', 'bool', false)
+      $this->newOption('phabricator.developer-mode', 'bool', false)
         ->setBoolOptions(
           array(
-            pht('Show stack traces'),
-            pht('Hide stack traces'),
+            pht('Enable developer mode'),
+            pht('Disable developer mode'),
           ))
-        ->setSummary(pht("Show stack traces when unhandled exceptions occur."))
-        ->setDescription(
-          pht(
-            "When unhandled exceptions occur, stack traces are hidden by ".
-            "default. You can enable traces for development to make it easier ".
-            "to debug problems.")),
-      $this->newOption('phabricator.show-error-callout', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Show error callout'),
-            pht('Hide error callout'),
-          ))
-        ->setSummary(pht("Show error callout."))
-        ->setDescription(
-          pht(
-            "Shows an error callout if a page generated PHP errors, warnings ".
-            "or notices. This makes it harder to miss problems while ".
-            "developing Phabricator. A callout is simply a red error at the ".
-            "top of the page.")),
-      $this->newOption('celerity.force-disk-reads', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Force disk reads'),
-            pht("Don't force disk reads"),
-          ))
-        ->setSummary(pht("Force Celerity to read from disk on every request."))
-        ->setDescription(
-          pht(
-            "In a development environment, it is desirable to force static ".
-            "resources (CSS and JS) to be read from disk on every request, so ".
-            "that edits to them appear when you reload the page even if you ".
-            "haven't updated the resource maps. This setting ensures requests ".
-            "will be verified against the state on disk. Generally, you ".
-            "should leave this off in production (caching behavior and ".
-            "performance improve with it off) but turn it on in development. ".
-            "(These settings are the defaults.)")),
+          ->setSummary(pht("Enable verbose error reporting and disk reads."))
+          ->setDescription(
+            pht(
+              "This option enables verbose error reporting (stack traces, ".
+              "error callouts) and forces disk reads of static assets on ".
+              "every reload.")),
       $this->newOption('celerity.minify', 'bool', false)
         ->setBoolOptions(
           array(

@@ -44,7 +44,6 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
       $item->setIcon('settings');
       $item->setSelected($selected);
       $item->setHref('/settings/');
-      $item->setSortOrder(0.90);
       $items[] = $item;
     }
 

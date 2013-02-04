@@ -116,7 +116,7 @@ final class PhabricatorImageTransformer {
     return $dst;
   }
 
-  private function generatePreview(PhabricatorFile $file, $size) {
+  public static function getPreviewDimensions(PhabricatorFile $file, $size) {
     $data = $file->loadFileData();
     $src = imagecreatefromstring($data);
 
@@ -128,12 +128,34 @@ final class PhabricatorImageTransformer {
     $dx = max($size / 4, $scale * $x);
     $dy = max($size / 4, $scale * $y);
 
+    $sdx = $scale * $x;
+    $sdy = $scale * $y;
+
+    return array(
+      'x' => $x,
+      'y' => $y,
+      'dx' => $dx,
+      'dy' => $dy,
+      'sdx' => $sdx,
+      'sdy' => $sdy
+    );
+  }
+
+  private function generatePreview(PhabricatorFile $file, $size) {
+    $data = $file->loadFileData();
+    $src = imagecreatefromstring($data);
+
+    $dimensions = self::getPreviewDimensions($file, $size);
+    $x = $dimensions['x'];
+    $y = $dimensions['y'];
+    $dx = $dimensions['dx'];
+    $dy = $dimensions['dy'];
+    $sdx = $dimensions['sdx'];
+    $sdy = $dimensions['sdy'];
+
     $dst = imagecreatetruecolor($dx, $dy);
     imagesavealpha($dst, true);
     imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
-
-    $sdx = $scale * $x;
-    $sdy = $scale * $y;
 
     imagecopyresampled(
       $dst,
@@ -153,10 +175,14 @@ final class PhabricatorImageTransformer {
     $data = $file->loadFileData();
     $img = imagecreatefromstring($data);
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
-    $font_path = $phabricator_root.'/resources/font/tuffy.ttf';
-    $white = imagecolorallocate($img, 255, 255, 255);
-    $black = imagecolorallocate($img, 0, 0, 0);
-    $border_width = 3;
+    $font_root = $phabricator_root.'/resources/font/';
+    $font_path = $font_root.'tuffy.ttf';
+    if (Filesystem::pathExists($font_root.'impact.ttf')) {
+      $font_path = $font_root.'impact.ttf';
+    }
+    $text_color = imagecolorallocate($img, 255, 255, 255);
+    $border_color = imagecolorallocatealpha($img, 0, 0, 0, 110);
+    $border_width = 4;
     $font_max = 200;
     $font_min = 5;
     for ($i = $font_max; $i > $font_min; $i--) {
@@ -172,8 +198,8 @@ final class PhabricatorImageTransformer {
           $i,
           $x,
           $y,
-          $white,
-          $black,
+          $text_color,
+          $border_color,
           $border_width,
           $font_path,
           $upper_text);
@@ -191,8 +217,8 @@ final class PhabricatorImageTransformer {
           $i,
           $x,
           $y,
-          $white,
-          $black,
+          $text_color,
+          $border_color,
           $border_width,
           $font_path,
           $lower_text);

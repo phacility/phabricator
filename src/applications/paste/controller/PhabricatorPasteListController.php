@@ -95,9 +95,8 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
       $line_count = count(explode("\n", $paste->getContent()));
       $line_count = pht(
-        '%2$s Line(s)',
-        $line_count,
-        PhutilTranslator::getInstance()->formatNumber($line_count));
+        '%s Line(s)',
+        new PhutilNumber($line_count));
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($paste->getFullName())

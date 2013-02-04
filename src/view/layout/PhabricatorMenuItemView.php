@@ -6,13 +6,13 @@ final class PhabricatorMenuItemView extends AphrontTagView {
   const TYPE_SPACER   = 'type-spacer';
   const TYPE_LABEL    = 'type-label';
   const TYPE_BUTTON   = 'type-button';
+  const TYPE_CUSTOM   = 'type-custom';
 
   private $name;
   private $href;
   private $type = self::TYPE_LINK;
   private $isExternal;
   private $key;
-  private $sortOrder = 1.0;
   private $icon;
   private $selected;
 
@@ -86,15 +86,6 @@ final class PhabricatorMenuItemView extends AphrontTagView {
 
   public function getIsExternal() {
     return $this->isExternal;
-  }
-
-  public function setSortOrder($order) {
-    $this->sortOrder = $order;
-    return $this;
-  }
-
-  public function getSortOrder() {
-    return $this->sortOrder;
   }
 
   protected function getTagName() {

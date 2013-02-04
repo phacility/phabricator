@@ -44,6 +44,7 @@ final class ConpherenceUpdateController extends
           'ip' => $request->getRemoteAddr()
         ));
       $editor = id(new ConpherenceEditor())
+        ->setContinueOnNoEffect($request->isContinueRequest())
         ->setContentSource($content_source)
         ->setActor($user);
 
@@ -55,28 +56,6 @@ final class ConpherenceUpdateController extends
             $conpherence,
             $message
           );
-          $time = time();
-          $conpherence->openTransaction();
-          $xactions = $editor->applyTransactions($conpherence, $xactions);
-          $last_xaction = end($xactions);
-          $xaction_phid = $last_xaction->getPHID();
-          $behind = ConpherenceParticipationStatus::BEHIND;
-          $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
-          $participants = $conpherence->getParticipants();
-          foreach ($participants as $phid => $participant) {
-            if ($phid != $user->getPHID()) {
-              if ($participant->getParticipationStatus() != $behind) {
-                $participant->setBehindTransactionPHID($xaction_phid);
-              }
-              $participant->setParticipationStatus($behind);
-              $participant->setDateTouched($time);
-            } else {
-              $participant->setParticipationStatus($up_to_date);
-              $participant->setDateTouched($time);
-            }
-            $participant->save();
-          }
-          $updated = $conpherence->saveTransaction();
           break;
         case 'metadata':
           $xactions = array();
@@ -112,22 +91,24 @@ final class ConpherenceUpdateController extends
               ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
               ->setNewValue($title);
           }
-
-          if ($xactions) {
-            $conpherence->openTransaction();
-            $xactions = $editor
-              ->setContinueOnNoEffect(true)
-              ->applyTransactions($conpherence, $xactions);
-            $updated = $conpherence->saveTransaction();
-          } else if (empty($errors)) {
-            $errors[] = pht(
-              'That was a non-update. Try cancel.'
-            );
-          }
           break;
         default:
           throw new Exception('Unknown action: '.$action);
           break;
+      }
+      if ($xactions) {
+        try {
+          $xactions = $editor->applyTransactions($conpherence, $xactions);
+          $updated = true;
+        } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+          return id(new PhabricatorApplicationTransactionNoEffectResponse())
+            ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
+            ->setException($ex);
+        }
+      } else if (empty($errors)) {
+        $errors[] = pht(
+          'That was a non-update. Try cancel.'
+        );
       }
     }
 

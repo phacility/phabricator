@@ -58,7 +58,6 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       $item = new PhabricatorMenuItemView();
       $item->setName($user->getUsername());
       $item->setHref('/p/'.$user->getUsername().'/');
-      $item->setSortOrder(0.0);
       $item->addClass('phabricator-core-menu-item-profile');
 
       $classes = array(

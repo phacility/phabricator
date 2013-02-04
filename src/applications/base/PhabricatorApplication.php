@@ -66,7 +66,9 @@ abstract class PhabricatorApplication {
     $uninstalled =
       PhabricatorEnv::getEnvConfig('phabricator.uninstalled-applications');
 
-      if (isset($uninstalled[get_class($this)])) {
+      if (!$this->canUninstall()) {
+        return true;
+      } else if (isset($uninstalled[get_class($this)])) {
         return false;
       } else {
         return true;
@@ -227,8 +229,21 @@ abstract class PhabricatorApplication {
 
 /* -(  Application Management  )--------------------------------------------- */
 
-  public static function getAllApplications() {
+  public static function getByClass($class_name) {
 
+    $selected = null;
+    $applications = PhabricatorApplication::getAllApplications();
+
+    foreach ($applications as $application) {
+      if (get_class($application) == $class_name) {
+        $selected = $application;
+        break;
+      }
+    }
+    return $selected;
+  }
+
+  public static function getAllApplications() {
     $classes = id(new PhutilSymbolLoader())
             ->setAncestorClass(__CLASS__)
             ->setConcreteOnly(true)
@@ -240,6 +255,13 @@ abstract class PhabricatorApplication {
       $app = newv($class['name'], array());
       $apps[] = $app;
     }
+
+    // Reorder the applications into "application order". Notably, this ensures
+    // their event handlers register in application order.
+    $apps = msort($apps, 'getApplicationOrder');
+    $apps = mgroup($apps, 'getApplicationGroup');
+    $apps = array_select_keys($apps, self::getApplicationGroups()) + $apps;
+    $apps = array_mergev($apps);
 
     return $apps;
   }
@@ -254,31 +276,24 @@ abstract class PhabricatorApplication {
       PhabricatorEnv::getEnvConfig('phabricator.uninstalled-applications');
 
 
-
     if (empty($applications)) {
-      $classes = id(new PhutilSymbolLoader())
-        ->setAncestorClass(__CLASS__)
-        ->setConcreteOnly(true)
-        ->selectAndLoadSymbols();
-
+      $all_applications = self::getAllApplications();
       $apps = array();
-      foreach ($classes as $class) {
-
-      if (isset($uninstalled[$class['name']])) {
-        continue;
-      }
-
-      $app = newv($class['name'], array());
-
-      if (!$app->isEnabled()) {
+      foreach ($all_applications as $app) {
+        $class = get_class($app);
+        if (isset($uninstalled[$class])) {
           continue;
-      }
+        }
 
-      if (!$show_beta && $app->isBeta()) {
+        if (!$app->isEnabled()) {
           continue;
-      }
+        }
 
-      $apps[] = $app;
+        if (!$show_beta && $app->isBeta()) {
+          continue;
+        }
+
+        $apps[] = $app;
       }
 
       $applications = $apps;

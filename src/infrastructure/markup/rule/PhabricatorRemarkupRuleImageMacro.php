@@ -10,7 +10,7 @@ final class PhabricatorRemarkupRuleImageMacro
 
   public function apply($text) {
     return preg_replace_callback(
-      '@^([a-zA-Z0-9_\-]+)$@m',
+      '@^([a-zA-Z0-9:_\-]+)$@m',
       array($this, 'markupImageMacro'),
       $text);
   }

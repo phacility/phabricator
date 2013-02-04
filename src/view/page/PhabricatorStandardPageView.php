@@ -256,7 +256,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     $developer_warning = null;
-    if (PhabricatorEnv::getEnvConfig('phabricator.show-error-callout') &&
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
         DarkConsoleErrorLogPluginAPI::getErrors()) {
       $developer_warning = phutil_tag(
         'div',

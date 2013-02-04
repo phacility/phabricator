@@ -238,7 +238,7 @@ class AphrontDefaultApplicationConfiguration
         "schema is up to date.";
     }
 
-    if (PhabricatorEnv::getEnvConfig('phabricator.show-stack-traces')) {
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
       $trace = $this->renderStackTrace($ex->getTrace(), $user);
     } else {
       $trace = null;
