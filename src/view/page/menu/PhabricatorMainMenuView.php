@@ -199,7 +199,9 @@ final class PhabricatorMainMenuView extends AphrontView {
     $view->addClass('phabricator-core-menu');
 
     $search = $this->renderSearch();
-    $view->addMenuItem($search);
+    if ($search) {
+      $view->addMenuItem($search);
+    }
 
     $view
       ->newLabel(pht('Home'))
