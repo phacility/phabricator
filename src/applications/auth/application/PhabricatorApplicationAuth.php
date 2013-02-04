@@ -22,7 +22,6 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       $item->setIcon('power');
       $item->setWorkflow(true);
       $item->setHref('/logout/');
-      $item->setSortOrder(2.0);
       $item->setSelected(($controller instanceof PhabricatorLogoutController));
       $items[] = $item;
     }

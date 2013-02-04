@@ -188,6 +188,8 @@ final class DifferentialDiff extends DifferentialDAO {
       'id' => $this->getID(),
       'parent' => $this->getParentRevisionID(),
       'revisionID' => $this->getRevisionID(),
+      'dateCreated' => $this->getDateCreated(),
+      'dateModified' => $this->getDateModified(),
       'sourceControlBaseRevision' => $this->getSourceControlBaseRevision(),
       'sourceControlPath' => $this->getSourceControlPath(),
       'sourceControlSystem' => $this->getSourceControlSystem(),

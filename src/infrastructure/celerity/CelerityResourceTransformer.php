@@ -74,7 +74,7 @@ final class CelerityResourceTransformer {
         $bin = $root.'/externals/javelin/support/jsxmin/jsxmin';
 
         if (@file_exists($bin)) {
-          $future = new ExecFuture("{$bin} __DEV__:0");
+          $future = new ExecFuture('%s __DEV__:0', $bin);
           $future->write($data);
           list($err, $result) = $future->resolve();
           if (!$err) {

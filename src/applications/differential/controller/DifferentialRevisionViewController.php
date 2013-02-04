@@ -182,10 +182,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
       $warning->appendChild(
         pht(
-          'This diff is very large and affects %2$s files. Load each file '.
+          'This diff is very large and affects %s files. Load each file '.
             'individually.',
-          $count,
-          PhutilTranslator::getInstance()->formatNumber($count)).
+          new PhutilNumber($count)).
         " <strong>".
           phutil_render_tag(
             'a',
@@ -499,7 +498,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
           'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
           'name'    => $viewer_is_cc ? pht('Unsubscribe') : pht('Subscribe'),
           'instant' => true,
-          'sigil' => 'workflow',
         );
       } else {
         $links[] = array(

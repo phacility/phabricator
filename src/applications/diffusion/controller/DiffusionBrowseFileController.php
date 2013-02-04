@@ -807,10 +807,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $size = strlen($data);
     $properties->addTextContent(
-      pht('This is a binary file. It is %2$s byte(s) in length.',
-          $size,
-          PhutilTranslator::getInstance()->formatNumber($size))
-    );
+      pht(
+        'This is a binary file. It is %s byte(s) in length.',
+        new PhutilNumber($size)));
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($this->getRequest()->getUser())

@@ -24,6 +24,10 @@
 }
 
 .phabricator-header-tags {
-  margin-left: 1em;
+  margin-left: 12px;
   font-size: 13px;
+}
+
+.phabricator-header-tags .phabricator-tag-view {
+  margin-left: 4px;
 }

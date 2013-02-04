@@ -22,8 +22,8 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
     return "\xE0\xBC\x84";
   }
 
-  public function shouldAppearInLaunchView() {
-    return false;
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
   }
 
  public function getRoutes() {

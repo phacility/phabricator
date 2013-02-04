@@ -44,7 +44,6 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
       $item->setName(pht('%s Help', $application->getName()));
       $item->setIcon('help');
       $item->setHref($application->getHelpURI());
-      $item->setSortOrder(0.1);
       $items[] = $item;
     }
 

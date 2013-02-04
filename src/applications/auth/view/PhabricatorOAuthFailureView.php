@@ -70,9 +70,10 @@ final class PhabricatorOAuthFailureView extends AphrontView {
 
       $provider_key = $provider->getProviderKey();
       $diagnose = hsprintf(
-        '<a href="/oauth/'.$provider_key.'/diagnose/" class="button green">'.
+        '<a href="/oauth/%s/diagnose/" class="button green">'.
           'Diagnose %s OAuth Problems'.
         '</a>',
+        $provider_key,
         $provider_name);
     }
 

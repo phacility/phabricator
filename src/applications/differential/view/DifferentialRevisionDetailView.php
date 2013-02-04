@@ -52,6 +52,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
         ->setName($action['name'])
         ->setHref(idx($action, 'href'))
         ->setWorkflow(idx($action, 'sigil') == 'workflow')
+        ->setRenderAsForm(!empty($action['instant']))
         ->setUser($user)
         ->setDisabled(idx($action, 'disabled', false));
       $actions->addAction($obj);

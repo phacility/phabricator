@@ -133,17 +133,18 @@ JX.install('Event', {
       var r = this.getRawEvent();
       return r.which == 3 || r.button == 2;
     },
-
-
+    
     /**
-     * Determine if a click event is a normal click (left mouse button, no
+     * Determine if a mouse event is a normal event (left mouse button, no
      * modifier keys).
      *
      * @return bool
      * @task info
      */
-    isNormalClick : function() {
-      if (this.getType() != 'click') {
+    isNormalMouseEvent : function() {
+      var supportedEvents = ['click','mouseup','mousedown'];
+
+      if (supportedEvents.indexOf(this.getType()) == -1) {
         return false;
       }
 
@@ -161,6 +162,22 @@ JX.install('Event', {
       }
 
       return true;
+    },
+
+
+    /**
+     * Determine if a click event is a normal click (left mouse button, no
+     * modifier keys).
+     *
+     * @return bool
+     * @task info
+     */
+    isNormalClick : function() {
+      if (this.getType() != 'click') {
+        return false;
+      }
+
+      return this.isNormalMouseEvent();
     },
 
 

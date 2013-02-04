@@ -164,7 +164,6 @@ final class PhabricatorMainMenuView extends AphrontView {
     $controller = $this->getController();
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
-    $applications = msort($applications, 'getName');
 
     $core = array();
     $more = array();
@@ -184,7 +183,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         if ($application->getApplicationGroup() == $group_core) {
           $core[] = $item;
         } else {
-          $more[] = $item;
+          $more[$application->getName()] = $item;
         }
       }
 
@@ -200,7 +199,9 @@ final class PhabricatorMainMenuView extends AphrontView {
     $view->addClass('phabricator-core-menu');
 
     $search = $this->renderSearch();
-    $view->appendChild($search);
+    if ($search) {
+      $view->addMenuItem($search);
+    }
 
     $view
       ->newLabel(pht('Home'))
@@ -235,7 +236,6 @@ final class PhabricatorMainMenuView extends AphrontView {
     }
 
     if ($actions) {
-      $actions = msort($actions, 'getSortOrder');
       $view->addMenuItem(
         id(new PhabricatorMenuItemView())
           ->addClass('phabricator-core-item-device')
@@ -260,6 +260,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           ->addClass('phabricator-core-item-device')
           ->setType(PhabricatorMenuItemView::TYPE_LABEL)
           ->setName(pht('More Applications')));
+      ksort($more);
       foreach ($more as $item) {
         $item->addClass('phabricator-core-item-device');
         $view->addMenuItem($item);

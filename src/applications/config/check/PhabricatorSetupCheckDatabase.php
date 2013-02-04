@@ -65,6 +65,20 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
       return;
     }
 
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+      $mode_string = queryfx_one($conn_raw, "SELECT @@sql_mode");
+      $modes = explode(',', $mode_string['@@sql_mode']);
+      if (!in_array('STRICT_ALL_TABLES', $modes)) {
+        $message = pht(
+          "The global sql_mode is not set to 'STRICT_ALL_TABLES'. It is ".
+          "recommended that you set this mode while developing Phabricator.");
+
+        $this->newIssue('mysql.mode')
+          ->setName(pht('MySQL STRICT_ALL_TABLES mode not set.'))
+          ->setMessage($message);
+      }
+    }
+
     $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
 
     $databases = queryfx_all($conn_raw, 'SHOW DATABASES');

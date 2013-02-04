@@ -167,9 +167,9 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d Lint Messages',
       ),
 
-      'This is a binary file. It is %2$s byte(s) in length.' => array(
-        'This is a binary file. It is %2$s byte in length.',
-        'This is a binary file. It is %2$s bytes in length.',
+      'This is a binary file. It is %s byte(s) in length.' => array(
+        'This is a binary file. It is %s byte in length.',
+        'This is a binary file. It is %s bytes in length.',
       ),
 
       '%d Action(s) Have No Effect' => array(
@@ -226,9 +226,9 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%2$s Line(s)' => array(
-        '%2$s Line',
-        '%2$s Lines',
+      '%s Line(s)' => array(
+        '%s Line',
+        '%s Lines',
       ),
 
       "Indexing %d object(s) of type %s." => array(

@@ -121,7 +121,10 @@ final class AphrontSideNavFilterView extends AphrontView {
   }
 
   public function addCustomBlock($block) {
-    $this->menu->appendChild($block);
+    $this->menu->addMenuItem(
+      id(new PhabricatorMenuItemView())
+        ->setType(PhabricatorMenuItemView::TYPE_CUSTOM)
+        ->appendChild($block));
     return $this;
   }
 

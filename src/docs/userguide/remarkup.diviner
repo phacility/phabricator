@@ -7,7 +7,7 @@ arguments.
 = Overview =
 
 Phabricator uses a lightweight markup language called "Remarkup", similar to
-other lightweight markup langauges like Markdown and Wiki markup.
+other lightweight markup languages like Markdown and Wiki markup.
 
 This document describes how to format text using Remarkup.
 

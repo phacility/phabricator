@@ -266,11 +266,14 @@ final class PhabricatorRepositorySvnCommitChangeParserWorker
                   if (empty($raw_paths[$full_from]) &&
                       empty($effects[$full_from])) {
                     if ($other_type == DifferentialChangeType::TYPE_COPY_AWAY) {
+                      // Add an indirect effect for the copied file, if we
+                      // don't already have an entry for it (e.g., a separate
+                      // change).
                       $effects[$full_from] = array(
                         'rawPath'         => $full_from,
                         'rawTargetPath'   => null,
                         'rawTargetCommit' => null,
-                        'rawDirect'       => true,
+                        'rawDirect'       => false,
 
                         'changeType'      => $other_type,
                         'fileType'        => $from_file_type,

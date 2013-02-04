@@ -21,32 +21,44 @@ final class PhabricatorApplicationUninstallController
       return new Aphront404Response();
     }
 
+    $view_uri = $this->getApplicationURI('view/'.$this->application);
+
     if ($request->isDialogFormPost()) {
       $this->manageApplication();
-     return id(new AphrontRedirectResponse())->setURI('/applications/');
+      return id(new AphrontRedirectResponse())->setURI($view_uri);
     }
+
+    $dialog = id(new AphrontDialogView())
+               ->setUser($user)
+               ->addCancelButton($view_uri);
 
     if ($this->action == 'install') {
+      if ($selected->canUninstall()) {
+        $dialog->setTitle('Confirmation')
+               ->appendChild(
+                 'Install '. $selected->getName(). ' application ?'
+                 )
+               ->addSubmitButton('Install');
 
-      $dialog = id(new AphrontDialogView())
-             ->setUser($user)
-             ->setTitle('Confirmation')
-             ->appendChild(
-               'Install '. $selected->getName(). ' application ?'
-               )
-             ->addSubmitButton('Install')
-             ->addCancelButton('/applications/view/'.$this->application);
+      } else {
+        $dialog->setTitle('Information')
+               ->appendChild('You cannot install a installed application.');
+      }
     } else {
-      $dialog = id(new AphrontDialogView())
-             ->setUser($user)
-             ->setTitle('Confirmation')
-             ->appendChild(
-               'Really Uninstall '. $selected->getName(). ' application ?'
-               )
-             ->addSubmitButton('Uninstall')
-             ->addCancelButton('/applications/view/'.$this->application);
+      if ($selected->canUninstall()) {
+        $dialog->setTitle('Confirmation')
+               ->appendChild(
+                 'Really Uninstall '. $selected->getName(). ' application ?'
+                 )
+               ->addSubmitButton('Uninstall');
+      } else {
+        $dialog->setTitle('Information')
+               ->appendChild(
+                 'This application cannot be uninstalled,
+                 because it is required for Phabricator to work.'
+                 );
+      }
     }
-
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
