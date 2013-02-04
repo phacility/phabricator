@@ -271,7 +271,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
 
-  public static function newFromFileDownload($uri, $name) {
+  public static function newFromFileDownload($uri, array $params) {
     $uri = new PhutilURI($uri);
 
     $protocol = $uri->getProtocol();
@@ -286,12 +286,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $timeout = 5;
 
-    $file_data = HTTPSFuture::loadContent($uri, $timeout);
-    if ($file_data === false) {
-      return null;
-    }
+    list($file_data) = id(new HTTPSFuture($uri))
+        ->setTimeout($timeout)
+        ->resolvex();
 
-    return self::newFromFileData($file_data, array('name' => $name));
+    return self::newFromFileData($file_data, $params);
   }
 
   public static function normalizeFileName($file_name) {
