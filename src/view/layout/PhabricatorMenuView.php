@@ -8,21 +8,23 @@ final class PhabricatorMenuView extends AphrontTagView {
     return false;
   }
 
-  public function newLabel($name) {
+  public function newLabel($name, $key = null) {
     $item = id(new PhabricatorMenuItemView())
       ->setType(PhabricatorMenuItemView::TYPE_LABEL)
-      ->setName($name);
+      ->setName($name)
+      ->setKey($key);
 
     $this->addMenuItem($item);
 
     return $item;
   }
 
-  public function newLink($name, $href) {
+  public function newLink($name, $href, $key = null) {
     $item = id(new PhabricatorMenuItemView())
       ->setType(PhabricatorMenuItemView::TYPE_LINK)
       ->setName($name)
-      ->setHref($href);
+      ->setHref($href)
+      ->setKey($key);
 
     $this->addMenuItem($item);
 

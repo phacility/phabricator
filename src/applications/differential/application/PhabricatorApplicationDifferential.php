@@ -28,6 +28,12 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return "\xE2\x9A\x99";
   }
 
+  public function getEventListeners() {
+    return array(
+      new DifferentialPeopleMenuEventListener()
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/D(?P<id>[1-9]\d*)' => 'DifferentialRevisionViewController',

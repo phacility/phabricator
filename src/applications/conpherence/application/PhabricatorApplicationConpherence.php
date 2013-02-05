@@ -33,6 +33,12 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
     return self::GROUP_COMMUNICATION;
   }
 
+  public function getEventListeners() {
+    return array(
+      new ConpherencePeopleMenuEventListener(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/conpherence/' => array(
