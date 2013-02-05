@@ -293,10 +293,10 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
   private static function renderDiffStar($star) {
     $class = 'diff-star-'.$star;
-    return
-      '<span class="'.$class.'">'.
-        "\xE2\x98\x85".
-      '</span>';
+    return phutil_tag(
+      'span',
+      array('class' => $class),
+      "\xE2\x98\x85");
   }
 
   private function renderBaseRevision(DifferentialDiff $diff) {

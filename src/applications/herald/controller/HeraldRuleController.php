@@ -134,8 +134,7 @@ final class HeraldRuleController extends HeraldController {
             ),
             'Create New Condition'))
           ->setDescription(
-            phutil_safe_html(
-              'When '.$must_match_selector.' these conditions are met:'))
+            hsprintf('When %s these conditions are met:', $must_match_selector))
           ->setContent(javelin_tag(
             'table',
             array(

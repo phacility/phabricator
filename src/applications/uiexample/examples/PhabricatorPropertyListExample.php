@@ -49,7 +49,7 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
     $view->addSectionHeader('Haiku About Pasta');
 
     $view->addTextContent(
-      phutil_safe_html(
+      hsprintf(
         'this is a pasta<br />'.
         'haiku. it is very bad.<br />'.
         'what did you expect?'));

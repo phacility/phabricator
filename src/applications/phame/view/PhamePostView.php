@@ -162,15 +162,16 @@ final class PhamePostView extends AphrontView {
       '');
 
     $c_uri = '//connect.facebook.net/en_US/all.js#xfbml=1&appId='.$fb_id;
-    $fb_js = phutil_safe_html(
+    $fb_js = hsprintf(
+      '<script>%s</script>',
       jsprintf(
-        '<script>(function(d, s, id) {'.
+        '(function(d, s, id) {'.
         ' var js, fjs = d.getElementsByTagName(s)[0];'.
         ' if (d.getElementById(id)) return;'.
         ' js = d.createElement(s); js.id = id;'.
         ' js.src = %s;'.
         ' fjs.parentNode.insertBefore(js, fjs);'.
-        '}(document, \'script\', \'facebook-jssdk\'));</script>',
+        '}(document, \'script\', \'facebook-jssdk\'));',
         $c_uri));
 
 
@@ -211,9 +212,9 @@ final class PhamePostView extends AphrontView {
     );
 
     // protip - try some  var disqus_developer = 1; action to test locally
-    $disqus_js = phutil_safe_html(
+    $disqus_js = hsprintf(
+      '<script>%s</script>',
       jsprintf(
-        '<script>'.
         ' var disqus_shortname = "phabricator";'.
         ' var disqus_identifier = %s;'.
         ' var disqus_url = %s;'.
@@ -225,7 +226,7 @@ final class PhamePostView extends AphrontView {
         ' dsq.src = "http://" + disqus_shortname + ".disqus.com/embed.js";'.
         '(document.getElementsByTagName("head")[0] ||'.
         ' document.getElementsByTagName("body")[0]).appendChild(dsq);'.
-        '})(); </script>',
+        '})();',
         $post->getPHID(),
         $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle()),
         $post->getTitle()));

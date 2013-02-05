@@ -53,20 +53,20 @@ final class PhabricatorSetupIssueView extends AphrontView {
       $install_these = pht(
         "Install these %d PHP extension(s):", count($extensions));
 
-      $install_info = phutil_safe_html(pht(
-        "You can usually install a PHP extension using <tt>apt-get</tt> or ".
-        "<tt>yum</tt>. Common package names are ".
-        "<tt>php-<em>extname</em></tt> or <tt>php5-<em>extname</em></tt>. ".
-        "Try commands like these:"));
+      $install_info = pht(
+        "You can usually install a PHP extension using %s or %s. Common ".
+        "package names are %s or %s. Try commands like these:",
+        phutil_tag('tt', array(), 'apt-get'),
+        phutil_tag('tt', array(), 'yum'),
+        hsprintf('<tt>php-<em>%s</em></tt>', pht('extname')),
+        hsprintf('<tt>php5-<em>%s</em></tt>', pht('extname')));
 
       // TODO: We should do a better job of detecting how to install extensions
       // on the current system.
-      $install_commands = array(
-        "$ sudo apt-get install php5-<em>extname</em>  # Debian / Ubuntu",
-        "$ sudo yum install php-<em>extname</em>       # Red Hat / Derivatives",
+      $install_commands = hsprintf(
+        "\$ sudo apt-get install php5-<em>extname</em>  # Debian / Ubuntu\n".
+        "\$ sudo yum install php-<em>extname</em>       # Red Hat / Derivatives"
       );
-      $install_commands = implode("\n", $install_commands);
-      $install_commands = phutil_safe_html($install_commands);
 
       $fallback_info = pht(
         "If those commands don't work, try Google. The process of installing ".
@@ -76,8 +76,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
       $restart_info = pht(
         "After installing new PHP extensions, <strong>restart your webserver ".
-        "for the changes to take effect</strong>.");
-      $restart_info = phutil_safe_html($restart_info);
+        "for the changes to take effect</strong>.",
+        hsprintf(''));
 
       $description[] = phutil_tag(
         'div',
@@ -274,17 +274,19 @@ final class PhabricatorSetupIssueView extends AphrontView {
     $info[] = phutil_tag(
       'p',
       array(),
-      phutil_safe_html(pht(
+      pht(
         'You can find more information about PHP configuration values in the '.
         '<a href="%s">PHP Documentation</a>.',
-        'http://php.net/manual/ini.list.php')));
+        'http://php.net/manual/ini.list.php',
+        hsprintf('')));
 
     $info[] = phutil_tag(
       'p',
       array(),
-      phutil_safe_html(pht(
+      pht(
         "After editing the PHP configuration, <strong>restart your ".
-        "webserver for the changes to take effect</strong>.")));
+        "webserver for the changes to take effect</strong>.",
+        hsprintf('')));
 
     return phutil_tag(
       'div',

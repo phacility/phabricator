@@ -43,7 +43,7 @@ final class DifferentialLintFieldSpecification
 
     $rows[] = array(
       'style'     => 'star',
-      'name'      => phutil_safe_html($lstar),
+      'name'      => $lstar,
       'value'     => $lmsg,
       'show'      => true,
     );
@@ -53,7 +53,7 @@ final class DifferentialLintFieldSpecification
       $rows[] = array(
         'style'   => 'excuse',
         'name'    => 'Excuse',
-        'value'   => phutil_safe_html(nl2br(phutil_escape_html($excuse))),
+        'value'   => phutil_escape_html_newlines($excuse),
         'show'    => true,
       );
     }
@@ -131,10 +131,7 @@ final class DifferentialLintFieldSpecification
           if (strlen($description)) {
             $rows[] = array(
               'style' => 'details',
-              'value' =>
-                phutil_safe_html(
-                  nl2br(
-                    phutil_escape_html($description))),
+              'value' => phutil_escape_html_newlines($description),
               'show'  => false,
             );
             if (empty($hidden['details'])) {

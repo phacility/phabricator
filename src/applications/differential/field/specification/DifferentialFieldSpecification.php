@@ -283,7 +283,7 @@ abstract class DifferentialFieldSpecification {
       $links[] = $handle->renderLink();
     }
 
-    return phutil_safe_html(implode(', ', $links));
+    return array_interleave(', ', $links);
   }
 
 

@@ -37,7 +37,7 @@ final class DifferentialUnitFieldSpecification
 
     $rows[] = array(
       'style' => 'star',
-      'name'  => phutil_safe_html($ustar),
+      'name'  => $ustar,
       'value' => $umsg,
       'show'  => true,
     );
@@ -47,7 +47,7 @@ final class DifferentialUnitFieldSpecification
       $rows[] = array(
         'style' => 'excuse',
         'name'  => 'Excuse',
-        'value' => phutil_safe_html(nl2br(phutil_escape_html($excuse))),
+        'value' => phutil_escape_html_newlines($excuse),
         'show'  => true,
       );
     }

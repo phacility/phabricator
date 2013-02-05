@@ -247,8 +247,7 @@ abstract class DiffusionController extends PhabricatorController {
       case 'change':
         $view_name = 'Change';
         $crumb_list[] = $crumb->setName(
-          phutil_safe_html(
-            phutil_escape_html($path).' ('.$commit_link.')'));
+          hsprintf('%s (%s)', $path, $commit_link));
         return $crumb_list;
     }
 
@@ -278,6 +277,7 @@ abstract class DiffusionController extends PhabricatorController {
       $thus_far = '';
       foreach ($path_parts as $path_part) {
         $thus_far .= $path_part.'/';
+        $path_sections[] = '/';
         $path_sections[] = phutil_tag(
           'a',
           array(
@@ -289,11 +289,10 @@ abstract class DiffusionController extends PhabricatorController {
           $path_part);
       }
 
-      $path_sections[] = phutil_escape_html($last);
-      $path_sections = '/'.implode('/', $path_sections);
+      $path_sections[] = '/'.$last;
 
       $crumb_list[] = id(new PhabricatorCrumbView())
-        ->setName(phutil_safe_html($path_sections));
+        ->setName($path_sections);
     }
 
     $last_crumb = array_pop($crumb_list);
@@ -310,11 +309,11 @@ abstract class DiffusionController extends PhabricatorController {
         'Jump to HEAD');
 
       $name = $last_crumb->getName();
-      $name = phutil_safe_html($name." @ {$commit_link} ({$jump_link})");
+      $name = hsprintf('%s @ %s (%s)', $name, $commit_link, $jump_link);
       $last_crumb->setName($name);
     } else if ($spec['view'] != 'lint') {
       $name = $last_crumb->getName();
-      $name = phutil_safe_html($name.' @ HEAD');
+      $name = hsprintf('%s @ HEAD', $name);
       $last_crumb->setName($name);
     }
 

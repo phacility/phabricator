@@ -264,7 +264,7 @@ abstract class PhabricatorController extends AphrontController {
    */
   protected function renderHandlesForPHIDs(array $phids, $style = "\n") {
     $style_map = array(
-      "\n"  => '<br />',
+      "\n"  => phutil_tag('br'),
       ','   => ', ',
     );
 
@@ -277,7 +277,7 @@ abstract class PhabricatorController extends AphrontController {
       $items[] = $this->getHandle($phid)->renderLink();
     }
 
-    return phutil_safe_html(implode($style_map[$style], $items));
+    return array_interleave($style_map[$style], $items);
   }
 
   protected function buildApplicationMenu() {
