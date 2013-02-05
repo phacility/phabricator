@@ -330,8 +330,8 @@ final class ManiphestTaskListController extends ManiphestController {
       $group = $query->getParameter('group');
       $order = $query->getParameter('order');
       $is_draggable =
-        ($group == 'priority') ||
-        ($group == 'none' && $order == 'priority');
+        ($order == 'priority') &&
+        ($group == 'none' || $group == 'priority');
 
       $lists = new AphrontNullView();
       $lists->appendChild('<div class="maniphest-group-container">');
