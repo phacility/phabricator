@@ -32,14 +32,15 @@ final class PhabricatorConduitTokenController
     $panel->setHeader('Certificate Install Token');
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    $panel->appendChild(
+    $panel->appendChild(hsprintf(
       '<p class="aphront-form-instructions">Copy and paste this token into '.
       'the prompt given to you by "arc install-certificate":</p>'.
       '<p style="padding: 0 0 1em 4em;">'.
-        '<strong>'.phutil_escape_html($token->getToken()).'</strong>'.
+        '<strong>%s</strong>'.
       '</p>'.
       '<p class="aphront-form-instructions">arc will then complete the '.
-      'install process for you.</p>');
+      'install process for you.</p>',
+      $token->getToken()));
 
     $this->setShowSideNav(false);
 

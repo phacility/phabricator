@@ -58,11 +58,10 @@ final class PhabricatorConduitConsoleController
     if ($error_types) {
       $error_description[] = '<ul>';
       foreach ($error_types as $error => $meaning) {
-        $error_description[] =
-          '<li>'.
-            '<strong>'.phutil_escape_html($error).':</strong> '.
-            phutil_escape_html($meaning).
-          '</li>';
+        $error_description[] = hsprintf(
+          '<li><strong>%s:</strong> %s</li>',
+          $error,
+          $meaning);
       }
       $error_description[] = '</ul>';
       $error_description = implode("\n", $error_description);
