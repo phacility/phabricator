@@ -109,12 +109,15 @@ JX.behavior('phabricator-nav', function(config) {
     content.style.marginLeft = '';
   }
 
-  var collapsed = false;
+  var collapsed = config.collapsed;
   JX.Stratcom.listen('differential-filetree-toggle', null, function(e) {
     collapsed = !collapsed;
     JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
     JX.DOM.alterClass(main, 'has-drag-nav', !collapsed);
     resetdrag();
+    new JX.Request('/settings/adjust/', JX.Bag)
+      .setData({ key : 'nav-collapsed', value : (collapsed ? 1 : 0) })
+      .send();
   });
 
 

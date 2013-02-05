@@ -408,10 +408,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setAnchorName('top')
       ->setNavigationMarker(true);
 
+    $collapsed = $user->loadPreferences()->getPreference(
+      PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED,
+      false);
+
     $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
       ->setAnchorName('top')
       ->setTitle('D'.$revision->getID())
       ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
+      ->setCollapsed((bool)$collapsed)
       ->build($changesets);
     $nav->appendChild(
       array(
