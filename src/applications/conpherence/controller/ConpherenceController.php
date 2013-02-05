@@ -206,6 +206,7 @@ abstract class ConpherenceController extends PhabricatorController {
         'messages' => 'conpherence-messages',
         'widgets_pane' => 'conpherence-widget-pane',
         'form_pane' => 'conpherence-form',
+        'menu_pane' => 'conpherence-menu',
         'fancy_ajax' => (bool) $this->getSelectedConpherencePHID()
       )
     );
