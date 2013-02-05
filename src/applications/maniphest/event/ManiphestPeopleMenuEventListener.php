@@ -19,7 +19,7 @@ final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
     $menu = $event->getValue('menu');
     $person_phid = $event->getValue('person')->getPHID();
 
-    $href = '/maniphest/view/action/?persons='.$person_phid;
+    $href = '/maniphest/view/action/?users='.$person_phid;
     $name = pht('Tasks');
 
     $menu->addMenuItemToLabel('activity',
