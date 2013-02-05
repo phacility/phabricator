@@ -65,51 +65,55 @@ final class ConpherenceListController extends
 
   private function renderEmptyMainPane() {
     $this->initJavelinBehaviors();
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'id' => 'conpherence-main-pane'
       ),
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'conpherence-header-pane',
-          'id' => 'conpherence-header-pane',
-        ),
-        ''
-      ).
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'conpherence-widget-pane',
-          'id' => 'conpherence-widget-pane'
-        ),
-        ''
-      ).
-      javelin_render_tag(
-        'div',
-        array(
-          'class' => 'conpherence-message-pane',
-          'id' => 'conpherence-message-pane'
-        ),
-        phutil_render_tag(
+      array(
+        phutil_tag(
           'div',
           array(
-            'class' => 'conpherence-messages',
-            'id' => 'conpherence-messages'
+            'class' => 'conpherence-header-pane',
+            'id' => 'conpherence-header-pane',
           ),
           ''
-        ).
-        phutil_render_tag(
+        ),
+        phutil_tag(
           'div',
           array(
-            'id' => 'conpherence-form'
+            'class' => 'conpherence-widget-pane',
+            'id' => 'conpherence-widget-pane'
           ),
           ''
+        ),
+        javelin_tag(
+          'div',
+          array(
+            'class' => 'conpherence-message-pane',
+            'id' => 'conpherence-message-pane'
+          ),
+          array(
+            phutil_tag(
+              'div',
+              array(
+                'class' => 'conpherence-messages',
+                'id' => 'conpherence-messages'
+              ),
+              ''
+            ),
+            phutil_tag(
+              'div',
+              array(
+                'id' => 'conpherence-form'
+              ),
+              ''
+            )
+          )
         )
       )
     );
   }
 
 
-}
+  }

@@ -141,17 +141,22 @@ final class ConpherenceThreadQuery
     $tasks = mgroup($tasks, 'getOwnerPHID');
 
     // statuses of everyone currently in the conpherence
-    // until the beginning of the next work week.
-    // NOTE: this is a bit boring on the weekends.
+    // for a rolling one week window
+    $start_of_week = phabricator_format_local_time(
+      strtotime('today'),
+      $this->getViewer(),
+      'U'
+    );
     $end_of_week = phabricator_format_local_time(
-      strtotime('Monday midnight'),
+      strtotime('midnight +1 week'),
       $this->getViewer(),
       'U'
     );
     $statuses = id(new PhabricatorUserStatus())
       ->loadAllWhere(
-        'userPHID in (%Ls) AND dateTo <= %d',
+        'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
         $participant_phids,
+        $start_of_week,
         $end_of_week
       );
     $statuses = mgroup($statuses, 'getUserPHID');
@@ -168,9 +173,12 @@ final class ConpherenceThreadQuery
 
     foreach ($conpherences as $phid => $conpherence) {
       $participant_phids = array_keys($conpherence->getParticipants());
+      $statuses = array_select_keys($statuses, $participant_phids);
+      $statuses = array_mergev($statuses);
+      $statuses = msort($statuses, 'getDateFrom');
       $widget_data = array(
         'tasks' => array_select_keys($tasks, $participant_phids),
-        'statuses' => array_select_keys($statuses, $participant_phids),
+        'statuses' => $statuses,
         'files' => array_select_keys($files, $conpherence->getFilePHIDs()),
       );
       $conpherence->attachWidgetData($widget_data);

@@ -47,7 +47,7 @@ final class ConpherenceTransactionView extends AphrontView {
       case ConpherenceTransactionType::TYPE_PICTURE:
         $img = $transaction->getHandle($transaction->getNewValue());
         $content = $transaction->getTitle() .
-          phutil_render_tag(
+          phutil_tag(
             'img',
             array(
               'src' => $img->getImageURI()
@@ -85,12 +85,12 @@ final class ConpherenceTransactionView extends AphrontView {
     }
 
     $transaction_view
-      ->appendChild(phutil_render_tag(
+      ->appendChild(phutil_tag(
         'div',
         array(
           'class' => $content_class
         ),
-        $content)
+        new PhutilSafeHTML($content))
       );
 
     return $transaction_view->render();
