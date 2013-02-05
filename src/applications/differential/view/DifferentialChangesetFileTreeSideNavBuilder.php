@@ -123,6 +123,8 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
     }
     $tree->destroy();
 
+    Javelin::initBehavior('phabricator-file-tree', array());
+
     $filetree =
       '<div class="phabricator-filetree">'.
         implode("\n", $filetree).
