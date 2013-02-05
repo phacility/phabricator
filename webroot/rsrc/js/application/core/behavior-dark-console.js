@@ -40,6 +40,8 @@ JX.behavior('dark-console', function(config, statics) {
     statics.visible = config.visible;
     statics.selected = config.selected;
 
+    install_shortcut();
+
     return statics.root;
   }
 
@@ -202,29 +204,30 @@ JX.behavior('dark-console', function(config, statics) {
     JX.DOM.setContent(statics.el.panel, div);
   }
 
-  // Install keyboard shortcut.
-  var desc = 'Toggle visibility of DarkConsole.';
-  new JX.KeyboardShortcut('`', desc)
-    .setHandler(function(manager) {
-      statics.visible = !statics.visible;
+  function install_shortcut() {
+    var desc = 'Toggle visibility of DarkConsole.';
+    new JX.KeyboardShortcut('`', desc)
+      .setHandler(function(manager) {
+        statics.visible = !statics.visible;
 
-      if (statics.visible) {
-        JX.DOM.show(root);
-        if (statics.req.current) {
-          draw_request(statics.req.current);
+        if (statics.visible) {
+          JX.DOM.show(root);
+          if (statics.req.current) {
+            draw_request(statics.req.current);
+          }
+        } else {
+          JX.DOM.hide(root);
         }
-      } else {
-        JX.DOM.hide(root);
-      }
 
-      // Save user preference.
-      new JX.Request('/~/', JX.bag)
-        .setData({visible: statics.visible ? 1 : 0})
-        .send();
+        // Save user preference.
+        new JX.Request('/~/', JX.bag)
+          .setData({visible: statics.visible ? 1 : 0})
+          .send();
 
-      // Force resize listeners to take effect.
-      JX.Stratcom.invoke('resize');
-    })
-    .register();
+        // Force resize listeners to take effect.
+        JX.Stratcom.invoke('resize');
+      })
+      .register();
+  }
 
 });

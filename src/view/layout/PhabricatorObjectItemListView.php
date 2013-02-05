@@ -53,8 +53,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
       $string = nonempty($this->noDataString, pht('No data.'));
       $items = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
-        ->appendChild(phutil_escape_html($string))
-        ->render();
+        ->appendChild(phutil_escape_html($string));
     }
 
     $pager = null;

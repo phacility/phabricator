@@ -47,17 +47,17 @@ final class PhabricatorDaemonLogListView extends AphrontView {
         case PhabricatorDaemonLog::STATUS_RUNNING:
           $style = 'color: #00cc00';
           $title = 'Running';
-          $symbol = '&bull;';
+          $symbol = "\xE2\x80\xA2";
           break;
         case PhabricatorDaemonLog::STATUS_DEAD:
           $style = 'color: #cc0000';
           $title = 'Died';
-          $symbol = '&bull;';
+          $symbol = "\xE2\x80\xA2";
           break;
         case PhabricatorDaemonLog::STATUS_EXITED:
           $style = 'color: #000000';
           $title = 'Exited';
-          $symbol = '&bull;';
+          $symbol = "\xE2\x80\xA2";
           break;
         case PhabricatorDaemonLog::STATUS_UNKNOWN:
         default: // fallthrough

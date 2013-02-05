@@ -476,21 +476,21 @@ final class HeraldTranscriptController extends HeraldController {
 
     $rows = array();
     foreach ($data as $name => $value) {
-      if (!is_scalar($value) && !is_null($value)) {
-        $value = implode("\n", $value);
-      }
+      if (!($value instanceof PhutilSafeHTML)) {
+        if (!is_scalar($value) && !is_null($value)) {
+          $value = implode("\n", $value);
+        }
 
-      if (strlen($value) > 256) {
-        $value = phutil_tag(
-          'textarea',
-          array(
-            'class' => 'herald-field-value-transcript',
-          ),
-          $value);
-      } else if ($name === 'Object Link') {
-        // The link cannot be escaped
-      } else {
-        $value = phutil_escape_html($value);
+        if (strlen($value) > 256) {
+          $value = phutil_tag(
+            'textarea',
+            array(
+              'class' => 'herald-field-value-transcript',
+            ),
+            $value);
+        } else {
+          $value = phutil_escape_html($value);
+        }
       }
 
       $rows[] = array(

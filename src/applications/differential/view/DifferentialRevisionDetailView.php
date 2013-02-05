@@ -80,7 +80,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
     foreach ($this->auxiliaryFields as $field) {
       $value = $field->renderValueForRevisionView();
-      if (strlen($value)) {
+      if ($value !== null) {
         $label = rtrim($field->renderLabelForRevisionView(), ':');
         $properties->addProperty($label, $value);
       }

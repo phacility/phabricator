@@ -345,7 +345,7 @@ final class PhabricatorDirectoryMainController
         array(
         ),
         array(
-          phutil_tag('strong', array(), $title.':'),
+          phutil_tag('strong', array(), $title.': '),
           $body
         )));
     $this->minipanels[] = $panel;

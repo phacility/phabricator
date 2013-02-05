@@ -32,7 +32,10 @@ final class PhabricatorOwnersEditController
       $package->setName($request->getStr('name'));
       $package->setDescription($request->getStr('description'));
       $old_auditing_enabled = $package->getAuditingEnabled();
-      $package->setAuditingEnabled($request->getStr('auditing') === 'enabled');
+      $package->setAuditingEnabled(
+        ($request->getStr('auditing') === 'enabled')
+          ? 1
+          : 0);
 
       $primary = $request->getArr('primary');
       $primary = reset($primary);

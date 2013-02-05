@@ -111,7 +111,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
 
     require_celerity_resource('phabricator-feed-css');
 
-    return phutil_tag(
+    return phutil_render_tag(
       'div',
       array(
         'class' => $this->oneLine
@@ -119,7 +119,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
           : 'phabricator-feed-story',
         'style' => $image_style,
       ),
-      array($head, $body, $foot));
+      $this->renderSingleView(array($head, $body, $foot)));
   }
 
 }

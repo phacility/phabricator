@@ -35,6 +35,7 @@ final class ConpherenceTransactionView extends AphrontView {
       ->setEpoch($transaction->getDateCreated())
       ->setContentSource($transaction->getContentSource());
 
+    $content = null;
     $content_class = null;
     switch ($transaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_TITLE:
