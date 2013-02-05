@@ -117,9 +117,10 @@ final class HeraldRuleController extends HeraldController {
     $form
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setValue(
-            "This <strong>${rule_type_name}</strong> rule triggers for " .
-            "<strong>${content_type_name}</strong>."))
+          ->setValue(hsprintf(
+            "This <strong>%s</strong> rule triggers for <strong>%s</strong>.",
+            $rule_type_name,
+            $content_type_name)))
       ->appendChild(
         id(new AphrontFormInsetView())
           ->setTitle('Conditions')
@@ -154,9 +155,9 @@ final class HeraldRuleController extends HeraldController {
               'mustcapture' => true,
             ),
             'Create New Action'))
-          ->setDescription(
-            phutil_safe_html(
-              'Take these actions '.$repetition_selector.' this rule matches:'))
+          ->setDescription(hsprintf(
+            'Take these actions %s this rule matches:',
+            $repetition_selector))
           ->setContent(javelin_tag(
               'table',
               array(

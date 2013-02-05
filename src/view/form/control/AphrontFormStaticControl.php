@@ -7,7 +7,7 @@ final class AphrontFormStaticControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    return phutil_escape_html($this->getValue());
+    return $this->getValue();
   }
 
 }

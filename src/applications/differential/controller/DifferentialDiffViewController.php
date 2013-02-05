@@ -38,11 +38,11 @@ final class DifferentialDiffViewController extends DifferentialController {
 
       // TODO: implmenent optgroup support in AphrontFormSelectControl?
       $select = array();
-      $select[] = '<optgroup label="Create New Revision">';
-      $select[] = '<option value="">'.
-                    pht('Create a new Revision...').
-                  '</option>';
-      $select[] = '</optgroup>';
+      $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));
+      $select[] = hsprintf(
+        '<option value="">%s</option>',
+        pht('Create a new Revision...'));
+      $select[] = hsprintf('</optgroup>');
 
       $revision_data = new DifferentialRevisionListData(
         DifferentialRevisionListData::QUERY_OPEN_OWNED,
@@ -50,7 +50,9 @@ final class DifferentialDiffViewController extends DifferentialController {
       $revisions = $revision_data->loadRevisions();
 
       if ($revisions) {
-        $select[] = '<optgroup label="'.pht('Update Existing Revision').'">';
+        $select[] = hsprintf(
+          '<optgroup label="%s">',
+          pht('Update Existing Revision'));
         foreach ($revisions as $revision) {
           $select[] = phutil_tag(
             'option',
@@ -59,13 +61,13 @@ final class DifferentialDiffViewController extends DifferentialController {
             ),
             $revision->getTitle());
         }
-        $select[] = '</optgroup>';
+        $select[] = hsprintf('</optgroup>');
       }
 
-      $select =
-        '<select name="revisionID">'.
-        implode("\n", $select).
-        '</select>';
+      $select = phutil_tag(
+        'select',
+        array('name' => 'revisionID'),
+        $select);
 
       $action_form = new AphrontFormView();
       $action_form

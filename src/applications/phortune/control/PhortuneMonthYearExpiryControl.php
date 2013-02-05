@@ -80,12 +80,7 @@ final class PhortuneMonthYearExpiryControl extends AphrontFormControl {
         'sigil' => 'year-input',
       ));
 
-    return self::renderSingleView(
-      array(
-        $months_sel,
-        $years_sel
-      )
-    );
+    return hsprintf('%s%s', $months_sel, $years_sel);
   }
 
 }

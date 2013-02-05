@@ -2,10 +2,12 @@
 
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
   private $disableMacro = false;
+
   public function setDisableMacros($disable) {
     $this->disableMacro = $disable;
     return $this;
   }
+
   protected function renderInput() {
     $id = $this->getID();
     if (!$id) {

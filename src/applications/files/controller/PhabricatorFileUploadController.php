@@ -30,13 +30,12 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     $instructions = id(new AphrontFormMarkupControl())
       ->setControlID($support_id)
       ->setControlStyle('display: none')
-      ->setValue(
-        '<br /><br />'.
+      ->setValue(hsprintf(
+        '<br /><br /><strong>%s</strong> %s<br /><br />',
+        pht('Drag and Drop:'),
         pht(
-          '<strong>Drag and Drop:</strong> You can also upload files by '.
-          'dragging and dropping them from your desktop onto this page or '.
-          'the Phabricator home page.').
-        '<br /><br />');
+          'You can also upload files by dragging and dropping them from your '.
+          'desktop onto this page or the Phabricator home page.')));
 
     $form = id(new AphrontFormView())
       ->setFlexible(true)

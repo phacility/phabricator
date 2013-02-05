@@ -122,10 +122,10 @@ EXAMPLE;
         ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-        ->setValue(
-          '<pre class="PhabricatorMonospaced">'.
-          phutil_escape_html($example_string).
-          '</pre>'))
+        ->setValue(phutil_tag(
+          'pre',
+          array('class' => 'PhabricatorMonospaced'),
+          $example_string)))
       ->appendChild(
         id(new AphrontFormRadioButtonControl())
         ->setLabel('Monospaced Textareas')

@@ -53,18 +53,16 @@ final class PhabricatorConduitConsoleController
       }
     }
 
-    $error_description = array();
     $error_types = $method_object->defineErrorTypes();
     if ($error_types) {
-      $error_description[] = '<ul>';
+      $error_description = array();
       foreach ($error_types as $error => $meaning) {
         $error_description[] = hsprintf(
           '<li><strong>%s:</strong> %s</li>',
           $error,
           $meaning);
       }
-      $error_description[] = '</ul>';
-      $error_description = implode("\n", $error_description);
+      $error_description = phutil_tag('ul', array(), $error_description);
     } else {
       $error_description = "This method does not raise any specific errors.";
     }

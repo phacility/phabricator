@@ -30,7 +30,7 @@ final class AphrontFormSubmitControl extends AphrontFormControl {
         ),
         $this->getValue());
     }
-    return $submit_button.$this->cancelButton;
+    return hsprintf('%s%s', $submit_button, $this->cancelButton);
   }
 
 }

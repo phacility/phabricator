@@ -9,14 +9,14 @@ final class AphrontFormImageControl extends AphrontFormControl {
   protected function renderInput() {
     $id = celerity_generate_unique_node_id();
 
-    return
+    return hsprintf(
+      '%s<div style="clear: both;">%s%s</div>',
       phutil_tag(
         'input',
         array(
           'type'  => 'file',
           'name'  => $this->getName(),
-        )).
-      '<div style="clear: both;">'.
+        )),
       phutil_tag(
         'input',
         array(
@@ -24,14 +24,13 @@ final class AphrontFormImageControl extends AphrontFormControl {
           'name'  => 'default_image',
           'class' => 'default-image',
           'id'    => $id,
-        )).
+        )),
       phutil_tag(
         'label',
         array(
           'for' => $id,
         ),
-        'Use Default Image instead').
-      '</div>';
+        'Use Default Image instead'));
   }
 
 }

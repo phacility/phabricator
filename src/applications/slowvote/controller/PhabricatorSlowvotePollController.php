@@ -112,7 +112,6 @@ final class PhabricatorSlowvotePollController
         $viewer_choices,
         $option);
     }
-    $option_markup = implode("\n", $option_markup);
 
     $comments_by_option = array();
     switch ($poll->getMethod()) {

@@ -46,7 +46,7 @@ final class AphrontFormToggleButtonsControl extends AphrontFormControl {
         $label);
     }
 
-    return implode('', $out);
+    return $out;
   }
 
 }
