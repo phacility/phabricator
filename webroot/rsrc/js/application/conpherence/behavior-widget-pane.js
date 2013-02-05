@@ -16,8 +16,15 @@ JX.behavior('conpherence-widget-pane', function(config) {
       for (var widget in config.widgetRegistery) {
         if (widget == data.widget) {
           JX.$(widget).style.display = 'block';
+          JX.DOM.alterClass(e.getTarget(), data.toggleClass, true);
         } else {
           JX.$(widget).style.display = 'none';
+          var cur_toggle = JX.$(widget + '-toggle');
+          JX.DOM.alterClass(
+            cur_toggle,
+            JX.Stratcom.getData(cur_toggle).toggleClass,
+            false
+          );
         }
       }
     }

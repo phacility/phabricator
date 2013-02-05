@@ -95,8 +95,7 @@ final class ConpherenceNewController extends ConpherenceController {
               phutil_tag(
                 'p',
                 array(),
-                pht('Message sent successfully.'))
-          );
+                pht('Message sent successfully.')));
           $response = id(new AphrontDialogResponse())
             ->setDialog($dialog);
         } else {

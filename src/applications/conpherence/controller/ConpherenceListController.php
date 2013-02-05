@@ -77,15 +77,17 @@ final class ConpherenceListController extends
             'class' => 'conpherence-header-pane',
             'id' => 'conpherence-header-pane',
           ),
-          ''),
+          ''
+        ),
         phutil_tag(
           'div',
           array(
             'class' => 'conpherence-widget-pane',
             'id' => 'conpherence-widget-pane'
           ),
-          ''),
-        phutil_tag(
+          ''
+        ),
+        javelin_tag(
           'div',
           array(
             'class' => 'conpherence-message-pane',
@@ -98,15 +100,19 @@ final class ConpherenceListController extends
                 'class' => 'conpherence-messages',
                 'id' => 'conpherence-messages'
               ),
-              ''),
+              ''
+            ),
             phutil_tag(
               'div',
               array(
                 'id' => 'conpherence-form'
               ),
-              ''),
-          )),
-      ));
+              ''
+            )
+          )
+        )
+      )
+    );
   }
 
 

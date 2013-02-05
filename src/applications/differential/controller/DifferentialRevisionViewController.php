@@ -408,29 +408,42 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setAnchorName('top')
       ->setNavigationMarker(true);
 
-    $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-      ->setAnchorName('top')
-      ->setTitle('D'.$revision->getID())
-      ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
-      ->build($changesets);
-    $nav->appendChild(
-      array(
-        $reviewer_warning,
-        $top_anchor,
-        $revision_detail,
-        $page_pane,
-      ));
-
+    $content = array(
+      $reviewer_warning,
+      $top_anchor,
+      $revision_detail,
+      $page_pane,
+    );
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($object_id)
         ->setHref('/'.$object_id));
-    $nav->setCrumbs($crumbs);
+
+    $prefs = $user->loadPreferences();
+
+    $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
+    if ($prefs->getPreference($pref_filetree)) {
+      $collapsed = $prefs->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED,
+        false);
+
+      $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
+        ->setAnchorName('top')
+        ->setTitle('D'.$revision->getID())
+        ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
+        ->setCollapsed((bool)$collapsed)
+        ->build($changesets);
+      $nav->appendChild($content);
+      $nav->setCrumbs($crumbs);
+      $content = $nav;
+    } else {
+      array_unshift($content, $crumbs);
+    }
 
     return $this->buildApplicationPage(
-      $nav,
+      $content,
       array(
         'title' => $object_id.' '.$revision->getTitle(),
       ));

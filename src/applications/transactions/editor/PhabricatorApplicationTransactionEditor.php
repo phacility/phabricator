@@ -153,25 +153,20 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-        break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
         break;
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         break;
-      default:
-        return $this->applyCustomInternalTransaction($object, $xaction);
     }
+    return $this->applyCustomInternalTransaction($object, $xaction);
   }
 
   private function applyExternalEffects(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-        break;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())
           ->setObject($object)
@@ -179,9 +174,8 @@ abstract class PhabricatorApplicationTransactionEditor
           ->subscribeExplicit($xaction->getNewValue())
           ->save();
         break;
-      default:
-        return $this->applyCustomExternalTransaction($object, $xaction);
     }
+    return $this->applyCustomExternalTransaction($object, $xaction);
   }
 
   protected function applyCustomInternalTransaction(

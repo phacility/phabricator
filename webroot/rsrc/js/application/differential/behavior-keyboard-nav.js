@@ -264,12 +264,6 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     })
     .register();
 
-  new JX.KeyboardShortcut('f', 'Toggle file tree.')
-    .setHandler(function(manager) {
-      JX.Stratcom.invoke('differential-filetree-toggle');
-    })
-    .register();
-
   if (config.haunt) {
     new JX.KeyboardShortcut('z', 'Cycle comment panel haunting modes.')
       .setHandler(haunt)

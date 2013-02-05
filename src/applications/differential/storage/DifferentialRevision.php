@@ -17,7 +17,6 @@ final class DifferentialRevision extends DifferentialDAO {
 
   protected $lineCount;
   protected $attached = array();
-  protected $unsubscribed = array();
 
   protected $mailKey;
   protected $branchName;
@@ -264,8 +263,10 @@ final class DifferentialRevision extends DifferentialDAO {
     return idx($this->relationships, $relation, array());
   }
 
-  public function getUnsubscribedPHIDs() {
-    return array_keys($this->getUnsubscribed());
+  public function loadUnsubscribedPHIDs() {
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->phid,
+      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
   }
 
   public function getPrimaryReviewer() {

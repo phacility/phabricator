@@ -21,6 +21,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $baseURI;
   private $selectedFilter = false;
   private $flexible;
+  private $collapsed = false;
   private $active;
   private $menu;
   private $crumbs;
@@ -67,6 +68,11 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function setFlexible($flexible) {
     $this->flexible = $flexible;
+    return $this;
+  }
+
+  public function setCollapsed($collapsed) {
+    $this->collapsed = $collapsed;
     return $this;
   }
 
@@ -196,7 +202,6 @@ final class AphrontSideNavFilterView extends AphrontView {
     $main_id = celerity_generate_unique_node_id();
 
     if ($this->flexible) {
-      $nav_classes[] = 'has-drag-nav';
       $drag_id = celerity_generate_unique_node_id();
       $flex_bar = phutil_tag(
         'div',
@@ -213,7 +218,10 @@ final class AphrontSideNavFilterView extends AphrontView {
     if ($this->menu->getItems()) {
       $local_id = celerity_generate_unique_node_id();
       $background_id = celerity_generate_unique_node_id();
-      $nav_classes[] = 'has-local-nav';
+
+      if (!$this->collapsed) {
+        $nav_classes[] = 'has-local-nav';
+      }
 
       $menu_background = phutil_tag(
         'div',
@@ -243,7 +251,9 @@ final class AphrontSideNavFilterView extends AphrontView {
     }
 
     if ($this->flexible) {
-      $nav_classes[] = 'has-drag-nav';
+      if (!$this->collapsed) {
+        $nav_classes[] = 'has-drag-nav';
+      }
 
       Javelin::initBehavior(
         'phabricator-nav',
@@ -253,6 +263,7 @@ final class AphrontSideNavFilterView extends AphrontView {
           'dragID'        => $drag_id,
           'contentID'     => $content_id,
           'backgroundID'  => $background_id,
+          'collapsed'     => $this->collapsed,
         ));
 
       if ($this->active) {

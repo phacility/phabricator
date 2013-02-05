@@ -801,7 +801,8 @@ return array(
   // Show stack traces when unhandled exceptions occur, force reloading of
   // static resources (skipping the cache), show an error callout if a page
   // generated PHP errors, warnings, or notices, force disk reads when
-  // reloading. This option should not be enabled in production.
+  // reloading, and generally make development easier. This option should not
+  // be enabled in production.
   'phabricator.developer-mode' => false,
 
   // When users write comments which have URIs, they'll be automatically linked

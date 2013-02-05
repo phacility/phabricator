@@ -251,10 +251,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
         $lang = last(explode('.', $drequest->getPath()));
 
-        $prefs = $this->getRequest()->getUser()->loadPreferences();
-        $pref_symbols = $prefs->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_DIFFUSION_SYMBOLS);
-        if (isset($langs[$lang]) && $pref_symbols != 'disabled') {
+        if (isset($langs[$lang])) {
           Javelin::initBehavior(
             'repository-crossreference',
             array(

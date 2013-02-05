@@ -46,42 +46,57 @@ final class PhabricatorSettingsPanelProfile
       $user->setTranslation($request->getStr('translation'));
 
       $default_image = $request->getExists('default_image');
+      $gravatar_email = $request->getStr('gravatar');
       if ($default_image) {
         $profile->setProfileImagePHID(null);
         $user->setProfileImagePHID(null);
-      } else if (!empty($_FILES['image'])) {
-        $err = idx($_FILES['image'], 'error');
-        if ($err != UPLOAD_ERR_NO_FILE) {
+      } else if (!empty($gravatar_email) || $request->getFileExists('image')) {
+        $file = null;
+        if (!empty($gravatar_email)) {
+          // These steps recommended by:
+          // https://en.gravatar.com/site/implement/hash/
+          $trimmed = trim($gravatar_email);
+          $lower_cased = strtolower($trimmed);
+          $hash = md5($lower_cased);
+          $url = 'http://www.gravatar.com/avatar/'.($hash).'?s=200';
+          $file = PhabricatorFile::newFromFileDownload(
+            $url,
+            array(
+              'name' => 'gravatar',
+              'authorPHID' => $user->getPHID(),
+            ));
+        } else if ($request->getFileExists('image')) {
           $file = PhabricatorFile::newFromPHPUpload(
             $_FILES['image'],
             array(
               'authorPHID' => $user->getPHID(),
             ));
-          $okay = $file->isTransformableImage();
-          if ($okay) {
-            $xformer = new PhabricatorImageTransformer();
+        }
 
-            // Generate the large picture for the profile page.
-            $large_xformed = $xformer->executeProfileTransform(
-              $file,
-              $width = 280,
-              $min_height = 140,
-              $max_height = 420);
-            $profile->setProfileImagePHID($large_xformed->getPHID());
+        $okay = $file->isTransformableImage();
+        if ($okay) {
+          $xformer = new PhabricatorImageTransformer();
 
-            // Generate the small picture for comments, etc.
-            $small_xformed = $xformer->executeProfileTransform(
-              $file,
-              $width = 50,
-              $min_height = 50,
-              $max_height = 50);
-            $user->setProfileImagePHID($small_xformed->getPHID());
-          } else {
-            $e_image = 'Not Supported';
-            $errors[] =
-              'This server only supports these image formats: '.
-              implode(', ', $supported_formats).'.';
-          }
+          // Generate the large picture for the profile page.
+          $large_xformed = $xformer->executeProfileTransform(
+            $file,
+            $width = 280,
+            $min_height = 140,
+            $max_height = 420);
+          $profile->setProfileImagePHID($large_xformed->getPHID());
+
+          // Generate the small picture for comments, etc.
+          $small_xformed = $xformer->executeProfileTransform(
+            $file,
+            $width = 50,
+            $min_height = 50,
+            $max_height = 50);
+          $user->setProfileImagePHID($small_xformed->getPHID());
+        } else {
+          $e_image = 'Not Supported';
+          $errors[] =
+            'This server only supports these image formats: '.
+            implode(', ', $supported_formats).'.';
         }
       }
 
@@ -190,6 +205,12 @@ final class PhabricatorSettingsPanelProfile
           ->setName('image')
           ->setError($e_image)
           ->setCaption('Supported formats: '.implode(', ', $supported_formats)))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Import Gravatar')
+          ->setName('gravatar')
+          ->setError($e_image)
+          ->setCaption('Enter gravatar email address'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save')
