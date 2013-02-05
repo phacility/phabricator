@@ -99,7 +99,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     $limit = phabricator_parse_bytes($limit);
     if ($limit) {
       $formatted = phabricator_format_bytes($limit);
-      return 'Maximum file size: '.phutil_escape_html($formatted);
+      return 'Maximum file size: '.$formatted;
     }
 
     $doc_href = PhabricatorEnv::getDocLink(
@@ -112,7 +112,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       ),
       'Configuring File Upload Limits');
 
-    return 'Upload limit is not configured, see '.$doc_link.'.';
+    return hsprintf('Upload limit is not configured, see %s.', $doc_link);
   }
 
 }

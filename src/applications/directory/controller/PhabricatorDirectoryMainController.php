@@ -149,9 +149,9 @@ final class PhabricatorDirectoryMainController
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Needs Triage');
-    $panel->setCaption(
+    $panel->setCaption(hsprintf(
       'Open tasks with "Needs Triage" priority in '.
-      '<a href="/project/">projects you are a member of</a>.');
+      '<a href="/project/">projects you are a member of</a>.'));
 
     $panel->addButton(
       phutil_tag(

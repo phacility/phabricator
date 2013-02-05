@@ -456,7 +456,8 @@ final class PhabricatorRepositoryEditController
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setValue($repository->getDetail('ssh-key'))
           ->setError($e_ssh_key)
-          ->setCaption('Specify the entire private key, <em>or</em>...'))
+          ->setCaption(
+            hsprintf('Specify the entire private key, <em>or</em>...')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('ssh-keyfile')
@@ -552,10 +553,10 @@ final class PhabricatorRepositoryEditController
             ->setName('branch-filter')
             ->setLabel('Track Only')
             ->setValue($branch_filter_str)
-            ->setCaption(
+            ->setCaption(hsprintf(
               'Optional list of branches to track. Other branches will be '.
               'completely ignored. If left empty, all branches are tracked. '.
-              'Example: <tt>master, release</tt>'));
+              'Example: <tt>master, release</tt>')));
     }
 
     $inset
@@ -651,7 +652,7 @@ final class PhabricatorRepositoryEditController
             ->setName('uuid')
             ->setLabel('UUID')
             ->setValue($repository->getUUID())
-            ->setCaption('Repository UUID from <tt>svn info</tt>.'));
+            ->setCaption(hsprintf('Repository UUID from <tt>svn info</tt>.')));
     }
 
     $form->appendChild($inset);

@@ -177,9 +177,9 @@ final class PhabricatorLoginController
           id(new AphrontFormPasswordControl())
             ->setLabel(pht('Password'))
             ->setName('password')
-            ->setCaption(
-              '<a href="/login/email/">'.
-                pht('Forgot your password? / Email Login').'</a>'));
+            ->setCaption(hsprintf(
+              '<a href="/login/email/">%s</a>',
+              pht('Forgot your password? / Email Login'))));
 
       if ($require_captcha) {
         $form->appendChild(

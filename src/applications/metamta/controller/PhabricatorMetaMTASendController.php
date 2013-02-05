@@ -116,8 +116,10 @@ final class PhabricatorMetaMTASendController
         id(new AphrontFormTextControl())
           ->setLabel(pht('Mail Tags'))
           ->setName('mailtags')
-          ->setCaption(
-            pht('Example:').' <tt>differential-cc, differential-comment</tt>'))
+          ->setCaption(pht(
+            'Example: %s',
+            phutil_tag('tt', array(), 'differential-cc, differential-comment'))
+          ))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())
           ->setLabel(pht('Attach Files'))
@@ -144,8 +146,7 @@ final class PhabricatorMetaMTASendController
             '1',
             pht('Send immediately. (Do not enqueue for daemons.)'),
             PhabricatorEnv::getEnvConfig('metamta.send-immediately'))
-          ->setCaption(pht('Daemons can be started with %s.', $phdlink))
-          )
+          ->setCaption(pht('Daemons can be started with %s.', $phdlink)))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Send Mail')));

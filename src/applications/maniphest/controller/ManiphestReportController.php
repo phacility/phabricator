@@ -245,12 +245,13 @@ final class ManiphestReportController extends ManiphestController {
 
     if ($handle) {
       $header = "Task Burn Rate for Project ".$handle->renderLink();
-      $caption = "<p>NOTE: This table reflects tasks <em>currently</em> in ".
-                 "the project. If a task was opened in the past but added to ".
-                 "the project recently, it is counted on the day it was ".
-                 "opened, not the day it was categorized. If a task was part ".
-                 "of this project in the past but no longer is, it is not ".
-                 "counted at all.</p>";
+      $caption = hsprintf(
+        "<p>NOTE: This table reflects tasks <em>currently</em> in ".
+        "the project. If a task was opened in the past but added to ".
+        "the project recently, it is counted on the day it was ".
+        "opened, not the day it was categorized. If a task was part ".
+        "of this project in the past but no longer is, it is not ".
+        "counted at all.</p>");
     } else {
       $header = "Task Burn Rate for All Tasks";
       $caption = null;

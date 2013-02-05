@@ -67,7 +67,6 @@ EXAMPLE;
       'User Guide: Configuring an External Editor');
 
     $font_default = PhabricatorEnv::getEnvConfig('style.monospace');
-    $font_default = phutil_escape_html($font_default);
 
     $pref_monospaced_textareas_value = $preferences
       ->getPreference($pref_monospaced_textareas);
@@ -97,11 +96,11 @@ EXAMPLE;
         id(new AphrontFormTextControl())
         ->setLabel('Editor Link')
         ->setName($pref_editor)
-        ->setCaption(
+        ->setCaption(hsprintf(
           'Link to edit files in external editor. '.
-          '%f is replaced by filename, %l by line number, %r by repository '.
-          'callsign, %% by literal %. '.
-          "For documentation, see {$editor_doc_link}.")
+          '%%f is replaced by filename, %%l by line number, %%r by repository '.
+          'callsign, %%%% by literal %%. For documentation, see %s.',
+          $editor_doc_link))
         ->setValue($preferences->getPreference($pref_editor)))
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -116,9 +115,10 @@ EXAMPLE;
         id(new AphrontFormTextControl())
         ->setLabel('Monospaced Font')
         ->setName($pref_monospaced)
-        ->setCaption(
+        ->setCaption(hsprintf(
           'Overrides default fonts in tools like Differential.<br />'.
-          '(Default: '.$font_default.')')
+          '(Default: %s)',
+          $font_default))
         ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
         id(new AphrontFormMarkupControl())

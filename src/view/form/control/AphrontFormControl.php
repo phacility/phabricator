@@ -140,10 +140,10 @@ abstract class AphrontFormControl extends AphrontView {
     }
 
     if (strlen($this->getCaption())) {
-      $caption =
-        '<div class="aphront-form-caption">'.
-          $this->getCaption().
-        '</div>';
+      $caption = phutil_tag(
+        'div',
+        array('class' => 'aphront-form-caption'),
+        $this->getCaption());
     } else {
       $caption = null;
     }

@@ -97,11 +97,11 @@ final class PhabricatorCountdownEditController
           ->setLabel('End date')
           ->setValue($display_datepoint)
           ->setName('datepoint')
-          ->setCaption(
+          ->setCaption(hsprintf(
             'Examples: '.
             '<tt>2011-12-25</tt> or '.
             '<tt>3 hours</tt> or '.
-            '<tt>June 8 2011, 5 PM</tt>.'))
+            '<tt>June 8 2011, 5 PM</tt>.')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/countdown/')

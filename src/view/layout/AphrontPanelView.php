@@ -69,10 +69,10 @@ final class AphrontPanelView extends AphrontView {
     }
 
     if ($this->caption !== null) {
-      $caption =
-        '<div class="aphront-panel-view-caption">'.
-          $this->caption.
-        '</div>';
+      $caption = phutil_tag(
+        'div',
+        array('class' => 'aphront-panel-view-caption'),
+        $this->caption);
     } else {
       $caption = null;
     }

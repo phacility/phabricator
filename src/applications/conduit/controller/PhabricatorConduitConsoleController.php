@@ -97,7 +97,7 @@ final class PhabricatorConduitConsoleController
         id(new AphrontFormTextControl())
           ->setLabel($param)
           ->setName("params[{$param}]")
-          ->setCaption(phutil_escape_html($desc)));
+          ->setCaption($desc));
     }
 
     $form
