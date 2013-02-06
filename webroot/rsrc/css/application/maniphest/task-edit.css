@@ -2,6 +2,17 @@
  * @provides maniphest-task-edit-css
  */
 
+h4.maniphest-aux-group {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  color: #FFF;
+  font-style: italic;
+  display: block;
+  background-color: #2D3236;
+  padding: 5px;
+  padding-left: 10px;
+}
+
 .maniphest-description-preview-header {
   color: #666;
   margin-bottom: 1em;

@@ -1092,6 +1092,91 @@ return array(
   // Defaults to "needs triage".
   'maniphest.default-priority' => 90,
 
+  // What values should populate the columns displayed in the Maniphest task list?
+  'maniphest.task-list.get-fields' => function($task, $handles, $status_map, $projects_view, $user, $aux_fields) {
+    return array(
+      'maniphest-task-number' => 'T'.$task->getID(),
+      'maniphest-task-status' => idx($status_map, $task->getStatus(), 'Unknown'),
+      'maniphest-task-owner' => ($task->getOwnerPHID()
+            ? $handles[$task->getOwnerPHID()]->renderLink()
+            : '<em>None</em>'),
+      'maniphest-task-name' => phutil_render_tag(
+            'a',
+            array(
+              'href' => '/T'.$task->getID(),
+            ),
+            phutil_escape_html($task->getTitle())),
+      'maniphest-task-projects' => $projects_view->render(),
+      'maniphest-task-updated' => phabricator_date($task->getDateModified(), $user)
+    );
+  },
+
+  // Whether the Change Control Board export should be enabled.
+  'maniphest.change-control-board.enabled' => false,
+
+  // The Change Control Board header function.  Returns an array containing the
+  // names of the headers as well as additional information (whether or not
+  // a particular field is a date field).
+  'maniphest.change-control-board.get-columns' => function() {
+    return array(
+      'ID' => array(),
+      'Owner' => array(),
+      'Status' => array(),
+      'Priority' => array(),
+      'Date Created' => array('date' => true),
+      'Date Modified' => array('date' => true),
+      'Title' => array(),
+      'Projects' => array(),
+      'URI' => array(),
+      'Description' => array(),
+    );
+  },
+
+  // The Change Control Board header format.  Used by PHPExcel for formatting.
+  'maniphest.change-control-board.header-format' => array(
+    'font' => array(
+      'bold' => true,
+    )
+  ),
+
+  // The Change Control Board field function.  Returns an array containing the
+  // values to store in each row.
+  //
+  // The valid values inside $ccb are:
+  // - task
+  // - task_owner
+  // - status_map
+  // - pri_map
+  // - this
+  // - projects
+  // - aux_fields
+  'maniphest.change-control-board.get-fields' => function($ccb) {
+    return array(
+      'T'.$ccb['task']->getID(),
+      $ccb['task_owner'],
+      idx($ccb['status_map'], $ccb['task']->getStatus(), '?'),
+      idx($ccb['pri_map'], $ccb['task']->getPriority(), '?'),
+      $ccb['this']->computeExcelDate($ccb['task']->getDateCreated()),
+      $ccb['this']->computeExcelDate($ccb['task']->getDateModified()),
+      $ccb['task']->getTitle(),
+      $ccb['projects'],
+      PhabricatorEnv::getProductionURI('/T'.$ccb['task']->getID()),
+      phutil_utf8_shorten($ccb['task']->getDescription(), 512),
+      // An example of how to render auxiliary fields:
+      //$ccb['this']->renderAuxiliaryAttribute($ccb['task'], 'auxiliary-field-name', $ccb['aux_fields']),
+    );
+  },
+
+  // The Change Control Board filter function.  This returns a boolean which
+  // specifies whether the task should appear in the results (regardless of
+  // selection in the Maniphest UI).  Return true to include, false to exclude.
+  'maniphest.change-control-board.filter' => function($task) {
+    return true;
+  },
+
+  // The default filename prefix for the Change Control Board export.
+  'maniphest.change-control-board.filename' => '',
+
 // -- Phriction ------------------------------------------------------------- //
 
   'phriction.enabled' => true,

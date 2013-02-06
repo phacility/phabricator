@@ -70,6 +70,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
             => 'ManiphestTransactionPreviewController',
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
+        'export-ccb/(?P<key>[^/]+)/' => 'ManiphestExportChangeControlBoardController',
         'subpriority/' => 'ManiphestSubpriorityController',
         'custom/' => array(
           '' => 'ManiphestSavedQueryListController',

@@ -12,6 +12,8 @@ abstract class ManiphestAuxiliaryFieldSpecification {
   private $auxiliaryKey;
   private $caption;
   private $value;
+  private $group;
+  private $readonly;
 
   public function setLabel($val) {
     $this->label = $val;
@@ -38,6 +40,24 @@ abstract class ManiphestAuxiliaryFieldSpecification {
 
   public function getCaption() {
     return $this->caption;
+  }
+
+  public function setGroup($val) {
+    $this->group = $val;
+    return $this;
+  }
+
+  public function getGroup() {
+    return $this->group;
+  }
+
+  public function setReadonly($val) {
+    $this->readonly = $val;
+    return $this;
+  }
+
+  public function isReadonly() {
+    return $this->readonly;
   }
 
   public function setValue($val) {
@@ -70,7 +90,11 @@ abstract class ManiphestAuxiliaryFieldSpecification {
     return null;
   }
 
-  public function renderForDetailView() {
+  public function renderSearchControls($user) {
+    return array();
+  }
+
+  public function renderForDetailView(PhabricatorUser $user) {
     return $this->getValue();
   }
 

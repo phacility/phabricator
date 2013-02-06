@@ -22,6 +22,8 @@ class AphrontDefaultApplicationConfiguration
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
           => 'PhabricatorTypeaheadCommonDatasourceController',
+        'maniphest/custom-attribute/(?P<key>\w+)/'
+          => 'PhabricatorTypeaheadManiphestCustomAttributeDatasourceController',
       ),
 
       '/login/' => array(

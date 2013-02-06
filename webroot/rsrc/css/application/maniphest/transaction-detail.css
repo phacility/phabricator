@@ -2,6 +2,17 @@
  * @provides maniphest-transaction-detail-css
  */
 
+h4.maniphest-aux-group {
+  margin-top: 12px;
+  margin-bottom: 12px;
+  color: #FFF;
+  font-style: italic;
+  display: block;
+  background-color: #2D3236;
+  padding: 5px;
+  padding-left: 10px;
+}
+
 .maniphest-transaction-list-view {
   padding: 0 20px;;
 }

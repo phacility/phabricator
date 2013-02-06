@@ -550,7 +550,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           $transaction,
           $this->forEmail
             ? ManiphestAuxiliaryFieldSpecification::RENDER_TARGET_TEXT
-            : ManiphestAuxiliaryFieldSpecification::RENDER_TARGET_HTML);
+            : ManiphestAuxiliaryFieldSpecification::RENDER_TARGET_HTML,
+          $this->user);
 
         break;
       default:

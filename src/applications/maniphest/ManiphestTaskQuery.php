@@ -18,6 +18,10 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
   private $subscriberPHIDs  = array();
   private $anyProjectPHIDs  = array();
   private $includeNoProject = null;
+  private $customAttributes = array();
+  private $allCustomAttributes = array();
+  private $anyCustomAttributes = array();
+  private $excludedCustomAttributes = array();
 
   private $fullTextSearch   = '';
 
@@ -81,6 +85,26 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
 
   public function withTaskPHIDs(array $phids) {
     $this->taskPHIDs = $phids;
+    return $this;
+  }
+
+  public function withCustomAttribute($key, $value) {
+    $this->customAttributes[$key] = $value;
+    return $this;
+  }
+
+  public function withAllCustomAttributes($key, $value) {
+    $this->allCustomAttributes[$key] = $value;
+    return $this;
+  }
+  
+  public function withAnyCustomAttributes($key, $value) {
+    $this->anyCustomAttributes[$key] = $value;
+    return $this;
+  }
+
+  public function withExcludedCustomAttributes($key, $value) {
+    $this->excludedCustomAttributes[$key] = $value;
     return $this;
   }
 
@@ -202,6 +226,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
     $where[] = $this->buildSubscriberWhereClause($conn);
+    $where[] = $this->buildCustomAttributeWhereClause($conn);
     $where[] = $this->buildProjectWhereClause($conn);
     $where[] = $this->buildAnyProjectWhereClause($conn);
     $where[] = $this->buildXProjectWhereClause($conn);
@@ -214,6 +239,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     $join[] = $this->buildAnyProjectJoinClause($conn);
     $join[] = $this->buildXProjectJoinClause($conn);
     $join[] = $this->buildSubscriberJoinClause($conn);
+    $join[] = $this->buildCustomAttributeJoinClause($conn);
 
     $join = array_filter($join);
     if ($join) {
@@ -255,7 +281,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $limit  = PHP_INT_MAX;
       $offset = 0;
     }
-
+ 
     $data = queryfx_all(
       $conn,
       'SELECT %Q * %Q FROM %T task %Q %Q %Q %Q %Q LIMIT %d, %d',
@@ -430,6 +456,73 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $this->subscriberPHIDs);
   }
 
+  private function hashCustomFieldName($name) {
+    return substr(md5($name), 10);
+  }
+
+  private function buildCustomAttributeWhereClause(AphrontDatabaseConnection $conn) {
+    if (!$this->customAttributes && !$this->anyCustomAttributes && 
+        !$this->allCustomAttributes && !$this->excludedCustomAttributes) {
+      return null;
+    }
+    $where = '';
+
+    // Build where clause for "any" selection of multiple attributes.
+    foreach ($this->anyCustomAttributes as $key => $value) {
+      $where .= '(';
+      foreach ($value as $opt) {
+        $where .= qsprintf(
+          $conn,
+          '(auxstore_' . $this->hashCustomFieldName($key) . '.name = %s AND auxstore_' . $this->hashCustomFieldName($key) . '.value = %s) OR ',
+          $key,
+          $opt);
+      }
+      $where = substr($where, 0, strlen($where) - strlen(' OR '));
+      $where .= ') AND ';
+    }
+
+    // Build where clause for "all" selection of multiple attributes.
+    foreach ($this->allCustomAttributes as $key => $value) {
+      $where .= '(';
+      foreach ($value as $opt) {
+        $where .= qsprintf(
+          $conn,
+          '(auxstore_' . $this->hashCustomFieldName($key) . '.name = %s AND auxstore_' . $this->hashCustomFieldName($key) . '.value = %s) AND ',
+          $key,
+          $opt);
+      }
+      $where = substr($where, 0, strlen($where) - strlen(' AND '));
+      $where .= ') AND ';
+    }
+
+    // Build where clause for "exclude" selection of multiple attributes.
+    foreach ($this->excludedCustomAttributes as $key => $value) {
+      $where .= '(';
+      foreach ($value as $opt) {
+        $where .= qsprintf(
+          $conn,
+          '(auxstore_' . $this->hashCustomFieldName($key) . '.name = %s AND auxstore_' . $this->hashCustomFieldName($key) . '.value != %s) AND ',
+          $key,
+          $opt);
+      }
+      $where = substr($where, 0, strlen($where) - strlen(' AND '));
+      $where .= ') AND ';
+    }
+
+    // Build where clause for 1:1 attributes.
+    foreach ($this->customAttributes as $key => $value) {
+      $where .= qsprintf(
+        $conn,
+        '(auxstore_' . $this->hashCustomFieldName($key) . '.name = %s AND auxstore_' . $this->hashCustomFieldName($key) . '.value = %s) AND ',
+        $key,
+        $value);
+    }
+
+    // Trim off the last "AND".
+    $where = substr($where, 0, strlen($where) - strlen(' AND '));
+    return $where;
+  }
+
   private function buildProjectWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->projectPHIDs && !$this->includeNoProject) {
       return null;
@@ -521,6 +614,50 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $conn,
       'JOIN %T subscriber ON subscriber.taskPHID = task.phid',
       $subscriber_dao->getTableName());
+  }
+
+  private function buildCustomAttributeJoinClause(AphrontDatabaseConnection $conn) {
+    if (!$this->customAttributes && !$this->anyCustomAttributes && 
+        !$this->allCustomAttributes && !$this->excludedCustomAttributes) {
+      return null;
+    }
+    $join = '';
+    $joined = array();
+    $auxiliary_storage = new ManiphestTaskAuxiliaryStorage();
+
+    // Build join clause for "any" selection of multiple attributes.
+    foreach ($this->anyCustomAttributes as $key => $value) {
+      if (!array_key_exists($key, $joined) || $joined[$key] == false) {
+        $join .= qsprintf($conn, 'JOIN %T AS auxstore_' . $this->hashCustomFieldName($key) . ' ON auxstore_' . $this->hashCustomFieldName($key) . '.taskPHID = task.phid ', $auxiliary_storage->getTableName());
+        $joined[$key] = true;
+      }
+    }
+
+    // Build where clause for "all" selection of multiple attributes.
+    foreach ($this->allCustomAttributes as $key => $value) {
+      if (!array_key_exists($key, $joined) || $joined[$key] == false) {
+        $join .= qsprintf($conn, 'JOIN %T AS auxstore_' . $this->hashCustomFieldName($key) . ' ON auxstore_' . $this->hashCustomFieldName($key) . '.taskPHID = task.phid ', $auxiliary_storage->getTableName());
+        $joined[$key] = true;
+      }
+    }
+
+    // Build where clause for "exclude" selection of multiple attributes.
+    foreach ($this->excludedCustomAttributes as $key => $value) {
+      if (!array_key_exists($key, $joined) || $joined[$key] == false) {
+        $join .= qsprintf($conn, 'JOIN %T AS auxstore_' . $this->hashCustomFieldName($key) . ' ON auxstore_' . $this->hashCustomFieldName($key) . '.taskPHID = task.phid ', $auxiliary_storage->getTableName());
+        $joined[$key] = true;
+      }
+    }
+
+    // Build where clause for 1:1 attributes.
+    foreach ($this->customAttributes as $key => $value) {
+      if (!array_key_exists($key, $joined) || $joined[$key] == false) {
+        $join .= qsprintf($conn, 'JOIN %T AS auxstore_' . $this->hashCustomFieldName($key) . ' ON auxstore_' . $this->hashCustomFieldName($key) . '.taskPHID = task.phid ', $auxiliary_storage->getTableName());
+        $joined[$key] = true;
+      }
+    }
+
+    return $join;
   }
 
   private function buildOrderClause(AphrontDatabaseConnection $conn) {

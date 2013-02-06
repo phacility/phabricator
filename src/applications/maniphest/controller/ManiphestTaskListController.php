@@ -24,6 +24,9 @@ final class ManiphestTaskListController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
+
     if ($request->isFormPost()) {
       // Redirect to GET so URIs can be copy/pasted.
 
@@ -47,6 +50,39 @@ final class ManiphestTaskListController extends ManiphestController {
         ->alter('hpriority', $max_priority)
         ->alter('tasks', $task_ids)
         ->alter('search', $search_text);
+
+      $aux_array = $request->getArr('auxiliary');
+      foreach ($aux_fields as $aux_field) {
+        $uri = $uri->alter($aux_field->getAuxiliaryKey(), null);
+        switch ($aux_field->getFieldType())
+        {
+          case ManiphestAuxiliaryFieldDefaultSpecification::TYPE_DATE:
+            if (array_key_exists($aux_field->getAuxiliaryKey() . '_use')) {
+              $uri = $uri->alter($aux_field->getAuxiliaryKey() . '_before', $aux_array[$aux_field->getAuxiliaryKey() . '_before']);
+              $uri = $uri->alter($aux_field->getAuxiliaryKey() . '_after', $aux_array[$aux_field->getAuxiliaryKey() . '_after']);
+            }
+            break;
+          case ManiphestAuxiliaryFieldDefaultSpecification::TYPE_SELECT:
+            $uri = $uri->alter($aux_field->getAuxiliaryKey() . '_any', $aux_array[$aux_field->getAuxiliaryKey() . '_any']);
+            $uri = $uri->alter($aux_field->getAuxiliaryKey() . '_exclude', $aux_array[$aux_field->getAuxiliaryKey() . '_exclude']);
+            break;
+          case ManiphestAuxiliaryFieldDefaultSpecification::TYPE_PERSON:
+            $uri = $uri->alter($aux_field->getAuxiliaryKey() . '_all', $aux_array[$aux_field->getAuxiliaryKey() . '_all']);
+            $uri = $uri->alter($aux_field->getAuxiliaryKey() . '_any', $aux_array[$aux_field->getAuxiliaryKey() . '_any']);
+            $uri = $uri->alter($aux_field->getAuxiliaryKey() . '_exclude', $aux_array[$aux_field->getAuxiliaryKey() . '_exclude']);
+            break;
+          case ManiphestAuxiliaryFieldDefaultSpecification::TYPE_BOOL:
+            if ($aux_array[$aux_field->getAuxiliaryKey()] != "" && $aux_array[$aux_field->getAuxiliaryKey()] != "either") {
+              $uri = $uri->alter($aux_field->getAuxiliaryKey(), $aux_array[$aux_field->getAuxiliaryKey()]);
+            }
+            break;
+          default:
+            if ($aux_array[$aux_field->getAuxiliaryKey()] != "") {
+              $uri = $uri->alter($aux_field->getAuxiliaryKey(), $aux_array[$aux_field->getAuxiliaryKey()]);
+            }
+            break;
+        }
+      }
 
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
@@ -84,14 +120,15 @@ final class ManiphestTaskListController extends ManiphestController {
       $this->view = 'custom';
     } else {
       $this->view = $nav->selectFilter($this->view, 'action');
-      $query = $this->buildQueryFromRequest();
+      $query = $this->buildQueryFromRequest($aux_fields);
     }
 
     // Execute the query.
 
     list($tasks, $handles, $total_count) = self::loadTasks(
       $query,
-      $user);
+      $user,
+      $aux_fields);
 
     // Extract information we need to render the filters from the query.
 
@@ -118,20 +155,24 @@ final class ManiphestTaskListController extends ManiphestController {
     $q_group  = $query->getParameter('group');
     $q_order  = $query->getParameter('order');
 
+    $action = $request->getRequestURI()
+      ->alter('key', null)
+      ->alter(
+        $this->getStatusRequestKey(),
+        $this->getStatusRequestValue($q_status))
+      ->alter(
+        $this->getOrderRequestKey(),
+        $this->getOrderRequestValue($q_order))
+      ->alter(
+        $this->getGroupRequestKey(),
+        $this->getGroupRequestValue($q_group));
+    foreach ($aux_fields as $aux_field) {
+      $action->alter($aux_field->getAuxiliaryKey(), $query->getParameter($aux_field->getAuxiliaryKey()));
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setAction(
-          $request->getRequestURI()
-            ->alter('key', null)
-            ->alter(
-              $this->getStatusRequestKey(),
-              $this->getStatusRequestValue($q_status))
-            ->alter(
-              $this->getOrderRequestKey(),
-              $this->getOrderRequestValue($q_order))
-            ->alter(
-              $this->getGroupRequestKey(),
-              $this->getGroupRequestValue($q_group)));
+      ->setAction($action);
 
     if (isset($has_filter[$this->view])) {
       $tokens = array();
@@ -250,13 +291,49 @@ final class ManiphestTaskListController extends ManiphestController {
             ->setName('set_hpriority')
             ->setValue($priority)
             ->setOptions(ManiphestTaskPriority::getTaskPriorityMap()));
-
     }
 
     $form
       ->appendChild($this->renderStatusControl($q_status))
       ->appendChild($this->renderGroupControl($q_group))
       ->appendChild($this->renderOrderControl($q_order));
+
+    if ($this->view == 'custom') {
+      $aux_groups = $extensions->getGroupedAuxiliaryFieldSpecifications($aux_fields);
+      $request_data = $request->getRequestData();
+      $extensions->renderGroupedFields($aux_groups, null, $user, array('form' => $form, 'user' => $user, 'request_data' => $request_data), false, false, function($data, $group) {
+        $data['form']->appendChild("
+<div class='aphront-form-control aphront-form-control-text'>
+  <label class='aphront-form-label'></label>
+  <div class='aphront-form-input'>
+    <h4 class='maniphest-aux-group'>".$group."</h4>
+  </div>
+</div>");
+      }, function($data, $aux_field) {
+        $controls = $aux_field->renderSearchControls($data['user']);
+        foreach ($controls as $control) {
+          $normalized = substr($control->getName(), strlen("auxiliary["));
+          $normalized = substr($normalized, 0, strlen($normalized) - 1);
+
+          // If this is a select type, we need to set the correct values.
+          if (array_key_exists($normalized, $data['request_data'])) {
+            if ($aux_field->getFieldType() == ManiphestAuxiliaryFieldDefaultSpecification::TYPE_SELECT) {
+              $options = $aux_field->getSelectOptions();
+              $new_array = array();
+              foreach ($data['request_data'][$normalized] as $key) {
+                if (array_key_exists($key, $options)) {
+                  $new_array[$key] = $options[$key];
+                }
+              }
+              $control->setValue($new_array);
+            } else {
+              $control->setValue($data['request_data'][$normalized]);
+            }
+          }
+          $data['form']->appendChild($control);
+        }
+      });
+    }
 
     $submit = id(new AphrontFormSubmitControl())
       ->setValue('Filter Tasks');
@@ -420,7 +497,8 @@ final class ManiphestTaskListController extends ManiphestController {
 
   public static function loadTasks(
     PhabricatorSearchQuery $search_query,
-    PhabricatorUser $viewer) {
+    PhabricatorUser $viewer,
+    $aux_fields) {
 
     $any_project = false;
     $search_text = $search_query->getParameter('fullTextSearch');
@@ -464,6 +542,35 @@ final class ManiphestTaskListController extends ManiphestController {
 
     if ($author_phids) {
       $query->withAuthors($author_phids);
+    }
+
+    foreach ($aux_fields as $aux_field) {
+      $value = $search_query->getParameter($aux_field->getAuxiliaryKey(), '');
+      $value_all = $search_query->getParameter($aux_field->getAuxiliaryKey() . '_all', '');
+      $value_any = $search_query->getParameter($aux_field->getAuxiliaryKey() . '_any', '');
+      $value_exclude = $search_query->getParameter($aux_field->getAuxiliaryKey() . '_exclude', '');
+      if ($value) {
+        if ($aux_field->getFieldType() == ManiphestAuxiliaryFieldDefaultSpecification::TYPE_BOOL) {
+          if ($value == "true") {
+            $query->withCustomAttribute($aux_field->getAuxiliaryKey(), 1);
+          } else if ($value == "false") {
+            $query->withCustomAttribute($aux_field->getAuxiliaryKey(), 0);
+          } else {
+            // Do nothing, it's set to "either".
+          }
+        } else {
+          $query->withCustomAttribute($aux_field->getAuxiliaryKey(), $value);
+        }
+      }
+      if ($value_all) {
+        $query->withAllCustomAttributes($aux_field->getAuxiliaryKey(), $value_all);
+      }
+      if ($value_any) {
+        $query->withAnyCustomAttributes($aux_field->getAuxiliaryKey(), $value_any);
+      }
+      if ($value_exclude) {
+        $query->withExcludedCustomAttributes($aux_field->getAuxiliaryKey(), $value_exclude);
+      }
     }
 
     $status = $search_query->getParameter('status', 'all');
@@ -682,24 +789,36 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       'Export Tasks to Excel...');
 
+    if (PhabricatorEnv::getEnvConfig('maniphest.change-control-board.enabled')) {
+      $export_ccb = javelin_render_tag(
+        'a',
+        array(
+          'href' => '/maniphest/export-ccb/'.$search_query->getQueryKey().'/',
+          'class' => 'grey button',
+        ),
+        'Export Change Control Board...');
+    }
+    else
+      $export_ccb = "";
+
     return hsprintf(
       '<div class="maniphest-batch-editor">'.
         '<div class="batch-editor-header">Batch Task Editor</div>'.
         '<table class="maniphest-batch-editor-layout">'.
           '<tr>'.
             '<td>%s%s</td>'.
-            '<td>%s</td>'.
+            '<td>%s%s</td>'.
             '<td id="batch-select-status-cell">0 Selected Tasks</td>'.
             '<td class="batch-select-submit-cell">%s</td>'.
           '</tr>'.
         '</table>'.
       '</table>',
       $select_all, $select_none,
-      $export,
+      $export, $export_ccb,
       $submit);
   }
 
-  private function buildQueryFromRequest() {
+  private function buildQueryFromRequest($aux_fields) {
     $request  = $this->getRequest();
     $user     = $request->getUser();
 
@@ -757,8 +876,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
     $query = new PhabricatorSearchQuery();
     $query->setQuery('<<maniphest>>');
-    $query->setParameters(
-      array(
+    $params = array(
         'fullTextSearch'      => $search_string,
         'view'                => $this->view,
         'userPHIDs'           => $user_phids,
@@ -774,8 +892,24 @@ final class ManiphestTaskListController extends ManiphestController {
         'order'               => $order,
         'offset'              => $page,
         'limit'               => $page_size,
-        'status'              => $status,
-      ));
+        'status'              => $status
+        );
+    $request_data = $this->getRequest()->getRequestData();
+    foreach ($aux_fields as $aux_field) {
+      if (array_key_exists($aux_field->getAuxiliaryKey(), $request_data)) {
+        $params[$aux_field->getAuxiliaryKey()] = $request_data[$aux_field->getAuxiliaryKey()];
+      }
+      if (array_key_exists($aux_field->getAuxiliaryKey() . '_all', $request_data)) {
+        $params[$aux_field->getAuxiliaryKey() . '_all'] = $request_data[$aux_field->getAuxiliaryKey() . '_all'];
+      }
+      if (array_key_exists($aux_field->getAuxiliaryKey() . '_any', $request_data)) {
+        $params[$aux_field->getAuxiliaryKey() . '_any'] = $request_data[$aux_field->getAuxiliaryKey() . '_any'];
+      }
+      if (array_key_exists($aux_field->getAuxiliaryKey() . '_exclude', $request_data)) {
+        $params[$aux_field->getAuxiliaryKey() . '_exclude'] = $request_data[$aux_field->getAuxiliaryKey() . '_exclude'];
+      }
+    }
+    $query->setParameters($params);
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     $query->save();
@@ -922,5 +1056,4 @@ final class ManiphestTaskListController extends ManiphestController {
       ->setBaseURI($request->getRequestURI(), $this->getGroupRequestKey())
       ->setButtons($this->getGroupButtonMap());
   }
-
 }
