@@ -96,6 +96,6 @@ abstract class PhabricatorRepositoryCommitParserWorker
       ->load($commit->getRepositoryID());
     $link = DiffusionView::linkCommit($repository,
                                       $commit->getCommitIdentifier());
-    return $link.$suffix;
+    return hsprintf('%s%s', $link, $suffix);
   }
 }

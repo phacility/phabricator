@@ -84,7 +84,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
             'type'  => 'hidden',
             'name'  => $input_name,
             'value' => $key,
-          )).
+          )),
         phutil_tag('span', array('class' => 'jx-tokenizer-x-placeholder'), ''),
       ));
   }

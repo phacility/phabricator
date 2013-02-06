@@ -151,9 +151,7 @@ abstract class PhabricatorWorker {
 
   public function renderForDisplay() {
     $data = PhutilReadableSerializer::printableValue($this->data);
-    $data = phutil_escape_html($data);
-    $data = '<pre>'.$data.'</pre>';
-    return $data;
+    return phutil_tag('pre', array(), $data);
   }
 
 }
