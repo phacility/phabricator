@@ -29,7 +29,7 @@ final class PhabricatorMenuView extends AphrontTagView {
       ->setHref($href);
 
     if ($key !== null) {
-      $key->setKey($key);
+      $item->setKey($key);
     }
 
     $this->addMenuItem($item);
