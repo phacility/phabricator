@@ -113,11 +113,24 @@ JX.behavior('pholio-mock-view', function(config) {
 
       selection.title = comment;
 
-      console.log("ImageID: " + imageData['imageID'] +
-        ", coords: (" + Math.min(startPos.x, endPos.x) + "," +
-        Math.min(startPos.y, endPos.y) + ") -> (" +
-        Math.max(startPos.x,endPos.x) + "," + Math.max(startPos.y,endPos.y) +
-        "), comment: " + comment);
+      var saveURL = "/pholio/inline/" + imageData['imageID'] + "/";
+
+      var inlineComment = new JX.Request(saveURL, function(r) {
+
+      });
+
+      var commentToAdd = {
+        mockID: config.mockID,
+        imageID: imageData['imageID'],
+        startX: Math.min(startPos.x, endPos.x),
+        startY: Math.min(startPos.y, endPos.y),
+        endX: Math.max(startPos.x,endPos.x),
+        endY: Math.max(startPos.y,endPos.y),
+        comment: comment};
+
+
+      inlineComment.addData(commentToAdd);
+      inlineComment.send();
 
     });
 
