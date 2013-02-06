@@ -3,12 +3,12 @@
 /**
  * @group irc
  */
-final class PhabricatorIRCDifferentialNotificationHandler
-  extends PhabricatorIRCHandler {
+final class PhabricatorBotDifferentialNotificationHandler
+  extends PhabricatorBotHandler {
 
   private $skippedOldEvents;
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
     return;
   }
 

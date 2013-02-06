@@ -7,12 +7,12 @@
   ],
   "handlers" : [
     "PhabricatorIRCProtocolHandler",
-    "PhabricatorIRCObjectNameHandler",
-    "PhabricatorIRCSymbolHandler",
-    "PhabricatorIRCLogHandler",
-    "PhabricatorIRCWhatsNewHandler",
-    "PhabricatorIRCDifferentialNotificationHandler",
-    "PhabricatorIRCMacroHandler"
+    "PhabricatorBotObjectNameHandler",
+    "PhabricatorBotSymbolHandler",
+    "PhabricatorBotLogHandler",
+    "PhabricatorBotWhatsNewHandler",
+    "PhabricatorBotDifferentialNotificationHandler",
+    "PhabricatorBotMacroHandler"
   ],
 
   "conduit.uri" : null,

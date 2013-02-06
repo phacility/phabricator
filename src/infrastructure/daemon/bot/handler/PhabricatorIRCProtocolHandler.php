@@ -5,9 +5,9 @@
  *
  * @group irc
  */
-final class PhabricatorIRCProtocolHandler extends PhabricatorIRCHandler {
+final class PhabricatorIRCProtocolHandler extends PhabricatorBotHandler {
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
     switch ($message->getCommand()) {
       case '422': // Error - no MOTD
       case '376': // End of MOTD

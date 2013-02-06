@@ -5,11 +5,11 @@
  *
  * @group irc
  */
-final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
+final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
 
   private $floodblock = 0;
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
 
     switch ($message->getCommand()) {
       case 'PRIVMSG':

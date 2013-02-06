@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorIRCMessage {
+final class PhabricatorBotMessage {
 
   private $sender;
   private $command;

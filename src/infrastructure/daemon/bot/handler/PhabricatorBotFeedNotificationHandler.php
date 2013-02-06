@@ -5,8 +5,8 @@
  *
  * @group irc
  */
-final class PhabricatorIRCFeedNotificationHandler
-  extends PhabricatorIRCHandler {
+final class PhabricatorBotFeedNotificationHandler
+  extends PhabricatorBotHandler {
 
   private $startupDelay = 30;
   private $lastSeenChronoKey = 0;
@@ -82,7 +82,7 @@ final class PhabricatorIRCFeedNotificationHandler
     return false;
   }
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
     return;
   }
 

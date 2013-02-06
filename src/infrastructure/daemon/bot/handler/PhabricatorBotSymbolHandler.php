@@ -5,9 +5,9 @@
  *
  * @group irc
  */
-final class PhabricatorIRCSymbolHandler extends PhabricatorIRCHandler {
+final class PhabricatorBotSymbolHandler extends PhabricatorBotHandler {
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
 
     switch ($message->getCommand()) {
       case 'PRIVMSG':
