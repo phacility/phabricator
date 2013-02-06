@@ -11,8 +11,11 @@ final class PhabricatorMenuView extends AphrontTagView {
   public function newLabel($name, $key = null) {
     $item = id(new PhabricatorMenuItemView())
       ->setType(PhabricatorMenuItemView::TYPE_LABEL)
-      ->setName($name)
-      ->setKey($key);
+      ->setName($name);
+
+    if ($key !== null) {
+      $item->setKey($key);
+    }
 
     $this->addMenuItem($item);
 
@@ -23,8 +26,11 @@ final class PhabricatorMenuView extends AphrontTagView {
     $item = id(new PhabricatorMenuItemView())
       ->setType(PhabricatorMenuItemView::TYPE_LINK)
       ->setName($name)
-      ->setHref($href)
-      ->setKey($key);
+      ->setHref($href);
+
+    if ($key !== null) {
+      $key->setKey($key);
+    }
 
     $this->addMenuItem($item);
 
