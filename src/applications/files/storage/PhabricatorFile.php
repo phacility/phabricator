@@ -134,9 +134,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
 
   public static function newFromFileData($data, array $params = array()) {
-    $selector = PhabricatorEnv::newObjectFromConfig('storage.engine-selector');
 
-    $engines = $selector->selectStorageEngines($data, $params);
+    if (isset($params['storageEngines'])) {
+      $engines = $params['storageEngines'];
+    } else {
+      $selector = PhabricatorEnv::newObjectFromConfig(
+        'storage.engine-selector');
+      $engines = $selector->selectStorageEngines($data, $params);
+    }
+
+    assert_instances_of($engines, 'PhabricatorFileStorageEngine');
     if (!$engines) {
       throw new Exception("No valid storage engines are available!");
     }
