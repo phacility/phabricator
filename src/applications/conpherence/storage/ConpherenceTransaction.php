@@ -31,6 +31,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case ConpherenceTransactionType::TYPE_PICTURE:
         return false;
       case ConpherenceTransactionType::TYPE_FILES:
+      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
         return true;
     }
 
@@ -107,12 +108,10 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     $phids[] = $this->getAuthorPHID();
     switch ($this->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_PICTURE:
-        $phids[] = $new;
-        break;
       case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransactionType::TYPE_FILES:
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-      case ConpherenceTransactionType::TYPE_FILES:
         $phids = array_merge($phids, $this->getOldValue());
         $phids = array_merge($phids, $this->getNewValue());
         break;

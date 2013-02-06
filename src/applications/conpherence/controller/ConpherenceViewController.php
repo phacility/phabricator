@@ -45,6 +45,7 @@ final class ConpherenceViewController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needWidgetData(true)
+      ->needHeaderPics(true)
       ->executeOne();
     $this->setConpherence($conpherence);
 
@@ -67,23 +68,34 @@ final class ConpherenceViewController extends
     require_celerity_resource('conpherence-header-pane-css');
     $user = $this->getRequest()->getUser();
     $conpherence = $this->getConpherence();
-    $display_data = $conpherence->getDisplayData($user);
+    $display_data = $conpherence->getDisplayData(
+      $user,
+      ConpherenceImageData::SIZE_HEAD
+    );
     $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+    $class_mod = $display_data['image_class'];
 
     $header =
+    phutil_tag(
+      'div',
+      array(
+        'class' => 'upload-photo'
+      ),
+      pht('Drop photo here to change this Conpherence photo.')
+    ).
     javelin_tag(
       'a',
       array(
         'class' => 'edit',
         'href' => $edit_href,
-        'sigil' => 'workflow',
+        'sigil' => 'workflow edit-action',
       ),
       ''
     ).
     phutil_tag(
       'div',
       array(
-        'class' => 'header-image',
+        'class' => $class_mod.'header-image',
         'style' => 'background-image: url('.$display_data['image'].');'
       ),
       ''
@@ -91,14 +103,14 @@ final class ConpherenceViewController extends
     phutil_tag(
       'div',
       array(
-        'class' => 'title',
+        'class' => $class_mod.'title',
       ),
       $display_data['title']
     ).
     phutil_tag(
       'div',
       array(
-        'class' => 'subtitle',
+        'class' => $class_mod.'subtitle',
       ),
       $display_data['subtitle']
     );
