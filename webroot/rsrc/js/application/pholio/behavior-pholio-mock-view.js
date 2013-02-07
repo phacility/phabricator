@@ -4,7 +4,8 @@
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-vector
- *           javelin-event
+ *           javelin-magical-init
+ *           javelin-request
  */
 JX.behavior('pholio-mock-view', function(config) {
   var is_dragging = false;
@@ -13,7 +14,9 @@ JX.behavior('pholio-mock-view', function(config) {
   var imageData;
   var startPos;
   var endPos;
-  var selection;
+
+  var selection_border;
+  var selection_fill;
 
   JX.Stratcom.listen(
     'click', // Listen for clicks...
@@ -35,26 +38,28 @@ JX.behavior('pholio-mock-view', function(config) {
     });
 
 
-  function draw_rectangle(node, current, init) {
-    JX.$V(
-      Math.abs(current.x-init.x),
-      Math.abs(current.y-init.y))
-    .setDim(node);
+  function draw_rectangle(nodes, current, init) {
+    for (var ii = 0; ii < nodes.length; ii++) {
+      var node = nodes[ii];
 
-    JX.$V(
-      (current.x-init.x < 0) ? current.x:init.x,
-      (current.y-init.y < 0) ? current.y:init.y)
-    .setPos(node);
+      JX.$V(
+        Math.abs(current.x-init.x),
+        Math.abs(current.y-init.y))
+      .setDim(node);
+
+      JX.$V(
+        (current.x-init.x < 0) ? current.x:init.x,
+        (current.y-init.y < 0) ? current.y:init.y)
+      .setPos(node);
+    }
   }
 
   function getRealXY(parent, point) {
     var pos = {x: (point.x - parent.x), y: (point.y - parent.y)};
+    var dim = JX.Vector.getDim(image);
 
-    if (pos.x < 0) pos.x = 0;
-    else if (pos.x > image.clientWidth) pos.x = image.clientWidth - 1;
-
-    if (pos.y < 0) pos.y = 0;
-    else if (pos.y > image.clientHeight) pos.y = image.clientHeight - 2;
+    pos.x = Math.max(0, Math.min(pos.x, dim.x));
+    pos.y = Math.max(0, Math.min(pos.y, dim.y));
 
     return pos;
   }
@@ -72,17 +77,18 @@ JX.behavior('pholio-mock-view', function(config) {
 
     startPos = getRealXY(JX.$V(wrapper),JX.$V(e));
 
-    selection = JX.$N(
+    selection_border = JX.$N(
       'div',
-      {className: 'pholio-mock-select'}
-    );
+      {className: 'pholio-mock-select-border'});
 
+    selection_fill = JX.$N(
+      'div',
+      {className: 'pholio-mock-select-fill'});
 
-    JX.$V(startPos.x,startPos.y).setPos(selection);
+    JX.$V(startPos.x, startPos.y).setPos(selection_border);
+    JX.$V(startPos.x, startPos.y).setPos(selection_fill);
 
-    JX.DOM.appendContent(wrapper, selection);
-
-
+    JX.DOM.appendContent(wrapper, [selection_border, selection_fill]);
   });
 
   JX.enableDispatch(document.body, 'mousemove');
@@ -91,7 +97,10 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
 
-    draw_rectangle(selection, getRealXY(JX.$V(wrapper), JX.$V(e)), startPos);
+    draw_rectangle(
+      [selection_border, selection_fill],
+      getRealXY(JX.$V(wrapper),
+      JX.$V(e)), startPos);
   });
 
   JX.Stratcom.listen(
@@ -107,11 +116,12 @@ JX.behavior('pholio-mock-view', function(config) {
 
       comment = window.prompt("Add your comment");
       if (comment == null || comment == "") {
-        selection.remove();
+        JX.DOM.remove(selection_border);
+        JX.DOM.remove(selection_fill);
         return;
       }
 
-      selection.title = comment;
+      selection_fill.title = comment;
 
       var saveURL = "/pholio/inline/" + imageData['imageID'] + "/";
 
