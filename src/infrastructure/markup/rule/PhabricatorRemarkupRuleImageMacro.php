@@ -45,14 +45,14 @@ final class PhabricatorRemarkupRuleImageMacro
         }
       }
 
-      $img = phutil_render_tag(
+      $img = phutil_tag(
         'img',
         array(
           'src'   => $src_uri,
           'alt'   => $matches[1],
           'title' => $matches[1],
-          'style' => $style),
-        null);
+          'style' => $style,
+        ));
       return $this->getEngine()->storeText($img);
     } else {
       return $matches[1];

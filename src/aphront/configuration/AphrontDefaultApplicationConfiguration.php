@@ -73,7 +73,10 @@ class AphrontDefaultApplicationConfiguration
         'profile/(?P<phid>[^/]+)/' => 'PhabricatorXHProfProfileController',
       ),
 
-      '/~/' => 'DarkConsoleController',
+      '/~/' => array(
+        '' => 'DarkConsoleController',
+        'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
+      ),
 
       '/search/' => array(
         '' => 'PhabricatorSearchController',
@@ -179,10 +182,9 @@ class AphrontDefaultApplicationConfiguration
         return $login_controller->processRequest();
       }
 
-      $content =
-        '<div class="aphront-policy-exception">'.
-          phutil_escape_html($ex->getMessage()).
-        '</div>';
+      $content = hsprintf(
+        '<div class="aphront-policy-exception">%s</div>',
+        $ex->getMessage());
 
       $dialog = new AphrontDialogView();
       $dialog
@@ -208,7 +210,7 @@ class AphrontDefaultApplicationConfiguration
     if ($ex instanceof AphrontUsageException) {
       $error = new AphrontErrorView();
       $error->setTitle(phutil_escape_html($ex->getTitle()));
-      $error->appendChild(phutil_escape_html($ex->getMessage()));
+      $error->appendChild($ex->getMessage());
 
       $view = new PhabricatorStandardPageView();
       $view->setRequest($this->getRequest());
@@ -333,17 +335,17 @@ class AphrontDefaultApplicationConfiguration
               '$'.$part['line'];
             $attrs['target'] = '_blank';
           }
-          $file_name = phutil_render_tag(
+          $file_name = phutil_tag(
             'a',
             $attrs,
-            phutil_escape_html($relative));
+            $relative);
         } else {
-          $file_name = phutil_render_tag(
+          $file_name = phutil_tag(
             'span',
             array(
               'title' => $file,
             ),
-            phutil_escape_html($relative));
+            $relative);
         }
         $file_name = $file_name.' : '.(int)$part['line'];
       } else {

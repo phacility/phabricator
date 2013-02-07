@@ -16,7 +16,7 @@ final class AphrontRequestFailureView extends AphrontView {
     return
       '<div class="aphront-request-failure-view">'.
         '<div class="aphront-request-failure-head">'.
-          '<h1>'.phutil_escape_html($this->header).'</h1>'.
+          phutil_tag('h1', array(), $this->header).
         '</div>'.
         '<div class="aphront-request-failure-body">'.
           $this->renderChildren().

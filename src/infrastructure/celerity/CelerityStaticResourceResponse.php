@@ -106,7 +106,7 @@ final class CelerityStaticResourceResponse {
     $uri = PhabricatorEnv::getCDNURI($resource['uri']);
     switch ($resource['type']) {
       case 'css':
-        return phutil_render_tag(
+        return phutil_tag(
           'link',
           array(
             'rel'   => 'stylesheet',
@@ -114,7 +114,7 @@ final class CelerityStaticResourceResponse {
             'href'  => $uri,
           ));
       case 'js':
-        return phutil_render_tag(
+        return phutil_tag(
           'script',
           array(
             'type'  => 'text/javascript',
@@ -128,7 +128,8 @@ final class CelerityStaticResourceResponse {
   public function renderHTMLFooter() {
     $data = array();
     if ($this->metadata) {
-      $json_metadata = json_encode($this->metadata);
+      $json_metadata = AphrontResponse::encodeJSONForHTTPResponse(
+        $this->metadata);
       $this->metadata = array();
     } else {
       $json_metadata = '{}';
@@ -164,7 +165,9 @@ final class CelerityStaticResourceResponse {
         if (!$group) {
           continue;
         }
-        $onload[] = 'JX.initBehaviors('.json_encode($group).')';
+        $group_json = AphrontResponse::encodeJSONForHTTPResponse(
+          $group);
+        $onload[] = 'JX.initBehaviors('.$group_json.')';
       }
     }
 

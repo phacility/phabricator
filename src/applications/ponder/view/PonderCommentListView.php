@@ -51,24 +51,20 @@ final class PonderCommentListView extends AphrontView {
         $comment->getMarkupField(),
         $this->user);
 
-      $comment_anchor = '<a name="comment-' . $comment->getID() . '" />';
-      $comment_markup[] =
+      $comment_anchor = '';
+      $comment_markup[] = hsprintf(
         '<tr>'.
-          '<th>'.
-            $comment_anchor.
-          '</th>'.
+          '<th><a name="comment-%s" /></th>'.
           '<td>'.
             '<div class="phabricator-remarkup ponder-comment-markup">'.
-              $body.
-              '&nbsp;&mdash;'.
-              $handle->renderLink().
-              '&nbsp;'.
-              '<span class="ponder-datestamp">'.
-                phabricator_datetime($comment->getDateCreated(), $user).
-              '</span>'.
+              '%s&nbsp;&mdash;%s&nbsp;<span class="ponder-datestamp">%s</span>'.
             '</div>'.
           '</td>'.
-        '</tr>';
+        '</tr>',
+        $comment->getID(),
+        $body,
+        $handle->renderLink(),
+        phabricator_datetime($comment->getDateCreated(), $user));
     }
 
     $addview = id(new PonderAddCommentView)
@@ -77,20 +73,16 @@ final class PonderCommentListView extends AphrontView {
       ->setQuestionID($this->questionID)
       ->setActionURI($this->actionURI);
 
-    $comment_markup[] =
-      '<tr>'.
-       '<th>&nbsp;</th>'.
-       '<td>'.$addview->render().'</td>'.
-      '</tr>';
+    $comment_markup[] = hsprintf(
+      '<tr><th>&nbsp;</th><td>%s</td></tr>',
+      $addview->render());
 
-    $comment_markup = phutil_render_tag(
+    $comment_markup = phutil_tag(
       'table',
       array(
         'class' => 'ponder-comments',
       ),
-      implode("\n", $comment_markup)
-    );
-
+      $comment_markup);
 
     return $comment_markup;
   }

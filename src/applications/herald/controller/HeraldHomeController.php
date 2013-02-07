@@ -98,7 +98,7 @@ final class HeraldHomeController extends HeraldController {
 
     if ($can_create) {
       $panel->addButton(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/herald/new/'.$this->contentType.'/'.$this->ruleType.'/',

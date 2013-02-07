@@ -36,6 +36,14 @@ abstract class AphrontView extends Phobject {
     return implode('', $out);
   }
 
+  final protected function renderHTMLChildren() {
+    $out = array();
+    foreach ($this->children as $child) {
+      $out[] = $this->renderHTMLView($child);
+    }
+    return $out;
+  }
+
   final protected function renderSingleView($child) {
     if ($child instanceof AphrontView) {
       return $child->render();
@@ -47,6 +55,35 @@ abstract class AphrontView extends Phobject {
       return implode('', $out);
     } else {
       return $child;
+    }
+  }
+
+  final protected function renderHTMLView($child) {
+    if ($child instanceof AphrontView) {
+      return phutil_safe_html($child->render());
+    } else if ($child instanceof PhutilSafeHTML) {
+      return $child;
+    } else if (is_array($child)) {
+      $out = array();
+      foreach ($child as $element) {
+        $out[] = $this->renderHTMLView($element);
+      }
+      return phutil_safe_html(implode('', $out));
+    } else {
+      return phutil_safe_html(phutil_escape_html($child));
+    }
+  }
+
+  final protected function isEmptyContent($content) {
+    if (is_array($content)) {
+      foreach ($content as $element) {
+        if (!$this->isEmptyContent($element)) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return !strlen((string)$content);
     }
   }
 

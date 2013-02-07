@@ -49,16 +49,16 @@ final class PhabricatorPeopleListController
       $rows[] = array(
         phabricator_date($user->getDateCreated(), $viewer),
         phabricator_time($user->getDateCreated(), $viewer),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/p/'.$user->getUsername().'/',
           ),
-          phutil_escape_html($user->getUserName())),
+          $user->getUserName()),
         phutil_escape_html($user->getRealName()),
         $status,
         $email,
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'class' => 'button grey small',
@@ -107,7 +107,7 @@ final class PhabricatorPeopleListController
 
     if ($is_admin) {
       $panel->addButton(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/people/edit/',
@@ -116,7 +116,7 @@ final class PhabricatorPeopleListController
           'Create New Account'));
       if (PhabricatorEnv::getEnvConfig('ldap.auth-enabled')) {
         $panel->addButton(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/people/ldap/',

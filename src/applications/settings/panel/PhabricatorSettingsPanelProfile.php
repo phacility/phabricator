@@ -119,7 +119,8 @@ final class PhabricatorSettingsPanelProfile
         $error_view = new AphrontErrorView();
         $error_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
         $error_view->setTitle('Changes Saved');
-        $error_view->appendChild('<p>Your changes have been saved.</p>');
+        $error_view->appendChild(
+          phutil_tag('p', array(), 'Your changes have been saved.'));
         $error_view = $error_view->render();
       }
     }
@@ -175,16 +176,16 @@ final class PhabricatorSettingsPanelProfile
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile URI')
           ->setValue(
-            phutil_render_tag(
+            phutil_tag(
               'a',
               array(
                 'href' => $profile_uri,
               ),
-              phutil_escape_html($profile_uri))))
-      ->appendChild(
+              $profile_uri)))
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Write something about yourself! '.
         'Make sure to include <strong>important information</strong> like '.
-        'your favorite Pokemon and which Starcraft race you play.</p>')
+        'your favorite Pokemon and which Starcraft race you play.</p>'))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Blurb')
@@ -194,7 +195,7 @@ final class PhabricatorSettingsPanelProfile
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile Image')
           ->setValue(
-            phutil_render_tag(
+            phutil_tag(
               'img',
               array(
                 'src' => $img_src,

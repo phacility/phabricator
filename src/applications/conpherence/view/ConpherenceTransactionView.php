@@ -41,6 +41,7 @@ final class ConpherenceTransactionView extends AphrontView {
       ->setEpoch($transaction->getDateCreated())
       ->setContentSource($transaction->getContentSource());
 
+    $content = null;
     $content_class = null;
     $content = null;
     switch ($transaction->getTransactionType()) {
@@ -52,6 +53,17 @@ final class ConpherenceTransactionView extends AphrontView {
         break;
       case ConpherenceTransactionType::TYPE_FILES:
         $content = $transaction->getTitle();
+        break;
+      case ConpherenceTransactionType::TYPE_PICTURE:
+        $img = $transaction->getHandle($transaction->getNewValue());
+        $content = array(
+          $transaction->getTitle(),
+          phutil_tag(
+            'img',
+            array(
+              'src' => $img->getImageURI()
+            )));
+        $transaction_view->addClass('conpherence-edited');
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         $content = $transaction->getTitle();
@@ -79,7 +91,7 @@ final class ConpherenceTransactionView extends AphrontView {
         array(
           'class' => $content_class
         ),
-        new PhutilSafeHTML($content))
+        $this->renderHTMLView($content))
       );
 
     return $transaction_view->render();

@@ -72,7 +72,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
       if ($id) {
         $new_checked = ($this->selectedDiffID == $id);
-        $new = javelin_render_tag(
+        $new = javelin_tag(
           'input',
           array(
             'type' => 'radio',
@@ -92,7 +92,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       if ($max_id != $id) {
         $uniq = celerity_generate_unique_node_id();
         $old_checked = ($this->selectedVersusDiffID == $id);
-        $old = phutil_render_tag(
+        $old = phutil_tag(
           'input',
           array(
             'type' => 'radio',
@@ -119,24 +119,22 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
 
       if (++$idx % 2) {
-        $class = ' class="alt"';
+        $class = 'alt';
       } else {
         $class = null;
       }
 
+      $lint_attrs = array('class' => 'revhistory-star');
+      $unit_attrs = array('class' => 'revhistory-star');
       if ($diff) {
         $lint = self::renderDiffLintStar($row['obj']);
         $unit = self::renderDiffUnitStar($row['obj']);
-        $lint_message = self::getDiffLintMessage($diff);
-        $unit_message = self::getDiffUnitMessage($diff);
-        $lint_title = ' title="'.phutil_escape_html($lint_message).'"';
-        $unit_title = ' title="'.phutil_escape_html($unit_message).'"';
+        $lint_attrs['title'] = self::getDiffLintMessage($diff);
+        $unit_attrs['title'] = self::getDiffUnitMessage($diff);
         $base = $this->renderBaseRevision($diff);
       } else {
         $lint = null;
         $unit = null;
-        $lint_title = null;
-        $unit_title = null;
         $base = null;
       }
 
@@ -145,22 +143,24 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
       $last_base = $base;
 
-      $id_link = phutil_render_tag(
+      $id_link = phutil_tag(
         'a',
         array('href' => '/differential/diff/'.$id.'/'),
-        phutil_escape_html($id));
-      $rows[] =
-        '<tr'.$class.'>'.
-          '<td class="revhistory-name">'.phutil_escape_html($name).'</td>'.
-          '<td class="revhistory-id">'.$id_link.'</td>'.
-          '<td class="revhistory-base">'.phutil_escape_html($base).'</td>'.
-          '<td class="revhistory-desc">'.phutil_escape_html($desc).'</td>'.
-          '<td class="revhistory-age">'.$age.'</td>'.
-          '<td class="revhistory-star"'.$lint_title.'>'.$lint.'</td>'.
-          '<td class="revhistory-star"'.$unit_title.'>'.$unit.'</td>'.
-          '<td class="revhistory-old'.$old_class.'">'.$old.'</td>'.
-          '<td class="revhistory-new'.$new_class.'">'.$new.'</td>'.
-        '</tr>';
+        $id);
+      $rows[] = phutil_tag(
+        'tr',
+        array('class' => $class),
+        array(
+          phutil_tag('td', array('class' => 'revhistory-name'), $name),
+          phutil_tag('td', array('class' => 'revhistory-id'), $id_link),
+          phutil_tag('td', array('class' => 'revhistory-base'), $base),
+          phutil_tag('td', array('class' => 'revhistory-desc'), $desc),
+          phutil_tag('td', array('class' => 'revhistory-age'), $age),
+          phutil_tag('td', $lint_attrs, $lint),
+          phutil_tag('td', $unit_attrs, $unit),
+          phutil_tag('td', array('class' => 'revhistory-old'.$old_class), $old),
+          phutil_tag('td', array('class' => 'revhistory-new'.$new_class), $new),
+        ));
     }
 
     Javelin::initBehavior(
@@ -179,7 +179,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
     $select = '<select name="whitespace">';
     foreach ($options as $value => $label) {
-      $select .= phutil_render_tag(
+      $select .= phutil_tag(
         'option',
         array(
           'value' => $value,
@@ -187,7 +187,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           ? 'selected'
           : null,
         ),
-        phutil_escape_html($label));
+        $label);
     }
     $select .= '</select>';
 
@@ -293,10 +293,10 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
   private static function renderDiffStar($star) {
     $class = 'diff-star-'.$star;
-    return
-      '<span class="'.$class.'">'.
-        "\xE2\x98\x85".
-      '</span>';
+    return phutil_tag(
+      'span',
+      array('class' => $class),
+      "\xE2\x98\x85");
   }
 
   private function renderBaseRevision(DifferentialDiff $diff) {

@@ -46,12 +46,12 @@ final class PhabricatorSlowvoteListController
     foreach ($polls as $poll) {
       $rows[] = array(
         'V'.$poll->getID(),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/V'.$poll->getID(),
           ),
-          phutil_escape_html($poll->getQuestion())),
+          $poll->getQuestion()),
         $handles[$poll->getAuthorPHID()]->renderLink(),
         phabricator_date($poll->getDateCreated(), $user),
         phabricator_time($poll->getDateCreated(), $user),

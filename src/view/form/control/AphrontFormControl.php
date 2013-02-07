@@ -108,59 +108,61 @@ abstract class AphrontFormControl extends AphrontView {
     $custom_class = $this->getCustomControlClass();
 
     if (strlen($this->getLabel())) {
-      $label =
-        '<label class="aphront-form-label">'.
-          phutil_escape_html($this->getLabel()).
-        '</label>';
+      $label = phutil_tag(
+        'label',
+        array('class' => 'aphront-form-label'),
+        $this->getLabel());
     } else {
       $label = null;
       $custom_class .= ' aphront-form-control-nolabel';
     }
 
-    $input =
-      '<div class="aphront-form-input">'.
-        $this->renderInput().
-      '</div>';
+    $input = phutil_tag(
+      'div',
+      array('class' => 'aphront-form-input'),
+      $this->renderInput());
 
     if (strlen($this->getError())) {
       $error = $this->getError();
       if ($error === true) {
-        $error =
-          '<div class="aphront-form-error aphront-form-required">'.
-            'Required'.
-          '</div>';
+        $error = phutil_tag(
+          'div',
+          array('class' => 'aphront-form-error aphront-form-required'),
+          'Required');
       } else {
-        $error =
-          '<div class="aphront-form-error">'.
-            phutil_escape_html($error).
-          '</div>';
+        $error = phutil_tag(
+          'div',
+          array('class' => 'aphront-form-error'),
+          $error);
       }
     } else {
       $error = null;
     }
 
     if (strlen($this->getCaption())) {
-      $caption =
-        '<div class="aphront-form-caption">'.
-          $this->getCaption().
-        '</div>';
+      $caption = phutil_tag(
+        'div',
+        array('class' => 'aphront-form-caption'),
+        $this->getCaption());
     } else {
       $caption = null;
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => "aphront-form-control {$custom_class}",
         'id' => $this->controlID,
         'style' => $this->controlStyle,
       ),
-      $label.
-      $error.
-      $input.
-      $caption.
+      array(
+        $label,
+        $error,
+        $input,
+        $caption,
 
-      // TODO: Remove this once the redesign finishes up.
-      '<div style="clear: both;"></div>');
+        // TODO: Remove this once the redesign finishes up.
+        phutil_tag('div', array('style' => 'clear: both;'), ''),
+      ));
   }
 }

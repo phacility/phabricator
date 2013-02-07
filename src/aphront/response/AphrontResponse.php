@@ -54,7 +54,21 @@ abstract class AphrontResponse {
     return $this;
   }
 
-  protected function encodeJSONForHTTPResponse(array $object) {
+  public static function processValueForJSONEncoding(&$value, $key) {
+    if ($value instanceof PhutilSafeHTML) {
+      // TODO: Javelin supports implicity conversion of '__html' objects to
+      // JX.HTML, but only for Ajax responses, not behaviors. Just leave things
+      // as they are for now (where behaviors treat responses as HTML or plain
+      // text at their discretion).
+      $value = $value->getHTMLContent();
+    }
+  }
+
+  public static function encodeJSONForHTTPResponse(array $object) {
+
+    array_walk_recursive(
+      $object,
+      array('AphrontResponse', 'processValueForJSONEncoding'));
 
     $response = json_encode($object);
 

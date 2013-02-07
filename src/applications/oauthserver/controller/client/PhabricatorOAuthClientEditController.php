@@ -107,7 +107,7 @@ extends PhabricatorOAuthClientBaseController {
 
     $panel = new AphrontPanelView();
     if ($this->isClientEdit()) {
-      $delete_button = phutil_render_tag(
+      $delete_button = phutil_tag(
         'a',
         array(
           'href' => $client->getDeleteURI(),

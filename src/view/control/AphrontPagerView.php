@@ -187,7 +187,7 @@ final class AphrontPagerView extends AphrontView {
       list($index, $label, $class) = $link;
       $display_index = $this->getDisplayIndex($index);
       $link = $base_uri->alter($parameter, $display_index);
-      $rendered_links[] = phutil_render_tag(
+      $rendered_links[] = phutil_tag(
         'a',
         array(
           'href' => $link,

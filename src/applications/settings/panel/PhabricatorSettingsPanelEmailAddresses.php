@@ -52,7 +52,7 @@ final class PhabricatorSettingsPanelEmailAddresses
     $rows = array();
     foreach ($emails as $email) {
 
-      $button_verify = javelin_render_tag(
+      $button_verify = javelin_tag(
         'a',
         array(
           'class' => 'button small grey',
@@ -61,7 +61,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         ),
         'Verify');
 
-      $button_make_primary = javelin_render_tag(
+      $button_make_primary = javelin_tag(
         'a',
         array(
           'class' => 'button small grey',
@@ -70,7 +70,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         ),
         'Make Primary');
 
-      $button_remove = javelin_render_tag(
+      $button_remove = javelin_tag(
         'a',
         array(
           'class'   => 'button small grey',
@@ -79,7 +79,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         ),
         'Remove');
 
-      $button_primary = phutil_render_tag(
+      $button_primary = phutil_tag(
         'a',
         array(
           'class' => 'button small disabled',
@@ -133,7 +133,7 @@ final class PhabricatorSettingsPanelEmailAddresses
     $view = new AphrontPanelView();
     if ($editable) {
       $view->addButton(
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'href'      => $uri->alter('new', 'true'),
@@ -301,9 +301,9 @@ final class PhabricatorSettingsPanelEmailAddresses
       ->setUser($user)
       ->addHiddenInput('verify', $email_id)
       ->setTitle("Send Another Verification Email?")
-      ->appendChild(
-        '<p>Send another copy of the verification email to '.
-        phutil_escape_html($address).'?</p>')
+      ->appendChild(hsprintf(
+        '<p>Send another copy of the verification email to %s?</p>',
+        $address))
       ->addSubmitButton('Send Email')
       ->addCancelButton($uri);
 
@@ -342,9 +342,10 @@ final class PhabricatorSettingsPanelEmailAddresses
       ->setUser($user)
       ->addHiddenInput('primary', $email_id)
       ->setTitle("Change primary email address?")
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p>If you change your primary address, Phabricator will send all '.
-        'email to '.phutil_escape_html($address).'.</p>')
+          'email to %s.</p>',
+        $address))
       ->addSubmitButton('Change Primary Address')
       ->addCancelButton($uri);
 

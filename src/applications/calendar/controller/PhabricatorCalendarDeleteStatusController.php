@@ -37,7 +37,7 @@ final class PhabricatorCalendarDeleteStatusController
     $dialog = new AphrontDialogView();
     $dialog->setUser($user);
     $dialog->setTitle(pht('Really delete status?'));
-    $dialog->appendChild(phutil_render_tag(
+    $dialog->appendChild(phutil_tag(
       'p',
       array(),
       pht('Permanently delete this status? This action can not be undone.')

@@ -96,11 +96,11 @@ final class HeraldTestConsoleController extends HeraldController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Enter an object to test rules '.
         'for, like a Diffusion commit (e.g., <tt>rX123</tt>) or a '.
         'Differential revision (e.g., <tt>D123</tt>). You will be shown the '.
-        'results of a dry run on the object.</p>')
+        'results of a dry run on the object.</p>'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Object Name'))

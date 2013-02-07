@@ -79,17 +79,17 @@ final class AphrontDialogView extends AphrontView {
 
     $buttons = array();
     if ($this->submitButton) {
-      $buttons[] = javelin_render_tag(
+      $buttons[] = javelin_tag(
         'button',
         array(
           'name' => '__submit__',
           'sigil' => '__default__',
         ),
-        phutil_escape_html($this->submitButton));
+        $this->submitButton);
     }
 
     if ($this->cancelURI) {
-      $buttons[] = javelin_render_tag(
+      $buttons[] = javelin_tag(
         'a',
         array(
           'href'  => $this->cancelURI,
@@ -97,7 +97,7 @@ final class AphrontDialogView extends AphrontView {
           'name'  => '__cancel__',
           'sigil' => 'jx-workflow-button',
         ),
-        phutil_escape_html($this->cancelText));
+        $this->cancelText);
     }
     $buttons = implode('', $buttons);
 
@@ -133,7 +133,7 @@ final class AphrontDialogView extends AphrontView {
     $hidden_inputs = array();
     foreach ($this->hidden as $desc) {
       list($key, $value) = $desc;
-      $hidden_inputs[] = javelin_render_tag(
+      $hidden_inputs[] = javelin_tag(
         'input',
         array(
           'type' => 'hidden',
@@ -156,9 +156,7 @@ final class AphrontDialogView extends AphrontView {
     }
 
     $content =
-      '<div class="aphront-dialog-head">'.
-        phutil_escape_html($this->title).
-      '</div>'.
+      hsprintf('<div class="aphront-dialog-head">%s</div>', $this->title).
       '<div class="aphront-dialog-body">'.
         $this->renderChildren().
       '</div>'.

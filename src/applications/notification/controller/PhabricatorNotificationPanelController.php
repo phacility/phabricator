@@ -32,7 +32,7 @@ final class PhabricatorNotificationPanelController
       '</div>'.
       $content.
       '<div class="phabricator-notification-view-all">'.
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/notification/',

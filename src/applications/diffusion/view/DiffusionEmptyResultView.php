@@ -43,8 +43,6 @@ final class DiffusionEmptyResultView extends DiffusionView {
         $deleted = $this->browseQuery->getDeletedAtCommit();
         $existed = $this->browseQuery->getExistedAtCommit();
 
-        $deleted = self::linkCommit($drequest->getRepository(), $deleted);
-
         $browse = $this->linkBrowse(
           $drequest->getPath(),
           array(
@@ -54,11 +52,14 @@ final class DiffusionEmptyResultView extends DiffusionView {
           )
         );
 
-        $existed = "r{$callsign}{$existed}";
-
         $title = 'Path Was Deleted';
-        $body = "This path does not exist at {$commit}. It was deleted in ".
-                "{$deleted} and last {$browse} at {$existed}.";
+        $body = hsprintf(
+          "This path does not exist at %s. It was deleted in %s and last %s ".
+            "at %s.",
+          $commit,
+          self::linkCommit($drequest->getRepository(), $deleted),
+          $browse,
+          "r{$callsign}{$existed}");
         $severity = AphrontErrorView::SEVERITY_WARNING;
         break;
       case DiffusionBrowseQuery::REASON_IS_UNTRACKED_PARENT:
@@ -66,7 +67,7 @@ final class DiffusionEmptyResultView extends DiffusionView {
         $title = 'Directory Not Tracked';
         $body =
           "This repository is configured to track only one subdirectory ".
-          "of the entire repository ('".phutil_escape_html($subdir)."'), ".
+          "of the entire repository ('{$subdir}'), ".
           "but you aren't looking at something in that subdirectory, so no ".
           "information is available.";
         $severity = AphrontErrorView::SEVERITY_WARNING;
@@ -78,7 +79,7 @@ final class DiffusionEmptyResultView extends DiffusionView {
     $error_view = new AphrontErrorView();
     $error_view->setSeverity($severity);
     $error_view->setTitle($title);
-    $error_view->appendChild('<p>'.$body.'</p>');
+    $error_view->appendChild(phutil_tag('p', array(), $body));
 
     return $error_view->render();
   }

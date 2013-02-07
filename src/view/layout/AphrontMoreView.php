@@ -22,17 +22,19 @@ final class AphrontMoreView extends AphrontView {
   }
 
   public function render() {
-    $some = $this->some;
 
-    $text = "(Show More\xE2\x80\xA6)";
-    if ($this->expandtext !== null) {
-      $text = $this->expandtext;
-    }
+    $content = array();
+    $content[] = $this->some;
 
-    $link = null;
     if ($this->more && $this->more != $this->some) {
+      $text = "(Show More\xE2\x80\xA6)";
+      if ($this->expandtext !== null) {
+        $text = $this->expandtext;
+      }
+
       Javelin::initBehavior('aphront-more');
-      $link = ' '.javelin_render_tag(
+      $content[] = ' ';
+      $content[] = javelin_tag(
         'a',
         array(
           'sigil'       => 'aphront-more-view-show-more',
@@ -45,11 +47,11 @@ final class AphrontMoreView extends AphrontView {
         $text);
     }
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'sigil' => 'aphront-more-view',
       ),
-      $some.$link);
+      $content);
   }
 }

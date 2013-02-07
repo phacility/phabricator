@@ -100,7 +100,7 @@ final class HeraldRuleController extends HeraldController {
       ->appendChild(
         // Build this explicitly (instead of using addHiddenInput())
         // so we can add a sigil to it.
-        javelin_render_tag(
+        javelin_tag(
           'input',
           array(
             'type'  => 'hidden',
@@ -117,13 +117,14 @@ final class HeraldRuleController extends HeraldController {
     $form
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setValue(
-            "This <strong>${rule_type_name}</strong> rule triggers for " .
-            "<strong>${content_type_name}</strong>."))
+          ->setValue(hsprintf(
+            "This <strong>%s</strong> rule triggers for <strong>%s</strong>.",
+            $rule_type_name,
+            $content_type_name)))
       ->appendChild(
         id(new AphrontFormInsetView())
           ->setTitle('Conditions')
-          ->setRightButton(javelin_render_tag(
+          ->setRightButton(javelin_tag(
             'a',
             array(
               'href' => '#',
@@ -133,9 +134,8 @@ final class HeraldRuleController extends HeraldController {
             ),
             'Create New Condition'))
           ->setDescription(
-            'When '.$must_match_selector .
-            ' these conditions are met:')
-          ->setContent(javelin_render_tag(
+            hsprintf('When %s these conditions are met:', $must_match_selector))
+          ->setContent(javelin_tag(
             'table',
             array(
               'sigil' => 'rule-conditions',
@@ -145,7 +145,7 @@ final class HeraldRuleController extends HeraldController {
       ->appendChild(
         id(new AphrontFormInsetView())
           ->setTitle('Action')
-          ->setRightButton(javelin_render_tag(
+          ->setRightButton(javelin_tag(
             'a',
             array(
               'href' => '#',
@@ -154,9 +154,10 @@ final class HeraldRuleController extends HeraldController {
               'mustcapture' => true,
             ),
             'Create New Action'))
-          ->setDescription('Take these actions '.$repetition_selector.
-            ' this rule matches:')
-          ->setContent(javelin_render_tag(
+          ->setDescription(hsprintf(
+            'Take these actions %s this rule matches:',
+            $repetition_selector))
+          ->setContent(javelin_tag(
               'table',
               array(
                 'sigil' => 'rule-actions',

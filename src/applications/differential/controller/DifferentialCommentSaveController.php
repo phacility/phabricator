@@ -56,7 +56,7 @@ final class DifferentialCommentSaveController extends DifferentialController {
 
       $dialog->setTitle(pht('Action Has No Effect'));
       $dialog->appendChild(
-        '<p>'.phutil_escape_html($no_effect->getMessage()).'</p>');
+        phutil_tag('p', array(), $no_effect->getMessage()));
 
       if (strlen($comment) || $has_inlines) {
         $dialog->addSubmitButton(pht('Post as Comment'));

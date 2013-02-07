@@ -87,7 +87,18 @@ JX.$ = function(id) {
 JX.install('HTML', {
 
   construct : function(str) {
+    if (str instanceof JX.HTML) {
+      this._content = str._content;
+      return;
+    }
+
     if (__DEV__) {
+      if ((typeof str !== 'string') && (!str || !str.match)) {
+        JX.$E(
+          'new JX.HTML(<empty?>): ' +
+          'call initializes an HTML object with an empty value.');
+      }
+
       var tags = ['legend', 'thead', 'tbody', 'tfoot', 'column', 'colgroup',
                   'caption', 'tr', 'th', 'td', 'option'];
       var evil_stuff = new RegExp('^\\s*<(' + tags.join('|') + ')\\b', 'i');

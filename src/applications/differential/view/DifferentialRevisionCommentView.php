@@ -134,12 +134,12 @@ final class DifferentialRevisionCommentView extends AphrontView {
       case DifferentialAction::ACTION_UPDATE:
         $diff_id = idx($metadata, DifferentialComment::METADATA_DIFF_ID);
         if ($diff_id) {
-          $diff_link = phutil_render_tag(
+          $diff_link = phutil_tag(
             'a',
             array(
               'href' => '/D'.$comment->getRevisionID().'?id='.$diff_id,
             ),
-            'Diff #'.phutil_escape_html($diff_id));
+            'Diff #'.$diff_id);
           $actions[] = "{$author_link} updated this revision to {$diff_link}.";
         } else {
           $actions[] = "{$author_link} {$verb} this revision.";

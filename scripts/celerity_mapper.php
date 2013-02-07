@@ -81,7 +81,6 @@ $package_spec = array(
     'aphront-pager-view-css',
     'phabricator-transaction-view-css',
     'aphront-tooltip-css',
-    'aphront-headsup-view-css',
     'phabricator-flag-css',
     'aphront-error-view-css',
 
@@ -115,7 +114,6 @@ $package_spec = array(
     'differential-revision-add-comment-css',
     'differential-revision-comment-list-css',
     'phabricator-object-selector-css',
-    'aphront-headsup-action-list-view-css',
     'phabricator-content-source-view-css',
     'differential-local-commits-view-css',
     'inline-comment-summary-css',
@@ -166,7 +164,6 @@ $package_spec = array(
     'javelin-behavior-maniphest-subpriority-editor',
   ),
   'darkconsole.pkg.js' => array(
-    'javelin-behavior-dark-console-ajax',
     'javelin-behavior-dark-console',
     'javelin-behavior-error-log',
   ),

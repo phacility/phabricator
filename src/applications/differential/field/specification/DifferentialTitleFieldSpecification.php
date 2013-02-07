@@ -87,12 +87,12 @@ final class DifferentialTitleFieldSpecification
   }
 
   public function renderValueForRevisionList(DifferentialRevision $revision) {
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'href' => '/D'.$revision->getID(),
       ),
-      phutil_escape_html($revision->getTitle()));
+      $revision->getTitle());
   }
 
 }

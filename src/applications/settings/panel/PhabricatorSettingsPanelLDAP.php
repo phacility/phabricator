@@ -35,10 +35,11 @@ final class PhabricatorSettingsPanelLDAP
       $unlink_form
         ->setUser($user)
         ->setAction('/ldap/login/')
-        ->appendChild(
+        ->appendChild(hsprintf(
           '<p class="aphront-form-instructions">There is currently no '.
-          'LDAP account linked to your Phabricator account. You can link an ' .
-          'account, which will allow you to use it to log into Phabricator</p>')
+          'LDAP account linked to your Phabricator account. You can link an '.
+          'account, which will allow you to use it to log into Phabricator.'.
+          '</p>'))
         ->appendChild(
           id(new AphrontFormTextControl())
           ->setLabel('LDAP username')
@@ -57,10 +58,10 @@ final class PhabricatorSettingsPanelLDAP
       $unlink_form = new AphrontFormView();
       $unlink_form
         ->setUser($user)
-        ->appendChild(
+        ->appendChild(hsprintf(
           '<p class="aphront-form-instructions">You may unlink this account '.
           'from your LDAP account. This will prevent you from logging in with '.
-          'your LDAP credentials.</p>')
+          'your LDAP credentials.</p>'))
         ->appendChild(
           id(new AphrontFormSubmitControl())
           ->addCancelButton('/ldap/unlink/', $unlink));

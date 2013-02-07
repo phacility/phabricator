@@ -159,22 +159,30 @@ final class DifferentialRevisionCommentListView extends AphrontView {
         array(
           'markup' => implode("\n", $hidden),
         ));
-      $hidden = javelin_render_tag(
+      $hidden = javelin_tag(
         'div',
         array(
           'sigil' =>  "differential-all-comments-container",
         ),
-        '<div class="differential-older-comments-are-hidden">'.
-          pht('%d older comments are hidden. ', number_format(count($hidden))).
-          javelin_render_tag(
-            'a',
-            array(
-              'href' => '#',
-              'mustcapture' => true,
-              'sigil' => 'differential-show-all-comments',
-            ),
-            pht('Show all comments.')).
-        '</div>');
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'differential-older-comments-are-hidden',
+          ),
+          array(
+            pht(
+              '%s older comments are hidden.',
+              new PhutilNumber(count($hidden))),
+            ' ',
+            javelin_tag(
+              'a',
+              array(
+                'href' => '#',
+                'mustcapture' => true,
+                'sigil' => 'differential-show-all-comments',
+              ),
+              pht('Show all comments.')),
+          )));
     } else {
       $hidden = null;
     }

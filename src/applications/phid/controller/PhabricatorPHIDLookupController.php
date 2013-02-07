@@ -13,12 +13,12 @@ final class PhabricatorPHIDLookupController
       $rows = array();
       foreach ($handles as $handle) {
         if ($handle->getURI()) {
-          $link = phutil_render_tag(
+          $link = phutil_tag(
             'a',
             array(
               'href' => $handle->getURI(),
             ),
-            phutil_escape_html($handle->getURI()));
+            $handle->getURI());
         } else {
           $link = null;
         }

@@ -145,7 +145,7 @@ final class PhabricatorSearchController
       ->setUser($user)
       ->setAction('/search/')
       ->appendChild(
-        phutil_render_tag(
+        phutil_tag(
           'input',
           array(
             'type' => 'hidden',

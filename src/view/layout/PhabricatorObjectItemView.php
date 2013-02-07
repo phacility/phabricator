@@ -71,13 +71,13 @@ final class PhabricatorObjectItemView extends AphrontView {
   }
 
   public function render() {
-    $header = phutil_render_tag(
+    $header = phutil_tag(
       'a',
       array(
         'href' => $this->href,
         'class' => 'phabricator-object-item-name',
       ),
-      phutil_escape_html($this->header));
+      $this->header);
 
     $icons = null;
     if ($this->icons) {
@@ -85,7 +85,7 @@ final class PhabricatorObjectItemView extends AphrontView {
       foreach ($this->icons as $spec) {
         $icon = $spec['icon'];
 
-        $icon = phutil_render_tag(
+        $icon = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-object-item-icon-image '.
@@ -93,54 +93,57 @@ final class PhabricatorObjectItemView extends AphrontView {
           ),
           '');
 
-        $label = phutil_render_tag(
+        $label = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-object-item-icon-label',
           ),
-          phutil_escape_html($spec['label']));
+          $spec['label']);
 
-        $icon_list[] = phutil_render_tag(
+        $icon_list[] = phutil_tag(
           'li',
           array(
             'class' => 'phabricator-object-item-icon',
           ),
-          $label.$icon);
+          array($label, $icon));
       }
 
-      $icons = phutil_render_tag(
+      $icons = phutil_tag(
         'ul',
         array(
           'class' => 'phabricator-object-item-icons',
         ),
-        implode('', $icon_list));
+        $icon_list);
     }
 
     $attrs = null;
     if ($this->attributes) {
       $attrs = array();
-      $spacer = phutil_render_tag(
+      $spacer = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-object-item-attribute-spacer',
         ),
-        '&middot;');
+        "\xC2\xB7");
       $first = true;
       foreach ($this->attributes as $attribute) {
-        $attrs[] = phutil_render_tag(
+        $attrs[] = phutil_tag(
           'li',
           array(
             'class' => 'phabricator-object-item-attribute',
           ),
-          ($first ? null : $spacer).$attribute);
+          array(
+            ($first ? null : $spacer),
+            $attribute,
+          ));
         $first = false;
       }
-      $attrs = phutil_render_tag(
+      $attrs = phutil_tag(
         'ul',
         array(
           'class' => 'phabricator-object-item-attributes',
         ),
-        implode('', $attrs));
+        $attrs);
     }
 
     $classes = array();
@@ -158,19 +161,24 @@ final class PhabricatorObjectItemView extends AphrontView {
         throw new Exception("Invalid effect!");
     }
 
-    $content = phutil_render_tag(
+    $content = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-object-item-content',
       ),
-      $header.$attrs.$this->renderChildren());
+      $this->renderHTMLView(
+        array(
+          $header,
+          $attrs,
+          $this->renderHTMLChildren(),
+        )));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'li',
       array(
         'class' => implode(' ', $classes),
       ),
-      $icons.$content);
+      array($icons, $content));
   }
 
 }

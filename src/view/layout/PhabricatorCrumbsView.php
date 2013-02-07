@@ -30,43 +30,49 @@ final class PhabricatorCrumbsView extends AphrontView {
       foreach ($this->actions as $action) {
         $icon = null;
         if ($action->getIcon()) {
-          $icon = phutil_render_tag(
+          $icon = phutil_tag(
             'span',
             array(
               'class' => 'sprite-icon action-'.$action->getIcon(),
             ),
             '');
         }
-        $actions[] = javelin_render_tag(
+        $actions[] = javelin_tag(
           'a',
           array(
             'href' => $action->getHref(),
             'class' => 'phabricator-crumbs-action',
             'sigil' => $action->getWorkflow() ? 'workflow' : null,
           ),
-          $icon.phutil_escape_html($action->getName()));
+          array(
+            $icon,
+            $action->getName(),
+          ));
       }
 
-      $action_view = phutil_render_tag(
+      $action_view = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-crumbs-actions',
         ),
-        self::renderSingleView($actions));
+        $this->renderHTMLView($actions));
     }
 
     if ($this->crumbs) {
       last($this->crumbs)->setIsLastCrumb(true);
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-crumbs-view '.
                    'sprite-gradient gradient-breadcrumbs',
       ),
-      $action_view.
-      self::renderSingleView($this->crumbs));
+      $this->renderHTMLView(
+        array(
+          $action_view,
+          $this->crumbs,
+        )));
   }
 
 }

@@ -39,7 +39,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
       }
 
       if (isset($this->renderingReferences[$id])) {
-        $path_column = javelin_render_tag(
+        $path_column = javelin_tag(
           'a',
           array(
             'href' => '#'.$hash,
@@ -49,7 +49,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
             ),
             'sigil' => 'differential-load',
           ),
-          phutil_escape_html($path));
+          $path);
       } else {
         $path_column = phutil_escape_html($path);
       }

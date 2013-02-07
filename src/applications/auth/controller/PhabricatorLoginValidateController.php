@@ -43,9 +43,9 @@ final class PhabricatorLoginValidateController
 
       $list = array();
       foreach ($failures as $failure) {
-        $list[] = '<li>'.phutil_escape_html($failure).'</li>';
+        $list[] = phutil_tag('li', array(), $failure);
       }
-      $list = '<ul>'.implode("\n", $list).'</ul>';
+      $list = phutil_tag('ul', array(), $list);
 
       $view = new AphrontRequestFailureView();
       $view->setHeader(pht('Login Failed'));

@@ -7,7 +7,7 @@ final class AphrontFormPasswordControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    return phutil_render_tag(
+    return phutil_tag(
       'input',
       array(
         'type'      => 'password',

@@ -138,7 +138,7 @@ final class DifferentialChangesetListView extends AphrontView {
         $load = 'Loading...';
         $mapping[$uniq_id] = $ref;
       } else {
-        $load = javelin_render_tag(
+        $load = javelin_tag(
           'a',
           array(
             'href' => '#'.$uniq_id,
@@ -150,15 +150,15 @@ final class DifferentialChangesetListView extends AphrontView {
             'sigil' => 'differential-load',
             'mustcapture' => true,
           ),
-          'Load');
+          pht('Load'));
       }
       $detail->appendChild(
-        phutil_render_tag(
+        phutil_tag(
           'div',
           array(
             'id' => $uniq_id,
           ),
-          '<div class="differential-loading">'.$load.'</div>'));
+          phutil_tag('div', array('class' => 'differential-loading'), $load)));
       $output[] = $detail->render();
     }
 
@@ -187,37 +187,39 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    return
-      id(new PhabricatorHeaderView())
-        ->setHeader($this->getTitle())
-        ->render().
-      phutil_render_tag(
-      'div',
+    return $this->renderHTMLView(
       array(
-        'class' => 'differential-review-stage',
-        'id'    => 'differential-review-stage',
-      ),
-      implode("\n", $output));
+        id(new PhabricatorHeaderView())
+          ->setHeader($this->getTitle())
+          ->render(),
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'differential-review-stage',
+            'id'    => 'differential-review-stage',
+          ),
+          $output),
+      ));
   }
 
   /**
    * Render the "Undo" markup for the inline comment undo feature.
    */
   private function renderUndoTemplates() {
-    $link = javelin_render_tag(
+    $link = javelin_tag(
       'a',
       array(
         'href'  => '#',
         'sigil' => 'differential-inline-comment-undo',
       ),
-      'Undo');
+      pht('Undo'));
 
-    $div = phutil_render_tag(
+    $div = phutil_tag(
       'div',
       array(
         'class' => 'differential-inline-undo',
       ),
-      'Changes discarded. '.$link);
+      array('Changes discarded. ', $link));
 
     $template =
       '<table><tr>'.
@@ -302,7 +304,7 @@ final class DifferentialChangesetListView extends AphrontView {
       'differential-dropdown-menus',
       array());
 
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'class'   => 'button small grey',
@@ -311,7 +313,7 @@ final class DifferentialChangesetListView extends AphrontView {
         'target'  => '_blank',
         'sigil'   => 'differential-view-options',
       ),
-      "View Options \xE2\x96\xBC");
+      pht("View Options \xE2\x96\xBC"));
   }
 
 }

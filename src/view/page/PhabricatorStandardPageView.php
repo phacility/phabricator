@@ -108,29 +108,47 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     Javelin::initBehavior('workflow', array());
 
-    $current_token = null;
     $request = $this->getRequest();
+    $user = null;
     if ($request) {
       $user = $request->getUser();
-      if ($user) {
-        $current_token = $user->getCSRFToken();
-        $download_form = phabricator_render_form_magic($user);
-        $default_img_uri =
-          PhabricatorEnv::getCDNURI(
-            '/rsrc/image/icon/fatcow/document_black.png'
-          );
-
-        Javelin::initBehavior(
-          'lightbox-attachments',
-          array(
-            'defaultImageUri' => $default_img_uri,
-            'downloadForm'    => $download_form,
-          ));
-      }
     }
 
+    if ($user) {
+      $default_img_uri =
+        PhabricatorEnv::getCDNURI(
+          '/rsrc/image/icon/fatcow/document_black.png'
+        );
+      $download_form = phabricator_form(
+        $user,
+        array(
+          'action' => '#',
+          'method' => 'POST',
+          'class'  => 'lightbox-download-form',
+          'sigil'  => 'download',
+        ),
+        phutil_tag(
+          'button',
+          array(),
+          pht('Download')));
+
+      Javelin::initBehavior(
+        'lightbox-attachments',
+        array(
+          'defaultImageUri' => $default_img_uri,
+          'downloadForm'    => $download_form,
+        ));
+    }
+
+    Javelin::initBehavior('aphront-form-disable-on-submit');
     Javelin::initBehavior('toggle-class', array());
     Javelin::initBehavior('konami', array());
+
+    $current_token = null;
+    if ($user) {
+      $current_token = $user->getCSRFToken();
+    }
+
     Javelin::initBehavior(
       'refresh-csrf',
       array(
@@ -138,6 +156,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'header'    => AphrontRequest::getCSRFHeaderName(),
         'current'   => $current_token,
       ));
+
     Javelin::initBehavior('device');
 
     if ($console) {
@@ -145,8 +164,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       Javelin::initBehavior(
         'dark-console',
         array(
-          'uri'         => '/~/',
-          'request_uri' => $request ? (string) $request->getRequestURI() : '/',
+          'uri' => $request ? (string)$request->getRequestURI() : '?',
+          'selected' => $user ? $user->getConsoleTab() : null,
+          'visible'  => $user ? (int)$user->getConsoleVisible() : true,
         ));
 
       // Change this to initBehavior when there is some behavior to initialize
@@ -206,13 +226,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   protected function willSendResponse($response) {
+    $request = $this->getRequest();
     $response = parent::willSendResponse($response);
 
-    $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
+    $console = $request->getApplicationConfiguration()->getConsole();
+
     if ($console) {
       $response = str_replace(
         '<darkconsole />',
-        $console->render($this->getRequest()),
+        $console->render($request),
         $response);
     }
 
@@ -236,12 +258,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $developer_warning = null;
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
         DarkConsoleErrorLogPluginAPI::getErrors()) {
-      $developer_warning =
-        '<div class="aphront-developer-error-callout">'.
-          pht(
-            'This page raised PHP errors. Find them in DarkConsole '.
-            'or the error log.').
-        '</div>';
+      $developer_warning = phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-developer-error-callout',
+        ),
+        pht(
+          'This page raised PHP errors. Find them in DarkConsole '.
+          'or the error log.'));
     }
 
     // Render the "you have unresolved setup issues..." warning.
@@ -249,12 +273,12 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($user && $user->getIsAdmin()) {
       $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
       if ($open) {
-        $setup_warning = phutil_render_tag(
+        $setup_warning = phutil_tag(
           'div',
           array(
             'class' => 'setup-warning-callout',
           ),
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/config/issue/',
@@ -309,7 +333,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           'debug'        => $enable_debug,
           'pageObjects'  => array_fill_keys($this->pageObjects, true),
         ));
-      $container = phutil_render_tag(
+      $container = phutil_tag(
         'div',
         array(
           'id' => $aphlict_container_id,

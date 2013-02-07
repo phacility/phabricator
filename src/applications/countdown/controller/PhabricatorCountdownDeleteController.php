@@ -33,9 +33,9 @@ final class PhabricatorCountdownDeleteController
     $dialog = new AphrontDialogView();
     $dialog->setUser($request->getUser());
     $dialog->setTitle('Really delete this countdown?');
-    $dialog->appendChild(
-      '<p>Are you sure you want to delete the countdown "'.
-      phutil_escape_html($timer->getTitle()).'"?</p>');
+    $dialog->appendChild(hsprintf(
+      '<p>Are you sure you want to delete the countdown "%s"?</p>',
+      $timer->getTitle()));
     $dialog->addSubmitButton('Delete');
     $dialog->addCancelButton('/countdown/');
     $dialog->setSubmitURI($request->getPath());

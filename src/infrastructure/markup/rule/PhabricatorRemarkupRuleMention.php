@@ -95,7 +95,7 @@ final class PhabricatorRemarkupRuleMention
       }
 
       if ($exists) {
-        $tag = phutil_render_tag(
+        $tag = phutil_tag(
           'a',
           array(
             'class'   => $class,
@@ -103,7 +103,7 @@ final class PhabricatorRemarkupRuleMention
             'target'  => '_blank',
             'title'   => $actual_users[$username]['realName'],
           ),
-          phutil_escape_html('@'.$actual_users[$username]['username']));
+          '@'.$actual_users[$username]['username']);
         foreach ($tokens as $token) {
           $engine->overwriteStoredText($token, $tag);
         }
@@ -112,12 +112,12 @@ final class PhabricatorRemarkupRuleMention
         // because we want to preserve the original text capitalization and it
         // may differ for each token.
         foreach ($tokens as $token) {
-          $tag = phutil_render_tag(
+          $tag = phutil_tag(
             'span',
             array(
               'class' => $class,
             ),
-            phutil_escape_html('@'.idx($original, $token, $username)));
+            '@'.idx($original, $token, $username));
           $engine->overwriteStoredText($token, $tag);
         }
       }

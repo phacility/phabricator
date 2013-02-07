@@ -96,9 +96,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $notice->setTitle('File Renamed');
       $notice->appendChild(
-        "File history passes through a rename from '".
-        phutil_escape_html($drequest->getPath())."' to '".
-        phutil_escape_html($renamed)."'.");
+        "File history passes through a rename from '".$drequest->getPath().
+        "' to '".$renamed."'.");
       $content[] = $notice;
     }
 
@@ -178,12 +177,12 @@ final class DiffusionBrowseFileController extends DiffusionController {
       case 'plain':
         $style =
           "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
-        $corpus = phutil_render_tag(
+        $corpus = phutil_tag(
           'textarea',
           array(
             'style' => $style,
           ),
-          phutil_escape_html($file_query->getRawData()));
+          $file_query->getRawData());
 
           break;
 
@@ -205,12 +204,12 @@ final class DiffusionBrowseFileController extends DiffusionController {
             sprintf("%-10s %-20s %s", substr($rev, 0, 7), $author, $line);
         }
 
-        $corpus = phutil_render_tag(
+        $corpus = phutil_tag(
           'textarea',
           array(
             'style' => $style,
           ),
-          phutil_escape_html(implode("\n", $rows)));
+          implode("\n", $rows));
 
         break;
 
@@ -261,14 +260,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
             ));
         }
 
-        $corpus_table = javelin_render_tag(
+        $corpus_table = javelin_tag(
           'table',
           array(
             'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
             'sigil' => 'diffusion-source',
           ),
-          implode("\n", $rows));
-        $corpus = phutil_render_tag(
+          $rows);
+
+        $corpus = phutil_tag(
           'div',
           array(
             'style' => 'padding: 0 2em;',
@@ -490,11 +490,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
           if (isset($blame['handle'])) {
             $author_link = $blame['handle']->renderLink();
           } else {
-            $author_link = phutil_render_tag(
+            $author_link = phutil_tag(
               'span',
               array(
               ),
-              phutil_escape_html($blame['author']));
+              $blame['author']);
           }
           $display_line['author'] = $author_link;
 
@@ -602,7 +602,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           Javelin::initBehavior('phabricator-tooltips', array());
           require_celerity_resource('aphront-tooltip-css');
 
-          $commit_link = javelin_render_tag(
+          $commit_link = javelin_tag(
             'a',
             array(
               'href' => $drequest->generateURI(
@@ -617,7 +617,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
                 'size'  => 600,
               ),
             ),
-            phutil_escape_html(phutil_utf8_shorten($line['commit'], 9, '')));
+            phutil_utf8_shorten($line['commit'], 9, ''));
 
           $revision_id = null;
           if (idx($commits, $commit)) {
@@ -634,7 +634,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
                 " \xC2\xB7 ".
                 $revision->getTitle();
             }
-            $revision_link = javelin_render_tag(
+            $revision_link = javelin_tag(
               'a',
               array(
                 'href' => '/D'.$revision_id,
@@ -649,7 +649,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           }
 
           $uri = $line_href->alter('before', $commit);
-          $before_link = javelin_render_tag(
+          $before_link = javelin_tag(
             'a',
             array(
               'href'  => $uri->setQueryParam('view', 'blame'),
@@ -663,7 +663,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
             "\xC2\xAB");
         }
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-blame-link',
@@ -671,7 +671,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           ),
           $before_link);
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-rev-link',
@@ -679,7 +679,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           ),
           $commit_link);
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-rev-link',
@@ -687,7 +687,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           ),
           $revision_link);
 
-        $blame[] = phutil_render_tag(
+        $blame[] = phutil_tag(
           'th',
           array(
             'class' => 'diffusion-author-link',
@@ -696,14 +696,14 @@ final class DiffusionBrowseFileController extends DiffusionController {
           idx($line, 'author'));
       }
 
-      $line_link = phutil_render_tag(
+      $line_link = phutil_tag(
         'a',
         array(
           'href' => $line_href,
         ),
-        phutil_escape_html($line['line']));
+        $line['line']);
 
-      $blame[] = javelin_render_tag(
+      $blame[] = javelin_tag(
         'th',
         array(
           'class' => 'diffusion-line-link',
@@ -714,34 +714,42 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
       Javelin::initBehavior('diffusion-line-linker');
 
-      $blame = implode('', $blame);
-
       if ($line['target']) {
         Javelin::initBehavior(
           'diffusion-jump-to',
           array(
             'target' => 'scroll_target',
           ));
-        $anchor_text = '<a id="scroll_target"></a>';
+        $anchor_text = phutil_tag(
+          'a',
+          array(
+            'id' => 'scroll_target',
+          ),
+          '');
       } else {
         $anchor_text = null;
       }
 
-      $line_text = phutil_render_tag(
+      $blame[] = phutil_tag(
         'td',
         array(
         ),
-        $anchor_text.
-        "\xE2\x80\x8B". // NOTE: See phabricator-oncopy behavior.
-        $line['data']);
+        array(
+          $anchor_text,
 
-      $rows[] = phutil_render_tag(
+          // NOTE: See phabricator-oncopy behavior.
+          "\xE2\x80\x8B",
+
+          // TODO: [HTML] Not ideal.
+          phutil_safe_html($line['data']),
+        ));
+
+      $rows[] = phutil_tag(
         'tr',
         array(
           'class' => ($line['highlighted'] ? 'highlighted' : null),
         ),
-        $blame.
-        $line_text);
+        $blame);
 
       $rows = array_merge($rows, $this->renderInlines(
         idx($inlines, $line['line'], array()),
@@ -759,11 +767,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
         ->setMarkupEngine($engine)
         ->setInlineComment($inline)
         ->render();
-      $rows[] =
-        '<tr class="inline">'.
-          str_repeat('<th></th>', ($needs_blame ? 5 : 1)).
-          '<td>'.$inline_view.'</td>'.
-        '</tr>';
+      $row = array_fill(0, ($needs_blame ? 5 : 1), phutil_tag('th'));
+      $row[] = phutil_tag('td', array(), $inline_view);
+      $rows[] = phutil_tag('tr', array('class' => 'inline'), $row);
     }
     return $rows;
   }
@@ -786,7 +792,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $properties->addProperty(
       pht('Image'),
-      phutil_render_tag(
+      phutil_tag(
         'img',
         array(
           'src' => $file_uri,
@@ -811,10 +817,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $actions = id(new PhabricatorActionListView())
       ->setUser($this->getRequest()->getUser())
       ->addAction($this->createEditAction())
-      ->addAction(id(new PhabricatorActionView())
-                    ->setName(pht('Download Binary File...'))
-                    ->setIcon('download')
-                    ->setHref($file_uri));
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Download Binary File...'))
+          ->setIcon('download')
+          ->setHref($file_uri));
 
     return array($actions, $properties);
 

@@ -68,7 +68,7 @@ final class PhabricatorMetaMTAListController
         phabricator_format_relative_time_detailed(
           time() - $mail->getDateModified()),
         phutil_escape_html($mail->getSubject()),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'class' => 'button small grey',

@@ -16,33 +16,36 @@ final class PhabricatorSetupIssueView extends AphrontView {
   public function render() {
     $issue = $this->getIssue();
 
-    $description = phutil_render_tag(
+    $description = array();
+    $description[] = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-instructions',
       ),
-      nl2br(phutil_escape_html($issue->getMessage())));
+      phutil_escape_html_newlines($issue->getMessage()));
 
     $configs = $issue->getPHPConfig();
     if ($configs) {
-      $description .= $this->renderPHPConfig($configs);
+      $description[] = $this->renderPHPConfig($configs);
     }
 
     $configs = $issue->getPhabricatorConfig();
     if ($configs) {
-      $description .= $this->renderPhabricatorConfig($configs);
+      $description[] = $this->renderPhabricatorConfig($configs);
     }
 
     $commands = $issue->getCommands();
     if ($commands) {
       $run_these = pht("Run these %d command(s):", count($commands));
-      $description .= phutil_render_tag(
+      $description[] = phutil_tag(
         'div',
         array(
           'class' => 'setup-issue-config',
         ),
-        phutil_render_tag('p', array(), $run_these).
-        phutil_render_tag('pre', array(), implode("\n", $commands)));
+        array(
+          phutil_tag('p', array(), $run_these),
+          phutil_tag('pre', array(), array_interleave("\n", $commands)),
+        ));
     }
 
     $extensions = $issue->getPHPExtensions();
@@ -51,18 +54,19 @@ final class PhabricatorSetupIssueView extends AphrontView {
         "Install these %d PHP extension(s):", count($extensions));
 
       $install_info = pht(
-        "You can usually install a PHP extension using <tt>apt-get</tt> or ".
-        "<tt>yum</tt>. Common package names are ".
-        "<tt>php-<em>extname</em></tt> or <tt>php5-<em>extname</em></tt>. ".
-        "Try commands like these:");
+        "You can usually install a PHP extension using %s or %s. Common ".
+        "package names are %s or %s. Try commands like these:",
+        phutil_tag('tt', array(), 'apt-get'),
+        phutil_tag('tt', array(), 'yum'),
+        hsprintf('<tt>php-<em>%s</em></tt>', pht('extname')),
+        hsprintf('<tt>php5-<em>%s</em></tt>', pht('extname')));
 
       // TODO: We should do a better job of detecting how to install extensions
       // on the current system.
-      $install_commands = array(
-        "$ sudo apt-get install php5-<em>extname</em>  # Debian / Ubuntu",
-        "$ sudo yum install php-<em>extname</em>       # Red Hat / Derivatives",
+      $install_commands = hsprintf(
+        "\$ sudo apt-get install php5-<em>extname</em>  # Debian / Ubuntu\n".
+        "\$ sudo yum install php-<em>extname</em>       # Red Hat / Derivatives"
       );
-      $install_commands = implode("\n", $install_commands);
 
       $fallback_info = pht(
         "If those commands don't work, try Google. The process of installing ".
@@ -72,85 +76,72 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
       $restart_info = pht(
         "After installing new PHP extensions, <strong>restart your webserver ".
-        "for the changes to take effect</strong>.");
+        "for the changes to take effect</strong>.",
+        hsprintf(''));
 
-      $description .= phutil_render_tag(
+      $description[] = phutil_tag(
         'div',
         array(
           'class' => 'setup-issue-config',
         ),
-        phutil_render_tag('p', array(), $install_these).
-        phutil_render_tag('pre', array(), implode("\n", $extensions)).
-        phutil_render_tag('p', array(), $install_info).
-        phutil_render_tag('pre', array(), $install_commands).
-        phutil_render_tag('p', array(), $fallback_info).
-        phutil_render_tag('p', array(), $restart_info));
+        array(
+          phutil_tag('p', array(), $install_these),
+          phutil_tag('pre', array(), implode("\n", $extensions)),
+          phutil_tag('p', array(), $install_info),
+          phutil_tag('pre', array(), $install_commands),
+          phutil_tag('p', array(), $fallback_info),
+          phutil_tag('p', array(), $restart_info),
+        ));
 
     }
 
-    $next = phutil_render_tag(
+    $next = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-next',
       ),
       pht('To continue, resolve this problem and reload the page.'));
 
-    $name = phutil_render_tag(
+    $name = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-name',
       ),
-      phutil_escape_html($issue->getName()));
+      $issue->getName());
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'setup-issue',
       ),
-      $name.$description.$next);
+      $this->renderHTMLView(
+        array(
+          $name,
+          $description,
+          $next,
+        )));
   }
 
   private function renderPhabricatorConfig(array $configs) {
     $issue = $this->getIssue();
 
-    $table_info = phutil_render_tag(
+    $table_info = phutil_tag(
       'p',
       array(),
       pht(
         "The current Phabricator configuration has these %d value(s):",
         count($configs)));
 
-    $table = array();
+    $dict = array();
     foreach ($configs as $key) {
-      $table[] = '<tr>';
-      $table[] = '<th>'.phutil_escape_html($key).'</th>';
-
-      $value = PhabricatorEnv::getUnrepairedEnvConfig($key);
-      if ($value === null) {
-        $value = '<em>null</em>';
-      } else if ($value === false) {
-        $value = '<em>false</em>';
-      } else if ($value === true) {
-        $value = '<em>true</em>';
-      } else {
-        $value = phutil_escape_html(
-          PhabricatorConfigJSON::prettyPrintJSON($value));
-      }
-
-      $table[] = '<td>'.$value.'</td>';
-      $table[] = '</tr>';
+      $dict[$key] = PhabricatorEnv::getUnrepairedEnvConfig($key);
     }
-
-    $table = phutil_render_tag(
-      'table',
-      array(
-      ),
-      implode("\n", $table));
+    $table = $this->renderValueTable($dict);
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
 
     if ($this->getIssue()->getIsFatal()) {
-      $update_info = phutil_render_tag(
+      $update_info = phutil_tag(
         'p',
         array(),
         pht(
@@ -160,29 +151,28 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
       $update = array();
       foreach ($configs as $key) {
-        $cmd = '<tt>phabricator/ $</tt> ./bin/config set '.
-                phutil_escape_html($key).' '.
-               '<em>value</em>';
-        $update[] = $cmd;
+        $update[] = hsprintf(
+          '<tt>phabricator/ $</tt> ./bin/config set %s <em>value</em>',
+          $key);
       }
-      $update = phutil_render_tag('pre', array(), implode("\n", $update));
+      $update = phutil_tag('pre', array(), array_interleave("\n", $update));
     } else {
       $update = array();
       foreach ($configs as $config) {
         if (!idx($options, $config) || $options[$config]->getLocked()) {
           continue;
         }
-        $link = phutil_render_tag(
+        $link = phutil_tag(
           'a',
           array(
             'href' => '/config/edit/'.$config.'/?issue='.$issue->getIssueKey(),
           ),
-          pht('Edit %s', phutil_escape_html($config)));
-        $update[] = '<li>'.$link.'</li>';
+          pht('Edit %s', $config));
+        $update[] = phutil_tag('li', array(), $link);
       }
       if ($update) {
-        $update = '<ul>'.implode("\n", $update).'</ul>';
-        $update_info = phutil_render_tag(
+        $update = phutil_tag('ul', array(), $update);
+        $update_info = phutil_tag(
           'p',
           array(),
           pht("You can update these %d value(s) here:", count($configs)));
@@ -192,12 +182,12 @@ final class PhabricatorSetupIssueView extends AphrontView {
       }
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-config',
       ),
-      self::renderSingleView(
+      self::renderHTMLView(
         array(
           $table_info,
           $table,
@@ -207,41 +197,19 @@ final class PhabricatorSetupIssueView extends AphrontView {
   }
 
   private function renderPHPConfig(array $configs) {
-    $table_info = phutil_render_tag(
+    $table_info = phutil_tag(
       'p',
       array(),
       pht(
         "The current PHP configuration has these %d value(s):",
         count($configs)));
 
-    $table = array();
+    $dict = array();
     foreach ($configs as $key) {
-      $table[] = '<tr>';
-      $table[] = '<th>'.phutil_escape_html($key).'</th>';
-
-      $value = ini_get($key);
-      if ($value === null) {
-        $value = '<em>null</em>';
-      } else if ($value === false) {
-        $value = '<em>false</em>';
-      } else if ($value === true) {
-        $value = '<em>true</em>';
-      } else if ($value === '') {
-        $value = '<em>(empty string)</em>';
-      } else {
-        $value = phutil_escape_html($value);
-      }
-
-      $table[] = '<td>'.$value.'</td>';
-      $table[] = '</tr>';
+      $dict[$key] = ini_get($key);
     }
 
-    $table = phutil_render_tag(
-      'table',
-      array(
-
-      ),
-      implode("\n", $table));
+    $table = $this->renderValueTable($dict);
 
     ob_start();
       phpinfo();
@@ -268,66 +236,95 @@ final class PhabricatorSetupIssueView extends AphrontView {
       }
     }
 
+    $info = array();
     if (!$ini_loc) {
-      $info = phutil_render_tag(
+      $info[] = phutil_tag(
         'p',
         array(),
         pht(
           "To update these %d value(s), edit your PHP configuration file.",
           count($configs)));
     } else {
-      $info = phutil_render_tag(
+      $info[] = phutil_tag(
         'p',
         array(),
         pht(
           "To update these %d value(s), edit your PHP configuration file, ".
           "located here:",
           count($configs)));
-      $info .= phutil_render_tag(
+      $info[] = phutil_tag(
         'pre',
         array(),
-        phutil_escape_html($ini_loc));
+        $ini_loc);
     }
 
     if ($more_loc) {
-      $info .= phutil_render_tag(
+      $info[] = phutil_tag(
         'p',
         array(),
         pht(
           "PHP also loaded these configuration file(s):",
           count($more_loc)));
-      $info .= phutil_render_tag(
+      $info[] = phutil_tag(
         'pre',
         array(),
-        phutil_escape_html(implode("\n", $more_loc)));
+        implode("\n", $more_loc));
     }
 
-    $info .= phutil_render_tag(
+    $info[] = phutil_tag(
       'p',
       array(),
       pht(
-        "You can find more information about PHP configuration values in the ".
-        "%s.",
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => 'http://php.net/manual/ini.list.php',
-          ),
-          pht('PHP Documentation'))));
+        'You can find more information about PHP configuration values in the '.
+        '<a href="%s">PHP Documentation</a>.',
+        'http://php.net/manual/ini.list.php',
+        hsprintf('')));
 
-    $info .= phutil_render_tag(
+    $info[] = phutil_tag(
       'p',
       array(),
       pht(
         "After editing the PHP configuration, <strong>restart your ".
-        "webserver for the changes to take effect</strong>."));
+        "webserver for the changes to take effect</strong>.",
+        hsprintf('')));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-config',
       ),
-      $table_info.$table.$info);
+      $this->renderHTMLView(
+        array(
+          $table_info,
+          $table,
+          $info,
+        )));
+  }
+
+  private function renderValueTable(array $dict) {
+    $rows = array();
+    foreach ($dict as $key => $value) {
+      $cols = array(
+        phutil_tag('th', array(), $key),
+        phutil_tag('td', array(), $this->renderValueForDisplay($value)),
+      );
+      $rows[] = phutil_tag('tr', array(), $cols);
+    }
+    return phutil_tag('table', array(), $rows);
+  }
+
+  private function renderValueForDisplay($value) {
+    if ($value === null) {
+      return phutil_tag('em', array(), 'null');
+    } else if ($value === false) {
+      return phutil_tag('em', array(), 'false');
+    } else if ($value === true) {
+      return phutil_tag('em', array(), 'true');
+    } else if ($value === '') {
+      return phutil_tag('em', array(), 'empty string');
+    } else {
+      return PhabricatorConfigJSON::prettyPrintJSON($value);
+    }
   }
 
 }

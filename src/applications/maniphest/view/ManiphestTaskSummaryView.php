@@ -60,18 +60,19 @@ final class ManiphestTaskSummaryView extends ManiphestView {
 
     $batch = null;
     if ($this->showBatchControls) {
-      $batch =
-        '<td class="maniphest-task-batch">'.
-          javelin_render_tag(
-            'input',
-            array(
-              'type'  => 'checkbox',
-              'name'  => 'batch[]',
-              'value' => $task->getID(),
-              'sigil' => 'maniphest-batch',
-            ),
-            null).
-        '</td>';
+      $batch = phutil_tag(
+        'td',
+        array(
+          'class' => 'maniphest-task-batch',
+        ),
+        javelin_tag(
+          'input',
+          array(
+            'type'  => 'checkbox',
+            'name'  => 'batch[]',
+            'value' => $task->getID(),
+            'sigil' => 'maniphest-batch',
+          )));
     }
 
     $projects_view = new ManiphestTaskProjectsView();
@@ -87,7 +88,7 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       $control_sigil = 'maniphest-task-handle';
     }
 
-    $handle = javelin_render_tag(
+    $handle = javelin_tag(
       'td',
       array(
         'class' => 'maniphest-task-handle '.$pri_class.' '.$control_class,
@@ -95,7 +96,70 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       ),
       '');
 
-    return javelin_render_tag(
+    $task_id = phutil_tag(
+      'td',
+      array(
+        'class' => 'maniphest-task-number',
+      ),
+      'T'.$task->getID());
+
+    $task_status = phutil_tag(
+      'td',
+      array(
+        'class' => 'maniphest-task-status',
+      ),
+      idx($status_map, $task->getStatus(), 'Unknown'));
+
+    $task_owner = phutil_tag(
+      'td',
+      array(
+        'class' => 'maniphest-task-owner',
+      ),
+      $task->getOwnerPHID()
+        ? $handles[$task->getOwnerPHID()]->renderLink()
+        : phutil_tag('em', array(), pht('None')));
+
+    $task_name = phutil_tag(
+      'td',
+      array(
+        'class' => 'maniphest-task-name',
+      ),
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/T'.$task->getID(),
+        ),
+        $task->getTitle()));
+
+    $task_projects = phutil_tag(
+      'td',
+      array(
+        'class' => 'maniphest-task-projects',
+      ),
+      $projects_view->render());
+
+    $task_updated = phutil_tag(
+      'td',
+      array(
+        'class' => 'maniphest-task-updated',
+      ),
+      phabricator_date($task->getDateModified(), $this->user));
+
+    $row = phutil_tag(
+      'tr',
+      array(),
+      array(
+        $handle,
+        $batch,
+        $task_id,
+        $task_status,
+        $task_owner,
+        $task_name,
+        $task_projects,
+        $task_updated,
+      ));
+
+    return javelin_tag(
       'table',
       array(
         'class' => 'maniphest-task-summary',
@@ -104,35 +168,7 @@ final class ManiphestTaskSummaryView extends ManiphestView {
           'taskID' => $task->getID(),
         ),
       ),
-      '<tr>'.
-        $handle.
-        $batch.
-        '<td class="maniphest-task-number">'.
-          'T'.$task->getID().
-        '</td>'.
-        '<td class="maniphest-task-status">'.
-          idx($status_map, $task->getStatus(), 'Unknown').
-        '</td>'.
-        '<td class="maniphest-task-owner">'.
-          ($task->getOwnerPHID()
-            ? $handles[$task->getOwnerPHID()]->renderLink()
-            : '<em>None</em>').
-        '</td>'.
-        '<td class="maniphest-task-name">'.
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => '/T'.$task->getID(),
-            ),
-            phutil_escape_html($task->getTitle())).
-        '</td>'.
-        '<td class="maniphest-task-projects">'.
-          $projects_view->render().
-        '</td>'.
-        '<td class="maniphest-task-updated">'.
-          phabricator_date($task->getDateModified(), $this->user).
-        '</td>'.
-      '</tr>');
+      $row);
   }
 
 }

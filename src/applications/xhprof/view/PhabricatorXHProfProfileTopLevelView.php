@@ -84,7 +84,7 @@ final class PhabricatorXHProfProfileTopLevelView
       array(
         'Symbol',
         'Count',
-        javelin_render_tag(
+        javelin_tag(
           'span',
           array(
             'sigil' => 'has-tooltip',
@@ -97,7 +97,7 @@ final class PhabricatorXHProfProfileTopLevelView
           ),
           'Wall Time (Inclusive)'),
         '%',
-        javelin_render_tag(
+        javelin_tag(
           'span',
           array(
             'sigil' => 'has-tooltip',
@@ -126,7 +126,7 @@ final class PhabricatorXHProfProfileTopLevelView
 
     if ($this->file) {
       $panel->addButton(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $this->file->getBestURI(),

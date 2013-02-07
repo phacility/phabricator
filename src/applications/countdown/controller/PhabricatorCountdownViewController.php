@@ -23,21 +23,18 @@ final class PhabricatorCountdownViewController
 
     $chrome_visible = $request->getBool('chrome', true);
     $chrome_new = $chrome_visible ? false : null;
-    $chrome_link = phutil_render_tag(
+    $chrome_link = phutil_tag(
       'a',
       array(
         'href' => $request->getRequestURI()->alter('chrome', $chrome_new),
         'class' => 'phabricator-timer-chrome-link',
       ),
-      $chrome_visible ? 'Disable Chrome' : 'Enable Chrome');
+      $chrome_visible ? pht('Disable Chrome') : pht('Enable Chrome'));
 
     $container = celerity_generate_unique_node_id();
-    $content =
-      '<div class="phabricator-timer" id="'.$container.'">
-        <h1 class="phabricator-timer-header">'.
-          phutil_escape_html($timer->getTitle()).' &middot; '.
-          phabricator_datetime($timer->getDatePoint(), $user).
-        '</h1>
+    $content = hsprintf(
+      '<div class="phabricator-timer" id="%s">
+        <h1 class="phabricator-timer-header">%s &middot; %s</h1>
         <div class="phabricator-timer-pane">
           <table class="phabricator-timer-table">
             <tr>
@@ -46,20 +43,19 @@ final class PhabricatorCountdownViewController
               <th>Minutes</th>
               <th>Seconds</th>
             </tr>
-            <tr>'.
-              javelin_render_tag('td',
-                array('sigil' => 'phabricator-timer-days'), '').
-              javelin_render_tag('td',
-                array('sigil' => 'phabricator-timer-hours'), '').
-              javelin_render_tag('td',
-                array('sigil' => 'phabricator-timer-minutes'), '').
-              javelin_render_tag('td',
-                array('sigil' => 'phabricator-timer-seconds'), '').
-            '</tr>
+            <tr>%s%s%s%s</tr>
           </table>
-        </div>'.
-        $chrome_link.
-      '</div>';
+        </div>
+        %s
+      </div>',
+      $container,
+      $timer->getTitle(),
+      phabricator_datetime($timer->getDatePoint(), $user),
+      javelin_tag('td', array('sigil' => 'phabricator-timer-days'), ''),
+      javelin_tag('td', array('sigil' => 'phabricator-timer-hours'), ''),
+      javelin_tag('td', array('sigil' => 'phabricator-timer-minutes'), ''),
+      javelin_tag('td', array('sigil' => 'phabricator-timer-seconds'), ''),
+      $chrome_link);
 
     Javelin::initBehavior('countdown-timer', array(
       'timestamp' => $timer->getDatepoint(),

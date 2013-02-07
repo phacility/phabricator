@@ -153,7 +153,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $reviewer_warning->setTitle(pht('No Active Reviewers'));
         if ($revision->getReviewers()) {
           $reviewer_warning->appendChild(
-            phutil_render_tag(
+            phutil_tag(
               'p',
               array(),
               pht('All specified reviewers are disabled and this revision '.
@@ -161,7 +161,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
             ));
         } else {
           $reviewer_warning->appendChild(
-            phutil_render_tag(
+            phutil_tag(
               'p',
               array(),
               pht('This revision has no specified reviewers and needs '.
@@ -180,21 +180,20 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning = new AphrontErrorView();
       $warning->setTitle('Very Large Diff');
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $warning->appendChild(
+      $warning->appendChild(hsprintf(
+        '%s <strong>%s</strong>',
         pht(
           'This diff is very large and affects %s files. Load each file '.
             'individually.',
-          new PhutilNumber($count)).
-        " <strong>".
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => $request_uri
-                ->alter('large', 'true')
-                ->setFragment('toc'),
-            ),
-            pht('Show All Files Inline')).
-        "</strong>");
+          new PhutilNumber($count)),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $request_uri
+              ->alter('large', 'true')
+              ->setFragment('toc'),
+          ),
+          pht('Show All Files Inline'))));
       $warning = $warning->render();
 
       $my_inlines = id(new DifferentialInlineComment())->loadAllWhere(

@@ -79,12 +79,12 @@ final class PonderUserProfileView extends AphrontView {
       $item->addAttribute(
         pht(
           'Answer to %s',
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/Q'.$question->getID(),
             ),
-            phutil_escape_html(self::abbreviate($question->getTitle())))));
+            self::abbreviate($question->getTitle()))));
 
       $view->addItem($item);
     }

@@ -26,7 +26,7 @@ final class DifferentialCommitsFieldSpecification
       $links[] = $this->getHandle($commit_phid)->renderLink();
     }
 
-    return implode('<br />', $links);
+    return array_interleave(phutil_tag('br'), $links);
   }
 
   private function getCommitPHIDs() {

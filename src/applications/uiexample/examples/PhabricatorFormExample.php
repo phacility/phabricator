@@ -7,7 +7,7 @@ final class PhabricatorFormExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>AphrontFormView</tt> to render forms.';
+    return hsprintf('Use <tt>AphrontFormView</tt> to render forms.');
   }
 
   public function renderExample() {

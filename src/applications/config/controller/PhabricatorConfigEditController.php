@@ -108,7 +108,7 @@ final class PhabricatorConfigEditController
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Hidden'))
         ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-        ->appendChild('<p>'.phutil_escape_html($msg).'</p>');
+        ->appendChild(phutil_tag('p', array(), $msg));
     } else if ($option->getLocked()) {
       $msg = pht(
         "This configuration is locked and can not be edited from the web ".
@@ -117,7 +117,7 @@ final class PhabricatorConfigEditController
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Locked'))
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->appendChild('<p>'.phutil_escape_html($msg).'</p>');
+        ->appendChild(phutil_tag('p', array(), $msg));
     }
 
     if ($option->getHidden()) {
@@ -132,7 +132,7 @@ final class PhabricatorConfigEditController
     $engine = new PhabricatorMarkupEngine();
     $engine->addObject($option, 'description');
     $engine->process();
-    $description = phutil_render_tag(
+    $description = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-remarkup',
@@ -419,33 +419,33 @@ final class PhabricatorConfigEditController
     }
 
     $table = array();
-    $table[] = '<tr class="column-labels">';
-    $table[] = '<th>'.pht('Example').'</th>';
-    $table[] = '<th>'.pht('Value').'</th>';
-    $table[] = '</tr>';
+    $table[] = hsprintf(
+      '<tr class="column-labels"><th>%s</th><th>%s</th></tr>',
+      pht('Example'),
+      pht('Value'));
     foreach ($examples as $example) {
       list($value, $description) = $example;
 
       if ($value === null) {
-        $value = '<em>'.pht('(empty)').'</em>';
+        $value = phutil_tag('em', array(), pht('(empty)'));
       } else {
-        $value = nl2br(phutil_escape_html($value));
+        $value = phutil_escape_html_newlines($value);
       }
 
-      $table[] = '<tr>';
-      $table[] = '<th>'.phutil_escape_html($description).'</th>';
-      $table[] = '<td>'.$value.'</td>';
-      $table[] = '</tr>';
+      $table[] = hsprintf(
+        '<tr><th>%s</th><td>%s</td></tr>',
+        $description,
+        $value);
     }
 
     require_celerity_resource('config-options-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'table',
       array(
         'class' => 'config-option-table',
       ),
-      implode("\n", $table));
+      $table);
   }
 
   private function renderDefaults(PhabricatorConfigOption $option) {
@@ -467,10 +467,10 @@ final class PhabricatorConfigEditController
 
 
     $table = array();
-    $table[] = '<tr class="column-labels">';
-    $table[] = '<th>'.pht('Source').'</th>';
-    $table[] = '<th>'.pht('Value').'</th>';
-    $table[] = '</tr>';
+    $table[] = hsprintf(
+      '<tr class="column-labels"><th>%s</th><th>%s</th></tr>',
+      pht('Source'),
+      pht('Value'));
     foreach ($stack as $key => $source) {
       $value = $source->getKeys(
         array(
@@ -478,26 +478,26 @@ final class PhabricatorConfigEditController
         ));
 
       if (!array_key_exists($option->getKey(), $value)) {
-        $value = '<em>'.pht('(empty)').'</em>';
+        $value = phutil_tag('em', array(), pht('(empty)'));
       } else {
         $value = PhabricatorConfigJSON::prettyPrintJSON(
           $value[$option->getKey()]);
       }
 
-      $table[] = '<tr>';
-      $table[] = '<th>'.phutil_escape_html($source->getName()).'</th>';
-      $table[] = '<td>'.$value.'</td>';
-      $table[] = '</tr>';
+      $table[] = hsprintf(
+        '<tr><th>%s</th><td>%s</td></tr>',
+        $source->getName(),
+        $value);
     }
 
     require_celerity_resource('config-options-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'table',
       array(
         'class' => 'config-option-table',
       ),
-      implode("\n", $table));
+      $table);
   }
 
 }

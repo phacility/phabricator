@@ -7,7 +7,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>PhabricatorTagView</tt> to render various tags.';
+    return hsprintf('Use <tt>PhabricatorTagView</tt> to render various tags.');
   }
 
   public function renderExample() {

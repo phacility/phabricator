@@ -106,9 +106,9 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function markupText($text) {
     $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-    $text = $engine->markupText($text);
+    $text = phutil_safe_html($engine->markupText($text));
 
-    $text = phutil_render_tag(
+    $text = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-remarkup',

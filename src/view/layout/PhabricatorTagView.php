@@ -99,7 +99,7 @@ final class PhabricatorTagView extends AphrontView {
 
     if ($this->dotColor) {
       $dotcolor = 'phabricator-tag-color-'.$this->dotColor;
-      $dot = phutil_render_tag(
+      $dot = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-tag-dot '.$dotcolor,
@@ -109,16 +109,16 @@ final class PhabricatorTagView extends AphrontView {
       $dot = null;
     }
 
-    $content = phutil_render_tag(
+    $content = phutil_tag(
       'span',
       array(
         'class' => 'phabricator-tag-core '.$color,
       ),
-      $dot.phutil_escape_html($this->name));
+      array($dot, $this->name));
 
     if ($this->barColor) {
       $barcolor = 'phabricator-tag-color-'.$this->barColor;
-      $bar = phutil_render_tag(
+      $bar = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-tag-bar '.$barcolor,
@@ -129,13 +129,13 @@ final class PhabricatorTagView extends AphrontView {
       $bar = null;
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       $this->href ? 'a' : 'span',
       array(
         'href'  => $this->href,
         'class' => implode(' ', $classes),
       ),
-      $bar.$content);
+      array($bar, $content));
   }
 
   public static function getTagTypes() {

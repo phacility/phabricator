@@ -23,7 +23,7 @@ final class PhabricatorSlowvoteCreateController
     if ($request->isFormPost()) {
       $poll->setQuestion($request->getStr('question'));
       $poll->setResponseVisibility($request->getInt('response_visibility'));
-      $poll->setShuffle($request->getBool('shuffle', false));
+      $poll->setShuffle((int)$request->getBool('shuffle', false));
       $poll->setMethod($request->getInt('method'));
 
       if (!strlen($poll->getQuestion())) {
@@ -65,9 +65,9 @@ final class PhabricatorSlowvoteCreateController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Resolve issues and build '.
-        'consensus through protracted deliberation.</p>')
+        'consensus through protracted deliberation.</p>'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Question')

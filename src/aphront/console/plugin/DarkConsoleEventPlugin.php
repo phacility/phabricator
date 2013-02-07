@@ -37,7 +37,7 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
     );
   }
 
-  public function render() {
+  public function renderPanel() {
     $data = $this->getData();
 
     $out = array();

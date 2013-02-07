@@ -135,14 +135,14 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
         $group_id = celerity_generate_unique_node_id();
         $tile_ids[] = $group_id;
         $nav->addCustomBlock(
-          phutil_render_tag(
+          phutil_tag(
             'div',
             array(
               'class' => 'application-tile-group',
               'id' => $group_id,
               'style' => ($is_hide ? 'display: none' : null),
             ),
-            id(new AphrontNullView())->appendChild($tiles)->render()));
+            mpull($tiles, 'render')));
       }
 
       if ($is_hide) {

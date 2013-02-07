@@ -23,7 +23,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     $target_id  = celerity_generate_unique_node_id();
     $search_id = $this->getID();
 
-    $input = phutil_render_tag(
+    $input = phutil_tag(
       'input',
       array(
         'type' => 'text',
@@ -34,7 +34,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
 
     $scope = $this->scope;
 
-    $target = javelin_render_tag(
+    $target = javelin_tag(
       'div',
       array(
         'id'    => $target_id,
@@ -52,7 +52,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         'placeholder' => PhabricatorSearchScope::getScopePlaceholder($scope),
       ));
 
-    $scope_input = phutil_render_tag(
+    $scope_input = phutil_tag(
       'input',
       array(
         'type' => 'hidden',

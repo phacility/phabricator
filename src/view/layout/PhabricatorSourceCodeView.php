@@ -31,7 +31,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
       if ($hit_limit) {
         $content_number = '';
-        $content_line = phutil_render_tag(
+        $content_line = phutil_tag(
           'span',
           array(
             'class' => 'c',
@@ -66,17 +66,17 @@ final class PhabricatorSourceCodeView extends AphrontView {
     $classes[] = 'remarkup-code';
     $classes[] = 'PhabricatorMonospaced';
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-source-code-container',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'table',
         array(
           'class' => implode(' ', $classes),
         ),
-        implode('', $rows)));
+        new PhutilSafeHTML(implode('', $rows))));
   }
 
 }

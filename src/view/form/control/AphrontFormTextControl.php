@@ -25,7 +25,7 @@ final class AphrontFormTextControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    return javelin_render_tag(
+    return javelin_tag(
       'input',
       array(
         'type'         => 'text',

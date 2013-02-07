@@ -184,9 +184,12 @@ final class PhamePostViewController extends PhameController {
       ->process();
 
     $properties->addTextContent(
-      '<div class="phabricator-remarkup">'.
-        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY).
-      '</div>');
+      phutil_tag(
+         'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY)));
 
     return $properties;
   }

@@ -396,12 +396,9 @@ final class PhabricatorConduitAPIController
     $json = new PhutilJSON();
     if (is_array($value)) {
       $value = $json->encodeFormatted($value);
-      $value = phutil_escape_html($value);
-    } else {
-      $value = phutil_escape_html($value);
     }
 
-    $value = '<pre style="white-space: pre-wrap;">'.$value.'</pre>';
+    $value = hsprintf('<pre style="white-space: pre-wrap;">%s</pre>', $value);
 
     return $value;
   }

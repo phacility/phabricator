@@ -42,17 +42,18 @@ class AphrontRedirectResponse extends AphrontResponse {
       $error->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $error->setTitle('Stopped on Redirect');
 
-      $link = phutil_render_tag(
+      $link = phutil_tag(
         'a',
         array(
           'href' => $this->getURI(),
         ),
-        'Continue to: '.phutil_escape_html($this->getURI()));
+        'Continue to: '.$this->getURI());
 
-      $error->appendChild(
+      $error->appendChild(hsprintf(
         '<p>You were stopped here because <tt>debug.stop-on-redirect</tt> '.
         'is set in your configuration.</p>'.
-        '<p>'.$link.'</p>');
+        '<p>%s</p>',
+        $link));
 
       $view->appendChild($error);
 

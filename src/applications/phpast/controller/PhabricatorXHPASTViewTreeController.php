@@ -29,12 +29,12 @@ final class PhabricatorXHPASTViewTreeController
     $tree = array();
     $tree[] =
       '<li>'.
-        phutil_render_tag(
+        phutil_tag(
           'span',
           array(
             'title' => $title,
           ),
-          phutil_escape_html($name)).
+          $name).
       '</li>';
     foreach ($root->getChildren() as $child) {
       $tree[] = '<ul>'.$this->buildTree($child).'</ul>';

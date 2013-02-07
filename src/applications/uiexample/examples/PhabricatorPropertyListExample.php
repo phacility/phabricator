@@ -7,8 +7,8 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>PhabricatorPropertyListView</tt> to render object '.
-           'properties.';
+    return hsprintf(
+      'Use <tt>PhabricatorPropertyListView</tt> to render object properties.');
   }
 
   public function renderExample() {
@@ -49,9 +49,10 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
     $view->addSectionHeader('Haiku About Pasta');
 
     $view->addTextContent(
-      'this is a pasta<br />'.
-      'haiku. it is very bad.<br />'.
-      'what did you expect?');
+      hsprintf(
+        'this is a pasta<br />'.
+        'haiku. it is very bad.<br />'.
+        'what did you expect?'));
 
     $edge_cases_header = id(new PhabricatorHeaderView())
       ->setHeader(pht('Edge Cases'));

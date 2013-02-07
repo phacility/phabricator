@@ -20,7 +20,7 @@ final class PhabricatorRepositoryListController
     foreach ($repos as $repo) {
 
       if ($repo->isTracked()) {
-        $diffusion_link = phutil_render_tag(
+        $diffusion_link = phutil_tag(
           'a',
           array(
             'href' => '/diffusion/'.$repo->getCallsign().'/',
@@ -36,14 +36,14 @@ final class PhabricatorRepositoryListController
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repo->getVersionControlSystem()),
         $diffusion_link,
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'class' => 'button small grey',
             'href'  => '/repository/edit/'.$repo->getID().'/',
           ),
           'Edit'),
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'class' => 'button small grey',
@@ -106,14 +106,14 @@ final class PhabricatorRepositoryListController
       $rows[] = array(
         phutil_escape_html($project->getName()),
         $repo_name,
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/repository/project/edit/'.$project->getID().'/',
             'class' => 'button grey small',
           ),
           'Edit'),
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'href' => '/repository/project/delete/'.$project->getID().'/',

@@ -45,7 +45,7 @@ final class ManiphestTaskListView extends ManiphestView {
       $views[] = $view->render();
     }
 
-    return implode("\n", $views);
+    return $this->renderHTMLView($views);
   }
 
 }

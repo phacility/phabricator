@@ -16,12 +16,12 @@ final class DifferentialChangesetTwoUpRenderer
 
     $context_not_available = null;
     if ($hunk_starts) {
-      $context_not_available = javelin_render_tag(
+      $context_not_available = javelin_tag(
         'tr',
         array(
           'sigil' => 'context-target',
         ),
-        phutil_render_tag(
+        phutil_tag(
           'td',
           array(
             'colspan' => 6,
@@ -83,7 +83,7 @@ final class DifferentialChangesetTwoUpRenderer
             $is_first_block = true;
           }
 
-          $contents[] = javelin_render_tag(
+          $contents[] = javelin_tag(
             'a',
             array(
               'href' => '#',
@@ -99,7 +99,7 @@ final class DifferentialChangesetTwoUpRenderer
               : pht("\xE2\x96\xB2 Show 20 Lines"));
         }
 
-        $contents[] = javelin_render_tag(
+        $contents[] = javelin_tag(
           'a',
           array(
             'href' => '#',
@@ -119,7 +119,7 @@ final class DifferentialChangesetTwoUpRenderer
         }
 
         if ($len > 40) {
-          $contents[] = javelin_render_tag(
+          $contents[] = javelin_tag(
             'a',
             array(
               'href' => '#',
@@ -148,16 +148,36 @@ final class DifferentialChangesetTwoUpRenderer
           }
         }
 
-        $container = javelin_render_tag(
+        $container = javelin_tag(
           'tr',
           array(
             'sigil' => 'context-target',
           ),
-          '<td colspan="2" class="show-more">'.
-            implode(' &bull; ', $contents).
-          '</td>'.
-          '<th class="show-context-line">'.$context_line.'</td>'.
-          '<td colspan="3" class="show-context">'.$context.'</td>');
+          array(
+            phutil_tag(
+              'td',
+              array(
+                'colspan' => 2,
+                'class' => 'show-more',
+              ),
+              array_interleave(
+                " \xE2\x80\xA2 ", // Bullet
+                $contents)),
+            phutil_tag(
+              'th',
+              array(
+                'class' => 'show-context-line',
+              ),
+              $context_line ? (int)$context_line : null),
+            phutil_tag(
+              'td',
+              array(
+                'colspan' => 3,
+                'class' => 'show-context',
+              ),
+              // TODO: [HTML] Escaping model here isn't ideal.
+              phutil_safe_html($context)),
+          ));
 
         $html[] = $container;
 
@@ -235,7 +255,7 @@ final class DifferentialChangesetTwoUpRenderer
                 dirname('/'.$orig_file);
             }
             $class = ($orig_type == '-' ? 'new-move' : 'new-copy');
-            $n_copy = javelin_render_tag(
+            $n_copy = javelin_tag(
               'td',
               array(
                 'meta' => array(
@@ -304,26 +324,29 @@ final class DifferentialChangesetTwoUpRenderer
               }
             }
           }
-          $html[] =
+          $html[] = hsprintf(
             '<tr class="inline">'.
               '<th />'.
-              '<td class="left">'.$comment_html.'</td>'.
+              '<td class="left">%s</td>'.
               '<th />'.
-              '<td colspan="3" class="right3">'.$new.'</td>'.
-            '</tr>';
+              '<td colspan="3" class="right3">%s</td>'.
+            '</tr>',
+            $comment_html,
+            $new);
         }
       }
       if ($n_num && isset($new_comments[$n_num])) {
         foreach ($new_comments[$n_num] as $comment) {
           $comment_html = $this->renderInlineComment($comment,
                                                      $on_right = true);
-          $html[] =
+          $html[] = hsprintf(
             '<tr class="inline">'.
               '<th />'.
               '<td class="left" />'.
               '<th />'.
-              '<td colspan="3" class="right3">'.$comment_html.'</td>'.
-            '</tr>';
+              '<td colspan="3" class="right3">%s</td>'.
+            '</tr>',
+            $comment_html);
         }
       }
     }
@@ -337,12 +360,12 @@ final class DifferentialChangesetTwoUpRenderer
                                    $vs = 0) {
     $old = null;
     if ($old_file) {
-      $old = phutil_render_tag(
+      $old = phutil_tag(
         'div',
         array(
           'class' => 'differential-image-stage'
         ),
-        phutil_render_tag(
+        phutil_tag(
           'img',
           array(
             'src' => $old_file->getBestURI(),
@@ -353,12 +376,12 @@ final class DifferentialChangesetTwoUpRenderer
 
     $new = null;
     if ($new_file) {
-      $new = phutil_render_tag(
+      $new = phutil_tag(
         'div',
         array(
           'class' => 'differential-image-stage'
         ),
-        phutil_render_tag(
+        phutil_tag(
           'img',
           array(
             'src' => $new_file->getBestURI(),

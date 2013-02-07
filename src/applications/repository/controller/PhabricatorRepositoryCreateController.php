@@ -78,11 +78,11 @@ final class PhabricatorRepositoryCreateController
           ->setValue($repository->getName())
           ->setError($e_name)
           ->setCaption('Human-readable repository name.'))
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Select a "Callsign" &mdash; a '.
         'short, uppercase string to identify revisions in this repository. If '.
         'you choose "EX", revisions in this repository will be identified '.
-        'with the prefix "rEX".</p>')
+        'with the prefix "rEX".</p>'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Callsign')

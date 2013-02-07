@@ -25,7 +25,7 @@ final class DifferentialResultsTableView extends AphrontView {
       $style = idx($row, 'style');
       switch ($style) {
         case 'section':
-          $cells = phutil_render_tag(
+          $cells = phutil_tag(
             'th',
             array(
               'colspan' => 2,
@@ -33,23 +33,23 @@ final class DifferentialResultsTableView extends AphrontView {
             idx($row, 'name'));
           break;
         default:
-          $name = phutil_render_tag(
+          $name = phutil_tag(
             'th',
             array(
             ),
             idx($row, 'name'));
-          $value = phutil_render_tag(
+          $value = phutil_tag(
             'td',
             array(
             ),
             idx($row, 'value'));
-          $cells = $name.$value;
+          $cells = array($name, $value);
           break;
       }
 
       $show = idx($row, 'show');
 
-      $rows[] = javelin_render_tag(
+      $rows[] = javelin_tag(
         'tr',
         array(
           'style' => $show ? null : 'display: none',
@@ -64,7 +64,7 @@ final class DifferentialResultsTableView extends AphrontView {
     }
 
     if ($any_hidden) {
-      $show_more = javelin_render_tag(
+      $show_more = javelin_tag(
         'a',
         array(
           'href'        => '#',
@@ -72,7 +72,7 @@ final class DifferentialResultsTableView extends AphrontView {
         ),
         $this->showMoreString);
 
-      $hide_more = javelin_render_tag(
+      $hide_more = javelin_tag(
         'a',
         array(
           'href'        => '#',
@@ -80,35 +80,35 @@ final class DifferentialResultsTableView extends AphrontView {
         ),
         'Hide');
 
-      $rows[] = javelin_render_tag(
+      $rows[] = javelin_tag(
         'tr',
         array(
           'class' => 'differential-results-row-show',
           'sigil' => 'differential-results-row-show',
         ),
-        '<th colspan="2">'.$show_more.'</td>');
+        phutil_tag('th', array('colspan' => 2), $show_more));
 
-      $rows[] = javelin_render_tag(
+      $rows[] = javelin_tag(
         'tr',
         array(
           'class' => 'differential-results-row-show',
           'sigil' => 'differential-results-row-hide',
           'style' => 'display: none',
         ),
-        '<th colspan="2">'.$hide_more.'</th>');
+        phutil_tag('th', array('colspan' => 2), $hide_more));
 
       Javelin::initBehavior('differential-show-field-details');
     }
 
     require_celerity_resource('differential-results-table-css');
 
-    return javelin_render_tag(
+    return javelin_tag(
       'table',
       array(
         'class' => 'differential-results-table',
         'sigil' => 'differential-results-table',
       ),
-      implode("\n", $rows));
+      $rows);
   }
 
 

@@ -146,7 +146,7 @@ final class DifferentialReviewersFieldSpecification
           $names[] = phutil_escape_html(
             $this->getHandle($reviewer)->getLinkName());
         }
-        $suffix = ' '.javelin_render_tag(
+        $suffix = ' '.javelin_tag(
           'abbr',
           array(
             'sigil' => 'has-tooltip',

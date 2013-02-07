@@ -83,7 +83,8 @@ final class PhabricatorRepositoryArcanistProjectEditController
         id(new AphrontFormTextControl())
           ->setLabel('Indexed Languages')
           ->setName('symbolIndexLanguages')
-          ->setCaption('Separate with commas, for example: <tt>php, py</tt>')
+          ->setCaption(
+            hsprintf('Separate with commas, for example: <tt>php, py</tt>'))
           ->setValue($langs))
       ->appendChild(
         id(new AphrontFormTokenizerControl())

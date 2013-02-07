@@ -98,31 +98,29 @@ final class PhabricatorChatLogChannelLogController
     foreach ($blocks as $block) {
       $author = $block['author'];
       $author = phutil_utf8_shorten($author, 18);
-      $author = phutil_escape_html($author);
-      $author = phutil_render_tag('td', array('class' => 'author'), $author);
+      $author = phutil_tag('td', array('class' => 'author'), $author);
 
       $message = mpull($block['logs'], 'getMessage');
       $message = implode("\n", $message);
-      $message = phutil_escape_html($message);
-      $message = phutil_render_tag('td', array('class' => 'message'), $message);
+      $message = phutil_tag('td', array('class' => 'message'), $message);
 
       $href = $uri->alter('at', $block['id']);
       $timestamp = $block['epoch'];
       $timestamp = phabricator_datetime($timestamp, $user);
-      $timestamp = phutil_render_tag('a', array('href' => $href), $timestamp);
-      $timestamp = phutil_render_tag(
+      $timestamp = phutil_tag('a', array('href' => $href), $timestamp);
+      $timestamp = phutil_tag(
         'td',
         array(
           'class' => 'timestamp',
         ),
         $timestamp);
 
-      $out[] = phutil_render_tag(
+      $out[] = phutil_tag(
         'tr',
         array(
           'class' => $block['class'],
         ),
-        $author.$message.$timestamp);
+        array($author, $message, $timestamp));
     }
     $out[] = '</table>';
 

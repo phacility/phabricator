@@ -76,7 +76,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   }
 
   private function renderCommentPanel() {
-    $status = phutil_render_tag(
+    $status = phutil_tag(
       'div',
       array(
         'id' => $this->getStatusID(),
@@ -115,20 +115,20 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $preview = id(new PhabricatorTimelineView())
       ->setID($this->getPreviewTimelineID());
 
-    $header = phutil_render_tag(
+    $header = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-timeline-preview-header',
       ),
-      phutil_escape_html(pht('Preview')));
+      pht('Preview'));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'id'    => $this->getPreviewPanelID(),
         'style' => 'display: none',
       ),
-      self::renderSingleView(
+      self::renderHTMLView(
         array(
           $header,
           $preview,

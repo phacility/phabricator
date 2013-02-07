@@ -109,15 +109,19 @@ final class PhabricatorMenuItemView extends AphrontTagView {
       if ($this->isExternal) {
         $external = " \xE2\x86\x97";
       }
-      $name = phutil_render_tag(
+      $name = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-menu-item-name',
         ),
-        phutil_escape_html($this->name.$external));
+        $this->name.$external);
     }
 
-    return $this->renderChildren().$name;
+    return $this->renderHTMLView(
+      array(
+        $this->renderHTMLChildren(),
+        $name,
+      ));
   }
 
 }

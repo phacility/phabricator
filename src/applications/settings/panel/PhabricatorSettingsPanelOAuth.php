@@ -84,11 +84,12 @@ final class PhabricatorSettingsPanelOAuth
     $forms[] = $form;
     if (!$oauth_info) {
       $form
-        ->appendChild(
-          '<p class="aphront-form-instructions">There is currently no '.
-          phutil_escape_html($provider_name).' account linked to your '.
-          'Phabricator account. You can link an account, which will allow you '.
-          'to use it to log into Phabricator.</p>');
+        ->appendChild(hsprintf(
+          '<p class="aphront-form-instructions">There is currently no %s '.
+            'account linked to your Phabricator account. You can link an '.
+            'account, which will allow you to use it to log into Phabricator.'.
+            '</p>',
+          $provider_name));
 
       $this->prepareAuthForm($form);
 
@@ -100,11 +101,12 @@ final class PhabricatorSettingsPanelOAuth
       $expires = $oauth_info->getTokenExpires();
 
       $form
-        ->appendChild(
+        ->appendChild(hsprintf(
           '<p class="aphront-form-instructions">Your account is linked with '.
-          'a '.phutil_escape_html($provider_name).' account. You may use your '.
-          phutil_escape_html($provider_name).' credentials to log into '.
-          'Phabricator.</p>')
+            'a %s account. You may use your %s credentials to log into '.
+            'Phabricator.</p>',
+          $provider_name,
+          $provider_name))
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' ID')
@@ -133,11 +135,12 @@ final class PhabricatorSettingsPanelOAuth
         $unlink_form = new AphrontFormView();
         $unlink_form
           ->setUser($user)
-          ->appendChild(
+          ->appendChild(hsprintf(
             '<p class="aphront-form-instructions">You may unlink this account '.
-            'from your '.phutil_escape_html($provider_name).' account. This '.
-            'will prevent you from logging in with your '.
-            phutil_escape_html($provider_name).' credentials.</p>')
+              'from your %s account. This will prevent you from logging in '.
+              'with your %s credentials.</p>',
+            $provider_name,
+            $provider_name))
           ->appendChild(
             id(new AphrontFormSubmitControl())
               ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));
@@ -165,18 +168,22 @@ final class PhabricatorSettingsPanelOAuth
       $rappable_status = PhabricatorUserOAuthInfo::getRappableTokenStatus(
         $status);
       $beat = self::getBeat();
-      $rap = $beat . "Yo yo yo<br />".
+      $rap = hsprintf(
+        "%s Yo yo yo<br />".
         'My name\'s DJ Token and I\'m here to say<br />'.
         // pronounce as "dollar rappable status" for meter to work
-        "$rappable_status, hey hey hey hey<br />".
+        "%s, hey hey hey hey<br />".
         'I rap \'bout tokens, that might be why<br />'.
-        'I\'m such a cool and popular guy';
+        'I\'m such a cool and popular guy',
+        $beat,
+        $rappable_status);
 
       $token_form = new AphrontFormView();
       $token_form
         ->setUser($user)
-        ->appendChild(
-          '<p class="aphront-from-instructions">'.$rap.'</p>')
+        ->appendChild(hsprintf(
+          '<p class="aphront-form-instructions">%s</p>',
+          $rap))
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel('Token Status')
@@ -282,12 +289,12 @@ final class PhabricatorSettingsPanelOAuth
   private static function getBeat() {
     // Gangsta's Paradise (karaoke version).
     // Chosen because it's the only thing I listen to.
-    $song_id = "Gangsta\\'s Paradise";
+    $song_id = "Gangsta's Paradise";
 
     // Make a musical note which you can click for the beat.
-    $beat = '<a href="javascript:void(0);" onclick="javascript:alert('.
-      "'Think about $song_id.'".
-      '); return 0;">&#9835; </a>';
+    $beat = hsprintf(
+      '<a href="javascript:void(0);" onclick="%s">&#9835;</a>',
+      jsprintf('alert(%s); return 0;', "Think about {$song_id}."));
     return $beat;
   }
 }

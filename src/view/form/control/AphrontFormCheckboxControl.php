@@ -22,7 +22,7 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
     $rows = array();
     foreach ($this->boxes as $box) {
       $id = celerity_generate_unique_node_id();
-      $checkbox = phutil_render_tag(
+      $checkbox = phutil_tag(
         'input',
         array(
           'id' => $id,
@@ -32,22 +32,21 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
           'checked' => $box['checked'] ? 'checked' : null,
           'disabled' => $this->getDisabled() ? 'disabled' : null,
         ));
-      $label = phutil_render_tag(
+      $label = phutil_tag(
         'label',
         array(
           'for' => $id,
         ),
-        phutil_escape_html($box['label']));
-      $rows[] =
-        '<tr>'.
-          '<td>'.$checkbox.'</td>'.
-          '<th>'.$label.'</th>'.
-        '</tr>';
+        $box['label']);
+      $rows[] = hsprintf(
+        '<tr><td>%s</td><th>%s</th></tr>',
+        $checkbox,
+        $label);
     }
-    return
-      '<table class="aphront-form-control-checkbox-layout">'.
-        implode("\n", $rows).
-      '</table>';
+    return phutil_tag(
+      'table',
+      array('class' => 'aphront-form-control-checkbox-layout'),
+      $rows);
   }
 
 }

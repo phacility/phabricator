@@ -32,7 +32,10 @@ final class PhabricatorOwnersEditController
       $package->setName($request->getStr('name'));
       $package->setDescription($request->getStr('description'));
       $old_auditing_enabled = $package->getAuditingEnabled();
-      $package->setAuditingEnabled($request->getStr('auditing') === 'enabled');
+      $package->setAuditingEnabled(
+        ($request->getStr('auditing') === 'enabled')
+          ? 1
+          : 0);
 
       $primary = $request->getArr('primary');
       $primary = reset($primary);
@@ -218,7 +221,7 @@ final class PhabricatorOwnersEditController
         id(new AphrontFormInsetView())
           ->setTitle('Paths')
           ->addDivAttributes(array('id' => 'path-editor'))
-          ->setRightButton(javelin_render_tag(
+          ->setRightButton(javelin_tag(
               'a',
               array(
                 'href' => '#',
@@ -229,7 +232,7 @@ final class PhabricatorOwnersEditController
               'Add New Path'))
           ->setDescription('Specify the files and directories which comprise '.
                            'this package.')
-          ->setContent(javelin_render_tag(
+          ->setContent(javelin_tag(
               'table',
               array(
                 'class' => 'owners-path-editor-table',

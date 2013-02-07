@@ -30,7 +30,7 @@ final class PhabricatorRemarkupRuleMeme
       ->alter('uppertext', $options['above'])
       ->alter('lowertext', $options['below']);
 
-    $img = phutil_render_tag(
+    $img = phutil_tag(
       'img',
       array(
         'src' => (string)$uri,

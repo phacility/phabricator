@@ -52,9 +52,10 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
 
     if ($is_new) {
       $form
-        ->appendChild(
-          "<p>You can flag this {$type_name} if you want to remember to look ".
-          "at it later.</p><br />");
+        ->appendChild(hsprintf(
+          "<p>You can flag this %s if you want to remember to look ".
+          "at it later.</p><br />",
+          $type_name));
     }
 
     $radio = new AphrontFormRadioButtonControl();

@@ -97,21 +97,21 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
         $icon = 'phabricator-filetree-icon-dir';
       }
 
-      $icon = phutil_render_tag(
+      $icon = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-filetree-icon '.$icon,
         ),
         '');
 
-      $name_element = phutil_render_tag(
+      $name_element = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-filetree-name',
         ),
-        phutil_escape_html($name));
+        $name);
 
-      $filetree[] = javelin_render_tag(
+      $filetree[] = javelin_tag(
         $href ? 'a' : 'span',
         array(
           'href' => $href,
@@ -119,16 +119,19 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
           'title' => $title,
           'class' => 'phabricator-filetree-item',
         ),
-        $icon.$name_element);
+        array($icon, $name_element));
     }
     $tree->destroy();
 
+    $filetree = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-filetree',
+      ),
+      $filetree);
+
     Javelin::initBehavior('phabricator-file-tree', array());
 
-    $filetree =
-      '<div class="phabricator-filetree">'.
-        implode("\n", $filetree).
-      '</div>';
     $nav->addLabel(pht('Changed Files'));
     $nav->addCustomBlock($filetree);
     $nav->setActive(true);

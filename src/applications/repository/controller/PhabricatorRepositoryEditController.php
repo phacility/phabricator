@@ -94,8 +94,7 @@ final class PhabricatorRepositoryEditController
       $error_view = new AphrontErrorView();
       $error_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $error_view->setTitle('Changes Saved');
-      $error_view->appendChild(
-        'Repository changes were saved.');
+      $error_view->appendChild('Repository changes were saved.');
     }
 
     $encoding_doc_link = PhabricatorEnv::getDoclink(
@@ -123,16 +122,15 @@ final class PhabricatorRepositoryEditController
           ->setLabel('Callsign')
           ->setName('callsign')
           ->setValue($repository->getCallsign()))
-      ->appendChild('
+      ->appendChild(hsprintf('
         <p class="aphront-form-instructions">'.
           'If source code in this repository uses a character '.
           'encoding other than UTF-8 (for example, ISO-8859-1), '.
           'specify it here. You can usually leave this field blank. '.
           'See User Guide: '.
-          '<a href="'.$encoding_doc_link.'">'.
-            'UTF-8 and Character Encoding'.
-          '</a> for more information.'.
-        '</p>')
+          '<a href="%s">UTF-8 and Character Encoding</a> for more information.'.
+        '</p>',
+        $encoding_doc_link))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Encoding')
@@ -348,7 +346,7 @@ final class PhabricatorRepositoryEditController
     }
 
     $doc_href = PhabricatorEnv::getDoclink('article/Diffusion_User_Guide.html');
-    $user_guide_link = phutil_render_tag(
+    $user_guide_link = phutil_tag(
       'a',
       array(
         'href' => $doc_href,
@@ -359,13 +357,14 @@ final class PhabricatorRepositoryEditController
     $form
       ->setUser($user)
       ->setAction('/repository/edit/'.$repository->getID().'/tracking/')
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Phabricator can track '.
         'repositories, importing commits as they happen and notifying '.
         'Differential, Diffusion, Herald, and other services. To enable '.
         'tracking for a repository, configure it here and then start (or '.
         'restart) the daemons. More information is available in the '.
-        '<strong>'.$user_guide_link.'</strong>.</p>');
+        '<strong>%s</strong>.</p>',
+        $user_guide_link));
 
     $form
       ->appendChild(
@@ -402,28 +401,30 @@ final class PhabricatorRepositoryEditController
     $uri_label = 'Repository URI';
     if ($has_local) {
       if ($is_git) {
-        $instructions =
+        $instructions = hsprintf(
           'Enter the URI to clone this repository from. It should look like '.
           '<tt>git@github.com:example/example.git</tt>, '.
           '<tt>ssh://user@host.com/git/example.git</tt>, or '.
-          '<tt>file:///local/path/to/repo</tt>';
+          '<tt>file:///local/path/to/repo</tt>');
       } else if ($is_mercurial) {
-        $instructions =
+        $instructions = hsprintf(
           'Enter the URI to clone this repository from. It should look '.
-          'something like <tt>ssh://user@host.com/hg/example</tt>';
+          'something like <tt>ssh://user@host.com/hg/example</tt>');
       }
-      $inset->appendChild(
-        '<p class="aphront-form-instructions">'.$instructions.'</p>');
+      $inset->appendChild(hsprintf(
+        '<p class="aphront-form-instructions">%s</p>',
+        $instructions));
     } else if ($is_svn) {
-      $instructions =
+      $instructions = hsprintf(
         'Enter the <strong>Repository Root</strong> for this SVN repository. '.
         'You can figure this out by running <tt>svn info</tt> and looking at '.
         'the value in the <tt>Repository Root</tt> field. It should be a URI '.
         'and look like <tt>http://svn.example.org/svn/</tt>, '.
         '<tt>svn+ssh://svn.example.com/svnroot/</tt>, or '.
-        '<tt>svn://svn.example.net/svn/</tt>';
-      $inset->appendChild(
-        '<p class="aphront-form-instructions">'.$instructions.'</p>');
+        '<tt>svn://svn.example.net/svn/</tt>');
+      $inset->appendChild(hsprintf(
+        '<p class="aphront-form-instructions">%s</p>',
+        $instructions));
       $uri_label = 'Repository Root';
     }
 
@@ -436,12 +437,12 @@ final class PhabricatorRepositoryEditController
           ->setValue($repository->getDetail('remote-uri'))
           ->setError($e_uri));
 
-    $inset->appendChild(
+    $inset->appendChild(hsprintf(
       '<div class="aphront-form-instructions">'.
         'If you want to connect to this repository over SSH, enter the '.
         'username and private key to use. You can leave these fields blank if '.
         'the repository does not use SSH.'.
-      '</div>');
+      '</div>'));
 
     $inset
       ->appendChild(
@@ -456,7 +457,8 @@ final class PhabricatorRepositoryEditController
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setValue($repository->getDetail('ssh-key'))
           ->setError($e_ssh_key)
-          ->setCaption('Specify the entire private key, <em>or</em>...'))
+          ->setCaption(
+            hsprintf('Specify the entire private key, <em>or</em>...')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('ssh-keyfile')
@@ -469,14 +471,14 @@ final class PhabricatorRepositoryEditController
 
     if ($has_auth_support) {
       $inset
-        ->appendChild(
+        ->appendChild(hsprintf(
           '<div class="aphront-form-instructions">'.
             'If you want to connect to this repository with a username and '.
             'password, such as over HTTP Basic Auth or SVN with SASL, '.
             'enter the username and password to use. You can leave these '.
             'fields blank if the repository does not use a username and '.
             'password for authentication.'.
-          '</div>')
+          '</div>'))
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setName('http-login')
@@ -490,18 +492,18 @@ final class PhabricatorRepositoryEditController
     }
 
     $inset
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<div class="aphront-form-important">'.
           'To test your authentication configuration, <strong>save this '.
           'form</strong> and then run this script:'.
           '<code>'.
-            'phabricator/ $ ./scripts/repository/test_connection.php '.
-            phutil_escape_html($repository->getCallsign()).
+            'phabricator/ $ ./scripts/repository/test_connection.php %s'.
           '</code>'.
           'This will verify that your configuration is correct and the '.
           'daemons can connect to the remote repository and pull changes '.
           'from it.'.
-        '</div>');
+        '</div>',
+        $repository->getCallsign()));
 
     $form->appendChild($inset);
 
@@ -515,12 +517,14 @@ final class PhabricatorRepositoryEditController
       if (!$repository->getDetail('remote-uri') && $default) {
         $default_local_path = $default.strtolower($repository->getCallsign());
       }
-      $inset->appendChild(
+      $inset->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Select a path on local disk '.
-        'which the daemons should <tt>'.$clone_command.'</tt> the repository '.
-        'into. This must be readable and writable by the daemons, and '.
-        'readable by the webserver. The daemons will <tt>'.$fetch_command.
-        '</tt> and keep this repository up to date.</p>');
+        'which the daemons should <tt>%s</tt> the repository into. This must '.
+        'be readable and writable by the daemons, and readable by the '.
+        'webserver. The daemons will <tt>%s</tt> and keep this repository up '.
+        'to date.</p>',
+        $clone_command,
+        $fetch_command));
       $inset->appendChild(
         id(new AphrontFormTextControl())
           ->setName('path')
@@ -528,12 +532,12 @@ final class PhabricatorRepositoryEditController
           ->setValue($repository->getDetail('local-path', $default_local_path))
           ->setError($e_path));
     } else if ($is_svn) {
-      $inset->appendChild(
+      $inset->appendChild(hsprintf(
         '<p class="aphront-form-instructions">If you only want to parse one '.
         'subpath of the repository, specify it here, relative to the '.
         'repository root (e.g., <tt>trunk/</tt> or <tt>projects/wheel/</tt>). '.
         'If you want to parse multiple subdirectories, create a separate '.
-        'Phabricator repository for each one.</p>');
+        'Phabricator repository for each one.</p>'));
       $inset->appendChild(
         id(new AphrontFormTextControl())
           ->setName('svn-subpath')
@@ -552,10 +556,10 @@ final class PhabricatorRepositoryEditController
             ->setName('branch-filter')
             ->setLabel('Track Only')
             ->setValue($branch_filter_str)
-            ->setCaption(
+            ->setCaption(hsprintf(
               'Optional list of branches to track. Other branches will be '.
               'completely ignored. If left empty, all branches are tracked. '.
-              'Example: <tt>master, release</tt>'));
+              'Example: <tt>master, release</tt>')));
     }
 
     $inset
@@ -651,7 +655,7 @@ final class PhabricatorRepositoryEditController
             ->setName('uuid')
             ->setLabel('UUID')
             ->setValue($repository->getUUID())
-            ->setCaption('Repository UUID from <tt>svn info</tt>.'));
+            ->setCaption(hsprintf('Repository UUID from <tt>svn info</tt>.')));
     }
 
     $form->appendChild($inset);

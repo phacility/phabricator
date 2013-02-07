@@ -164,12 +164,18 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       if ($this->getRenderFullSummary()) {
         $full_summary = $this->renderFullSummary($transaction);
       }
-      $descs[] = javelin_render_tag(
+      $descs[] = javelin_tag(
         'div',
         array(
           'sigil' => 'maniphest-transaction-description',
         ),
-        $author->renderLink().' '.$desc.'.'.$full_summary);
+        array(
+          $author->renderLink(),
+          ' ',
+          $desc,
+          '.',
+          $full_summary,
+        ));
     }
 
     if ($this->getRenderSummaryOnly()) {
@@ -551,6 +557,11 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         return array($type, ' brazenly '.$type."'d", $classes);
     }
 
+    // TODO: [HTML] This code will all be rewritten when we switch to using
+    // ApplicationTransactions. It does not handle HTML or translations
+    // correctly right now.
+    $desc = phutil_safe_html($desc);
+
     return array($verb, $desc, $classes);
   }
 
@@ -579,6 +590,9 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           DifferentialChangesetParser::parseRangeSpecification($spec);
         $output = $parser->render($range_s, $range_e, $mask);
 
+        // TODO: [HTML] DifferentialChangesetParser needs cleanup.
+        $output = phutil_safe_html($output);
+
         return $output;
     }
 
@@ -590,7 +604,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
     Javelin::initBehavior('maniphest-transaction-expand');
 
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'href'          => '/maniphest/task/descriptionchange/'.$id.'/',

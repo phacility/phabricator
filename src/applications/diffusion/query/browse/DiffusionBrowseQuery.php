@@ -111,8 +111,7 @@ abstract class DiffusionBrowseQuery {
     $readme_content = $content_query->getRawData();
 
     if (preg_match('/\\.txt$/', $readme->getPath())) {
-      $readme_content = phutil_escape_html($readme_content);
-      $readme_content = nl2br($readme_content);
+      $readme_content = phutil_escape_html_newlines($readme_content);
 
       $class = null;
     } else if (preg_match('/\\.rainbow$/', $readme->getPath())) {
@@ -121,18 +120,19 @@ abstract class DiffusionBrowseQuery {
         ->getHighlightFuture($readme_content)
         ->resolve();
       $readme_content = nl2br($readme_content);
+      $readme_content = phutil_safe_html($readme_content);
 
       require_celerity_resource('syntax-highlighting-css');
       $class = 'remarkup-code';
     } else {
       // Markup extensionless files as remarkup so we get links and such.
       $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-      $readme_content = $engine->markupText($readme_content);
+      $readme_content = phutil_safe_html($engine->markupText($readme_content));
 
       $class = 'phabricator-remarkup';
     }
 
-    $readme_content = phutil_render_tag(
+    $readme_content = phutil_tag(
       'div',
       array(
         'class' => $class,

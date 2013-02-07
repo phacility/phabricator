@@ -9,29 +9,28 @@ final class AphrontFormImageControl extends AphrontFormControl {
   protected function renderInput() {
     $id = celerity_generate_unique_node_id();
 
-    return
-      phutil_render_tag(
+    return hsprintf(
+      '%s<div style="clear: both;">%s%s</div>',
+      phutil_tag(
         'input',
         array(
           'type'  => 'file',
           'name'  => $this->getName(),
-        )).
-      '<div style="clear: both;">'.
-      phutil_render_tag(
+        )),
+      phutil_tag(
         'input',
         array(
           'type'  => 'checkbox',
           'name'  => 'default_image',
           'class' => 'default-image',
           'id'    => $id,
-        )).
-      phutil_render_tag(
+        )),
+      phutil_tag(
         'label',
         array(
           'for' => $id,
         ),
-        'Use Default Image instead').
-      '</div>';
+        'Use Default Image instead'));
   }
 
 }

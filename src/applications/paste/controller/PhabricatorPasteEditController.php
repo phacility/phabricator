@@ -153,7 +153,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
             ->setCustomClass('PhabricatorMonospaced')
             ->setName('text'));
     } else {
-      $fork_link = phutil_render_tag(
+      $fork_link = phutil_tag(
         'a',
         array(
           'href' => $this->getApplicationURI('?parent='.$paste->getID())
@@ -164,10 +164,9 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         ->appendChild(
           id(new AphrontFormMarkupControl())
           ->setLabel('Text')
-          ->setValue(
-            'Paste text can not be edited. '.
-            $fork_link.' to create a new paste.'
-          ));
+          ->setValue(hsprintf(
+            'Paste text can not be edited. %s to create a new paste.',
+            $fork_link)));
     }
 
     $submit = new AphrontFormSubmitControl();

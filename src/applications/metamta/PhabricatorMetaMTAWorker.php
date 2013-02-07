@@ -42,10 +42,10 @@ final class PhabricatorMetaMTAWorker
   }
 
   public function renderForDisplay() {
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array('href' => '/mail/view/'.$this->getTaskData().'/'),
-      phutil_escape_html($this->getTaskData()));
+      $this->getTaskData());
   }
 
 }

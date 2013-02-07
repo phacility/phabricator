@@ -31,9 +31,12 @@ final class PhabricatorMustVerifyEmailController
       $sent = new AphrontErrorView();
       $sent->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $sent->setTitle(pht('Email Sent'));
-      $sent->appendChild('<p>'.
-        pht('Another verification email was sent to <strong>%s</strong>.',
-        phutil_escape_html($email_address)).'</p>');
+      $sent->appendChild(phutil_tag(
+        'p',
+        array(),
+        pht(
+          'Another verification email was sent to %s.',
+          phutil_tag('strong', array(), $email_address))));
     }
 
     $error_view = new AphrontRequestFailureView();
@@ -42,7 +45,7 @@ final class PhabricatorMustVerifyEmailController
       '<p>'.
       pht('You must verify your email address to login. You should have a new '.
       'email message from Phabricator with verification instructions in your '.
-      'inbox (<strong>%s</strong>).', phutil_escape_html($email_address)).
+      'inbox (%s).', phutil_tag('strong', array(), $email_address)).
       '</p>');
     $error_view->appendChild(
       '<p>'.
@@ -51,13 +54,13 @@ final class PhabricatorMustVerifyEmailController
       '</p>');
     $error_view->appendChild(
       '<div class="aphront-failure-continue">'.
-        phabricator_render_form(
+        phabricator_form(
           $user,
           array(
             'action' => '/login/mustverify/',
             'method' => 'POST',
           ),
-          phutil_render_tag(
+          phutil_tag(
             'button',
             array(
             ),

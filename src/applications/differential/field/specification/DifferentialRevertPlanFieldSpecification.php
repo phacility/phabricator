@@ -47,7 +47,7 @@ final class DifferentialRevertPlanFieldSpecification
     if (!$this->value) {
       return null;
     }
-    return phutil_escape_html($this->value);
+    return $this->value;
   }
 
   public function shouldAppearOnConduitView() {

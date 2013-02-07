@@ -92,14 +92,13 @@ final class PhabricatorOwnersDetailController
           'path'     => $path->getPath(),
           'action'   => 'browse'
         ));
-      $repo_name = '<strong>'.phutil_escape_html($repo->getName()).
-                   '</strong>';
-      $path_link = phutil_render_tag(
+      $repo_name = phutil_tag('strong', array(), $repo->getName());
+      $path_link = phutil_tag(
         'a',
         array(
           'href' => (string) $href,
         ),
-        phutil_escape_html($path->getPath()));
+        $path->getPath());
       $path_links[] =
         ($path->getExcluded() ? '&ndash;' : '+').' '.
         $repo_name.' '.$path_link;
@@ -120,7 +119,7 @@ final class PhabricatorOwnersDetailController
     $panel->setHeader(
       'Package Details for "'.phutil_escape_html($package->getName()).'"');
     $panel->addButton(
-      javelin_render_tag(
+      javelin_tag(
         'a',
         array(
           'href' => '/owners/delete/'.$package->getID().'/',
@@ -129,7 +128,7 @@ final class PhabricatorOwnersDetailController
         ),
         'Delete Package'));
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => '/owners/edit/'.$package->getID().'/',
@@ -164,7 +163,7 @@ final class PhabricatorOwnersDetailController
       $commit_views[] = array(
         'view'    => $view,
         'header'  => 'Commits in this Package that Need Attention',
-        'button'  => phutil_render_tag(
+        'button'  => phutil_tag(
           'a',
           array(
             'href'  => $commit_uri->alter('status', 'open'),
@@ -189,7 +188,7 @@ final class PhabricatorOwnersDetailController
     $commit_views[] = array(
       'view'    => $view,
       'header'  => 'Recent Commits in Package',
-      'button'  => phutil_render_tag(
+      'button'  => phutil_tag(
         'a',
         array(
           'href'  => $commit_uri,

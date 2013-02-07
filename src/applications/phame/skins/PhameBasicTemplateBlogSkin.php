@@ -18,7 +18,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
         if (!preg_match('/.css$/', $path)) {
           continue;
         }
-        $this->cssResources[] = phutil_render_tag(
+        $this->cssResources[] = phutil_tag(
           'link',
           array(
             'rel'   => 'stylesheet',

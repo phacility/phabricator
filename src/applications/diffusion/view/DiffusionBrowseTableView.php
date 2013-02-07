@@ -59,8 +59,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         }
       }
 
-      $details = AphrontTableView::renderSingleDisplayLine(
-        phutil_escape_html($data->getSummary()));
+      $details = AphrontTableView::renderSingleDisplayLine($data->getSummary());
     } else {
       $author = '';
       $details = '';
@@ -136,7 +135,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $browse_link = '<strong>'.$this->linkBrowse(
           $base_path.$path->getPath().$dir_slash,
           array(
-            'html' => $this->renderPathIcon(
+            'text' => $this->renderPathIcon(
               'dir',
               $browse_text),
           )).'</strong>';
@@ -161,7 +160,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $browse_link = $this->linkBrowse(
           $base_path.$path->getPath(),
           array(
-            'html' => $this->renderPathIcon($type, $browse_text),
+            'text' => $this->renderPathIcon($type, $browse_text),
           ));
       }
 
@@ -203,7 +202,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
           $request->getRepository()->getCallsign());
         if ($editor_link) {
           $show_edit = true;
-          $editor_button = phutil_render_tag(
+          $editor_button = phutil_tag(
             'a',
             array(
               'href' => $editor_link,
@@ -239,7 +238,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         'History',
         'Edit',
         'Path',
-        ($lint ? phutil_escape_html($lint) : 'Lint'),
+        ($lint ? $lint : 'Lint'),
         'Modified',
         'Date',
         'Time',
@@ -277,12 +276,12 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     require_celerity_resource('diffusion-icons-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'span',
       array(
         'class' => 'diffusion-path-icon diffusion-path-icon-'.$type,
       ),
-      phutil_escape_html($text));
+      $text);
   }
 
 }
