@@ -316,9 +316,10 @@ final class PhabricatorDirectoryMainController
       array(
         'class' => 'phabricator-jump-nav-caption',
       ),
-      new PhutilSafeHTML(
+      hsprintf(
         'Enter the name of an object like <tt>D123</tt> to quickly jump to '.
-        'it. See '.$doc_link.' or type <tt>help</tt>.'));
+          'it. See %s or type <tt>help</tt>.',
+        $doc_link));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Jump Nav');

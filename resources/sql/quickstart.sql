@@ -1666,7 +1666,7 @@ CREATE TABLE `ponder_question` (
   UNIQUE KEY `phid` (`phid`),
   KEY `authorPHID` (`authorPHID`),
   KEY `heat` (`heat`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=11;
 
 
 CREATE DATABASE `{$NAMESPACE}_project` /*!40100 DEFAULT CHARACTER SET utf8 */;

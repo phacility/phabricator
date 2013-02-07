@@ -22,7 +22,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-instructions',
       ),
-      new PhutilSafeHTML(nl2br(phutil_escape_html($issue->getMessage()))));
+      phutil_escape_html_newlines($issue->getMessage()));
 
     $configs = $issue->getPHPConfig();
     if ($configs) {

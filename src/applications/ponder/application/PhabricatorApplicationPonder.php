@@ -39,7 +39,7 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
     return true;
   }
 
-  public function getroutes() {
+  public function getRoutes() {
     return array(
       '/Q(?P<id>[1-9]\d*)' => 'PonderQuestionViewController',
       '/ponder/' => array(
@@ -53,7 +53,8 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
         'comment/add/' => 'PonderCommentSaveController',
         '(?P<kind>question)/vote/' => 'PonderVoteSaveController',
         '(?P<kind>answer)/vote/' => 'PonderVoteSaveController'
-      ));
+      ),
+    );
   }
-}
 
+}
