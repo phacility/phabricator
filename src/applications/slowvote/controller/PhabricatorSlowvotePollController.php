@@ -208,19 +208,19 @@ final class PhabricatorSlowvotePollController
 
       require_celerity_resource('phabricator-remarkup-css');
 
-      $comment_markup[] =
+      $comment_markup[] = hsprintf(
         '<tr>'.
           '<th>'.
-            $handle->renderLink().
-            '<div class="phabricator-slowvote-datestamp">'.
-              phabricator_datetime($comment->getDateCreated(), $viewer).
-            '</div>'.
+            '%s'.
+            '<div class="phabricator-slowvote-datestamp">%s</div>'.
+          '</th>'.
           '<td>'.
-            '<div class="phabricator-remarkup">'.
-              $markup.
-            '</div>'.
+            '<div class="phabricator-remarkup">%s</div>'.
           '</td>'.
-        '</tr>';
+        '</tr>',
+        $handle->renderLink(),
+        phabricator_datetime($comment->getDateCreated(), $viewer),
+        $markup);
     }
 
     if ($comment_markup) {
@@ -229,7 +229,7 @@ final class PhabricatorSlowvotePollController
         array(
           'class' => 'phabricator-slowvote-comments',
         ),
-        new PhutilSafeHTML(implode("\n", $comment_markup)));
+        $comment_markup);
     } else {
       $comment_markup = null;
     }
@@ -373,7 +373,7 @@ final class PhabricatorSlowvotePollController
     }
 
     $result_markup = id(new AphrontFormLayoutView())
-      ->appendChild('<h1>Ongoing Deliberation</h1>');
+      ->appendChild(phutil_tag('h1', array(), 'Ongoing Deliberation'));
 
     if (!$can_see_responses) {
       if ($need_vote) {
@@ -382,8 +382,9 @@ final class PhabricatorSlowvotePollController
         $reason = "The results are not public.";
       }
       $result_markup
-        ->appendChild(
-          '<p class="aphront-form-instructions"><em>'.$reason.'</em></p>');
+        ->appendChild(hsprintf(
+          '<p class="aphront-form-instructions"><em>%s</em></p>',
+          $reason));
       return $result_markup;
     }
 
@@ -414,7 +415,6 @@ final class PhabricatorSlowvotePollController
                 'src' => $profile_image,
               )));
         }
-        $user_markup = implode('', $user_markup);
       } else {
         $user_markup = 'This option has failed to appeal to anyone.';
       }
@@ -428,18 +428,20 @@ final class PhabricatorSlowvotePollController
         $choices,
         $chosen);
 
-      $result_markup->appendChild(
+      $result_markup->appendChild(hsprintf(
         '<div>'.
-          '<div class="phabricator-slowvote-count">'.
-            $vote_count.
-          '</div>'.
-          '<h1>'.phutil_escape_html($option->getName()).'</h1>'.
+          '<div class="phabricator-slowvote-count">%s</div>'.
+          '<h1>%s</h1>'.
           '<hr class="phabricator-slowvote-hr" />'.
-          $user_markup.
-          '<div style="clear: both;">'.
+          '%s'.
+          '<div style="clear: both;" />'.
           '<hr class="phabricator-slowvote-hr" />'.
-          $comment_markup.
-        '</div>');
+          '%s'.
+        '</div>',
+        $vote_count,
+        $option->getName(),
+        phutil_tag('div', array(), $user_markup),
+        $comment_markup));
     }
 
     if ($poll->getMethod() == PhabricatorSlowvotePoll::METHOD_APPROVAL &&
@@ -448,7 +450,7 @@ final class PhabricatorSlowvotePollController
         $comments,
         $handles);
       $result_markup->appendChild(
-        '<h1>Motions Proposed for Consideration</h1>');
+        phutil_tag('h1', array(), 'Motions Proposed for Consideration'));
       $result_markup->appendChild($comment_markup);
     }
 

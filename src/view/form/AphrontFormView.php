@@ -68,7 +68,7 @@ final class AphrontFormView extends AphrontView {
 
     $layout
       ->appendChild($this->renderDataInputs())
-      ->appendChild($this->renderChildren());
+      ->appendChild($this->renderHTMLChildren());
 
     if (!$this->user) {
       throw new Exception('You must pass the user to AphrontFormView.');
@@ -79,7 +79,7 @@ final class AphrontFormView extends AphrontView {
       $sigils[] = 'workflow';
     }
 
-    return phabricator_render_form(
+    return phabricator_form(
       $this->user,
       array(
         'class'   => $this->flexible ? 'phabricator-form-view' : null,
@@ -106,7 +106,7 @@ final class AphrontFormView extends AphrontView {
           'value' => $value,
         ));
     }
-    return implode("\n", $inputs);
+    return $inputs;
   }
 
 }

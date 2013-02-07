@@ -45,7 +45,7 @@ final class PonderAddCommentView extends AphrontView {
 
     $view = id(new AphrontMoreView())
       ->setSome('')
-      ->setMore(phutil_safe_html($form->render()))
+      ->setMore($form->render())
       ->setExpandText('Add Comment');
 
     return $view->render();
