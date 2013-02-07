@@ -30,8 +30,7 @@ abstract class PhabricatorBaseProtocolAdapter {
   /**
    * This is the output mechanism for the protocol.
    *
-   * @param String $command The command for the message
-   * @param String $message The contents of the message itself
+   * @param PhabricatorBotMessage $message The message to write
    */
-  abstract public function writeCommand($command, $message);
+  abstract public function writeMessage(PhabricatorBotMessage $message);
 }

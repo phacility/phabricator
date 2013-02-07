@@ -4,69 +4,65 @@ final class PhabricatorBotMessage {
 
   private $sender;
   private $command;
-  private $data;
+  private $body;
+  private $target;
+  private $public;
 
-  public function __construct($sender, $command, $data) {
-    $this->sender = $sender;
-    $this->command = $command;
-    $this->data = $data;
+  public function __construct() {
+    // By default messages are public
+    $this->public = true;
   }
 
-  public function getRawSender() {
+  public function setSender($sender) {
+    $this->sender = $sender;
+    return $this;
+  }
+
+  public function getSender() {
     return $this->sender;
   }
 
-  public function getRawData() {
-    return $this->data;
+  public function setCommand($command) {
+    $this->command = $command;
+    return $this;
   }
 
   public function getCommand() {
     return $this->command;
   }
 
-  public function getReplyTo() {
-    switch ($this->getCommand()) {
-      case 'PRIVMSG':
-        $target = $this->getTarget();
-        if ($target[0] == '#') {
-          return $target;
-        }
-        break;
-    }
-    return null;
+  public function setBody($body) {
+    $this->body = $body;
+    return $this;
   }
 
-  public function getSenderNickname() {
-    $nick = $this->getRawSender();
-    $nick = ltrim($nick, ':');
-    $nick = head(explode('!', $nick));
-    return $nick;
+  public function getBody() {
+    return $this->body;
+  }
+
+  public function setTarget($target) {
+    $this->target = $target;
+    return $this;
   }
 
   public function getTarget() {
-    switch ($this->getCommand()) {
-      case 'PRIVMSG':
-        $matches = null;
-        $raw = $this->getRawData();
-        if (preg_match('/^(\S+)\s/', $raw, $matches)) {
-          return $matches[1];
-        }
-       break;
-    }
-    return null;
+    return $this->target;
   }
 
-  public function getMessageText() {
-    switch ($this->getCommand()) {
-      case 'PRIVMSG':
-        $matches = null;
-        $raw = $this->getRawData();
-        if (preg_match('/^\S+\s+:?(.*)$/', $raw, $matches)) {
-          return rtrim($matches[1], "\r\n");
-        }
-        break;
-    }
-    return null;
+  public function isPublic() {
+    return $this->public;
   }
 
+  public function setPublic($is_public) {
+    $this->public = $is_public;
+    return $this;
+  }
+
+  public function getReplyTo() {
+    if ($this->public) {
+      return $this->target;
+    } else {
+      return $this->sender;
+    }
+  }
 }

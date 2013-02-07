@@ -13,18 +13,28 @@ final class PhabricatorIRCProtocolHandler extends PhabricatorBotHandler {
       case '376': // End of MOTD
         $nickpass = $this->getConfig('nickpass');
         if ($nickpass) {
-          $this->write('PRIVMSG', "nickserv :IDENTIFY {$nickpass}");
+          $this->writeMessage(
+            id(new PhabricatorBotMessage())
+            ->setCommand('MESSAGE')
+            ->setTarget('nickserv')
+            ->setBody("IDENTIFY {$nickpass}"));
         }
         $join = $this->getConfig('join');
         if (!$join) {
           throw new Exception("Not configured to join any channels!");
         }
         foreach ($join as $channel) {
-          $this->write('JOIN', $channel);
+          $this->writeMessage(
+            id(new PhabricatorBotMessage())
+            ->setCommand('JOIN')
+            ->setBody($channel));
         }
         break;
       case 'PING':
-        $this->write('PONG', $message->getRawData());
+        $this->writeMessage(
+          id(new PhabricatorBotMessage())
+          ->setCommand('PONG')
+          ->setBody($message->getBody()));
         break;
     }
   }

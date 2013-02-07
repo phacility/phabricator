@@ -10,45 +10,40 @@ final class PhabricatorBotSymbolHandler extends PhabricatorBotHandler {
   public function receiveMessage(PhabricatorBotMessage $message) {
 
     switch ($message->getCommand()) {
-      case 'PRIVMSG':
-        $reply_to = $message->getReplyTo();
-        if (!$reply_to) {
+    case 'MESSAGE':
+      $text = $message->getBody();
+
+      $matches = null;
+      if (!preg_match('/where(?: in the world)? is (\S+?)\?/i',
+        $text, $matches)) {
           break;
         }
 
-        $text = $message->getMessageText();
+      $symbol = $matches[1];
+      $results = $this->getConduit()->callMethodSynchronous(
+        'diffusion.findsymbols',
+        array(
+          'name' => $symbol,
+        ));
 
-        $matches = null;
-        if (!preg_match('/where(?: in the world)? is (\S+?)\?/i',
-            $text, $matches)) {
-          break;
-        }
+      $default_uri = $this->getURI('/diffusion/symbol/'.$symbol.'/');
 
-        $symbol = $matches[1];
-        $results = $this->getConduit()->callMethodSynchronous(
-          'diffusion.findsymbols',
-          array(
-            'name' => $symbol,
-          ));
+      if (count($results) > 1) {
+        $response = "Multiple symbols named '{$symbol}': {$default_uri}";
+      } else if (count($results) == 1) {
+        $result = head($results);
+        $response =
+          $result['type'].' '.
+          $result['name'].' '.
+          '('.$result['language'].'): '.
+          nonempty($result['uri'], $default_uri);
+      } else {
+        $response = "No symbol '{$symbol}' found anywhere.";
+      }
 
-        $default_uri = $this->getURI('/diffusion/symbol/'.$symbol.'/');
+      $this->replyTo($message, $response);
 
-        if (count($results) > 1) {
-          $response = "Multiple symbols named '{$symbol}': {$default_uri}";
-        } else if (count($results) == 1) {
-          $result = head($results);
-          $response =
-            $result['type'].' '.
-            $result['name'].' '.
-            '('.$result['language'].'): '.
-            nonempty($result['uri'], $default_uri);
-        } else {
-          $response = "No symbol '{$symbol}' found anywhere.";
-        }
-
-        $this->write('PRIVMSG', "{$reply_to} :{$response}");
-
-        break;
+      break;
     }
   }
 

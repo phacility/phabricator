@@ -8,7 +8,7 @@ final class PhabricatorBotDebugLogHandler extends PhabricatorBotHandler {
     switch ($message->getCommand()) {
     case 'LOG':
       echo addcslashes(
-        $message->getRawData(),
+        $message->getBody(),
         "\0..\37\177..\377");
       echo "\n";
       break;
