@@ -5,19 +5,19 @@
  *
  * @group irc
  */
-final class PhabricatorIRCLogHandler extends PhabricatorIRCHandler {
+final class PhabricatorBotLogHandler extends PhabricatorBotHandler {
 
   private $futures = array();
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
 
     switch ($message->getCommand()) {
-      case 'PRIVMSG':
+      case 'MESSAGE':
         $reply_to = $message->getReplyTo();
         if (!$reply_to) {
           break;
         }
-        if (!$this->isChannelName($reply_to)) {
+        if (!$message->isPublic()) {
           // Don't log private messages, although maybe we should for debugging?
           break;
         }
@@ -27,8 +27,8 @@ final class PhabricatorIRCLogHandler extends PhabricatorIRCHandler {
             'channel' => $reply_to,
             'type'    => 'mesg',
             'epoch'   => time(),
-            'author'  => $message->getSenderNickname(),
-            'message' => $message->getMessageText(),
+            'author'  => $message->getSender(),
+            'message' => $message->getBody(),
           ),
         );
 
@@ -46,7 +46,7 @@ final class PhabricatorIRCLogHandler extends PhabricatorIRCHandler {
 
         $tell = false;
         foreach ($prompts as $prompt) {
-          if (preg_match($prompt, $message->getMessageText())) {
+          if (preg_match($prompt, $message->getBody())) {
             $tell = true;
             break;
           }
@@ -55,7 +55,8 @@ final class PhabricatorIRCLogHandler extends PhabricatorIRCHandler {
         if ($tell) {
           $response = $this->getURI(
             '/chatlog/channel/'.phutil_escape_uri($reply_to).'/');
-          $this->write('PRIVMSG', "{$reply_to} :{$response}");
+
+          $this->replyTo($message, $response);
         }
 
         break;

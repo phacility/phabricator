@@ -24,6 +24,12 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     );
   }
 
+  public function getEventListeners() {
+    return array(
+      new DiffusionPeopleMenuEventListener()
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'

@@ -75,9 +75,12 @@ final class PhabricatorApplicationTransactionCommentEditor
         "Transaction must have a PHID before calling applyEdit()!");
     }
 
-    if ($comment->getPHID()) {
-      throw new Exception(
+    $type_comment = PhabricatorTransactions::TYPE_COMMENT;
+    if ($xaction->getTransactionType() == $type_comment) {
+      if ($comment->getPHID()) {
+        throw new Exception(
         "Transaction comment must not yet have a PHID!");
+      }
     }
 
     if (!$this->getContentSource()) {

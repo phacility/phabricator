@@ -5,23 +5,23 @@
  *
  * @group irc
  */
-final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
+final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
 
   private $floodblock = 0;
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
 
     switch ($message->getCommand()) {
-      case 'PRIVMSG':
+      case 'MESSAGE':
         $reply_to = $message->getReplyTo();
         if (!$reply_to) {
           break;
         }
 
-        $message = $message->getMessageText();
+        $message_body = $message->getBody();
 
         $prompt = '~what( i|\')?s new\?~i';
-        if (preg_match($prompt, $message)) {
+        if (preg_match($prompt, $message_body)) {
           if (time() < $this->floodblock) {
             return;
           }
@@ -108,9 +108,15 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
       $gray = $color.'15';
       $bold = chr(2);
       $reset = chr(15);
-      $content = "{$bold}{$user}{$reset} {$gray}{$action} {$blue}{$bold}".
-        "{$title}{$reset} - {$gray}{$uri}{$reset}";
-      $this->write('PRIVMSG',"{$reply_to} :{$content}");
+      // Disabling irc-specific styling, at least for now
+      // $content = "{$bold}{$user}{$reset} {$gray}{$action} {$blue}{$bold}".
+        // "{$title}{$reset} - {$gray}{$uri}{$reset}";
+      $content = "{$user} {$action} {$title} - {$uri}";
+      $this->writeMessage(
+        id(new PhabricatorBotMessage())
+        ->setCommand('MESSAGE')
+        ->setTarget($reply_to)
+        ->setBody($content));
     }
     return;
   }

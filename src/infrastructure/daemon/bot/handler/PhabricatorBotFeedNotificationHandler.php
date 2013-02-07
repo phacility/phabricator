@@ -5,8 +5,8 @@
  *
  * @group irc
  */
-final class PhabricatorIRCFeedNotificationHandler
-  extends PhabricatorIRCHandler {
+final class PhabricatorBotFeedNotificationHandler
+  extends PhabricatorBotHandler {
 
   private $startupDelay = 30;
   private $lastSeenChronoKey = 0;
@@ -82,7 +82,7 @@ final class PhabricatorIRCFeedNotificationHandler
     return false;
   }
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
     return;
   }
 
@@ -150,7 +150,11 @@ final class PhabricatorIRCFeedNotificationHandler
 
         $channels = $this->getConfig('join');
         foreach ($channels as $channel) {
-          $this->write('PRIVMSG', "{$channel} :{$story['text']}");
+          $this->writeMessage(
+            id(new PhabricatorBotMessage())
+            ->setCommand('MESSAGE')
+            ->setTarget($channel)
+            ->setBody($story['text']));
         }
       }
     }

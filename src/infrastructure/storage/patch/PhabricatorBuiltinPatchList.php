@@ -1105,6 +1105,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130201.revisionunsubscribed.sql'),
       ),
+      '20130131.conpherencepics.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130131.conpherencepics.sql'),
+      ),
     );
   }
 

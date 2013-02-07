@@ -19,14 +19,21 @@ JX.behavior('conpherence-menu', function(config) {
     var messagesRoot = JX.$(config.messages);
     var formRoot = JX.$(config.form_pane);
     var widgetsRoot = JX.$(config.widgets_pane);
+    var menuRoot = JX.$(config.menu_pane);
     JX.DOM.setContent(headerRoot, header);
     JX.DOM.setContent(messagesRoot, messages);
     messagesRoot.scrollTop = messagesRoot.scrollHeight;
     JX.DOM.setContent(formRoot, form);
     JX.DOM.setContent(widgetsRoot, widgets);
 
-    for (var i = 0; i < context.parentNode.childNodes.length; i++) {
-      var current = context.parentNode.childNodes[i];
+    var conpherences = JX.DOM.scry(
+      menuRoot,
+      'a',
+      'conpherence-menu-click'
+    );
+
+    for (var i = 0; i < conpherences.length; i++) {
+      var current = conpherences[i];
       if (current.id == context.id) {
         JX.DOM.alterClass(current, 'conpherence-selected', true);
         JX.DOM.alterClass(current, 'hide-unread-count', true);

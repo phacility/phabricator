@@ -231,6 +231,18 @@ table.aphront-form-control-checkbox-layout th {
   border-color: #669966;
 }
 
+.aphront-form-crop .crop-box {
+  cursor: move;
+  overflow: hidden;
+}
+
+.aphront-form-crop .crop-box .crop-image {
+  position: relative;
+  top: 0px;
+  left: 0px;
+}
+
+
 .calendar-button {
   display: inline;
   background: url(/rsrc/image/icon/fatcow/calendar_edit.png)

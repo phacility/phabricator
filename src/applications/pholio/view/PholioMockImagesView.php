@@ -15,7 +15,9 @@ final class PholioMockImagesView extends AphrontView {
 
     $main_image_id = celerity_generate_unique_node_id();
     require_celerity_resource('javelin-behavior-pholio-mock-view');
-    $config = array('mainID' => $main_image_id);
+    $config = array(
+      'mainID' => $main_image_id,
+      'mockID' => $this->mock->getID());
     Javelin::initBehavior('pholio-mock-view', $config);
 
     $mockview = "";
