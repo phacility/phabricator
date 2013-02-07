@@ -9,6 +9,18 @@ final class ConpherenceThreadQuery
   private $phids;
   private $ids;
   private $needWidgetData;
+  private $needHeaderPics;
+  private $needOrigPics;
+
+  public function needOrigPics($need_orig_pics) {
+    $this->needOrigPics = $need_orig_pics;
+    return $this;
+  }
+
+  public function needHeaderPics($need_header_pics) {
+    $this->needHeaderPics = $need_header_pics;
+    return $this;
+  }
 
   public function needWidgetData($need_widget_data) {
     $this->needWidgetData = $need_widget_data;
@@ -46,6 +58,12 @@ final class ConpherenceThreadQuery
       $this->loadFilePHIDs($conpherences);
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
+      }
+      if ($this->needOrigPics) {
+        $this->loadOrigPics($conpherences);
+      }
+      if ($this->needHeaderPics) {
+        $this->loadHeaderPics($conpherences);
       }
     }
 
@@ -141,17 +159,22 @@ final class ConpherenceThreadQuery
     $tasks = mgroup($tasks, 'getOwnerPHID');
 
     // statuses of everyone currently in the conpherence
-    // until the beginning of the next work week.
-    // NOTE: this is a bit boring on the weekends.
+    // for a rolling one week window
+    $start_of_week = phabricator_format_local_time(
+      strtotime('today'),
+      $this->getViewer(),
+      'U'
+    );
     $end_of_week = phabricator_format_local_time(
-      strtotime('Monday midnight'),
+      strtotime('midnight +1 week'),
       $this->getViewer(),
       'U'
     );
     $statuses = id(new PhabricatorUserStatus())
       ->loadAllWhere(
-        'userPHID in (%Ls) AND dateTo <= %d',
+        'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
         $participant_phids,
+        $start_of_week,
         $end_of_week
       );
     $statuses = mgroup($statuses, 'getUserPHID');
@@ -168,12 +191,50 @@ final class ConpherenceThreadQuery
 
     foreach ($conpherences as $phid => $conpherence) {
       $participant_phids = array_keys($conpherence->getParticipants());
+      $statuses = array_select_keys($statuses, $participant_phids);
+      $statuses = array_mergev($statuses);
+      $statuses = msort($statuses, 'getDateFrom');
       $widget_data = array(
         'tasks' => array_select_keys($tasks, $participant_phids),
-        'statuses' => array_select_keys($statuses, $participant_phids),
+        'statuses' => $statuses,
         'files' => array_select_keys($files, $conpherence->getFilePHIDs()),
       );
       $conpherence->attachWidgetData($widget_data);
+    }
+
+    return $this;
+  }
+
+  private function loadOrigPics(array $conpherences) {
+    return $this->loadPics(
+      $conpherences,
+      ConpherenceImageData::SIZE_ORIG
+    );
+  }
+
+  private function loadHeaderPics(array $conpherences) {
+    return $this->loadPics(
+      $conpherences,
+      ConpherenceImageData::SIZE_HEAD
+    );
+  }
+
+  private function loadPics(array $conpherences, $size) {
+    $conpherence_pic_phids = array();
+    foreach ($conpherences as $conpherence) {
+      $phid = $conpherence->getImagePHID($size);
+      if ($phid) {
+        $conpherence_pic_phids[$conpherence->getPHID()] = $phid;
+      }
+    }
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($conpherence_pic_phids)
+      ->execute();
+    $files = mpull($files, null, 'getPHID');
+
+    foreach ($conpherence_pic_phids as $conpherence_phid => $pic_phid) {
+      $conpherences[$conpherence_phid]->setImage($files[$pic_phid], $size);
     }
 
     return $this;

@@ -413,9 +413,6 @@ final class PhabricatorObjectHandleData {
               $handle->setName($file->getName());
               $handle->setURI($file->getBestURI());
               $handle->setComplete(true);
-              if ($file->isViewableImage()) {
-                $handle->setImageURI($file->getBestURI());
-              }
             }
             $handles[$phid] = $handle;
           }

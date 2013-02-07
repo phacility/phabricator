@@ -1,7 +1,11 @@
 <?php
 
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
-
+  private $disableMacro = false;
+  public function setDisableMacros($disable) {
+    $this->disableMacro = $disable;
+    return $this;
+  }
   protected function renderInput() {
     $id = $this->getID();
     if (!$id) {
@@ -48,20 +52,22 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       'table' => array(
         'tip' => pht('Table'),
-      ),
-      array(
+      )
+    );
+    if (!$this->disableMacro and function_exists('imagettftext')) {
+      $actions[] = array(
         'spacer' => true,
-      ),
-      'meme' => array(
+        );
+      $actions['meme'] = array(
         'tip' => pht('Meme'),
-      ),
-      'help'  => array(
+      );
+    }
+    $actions['help'] = array(
         'tip' => pht('Help'),
         'align' => 'right',
         'href'  => PhabricatorEnv::getDoclink(
           'article/Remarkup_Reference.html'),
-      ),
-    );
+      );
 
     $buttons = array();
     foreach ($actions as $action => $spec) {
@@ -74,7 +80,6 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           '');
         continue;
       }
-
       $classes = array();
       $classes[] = 'remarkup-assist-button';
       if (idx($spec, 'align') == 'right') {

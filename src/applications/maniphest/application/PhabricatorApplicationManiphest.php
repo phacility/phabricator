@@ -36,6 +36,12 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return $this->getBaseURI().'task/create/';
   }
 
+  public function getEventListeners() {
+    return array(
+      new ManiphestPeopleMenuEventListener()
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/T(?P<id>[1-9]\d*)' => 'ManiphestTaskDetailController',

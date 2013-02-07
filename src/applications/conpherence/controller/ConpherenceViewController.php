@@ -45,6 +45,7 @@ final class ConpherenceViewController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needWidgetData(true)
+      ->needHeaderPics(true)
       ->executeOne();
     $this->setConpherence($conpherence);
 
@@ -67,40 +68,51 @@ final class ConpherenceViewController extends
     require_celerity_resource('conpherence-header-pane-css');
     $user = $this->getRequest()->getUser();
     $conpherence = $this->getConpherence();
-    $display_data = $conpherence->getDisplayData($user);
+    $display_data = $conpherence->getDisplayData(
+      $user,
+      ConpherenceImageData::SIZE_HEAD
+    );
     $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+    $class_mod = $display_data['image_class'];
 
     $header =
-    javelin_render_tag(
+    phutil_tag(
+      'div',
+      array(
+        'class' => 'upload-photo'
+      ),
+      pht('Drop photo here to change this Conpherence photo.')
+    ).
+    javelin_tag(
       'a',
       array(
         'class' => 'edit',
         'href' => $edit_href,
-        'sigil' => 'workflow',
+        'sigil' => 'workflow edit-action',
       ),
       ''
     ).
-    phutil_render_tag(
+    phutil_tag(
       'div',
       array(
-        'class' => 'header-image',
+        'class' => $class_mod.'header-image',
         'style' => 'background-image: url('.$display_data['image'].');'
       ),
       ''
     ).
-    phutil_render_tag(
+    phutil_tag(
       'div',
       array(
-        'class' => 'title',
+        'class' => $class_mod.'title',
       ),
-      phutil_escape_html($display_data['title'])
+      $display_data['title']
     ).
-    phutil_render_tag(
+    phutil_tag(
       'div',
       array(
-        'class' => 'subtitle',
+        'class' => $class_mod.'subtitle',
       ),
-      phutil_escape_html($display_data['subtitle'])
+      $display_data['subtitle']
     );
 
     return array('header' => $header);
@@ -152,6 +164,7 @@ final class ConpherenceViewController extends
 
   private function renderWidgetPaneContent() {
     require_celerity_resource('conpherence-widget-pane-css');
+    require_celerity_resource('sprite-conpher-css');
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
@@ -165,37 +178,54 @@ final class ConpherenceViewController extends
 
     $conpherence = $this->getConpherence();
 
-    $widgets = phutil_render_tag(
+    $widgets = phutil_tag(
       'div',
       array(
         'class' => 'widgets-header'
       ),
-      javelin_render_tag(
-        'a',
-        array(
-          'sigil' => 'conpherence-change-widget',
-          'meta'  => array('widget' => 'widgets-files')
+      array(
+        javelin_tag(
+          'a',
+          array(
+            'sigil' => 'conpherence-change-widget',
+            'meta'  => array(
+              'widget' => 'widgets-files',
+              'toggleClass' => 'conpher_files_on'
+            ),
+            'id' => 'widgets-files-toggle',
+            'class' => 'sprite-conpher conpher_files_off first-icon'
+          ),
+          ''
         ),
-        pht('Files')
-      ).' | '.
-      javelin_render_tag(
-        'a',
-        array(
-          'sigil' => 'conpherence-change-widget',
-          'meta'  => array('widget' => 'widgets-tasks')
+        javelin_tag(
+          'a',
+          array(
+            'sigil' => 'conpherence-change-widget',
+            'meta'  => array(
+              'widget' => 'widgets-tasks',
+              'toggleClass' => 'conpher_list_on'
+            ),
+            'id' => 'widgets-tasks-toggle',
+            'class' => 'sprite-conpher conpher_list_off conpher_list_on',
+          ),
+          ''
         ),
-        pht('Tasks')
-      ).' | '.
-      javelin_render_tag(
-        'a',
-        array(
-          'sigil' => 'conpherence-change-widget',
-          'meta'  => array('widget' => 'widgets-calendar')
-        ),
-        pht('Calendar')
+        javelin_tag(
+          'a',
+          array(
+            'sigil' => 'conpherence-change-widget',
+            'meta'  => array(
+              'widget' => 'widgets-calendar',
+              'toggleClass' => 'conpher_calendar_on'
+            ),
+            'id' => 'widgets-calendar-toggle',
+            'class' => 'sprite-conpher conpher_calendar_off',
+          ),
+          ''
+        )
       )
     ).
-    phutil_render_tag(
+    phutil_tag(
       'div',
       array(
         'class' => 'widgets-body',
@@ -204,7 +234,7 @@ final class ConpherenceViewController extends
       ),
       $this->renderFilesWidgetPaneContent()
     ).
-    phutil_render_tag(
+    phutil_tag(
       'div',
       array(
         'class' => 'widgets-body',
@@ -212,7 +242,7 @@ final class ConpherenceViewController extends
       ),
       $this->renderTaskWidgetPaneContent()
     ).
-    phutil_render_tag(
+    phutil_tag(
       'div',
       array(
         'class' => 'widgets-body',
@@ -234,7 +264,7 @@ final class ConpherenceViewController extends
     foreach ($files as $file) {
       $thumb = $file->getThumb60x45URI();
       $table_data[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'img',
           array(
             'src' => $thumb
@@ -250,7 +280,7 @@ final class ConpherenceViewController extends
         ->setNoDataString(pht('No files attached to conpherence.'))
         ->setHeaders(array('', pht('Name')))
         ->setColumnClasses(array('', 'wide'));
-    return $header->render() . $table->render();
+    return new PhutilSafeHTML($header->render() . $table->render());
   }
 
   private function renderTaskWidgetPaneContent() {
@@ -271,12 +301,12 @@ final class ConpherenceViewController extends
       foreach ($actual_tasks as $task) {
         $data[] = array(
           idx($priority_map, $task->getPriority(), pht('???')),
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => '/T'.$task->getID()
             ),
-            phutil_escape_html($task->getTitle())
+            $task->getTitle()
           )
         );
       }
@@ -286,13 +316,110 @@ final class ConpherenceViewController extends
         ->setColumnClasses(array('', 'wide'));
       $content[] = $table->render();
     }
-    return implode('', $content);
+    return new PhutilSafeHTML(implode('', $content));
   }
 
   private function renderCalendarWidgetPaneContent() {
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Calendar'));
-    return $header->render() . 'TODO';
+    $user = $this->getRequest()->getUser();
+
+    $conpherence = $this->getConpherence();
+    $widget_data = $conpherence->getWidgetData();
+    $statuses = $widget_data['statuses'];
+    $handles = $conpherence->getHandles();
+    $content = array();
+    $timestamps = $this->getCalendarWidgetWeekTimestamps();
+    $one_day = 24 * 60 * 60;
+    foreach ($timestamps as $time => $day) {
+      // build a header for the new day
+      $content[] = id(new PhabricatorHeaderView())
+        ->setHeader($day->format('l'))
+        ->render();
+
+      $day->setTime(0, 0, 0);
+      $epoch_start = $day->format('U');
+      $day->modify('+1 day');
+      $epoch_end = $day->format('U');
+
+      // keep looking through statuses where we last left off
+      foreach ($statuses as $status) {
+        if ($status->getDateFrom() >= $epoch_end) {
+          // This list is sorted, so we can stop looking.
+          break;
+        }
+        if ($status->getDateFrom() < $epoch_end &&
+            $status->getDateTo() > $epoch_start) {
+          $timespan = $status->getDateTo() - $status->getDateFrom();
+          if ($timespan > $one_day) {
+            $time_str = 'm/d';
+          } else {
+            $time_str = 'h:i A';
+          }
+          $epoch_range = phabricator_format_local_time(
+            $status->getDateFrom(),
+            $user,
+            $time_str
+          ) . ' - ' . phabricator_format_local_time(
+            $status->getDateTo(),
+            $user,
+            $time_str
+          );
+
+          $content[] = phutil_tag(
+            'div',
+            array(
+              'class' => 'user-status '.$status->getTextStatus(),
+            ),
+            array(
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'epoch-range'
+                ),
+              $epoch_range
+              ),
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'icon',
+                ),
+                ''
+              ),
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'description'
+                ),
+                $status->getTerseSummary($user)
+              ),
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'participant'
+                ),
+                $handles[$status->getUserPHID()]->getName()
+              )
+            )
+          );
+        }
+      }
+    }
+
+    return new PhutilSafeHTML(implode('', $content));
+  }
+
+  private function getCalendarWidgetWeekTimestamps() {
+    $user = $this->getRequest()->getUser();
+    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
+
+    $timestamps = array();
+    for ($day = 0; $day < 7; $day++) {
+      $timestamps[] = new DateTime(
+        sprintf('today +%d days', $day),
+        $timezone
+      );
+    }
+
+    return $timestamps;
   }
 
 }

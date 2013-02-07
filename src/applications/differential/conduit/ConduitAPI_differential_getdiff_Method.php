@@ -72,7 +72,6 @@ final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
       $project_name = null;
     }
     $basic_dict['projectName'] = $project_name;
-    $basic_dict['author'] = $diff->loadAuthorInformation();
 
     return $basic_dict;
   }

@@ -13,7 +13,9 @@ JX.behavior('phabricator-home-reveal-tiles', function(config) {
     function(e) {
       e.kill();
 
-      JX.DOM.show(JX.$(config.tilesID));
+      for (var ii = 0; ii < config.tileIDs.length; ii++) {
+        JX.DOM.show(JX.$(config.tileIDs[ii]));
+      }
       JX.DOM.hide(JX.$(config.showID));
     });
 
@@ -23,7 +25,9 @@ JX.behavior('phabricator-home-reveal-tiles', function(config) {
     function(e) {
       e.kill();
 
-      JX.DOM.hide(JX.$(config.tilesID));
+      for (var ii = 0; ii < config.tileIDs.length; ii++) {
+        JX.DOM.hide(JX.$(config.tileIDs[ii]));
+      }
       JX.DOM.show(JX.$(config.showID));
     });
 });

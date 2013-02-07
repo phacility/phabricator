@@ -5,6 +5,7 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
   private $title;
   private $baseURI;
   private $anchorName;
+  private $collapsed = false;
 
   public function setAnchorName($anchor_name) {
     $this->anchorName = $anchor_name;
@@ -30,12 +31,18 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
     return $this->title;
   }
 
+  public function setCollapsed($collapsed) {
+    $this->collapsed = $collapsed;
+    return $this;
+  }
+
   public function build(array $changesets) {
     assert_instances_of($changesets, 'DifferentialChangeset');
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI($this->getBaseURI());
     $nav->setFlexible(true);
+    $nav->setCollapsed($this->collapsed);
 
     $anchor = $this->getAnchorName();
 
@@ -115,6 +122,8 @@ final class DifferentialChangesetFileTreeSideNavBuilder {
         $icon.$name_element);
     }
     $tree->destroy();
+
+    Javelin::initBehavior('phabricator-file-tree', array());
 
     $filetree =
       '<div class="phabricator-filetree">'.

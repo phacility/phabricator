@@ -127,28 +127,6 @@ final class PhabricatorDifferentialConfigOptions
             "If you set this to true, users won't need to login to view ".
             "Differential revisions. Anonymous users will have read-only ".
             "access and won't be able to interact with the revisions.")),
-      $this->newOption('differential.expose-emails-prudently', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht("Expose revision author email address via Conduit"),
-            pht("Don't expose revision author email address via Conduit"),
-          ))
-        ->setSummary(
-          pht(
-            "Determines whether or not the author's email address should be ".
-            "exposed via Conduit."))
-        ->setDescription(
-          pht(
-            "If you set this to true, revision author email address ".
-            "information will be exposed in Conduit. This is useful for ".
-            "Arcanist.\n\n".
-            "For example, consider the 'arc patch DX' workflow which needs ".
-            "to ask Differential for the revision DX. This data often should ".
-            "contain the author's email address, eg 'George Washington ".
-            "<gwashinton@example.com>' when DX is a git or mercurial ".
-            "revision. If this option is false, Differential defaults to the ".
-            "best it can, something like 'George Washington' or ".
-            "'gwashington'.")),
       $this->newOption('differential.generated-paths', 'list<string>', array())
         ->setSummary(pht("File regexps to treat as automatically generated."))
         ->setDescription(

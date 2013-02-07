@@ -24,8 +24,6 @@ final class PhabricatorSettingsPanelDisplayPreferences
     $pref_editor       = PhabricatorUserPreferences::PREFERENCE_EDITOR;
     $pref_multiedit    = PhabricatorUserPreferences::PREFERENCE_MULTIEDIT;
     $pref_titles       = PhabricatorUserPreferences::PREFERENCE_TITLES;
-    $pref_symbols      =
-      PhabricatorUserPreferences::PREFERENCE_DIFFUSION_SYMBOLS;
     $pref_monospaced_textareas =
       PhabricatorUserPreferences::PREFERENCE_MONOSPACED_TEXTAREAS;
 
@@ -40,9 +38,6 @@ final class PhabricatorSettingsPanelDisplayPreferences
       $preferences->setPreference(
         $pref_multiedit,
         $request->getStr($pref_multiedit));
-      $preferences->setPreference(
-        $pref_symbols,
-        $request->getStr($pref_symbols));
       $preferences->setPreference($pref_monospaced, $monospaced);
       $preferences->setPreference(
         $pref_monospaced_textareas,
@@ -74,7 +69,6 @@ EXAMPLE;
     $font_default = PhabricatorEnv::getEnvConfig('style.monospace');
     $font_default = phutil_escape_html($font_default);
 
-    $pref_symbols_value = $preferences->getPreference($pref_symbols);
     $pref_monospaced_textareas_value = $preferences
       ->getPreference($pref_monospaced_textareas);
     if (!$pref_monospaced_textareas_value) {
@@ -132,15 +126,6 @@ EXAMPLE;
           '<pre class="PhabricatorMonospaced">'.
           phutil_escape_html($example_string).
           '</pre>'))
-      ->appendChild(
-        id(new AphrontFormRadioButtonControl())
-        ->setLabel('Symbol Links')
-        ->setName($pref_symbols)
-        ->setValue($pref_symbols_value ? $pref_symbols_value : 'enabled')
-        ->addButton('enabled', 'Enabled (default)',
-          'Use this setting to disable linking symbol names in Differential '.
-          'and Diffusion to their definitions. This is enabled by default.')
-        ->addButton('disabled', 'Disabled', null))
       ->appendChild(
         id(new AphrontFormRadioButtonControl())
         ->setLabel('Monospaced Textareas')

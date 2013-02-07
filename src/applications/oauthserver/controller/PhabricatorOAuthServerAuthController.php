@@ -15,7 +15,7 @@ extends PhabricatorAuthController {
     $current_user  = $request->getUser();
     $server        = new PhabricatorOAuthServer();
     $client_phid   = $request->getStr('client_id');
-    $scope         = $request->getStr('scope');
+    $scope         = $request->getStr('scope', array());
     $redirect_uri  = $request->getStr('redirect_uri');
     $state         = $request->getStr('state');
     $response_type = $request->getStr('response_type');
@@ -63,10 +63,8 @@ extends PhabricatorAuthController {
           return $response;
         }
         $uri              = $redirect_uri;
-        $access_token_uri = $uri;
       } else {
         $uri              = new PhutilURI($client->getRedirectURI());
-        $access_token_uri = null;
       }
       // we've now validated this request enough overall such that we
       // can safely redirect to the client with the response
@@ -121,7 +119,7 @@ extends PhabricatorAuthController {
       if ($return_auth_code) {
         // step 1 -- generate authorization code
         $auth_code =
-          $server->generateAuthorizationCode($access_token_uri);
+          $server->generateAuthorizationCode($uri);
 
         // step 2 return it
         $content = array(

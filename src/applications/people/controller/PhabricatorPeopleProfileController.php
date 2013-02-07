@@ -16,6 +16,21 @@ final class PhabricatorPeopleProfileController
     return $this->profileUser;
   }
 
+  private function getMainFilters($username) {
+    return array(
+      array(
+        'key' => 'feed',
+        'name' => pht('Feed'),
+        'href' => '/p/'.$username.'/feed/'
+      ),
+      array(
+        'key' => 'about',
+        'name' => pht('About'),
+        'href' => '/p/'.$username.'/about/'
+      )
+    );
+  }
+
   public function processRequest() {
 
     $viewer = $this->getRequest()->getUser();
@@ -39,40 +54,14 @@ final class PhabricatorPeopleProfileController
     }
     $username = phutil_escape_uri($user->getUserName());
 
-    $external_arrow = "\xE2\x86\x97";
+    $menu = new PhabricatorMenuView();
+    foreach ($this->getMainFilters($username) as $filter) {
+      $menu->newLink($filter['name'], $filter['href'], $filter['key']);
+    }
 
-    $conpherence_uri =
-      new PhutilURI('/conpherence/new/?participant='.$user->getPHID());
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/p/'.$username.'/'));
-    $nav->addFilter('feed', 'Feed');
-    $nav->addMenuItem(
-      id(new PhabricatorMenuItemView())
-      ->setName(pht('Conpherence').' '.$external_arrow)
-      ->setHref($conpherence_uri)
-    );
-    $nav->addFilter('about', 'About');
-    $nav->addLabel('Activity');
-
-    $nav->addFilter(
-      null,
-      "Revisions {$external_arrow}",
-      '/differential/filter/revisions/'.$username.'/');
-
-    $nav->addFilter(
-      null,
-      "Tasks {$external_arrow}",
-      '/maniphest/view/action/?users='.$user->getPHID());
-
-    $nav->addFilter(
-      null,
-      "Commits {$external_arrow}",
-      '/audit/view/author/'.$username.'/');
-
-    $nav->addFilter(
-      null,
-      "Lint Messages {$external_arrow}",
-      '/diffusion/lint/?owner[0]='.$user->getPHID());
+    $menu->newLabel(pht('Activity'), 'activity');
+    // NOTE: applications install the various links through PhabricatorEvent
+    // listeners
 
     $oauths = id(new PhabricatorUserOAuthInfo())->loadAllWhere(
       'userID = %d',
@@ -92,17 +81,33 @@ final class PhabricatorPeopleProfileController
         continue;
       }
 
-      $name = $provider->getProviderName().' Profile';
+      $name = pht('%s Profile', $provider->getProviderName());
       $href = $oauths[$provider_key]->getAccountURI();
 
       if ($href) {
         if (!$added_label) {
-          $nav->addLabel('Linked Accounts');
+          $menu->newLabel(pht('Linked Accounts'), 'linked_accounts');
           $added_label = true;
         }
-        $nav->addFilter(null, $name.' '.$external_arrow, $href);
+        $menu->addMenuItem(
+          id(new PhabricatorMenuItemView())
+          ->setIsExternal(true)
+          ->setName($name)
+          ->setHref($href)
+          ->setType(PhabricatorMenuItemView::TYPE_LINK)
+        );
       }
     }
+
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_PEOPLE_DIDRENDERMENU,
+      array(
+        'menu' => $menu,
+        'person' => $user,
+      ));
+    $event->setUser($viewer);
+    PhutilEventEngine::dispatchEvent($event);
+    $nav = AphrontSideNavFilterView::newFromMenu($event->getValue('menu'));
 
     $this->page = $nav->selectFilter($this->page, 'feed');
 
@@ -141,14 +146,19 @@ final class PhabricatorPeopleProfileController
     $header->appendChild($content);
 
     if ($user->getPHID() == $viewer->getPHID()) {
-      $nav->addFilter(null, 'Edit Profile...', '/settings/panel/profile/');
+      $nav->addFilter(
+        null,
+        pht('Edit Profile...'),
+        '/settings/panel/profile/'
+      );
     }
 
     if ($viewer->getIsAdmin()) {
       $nav->addFilter(
         null,
-        'Administrate User...',
-        '/people/edit/'.$user->getID().'/');
+        pht('Administrate User...'),
+        '/people/edit/'.$user->getID().'/'
+      );
     }
 
     return $this->buildApplicationPage(
@@ -162,7 +172,10 @@ final class PhabricatorPeopleProfileController
 
     $blurb = nonempty(
       $profile->getBlurb(),
-      '//Nothing is known about this rare specimen.//');
+      '//'.
+      pht('Nothing is known about this rare specimen.')
+      .'//'
+    );
 
     $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
     $blurb = $engine->markupText($blurb);

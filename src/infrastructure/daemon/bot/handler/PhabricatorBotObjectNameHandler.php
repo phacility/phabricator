@@ -5,7 +5,7 @@
  *
  * @group irc
  */
-final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
+final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
 
   /**
    * Map of PHIDs to the last mention of them (as an epoch timestamp); prevents
@@ -13,7 +13,7 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
    */
   private $recentlyMentioned = array();
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
 
     switch ($message->getCommand()) {
       case 'PRIVMSG':

@@ -3,7 +3,7 @@
 /**
  * @group irc
  */
-final class PhabricatorIRCMacroHandler extends PhabricatorIRCHandler {
+final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
 
   private $macros;
   private $regexp;
@@ -40,7 +40,7 @@ final class PhabricatorIRCMacroHandler extends PhabricatorIRCHandler {
     return true;
   }
 
-  public function receiveMessage(PhabricatorIRCMessage $message) {
+  public function receiveMessage(PhabricatorBotMessage $message) {
     if (!$this->init()) {
       return;
     }

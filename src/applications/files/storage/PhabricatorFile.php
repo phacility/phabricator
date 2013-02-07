@@ -134,9 +134,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
 
   public static function newFromFileData($data, array $params = array()) {
-    $selector = PhabricatorEnv::newObjectFromConfig('storage.engine-selector');
 
-    $engines = $selector->selectStorageEngines($data, $params);
+    if (isset($params['storageEngines'])) {
+      $engines = $params['storageEngines'];
+    } else {
+      $selector = PhabricatorEnv::newObjectFromConfig(
+        'storage.engine-selector');
+      $engines = $selector->selectStorageEngines($data, $params);
+    }
+
+    assert_instances_of($engines, 'PhabricatorFileStorageEngine');
     if (!$engines) {
       throw new Exception("No valid storage engines are available!");
     }
@@ -271,7 +278,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
 
-  public static function newFromFileDownload($uri, $name) {
+  public static function newFromFileDownload($uri, array $params) {
     $uri = new PhutilURI($uri);
 
     $protocol = $uri->getProtocol();
@@ -286,12 +293,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $timeout = 5;
 
-    $file_data = HTTPSFuture::loadContent($uri, $timeout);
-    if ($file_data === false) {
-      return null;
-    }
+    list($file_data) = id(new HTTPSFuture($uri))
+        ->setTimeout($timeout)
+        ->resolvex();
 
-    return self::newFromFileData($file_data, array('name' => $name));
+    return self::newFromFileData($file_data, $params);
   }
 
   public static function normalizeFileName($file_name) {

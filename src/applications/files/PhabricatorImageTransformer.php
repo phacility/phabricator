@@ -56,6 +56,29 @@ final class PhabricatorImageTransformer {
       ));
   }
 
+  public function executeConpherenceTransform(
+    PhabricatorFile $file,
+    $top,
+    $left,
+    $width,
+    $height
+  ) {
+
+    $image = $this->crasslyCropTo(
+      $file,
+      $top,
+      $left,
+      $width,
+      $height
+    );
+
+    return PhabricatorFile::newFromFileData(
+      $image,
+      array(
+        'name' => 'conpherence-'.$file->getName(),
+      )
+    );
+  }
 
   private function crudelyCropTo(PhabricatorFile $file, $x, $min_y, $max_y) {
     $data = $file->loadFileData();
@@ -80,6 +103,30 @@ final class PhabricatorImageTransformer {
     return $this->saveImageDataInAnyFormat($img, $file->getMimeType());
   }
 
+  private function crasslyCropTo(PhabricatorFile $file, $top, $left, $w, $h) {
+    $data = $file->loadFileData();
+    $src = imagecreatefromstring($data);
+    $dst = $this->getBlankDestinationFile($w, $h);
+
+    $scale = self::getScaleForCrop($file, $w, $h);
+    $orig_x = $left / $scale;
+    $orig_y = $top / $scale;
+    $orig_w = $w / $scale;
+    $orig_h = $h / $scale;
+
+    imagecopyresampled(
+      $dst,
+      $src,
+      0, 0,
+      $orig_x, $orig_y,
+      $w, $h,
+      $orig_w, $orig_h
+    );
+
+    return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
+  }
+
+
   /**
    * Very crudely scale an image up or down to an exact size.
    */
@@ -92,15 +139,21 @@ final class PhabricatorImageTransformer {
     return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
+  private function getBlankDestinationFile($dx, $dy) {
+    $dst = imagecreatetruecolor($dx, $dy);
+    imagesavealpha($dst, true);
+    imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
+
+    return $dst;
+  }
+
   private function applyScaleTo($src, $dx, $dy) {
     $x = imagesx($src);
     $y = imagesy($src);
 
     $scale = min(($dx / $x), ($dy / $y), 1);
 
-    $dst = imagecreatetruecolor($dx, $dy);
-    imagesavealpha($dst, true);
-    imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
+    $dst = $this->getBlankDestinationFile($dx, $dy);
 
     $sdx = $scale * $x;
     $sdy = $scale * $y;
@@ -141,6 +194,27 @@ final class PhabricatorImageTransformer {
     );
   }
 
+  public static function getScaleForCrop(
+    PhabricatorFile $file,
+    $des_width,
+    $des_height) {
+
+    $metadata = $file->getMetadata();
+    $width = $metadata[PhabricatorFile::METADATA_IMAGE_WIDTH];
+    $height = $metadata[PhabricatorFile::METADATA_IMAGE_HEIGHT];
+
+    if ($height < $des_height) {
+      $scale = $height / $des_height;
+    } else if ($width < $des_width) {
+      $scale = $width / $des_width;
+    } else {
+      $scale_x = $des_width / $width;
+      $scale_y = $des_height / $height;
+      $scale = max($scale_x, $scale_y);
+    }
+
+    return $scale;
+  }
   private function generatePreview(PhabricatorFile $file, $size) {
     $data = $file->loadFileData();
     $src = imagecreatefromstring($data);
@@ -153,9 +227,7 @@ final class PhabricatorImageTransformer {
     $sdx = $dimensions['sdx'];
     $sdy = $dimensions['sdy'];
 
-    $dst = imagecreatetruecolor($dx, $dy);
-    imagesavealpha($dst, true);
-    imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
+    $dst = $this->getBlankDestinationFile($dx, $dy);
 
     imagecopyresampled(
       $dst,

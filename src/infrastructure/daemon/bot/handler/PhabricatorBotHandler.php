@@ -2,15 +2,15 @@
 
 /**
  * Responds to IRC messages. You plug a bunch of these into a
- * @{class:PhabricatorIRCBot} to give it special behavior.
+ * @{class:PhabricatorBot} to give it special behavior.
  *
  * @group irc
  */
-abstract class PhabricatorIRCHandler {
+abstract class PhabricatorBotHandler {
 
   private $bot;
 
-  final public function __construct(PhabricatorIRCBot $irc_bot) {
+  final public function __construct(PhabricatorBot $irc_bot) {
     $this->bot = $irc_bot;
   }
 
@@ -37,7 +37,7 @@ abstract class PhabricatorIRCHandler {
     return (strncmp($name, '#', 1) === 0);
   }
 
-  abstract public function receiveMessage(PhabricatorIRCMessage $message);
+  abstract public function receiveMessage(PhabricatorBotMessage $message);
 
   public function runBackgroundTasks() {
     return;

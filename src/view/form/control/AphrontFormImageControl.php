@@ -15,7 +15,6 @@ final class AphrontFormImageControl extends AphrontFormControl {
         array(
           'type'  => 'file',
           'name'  => $this->getName(),
-          'class' => 'image',
         )).
       '<div style="clear: both;">'.
       phutil_render_tag(

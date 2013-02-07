@@ -324,13 +324,20 @@ final class DiffusionCommitController extends DiffusionController {
       'commit' => true,
     ));
 
-    if ($changesets) {
+    $prefs = $user->loadPreferences();
+    $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
+    $pref_collapse = PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED;
+    $show_filetree = $prefs->getPreference($pref_filetree);
+    $collapsed = $prefs->getPreference($pref_collapse);
+
+    if ($changesets && $show_filetree) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
         ->setAnchorName('top')
         ->setTitle($short_name)
         ->setBaseURI(new PhutilURI('/'.$commit_id))
         ->build($changesets)
         ->setCrumbs($crumbs)
+        ->setCollapsed((bool)$collapsed)
         ->appendChild($content);
       $content = $nav;
     } else {

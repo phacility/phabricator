@@ -131,7 +131,10 @@ abstract class ConpherenceController extends PhabricatorController {
     $user = $this->getRequest()->getUser();
     foreach ($conpherences as $conpherence) {
       $uri = $this->getApplicationURI('view/'.$conpherence->getID().'/');
-      $data = $conpherence->getDisplayData($user);
+      $data = $conpherence->getDisplayData(
+        $user,
+        null
+      );
       $title = $data['title'];
       $subtitle = $data['subtitle'];
       $unread_count = $data['unread_count'];
@@ -166,7 +169,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
   private function getNoConpherencesBlock() {
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'no-conpherences-menu-item'
@@ -206,6 +209,7 @@ abstract class ConpherenceController extends PhabricatorController {
         'messages' => 'conpherence-messages',
         'widgets_pane' => 'conpherence-widget-pane',
         'form_pane' => 'conpherence-form',
+        'menu_pane' => 'conpherence-menu',
         'fancy_ajax' => (bool) $this->getSelectedConpherencePHID()
       )
     );
@@ -217,6 +221,14 @@ abstract class ConpherenceController extends PhabricatorController {
         'messages' => 'conpherence-messages',
         'widgets_pane' => 'conpherence-widget-pane',
         'form_pane' => 'conpherence-form'
+      )
+    );
+    Javelin::initBehavior('conpherence-drag-and-drop-photo',
+      array(
+        'target' => 'conpherence-header-pane',
+        'form_pane' => 'conpherence-form',
+        'upload_uri' => '/file/dropupload/',
+        'activated_class' => 'conpherence-header-upload-photo',
       )
     );
   }

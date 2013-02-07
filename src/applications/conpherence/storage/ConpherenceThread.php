@@ -9,7 +9,7 @@ final class ConpherenceThread extends ConpherenceDAO
   protected $id;
   protected $phid;
   protected $title;
-  protected $imagePHID;
+  protected $imagePHIDs = array();
   protected $mailKey;
 
   private $participants;
@@ -17,10 +17,14 @@ final class ConpherenceThread extends ConpherenceDAO
   private $handles;
   private $filePHIDs;
   private $widgetData;
+  private $images = array();
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'imagePHIDs'  => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -34,6 +38,33 @@ final class ConpherenceThread extends ConpherenceDAO
       $this->setMailKey(Filesystem::readRandomCharacters(20));
     }
     return parent::save();
+  }
+
+  public function getImagePHID($size) {
+    $image_phids = $this->getImagePHIDs();
+    return idx($image_phids, $size);
+  }
+  public function setImagePHID($phid, $size) {
+    $image_phids = $this->getImagePHIDs();
+    $image_phids[$size] = $phid;
+    return $this->setImagePHIDs($image_phids);
+  }
+
+  public function getImage($size) {
+    $images = $this->getImages();
+    return idx($images, $size);
+  }
+  public function setImage(PhabricatorFile $file, $size) {
+    $files = $this->getImages();
+    $files[$size] = $file;
+    return $this->setImages($files);
+  }
+  public function setImages(array $files) {
+    $this->images = $files;
+    return $this;
+  }
+  private function getImages() {
+    return $this->images;
   }
 
   public function attachParticipants(array $participants) {
@@ -112,59 +143,36 @@ final class ConpherenceThread extends ConpherenceDAO
     return $this->widgetData;
   }
 
-  public function loadImageURI() {
-    $src_phid = $this->getImagePHID();
+  public function loadImageURI($size) {
+    $file = $this->getImage($size);
 
-    if ($src_phid) {
-      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-      if ($file) {
-        return $file->getBestURI();
-      }
+    if ($file) {
+      return $file->getBestURI();
     }
 
     return PhabricatorUser::getDefaultProfileImageURI();
   }
 
-  public function getDisplayData(PhabricatorUser $user) {
+  public function getDisplayData(PhabricatorUser $user, $size) {
     $transactions = $this->getTransactions();
-    $latest_transaction = end($transactions);
-    $latest_participant = $latest_transaction->getAuthorPHID();
-    $handles = $this->getHandles();
-    $latest_handle = $handles[$latest_participant];
-    if ($this->getImagePHID()) {
-      $img_src = $this->loadImageURI();
-    } else {
-      $img_src = $latest_handle->getImageURI();
-    }
-    $title = $this->getTitle();
-    if (!$title) {
-      $title = $latest_handle->getName();
-      unset($handles[$latest_participant]);
-    }
-    unset($handles[$user->getPHID()]);
 
-    $subtitle = '';
-    $count = 0;
-    $final = false;
-    foreach ($handles as $handle) {
-      if ($handle->getType() != PhabricatorPHIDConstants::PHID_TYPE_USER) {
-        continue;
-      }
-      if ($subtitle) {
-        if ($final) {
-          $subtitle .= '...';
-          break;
-        } else {
-          $subtitle .= ', ';
-        }
-      }
-      $subtitle .= $handle->getName();
-      $count++;
-      $final = $count == 3;
+    $handles = $this->getHandles();
+    // we don't want to show the user unless they are babbling to themselves
+    if (count($handles) > 1) {
+      unset($handles[$user->getPHID()]);
     }
 
     $participants = $this->getParticipants();
     $user_participation = $participants[$user->getPHID()];
+    $latest_transaction = null;
+    $title = $this->getTitle();
+    $subtitle = '';
+    $img_src = null;
+    $img_class = null;
+    if ($this->getImagePHID($size)) {
+      $img_src = $this->getImage($size)->getBestURI();
+      $img_class = 'custom-';
+    }
     $unread_count = 0;
     $max_count = 10;
     $snippet = null;
@@ -186,9 +194,28 @@ final class ConpherenceThread extends ConpherenceDAO
               $transaction->getComment()->getContent(),
               48
             );
+            if ($transaction->getAuthorPHID() == $user->getPHID()) {
+              $snippet = "\xE2\x86\xB0  " . $snippet;
+            }
           }
           // fallthrough intentionally here
         case ConpherenceTransactionType::TYPE_FILES:
+          if (!$latest_transaction) {
+            $latest_transaction = $transaction;
+          }
+          $latest_participant_phid = $transaction->getAuthorPHID();
+          if ((!$title || !$img_src) &&
+                $latest_participant_phid != $user->getPHID()) {
+            $latest_handle = $handles[$latest_participant_phid];
+            if (!$img_src) {
+              $img_src = $latest_handle->getImageURI();
+            }
+            if (!$title) {
+              $title = $latest_handle->getName();
+              // (maybs) used the pic, definitely used the name -- discard
+              unset($handles[$latest_participant_phid]);
+            }
+          }
           if ($behind_transaction_phid) {
             $unread_count++;
             if ($transaction->getPHID() == $behind_transaction_phid) {
@@ -210,12 +237,45 @@ final class ConpherenceThread extends ConpherenceDAO
       $unread_count = $max_count.'+';
     }
 
+    // This happens if the user has been babbling, maybs just to themselves,
+    // but enough un-responded to transactions for our SQL limit would
+    // hit this too... Also happens on new threads since only the first
+    // author has participated.
+    // ...so just pick a different handle in these cases.
+    $some_handle = reset($handles);
+    if (!$img_src) {
+      $img_src = $some_handle->getImageURI();
+    }
+    if (!$title) {
+      $title = $some_handle->getName();
+    }
+
+    $count = 0;
+    $final = false;
+    foreach ($handles as $handle) {
+      if ($handle->getType() != PhabricatorPHIDConstants::PHID_TYPE_USER) {
+        continue;
+      }
+      if ($subtitle) {
+        if ($final) {
+          $subtitle .= '...';
+          break;
+        } else {
+          $subtitle .= ', ';
+        }
+      }
+      $subtitle .= $handle->getName();
+      $count++;
+      $final = $count == 3;
+    }
+
     return array(
       'title' => $title,
       'subtitle' => $subtitle,
       'unread_count' => $unread_count,
       'epoch' => $latest_transaction->getDateCreated(),
       'image' => $img_src,
+      'image_class' => $img_class,
       'snippet' => $snippet,
     );
   }

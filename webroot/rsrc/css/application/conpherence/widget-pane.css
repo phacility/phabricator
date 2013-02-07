@@ -12,9 +12,88 @@
   border-color: #CCC;
   border-style: solid;
   background: url('/rsrc/image/texture/dust_background.jpg');
+  overflow-y: auto;
 }
 
 .conpherence-widget-pane .aphront-form-input {
   margin: 0;
   width: 100%;
+}
+
+.conpherence-widget-pane .widgets-header {
+  height: 40px;
+  width: 127px;
+  margin: 0px auto 0px auto;
+}
+
+.conpherence-widget-pane .widgets-header .sprite-conpher {
+  display: block;
+  width: 29px;
+  height: 33px;
+  margin: 4px 0px 0px 20px;
+  float: left;
+  clear: none;
+}
+.conpherence-widget-pane .widgets-header .first-icon {
+  margin-left: 0px;
+}
+
+.conpherence-widget-pane .widgets-body {
+  position: fixed;
+  overflow-y: auto;
+  top: 165px;
+  bottom: 0px;
+  width: 320px;
+}
+
+/* calendar widget */
+
+.conpherence-widget-pane #widgets-calendar {
+}
+
+.conpherence-widget-pane #widgets-calendar .user-status {
+  height: 60px;
+}
+
+.conpherence-widget-pane #widgets-calendar .user-status .icon {
+  border-radius: 10px;
+  position: relative;
+  top: 24px;
+  left: 12px;
+  height: 16px;
+  width: 16px;
+  box-shadow: 0px 0px 1px #000;
+}
+
+.conpherence-widget-pane #widgets-calendar .sporadic .icon {
+  background-color: rgb(222, 226, 232);
+}
+
+.conpherence-widget-pane #widgets-calendar .away .icon {
+  background-color: rgb(102, 204, 255);
+}
+
+.conpherence-widget-pane #widgets-calendar .user-status .epoch-range {
+  float: right;
+  font-style: italic;
+  position: relative;
+  top: 24px;
+  right: 8px;
+  font-size: 11px;
+}
+
+.conpherence-widget-pane #widgets-calendar .user-status .description {
+  position: relative;
+  left: 40px;
+  top: 0px;
+  width: 260px;
+}
+
+.conpherence-widget-pane #widgets-calendar .user-status .participant {
+  position: relative;
+  left: 40px;
+  top: 0px;
+  font-style: italic;
+  font-size: 11px;
+  width: 260px;
 }
