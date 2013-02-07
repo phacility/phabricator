@@ -14,6 +14,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
     $types[] = PholioTransactionType::TYPE_NAME;
     $types[] = PholioTransactionType::TYPE_DESCRIPTION;
+    $types[] = PholioTransactionType::TYPE_INLINE;
     return $types;
   }
 
@@ -38,6 +39,18 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       case PholioTransactionType::TYPE_DESCRIPTION:
         return $xaction->getNewValue();
     }
+  }
+
+  protected function transactionHasEffect(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PholioTransactionType::TYPE_INLINE:
+        return true;
+    }
+
+    return parent::transactionHasEffect($object, $xaction);
   }
 
   protected function applyCustomInternalTransaction(
