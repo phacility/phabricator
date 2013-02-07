@@ -62,8 +62,8 @@ final class DiffusionCommitController extends DiffusionController {
       $error_panel->appendChild(
         "This Diffusion repository is configured to track only one ".
         "subdirectory of the entire Subversion repository, and this commit ".
-        "didn't affect the tracked subdirectory ('".
-        phutil_escape_html($subpath)."'), so no information is available.");
+        "didn't affect the tracked subdirectory ('".$subpath."'), so no ".
+        "information is available.");
       $content[] = $error_panel;
       $content[] = $top_anchor;
     } else {
@@ -162,8 +162,7 @@ final class DiffusionCommitController extends DiffusionController {
     if ($bad_commit) {
       $error_panel = new AphrontErrorView();
       $error_panel->setTitle('Bad Commit');
-      $error_panel->appendChild(
-        phutil_escape_html($bad_commit['description']));
+      $error_panel->appendChild($bad_commit['description']);
 
       $content[] = $error_panel;
     } else if ($is_foreign) {
@@ -207,8 +206,10 @@ final class DiffusionCommitController extends DiffusionController {
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
-          ->appendChild(
-            "<p>This commit is very large. Load each file individually.</p>");
+          ->appendChild(phutil_tag(
+            'p',
+            array(),
+            "This commit is very large. Load each file individually."));
 
         $change_panel->appendChild($warning_view);
         $change_panel->addButton($show_all_button);

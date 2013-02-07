@@ -35,8 +35,10 @@ final class HeraldTranscriptController extends HeraldController {
       $notice = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
         ->setTitle('Old Transcript')
-        ->appendChild(
-          '<p>Details of this transcript have been garbage collected.</p>');
+        ->appendChild(phutil_tag(
+          'p',
+          array(),
+          'Details of this transcript have been garbage collected.'));
       $nav->appendChild($notice);
     } else {
       $filter = $this->getFilterPHIDs();

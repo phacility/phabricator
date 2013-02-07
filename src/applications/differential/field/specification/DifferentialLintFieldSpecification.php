@@ -245,24 +245,24 @@ final class DifferentialLintFieldSpecification
 
     if ($status == DifferentialLintStatus::LINT_SKIP) {
       $content =
-        "<p>This diff was created without running lint. Make sure you are ".
-        "OK with that before you accept this diff.</p>";
+        "This diff was created without running lint. Make sure you are ".
+        "OK with that before you accept this diff.";
 
     } else if ($status == DifferentialLintStatus::LINT_POSTPONED) {
       $severity = AphrontErrorView::SEVERITY_WARNING;
       $content =
-        "<p>Postponed linters didn't finish yet. Make sure you are OK with ".
-        "that before you accept this diff.</p>";
+        "Postponed linters didn't finish yet. Make sure you are OK with ".
+        "that before you accept this diff.";
 
     } else {
       $content =
-        "<p>This diff has Lint Problems. Make sure you are OK with them ".
-        "before you accept this diff.</p>";
+        "This diff has Lint Problems. Make sure you are OK with them ".
+        "before you accept this diff.";
     }
 
     return id(new AphrontErrorView())
       ->setSeverity($severity)
-      ->appendChild($content)
+      ->appendChild(phutil_tag('p', array(), $content))
       ->setTitle(idx($titles, $status, 'Warning'));
   }
 

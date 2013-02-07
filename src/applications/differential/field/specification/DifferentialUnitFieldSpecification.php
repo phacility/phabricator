@@ -200,21 +200,21 @@ final class DifferentialUnitFieldSpecification
         );
       if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
         $content =
-          "<p>This diff has postponed unit tests. The results should be ".
+          "This diff has postponed unit tests. The results should be ".
           "coming in soon. You should probably wait for them before accepting ".
-          "this diff.</p>";
+          "this diff.";
       } else if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_SKIP) {
         $content =
-          "<p>Unit tests were skipped when this diff was created. Make sure ".
-          "you are OK with that before you accept this diff.</p>";
+          "Unit tests were skipped when this diff was created. Make sure ".
+          "you are OK with that before you accept this diff.";
       } else {
         $content =
-          "<p>This diff has Unit Test Problems. Make sure you are OK with ".
-          "them before you accept this diff.</p>";
+          "This diff has Unit Test Problems. Make sure you are OK with ".
+          "them before you accept this diff.";
       }
       $unit_warning = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
-        ->appendChild($content)
+        ->appendChild(phutil_tag('p', array(), $content))
         ->setTitle(idx($titles, $diff->getUnitStatus(), 'Warning'));
     }
     return $unit_warning;

@@ -54,7 +54,8 @@ final class PhabricatorPeopleEditController
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $notice->setTitle('Changes Saved');
-      $notice->appendChild('<p>Your changes were saved.</p>');
+      $notice->appendChild(
+        phutil_tag('p', array(), 'Your changes were saved.'));
       $content[] = $notice;
     }
 
@@ -578,10 +579,10 @@ final class PhabricatorPeopleEditController
     if ($user->getPHID() == $admin->getPHID()) {
       $error = new AphrontErrorView();
       $error->setTitle('You Shall Journey No Farther');
-      $error->appendChild(
+      $error->appendChild(hsprintf(
         '<p>As you stare into the gaping maw of the abyss, something holds '.
         'you back.</p>'.
-        '<p>You can not delete your own account.</p>');
+        '<p>You can not delete your own account.</p>'));
       return $error;
     }
 

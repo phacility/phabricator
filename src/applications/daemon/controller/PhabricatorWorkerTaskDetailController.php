@@ -23,8 +23,10 @@ final class PhabricatorWorkerTaskDetailController
 
       $error_view = new AphrontErrorView();
       $error_view->setTitle('No Such Task');
-      $error_view->appendChild(
-        '<p>This task may have recently been garbage collected.</p>');
+      $error_view->appendChild(phutil_tag(
+        'p',
+        array(),
+        'This task may have recently been garbage collected.'));
       $error_view->setSeverity(AphrontErrorView::SEVERITY_NODATA);
 
       $content = $error_view;

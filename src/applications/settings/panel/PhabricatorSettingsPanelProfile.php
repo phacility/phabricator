@@ -119,7 +119,8 @@ final class PhabricatorSettingsPanelProfile
         $error_view = new AphrontErrorView();
         $error_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
         $error_view->setTitle('Changes Saved');
-        $error_view->appendChild('<p>Your changes have been saved.</p>');
+        $error_view->appendChild(
+          phutil_tag('p', array(), 'Your changes have been saved.'));
         $error_view = $error_view->render();
       }
     }

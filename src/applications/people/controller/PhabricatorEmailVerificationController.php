@@ -30,7 +30,9 @@ final class PhabricatorEmailVerificationController
         'href' => '/',
       ),
       'Continue to Phabricator');
-    $home_link = '<br /><p><strong>'.$home_link.'</strong></p>';
+    $home_link = hsprintf(
+      '<br /><p><strong>%s</strong></p>',
+      $home_link);
 
     $settings_link = phutil_tag(
       'a',
@@ -38,23 +40,26 @@ final class PhabricatorEmailVerificationController
         'href' => '/settings/panel/email/',
       ),
       'Return to Email Settings');
-    $settings_link = '<br /><p><strong>'.$settings_link.'</strong></p>';
-
+    $settings_link = hsprintf(
+      '<br /><p><strong>%s</strong></p>',
+      $settings_link);
 
     if (!$email) {
       $content = id(new AphrontErrorView())
         ->setTitle('Unable To Verify')
-        ->appendChild(
-          '<p>The verification code is incorrect, the email address has '.
-          'been removed, or the email address is owned by another user. Make '.
-          'sure you followed the link in the email correctly.</p>');
+        ->appendChild(phutil_tag(
+          'p',
+          array(),
+          'The verification code is incorrect, the email address has been '.
+            'removed, or the email address is owned by another user. Make '.
+            'sure you followed the link in the email correctly.'));
     } else if ($email->getIsVerified()) {
       $content = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
         ->setTitle('Address Already Verified')
-        ->appendChild(
-          '<p>This email address has already been verified.</p>'.
-          $settings_link);
+        ->appendChild(hsprintf(
+          '<p>This email address has already been verified.</p>%s',
+          $settings_link));
     } else {
 
       $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -65,10 +70,10 @@ final class PhabricatorEmailVerificationController
       $content = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
         ->setTitle('Address Verified')
-        ->appendChild(
-          '<p>This email address has now been verified. Thanks!</p>'.
-          $home_link.
-          $settings_link);
+        ->appendChild(hsprintf(
+          '<p>This email address has now been verified. Thanks!</p>%s%s',
+          $home_link,
+          $settings_link));
     }
 
     return $this->buildApplicationPage(

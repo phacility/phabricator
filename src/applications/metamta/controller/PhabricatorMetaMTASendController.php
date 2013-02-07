@@ -67,12 +67,16 @@ final class PhabricatorMetaMTASendController
       $warning = new AphrontErrorView();
       $warning->setTitle('Email is Disabled');
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $warning->appendChild(
-        '<p>'.pht('This installation of Phabricator is currently set to use '.
-        '<tt>PhabricatorMailImplementationTestAdapter</tt> to deliver '.
-        'outbound email. This completely disables outbound email! All '.
-        'outbound email will be thrown in a deep, dark hole until you '.
-        'configure a real adapter.').'</p>');
+      $warning->appendChild(phutil_tag(
+        'p',
+        array(),
+        pht(
+          'This installation of Phabricator is currently set to use %s to '.
+            'deliver outbound email. This completely disables outbound email! '.
+            'All outbound email will be thrown in a deep, dark hole until you '.
+            'configure a real adapter.',
+          phutil_tag('tt', array(), 'PhabricatorMailImplementationTestAdapter'))
+        ));
     }
 
     $phdlink_href = PhabricatorEnv::getDoclink(

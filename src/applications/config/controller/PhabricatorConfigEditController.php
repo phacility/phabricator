@@ -108,7 +108,7 @@ final class PhabricatorConfigEditController
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Hidden'))
         ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-        ->appendChild('<p>'.phutil_escape_html($msg).'</p>');
+        ->appendChild(phutil_tag('p', array(), $msg));
     } else if ($option->getLocked()) {
       $msg = pht(
         "This configuration is locked and can not be edited from the web ".
@@ -117,7 +117,7 @@ final class PhabricatorConfigEditController
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Locked'))
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->appendChild('<p>'.phutil_escape_html($msg).'</p>');
+        ->appendChild(phutil_tag('p', array(), $msg));
     }
 
     if ($option->getHidden()) {

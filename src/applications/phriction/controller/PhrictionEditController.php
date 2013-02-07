@@ -183,8 +183,9 @@ final class PhrictionEditController
       $draft_note = new AphrontErrorView();
       $draft_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $draft_note->setTitle('Recovered Draft');
-      $draft_note->appendChild(
-        '<p>Showing a saved draft of your edits, you can '.$discard.'.</p>');
+      $draft_note->appendChild(hsprintf(
+        '<p>Showing a saved draft of your edits, you can %s.</p>',
+        $discard));
     } else {
       $content_text = $content->getContent();
       $draft_note = null;

@@ -96,9 +96,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $notice->setTitle('File Renamed');
       $notice->appendChild(
-        "File history passes through a rename from '".
-        phutil_escape_html($drequest->getPath())."' to '".
-        phutil_escape_html($renamed)."'.");
+        "File history passes through a rename from '".$drequest->getPath().
+        "' to '".$renamed."'.");
       $content[] = $notice;
     }
 

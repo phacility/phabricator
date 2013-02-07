@@ -35,20 +35,16 @@ final class PhabricatorConduitConsoleController
         case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
           $status_view->setTitle('Deprecated Method');
           $status_view->appendChild(
-            phutil_escape_html(
-              nonempty(
-                $reason,
-                "This method is deprecated.")));
+            nonempty($reason, "This method is deprecated."));
           break;
         case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
           $status_view->setSeverity(AphrontErrorView::SEVERITY_WARNING);
           $status_view->setTitle('Unstable Method');
           $status_view->appendChild(
-            phutil_escape_html(
-              nonempty(
-                $reason,
-                "This method is new and unstable. Its interface is subject ".
-                "to change.")));
+            nonempty(
+              $reason,
+              "This method is new and unstable. Its interface is subject ".
+              "to change."));
           break;
       }
     }

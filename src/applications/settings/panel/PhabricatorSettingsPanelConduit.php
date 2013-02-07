@@ -53,10 +53,12 @@ final class PhabricatorSettingsPanelConduit
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $notice->setTitle('Certificate Regenerated');
-      $notice->appendChild(
-        '<p>Your old certificate has been destroyed and you have been issued '.
+      $notice->appendChild(phutil_tag(
+        'p',
+        array(),
+        'Your old certificate has been destroyed and you have been issued '.
         'a new certificate. Sessions established under the old certificate '.
-        'are no longer valid.</p>');
+        'are no longer valid.'));
       $notice = $notice->render();
     } else {
       $notice = null;

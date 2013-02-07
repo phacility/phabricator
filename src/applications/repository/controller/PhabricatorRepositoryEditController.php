@@ -94,8 +94,7 @@ final class PhabricatorRepositoryEditController
       $error_view = new AphrontErrorView();
       $error_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $error_view->setTitle('Changes Saved');
-      $error_view->appendChild(
-        'Repository changes were saved.');
+      $error_view->appendChild('Repository changes were saved.');
     }
 
     $encoding_doc_link = PhabricatorEnv::getDoclink(

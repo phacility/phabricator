@@ -49,10 +49,11 @@ class AphrontRedirectResponse extends AphrontResponse {
         ),
         'Continue to: '.$this->getURI());
 
-      $error->appendChild(
+      $error->appendChild(hsprintf(
         '<p>You were stopped here because <tt>debug.stop-on-redirect</tt> '.
         'is set in your configuration.</p>'.
-        '<p>'.$link.'</p>');
+        '<p>%s</p>',
+        $link));
 
       $view->appendChild($error);
 

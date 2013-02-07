@@ -180,21 +180,20 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning = new AphrontErrorView();
       $warning->setTitle('Very Large Diff');
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $warning->appendChild(
+      $warning->appendChild(hsprintf(
+        '%s <strong>%s</strong>',
         pht(
           'This diff is very large and affects %s files. Load each file '.
             'individually.',
-          new PhutilNumber($count)).
-        " <strong>".
-          phutil_tag(
-            'a',
-            array(
-              'href' => $request_uri
-                ->alter('large', 'true')
-                ->setFragment('toc'),
-            ),
-            pht('Show All Files Inline')).
-        "</strong>");
+          new PhutilNumber($count)),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $request_uri
+              ->alter('large', 'true')
+              ->setFragment('toc'),
+          ),
+          pht('Show All Files Inline'))));
       $warning = $warning->render();
 
       $my_inlines = id(new DifferentialInlineComment())->loadAllWhere(

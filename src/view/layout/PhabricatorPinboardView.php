@@ -22,7 +22,7 @@ final class PhabricatorPinboardView extends AphrontView {
       $string = nonempty($this->noDataString, pht('No data.'));
       return id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
-        ->appendChild(phutil_escape_html($string))
+        ->appendChild($string)
         ->render();
     }
 

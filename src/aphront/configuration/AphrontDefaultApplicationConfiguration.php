@@ -211,7 +211,7 @@ class AphrontDefaultApplicationConfiguration
     if ($ex instanceof AphrontUsageException) {
       $error = new AphrontErrorView();
       $error->setTitle(phutil_escape_html($ex->getTitle()));
-      $error->appendChild(phutil_escape_html($ex->getMessage()));
+      $error->appendChild($ex->getMessage());
 
       $view = new PhabricatorStandardPageView();
       $view->setRequest($this->getRequest());

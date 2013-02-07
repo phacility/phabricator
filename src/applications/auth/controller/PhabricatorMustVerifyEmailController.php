@@ -31,9 +31,12 @@ final class PhabricatorMustVerifyEmailController
       $sent = new AphrontErrorView();
       $sent->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $sent->setTitle(pht('Email Sent'));
-      $sent->appendChild('<p>'.
-        pht('Another verification email was sent to <strong>%s</strong>.',
-        phutil_escape_html($email_address)).'</p>');
+      $sent->appendChild(phutil_tag(
+        'p',
+        array(),
+        pht(
+          'Another verification email was sent to %s.',
+          phutil_tag('strong', array(), $email_address))));
     }
 
     $error_view = new AphrontRequestFailureView();
