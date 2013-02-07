@@ -5,7 +5,7 @@ return array(
   // To populate this file, first copy it to
   //    <root>/phabricator/conf/custom/khan-google.conf.php
   // Then go to https://code.google.com/apis/console/,
-  // click on 'api access' and then 'craete client id':
+  // click on 'api access' and then 'create client id':
   //   name='Phabricator login'
   //   logo='http://phabricator.khanacademy.org/favicon.ico'
   //   [click next]

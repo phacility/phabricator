@@ -2,9 +2,6 @@
 
 return array(
 
-  // Uncomment this for initial setup, then recomment.
-//setup  'phabricator.setup' => true,
-
   // This will be the base domain for your install, and must be configured.
   // Use "https://" if you have SSL. See below for some notes.
   'phabricator.base-uri' => 'http://phabricator.khanacademy.org/',
