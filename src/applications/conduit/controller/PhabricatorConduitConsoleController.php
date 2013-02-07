@@ -80,10 +80,10 @@ final class PhabricatorConduitConsoleController
         id(new AphrontFormMarkupControl())
           ->setLabel('Errors')
           ->setValue($error_description))
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Enter parameters using '.
         '<strong>JSON</strong>. For instance, to enter a list, type: '.
-        '<tt>["apple", "banana", "cherry"]</tt>');
+        '<tt>["apple", "banana", "cherry"]</tt>'));
 
     $params = $method_object->defineParamTypes();
     foreach ($params as $param => $desc) {

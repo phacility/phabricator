@@ -41,12 +41,15 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ->setAction('/differential/diff/create/')
       ->setEncType('multipart/form-data')
       ->setUser($request->getUser())
-      ->appendChild(
-        '<p class="aphront-form-instructions">'.pht('The best way to create '.
-        'a Differential diff is by using %s, but you '.
-        'can also just paste a diff (e.g., from <tt>svn diff</tt> or '.
-        '<tt>git diff</tt>) into this box or upload it as a file if you '.
-        'really want.', $arcanist_link).'</p>')
+      ->appendChild(hsprintf(
+        '<p class="aphront-form-instructions">%s</p>',
+        pht(
+          'The best way to create a Differential diff is by using %s, but you '.
+            'can also just paste a diff (e.g., from %s or %s) into this box '.
+            'or upload it as a file if you really want.',
+          $arcanist_link,
+          phutil_tag('tt', array(), 'svn diff'),
+          phutil_tag('tt', array(), 'git diff'))))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Raw Diff'))

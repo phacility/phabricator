@@ -55,11 +55,12 @@ final class PhabricatorMetaMTASendController
         'target' => '_blank',
       ),
     pht('Configuring Outbound Email'));
-    $instructions =
-      '<p class="aphront-form-instructions">'.
-      pht('This form will send a normal email using the settings you have '.
-      'configured for Phabricator. For more information, see %s.', $doclink).
-      '</p>';
+    $instructions = hsprintf(
+      '<p class="aphront-form-instructions">%s</p>',
+      pht(
+        'This form will send a normal email using the settings you have '.
+          'configured for Phabricator. For more information, see %s.',
+        $doclink));
 
     $adapter = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
     $warning = null;

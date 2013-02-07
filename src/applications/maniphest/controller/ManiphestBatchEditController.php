@@ -96,7 +96,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           'name' => 'actions',
           'id'   => 'batch-form-actions',
         )));
-    $form->appendChild('<p>These tasks will be edited:</p>');
+    $form->appendChild(phutil_tag('p', array(), 'These tasks will be edited:'));
     $form->appendChild($list);
     $form->appendChild(
       id(new AphrontFormInsetView())

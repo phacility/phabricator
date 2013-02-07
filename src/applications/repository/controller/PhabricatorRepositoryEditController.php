@@ -122,16 +122,15 @@ final class PhabricatorRepositoryEditController
           ->setLabel('Callsign')
           ->setName('callsign')
           ->setValue($repository->getCallsign()))
-      ->appendChild('
+      ->appendChild(hsprintf('
         <p class="aphront-form-instructions">'.
           'If source code in this repository uses a character '.
           'encoding other than UTF-8 (for example, ISO-8859-1), '.
           'specify it here. You can usually leave this field blank. '.
           'See User Guide: '.
-          '<a href="'.$encoding_doc_link.'">'.
-            'UTF-8 and Character Encoding'.
-          '</a> for more information.'.
-        '</p>')
+          '<a href="%s">UTF-8 and Character Encoding</a> for more information.'.
+        '</p>',
+        $encoding_doc_link))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Encoding')
@@ -358,13 +357,14 @@ final class PhabricatorRepositoryEditController
     $form
       ->setUser($user)
       ->setAction('/repository/edit/'.$repository->getID().'/tracking/')
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Phabricator can track '.
         'repositories, importing commits as they happen and notifying '.
         'Differential, Diffusion, Herald, and other services. To enable '.
         'tracking for a repository, configure it here and then start (or '.
         'restart) the daemons. More information is available in the '.
-        '<strong>'.$user_guide_link.'</strong>.</p>');
+        '<strong>%s</strong>.</p>',
+        $user_guide_link));
 
     $form
       ->appendChild(

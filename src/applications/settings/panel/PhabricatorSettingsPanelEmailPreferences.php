@@ -165,7 +165,7 @@ final class PhabricatorSettingsPanelEmailPreferences
             'break threading in some clients.'));
 
     $form
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<br />'.
         '<p class="aphront-form-instructions">'.
           'You can customize what mail you receive from Phabricator here.'.
@@ -176,7 +176,7 @@ final class PhabricatorSettingsPanelEmailPreferences
           'still receive an email as long as at least one of the changes '.
           'is set to notify you.'.
         '</p>'
-        );
+        ));
 
     $mailtags = $preferences->getPreference('mailtags', array());
 

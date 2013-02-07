@@ -168,10 +168,10 @@ final class PhabricatorProjectProfileEditController
           ->setLabel('Blurb')
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">NOTE: Policy settings are not '.
         'yet fully implemented. Some interfaces still ignore these settings, '.
-        'particularly "Visible To".</p>')
+        'particularly "Visible To".</p>'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)

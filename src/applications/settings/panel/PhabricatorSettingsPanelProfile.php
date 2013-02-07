@@ -182,10 +182,10 @@ final class PhabricatorSettingsPanelProfile
                 'href' => $profile_uri,
               ),
               $profile_uri)))
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Write something about yourself! '.
         'Make sure to include <strong>important information</strong> like '.
-        'your favorite Pokemon and which Starcraft race you play.</p>')
+        'your favorite Pokemon and which Starcraft race you play.</p>'))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Blurb')

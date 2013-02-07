@@ -393,9 +393,9 @@ final class PhabricatorPeopleEditController
       ->setAction($request->getRequestURI()->alter('saved', null));
 
     if ($is_self) {
-      $form->appendChild(
+      $form->appendChild(hsprintf(
         '<p class="aphront-form-instructions">NOTE: You can not edit your own '.
-        'role.</p>');
+        'role.</p>'));
     }
 
     $form
@@ -448,10 +448,10 @@ final class PhabricatorPeopleEditController
     $form
       ->setUser($admin)
       ->setAction($request->getRequestURI())
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">You can use this certificate '.
         'to write scripts or bots which interface with Phabricator over '.
-        'Conduit.</p>');
+        'Conduit.</p>'));
 
     if ($user->getIsSystemAgent()) {
       $form
@@ -530,7 +530,7 @@ final class PhabricatorPeopleEditController
     $form
       ->setUser($admin)
       ->setAction($request->getRequestURI())
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">'.
           '<strong>Be careful when renaming users!</strong> '.
           'The old username will no longer be tied to the user, so anything '.
@@ -549,7 +549,7 @@ final class PhabricatorPeopleEditController
           'after their username is changed (their username is part of the '.
           'salt in the password hash). They will receive an email with '.
           'instructions on how to do this.'.
-        '</p>')
+        '</p>'))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Old Username')
@@ -622,7 +622,7 @@ final class PhabricatorPeopleEditController
     $form
       ->setUser($admin)
       ->setAction($request->getRequestURI())
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">'.
           '<strong>Be careful when deleting users!</strong> '.
           'If this user interacted with anything, it is generally better '.
@@ -636,7 +636,7 @@ final class PhabricatorPeopleEditController
           'It is generally safe to delete newly created users (and test users '.
           'and so on), but less safe to delete established users. If '.
           'possible, disable them instead.'.
-        '</p>')
+        '</p>'))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Username')
@@ -670,11 +670,11 @@ final class PhabricatorPeopleEditController
       ),
       'User Guide: Account Roles');
 
-    return
+    return hsprintf(
       '<p class="aphront-form-instructions">'.
-        'For a detailed explanation of account roles, see '.
-        $roles_link.'.'.
-      '</p>';
+        'For a detailed explanation of account roles, see %s.'.
+      '</p>',
+      $roles_link);
   }
 
 }

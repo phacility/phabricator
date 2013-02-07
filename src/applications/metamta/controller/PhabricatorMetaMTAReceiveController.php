@@ -49,10 +49,9 @@ final class PhabricatorMetaMTAReceiveController
     $form->setUser($request->getUser());
     $form->setAction($this->getApplicationURI('/receive/'));
     $form
-      ->appendChild(
-        '<p class="aphront-form-instructions">'.
-          pht('This form will simulate sending mail to an object.').
-        '</p>')
+      ->appendChild(hsprintf(
+        '<p class="aphront-form-instructions">%s</p>',
+        pht('This form will simulate sending mail to an object.')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('To'))

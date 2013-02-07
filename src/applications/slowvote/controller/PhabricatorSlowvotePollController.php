@@ -158,8 +158,9 @@ final class PhabricatorSlowvotePollController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(
-        '<p class="aphront-form-instructions">'.$instructions.'</p>')
+      ->appendChild(hsprintf(
+        '<p class="aphront-form-instructions">%s</p>',
+        $instructions))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Vote')
