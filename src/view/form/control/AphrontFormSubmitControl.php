@@ -25,6 +25,7 @@ final class AphrontFormSubmitControl extends AphrontFormControl {
       $submit_button = phutil_render_tag(
         'button',
         array(
+          'type'      => 'submit',
           'name'      => '__submit__',
           'disabled'  => $this->getDisabled() ? 'disabled' : null,
         ),
