@@ -133,7 +133,7 @@ final class PhabricatorCoreConfigOptions
         ->setDescription(
           pht('Array containing list of Uninstalled applications.')
           ),
-    );
+      );
   }
 
   protected function didValidateOption(
