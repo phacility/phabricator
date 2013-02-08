@@ -101,8 +101,8 @@ final class PhabricatorBot extends PhabricatorDaemon {
     } while (true);
   }
 
-  public function writeCommand($command, $message) {
-    return $this->protocolAdapter->writeCommand($command, $message);
+  public function writeMessage(PhabricatorBotMessage $message) {
+    return $this->protocolAdapter->writeMessage($message);
   }
 
   private function routeMessage(PhabricatorBotMessage $message) {

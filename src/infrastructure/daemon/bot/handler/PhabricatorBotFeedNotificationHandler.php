@@ -150,7 +150,11 @@ final class PhabricatorBotFeedNotificationHandler
 
         $channels = $this->getConfig('join');
         foreach ($channels as $channel) {
-          $this->write('PRIVMSG', "{$channel} :{$story['text']}");
+          $this->writeMessage(
+            id(new PhabricatorBotMessage())
+            ->setCommand('MESSAGE')
+            ->setTarget($channel)
+            ->setBody($story['text']));
         }
       }
     }

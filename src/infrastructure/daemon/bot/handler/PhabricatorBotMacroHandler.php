@@ -46,38 +46,38 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
     }
 
     switch ($message->getCommand()) {
-      case 'PRIVMSG':
-        $reply_to = $message->getReplyTo();
-        if (!$reply_to) {
-          break;
-        }
-
-        $message = $message->getMessageText();
-
-        $matches = null;
-        if (!preg_match($this->regexp, $message, $matches)) {
-          return;
-        }
-
-        $macro = $matches[1];
-
-        $ascii = idx($this->macros[$macro], 'ascii');
-        if ($ascii === false) {
-          return;
-        }
-
-        if (!$ascii) {
-          $this->macros[$macro]['ascii'] = $this->rasterize(
-            $this->macros[$macro],
-            $this->getConfig('macro.size', 48),
-            $this->getConfig('macro.aspect', 0.66));
-          $ascii = $this->macros[$macro]['ascii'];
-        }
-
-        foreach ($ascii as $line) {
-          $this->buffer[$reply_to][] = $line;
-        }
+    case 'MESSAGE':
+      $reply_to = $message->getReplyTo();
+      if (!$reply_to) {
         break;
+      }
+
+      $message_body = $message->getBody();
+
+      $matches = null;
+      if (!preg_match($this->regexp, $message_body, $matches)) {
+        return;
+      }
+
+      $macro = $matches[1];
+
+      $ascii = idx($this->macros[$macro], 'ascii');
+      if ($ascii === false) {
+        return;
+      }
+
+      if (!$ascii) {
+        $this->macros[$macro]['ascii'] = $this->rasterize(
+          $this->macros[$macro],
+          $this->getConfig('macro.size', 48),
+          $this->getConfig('macro.aspect', 0.66));
+        $ascii = $this->macros[$macro]['ascii'];
+      }
+
+      foreach ($ascii as $line) {
+        $this->buffer[$reply_to][] = $line;
+      }
+      break;
     }
   }
 
@@ -92,7 +92,11 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
         continue;
       }
       foreach ($lines as $key => $line) {
-        $this->write('PRIVMSG', "{$channel} :{$line}");
+        $this->writeMessage(
+          id(new PhabricatorBotMessage())
+          ->setCommand('MESSAGE')
+          ->setTarget($channel)
+          ->setBody($line));
         unset($this->buffer[$channel][$key]);
         break 2;
       }

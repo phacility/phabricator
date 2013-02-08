@@ -7,6 +7,9 @@ body {
      scrollbar to a page with a scrollbar doesn't make content jump a few
      pixels left when the viewport narrows. */
   overflow-y: scroll;
+  /* reset behavior in ie7, as it will add an extra scrollbar regardless
+     selector * targets ie6 and ie7 only */
+  *overflow-y: auto;
 }
 
 .device-phone {

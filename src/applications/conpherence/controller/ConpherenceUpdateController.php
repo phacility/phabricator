@@ -64,6 +64,7 @@ final class ConpherenceUpdateController extends
           $top = $request->getInt('image_y');
           $left = $request->getInt('image_x');
           $file_id = $request->getInt('file_id');
+          $title = $request->getStr('title');
           if ($file_id) {
             $orig_file = id(new PhabricatorFileQuery())
               ->setViewer($user)
@@ -101,6 +102,8 @@ final class ConpherenceUpdateController extends
                 pht('This server only supports these image formats: %s.',
                   implode(', ', $supported_formats));
             }
+            // use the existing title in this image upload case
+            $title = $conpherence->getTitle();
           } else if ($top !== null || $left !== null) {
             $file = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
             $xformer = new PhabricatorImageTransformer();
@@ -119,7 +122,6 @@ final class ConpherenceUpdateController extends
               )
               ->setNewValue($image_phid);
           }
-          $title = $request->getStr('title');
           if ($title != $conpherence->getTitle()) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)

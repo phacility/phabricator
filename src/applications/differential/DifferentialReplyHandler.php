@@ -172,7 +172,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     DifferentialRevisionEditor::removeCCAndUpdateRevision(
       $revision,
       $user->getPHID(),
-      $user->getPHID());
+      $user);
   }
 
 

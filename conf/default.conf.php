@@ -882,6 +882,10 @@ return array(
     'image/vnd.microsoft.icon'  => true,
   ),
 
+  //  Configuration option for enabling imagemagick
+  //  to resize animated profile pictures (gif)
+  'files.enable-imagemagick' => false,
+
 // -- Storage --------------------------------------------------------------- //
 
   // Phabricator allows users to upload files, and can keep them in various

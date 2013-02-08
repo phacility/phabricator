@@ -49,7 +49,7 @@ final class PhrictionHistoryController
 
       $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
 
-      $vs_previous = '<em>Created</em>';
+      $vs_previous = '<em>'.pht('Created').'</em>';
       if ($content->getVersion() != 1) {
         $uri = $diff_uri
           ->alter('l', $content->getVersion() - 1)
@@ -59,10 +59,10 @@ final class PhrictionHistoryController
           array(
             'href' => $uri,
           ),
-          'Show Change');
+          pht('Show Change'));
       }
 
-      $vs_head = '<em>Current</em>';
+      $vs_head = '<em>'.pht('Current').'</em>';
       if ($content->getID() != $document->getContentID()) {
         $uri = $diff_uri
           ->alter('l', $content->getVersion())
@@ -73,7 +73,7 @@ final class PhrictionHistoryController
           array(
             'href' => $uri,
           ),
-          'Show Later Changes');
+          pht('Show Later Changes'));
       }
 
       $change_type = PhrictionChangeType::getChangeTypeLabel(
@@ -87,7 +87,7 @@ final class PhrictionHistoryController
           array(
             'href' => $slug_uri.'?v='.$version,
           ),
-          'Version '.$version),
+          pht('Version %s', $version)),
         $handles[$content->getAuthorPHID()]->renderLink(),
         $change_type,
         phutil_escape_html($content->getDescription()),
@@ -99,14 +99,14 @@ final class PhrictionHistoryController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Date',
-        'Time',
-        'Version',
-        'Author',
-        'Type',
-        'Description',
-        'Against Previous',
-        'Against Current',
+        pht('Date'),
+        pht('Time'),
+        pht('Version'),
+        pht('Author'),
+        pht('Type'),
+        pht('Description'),
+        pht('Against Previous'),
+        pht('Against Current'),
       ));
     $table->setColumnClasses(
       array(
@@ -132,7 +132,8 @@ final class PhrictionHistoryController
           PhrictionDocument::getSlugURI($document->getSlug(), 'history')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Document History');
+    $panel->setHeader(pht('Document History'));
+    $panel->setNoBackground();
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
@@ -142,7 +143,7 @@ final class PhrictionHistoryController
         $panel,
       ),
       array(
-        'title'     => 'Document History',
+        'title'     => pht('Document History'),
         'device'    => true,
       ));
 

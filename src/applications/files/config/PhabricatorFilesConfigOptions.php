@@ -119,6 +119,16 @@ final class PhabricatorFilesConfigOptions
             "value and the UI will then reflect the actual configured ".
             "limit."))
         ->addExample('10M', pht("Valid setting.")),
+     $this->newOption('files.enable-imagemagick', 'bool', false)
+       ->setBoolOptions(
+         array(
+           pht('Enable'),
+           pht('Disable')
+         ))->setDescription(
+             pht("This option will enable animated gif images".
+                  "to be set as profile pictures. The \'convert\' binary ".
+                  "should be available to the webserver for this to work")),
+
     );
   }
 

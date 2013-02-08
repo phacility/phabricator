@@ -4,7 +4,7 @@
  * @group irc
  */
 final class PhabricatorBotDifferentialNotificationHandler
-  extends PhabricatorBotHandler {
+extends PhabricatorBotHandler {
 
   private $skippedOldEvents;
 
@@ -39,11 +39,16 @@ final class PhabricatorBotDifferentialNotificationHandler
       $verb = DifferentialAction::getActionPastTenseVerb($data['action']);
 
       $actor_name = $handles[$actor_phid]->getName();
-      $message = "{$actor_name} {$verb} revision D".$data['revision_id'].".";
+      $message_body =
+        "{$actor_name} {$verb} revision D".$data['revision_id'].".";
 
       $channels = $this->getConfig('notification.channels', array());
       foreach ($channels as $channel) {
-        $this->write('PRIVMSG', "{$channel} :{$message}");
+        $this->writeMessage(
+          id(new PhabricatorBotMessage())
+          ->setCommand('MESSAGE')
+          ->setTarget($channel)
+          ->setBody($message_body));
       }
     }
   }

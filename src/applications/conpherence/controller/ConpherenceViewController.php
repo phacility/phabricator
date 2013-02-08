@@ -126,6 +126,18 @@ final class ConpherenceViewController extends
     $rendered_transactions = array();
 
     $transactions = $conpherence->getTransactions();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user);
+    foreach ($transactions as $transaction) {
+      if ($transaction->getComment()) {
+        $engine->addObject(
+          $transaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
     foreach ($transactions as $transaction) {
       if ($transaction->shouldHide()) {
         continue;
@@ -134,6 +146,7 @@ final class ConpherenceViewController extends
         ->setUser($user)
         ->setConpherenceTransaction($transaction)
         ->setHandles($handles)
+        ->setMarkupEngine($engine)
         ->render();
     }
     $transactions = implode(' ', $rendered_transactions);

@@ -60,15 +60,15 @@ final class PhrictionDocumentController
           'href' => $create_uri,
           'class' => 'green button',
         ),
-        'Create Page');
+        pht('Create Page'));
 
       $page_content =
         '<div class="phriction-content">'.
-          '<em>No content here!</em><br />'.
-          'No document found at <tt>'.phutil_escape_html($slug).'</tt>. '.
-          $create_sentence.
+          '<em>'.pht('No content here!').'</em><br />'.
+          pht('No document found at <tt>%s</tt>.', phutil_escape_html($slug)).
+          ' '.$create_sentence.
         '</div>';
-      $page_title = 'Page Not Found';
+      $page_title = pht('Page Not Found');
       $buttons = $button;
     } else {
       $version = $request->getInt('v');
@@ -82,13 +82,13 @@ final class PhrictionDocumentController
         }
 
         if ($content->getID() != $document->getContentID()) {
+          $vdate = phabricator_datetime($content->getDateCreated(), $user);
           $version_note = new AphrontErrorView();
           $version_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
           $version_note->setTitle('Older Version');
           $version_note->appendChild(
-            'You are viewing an older version of this document, as it '.
-            'appeared on '.
-            phabricator_datetime($content->getDateCreated(), $user).'.');
+            pht('You are viewing an older version of this document, as it '.
+            'appeared on %s.', $vdate));
         }
       } else {
         $content = id(new PhrictionContent())->load($document->getContentID());
@@ -154,8 +154,8 @@ final class PhrictionDocumentController
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
         $notice->setTitle('Document Deleted');
         $notice->appendChild(
-          'This document has been deleted. You can edit it to put new content '.
-          'here, or use history to revert to an earlier version.');
+          pht('This document has been deleted. You can edit it to put new '.
+          'content here, or use history to revert to an earlier version.'));
         $core_content = $notice->render();
       } else {
         throw new Exception("Unknown document status '{$doc_status}'!");
@@ -338,20 +338,22 @@ final class PhrictionDocumentController
       }
     }
     if ($more_children) {
-      $list[] = '<li>More...</li>';
+      $list[] = '<li>'.pht('More...').'</li>';
     }
     $list[] = '</ul>';
     $list = implode("\n", $list);
 
     return
       '<div class="phriction-children">'.
-        '<div class="phriction-children-header">Document Hierarchy</div>'.
+        '<div class="phriction-children-header">'.
+          pht('Document Hierarchy').
+        '</div>'.
         $list.
       '</div>';
   }
 
   private function renderChildDocumentLink(array $info) {
-    $title = nonempty($info['title'], '(Untitled Document)');
+    $title = nonempty($info['title'], pht('(Untitled Document)'));
     $item = phutil_render_tag(
       'a',
       array(

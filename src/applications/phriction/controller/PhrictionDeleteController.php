@@ -32,11 +32,11 @@ final class PhrictionDeleteController extends PhrictionController {
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Delete document?')
+      ->setTitle(pht('Delete document?'))
       ->appendChild(
-        'Really delete this document? You can recover it later by reverting '.
-        'to a previous version.')
-      ->addSubmitButton('Delete')
+        pht('Really delete this document? You can recover it later by '.
+        'reverting to a previous version.'))
+      ->addSubmitButton(pht('Delete'))
       ->addCancelButton($document_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

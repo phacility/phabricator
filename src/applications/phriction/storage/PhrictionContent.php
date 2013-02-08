@@ -78,7 +78,7 @@ final class PhrictionContent extends PhrictionDAO
       $toc =
         '<div class="phabricator-remarkup-toc">'.
           '<div class="phabricator-remarkup-toc-header">'.
-            'Table of Contents'.
+            pht('Table of Contents').
           '</div>'.
           $toc.
         '</div>';
