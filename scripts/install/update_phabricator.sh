@@ -38,6 +38,41 @@ cd $ROOT/phabricator
 ../arcanist/bin/arc unit src/infrastructure/__tests__/
 
 
+### DETECT OS AND SET APACHE START/STOP COMMANDS ##################################
+
+lowercase(){
+    echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
+}
+
+OS=`lowercase \`uname\``
+KERNEL=`uname -r`
+MACH=`uname -m`
+HTTPD_START_COMMAND="sudo /etc/init.d/httpd start"
+HTTPD_STOP_COMMAND="sudo /etc/init.d/httpd stop"
+
+if [ "{$OS}" == "darwin" ]; then
+    #OS=mac
+    HTTPD_START_COMMAND="sudo /usr/sbin/apachectl -k start"
+    HTTPD_STOP_COMMAND="sudo /usr/sbin/apachectl -k stop"
+else
+    OS=`uname`
+    if [ "${OS}" = "Linux" ] ; then
+        if [ -f /etc/redhat-release ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/httpd start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/httpd  stop"
+        elif [ -f /etc/mandrake-release ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/httpd start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/httpd  stop"
+        elif [ -f /etc/debian_version ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/apache2 start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/apache2  stop"
+        elif [ -f /etc/debian_version ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/apache2 start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/apache2  stop"
+        fi
+    fi
+fi
+
 ### CYCLE APACHE AND DAEMONS ###################################################
 
 # Stop daemons.
@@ -45,13 +80,13 @@ $ROOT/phabricator/bin/phd stop
 
 # Stop Apache. Depening on what system you're running, you may need to use
 # 'apachectl' or something else to cycle apache.
-sudo /etc/init.d/httpd stop
+$HTTPD_STOP_COMMAND
 
 # Upgrade the database schema.
 $ROOT/phabricator/bin/storage upgrade --force
 
 # Restart apache.
-sudo /etc/init.d/httpd start
+$HTTPD_START_COMMAND
 
 # Restart daemons. Customize this to start whatever daemons you're running on
 # your system.
