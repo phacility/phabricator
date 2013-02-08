@@ -24,7 +24,7 @@ final class PholioMockImagesView extends AphrontView {
 
     $main_image = head($this->mock->getImages());
 
-      $main_image_tag = javelin_render_tag(
+    $main_image_tag = javelin_render_tag(
       'img',
       array(
         'id' => $main_image_id,

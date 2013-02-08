@@ -43,7 +43,8 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
         'new/'                  => 'PholioMockEditController',
         'edit/(?P<id>\d+)/'     => 'PholioMockEditController',
         'comment/(?P<id>\d+)/'  => 'PholioMockCommentController',
-        'inline/(?P<id>\d+)/'   => 'PholioInlineSaveController',
+        'inline/(?P<id>\d+)/'   => 'PholioInlineController',
+        'inline/save/'          => 'PholioInlineSaveController',
       ),
     );
   }
