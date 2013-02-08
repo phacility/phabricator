@@ -84,6 +84,7 @@ final class PhrictionListController
     $view_header = $views[$this->view];
 
     $panel = new AphrontPanelView();
+    $panel->setNoBackground();
     $panel->appendChild($document_table);
     $panel->appendChild($pager);
 

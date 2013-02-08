@@ -226,7 +226,7 @@ final class PhrictionEditController
           ->setValue($submit_button));
 
     $panel = id(new AphrontPanelView())
-      ->setWidth(AphrontPanelView::WIDTH_WIDE)
+      ->setNoBackground()
       ->setHeader($panel_header)
       ->appendChild($form);
 

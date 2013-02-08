@@ -133,6 +133,7 @@ final class PhrictionHistoryController
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Document History');
+    $panel->setNoBackground();
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
