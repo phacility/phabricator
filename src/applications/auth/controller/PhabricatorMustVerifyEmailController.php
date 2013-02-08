@@ -45,7 +45,7 @@ final class PhabricatorMustVerifyEmailController
       '<p>'.
       pht('You must verify your email address to login. You should have a new '.
       'email message from Phabricator with verification instructions in your '.
-      'inbox (<strong>%s</strong>).', phutil_escape_html($email_address)).
+      'inbox (%s).', phutil_tag('strong', array(), $email_address)).
       '</p>');
     $error_view->appendChild(
       '<p>'.

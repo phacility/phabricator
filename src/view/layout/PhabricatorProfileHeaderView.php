@@ -47,33 +47,29 @@ final class PhabricatorProfileHeaderView extends AphrontView {
         '');
     }
 
-    $description = phutil_escape_html($this->profileDescription);
+    $description = $this->profileDescription;
     if ($this->profileStatus != '') {
-      $description =
-        '<strong>'.phutil_escape_html($this->profileStatus).'</strong>'.
-        ($description != '' ? ' &mdash; ' : '').
-        $description;
+      $description = hsprintf(
+        '<strong>%s</strong>%s',
+        $this->profileStatus,
+        ($description != '' ? "\xE2\x80\x94".$description : ''));
     }
 
-    return
+    return hsprintf(
       '<table class="phabricator-profile-header">
         <tr>
-          <td class="profile-header-name">'.
-            phutil_escape_html($this->profileName).
-          '</td>
-          <td class="profile-header-actions" rowspan="2">'.
-            self::renderSingleView($this->profileActions).
-          '</td>
-          <td class="profile-header-picture" rowspan="2">'.
-            $image.
-          '</td>
+          <td class="profile-header-name">%s</td>
+          <td class="profile-header-actions" rowspan="2">%s</td>
+          <td class="profile-header-picture" rowspan="2">%s</td>
         </tr>
         <tr>
-          <td class="profile-header-description">'.
-            $description.
-          '</td>
+          <td class="profile-header-description">%s</td>
         </tr>
-      </table>'.
+      </table>',
+      $this->profileName,
+      phutil_safe_html(self::renderSingleView($this->profileActions)),
+      $image,
+      $description).
       $this->renderChildren();
   }
 }

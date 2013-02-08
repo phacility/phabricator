@@ -182,36 +182,36 @@ final class PhabricatorPeopleProfileController
 
     $viewer = $this->getRequest()->getUser();
 
-    $content =
+    $content = hsprintf(
       '<div class="phabricator-profile-info-group">
         <h1 class="phabricator-profile-info-header">Basic Information</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
               <th>PHID</th>
-              <td>'.phutil_escape_html($user->getPHID()).'</td>
+              <td>%s</td>
             </tr>
             <tr>
               <th>User Since</th>
-              <td>'.phabricator_datetime($user->getDateCreated(),
-                                         $viewer).
-             '</td>
+              <td>%s</td>
             </tr>
           </table>
         </div>
-      </div>';
-    $content .=
+      </div>'.
       '<div class="phabricator-profile-info-group">
         <h1 class="phabricator-profile-info-header">Flavor Text</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
               <th>Blurb</th>
-              <td>'.$blurb.'</td>
+              <td>%s</td>
             </tr>
           </table>
         </div>
-      </div>';
+      </div>',
+      $user->getPHID(),
+      phabricator_datetime($user->getDateCreated(), $viewer),
+      $blurb);
 
     return $content;
   }

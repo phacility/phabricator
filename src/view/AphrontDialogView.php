@@ -156,9 +156,7 @@ final class AphrontDialogView extends AphrontView {
     }
 
     $content =
-      '<div class="aphront-dialog-head">'.
-        phutil_escape_html($this->title).
-      '</div>'.
+      hsprintf('<div class="aphront-dialog-head">%s</div>', $this->title).
       '<div class="aphront-dialog-body">'.
         $this->renderChildren().
       '</div>'.

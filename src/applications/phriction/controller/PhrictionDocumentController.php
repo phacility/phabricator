@@ -45,31 +45,16 @@ final class PhrictionDocumentController
         }
       }
       $create_uri = '/phriction/edit/?slug='.$slug;
-      $create_sentence =
-        'You can <strong>'.
-        phutil_tag(
-          'a',
-          array(
-            'href' => $create_uri,
-          ),
-          'create a new document').
-          '</strong>.';
-      $button = phutil_tag(
-        'a',
-        array(
-          'href' => $create_uri,
-          'class' => 'green button',
-        ),
-        'Create Page');
 
-      $page_content =
+      $page_content = hsprintf(
         '<div class="phriction-content">'.
           '<em>No content here!</em><br />'.
-          'No document found at <tt>'.phutil_escape_html($slug).'</tt>. '.
-          $create_sentence.
-        '</div>';
+          'No document found at <tt>%s</tt>. '.
+          'You can <strong><a href="%s">create a new document</a></strong>.'.
+        '</div>',
+        $slug,
+        $create_uri);
       $page_title = 'Page Not Found';
-      $buttons = $button;
     } else {
       $version = $request->getInt('v');
       if ($version) {

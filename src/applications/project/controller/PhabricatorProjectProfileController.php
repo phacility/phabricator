@@ -129,8 +129,7 @@ final class PhabricatorProjectProfileController
     $viewer = $this->getRequest()->getUser();
 
     $blurb = $profile->getBlurb();
-    $blurb = phutil_escape_html($blurb);
-    $blurb = str_replace("\n", '<br />', $blurb);
+    $blurb = phutil_escape_html_newlines($blurb);
 
     $phids = array($project->getAuthorPHID());
     $phids = array_unique($phids);
@@ -138,30 +137,34 @@ final class PhabricatorProjectProfileController
 
     $timestamp = phabricator_datetime($project->getDateCreated(), $viewer);
 
-    $about =
+    $about = hsprintf(
       '<div class="phabricator-profile-info-group">
         <h1 class="phabricator-profile-info-header">About</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
               <th>Creator</th>
-              <td>'.$handles[$project->getAuthorPHID()]->renderLink().'</td>
+              <td>%s</td>
             </tr>
             <tr>
               <th>Created</th>
-              <td>'.$timestamp.'</td>
+              <td>%s</td>
             </tr>
             <tr>
               <th>PHID</th>
-              <td>'.phutil_escape_html($project->getPHID()).'</td>
+              <td>%s</td>
             </tr>
             <tr>
               <th>Blurb</th>
-              <td>'.$blurb.'</td>
+              <td>%s</td>
             </tr>
           </table>
         </div>
-      </div>';
+      </div>',
+      $handles[$project->getAuthorPHID()]->renderLink(),
+      $timestamp,
+      $project->getPHID(),
+      $blurb);
 
     return $about;
   }

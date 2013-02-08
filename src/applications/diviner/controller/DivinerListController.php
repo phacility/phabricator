@@ -41,11 +41,13 @@ final class DivinerListController extends PhabricatorController {
         ),
         $name);
 
-      $out[] =
+      $out[] = hsprintf(
         '<div class="aphront-directory-item">'.
-          '<h1>'.$link.'</h1>'.
-          '<p>'.phutil_escape_html($flavor).'</p>'.
-        '</div>';
+          '<h1>%s</h1>'.
+          '<p>%s</p>'.
+        '</div>',
+        $link,
+        $flavor);
     }
 
     $out =

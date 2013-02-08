@@ -7,7 +7,7 @@ final class PhabricatorButtonsExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>&lt;button&gt;</tt> to render buttons.';
+    return hsprintf('Use <tt>&lt;button&gt;</tt> to render buttons.');
   }
 
   public function renderExample() {

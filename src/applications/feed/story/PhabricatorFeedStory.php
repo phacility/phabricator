@@ -243,15 +243,14 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   }
 
   final protected function renderString($str) {
-    return '<strong>'.phutil_escape_html($str).'</strong>';
+    return phutil_tag('strong', array(), $str);
   }
 
   final protected function renderSummary($text, $len = 128) {
     if ($len) {
       $text = phutil_utf8_shorten($text, $len);
     }
-    $text = phutil_escape_html($text);
-    $text = str_replace("\n", '<br />', $text);
+    $text = phutil_escape_html_newlines($text);
     return $text;
   }
 

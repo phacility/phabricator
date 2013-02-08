@@ -7,7 +7,8 @@ final class PhabricatorActionListExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>PhabricatorActionListView</tt> to render object actions.';
+    return hsprintf(
+      'Use <tt>PhabricatorActionListView</tt> to render object actions.');
   }
 
   public function renderExample() {

@@ -7,8 +7,8 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>PhabricatorPropertyListView</tt> to render object '.
-           'properties.';
+    return hsprintf(
+      'Use <tt>PhabricatorPropertyListView</tt> to render object properties.');
   }
 
   public function renderExample() {

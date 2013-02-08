@@ -7,7 +7,7 @@ final class PhabricatorUINotificationExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>JX.Notification</tt> to create notifications.';
+    return hsprintf('Use <tt>JX.Notification</tt> to create notifications.');
   }
 
   public function renderExample() {

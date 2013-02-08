@@ -7,7 +7,8 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>PhabricatorTimelineView</tt> to comments and transactions.';
+    return hsprintf(
+      'Use <tt>PhabricatorTimelineView</tt> to comments and transactions.');
   }
 
   public function renderExample() {

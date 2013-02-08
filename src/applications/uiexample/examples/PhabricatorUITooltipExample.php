@@ -7,7 +7,7 @@ final class PhabricatorUITooltipExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>JX.Tooltip</tt> to create tooltips.';
+    return hsprintf('Use <tt>JX.Tooltip</tt> to create tooltips.');
   }
 
   public function renderExample() {

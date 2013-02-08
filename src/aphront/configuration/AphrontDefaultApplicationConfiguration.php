@@ -182,10 +182,9 @@ class AphrontDefaultApplicationConfiguration
         return $login_controller->processRequest();
       }
 
-      $content =
-        '<div class="aphront-policy-exception">'.
-          phutil_escape_html($ex->getMessage()).
-        '</div>';
+      $content = hsprintf(
+        '<div class="aphront-policy-exception">%s</div>',
+        $ex->getMessage());
 
       $dialog = new AphrontDialogView();
       $dialog

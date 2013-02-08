@@ -70,10 +70,7 @@ abstract class DifferentialChangesetHTMLRenderer
           break;
 
         case DifferentialChangeType::TYPE_MOVE_HERE:
-          $from =
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>";
+          $from = phutil_tag('strong', array(), $changeset->getOldFile());
           switch ($file) {
             case DifferentialChangeType::FILE_TEXT:
               $message = pht('This file was moved from %s.', $from);
@@ -97,10 +94,7 @@ abstract class DifferentialChangesetHTMLRenderer
           break;
 
         case DifferentialChangeType::TYPE_COPY_HERE:
-          $from =
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>";
+          $from = phutil_tag('strong', array(), $changeset->getOldFile());
           switch ($file) {
             case DifferentialChangeType::FILE_TEXT:
               $message = pht('This file was copied from %s.', $from);
@@ -124,10 +118,10 @@ abstract class DifferentialChangesetHTMLRenderer
           break;
 
         case DifferentialChangeType::TYPE_MOVE_AWAY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
+          $paths = phutil_tag(
+            'strong',
+            array(),
+            implode(', ', $changeset->getAwayPaths()));
           switch ($file) {
             case DifferentialChangeType::FILE_TEXT:
               $message = pht('This file was moved to %s.', $paths);
@@ -151,10 +145,10 @@ abstract class DifferentialChangesetHTMLRenderer
           break;
 
         case DifferentialChangeType::TYPE_COPY_AWAY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
+          $paths = phutil_tag(
+            'strong',
+            array(),
+            implode(', ', $changeset->getAwayPaths()));
           switch ($file) {
             case DifferentialChangeType::FILE_TEXT:
               $message = pht('This file was copied to %s.', $paths);
@@ -178,10 +172,10 @@ abstract class DifferentialChangesetHTMLRenderer
           break;
 
         case DifferentialChangeType::TYPE_MULTICOPY:
-          $paths =
-            "<strong>".
-              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
-            "</strong>";
+          $paths = phutil_tag(
+            'strong',
+            array(),
+            implode(', ', $changeset->getAwayPaths()));
           switch ($file) {
             case DifferentialChangeType::FILE_TEXT:
               $message = pht(
@@ -262,23 +256,26 @@ abstract class DifferentialChangesetHTMLRenderer
       $nval = idx($new, $key);
       if ($oval !== $nval) {
         if ($oval === null) {
-          $oval = '<em>null</em>';
+          $oval = phutil_tag('em', array(), 'null');
         } else {
-          $oval = nl2br(phutil_escape_html($oval));
+          $oval = phutil_escape_html_newlines($oval);
         }
 
         if ($nval === null) {
-          $nval = '<em>null</em>';
+          $nval = phutil_tag('em', array(), 'null');
         } else {
-          $nval = nl2br(phutil_escape_html($nval));
+          $nval = phutil_escape_html_newlines($nval);
         }
 
-        $rows[] =
+        $rows[] = hsprintf(
           '<tr>'.
-            '<th>'.phutil_escape_html($key).'</th>'.
-            '<td class="oval">'.$oval.'</td>'.
-            '<td class="nval">'.$nval.'</td>'.
-          '</tr>';
+            '<th>%s</th>'.
+            '<td class="oval">%s</td>'.
+            '<td class="nval">%s</td>'.
+          '</tr>',
+          $key,
+          $oval,
+          $nval);
       }
     }
 

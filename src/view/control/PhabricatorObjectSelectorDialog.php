@@ -136,9 +136,9 @@ final class PhabricatorObjectSelectorDialog {
     $attached_box =
       '<div class="phabricator-object-selector-current">'.
         '<div class="phabricator-object-selector-currently-attached">'.
-          '<div class="phabricator-object-selector-header">'.
-            phutil_escape_html($this->header).
-          '</div>'.
+          hsprintf(
+            '<div class="phabricator-object-selector-header">%s</div>',
+            $this->header).
           '<div id="'.$current_id.'">'.
           '</div>'.
           $instructions.

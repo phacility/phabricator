@@ -7,8 +7,9 @@ final class PhabricatorUIPagerExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>AphrontPagerView</tt> to create a control which allows '.
-           'users to paginate through large amounts of content.';
+    return hsprintf(
+      'Use <tt>AphrontPagerView</tt> to create a control which allows '.
+      'users to paginate through large amounts of content.');
   }
 
   public function renderExample() {

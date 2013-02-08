@@ -253,7 +253,7 @@ final class PhabricatorOwnersListController
             ));
           $pkg_paths[$key] =
             ($path->getExcluded() ? '&ndash;' : '+').' '.
-            '<strong>'.phutil_escape_html($repo->getName()).'</strong> '.
+            phutil_tag('strong', array(), $repo->getName()).
             phutil_tag(
               'a',
               array(

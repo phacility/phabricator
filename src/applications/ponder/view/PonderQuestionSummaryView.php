@@ -25,26 +25,23 @@ final class PonderQuestionSummaryView extends AphrontView {
     $authorlink = $handles[$author_phid]
       ->renderLink();
 
-    $votecount =
+    $votecount = hsprintf(
       '<div class="ponder-summary-votes">'.
-        phutil_escape_html($question->getVoteCount()).
-        '<div class="ponder-question-label">'.
-          'votes'.
-        '</div>'.
-      '</div>';
+        '%s'.
+        '<div class="ponder-question-label">votes</div>'.
+      '</div>',
+      $question->getVoteCount());
 
     $answerclass = "ponder-summary-answers";
     if ($question->getAnswercount() == 0) {
       $answerclass .= " ponder-not-answered";
     }
-    $answercount =
+    $answercount = hsprintf(
       '<div class="ponder-summary-answers">'.
-        phutil_escape_html($question->getAnswerCount()).
-        '<div class="ponder-question-label">'.
-          'answers'.
-        '</div>'.
-      '</div>';
-
+        '%s'.
+        '<div class="ponder-question-label">answers</div>'.
+      '</div>',
+      $question->getAnswerCount());
 
     $title =
       '<h2 class="ponder-question-title">'.

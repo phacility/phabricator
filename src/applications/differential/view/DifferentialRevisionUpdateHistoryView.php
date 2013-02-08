@@ -119,24 +119,22 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
 
       if (++$idx % 2) {
-        $class = ' class="alt"';
+        $class = 'alt';
       } else {
         $class = null;
       }
 
+      $lint_attrs = array('class' => 'revhistory-star');
+      $unit_attrs = array('class' => 'revhistory-star');
       if ($diff) {
         $lint = self::renderDiffLintStar($row['obj']);
         $unit = self::renderDiffUnitStar($row['obj']);
-        $lint_message = self::getDiffLintMessage($diff);
-        $unit_message = self::getDiffUnitMessage($diff);
-        $lint_title = ' title="'.phutil_escape_html($lint_message).'"';
-        $unit_title = ' title="'.phutil_escape_html($unit_message).'"';
+        $lint_attrs['title'] = self::getDiffLintMessage($diff);
+        $unit_attrs['title'] = self::getDiffUnitMessage($diff);
         $base = $this->renderBaseRevision($diff);
       } else {
         $lint = null;
         $unit = null;
-        $lint_title = null;
-        $unit_title = null;
         $base = null;
       }
 
@@ -149,18 +147,20 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         'a',
         array('href' => '/differential/diff/'.$id.'/'),
         $id);
-      $rows[] =
-        '<tr'.$class.'>'.
-          '<td class="revhistory-name">'.phutil_escape_html($name).'</td>'.
-          '<td class="revhistory-id">'.$id_link.'</td>'.
-          '<td class="revhistory-base">'.phutil_escape_html($base).'</td>'.
-          '<td class="revhistory-desc">'.phutil_escape_html($desc).'</td>'.
-          '<td class="revhistory-age">'.$age.'</td>'.
-          '<td class="revhistory-star"'.$lint_title.'>'.$lint.'</td>'.
-          '<td class="revhistory-star"'.$unit_title.'>'.$unit.'</td>'.
-          '<td class="revhistory-old'.$old_class.'">'.$old.'</td>'.
-          '<td class="revhistory-new'.$new_class.'">'.$new.'</td>'.
-        '</tr>';
+      $rows[] = phutil_tag(
+        'tr',
+        array('class' => $class),
+        array(
+          phutil_tag('td', array('class' => 'revhistory-name'), $name),
+          phutil_tag('td', array('class' => 'revhistory-id'), $id_link),
+          phutil_tag('td', array('class' => 'revhistory-base'), $base),
+          phutil_tag('td', array('class' => 'revhistory-desc'), $desc),
+          phutil_tag('td', array('class' => 'revhistory-age'), $age),
+          phutil_tag('td', $lint_attrs, $lint),
+          phutil_tag('td', $unit_attrs, $unit),
+          phutil_tag('td', array('class' => 'revhistory-old'.$old_class), $old),
+          phutil_tag('td', array('class' => 'revhistory-new'.$new_class), $new),
+        ));
     }
 
     Javelin::initBehavior(

@@ -69,14 +69,16 @@ final class PhabricatorOAuthLoginController
           $dialog = new AphrontDialogView();
           $dialog->setUser($current_user);
           $dialog->setTitle(pht('Already Linked to Another Account'));
-          $dialog->appendChild('<p>'.
+          $dialog->appendChild(phutil_tag(
+            'p',
+            array(),
             pht(
               'The %s account you just authorized is already linked to '.
               'another Phabricator account. Before you can associate your %s '.
               'account with this Phabriactor account, you must unlink it from '.
-              'the Phabricator account it is currently linked to.</p>',
-              phutil_escape_html($provider_name),
-              phutil_escape_html($provider_name))).'</p>';
+              'the Phabricator account it is currently linked to.',
+              $provider_name,
+              $provider_name)));
           $dialog->addCancelButton($provider->getSettingsPanelURI());
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -97,13 +99,15 @@ final class PhabricatorOAuthLoginController
         $dialog->setUser($current_user);
         $dialog->setTitle(
           pht('Already Linked to an Account From This Provider'));
-        $dialog->appendChild('<p>'.
+        $dialog->appendChild(phutil_tag(
+          'p',
+          array(),
           pht(
             'The account you are logged in with is already linked to a %s '.
             'account. Before you can link it to a different %s account, you '.
-            'must unlink the old account.</p>',
-            phutil_escape_html($provider_name),
-            phutil_escape_html($provider_name))).'</p>';
+            'must unlink the old account.',
+            $provider_name,
+            $provider_name)));
         $dialog->addCancelButton($provider->getSettingsPanelURI());
         return id(new AphrontDialogResponse())->setDialog($dialog);
       }
@@ -170,13 +174,15 @@ final class PhabricatorOAuthLoginController
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
         $dialog->setTitle(pht('Already Linked to Another Account'));
-        $dialog->appendChild('<p>'.
+        $dialog->appendChild(phutil_tag(
+          'p',
+          array(),
           pht(
             'The %s account you just authorized has an email address which '.
             'is already in use by another Phabricator account. To link the '.
             'accounts, log in to your Phabricator account and then go to '.
             'Settings.',
-            phutil_escape_html($provider_name))).'</p>';
+            $provider_name)));
 
         $user = id(new PhabricatorUser())
           ->loadOneWhere('phid = %s', $known_email->getUserPHID());
@@ -189,10 +195,12 @@ final class PhabricatorOAuthLoginController
             $providers[] = PhabricatorOAuthProvider::newProvider($provider)
               ->getProviderName();
           }
-          $dialog->appendChild(
+          $dialog->appendChild(phutil_tag(
+            'p',
+            array(),
             pht(
-              '<p>The account is associated with: %s.</p>',
-              implode(', ', phutil_escape_html($providers))));
+              'The account is associated with: %s.',
+              implode(', ', $providers))));
         }
 
         $dialog->addCancelButton('/login/');
@@ -205,13 +213,15 @@ final class PhabricatorOAuthLoginController
       $dialog = new AphrontDialogView();
       $dialog->setUser($current_user);
       $dialog->setTitle(pht('No Account Registration with %s', $provider_name));
-      $dialog->appendChild('<p>'.
+      $dialog->appendChild(phutil_tag(
+        'p',
+        array(),
         pht(
           'You can not register a new account using %s; you can only use '.
           'your %s account to log into an existing Phabricator account which '.
           'you have registered through other means.',
-          phutil_escape_html($provider_name),
-          phutil_escape_html($provider_name))).'</p>';
+          $provider_name,
+          $provider_name)));
       $dialog->addCancelButton('/login/');
 
       return id(new AphrontDialogResponse())->setDialog($dialog);

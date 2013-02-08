@@ -39,12 +39,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
         }
       }
 
-      $rows[] =
-        '<tr>'.
-          '<th colspan="3">'.
-            phutil_escape_html($group).
-          '</th>'.
-        '</tr>';
+      $rows[] = hsprintf('<tr><th colspan="3">%s</th></tr>', $group);
 
       foreach ($items as $item) {
 
@@ -88,10 +83,8 @@ final class PhabricatorInlineSummaryView extends AphrontView {
         $rows[] =
           '<tr>'.
             '<td class="inline-line-number">'.$lines.'</td>'.
-            ($has_where ?
-              '<td class="inline-which-diff">'.
-                phutil_escape_html($where).
-              '</td>'
+            ($has_where
+              ? hsprintf('<td class="inline-which-diff">%s</td>', $where)
               : null).
             '<td class="inline-summary-content"'.$colspan.'>'.
               '<div class="phabricator-remarkup">'.

@@ -24,8 +24,7 @@ final class PhabricatorRepositoryDeleteController
 
     $dialog = new AphrontDialogView();
     $text_1 = pht('If you really want to delete the repository, you must run:');
-    $command = 'bin/repository delete '.
-               phutil_escape_html($repository->getCallsign());
+    $command = 'bin/repository delete '.$repository->getCallsign();
     $text_2 = pht('Repositories touch many objects and as such deletes are '.
                   'prohibitively expensive to run from the web UI.');
     $body = phutil_tag(

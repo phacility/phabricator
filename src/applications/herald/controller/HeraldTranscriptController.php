@@ -108,10 +108,7 @@ final class HeraldTranscriptController extends HeraldController {
       $value = implode(', ', $value);
     }
 
-    return
-      '<span class="condition-test-value">'.
-        phutil_escape_html($value).
-      '</span>';
+    return hsprintf('<span class="condition-test-value">%s</span>', $value);
   }
 
   private function buildSideNav() {
@@ -296,22 +293,22 @@ final class HeraldTranscriptController extends HeraldController {
           }
           break;
       }
-      $target = phutil_escape_html($target);
 
       if ($apply_xscript->getApplied()) {
-        $outcome = '<span class="outcome-success">SUCCESS</span>';
+        $outcome = hsprintf('<span class="outcome-success">SUCCESS</span>');
       } else {
-        $outcome = '<span class="outcome-failure">FAILURE</span>';
+        $outcome = hsprintf('<span class="outcome-failure">FAILURE</span>');
       }
-      $outcome .= ' '.phutil_escape_html($apply_xscript->getAppliedReason());
 
       $rows[] = array(
         phutil_escape_html($action_names[$apply_xscript->getAction()]),
-        $target,
-        '<strong>Taken because:</strong> '.
-        phutil_escape_html($apply_xscript->getReason()).
-        '<br />'.
-        '<strong>Outcome:</strong> '.$outcome,
+        phutil_escape_html($target),
+        hsprintf(
+          '<strong>Taken because:</strong> %s<br />'.
+            '<strong>Outcome:</strong> %s %s',
+          $apply_xscript->getReason(),
+          $outcome,
+          $apply_xscript->getAppliedReason()),
       );
     }
 
@@ -351,48 +348,48 @@ final class HeraldTranscriptController extends HeraldController {
       $cond_markup = array();
       foreach ($xscript->getConditionTranscriptsForRule($rule_id) as $cond) {
         if ($cond->getNote()) {
-          $note =
-            '<div class="herald-condition-note">'.
-              phutil_escape_html($cond->getNote()).
-            '</div>';
+          $note = hsprintf(
+            '<div class="herald-condition-note">%s</div>',
+            $cond->getNote());
         } else {
           $note = null;
         }
 
         if ($cond->getResult()) {
-          $result =
+          $result = hsprintf(
             '<span class="herald-outcome condition-pass">'.
               "\xE2\x9C\x93".
-            '</span>';
+            '</span>');
         } else {
-          $result =
+          $result = hsprintf(
             '<span class="herald-outcome condition-fail">'.
               "\xE2\x9C\x98".
-            '</span>';
+            '</span>');
         }
 
-        $cond_markup[] =
-          '<li>'.
-            $result.' Condition: '.
-            phutil_escape_html($field_names[$cond->getFieldName()]).
-            ' '.
-            phutil_escape_html($condition_names[$cond->getCondition()]).
-            ' '.
-            $this->renderConditionTestValue($cond, $handles).
-            $note.
-          '</li>';
+        $cond_markup[] = phutil_tag(
+          'li',
+          array(),
+          hsprintf(
+            '%s Condition: %s %s %s%s',
+            $result,
+            $field_names[$cond->getFieldName()],
+            $condition_names[$cond->getCondition()],
+            $this->renderConditionTestValue($cond, $handles),
+            $note));
       }
 
       if ($rule->getResult()) {
-        $result = '<span class="herald-outcome rule-pass">PASS</span>';
+        $result = hsprintf(
+          '<span class="herald-outcome rule-pass">PASS</span>');
         $class = 'herald-rule-pass';
       } else {
-        $result = '<span class="herald-outcome rule-fail">FAIL</span>';
+        $result = hsprintf(
+          '<span class="herald-outcome rule-fail">FAIL</span>');
         $class = 'herald-rule-fail';
       }
 
-      $cond_markup[] =
-        '<li>'.$result.' '.phutil_escape_html($rule->getReason()).'</li>';
+      $cond_markup[] = hsprintf('<li>%s %s</li>', $result, $rule->getReason());
 
 /*
       if ($rule->getResult()) {
@@ -426,16 +423,16 @@ final class HeraldTranscriptController extends HeraldController {
       }
 
       $rule_markup[] =
-        phutil_render_tag(
+        phutil_tag(
           'li',
           array(
             'class' => $class,
           ),
-          '<div class="rule-name">'.
-            '<strong>'.phutil_escape_html($name).'</strong> '.
-            phutil_escape_html($handles[$rule->getRuleOwner()]->getName()).
-          '</div>'.
-          '<ul>'.implode("\n", $cond_markup).'</ul>');
+          hsprintf(
+            '<div class="rule-name"><strong>%s</strong> %s</div>%s',
+            $name,
+            $handles[$rule->getRuleOwner()]->getName(),
+            phutil_tag('ul', array(), $cond_markup)));
     }
 
     $panel = new AphrontPanelView();

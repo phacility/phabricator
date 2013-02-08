@@ -35,20 +35,19 @@ final class PhameBlogFeedController extends PhameController {
       ->execute();
 
     $content = array();
-    $content[] = '<feed xmlns="http://www.w3.org/2005/Atom">';
-    $content[] = '<title>'.phutil_escape_html($blog->getName()).'</title>';
-    $content[] = '<id>'.phutil_escape_html(PhabricatorEnv::getProductionURI(
-      '/phame/blog/view/'.$blog->getID().'/')).'</id>';
+    $content[] = phutil_tag('title', array(), $blog->getName());
+    $content[] = phutil_tag('id', array(), PhabricatorEnv::getProductionURI(
+      '/phame/blog/view/'.$blog->getID().'/'));
 
     $updated = $blog->getDateModified();
     if ($posts) {
       $updated = max($updated, max(mpull($posts, 'getDateModified')));
     }
-    $content[] = '<updated>'.date('c', $updated).'</updated>';
+    $content[] = phutil_tag('updated', array(), date('c', $updated));
 
     $description = $blog->getDescription();
     if ($description != '') {
-      $content[] = '<subtitle>'.phutil_escape_html($description).'</subtitle>';
+      $content[] = phutil_tag('subtitle', array(), $description);
     }
 
     $engine = id(new PhabricatorMarkupEngine())->setViewer($user);
@@ -63,37 +62,39 @@ final class PhameBlogFeedController extends PhameController {
       ->loadHandles();
 
     foreach ($posts as $post) {
-      $content[] = '<entry>';
-      $content[] = '<title>'.phutil_escape_html($post->getTitle()).'</title>';
-      $content[] = '<link href="'.phutil_escape_html($post->getViewURI()).'"/>';
+      $content[] = hsprintf('<entry>');
+      $content[] = phutil_tag('title', array(), $post->getTitle());
+      $content[] = phutil_tag('link', array('href' => $post->getViewURI()));
 
-      $content[] = '<id>'.phutil_escape_html(PhabricatorEnv::getProductionURI(
-        '/phame/post/view/'.$post->getID().'/')).'</id>';
+      $content[] = phutil_tag('id', array(), PhabricatorEnv::getProductionURI(
+        '/phame/post/view/'.$post->getID().'/'));
 
-      $content[] =
-        '<author>'.
-        '<name>'.
-        phutil_escape_html($bloggers[$post->getBloggerPHID()]->getFullName()).
-        '</name>'.
-        '</author>';
+      $content[] = hsprintf(
+        '<author><name>%s</name>%s</author>',
+        $bloggers[$post->getBloggerPHID()]->getFullName());
 
-      $content[] = '<updated>'.date('c', $post->getDateModified()).'</updated>';
+      $content[] = phutil_tag(
+        'updated',
+        array(),
+        date('c', $post->getDateModified()));
 
-      $content[] =
+      $content[] = hsprintf(
         '<content type="xhtml">'.
-        '<div xmlns="http://www.w3.org/1999/xhtml">'.
-        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY).
-        '</div>'.
-        '</content>';
+        '<div xmlns="http://www.w3.org/1999/xhtml">%s</div>'.
+        '</content>',
+        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY));
 
-      $content[] = '</entry>';
+      $content[] = hsprintf('</entry>');
     }
 
-    $content[] = '</feed>';
+    $content = phutil_tag(
+      'feed',
+      array('xmlns' => 'http://www.w3.org/2005/Atom'),
+      $content);
 
     return id(new AphrontFileResponse())
       ->setMimeType('application/xml')
-      ->setContent(implode('', $content));
+      ->setContent($content);
   }
 
 }
