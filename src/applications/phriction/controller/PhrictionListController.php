@@ -67,10 +67,10 @@ final class PhrictionListController
     $document_table = new AphrontTableView($rows);
     $document_table->setHeaders(
       array(
-        'Last Editor',
-        'Title',
-        'Last Update',
-        'Time',
+        pht('Last Editor'),
+        pht('Title'),
+        pht('Last Update'),
+        pht('Time'),
       ));
 
     $document_table->setColumnClasses(

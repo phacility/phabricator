@@ -95,8 +95,8 @@ final class PhrictionEditController
       $notes = $request->getStr('description');
 
       if (!strlen($title)) {
-        $e_title = 'Required';
-        $errors[] = 'Document title is required.';
+        $e_title = pht('Required');
+        $errors[] = pht('Document title is required.');
       } else {
         $e_title = null;
       }
@@ -107,9 +107,9 @@ final class PhrictionEditController
 
           $dialog = new AphrontDialogView();
           $dialog->setUser($user);
-          $dialog->setTitle('No Edits');
+          $dialog->setTitle(pht('No Edits'));
           $dialog->appendChild(
-            '<p>You did not make any changes to the document.</p>');
+            '<p>'.pht('You did not make any changes to the document.').'</p>');
           $dialog->addCancelButton($request->getRequestURI());
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -121,9 +121,9 @@ final class PhrictionEditController
 
         $dialog = new AphrontDialogView();
         $dialog->setUser($user);
-        $dialog->setTitle('Empty Page');
+        $dialog->setTitle(pht('Empty Page'));
         $dialog->appendChild(
-          '<p>You can not create an empty document.</p>');
+          '<p>'.pht('You can not create an empty document.').'</p>');
         $dialog->addCancelButton($request->getRequestURI());
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -150,16 +150,16 @@ final class PhrictionEditController
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 
     if ($document->getID()) {
-      $panel_header = 'Edit Phriction Document';
-      $submit_button = 'Save Changes';
+      $panel_header = pht('Edit Phriction Document');
+      $submit_button = pht('Save Changes');
     } else {
-      $panel_header = 'Create New Phriction Document';
-      $submit_button = 'Create Document';
+      $panel_header = pht('Create New Phriction Document');
+      $submit_button = pht('Create Document');
     }
 
     $uri = $document->getSlug();
@@ -178,13 +178,14 @@ final class PhrictionEditController
         array(
           'href' => $request->getRequestURI()->alter('nodraft', true),
         ),
-        'discard this draft');
+        pht('discard this draft'));
 
       $draft_note = new AphrontErrorView();
       $draft_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $draft_note->setTitle('Recovered Draft');
       $draft_note->appendChild(
-        '<p>Showing a saved draft of your edits, you can '.$discard.'.</p>');
+        '<p>'.pht('Showing a saved draft of your edits, you can %s.',
+         $discard).'</p>');
     } else {
       $content_text = $content->getContent();
       $draft_note = null;
@@ -198,17 +199,17 @@ final class PhrictionEditController
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Title')
+          ->setLabel(pht('Title'))
           ->setValue($content->getTitle())
           ->setError($e_title)
           ->setName('title'))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('URI')
+          ->setLabel(pht('URI'))
           ->setValue($uri))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setLabel('Content')
+          ->setLabel(pht('Content'))
           ->setValue($content_text)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
@@ -216,7 +217,7 @@ final class PhrictionEditController
           ->setUser($user))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Edit Notes')
+          ->setLabel(pht('Edit Notes'))
           ->setValue($notes)
           ->setError(null)
           ->setName('description'))
@@ -233,11 +234,11 @@ final class PhrictionEditController
     $preview_panel =
       '<div class="aphront-panel-preview aphront-panel-preview-wide">
         <div class="phriction-document-preview-header">
-          Document Preview
+          '.pht('Document Preview').'
         </div>
         <div id="document-preview">
           <div class="aphront-panel-preview-loading-text">
-            Loading preview...
+            '.pht('Loading preview...').'
           </div>
         </div>
       </div>';
@@ -258,7 +259,7 @@ final class PhrictionEditController
         $preview_panel,
       ),
       array(
-        'title' => 'Edit Document',
+        'title' => pht('Edit Document'),
       ));
   }
 
