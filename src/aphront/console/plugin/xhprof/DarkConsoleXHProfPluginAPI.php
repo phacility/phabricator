@@ -22,12 +22,9 @@ final class DarkConsoleXHProfPluginAPI {
       return $_REQUEST['__profile__'];
     }
 
-    $header = self::getProfilerHeader();
-    $header = strtoupper($header);
-    $header = str_replace('-', '_', $header);
-    $header = 'HTTP_'.$header;
-    if (!empty($_SERVER[$header])) {
-      return $_SERVER[$header];
+    $header = AphrontRequest::getHTTPHeader(self::getProfilerHeader());
+    if ($header) {
+      return $header;
     }
 
     static $profilerRequested = null;

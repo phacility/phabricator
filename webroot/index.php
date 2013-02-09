@@ -15,7 +15,7 @@ try {
     PhabricatorStartup::setGlobal('log.access', $access_log);
     $access_log->setData(
       array(
-        'R' => idx($_SERVER, 'HTTP_REFERER', '-'),
+        'R' => AphrontRequest::getHTTPHeader('Referer', '-'),
         'r' => idx($_SERVER, 'REMOTE_ADDR', '-'),
         'M' => idx($_SERVER, 'REQUEST_METHOD', '-'),
       ));
@@ -34,7 +34,7 @@ try {
     return;
   }
 
-  $host = $_SERVER['HTTP_HOST'];
+  $host = AphrontRequest::getHTTPHeader('Host');
   $path = $_REQUEST['__path__'];
 
   switch ($host) {

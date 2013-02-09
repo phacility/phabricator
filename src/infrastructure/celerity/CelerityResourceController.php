@@ -34,7 +34,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       throw new Exception("Only static resources may be served.");
     }
 
-    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) &&
+    if (AphrontRequest::getHTTPHeader('If-Modified-Since') &&
         !PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
       // Return a "304 Not Modified". We don't care about the value of this
       // field since we never change what resource is served by a given URI.

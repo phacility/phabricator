@@ -367,7 +367,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $classes[] = 'phabricator-chromeless-page';
     }
 
-    $agent = idx($_SERVER, 'HTTP_USER_AGENT');
+    $agent = AphrontRequest::getHTTPHeader('User-Agent');
 
     // Try to guess the device resolution based on UA strings to avoid a flash
     // of incorrectly-styled content.
