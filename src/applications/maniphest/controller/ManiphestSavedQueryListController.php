@@ -81,7 +81,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
           'value'     => 0,
           'checked'   => ($default === null ? 'checked' : null),
         )),
-      '<em>No Default</em>',
+      phutil_tag('em', array(), 'No Default'),
       '',
       '',
     );

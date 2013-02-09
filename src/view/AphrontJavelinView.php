@@ -21,7 +21,7 @@ final class AphrontJavelinView extends AphrontView {
 
   public function render() {
     $id = celerity_generate_unique_node_id();
-    $placeholder = "<span id={$id} />";
+    $placeholder = phutil_tag('span', array('id' => $id));
 
     require_celerity_resource($this->getCelerityResource());
 

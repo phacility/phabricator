@@ -283,7 +283,7 @@ final class ConpherenceViewController extends
             'src' => $thumb
           ),
           ''),
-        phutil_escape_html($file->getName()),
+        $file->getName(),
       );
     }
     $header = id(new PhabricatorHeaderView())

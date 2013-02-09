@@ -46,7 +46,7 @@ final class PhabricatorCountdownListController
           'Delete');
       }
       $rows[] = array(
-        phutil_escape_html($timer->getID()),
+        $timer->getID(),
         $handles[$timer->getAuthorPHID()]->renderLink(),
         phutil_tag(
           'a',

@@ -349,7 +349,7 @@ class AphrontDefaultApplicationConfiguration
             ),
             $relative);
         }
-        $file_name = $file_name.' : '.(int)$part['line'];
+        $file_name = hsprintf('%s : %d', $file_name, $part['line']);
       } else {
         $file_name = phutil_tag('em', array(), '(Internal)');
       }
@@ -357,9 +357,9 @@ class AphrontDefaultApplicationConfiguration
 
       $rows[] = array(
         $depth--,
-        phutil_escape_html($lib),
+        $lib,
         $file_name,
-        phutil_escape_html($where),
+        $where,
       );
     }
     $table = new AphrontTableView($rows);
@@ -383,7 +383,7 @@ class AphrontDefaultApplicationConfiguration
         '<div class="exception-trace-header">Stack Trace</div>'.
         '%s',
       '</div>',
-      phutil_safe_html($table->render()));
+      $table->render());
   }
 
 }

@@ -49,10 +49,7 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
     $rows = array();
     foreach ($data['listeners'] as $listener) {
-      $rows[] = array(
-        phutil_escape_html($listener['id']),
-        phutil_escape_html($listener['class']),
-      );
+      $rows[] = array($listener['id'], $listener['class']);
     }
 
     $table = new AphrontTableView($rows);
@@ -77,7 +74,7 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
     $rows = array();
     foreach ($data['events'] as $event) {
       $rows[] = array(
-        phutil_escape_html($event['type']),
+        $event['type'],
         $event['stopped'] ? 'STOPPED' : null,
       );
     }

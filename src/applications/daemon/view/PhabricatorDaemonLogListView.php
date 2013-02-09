@@ -76,8 +76,8 @@ final class PhabricatorDaemonLogListView extends AphrontView {
 
       $rows[] = array(
         $running,
-        phutil_escape_html($log->getDaemon()),
-        phutil_escape_html($log->getHost()),
+        $log->getDaemon(),
+        $log->getHost(),
         $log->getPID(),
         phabricator_date($epoch, $this->user),
         phabricator_time($epoch, $this->user),

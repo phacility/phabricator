@@ -43,8 +43,8 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
       $rows = array();
       foreach ($map as $key => $value) {
         $rows[] = array(
-          phutil_escape_html($key),
-          phutil_escape_html(is_array($value) ? json_encode($value) : $value),
+          $key,
+          (is_array($value) ? json_encode($value) : $value),
         );
       }
 

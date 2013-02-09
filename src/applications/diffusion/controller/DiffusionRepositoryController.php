@@ -125,9 +125,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $rows = array();
     foreach ($properties as $key => $value) {
-      $rows[] = array(
-        phutil_escape_html($key),
-        phutil_escape_html($value));
+      $rows[] = array($key, $value);
     }
 
     $table = new AphrontTableView($rows);

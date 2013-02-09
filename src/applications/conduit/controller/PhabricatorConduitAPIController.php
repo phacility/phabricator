@@ -346,7 +346,7 @@ final class PhabricatorConduitAPIController
     if ($request) {
       foreach ($request->getAllParameters() as $key => $value) {
         $param_rows[] = array(
-          phutil_escape_html($key),
+          $key,
           $this->renderAPIValue($value),
         );
       }
@@ -362,7 +362,7 @@ final class PhabricatorConduitAPIController
     $result_rows = array();
     foreach ($result as $key => $value) {
       $result_rows[] = array(
-        phutil_escape_html($key),
+        $key,
         $this->renderAPIValue($value),
       );
     }

@@ -103,7 +103,7 @@ final class PhabricatorSettingsPanelEmailAddresses
       }
 
       $rows[] = array(
-        phutil_escape_html($email->getAddress()),
+        $email->getAddress(),
         $action,
         $remove,
       );

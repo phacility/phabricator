@@ -34,10 +34,9 @@ final class DiffusionLintDetailsController extends DiffusionController {
       $rows[] = array(
         $path,
         $line,
-        phutil_escape_html(ArcanistLintSeverity::getStringForSeverity(
-          $message['severity'])),
-        phutil_escape_html($message['name']),
-        phutil_escape_html($message['description']),
+        ArcanistLintSeverity::getStringForSeverity($message['severity']),
+        $message['name'],
+        $message['description'],
       );
     }
 

@@ -21,11 +21,11 @@ final class PhabricatorOAuthDiagnosticsController
     $client_id      = $provider->getClientID();
     $client_secret  = $provider->getClientSecret();
     $key            = $provider->getProviderKey();
-    $name           = phutil_escape_html($provider->getProviderName());
+    $name           = $provider->getProviderName();
 
-    $res_ok = '<strong style="color: #00aa00;">OK</strong>';
-    $res_no = '<strong style="color: #aa0000;">NO</strong>';
-    $res_na = '<strong style="color: #999999;">N/A</strong>';
+    $res_ok = hsprintf('<strong style="color: #00aa00;">OK</strong>');
+    $res_no = hsprintf('<strong style="color: #aa0000;">NO</strong>');
+    $res_na = hsprintf('<strong style="color: #999999;">N/A</strong>');
 
     $results = array();
     $auth_key = $key . '.auth-enabled';
@@ -159,10 +159,10 @@ final class PhabricatorOAuthDiagnosticsController
     $rows = array();
     foreach ($results as $key => $result) {
       $rows[] = array(
-        phutil_escape_html($key),
+        $key,
         $result[0],
-        phutil_escape_html($result[1]),
-        phutil_escape_html($result[2]),
+        $result[1],
+        $result[2],
       );
     }
 

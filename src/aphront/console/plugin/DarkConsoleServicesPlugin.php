@@ -224,23 +224,18 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
               $row['explain']['reason']);
           }
 
-          $info = phutil_escape_html($info);
           break;
         case 'connect':
           $info = $row['host'].':'.$row['database'];
-          $info = phutil_escape_html($info);
           break;
         case 'exec':
           $info = $row['command'];
-          $info = phutil_escape_html($info);
           break;
         case 'conduit':
           $info = $row['method'];
-          $info = phutil_escape_html($info);
           break;
         case 'http':
           $info = $row['uri'];
-          $info = phutil_escape_html($info);
           break;
         default:
           $info = '-';
@@ -248,7 +243,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       }
 
       $rows[] = array(
-        phutil_escape_html($row['type']),
+        $row['type'],
         '+'.number_format(1000 * ($row['begin'] - $data['start'])).' ms',
         number_format(1000000 * $row['duration']).' us',
         $info,

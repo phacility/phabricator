@@ -234,9 +234,9 @@ final class PhrictionDiffController
       $rows[] = array(
         phabricator_date($c->getDateCreated(), $user),
         phabricator_time($c->getDateCreated(), $user),
-        phutil_escape_html('Version '.$c->getVersion()),
+        'Version '.$c->getVersion(),
         $handles[$c->getAuthorPHID()]->renderLink(),
-        phutil_escape_html($c->getDescription()),
+        $c->getDescription(),
       );
     }
 

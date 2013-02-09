@@ -44,7 +44,7 @@ abstract class DrydockController extends PhabricatorController {
             'href' => $lease_uri,
           ),
           $log->getLeaseID()),
-        phutil_escape_html($log->getMessage()),
+        $log->getMessage(),
         phabricator_date($log->getEpoch(), $user),
       );
     }
