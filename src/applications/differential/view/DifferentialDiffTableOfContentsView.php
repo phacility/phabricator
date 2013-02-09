@@ -94,22 +94,20 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             $meta[] = pht('Copied to multiple locations:');
           }
           foreach ($away as $path) {
-            $meta[] = phutil_escape_html($path);
+            $meta[] = $path;
           }
-          $meta = implode('<br />', $meta);
+          $meta = phutil_implode_html(phutil_tag('br'), $meta);
         } else {
           if ($type == DifferentialChangeType::TYPE_MOVE_AWAY) {
-            $meta = pht('Moved to %s', phutil_escape_html(reset($away)));
+            $meta = pht('Moved to %s', reset($away));
           } else {
-            $meta = pht('Copied to %s', phutil_escape_html(reset($away)));
+            $meta = pht('Copied to %s', reset($away));
           }
         }
       } else if ($type == DifferentialChangeType::TYPE_MOVE_HERE) {
-        $meta = pht('Moved from %s',
-          phutil_escape_html($changeset->getOldFile()));
+        $meta = pht('Moved from %s', $changeset->getOldFile());
       } else if ($type == DifferentialChangeType::TYPE_COPY_HERE) {
-        $meta = pht('Copied from %s',
-          phutil_escape_html($changeset->getOldFile()));
+        $meta = pht('Copied from %s', $changeset->getOldFile());
       } else {
         $meta = null;
       }
@@ -162,11 +160,12 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           '<td class="differential-toc-mcov">'.$mcov.'</td>'.
         '</tr>';
       if ($meta) {
-        $rows[] =
+        $rows[] = hsprintf(
           '<tr>'.
             '<td colspan="3"></td>'.
-            '<td class="differential-toc-meta">'.$meta.'</td>'.
-          '</tr>';
+            '<td class="differential-toc-meta">%s</td>'.
+          '</tr>',
+          $meta);
       }
       if ($this->diff && $this->repository) {
         $paths[] =

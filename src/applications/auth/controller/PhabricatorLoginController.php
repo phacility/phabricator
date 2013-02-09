@@ -247,8 +247,7 @@ final class PhabricatorLoginController
         $title = pht("Login or Register with %s", $provider_name);
         $body = pht('Login or register for Phabricator using your %s account.',
           $provider_name);
-        $button = pht("Login or Register with %s",
-          phutil_escape_html($provider_name));
+        $button = pht("Login or Register with %s", $provider_name);
       } else {
         $title = pht("Login with %s", $provider_name);
         $body = hsprintf(
@@ -259,7 +258,7 @@ final class PhabricatorLoginController
           pht(
             'You can not use %s to register a new account.',
             $provider_name));
-        $button = pht("Log in with %s", phutil_escape_html($provider_name));
+        $button = pht("Log in with %s", $provider_name);
       }
 
       $auth_form = new AphrontFormView();

@@ -50,11 +50,11 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
         $row['str'].' at ['.basename($file).':'.$line.']');
       $rows[] = array($tag);
 
-      $details .=
-        '<div class="dark-console-panel-error-details" id="row-details-'.
-        $index.'">'.
-        phutil_escape_html($row['details'])."\n".
-        'Stack trace:'."\n";
+      $details .= hsprintf(
+        '<div class="dark-console-panel-error-details" id="row-details-%s">'.
+        "%s\nStack trace:\n",
+        $index,
+        $row['details']);
 
       foreach ($row['trace'] as $key => $entry) {
         $line = '';

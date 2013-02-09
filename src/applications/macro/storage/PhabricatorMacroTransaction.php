@@ -64,8 +64,8 @@ final class PhabricatorMacroTransaction
         return pht(
           '%s renamed this macro from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          phutil_escape_html($old),
-          phutil_escape_html($new));
+          $old,
+          $new);
         break;
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
         if ($new) {
@@ -109,8 +109,8 @@ final class PhabricatorMacroTransaction
           '%s renamed %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid),
-          phutil_escape_html($old),
-          phutil_escape_html($new));
+          $old,
+          $new);
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
         if ($new) {
           return pht(

@@ -94,7 +94,7 @@ final class PhabricatorCalendarViewStatusController
     } else {
       $no_data =
         pht('%s does not have any upcoming status events.',
-            phutil_escape_html($this->getHandle($this->phid)->getName()));
+            $this->getHandle($this->phid)->getName());
     }
     return $no_data;
   }
@@ -115,7 +115,7 @@ final class PhabricatorCalendarViewStatusController
     } else {
       $page_title = pht(
         'Upcoming Statuses for %s',
-        phutil_escape_html($this->getHandle($this->phid)->getName())
+        $this->getHandle($this->phid)->getName()
       );
     }
     return $page_title;

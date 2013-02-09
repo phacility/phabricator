@@ -143,8 +143,7 @@ final class DifferentialReviewersFieldSpecification
       if ($other_reviewers) {
         $names = array();
         foreach ($other_reviewers as $reviewer => $_) {
-          $names[] = phutil_escape_html(
-            $this->getHandle($reviewer)->getLinkName());
+          $names[] = $this->getHandle($reviewer)->getLinkName();
         }
         $suffix = javelin_tag(
           'abbr',

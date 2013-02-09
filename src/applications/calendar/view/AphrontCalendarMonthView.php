@@ -100,11 +100,14 @@ final class AphrontCalendarMonthView extends AphrontView {
 
       $holiday_markup = null;
       if ($holiday) {
-        $name = phutil_escape_html($holiday->getName());
-        $holiday_markup =
-          '<div class="aphront-calendar-holiday" title="'.$name.'">'.
-            $name.
-          '</div>';
+        $name = $holiday->getName();
+        $holiday_markup = phutil_tag(
+          'div',
+          array(
+            'class' => 'aphront-calendar-holiday',
+            'title' => $name,
+          ),
+          $name);
       }
 
       $markup[] =

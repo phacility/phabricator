@@ -36,7 +36,7 @@ final class PhabricatorSubscriptionsUIEventListener
         ->setDisabled(true)
         ->setRenderAsForm(true)
         ->setHref('/subscriptions/add/'.$object->getPHID().'/')
-        ->setName(phutil_escape_html('Automatically Subscribed'))
+        ->setName('Automatically Subscribed')
         ->setIcon('subscribe-auto');
     } else {
       $subscribed = false;
@@ -59,7 +59,7 @@ final class PhabricatorSubscriptionsUIEventListener
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/delete/'.$object->getPHID().'/')
-          ->setName(phutil_escape_html('Unsubscribe'))
+          ->setName('Unsubscribe')
           ->setIcon('subscribe-delete');
       } else {
         $sub_action = id(new PhabricatorActionView())
@@ -67,7 +67,7 @@ final class PhabricatorSubscriptionsUIEventListener
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/add/'.$object->getPHID().'/')
-          ->setName(phutil_escape_html('Subscribe'))
+          ->setName('Subscribe')
           ->setIcon('subscribe-add');
       }
 

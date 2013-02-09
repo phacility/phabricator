@@ -71,7 +71,7 @@ abstract class ManiphestAuxiliaryFieldSpecification {
   }
 
   public function renderForDetailView() {
-    return phutil_escape_html($this->getValue());
+    return $this->getValue();
   }
 
 

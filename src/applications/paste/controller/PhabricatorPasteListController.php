@@ -109,7 +109,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       $lang_name = $paste->getLanguage();
       if ($lang_name) {
         $lang_name = idx($lang_map, $lang_name, $lang_name);
-        $item->addIcon('none', phutil_escape_html($lang_name));
+        $item->addIcon('none', $lang_name);
       }
 
       $list->addItem($item);

@@ -38,7 +38,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
           ),
           pht('...'));
       } else {
-        $content_number = phutil_escape_html($line_number);
+        $content_number = $line_number;
         $content_line = "\xE2\x80\x8B".$line;
       }
 
