@@ -13,9 +13,21 @@ final class DarkConsoleXHProfPluginAPI {
     return extension_loaded('xhprof');
   }
 
+  public static function getProfilerHeader() {
+    return 'X-Phabricator-Profiler';
+  }
+
   public static function isProfilerRequested() {
     if (!empty($_REQUEST['__profile__'])) {
       return $_REQUEST['__profile__'];
+    }
+
+    $header = self::getProfilerHeader();
+    $header = strtoupper($header);
+    $header = str_replace('-', '_', $header);
+    $header = 'HTTP_'.$header;
+    if (!empty($_SERVER[$header])) {
+      return $_SERVER[$header];
     }
 
     static $profilerRequested = null;

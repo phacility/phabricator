@@ -14,7 +14,6 @@ JX.behavior('dark-console', function(config, statics) {
   config.key = config.key || root.getAttribute('data-console-key');
   add_request(config);
 
-
   // Do first-time setup.
   function setup_console() {
     statics.root = JX.$('darkconsole');
@@ -41,6 +40,16 @@ JX.behavior('dark-console', function(config, statics) {
     statics.selected = config.selected;
 
     install_shortcut();
+
+    if (config.headers) {
+      // If the main page had profiling enabled, also enable it for any Ajax
+      // requests.
+      JX.Request.listen('open', function(r) {
+        for (var k in config.headers) {
+          r.getTransport().setRequestHeader(k, config.headers[k]);
+        }
+      });
+    }
 
     return statics.root;
   }

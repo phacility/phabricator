@@ -147,6 +147,7 @@ final class CelerityStaticResourceResponse {
       $higher_priority_names = array(
         'refresh-csrf',
         'aphront-basic-tokenizer',
+        'dark-console',
       );
 
       $higher_priority_behaviors = array_select_keys(
