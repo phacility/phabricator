@@ -37,10 +37,10 @@ final class PhabricatorHelpKeyboardShortcutController
         ));
     }
 
-    $table =
-      '<table class="keyboard-shortcut-help">'.
-        implode('', $rows).
-      '</table>';
+    $table = phutil_tag(
+      'table',
+      array('class' => 'keyboard-shortcut-help'),
+      $rows);
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)

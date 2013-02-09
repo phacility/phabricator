@@ -25,16 +25,16 @@ final class PhamePostNotLiveController extends PhameController {
 
     $reasons = array();
     if (!$post->getBlog()) {
-      $reasons[] =
-        '<p>'.pht('You can not view the live version of this post because it '.
+      $reasons[] = phutil_tag('p', array(), pht(
+        'You can not view the live version of this post because it '.
         'is not associated with a blog. Move the post to a blog in order to '.
-        'view it live.').'</p>';
+        'view it live.'));
     }
 
     if ($post->isDraft()) {
-      $reasons[] =
-        '<p>'.pht('You can not view the live version of this post because it '.
-        'is still a draft. Use "Preview/Publish" to publish the post.').'</p>';
+      $reasons[] = phutil_tag('p', array(), pht(
+        'You can not view the live version of this post because it '.
+        'is still a draft. Use "Preview/Publish" to publish the post.'));
     }
 
     if ($reasons) {

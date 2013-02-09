@@ -29,7 +29,8 @@ final class PhabricatorLoginController
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
       $dialog->setTitle(pht('Login Required'));
-      $dialog->appendChild('<p>'.pht('You must login to continue.').'</p>');
+      $dialog->appendChild(phutil_tag('p', array(), pht(
+        'You must login to continue.')));
       $dialog->addSubmitButton(pht('Login'));
       $dialog->addCancelButton('/', pht('Cancel'));
 

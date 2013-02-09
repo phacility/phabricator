@@ -240,7 +240,7 @@ final class PhabricatorSettingsPanelSSHKeys
 
     $user = $request->getUser();
 
-    $name = phutil_escape_html($key->getName());
+    $name = phutil_tag('strong', array(), $key->getName());
 
     if ($request->isDialogFormPost()) {
       $key->delete();
@@ -252,10 +252,10 @@ final class PhabricatorSettingsPanelSSHKeys
       ->setUser($user)
       ->addHiddenInput('delete', $key->getID())
       ->setTitle('Really delete SSH Public Key?')
-      ->appendChild(
-        '<p>The key "<strong>'.$name.'</strong>" will be permanently deleted, '.
-        'and you will not longer be able to use the corresponding private key '.
-        'to authenticate.</p>')
+      ->appendChild(phutil_tag('p', array(), pht(
+        'The key "%s" will be permanently deleted, and you will not longer be '.
+          'able to use the corresponding private key to authenticate.',
+        $name)))
       ->addSubmitButton('Delete Public Key')
       ->addCancelButton($this->getPanelURI());
 

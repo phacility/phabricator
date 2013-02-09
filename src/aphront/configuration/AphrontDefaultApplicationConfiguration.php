@@ -227,7 +227,7 @@ class AphrontDefaultApplicationConfiguration
     phlog($ex);
 
     $class    = get_class($ex);
-    $message  = phutil_escape_html($ex->getMessage());
+    $message  = $ex->getMessage();
 
     if ($ex instanceof AphrontQuerySchemaException) {
       $message .=
@@ -243,11 +243,13 @@ class AphrontDefaultApplicationConfiguration
       $trace = null;
     }
 
-    $content =
+    $content = hsprintf(
       '<div class="aphront-unhandled-exception">'.
-        '<div class="exception-message">'.$message.'</div>'.
-        $trace.
-      '</div>';
+        '<div class="exception-message">%s</div>'.
+        '%s'.
+      '</div>',
+      $message,
+      $trace);
 
     $dialog = new AphrontDialogView();
     $dialog
@@ -349,7 +351,7 @@ class AphrontDefaultApplicationConfiguration
         }
         $file_name = $file_name.' : '.(int)$part['line'];
       } else {
-        $file_name = '<em>(Internal)</em>';
+        $file_name = phutil_tag('em', array(), '(Internal)');
       }
 
 
@@ -376,11 +378,12 @@ class AphrontDefaultApplicationConfiguration
         'wide',
       ));
 
-    return
+    return hsprintf(
       '<div class="exception-trace">'.
         '<div class="exception-trace-header">Stack Trace</div>'.
-        $table->render().
-      '</div>';
+        '%s',
+      '</div>',
+      phutil_safe_html($table->render()));
   }
 
 }

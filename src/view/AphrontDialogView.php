@@ -99,7 +99,6 @@ final class AphrontDialogView extends AphrontView {
         ),
         $this->cancelText);
     }
-    $buttons = implode('', $buttons);
 
     if (!$this->user) {
       throw new Exception(
@@ -131,6 +130,14 @@ final class AphrontDialogView extends AphrontView {
     );
 
     $hidden_inputs = array();
+    $hidden_inputs[] = phutil_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => '__dialog__',
+        'value' => '1',
+      ));
+
     foreach ($this->hidden as $desc) {
       list($key, $value) = $desc;
       $hidden_inputs[] = javelin_tag(
@@ -142,37 +149,30 @@ final class AphrontDialogView extends AphrontView {
           'sigil' => 'aphront-dialog-application-input'
         ));
     }
-    $hidden_inputs = implode("\n", $hidden_inputs);
-    $hidden_inputs =
-      '<input type="hidden" name="__dialog__" value="1" />'.
-      $hidden_inputs;
-
 
     if (!$this->renderAsForm) {
-      $buttons = phabricator_render_form(
+      $buttons = array(phabricator_form(
         $this->user,
         $form_attributes,
-        $hidden_inputs.$buttons);
+        array_merge($hidden_inputs, $buttons)));
     }
 
-    $content =
-      hsprintf('<div class="aphront-dialog-head">%s</div>', $this->title).
-      '<div class="aphront-dialog-body">'.
-        $this->renderChildren().
-      '</div>'.
-      '<div class="aphront-dialog-tail">'.
-        $buttons.
-        '<div style="clear: both;"></div>'.
-      '</div>';
+    $buttons[] = phutil_tag('div', array('style' => 'clear: both;'), '');
+    $children = $this->renderHTMLChildren();
+
+    $content = hsprintf(
+      '%s%s%s',
+      phutil_tag('div', array('class' => 'aphront-dialog-head'), $this->title),
+      phutil_tag('div', array('class' => 'aphront-dialog-body'), $children),
+      phutil_tag('div', array('class' => 'aphront-dialog-tail'), $buttons));
 
     if ($this->renderAsForm) {
-      return phabricator_render_form(
+      return phabricator_form(
         $this->user,
         $form_attributes + $attributes,
-        $hidden_inputs.
-        $content);
+        array($hidden_inputs, $content));
     } else {
-      return javelin_render_tag(
+      return javelin_tag(
         'div',
         $attributes,
         $content);

@@ -191,9 +191,9 @@ final class PhabricatorSettingsPanelEmailAddresses
             ->setUser($user)
             ->addHiddenInput('new',  'verify')
             ->setTitle('Verification Email Sent')
-            ->appendChild(
-              '<p>A verification email has been sent. Click the link in the '.
-              'email to verify your address.</p>')
+            ->appendChild(phutil_tag('p', array(), pht(
+              'A verification email has been sent. Click the link in the '.
+              'email to verify your address.')))
             ->setSubmitURI($uri)
             ->addSubmitButton('Done');
 
@@ -264,9 +264,9 @@ final class PhabricatorSettingsPanelEmailAddresses
       ->setUser($user)
       ->addHiddenInput('delete', $email_id)
       ->setTitle("Really delete address '{$address}'?")
-      ->appendChild(
-        '<p>Are you sure you want to delete this address? You will no '.
-        'longer be able to use it to login.</p>')
+      ->appendChild(phutil_tag('p', array(), pht(
+        'Are you sure you want to delete this address? You will no '.
+        'longer be able to use it to login.')))
       ->addSubmitButton('Delete')
       ->addCancelButton($uri);
 

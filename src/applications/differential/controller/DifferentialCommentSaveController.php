@@ -60,10 +60,9 @@ final class DifferentialCommentSaveController extends DifferentialController {
 
       if (strlen($comment) || $has_inlines) {
         $dialog->addSubmitButton(pht('Post as Comment'));
-        $dialog->appendChild('<br />');
-        $dialog->appendChild(
-          '<p>'.pht('Do you want to post your feedback anyway, as a normal '.
-          'comment?').'</p>');
+        $dialog->appendChild(phutil_tag('br'));
+        $dialog->appendChild(phutil_tag('p', array(), pht(
+          'Do you want to post your feedback anyway, as a normal comment?')));
       }
 
       return id(new AphrontDialogResponse())->setDialog($dialog);

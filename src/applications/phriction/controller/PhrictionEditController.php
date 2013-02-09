@@ -108,8 +108,8 @@ final class PhrictionEditController
           $dialog = new AphrontDialogView();
           $dialog->setUser($user);
           $dialog->setTitle(pht('No Edits'));
-          $dialog->appendChild(
-            '<p>'.pht('You did not make any changes to the document.').'</p>');
+          $dialog->appendChild(phutil_tag('p', array(), pht(
+            'You did not make any changes to the document.')));
           $dialog->addCancelButton($request->getRequestURI());
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -122,8 +122,8 @@ final class PhrictionEditController
         $dialog = new AphrontDialogView();
         $dialog->setUser($user);
         $dialog->setTitle(pht('Empty Page'));
-        $dialog->appendChild(
-          '<p>'.pht('You can not create an empty document.').'</p>');
+        $dialog->appendChild(phutil_tag('p', array(), pht(
+          'You can not create an empty document.')));
         $dialog->addCancelButton($request->getRequestURI());
 
         return id(new AphrontDialogResponse())->setDialog($dialog);

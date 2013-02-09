@@ -37,9 +37,8 @@ extends PhabricatorOAuthClientBaseController {
     $dialog = new AphrontDialogView();
     $dialog->setUser($current_user);
     $dialog->setTitle($title);
-    $dialog->appendChild(
-      '<p>Are you sure you want to delete this client?</p>'
-    );
+    $dialog->appendChild(phutil_tag('p', array(), pht(
+      'Are you sure you want to delete this client?')));
     $dialog->addSubmitButton();
     $dialog->addCancelButton($client->getEditURI());
     return id(new AphrontDialogResponse())->setDialog($dialog);

@@ -72,9 +72,8 @@ final class PhabricatorWorkerTaskUpdateController
       case 'retry':
         if ($can_retry) {
           $dialog->setTitle('Really retry task?');
-          $dialog->appendChild(
-            '<p>The task will be put back in the queue and executed '.
-            'again.</p>');
+          $dialog->appendChild(phutil_tag('p', array(), pht(
+            'The task will be put back in the queue and executed again.')));
           $dialog->addSubmitButton('Retry Task');
         } else {
           $dialog->setTitle('Can Not Retry');

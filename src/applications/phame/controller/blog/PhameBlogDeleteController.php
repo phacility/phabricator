@@ -41,7 +41,7 @@ final class PhameBlogDeleteController extends PhameController {
       ->appendChild(
         pht(
           'Really delete the blog "%s"? It will be gone forever.',
-          phutil_escape_html($blog->getName())))
+          $blog->getName()))
       ->addSubmitButton(pht('Delete'))
       ->addCancelButton($cancel_uri);
 
