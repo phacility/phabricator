@@ -420,14 +420,6 @@ final class DifferentialChangesetParser {
   }
 
   private function getHighlightFuture($corpus) {
-    if (preg_match('/\r(?!\n)/', $corpus)) {
-      // TODO: Pygments converts "\r" newlines into "\n" newlines, so we can't
-      // use it on files with "\r" newlines. If we have "\r" not followed by
-      // "\n" in the file, skip highlighting.
-      $result = phutil_escape_html($corpus);
-      return new ImmediateFuture($result);
-    }
-
     return $this->highlightEngine->getHighlightFuture(
       $this->highlightEngine->getLanguageFromFilename($this->filename),
       $corpus);
