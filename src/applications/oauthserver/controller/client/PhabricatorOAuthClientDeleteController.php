@@ -32,8 +32,7 @@ extends PhabricatorOAuthClientBaseController {
         ->setURI('/oauthserver/client/?deleted=1');
     }
 
-    $client_name = phutil_escape_html($client->getName());
-    $title .= ' '.$client_name;
+    $title .= ' '.$client->getName();
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($current_user);

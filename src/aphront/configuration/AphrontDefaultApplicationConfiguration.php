@@ -209,7 +209,7 @@ class AphrontDefaultApplicationConfiguration
 
     if ($ex instanceof AphrontUsageException) {
       $error = new AphrontErrorView();
-      $error->setTitle(phutil_escape_html($ex->getTitle()));
+      $error->setTitle($ex->getTitle());
       $error->appendChild($ex->getMessage());
 
       $view = new PhabricatorStandardPageView();
@@ -226,7 +226,7 @@ class AphrontDefaultApplicationConfiguration
     // Always log the unhandled exception.
     phlog($ex);
 
-    $class    = phutil_escape_html(get_class($ex));
+    $class    = get_class($ex);
     $message  = phutil_escape_html($ex->getMessage());
 
     if ($ex instanceof AphrontQuerySchemaException) {

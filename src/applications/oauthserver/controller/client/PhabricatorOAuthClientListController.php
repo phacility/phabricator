@@ -113,10 +113,8 @@ extends PhabricatorOAuthClientBaseController {
     $new     = $this->getRequest()->getStr('new');
     $deleted = $this->getRequest()->getBool('deleted');
     if ($edited) {
-      $edited = phutil_escape_html($edited);
       $title  = 'Successfully edited client with id '.$edited.'.';
     } else if ($new) {
-      $new   = phutil_escape_html($new);
       $title = 'Successfully created client with id '.$new.'.';
     } else if ($deleted) {
       $title = 'Successfully deleted client.';

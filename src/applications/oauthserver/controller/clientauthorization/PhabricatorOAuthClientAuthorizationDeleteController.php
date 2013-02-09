@@ -37,12 +37,10 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
       ->loadOneWhere('phid = %s',
                      $client_phid);
     if ($client) {
-      $client_name = phutil_escape_html($client->getName());
-      $title .= ' for '.$client_name;
+      $title .= ' for '.$client->getName();
     } else {
       // the client does not exist so token is dead already (but
       // let's let the user clean this up anyway in that case)
-      $client_name = '';
     }
 
     $dialog = new AphrontDialogView();
