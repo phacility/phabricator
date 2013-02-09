@@ -132,25 +132,7 @@ try {
     $access_log->write();
   }
 
-  if (DarkConsoleXHProfPluginAPI::isProfilerRequested()) {
-    $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
-    $profile_sample = id(new PhabricatorXHProfSample())
-      ->setFilePHID($profile);
-    if (empty($_REQUEST['__profile__'])) {
-      $sample_rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
-    } else {
-      $sample_rate = 0;
-    }
-    $profile_sample->setSampleRate($sample_rate);
-    if ($access_log) {
-      $profile_sample->setUsTotal($access_log->getData('T'))
-        ->setHostname($access_log->getData('h'))
-        ->setRequestPath($access_log->getData('U'))
-        ->setController($access_log->getData('C'))
-        ->setUserPHID($request->getUser()->getPHID());
-    }
-    $profile_sample->save();
-  }
+  DarkConsoleXHProfPluginAPI::saveProfilerSample($request, $access_log);
 
 } catch (Exception $ex) {
   PhabricatorStartup::didFatal("[Exception] ".$ex->getMessage());

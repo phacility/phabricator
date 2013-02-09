@@ -163,7 +163,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       require_celerity_resource('aphront-dark-console-css');
 
       $headers = array();
-      if (DarkConsoleXHProfPluginAPI::isProfilerRequested()) {
+      if (DarkConsoleXHProfPluginAPI::isProfilerStarted()) {
         $headers[DarkConsoleXHProfPluginAPI::getProfilerHeader()] = 'page';
       }
 
