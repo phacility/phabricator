@@ -71,10 +71,6 @@ final class ConpherenceTransactionView extends AphrontView {
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
         $comment = $transaction->getComment();
-        $file_ids =
-          PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-            array($comment->getContent())
-          );
         $content = $this->markupEngine->getOutput(
           $comment,
           PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
