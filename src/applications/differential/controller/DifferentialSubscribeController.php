@@ -59,13 +59,13 @@ final class DifferentialSubscribeController extends DifferentialController {
         DifferentialRevisionEditor::addCCAndUpdateRevision(
           $revision,
           $phid,
-          $phid);
+          $user);
         break;
       case 'rem':
         DifferentialRevisionEditor::removeCCAndUpdateRevision(
           $revision,
           $phid,
-          $phid);
+          $user);
         break;
       default:
         return new Aphront400Response();

@@ -253,10 +253,15 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $repository = $this->repository;
     if ($repository) {
-      $meta['diffusionURI'] = (string)$repository->getDiffusionBrowseURIForPath(
-        $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
-        idx($changeset->getMetadata(), 'line:first'),
-        $this->getBranch());
+      try {
+        $meta['diffusionURI'] =
+          (string)$repository->getDiffusionBrowseURIForPath(
+            $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
+            idx($changeset->getMetadata(), 'line:first'),
+            $this->getBranch());
+      } catch (DiffusionSetupException $e) {
+        // Ignore
+      }
     }
 
     $change = $changeset->getChangeType();

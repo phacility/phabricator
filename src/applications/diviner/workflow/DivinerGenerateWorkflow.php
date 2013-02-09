@@ -2,6 +2,9 @@
 
 final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
+  private $config;
+  private $atomCache;
+
   public function didConstruct() {
     $this
       ->setName('generate')
@@ -12,10 +15,37 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
             'name' => 'clean',
             'help' => 'Clear the caches before generating documentation.',
           ),
+          array(
+            'name' => 'book',
+            'param' => 'path',
+            'help' => 'Path to a Diviner book configuration.',
+          ),
         ));
   }
 
+  protected function getConfig($key, $default = null) {
+    return idx($this->config, $key, $default);
+  }
+
+  protected function getAtomCache() {
+    if (!$this->atomCache) {
+      $book_root = $this->getConfig('root');
+      $book_name = $this->getConfig('name');
+      $cache_directory = $book_root.'/.divinercache/'.$book_name;
+      $this->atomCache = new DivinerAtomCache($cache_directory);
+    }
+    return $this->atomCache;
+  }
+
+  protected function log($message) {
+    $console = PhutilConsole::getConsole();
+    $console->getServer()->setEnableLog(true);
+    $console->writeLog($message."\n");
+  }
+
   public function execute(PhutilArgumentParser $args) {
+    $this->readBookConfiguration($args);
+
     if ($args->getArg('clean')) {
       $this->log(pht('CLEARING CACHES'));
       $this->getAtomCache()->delete();
@@ -170,7 +200,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
 
   private function findFilesInProject() {
-    $file_hashes = id(new FileFinder($this->getRoot()))
+    $file_hashes = id(new FileFinder($this->getConfig('root')))
       ->excludePath('*/.*')
       ->withType('f')
       ->setGenerateChecksums(true)
@@ -222,11 +252,11 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     foreach ($atomizers as $class => $files) {
       foreach (array_chunk($files, 32) as $chunk) {
         $future = new ExecFuture(
-          '%s atomize --atomizer %s -- %Ls',
+          '%s atomize --ugly --atomizer %s -- %Ls',
           dirname(phutil_get_library_root('phabricator')).'/bin/diviner',
           $class,
           $chunk);
-        $future->setCWD($this->getRoot());
+        $future->setCWD($this->getConfig('root'));
 
         $futures[] = $future;
       }
@@ -381,4 +411,42 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     return md5(serialize($inputs)).'G';
   }
 
+  private function readBookConfiguration(PhutilArgumentParser $args) {
+    $book_path = $args->getArg('book');
+    if ($book_path === null) {
+      throw new PhutilArgumentUsageException(
+        "Specify a Diviner book configuration file with --book.");
+    }
+
+    $book_data = Filesystem::readFile($book_path);
+    $book = json_decode($book_data, true);
+    if (!is_array($book)) {
+      throw new PhutilArgumentUsageException(
+        "Book configuration '{$book_path}' is not in JSON format.");
+    }
+
+    // If the book specifies a "root", resolve it; otherwise, use the directory
+    // the book configuration file lives in.
+    $full_path = dirname(Filesystem::resolvePath($book_path));
+    if (empty($book['root'])) {
+      $book['root'] = '.';
+    }
+    $book['root'] = Filesystem::resolvePath($book['root'], $full_path);
+
+    // Make sure we have a valid book name.
+    if (!isset($book['name'])) {
+      throw new PhutilArgumentUsageException(
+        "Book configuration '{$book_path}' is missing required ".
+        "property 'name'.");
+    }
+
+    if (!preg_match('/^[a-z][a-z-]*$/', $book['name'])) {
+      $name = $book['name'];
+      throw new PhutilArgumentUsageException(
+        "Book configuration '{$book_path}' has name '{$name}', but book names ".
+        "must include only lowercase letters and hyphens.");
+    }
+
+    $this->config = $book;
+  }
 }

@@ -101,7 +101,8 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
           'span',
           array(
             'class' => implode(' ', $classes),
-          ));
+          ),
+          '');
 
         $create_button = phutil_tag(
           'a',

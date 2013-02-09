@@ -9,7 +9,7 @@ abstract class PhrictionController extends PhabricatorController {
 
     $page = $this->buildStandardPageView();
 
-    $page->setApplicationName('Phriction');
+    $page->setApplicationName(pht('Phriction'));
     $page->setBaseURI('/w/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\xA1");
@@ -32,7 +32,7 @@ abstract class PhrictionController extends PhabricatorController {
       $nav->addFilter('', pht('Create Document'), '/phriction/new');
     }
 
-    $nav->addLabel('Filters');
+    $nav->addLabel(pht('Filters'));
     $nav->addFilter('active', pht('Active Documents'));
     $nav->addFilter('all', pht('All Documents'));
     $nav->addFilter('updates', pht('Recently Updated'));

@@ -3,7 +3,7 @@
 final class PhabricatorApplicationPhriction extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return 'Wiki';
+    return pht('Wiki');
   }
 
   public function getBaseURI() {

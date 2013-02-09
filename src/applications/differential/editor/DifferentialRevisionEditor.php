@@ -496,12 +496,13 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
   public static function addCCAndUpdateRevision(
     $revision,
     $phid,
-    $reason) {
+    PhabricatorUser $actor) {
 
-    self::addCC($revision, $phid, $reason);
+    self::addCC($revision, $phid, $actor->getPHID());
 
     $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER;
     id(new PhabricatorEdgeEditor())
+      ->setActor($actor)
       ->removeEdge($revision->getPHID(), $type, $phid)
       ->save();
   }
@@ -509,12 +510,13 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
   public static function removeCCAndUpdateRevision(
     $revision,
     $phid,
-    $reason) {
+    PhabricatorUser $actor) {
 
-    self::removeCC($revision, $phid, $reason);
+    self::removeCC($revision, $phid, $actor->getPHID());
 
     $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER;
     id(new PhabricatorEdgeEditor())
+      ->setActor($actor)
       ->addEdge($revision->getPHID(), $type, $phid)
       ->save();
   }

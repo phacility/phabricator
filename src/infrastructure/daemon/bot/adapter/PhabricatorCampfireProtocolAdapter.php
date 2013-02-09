@@ -9,16 +9,16 @@ extends PhabricatorBaseProtocolAdapter {
   private $readHandles;
   private $multiHandle;
   private $active;
-  private $rooms;
+  private $inRooms = array();
 
   public function connect() {
     $this->server = idx($this->config, 'server');
     $this->authtoken = idx($this->config, 'authtoken');
     $ssl = idx($this->config, 'ssl', false);
-    $this->rooms = idx($this->config, 'join');
+    $rooms = idx($this->config, 'join');
 
     // First, join the room
-    if (!$this->rooms) {
+    if (!$rooms) {
       throw new Exception("Not configured to join any rooms!");
     }
 
@@ -29,7 +29,7 @@ extends PhabricatorBaseProtocolAdapter {
     $this->multiHandle = curl_multi_init();
     $this->readHandles = array();
 
-    foreach ($this->rooms as $room_id) {
+    foreach ($rooms as $room_id) {
       $this->joinRoom($room_id);
 
       // Set up the curl stream for reading
@@ -138,10 +138,12 @@ extends PhabricatorBaseProtocolAdapter {
 
   private function joinRoom($room_id) {
     $this->performPost("/room/{$room_id}/join.json");
+    $this->inRooms[$room_id] = true;
   }
 
   private function leaveRoom($room_id) {
     $this->performPost("/room/{$room_id}/leave.json");
+    unset($this->inRooms[$room_id]);
   }
 
   private function speak($message, $room_id) {
@@ -154,48 +156,42 @@ extends PhabricatorBaseProtocolAdapter {
   }
 
   private function performPost($endpoint, $data = Null) {
-    $url = $this->server.$endpoint;
+    $uri = new PhutilURI($this->server);
+    $uri->setPath($endpoint);
 
     $payload = json_encode($data);
 
-    // cURL init & config
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($ch, CURLOPT_USERPWD, $this->authtoken . ':x');
-    curl_setopt(
-      $ch,
-      CURLOPT_HTTPHEADER,
-      array("Content-type: application/json"));
-
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    $output = curl_exec($ch);
-
-    curl_close($ch);
+    list($output) = id(new HTTPSFuture($uri))
+      ->setMethod('POST')
+      ->addHeader('Content-Type', 'application/json')
+      ->addHeader('Authorization', $this->getAuthorizationHeader())
+      ->setData($payload)
+      ->resolvex();
 
     $output = trim($output);
-
     if (strlen($output)) {
-      return json_decode($output);
+      return json_decode($output, true);
     }
 
     return true;
   }
 
   public function __destruct() {
-    if ($this->rooms) {
-      foreach ($this->rooms as $room_id) {
-        $this->leaveRoom($room_id);
-      }
+    foreach ($this->inRooms as $room_id => $ignored) {
+      $this->leaveRoom($room_id);
     }
+
     if ($this->readHandles) {
       foreach ($this->readHandles as $read_handle) {
         curl_multi_remove_handle($this->multiHandle, $read_handle);
         curl_close($read_handle);
       }
     }
+
     curl_multi_close($this->multiHandle);
+  }
+
+  private function getAuthorizationHeader() {
+    return 'Basic '.base64_encode($this->authtoken.':x');
   }
 }

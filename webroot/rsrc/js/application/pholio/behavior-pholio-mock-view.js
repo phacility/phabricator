@@ -35,6 +35,7 @@ JX.behavior('pholio-mock-view', function(config) {
       main.src = data.fullSizeURI;
 
       JX.DOM.setContent(wrapper,main);
+      load_inline_comments();
     });
 
 
@@ -123,7 +124,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
       selection_fill.title = comment;
 
-      var saveURL = "/pholio/inline/" + imageData['imageID'] + "/";
+      var saveURL = "/pholio/inline/save/";
 
       var inlineComment = new JX.Request(saveURL, function(r) {
 
@@ -143,6 +144,36 @@ JX.behavior('pholio-mock-view', function(config) {
       inlineComment.send();
 
     });
+
+    function load_inline_comments() {
+      var data = JX.Stratcom.getData(JX.$(config.mainID));
+
+      var inline_comments_url = "/pholio/inline/" + data['imageID'] + "/";
+      var inline_comments = new JX.Request(inline_comments_url, function(r) {
+
+        if (r.length > 0) {
+          for(i=0; i < r.length; i++) {
+            var inlineSelection = JX.$N(
+              'div',
+              {
+                id: r[i].phid,
+                className: 'pholio-mock-select-border',
+                title: r[i].content
+              });
+
+            JX.DOM.appendContent(wrapper, inlineSelection);
+
+            JX.$V(r[i].x, r[i].y).setPos(inlineSelection);
+            JX.$V(r[i].width, r[i].height)
+              .setDim(inlineSelection);
+          }
+        }
+      });
+
+      inline_comments.send();
+    }
+
+    load_inline_comments();
 
 });
 

@@ -67,7 +67,7 @@ NOTE: This is cumbersome. There will be better testing tools at some point.
 
 You can run `aphlict` in the foreground to get output to your console:
 
-  phabricator/ $ ./bin/aphlict --foreground
+  phabricator/ $ sudo ./bin/aphlict --foreground
 
 You can run `support/aphlict/client/aphlict_test_client.php` to connect to the
 Aphlict server from the command line. Messages the client receives will be

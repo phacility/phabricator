@@ -1259,6 +1259,7 @@ phutil_register_library_map(array(
     'PhabricatorSetupCheckExtraConfig' => 'applications/config/check/PhabricatorSetupCheckExtraConfig.php',
     'PhabricatorSetupCheckFacebook' => 'applications/config/check/PhabricatorSetupCheckFacebook.php',
     'PhabricatorSetupCheckGD' => 'applications/config/check/PhabricatorSetupCheckGD.php',
+    'PhabricatorSetupCheckImagemagick' => 'applications/config/check/PhabricatorSetupCheckImagemagick.php',
     'PhabricatorSetupCheckInvalidConfig' => 'applications/config/check/PhabricatorSetupCheckInvalidConfig.php',
     'PhabricatorSetupCheckMail' => 'applications/config/check/PhabricatorSetupCheckMail.php',
     'PhabricatorSetupCheckMySQL' => 'applications/config/check/PhabricatorSetupCheckMySQL.php',
@@ -1409,6 +1410,7 @@ phutil_register_library_map(array(
     'PholioController' => 'applications/pholio/controller/PholioController.php',
     'PholioDAO' => 'applications/pholio/storage/PholioDAO.php',
     'PholioImage' => 'applications/pholio/storage/PholioImage.php',
+    'PholioInlineController' => 'applications/pholio/controller/PholioInlineController.php',
     'PholioInlineSaveController' => 'applications/pholio/controller/PholioInlineSaveController.php',
     'PholioMock' => 'applications/pholio/storage/PholioMock.php',
     'PholioMockCommentController' => 'applications/pholio/controller/PholioMockCommentController.php',
@@ -2673,6 +2675,7 @@ phutil_register_library_map(array(
     'PhabricatorSetupCheckExtraConfig' => 'PhabricatorSetupCheck',
     'PhabricatorSetupCheckFacebook' => 'PhabricatorSetupCheck',
     'PhabricatorSetupCheckGD' => 'PhabricatorSetupCheck',
+    'PhabricatorSetupCheckImagemagick' => 'PhabricatorSetupCheck',
     'PhabricatorSetupCheckInvalidConfig' => 'PhabricatorSetupCheck',
     'PhabricatorSetupCheckMail' => 'PhabricatorSetupCheck',
     'PhabricatorSetupCheckMySQL' => 'PhabricatorSetupCheck',
@@ -2827,6 +2830,7 @@ phutil_register_library_map(array(
       0 => 'PholioDAO',
       1 => 'PhabricatorMarkupInterface',
     ),
+    'PholioInlineController' => 'PholioController',
     'PholioInlineSaveController' => 'PholioController',
     'PholioMock' =>
     array(

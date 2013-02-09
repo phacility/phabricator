@@ -138,9 +138,9 @@ final class PhrictionDiffController
           array(
             'href' => $uri->alter('l', $l - 1)->alter('r', $r - 1),
           ),
-          "\xC2\xAB Previous Change");
+          pht("\xC2\xAB Previous Change"));
       } else {
-        $link_l = 'Original Change';
+        $link_l = pht('Original Change');
       }
 
       $link_r = null;
@@ -150,9 +150,9 @@ final class PhrictionDiffController
           array(
             'href' => $uri->alter('l', $l + 1)->alter('r', $r + 1),
           ),
-          "Next Change \xC2\xBB");
+          pht("Next Change \xC2\xBB"));
       } else {
-        $link_r = 'Most Recent Change';
+        $link_r = pht('Most Recent Change');
       }
 
       $navigation_table =
@@ -184,7 +184,7 @@ final class PhrictionDiffController
         $output,
       ),
       array(
-        'title'     => 'Document History',
+        'title'     => pht('Document History'),
       ));
   }
 
@@ -208,7 +208,7 @@ final class PhrictionDiffController
           'href'  => '/phriction/edit/'.$document_id.'/',
           'class' => 'button',
         ),
-        'Edit Current Version');
+        pht('Edit Current Version'));
     }
 
 
@@ -218,7 +218,7 @@ final class PhrictionDiffController
         'href'  => '/phriction/edit/'.$document_id.'/?revert='.$version,
         'class' => 'button',
       ),
-      'Revert to Version '.$version.'...');
+      pht('Revert to Version %s...', $version));
   }
 
   private function renderComparisonTable(array $content) {
@@ -244,11 +244,11 @@ final class PhrictionDiffController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Date',
-        'Time',
-        'Version',
-        'Author',
-        'Description',
+        pht('Date'),
+        pht('Time'),
+        pht('Version'),
+        pht('Author'),
+        pht('Description'),
       ));
     $table->setColumnClasses(
       array(
