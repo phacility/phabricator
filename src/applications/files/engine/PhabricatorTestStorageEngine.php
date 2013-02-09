@@ -18,7 +18,7 @@ final class PhabricatorTestStorageEngine
   public function writeFile($data, array $params) {
     AphrontWriteGuard::willWrite();
     self::$storage[self::$nextHandle] = $data;
-    return self::$nextHandle++;
+    return (string)self::$nextHandle++;
   }
 
   public function readFile($handle) {
