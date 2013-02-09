@@ -251,7 +251,7 @@ final class PhrictionEditController
         'uri'       => '/phriction/preview/?draftkey='.$draft_key,
       ));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $draft_note,
         $error_view,
@@ -260,6 +260,7 @@ final class PhrictionEditController
       ),
       array(
         'title' => pht('Edit Document'),
+        'device' => true,
       ));
   }
 
