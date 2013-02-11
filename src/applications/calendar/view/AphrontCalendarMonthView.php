@@ -48,9 +48,10 @@ final class AphrontCalendarMonthView extends AphrontView {
 
     $markup = array();
 
-    $empty_box =
-      '<div class="aphront-calendar-day aphront-calendar-empty">'.
-      '</div>';
+    $empty_box = phutil_tag(
+      'div',
+      array('class' => 'aphront-calendar-day aphront-calendar-empty'),
+      '');
 
     for ($ii = 0; $ii < $empty; $ii++) {
       $markup[] = $empty_box;
@@ -79,9 +80,10 @@ final class AphrontCalendarMonthView extends AphrontView {
       } else {
         $show_events = array_fill_keys(
           array_keys($show_events),
-          '<div class="aphront-calendar-event aphront-calendar-event-empty">'.
-            '&nbsp;'.
-          '</div>');
+          hsprintf(
+            '<div class="aphront-calendar-event aphront-calendar-event-empty">'.
+              '&nbsp;'.
+            '</div>'));
       }
 
       foreach ($events as $event) {
@@ -110,31 +112,32 @@ final class AphrontCalendarMonthView extends AphrontView {
           $name);
       }
 
-      $markup[] =
-        '<div class="'.$class.'">'.
-          '<div class="aphront-calendar-date-number">'.
-            $day_number.
-          '</div>'.
-          $holiday_markup.
-          implode("\n", $show_events).
-        '</div>';
+      $markup[] = hsprintf(
+        '<div class="%s">'.
+          '<div class="aphront-calendar-date-number">%s</div>'.
+          '%s%s'.
+        '</div>',
+        $class,
+        $day_number,
+        $holiday_markup,
+        phutil_implode_html("\n", $show_events));
     }
 
     $table = array();
     $rows = array_chunk($markup, 7);
     foreach ($rows as $row) {
-      $table[] = '<tr>';
+      $table[] = hsprintf('<tr>');
       while (count($row) < 7) {
         $row[] = $empty_box;
       }
       foreach ($row as $cell) {
-        $table[] = '<td>'.$cell.'</td>';
+        $table[] = phutil_tag('p', array(), $cell);
       }
-      $table[] = '</tr>';
+      $table[] = hsprintf('</tr>');
     }
-    $table =
+    $table = hsprintf(
       '<table class="aphront-calendar-view">'.
-        $this->renderCalendarHeader($first).
+       '%s'.
        '<tr class="aphront-calendar-day-of-week-header">'.
           '<th>Sun</th>'.
           '<th>Mon</th>'.
@@ -144,8 +147,10 @@ final class AphrontCalendarMonthView extends AphrontView {
           '<th>Fri</th>'.
           '<th>Sat</th>'.
         '</tr>'.
-        implode("\n", $table).
-      '</table>';
+        '%s'.
+      '</table>',
+      $this->renderCalendarHeader($first),
+      phutil_implode_html("\n", $table));
 
     return $table;
   }
@@ -176,16 +181,15 @@ final class AphrontCalendarMonthView extends AphrontView {
         "\xE2\x86\x92"
       );
 
-      $left_th = '<th>'.$prev_link.'</th>';
-      $right_th = '<th>'.$next_link.'</th>';
+      $left_th = phutil_tag('th', array(), $prev_link);
+      $right_th = phutil_tag('th', array(), $next_link);
     }
 
-    return
-      '<tr class="aphront-calendar-month-year-header">'.
-        $left_th.
-        '<th colspan="'.$colspan.'">'.$date->format('F Y').'</th>'.
-        $right_th.
-      '</tr>';
+    return hsprintf(
+      '<tr class="aphront-calendar-month-year-header">%s%s%s</tr>',
+      $left_th,
+      phutil_tag('th', array('colspan' => $colspan), $date->format('F Y')),
+      $right_th);
   }
 
   private function getNextYearAndMonth() {

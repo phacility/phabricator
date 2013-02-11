@@ -8,7 +8,7 @@ final class JavelinViewExampleServerView extends AphrontView {
       array(
         'class' => 'server-view',
       ),
-      $this->renderChildren());
+      $this->renderHTMLChildren());
   }
 
 }

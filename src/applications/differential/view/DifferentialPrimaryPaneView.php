@@ -11,13 +11,13 @@ final class DifferentialPrimaryPaneView extends AphrontView {
 
   public function render() {
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'differential-primary-pane',
         'id'    => $this->id,
       ),
-      $this->renderChildren());
+      $this->renderHTMLChildren());
   }
 
 }

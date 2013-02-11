@@ -17,18 +17,15 @@ final class AphrontCrumbsView extends AphrontView {
     foreach ($this->crumbs as $crumb) {
       $out[] = $this->renderSingleView($crumb);
     }
-    $out = implode(
-      '<span class="aphront-crumbs-spacer">'.
-        "\xC2\xBB".
-      '</span>',
+    $out = phutil_implode_html(
+      hsprintf('<span class="aphront-crumbs-spacer">'."\xC2\xBB".'</span>'),
       $out);
 
-    return
+    return hsprintf(
       '<div class="aphront-crumbs-view">'.
-        '<div class="aphront-crumbs-content">'.
-          $out.
-        '</div>'.
-      '</div>';
+        '<div class="aphront-crumbs-content">%s</div>'.
+      '</div>',
+      $out);
   }
 
 }

@@ -3,10 +3,9 @@
 final class AphrontMiniPanelView extends AphrontView {
 
   public function render() {
-    return
-      '<div class="aphront-mini-panel-view">'.
-        $this->renderChildren().
-      '</div>';
+    return hsprintf(
+      '<div class="aphront-mini-panel-view">%s</div>',
+      $this->renderHTMLChildren());
   }
 
 }

@@ -15,7 +15,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
 
   public function render() {
     require_celerity_resource('inline-comment-summary-css');
-    return $this->renderHeader().$this->renderTable();
+    return hsprintf('%s%s', $this->renderHeader(), $this->renderTable());
   }
 
   private function renderHeader() {

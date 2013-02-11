@@ -16,8 +16,8 @@ final class PhabricatorDisabledUserController
 
     $failure_view = new AphrontRequestFailureView();
     $failure_view->setHeader(pht('Account Disabled'));
-    $failure_view->appendChild(
-      '<p>'.pht('Your account has been disabled.').'</p>');
+    $failure_view->appendChild(phutil_tag('p', array(), pht(
+      'Your account has been disabled.')));
 
     return $this->buildStandardPageResponse(
       $failure_view,

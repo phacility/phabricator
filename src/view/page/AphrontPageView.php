@@ -73,7 +73,9 @@ abstract class AphrontPageView extends AphrontView {
 EOHTML;
 
     $response = $this->willSendResponse($response);
-    return $response;
+
+    // TODO: [HTML] Make HTML safe.
+    return phutil_safe_html($response);
 
   }
 

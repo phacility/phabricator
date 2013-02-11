@@ -62,20 +62,22 @@ final class PhabricatorTransactionView extends AphrontView {
 
     $transaction_id = $this->anchorName ? 'anchor-'.$this->anchorName : null;
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-transaction-view',
         'id'    => $transaction_id,
         'style' => $style,
       ),
-      '<div class="phabricator-transaction-detail '.$classes.'">'.
-        '<div class="phabricator-transaction-header">'.
-          $info.
-          $actions.
-        '</div>'.
-        $content.
-      '</div>');
+      // TODO: [HTML] Make HTML safe.
+      phutil_safe_html(
+        '<div class="phabricator-transaction-detail '.$classes.'">'.
+          '<div class="phabricator-transaction-header">'.
+            $info.
+            $actions.
+          '</div>'.
+          $content.
+        '</div>'));
 
   }
 

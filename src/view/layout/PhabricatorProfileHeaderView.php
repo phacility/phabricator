@@ -67,9 +67,9 @@ final class PhabricatorProfileHeaderView extends AphrontView {
         </tr>
       </table>',
       $this->profileName,
-      phutil_safe_html(self::renderSingleView($this->profileActions)),
+      self::renderSingleView($this->profileActions),
       $image,
       $description).
-      $this->renderChildren();
+      $this->renderHTMLChildren();
   }
 }

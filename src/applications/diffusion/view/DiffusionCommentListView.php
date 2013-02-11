@@ -87,10 +87,10 @@ final class DiffusionCommentListView extends AphrontView {
       ++$num;
     }
 
-    return
-      '<div class="diffusion-comment-list">'.
-        $this->renderSingleView($comments).
-      '</div>';
+    return phutil_tag(
+      'div',
+      array('class' => 'diffusion-comment-list'),
+      $comments);
   }
 
 }

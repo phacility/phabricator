@@ -63,7 +63,7 @@ final class PonderVotableView extends AphrontView {
       ),
       $this->count);
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'class' => 'ponder-votable',
@@ -80,12 +80,12 @@ final class PonderVotableView extends AphrontView {
             'class' => 'ponder-votebox',
           ),
           array($up, $count, $down)),
-        phutil_render_tag(
+        phutil_tag(
           'div',
           array(
             'class' => 'ponder-votebox-content',
           ),
-          $this->renderChildren()),
+          $this->renderHTMLChildren()),
       ));
   }
 

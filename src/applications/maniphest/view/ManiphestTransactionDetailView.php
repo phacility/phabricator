@@ -179,7 +179,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     }
 
     if ($this->getRenderSummaryOnly()) {
-      return implode("\n", $descs);
+      return phutil_implode_html("\n", $descs);
     }
 
     if ($comment_transaction && $comment_transaction->hasComments()) {

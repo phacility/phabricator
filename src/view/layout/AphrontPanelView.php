@@ -98,13 +98,14 @@ final class AphrontPanelView extends AphrontView {
       $classes[] = 'aphront-panel-width-'.$this->width;
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
         'id'    => $this->id,
       ),
-      $header_elements.$table);
+      // TODO: [HTML] Make HTML safe.
+      phutil_safe_html($header_elements.$table));
   }
 
 }

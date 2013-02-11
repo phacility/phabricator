@@ -52,7 +52,7 @@ abstract class AphrontView extends Phobject {
       foreach ($child as $element) {
         $out[] = $this->renderSingleView($element);
       }
-      return implode('', $out);
+      return phutil_implode_html('', $out);
     } else {
       return $child;
     }
@@ -60,7 +60,7 @@ abstract class AphrontView extends Phobject {
 
   final protected function renderHTMLView($child) {
     if ($child instanceof AphrontView) {
-      return phutil_safe_html($child->render());
+      return $child->render();
     } else if ($child instanceof PhutilSafeHTML) {
       return $child;
     } else if (is_array($child)) {
@@ -68,9 +68,9 @@ abstract class AphrontView extends Phobject {
       foreach ($child as $element) {
         $out[] = $this->renderHTMLView($element);
       }
-      return phutil_safe_html(implode('', $out));
+      return phutil_implode_html('', $out);
     } else {
-      return phutil_safe_html(phutil_escape_html($child));
+      return hsprintf('%s', $child);
     }
   }
 

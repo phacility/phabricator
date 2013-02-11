@@ -157,7 +157,7 @@ final class PhrictionDocumentController
       $version_note = $version_note->render();
     }
 
-    $children = $this->renderChildren($slug);
+    $children = $this->renderDocumentChildren($slug);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumb_views = $this->renderBreadcrumbs($slug);
@@ -225,7 +225,7 @@ final class PhrictionDocumentController
         ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
   }
 
-  private function renderChildren($slug) {
+  private function renderDocumentChildren($slug) {
     $document_dao = new PhrictionDocument();
     $content_dao = new PhrictionContent();
     $conn = $document_dao->establishConnection('r');

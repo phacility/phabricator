@@ -98,10 +98,8 @@ EOBODY;
 
           $view = new AphrontRequestFailureView();
           $view->setHeader(pht('Check Your Email'));
-          $view->appendChild(
-            '<p>'.pht(
-              'An email has been sent with a link you can use to login.'
-            ).'</p>');
+          $view->appendChild(phutil_tag('p', array(), pht(
+              'An email has been sent with a link you can use to login.')));
           return $this->buildStandardPageResponse(
             $view,
             array(
