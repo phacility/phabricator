@@ -12,9 +12,7 @@ final class DiffusionGitRequest extends DiffusionRequest {
   protected function didInitialize() {
     $repository = $this->getRepository();
 
-    if (!Filesystem::pathExists($repository->getLocalPath())) {
-      $this->raiseCloneException();
-    }
+    $this->validateWorkingCopy($repository->getLocalPath());
 
     if (!$this->commit) {
       return;
