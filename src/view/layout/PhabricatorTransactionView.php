@@ -142,7 +142,7 @@ final class PhabricatorTransactionView extends AphrontView {
     }
     return
       '<div class="phabricator-transaction-content">'.
-        $content.
+        implode('', $content).
       '</div>';
   }
 

@@ -100,7 +100,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
   }
 
   public function render() {
-    $content = $this->renderHTMLChildren();
+    $content = $this->renderChildren();
 
     $title = $this->title;
     if (($title === null) && $this->isEmptyContent($content)) {

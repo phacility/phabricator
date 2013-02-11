@@ -70,6 +70,6 @@ final class PhabricatorProfileHeaderView extends AphrontView {
       self::renderSingleView($this->profileActions),
       $image,
       $description).
-      $this->renderHTMLChildren();
+      $this->renderChildren();
   }
 }

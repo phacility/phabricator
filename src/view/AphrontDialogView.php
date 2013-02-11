@@ -158,7 +158,7 @@ final class AphrontDialogView extends AphrontView {
     }
 
     $buttons[] = phutil_tag('div', array('style' => 'clear: both;'), '');
-    $children = $this->renderHTMLChildren();
+    $children = $this->renderChildren();
 
     $content = hsprintf(
       '%s%s%s',

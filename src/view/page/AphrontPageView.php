@@ -22,7 +22,7 @@ abstract class AphrontPageView extends AphrontView {
   }
 
   protected function getBody() {
-    return $this->renderChildren();
+    return implode('', $this->renderChildren());
   }
 
   protected function getTail() {

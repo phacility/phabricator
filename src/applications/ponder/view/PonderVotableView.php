@@ -85,7 +85,7 @@ final class PonderVotableView extends AphrontView {
           array(
             'class' => 'ponder-votebox-content',
           ),
-          $this->renderHTMLChildren()),
+          $this->renderChildren()),
       ));
   }
 

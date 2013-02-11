@@ -17,7 +17,7 @@ final class DifferentialPrimaryPaneView extends AphrontView {
         'class' => 'differential-primary-pane',
         'id'    => $this->id,
       ),
-      $this->renderHTMLChildren());
+      $this->renderChildren());
   }
 
 }

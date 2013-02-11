@@ -21,7 +21,7 @@ final class AphrontRequestFailureView extends AphrontView {
         '<div class="aphront-request-failure-body">%s</div>'.
       '</div>',
       $this->header,
-      $this->renderHTMLChildren());
+      $this->renderChildren());
   }
 
 }

@@ -33,14 +33,6 @@ abstract class AphrontView extends Phobject {
     foreach ($this->children as $child) {
       $out[] = $this->renderSingleView($child);
     }
-    return implode('', $out);
-  }
-
-  final protected function renderHTMLChildren() {
-    $out = array();
-    foreach ($this->children as $child) {
-      $out[] = $this->renderSingleView($child);
-    }
     return $out;
   }
 

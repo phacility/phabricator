@@ -123,7 +123,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       array(
         'class' => 'differential-inline-comment-edit-body',
       ),
-      $this->renderHTMLChildren());
+      $this->renderChildren());
 
     $edit = phutil_tag(
       'edit',

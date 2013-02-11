@@ -55,7 +55,7 @@ class PhabricatorBarePageView extends AphrontPageView {
   protected function willRenderPage() {
     // We render this now to resolve static resources so they can appear in the
     // document head.
-    $this->bodyContent = $this->renderChildren();
+    $this->bodyContent = implode('', $this->renderChildren());
   }
 
   protected function getHead() {

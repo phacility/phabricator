@@ -88,7 +88,7 @@ final class AphrontPanelView extends AphrontView {
       '<div class="aphront-panel-header">'.
         $buttons.$header.$caption.
       '</div>';
-    $table = $this->renderChildren();
+    $table = implode('', $this->renderChildren());
 
     require_celerity_resource('aphront-panel-view-css');
 

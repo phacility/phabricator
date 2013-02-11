@@ -89,7 +89,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
         array(
           'class' => 'phabricator-feed-story-body',
         ),
-        phutil_safe_html($this->renderChildren()));
+        phutil_safe_html(implode('', $this->renderChildren())));
 
       if ($this->epoch) {
         $foot = phabricator_datetime($this->epoch, $this->user);

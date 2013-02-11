@@ -24,7 +24,7 @@ final class AphrontContextBarView extends AphrontView {
         '<div style="clear: both;"></div>'.
       '</div>',
       $view->render(),
-      $this->renderHTMLChildren());
+      $this->renderChildren());
   }
 
 }

@@ -10,7 +10,7 @@ final class AphrontListFilterView extends AphrontView {
           '<td class="aphront-list-filter-view-controls">%s</td>'.
         '</tr>'.
       '</table>',
-      $this->renderHTMLChildren());
+      $this->renderChildren());
   }
 
 }
