@@ -70,7 +70,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
       array(
         'class' => 'phabricator-pinboard-item-view',
       ),
-      $this->renderHTMLView(
+      $this->renderSingleView(
         array(
           $header,
           $image,

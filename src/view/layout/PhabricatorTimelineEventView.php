@@ -138,7 +138,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         ),
         array($title, $extra));
 
-      $title = $this->renderHTMLView(array($icon, $title));
+      $title = $this->renderSingleView(array($icon, $title));
     }
 
     $wedge = phutil_tag(
@@ -275,7 +275,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
             ->setAnchorName($this->anchor)
             ->render();
 
-          $date = $this->renderHTMLView(
+          $date = $this->renderSingleView(
             array(
               $anchor,
               phutil_tag(

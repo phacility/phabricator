@@ -81,6 +81,6 @@ final class PholioMockImagesView extends AphrontView {
         $thumbnails);
     }
 
-    return $this->renderHTMLView($mockview);
+    return $this->renderSingleView($mockview);
   }
 }

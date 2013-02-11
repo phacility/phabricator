@@ -92,7 +92,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
         'class' => $class,
         'id'    => $id,
       ),
-      $this->renderHTMLView(
+      $this->renderSingleView(
         array(
           id(new PhabricatorAnchorView())
             ->setAnchorName($changeset->getAnchorName())

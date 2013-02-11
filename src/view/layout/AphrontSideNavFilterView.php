@@ -231,7 +231,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         ),
         '');
 
-      $local_menu = $this->renderHTMLView(
+      $local_menu = $this->renderSingleView(
         array(
           $menu_background,
           phutil_tag(

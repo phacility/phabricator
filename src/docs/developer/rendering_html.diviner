@@ -125,12 +125,12 @@ return `phutil_tag()` or `javelin_tag()`:
   return phutil_tag('div', ...);
 
 @{class:AphrontView} subclasses can use `renderHTMLChildren()` and
-`renderHTMLView()` to build @{class@libphutil:PhutilSafeHTML} objects from
+`renderSingleView()` to build @{class@libphutil:PhutilSafeHTML} objects from
 children or arbitrary lists of components.
 
-@{class:AphrontView} subclasses should avoid `renderChildren()` and
-`renderSingleView()` and transition callers to the `HTML` varieties. These older
-methods do not return @{class@libphutil:PhutilSafeHTML} objects.
+@{class:AphrontView} subclasses should avoid `renderChildren()` and transition
+callers to `renderHTMLChildren()`. This older method does not return
+@{class@libphutil:PhutilSafeHTML} objects.
 
 = Internationalization: pht() =
 

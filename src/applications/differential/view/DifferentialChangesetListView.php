@@ -187,7 +187,7 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    return $this->renderHTMLView(
+    return $this->renderSingleView(
       array(
         id(new PhabricatorHeaderView())
           ->setHeader($this->getTitle())

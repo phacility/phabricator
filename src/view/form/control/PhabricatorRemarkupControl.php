@@ -154,7 +154,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       array(
         'sigil' => 'remarkup-assist-control',
       ),
-      $this->renderHTMLView(
+      $this->renderSingleView(
         array(
           $buttons,
           parent::renderInput(),

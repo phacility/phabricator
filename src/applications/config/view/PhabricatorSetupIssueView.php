@@ -114,7 +114,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue',
       ),
-      $this->renderHTMLView(
+      $this->renderSingleView(
         array(
           $name,
           $description,
@@ -187,7 +187,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-config',
       ),
-      self::renderHTMLView(
+      self::renderSingleView(
         array(
           $table_info,
           $table,
@@ -293,7 +293,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-config',
       ),
-      $this->renderHTMLView(
+      $this->renderSingleView(
         array(
           $table_info,
           $table,

@@ -166,7 +166,7 @@ final class PhabricatorObjectItemView extends AphrontView {
       array(
         'class' => 'phabricator-object-item-content',
       ),
-      $this->renderHTMLView(
+      $this->renderSingleView(
         array(
           $header,
           $attrs,
