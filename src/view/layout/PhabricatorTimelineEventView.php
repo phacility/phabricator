@@ -296,7 +296,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         array(
           'class' => 'phabricator-timeline-extra',
         ),
-        array_interleave(" \xC2\xB7 ", $extra));
+        phutil_implode_html(" \xC2\xB7 ", $extra));
     }
 
     return $extra;

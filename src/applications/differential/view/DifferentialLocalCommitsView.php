@@ -74,7 +74,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
         }
         $parents[$k] = substr($parent, 0, 16);
       }
-      $parents = array_interleave(phutil_tag('br'), $parents);
+      $parents = phutil_implode_html(phutil_tag('br'), $parents);
       $row[] = phutil_tag('td', array(), $parents);
 
       $author = nonempty(

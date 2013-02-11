@@ -108,13 +108,13 @@ must to maintain backward compatibility.)
 
 If you need to build a list of items with some element in between each of them
 (like a middot, comma, or vertical bar) you can use
-@{function:array_interleave}:
+@{function:phutil_implode_html}:
 
   // Render links with commas between them.
   phutil_tag(
     'div',
     array(),
-    array_interleave(', ', $list_of_links));
+    phutil_implode_html(', ', $list_of_links));
 
 = AphrontView Classes =
 

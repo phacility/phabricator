@@ -449,9 +449,7 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($parents as $parent) {
         $parent_links[] = $handles[$parent->getPHID()]->renderLink();
       }
-      $props['Parents'] = array_interleave(
-        " \xC2\xB7 ",
-        $parent_links);
+      $props['Parents'] = phutil_implode_html(" \xC2\xB7 ", $parent_links);
     }
 
     $request = $this->getDiffusionRequest();
@@ -488,7 +486,7 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($task_phids as $phid) {
         $task_list[] = $handles[$phid]->renderLink();
       }
-      $task_list = array_interleave(phutil_tag('br'), $task_list);
+      $task_list = phutil_implode_html(phutil_tag('br'), $task_list);
       $props['Tasks'] = $task_list;
     }
 
@@ -497,7 +495,7 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($proj_phids as $phid) {
         $proj_list[] = $handles[$phid]->renderLink();
       }
-      $proj_list = array_interleave(phutil_tag('br'), $proj_list);
+      $proj_list = phutil_implode_html(phutil_tag('br'), $proj_list);
       $props['Projects'] = $proj_list;
     }
 
@@ -938,7 +936,7 @@ final class DiffusionCommitController extends DiffusionController {
         $ref);
     }
 
-    return array_interleave(', ', $ref_links);
+    return phutil_implode_html(', ', $ref_links);
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {

@@ -238,7 +238,7 @@ final class PhabricatorOwnersListController
           $pkg_owners[$key] = phutil_tag('strong', array(), $pkg_owners[$key]);
         }
       }
-      $pkg_owners = array_interleave(phutil_tag('br'), $pkg_owners);
+      $pkg_owners = phutil_implode_html(phutil_tag('br'), $pkg_owners);
 
       $pkg_paths = idx($paths, $package->getID(), array());
       foreach ($pkg_paths as $key => $path) {
@@ -265,7 +265,7 @@ final class PhabricatorOwnersListController
           $pkg_paths[$key] = $path->getPath();
         }
       }
-      $pkg_paths = array_interleave(phutil_tag('br'), $pkg_paths);
+      $pkg_paths = phutil_implode_html(phutil_tag('br'), $pkg_paths);
 
       $rows[] = array(
         phutil_tag(

@@ -64,7 +64,7 @@ final class PhabricatorOwnersDetailController
     foreach ($owners as $owner) {
       $owner_links[] = $handles[$owner->getUserPHID()]->renderLink();
     }
-    $owner_links = array_interleave(phutil_tag('br'), $owner_links);
+    $owner_links = phutil_implode_html(phutil_tag('br'), $owner_links);
     $rows[] = array('Owners', $owner_links);
 
     $rows[] = array(
@@ -98,7 +98,7 @@ final class PhabricatorOwnersDetailController
         $repo_name,
         $path_link);
     }
-    $path_links = array_interleave(phutil_tag('br'), $path_links);
+    $path_links = phutil_implode_html(phutil_tag('br'), $path_links);
     $rows[] = array('Paths', $path_links);
 
     $table = new AphrontTableView($rows);

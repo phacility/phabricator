@@ -27,7 +27,7 @@ final class PhabricatorHelpKeyboardShortcutController
       foreach ($shortcut['keys'] as $stroke) {
         $keystrokes[] = phutil_tag('kbd', array(), $stroke);
       }
-      $keystrokes = array_interleave(' or ', $keystrokes);
+      $keystrokes = phutil_implode_html(' or ', $keystrokes);
       $rows[] = phutil_tag(
         'tr',
         array(),

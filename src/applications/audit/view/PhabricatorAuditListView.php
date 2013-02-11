@@ -129,7 +129,7 @@ final class PhabricatorAuditListView extends AphrontView {
       }
 
       $reasons = $audit->getAuditReasons();
-      $reasons = array_interleave(phutil_tag('br'), $reasons);
+      $reasons = phutil_implode_html(phutil_tag('br'), $reasons);
 
       $status_code = $audit->getAuditStatus();
       $status = PhabricatorAuditStatusConstants::getStatusName($status_code);

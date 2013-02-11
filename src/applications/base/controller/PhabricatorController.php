@@ -277,7 +277,7 @@ abstract class PhabricatorController extends AphrontController {
       $items[] = $this->getHandle($phid)->renderLink();
     }
 
-    return array_interleave($style_map[$style], $items);
+    return phutil_implode_html($style_map[$style], $items);
   }
 
   protected function buildApplicationMenu() {

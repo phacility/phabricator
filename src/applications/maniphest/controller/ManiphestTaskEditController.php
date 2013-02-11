@@ -456,7 +456,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     if ($files) {
       $file_display = mpull($files, 'getName');
-      $file_display = array_interleave(phutil_tag('br'), $file_display);
+      $file_display = phutil_implode_html(phutil_tag('br'), $file_display);
 
       $form->appendChild(
         id(new AphrontFormMarkupControl())

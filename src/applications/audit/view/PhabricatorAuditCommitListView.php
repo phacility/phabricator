@@ -73,7 +73,7 @@ final class PhabricatorAuditCommitListView extends AphrontView {
         $commit->getCommitData()->getSummary(),
         PhabricatorAuditCommitStatusConstants::getStatusName(
           $commit->getAuditStatus()),
-        array_interleave(', ', $auditors),
+        phutil_implode_html(', ', $auditors),
         phabricator_datetime($commit->getEpoch(), $this->user),
       );
     }

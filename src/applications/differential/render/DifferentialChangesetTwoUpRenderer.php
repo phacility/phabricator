@@ -160,7 +160,7 @@ final class DifferentialChangesetTwoUpRenderer
                 'colspan' => 2,
                 'class' => 'show-more',
               ),
-              array_interleave(
+              phutil_implode_html(
                 " \xE2\x80\xA2 ", // Bullet
                 $contents)),
             phutil_tag(
