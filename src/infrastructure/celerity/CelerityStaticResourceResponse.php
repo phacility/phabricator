@@ -103,7 +103,7 @@ final class CelerityStaticResourceResponse {
   }
 
   private function renderResource(array $resource) {
-    $uri = PhabricatorEnv::getCDNURI($resource['uri']);
+    $uri = $this->getURI($resource);
     switch ($resource['type']) {
       case 'css':
         return phutil_tag(
@@ -206,13 +206,41 @@ final class CelerityStaticResourceResponse {
     $this->resolveResources();
     $resources = array();
     foreach ($this->packaged as $resource) {
-      $resources[] = PhabricatorEnv::getCDNURI($resource['uri']);
+      $resources[] = $this->getURI($resource);
     }
     if ($resources) {
       $response['javelin_resources'] = $resources;
     }
 
     return $response;
+  }
+
+  private function getURI($resource) {
+    $uri = $resource['uri'];
+
+    // In developer mode, we dump file modification times into the URI. When a
+    // page is reloaded in the browser, any resources brought in by Ajax calls
+    // do not trigger revalidation, so without this it's very difficult to get
+    // changes to Ajaxed-in CSS to work (you must clear your cache or rerun
+    // the map script). In production, we can assume the map script gets run
+    // after changes, and safely skip this.
+    if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+      $root = dirname(phutil_get_library_root('phabricator')).'/webroot/';
+      if (isset($resource['disk'])) {
+        $mtime = (int)filemtime($root.$resource['disk']);
+      } else {
+        $mtime = 0;
+        foreach ($resource['symbols'] as $symbol) {
+          $map = CelerityResourceMap::getInstance();
+          $symbol_info = $map->lookupSymbolInformation($symbol);
+          $mtime = max($mtime, (int)filemtime($root.$symbol_info['disk']));
+        }
+      }
+
+      $uri = preg_replace('@^/res/@', '/res/'.$mtime.'T/', $uri);
+    }
+
+    return PhabricatorEnv::getCDNURI($uri);
   }
 
 }
