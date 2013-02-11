@@ -301,14 +301,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $comment_header = id(new PhabricatorHeaderView())
       ->setHeader($is_serious ? pht('Add Comment') : pht('Weigh In'));
 
-    $preview_panel =
+    $preview_panel = hsprintf(
       '<div class="aphront-panel-preview">
         <div id="transaction-preview">
-          <div class="aphront-panel-preview-loading-text">
-            '.pht('Loading preview...').'
-          </div>
+          <div class="aphront-panel-preview-loading-text">%s</div>
         </div>
-      </div>';
+      </div>',
+      pht('Loading preview...'));
 
     $transaction_view = new ManiphestTransactionListView();
     $transaction_view->setTransactions($transactions);

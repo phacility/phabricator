@@ -299,7 +299,7 @@ final class PhabricatorLoginController
     return $this->buildApplicationPage(
       array(
         $error_view,
-        $login_message,
+        phutil_safe_html($login_message),
         $panel,
       ),
       array(

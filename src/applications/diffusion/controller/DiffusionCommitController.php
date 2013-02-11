@@ -687,7 +687,7 @@ final class DiffusionCommitController extends DiffusionController {
       'inlineuri'  => '/diffusion/inline/preview/'.$commit->getPHID().'/',
     ));
 
-    $preview_panel =
+    $preview_panel = hsprintf(
       '<div class="aphront-panel-preview aphront-panel-flush">
         <div id="audit-preview">
           <div class="aphront-panel-preview-loading-text">
@@ -696,27 +696,24 @@ final class DiffusionCommitController extends DiffusionController {
         </div>
         <div id="inline-comment-preview">
         </div>
-      </div>';
+      </div>');
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'id' => $pane_id,
       ),
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'differential-add-comment-panel',
-        ),
+      hsprintf(
+        '<div class="differential-add-comment-panel">%s%s%s</div>',
         id(new PhabricatorAnchorView())
           ->setAnchorName('comment')
           ->setNavigationMarker(true)
-          ->render().
-        $panel->render().
+          ->render(),
+        $panel->render(),
         $preview_panel));
   }
 

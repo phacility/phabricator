@@ -134,6 +134,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
     $panel->appendChild('<h1>'.pht('LDAP login').'</h1>');
     $panel->appendChild($ldap_form);
 
+    $error_view = null;
     if (isset($errors) && count($errors) > 0) {
       $error_view = new AphrontErrorView();
       $error_view->setTitle(pht('Login Failed'));
@@ -142,7 +143,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
 
     return $this->buildStandardPageResponse(
       array(
-        isset($error_view) ? $error_view : null,
+        $error_view,
         $panel,
       ),
       array(

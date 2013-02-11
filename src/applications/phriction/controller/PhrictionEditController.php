@@ -231,17 +231,15 @@ final class PhrictionEditController
       ->setHeader($panel_header)
       ->appendChild($form);
 
-    $preview_panel =
+    $preview_panel = hsprintf(
       '<div class="aphront-panel-preview aphront-panel-preview-wide">
-        <div class="phriction-document-preview-header">
-          '.pht('Document Preview').'
-        </div>
+        <div class="phriction-document-preview-header">%s</div>
         <div id="document-preview">
-          <div class="aphront-panel-preview-loading-text">
-            '.pht('Loading preview...').'
-          </div>
+          <div class="aphront-panel-preview-loading-text">%s</div>
         </div>
-      </div>';
+      </div>',
+      pht('Document Preview'),
+      pht('Loading preview...'));
 
     Javelin::initBehavior(
       'phriction-document-preview',

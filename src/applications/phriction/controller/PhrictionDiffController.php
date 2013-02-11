@@ -155,28 +155,32 @@ final class PhrictionDiffController
         $link_r = pht('Most Recent Change');
       }
 
-      $navigation_table =
+      $navigation_table = hsprintf(
         '<table class="phriction-history-nav-table">
           <tr>
-            <td class="nav-prev">'.$link_l.'</td>
-            <td class="nav-next">'.$link_r.'</td>
+            <td class="nav-prev">%s</td>
+            <td class="nav-next">%s</td>
           </tr>
-        </table>';
+        </table>',
+        $link_l,
+        $link_r);
     }
 
 
 
-    $output =
+    $output = hsprintf(
       '<div class="phriction-document-history-diff">'.
-        $comparison_table->render().
-        '<br />'.
-        '<br />'.
-        $navigation_table.
+        '%s<br /><br />%s'.
         '<table class="phriction-revert-table">'.
-          '<tr><td>'.$revert_l.'</td><td>'.$revert_r.'</td>'.
+          '<tr><td>%s</td><td>%s</td>'.
         '</table>'.
-        $output.
-      '</div>';
+        '%s'.
+      '</div>',
+      $comparison_table->render(),
+      $navigation_table,
+      $revert_l,
+      $revert_r,
+      $output);
 
     return $this->buildStandardPageResponse(
       array(

@@ -409,7 +409,9 @@ final class PhabricatorMainMenuView extends AphrontView {
       '');
 
     return array(
-      $bubble_tag.$message_tag, $notification_dropdown);
+      hsprintf('%s%s', $bubble_tag, $message_tag),
+      $notification_dropdown,
+    );
   }
 
   private function renderMenuIcon($name) {
