@@ -51,7 +51,8 @@ final class PhabricatorSettingsPanelAccount
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
         $notice->setTitle('Changes Saved');
-        $notice->appendChild('<p>Your changes have been saved.</p>');
+        $notice->appendChild(
+          phutil_tag('p', array(), 'Your changes have been saved.'));
         $notice = $notice->render();
       }
     } else {

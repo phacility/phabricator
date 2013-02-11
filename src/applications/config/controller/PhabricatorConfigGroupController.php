@@ -85,13 +85,15 @@ final class PhabricatorConfigGroupController
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
         $current_value = PhabricatorConfigJSON::prettyPrintJSON(
           $current_value);
-        $current_value = phutil_render_tag(
+        $current_value = phutil_tag(
           'div',
           array(
             'class' => 'config-options-current-value',
           ),
-          '<span>'.pht('Current Value:').'</span> '.
-          phutil_escape_html($current_value));
+          array(
+            phutil_tag('span', array(), pht('Current Value:')),
+            ' '.$current_value,
+          ));
 
         $item->appendChild($current_value);
       }

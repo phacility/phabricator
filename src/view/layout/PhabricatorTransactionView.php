@@ -105,12 +105,12 @@ final class PhabricatorTransactionView extends AphrontView {
         ->setAnchorName($this->anchorName)
         ->render();
 
-      $info[] = $anchor.phutil_render_tag(
+      $info[] = $anchor.phutil_tag(
         'a',
         array(
           'href'  => '#'.$this->anchorName,
         ),
-        phutil_escape_html($this->anchorText));
+        $this->anchorText);
     }
 
     $info = implode(' &middot; ', $info);

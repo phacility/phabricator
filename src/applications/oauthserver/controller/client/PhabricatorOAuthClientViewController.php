@@ -84,7 +84,7 @@ extends PhabricatorOAuthClientBaseController {
     $panel->appendChild($form);
     $admin_panel = null;
     if ($client->getCreatorPHID() == $current_user->getPHID()) {
-      $edit_button = phutil_render_tag(
+      $edit_button = phutil_tag(
         'a',
         array(
           'href'  => $client->getEditURI(),

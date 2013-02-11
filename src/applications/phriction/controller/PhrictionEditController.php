@@ -173,7 +173,7 @@ final class PhrictionEditController
         ($draft->getDraft() != $content->getContent())) {
       $content_text = $draft->getDraft();
 
-      $discard = phutil_render_tag(
+      $discard = phutil_tag(
         'a',
         array(
           'href' => $request->getRequestURI()->alter('nodraft', true),
@@ -183,9 +183,9 @@ final class PhrictionEditController
       $draft_note = new AphrontErrorView();
       $draft_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $draft_note->setTitle('Recovered Draft');
-      $draft_note->appendChild(
-        '<p>'.pht('Showing a saved draft of your edits, you can %s.',
-         $discard).'</p>');
+      $draft_note->appendChild(hsprintf(
+        '<p>Showing a saved draft of your edits, you can %s.</p>',
+        $discard));
     } else {
       $content_text = $content->getContent();
       $draft_note = null;
@@ -251,7 +251,7 @@ final class PhrictionEditController
         'uri'       => '/phriction/preview/?draftkey='.$draft_key,
       ));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $draft_note,
         $error_view,
@@ -260,6 +260,7 @@ final class PhrictionEditController
       ),
       array(
         'title' => pht('Edit Document'),
+        'device' => true,
       ));
   }
 

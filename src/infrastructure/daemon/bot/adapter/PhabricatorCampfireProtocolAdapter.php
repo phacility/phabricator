@@ -118,6 +118,7 @@ extends PhabricatorBaseProtocolAdapter {
 
       return id(new PhabricatorBotMessage())
         ->setCommand('MESSAGE')
+        ->setSender($m_obj['user_id'])
         ->setTarget($m_obj['room_id'])
         ->setBody($m_obj['body']);
     }

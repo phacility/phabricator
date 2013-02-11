@@ -143,7 +143,7 @@ abstract class PhabricatorApplicationTransaction
     foreach ($phids as $phid) {
       $links[] = $this->renderHandleLink($phid);
     }
-    return implode(', ', $links);
+    return phutil_safe_html(implode(', ', $links));
   }
 
   public function getIcon() {

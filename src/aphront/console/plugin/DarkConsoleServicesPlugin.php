@@ -136,21 +136,26 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       'start' => PhabricatorStartup::getStartTime(),
       'end'   => microtime(true),
       'log'   => $log,
+      'analyzeURI' => (string)$this
+        ->getRequestURI()
+        ->alter('__analyze__', true),
+      'didAnalyze' => isset($_REQUEST['__analyze__']),
     );
   }
 
-  public function render() {
+  public function renderPanel() {
     $data = $this->getData();
+
     $log = $data['log'];
     $results = array();
 
     $results[] =
       '<div class="dark-console-panel-header">'.
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
-            'href'  => $this->getRequestURI()->alter('__analyze__', true),
-            'class' => isset($_REQUEST['__analyze__'])
+            'href'  => $data['analyzeURI'],
+            'class' => $data['didAnalyze']
               ? 'disabled button'
               : 'green button',
           ),
@@ -211,13 +216,12 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
           $info = wordwrap($info, 128, "\n", true);
 
           if (!empty($row['explain'])) {
-            $analysis = phutil_escape_html($row['explain']['reason']);
-            $analysis = phutil_render_tag(
+            $analysis = phutil_tag(
               'span',
               array(
                 'class' => 'explain-sev-'.$row['explain']['sev'],
               ),
-              $analysis);
+              $row['explain']['reason']);
           }
 
           $info = phutil_escape_html($info);

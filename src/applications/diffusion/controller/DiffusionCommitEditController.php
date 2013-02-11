@@ -62,15 +62,15 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setValue($proj_t_values)
         ->setID($tokenizer_id)
         ->setCaption(
-          javelin_render_tag(
+          javelin_tag(
             'a',
             array(
               'href'        => '/project/create/',
               'mustcapture' => true,
               'sigil'       => 'project-create',
             ),
-            'Create New Project'))
-            ->setDatasource('/typeahead/common/projects/'));;
+            pht('Create New Project')))
+        ->setDatasource('/typeahead/common/projects/'));;
 
     Javelin::initBehavior('project-create', array(
       'tokenizerID' => $tokenizer_id,

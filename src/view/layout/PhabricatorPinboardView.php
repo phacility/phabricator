@@ -22,16 +22,16 @@ final class PhabricatorPinboardView extends AphrontView {
       $string = nonempty($this->noDataString, pht('No data.'));
       return id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
-        ->appendChild(phutil_escape_html($string))
+        ->appendChild($string)
         ->render();
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-pinboard-view',
       ),
-      $this->renderSingleView($this->items));
+      $this->renderHTMLView($this->items));
   }
 
 }

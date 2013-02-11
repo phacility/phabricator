@@ -24,32 +24,35 @@ final class PhabricatorHeaderView extends AphrontView {
   public function render() {
     require_celerity_resource('phabricator-header-view-css');
 
-    $header = phutil_escape_html($this->header);
+    $header = array($this->header);
 
     if ($this->objectName) {
-      $header = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/'.$this->objectName,
-        ),
-        phutil_escape_html($this->objectName)).' '.$header;
+      array_unshift(
+        $header,
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/'.$this->objectName,
+          ),
+          $this->objectName),
+        ' ');
     }
 
     if ($this->tags) {
-      $header .= phutil_render_tag(
+      $header[] = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-header-tags',
         ),
-        self::renderSingleView($this->tags));
+        $this->renderHTMLView($this->tags));
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-header-shell',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'h1',
         array(
           'class' => 'phabricator-header-view',

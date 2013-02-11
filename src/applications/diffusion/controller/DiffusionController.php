@@ -246,9 +246,8 @@ abstract class DiffusionController extends PhabricatorController {
         break;
       case 'change':
         $view_name = 'Change';
-        $crumb_list[] = $crumb->setRawName(
-          phutil_escape_html($path).' ('.$commit_link.')'
-        );
+        $crumb_list[] = $crumb->setName(
+          hsprintf('%s (%s)', $path, $commit_link));
         return $crumb_list;
     }
 
@@ -278,7 +277,8 @@ abstract class DiffusionController extends PhabricatorController {
       $thus_far = '';
       foreach ($path_parts as $path_part) {
         $thus_far .= $path_part.'/';
-        $path_sections[] = phutil_render_tag(
+        $path_sections[] = '/';
+        $path_sections[] = phutil_tag(
           'a',
           array(
             'href' => $drequest->generateURI(
@@ -286,20 +286,19 @@ abstract class DiffusionController extends PhabricatorController {
                 'path' => $thus_far,
               ) + $uri_params),
           ),
-          phutil_escape_html($path_part));
+          $path_part);
       }
 
-      $path_sections[] = phutil_escape_html($last);
-      $path_sections = '/'.implode('/', $path_sections);
+      $path_sections[] = '/'.$last;
 
       $crumb_list[] = id(new PhabricatorCrumbView())
-        ->setRawName($path_sections);
+        ->setName($path_sections);
     }
 
     $last_crumb = array_pop($crumb_list);
 
     if ($raw_commit) {
-      $jump_link = phutil_render_tag(
+      $jump_link = phutil_tag(
         'a',
         array(
           'href' => $drequest->generateURI(
@@ -308,13 +307,14 @@ abstract class DiffusionController extends PhabricatorController {
             ) + $uri_params),
         ),
         'Jump to HEAD');
-      $last_crumb->setRawName(
-        $last_crumb->getNameForRender() . " @ {$commit_link} ({$jump_link})"
-      );
+
+      $name = $last_crumb->getName();
+      $name = hsprintf('%s @ %s (%s)', $name, $commit_link, $jump_link);
+      $last_crumb->setName($name);
     } else if ($spec['view'] != 'lint') {
-      $last_crumb->setRawName(
-        $last_crumb->getNameForRender() . " @ HEAD"
-      );
+      $name = $last_crumb->getName();
+      $name = hsprintf('%s @ HEAD', $name);
+      $last_crumb->setName($name);
     }
 
     $crumb_list[] = $last_crumb;

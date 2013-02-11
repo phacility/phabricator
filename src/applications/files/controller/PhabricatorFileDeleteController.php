@@ -33,9 +33,9 @@ final class PhabricatorFileDeleteController extends PhabricatorFileController {
     $dialog = new AphrontDialogView();
     $dialog->setUser($user);
     $dialog->setTitle('Really delete file?');
-    $dialog->appendChild(
-      "<p>Permanently delete '".phutil_escape_html($file->getName())."'? This ".
-      "action can not be undone.");
+    $dialog->appendChild(hsprintf(
+      "<p>Permanently delete '%s'? This action can not be undone.</p>",
+      $file->getName()));
     $dialog->addSubmitButton('Delete');
     $dialog->addCancelButton($file->getInfoURI());
 

@@ -35,30 +35,30 @@ final class AphrontFormSelectControl extends AphrontFormControl {
 
     $option_tags = self::renderOptions($selected, $options);
 
-    return javelin_render_tag(
+    return javelin_tag(
       'select',
       $attrs,
-      implode("\n", $option_tags));
+      $option_tags);
   }
 
   private static function renderOptions($selected, array $options) {
     $tags = array();
     foreach ($options as $value => $thing) {
       if (is_array($thing)) {
-        $tags[] = phutil_render_tag(
+        $tags[] = phutil_tag(
           'optgroup',
           array(
             'label' => $value,
           ),
-          implode("\n", self::renderOptions($selected, $thing)));
+          self::renderOptions($selected, $thing));
       } else {
-        $tags[] = phutil_render_tag(
+        $tags[] = phutil_tag(
           'option',
           array(
             'selected' => ($value == $selected) ? 'selected' : null,
             'value'    => $value,
           ),
-          phutil_escape_html($thing));
+          $thing);
       }
     }
     return $tags;

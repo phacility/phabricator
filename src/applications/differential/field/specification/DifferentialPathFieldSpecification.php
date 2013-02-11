@@ -19,7 +19,7 @@ final class DifferentialPathFieldSpecification
       return null;
     }
 
-    return phutil_escape_html($path);
+    return $path;
   }
 
 }

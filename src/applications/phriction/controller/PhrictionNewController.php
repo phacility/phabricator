@@ -25,7 +25,7 @@ final class PhrictionNewController extends PhrictionController {
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle(pht('New Document'))
-      ->appendChild(phutil_render_tag('p',
+      ->appendChild(phutil_tag('p',
         array(),
       pht('Create a new document at')))
       ->appendChild($view)

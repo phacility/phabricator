@@ -66,7 +66,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       );
 
       $item->appendChild(
-        phutil_render_tag(
+        phutil_tag(
           'span',
           array(
             'class' => implode(' ', $classes),

@@ -33,22 +33,21 @@ final class PhabricatorPinboardItemView extends AphrontView {
   public function render() {
     $header = null;
     if ($this->header) {
-      $header = hsprintf('<a href="%s">%s</a>', $this->uri, $this->header);
-      $header = phutil_render_tag(
+      $header = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-pinboard-item-header',
         ),
-        $header);
+        phutil_tag('a', array('href' => $this->uri), $this->header));
     }
 
-    $image = phutil_render_tag(
+    $image = phutil_tag(
       'a',
       array(
         'href' => $this->uri,
         'class' => 'phabricator-pinboard-item-image-link',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'img',
         array(
           'src'     => $this->imageURI,
@@ -56,9 +55,9 @@ final class PhabricatorPinboardItemView extends AphrontView {
           'height'  => $this->imageHeight,
         )));
 
-    $content = $this->renderChildren();
+    $content = $this->renderHTMLChildren();
     if ($content) {
-      $content = phutil_render_tag(
+      $content = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-pinboard-item-content',
@@ -66,14 +65,17 @@ final class PhabricatorPinboardItemView extends AphrontView {
         $content);
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-pinboard-item-view',
       ),
-      $header.
-      $image.
-      $content);
+      $this->renderHTMLView(
+        array(
+          $header,
+          $image,
+          $content,
+        )));
   }
 
 }

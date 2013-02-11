@@ -225,7 +225,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'sigil' => 'year-input',
       ));
 
-    $cal_icon = javelin_render_tag(
+    $cal_icon = javelin_tag(
       'a',
       array(
         'href'  => '#',
@@ -234,7 +234,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       '');
 
-    $time_sel = phutil_render_tag(
+    $time_sel = phutil_tag(
       'input',
       array(
         'name'  => $this->getTimeInputName(),
@@ -247,20 +247,19 @@ final class AphrontFormDateControl extends AphrontFormControl {
 
     Javelin::initBehavior('fancy-datepicker', array());
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'class' => 'aphront-form-date-container',
         'sigil' => 'phabricator-date-control',
       ),
-      self::renderSingleView(
-        array(
-          $days_sel,
-          $months_sel,
-          $years_sel,
-          $cal_icon,
-          $time_sel,
-        )));
+      array(
+        $days_sel,
+        $months_sel,
+        $years_sel,
+        $cal_icon,
+        $time_sel,
+      ));
   }
 
 }

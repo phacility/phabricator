@@ -47,7 +47,7 @@ final class DifferentialUnitFieldSpecification
       $rows[] = array(
         'style' => 'excuse',
         'name'  => 'Excuse',
-        'value' => nl2br(phutil_escape_html($excuse)),
+        'value' => phutil_escape_html_newlines($excuse),
         'show'  => true,
       );
     }
@@ -93,9 +93,9 @@ final class DifferentialUnitFieldSpecification
           $hidden[$result]++;
         }
 
-        $value = phutil_escape_html(idx($test, 'name'));
+        $value = idx($test, 'name');
         if (!empty($test['link'])) {
-          $value = phutil_render_tag(
+          $value = phutil_tag(
             'a',
             array(
               'href' => $test['link'],
@@ -105,7 +105,7 @@ final class DifferentialUnitFieldSpecification
         }
         $rows[] = array(
           'style' => $this->getResultStyle($result),
-          'name'  => phutil_escape_html(ucwords($result)),
+          'name'  => ucwords($result),
           'value' => $value,
           'show'  => $show,
         );
@@ -113,7 +113,7 @@ final class DifferentialUnitFieldSpecification
         $userdata = idx($test, 'userdata');
         if ($userdata) {
           $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
-          $userdata = $engine->markupText($userdata);
+          $userdata = phutil_safe_html($engine->markupText($userdata));
           $rows[] = array(
             'style' => 'details',
             'value' => $userdata,
@@ -200,21 +200,21 @@ final class DifferentialUnitFieldSpecification
         );
       if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
         $content =
-          "<p>This diff has postponed unit tests. The results should be ".
+          "This diff has postponed unit tests. The results should be ".
           "coming in soon. You should probably wait for them before accepting ".
-          "this diff.</p>";
+          "this diff.";
       } else if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_SKIP) {
         $content =
-          "<p>Unit tests were skipped when this diff was created. Make sure ".
-          "you are OK with that before you accept this diff.</p>";
+          "Unit tests were skipped when this diff was created. Make sure ".
+          "you are OK with that before you accept this diff.";
       } else {
         $content =
-          "<p>This diff has Unit Test Problems. Make sure you are OK with ".
-          "them before you accept this diff.</p>";
+          "This diff has Unit Test Problems. Make sure you are OK with ".
+          "them before you accept this diff.";
       }
       $unit_warning = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
-        ->appendChild($content)
+        ->appendChild(phutil_tag('p', array(), $content))
         ->setTitle(idx($titles, $diff->getUnitStatus(), 'Warning'));
     }
     return $unit_warning;

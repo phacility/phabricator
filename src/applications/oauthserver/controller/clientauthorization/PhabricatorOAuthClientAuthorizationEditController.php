@@ -45,7 +45,7 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
                                     $current_user);
 
     $panel = new AphrontPanelView();
-    $delete_button = phutil_render_tag(
+    $delete_button = phutil_tag(
       'a',
       array(
         'href' => $authorization->getDeleteURI(),
@@ -61,12 +61,12 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
         id(new AphrontFormMarkupControl())
         ->setLabel('Client')
         ->setValue(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $client->getViewURI(),
             ),
-            phutil_escape_html($client->getName())))
+            $client->getName()))
       )
       ->appendChild(
         id(new AphrontFormStaticControl())

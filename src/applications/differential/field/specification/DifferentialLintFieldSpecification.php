@@ -53,7 +53,7 @@ final class DifferentialLintFieldSpecification
       $rows[] = array(
         'style'   => 'excuse',
         'name'    => 'Excuse',
-        'value'   => nl2br(phutil_escape_html($excuse)),
+        'value'   => phutil_escape_html_newlines($excuse),
         'show'    => true,
       );
     }
@@ -67,7 +67,7 @@ final class DifferentialLintFieldSpecification
 
         $rows[] = array(
           'style' => 'section',
-          'name'  => phutil_escape_html($path),
+          'name'  => $path,
           'show'  => $show_limit,
         );
 
@@ -87,7 +87,7 @@ final class DifferentialLintFieldSpecification
             if ($diff->getID() != $this->getDiff()->getID()) {
               $href = '/D'.$diff->getRevisionID().'?id='.$diff->getID().$href;
             }
-            $line_link = phutil_render_tag(
+            $line_link = phutil_tag(
               'a',
               array(
                 'href' => $href,
@@ -108,11 +108,12 @@ final class DifferentialLintFieldSpecification
 
           $rows[] = array(
             'style' => $this->getSeverityStyle($severity),
-            'name'  => phutil_escape_html(ucwords($severity)),
+            'name'  => ucwords($severity),
             'value' => hsprintf(
-              "(%s) %s at {$line_link}",
+              '(%s) %s at %s',
               $code,
-              $name),
+              $name,
+              $line_link),
             'show'  => $show,
           );
 
@@ -130,7 +131,7 @@ final class DifferentialLintFieldSpecification
           if (strlen($description)) {
             $rows[] = array(
               'style' => 'details',
-              'value' => nl2br(phutil_escape_html($description)),
+              'value' => phutil_escape_html_newlines($description),
               'show'  => false,
             );
             if (empty($hidden['details'])) {
@@ -148,7 +149,7 @@ final class DifferentialLintFieldSpecification
         $rows[] = array(
           'style' => $this->getPostponedStyle(),
           'name' => 'Postponed',
-          'value' => phutil_escape_html($linter),
+          'value' => $linter,
           'show'  => false,
           );
         if (empty($hidden['postponed'])) {
@@ -244,24 +245,24 @@ final class DifferentialLintFieldSpecification
 
     if ($status == DifferentialLintStatus::LINT_SKIP) {
       $content =
-        "<p>This diff was created without running lint. Make sure you are ".
-        "OK with that before you accept this diff.</p>";
+        "This diff was created without running lint. Make sure you are ".
+        "OK with that before you accept this diff.";
 
     } else if ($status == DifferentialLintStatus::LINT_POSTPONED) {
       $severity = AphrontErrorView::SEVERITY_WARNING;
       $content =
-        "<p>Postponed linters didn't finish yet. Make sure you are OK with ".
-        "that before you accept this diff.</p>";
+        "Postponed linters didn't finish yet. Make sure you are OK with ".
+        "that before you accept this diff.";
 
     } else {
       $content =
-        "<p>This diff has Lint Problems. Make sure you are OK with them ".
-        "before you accept this diff.</p>";
+        "This diff has Lint Problems. Make sure you are OK with them ".
+        "before you accept this diff.";
     }
 
     return id(new AphrontErrorView())
       ->setSeverity($severity)
-      ->appendChild($content)
+      ->appendChild(phutil_tag('p', array(), $content))
       ->setTitle(idx($titles, $status, 'Warning'));
   }
 

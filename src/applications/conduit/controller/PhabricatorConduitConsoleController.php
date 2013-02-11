@@ -35,37 +35,30 @@ final class PhabricatorConduitConsoleController
         case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
           $status_view->setTitle('Deprecated Method');
           $status_view->appendChild(
-            phutil_escape_html(
-              nonempty(
-                $reason,
-                "This method is deprecated.")));
+            nonempty($reason, "This method is deprecated."));
           break;
         case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
           $status_view->setSeverity(AphrontErrorView::SEVERITY_WARNING);
           $status_view->setTitle('Unstable Method');
           $status_view->appendChild(
-            phutil_escape_html(
-              nonempty(
-                $reason,
-                "This method is new and unstable. Its interface is subject ".
-                "to change.")));
+            nonempty(
+              $reason,
+              "This method is new and unstable. Its interface is subject ".
+              "to change."));
           break;
       }
     }
 
-    $error_description = array();
     $error_types = $method_object->defineErrorTypes();
     if ($error_types) {
-      $error_description[] = '<ul>';
+      $error_description = array();
       foreach ($error_types as $error => $meaning) {
-        $error_description[] =
-          '<li>'.
-            '<strong>'.phutil_escape_html($error).':</strong> '.
-            phutil_escape_html($meaning).
-          '</li>';
+        $error_description[] = hsprintf(
+          '<li><strong>%s:</strong> %s</li>',
+          $error,
+          $meaning);
       }
-      $error_description[] = '</ul>';
-      $error_description = implode("\n", $error_description);
+      $error_description = phutil_tag('ul', array(), $error_description);
     } else {
       $error_description = "This method does not raise any specific errors.";
     }
@@ -87,10 +80,10 @@ final class PhabricatorConduitConsoleController
         id(new AphrontFormMarkupControl())
           ->setLabel('Errors')
           ->setValue($error_description))
-      ->appendChild(
+      ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Enter parameters using '.
         '<strong>JSON</strong>. For instance, to enter a list, type: '.
-        '<tt>["apple", "banana", "cherry"]</tt>');
+        '<tt>["apple", "banana", "cherry"]</tt>'));
 
     $params = $method_object->defineParamTypes();
     foreach ($params as $param => $desc) {
@@ -98,7 +91,7 @@ final class PhabricatorConduitConsoleController
         id(new AphrontFormTextControl())
           ->setLabel($param)
           ->setName("params[{$param}]")
-          ->setCaption(phutil_escape_html($desc)));
+          ->setCaption($desc));
     }
 
     $form

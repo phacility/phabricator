@@ -8,6 +8,16 @@ final class PhabricatorActionView extends AphrontView {
   private $disabled;
   private $workflow;
   private $renderAsForm;
+  private $download;
+
+  public function setDownload($download) {
+    $this->download = $download;
+    return $this;
+  }
+
+  public function getDownload() {
+    return $this->download;
+  }
 
   public function setHref($href) {
     $this->href = $href;
@@ -50,7 +60,7 @@ final class PhabricatorActionView extends AphrontView {
       }
 
       require_celerity_resource('sprite-icon-css');
-      $icon = phutil_render_tag(
+      $icon = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-action-view-icon sprite-icon '.
@@ -66,38 +76,46 @@ final class PhabricatorActionView extends AphrontView {
             'Call setUser() when rendering an action as a form.');
         }
 
-        $item = javelin_render_tag(
+        $item = javelin_tag(
           'button',
           array(
             'class' => 'phabricator-action-view-item',
           ),
-          phutil_escape_html($this->name));
+          $this->name);
 
-        $item = phabricator_render_form(
+        $sigils = array();
+        if ($this->workflow) {
+          $sigils[] = 'workflow';
+        }
+        if ($this->download) {
+          $sigils[] = 'download';
+        }
+
+        $item = phabricator_form(
           $this->user,
           array(
             'action'    => $this->href,
             'method'    => 'POST',
-            'sigil'     => $this->workflow ? 'workflow' : null,
+            'sigil'     => implode(' ', $sigils),
           ),
           $item);
       } else {
-        $item = javelin_render_tag(
+        $item = javelin_tag(
           'a',
           array(
             'href'  => $this->href,
             'class' => 'phabricator-action-view-item',
             'sigil' => $this->workflow ? 'workflow' : null,
           ),
-          phutil_escape_html($this->name));
+          $this->name);
       }
     } else {
-      $item = phutil_render_tag(
+      $item = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-action-view-item',
         ),
-        phutil_escape_html($this->name));
+        $this->name);
     }
 
     $classes = array();
@@ -106,12 +124,12 @@ final class PhabricatorActionView extends AphrontView {
       $classes[] = 'phabricator-action-view-disabled';
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'li',
       array(
         'class' => implode(' ', $classes),
       ),
-      $icon.$item);
+      array($icon, $item));
   }
 
   public static function getAvailableIcons() {

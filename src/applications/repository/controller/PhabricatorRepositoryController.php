@@ -33,7 +33,7 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
   }
 
   protected function renderDaemonNotice() {
-    $documentation = phutil_render_tag(
+    $documentation = phutil_tag(
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(
@@ -41,10 +41,10 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
       ),
       'Diffusion User Guide');
 
-    $common =
+    $common = hsprintf(
       "Without this daemon, Phabricator will not be able to import or update ".
-      "repositories. For instructions on starting the daemon, see ".
-      "<strong>{$documentation}</strong>.";
+      "repositories. For instructions on starting the daemon, see %s.",
+      phutil_tag('strong', array(), $documentation));
 
     try {
       $daemon_running = $this->isPullDaemonRunning();
@@ -52,17 +52,17 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
         return null;
       }
       $title = "Repository Daemon Not Running";
-      $message =
-        "<p>The repository daemon is not running on this machine. ".
-        "{$common}</p>";
+      $message = hsprintf(
+        "<p>The repository daemon is not running on this machine. %s</p>",
+        $common);
     } catch (Exception $ex) {
       $title = "Unable To Verify Repository Daemon";
-      $message =
+      $message = hsprintf(
         "<p>Unable to determine if the repository daemon is running on this ".
-        "machine. {$common}</p>".
-        "<p><strong>Exception:</strong> ".
-          phutil_escape_html($ex->getMessage()).
-        "</p>";
+        "machine. %s</p>".
+        "<p><strong>Exception:</strong> %s</p>",
+        $common,
+        $ex->getMessage());
     }
 
     $view = new AphrontErrorView();

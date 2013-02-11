@@ -203,7 +203,7 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     if ($this->flexible) {
       $drag_id = celerity_generate_unique_node_id();
-      $flex_bar = phutil_render_tag(
+      $flex_bar = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-nav-drag',
@@ -223,7 +223,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         $nav_classes[] = 'has-local-nav';
       }
 
-      $menu_background = phutil_render_tag(
+      $menu_background = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-nav-column-background',
@@ -231,14 +231,17 @@ final class AphrontSideNavFilterView extends AphrontView {
         ),
         '');
 
-      $local_menu = $menu_background.phutil_render_tag(
-        'div',
+      $local_menu = $this->renderHTMLView(
         array(
-          'class' => 'phabricator-nav-local phabricator-side-menu',
-          'id'    => $local_id,
-        ),
-        self::renderSingleView($this->menu->setID($this->getMenuID()))
-      );
+          $menu_background,
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'phabricator-nav-local phabricator-side-menu',
+              'id'    => $local_id,
+            ),
+            self::renderSingleView($this->menu->setID($this->getMenuID()))),
+        ));
     }
 
     $crumbs = null;

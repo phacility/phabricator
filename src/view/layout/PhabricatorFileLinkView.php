@@ -67,7 +67,7 @@ final class PhabricatorFileLinkView extends AphrontView {
       );
     }
 
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'href'        => $this->getFileViewURI(),
@@ -76,7 +76,6 @@ final class PhabricatorFileLinkView extends AphrontView {
         'meta'        => $meta,
         'mustcapture' => $mustcapture,
       ),
-      phutil_escape_html($this->getFileName())
-    );
+      $this->getFileName());
   }
 }

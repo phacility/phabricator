@@ -43,16 +43,14 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
     require_celerity_resource('phabricator-ui-example-css');
 
-    $nav->appendChild(
+    $nav->appendChild(hsprintf(
       '<div class="phabricator-ui-example-header">'.
-        '<h1 class="phabricator-ui-example-name">'.
-          phutil_escape_html($example->getName()).
-          ' ('.get_class($example).')'.
-        '</h1>'.
-        '<p class="phabricator-ui-example-description">'
-          .$example->getDescription().
-        '</p>'.
-      '</div>');
+        '<h1 class="phabricator-ui-example-name">%s (%s)</h1>'.
+        '<p class="phabricator-ui-example-description">%s</p>'.
+      '</div>',
+      $example->getName(),
+      get_class($example),
+      $example->getDescription()));
 
     $nav->appendChild($result);
 

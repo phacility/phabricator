@@ -46,7 +46,7 @@ final class AphrontFormDragAndDropUploadControl extends AphrontFormControl {
         'activatedClass'  => $this->activatedClass,
       ));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'id'    => $list_id,

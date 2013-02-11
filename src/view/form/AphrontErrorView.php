@@ -58,29 +58,29 @@ final class AphrontErrorView extends AphrontView {
     if ($errors) {
       $list = array();
       foreach ($errors as $error) {
-        $list[] = phutil_render_tag(
+        $list[] = phutil_tag(
           'li',
           array(),
-          phutil_escape_html($error));
+          $error);
       }
-      $list = phutil_render_tag(
+      $list = phutil_tag(
         'ul',
         array(
           'class' => 'aphront-error-view-list',
         ),
-        implode("\n", $list));
+        $list);
     } else {
       $list = null;
     }
 
     $title = $this->title;
     if (strlen($title)) {
-      $title = phutil_render_tag(
+      $title = phutil_tag(
         'h1',
         array(
           'class' => 'aphront-error-view-head',
         ),
-        phutil_escape_html($title));
+        $title);
     } else {
       $title = null;
     }
@@ -92,19 +92,23 @@ final class AphrontErrorView extends AphrontView {
     $classes[] = 'aphront-error-severity-'.$this->severity;
     $classes = implode(' ', $classes);
 
-    return phutil_render_tag(
+    $children = $this->renderHTMLChildren();
+    $children[] = $list;
+
+    return phutil_tag(
       'div',
       array(
         'id' => $this->id,
         'class' => $classes,
       ),
-      $title.
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'aphront-error-view-body',
-        ),
-        $this->renderChildren().
-        $list));
+      array(
+        $title,
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'aphront-error-view-body',
+          ),
+          $children),
+      ));
   }
 }

@@ -59,10 +59,12 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
     $buttons = null;
     if ($this->buttons) {
-      $buttons =
-        '<div class="differential-changeset-buttons">'.
-          implode('', $this->buttons).
-        '</div>';
+      $buttons = phutil_tag(
+        'div',
+        array(
+          'class' => 'differential-changeset-buttons',
+        ),
+        $this->buttons);
     }
 
     $id = $this->getID();
@@ -77,7 +79,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
     $display_filename = $changeset->getDisplayFilename();
 
-    $output = javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'sigil' => 'differential-changeset',
@@ -90,17 +92,17 @@ final class DifferentialChangesetDetailView extends AphrontView {
         'class' => $class,
         'id'    => $id,
       ),
-      id(new PhabricatorAnchorView())
-        ->setAnchorName($changeset->getAnchorName())
-        ->setNavigationMarker(true)
-        ->render().
-      $buttons.
-      '<h1>'.phutil_escape_html($display_filename).'</h1>'.
-      '<div style="clear: both;"></div>'.
-      $this->renderChildren());
-
-
-    return $output;
+      $this->renderHTMLView(
+        array(
+          id(new PhabricatorAnchorView())
+            ->setAnchorName($changeset->getAnchorName())
+            ->setNavigationMarker(true)
+            ->render(),
+          $buttons,
+          phutil_tag('h1', array(), $display_filename),
+          phutil_tag('div', array('style' => 'clear: both'), ''),
+          $this->renderHTMLChildren(),
+        )));
   }
 
 }

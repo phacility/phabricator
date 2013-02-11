@@ -60,7 +60,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table->setIsHead(true);
 
     $callsign = $drequest->getRepository()->getCallsign();
-    $all = phutil_render_tag(
+    $all = phutil_tag(
       'a',
       array(
         'href' => "/diffusion/{$callsign}/history/",
@@ -182,7 +182,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       }
 
       $panel->addButton(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $drequest->generateURI(
@@ -240,7 +240,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => $drequest->generateURI(

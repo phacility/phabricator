@@ -79,8 +79,7 @@ final class PhabricatorCalendarViewStatusController
         ->setBarColor($color)
         ->addAttribute(pht('From %s to %s', $from, $to))
         ->addAttribute(
-          phutil_escape_html(
-            phutil_utf8_shorten($status->getDescription(), 64)));
+            phutil_utf8_shorten($status->getDescription(), 64));
 
       $list->addItem($item);
     }

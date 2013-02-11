@@ -5,7 +5,7 @@ final class PhabricatorSetupCheckBaseURI extends PhabricatorSetupCheck {
   protected function executeChecks() {
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
 
-    if (strpos($_SERVER['HTTP_HOST'], '.') === false) {
+    if (strpos(AphrontRequest::getHTTPHeader('Host'), '.') === false) {
       $summary = pht(
         'The domain does not contain a dot. This is necessary for some web '.
         'browsers to be able to set cookies.');
@@ -59,9 +59,10 @@ final class PhabricatorSetupCheckBaseURI extends PhabricatorSetupCheck {
       ->setSummary($summary)
       ->setMessage($message)
       ->addCommand(
-        csprintf(
-          '<tt>phabricator/ $</tt> '.
-          './bin/config set phabricator.base-uri %s',
-          $base_uri_guess));
+        hsprintf(
+          '<tt>phabricator/ $</tt> %s',
+          csprintf(
+            './bin/config set phabricator.base-uri %s',
+            $base_uri_guess)));
   }
 }

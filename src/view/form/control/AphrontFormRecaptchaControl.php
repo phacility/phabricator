@@ -53,10 +53,10 @@ final class AphrontFormRecaptchaControl extends AphrontFormControl {
     $protocol = $uri->getProtocol();
     $use_ssl = ($protocol == 'https');
 
-    return recaptcha_get_html(
+    return phutil_safe_html(recaptcha_get_html(
       PhabricatorEnv::getEnvConfig('recaptcha.public-key'),
       $error = null,
-      $use_ssl);
+      $use_ssl));
   }
 
 }

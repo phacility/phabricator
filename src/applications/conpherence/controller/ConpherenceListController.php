@@ -116,4 +116,4 @@ final class ConpherenceListController extends
   }
 
 
-  }
+}

@@ -48,15 +48,15 @@ final class PhabricatorMainMenuIconView extends AphrontView {
     $classes = $this->classes;
     $classes[] = 'phabricator-main-menu-icon';
 
-    $label = javelin_render_tag(
+    $label = javelin_tag(
       'a',
       array(
         'href' => $href,
         'class' => 'phabricator-main-menu-icon-label',
       ),
-      phutil_escape_html($name));
+      $name);
 
-    $item = javelin_render_tag(
+    $item = javelin_tag(
       'a',
       array(
         'href' => $href,

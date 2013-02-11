@@ -5,57 +5,32 @@
  */
 final class DarkConsoleCore {
 
-  const PLUGIN_ERRORLOG     = 'ErrorLog';
-  const PLUGIN_SERVICES     = 'Services';
-  const PLUGIN_EVENT        = 'Event';
-  const PLUGIN_XHPROF       = 'XHProf';
-  const PLUGIN_REQUEST      = 'Request';
-
-  public static function getPlugins() {
-    return array(
-      self::PLUGIN_ERRORLOG,
-      self::PLUGIN_REQUEST,
-      self::PLUGIN_SERVICES,
-      self::PLUGIN_EVENT,
-      self::PLUGIN_XHPROF,
-    );
-  }
-
   private $plugins = array();
-  private $settings;
-  private $coredata;
-
-  public function getPlugin($plugin_name) {
-    return idx($this->plugins, $plugin_name);
-  }
+  const STORAGE_VERSION = 1;
 
   public function __construct() {
-    foreach (self::getPlugins() as $plugin_name) {
-      $plugin = self::newPlugin($plugin_name);
-      if ($plugin->isPermanent() || !isset($disabled[$plugin_name])) {
-        if ($plugin->shouldStartup()) {
-          $plugin->didStartup();
-          $plugin->setConsoleCore($this);
-          $this->plugins[$plugin_name] = $plugin;
-        }
+    $symbols = id(new PhutilSymbolLoader())
+      ->setType('class')
+      ->setAncestorClass('DarkConsolePlugin')
+      ->selectAndLoadSymbols();
+
+    foreach ($symbols as $symbol) {
+      $plugin = newv($symbol['name'], array());
+      if (!$plugin->shouldStartup()) {
+        continue;
       }
+      $plugin->setConsoleCore($this);
+      $plugin->didStartup();
+      $this->plugins[$symbol['name']] = $plugin;
     }
   }
 
-  public static function newPlugin($plugin) {
-    $class = 'DarkConsole'.$plugin.'Plugin';
-    return newv($class, array());
-  }
-
-  public function getEnabledPlugins() {
+  public function getPlugins() {
     return $this->plugins;
   }
 
-  public function render(AphrontRequest $request) {
-
-    $user = $request->getUser();
-
-    $plugins = $this->getEnabledPlugins();
+  public function getKey(AphrontRequest $request) {
+    $plugins = $this->getPlugins();
 
     foreach ($plugins as $plugin) {
       $plugin->setRequest($request);
@@ -70,128 +45,58 @@ final class DarkConsoleCore {
       $plugin->setData($plugin->generateData());
     }
 
-    $selected = $user->getConsoleTab();
-    $visible  = $user->getConsoleVisible();
+    $plugins = msort($plugins, 'getOrderKey');
 
-    if (!isset($plugins[$selected])) {
-      $selected = head_key($plugins);
-    }
+    $key = Filesystem::readRandomCharacters(24);
 
     $tabs = array();
-    foreach ($plugins as $key => $plugin) {
-      $tabs[$key] = array(
+    $data = array();
+    foreach ($plugins as $plugin) {
+      $class = get_class($plugin);
+      $tabs[] = array(
+        'class' => $class,
         'name'  => $plugin->getName(),
-        'panel' => $plugin->render(),
+        'color' => $plugin->getColor(),
       );
+      $data[$class] = $plugin->getData();
     }
 
-    $tabs_markup   = array();
-    $panel_markup = array();
-    foreach ($tabs as $key => $data) {
-      $is_selected = ($key == $selected);
-      if ($is_selected) {
-        $style    = null;
-        $tabclass = 'dark-console-tab-selected';
-      } else {
-        $style    = 'display: none;';
-        $tabclass = null;
-      }
+    $storage = array(
+      'vers' => self::STORAGE_VERSION,
+      'tabs' => $tabs,
+      'data' => $data,
+      'user' => $request->getUser()
+        ? $request->getUser()->getPHID()
+        : null,
+    );
 
-      $tabs_markup[] = javelin_render_tag(
-        'a',
-        array(
-          'class' => "dark-console-tab {$tabclass}",
-          'sigil' => 'dark-console-tab',
-          'id'    => 'dark-console-tab-'.$key,
-        ),
-        (string)$data['name']);
+    $cache = new PhabricatorKeyValueDatabaseCache();
+    $cache = new PhutilKeyValueCacheProfiler($cache);
+    $cache->setProfiler(PhutilServiceProfiler::getInstance());
 
-      $panel_markup[] = javelin_render_tag(
-        'div',
-        array(
-          'class' => 'dark-console-panel dark-console-panel-'.$key,
-          'style' => $style,
-          'sigil' => 'dark-console-panel',
-        ),
-        (string)$data['panel']);
-    }
-
-    $console = javelin_render_tag(
-      'table',
+    $cache->setKeys(
       array(
-        'class' => 'dark-console',
-        'sigil' => 'dark-console',
-        'style' => $visible ? '' : 'display: none;',
+        'darkconsole:'.$key => json_encode($storage),
       ),
-      '<tr>'.
-        '<th class="dark-console-tabs">'.
-          implode("\n", $tabs_markup).
-        '</th>'.
-        '<td>'.implode("\n", $panel_markup).'</td>'.
-      '</tr>');
+      $ttl = (60 * 60 * 6));
 
-    if (!empty($_COOKIE['phsid'])) {
-      $console = str_replace(
-        $_COOKIE['phsid'],
-        phutil_escape_html('<session-key>'),
-        $console);
-    }
-
-    if ($request->isAjax()) {
-
-      // for ajax this HTML gets updated on the client
-      $request_history = null;
-
-    } else {
-
-      $request_table_header =
-        '<div class="dark-console-panel-request-log-separator"></div>';
-
-      $rows = array();
-
-      $table = new AphrontTableView($rows);
-      $table->setHeaders(
-        array(
-          'Sequence',
-          'Type',
-          'URI',
-        ));
-      $table->setColumnClasses(
-        array(
-          '',
-          '',
-          'wide',
-        ));
-
-      $request_table = $request_table_header . $table->render();
-      $request_history = javelin_render_tag(
-        'table',
-        array(
-          'class' => 'dark-console dark-console-request-log',
-          'sigil' => 'dark-console-request-log',
-          'style' => $visible ? '' : 'display: none;',
-        ),
-        '<tr>'.
-          '<th class="dark-console-tabs">'.
-            javelin_render_tag(
-              'a',
-              array(
-                'class' => 'dark-console-tab dark-console-tab-selected',
-              ),
-              'Request Log').
-          '</th>'.
-          '<td>'.
-            javelin_render_tag(
-              'div',
-              array(
-                'class' => 'dark-console-panel dark-console-panel-RequestLog',
-              ),
-              $request_table).
-          '</td>'.
-        '</tr>');
-    }
-
-    return "\n\n\n\n".$console.$request_history."\n\n\n\n";
+    return $key;
   }
+
+  public function render(AphrontRequest $request) {
+    $user = $request->getUser();
+    $visible = $user ? $user->getConsoleVisible() : true;
+
+    return javelin_tag(
+      'div',
+      array(
+        'id' => 'darkconsole',
+        'class' => 'dark-console',
+        'style' => $visible ? '' : 'display: none;',
+        'data-console-key' => $this->getKey($request),
+      ),
+      '');
+  }
+
 }
 

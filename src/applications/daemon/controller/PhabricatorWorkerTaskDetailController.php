@@ -23,8 +23,10 @@ final class PhabricatorWorkerTaskDetailController
 
       $error_view = new AphrontErrorView();
       $error_view->setTitle('No Such Task');
-      $error_view->appendChild(
-        '<p>This task may have recently been garbage collected.</p>');
+      $error_view->appendChild(phutil_tag(
+        'p',
+        array(),
+        'This task may have recently been garbage collected.'));
       $error_view->setSeverity(AphrontErrorView::SEVERITY_NODATA);
 
       $content = $error_view;
@@ -124,7 +126,7 @@ final class PhabricatorWorkerTaskDetailController
 
     $view->addProperty(
       pht('Task Class'),
-      phutil_escape_html($task->getTaskClass()));
+      $task->getTaskClass());
 
     if ($task->getLeaseExpires()) {
       if ($task->getLeaseExpires() > time()) {
@@ -133,7 +135,7 @@ final class PhabricatorWorkerTaskDetailController
         $lease_status = pht('Lease Expired');
       }
     } else {
-      $lease_status = '<em>'.pht('Not Leased').'</em>';
+      $lease_status = phutil_tag('em', array(), pht('Not Leased'));
     }
 
     $view->addProperty(
@@ -143,14 +145,14 @@ final class PhabricatorWorkerTaskDetailController
     $view->addProperty(
       pht('Lease Owner'),
       $task->getLeaseOwner()
-        ? phutil_escape_html($task->getLeaseOwner())
-        : '<em>'.pht('None').'</em>');
+        ? $task->getLeaseOwner()
+        : phutil_tag('em', array(), pht('None')));
 
     if ($task->getLeaseExpires() && $task->getLeaseOwner()) {
       $expires = ($task->getLeaseExpires() - time());
       $expires = phabricator_format_relative_time_detailed($expires);
     } else {
-      $expires = '<em>'.pht('None').'</em>';
+      $expires = phutil_tag('em', array(), pht('None'));
     }
 
     $view->addProperty(
@@ -159,12 +161,12 @@ final class PhabricatorWorkerTaskDetailController
 
     $view->addProperty(
       pht('Failure Count'),
-      phutil_escape_html($task->getFailureCount()));
+      $task->getFailureCount());
 
     if ($task->isArchived()) {
-      $duration = phutil_escape_html(number_format($task->getDuration()).' us');
+      $duration = number_format($task->getDuration()).' us';
     } else {
-      $duration = '<em>'.pht('Not Completed').'</em>';
+      $duration = phutil_tag('em', array(), pht('Not Completed'));
     }
 
     $view->addProperty(

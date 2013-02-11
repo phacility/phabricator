@@ -46,21 +46,6 @@ final class DifferentialAddCommentView extends AphrontView {
     return $this;
   }
 
-  private function generateWarningView(
-    $status,
-    array $titles,
-    $id,
-    $content) {
-
-    $warning = new AphrontErrorView();
-    $warning->setSeverity(AphrontErrorView::SEVERITY_ERROR);
-    $warning->setID($id);
-    $warning->appendChild($content);
-    $warning->setTitle(idx($titles, $status, 'Warning'));
-
-    return $warning;
-  }
-
   public function render() {
 
     require_celerity_resource('differential-revision-add-comment-css');

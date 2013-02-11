@@ -150,8 +150,7 @@ final class PhameBlogEditController
         ->setLabel('Custom Domain')
         ->setName('custom_domain')
         ->setValue($blog->getDomain())
-        ->setCaption('Must include at least one dot (.), e.g. '.
-        'blog.example.com')
+        ->setCaption('Must include at least one dot (.), e.g. blog.example.com')
         ->setError($e_custom_domain)
       )
       ->appendChild(

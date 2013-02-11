@@ -52,7 +52,7 @@ final class PhabricatorConfigListController
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($group->getName())
         ->setHref('/config/group/'.$group->getKey().'/')
-        ->addAttribute(phutil_escape_html($group->getDescription()));
+        ->addAttribute($group->getDescription());
       $list->addItem($item);
     }
 

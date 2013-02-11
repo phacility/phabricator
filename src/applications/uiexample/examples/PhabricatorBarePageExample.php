@@ -13,10 +13,10 @@ final class PhabricatorBarePageExample extends PhabricatorUIExample {
   public function renderExample() {
     $view = new PhabricatorBarePageView();
     $view->appendChild(
-      phutil_render_tag(
+      phutil_tag(
         'h1',
         array(),
-        phutil_escape_html($this->getDescription())));
+        $this->getDescription()));
 
     $response = new AphrontWebpageResponse();
     $response->setContent($view->render());

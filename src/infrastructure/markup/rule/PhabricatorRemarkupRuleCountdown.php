@@ -46,19 +46,21 @@ final class PhabricatorRemarkupRuleCountdown extends PhutilRemarkupRule {
 
     foreach ($metadata as $id => $info) {
       list($time, $token) = $info;
-      $count = phutil_render_tag(
+      $count = phutil_tag(
         'span',
         array(
           'id' => $id,
         ),
-        javelin_render_tag('span',
-          array('sigil' => 'phabricator-timer-days'), '').'d'.
-        javelin_render_tag('span',
-          array('sigil' => 'phabricator-timer-hours'), '').'h'.
-        javelin_render_tag('span',
-          array('sigil' => 'phabricator-timer-minutes'), '').'m'.
-        javelin_render_tag('span',
-          array('sigil' => 'phabricator-timer-seconds'), '').'s');
+        array(
+          javelin_tag('span',
+            array('sigil' => 'phabricator-timer-days'), '').'d',
+          javelin_tag('span',
+            array('sigil' => 'phabricator-timer-hours'), '').'h',
+          javelin_tag('span',
+            array('sigil' => 'phabricator-timer-minutes'), '').'m',
+          javelin_tag('span',
+            array('sigil' => 'phabricator-timer-seconds'), '').'s',
+        ));
       Javelin::initBehavior('countdown-timer', array(
         'timestamp' => $time,
         'container' => $id,

@@ -97,7 +97,6 @@ final class DrydockResourceViewController extends DrydockController {
 
     $status = $resource->getStatus();
     $status = DrydockResourceStatus::getNameForStatus($status);
-    $status = phutil_escape_html($status);
 
     $view->addProperty(
       pht('Status'),
@@ -105,15 +104,13 @@ final class DrydockResourceViewController extends DrydockController {
 
     $view->addProperty(
       pht('Resource Type'),
-      phutil_escape_html($resource->getType()));
+      $resource->getType());
 
     $attributes = $resource->getAttributes();
     if ($attributes) {
       $view->addSectionHeader(pht('Attributes'));
       foreach ($attributes as $key => $value) {
-        $view->addProperty(
-          phutil_escape_html($key),
-          phutil_escape_html($value));
+        $view->addProperty($key, $value);
       }
     }
 

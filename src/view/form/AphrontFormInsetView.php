@@ -48,16 +48,12 @@ final class AphrontFormInsetView extends AphrontView {
 
   public function render() {
 
-    $title = $hidden_inputs = $right_button = $desc = $content = '';
-
-    if ($this->title) {
-      $title = '<h1>'.phutil_escape_html($this->title).'</h1>';
-    }
+    $right_button = $desc = '';
 
     $hidden_inputs = array();
     foreach ($this->hidden as $inp) {
       list($key, $value) = $inp;
-      $hidden_inputs[] = phutil_render_tag(
+      $hidden_inputs[] = phutil_tag(
         'input',
         array(
           'type' => 'hidden',
@@ -65,10 +61,9 @@ final class AphrontFormInsetView extends AphrontView {
           'value' => $value,
         ));
     }
-    $hidden_inputs = implode("\n", $hidden_inputs);
 
     if ($this->rightButton) {
-      $right_button = phutil_render_tag(
+      $right_button = phutil_tag(
         'div',
         array(
           'style' => 'float: right;',
@@ -77,13 +72,13 @@ final class AphrontFormInsetView extends AphrontView {
     }
 
     if ($this->description) {
-      $desc = phutil_render_tag(
+      $desc = phutil_tag(
         'p',
         array(),
         $this->description);
 
       if ($right_button) {
-        $desc .= '<div style="clear: both;"></div>';
+        $desc = hsprintf('%s<div style="clear: both;"></div>', $desc);
       }
     }
 
@@ -95,13 +90,20 @@ final class AphrontFormInsetView extends AphrontView {
 
     $div_attributes['class'] = implode(' ', $classes);
 
-    if ($this->content) {
-      $content = $this->content;
+    $content = $hidden_inputs;
+    $content[] = $right_button;
+    $content[] = $desc;
+
+    if ($this->title != '') {
+      array_unshift($content, phutil_tag('h1', array(), $this->title));
     }
 
-    return $title.phutil_render_tag(
-      'div',
-      $div_attributes,
-      $hidden_inputs.$right_button.$desc.$content.$this->renderChildren());
+    if ($this->content) {
+      $content[] = $this->content;
+    }
+
+    $content = array_merge($content, $this->renderHTMLChildren());
+
+    return phutil_tag('div', $div_attributes, $content);
   }
 }

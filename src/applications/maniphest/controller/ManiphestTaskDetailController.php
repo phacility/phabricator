@@ -89,7 +89,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if ($parent_task) {
       $context_bar = new AphrontContextBarView();
       $context_bar->addButton(
-         phutil_render_tag(
+         phutil_tag(
          'a',
          array(
            'href' => '/maniphest/task/create/?parent='.$parent_task->getID(),
@@ -104,7 +104,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $context_bar = new AphrontContextBarView();
       $context_bar->addButton('<label>Create Another:</label>');
       $context_bar->addButton(
-         phutil_render_tag(
+         phutil_tag(
          'a',
          array(
            'href' => '/maniphest/task/create/?template='.$task->getID(),
@@ -112,7 +112,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
          ),
         'Similar Task'));
       $context_bar->addButton(
-         phutil_render_tag(
+         phutil_tag(
          'a',
          array(
            'href' => '/maniphest/task/create/',
@@ -435,18 +435,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
       pht('Assigned To'),
       $task->getOwnerPHID()
         ? $this->getHandle($task->getOwnerPHID())->renderLink()
-        : '<em>'.pht('None').'</em>');
+        : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Priority'),
-      phutil_escape_html(
-        ManiphestTaskPriority::getTaskPriorityName($task->getPriority())));
+      ManiphestTaskPriority::getTaskPriorityName($task->getPriority()));
 
     $view->addProperty(
       pht('Subscribers'),
       $task->getCCPHIDs()
         ? $this->renderHandlesForPHIDs($task->getCCPHIDs(), ',')
-        : '<em>'.pht('None').'</em>');
+        : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Author'),
@@ -457,19 +456,19 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $subject = '[T'.$task->getID().'] '.$task->getTitle();
       $view->addProperty(
         pht('From Email'),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => 'mailto:'.$source.'?subject='.$subject
             ),
-          phutil_escape_html($source)));
+          $source));
     }
 
     $view->addProperty(
       pht('Projects'),
       $task->getProjectPHIDs()
         ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
-        : '<em>'.pht('None').'</em>');
+        : phutil_tag('em', array(), pht('None')));
 
     foreach ($aux_fields as $aux_field) {
       $aux_key = $aux_field->getAuxiliaryKey();
@@ -520,7 +519,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if (strlen($task->getDescription())) {
       $view->addSectionHeader(pht('Description'));
       $view->addTextContent(
-        phutil_render_tag(
+        phutil_tag(
           'div',
           array(
             'class' => 'phabricator-remarkup',

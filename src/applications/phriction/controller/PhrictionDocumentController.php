@@ -45,31 +45,15 @@ final class PhrictionDocumentController
         }
       }
       $create_uri = '/phriction/edit/?slug='.$slug;
-      $create_sentence =
-        'You can <strong>'.
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $create_uri,
-          ),
-          'create a new document').
-          '</strong>.';
-      $button = phutil_render_tag(
-        'a',
-        array(
-          'href' => $create_uri,
-          'class' => 'green button',
-        ),
-        pht('Create Page'));
-
-      $page_content =
+      $page_content = hsprintf(
         '<div class="phriction-content">'.
-          '<em>'.pht('No content here!').'</em><br />'.
-          pht('No document found at <tt>%s</tt>.', phutil_escape_html($slug)).
-          ' '.$create_sentence.
-        '</div>';
+          '<em>No content here!</em><br />'.
+          'No document found at <tt>%s</tt>. '.
+          'You can <strong><a href="%s">create a new document</a></strong>.'.
+        '</div>',
+        $slug,
+        $create_uri);
       $page_title = pht('Page Not Found');
-      $buttons = $button;
     } else {
       $version = $request->getInt('v');
       if ($version) {
@@ -131,7 +115,7 @@ final class PhrictionDocumentController
           $handles[$project_phid]->renderLink().'.';
       }
 
-      $index_link = phutil_render_tag(
+      $index_link = phutil_tag(
         'a',
         array(
           'href' => '/phriction/',
@@ -354,12 +338,12 @@ final class PhrictionDocumentController
 
   private function renderChildDocumentLink(array $info) {
     $title = nonempty($info['title'], pht('(Untitled Document)'));
-    $item = phutil_render_tag(
+    $item = phutil_tag(
       'a',
       array(
         'href' => PhrictionDocument::getSlugURI($info['slug']),
       ),
-      phutil_escape_html($title));
+      $title);
 
     if (isset($info['empty'])) {
       $item = '<em>'.$item.'</em>';

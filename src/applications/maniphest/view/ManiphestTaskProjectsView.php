@@ -21,14 +21,13 @@ final class ManiphestTaskProjectsView extends ManiphestView {
 
     $tags = array();
     foreach ($show as $handle) {
-      $tags[] = phutil_render_tag(
+      $tags[] = phutil_tag(
         'a',
         array(
           'href'  => $handle->getURI(),
           'class' => 'phabricator-project-tag',
         ),
-        phutil_escape_html(
-          phutil_utf8_shorten($handle->getName(), 24)));
+        phutil_utf8_shorten($handle->getName(), 24));
     }
 
     if (count($this->handles) > 2) {
@@ -40,7 +39,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
         $all[] = $handle->getName();
       }
 
-      $tags[] = javelin_render_tag(
+      $tags[] = javelin_tag(
         'span',
         array(
           'class' => 'phabricator-project-tag',
@@ -53,7 +52,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
         "\xE2\x80\xA6");
     }
 
-    return implode("\n", $tags);
+    return $this->renderHTMLView($tags);
   }
 
 }

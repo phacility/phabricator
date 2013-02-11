@@ -132,8 +132,46 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $file;
   }
 
+  public static function newFileFromContentHash($hash, $params) {
 
-  public static function newFromFileData($data, array $params = array()) {
+    // Check to see if a file with same contentHash exist
+    $file = id(new PhabricatorFile())->loadOneWhere(
+      'contentHash = %s LIMIT 1', $hash);
+
+    if ($file) {
+      // copy storageEngine, storageHandle, storageFormat
+      $copy_of_storage_engine = $file->getStorageEngine();
+      $copy_of_storage_handle = $file->getStorageHandle();
+      $copy_of_storage_format = $file->getStorageFormat();
+      $copy_of_byteSize = $file->getByteSize();
+      $copy_of_mimeType = $file->getMimeType();
+
+      $file_name = idx($params, 'name');
+      $file_name = self::normalizeFileName($file_name);
+      $authorPHID = idx($params, 'authorPHID');
+
+      $new_file = new  PhabricatorFile();
+
+      $new_file->setName($file_name);
+      $new_file->setByteSize($copy_of_byteSize);
+      $new_file->setAuthorPHID($authorPHID);
+
+      $new_file->setContentHash($hash);
+      $new_file->setStorageEngine($copy_of_storage_engine);
+      $new_file->setStorageHandle($copy_of_storage_handle);
+      $new_file->setStorageFormat($copy_of_storage_format);
+      $new_file->setMimeType($copy_of_mimeType);
+
+      $new_file->save();
+
+      return $new_file;
+    }
+
+    return $file;
+  }
+
+  private static function buildFromFileData($data, array $params = array()) {
+    $selector = PhabricatorEnv::newObjectFromConfig('storage.engine-selector');
 
     if (isset($params['storageEngines'])) {
       $engines = $params['storageEngines'];
@@ -221,6 +259,17 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $file;
   }
 
+  public static function newFromFileData($data, array $params = array()) {
+    $hash = self::hashFileContent($data);
+    $file = self::newFileFromContentHash($hash, $params);
+
+    if ($file) {
+      return $file;
+    }
+
+    return self::buildFromFileData($data, $params);
+  }
+
   public function migrateToEngine(PhabricatorFileStorageEngine $engine) {
     if (!$this->getID() || !$this->getStorageHandle()) {
       throw new Exception(
@@ -305,13 +354,26 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function delete() {
-    $engine = $this->instantiateStorageEngine();
+    // Check to see if other files are using storage
+    $other_file = id(new PhabricatorFile())->loadAllWhere(
+      'storageEngine = %s AND storageHandle = %s AND
+      storageFormat = %s AND id != %d LIMIT 1', $this->getStorageEngine(),
+      $this->getStorageHandle(), $this->getStorageFormat(),
+      $this->getID());
+
+    // If this is the only file using the storage, delete storage
+    if (count($other_file) == 0) {
+      $engine = $this->instantiateStorageEngine();
+      $engine->deleteFile($this->getStorageHandle());
+    }
 
     $ret = parent::delete();
 
-    $engine->deleteFile($this->getStorageHandle());
-
     return $ret;
+  }
+
+  public static function hashFileContent($data) {
+    return PhabricatorHash::digest($data);
   }
 
   public function loadFileData() {

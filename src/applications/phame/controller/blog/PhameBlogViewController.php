@@ -69,11 +69,11 @@ final class PhameBlogViewController extends PhameController {
 
     $properties->addProperty(
       pht('Skin'),
-      phutil_escape_html($blog->getSkin()));
+      $blog->getSkin());
 
     $properties->addProperty(
       pht('Domain'),
-      phutil_escape_html($blog->getDomain()));
+      $blog->getDomain());
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $user,
@@ -97,9 +97,12 @@ final class PhameBlogViewController extends PhameController {
       ->process();
 
     $properties->addTextContent(
-      '<div class="phabricator-remarkup">'.
-        $engine->getOutput($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION).
-      '</div>');
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        $engine->getOutput($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)));
 
     return $properties;
   }

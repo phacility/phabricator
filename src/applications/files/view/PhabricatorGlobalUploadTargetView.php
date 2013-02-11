@@ -25,7 +25,7 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
       'browseURI'     => '/file/filter/my/',
     ));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'id'    => $instructions_id,

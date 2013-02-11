@@ -53,8 +53,7 @@ final class PhabricatorApplicationsListController
         $item = id(new PhabricatorObjectItemView())
           ->setHeader($application->getName())
           ->setHref('/applications/view/'.get_class($application).'/')
-          ->addAttribute(
-            phutil_escape_html($application->getShortDescription()));
+          ->addAttribute($application->getShortDescription());
 
         if (!$application->isInstalled()) {
           $item->addIcon('delete', pht('Uninstalled'));
@@ -63,6 +62,7 @@ final class PhabricatorApplicationsListController
         if ($application->isBeta()) {
           $item->addIcon('lint-warning', pht('Beta'));
         }
+
         $list->addItem($item);
 
       }

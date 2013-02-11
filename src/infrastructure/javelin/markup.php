@@ -51,30 +51,47 @@ function javelin_tag(
   return phutil_tag($tag, $attributes, $content);
 }
 
+function phabricator_form(PhabricatorUser $user, $attributes, $content) {
+  $body = array();
 
-function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
   if (strcasecmp(idx($attributes, 'method'), 'POST') == 0 &&
       !preg_match('#^(https?:|//)#', idx($attributes, 'action'))) {
-    $content = phabricator_render_form_magic($user).$content;
-  }
-  return javelin_render_tag('form', $attributes, $content);
-}
-
-function phabricator_render_form_magic(PhabricatorUser $user) {
-  return
-    phutil_render_tag(
+    $body[] = phutil_tag(
       'input',
       array(
         'type' => 'hidden',
         'name' => AphrontRequest::getCSRFTokenName(),
         'value' => $user->getCSRFToken(),
-      )).
-    phutil_render_tag(
+      ));
+
+    $body[] = phutil_tag(
       'input',
       array(
         'type' => 'hidden',
         'name' => '__form__',
         'value' => true,
       ));
+  }
+
+  if (is_array($content)) {
+    $body = array_merge($body, $content);
+  } else {
+    $body[] = $content;
+  }
+
+  return javelin_tag('form', $attributes, $body);
+}
+
+
+/**
+ * @deprecated
+ */
+function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
+  if (is_array($content)) {
+    $content = implode('', $content);
+  }
+
+  $html = phabricator_form($user, $attributes, phutil_safe_html($content));
+  return $html->getHTMLContent();
 }
 

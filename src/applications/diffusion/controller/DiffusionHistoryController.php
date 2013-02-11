@@ -47,13 +47,13 @@ final class DiffusionHistoryController extends DiffusionController {
       $copies_new = true;
     }
 
-    $button = phutil_render_tag(
+    $button = phutil_tag(
       'a',
       array(
         'class'   => 'button small grey',
         'href'    => $request->getRequestURI()->alter('copies', $copies_new),
       ),
-      phutil_escape_html($button_title));
+      $button_title);
 
     $history_table = new DiffusionHistoryTableView();
     $history_table->setUser($request->getUser());

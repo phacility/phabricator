@@ -158,7 +158,9 @@ abstract class ConpherenceController extends PhabricatorController {
         $item->addClass('conpherence-selected');
         $item->addClass('hide-unread-count');
       }
-      $nav->addCustomBlock($item->render());
+
+      // TODO: [HTML] Clean this up when we clean up HTML stuff in Conpherence.
+      $nav->addCustomBlock(phutil_safe_html($item->render()));
     }
     if (empty($conpherences) || $read) {
       $nav->addCustomBlock($this->getNoConpherencesBlock());
@@ -168,14 +170,12 @@ abstract class ConpherenceController extends PhabricatorController {
   }
 
   private function getNoConpherencesBlock() {
-
     return phutil_tag(
       'div',
       array(
         'class' => 'no-conpherences-menu-item'
       ),
-      pht('No more conversations.')
-    );
+      pht('No more conpherences.'));
   }
 
   public function buildApplicationMenu() {

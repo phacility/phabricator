@@ -30,13 +30,13 @@ final class PhabricatorRemarkupRulePhriction
     if ($this->getEngine()->getState('toc')) {
       $text = phutil_escape_html($name);
     } else {
-      $text = phutil_render_tag(
+      $text = phutil_tag(
           'a',
           array(
             'href'  => $href,
             'class' => 'phriction-link',
           ),
-          phutil_escape_html($name));
+          $name);
     }
 
     return $this->getEngine()->storeText($text);

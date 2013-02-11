@@ -40,7 +40,7 @@ abstract class PhabricatorRemarkupRuleObjectName
     }
 
     return $this->getEngine()->storeText(
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => $href,

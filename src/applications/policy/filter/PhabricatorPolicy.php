@@ -77,12 +77,12 @@ final class PhabricatorPolicy {
 
   public function renderDescription() {
     if ($this->getHref()) {
-      $desc = phutil_render_tag(
+      $desc = phutil_tag(
         'a',
         array(
           'href' => $this->getHref(),
         ),
-        phutil_escape_html($this->getName()));
+        $this->getName());
     } else {
       $desc = phutil_escape_html($this->getName());
     }

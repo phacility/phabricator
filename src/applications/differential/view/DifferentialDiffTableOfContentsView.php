@@ -137,7 +137,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       if ($cov === null) {
         $mcov = $cov = '<em>-</em>';
       } else {
-        $mcov = phutil_render_tag(
+        $mcov = phutil_tag(
           'div',
           array(
             'id' => 'differential-mcoverage-'.md5($fname),
@@ -148,7 +148,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
       $rows[] =
         '<tr>'.
-          phutil_render_tag(
+          phutil_tag(
             'td',
             array(
               'class' => 'differential-toc-char',
@@ -182,7 +182,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         $this->repository->getCallsign());
       if ($editor_link) {
         $editor_link =
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $editor_link,
@@ -192,16 +192,14 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       }
     }
 
-    $reveal_link =
-      javelin_render_tag(
+    $reveal_link = javelin_tag(
         'a',
         array(
           'sigil' => 'differential-reveal-all',
           'mustcapture' => true,
           'class' => 'button differential-toc-reveal-all',
         ),
-        pht('Show All Context')
-      );
+        pht('Show All Context'));
 
     $buttons =
       '<tr><td colspan="7">'.
@@ -256,7 +254,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   private function renderChangesetLink(DifferentialChangeset $changeset, $ref) {
     $display_file = $changeset->getDisplayFilename();
 
-    return javelin_render_tag(
+    return javelin_tag(
       'a',
       array(
         'href' => '#'.$changeset->getAnchorName(),
@@ -266,7 +264,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ),
         'sigil' => 'differential-load',
       ),
-      phutil_escape_html($display_file));
+      $display_file);
   }
 
 }

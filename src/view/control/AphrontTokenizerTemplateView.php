@@ -41,7 +41,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       $tokens[] = $this->renderToken($key, $value);
     }
 
-    $input = javelin_render_tag(
+    $input = javelin_tag(
       'input',
       array(
         'mustcapture' => true,
@@ -53,15 +53,17 @@ final class AphrontTokenizerTemplateView extends AphrontView {
         'type'        => 'text',
       ));
 
-    return phutil_render_tag(
+    $content = $tokens;
+    $content[] = $input;
+    $content[] = phutil_tag('div', array('style' => 'clear: both;'), '');
+
+    return phutil_tag(
       'div',
       array(
         'id' => $id,
         'class' => 'jx-tokenizer-container',
       ),
-      implode('', $tokens).
-      $input.
-      '<div style="clear: both;"></div>');
+      $content);
   }
 
   private function renderToken($key, $value) {
@@ -69,20 +71,22 @@ final class AphrontTokenizerTemplateView extends AphrontView {
     if ($input_name) {
       $input_name .= '[]';
     }
-    return phutil_render_tag(
+    return phutil_tag(
       'a',
       array(
         'class' => 'jx-tokenizer-token',
       ),
-      phutil_escape_html($value).
-      phutil_render_tag(
-        'input',
-        array(
-          'type'  => 'hidden',
-          'name'  => $input_name,
-          'value' => $key,
-        )).
-      '<span class="jx-tokenizer-x-placeholder"></span>');
+      array(
+        $value,
+        phutil_tag(
+          'input',
+          array(
+            'type'  => 'hidden',
+            'name'  => $input_name,
+            'value' => $key,
+          )),
+        phutil_tag('span', array('class' => 'jx-tokenizer-x-placeholder'), ''),
+      ));
   }
 
 }

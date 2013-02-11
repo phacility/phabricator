@@ -60,17 +60,19 @@ final class DiffusionExternalController extends DiffusionController {
     if (empty($commits)) {
       $desc = null;
       if ($uri) {
-        $desc = phutil_escape_html($uri).', at ';
+        $desc = $uri.', at ';
       }
-      $desc .= phutil_escape_html($id);
+      $desc .= $id;
 
       $content = id(new AphrontErrorView())
         ->setTitle('Unknown External')
         ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-        ->appendChild(
-          "<p>This external ({$desc}) does not appear in any tracked ".
+        ->appendChild(phutil_tag(
+          'p',
+          array(),
+          "This external ({$desc}) does not appear in any tracked ".
           "repository. It may exist in an untracked repository that ".
-          "Diffusion does not know about.</p>");
+          "Diffusion does not know about."));
     } else if (count($commits) == 1) {
       $commit = head($commits);
       $repo = $repositories[$commit->getRepositoryID()];
@@ -95,13 +97,12 @@ final class DiffusionExternalController extends DiffusionController {
             'commit'    => $commit->getCommitIdentifier(),
           ));
         $rows[] = array(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $href,
             ),
-            phutil_escape_html(
-              'r'.$repo->getCallsign().$commit->getCommitIdentifier())),
+              'r'.$repo->getCallsign().$commit->getCommitIdentifier()),
           phutil_escape_html($commit->loadCommitData()->getSummary()),
         );
       }

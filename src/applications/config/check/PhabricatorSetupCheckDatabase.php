@@ -79,7 +79,7 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
         ->setName(pht('Setup MySQL Schema'))
         ->setMessage($message)
         ->setIsFatal(true)
-        ->addCommand('<tt>phabricator/ $</tt> ./bin/storage upgrade');
+        ->addCommand(hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
     }
   }
 }

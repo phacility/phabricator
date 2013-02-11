@@ -13,12 +13,12 @@ final class DiffusionHomeController extends DiffusionController {
       $rows = array();
       foreach ($shortcuts as $shortcut) {
         $rows[] = array(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $shortcut->getHref(),
             ),
-            phutil_escape_html($shortcut->getName())),
+            $shortcut->getName()),
           phutil_escape_html($shortcut->getDescription()),
         );
       }
@@ -105,7 +105,7 @@ final class DiffusionHomeController extends DiffusionController {
       $branch = $repository->getDefaultArcanistBranch();
       if (isset($lint_branches[$branch])) {
         $show_lint = true;
-        $lint_count = phutil_render_tag(
+        $lint_count = phutil_tag(
           'a',
           array(
             'href' => DiffusionRequest::generateDiffusionURI(array(
@@ -124,12 +124,12 @@ final class DiffusionHomeController extends DiffusionController {
       }
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/diffusion/'.$repository->getCallsign().'/',
           ),
-          phutil_escape_html($repository->getName())),
+          $repository->getName()),
         phutil_escape_html($repository->getDetail('description')),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
@@ -146,7 +146,7 @@ final class DiffusionHomeController extends DiffusionController {
     }
 
     $repository_tool_uri = PhabricatorEnv::getProductionURI('/repository/');
-    $repository_tool     = phutil_render_tag('a',
+    $repository_tool     = phutil_tag('a',
                                              array(
                                                'href' => $repository_tool_uri,
                                              ),

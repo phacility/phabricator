@@ -23,7 +23,7 @@ final class PhabricatorRemarkupRuleYoutube
       $youtube_src = 'https://www.youtube.com/embed/'.$v;
       $iframe =
         '<div class="embedded-youtube-video">'.
-          phutil_render_tag(
+          phutil_tag(
             'iframe',
             array(
               'width'       => '650',

@@ -16,12 +16,12 @@ final class PhabricatorChatLogChannelListController
     foreach ($channels as $channel) {
       $name = $channel['channel'];
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/chatlog/channel/'.phutil_escape_uri($name).'/',
           ),
-          phutil_escape_html($name)));
+          $name));
     }
 
     $table = new AphrontTableView($rows);

@@ -37,16 +37,16 @@ final class AphrontFormToggleButtonsControl extends AphrontFormControl {
         $more = null;
       }
 
-      $out[] = phutil_render_tag(
+      $out[] = phutil_tag(
         'a',
         array(
           'class' => 'toggle'.$more,
           'href'  => $this->baseURI->alter($this->param, $value),
         ),
-        phutil_escape_html($label));
+        $label);
     }
 
-    return implode('', $out);
+    return $out;
   }
 
 }

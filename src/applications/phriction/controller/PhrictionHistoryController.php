@@ -54,7 +54,7 @@ final class PhrictionHistoryController
         $uri = $diff_uri
           ->alter('l', $content->getVersion() - 1)
           ->alter('r', $content->getVersion());
-        $vs_previous = phutil_render_tag(
+        $vs_previous = phutil_tag(
           'a',
           array(
             'href' => $uri,
@@ -68,7 +68,7 @@ final class PhrictionHistoryController
           ->alter('l', $content->getVersion())
           ->alter('r', $current->getVersion());
 
-        $vs_head = phutil_render_tag(
+        $vs_head = phutil_tag(
           'a',
           array(
             'href' => $uri,
@@ -82,7 +82,7 @@ final class PhrictionHistoryController
       $rows[] = array(
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $slug_uri.'?v='.$version,

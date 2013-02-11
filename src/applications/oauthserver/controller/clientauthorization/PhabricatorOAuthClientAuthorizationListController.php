@@ -50,14 +50,14 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
         'article/Using_the_Phabricator_OAuth_Server.html#scopes'
       );
       $row = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $client->getViewURI(),
           ),
-          phutil_escape_html($client->getName())
+          $client->getName()
         ),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $scope_doc_href,
@@ -72,7 +72,7 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
           $authorization->getDateModified(),
           $current_user
         ),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'class' => 'small button grey',

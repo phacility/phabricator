@@ -20,7 +20,7 @@ final class PhabricatorFlagListView extends AphrontView {
       $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'div',
           array(
             'class' => 'phabricator-flag-icon '.$class,
@@ -29,27 +29,27 @@ final class PhabricatorFlagListView extends AphrontView {
         $flag->getHandle()->renderLink(),
         phutil_escape_html($flag->getNote()),
         phabricator_datetime($flag->getDateCreated(), $user),
-        phabricator_render_form(
+        phabricator_form(
           $user,
           array(
             'method' => 'POST',
             'action' => '/flag/edit/'.$flag->getObjectPHID().'/',
             'sigil'  => 'workflow',
           ),
-          phutil_render_tag(
+          phutil_tag(
             'button',
             array(
               'class' => 'small grey',
             ),
             'Edit Flag')),
-        phabricator_render_form(
+        phabricator_form(
           $user,
           array(
             'method' => 'POST',
             'action' => '/flag/delete/'.$flag->getID().'/',
             'sigil'  => 'workflow',
           ),
-          phutil_render_tag(
+          phutil_tag(
             'button',
             array(
               'class' => 'small grey',

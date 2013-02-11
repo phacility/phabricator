@@ -28,10 +28,10 @@ final class PhabricatorRepositoryArcanistProjectDeleteController
     $dialog
       ->setUser($request->getUser())
       ->setTitle('Really delete this arcanist project?')
-      ->appendChild(
-        '<p>Really delete the "'.phutil_escape_html($arc_project->getName()).
-        '" arcanist project? '.
-        'This operation can not be undone.</p>')
+      ->appendChild(hsprintf(
+        '<p>Really delete the "%s" arcanist project? '.
+          'This operation can not be undone.</p>',
+        $arc_project->getName()))
       ->setSubmitURI('/repository/project/delete/'.$this->id.'/')
       ->addSubmitButton('Delete Arcanist Project')
       ->addCancelButton('/repository/');

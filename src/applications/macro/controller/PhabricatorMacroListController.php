@@ -125,11 +125,11 @@ final class PhabricatorMacroListController
         if ($file->getAuthorPHID()) {
           $author_handle = $this->getHandle($file->getAuthorPHID());
           $item->appendChild(
-            'Created by '.$author_handle->renderLink());
+            pht('Created by %s', $author_handle->renderLink()));
         }
         $datetime = phabricator_date($file->getDateCreated(), $viewer);
         $item->appendChild(
-          phutil_render_tag(
+          phutil_tag(
             'div',
             array(),
             pht('Created on %s', $datetime)));

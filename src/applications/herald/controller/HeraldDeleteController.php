@@ -43,9 +43,9 @@ final class HeraldDeleteController extends HeraldController {
     $dialog = new AphrontDialogView();
     $dialog->setUser($request->getUser());
     $dialog->setTitle('Really delete this rule?');
-    $dialog->appendChild(
-      "Are you sure you want to delete the rule ".
-      "'<strong>".phutil_escape_html($rule->getName())."</strong>'?");
+    $dialog->appendChild(hsprintf(
+      "Are you sure you want to delete the rule '<strong>%s</strong>'?",
+      $rule->getName()));
     $dialog->addSubmitButton('Delete');
     $dialog->addCancelButton('/herald/');
     $dialog->setSubmitURI($request->getPath());

@@ -160,7 +160,7 @@ final class PhabricatorMarkupEngine {
         "Call process() before getOutput().");
     }
 
-    return $this->objects[$key]['output'];
+    return new PhutilSafeHTML($this->objects[$key]['output']);
   }
 
 

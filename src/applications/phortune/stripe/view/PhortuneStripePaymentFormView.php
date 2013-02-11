@@ -51,7 +51,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
         id(new AphrontFormMarkupControl())
         ->setLabel('')
         ->setValue(
-          javelin_render_tag(
+          javelin_tag(
             'div',
             array(
               'class' => 'credit-card-logos',
@@ -86,7 +86,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
         ->setError($this->getCardExpirationError())
       )
       ->appendChild(
-        javelin_render_tag(
+        javelin_tag(
           'input',
           array(
             'hidden' => true,
@@ -96,7 +96,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
         )
       )
       ->appendChild(
-        javelin_render_tag(
+        javelin_tag(
           'input',
           array(
             'hidden' => true,
@@ -106,7 +106,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
         )
       )
       ->appendChild(
-        phutil_render_tag(
+        phutil_tag(
           'input',
           array(
             'hidden' => true,

@@ -111,7 +111,7 @@ final class DifferentialRevisionListView extends AphrontView {
       if (isset($flagged[$phid])) {
         $class = PhabricatorFlagColor::getCSSClass($flagged[$phid]->getColor());
         $note = $flagged[$phid]->getNote();
-        $flag = javelin_render_tag(
+        $flag = javelin_tag(
           'div',
           $note ? array(
             'class' => 'phabricator-flag-icon '.$class,
@@ -130,7 +130,7 @@ final class DifferentialRevisionListView extends AphrontView {
         $src = '/rsrc/image/icon/fatcow/page_white_edit.png';
         $flag =
           '<a href="/D'.$revision->getID().'#comment-preview">'.
-            phutil_render_tag(
+            phutil_tag(
               'img',
               array(
                 'src' => celerity_get_resource_uri($src),

@@ -13,7 +13,10 @@ final class DifferentialExportPatchFieldSpecification
 
   public function renderValueForRevisionView() {
     $revision = $this->getRevision();
-    return '<tt>arc export --revision '.$revision->getID().'</tt>';
+    return phutil_tag(
+      'tt',
+      array(),
+      'arc export --revision '.$revision->getID());
   }
 
 }

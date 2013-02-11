@@ -245,12 +245,13 @@ final class ManiphestReportController extends ManiphestController {
 
     if ($handle) {
       $header = "Task Burn Rate for Project ".$handle->renderLink();
-      $caption = "<p>NOTE: This table reflects tasks <em>currently</em> in ".
-                 "the project. If a task was opened in the past but added to ".
-                 "the project recently, it is counted on the day it was ".
-                 "opened, not the day it was categorized. If a task was part ".
-                 "of this project in the past but no longer is, it is not ".
-                 "counted at all.</p>";
+      $caption = hsprintf(
+        "<p>NOTE: This table reflects tasks <em>currently</em> in ".
+        "the project. If a task was opened in the past but added to ".
+        "the project recently, it is counted on the day it was ".
+        "opened, not the day it was categorized. If a task was part ".
+        "of this project in the past but no longer is, it is not ".
+        "counted at all.</p>");
     } else {
       $header = "Task Burn Rate for All Tasks";
       $caption = null;
@@ -271,7 +272,7 @@ final class ManiphestReportController extends ManiphestController {
     $filter = $this->renderReportFilters($tokens, $has_window = false);
 
     $id = celerity_generate_unique_node_id();
-    $chart = phutil_render_tag(
+    $chart = phutil_tag(
       'div',
       array(
         'id' => $id,
@@ -409,12 +410,12 @@ final class ManiphestReportController extends ManiphestController {
         unset($result_closed['']);
 
         $base_link = '/maniphest/?users=';
-        $leftover_name = phutil_render_tag(
+        $leftover_name = phutil_tag(
           'a',
           array(
             'href' => $base_link.ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
           ),
-          '<em>(Up For Grabs)</em>');
+          phutil_tag('em', array(), '(Up For Grabs)'));
         $col_header = 'User';
         $header = 'Open Tasks by User and Priority ('.$date.')';
         break;
@@ -446,12 +447,12 @@ final class ManiphestReportController extends ManiphestController {
         }
 
         $base_link = '/maniphest/view/all/?projects=';
-        $leftover_name = phutil_render_tag(
+        $leftover_name = phutil_tag(
           'a',
           array(
             'href' => $base_link.ManiphestTaskOwner::PROJECT_NO_PROJECT,
           ),
-          '<em>(No Project)</em>');
+          phutil_tag('em', array(), '(No Project)'));
         $col_header = 'Project';
         $header = 'Open Tasks by Project and Priority ('.$date.')';
         break;
@@ -478,12 +479,12 @@ final class ManiphestReportController extends ManiphestController {
         }
 
         $tasks = idx($result, $handle->getPHID(), array());
-        $name = phutil_render_tag(
+        $name = phutil_tag(
           'a',
           array(
             'href' => $base_link.$handle->getPHID(),
           ),
-          phutil_escape_html($handle->getName()));
+          $handle->getName());
         $closed = idx($result_closed, $handle->getPHID(), array());
       } else {
         $tasks = $leftover;
@@ -524,13 +525,13 @@ final class ManiphestReportController extends ManiphestController {
 
       if ($closed) {
         $task_ids = implode(',', mpull($closed, 'getID'));
-        $row[] = phutil_render_tag(
+        $row[] = phutil_tag(
           'a',
           array(
             'href' => '/maniphest/view/custom/?s=oc&tasks='.$task_ids,
             'target' => '_blank',
           ),
-          phutil_escape_html(number_format(count($closed))));
+          number_format(count($closed)));
       } else {
         $row[] = '-';
       }
@@ -574,7 +575,7 @@ final class ManiphestReportController extends ManiphestController {
     }
     $cname[] = 'Total';
     $cclass[] = 'n';
-    $cname[] = javelin_render_tag(
+    $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
@@ -585,7 +586,7 @@ final class ManiphestReportController extends ManiphestController {
       ),
       'Oldest (All)');
     $cclass[] = 'n';
-    $cname[] = javelin_render_tag(
+    $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
@@ -599,7 +600,7 @@ final class ManiphestReportController extends ManiphestController {
     $cclass[] = 'n';
 
     list($ignored, $window_epoch) = $this->getWindow();
-    $cname[] = javelin_render_tag(
+    $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
@@ -745,7 +746,7 @@ final class ManiphestReportController extends ManiphestController {
     $raw_age = (time() - $oldest->getDateCreated());
     $age = number_format($raw_age / (24 * 60 * 60)).' d';
 
-    $link = javelin_render_tag(
+    $link = javelin_tag(
       'a',
       array(
         'href'  => '/T'.$oldest->getID(),
@@ -755,7 +756,7 @@ final class ManiphestReportController extends ManiphestController {
         ),
         'target' => '_blank',
       ),
-      phutil_escape_html($age));
+      $age);
 
     return array($link, $raw_age);
   }

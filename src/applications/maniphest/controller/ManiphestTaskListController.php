@@ -348,7 +348,7 @@ final class ManiphestTaskListController extends ManiphestController {
         $count = number_format(count($list));
 
         $header =
-          javelin_render_tag(
+          javelin_tag(
             'h1',
             array(
               'class' => 'maniphest-task-group-header',
@@ -357,7 +357,7 @@ final class ManiphestTaskListController extends ManiphestController {
                 'priority' => head($list)->getPriority(),
               ),
             ),
-            phutil_escape_html($group).' ('.$count.')');
+            $group.' ('.$count.')');
 
 
         $panel = new AphrontPanelView();
@@ -641,7 +641,7 @@ final class ManiphestTaskListController extends ManiphestController {
         'status'      => 'batch-select-status-cell',
       ));
 
-    $select_all = javelin_render_tag(
+    $select_all = javelin_tag(
       'a',
       array(
         'href'        => '#',
@@ -651,7 +651,7 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       'Select All');
 
-    $select_none = javelin_render_tag(
+    $select_none = javelin_tag(
       'a',
       array(
         'href'        => '#',
@@ -661,16 +661,16 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       'Clear Selection');
 
-    $submit = phutil_render_tag(
+    $submit = phutil_tag(
       'button',
       array(
         'id'          => 'batch-select-submit',
         'disabled'    => 'disabled',
         'class'       => 'disabled',
       ),
-      'Batch Edit Selected Tasks &raquo;');
+      "Batch Edit Selected Tasks \xC2\xBB");
 
-    $export = javelin_render_tag(
+    $export = javelin_tag(
       'a',
       array(
         'href' => '/maniphest/export/'.$search_query->getQueryKey().'/',

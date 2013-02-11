@@ -22,7 +22,7 @@ final class PhabricatorConfigIssueViewController
         ->setTitle(pht('Issue Resolved'))
         ->appendChild(pht('This setup issue has been resolved. '))
         ->appendChild(
-          phutil_render_tag(
+          phutil_tag(
             'a',
             array(
               'href' => $this->getApplicationURI('issue/'),
@@ -64,7 +64,7 @@ final class PhabricatorConfigIssueViewController
     $view = new PhabricatorSetupIssueView();
     $view->setIssue($issue);
 
-    $container = phutil_render_tag(
+    $container = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue-background',

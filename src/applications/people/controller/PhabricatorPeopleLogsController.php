@@ -163,22 +163,22 @@ final class PhabricatorPeopleLogsController
         phutil_escape_html($handles[$log->getUserPHID()]->getName()),
         json_encode($log->getOldValue(), true),
         json_encode($log->getNewValue(), true),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $request
               ->getRequestURI()
               ->alter('ip', $log->getRemoteAddr()),
           ),
-          phutil_escape_html($log->getRemoteAddr())),
-        phutil_render_tag(
+          $log->getRemoteAddr()),
+        phutil_tag(
           'a',
           array(
             'href' => $request
               ->getRequestURI()
               ->alter('session', $log->getSession()),
           ),
-          phutil_escape_html($log->getSession())),
+          $log->getSession()),
       );
     }
 

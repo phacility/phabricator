@@ -24,7 +24,7 @@ final class PholioMockImagesView extends AphrontView {
 
     $main_image = head($this->mock->getImages());
 
-    $main_image_tag = javelin_render_tag(
+    $main_image_tag = javelin_tag(
       'img',
       array(
         'id' => $main_image_id,
@@ -37,7 +37,7 @@ final class PholioMockImagesView extends AphrontView {
         ),
     ));
 
-    $main_image_tag = javelin_render_tag(
+    $main_image_tag = javelin_tag(
       'div',
       array(
         'id' => 'mock-wrapper',
@@ -47,7 +47,7 @@ final class PholioMockImagesView extends AphrontView {
       $main_image_tag
     );
 
-    $mockview .= phutil_render_tag(
+    $mockview[] = phutil_tag(
       'div',
         array(
           'class' => 'pholio-mock-image-container',
@@ -59,7 +59,7 @@ final class PholioMockImagesView extends AphrontView {
       foreach ($this->mock->getImages() as $image) {
         $thumbfile = $image->getFile();
 
-        $tag = javelin_render_tag(
+        $tag = javelin_tag(
           'img',
           array(
             'src' => $thumbfile->getThumb160x120URI(),
@@ -73,14 +73,14 @@ final class PholioMockImagesView extends AphrontView {
         $thumbnails[] = $tag;
       }
 
-      $mockview .= phutil_render_tag(
+      $mockview[] = phutil_tag(
         'div',
-          array(
-            'class' => 'pholio-mock-carousel',
-          ),
-        implode($thumbnails));
+        array(
+          'class' => 'pholio-mock-carousel',
+        ),
+        $thumbnails);
     }
 
-    return $mockview;
+    return $this->renderHTMLView($mockview);
   }
 }

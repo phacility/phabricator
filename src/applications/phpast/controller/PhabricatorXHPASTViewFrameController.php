@@ -13,7 +13,7 @@ final class PhabricatorXHPASTViewFrameController
     $id = $this->id;
 
     return $this->buildStandardPageResponse(
-      phutil_render_tag(
+      phutil_tag(
         'iframe',
         array(
           'src'         => '/xhpast/frameset/'.$id.'/',

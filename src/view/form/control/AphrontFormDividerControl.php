@@ -7,7 +7,7 @@ final class AphrontFormDividerControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    return '<hr />';
+    return phutil_tag('hr');
   }
 
 }

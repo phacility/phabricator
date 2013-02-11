@@ -40,7 +40,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
         $default = $query;
       }
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'input',
           array(
             'type'      => 'radio',
@@ -48,20 +48,20 @@ final class ManiphestSavedQueryListController extends ManiphestController {
             'value'     => $query->getID(),
             'checked'   => ($query->getIsDefault() ? 'checked' : null),
           )),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/maniphest/view/custom/?key='.$query->getQueryKey(),
           ),
-          phutil_escape_html($query->getName())),
-        phutil_render_tag(
+          $query->getName()),
+        phutil_tag(
           'a',
           array(
             'href'  => '/maniphest/custom/edit/'.$query->getID().'/',
             'class' => 'grey small button',
           ),
           'Edit'),
-        javelin_render_tag(
+        javelin_tag(
           'a',
           array(
             'href'  => '/maniphest/custom/delete/'.$query->getID().'/',
@@ -73,7 +73,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
     }
 
     $rows[] = array(
-      phutil_render_tag(
+      phutil_tag(
         'input',
         array(
           'type'      => 'radio',
@@ -105,7 +105,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Saved Custom Queries');
     $panel->addButton(
-      phutil_render_tag(
+      phutil_tag(
         'button',
         array(),
         'Save Default Query'));

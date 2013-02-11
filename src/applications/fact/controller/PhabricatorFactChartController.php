@@ -53,7 +53,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
     $y = array_values($points);
 
     $id = celerity_generate_unique_node_id();
-    $chart = phutil_render_tag(
+    $chart = phutil_tag(
       'div',
       array(
         'id' => $id,

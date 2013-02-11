@@ -181,20 +181,24 @@ final class AphrontTableView extends AphrontView {
             $classes[] = 'aphront-table-view-sortable-selected';
           }
 
-          $sort_glyph = phutil_render_tag(
+          $sort_glyph = phutil_tag(
             'span',
             array(
               'class' => $sort_glyph_class,
             ),
             '');
 
-          $header = phutil_render_tag(
+          $header = phutil_tag(
             'a',
             array(
               'href'  => $this->sortURI->alter($this->sortParam, $sort_value),
               'class' => 'aphront-table-view-sort-link',
             ),
-            $header.' '.$sort_glyph);
+            array(
+              $header,
+              ' ',
+              $sort_glyph,
+            ));
         }
 
         if ($classes) {
@@ -204,18 +208,18 @@ final class AphrontTableView extends AphrontView {
         }
 
         if ($short_headers[$col_num] !== null) {
-          $header_nodevice = phutil_render_tag(
+          $header_nodevice = phutil_tag(
             'span',
             array(
               'class' => 'aphront-table-view-nodevice',
             ),
             $header);
-          $header_device = phutil_render_tag(
+          $header_device = phutil_tag(
             'span',
             array(
               'class' => 'aphront-table-view-device',
             ),
-            phutil_escape_html($short_headers[$col_num]));
+            $short_headers[$col_num]);
 
           $header = $header_nodevice.$header_device;
         }
@@ -302,17 +306,20 @@ final class AphrontTableView extends AphrontView {
     // (alternatively, we could hard-code the line height). This is gross but
     // it's not clear that there's a better appraoch.
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'single-display-line-bounds',
       ),
-      phutil_render_tag(
-        'span',
-        array(
-          'class' => 'single-display-line-content',
-        ),
-        $line).'&nbsp;');
+      array(
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'single-display-line-content',
+          ),
+          $line),
+        "\xC2\xA0",
+      ));
   }
 
 

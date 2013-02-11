@@ -59,36 +59,35 @@ final class PhamePostView extends AphrontView {
 
   public function renderTitle() {
     $href = $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle());
-    return phutil_render_tag(
+    return phutil_tag(
       'h2',
       array(
         'class' => 'phame-post-title',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'a',
         array(
           'href' => $href,
         ),
-        phutil_escape_html($this->getPost()->getTitle())));
+        $this->getPost()->getTitle()));
   }
 
   public function renderDatePublished() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post-date',
       ),
-      phutil_escape_html(
         pht(
           'Published on %s by %s',
           phabricator_datetime(
             $this->getPost()->getDatePublished(),
             $this->getUser()),
-          $this->getAuthor()->getName())));
+          $this->getAuthor()->getName()));
   }
 
   public function renderBody() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post-body',
@@ -97,7 +96,7 @@ final class PhamePostView extends AphrontView {
   }
 
   public function renderSummary() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post-body',
@@ -124,26 +123,30 @@ final class PhamePostView extends AphrontView {
   }
 
   public function render() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post',
       ),
-      $this->renderTitle().
-      $this->renderDatePublished().
-      $this->renderBody().
-      $this->renderComments());
+      array(
+        $this->renderTitle(),
+        $this->renderDatePublished(),
+        $this->renderBody(),
+        $this->renderComments(),
+      ));
   }
 
   public function renderWithSummary() {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-post',
       ),
-      $this->renderTitle().
-      $this->renderDatePublished().
-      $this->renderSummary());
+      array(
+        $this->renderTitle(),
+        $this->renderDatePublished(),
+        $this->renderSummary(),
+      ));
   }
 
   private function renderFacebookComments() {
@@ -152,45 +155,46 @@ final class PhamePostView extends AphrontView {
       return null;
     }
 
-    $fb_root = phutil_render_tag('div',
+    $fb_root = phutil_tag('div',
       array(
         'id' => 'fb-root',
       ),
-      ''
-    );
+      '');
 
     $c_uri = '//connect.facebook.net/en_US/all.js#xfbml=1&appId='.$fb_id;
-    $fb_js = jsprintf(
-      '<script>(function(d, s, id) {'.
-      ' var js, fjs = d.getElementsByTagName(s)[0];'.
-      ' if (d.getElementById(id)) return;'.
-      ' js = d.createElement(s); js.id = id;'.
-      ' js.src = %s;'.
-      ' fjs.parentNode.insertBefore(js, fjs);'.
-      '}(document, \'script\', \'facebook-jssdk\'));</script>',
-      $c_uri
-    );
+    $fb_js = hsprintf(
+      '<script>%s</script>',
+      jsprintf(
+        '(function(d, s, id) {'.
+        ' var js, fjs = d.getElementsByTagName(s)[0];'.
+        ' if (d.getElementById(id)) return;'.
+        ' js = d.createElement(s); js.id = id;'.
+        ' js.src = %s;'.
+        ' fjs.parentNode.insertBefore(js, fjs);'.
+        '}(document, \'script\', \'facebook-jssdk\'));',
+        $c_uri));
 
 
     $uri = $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle());
 
-    $fb_comments = phutil_render_tag('div',
+    $fb_comments = phutil_tag('div',
       array(
         'class'            => 'fb-comments',
         'data-href'        => $uri,
         'data-num-posts'   => 5,
       ),
-      ''
-    );
+      '');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-comments-facebook',
       ),
-      $fb_root.
-      $fb_js.
-      $fb_comments);
+      array(
+        $fb_root,
+        $fb_js,
+        $fb_comments,
+      ));
   }
 
   private function renderDisqusComments() {
@@ -201,39 +205,41 @@ final class PhamePostView extends AphrontView {
 
     $post = $this->getPost();
 
-    $disqus_thread = phutil_render_tag('div',
+    $disqus_thread = phutil_tag('div',
       array(
         'id' => 'disqus_thread'
       )
     );
 
     // protip - try some  var disqus_developer = 1; action to test locally
-    $disqus_js = jsprintf(
-      '<script>'.
-      ' var disqus_shortname = "phabricator";'.
-      ' var disqus_identifier = %s;'.
-      ' var disqus_url = %s;'.
-      ' var disqus_title = %s;'.
-      '(function() {'.
-      ' var dsq = document.createElement("script");'.
-      ' dsq.type = "text/javascript";'.
-      ' dsq.async = true;'.
-      ' dsq.src = "http://" + disqus_shortname + ".disqus.com/embed.js";'.
-      '(document.getElementsByTagName("head")[0] ||'.
-      ' document.getElementsByTagName("body")[0]).appendChild(dsq);'.
-      '})(); </script>',
-      $post->getPHID(),
-      $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle()),
-      $post->getTitle()
-    );
+    $disqus_js = hsprintf(
+      '<script>%s</script>',
+      jsprintf(
+        ' var disqus_shortname = "phabricator";'.
+        ' var disqus_identifier = %s;'.
+        ' var disqus_url = %s;'.
+        ' var disqus_title = %s;'.
+        '(function() {'.
+        ' var dsq = document.createElement("script");'.
+        ' dsq.type = "text/javascript";'.
+        ' dsq.async = true;'.
+        ' dsq.src = "http://" + disqus_shortname + ".disqus.com/embed.js";'.
+        '(document.getElementsByTagName("head")[0] ||'.
+        ' document.getElementsByTagName("body")[0]).appendChild(dsq);'.
+        '})();',
+        $post->getPHID(),
+        $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle()),
+        $post->getTitle()));
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phame-comments-disqus',
       ),
-      $disqus_thread.
-      $disqus_js);
+      array(
+        $disqus_thread,
+        $disqus_js,
+      ));
   }
 
 }

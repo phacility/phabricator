@@ -19,7 +19,7 @@ final class DiffusionCommitTagsController extends DiffusionController {
 
     $tag_links = array();
     foreach ($tags as $tag) {
-      $tag_links[] = phutil_render_tag(
+      $tag_links[] = phutil_tag(
         'a',
         array(
           'href' => $request->generateURI(
@@ -28,11 +28,11 @@ final class DiffusionCommitTagsController extends DiffusionController {
               'commit'  => $tag->getName(),
             )),
         ),
-        phutil_escape_html($tag->getName()));
+        $tag->getName());
     }
 
     if ($has_more_tags) {
-      $tag_links[] = phutil_render_tag(
+      $tag_links[] = phutil_tag(
         'a',
         array(
           'href' => $request->generateURI(

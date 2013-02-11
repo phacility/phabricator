@@ -15,7 +15,7 @@ try {
     PhabricatorStartup::setGlobal('log.access', $access_log);
     $access_log->setData(
       array(
-        'R' => idx($_SERVER, 'HTTP_REFERER', '-'),
+        'R' => AphrontRequest::getHTTPHeader('Referer', '-'),
         'r' => idx($_SERVER, 'REMOTE_ADDR', '-'),
         'M' => idx($_SERVER, 'REQUEST_METHOD', '-'),
       ));
@@ -34,7 +34,7 @@ try {
     return;
   }
 
-  $host = $_SERVER['HTTP_HOST'];
+  $host = AphrontRequest::getHTTPHeader('Host');
   $path = $_REQUEST['__path__'];
 
   switch ($host) {
@@ -132,25 +132,7 @@ try {
     $access_log->write();
   }
 
-  if (DarkConsoleXHProfPluginAPI::isProfilerRequested()) {
-    $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
-    $profile_sample = id(new PhabricatorXHProfSample())
-      ->setFilePHID($profile);
-    if (empty($_REQUEST['__profile__'])) {
-      $sample_rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
-    } else {
-      $sample_rate = 0;
-    }
-    $profile_sample->setSampleRate($sample_rate);
-    if ($access_log) {
-      $profile_sample->setUsTotal($access_log->getData('T'))
-        ->setHostname($access_log->getData('h'))
-        ->setRequestPath($access_log->getData('U'))
-        ->setController($access_log->getData('C'))
-        ->setUserPHID($request->getUser()->getPHID());
-    }
-    $profile_sample->save();
-  }
+  DarkConsoleXHProfPluginAPI::saveProfilerSample($request, $access_log);
 
 } catch (Exception $ex) {
   PhabricatorStartup::didFatal("[Exception] ".$ex->getMessage());

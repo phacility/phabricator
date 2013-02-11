@@ -41,7 +41,7 @@ final class AphrontTypeaheadTemplateView extends AphrontView {
       $tokens[] = $this->renderToken($key, $value);
     }
 
-    $input = javelin_render_tag(
+    $input = javelin_tag(
       'input',
       array(
         'name'          => $name,
@@ -52,14 +52,16 @@ final class AphrontTypeaheadTemplateView extends AphrontView {
         'autocomplete'  => 'off',
       ));
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'id'    => $id,
         'sigil' => 'typeahead-hardpoint',
         'class' => 'jx-typeahead-hardpoint',
       ),
-      $input.
-      '<div style="clear: both;"></div>');
+      array(
+        $input,
+        phutil_tag('div', array('style' => 'clear: both'), ''),
+      ));
   }
 }

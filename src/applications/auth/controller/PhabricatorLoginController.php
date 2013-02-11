@@ -177,9 +177,9 @@ final class PhabricatorLoginController
           id(new AphrontFormPasswordControl())
             ->setLabel(pht('Password'))
             ->setName('password')
-            ->setCaption(
-              '<a href="/login/email/">'.
-                pht('Forgot your password? / Email Login').'</a>'));
+            ->setCaption(hsprintf(
+              '<a href="/login/email/">%s</a>',
+              pht('Forgot your password? / Email Login'))));
 
       if ($require_captcha) {
         $form->appendChild(
@@ -243,22 +243,21 @@ final class PhabricatorLoginController
       // CSRF for logged-out users is vaugely tricky.
 
       if ($provider->isProviderRegistrationEnabled()) {
-        $title = pht("Login or Register with %s",
-          phutil_escape_html($provider_name));
+        $title = pht("Login or Register with %s", $provider_name);
         $body = pht('Login or register for Phabricator using your %s account.',
-          phutil_escape_html($provider_name));
+          $provider_name);
         $button = pht("Login or Register with %s",
           phutil_escape_html($provider_name));
       } else {
-        $title = pht("Login with %s",
-          phutil_escape_html($provider_name));
-        $body = pht('Login to your existing Phabricator account using your '.
-                '%s account.', phutil_escape_html($provider_name)).
-                '<br /><br />'.
-                '<strong>'.
-                  pht('You can not use %s to register a new account.',
-                  phutil_escape_html($provider_name)).
-                '</strong>';
+        $title = pht("Login with %s", $provider_name);
+        $body = hsprintf(
+          '%s<br /><br /><strong>%s</strong>',
+          pht(
+            'Login to your existing Phabricator account using your %s account.',
+            $provider_name),
+          pht(
+            'You can not use %s to register a new account.',
+            $provider_name));
         $button = pht("Log in with %s", phutil_escape_html($provider_name));
       }
 
@@ -276,8 +275,9 @@ final class PhabricatorLoginController
       $auth_form
         ->setUser($request->getUser())
         ->setMethod('GET')
-        ->appendChild(
-          '<p class="aphront-form-instructions">'.$body.'</p>')
+        ->appendChild(hsprintf(
+          '<p class="aphront-form-instructions">%s</p>',
+          $body))
         ->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue("{$button} \xC2\xBB"));
@@ -289,9 +289,9 @@ final class PhabricatorLoginController
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->setNoBackground();
     foreach ($forms as $name => $form) {
-      $panel->appendChild('<h1>'.$name.'</h1>');
+      $panel->appendChild(phutil_tag('h1', array(), $name));
       $panel->appendChild($form);
-      $panel->appendChild('<br />');
+      $panel->appendChild(phutil_tag('br'));
     }
 
     $login_message = PhabricatorEnv::getEnvConfig('auth.login-message');

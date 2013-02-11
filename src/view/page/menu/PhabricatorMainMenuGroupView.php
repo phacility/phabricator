@@ -28,12 +28,12 @@ final class PhabricatorMainMenuGroupView extends AphrontView {
       $classes = array_merge($classes, $this->classes);
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
       ),
-      $this->renderChildren());
+      $this->renderHTMLChildren());
   }
 
 }

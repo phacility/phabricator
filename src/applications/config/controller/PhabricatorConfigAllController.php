@@ -24,12 +24,12 @@ final class PhabricatorConfigAllController
       }
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => $this->getApplicationURI('edit/'.$key.'/'),
           ),
-          phutil_escape_html($key)),
+          $key),
         $value,
       );
     }
@@ -68,13 +68,16 @@ final class PhabricatorConfigAllController
       $display_version = pht('Unknown');
     }
     $version_property_list = id(new PhabricatorPropertyListView());
-    $version_property_list->addProperty('Version',
-      phutil_escape_html($display_version));
+    $version_property_list->addProperty(
+      pht('Version'),
+      $display_version);
+
     $version_path = $phabricator_root.'/conf/local/VERSION';
     if (Filesystem::pathExists($version_path)) {
       $version_from_file = Filesystem::readFile($version_path);
-      $version_property_list->addProperty('Local Version',
-        phutil_escape_html($version_from_file));
+      $version_property_list->addProperty(
+        pht('Local Version'),
+        $version_from_file);
     }
 
     $nav = $this->buildSideNavView();

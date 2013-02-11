@@ -22,7 +22,7 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
     $rows = array();
     foreach ($this->buttons as $button) {
       $id = celerity_generate_unique_node_id();
-      $radio = phutil_render_tag(
+      $radio = phutil_tag(
         'input',
         array(
           'id' => $id,
@@ -34,31 +34,30 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
             : null,
           'disabled' => $this->getDisabled() ? 'disabled' : null,
         ));
-      $label = phutil_render_tag(
+      $label = phutil_tag(
         'label',
         array(
           'for' => $id,
           'class' => $button['class'],
         ),
-        phutil_escape_html($button['label']));
+        $button['label']);
 
       if (strlen($button['caption'])) {
-        $label .=
-          '<div class="aphront-form-radio-caption">'.
-            phutil_escape_html($button['caption']).
-          '</div>';
+        $label = hsprintf(
+          '%s<div class="aphront-form-radio-caption">%s</div>',
+          $label,
+          $button['caption']);
       }
-      $rows[] =
-        '<tr>'.
-          '<td>'.$radio.'</td>'.
-          '<th>'.$label.'</th>'.
-        '</tr>';
+      $rows[] = hsprintf(
+        '<tr><td>%s</td><th>%s</th></tr>',
+        $radio,
+        $label);
     }
 
-    return
-      '<table class="aphront-form-control-radio-layout">'.
-        implode("\n", $rows).
-      '</table>';
+    return phutil_tag(
+      'table',
+      array('class' => 'aphront-form-control-radio-layout'),
+      $rows);
   }
 
 }

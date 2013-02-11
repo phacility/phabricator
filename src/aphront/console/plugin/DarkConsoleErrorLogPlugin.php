@@ -7,29 +7,32 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
 
   public function getName() {
     $count = count($this->getData());
-
     if ($count) {
-      return
-        '<span style="color: #ff0000;">&bull;</span> '.
-        "Error Log ({$count})";
+      return pht('Error Log (%d)', $count);
     }
-
-    return 'Error Log';
+    return pht('Error Log');
   }
 
+  public function getOrder() {
+    return 0;
+  }
+
+  public function getColor() {
+    if (count($this->getData())) {
+      return '#ff0000';
+    }
+    return null;
+  }
 
   public function getDescription() {
-    return 'Shows errors and warnings.';
+    return pht('Shows errors and warnings.');
   }
-
 
   public function generateData() {
     return DarkConsoleErrorLogPluginAPI::getErrors();
   }
 
-
-  public function render() {
-
+  public function renderPanel() {
     $data = $this->getData();
 
     $rows = array();
@@ -39,12 +42,12 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
       $file = $row['file'];
       $line = $row['line'];
 
-      $tag = phutil_render_tag(
+      $tag = phutil_tag(
         'a',
         array(
           'onclick' => jsprintf('show_details(%d)', $index),
         ),
-        phutil_escape_html($row['str'].' at ['.basename($file).':'.$line.']'));
+        $row['str'].' at ['.basename($file).':'.$line.']');
       $rows[] = array($tag);
 
       $details .=
@@ -70,12 +73,12 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
           }
         }
 
-        $details .= phutil_render_tag(
+        $details .= phutil_tag(
           'a',
           array(
             'href' => $href,
           ),
-          phutil_escape_html($line));
+          $line);
         $details .= "\n";
       }
 

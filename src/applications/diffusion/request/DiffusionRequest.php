@@ -544,6 +544,30 @@ abstract class DiffusionRequest {
     return $result;
   }
 
+  /**
+   * Check that the working copy of the repository is present and readable.
+   *
+   * @param   string  Path to the working copy.
+   */
+  protected function validateWorkingCopy($path) {
+    if (!is_readable(dirname($path))) {
+      $this->raisePermissionException();
+    }
+
+    if (!Filesystem::pathExists($path)) {
+      $this->raiseCloneException();
+    }
+  }
+
+  protected function raisePermissionException() {
+    $host = php_uname('n');
+    $callsign = $this->getRepository()->getCallsign();
+    throw new DiffusionSetupException(
+      "The clone of this repository ('{$callsign}') on the local machine " .
+      "('{$host}') could not be read. Ensure that the repository is in a " .
+      "location where the web server has read permissions.");
+  }
+
   protected function raiseCloneException() {
     $host = php_uname('n');
     $callsign = $this->getRepository()->getCallsign();

@@ -7,8 +7,8 @@ final class PhabricatorErrorExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Use <tt>AphrontErrorView</tt> to render errors, warnings and '.
-           'notices.';
+    return hsprintf(
+      'Use <tt>AphrontErrorView</tt> to render errors, warnings and notices.');
   }
 
   public function renderExample() {

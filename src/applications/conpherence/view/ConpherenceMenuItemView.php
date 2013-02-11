@@ -136,9 +136,17 @@ final class ConpherenceMenuItemView extends AphrontTagView {
         array(
           'class' => 'conpherence-menu-item-unread-count'
         ),
-        $this->unreadCount);
+        (int)$this->unreadCount);
     }
 
-    return $image.$title.$subtitle.$message.$epoch.$unread_count;
+    return $this->renderHTMLView(
+      array(
+        $image,
+        $title,
+        $subtitle,
+        $message,
+        $epoch,
+        $unread_count,
+      ));
   }
 }

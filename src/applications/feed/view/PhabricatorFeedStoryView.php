@@ -97,7 +97,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
         $foot = '';
       }
 
-      $foot = phutil_render_tag(
+      $foot = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-feed-story-foot',
@@ -119,7 +119,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
           : 'phabricator-feed-story',
         'style' => $image_style,
       ),
-      $head.$body.$foot);
+      $this->renderSingleView(array($head, $body, $foot)));
   }
 
 }

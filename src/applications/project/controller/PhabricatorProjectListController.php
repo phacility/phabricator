@@ -100,22 +100,22 @@ final class PhabricatorProjectListController
 
 
       $rows[] = array(
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/project/view/'.$project->getID().'/',
           ),
-          phutil_escape_html($project->getName())),
+          $project->getName()),
         phutil_escape_html(
           PhabricatorProjectStatus::getNameForStatus($project->getStatus())),
         phutil_escape_html($blurb),
         phutil_escape_html($population),
-        phutil_render_tag(
+        phutil_tag(
           'a',
           array(
             'href' => '/maniphest/view/all/?projects='.$phid,
           ),
-          phutil_escape_html($task_count)),
+          $task_count),
       );
     }
 

@@ -31,15 +31,15 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
     $icon = null;
     $create_button = null;
     if ($application) {
-      $content[] = phutil_render_tag(
+      $content[] = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-application-launch-name',
         ),
-        phutil_escape_html($application->getName()));
+        $application->getName());
 
       if ($application->isBeta()) {
-        $content[] = phutil_render_tag(
+        $content[] = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-application-beta',
@@ -48,12 +48,12 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       }
 
       if ($this->fullWidth) {
-        $content[] = phutil_render_tag(
+        $content[] = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-application-launch-description',
           ),
-          phutil_escape_html($application->getShortDescription()));
+          $application->getShortDescription());
       }
 
       $count = 0;
@@ -64,12 +64,12 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       }
 
       if ($count) {
-        $content[] = phutil_render_tag(
+        $content[] = phutil_tag(
           'span',
           array(
             'class' => 'phabricator-application-launch-attention',
           ),
-          phutil_escape_html($count));
+          $count);
       }
 
       $classes = array();
@@ -84,7 +84,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $classes[] = 'app-'.$icon.'-light-large';
       }
 
-      $icon = phutil_render_tag(
+      $icon = phutil_tag(
         'span',
         array(
           'class' => implode(' ', $classes),
@@ -97,14 +97,14 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         $classes[] = 'phabricator-application-create-icon';
         $classes[] = 'sprite-icon';
         $classes[] = 'action-new-grey';
-        $plus_icon = phutil_render_tag(
+        $plus_icon = phutil_tag(
           'span',
           array(
             'class' => implode(' ', $classes),
           ),
           '');
 
-        $create_button = phutil_render_tag(
+        $create_button = phutil_tag(
           'a',
           array(
             'href' => $application->getQuickCreateURI(),
@@ -121,16 +121,23 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       $classes[] = 'application-tile-full';
     }
 
-    $app_button = phutil_render_tag(
+    $app_button = phutil_tag(
       $application ? 'a' : 'div',
       array(
         'class' => implode(' ', $classes),
         'href'  => $application ? $application->getBaseURI() : null,
         'title' => $application ? $application->getShortDescription() : null,
       ),
-      $icon.
-      $this->renderSingleView($content));
+      $this->renderHTMLView(
+        array(
+          $icon,
+          $content,
+        )));
 
-    return $app_button.$create_button;
+    return $this->renderHTMLView(
+      array(
+        $app_button,
+        $create_button,
+      ));
   }
 }

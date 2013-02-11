@@ -70,12 +70,12 @@ final class PhamePostPublishController extends PhameController {
 
     // TODO: Clean up this CSS.
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'style' => 'text-align: center; padding: 1em;',
       ),
-      phutil_render_tag(
+      phutil_tag(
         'iframe',
         array(
           'style' => 'width: 100%; height: 600px; '.

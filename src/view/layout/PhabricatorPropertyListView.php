@@ -73,12 +73,12 @@ final class PhabricatorPropertyListView extends AphrontView {
       }
     }
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-property-list-view',
       ),
-      $this->renderSingleView($items));
+      $this->renderHTMLView($items));
   }
 
   private function renderPropertyPart(array $part) {
@@ -87,36 +87,27 @@ final class PhabricatorPropertyListView extends AphrontView {
       $key = $spec['key'];
       $value = $spec['value'];
 
-      $items[] = phutil_render_tag(
+      $items[] = phutil_tag(
         'dt',
         array(
           'class' => 'phabricator-property-list-key',
         ),
-        phutil_escape_html($key));
-      $items[] = phutil_render_tag(
+        $key);
+
+      $items[] = phutil_tag(
         'dd',
         array(
           'class' => 'phabricator-property-list-value',
         ),
-        $this->renderSingleView($value));
+        $this->renderHTMLView($value));
     }
 
-    $list = phutil_render_tag(
+    $list = phutil_tag(
       'dl',
       array(
         'class' => 'phabricator-property-list-properties',
       ),
-      $this->renderSingleView($items));
-
-    $content = $this->renderChildren();
-    if (strlen($content)) {
-      $content = phutil_render_tag(
-        'div',
-        array(
-          'class' => 'phabricator-property-list-content',
-        ),
-        $content);
-    }
+      $this->renderHTMLView($items));
 
     $shortcuts = null;
     if ($this->hasKeyboardShortcuts) {
@@ -124,29 +115,33 @@ final class PhabricatorPropertyListView extends AphrontView {
         id(new AphrontKeyboardShortcutsAvailableView())->render();
     }
 
-    return
-      $shortcuts.
-      phutil_render_tag(
+    return array(
+      $shortcuts,
+      phutil_tag(
         'div',
         array(
           'class' => 'phabricator-property-list-container',
         ),
-        $list.
-        '<div class="phabriator-property-list-view-end"></div>'
-      );
+        array(
+          $list,
+          phutil_tag(
+            'div',
+            array('class' => 'phabriator-property-list-view-end'),
+            ''),
+        )));
   }
 
   private function renderSectionPart(array $part) {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-property-list-section-header',
       ),
-      phutil_escape_html($part['name']));
+      $part['name']);
   }
 
   private function renderTextPart(array $part) {
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-property-list-text-content',

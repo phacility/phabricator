@@ -26,27 +26,34 @@ final class PhabricatorObjectListView extends AphrontView {
     foreach ($handles as $handle) {
       $buttons = idx($this->buttons, $handle->getPHID(), array());
       if ($buttons) {
-        $buttons =
-          '<div class="phabricator-object-list-view-buttons">'.
-            implode('', $buttons).
-          '</div>';
+        $buttons = phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-object-list-view-buttons',
+          ),
+          $buttons);
       } else {
         $buttons = null;
       }
 
-      $out[] = javelin_render_tag(
+      $out[] = javelin_tag(
         'div',
         array(
           'class' => 'phabricator-object-list-view-item',
           'style' => 'background-image: url('.$handle->getImageURI().');',
         ),
-        $handle->renderLink().$buttons);
+        array(
+          $handle->renderLink(),
+          $buttons,
+        ));
     }
 
-    return
-      '<div class="phabricator-object-list-view">'.
-        implode("\n", $out).
-      '</div>';
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-object-list-view',
+      ),
+      $out);
   }
 
 }

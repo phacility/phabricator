@@ -34,11 +34,9 @@ final class ManiphestSavedQueryDeleteController extends ManiphestController {
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle('Really delete this query?')
-      ->appendChild(
-        '<p>'.
-          'Really delete the query "'.phutil_escape_html($name).'"? '.
-          'It will be lost forever!'.
-        '</p>')
+      ->appendChild(hsprintf(
+        '<p>Really delete the query "%s"? It will be lost forever!</p>',
+        $name))
       ->addCancelButton('/maniphest/custom/')
       ->addSubmitButton('Delete');
 

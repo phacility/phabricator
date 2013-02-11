@@ -24,13 +24,14 @@ final class PhabricatorNotificationStatusController
     } catch (Exception $ex) {
       $status = new AphrontErrorView();
       $status->setTitle("Notification Server Issue");
-      $status->appendChild(
+      $status->appendChild(hsprintf(
         'Unable to determine server status. This probably means the server '.
         'is not in great shape. The specific issue encountered was:'.
         '<br />'.
         '<br />'.
-        '<strong>'.phutil_escape_html(get_class($ex)).'</strong> '.
-        nl2br(phutil_escape_html($ex->getMessage())));
+        '<strong>%s</strong> %s',
+        get_class($ex),
+        phutil_escape_html_newlines($ex->getMessage())));
     }
 
     return $this->buildStandardPageResponse(

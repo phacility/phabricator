@@ -38,10 +38,10 @@ final class AphrontAjaxResponse extends AphrontResponse {
     $console = $this->getConsole();
     if ($console) {
       Javelin::initBehavior(
-        'dark-console-ajax',
+        'dark-console',
         array(
-          'console' => $console->render($this->getRequest()),
-          'uri'     => (string) $this->getRequest()->getRequestURI(),
+          'uri'     => (string)$this->getRequest()->getRequestURI(),
+          'key'     => $console->getKey($this->getRequest()),
         ));
     }
 

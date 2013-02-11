@@ -18,7 +18,7 @@ final class PhabricatorConfigEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorConfigTransaction::TYPE_EDIT:
         return array(
-          'deleted' => (bool)$object->getIsDeleted(),
+          'deleted' => (int)$object->getIsDeleted(),
           'value'   => $object->getValue(),
         );
     }
@@ -54,7 +54,7 @@ final class PhabricatorConfigEditor
             $v['value']);
         }
 
-        $object->setIsDeleted($v['deleted']);
+        $object->setIsDeleted((int)$v['deleted']);
         $object->setValue($v['value']);
         break;
     }

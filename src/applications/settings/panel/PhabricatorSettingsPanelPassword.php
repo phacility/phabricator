@@ -114,7 +114,8 @@ final class PhabricatorSettingsPanelPassword
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
         $notice->setTitle('Changes Saved');
-        $notice->appendChild('<p>Your password has been updated.</p>');
+        $notice->appendChild(
+          phutil_tag('p', array(), 'Your password has been updated.'));
       }
     } else {
       $notice = new AphrontErrorView();

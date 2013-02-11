@@ -125,9 +125,9 @@ final class PhabricatorRemarkupRuleEmbedFile
         }
 
         require_celerity_resource('lightbox-attachment-css');
-        $img = phutil_render_tag('img', $data['attrs']);
+        $img = phutil_tag('img', $data['attrs']);
 
-        $embed = javelin_render_tag(
+        $embed = javelin_tag(
           'a',
           array(
             'href'        => $meta['uri'],
@@ -168,7 +168,7 @@ final class PhabricatorRemarkupRuleEmbedFile
         }
 
         if ($layout_class) {
-          $embed = phutil_render_tag(
+          $embed = phutil_tag(
             'div',
             array(
               'class' => $layout_class,
