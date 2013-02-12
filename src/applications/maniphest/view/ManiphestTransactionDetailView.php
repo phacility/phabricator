@@ -186,10 +186,10 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       $comment_block = $this->markupEngine->getOutput(
         $comment_transaction,
         ManiphestTransaction::MARKUP_FIELD_BODY);
-      $comment_block =
-        '<div class="maniphest-transaction-comments phabricator-remarkup">'.
-          $comment_block.
-        '</div>';
+      $comment_block = phutil_tag(
+        'div',
+        array('class' => 'maniphest-transaction-comments phabricator-remarkup'),
+        $comment_block);
     } else {
       $comment_block = null;
     }

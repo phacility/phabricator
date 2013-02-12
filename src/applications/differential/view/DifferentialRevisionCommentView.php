@@ -87,10 +87,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
         $comment,
         PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
 
-      $content =
-        '<div class="phabricator-remarkup">'.
-          $content.
-        '</div>';
+      $content = hsprintf(
+        '<div class="phabricator-remarkup">%s</div>',
+        $content);
     }
 
     $inline_render = $this->renderInlineComments();
@@ -208,11 +207,10 @@ final class DifferentialRevisionCommentView extends AphrontView {
     }
 
     if (!$hide_comments) {
-      $xaction_view->appendChild(
-        '<div class="differential-comment-core">'.
-          $content.
-        '</div>'.
-        $this->renderSingleView($inline_render));
+      $xaction_view->appendChild(hsprintf(
+        '<div class="differential-comment-core">%s%s</div>',
+        $content,
+        $this->renderSingleView($inline_render)));
     }
 
     return $xaction_view->render();

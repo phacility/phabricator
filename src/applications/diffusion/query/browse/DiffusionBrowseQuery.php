@@ -119,8 +119,7 @@ abstract class DiffusionBrowseQuery {
       $readme_content = $highlighter
         ->getHighlightFuture($readme_content)
         ->resolve();
-      $readme_content = nl2br($readme_content);
-      $readme_content = phutil_safe_html($readme_content);
+      $readme_content = phutil_escape_html_newlines($readme_content);
 
       require_celerity_resource('syntax-highlighting-css');
       $class = 'remarkup-code';
