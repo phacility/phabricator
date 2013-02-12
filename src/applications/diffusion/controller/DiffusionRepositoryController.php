@@ -68,7 +68,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       'View Full Commit History');
 
     $panel = new AphrontPanelView();
-    $panel->setHeader("Recent Commits &middot; {$all}");
+    $panel->setHeader(hsprintf("Recent Commits &middot; %s", $all));
     $panel->appendChild($history_table);
     $panel->setNoBackground();
 

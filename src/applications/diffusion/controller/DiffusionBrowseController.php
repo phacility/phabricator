@@ -21,7 +21,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $title = 'Tag: '.$drequest->getSymbolicCommit();
 
       $tag_view = new AphrontPanelView();
-      $tag_view->setHeader(phutil_escape_html($title));
+      $tag_view->setHeader($title);
       $tag_view->appendChild(
         $this->markupText($drequest->getTagContent()));
 

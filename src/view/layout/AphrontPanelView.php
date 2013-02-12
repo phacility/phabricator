@@ -63,7 +63,7 @@ final class AphrontPanelView extends AphrontView {
 
   public function render() {
     if ($this->header !== null) {
-      $header = '<h1>'.$this->header.'</h1>';
+      $header = phutil_tag('h1', array(), $this->header);
     } else {
       $header = null;
     }
@@ -79,16 +79,18 @@ final class AphrontPanelView extends AphrontView {
 
     $buttons = null;
     if ($this->buttons) {
-      $buttons =
-        '<div class="aphront-panel-view-buttons">'.
-          implode(" ", $this->buttons).
-        '</div>';
+      $buttons = hsprintf(
+        '<div class="aphront-panel-view-buttons">%s</div>',
+        phutil_implode_html(" ", $this->buttons));
     }
-    $header_elements =
-      '<div class="aphront-panel-header">'.
-        $buttons.$header.$caption.
-      '</div>';
-    $table = implode('', $this->renderChildren());
+    $header_elements = hsprintf(
+      '<div class="aphront-panel-header">%s%s%s</div>',
+      $buttons,
+      $header,
+      $caption);
+
+    // TODO: [HTML] Make HTML safe.
+    $table = phutil_safe_html(implode('', $this->renderChildren()));
 
     require_celerity_resource('aphront-panel-view-css');
 
@@ -104,8 +106,7 @@ final class AphrontPanelView extends AphrontView {
         'class' => implode(' ', $classes),
         'id'    => $this->id,
       ),
-      // TODO: [HTML] Make HTML safe.
-      phutil_safe_html($header_elements.$table));
+      array($header_elements, $table));
   }
 
 }

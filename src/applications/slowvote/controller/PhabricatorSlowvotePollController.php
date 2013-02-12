@@ -177,7 +177,7 @@ final class PhabricatorSlowvotePollController
 
 
     $panel = new AphrontPanelView();
-    $panel->setHeader(phutil_escape_html($poll->getQuestion()));
+    $panel->setHeader($poll->getQuestion());
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
 
     $panel->appendChild($form);

@@ -109,8 +109,7 @@ final class PhabricatorOwnersDetailController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader(
-      'Package Details for "'.phutil_escape_html($package->getName()).'"');
+    $panel->setHeader('Package Details for "'.$package->getName().'"');
     $panel->addButton(
       javelin_tag(
         'a',
@@ -200,7 +199,7 @@ final class PhabricatorOwnersDetailController
     $commit_panels = array();
     foreach ($commit_views as $commit_view) {
       $commit_panel = new AphrontPanelView();
-      $commit_panel->setHeader(phutil_escape_html($commit_view['header']));
+      $commit_panel->setHeader($commit_view['header']);
       if (isset($commit_view['button'])) {
         $commit_panel->addButton($commit_view['button']);
       }

@@ -70,7 +70,7 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $content[] = id(new AphrontPanelView())
       ->setHeader(
-        ($lint != '' ? phutil_escape_html($lint)." \xC2\xB7 " : '').
+        ($lint != '' ? $lint." \xC2\xB7 " : '').
         pht('%d Lint Message(s)', count($messages)))
       ->setCaption($link)
       ->appendChild($table)
