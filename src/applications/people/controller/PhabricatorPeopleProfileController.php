@@ -172,13 +172,11 @@ final class PhabricatorPeopleProfileController
 
     $blurb = nonempty(
       $profile->getBlurb(),
-      '//'.
-      pht('Nothing is known about this rare specimen.')
-      .'//'
+      '//'.pht('Nothing is known about this rare specimen.').'//'
     );
 
     $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
-    $blurb = phutil_safe_html($engine->markupText($blurb));
+    $blurb = $engine->markupText($blurb);
 
     $viewer = $this->getRequest()->getUser();
 

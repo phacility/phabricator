@@ -203,8 +203,7 @@ final class PhabricatorSlowvotePollController
     foreach ($comments as $comment) {
       $handle = $handles[$comment->getAuthorPHID()];
 
-      $markup = phutil_safe_html(
-        $engine->markupText($comment->getCommentText()));
+      $markup = $engine->markupText($comment->getCommentText());
 
       require_celerity_resource('phabricator-remarkup-css');
 

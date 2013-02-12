@@ -97,8 +97,7 @@ final class DiffusionCommitController extends DiffusionController {
           array(
             'class' => 'diffusion-commit-message phabricator-remarkup',
           ),
-          phutil_safe_html(
-            $engine->markupText($commit_data->getCommitMessage()))));
+          $engine->markupText($commit_data->getCommitMessage())));
 
       $content[] = $top_anchor;
       $content[] = $headsup_view;
