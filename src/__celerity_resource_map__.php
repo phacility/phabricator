@@ -1864,6 +1864,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/phame/phame-post-preview.js',
   ),
+  'javelin-behavior-pholio-edit-inline-comment' =>
+  array(
+    'uri' => '/res/61759cd8/rsrc/js/application/pholio/behavior-pholio-edit-inline-comment.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/pholio/behavior-pholio-edit-inline-comment.js',
+  ),
   'javelin-behavior-pholio-mock-view' =>
   array(
     'uri' => '/res/e5f432ac/rsrc/js/application/pholio/behavior-pholio-mock-view.js',

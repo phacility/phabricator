@@ -47,12 +47,22 @@ final class PholioMockImagesView extends AphrontView {
       $main_image_tag
     );
 
+
+    $inline_comments_holder = javelin_tag(
+      'div',
+      array(
+        'id' => 'mock-inline-comments',
+        'sigil' => 'mock-inline-comments',
+        'class' => 'pholio-mock-inline-comments'
+      ),
+      "");
+
     $mockview[] = phutil_tag(
       'div',
         array(
           'class' => 'pholio-mock-image-container',
         ),
-      $main_image_tag);
+      array($main_image_tag, $inline_comments_holder));
 
     if (count($this->mock->getImages()) > 1) {
       $thumbnails = array();

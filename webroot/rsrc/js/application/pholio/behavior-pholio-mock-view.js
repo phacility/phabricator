@@ -139,14 +139,56 @@ JX.behavior('pholio-mock-view', function(config) {
         endY: Math.max(startPos.y,endPos.y),
         comment: comment};
 
-
       inlineComment.addData(commentToAdd);
       inlineComment.send();
-
+      load_inline_comments();
     });
+
+    function forge_inline_comment(data) {
+      var comment_head = data.username;
+      if (data.transactionphid == null) comment_head += " (draft)";
+
+      var links = null;
+      if (data.canEdit && data.transactionphid == null) {
+        links = JX.$N(
+          'span',
+          {
+            className: 'pholio-inline-head-links'
+          },
+          [
+            JX.$N('a',{href: 'http://www.google.fi'},'Edit'),
+            JX.$N('a',{href: 'http://www.google.fi'},'Delete')
+          ]);
+
+      }
+
+      var comment_header = JX.$N(
+        'div',
+        {
+          className: 'pholio-inline-comment-header'
+        },
+        [comment_head, links]);
+
+      var comment_body = JX.$N(
+        'div',
+        {},
+        data.content);
+
+      var inline_comment = JX.$N(
+        'div',
+        {
+          id: data.phid + "_comment",
+          className: 'pholio-inline-comment'
+        },
+        [comment_header, comment_body]);
+
+      return inline_comment;
+    }
 
     function load_inline_comments() {
       var data = JX.Stratcom.getData(JX.$(config.mainID));
+      var comment_holder = JX.$('mock-inline-comments');
+      JX.DOM.setContent(comment_holder, '');
 
       var inline_comments_url = "/pholio/inline/" + data['imageID'] + "/";
       var inline_comments = new JX.Request(inline_comments_url, function(r) {
@@ -156,25 +198,68 @@ JX.behavior('pholio-mock-view', function(config) {
             var inlineSelection = JX.$N(
               'div',
               {
-                id: r[i].phid,
+                id: r[i].phid + "_selection",
                 className: 'pholio-mock-select-border',
                 title: r[i].content
               });
 
+            JX.Stratcom.addData(
+              inlineSelection,
+              {phid: r[i].phid});
+
+            JX.Stratcom.addSigil(inlineSelection, "image_selection");
+            JX.DOM.appendContent(comment_holder, forge_inline_comment(r[i]));
+
             JX.DOM.appendContent(wrapper, inlineSelection);
 
             JX.$V(r[i].x, r[i].y).setPos(inlineSelection);
-            JX.$V(r[i].width, r[i].height)
-              .setDim(inlineSelection);
+            JX.$V(r[i].width, r[i].height).setDim(inlineSelection);
+
+            if (r[i].transactionphid == null) {
+
+              var inlineDraft = JX.$N(
+                'div',{className: 'pholio-mock-select-fill'});
+
+              JX.$V(r[i].x, r[i].y).setPos(inlineDraft);
+              JX.$V(r[i].width, r[i].height).setDim(inlineDraft);
+
+              JX.Stratcom.addData(
+                inlineDraft,
+                {phid: r[i].phid});
+
+              JX.Stratcom.addSigil(inlineDraft, "image_selection");
+              JX.DOM.appendContent(wrapper, inlineDraft);
+            }
           }
         }
+
+        JX.Stratcom.listen(
+          'mouseover',
+          'image_selection',
+          function(e) {
+            var data = e.getNodeData('image_selection');
+
+            var inline_comment = JX.$(data.phid + "_comment");
+            JX.DOM.alterClass(inline_comment,
+              'pholio-mock-inline-comment-highlight', true);
+        });
+
+        JX.Stratcom.listen(
+          'mouseout',
+          'image_selection',
+          function(e) {
+          var data = e.getNodeData('image_selection');
+
+          var inline_comment = JX.$(data.phid + "_comment");
+            JX.DOM.alterClass(inline_comment,
+              'pholio-mock-inline-comment-highlight', false);
+        });
       });
 
       inline_comments.send();
     }
 
     load_inline_comments();
-
 });
 
 
