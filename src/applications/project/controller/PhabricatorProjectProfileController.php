@@ -5,6 +5,7 @@ final class PhabricatorProjectProfileController
 
   private $id;
   private $page;
+  private $project;
 
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
@@ -24,6 +25,7 @@ final class PhabricatorProjectProfileController
     }
 
     $project = $query->executeOne();
+    $this->project = $project;
     if (!$project) {
       return new Aphront404Response();
     }
@@ -96,7 +98,7 @@ final class PhabricatorProjectProfileController
           array(
             'class' => $class,
           ),
-          'Join Project'));
+          pht('Join Project')));
     } else {
       $action = javelin_tag(
         'a',
@@ -105,7 +107,7 @@ final class PhabricatorProjectProfileController
           'sigil' => 'workflow',
           'class' => 'grey button',
         ),
-        'Leave Project...');
+        pht('Leave Project...'));
     }
 
     $header->addAction($action);
@@ -115,10 +117,10 @@ final class PhabricatorProjectProfileController
     $content = '<div style="padding: 1em;">'.$content.'</div>';
     $header->appendChild($content);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav_view,
       array(
-        'title' => $project->getName().' Project',
+        'title' => pht('%s Project', $project->getName()),
       ));
   }
 
@@ -143,11 +145,11 @@ final class PhabricatorProjectProfileController
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
-              <th>Creator</th>
+              <th>%s</th>
               <td>%s</td>
             </tr>
             <tr>
-              <th>Created</th>
+              <th>%s</th>
               <td>%s</td>
             </tr>
             <tr>
@@ -155,15 +157,18 @@ final class PhabricatorProjectProfileController
               <td>%s</td>
             </tr>
             <tr>
-              <th>Blurb</th>
+              <th>%s</th>
               <td>%s</td>
             </tr>
           </table>
         </div>
       </div>',
+      pht('Creator'),
       $handles[$project->getAuthorPHID()]->renderLink(),
+      pht('Created'),
       $timestamp,
       $project->getPHID(),
+      pht('Blurb'),
       $blurb);
 
     return $about;
@@ -184,12 +189,15 @@ final class PhabricatorProjectProfileController
     if ($affiliated) {
       $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
     } else {
-      $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
+      $affiliated =
+        '<p><em>'.
+          pht('No one is affiliated with this project.').
+        '</em></p>';
     }
 
     return
       '<div class="phabricator-profile-info-group">'.
-        '<h1 class="phabricator-profile-info-header">People</h1>'.
+        '<h1 class="phabricator-profile-info-header">'.pht('People').'</h1>'.
         '<div class="phabricator-profile-info-pane">'.
          $affiliated.
         '</div>'.
@@ -207,7 +215,7 @@ final class PhabricatorProjectProfileController
     $stories = $query->execute();
 
     if (!$stories) {
-      return 'There are no stories about this project.';
+      return pht('There are no stories about this project.');
     }
 
     return $this->renderStories($stories);
@@ -222,7 +230,9 @@ final class PhabricatorProjectProfileController
 
     return
       '<div class="phabricator-profile-info-group">'.
-        '<h1 class="phabricator-profile-info-header">Activity Feed</h1>'.
+        '<h1 class="phabricator-profile-info-header">'.
+          pht('Activity Feed').
+        '</h1>'.
         '<div class="phabricator-profile-info-pane">'.
          $view->render().
         '</div>'.
@@ -257,7 +267,7 @@ final class PhabricatorProjectProfileController
     }
 
     if (empty($tasks)) {
-      $task_views = '<em>No open tasks.</em>';
+      $task_views = '<em>'.pht('No open tasks.').'</em>';
     } else {
       $task_views = implode('', $task_views);
     }
@@ -269,12 +279,12 @@ final class PhabricatorProjectProfileController
       array(
         'href' => '/maniphest/view/all/?projects='.$project->getPHID(),
       ),
-      "View All Open Tasks \xC2\xBB");
+      pht("View All Open Tasks \xC2\xBB"));
 
     $content =
       '<div class="phabricator-profile-info-group">
         <h1 class="phabricator-profile-info-header">'.
-          "Open Tasks ({$open})".
+          pht("Open Tasks (%d)", $open).
         '</h1>'.
         '<div class="phabricator-profile-info-pane">'.
           $task_views.

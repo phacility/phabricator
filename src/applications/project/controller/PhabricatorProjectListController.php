@@ -12,14 +12,7 @@ final class PhabricatorProjectListController
   public function processRequest() {
     $request = $this->getRequest();
 
-    $nav = new AphrontSideNavFilterView();
-    $nav
-      ->setBaseURI(new PhutilURI('/project/filter/'))
-      ->addLabel('User')
-      ->addFilter('active',   'Active')
-      ->addLabel('All')
-      ->addFilter('all',      'All Projects')
-      ->addFilter('allactive','Active Projects');
+    $nav = $this->buildSideNavView($this->filter);
     $this->filter = $nav->selectFilter($this->filter, 'active');
 
     $pager = new AphrontPagerView();
@@ -33,21 +26,19 @@ final class PhabricatorProjectListController
 
     $view_phid = $request->getUser()->getPHID();
 
-    $status_filter = PhabricatorProjectQuery::STATUS_ANY;
-
     switch ($this->filter) {
       case 'active':
-        $table_header = 'Your Projects';
+        $table_header = pht('Your Projects');
         $query->withMemberPHIDs(array($view_phid));
         $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
         break;
       case 'allactive':
-        $status_filter = PhabricatorProjectQuery::STATUS_ACTIVE;
-        $table_header = 'Active Projects';
-        // fallthrough
+        $table_header = pht('Active Projects');
+        $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
+        break;
       case 'all':
-        $table_header = 'All Projects';
-        $query->withStatus($status_filter);
+        $table_header = pht('All Projects');
+        $query->withStatus(PhabricatorProjectQuery::STATUS_ANY);
         break;
     }
 
@@ -122,11 +113,11 @@ final class PhabricatorProjectListController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Project',
-        'Status',
-        'Description',
-        'Population',
-        'Open Tasks',
+        pht('Project'),
+        pht('Status'),
+        pht('Description'),
+        pht('Population'),
+        pht('Open Tasks'),
       ));
     $table->setColumnClasses(
       array(
@@ -139,16 +130,25 @@ final class PhabricatorProjectListController
 
     $panel = new AphrontPanelView();
     $panel->setHeader($table_header);
-    $panel->setCreateButton('Create New Project', '/project/create/');
     $panel->appendChild($table);
+    $panel->setNoBackground();
     $panel->appendChild($pager);
 
     $nav->appendChild($panel);
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($table_header)
+        ->setHref($this->getApplicationURI())
+      );
+    $nav->setCrumbs($crumbs);
+
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Projects',
+        'title' => pht('Projects'),
+        'device' => true,
       ));
   }
 }

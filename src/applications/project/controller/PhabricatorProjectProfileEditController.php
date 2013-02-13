@@ -86,8 +86,8 @@ final class PhabricatorProjectProfileEditController
       $profile->setBlurb($request->getStr('blurb'));
 
       if (!strlen($project->getName())) {
-        $e_name = 'Required';
-        $errors[] = 'Project name is required.';
+        $e_name = pht('Required');
+        $errors[] = pht('Project name is required.');
       } else {
         $e_name = null;
       }
@@ -112,9 +112,9 @@ final class PhabricatorProjectProfileEditController
               $y = 50);
             $profile->setProfileImagePHID($xformed->getPHID());
           } else {
-            $e_image = 'Not Supported';
+            $e_image = pht('Not Supported');
             $errors[] =
-              'This server only supports these image formats: '.
+              pht('This server only supports these image formats:').' '.
               implode(', ', $supported_formats).'.';
           }
         }
@@ -132,12 +132,12 @@ final class PhabricatorProjectProfileEditController
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     }
 
-    $header_name = 'Edit Project';
-    $title = 'Edit Project';
+    $header_name = pht('Edit Project');
+    $title = pht('Edit Project');
     $action = '/project/edit/'.$project->getID().'/';
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -153,30 +153,30 @@ final class PhabricatorProjectProfileEditController
       ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($project->getName())
           ->setError($e_name))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Project Status')
+          ->setLabel(pht('Project Status'))
           ->setName('status')
           ->setOptions($options)
           ->setValue($project->getStatus()))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Blurb')
+          ->setLabel(pht('Blurb'))
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">NOTE: Policy settings are not '.
-        'yet fully implemented. Some interfaces still ignore these settings, '.
-        'particularly "Visible To".</p>'))
+      ->appendChild('<p class="aphront-form-instructions">'.
+        pht('NOTE: Policy settings are not yet fully implemented. '.
+        'Some interfaces still ignore these settings, '.
+        'particularly "Visible To".').'</p>')
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)
           ->setName('can_view')
-          ->setCaption('Members can always view a project.')
+          ->setCaption(pht('Members can always view a project.'))
           ->setPolicyObject($project)
           ->setPolicies($policies)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
@@ -192,13 +192,13 @@ final class PhabricatorProjectProfileEditController
           ->setUser($user)
           ->setName('can_join')
           ->setCaption(
-            'Users who can edit a project can always join a project.')
+            pht('Users who can edit a project can always join a project.'))
           ->setPolicyObject($project)
           ->setPolicies($policies)
           ->setCapability(PhabricatorPolicyCapability::CAN_JOIN))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel('Profile Image')
+          ->setLabel(pht('Profile Image'))
           ->setValue(
             phutil_tag(
               'img',
@@ -207,18 +207,20 @@ final class PhabricatorProjectProfileEditController
               ))))
       ->appendChild(
         id(new AphrontFormImageControl())
-          ->setLabel('Change Image')
+          ->setLabel(pht('Change Image'))
           ->setName('image')
           ->setError($e_image)
-          ->setCaption('Supported formats: '.implode(', ', $supported_formats)))
+          ->setCaption(
+            pht('Supported formats:').' '.implode(', ', $supported_formats)))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/project/view/'.$project->getID().'/')
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new AphrontPanelView();
     $panel->setHeader($header_name);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
     $panel->appendChild($form);
 
     $nav = $this->buildLocalNavigation($project);
@@ -229,10 +231,24 @@ final class PhabricatorProjectProfileEditController
         $panel,
       ));
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($project->getName())
+        ->setHref('/project/view/'.$project->getID().'/')
+      );
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Edit Project'))
+        ->setHref($this->getApplicationURI())
+      );
+    $nav->setCrumbs($crumbs);
+
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => $title,
+        'device' => true,
       ));
   }
 }
