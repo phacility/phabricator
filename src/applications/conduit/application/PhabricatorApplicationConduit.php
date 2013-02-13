@@ -10,6 +10,10 @@ final class PhabricatorApplicationConduit extends PhabricatorApplication {
     return 'conduit';
   }
 
+  public function canUninstall() {
+    return false;
+  }
+
   public function getHelpURI() {
     return PhabricatorEnv::getDoclink(
       'article/Conduit_Technical_Documentation.html');
