@@ -187,12 +187,14 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $hidden = null;
     }
 
-    return javelin_tag(
+    return javelin_render_tag(
       'div',
       array(
         'class' => 'differential-comment-list',
         'id' => $this->getID(),
       ),
-      array_merge($header, array($hidden), $visible));
+      implode("\n", $header).
+      $hidden.
+      implode("\n", $visible));
   }
 }

@@ -149,7 +149,7 @@ final class ConpherenceViewController extends
         ->setMarkupEngine($engine)
         ->render();
     }
-    $transactions = phutil_implode_html(' ', $rendered_transactions);
+    $transactions = implode(' ', $rendered_transactions);
 
     $form =
       id(new AphrontFormView())
@@ -283,7 +283,7 @@ final class ConpherenceViewController extends
             'src' => $thumb
           ),
           ''),
-        $file->getName(),
+        phutil_escape_html($file->getName()),
       );
     }
     $header = id(new PhabricatorHeaderView())
@@ -292,7 +292,7 @@ final class ConpherenceViewController extends
         ->setNoDataString(pht('No files attached to conpherence.'))
         ->setHeaders(array('', pht('Name')))
         ->setColumnClasses(array('', 'wide'));
-    return hsprintf('%s%s', $header->render(), $table->render());
+    return new PhutilSafeHTML($header->render() . $table->render());
   }
 
   private function renderTaskWidgetPaneContent() {
@@ -328,7 +328,7 @@ final class ConpherenceViewController extends
         ->setColumnClasses(array('', 'wide'));
       $content[] = $table->render();
     }
-    return phutil_implode_html('', $content);
+    return new PhutilSafeHTML(implode('', $content));
   }
 
   private function renderCalendarWidgetPaneContent() {
@@ -416,7 +416,7 @@ final class ConpherenceViewController extends
       }
     }
 
-    return phutil_implode_html('', $content);
+    return new PhutilSafeHTML(implode('', $content));
   }
 
   private function getCalendarWidgetWeekTimestamps() {

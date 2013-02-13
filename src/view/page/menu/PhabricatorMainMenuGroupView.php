@@ -33,7 +33,7 @@ final class PhabricatorMainMenuGroupView extends AphrontView {
       array(
         'class' => implode(' ', $classes),
       ),
-      $this->renderChildren());
+      $this->renderHTMLChildren());
   }
 
 }

@@ -178,7 +178,7 @@ final class DifferentialInlineCommentView extends AphrontView {
       $links = phutil_tag(
         'span',
         array('class' => 'differential-inline-comment-links'),
-        phutil_implode_html(" \xC2\xB7 ", $links));
+        array_interleave(" \xC2\xB7 ", $links));
     } else {
       $links = null;
     }

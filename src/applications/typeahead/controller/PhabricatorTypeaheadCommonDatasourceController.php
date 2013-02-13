@@ -297,6 +297,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $rows = array();
     foreach ($results as $result) {
       $wire = $result->getWireFormat();
+      foreach ($wire as $k => $v) {
+        $wire[$k] = phutil_escape_html($v);
+      }
       $rows[] = $wire;
     }
 

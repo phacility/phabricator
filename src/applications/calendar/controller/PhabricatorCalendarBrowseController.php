@@ -55,7 +55,9 @@ final class PhabricatorCalendarBrowseController
     $nav->appendChild(
       array(
         $this->getNoticeView(),
-        hsprintf('<div style="padding: 20px;">%s</div>', $month_view->render()),
+        '<div style="padding: 20px;">',
+          $month_view,
+        '</div>',
       ));
 
     return $this->buildApplicationPage(

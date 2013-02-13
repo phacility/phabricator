@@ -70,25 +70,21 @@ final class PhabricatorSearchResultView extends AphrontView {
         break;
     }
 
-    return hsprintf(
+    return
       '<div class="phabricator-search-result">'.
-        '%s'.
+        $img.
         '<div class="result-desc">'.
-          '%s'.
-          '<div class="result-type">%s &middot; %s</div>'.
+          phutil_tag(
+            'a',
+            array(
+              'class' => 'result-name',
+              'href' => $handle->getURI(),
+            ),
+            $this->emboldenQuery($object_name)).
+          '<div class="result-type">'.$type_name.' &middot; '.$link.'</div>'.
         '</div>'.
         '<div style="clear: both;"></div>'.
-      '</div>',
-      $img,
-      phutil_tag(
-        'a',
-        array(
-          'class' => 'result-name',
-          'href' => $handle->getURI(),
-        ),
-        $this->emboldenQuery($object_name)),
-      $type_name,
-      $link);
+      '</div>';
   }
 
   private function emboldenQuery($str) {

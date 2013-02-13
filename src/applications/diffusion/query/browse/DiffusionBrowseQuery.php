@@ -119,14 +119,15 @@ abstract class DiffusionBrowseQuery {
       $readme_content = $highlighter
         ->getHighlightFuture($readme_content)
         ->resolve();
-      $readme_content = phutil_escape_html_newlines($readme_content);
+      $readme_content = nl2br($readme_content);
+      $readme_content = phutil_safe_html($readme_content);
 
       require_celerity_resource('syntax-highlighting-css');
       $class = 'remarkup-code';
     } else {
       // Markup extensionless files as remarkup so we get links and such.
       $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-      $readme_content = $engine->markupText($readme_content);
+      $readme_content = phutil_safe_html($engine->markupText($readme_content));
 
       $class = 'phabricator-remarkup';
     }

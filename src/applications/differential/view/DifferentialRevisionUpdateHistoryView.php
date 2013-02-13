@@ -177,8 +177,9 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL => 'Show All',
     );
 
+    $select = '<select name="whitespace">';
     foreach ($options as $value => $label) {
-      $options[$value] = phutil_tag(
+      $select .= phutil_tag(
         'option',
         array(
           'value' => $value,
@@ -188,39 +189,34 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         ),
         $label);
     }
-    $select = phutil_tag('select', array('name' => 'whitespace'), $options);
+    $select .= '</select>';
 
-    array_unshift($rows, phutil_tag('tr', array(), array(
-      phutil_tag('th', array(), pht('Diff')),
-      phutil_tag('th', array(), pht('ID')),
-      phutil_tag('th', array(), pht('Base')),
-      phutil_tag('th', array(), pht('Description')),
-      phutil_tag('th', array(), pht('Created')),
-      phutil_tag('th', array(), pht('Lint')),
-      phutil_tag('th', array(), pht('Unit')),
-    )));
-
-    return hsprintf(
-      '%s'.
+    return
+      id(new PhabricatorHeaderView())
+        ->setHeader(pht('Revision Update History'))
+        ->render() .
       '<div class="differential-revision-history differential-panel">'.
         '<form action="#toc">'.
           '<table class="differential-revision-history-table">'.
-            '%s'.
+            '<tr>'.
+              '<th>'.pht('Diff').'</th>'.
+              '<th>'.pht('ID').'</th>'.
+              '<th>'.pht('Base').'</th>'.
+              '<th>'.pht('Description').'</th>'.
+              '<th>'.pht('Created').'</th>'.
+              '<th>'.pht('Lint').'</th>'.
+              '<th>'.pht('Unit').'</th>'.
+            '</tr>'.
+            implode("\n", $rows).
             '<tr>'.
               '<td colspan="9" class="diff-differ-submit">'.
-                '<label>%s</label>'.
-                '<button>%s</button>'.
+                '<label>'.pht('Whitespace Changes: %s', $select).'</label>'.
+                '<button>'.pht('Show Diff').'</button>'.
               '</td>'.
             '</tr>'.
           '</table>'.
         '</form>'.
-      '</div>',
-      id(new PhabricatorHeaderView())
-        ->setHeader(pht('Revision Update History'))
-        ->render(),
-      phutil_implode_html("\n", $rows),
-      pht('Whitespace Changes: %s', $select),
-      pht('Show Diff'));
+      '</div>';
   }
 
   const STAR_NONE = 'none';

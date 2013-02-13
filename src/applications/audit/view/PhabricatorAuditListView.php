@@ -129,7 +129,10 @@ final class PhabricatorAuditListView extends AphrontView {
       }
 
       $reasons = $audit->getAuditReasons();
-      $reasons = phutil_implode_html(phutil_tag('br'), $reasons);
+      foreach ($reasons as $key => $reason) {
+        $reasons[$key] = phutil_escape_html($reason);
+      }
+      $reasons = implode('<br />', $reasons);
 
       $status_code = $audit->getAuditStatus();
       $status = PhabricatorAuditStatusConstants::getStatusName($status_code);
@@ -137,10 +140,10 @@ final class PhabricatorAuditListView extends AphrontView {
       $auditor_handle = $this->getHandle($audit->getAuditorPHID());
       $rows[] = array(
         $commit_name,
-        $commit_desc,
+        phutil_escape_html($commit_desc),
         $committed,
         $auditor_handle->renderLink(),
-        $status,
+        phutil_escape_html($status),
         $reasons,
       );
 

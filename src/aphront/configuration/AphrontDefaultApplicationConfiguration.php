@@ -210,7 +210,7 @@ class AphrontDefaultApplicationConfiguration
 
     if ($ex instanceof AphrontUsageException) {
       $error = new AphrontErrorView();
-      $error->setTitle($ex->getTitle());
+      $error->setTitle(phutil_escape_html($ex->getTitle()));
       $error->appendChild($ex->getMessage());
 
       $view = new PhabricatorStandardPageView();
@@ -227,8 +227,8 @@ class AphrontDefaultApplicationConfiguration
     // Always log the unhandled exception.
     phlog($ex);
 
-    $class    = get_class($ex);
-    $message  = $ex->getMessage();
+    $class    = phutil_escape_html(get_class($ex));
+    $message  = phutil_escape_html($ex->getMessage());
 
     if ($ex instanceof AphrontQuerySchemaException) {
       $message .=
@@ -244,13 +244,11 @@ class AphrontDefaultApplicationConfiguration
       $trace = null;
     }
 
-    $content = hsprintf(
+    $content =
       '<div class="aphront-unhandled-exception">'.
-        '<div class="exception-message">%s</div>'.
-        '%s'.
-      '</div>',
-      $message,
-      $trace);
+        '<div class="exception-message">'.$message.'</div>'.
+        $trace.
+      '</div>';
 
     $dialog = new AphrontDialogView();
     $dialog
@@ -350,17 +348,17 @@ class AphrontDefaultApplicationConfiguration
             ),
             $relative);
         }
-        $file_name = hsprintf('%s : %d', $file_name, $part['line']);
+        $file_name = $file_name.' : '.(int)$part['line'];
       } else {
-        $file_name = phutil_tag('em', array(), '(Internal)');
+        $file_name = '<em>(Internal)</em>';
       }
 
 
       $rows[] = array(
         $depth--,
-        $lib,
+        phutil_escape_html($lib),
         $file_name,
-        $where,
+        phutil_escape_html($where),
       );
     }
     $table = new AphrontTableView($rows);
@@ -379,12 +377,11 @@ class AphrontDefaultApplicationConfiguration
         'wide',
       ));
 
-    return hsprintf(
+    return
       '<div class="exception-trace">'.
         '<div class="exception-trace-header">Stack Trace</div>'.
-        '%s',
-      '</div>',
-      $table->render());
+        $table->render().
+      '</div>';
   }
 
 }

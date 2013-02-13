@@ -298,14 +298,13 @@ final class ManiphestTaskListController extends ManiphestController {
     require_celerity_resource('maniphest-task-summary-css');
 
     $list_container = new AphrontNullView();
-    $list_container->appendChild(hsprintf(
-      '<div class="maniphest-list-container">'));
+    $list_container->appendChild('<div class="maniphest-list-container">');
 
     if (!$have_tasks) {
-      $list_container->appendChild(hsprintf(
+      $list_container->appendChild(
         '<h1 class="maniphest-task-group-header">'.
           'No matching tasks.'.
-        '</h1>'));
+        '</h1>');
     } else {
       $pager = new AphrontPagerView();
       $pager->setURI($request->getRequestURI(), 'offset');
@@ -317,13 +316,14 @@ final class ManiphestTaskListController extends ManiphestController {
       $max = min($pager->getOffset() + $page_size, $total_count);
       $tot = $total_count;
 
-      $list_container->appendChild(hsprintf(
+      $cur = number_format($cur);
+      $max = number_format($max);
+      $tot = number_format($tot);
+
+      $list_container->appendChild(
         '<div class="maniphest-total-result-count">'.
-          "Displaying tasks %s - %s of %s.".
-        '</div>',
-        number_format($cur),
-        number_format($max),
-        number_format($tot)));
+          "Displaying tasks {$cur} - {$max} of {$tot}.".
+        '</div>');
 
       $selector = new AphrontNullView();
 
@@ -334,7 +334,7 @@ final class ManiphestTaskListController extends ManiphestController {
         ($group == 'none' || $group == 'priority');
 
       $lists = new AphrontNullView();
-      $lists->appendChild(hsprintf('<div class="maniphest-group-container">'));
+      $lists->appendChild('<div class="maniphest-group-container">');
       foreach ($tasks as $group => $list) {
         $task_list = new ManiphestTaskListView();
         $task_list->setShowBatchControls(true);
@@ -367,14 +367,14 @@ final class ManiphestTaskListController extends ManiphestController {
 
         $lists->appendChild($panel);
       }
-      $lists->appendChild(hsprintf('</div>'));
+      $lists->appendChild('</div>');
       $selector->appendChild($lists);
 
 
       $selector->appendChild($this->renderBatchEditor($query));
 
       $form_id = celerity_generate_unique_node_id();
-      $selector = phabricator_form(
+      $selector = phabricator_render_form(
         $user,
         array(
           'method' => 'POST',
@@ -394,7 +394,7 @@ final class ManiphestTaskListController extends ManiphestController {
         ));
     }
 
-    $list_container->appendChild(hsprintf('</div>'));
+    $list_container->appendChild('</div>');
     $nav->appendChild($list_container);
 
     $title = pht('Task List');
@@ -678,21 +678,25 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       'Export Tasks to Excel...');
 
-    return hsprintf(
+    return
       '<div class="maniphest-batch-editor">'.
         '<div class="batch-editor-header">Batch Task Editor</div>'.
         '<table class="maniphest-batch-editor-layout">'.
           '<tr>'.
-            '<td>%s%s</td>'.
-            '<td>%s</td>'.
-            '<td id="batch-select-status-cell">0 Selected Tasks</td>'.
-            '<td class="batch-select-submit-cell">%s</td>'.
+            '<td>'.
+              $select_all.
+              $select_none.
+            '</td>'.
+            '<td>'.
+              $export.
+            '</td>'.
+            '<td id="batch-select-status-cell">'.
+              '0 Selected Tasks'.
+            '</td>'.
+            '<td class="batch-select-submit-cell">'.$submit.'</td>'.
           '</tr>'.
         '</table>'.
-      '</table>',
-      $select_all, $select_none,
-      $export,
-      $submit);
+      '</table>';
   }
 
   private function buildQueryFromRequest() {

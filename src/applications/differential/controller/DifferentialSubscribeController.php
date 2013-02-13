@@ -43,7 +43,7 @@ final class DifferentialSubscribeController extends DifferentialController {
       $dialog
         ->setUser($user)
         ->setTitle($title)
-        ->appendChild(phutil_tag('p', array(), $prompt))
+        ->appendChild('<p>'.$prompt.'</p>')
         ->setSubmitURI($request->getRequestURI())
         ->addSubmitButton($button)
         ->addCancelButton('/D'.$revision->getID());

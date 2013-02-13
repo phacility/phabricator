@@ -9,7 +9,7 @@
 final class AphrontRequest {
 
   // NOTE: These magic request-type parameters are automatically included in
-  // certain requests (e.g., by phabricator_form(), JX.Request,
+  // certain requests (e.g., by phabricator_render_form(), JX.Request,
   // JX.Workflow, and ConduitClient) and help us figure out what sort of
   // response the client expects.
 

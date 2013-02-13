@@ -44,18 +44,14 @@ final class AphrontAttachedFileView extends AphrontView {
       ),
       "\xE2\x9C\x96"); // "Heavy Multiplication X"
 
-    return hsprintf(
+    return
       '<table class="aphront-attached-file-view">
         <tr>
-          <td>%s</td>
-          <th><strong>%s</strong><br />%s</th>
-          <td class="aphront-attached-file-view-remove">%s</td>
+          <td>'.$thumb.'</td>
+          <th><strong>'.$name.'</strong><br />'.$size.'</th>
+          <td class="aphront-attached-file-view-remove">'.$remove.'</td>
         </tr>
-      </table>',
-      $thumb,
-      $name,
-      $size,
-      $remove);
+      </table>';
   }
 
 }

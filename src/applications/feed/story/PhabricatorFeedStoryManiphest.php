@@ -66,23 +66,16 @@ final class PhabricatorFeedStoryManiphest
       case ManiphestAction::ACTION_REASSIGN:
         if ($owner_phid) {
           if ($owner_phid == $actor_phid) {
-            $one_line = hsprintf('%s claimed %s', $actor_link, $task_link);
+            $one_line = "{$actor_link} claimed {$task_link}";
           } else {
-            $one_line = hsprintf('%s %s %s to %s',
-              $actor_link,
-              $verb,
-              $owner_link,
-              $task_link);
+            $one_line = "{$actor_link} {$verb} {$task_link} to {$owner_link}";
           }
         } else {
-          $one_line = hsprintf(
-            '%s placed %s up for grabs',
-            $actor_link,
-            $task_link);
+          $one_line = "{$actor_link} placed {$task_link} up for grabs";
         }
         break;
       default:
-        $one_line = hsprintf('%s %s %s', $actor_link, $verb, $task_link);
+        $one_line = "{$actor_link} {$verb} {$task_link}";
         break;
     }
 

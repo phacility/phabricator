@@ -103,7 +103,7 @@ final class DiffusionExternalController extends DiffusionController {
               'href' => $href,
             ),
               'r'.$repo->getCallsign().$commit->getCommitIdentifier()),
-          $commit->loadCommitData()->getSummary(),
+          phutil_escape_html($commit->loadCommitData()->getSummary()),
         );
       }
 

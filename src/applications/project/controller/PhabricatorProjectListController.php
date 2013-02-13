@@ -97,9 +97,10 @@ final class PhabricatorProjectListController
             'href' => '/project/view/'.$project->getID().'/',
           ),
           $project->getName()),
-        PhabricatorProjectStatus::getNameForStatus($project->getStatus()),
-        $blurb,
-        $population,
+        phutil_escape_html(
+          PhabricatorProjectStatus::getNameForStatus($project->getStatus())),
+        phutil_escape_html($blurb),
+        phutil_escape_html($population),
         phutil_tag(
           'a',
           array(

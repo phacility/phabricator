@@ -148,7 +148,7 @@ final class PhamePostEditController
         ->setValue($submit_button)
       );
 
-    $preview_panel = hsprintf(
+    $preview_panel =
       '<div class="aphront-panel-preview">
          <div class="phame-post-preview-header">
            Post Preview
@@ -158,7 +158,7 @@ final class PhamePostEditController
              Loading preview...
            </div>
          </div>
-       </div>');
+       </div>';
 
     require_celerity_resource('phame-css');
     Javelin::initBehavior(

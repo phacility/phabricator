@@ -22,7 +22,7 @@ abstract class AphrontPageView extends AphrontView {
   }
 
   protected function getBody() {
-    return phutil_implode_html('', $this->renderChildren());
+    return $this->renderChildren();
   }
 
   protected function getTail() {
@@ -45,36 +45,34 @@ abstract class AphrontPageView extends AphrontView {
 
     $this->willRenderPage();
 
-    $title = $this->getTitle();
+    $title = phutil_escape_html($this->getTitle());
     $head  = $this->getHead();
     $body  = $this->getBody();
     $tail  = $this->getTail();
 
     $body_classes = $this->getBodyClasses();
 
-    $body = phutil_tag(
+    $body = phutil_render_tag(
       'body',
       array(
         'class' => nonempty($body_classes, null),
       ),
-      array($body, $tail));
+      $body.$tail);
 
-    $response = hsprintf(
-      '<!DOCTYPE html>'.
-      '<html>'.
-        '<head>'.
-          '<meta charset="UTF-8" />'.
-          '<title>%s</title>'.
-          '%s'.
-        '</head>'.
-        '%s'.
-      '</html>',
-      $title,
-      $head,
-      $body);
+    $response = <<<EOHTML
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{$title}</title>
+    {$head}
+  </head>
+  {$body}
+</html>
+
+EOHTML;
 
     $response = $this->willSendResponse($response);
-
     return $response;
 
   }

@@ -57,8 +57,7 @@ final class PhabricatorApplicationTransactionNoEffectResponse
       ->setTitle($title);
 
     foreach ($xactions as $xaction) {
-      $dialog->appendChild(
-        phutil_tag('p', array(), $xaction->getNoEffectDescription()));
+      $dialog->appendChild('<p>'.$xaction->getNoEffectDescription().'</p>');
     }
     $dialog->appendChild($tail);
 

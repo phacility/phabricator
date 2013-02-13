@@ -58,26 +58,24 @@ final class PhabricatorTransactionView extends AphrontView {
     $actions = $this->renderTransactionActions();
     $style = $this->renderTransactionStyle();
     $content = $this->renderTransactionContent();
-    $classes = implode(' ', $this->classes);
+    $classes = phutil_escape_html(implode(' ', $this->classes));
 
     $transaction_id = $this->anchorName ? 'anchor-'.$this->anchorName : null;
 
-    return phutil_tag(
+    return phutil_render_tag(
       'div',
       array(
         'class' => 'phabricator-transaction-view',
         'id'    => $transaction_id,
         'style' => $style,
       ),
-      hsprintf(
-        '<div class="phabricator-transaction-detail %s">'.
-          '<div class="phabricator-transaction-header">%s%s</div>'.
-          '%s'.
-        '</div>',
-        $classes,
-        $info,
-        $actions,
-        $content));
+      '<div class="phabricator-transaction-detail '.$classes.'">'.
+        '<div class="phabricator-transaction-header">'.
+          $info.
+          $actions.
+        '</div>'.
+        $content.
+      '</div>');
 
   }
 
@@ -107,24 +105,24 @@ final class PhabricatorTransactionView extends AphrontView {
         ->setAnchorName($this->anchorName)
         ->render();
 
-      $info[] = hsprintf(
-        '%s%s',
-        $anchor,
-        phutil_tag(
-          'a',
-          array('href'  => '#'.$this->anchorName),
-          $this->anchorText));
+      $info[] = $anchor.phutil_tag(
+        'a',
+        array(
+          'href'  => '#'.$this->anchorName,
+        ),
+        $this->anchorText);
     }
 
-    $info = phutil_implode_html(" \xC2\xB7 ", $info);
+    $info = implode(' &middot; ', $info);
 
-    return hsprintf(
-      '<span class="phabricator-transaction-info">%s</span>',
-      $info);
+    return
+      '<span class="phabricator-transaction-info">'.
+        $info.
+      '</span>';
   }
 
   private function renderTransactionActions() {
-    return phutil_implode_html('', $this->actions);
+    return implode('', $this->actions);
   }
 
   private function renderTransactionStyle() {
@@ -140,10 +138,10 @@ final class PhabricatorTransactionView extends AphrontView {
     if (!$content) {
       return null;
     }
-    return phutil_tag(
-      'div',
-      array('class' => 'phabricator-transaction-content'),
-      $this->renderSingleView($content));
+    return
+      '<div class="phabricator-transaction-content">'.
+        $content.
+      '</div>';
   }
 
 }

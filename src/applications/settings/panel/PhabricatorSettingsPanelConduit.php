@@ -26,9 +26,9 @@ final class PhabricatorSettingsPanelConduit
         $dialog->setSubmitURI($this->getPanelURI());
         $dialog->addSubmitButton('Regenerate');
         $dialog->addCancelbutton($this->getPanelURI());
-        $dialog->appendChild(phutil_tag('p', array(), pht(
-          'Really destroy the old certificate? Any established '.
-          'sessions will be terminated.')));
+        $dialog->appendChild(
+          '<p>Really destroy the old certificate? Any established '.
+          'sessions will be terminated.');
 
         return id(new AphrontDialogResponse())
           ->setDialog($dialog);

@@ -34,9 +34,10 @@ final class DiffusionLintDetailsController extends DiffusionController {
       $rows[] = array(
         $path,
         $line,
-        ArcanistLintSeverity::getStringForSeverity($message['severity']),
-        $message['name'],
-        $message['description'],
+        phutil_escape_html(ArcanistLintSeverity::getStringForSeverity(
+          $message['severity'])),
+        phutil_escape_html($message['name']),
+        phutil_escape_html($message['description']),
       );
     }
 
@@ -70,7 +71,7 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $content[] = id(new AphrontPanelView())
       ->setHeader(
-        ($lint != '' ? $lint." \xC2\xB7 " : '').
+        ($lint != '' ? phutil_escape_html($lint)." \xC2\xB7 " : '').
         pht('%d Lint Message(s)', count($messages)))
       ->setCaption($link)
       ->appendChild($table)

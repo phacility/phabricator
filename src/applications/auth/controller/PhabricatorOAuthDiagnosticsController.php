@@ -21,11 +21,11 @@ final class PhabricatorOAuthDiagnosticsController
     $client_id      = $provider->getClientID();
     $client_secret  = $provider->getClientSecret();
     $key            = $provider->getProviderKey();
-    $name           = $provider->getProviderName();
+    $name           = phutil_escape_html($provider->getProviderName());
 
-    $res_ok = hsprintf('<strong style="color: #00aa00;">OK</strong>');
-    $res_no = hsprintf('<strong style="color: #aa0000;">NO</strong>');
-    $res_na = hsprintf('<strong style="color: #999999;">N/A</strong>');
+    $res_ok = '<strong style="color: #00aa00;">OK</strong>';
+    $res_no = '<strong style="color: #aa0000;">NO</strong>';
+    $res_na = '<strong style="color: #999999;">N/A</strong>';
 
     $results = array();
     $auth_key = $key . '.auth-enabled';
@@ -159,10 +159,10 @@ final class PhabricatorOAuthDiagnosticsController
     $rows = array();
     foreach ($results as $key => $result) {
       $rows[] = array(
-        $key,
+        phutil_escape_html($key),
         $result[0],
-        $result[1],
-        $result[2],
+        phutil_escape_html($result[1]),
+        phutil_escape_html($result[2]),
       );
     }
 
@@ -186,11 +186,11 @@ final class PhabricatorOAuthDiagnosticsController
 
     $panel_view = new AphrontPanelView();
     $panel_view->setHeader($title);
-    $panel_view->appendChild(hsprintf(
+    $panel_view->appendChild(
       '<p class="aphront-panel-instructions">These tests may be able to '.
-      'help diagnose the root cause of problems you experience with %s '.
-      'Authentication. Reload the page to run the tests again.</p>',
-      $provider->getProviderName()));
+      'help diagnose the root cause of problems you experience with '.
+      $provider->getProviderName() .
+      ' Authentication. Reload the page to run the tests again.</p>');
     $panel_view->appendChild($table_view);
 
     return $this->buildStandardPageResponse(

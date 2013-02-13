@@ -160,7 +160,7 @@ final class DifferentialChangesetTwoUpRenderer
                 'colspan' => 2,
                 'class' => 'show-more',
               ),
-              phutil_implode_html(
+              array_interleave(
                 " \xE2\x80\xA2 ", // Bullet
                 $contents)),
             phutil_tag(
@@ -205,7 +205,7 @@ final class DifferentialChangesetTwoUpRenderer
         }
       }
 
-      $n_copy = hsprintf('<td class="copy" />');
+      $n_copy = '<td class="copy" />';
       $n_cov = null;
       $n_colspan = 2;
       $n_classes = '';
@@ -224,7 +224,7 @@ final class DifferentialChangesetTwoUpRenderer
             $cov_class = $coverage[$n_num - 1];
           }
           $cov_class = 'cov-'.$cov_class;
-          $n_cov = hsprintf('<td class="cov %s"></td>', $cov_class);
+          $n_cov = '<td class="cov '.$cov_class.'"></td>';
           $n_colspan--;
         }
 
@@ -242,7 +242,7 @@ final class DifferentialChangesetTwoUpRenderer
           $n_classes = $n_class;
 
           if ($new_lines[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
-            $n_copy = hsprintf('<td class="copy %s"></td>', $n_class);
+            $n_copy = '<td class="copy '.$n_class.'"></td>';
           } else {
             list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
             $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
@@ -274,13 +274,13 @@ final class DifferentialChangesetTwoUpRenderer
       }
 
       if ($o_num && $left_id) {
-        $o_id = 'C'.$left_id.$left_char.'L'.$o_num;
+        $o_id = ' id="C'.$left_id.$left_char.'L'.$o_num.'"';
       } else {
         $o_id = null;
       }
 
       if ($n_num && $right_id) {
-        $n_id = 'C'.$right_id.$right_char.'L'.$n_num;
+        $n_id = ' id="C'.$right_id.$right_char.'L'.$n_num.'"';
       } else {
         $n_id = null;
       }
@@ -288,26 +288,20 @@ final class DifferentialChangesetTwoUpRenderer
       // NOTE: The Javascript is sensitive to whitespace changes in this
       // block!
 
-      $html[] = hsprintf(
+      $html[] =
         '<tr>'.
-          '%s'.
-          '<td class="%s">%s</td>'.
-          '%s'.
-          '%s'.
+          '<th'.$o_id.'>'.$o_num.'</th>'.
+          '<td class="'.$o_classes.'">'.$o_text.'</td>'.
+          '<th'.$n_id.'>'.$n_num.'</th>'.
+          $n_copy.
           // NOTE: This is a unicode zero-width space, which we use as a hint
           // when intercepting 'copy' events to make sure sensible text ends
           // up on the clipboard. See the 'phabricator-oncopy' behavior.
-          '<td class="%s" colspan="%s">'.
-            "\xE2\x80\x8B%s".
+          '<td class="'.$n_classes.'" colspan="'.$n_colspan.'">'.
+            "\xE2\x80\x8B".$n_text.
           '</td>'.
-          '%s'.
-        '</tr>',
-        phutil_tag('th', array('id' => $o_id), $o_num),
-        $o_classes, $o_text,
-        phutil_tag('th', array('id' => $n_id), $n_num),
-        $n_copy,
-        $n_classes, $n_colspan, $n_text,
-        $n_cov);
+          $n_cov.
+        '</tr>';
 
       if ($context_not_available && ($ii == $rows - 1)) {
         $html[] = $context_not_available;
@@ -357,7 +351,7 @@ final class DifferentialChangesetTwoUpRenderer
       }
     }
 
-    return $this->wrapChangeInTable(phutil_implode_html('', $html));
+    return $this->wrapChangeInTable(implode('', $html));
   }
 
   public function renderFileChange($old_file = null,
@@ -401,57 +395,51 @@ final class DifferentialChangesetTwoUpRenderer
     foreach ($this->getOldComments() as $on_line => $comment_group) {
       foreach ($comment_group as $comment) {
         $comment_html = $this->renderInlineComment($comment, $on_right = false);
-        $html_old[] = hsprintf(
+        $html_old[] =
           '<tr class="inline">'.
           '<th />'.
-          '<td class="left">%s</td>'.
+          '<td class="left">'.$comment_html.'</td>'.
           '<th />'.
           '<td class="right3" colspan="3" />'.
-          '</tr>',
-          $comment_html);
+          '</tr>';
       }
     }
     foreach ($this->getNewComments() as $lin_line => $comment_group) {
       foreach ($comment_group as $comment) {
         $comment_html = $this->renderInlineComment($comment, $on_right = true);
-        $html_new[] = hsprintf(
+        $html_new[] =
           '<tr class="inline">'.
           '<th />'.
           '<td class="left" />'.
           '<th />'.
-          '<td class="right3" colspan="3">%s</td>'.
-          '</tr>',
-          $comment_html);
+          '<td class="right3" colspan="3">'.$comment_html.'</td>'.
+          '</tr>';
       }
     }
 
     if (!$old) {
-      $th_old = hsprintf('<th></th>');
+      $th_old = '<th></th>';
     } else {
-      $th_old = hsprintf('<th id="C%sOL1">1</th>', $vs);
+      $th_old = '<th id="C'.$vs.'OL1">1</th>';
     }
 
     if (!$new) {
-      $th_new = hsprintf('<th></th>');
+      $th_new = '<th></th>';
     } else {
-      $th_new = hsprintf('<th id="C%sNL1">1</th>', $id);
+      $th_new = '<th id="C'.$id.'NL1">1</th>';
     }
 
-    $output = hsprintf(
+    $output =
       '<tr class="differential-image-diff">'.
-        '%s'.
-        '<td class="left differential-old-image">%s</td>'.
-        '%s'.
-        '<td class="right3 differential-new-image" colspan="3">%s</td>'.
+      $th_old.
+      '<td class="left differential-old-image">'.$old.'</td>'.
+      $th_new.
+      '<td class="right3 differential-new-image" colspan="3">'.
+      $new.
+      '</td>'.
       '</tr>'.
-      '%s'.
-      '%s',
-      $th_old,
-      $old,
-      $th_new,
-      $new,
-      phutil_implode_html('', $html_old),
-      phutil_implode_html('', $html_new));
+      implode('', $html_old).
+      implode('', $html_new);
 
     $output = $this->wrapChangeInTable($output);
 

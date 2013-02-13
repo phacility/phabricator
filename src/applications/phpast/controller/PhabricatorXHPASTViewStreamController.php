@@ -27,7 +27,6 @@ final class PhabricatorXHPASTViewStreamController
         $token->getValue());
     }
 
-    return $this->buildXHPASTViewPanelResponse(
-      phutil_implode_html('', $tokens));
+    return $this->buildXHPASTViewPanelResponse(implode('', $tokens));
   }
 }

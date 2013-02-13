@@ -14,12 +14,13 @@ final class PhabricatorConfigAllController
       $key = $option->getKey();
 
       if ($option->getMasked()) {
-        $value = phutil_tag('em', array(), pht('Masked'));
+        $value = '<em>'.pht('Masked').'</em>';
       } else if ($option->getHidden()) {
-        $value = phutil_tag('em', array(), pht('Hidden'));
+        $value = '<em>'.pht('Hidden').'</em>';
       } else {
         $value = PhabricatorEnv::getEnvConfig($key);
         $value = PhabricatorConfigJSON::prettyPrintJSON($value);
+        $value = phutil_escape_html($value);
       }
 
       $rows[] = array(

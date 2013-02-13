@@ -31,8 +31,8 @@ final class PhabricatorMailingListsListController
     $rows = array();
     foreach ($lists as $list) {
       $rows[] = array(
-        $list->getName(),
-        $list->getEmail(),
+        phutil_escape_html($list->getName()),
+        phutil_escape_html($list->getEmail()),
         phutil_tag(
           'a',
           array(

@@ -23,7 +23,7 @@ final class PhabricatorUINotificationExample extends PhabricatorUIExample {
       ),
       'Show Notification');
 
-    $content = hsprintf('<div style="padding: 1em 3em;">%s</div>', $content);
+    $content = '<div style="padding: 1em 3em;">'.$content.'</content>';
 
     return $content;
   }

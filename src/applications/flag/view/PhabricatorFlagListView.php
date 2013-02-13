@@ -27,7 +27,7 @@ final class PhabricatorFlagListView extends AphrontView {
           ),
           ''),
         $flag->getHandle()->renderLink(),
-        $flag->getNote(),
+        phutil_escape_html($flag->getNote()),
         phabricator_datetime($flag->getDateCreated(), $user),
         phabricator_form(
           $user,

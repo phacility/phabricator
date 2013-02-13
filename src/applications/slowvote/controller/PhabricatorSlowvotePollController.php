@@ -177,11 +177,11 @@ final class PhabricatorSlowvotePollController
 
 
     $panel = new AphrontPanelView();
-    $panel->setHeader($poll->getQuestion());
+    $panel->setHeader(phutil_escape_html($poll->getQuestion()));
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
 
     $panel->appendChild($form);
-    $panel->appendChild(hsprintf('<br /><br />'));
+    $panel->appendChild('<br /><br />');
     $panel->appendChild($result_markup);
 
     return $this->buildStandardPageResponse(
@@ -203,7 +203,8 @@ final class PhabricatorSlowvotePollController
     foreach ($comments as $comment) {
       $handle = $handles[$comment->getAuthorPHID()];
 
-      $markup = $engine->markupText($comment->getCommentText());
+      $markup = phutil_safe_html(
+        $engine->markupText($comment->getCommentText()));
 
       require_celerity_resource('phabricator-remarkup-css');
 

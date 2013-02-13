@@ -43,10 +43,10 @@ final class PhabricatorMacroDisableController
     $dialog
       ->setUser($request->getUser())
       ->setTitle(pht('Really disable macro?'))
-      ->appendChild(phutil_tag('p', array(), pht(
-        'Really disable the much-beloved image macro %s? '.
-          'It will be sorely missed.',
-        $macro->getName())))
+      ->appendChild(
+        '<p>'.pht('Really disable the much-beloved image macro %s? '.
+        'It will be sorely missed.', phutil_escape_html($macro->getName())).
+        '</p>')
       ->setSubmitURI($this->getApplicationURI('/disable/'.$this->id.'/'))
       ->addSubmitButton(pht('Disable'))
       ->addCancelButton($view_uri);

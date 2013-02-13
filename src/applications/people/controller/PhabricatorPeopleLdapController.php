@@ -153,29 +153,34 @@ final class PhabricatorPeopleLdapController
 
   private function renderUserInputs($user) {
     $username = $user[0];
-    return hsprintf(
-      '%s%s%s',
-      phutil_tag(
-        'input',
-        array(
-          'type' => 'checkbox',
-          'name' => 'usernames[]',
-          'value' => $username,
-        )),
-      phutil_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => "email[$username]",
-          'value' => $user[1],
-        )),
-      phutil_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => "name[$username]",
-          'value' => $user[2],
-        )));
+    $inputs =  phutil_tag(
+      'input',
+      array(
+        'type' => 'checkbox',
+        'name' => 'usernames[]',
+        'value' =>$username,
+      ),
+      '');
+
+    $inputs .=  phutil_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => "email[$username]",
+        'value' =>$user[1],
+      ),
+      '');
+
+    $inputs .=  phutil_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => "name[$username]",
+        'value' =>$user[2],
+      ),
+      '');
+
+    return $inputs;
   }
 
 }

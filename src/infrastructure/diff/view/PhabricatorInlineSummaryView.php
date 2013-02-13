@@ -15,7 +15,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
 
   public function render() {
     require_celerity_resource('inline-comment-summary-css');
-    return hsprintf('%s%s', $this->renderHeader(), $this->renderTable());
+    return $this->renderHeader().$this->renderTable();
   }
 
   private function renderHeader() {
@@ -79,26 +79,19 @@ final class PhabricatorInlineSummaryView extends AphrontView {
 
         $where = idx($item, 'where');
 
-        $colspan = ($has_where ? null : 2);
-        $rows[] = hsprintf(
+        $colspan = ($has_where ? '' : ' colspan="2"');
+        $rows[] =
           '<tr>'.
-            '<td class="inline-line-number">%s</td>'.
-            '%s'.
-            '%s'.
-          '</tr>',
-          $lines,
-          ($has_where
-            ? hsprintf('<td class="inline-which-diff">%s</td>', $where)
-            : null),
-          phutil_tag(
-            'td',
-            array(
-              'class' => 'inline-summary-content',
-              'colspan' => $colspan,
-            ),
-            hsprintf(
-              '<div class="phabricator-remarkup">%s</div>',
-              $item['content'])));
+            '<td class="inline-line-number">'.$lines.'</td>'.
+            ($has_where
+              ? hsprintf('<td class="inline-which-diff">%s</td>', $where)
+              : null).
+            '<td class="inline-summary-content"'.$colspan.'>'.
+              '<div class="phabricator-remarkup">'.
+                $item['content'].
+              '</div>'.
+            '</td>'.
+          '</tr>';
       }
     }
 
@@ -107,7 +100,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
       array(
         'class' => 'phabricator-inline-summary-table',
       ),
-      phutil_implode_html("\n", $rows));
+      new PhutilSafeHTML(implode("\n", $rows)));
   }
 
 }

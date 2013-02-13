@@ -78,7 +78,7 @@ final class PhabricatorPropertyListView extends AphrontView {
       array(
         'class' => 'phabricator-property-list-view',
       ),
-      $this->renderSingleView($items));
+      $this->renderHTMLView($items));
   }
 
   private function renderPropertyPart(array $part) {
@@ -99,7 +99,7 @@ final class PhabricatorPropertyListView extends AphrontView {
         array(
           'class' => 'phabricator-property-list-value',
         ),
-        $this->renderSingleView($value));
+        $this->renderHTMLView($value));
     }
 
     $list = phutil_tag(
@@ -107,7 +107,7 @@ final class PhabricatorPropertyListView extends AphrontView {
       array(
         'class' => 'phabricator-property-list-properties',
       ),
-      $this->renderSingleView($items));
+      $this->renderHTMLView($items));
 
     $shortcuts = null;
     if ($this->hasKeyboardShortcuts) {

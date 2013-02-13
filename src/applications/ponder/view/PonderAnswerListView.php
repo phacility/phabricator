@@ -70,8 +70,7 @@ final class PonderAnswerListView extends AphrontView {
 
       $panel->appendChild($view);
       $panel->appendChild($commentview);
-      $panel->appendChild(
-        hsprintf('<div style="height: 40px; clear : both"></div>'));
+      $panel->appendChild('<div style="height: 40px; clear : both"></div>');
 
     }
 

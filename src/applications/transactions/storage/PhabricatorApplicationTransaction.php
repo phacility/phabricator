@@ -134,7 +134,7 @@ abstract class PhabricatorApplicationTransaction
     if ($this->renderingTarget == self::TARGET_HTML) {
       return $this->getHandle($phid)->renderLink();
     } else {
-      return hsprintf('%s', $this->getHandle($phid)->getName());
+      return $this->getHandle($phid)->getName();
     }
   }
 
@@ -143,7 +143,7 @@ abstract class PhabricatorApplicationTransaction
     foreach ($phids as $phid) {
       $links[] = $this->renderHandleLink($phid);
     }
-    return phutil_implode_html(', ', $links);
+    return phutil_safe_html(implode(', ', $links));
   }
 
   public function getIcon() {
@@ -218,16 +218,16 @@ abstract class PhabricatorApplicationTransaction
           '%s changed the visibility of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          $old,
-          $new);
+          phutil_escape_html($old),
+          phutil_escape_html($new));
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         // TODO: Render human-readable.
         return pht(
           '%s changed the edit policy of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          $old,
-          $new);
+          phutil_escape_html($old),
+          phutil_escape_html($new));
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);

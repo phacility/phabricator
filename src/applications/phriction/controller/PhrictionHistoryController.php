@@ -49,7 +49,7 @@ final class PhrictionHistoryController
 
       $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
 
-      $vs_previous = phutil_tag('em', array(), pht('Created'));
+      $vs_previous = '<em>'.pht('Created').'</em>';
       if ($content->getVersion() != 1) {
         $uri = $diff_uri
           ->alter('l', $content->getVersion() - 1)
@@ -62,7 +62,7 @@ final class PhrictionHistoryController
           pht('Show Change'));
       }
 
-      $vs_head = phutil_tag('em', array(), pht('Current'));
+      $vs_head = '<em>'.pht('Current').'</em>';
       if ($content->getID() != $document->getContentID()) {
         $uri = $diff_uri
           ->alter('l', $content->getVersion())
@@ -90,7 +90,7 @@ final class PhrictionHistoryController
           pht('Version %s', $version)),
         $handles[$content->getAuthorPHID()]->renderLink(),
         $change_type,
-        $content->getDescription(),
+        phutil_escape_html($content->getDescription()),
         $vs_previous,
         $vs_head,
       );

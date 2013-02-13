@@ -74,7 +74,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
         }
         $parents[$k] = substr($parent, 0, 16);
       }
-      $parents = phutil_implode_html(phutil_tag('br'), $parents);
+      $parents = array_interleave(phutil_tag('br'), $parents);
       $row[] = phutil_tag('td', array(), $parents);
 
       $author = nonempty(
@@ -114,31 +114,29 @@ final class DifferentialLocalCommitsView extends AphrontView {
 
 
     $headers = array();
-    $headers[] = phutil_tag('th', array(), pht('Commit'));
+    $headers[] = '<th>'.pht('Commit').'</th>';
     if ($has_tree) {
-      $headers[] = phutil_tag('th', array(), pht('Tree'));
+      $headers[] = '<th>'.pht('Tree').'</th>';
     }
     if ($has_local) {
-      $headers[] = phutil_tag('th', array(), pht('Local'));
+      $headers[] = '<th>'.pht('Local').'</th>';
     }
-    $headers[] = phutil_tag('th', array(), pht('Parents'));
-    $headers[] = phutil_tag('th', array(), pht('Author'));
-    $headers[] = phutil_tag('th', array(), pht('Summary'));
-    $headers[] = phutil_tag('th', array(), pht('Date'));
+    $headers[] = '<th>'.pht('Parents').'</th>';
+    $headers[] = '<th>'.pht('Author').'</th>';
+    $headers[] = '<th>'.pht('Summary').'</th>';
+    $headers[] = '<th>'.pht('Date').'</th>';
 
-    $headers = phutil_tag('tr', array(), $headers);
+    $headers = '<tr>'.implode('', $headers).'</tr>';
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Local Commits'))
-      ->render();
-
-    return hsprintf(
-      '%s'.
+    return
+      id(new PhabricatorHeaderView())
+        ->setHeader(pht('Local Commits'))
+        ->render().
       '<div class="differential-panel">'.
-        '<table class="differential-local-commits-table">%s%s</table>'.
-      '</div>',
-      $header,
-      $headers,
-      phutil_implode_html("\n", $rows));
+        '<table class="differential-local-commits-table">'.
+          $headers.
+          implode("\n", $rows).
+        '</table>'.
+      '</div>';
   }
 }

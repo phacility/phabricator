@@ -28,7 +28,7 @@ final class ManiphestExportController extends ManiphestController {
       $dialog->setUser($user);
 
       $dialog->setTitle('Excel Export Not Configured');
-      $dialog->appendChild(hsprintf(
+      $dialog->appendChild(
         '<p>This system does not have PHPExcel installed. This software '.
         'component is required to export tasks to Excel. Have your system '.
         'administrator install it from:</p>'.
@@ -38,7 +38,7 @@ final class ManiphestExportController extends ManiphestController {
         '</p>'.
         '<br />'.
         '<p>Your PHP "include_path" needs to be updated to include the '.
-        'PHPExcel Classes/ directory.</p>'));
+        'PHPExcel Classes/ directory.</p>');
 
       $dialog->addCancelButton('/maniphest/');
       return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -59,8 +59,8 @@ final class ManiphestExportController extends ManiphestController {
       $dialog->setUser($user);
 
       $dialog->setTitle('Export Tasks to Excel');
-      $dialog->appendChild(phutil_tag('p', array(), pht(
-        'Do you want to export the query results to Excel?')));
+      $dialog->appendChild(
+        '<p>Do you want to export the query results to Excel?</p>');
 
       $dialog->addCancelButton('/maniphest/');
       $dialog->addSubmitButton('Export to Excel');

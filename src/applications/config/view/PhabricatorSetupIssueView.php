@@ -44,7 +44,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
         ),
         array(
           phutil_tag('p', array(), $run_these),
-          phutil_tag('pre', array(), phutil_implode_html("\n", $commands)),
+          phutil_tag('pre', array(), array_interleave("\n", $commands)),
         ));
     }
 
@@ -114,7 +114,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue',
       ),
-      $this->renderSingleView(
+      $this->renderHTMLView(
         array(
           $name,
           $description,
@@ -155,7 +155,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
           '<tt>phabricator/ $</tt> ./bin/config set %s <em>value</em>',
           $key);
       }
-      $update = phutil_tag('pre', array(), phutil_implode_html("\n", $update));
+      $update = phutil_tag('pre', array(), array_interleave("\n", $update));
     } else {
       $update = array();
       foreach ($configs as $config) {
@@ -187,7 +187,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-config',
       ),
-      self::renderSingleView(
+      self::renderHTMLView(
         array(
           $table_info,
           $table,
@@ -293,7 +293,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-config',
       ),
-      $this->renderSingleView(
+      $this->renderHTMLView(
         array(
           $table_info,
           $table,

@@ -101,51 +101,50 @@ final class PhabricatorObjectSelectorDialog {
         ),
         $label);
     }
+    $options = implode("\n", $options);
 
     $instructions = null;
     if ($this->instructions) {
-      $instructions = phutil_tag(
-        'p',
-        array('class' => 'phabricator-object-selector-instructions'),
-        $this->instructions);
+      $instructions =
+        '<p class="phabricator-object-selector-instructions">'.
+          $this->instructions.
+        '</p>';
     }
 
-    $search_box = phabricator_form(
+    $search_box = phabricator_render_form(
       $user,
       array(
         'method' => 'POST',
         'action' => $this->submitURI,
         'id'     => $search_id,
       ),
-      hsprintf(
-        '<table class="phabricator-object-selector-search">
-          <tr>
-            <td class="phabricator-object-selector-search-filter">%s</td>
-            <td class="phabricator-object-selector-search-text">%s</td>
-          </tr>
-        </table>',
-        phutil_tag('select', array('id' => $filter_id), $options),
-        phutil_tag('input', array('id' => $query_id))));
-
-    $result_box = phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-object-selector-results',
-        'id' => $results_id,
-      ),
-      '');
-
-    $attached_box = hsprintf(
+      '<table class="phabricator-object-selector-search">
+        <tr>
+          <td class="phabricator-object-selector-search-filter">
+            <select id="'.$filter_id.'">'.
+              $options.
+            '</select>
+          </td>
+          <td class="phabricator-object-selector-search-text">
+            <input type="text" id="'.$query_id.'" />
+          </td>
+        </tr>
+      </table>');
+    $result_box =
+      '<div class="phabricator-object-selector-results" id="'.$results_id.'">'.
+      '</div>';
+    $attached_box =
       '<div class="phabricator-object-selector-current">'.
         '<div class="phabricator-object-selector-currently-attached">'.
-          '<div class="phabricator-object-selector-header">%s</div>'.
-          '<div id="%s"></div>'.
-          '%s'.
+          hsprintf(
+            '<div class="phabricator-object-selector-header">%s</div>',
+            $this->header).
+          '<div id="'.$current_id.'">'.
+          '</div>'.
+          $instructions.
         '</div>'.
-      '</div>',
-      $this->header,
-      $current_id,
-      $instructions);
+      '</div>';
+
 
     $dialog = new AphrontDialogView();
     $dialog

@@ -51,52 +51,48 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
           'class' => 'bright-link',
         ),
         'Installation Guide');
-      return hsprintf(
+      return
         '<div class="dark-console-no-content">'.
           'The "xhprof" PHP extension is not available. Install xhprof '.
           'to enable the XHProf console plugin. You can find instructions in '.
-          'the %s.'.
-        '</div>',
-        $install_guide);
+          'the '.$install_guide.'.'.
+        '</div>';
     }
 
     $result = array();
 
-    $header = hsprintf(
+    $header =
       '<div class="dark-console-panel-header">'.
-        '%s'.
+        phutil_tag(
+          'a',
+          array(
+            'href'  => $profile_uri,
+            'class' => $run
+              ? 'disabled button'
+              : 'green button',
+          ),
+          'Profile Page').
         '<h1>XHProf Profiler</h1>'.
-      '</div>',
-      phutil_tag(
-        'a',
-        array(
-          'href'  => $profile_uri,
-          'class' => $run
-            ? 'disabled button'
-            : 'green button',
-        ),
-        'Profile Page'));
+      '</div>';
     $result[] = $header;
 
     if ($run) {
-      $result[] = hsprintf(
-        '<a href="/xhprof/profile/%s/" '.
+      $result[] =
+        '<a href="/xhprof/profile/'.$run.'/" '.
           'class="bright-link" '.
           'style="float: right; margin: 1em 2em 0 0;'.
             'font-weight: bold;" '.
           'target="_blank">Profile Permalink</a>'.
-        '<iframe src="/xhprof/profile/%s/?frame=true"></iframe>',
-        $run,
-        $run);
+        '<iframe src="/xhprof/profile/'.$run.'/?frame=true"></iframe>';
     } else {
-      $result[] = hsprintf(
+      $result[] =
         '<div class="dark-console-no-content">'.
           'Profiling was not enabled for this page. Use the button above '.
           'to enable it.'.
-        '</div>');
+        '</div>';
     }
 
-    return phutil_implode_html("\n", $result);
+    return implode("\n", $result);
   }
 
 

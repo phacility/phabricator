@@ -97,7 +97,8 @@ final class DiffusionCommitController extends DiffusionController {
           array(
             'class' => 'diffusion-commit-message phabricator-remarkup',
           ),
-          $engine->markupText($commit_data->getCommitMessage())));
+          phutil_safe_html(
+            $engine->markupText($commit_data->getCommitMessage()))));
 
       $content[] = $top_anchor;
       $content[] = $headsup_view;
@@ -448,7 +449,9 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($parents as $parent) {
         $parent_links[] = $handles[$parent->getPHID()]->renderLink();
       }
-      $props['Parents'] = phutil_implode_html(" \xC2\xB7 ", $parent_links);
+      $props['Parents'] = array_interleave(
+        " \xC2\xB7 ",
+        $parent_links);
     }
 
     $request = $this->getDiffusionRequest();
@@ -485,7 +488,7 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($task_phids as $phid) {
         $task_list[] = $handles[$phid]->renderLink();
       }
-      $task_list = phutil_implode_html(phutil_tag('br'), $task_list);
+      $task_list = array_interleave(phutil_tag('br'), $task_list);
       $props['Tasks'] = $task_list;
     }
 
@@ -494,7 +497,7 @@ final class DiffusionCommitController extends DiffusionController {
       foreach ($proj_phids as $phid) {
         $proj_list[] = $handles[$phid]->renderLink();
       }
-      $proj_list = phutil_implode_html(phutil_tag('br'), $proj_list);
+      $proj_list = array_interleave(phutil_tag('br'), $proj_list);
       $props['Projects'] = $proj_list;
     }
 
@@ -686,7 +689,7 @@ final class DiffusionCommitController extends DiffusionController {
       'inlineuri'  => '/diffusion/inline/preview/'.$commit->getPHID().'/',
     ));
 
-    $preview_panel = hsprintf(
+    $preview_panel =
       '<div class="aphront-panel-preview aphront-panel-flush">
         <div id="audit-preview">
           <div class="aphront-panel-preview-loading-text">
@@ -695,24 +698,27 @@ final class DiffusionCommitController extends DiffusionController {
         </div>
         <div id="inline-comment-preview">
         </div>
-      </div>');
+      </div>';
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
     require_celerity_resource('differential-core-view-css');
 
-    return phutil_tag(
+    return phutil_render_tag(
       'div',
       array(
         'id' => $pane_id,
       ),
-      hsprintf(
-        '<div class="differential-add-comment-panel">%s%s%s</div>',
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'differential-add-comment-panel',
+        ),
         id(new PhabricatorAnchorView())
           ->setAnchorName('comment')
           ->setNavigationMarker(true)
-          ->render(),
-        $panel->render(),
+          ->render().
+        $panel->render().
         $preview_panel));
   }
 
@@ -932,7 +938,7 @@ final class DiffusionCommitController extends DiffusionController {
         $ref);
     }
 
-    return phutil_implode_html(', ', $ref_links);
+    return array_interleave(', ', $ref_links);
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {

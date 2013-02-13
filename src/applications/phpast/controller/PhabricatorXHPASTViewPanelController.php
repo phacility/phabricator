@@ -20,7 +20,7 @@ abstract class PhabricatorXHPASTViewPanelController
   }
 
   protected function buildXHPASTViewPanelResponse($content) {
-    $content = hsprintf(
+    $content =
       '<!DOCTYPE html>'.
       '<html>'.
         '<head>'.
@@ -57,9 +57,10 @@ li span {
 
           </style>'.
         '</head>'.
-        '<body>%s</body>'.
-      '</html>',
-      $content);
+        '<body>'.
+          $content.
+        '</body>'.
+      '</html>';
 
     $response = new AphrontWebpageResponse();
     $response->setFrameable(true);

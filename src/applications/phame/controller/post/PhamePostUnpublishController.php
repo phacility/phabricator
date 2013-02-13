@@ -45,7 +45,7 @@ final class PhamePostUnpublishController extends PhameController {
         pht(
           'The post "%s" will no longer be visible to other users until you '.
           'republish it.',
-          $post->getTitle()))
+          phutil_escape_html($post->getTitle())))
       ->addSubmitButton(pht('Unpublish'))
       ->addCancelButton($cancel_uri);
 

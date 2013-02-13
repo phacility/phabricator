@@ -32,14 +32,14 @@ final class HeraldRuleEditHistoryView extends AphrontView {
 
       switch ($edit->getAction()) {
         case 'create':
-          $details = pht("Created rule '%s'.", $rule_name);
+          $details = "Created rule '{$rule_name}'.";
           break;
         case 'delete':
-          $details = pht("Deleted rule '%s'.", $rule_name);
+          $details = "Deleted rule '{$rule_name}'.";
           break;
         case 'edit':
         default:
-          $details = pht("Edited rule '%s'.", $rule_name);
+          $details = "Edited rule '{$rule_name}'.";
           break;
       }
 

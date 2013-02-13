@@ -27,7 +27,7 @@ final class PhabricatorHelpKeyboardShortcutController
       foreach ($shortcut['keys'] as $stroke) {
         $keystrokes[] = phutil_tag('kbd', array(), $stroke);
       }
-      $keystrokes = phutil_implode_html(' or ', $keystrokes);
+      $keystrokes = array_interleave(' or ', $keystrokes);
       $rows[] = phutil_tag(
         'tr',
         array(),
@@ -37,10 +37,10 @@ final class PhabricatorHelpKeyboardShortcutController
         ));
     }
 
-    $table = phutil_tag(
-      'table',
-      array('class' => 'keyboard-shortcut-help'),
-      $rows);
+    $table =
+      '<table class="keyboard-shortcut-help">'.
+        implode('', $rows).
+      '</table>';
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)

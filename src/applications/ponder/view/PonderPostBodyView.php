@@ -64,7 +64,7 @@ final class PonderPostBodyView extends AphrontView {
       $content);
 
     $author = $this->handles[$target->getAuthorPHID()];
-    $actions = array(hsprintf('%s %s', $author->renderLink(), $this->action));
+    $actions = array($author->renderLink().' '.$this->action);
     $author_link = $author->renderLink();
     $xaction_view = id(new PhabricatorTransactionView())
       ->setUser($user)

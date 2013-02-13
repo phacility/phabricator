@@ -77,12 +77,11 @@ final class PhabricatorOAuthFailureView extends AphrontView {
         $provider_name);
     }
 
-    $view->appendChild(hsprintf(
+    $view->appendChild(
       '<div class="aphront-failure-continue">'.
-        '%s<a href="/login/" class="button">%s</a>'.
-      '</div>',
-      $diagnose,
-      pht('Continue')));
+        $diagnose.
+        '<a href="/login/" class="button">'.pht('Continue').'</a>'.
+      '</div>');
 
     return $view->render();
   }

@@ -87,7 +87,7 @@ final class ConpherenceTransactionView extends AphrontView {
         array(
           'class' => $content_class
         ),
-        $this->renderSingleView($content))
+        $this->renderHTMLView($content))
       );
 
     return $transaction_view->render();

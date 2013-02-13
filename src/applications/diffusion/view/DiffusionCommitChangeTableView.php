@@ -51,7 +51,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
           ),
           $path);
       } else {
-        $path_column = $path;
+        $path_column = phutil_escape_html($path);
       }
 
       $rows[] = array(

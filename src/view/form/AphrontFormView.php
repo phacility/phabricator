@@ -68,7 +68,7 @@ final class AphrontFormView extends AphrontView {
 
     $layout
       ->appendChild($this->renderDataInputs())
-      ->appendChild($this->renderChildren());
+      ->appendChild($this->renderHTMLChildren());
 
     if (!$this->user) {
       throw new Exception('You must pass the user to AphrontFormView.');

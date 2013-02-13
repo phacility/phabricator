@@ -41,7 +41,7 @@ final class PhamePostDeleteController extends PhameController {
       ->appendChild(
         pht(
           'Really delete the post "%s"? It will be gone forever.',
-          $post->getTitle()))
+          phutil_escape_html($post->getTitle())))
       ->addSubmitButton(pht('Delete'))
       ->addCancelButton($cancel_uri);
 

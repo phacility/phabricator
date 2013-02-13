@@ -19,7 +19,7 @@ final class DiffusionHomeController extends DiffusionController {
               'href' => $shortcut->getHref(),
             ),
             $shortcut->getName()),
-          $shortcut->getDescription(),
+          phutil_escape_html($shortcut->getDescription()),
         );
       }
 
@@ -130,7 +130,7 @@ final class DiffusionHomeController extends DiffusionController {
             'href' => '/diffusion/'.$repository->getCallsign().'/',
           ),
           $repository->getName()),
-        $repository->getDetail('description'),
+        phutil_escape_html($repository->getDetail('description')),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
         $size,

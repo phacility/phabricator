@@ -34,7 +34,7 @@ abstract class PhabricatorInlineCommentPreviewController
       $view->setPreview(true);
       $views[] = $view->render();
     }
-    $views = phutil_implode_html("\n", $views);
+    $views = implode("\n", $views);
 
     return id(new AphrontAjaxResponse())
       ->setContent($views);

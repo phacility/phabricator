@@ -108,8 +108,8 @@ final class PhrictionEditController
           $dialog = new AphrontDialogView();
           $dialog->setUser($user);
           $dialog->setTitle(pht('No Edits'));
-          $dialog->appendChild(phutil_tag('p', array(), pht(
-            'You did not make any changes to the document.')));
+          $dialog->appendChild(
+            '<p>'.pht('You did not make any changes to the document.').'</p>');
           $dialog->addCancelButton($request->getRequestURI());
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -122,8 +122,8 @@ final class PhrictionEditController
         $dialog = new AphrontDialogView();
         $dialog->setUser($user);
         $dialog->setTitle(pht('Empty Page'));
-        $dialog->appendChild(phutil_tag('p', array(), pht(
-          'You can not create an empty document.')));
+        $dialog->appendChild(
+          '<p>'.pht('You can not create an empty document.').'</p>');
         $dialog->addCancelButton($request->getRequestURI());
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -231,15 +231,17 @@ final class PhrictionEditController
       ->setHeader($panel_header)
       ->appendChild($form);
 
-    $preview_panel = hsprintf(
+    $preview_panel =
       '<div class="aphront-panel-preview aphront-panel-preview-wide">
-        <div class="phriction-document-preview-header">%s</div>
-        <div id="document-preview">
-          <div class="aphront-panel-preview-loading-text">%s</div>
+        <div class="phriction-document-preview-header">
+          '.pht('Document Preview').'
         </div>
-      </div>',
-      pht('Document Preview'),
-      pht('Loading preview...'));
+        <div id="document-preview">
+          <div class="aphront-panel-preview-loading-text">
+            '.pht('Loading preview...').'
+          </div>
+        </div>
+      </div>';
 
     Javelin::initBehavior(
       'phriction-document-preview',

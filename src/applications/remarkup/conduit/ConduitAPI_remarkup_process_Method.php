@@ -45,7 +45,7 @@ final class ConduitAPI_remarkup_process_Method extends ConduitAPIMethod {
 
     $text = $engine->markupText($content);
     if ($text) {
-      $content = hsprintf('%s', $text)->getHTMLContent();
+      $content = phutil_safe_html($text)->getHTMLContent();
     } else {
       $content = '';
     }

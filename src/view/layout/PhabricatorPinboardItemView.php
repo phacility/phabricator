@@ -55,7 +55,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
           'height'  => $this->imageHeight,
         )));
 
-    $content = $this->renderChildren();
+    $content = $this->renderHTMLChildren();
     if ($content) {
       $content = phutil_tag(
         'div',
@@ -70,7 +70,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
       array(
         'class' => 'phabricator-pinboard-item-view',
       ),
-      $this->renderSingleView(
+      $this->renderHTMLView(
         array(
           $header,
           $image,

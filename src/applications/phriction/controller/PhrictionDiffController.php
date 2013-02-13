@@ -155,32 +155,28 @@ final class PhrictionDiffController
         $link_r = pht('Most Recent Change');
       }
 
-      $navigation_table = hsprintf(
+      $navigation_table =
         '<table class="phriction-history-nav-table">
           <tr>
-            <td class="nav-prev">%s</td>
-            <td class="nav-next">%s</td>
+            <td class="nav-prev">'.$link_l.'</td>
+            <td class="nav-next">'.$link_r.'</td>
           </tr>
-        </table>',
-        $link_l,
-        $link_r);
+        </table>';
     }
 
 
 
-    $output = hsprintf(
+    $output =
       '<div class="phriction-document-history-diff">'.
-        '%s<br /><br />%s'.
+        $comparison_table->render().
+        '<br />'.
+        '<br />'.
+        $navigation_table.
         '<table class="phriction-revert-table">'.
-          '<tr><td>%s</td><td>%s</td>'.
+          '<tr><td>'.$revert_l.'</td><td>'.$revert_r.'</td>'.
         '</table>'.
-        '%s'.
-      '</div>',
-      $comparison_table->render(),
-      $navigation_table,
-      $revert_l,
-      $revert_r,
-      $output);
+        $output.
+      '</div>';
 
     return $this->buildStandardPageResponse(
       array(
@@ -238,9 +234,9 @@ final class PhrictionDiffController
       $rows[] = array(
         phabricator_date($c->getDateCreated(), $user),
         phabricator_time($c->getDateCreated(), $user),
-        'Version '.$c->getVersion(),
+        phutil_escape_html('Version '.$c->getVersion()),
         $handles[$c->getAuthorPHID()]->renderLink(),
-        $c->getDescription(),
+        phutil_escape_html($c->getDescription()),
       );
     }
 

@@ -5,6 +5,7 @@ final class PhabricatorXHPASTViewInputController
 
   public function processRequest() {
     $input = $this->getStorageTree()->getInput();
-    return $this->buildXHPASTViewPanelResponse($input);
+    return $this->buildXHPASTViewPanelResponse(
+      phutil_escape_html($input));
   }
 }

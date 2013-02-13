@@ -114,19 +114,17 @@ final class DiffusionCommentView extends AphrontView {
     $actions = array();
     if ($action == PhabricatorAuditActionConstants::ADD_CCS) {
       $rendered_ccs = $this->renderHandleList($added_ccs);
-      $actions[] = hsprintf("%s added CCs: %s.", $author_link, $rendered_ccs);
+      $actions[] = "{$author_link} added CCs: {$rendered_ccs}.";
     } else if ($action == PhabricatorAuditActionConstants::ADD_AUDITORS) {
       $rendered_auditors = $this->renderHandleList($added_auditors);
-      $actions[] = hsprintf(
-        "%s added auditors: %s.",
-        $author_link,
-        $rendered_auditors);
+      $actions[] = "{$author_link} added auditors: ".
+        "{$rendered_auditors}.";
     } else {
-      $actions[] = hsprintf("%s %s this commit.", $author_link, $verb);
+      $actions[] = "{$author_link} ".phutil_escape_html($verb)." this commit.";
     }
 
     foreach ($actions as $key => $action) {
-      $actions[$key] = phutil_tag('div', array(), $action);
+      $actions[$key] = '<div>'.$action.'</div>';
     }
 
     return $actions;
@@ -139,12 +137,13 @@ final class DiffusionCommentView extends AphrontView {
     if (!strlen($comment->getContent()) && empty($this->inlineComments)) {
       return null;
     } else {
-      return hsprintf(
-        '<div class="phabricator-remarkup">%s%s</div>',
-        $engine->getOutput(
-          $comment,
-          PhabricatorAuditComment::MARKUP_FIELD_BODY),
-        $this->renderSingleView($this->renderInlines()));
+      return
+        '<div class="phabricator-remarkup">'.
+          $engine->getOutput(
+            $comment,
+            PhabricatorAuditComment::MARKUP_FIELD_BODY).
+          $this->renderSingleView($this->renderInlines()).
+        '</div>';
     }
   }
 
@@ -187,7 +186,7 @@ final class DiffusionCommentView extends AphrontView {
     foreach ($phids as $phid) {
       $result[] = $this->handles[$phid]->renderLink();
     }
-    return phutil_implode_html(', ', $result);
+    return implode(', ', $result);
   }
 
   private function renderClasses() {

@@ -43,29 +43,34 @@ final class PonderQuestionSummaryView extends AphrontView {
       '</div>',
       $question->getAnswerCount());
 
-    $title = hsprintf('<h2 class="ponder-question-title">%s</h2>',
-      phutil_tag(
-        'a',
-        array(
-          "href" => '/Q' . $question->getID(),
-        ),
-          'Q' . $question->getID() .
-          ' ' . $question->getTitle()
-      ));
+    $title =
+      '<h2 class="ponder-question-title">'.
+        phutil_tag(
+          'a',
+          array(
+            "href" => '/Q' . $question->getID(),
+          ),
+            'Q' . $question->getID() .
+            ' ' . $question->getTitle()
+        ) .
+      '</h2>';
 
-    $rhs = hsprintf(
+    $rhs =
       '<div class="ponder-metadata">'.
-        '%s <span class="ponder-small-metadata">asked on %s by %s</span>'.
-      '</div>',
-      $title,
-      phabricator_datetime($question->getDateCreated(), $user),
-      $authorlink);
+        $title.
+       '<span class="ponder-small-metadata">'.
+        'asked on '.
+        phabricator_datetime($question->getDateCreated(), $user).
+        ' by ' . $authorlink.
+       '</span>'.
+      '</div>';
 
-    $summary = hsprintf(
-      '<div class="ponder-question-summary">%s%s%s</div>',
-      $votecount,
-      $answercount,
-      $rhs);
+    $summary =
+      '<div class="ponder-question-summary">'.
+        $votecount.
+        $answercount.
+        $rhs.
+      '</div>';
 
 
     return $summary;

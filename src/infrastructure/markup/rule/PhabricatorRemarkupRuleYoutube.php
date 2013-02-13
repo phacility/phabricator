@@ -10,8 +10,7 @@ final class PhabricatorRemarkupRuleYoutube
     $this->uri = new PhutilURI($text);
 
     if ($this->uri->getDomain() &&
-        preg_match('/(^|\.)youtube\.com$/', $this->uri->getDomain()) &&
-        idx($this->uri->getQueryParams(), 'v')) {
+        preg_match('/(^|\.)youtube\.com$/', $this->uri->getDomain())) {
       return $this->markupYoutubeLink();
     }
 
@@ -20,20 +19,25 @@ final class PhabricatorRemarkupRuleYoutube
 
   public function markupYoutubeLink() {
     $v = idx($this->uri->getQueryParams(), 'v');
-    $youtube_src = 'https://www.youtube.com/embed/'.$v;
-    $iframe = hsprintf(
-      '<div class="embedded-youtube-video">%s</div>',
-      phutil_tag(
-        'iframe',
-        array(
-          'width'       => '650',
-          'height'      => '400',
-          'style'       => 'margin: 1em auto; border: 0px;',
-          'src'         => $youtube_src,
-          'frameborder' => 0,
-        ),
-        ''));
-    return $this->getEngine()->storeText($iframe);
+    if ($v) {
+      $youtube_src = 'https://www.youtube.com/embed/'.$v;
+      $iframe =
+        '<div class="embedded-youtube-video">'.
+          phutil_tag(
+            'iframe',
+            array(
+              'width'       => '650',
+              'height'      => '400',
+              'style'       => 'margin: 1em auto; border: 0px;',
+              'src'         => $youtube_src,
+              'frameborder' => 0,
+            ),
+            '').
+        '</div>';
+      return $this->getEngine()->storeText($iframe);
+    } else {
+      return $this->uri;
+    }
   }
 
 }

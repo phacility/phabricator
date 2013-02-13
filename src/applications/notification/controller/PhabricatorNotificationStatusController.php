@@ -45,19 +45,22 @@ final class PhabricatorNotificationStatusController
 
     $rows = array();
     foreach ($status as $key => $value) {
+      $label = phutil_escape_html($key);
+
       switch ($key) {
         case 'uptime':
           $value /= 1000;
           $value = phabricator_format_relative_time_detailed($value);
           break;
         case 'log':
+          $value = phutil_escape_html($value);
           break;
         default:
-          $value = number_format($value);
+          $value = phutil_escape_html(number_format($value));
           break;
       }
 
-      $rows[] = array($key, $value);
+      $rows[] = array($label, $value);
     }
 
     $table = new AphrontTableView($rows);

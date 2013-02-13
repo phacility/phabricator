@@ -29,7 +29,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
     $file = $this->getValue();
 
     if ($file === null) {
-      return phutil_tag(
+      return phutil_render_tag(
         'img',
         array(
           'src' => PhabricatorUser::getDefaultProfileImageURI()

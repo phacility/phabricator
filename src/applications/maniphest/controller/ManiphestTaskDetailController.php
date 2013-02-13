@@ -88,32 +88,36 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     if ($parent_task) {
       $context_bar = new AphrontContextBarView();
-      $context_bar->addButton(phutil_tag(
-      'a',
-      array(
-        'href' => '/maniphest/task/create/?parent='.$parent_task->getID(),
-        'class' => 'green button',
-      ),
-      'Create Another Subtask'));
-      $context_bar->appendChild(hsprintf(
-        'Created a subtask of <strong>%s</strong>',
-        $this->getHandle($parent_task->getPHID())->renderLink()));
+      $context_bar->addButton(
+         phutil_tag(
+         'a',
+         array(
+           'href' => '/maniphest/task/create/?parent='.$parent_task->getID(),
+           'class' => 'green button',
+         ),
+        'Create Another Subtask'));
+      $context_bar->appendChild(
+        'Created a subtask of <strong>'.
+        $this->getHandle($parent_task->getPHID())->renderLink().
+        '</strong>');
     } else if ($workflow == 'create') {
       $context_bar = new AphrontContextBarView();
-      $context_bar->addButton(phutil_tag('label', array(), 'Create Another'));
-      $context_bar->addButton(phutil_tag(
-        'a',
-        array(
-          'href' => '/maniphest/task/create/?template='.$task->getID(),
-          'class' => 'green button',
-        ),
+      $context_bar->addButton('<label>Create Another:</label>');
+      $context_bar->addButton(
+         phutil_tag(
+         'a',
+         array(
+           'href' => '/maniphest/task/create/?template='.$task->getID(),
+           'class' => 'green button',
+         ),
         'Similar Task'));
-      $context_bar->addButton(phutil_tag(
-        'a',
-        array(
-          'href' => '/maniphest/task/create/',
-          'class' => 'green button',
-        ),
+      $context_bar->addButton(
+         phutil_tag(
+         'a',
+         array(
+           'href' => '/maniphest/task/create/',
+           'class' => 'green button',
+         ),
         'Empty Task'));
       $context_bar->appendChild('New task created.');
     }
@@ -301,13 +305,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $comment_header = id(new PhabricatorHeaderView())
       ->setHeader($is_serious ? pht('Add Comment') : pht('Weigh In'));
 
-    $preview_panel = hsprintf(
+    $preview_panel =
       '<div class="aphront-panel-preview">
         <div id="transaction-preview">
-          <div class="aphront-panel-preview-loading-text">%s</div>
+          <div class="aphront-panel-preview-loading-text">
+            '.pht('Loading preview...').'
+          </div>
         </div>
-      </div>',
-      pht('Loading preview...'));
+      </div>';
 
     $transaction_view = new ManiphestTransactionListView();
     $transaction_view->setTransactions($transactions);

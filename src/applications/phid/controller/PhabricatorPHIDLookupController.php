@@ -24,9 +24,9 @@ final class PhabricatorPHIDLookupController
         }
 
         $rows[] = array(
-          $handle->getPHID(),
-          $handle->getType(),
-          $handle->getName(),
+          phutil_escape_html($handle->getPHID()),
+          phutil_escape_html($handle->getType()),
+          phutil_escape_html($handle->getName()),
           $link,
         );
       }

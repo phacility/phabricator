@@ -50,7 +50,10 @@ final class DivinerListController extends PhabricatorController {
         $flavor);
     }
 
-    $out = phutil_tag('div', array('class' => 'aphront-directory-list'), $out);
+    $out =
+      '<div class="aphront-directory-list">'.
+        implode("\n", $out).
+      '</div>';
 
     return $this->buildApplicationPage(
       $out,

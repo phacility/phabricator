@@ -111,7 +111,18 @@ final class AphrontTableView extends AphrontView {
   public function render() {
     require_celerity_resource('aphront-table-view-css');
 
-    $table = array();
+    $table_class = $this->className;
+
+    if ($this->deviceReadyTable) {
+      $table_class .= ' aphront-table-view-device-ready';
+    }
+
+    if ($table_class !== null) {
+      $table_class = ' class="aphront-table-view '.$table_class.'"';
+    } else {
+      $table_class = ' class="aphront-table-view"';
+    }
+    $table = array('<table'.$table_class.'>');
 
     $col_classes = array();
     foreach ($this->columnClasses as $key => $class) {
@@ -140,8 +151,7 @@ final class AphrontTableView extends AphrontView {
       while (count($headers) > count($sort_values)) {
         $sort_values[] = null;
       }
-
-      $tr = array();
+      $table[] = '<tr>';
       foreach ($headers as $col_num => $header) {
         if (!$visibility[$col_num]) {
           continue;
@@ -192,7 +202,7 @@ final class AphrontTableView extends AphrontView {
         }
 
         if ($classes) {
-          $class = implode(' ', $classes);
+          $class = ' class="'.implode(' ', $classes).'"';
         } else {
           $class = null;
         }
@@ -211,12 +221,12 @@ final class AphrontTableView extends AphrontView {
             ),
             $short_headers[$col_num]);
 
-          $header = hsprintf('%s %s', $header_nodevice, $header_device);
+          $header = $header_nodevice.$header_device;
         }
 
-        $tr[] = phutil_tag('th', array('class' => $class), $header);
+        $table[] = '<th'.$class.'>'.$header.'</th>';
       }
-      $table[] = phutil_tag('tr', array(), $tr);
+      $table[] = '</tr>';
     }
 
     foreach ($col_classes as $key => $value) {
@@ -241,7 +251,18 @@ final class AphrontTableView extends AphrontView {
         while (count($row) > count($visibility)) {
           $visibility[] = true;
         }
-        $tr = array();
+        $class = idx($this->rowClasses, $row_num);
+        if ($this->zebraStripes && ($row_num % 2)) {
+          if ($class !== null) {
+            $class = 'alt alt-'.$class;
+          } else {
+            $class = 'alt';
+          }
+        }
+        if ($class !== null) {
+          $class = ' class="'.$class.'"';
+        }
+        $table[] = '<tr'.$class.'>';
         // NOTE: Use of a separate column counter is to allow this to work
         // correctly if the row data has string or non-sequential keys.
         $col_num = 0;
@@ -254,40 +275,26 @@ final class AphrontTableView extends AphrontView {
           if (!empty($this->cellClasses[$row_num][$col_num])) {
             $class = trim($class.' '.$this->cellClasses[$row_num][$col_num]);
           }
-          $tr[] = phutil_tag('td', array('class' => $class), $value);
+          if ($class !== null) {
+            $table[] = '<td class="'.$class.'">';
+          } else {
+            $table[] = '<td>';
+          }
+          $table[] = $value.'</td>';
           ++$col_num;
         }
-
-        $class = idx($this->rowClasses, $row_num);
-        if ($this->zebraStripes && ($row_num % 2)) {
-          if ($class !== null) {
-            $class = 'alt alt-'.$class;
-          } else {
-            $class = 'alt';
-          }
-        }
-
-        $table[] = phutil_tag('tr', array('class' => $class), $tr);
         ++$row_num;
       }
     } else {
       $colspan = max(count(array_filter($visibility)), 1);
-      $table[] = hsprintf(
-        '<tr class="no-data"><td colspan="%s">%s</td></tr>',
-        $colspan,
-        coalesce($this->noDataString, 'No data available.'));
+      $table[] =
+        '<tr class="no-data"><td colspan="'.$colspan.'">'.
+          coalesce($this->noDataString, 'No data available.').
+        '</td></tr>';
     }
-
-    $table_class = 'aphront-table-view';
-    if ($this->className !== null) {
-      $table_class .= ' '.$this->className;
-    }
-    if ($this->deviceReadyTable) {
-      $table_class .= ' aphront-table-view-device-ready';
-    }
-
-    $html = phutil_tag('table', array('class' => $table_class), $table);
-    return hsprintf('<div class="aphront-table-wrap">%s</div>', $html);
+    $table[] = '</table>';
+    $html = implode('', $table);
+    return '<div class="aphront-table-wrap">'.$html.'</div>';
   }
 
   public static function renderSingleDisplayLine($line) {

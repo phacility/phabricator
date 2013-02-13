@@ -65,12 +65,11 @@ final class PhabricatorProfileHeaderView extends AphrontView {
         <tr>
           <td class="profile-header-description">%s</td>
         </tr>
-      </table>
-      %s',
+      </table>',
       $this->profileName,
-      self::renderSingleView($this->profileActions),
+      phutil_safe_html(self::renderSingleView($this->profileActions)),
       $image,
-      $description,
-      phutil_implode_html('', $this->renderChildren()));
+      $description).
+      $this->renderChildren();
   }
 }

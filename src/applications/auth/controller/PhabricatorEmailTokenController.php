@@ -50,16 +50,17 @@ final class PhabricatorEmailTokenController
 
       $view = new AphrontRequestFailureView();
       $view->setHeader(pht('Unable to Login'));
-      $view->appendChild(phutil_tag('p', array(), pht(
-        'The authentication information in the link you clicked is '.
+      $view->appendChild(
+        '<p>'.pht('The authentication information in the link you clicked is '.
         'invalid or out of date. Make sure you are copy-and-pasting the '.
         'entire link into your browser. You can try again, or request '.
-        'a new email.')));
-      $view->appendChild(hsprintf(
+        'a new email.').'</p>');
+      $view->appendChild(
         '<div class="aphront-failure-continue">'.
-          '<a class="button" href="/login/email/">%s</a>'.
-        '</div>',
-        pht('Send Another Email')));
+          '<a class="button" href="/login/email/">'.
+            pht('Send Another Email').
+          '</a>'.
+        '</div>');
 
       return $this->buildStandardPageResponse(
         $view,

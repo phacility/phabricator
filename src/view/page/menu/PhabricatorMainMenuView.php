@@ -51,7 +51,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $phabricator_menu = $this->renderPhabricatorMenu();
 
     if ($alerts) {
-      $alerts = phutil_tag(
+      $alerts = phutil_render_tag(
         'div',
         array(
           'class' => 'phabricator-main-menu-alerts',
@@ -65,14 +65,14 @@ final class PhabricatorMainMenuView extends AphrontView {
       $application_menu->addClass('phabricator-application-menu');
     }
 
-    return phutil_tag(
+    return phutil_render_tag(
       'div',
       array(
         'class' => 'phabricator-main-menu',
         'id'    => $header_id,
       ),
-      array(
-        self::renderSingleView(array(
+      self::renderSingleView(
+        array(
           $this->renderPhabricatorMenuButton($header_id),
           $application_menu
             ? $this->renderApplicationMenuButton($header_id)
@@ -81,9 +81,8 @@ final class PhabricatorMainMenuView extends AphrontView {
           $alerts,
           $phabricator_menu,
           $application_menu,
-        )),
-        self::renderSingleView($menus),
-      ));
+        ))).
+      self::renderSingleView($menus);
   }
 
   private function renderSearch() {
@@ -409,9 +408,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       '');
 
     return array(
-      hsprintf('%s%s', $bubble_tag, $message_tag),
-      $notification_dropdown,
-    );
+      $bubble_tag.$message_tag, $notification_dropdown);
   }
 
   private function renderMenuIcon($name) {

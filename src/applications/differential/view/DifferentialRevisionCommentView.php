@@ -87,9 +87,10 @@ final class DifferentialRevisionCommentView extends AphrontView {
         $comment,
         PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
 
-      $content = hsprintf(
-        '<div class="phabricator-remarkup">%s</div>',
-        $content);
+      $content =
+        '<div class="phabricator-remarkup">'.
+          $content.
+        '</div>';
     }
 
     $inline_render = $this->renderInlineComments();
@@ -115,22 +116,19 @@ final class DifferentialRevisionCommentView extends AphrontView {
       array());
 
     $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
+    $verb = phutil_escape_html($verb);
 
     $actions = array();
     // TODO: i18n
     switch ($comment->getAction()) {
       case DifferentialAction::ACTION_ADDCCS:
-        $actions[] = hsprintf(
-          "%s added CCs: %s.",
-          $author_link,
-          $this->renderHandleList($added_ccs));
+        $actions[] = "{$author_link} added CCs: ".
+          $this->renderHandleList($added_ccs).".";
         $added_ccs = null;
         break;
       case DifferentialAction::ACTION_ADDREVIEWERS:
-        $actions[] = hsprintf(
-          "%s added reviewers: %s.",
-          $author_link,
-          $this->renderHandleList($added_reviewers));
+        $actions[] = "{$author_link} added reviewers: ".
+          $this->renderHandleList($added_reviewers).".";
         $added_reviewers = null;
         break;
       case DifferentialAction::ACTION_UPDATE:
@@ -142,48 +140,33 @@ final class DifferentialRevisionCommentView extends AphrontView {
               'href' => '/D'.$comment->getRevisionID().'?id='.$diff_id,
             ),
             'Diff #'.$diff_id);
-          $actions[] = hsprintf(
-            "%s updated this revision to %s.",
-            $author_link,
-            $diff_link);
+          $actions[] = "{$author_link} updated this revision to {$diff_link}.";
         } else {
-          $actions[] = hsprintf(
-            "%s %s this revision.",
-            $author_link,
-            $verb);
+          $actions[] = "{$author_link} {$verb} this revision.";
         }
         break;
       default:
-        $actions[] = hsprintf(
-          "%s %s this revision.",
-          $author_link,
-          $verb);
+        $actions[] = "{$author_link} {$verb} this revision.";
         break;
     }
 
     if ($added_reviewers) {
-      $actions[] = hsprintf(
-        "%s added reviewers: %s.",
-        $author_link,
-        $this->renderHandleList($added_reviewers));
+      $actions[] = "{$author_link} added reviewers: ".
+        $this->renderHandleList($added_reviewers).".";
     }
 
     if ($removed_reviewers) {
-      $actions[] = hsprintf(
-        "%s removed reviewers: %s.",
-        $author_link,
-        $this->renderHandleList($removed_reviewers));
+      $actions[] = "{$author_link} removed reviewers: ".
+        $this->renderHandleList($removed_reviewers).".";
     }
 
     if ($added_ccs) {
-      $actions[] = hsprintf(
-        "%s added CCs: %s.",
-        $author_link,
-        $this->renderHandleList($added_ccs));
+      $actions[] = "{$author_link} added CCs: ".
+        $this->renderHandleList($added_ccs).".";
     }
 
     foreach ($actions as $key => $action) {
-      $actions[$key] = phutil_tag('div', array(), $action);
+      $actions[$key] = '<div>'.$action.'</div>';
     }
 
     $xaction_view = id(new PhabricatorTransactionView())
@@ -207,10 +190,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
     }
 
     if (!$hide_comments) {
-      $xaction_view->appendChild(hsprintf(
-        '<div class="differential-comment-core">%s%s</div>',
-        $content,
-        $this->renderSingleView($inline_render)));
+      $xaction_view->appendChild(
+        '<div class="differential-comment-core">'.
+          $content.
+        '</div>'.
+        $this->renderSingleView($inline_render));
     }
 
     return $xaction_view->render();
@@ -221,7 +205,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
     foreach ($phids as $phid) {
       $result[] = $this->handles[$phid]->renderLink();
     }
-    return phutil_implode_html(', ', $result);
+    return implode(', ', $result);
   }
 
   private function renderInlineComments() {

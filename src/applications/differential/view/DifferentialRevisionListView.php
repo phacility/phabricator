@@ -128,18 +128,18 @@ final class DifferentialRevisionListView extends AphrontView {
 
       } else if (array_key_exists($revision->getID(), $this->drafts)) {
         $src = '/rsrc/image/icon/fatcow/page_white_edit.png';
-        $flag = hsprintf(
-          '<a href="%s">%s</a>',
-          '/D'.$revision->getID().'#comment-preview',
-          phutil_tag(
-            'img',
-            array(
-              'src' => celerity_get_resource_uri($src),
-              'width' => 16,
-              'height' => 16,
-              'alt' => 'Draft',
-              'title' => pht('Draft Comment'),
-            )));
+        $flag =
+          '<a href="/D'.$revision->getID().'#comment-preview">'.
+            phutil_tag(
+              'img',
+              array(
+                'src' => celerity_get_resource_uri($src),
+                'width' => 16,
+                'height' => 16,
+                'alt' => 'Draft',
+                'title' => pht('Draft Comment'),
+              )).
+            '</a>';
       }
 
       $row = array($flag);

@@ -81,7 +81,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
           'value'     => 0,
           'checked'   => ($default === null ? 'checked' : null),
         )),
-      phutil_tag('em', array(), 'No Default'),
+      '<em>No Default</em>',
       '',
       '',
     );
@@ -111,7 +111,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
         'Save Default Query'));
     $panel->appendChild($table);
 
-    $form = phabricator_form(
+    $form = phabricator_render_form(
       $user,
       array(
         'method' => 'POST',

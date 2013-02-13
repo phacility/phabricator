@@ -13,13 +13,13 @@ abstract class PhabricatorRemarkupRuleObjectHandle
 
   public function apply($text) {
     $prefix = $this->getObjectNamePrefix();
-    return $this->replaceHTML(
+    return preg_replace_callback(
       "@\B{{$prefix}(\d+)}\B@",
       array($this, 'markupObjectHandle'),
       $text);
   }
 
-  protected function markupObjectHandle($matches) {
+  private function markupObjectHandle($matches) {
     // TODO: These are single gets but should be okay for now, they're behind
     // the cache.
     $phid = $this->loadObjectPHID($matches[1]);

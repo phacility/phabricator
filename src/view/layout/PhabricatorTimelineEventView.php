@@ -100,7 +100,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
   }
 
   public function render() {
-    $content = $this->renderChildren();
+    $content = $this->renderHTMLChildren();
 
     $title = $this->title;
     if (($title === null) && $this->isEmptyContent($content)) {
@@ -138,7 +138,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         ),
         array($title, $extra));
 
-      $title = $this->renderSingleView(array($icon, $title));
+      $title = $this->renderHTMLView(array($icon, $title));
     }
 
     $wedge = phutil_tag(
@@ -275,7 +275,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
             ->setAnchorName($this->anchor)
             ->render();
 
-          $date = $this->renderSingleView(
+          $date = $this->renderHTMLView(
             array(
               $anchor,
               phutil_tag(
@@ -296,7 +296,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         array(
           'class' => 'phabricator-timeline-extra',
         ),
-        phutil_implode_html(" \xC2\xB7 ", $extra));
+        array_interleave(" \xC2\xB7 ", $extra));
     }
 
     return $extra;

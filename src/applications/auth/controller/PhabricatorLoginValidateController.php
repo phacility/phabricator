@@ -49,18 +49,14 @@ final class PhabricatorLoginValidateController
 
       $view = new AphrontRequestFailureView();
       $view->setHeader(pht('Login Failed'));
-      $view->appendChild(hsprintf(
-        '<p>%s</p>%s<p>%s</p>',
-        pht('Login failed:'),
-        $list,
-        pht(
-          '<strong>Clear your cookies</strong> and try again.',
-          hsprintf(''))));
-      $view->appendChild(hsprintf(
+      $view->appendChild(
+        '<p>'.pht('Login failed:').'</p>'.
+        $list.
+        '<p>'.pht('<strong>Clear your cookies</strong> and try again.').'</p>');
+      $view->appendChild(
         '<div class="aphront-failure-continue">'.
-          '<a class="button" href="/login/">%s</a>'.
-        '</div>',
-        pht('Try Again')));
+          '<a class="button" href="/login/">'.pht('Try Again').'</a>'.
+        '</div>');
       return $this->buildStandardPageResponse(
         $view,
         array(

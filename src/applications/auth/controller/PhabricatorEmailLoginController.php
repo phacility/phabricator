@@ -98,8 +98,10 @@ EOBODY;
 
           $view = new AphrontRequestFailureView();
           $view->setHeader(pht('Check Your Email'));
-          $view->appendChild(phutil_tag('p', array(), pht(
-              'An email has been sent with a link you can use to login.')));
+          $view->appendChild(
+            '<p>'.pht(
+              'An email has been sent with a link you can use to login.'
+            ).'</p>');
           return $this->buildStandardPageResponse(
             $view,
             array(
@@ -138,8 +140,8 @@ EOBODY;
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild(phutil_tag('h1', array(), pht(
-      'Forgot Password / Email Login')));
+    $panel->appendChild('
+      <h1>'.pht('Forgot Password / Email Login').'</h1>');
     $panel->appendChild($email_auth);
     $panel->setNoBackground();
 

@@ -128,7 +128,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'id'    => $this->getPreviewPanelID(),
         'style' => 'display: none',
       ),
-      self::renderSingleView(
+      self::renderHTMLView(
         array(
           $header,
           $preview,

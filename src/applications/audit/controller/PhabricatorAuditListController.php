@@ -335,7 +335,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     if ($handle) {
-      $handle_name = $handle->getName();
+      $handle_name = phutil_escape_html($handle->getName());
     } else {
       $handle_name = null;
     }
@@ -435,7 +435,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     if ($handle) {
-      $handle_name = $handle->getName();
+      $handle_name = phutil_escape_html($handle->getName());
     } else {
       $handle_name = null;
     }

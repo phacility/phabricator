@@ -99,8 +99,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         $event->appendChild(
           $engine->getOutput($xaction->getComment(), $field));
       } else if ($has_deleted_comment) {
-        $event->appendChild(phutil_tag('em', array(), pht(
-          'This comment has been deleted.')));
+        $event->appendChild(
+          '<em>'.pht('This comment has been deleted.').'</em>');
       }
 
       $events[] = $event;

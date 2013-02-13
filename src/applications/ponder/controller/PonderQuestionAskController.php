@@ -74,13 +74,14 @@ final class PonderQuestionAskController extends PonderController {
         id(new AphrontFormSubmitControl())
         ->setValue('Ask Away!'));
 
-    $preview = hsprintf(
+    $preview =
       '<div class="aphront-panel-flush">'.
         '<div id="question-preview">'.
-          '<span class="aphront-panel-preview-loading-text">%s</span>'.
+          '<span class="aphront-panel-preview-loading-text">'.
+            pht('Loading question preview...').
+          '</span>'.
         '</div>'.
-      '</div>',
-      pht('Loading question preview...'));
+      '</div>';
 
     Javelin::initBehavior(
       'ponder-feedback-preview',

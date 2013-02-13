@@ -43,8 +43,8 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
       $rows = array();
       foreach ($map as $key => $value) {
         $rows[] = array(
-          $key,
-          (is_array($value) ? json_encode($value) : $value),
+          phutil_escape_html($key),
+          phutil_escape_html(is_array($value) ? json_encode($value) : $value),
         );
       }
 
@@ -62,6 +62,6 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
       $out[] = $table->render();
     }
 
-    return phutil_implode_html("\n", $out);
+    return implode("\n", $out);
   }
 }

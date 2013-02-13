@@ -92,7 +92,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
         'class' => $class,
         'id'    => $id,
       ),
-      $this->renderSingleView(
+      $this->renderHTMLView(
         array(
           id(new PhabricatorAnchorView())
             ->setAnchorName($changeset->getAnchorName())
@@ -101,7 +101,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
           $buttons,
           phutil_tag('h1', array(), $display_filename),
           phutil_tag('div', array('style' => 'clear: both'), ''),
-          $this->renderChildren(),
+          $this->renderHTMLChildren(),
         )));
   }
 

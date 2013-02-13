@@ -24,8 +24,8 @@ final class DrydockResourceCloseController extends DrydockController {
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
         ->setTitle(pht('Resource Not Open'))
-        ->appendChild(phutil_tag('p', array(), pht(
-          'You can only close "open" resources.')))
+        ->appendChild(
+          '<p>'.pht('You can only close "open" resources.').'</p>')
         ->addCancelButton($resource_uri);
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -35,9 +35,10 @@ final class DrydockResourceCloseController extends DrydockController {
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
         ->setTitle(pht('Really close resource?'))
-        ->appendChild(phutil_tag('p', array(), pht(
-          'Closing a resource releases all leases and destroys the '.
-          'resource. It can not be undone. Continue?')))
+        ->appendChild(
+          '<p>'.pht(
+            'Closing a resource releases all leases and destroys the '.
+            'resource. It can not be undone. Continue?').'</p>')
         ->addSubmitButton(pht('Close Resource'))
         ->addCancelButton($resource_uri);
 

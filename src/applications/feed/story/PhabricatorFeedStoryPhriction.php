@@ -17,11 +17,10 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $action = $data->getValue('action');
     $verb = PhrictionActionConstants::getActionPastTenseVerb($action);
 
-    $view->setTitle(hsprintf(
-      '%s %s the document %s.',
-      $this->linkTo($author_phid),
-      $verb,
-      $this->linkTo($document_phid)));
+    $view->setTitle(
+      $this->linkTo($author_phid).
+      " {$verb} the document ".
+      $this->linkTo($document_phid).'.');
     $view->setEpoch($data->getEpoch());
 
     $action = $data->getValue('action');

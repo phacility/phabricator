@@ -65,9 +65,9 @@ final class PhabricatorConduitLogController
       }
       $rows[] = array(
         $call->getConnectionID(),
-        $conn->getUserName(),
-        $call->getMethod(),
-        $call->getError(),
+        phutil_escape_html($conn->getUserName()),
+        phutil_escape_html($call->getMethod()),
+        phutil_escape_html($call->getError()),
         number_format($call->getDuration()).' us',
         phabricator_datetime($call->getDateCreated(), $user),
       );

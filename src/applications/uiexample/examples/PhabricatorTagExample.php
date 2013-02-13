@@ -19,7 +19,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->setName('@alincoln')
       ->setHref('#');
     $tags[] = ' how is stuff?';
-    $tags[] = hsprintf('<br /><br />');
+    $tags[] = '<br /><br />';
 
 
     $tags[] = 'Did you hear that ';
@@ -41,7 +41,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->setDotColor(PhabricatorTagView::COLOR_GREY)
       ->setHref('#');
     $tags[] = ' is gone?';
-    $tags[] = hsprintf('<br /><br />');
+    $tags[] = '<br /><br />';
 
     $tags[] = 'Take a look at ';
     $tags[] = id(new PhabricatorTagView())
@@ -49,7 +49,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->setName('D123')
       ->setHref('#');
     $tags[] = ' when you get a chance.';
-    $tags[] = hsprintf('<br /><br />');
+    $tags[] = '<br /><br />';
 
     $tags[] = 'Hmm? ';
     $tags[] = id(new PhabricatorTagView())
@@ -63,7 +63,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
       ->setName('Abandoned');
     $tags[] = '.';
-    $tags[] = hsprintf('<br /><br />');
+    $tags[] = '<br /><br />';
 
     $tags[] = 'I hope someone is going to ';
     $tags[] = id(new PhabricatorTagView())
@@ -77,7 +77,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->setBackgroundColor(PhabricatorTagView::COLOR_REDORANGE)
       ->setName('High Priority');
     $tags[] = '!';
-    $tags[] = hsprintf('<br /><br />');
+    $tags[] = '<br /><br />';
 
 
     $tags[] = id(new PhabricatorHeaderView())
@@ -89,7 +89,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
         ->setType(PhabricatorTagView::TYPE_STATE)
         ->setBackgroundColor($color)
         ->setName(ucwords($color));
-      $tags[] = hsprintf('<br /><br />');
+      $tags[] = '<br /><br />';
     }
 
     $tags[] = id(new PhabricatorHeaderView())
@@ -101,14 +101,14 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->setDotColor(PhabricatorTagView::COLOR_RED)
       ->setBarColor(PhabricatorTagView::COLOR_RED)
       ->setName('Christmas');
-    $tags[] = hsprintf('<br /><br />');
+    $tags[] = '<br /><br />';
     $tags[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_OBJECT)
       ->setBackgroundColor(PhabricatorTagView::COLOR_ORANGE)
       ->setDotColor(PhabricatorTagView::COLOR_BLACK)
       ->setBarColor(PhabricatorTagView::COLOR_BLACK)
       ->setName('Halloween');
-    $tags[] = hsprintf('<br /><br />');
+    $tags[] = '<br /><br />';
     $tags[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
       ->setBackgroundColor(PhabricatorTagView::COLOR_MAGENTA)
@@ -116,9 +116,10 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->setBarColor(PhabricatorTagView::COLOR_BLUE)
       ->setName('Easter');
 
-    return phutil_tag(
-      'div',
-      array('style' => 'padding: 1em 2em;'),
-      $tags);
+    return array(
+      '<div style="padding: 1em 2em;">',
+      $tags,
+      '</div>',
+    );
   }
 }

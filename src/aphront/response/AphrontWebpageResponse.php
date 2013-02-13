@@ -13,7 +13,7 @@ final class AphrontWebpageResponse extends AphrontHTMLResponse {
   }
 
   public function buildResponseString() {
-    return hsprintf('%s', $this->content);
+    return $this->content;
   }
 
 }

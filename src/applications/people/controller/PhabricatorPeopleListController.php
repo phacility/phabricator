@@ -55,7 +55,7 @@ final class PhabricatorPeopleListController
             'href' => '/p/'.$user->getUsername().'/',
           ),
           $user->getUserName()),
-        $user->getRealName(),
+        phutil_escape_html($user->getRealName()),
         $status,
         $email,
         phutil_tag(

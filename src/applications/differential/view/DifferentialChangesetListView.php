@@ -187,7 +187,7 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    return $this->renderSingleView(
+    return $this->renderHTMLView(
       array(
         id(new PhabricatorHeaderView())
           ->setHeader($this->getTitle())
@@ -221,20 +221,15 @@ final class DifferentialChangesetListView extends AphrontView {
       ),
       array('Changes discarded. ', $link));
 
-    return array(
-      'l' => hsprintf(
-        '<table><tr>'.
-          '<th></th><td>%s</td>'.
-          '<th></th><td colspan="3"></td>'.
-        '</tr></table>',
-        $div),
+    $template =
+      '<table><tr>'.
+      '<th></th><td>%s</td>'.
+      '<th></th><td colspan="3">%s</td>'.
+      '</tr></table>';
 
-      'r' => hsprintf(
-        '<table><tr>'.
-          '<th></th><td></td>'.
-          '<th></th><td colspan="3">%s</td>'.
-        '</tr></table>',
-        $div),
+    return array(
+      'l' => sprintf($template, $div, ''),
+      'r' => sprintf($template, '', $div),
     );
   }
 

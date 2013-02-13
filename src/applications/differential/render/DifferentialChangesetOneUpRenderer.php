@@ -20,32 +20,32 @@ final class DifferentialChangesetOneUpRenderer
       switch ($type) {
         case 'old':
         case 'new':
-          $out[] = hsprintf('<tr>');
+          $out[] = '<tr>';
           if ($type == 'old') {
             if ($p['htype']) {
               $class = 'left old';
             } else {
               $class = 'left';
             }
-            $out[] = hsprintf('<th>%s</th>', $p['line']);
-            $out[] = hsprintf('<th></th>');
-            $out[] = hsprintf('<td class="%s">%s</td>', $class, $p['render']);
+            $out[] = '<th>'.$p['line'].'</th>';
+            $out[] = '<th></th>';
+            $out[] = '<td class="'.$class.'">'.$p['render'].'</td>';
           } else if ($type == 'new') {
             if ($p['htype']) {
               $class = 'right new';
-              $out[] = hsprintf('<th />');
+              $out[] = '<th />';
             } else {
               $class = 'right';
-              $out[] = hsprintf('<th>%s</th>', $p['oline']);
+              $out[] = '<th>'.$p['oline'].'</th>';
             }
-            $out[] = hsprintf('<th>%s</th>', $p['line']);
-            $out[] = hsprintf('<td class="%s">%s</td>', $class, $p['render']);
+            $out[] = '<th>'.$p['line'].'</th>';
+            $out[] = '<td class="'.$class.'">'.$p['render'].'</td>';
           }
-          $out[] = hsprintf('</tr>');
+          $out[] = '</tr>';
           break;
         case 'inline':
-          $out[] = hsprintf('<tr><th /><th />');
-          $out[] = hsprintf('<td>');
+          $out[] = '<tr><th /><th />';
+          $out[] = '<td>';
 
           $inline = $this->buildInlineComment(
             $p['comment'],
@@ -53,16 +53,16 @@ final class DifferentialChangesetOneUpRenderer
           $inline->setBuildScaffolding(false);
           $out[] = $inline->render();
 
-          $out[] = hsprintf('</td></tr>');
+          $out[] = '</td></tr>';
           break;
         default:
-          $out[] = hsprintf('<tr><th /><th /><td>%s</td></tr>', $type);
+          $out[] = '<tr><th /><th /><td>'.$type.'</td></tr>';
           break;
       }
     }
 
     if ($out) {
-      return $this->wrapChangeInTable(phutil_implode_html('', $out));
+      return $this->wrapChangeInTable(implode('', $out));
     }
     return null;
   }

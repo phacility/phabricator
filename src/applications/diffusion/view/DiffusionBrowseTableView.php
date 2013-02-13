@@ -55,7 +55,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
           $committer = self::renderName($committer);
         }
         if ($author != $committer) {
-          $author = hsprintf('%s/%s', $author, $committer);
+          $author .= '/'.$committer;
         }
       }
 
@@ -132,17 +132,24 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $browse_text = $path->getPath().'/';
         $dir_slash = '/';
 
-        $browse_link = phutil_tag('strong', array(), $this->linkBrowse(
+        $browse_link = '<strong>'.$this->linkBrowse(
           $base_path.$path->getPath().$dir_slash,
           array(
-            'text' => $this->renderPathIcon('dir', $browse_text),
-          )));
+            'text' => $this->renderPathIcon(
+              'dir',
+              $browse_text),
+          )).'</strong>';
       } else if ($file_type == DifferentialChangeType::FILE_SUBMODULE) {
         $browse_text = $path->getPath().'/';
-        $browse_link = phutil_tag('strong', array(), $this->linkExternal(
-          $path->getHash(),
-          $path->getExternalURI(),
-          $this->renderPathIcon('ext', $browse_text)));
+        $browse_link =
+          '<strong>'.
+            $this->linkExternal(
+              $path->getHash(),
+              $path->getExternalURI(),
+              $this->renderPathIcon(
+                'ext',
+                $browse_text)).
+          '</strong>';
       } else {
         if ($file_type == DifferentialChangeType::FILE_SYMLINK) {
           $type = 'link';
@@ -183,7 +190,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
         $need_pull[$uri] = $dict;
         foreach ($dict as $k => $uniq) {
-          $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
+          $dict[$k] = '<span id="'.$uniq.'"></span>';
         }
       }
 

@@ -59,11 +59,11 @@ final class PhabricatorConduitListController
 
     $utils = new AphrontPanelView();
     $utils->setHeader('Utilities');
-    $utils->appendChild(hsprintf(
+    $utils->appendChild(
       '<ul>'.
       '<li><a href="/conduit/log/">Log</a> - Conduit Method Calls</li>'.
       '<li><a href="/conduit/token/">Token</a> - Certificate Install</li>'.
-      '</ul>'));
+      '</ul>');
     $utils->setWidth(AphrontPanelView::WIDTH_FULL);
 
     $this->setShowSideNav(false);

@@ -23,18 +23,20 @@ final class PhabricatorConfigResponse extends AphrontHTMLResponse {
 
     $view = $this->view->render();
 
-    return hsprintf(
-      '<!DOCTYPE html>'.
-      '<html>'.
-        '<head>'.
-          '<meta charset="UTF-8" />'.
-          '<title>Phabricator Setup</title>'.
-          '%s'.
-        '</head>'.
-        '<body class="setup-fatal">%s</body>'.
-      '</html>',
-      $resources,
-      $view);
+    $template = <<<EOTEMPLATE
+<!doctype html>
+<html>
+  <head>
+    <title>Phabricator Setup</title>
+    {$resources}
+  </head>
+  <body class="setup-fatal">
+    {$view}
+  </body>
+</html>
+EOTEMPLATE;
+
+    return $template;
   }
 
   private function buildResources() {
@@ -47,12 +49,11 @@ final class PhabricatorConfigResponse extends AphrontHTMLResponse {
 
     $resources = array();
     foreach ($css as $path) {
-      $resources[] = phutil_tag(
-        'style',
-        array('type' => 'text/css'),
-        Filesystem::readFile($webroot.'/rsrc/css/'.$path));
+      $resources[] = '<style type="text/css">';
+      $resources[] = Filesystem::readFile($webroot.'/rsrc/css/'.$path);
+      $resources[] = '</style>';
     }
-    return phutil_implode_html("\n", $resources);
+    return implode("\n", $resources);
   }
 
 

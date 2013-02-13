@@ -30,7 +30,7 @@ final class PhabricatorDaemonConsoleController
     $rows = array();
     foreach ($completed_info as $class => $info) {
       $rows[] = array(
-        $class,
+        phutil_escape_html($class),
         number_format($info['n']),
         number_format((int)($info['duration'] / $info['n'])).' us',
       );
@@ -127,7 +127,7 @@ final class PhabricatorDaemonConsoleController
     $rows = array();
     foreach ($queued as $row) {
       $rows[] = array(
-        $row['taskClass'],
+        phutil_escape_html($row['taskClass']),
         number_format($row['N']),
       );
     }
