@@ -21,7 +21,7 @@ abstract class DifferentialChangesetHTMLRenderer
         return null;
       }
     } else {
-      $none = $none;
+      $none = hsprintf('');
       switch ($change) {
 
         case DifferentialChangeType::TYPE_ADD:
