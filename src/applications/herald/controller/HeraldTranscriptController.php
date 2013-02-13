@@ -301,8 +301,8 @@ final class HeraldTranscriptController extends HeraldController {
       }
 
       $rows[] = array(
-        phutil_escape_html($action_names[$apply_xscript->getAction()]),
-        phutil_escape_html($target),
+        $action_names[$apply_xscript->getAction()],
+        $target,
         hsprintf(
           '<strong>Taken because:</strong> %s<br />'.
             '<strong>Outcome:</strong> %s %s',
@@ -437,10 +437,10 @@ final class HeraldTranscriptController extends HeraldController {
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Rule Details');
-    $panel->appendChild(
-      '<ul class="herald-explain-list">'.
-        implode("\n", $rule_markup).
-      '</ul>');
+    $panel->appendChild(phutil_tag(
+      'ul',
+      array('class' => 'herald-explain-list'),
+      $rule_markup));
 
     return $panel;
   }
@@ -487,15 +487,10 @@ final class HeraldTranscriptController extends HeraldController {
               'class' => 'herald-field-value-transcript',
             ),
             $value);
-        } else {
-          $value = phutil_escape_html($value);
         }
       }
 
-      $rows[] = array(
-        phutil_escape_html($name),
-        $value,
-      );
+      $rows[] = array($name, $value);
     }
 
     $table = new AphrontTableView($rows);

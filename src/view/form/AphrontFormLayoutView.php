@@ -38,6 +38,6 @@ final class AphrontFormLayoutView extends AphrontView {
       array(
         'class' => $classes,
       ),
-      $this->renderHTMLChildren());
+      $this->renderChildren());
   }
 }

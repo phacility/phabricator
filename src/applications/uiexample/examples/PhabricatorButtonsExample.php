@@ -35,11 +35,11 @@ final class PhabricatorButtonsExample extends PhabricatorUIExample {
             ),
             ucwords($size.' '.$color.' '.$tag));
 
-          $view[] = '<br /><br />';
+          $view[] = hsprintf('<br /><br />');
         }
       }
     }
 
-    return '<div style="margin: 1em 2em;">'.implode('', $view).'</div>';
+    return phutil_tag('div', array('style' => 'margin: 1em 2em;'), $view);
   }
 }

@@ -120,10 +120,10 @@ final class AphrontCursorPagerView extends AphrontView {
         "Next \xE2\x80\xBA");
     }
 
-    return
-      '<div class="aphront-pager-view">'.
-        implode('', $links).
-      '</div>';
+    return phutil_tag(
+      'div',
+      array('class' => 'aphront-pager-view'),
+      $links);
   }
 
 }

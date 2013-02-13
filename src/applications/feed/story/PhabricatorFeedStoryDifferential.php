@@ -51,7 +51,11 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
 
     $verb = DifferentialAction::getActionPastTenseVerb($action);
 
-    $one_line = "{$actor_link} {$verb} revision {$revision_link}";
+    $one_line = hsprintf(
+      '%s %s revision %s',
+      $actor_link,
+      $verb,
+      $revision_link);
 
     return $one_line;
   }

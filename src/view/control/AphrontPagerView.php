@@ -115,7 +115,7 @@ final class AphrontPagerView extends AphrontView {
     if ($max - $min > $last) {
       $max = $min + $last;
       if ($max == $min) {
-        return '<div class="aphront-pager-view"></div>';
+        return phutil_tag('div', array('class' => 'aphront-pager-view'), '');
       }
     }
 
@@ -196,10 +196,10 @@ final class AphrontPagerView extends AphrontView {
         $label);
     }
 
-    return
-      '<div class="aphront-pager-view">'.
-        implode('', $rendered_links).
-      '</div>';
+    return phutil_tag(
+      'div',
+      array('class' => 'aphront-pager-view'),
+      $rendered_links);
   }
 
   private function getDisplayIndex($page_index) {

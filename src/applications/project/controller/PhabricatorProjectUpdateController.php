@@ -62,11 +62,9 @@ final class PhabricatorProjectUpdateController
         $dialog = new AphrontDialogView();
         $dialog->setUser($user);
         $dialog->setTitle(pht('Really leave project?'));
-        $dialog->appendChild(
-          '<p>'.
-            pht('Your tremendous contributions to this project will be sorely '.
-            'missed. Are you sure you want to leave?').
-          '</p>');
+        $dialog->appendChild(phutil_tag('p', array(), pht(
+          'Your tremendous contributions to this project will be sorely '.
+          'missed. Are you sure you want to leave?')));
         $dialog->addCancelButton($project_uri);
         $dialog->addSubmitButton(pht('Leave Project'));
         break;

@@ -27,12 +27,12 @@ final class PhabricatorRepositoryListController
           ),
           'View in Diffusion');
       } else {
-        $diffusion_link = '<em>Not Tracked</em>';
+        $diffusion_link = phutil_tag('em', array(), 'Not Tracked');
       }
 
       $rows[] = array(
-        phutil_escape_html($repo->getCallsign()),
-        phutil_escape_html($repo->getName()),
+        $repo->getCallsign(),
+        $repo->getName(),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repo->getVersionControlSystem()),
         $diffusion_link,
@@ -98,13 +98,13 @@ final class PhabricatorRepositoryListController
     foreach ($projects as $project) {
       $repo = idx($repos, $project->getRepositoryID());
       if ($repo) {
-        $repo_name = phutil_escape_html($repo->getName());
+        $repo_name = $repo->getName();
       } else {
         $repo_name = '-';
       }
 
       $rows[] = array(
-        phutil_escape_html($project->getName()),
+        $project->getName(),
         $repo_name,
         phutil_tag(
           'a',

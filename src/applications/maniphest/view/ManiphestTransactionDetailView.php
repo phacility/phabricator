@@ -179,17 +179,17 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     }
 
     if ($this->getRenderSummaryOnly()) {
-      return implode("\n", $descs);
+      return phutil_implode_html("\n", $descs);
     }
 
     if ($comment_transaction && $comment_transaction->hasComments()) {
       $comment_block = $this->markupEngine->getOutput(
         $comment_transaction,
         ManiphestTransaction::MARKUP_FIELD_BODY);
-      $comment_block =
-        '<div class="maniphest-transaction-comments phabricator-remarkup">'.
-          $comment_block.
-        '</div>';
+      $comment_block = phutil_tag(
+        'div',
+        array('class' => 'maniphest-transaction-comments phabricator-remarkup'),
+        $comment_block);
     } else {
       $comment_block = null;
     }
@@ -590,9 +590,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           DifferentialChangesetParser::parseRangeSpecification($spec);
         $output = $parser->render($range_s, $range_e, $mask);
 
-        // TODO: [HTML] DifferentialChangesetParser needs cleanup.
-        $output = phutil_safe_html($output);
-
         return $output;
     }
 
@@ -627,7 +624,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $links[] = $this->handles[$phid]->renderLink();
       }
     }
-    return implode(', ', $links);
+    return phutil_implode_html(', ', $links);
   }
 
   private function renderString($string) {

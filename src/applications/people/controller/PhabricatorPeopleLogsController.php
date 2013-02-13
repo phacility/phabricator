@@ -157,10 +157,8 @@ final class PhabricatorPeopleLogsController
         phabricator_date($log->getDateCreated(),$user),
         phabricator_time($log->getDateCreated(),$user),
         $log->getAction(),
-        $log->getActorPHID()
-          ? phutil_escape_html($handles[$log->getActorPHID()]->getName())
-          : null,
-        phutil_escape_html($handles[$log->getUserPHID()]->getName()),
+        $log->getActorPHID() ? $handles[$log->getActorPHID()]->getName() : null,
+        $handles[$log->getUserPHID()]->getName(),
         json_encode($log->getOldValue(), true),
         json_encode($log->getNewValue(), true),
         phutil_tag(

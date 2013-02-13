@@ -143,8 +143,7 @@ extends PhabricatorAuthController {
 
     // display time -- make a nice form for the user to grant the client
     // access to the granularity specified by $scope
-    $name  = phutil_escape_html($client->getName());
-    $title = 'Authorize ' . $name . '?';
+    $title = 'Authorize '.$client->getName().'?';
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->setHeader($title);

@@ -94,7 +94,6 @@ final class PhabricatorChatLogChannelLogController
     require_celerity_resource('phabricator-chatlog-css');
 
     $out = array();
-    $out[] = '<table class="phabricator-chat-log">';
     foreach ($blocks as $block) {
       $author = $block['author'];
       $author = phutil_utf8_shorten($author, 18);
@@ -122,7 +121,6 @@ final class PhabricatorChatLogChannelLogController
         ),
         array($author, $message, $timestamp));
     }
-    $out[] = '</table>';
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -140,12 +138,11 @@ final class PhabricatorChatLogChannelLogController
 
     return $this->buildStandardPageResponse(
       array(
-        '<div class="phabricator-chat-log-panel">',
-        $form,
-        '<br />',
-        implode("\n", $out),
-        $pager,
-        '</div>',
+        hsprintf(
+          '<div class="phabricator-chat-log-panel">%s<br />%s%s</div>',
+          $form,
+          phutil_tag('table', array('class' => 'phabricator-chat-log'), $out),
+          $pager),
       ),
       array(
         'title' => 'Channel Log',

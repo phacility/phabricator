@@ -60,7 +60,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
       }
 
       $row = array(
-        phutil_escape_html($event->getLogType()),
+        $event->getLogType(),
         phabricator_date($event->getEpoch(), $this->user),
         phabricator_time($event->getEpoch(), $this->user),
         phutil_escape_html_newlines($message.$more),

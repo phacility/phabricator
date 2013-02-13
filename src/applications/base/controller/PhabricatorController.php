@@ -203,10 +203,9 @@ abstract class PhabricatorController extends AphrontController {
         $view = new PhabricatorStandardPageView();
         $view->setRequest($request);
         $view->setController($this);
-        $view->appendChild(
-          '<div style="padding: 2em 0;">'.
-            $response->buildResponseString().
-          '</div>');
+        $view->appendChild(hsprintf(
+          '<div style="padding: 2em 0;">%s</div>',
+          $response->buildResponseString()));
         $response = new AphrontWebpageResponse();
         $response->setContent($view->render());
         return $response;
@@ -277,7 +276,7 @@ abstract class PhabricatorController extends AphrontController {
       $items[] = $this->getHandle($phid)->renderLink();
     }
 
-    return array_interleave($style_map[$style], $items);
+    return phutil_implode_html($style_map[$style], $items);
   }
 
   protected function buildApplicationMenu() {

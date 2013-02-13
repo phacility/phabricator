@@ -94,22 +94,20 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             $meta[] = pht('Copied to multiple locations:');
           }
           foreach ($away as $path) {
-            $meta[] = phutil_escape_html($path);
+            $meta[] = $path;
           }
-          $meta = implode('<br />', $meta);
+          $meta = phutil_implode_html(phutil_tag('br'), $meta);
         } else {
           if ($type == DifferentialChangeType::TYPE_MOVE_AWAY) {
-            $meta = pht('Moved to %s', phutil_escape_html(reset($away)));
+            $meta = pht('Moved to %s', reset($away));
           } else {
-            $meta = pht('Copied to %s', phutil_escape_html(reset($away)));
+            $meta = pht('Copied to %s', reset($away));
           }
         }
       } else if ($type == DifferentialChangeType::TYPE_MOVE_HERE) {
-        $meta = pht('Moved from %s',
-          phutil_escape_html($changeset->getOldFile()));
+        $meta = pht('Moved from %s', $changeset->getOldFile());
       } else if ($type == DifferentialChangeType::TYPE_COPY_HERE) {
-        $meta = pht('Copied from %s',
-          phutil_escape_html($changeset->getOldFile()));
+        $meta = pht('Copied from %s', $changeset->getOldFile());
       } else {
         $meta = null;
       }
@@ -130,12 +128,12 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $pchar =
         ($changeset->getOldProperties() === $changeset->getNewProperties())
           ? null
-          : '<span title="'.pht('Properties Changed').'">M</span>';
+          : hsprintf('<span title="%s">M</span>', pht('Properties Changed'));
 
       $fname = $changeset->getFilename();
       $cov  = $this->renderCoverage($coverage, $fname);
       if ($cov === null) {
-        $mcov = $cov = '<em>-</em>';
+        $mcov = $cov = phutil_tag('em', array(), '-');
       } else {
         $mcov = phutil_tag(
           'div',
@@ -146,27 +144,28 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           (isset($this->visibleChangesets[$id]) ? 'Loading...' : '?'));
       }
 
-      $rows[] =
-        '<tr>'.
-          phutil_tag(
-            'td',
-            array(
-              'class' => 'differential-toc-char',
-              'title' => $chartitle,
-            ),
-            $char).
-          '<td class="differential-toc-prop">'.$pchar.'</td>'.
-          '<td class="differential-toc-ftype">'.$desc.'</td>'.
-          '<td class="differential-toc-file">'.$link.$lines.'</td>'.
-          '<td class="differential-toc-cov">'.$cov.'</td>'.
-          '<td class="differential-toc-mcov">'.$mcov.'</td>'.
-        '</tr>';
+      $rows[] = hsprintf(
+          '<tr>'.
+            '<td class="differential-toc-char" title="%s">%s</td>'.
+            '<td class="differential-toc-prop">%s</td>'.
+            '<td class="differential-toc-ftype">%s</td>'.
+            '<td class="differential-toc-file">%s%s</td>'.
+            '<td class="differential-toc-cov">%s</td>'.
+            '<td class="differential-toc-mcov">%s</td>'.
+          '</tr>',
+          $chartitle, $char,
+          $pchar,
+          $desc,
+          $link, $lines,
+          $cov,
+          $mcov);
       if ($meta) {
-        $rows[] =
+        $rows[] = hsprintf(
           '<tr>'.
             '<td colspan="3"></td>'.
-            '<td class="differential-toc-meta">'.$meta.'</td>'.
-          '</tr>';
+            '<td class="differential-toc-meta">%s</td>'.
+          '</tr>',
+          $meta);
       }
       if ($this->diff && $this->repository) {
         $paths[] =
@@ -201,19 +200,13 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ),
         pht('Show All Context'));
 
-    $buttons =
-      '<tr><td colspan="7">'.
-        $editor_link.$reveal_link.
-      '</td></tr>';
+    $buttons = hsprintf(
+      '<tr><td colspan="7">%s%s</td></tr>',
+      $editor_link,
+      $reveal_link);
 
-    return
-      id(new PhabricatorAnchorView())
-        ->setAnchorName('toc')
-        ->setNavigationMarker(true)
-        ->render().
-      id(new PhabricatorHeaderView())
-        ->setHeader(pht('Table of Contents'))
-        ->render().
+    return hsprintf(
+      '%s%s'.
       '<div class="differential-toc differential-panel">'.
         '<table>'.
           '<tr>'.
@@ -221,17 +214,23 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             '<th></th>'.
             '<th></th>'.
             '<th>Path</th>'.
-            '<th class="differential-toc-cov">'.
-              pht('Coverage (All)').
-            '</th>'.
-            '<th class="differential-toc-mcov">'.
-              pht('Coverage (Touched)').
-            '</th>'.
+            '<th class="differential-toc-cov">%s</th>'.
+            '<th class="differential-toc-mcov">%s</th>'.
           '</tr>'.
-          implode("\n", $rows).
-          $buttons.
+          '%s%s'.
         '</table>'.
-      '</div>';
+      '</div>',
+      id(new PhabricatorAnchorView())
+        ->setAnchorName('toc')
+        ->setNavigationMarker(true)
+        ->render(),
+      id(new PhabricatorHeaderView())
+        ->setHeader(pht('Table of Contents'))
+        ->render(),
+      pht('Coverage (All)'),
+      pht('Coverage (Touched)'),
+      phutil_implode_html("\n", $rows),
+      $buttons);
   }
 
   private function renderCoverage(array $coverage, $file) {

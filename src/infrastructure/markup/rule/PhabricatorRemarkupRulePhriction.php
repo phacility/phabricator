@@ -7,7 +7,7 @@ final class PhabricatorRemarkupRulePhriction
   extends PhutilRemarkupRule {
 
   public function apply($text) {
-    return preg_replace_callback(
+    return $this->replaceHTML(
       '@\B\\[\\[([^|\\]]+)(?:\\|([^\\]]+))?\\]\\]\B@U',
       array($this, 'markupDocumentLink'),
       $text);
@@ -28,7 +28,7 @@ final class PhabricatorRemarkupRulePhriction
     $href     = (string) id(new PhutilURI($slug))->setFragment($fragment);
 
     if ($this->getEngine()->getState('toc')) {
-      $text = phutil_escape_html($name);
+      $text = $name;
     } else {
       $text = phutil_tag(
           'a',

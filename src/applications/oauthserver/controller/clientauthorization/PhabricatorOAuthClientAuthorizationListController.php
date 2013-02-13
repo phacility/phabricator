@@ -137,7 +137,6 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
     $edited  = $this->getRequest()->getStr('edited');
     $deleted = $this->getRequest()->getBool('deleted');
     if ($edited) {
-      $edited = phutil_escape_html($edited);
       $title  = 'Successfully edited client authorization.';
     } else if ($deleted) {
       $title = 'Successfully deleted client authorization.';

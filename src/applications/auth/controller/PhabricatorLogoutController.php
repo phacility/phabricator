@@ -46,7 +46,8 @@ final class PhabricatorLogoutController
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
         ->setTitle(pht('Log out of Phabricator?'))
-        ->appendChild('<p>'.pht('Are you sure you want to log out?').'</p>')
+        ->appendChild(phutil_tag('p', array(), pht(
+          'Are you sure you want to log out?')))
         ->addSubmitButton(pht('Logout'))
         ->addCancelButton('/');
 

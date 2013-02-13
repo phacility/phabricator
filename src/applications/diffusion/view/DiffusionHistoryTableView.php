@@ -107,7 +107,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         } else {
           $committer = self::renderName($committer);
         }
-        $author .= '/'.$committer;
+        $author = hsprintf('%s/%s', $author, $committer);
       }
 
       $commit = $history->getCommit();
@@ -118,7 +118,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
           $path = null,
           $history->getCommitIdentifier());
       } else {
-        $change = "<em>Importing\xE2\x80\xA6</em>";
+        $change = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
       }
 
       $rows[] = array(

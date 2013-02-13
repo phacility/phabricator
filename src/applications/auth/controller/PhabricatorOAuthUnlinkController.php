@@ -34,9 +34,9 @@ final class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
       $dialog->setTitle(pht('Really unlink account?'));
-      $dialog->appendChild(
-        '<p>'.pht('You will not be able to login using this account '.
-        'once you unlink it. Continue?').'</p>');
+      $dialog->appendChild(phutil_tag('p', array(), pht(
+        'You will not be able to login using this account '.
+        'once you unlink it. Continue?')));
       $dialog->addSubmitButton(pht('Unlink Account'));
       $dialog->addCancelButton($provider->getSettingsPanelURI());
 

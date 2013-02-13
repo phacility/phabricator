@@ -149,20 +149,21 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     $log = $data['log'];
     $results = array();
 
-    $results[] =
+    $results[] = hsprintf(
       '<div class="dark-console-panel-header">'.
-        phutil_tag(
-          'a',
-          array(
-            'href'  => $data['analyzeURI'],
-            'class' => $data['didAnalyze']
-              ? 'disabled button'
-              : 'green button',
-          ),
-          'Analyze Query Plans').
+        '%s'.
         '<h1>Calls to External Services</h1>'.
         '<div style="clear: both;"></div>'.
-      '</div>';
+      '</div>',
+      phutil_tag(
+        'a',
+        array(
+          'href'  => $data['analyzeURI'],
+          'class' => $data['didAnalyze']
+            ? 'disabled button'
+            : 'green button',
+        ),
+        'Analyze Query Plans'));
 
     $page_total = $data['end'] - $data['start'];
     $totals = array();
@@ -224,23 +225,18 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
               $row['explain']['reason']);
           }
 
-          $info = phutil_escape_html($info);
           break;
         case 'connect':
           $info = $row['host'].':'.$row['database'];
-          $info = phutil_escape_html($info);
           break;
         case 'exec':
           $info = $row['command'];
-          $info = phutil_escape_html($info);
           break;
         case 'conduit':
           $info = $row['method'];
-          $info = phutil_escape_html($info);
           break;
         case 'http':
           $info = $row['uri'];
-          $info = phutil_escape_html($info);
           break;
         default:
           $info = '-';
@@ -248,7 +244,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       }
 
       $rows[] = array(
-        phutil_escape_html($row['type']),
+        $row['type'],
         '+'.number_format(1000 * ($row['begin'] - $data['start'])).' ms',
         number_format(1000000 * $row['duration']).' us',
         $info,
@@ -276,7 +272,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
 
     $results[] = $table->render();
 
-    return implode("\n", $results);
+    return phutil_implode_html("\n", $results);
   }
 }
 

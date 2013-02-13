@@ -21,31 +21,25 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
     switch ($type) {
       case PhabricatorProjectTransactionType::TYPE_NAME:
         if (strlen($old)) {
-          $action = 'renamed project '.
-            $this->linkTo($proj_phid).
-            ' from '.
-            $this->renderString($old).
-            ' to '.
-            $this->renderString($new).
-            '.';
+          $action = hsprintf(
+            'renamed project %s from %s to %s.',
+            $this->linkTo($proj_phid),
+            $this->renderString($old),
+            $this->renderString($new));
         } else {
-          $action = 'created project '.
-            $this->linkTo($proj_phid).
-            ' (as '.
-            $this->renderString($new).
-            ').';
+          $action = hsprintf(
+            'created project %s (as %s).',
+            $this->linkTo($proj_phid),
+            $this->renderString($new));
         }
         break;
       case PhabricatorProjectTransactionType::TYPE_STATUS:
-        $action = 'changed project '.
-                  $this->linkTo($proj_phid).
-                  ' status from '.
-                  $this->renderString(
-                    PhabricatorProjectStatus::getNameForStatus($old)).
-                  ' to '.
-                  $this->renderString(
-                    PhabricatorProjectStatus::getNameForStatus($new)).
-                  '.';
+        $action = hsprintf(
+          'changed project %s status from %s to %s.',
+          $this->linkTo($proj_phid),
+          $this->renderString(PhabricatorProjectStatus::getNameForStatus($old)),
+          $this->renderString(PhabricatorProjectStatus::getNameForStatus($new))
+        );
         break;
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
         $add = array_diff($new, $old);
@@ -53,30 +47,33 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
 
         if ((count($add) == 1) && (count($rem) == 0) &&
             (head($add) == $author_phid)) {
-          $action = 'joined project '.$this->linkTo($proj_phid).'.';
+          $action = hsprintf('joined project %s.', $this->linkTo($proj_phid));
         } else if ((count($add) == 0) && (count($rem) == 1) &&
                    (head($rem) == $author_phid)) {
-          $action = 'left project '.$this->linkTo($proj_phid).'.';
+          $action = hsprintf('left project %s.', $this->linkTo($proj_phid));
         } else if (empty($rem)) {
-          $action = 'added members to project '.
-            $this->linkTo($proj_phid).': '.
-            $this->renderHandleList($add).'.';
+          $action = hsprintf(
+            'added members to project %s: %s.',
+            $this->linkTo($proj_phid),
+            $this->renderHandleList($add));
         } else if (empty($add)) {
-          $action = 'removed members from project '.
-            $this->linkTo($proj_phid).': '.
-            $this->renderHandleList($rem).'.';
+          $action = hsprintf(
+            'removed members from project %s: %s.',
+            $this->linkTo($proj_phid),
+            $this->renderHandleList($rem));
         } else {
-          $action = 'changed members of project '.
-            $this->linkTo($proj_phid).', added: '.
-            $this->renderHandleList($add).'; removed: '.
-            $this->renderHandleList($rem).'.';
+          $action = hsprintf(
+            'changed members of project %s, added: %s; removed: %s.',
+            $this->linkTo($proj_phid),
+            $this->renderHandleList($add),
+            $this->renderHandleList($rem));
         }
         break;
       default:
-        $action = 'updated project '.$this->linkTo($proj_phid).'.';
+        $action = hsprintf('updated project %s.', $this->linkTo($proj_phid));
         break;
     }
-    $view->setTitle($this->linkTo($author_phid).' '.$action);
+    $view->setTitle(hsprintf('%s %s', $this->linkTo($author_phid), $action));
     $view->setOneLineStory(true);
 
     return $view;

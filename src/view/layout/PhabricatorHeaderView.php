@@ -44,7 +44,7 @@ final class PhabricatorHeaderView extends AphrontView {
         array(
           'class' => 'phabricator-header-tags',
         ),
-        $this->renderHTMLView($this->tags));
+        $this->renderSingleView($this->tags));
     }
 
     return phutil_tag(

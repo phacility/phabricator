@@ -235,10 +235,10 @@ final class PhabricatorOwnersListController
       foreach ($pkg_owners as $key => $owner) {
         $pkg_owners[$key] = $handles[$owner->getUserPHID()]->renderLink();
         if ($owner->getUserPHID() == $package->getPrimaryOwnerPHID()) {
-          $pkg_owners[$key] = '<strong>'.$pkg_owners[$key].'</strong>';
+          $pkg_owners[$key] = phutil_tag('strong', array(), $pkg_owners[$key]);
         }
       }
-      $pkg_owners = implode('<br />', $pkg_owners);
+      $pkg_owners = phutil_implode_html(phutil_tag('br'), $pkg_owners);
 
       $pkg_paths = idx($paths, $package->getID(), array());
       foreach ($pkg_paths as $key => $path) {
@@ -251,20 +251,21 @@ final class PhabricatorOwnersListController
               'path'     => $path->getPath(),
               'action'   => 'browse',
             ));
-          $pkg_paths[$key] =
-            ($path->getExcluded() ? '&ndash;' : '+').' '.
-            phutil_tag('strong', array(), $repo->getName()).
+          $pkg_paths[$key] = hsprintf(
+            '%s %s%s',
+            ($path->getExcluded() ? "\xE2\x80\x93" : '+'),
+            phutil_tag('strong', array(), $repo->getName()),
             phutil_tag(
               'a',
               array(
                 'href' => (string) $href,
               ),
-              $path->getPath());
+              $path->getPath()));
         } else {
-          $pkg_paths[$key] = phutil_escape_html($path->getPath());
+          $pkg_paths[$key] = $path->getPath();
         }
       }
-      $pkg_paths = implode('<br />', $pkg_paths);
+      $pkg_paths = phutil_implode_html(phutil_tag('br'), $pkg_paths);
 
       $rows[] = array(
         phutil_tag(
