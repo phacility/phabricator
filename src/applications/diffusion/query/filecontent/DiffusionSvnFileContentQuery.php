@@ -16,7 +16,7 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
         '%C %s%s@%s',
         $this->getNeedsBlame() ? 'blame --force' : 'cat',
         $remote_uri,
-        $path,
+        phutil_escape_uri($path),
         $commit);
     } catch (CommandException $ex) {
       $stderr = $ex->getStdErr();
