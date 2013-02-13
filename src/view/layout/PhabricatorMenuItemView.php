@@ -117,9 +117,9 @@ final class PhabricatorMenuItemView extends AphrontTagView {
         $this->name.$external);
     }
 
-    return $this->renderHTMLView(
+    return $this->renderSingleView(
       array(
-        $this->renderHTMLChildren(),
+        $this->renderChildren(),
         $name,
       ));
   }

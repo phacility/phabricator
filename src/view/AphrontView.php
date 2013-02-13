@@ -33,14 +33,6 @@ abstract class AphrontView extends Phobject {
     foreach ($this->children as $child) {
       $out[] = $this->renderSingleView($child);
     }
-    return implode('', $out);
-  }
-
-  final protected function renderHTMLChildren() {
-    $out = array();
-    foreach ($this->children as $child) {
-      $out[] = $this->renderHTMLView($child);
-    }
     return $out;
   }
 
@@ -52,25 +44,9 @@ abstract class AphrontView extends Phobject {
       foreach ($child as $element) {
         $out[] = $this->renderSingleView($element);
       }
-      return implode('', $out);
+      return phutil_implode_html('', $out);
     } else {
       return $child;
-    }
-  }
-
-  final protected function renderHTMLView($child) {
-    if ($child instanceof AphrontView) {
-      return phutil_safe_html($child->render());
-    } else if ($child instanceof PhutilSafeHTML) {
-      return $child;
-    } else if (is_array($child)) {
-      $out = array();
-      foreach ($child as $element) {
-        $out[] = $this->renderHTMLView($element);
-      }
-      return phutil_safe_html(implode('', $out));
-    } else {
-      return phutil_safe_html(phutil_escape_html($child));
     }
   }
 

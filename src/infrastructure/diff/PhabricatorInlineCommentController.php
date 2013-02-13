@@ -71,7 +71,7 @@ abstract class PhabricatorInlineCommentController
         $dialog->setTitle('Really delete this comment?');
         $dialog->addHiddenInput('id', $this->getCommentID());
         $dialog->addHiddenInput('op', 'delete');
-        $dialog->appendChild('<p>Delete this inline comment?</p>');
+        $dialog->appendChild(hsprintf('<p>Delete this inline comment?</p>'));
 
         $dialog->addCancelButton('#');
         $dialog->addSubmitButton('Delete');

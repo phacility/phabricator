@@ -386,14 +386,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $page_pane = id(new DifferentialPrimaryPaneView())
       ->setID($pane_id)
-      ->appendChild(
-        $comment_view->render().
-        $diff_history->render().
-        $warning.
-        $local_view->render().
-        $toc_view->render().
-        $other_view.
-        $changeset_view->render());
+      ->appendChild(array(
+        $comment_view->render(),
+        $diff_history->render(),
+        $warning,
+        $local_view->render(),
+        $toc_view->render(),
+        $other_view,
+        $changeset_view->render(),
+      ));
     if ($comment_form) {
       $page_pane->appendChild($comment_form->render());
     }
@@ -857,13 +858,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return
+    return hsprintf(
+      '%s<div class="differential-panel">%s</div>',
       id(new PhabricatorHeaderView())
         ->setHeader(pht('Open Revisions Affecting These Files'))
-        ->render().
-      '<div class="differential-panel">'.
-        $view->render().
-      '</div>';
+        ->render(),
+      $view->render());
   }
 
   /**

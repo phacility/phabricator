@@ -47,32 +47,25 @@ final class PhabricatorOwnersDetailController
 
     $rows = array();
 
-    $rows[] = array(
-      'Name',
-      phutil_escape_html($package->getName()));
-    $rows[] = array(
-      'Description',
-      phutil_escape_html($package->getDescription()));
+    $rows[] = array('Name', $package->getName());
+    $rows[] = array('Description', $package->getDescription());
 
     $primary_owner = null;
     $primary_phid = $package->getPrimaryOwnerPHID();
     if ($primary_phid && isset($handles[$primary_phid])) {
-      $primary_owner =
-        '<strong>'.$handles[$primary_phid]->renderLink().'</strong>';
+      $primary_owner = phutil_tag(
+        'strong',
+        array(),
+        $handles[$primary_phid]->renderLink());
     }
-    $rows[] = array(
-      'Primary Owner',
-      $primary_owner,
-      );
+    $rows[] = array('Primary Owner', $primary_owner);
 
     $owner_links = array();
     foreach ($owners as $owner) {
       $owner_links[] = $handles[$owner->getUserPHID()]->renderLink();
     }
-    $owner_links = implode('<br />', $owner_links);
-    $rows[] = array(
-      'Owners',
-      $owner_links);
+    $owner_links = phutil_implode_html(phutil_tag('br'), $owner_links);
+    $rows[] = array('Owners', $owner_links);
 
     $rows[] = array(
       'Auditing',
@@ -99,14 +92,14 @@ final class PhabricatorOwnersDetailController
           'href' => (string) $href,
         ),
         $path->getPath());
-      $path_links[] =
-        ($path->getExcluded() ? '&ndash;' : '+').' '.
-        $repo_name.' '.$path_link;
+      $path_links[] = hsprintf(
+        '%s %s %s',
+        ($path->getExcluded() ? "\xE2\x80\x93" : '+'),
+        $repo_name,
+        $path_link);
     }
-    $path_links = implode('<br />', $path_links);
-    $rows[] = array(
-      'Paths',
-      $path_links);
+    $path_links = phutil_implode_html(phutil_tag('br'), $path_links);
+    $rows[] = array('Paths', $path_links);
 
     $table = new AphrontTableView($rows);
     $table->setColumnClasses(
@@ -116,8 +109,7 @@ final class PhabricatorOwnersDetailController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader(
-      'Package Details for "'.phutil_escape_html($package->getName()).'"');
+    $panel->setHeader('Package Details for "'.$package->getName().'"');
     $panel->addButton(
       javelin_tag(
         'a',
@@ -207,7 +199,7 @@ final class PhabricatorOwnersDetailController
     $commit_panels = array();
     foreach ($commit_views as $commit_view) {
       $commit_panel = new AphrontPanelView();
-      $commit_panel->setHeader(phutil_escape_html($commit_view['header']));
+      $commit_panel->setHeader($commit_view['header']);
       if (isset($commit_view['button'])) {
         $commit_panel->addButton($commit_view['button']);
       }

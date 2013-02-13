@@ -143,10 +143,9 @@ final class DifferentialReviewersFieldSpecification
       if ($other_reviewers) {
         $names = array();
         foreach ($other_reviewers as $reviewer => $_) {
-          $names[] = phutil_escape_html(
-            $this->getHandle($reviewer)->getLinkName());
+          $names[] = $this->getHandle($reviewer)->getLinkName();
         }
-        $suffix = ' '.javelin_tag(
+        $suffix = javelin_tag(
           'abbr',
           array(
             'sigil' => 'has-tooltip',
@@ -159,9 +158,12 @@ final class DifferentialReviewersFieldSpecification
       } else {
         $suffix = null;
       }
-      return $this->getHandle($primary_reviewer)->renderLink().$suffix;
+      return hsprintf(
+        '%s %s',
+        $this->getHandle($primary_reviewer)->renderLink(),
+        $suffix);
     } else {
-      return '<em>None</em>';
+      return phutil_tag('em', array(), 'None');
     }
   }
 

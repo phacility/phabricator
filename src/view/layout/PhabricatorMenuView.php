@@ -167,6 +167,6 @@ final class PhabricatorMenuView extends AphrontTagView {
   }
 
   protected function getTagContent() {
-    return $this->renderHTMLView($this->items);
+    return $this->renderSingleView($this->items);
   }
 }

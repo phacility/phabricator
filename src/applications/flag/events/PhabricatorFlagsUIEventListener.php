@@ -31,7 +31,7 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
       $flag_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setHref('/flag/delete/'.$flag->getID().'/')
-        ->setName(phutil_escape_html('Remove '.$color.' Flag'))
+        ->setName('Remove '.$color.' Flag')
         ->setIcon('flag-'.$flag->getColor());
     } else {
       $flag_action = id(new PhabricatorActionView())

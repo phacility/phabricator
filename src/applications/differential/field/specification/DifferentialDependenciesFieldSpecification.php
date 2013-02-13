@@ -26,7 +26,7 @@ final class DifferentialDependenciesFieldSpecification
       $links[] = $this->getHandle($revision_phids)->renderLink();
     }
 
-    return array_interleave(phutil_tag('br'), $links);
+    return phutil_implode_html(phutil_tag('br'), $links);
   }
 
   private function getDependentRevisionPHIDs() {

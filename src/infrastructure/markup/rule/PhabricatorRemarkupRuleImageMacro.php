@@ -9,7 +9,7 @@ final class PhabricatorRemarkupRuleImageMacro
   private $images;
 
   public function apply($text) {
-    return preg_replace_callback(
+    return $this->replaceHTML(
       '@^([a-zA-Z0-9:_\-]+)$@m',
       array($this, 'markupImageMacro'),
       $text);
@@ -25,8 +25,10 @@ final class PhabricatorRemarkupRuleImageMacro
       }
     }
 
-    if (array_key_exists($matches[1], $this->images)) {
-      $phid = $this->images[$matches[1]];
+    $name = (string)$matches[1];
+
+    if (array_key_exists($name, $this->images)) {
+      $phid = $this->images[$name];
 
       $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
       $style = null;

@@ -19,14 +19,14 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
     if ($data->getValue('authorPHID')) {
       $author = $this->linkTo($data->getValue('authorPHID'));
     } else {
-      $author = phutil_escape_html($data->getValue('authorName'));
+      $author = $data->getValue('authorName');
     }
 
     $committer = null;
     if ($data->getValue('committerPHID')) {
       $committer = $this->linkTo($data->getValue('committerPHID'));
     } else if ($data->getValue('committerName')) {
-      $committer = phutil_escape_html($data->getValue('committerName'));
+      $committer = $data->getValue('committerName');
     }
 
     $commit = $this->linkTo($data->getValue('commitPHID'));
@@ -37,9 +37,16 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
     }
 
     if ($author) {
-      $title = "{$committer} committed {$commit} (authored by {$author})";
+      $title = hsprintf(
+        "%s committed %s (authored by %s)",
+        $committer,
+        $commit,
+        $author);
     } else {
-      $title = "{$committer} committed {$commit}";
+      $title = hsprintf(
+        "%s committed %s",
+        $committer,
+        $commit);
     }
 
     $view = new PhabricatorFeedStoryView();

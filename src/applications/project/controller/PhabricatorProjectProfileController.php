@@ -55,7 +55,7 @@ final class PhabricatorProjectProfileController
         $query->setViewer($this->getRequest()->getUser());
         $stories = $query->execute();
 
-        $content .= $this->renderStories($stories);
+        $content = hsprintf('%s%s', $content, $this->renderStories($stories));
         break;
       case 'about':
         $content = $this->renderAboutPage($project, $profile);
@@ -114,7 +114,7 @@ final class PhabricatorProjectProfileController
 
     $nav_view->appendChild($header);
 
-    $content = '<div style="padding: 1em;">'.$content.'</div>';
+    $content = hsprintf('<div style="padding: 1em;">%s</div>', $content);
     $header->appendChild($content);
 
     return $this->buildApplicationPage(
@@ -183,25 +183,23 @@ final class PhabricatorProjectProfileController
 
     $affiliated = array();
     foreach ($handles as $phids => $handle) {
-      $affiliated[] = '<li>'.$handle->renderLink().'</li>';
+      $affiliated[] = phutil_tag('li', array(), $handle->renderLink());
     }
 
     if ($affiliated) {
-      $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
+      $affiliated = phutil_tag('ul', array(), $affiliated);
     } else {
-      $affiliated =
-        '<p><em>'.
-          pht('No one is affiliated with this project.').
-        '</em></p>';
+      $affiliated = hsprintf('<p><em>%s</em></p>', pht(
+        'No one is affiliated with this project.'));
     }
 
-    return
+    return hsprintf(
       '<div class="phabricator-profile-info-group">'.
-        '<h1 class="phabricator-profile-info-header">'.pht('People').'</h1>'.
-        '<div class="phabricator-profile-info-pane">'.
-         $affiliated.
-        '</div>'.
-      '</div>';
+        '<h1 class="phabricator-profile-info-header">%s</h1>'.
+        '<div class="phabricator-profile-info-pane">%s</div>'.
+      '</div>',
+      pht('People'),
+      $affiliated);
   }
 
   private function renderFeedPage(
@@ -228,15 +226,13 @@ final class PhabricatorProjectProfileController
     $builder->setUser($this->getRequest()->getUser());
     $view = $builder->buildView();
 
-    return
+    return hsprintf(
       '<div class="phabricator-profile-info-group">'.
-        '<h1 class="phabricator-profile-info-header">'.
-          pht('Activity Feed').
-        '</h1>'.
-        '<div class="phabricator-profile-info-pane">'.
-         $view->render().
-        '</div>'.
-      '</div>';
+        '<h1 class="phabricator-profile-info-header">%s</h1>'.
+        '<div class="phabricator-profile-info-pane">%s</div>'.
+      '</div>',
+      pht('Activity Feed'),
+      $view->render());
   }
 
 
@@ -267,9 +263,9 @@ final class PhabricatorProjectProfileController
     }
 
     if (empty($tasks)) {
-      $task_views = '<em>'.pht('No open tasks.').'</em>';
+      $task_views = phutil_tag('em', array(), pht('No open tasks.'));
     } else {
-      $task_views = implode('', $task_views);
+      $task_views = phutil_implode_html('', $task_views);
     }
 
     $open = number_format($count);
@@ -281,18 +277,17 @@ final class PhabricatorProjectProfileController
       ),
       pht("View All Open Tasks \xC2\xBB"));
 
-    $content =
+    $content = hsprintf(
       '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">'.
-          pht("Open Tasks (%d)", $open).
-        '</h1>'.
+        <h1 class="phabricator-profile-info-header">%s</h1>'.
         '<div class="phabricator-profile-info-pane">'.
-          $task_views.
-          '<div class="phabricator-profile-info-pane-more-link">'.
-            $more_link.
-          '</div>'.
+          '%s'.
+          '<div class="phabricator-profile-info-pane-more-link">%s</div>'.
         '</div>
-      </div>';
+      </div>',
+      pht('Open Tasks (%s)', $open),
+      $task_views,
+      $more_link);
 
     return $content;
   }

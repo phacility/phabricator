@@ -31,7 +31,7 @@ final class PhabricatorPinboardView extends AphrontView {
       array(
         'class' => 'phabricator-pinboard-view',
       ),
-      $this->renderHTMLView($this->items));
+      $this->renderSingleView($this->items));
   }
 
 }

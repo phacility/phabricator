@@ -92,7 +92,7 @@ final class AphrontErrorView extends AphrontView {
     $classes[] = 'aphront-error-severity-'.$this->severity;
     $classes = implode(' ', $classes);
 
-    $children = $this->renderHTMLChildren();
+    $children = $this->renderChildren();
     $children[] = $list;
 
     return phutil_tag(

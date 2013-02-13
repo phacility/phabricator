@@ -20,25 +20,23 @@ final class PhabricatorNotificationPanelController
       $notifications_view = $builder->buildView();
       $content = $notifications_view->render();
     } else {
-      $content =
-        '<div class="phabricator-notification no-notifications">'.
-          'You have no notifications.'.
-        '</div>';
+      $content = hsprintf(
+        '<div class="phabricator-notification no-notifications">%s</div>',
+        pht('You have no notifications.'));
     }
 
-    $content =
-      '<div class="phabricator-notification-header">'.
-        pht('Notifications').
-      '</div>'.
-      $content.
-      '<div class="phabricator-notification-view-all">'.
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/notification/',
-          ),
-          'View All Notifications').
-      '</div>';
+    $content = hsprintf(
+      '<div class="phabricator-notification-header">%s</div>'.
+      '%s'.
+      '<div class="phabricator-notification-view-all">%s</div>',
+      pht('Notifications'),
+      $content,
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/notification/',
+        ),
+        'View All Notifications'));
 
     $unread_count = id(new PhabricatorFeedStoryNotification())
       ->countUnread($user);

@@ -224,7 +224,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     foreach ($phids as $phid) {
       $list[] = $this->linkTo($phid);
     }
-    return implode(', ', $list);
+    return phutil_implode_html(', ', $list);
   }
 
   final protected function linkTo($phid) {

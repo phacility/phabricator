@@ -43,12 +43,11 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
               $dialog = new AphrontDialogView();
               $dialog->setUser($current_user);
               $dialog->setTitle(pht('Already Linked to Another Account'));
-              $dialog->appendChild(
-                '<p>'.pht('The LDAP account you just authorized is already '.
+              $dialog->appendChild(phutil_tag('p', array(), pht(
+                'The LDAP account you just authorized is already '.
                 'linked toanother Phabricator account. Before you can link it '.
                 'to a different LDAP account, you must unlink the old '.
-                'account.').'</p>'
-              );
+                'account.')));
               $dialog->addCancelButton('/settings/panel/ldap/');
 
               return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -62,10 +61,8 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
             $dialog = new AphrontDialogView();
             $dialog->setUser($current_user);
             $dialog->setTitle(pht('Link LDAP Account'));
-            $dialog->appendChild(
-              '<p>'.
-                pht('Link your LDAP account to your Phabricator account?').
-              '</p>');
+            $dialog->appendChild(phutil_tag('p', array(), pht(
+              'Link your LDAP account to your Phabricator account?')));
             $dialog->addHiddenInput('username', $request->getStr('username'));
             $dialog->addHiddenInput('password', $request->getStr('password'));
             $dialog->addSubmitButton(pht('Link Accounts'));
@@ -134,9 +131,10 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild('<h1>'.pht('LDAP login').'</h1>');
+    $panel->appendChild(phutil_tag('h1', array(), pht('LDAP login')));
     $panel->appendChild($ldap_form);
 
+    $error_view = null;
     if (isset($errors) && count($errors) > 0) {
       $error_view = new AphrontErrorView();
       $error_view->setTitle(pht('Login Failed'));
@@ -145,7 +143,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
 
     return $this->buildStandardPageResponse(
       array(
-        isset($error_view) ? $error_view : null,
+        $error_view,
         $panel,
       ),
       array(

@@ -116,10 +116,9 @@ final class PhabricatorOAuthLoginController
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
         $dialog->setTitle(pht('Link %s Account', $provider_name));
-        $dialog->appendChild(
-          pht(
-            '<p>Link your %s account to your Phabricator account?</p>',
-            phutil_escape_html($provider_name)));
+        $dialog->appendChild(phutil_tag('p', array(), pht(
+          'Link your %s account to your Phabricator account?',
+          $provider_name)));
         $dialog->addHiddenInput('confirm_token', $provider->getAccessToken());
         $dialog->addHiddenInput('expires', $oauth_info->getTokenExpires());
         $dialog->addHiddenInput('state', $this->oauthState);

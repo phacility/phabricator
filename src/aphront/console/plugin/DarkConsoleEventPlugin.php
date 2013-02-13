@@ -42,17 +42,14 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
     $out = array();
 
-    $out[] =
+    $out[] = hsprintf(
       '<div class="dark-console-panel-header">'.
         '<h1>Registered Event Listeners</h1>'.
-      '</div>';
+      '</div>');
 
     $rows = array();
     foreach ($data['listeners'] as $listener) {
-      $rows[] = array(
-        phutil_escape_html($listener['id']),
-        phutil_escape_html($listener['class']),
-      );
+      $rows[] = array($listener['id'], $listener['class']);
     }
 
     $table = new AphrontTableView($rows);
@@ -69,15 +66,15 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
     $out[] = $table->render();
 
-    $out[] =
+    $out[] = hsprintf(
       '<div class="dark-console-panel-header">'.
         '<h1>Event Log</h1>'.
-      '</div>';
+      '</div>');
 
     $rows = array();
     foreach ($data['events'] as $event) {
       $rows[] = array(
-        phutil_escape_html($event['type']),
+        $event['type'],
         $event['stopped'] ? 'STOPPED' : null,
       );
     }
@@ -96,6 +93,6 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
     $out[] = $table->render();
 
 
-    return implode("\n", $out);
+    return phutil_implode_html("\n", $out);
   }
 }

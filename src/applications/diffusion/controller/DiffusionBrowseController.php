@@ -21,7 +21,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $title = 'Tag: '.$drequest->getSymbolicCommit();
 
       $tag_view = new AphrontPanelView();
-      $tag_view->setHeader(phutil_escape_html($title));
+      $tag_view->setHeader($title);
       $tag_view->appendChild(
         $this->markupText($drequest->getTagContent()));
 
@@ -106,7 +106,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
   private function markupText($text) {
     $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-    $text = phutil_safe_html($engine->markupText($text));
+    $text = $engine->markupText($text);
 
     $text = phutil_tag(
       'div',

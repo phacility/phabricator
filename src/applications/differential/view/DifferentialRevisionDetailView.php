@@ -87,7 +87,11 @@ final class DifferentialRevisionDetailView extends AphrontView {
     }
     $properties->setHasKeyboardShortcuts(true);
 
-    return $header->render() . $actions->render() . $properties->render();
+    return hsprintf(
+      '%s%s%s',
+      $header->render(),
+      $actions->render(),
+      $properties->render());
   }
 
   private function renderHeader(DifferentialRevision $revision) {

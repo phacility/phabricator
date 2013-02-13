@@ -152,13 +152,13 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     switch ($this->getFieldType()) {
       case self::TYPE_BOOL:
         if ($this->getValue()) {
-          return phutil_escape_html($this->getCheckboxValue());
+          return $this->getCheckboxValue();
         } else {
           return null;
         }
       case self::TYPE_SELECT:
         $display = idx($this->getSelectOptions(), $this->getValue());
-        return phutil_escape_html($display);
+        return $display;
     }
     return parent::renderForDetailView();
   }
@@ -201,10 +201,6 @@ class ManiphestAuxiliaryFieldDefaultSpecification
                   "from '{$old}' to '{$new}'";
         }
         break;
-    }
-
-    if ($target == self::RENDER_TARGET_HTML) {
-      $desc = phutil_escape_html($desc);
     }
 
     return $desc;

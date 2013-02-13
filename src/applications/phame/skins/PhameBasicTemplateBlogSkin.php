@@ -26,7 +26,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
             'href'  => $this->getResourceURI('css/'.$path),
           ));
       }
-      $this->cssResources = implode("\n", $this->cssResources);
+      $this->cssResources = phutil_implode_html("\n", $this->cssResources);
     }
 
     $request = $this->getRequest();
@@ -43,7 +43,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     );
 
     $response = new AphrontWebpageResponse();
-    $response->setContent(implode("\n", $content));
+    $response->setContent(phutil_implode_html("\n", $content));
 
     return $response;
   }

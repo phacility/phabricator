@@ -98,8 +98,9 @@ final class CelerityStaticResourceResponse {
       $this->hasRendered[$resource['uri']] = true;
 
       $output[] = $this->renderResource($resource);
+      $output[] = "\n";
     }
-    return implode("\n", $output)."\n";
+    return phutil_implode_html('', $output);
   }
 
   private function renderResource(array $resource) {
@@ -180,8 +181,9 @@ final class CelerityStaticResourceResponse {
 
     if ($data) {
       $data = implode("\n", $data);
-      return '<script type="text/javascript">//<![CDATA['."\n".
-             $data.'//]]></script>';
+      return hsprintf(
+        '<script type="text/javascript">//<![CDATA['."\n".'%s//]]></script>',
+        phutil_safe_html($data));
     } else {
       return '';
     }

@@ -71,11 +71,10 @@ final class DiffusionLintController extends DiffusionController {
           '<a href="%s">%s</a>',
           $drequest->generateURI(array('action' => 'lint')),
           $drequest->getCallsign()),
-        phutil_escape_html(ArcanistLintSeverity::getStringForSeverity(
-          $code['maxSeverity'])),
-        phutil_escape_html($code['code']),
-        phutil_escape_html($code['maxName']),
-        phutil_escape_html($code['maxDescription']),
+        ArcanistLintSeverity::getStringForSeverity($code['maxSeverity']),
+        $code['code'],
+        $code['maxName'],
+        $code['maxDescription'],
       );
     }
 

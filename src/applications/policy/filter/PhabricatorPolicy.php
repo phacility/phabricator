@@ -84,7 +84,7 @@ final class PhabricatorPolicy {
         ),
         $this->getName());
     } else {
-      $desc = phutil_escape_html($this->getName());
+      $desc = $this->getName();
     }
 
     switch ($this->getType()) {

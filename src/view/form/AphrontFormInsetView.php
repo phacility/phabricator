@@ -102,7 +102,7 @@ final class AphrontFormInsetView extends AphrontView {
       $content[] = $this->content;
     }
 
-    $content = array_merge($content, $this->renderHTMLChildren());
+    $content = array_merge($content, $this->renderChildren());
 
     return phutil_tag('div', $div_attributes, $content);
   }

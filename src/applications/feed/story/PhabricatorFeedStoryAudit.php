@@ -15,11 +15,11 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $action = $this->getValue('action');
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
 
-    $view->setTitle(
-      $this->linkTo($author_phid).
-      " {$verb} commit ".
-      $this->linkTo($commit_phid).
-      ".");
+    $view->setTitle(hsprintf(
+      '%s %s commit %s.',
+      $this->linkTo($author_phid),
+      $verb,
+      $this->linkTo($commit_phid)));
 
     $view->setEpoch($this->getEpoch());
 

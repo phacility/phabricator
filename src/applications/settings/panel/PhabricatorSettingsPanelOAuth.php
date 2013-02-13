@@ -215,7 +215,7 @@ final class PhabricatorSettingsPanelOAuth
 
     foreach ($forms as $name => $form) {
       if ($name) {
-        $panel->appendChild('<br /><h1>'.$name.'</h1><br />');
+        $panel->appendChild(hsprintf('<br /><h1>%s</h1><br />', $name));
       }
       $panel->appendChild($form);
     }

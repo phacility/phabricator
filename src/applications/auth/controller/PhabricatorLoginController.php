@@ -29,7 +29,8 @@ final class PhabricatorLoginController
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
       $dialog->setTitle(pht('Login Required'));
-      $dialog->appendChild('<p>'.pht('You must login to continue.').'</p>');
+      $dialog->appendChild(phutil_tag('p', array(), pht(
+        'You must login to continue.')));
       $dialog->addSubmitButton(pht('Login'));
       $dialog->addCancelButton('/', pht('Cancel'));
 
@@ -246,8 +247,7 @@ final class PhabricatorLoginController
         $title = pht("Login or Register with %s", $provider_name);
         $body = pht('Login or register for Phabricator using your %s account.',
           $provider_name);
-        $button = pht("Login or Register with %s",
-          phutil_escape_html($provider_name));
+        $button = pht("Login or Register with %s", $provider_name);
       } else {
         $title = pht("Login with %s", $provider_name);
         $body = hsprintf(
@@ -258,7 +258,7 @@ final class PhabricatorLoginController
           pht(
             'You can not use %s to register a new account.',
             $provider_name));
-        $button = pht("Log in with %s", phutil_escape_html($provider_name));
+        $button = pht("Log in with %s", $provider_name);
       }
 
       $auth_form = new AphrontFormView();
@@ -299,7 +299,7 @@ final class PhabricatorLoginController
     return $this->buildApplicationPage(
       array(
         $error_view,
-        $login_message,
+        phutil_safe_html($login_message),
         $panel,
       ),
       array(

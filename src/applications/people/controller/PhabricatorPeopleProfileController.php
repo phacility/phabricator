@@ -142,7 +142,7 @@ final class PhabricatorPeopleProfileController
 
     $nav->appendChild($header);
 
-    $content = '<div style="padding: 1em;">'.$content.'</div>';
+    $content = hsprintf('<div style="padding: 1em;">%s</div>', $content);
     $header->appendChild($content);
 
     if ($user->getPHID() == $viewer->getPHID()) {
@@ -172,13 +172,11 @@ final class PhabricatorPeopleProfileController
 
     $blurb = nonempty(
       $profile->getBlurb(),
-      '//'.
-      pht('Nothing is known about this rare specimen.')
-      .'//'
+      '//'.pht('Nothing is known about this rare specimen.').'//'
     );
 
     $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
-    $blurb = phutil_safe_html($engine->markupText($blurb));
+    $blurb = $engine->markupText($blurb);
 
     $viewer = $this->getRequest()->getUser();
 
@@ -232,12 +230,11 @@ final class PhabricatorPeopleProfileController
     $builder->setUser($viewer);
     $view = $builder->buildView();
 
-    return
+    return hsprintf(
       '<div class="phabricator-profile-info-group">
         <h1 class="phabricator-profile-info-header">Activity Feed</h1>
-        <div class="phabricator-profile-info-pane">
-          '.$view->render().'
-        </div>
-      </div>';
+        <div class="phabricator-profile-info-pane">%s</div>
+      </div>',
+      $view->render());
   }
 }
