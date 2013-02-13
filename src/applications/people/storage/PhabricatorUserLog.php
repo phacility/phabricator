@@ -75,7 +75,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
       $this->setSession(idx($_COOKIE, 'phsid'));
     }
     $this->details['host'] = php_uname('n');
-    $this->details['user_agent'] = idx($_SERVER, 'HTTP_USER_AGENT');
+    $this->details['user_agent'] = AphrontRequest::getHTTPHeader('User-Agent');
 
     return parent::save();
   }

@@ -164,7 +164,8 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
 
     if ($slug == '/') {
       throw new PhabricatorProjectNameCollisionException(
-        "Project names must be unique and contain some letters or numbers.");
+        pht("Project names must be unique and contain some ".
+        "letters or numbers."));
     }
 
     $id = $project->getID();

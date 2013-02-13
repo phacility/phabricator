@@ -31,6 +31,55 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     $this->assertEqual($data, $file->loadFileData());
   }
 
+  public function testFileStorageUploadDifferentFiles() {
+    $engine = new PhabricatorTestStorageEngine();
+
+    $data = Filesystem::readRandomCharacters(64);
+    $other_data = Filesystem::readRandomCharacters(64);
+
+    $params = array(
+      'name' => 'test.dat',
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    $first_file = PhabricatorFile::newFromFileData($data, $params);
+
+    $second_file = PhabricatorFile::newFromFileData($other_data, $params);
+
+    // Test that the the second file uses  different storage handle from
+    // the first file.
+    $first_handle = $first_file->getStorageHandle();
+    $second_handle = $second_file->getStorageHandle();
+
+    $this->assertEqual(true, ($first_handle != $second_handle));
+  }
+
+
+  public function testFileStorageUploadSameFile() {
+    $engine = new PhabricatorTestStorageEngine();
+
+    $data = Filesystem::readRandomCharacters(64);
+
+    $params = array(
+      'name' => 'test.dat',
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    $first_file = PhabricatorFile::newFromFileData($data, $params);
+
+    $second_file = PhabricatorFile::newFromFileData($data, $params);
+
+    // Test that the the second file uses the same storage handle as
+    // the first file.
+    $handle = $first_file->getStorageHandle();
+    $second_handle = $second_file->getStorageHandle();
+
+    $this->assertEqual($handle, $second_handle);
+  }
 
   public function testFileStorageDelete() {
     $engine = new PhabricatorTestStorageEngine();
@@ -56,6 +105,25 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     }
 
     $this->assertEqual(true, $caught instanceof Exception);
+  }
+
+  public function testFileStorageDeleteSharedHandle() {
+    $engine = new PhabricatorTestStorageEngine();
+
+    $data = Filesystem::readRandomCharacters(64);
+
+    $params = array(
+      'name' => 'test.dat',
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    $first_file = PhabricatorFile::newFromFileData($data, $params);
+    $second_file = PhabricatorFile::newFromFileData($data, $params);
+    $first_file->delete();
+
+    $this->assertEqual($data, $second_file->loadFileData());
   }
 
 }

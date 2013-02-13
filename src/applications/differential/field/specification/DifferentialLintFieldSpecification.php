@@ -117,7 +117,7 @@ final class DifferentialLintFieldSpecification
             'show'  => $show,
           );
 
-          if (isset($message['locations'])) {
+          if (!empty($message['locations'])) {
             $locations = array();
             foreach ($message['locations'] as $location) {
               $other_line = idx($location, 'line');

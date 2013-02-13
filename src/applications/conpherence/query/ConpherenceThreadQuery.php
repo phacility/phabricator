@@ -227,6 +227,11 @@ final class ConpherenceThreadQuery
         $conpherence_pic_phids[$conpherence->getPHID()] = $phid;
       }
     }
+
+    if (!$conpherence_pic_phids) {
+      return $this;
+    }
+
     $files = id(new PhabricatorFileQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs($conpherence_pic_phids)

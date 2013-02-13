@@ -12,9 +12,7 @@ final class DiffusionMercurialRequest extends DiffusionRequest {
   protected function didInitialize() {
     $repository = $this->getRepository();
 
-    if (!Filesystem::pathExists($repository->getLocalPath())) {
-      $this->raiseCloneException();
-    }
+    $this->validateWorkingCopy($repository->getLocalPath());
 
     // Expand abbreviated hashes to full hashes so "/rXnnnn" (i.e., fewer than
     // 40 characters) works correctly.

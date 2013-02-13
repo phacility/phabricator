@@ -4,6 +4,7 @@
 .pholio-mock-image-container {
   background-color: #282828;
   text-align: center;
+  vertical-align: middle;
 }
 
 .pholio-mock-carousel {
@@ -41,5 +42,37 @@
   cursor: crosshair;
   padding: 0px;
   margin: 10px 0px;
+}
+
+
+.pholio-mock-inline-comments {
+  display: inline-block;
+  margin-left: 10px;
+  text-align: left;
+  padding-bottom: 10px;
+}
+
+.pholio-inline-comment {
+  border: 1px solid #aa8;
+  background: #f9f9f1;
+  margin-bottom: 2px;
+  padding: 8px 10px;
+}
+
+.pholio-inline-comment-header {
+  border-bottom: 1px solid #cca;
+  color: #333;
+  font-weight: bold;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+}
+
+.pholio-mock-inline-comment-highlight {
+  background-color: #F0B160;
+}
+
+.pholio-inline-head-links a {
+  font-weight: normal;
+  margin-left: 5px;
 }
 

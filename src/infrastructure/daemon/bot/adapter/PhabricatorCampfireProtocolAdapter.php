@@ -118,6 +118,7 @@ extends PhabricatorBaseProtocolAdapter {
 
       return id(new PhabricatorBotMessage())
         ->setCommand('MESSAGE')
+        ->setSender($m_obj['user_id'])
         ->setTarget($m_obj['room_id'])
         ->setBody($m_obj['body']);
     }
@@ -128,11 +129,23 @@ extends PhabricatorBaseProtocolAdapter {
 
   public function writeMessage(PhabricatorBotMessage $message) {
     switch ($message->getCommand()) {
-    case 'MESSAGE':
-      $this->speak(
-        $message->getBody(),
-        $message->getTarget());
-      break;
+      case 'MESSAGE':
+        $this->speak(
+          $message->getBody(),
+          $message->getTarget());
+        break;
+      case 'SOUND':
+        $this->speak(
+          $message->getBody(),
+          $message->getTarget(),
+          'SoundMessage');
+        break;
+      case 'PASTE':
+        $this->speak(
+          $message->getBody(),
+          $message->getTarget(),
+          'PasteMessage');
+        break;
     }
   }
 
@@ -146,12 +159,12 @@ extends PhabricatorBaseProtocolAdapter {
     unset($this->inRooms[$room_id]);
   }
 
-  private function speak($message, $room_id) {
+  private function speak($message, $room_id, $type='TextMessage') {
     $this->performPost(
       "/room/{$room_id}/speak.json",
       array(
         'message' => array(
-          'type' => 'TextMessage',
+          'type' => $type,
           'body' => $message)));
   }
 

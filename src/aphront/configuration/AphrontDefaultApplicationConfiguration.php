@@ -122,6 +122,7 @@ class AphrontDefaultApplicationConfiguration
   protected function getResourceURIMapRules() {
     return array(
       '/res/' => array(
+        '(?:(?P<mtime>[0-9]+)T/)?'.
         '(?P<package>pkg/)?'.
         '(?P<hash>[a-f0-9]{8})/'.
         '(?P<path>.+\.(?:css|js|jpg|png|swf|gif))'

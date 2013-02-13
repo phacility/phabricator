@@ -50,7 +50,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getFullName() {
     $title = $this->getTitle();
     if (!$title) {
-      $title = '(An Untitled Masterwork)';
+      $title = pht('(An Untitled Masterwork)');
     }
     return 'P'.$this->getID().' '.$title;
   }

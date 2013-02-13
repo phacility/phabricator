@@ -1174,7 +1174,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-dark-console' =>
   array(
-    'uri' => '/res/ae7f15ce/rsrc/js/application/core/behavior-dark-console.js',
+    'uri' => '/res/89aeb6c0/rsrc/js/application/core/behavior-dark-console.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1863,6 +1863,18 @@ celerity_register_resource_map(array(
       3 => 'phabricator-shaped-request',
     ),
     'disk' => '/rsrc/js/application/phame/phame-post-preview.js',
+  ),
+  'javelin-behavior-pholio-edit-inline-comment' =>
+  array(
+    'uri' => '/res/61759cd8/rsrc/js/application/pholio/behavior-pholio-edit-inline-comment.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/pholio/behavior-pholio-edit-inline-comment.js',
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
@@ -3488,7 +3500,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/bc0774e5/core.pkg.js',
       'type' => 'js',
     ),
-    '3e0098ea' =>
+    'dca4a03d' =>
     array(
       'name' => 'darkconsole.pkg.js',
       'symbols' =>
@@ -3496,7 +3508,7 @@ celerity_register_resource_map(array(
         0 => 'javelin-behavior-dark-console',
         1 => 'javelin-behavior-error-log',
       ),
-      'uri' => '/res/pkg/3e0098ea/darkconsole.pkg.js',
+      'uri' => '/res/pkg/dca4a03d/darkconsole.pkg.js',
       'type' => 'js',
     ),
     '8aaacd1b' =>
@@ -3666,7 +3678,7 @@ celerity_register_resource_map(array(
     'javelin-behavior-aphront-drag-and-drop-textarea' => '95d0d865',
     'javelin-behavior-aphront-form-disable-on-submit' => 'bc0774e5',
     'javelin-behavior-audit-preview' => 'f96657b8',
-    'javelin-behavior-dark-console' => '3e0098ea',
+    'javelin-behavior-dark-console' => 'dca4a03d',
     'javelin-behavior-device' => 'bc0774e5',
     'javelin-behavior-differential-accept-with-errors' => '95d0d865',
     'javelin-behavior-differential-add-reviewers-and-ccs' => '95d0d865',
@@ -3682,7 +3694,7 @@ celerity_register_resource_map(array(
     'javelin-behavior-differential-user-select' => '95d0d865',
     'javelin-behavior-diffusion-commit-graph' => 'f96657b8',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f96657b8',
-    'javelin-behavior-error-log' => '3e0098ea',
+    'javelin-behavior-error-log' => 'dca4a03d',
     'javelin-behavior-global-drag-and-drop' => 'bc0774e5',
     'javelin-behavior-konami' => 'bc0774e5',
     'javelin-behavior-lightbox-attachments' => 'bc0774e5',

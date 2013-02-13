@@ -330,6 +330,7 @@ final class PhabricatorConfigEditController
       case 'int':
       case 'string':
       case 'enum':
+      case 'class':
         return $value;
       case 'bool':
         return $value ? 'true' : 'false';
