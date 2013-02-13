@@ -64,8 +64,8 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       if ($is_create) {
         $text = $request->getStr('text');
         if (!strlen($text)) {
-          $e_text = 'Required';
-          $errors[] = 'The paste may not be blank.';
+          $e_text = pht('Required');
+          $errors[] = pht('The paste may not be blank.');
         } else {
           $e_text = null;
         }
@@ -94,7 +94,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       }
     } else {
       if ($is_create && $parent) {
-        $paste->setTitle('Fork of '.$parent->getFullName());
+        $paste->setTitle(pht('Fork of %s', $parent->getFullName()));
         $paste->setLanguage($parent->getLanguage());
         $text = $parent->getRawContent();
       }
@@ -103,7 +103,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('A fatal omission!')
+        ->setTitle(pht('A Fatal Omission!'))
         ->setErrors($errors);
     }
 
@@ -111,7 +111,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     $form->setFlexible(true);
 
     $langs = array(
-      '' => '(Detect From Filename in Title)',
+      '' => pht('(Detect From Filename in Title)'),
     ) + PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
     $form
@@ -119,12 +119,12 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       ->addHiddenInput('parent', $parent_id)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Title')
+          ->setLabel(pht('Title'))
           ->setValue($paste->getTitle())
           ->setName('title'))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Language')
+          ->setLabel(pht('Language'))
           ->setName('language')
           ->setValue($paste->getLanguage())
           ->setOptions($langs));
@@ -146,7 +146,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       $form
         ->appendChild(
           id(new AphrontFormTextAreaControl())
-            ->setLabel('Text')
+            ->setLabel(pht('Text'))
             ->setError($e_text)
             ->setValue($text)
             ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
@@ -158,13 +158,13 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         array(
           'href' => $this->getApplicationURI('?parent='.$paste->getID())
         ),
-        'Fork'
+        pht('Fork')
       );
       $form
         ->appendChild(
           id(new AphrontFormMarkupControl())
-          ->setLabel('Text')
-          ->setValue(hsprintf(
+          ->setLabel(pht('Text'))
+          ->setValue(pht(
             'Paste text can not be edited. %s to create a new paste.',
             $fork_link)));
     }
