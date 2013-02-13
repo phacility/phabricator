@@ -294,7 +294,7 @@ final class AphrontSideNavFilterView extends AphrontView {
           ),
           array(
             $crumbs,
-            phutil_safe_html(implode('', $this->renderChildren())),
+            phutil_implode_html('', $this->renderChildren()),
           ))
       ));
   }

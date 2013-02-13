@@ -138,8 +138,8 @@ EOBODY;
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild('
-      <h1>'.pht('Forgot Password / Email Login').'</h1>');
+    $panel->appendChild(phutil_tag('h1', array(), pht(
+      'Forgot Password / Email Login')));
     $panel->appendChild($email_auth);
     $panel->setNoBackground();
 

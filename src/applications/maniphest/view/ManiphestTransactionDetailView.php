@@ -590,9 +590,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           DifferentialChangesetParser::parseRangeSpecification($spec);
         $output = $parser->render($range_s, $range_e, $mask);
 
-        // TODO: [HTML] DifferentialChangesetParser needs cleanup.
-        $output = phutil_safe_html($output);
-
         return $output;
     }
 
@@ -627,7 +624,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $links[] = $this->handles[$phid]->renderLink();
       }
     }
-    return implode(', ', $links);
+    return phutil_implode_html(', ', $links);
   }
 
   private function renderString($string) {

@@ -53,7 +53,9 @@ final class PhabricatorLoginValidateController
         '<p>%s</p>%s<p>%s</p>',
         pht('Login failed:'),
         $list,
-        pht('<strong>Clear your cookies</strong> and try again.')));
+        pht(
+          '<strong>Clear your cookies</strong> and try again.',
+          hsprintf(''))));
       $view->appendChild(hsprintf(
         '<div class="aphront-failure-continue">'.
           '<a class="button" href="/login/">%s</a>'.

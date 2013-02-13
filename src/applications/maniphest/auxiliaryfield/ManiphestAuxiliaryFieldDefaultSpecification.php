@@ -203,10 +203,6 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
     }
 
-    if ($target == self::RENDER_TARGET_HTML) {
-      $desc = phutil_escape_html($desc);
-    }
-
     return $desc;
   }
 

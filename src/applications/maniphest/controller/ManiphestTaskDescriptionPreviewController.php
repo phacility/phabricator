@@ -18,10 +18,9 @@ final class ManiphestTaskDescriptionPreviewController
       ManiphestTask::MARKUP_FIELD_DESCRIPTION,
       $request->getUser());
 
-    $content =
-      '<div class="phabricator-remarkup">'.
-        $output.
-      '</div>';
+    $content = hsprintf(
+      '<div class="phabricator-remarkup">%s</div>',
+      $output);
 
     return id(new AphrontAjaxResponse())
       ->setContent($content);

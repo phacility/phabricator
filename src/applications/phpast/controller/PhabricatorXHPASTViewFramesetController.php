@@ -14,12 +14,15 @@ final class PhabricatorXHPASTViewFramesetController
 
     $response = new AphrontWebpageResponse();
     $response->setFrameable(true);
-    $response->setContent(
-      '<frameset cols="33%, 34%, 33%">'.
-        '<frame src="/xhpast/input/'.$id.'/" />'.
-        '<frame src="/xhpast/tree/'.$id.'/" />'.
-        '<frame src="/xhpast/stream/'.$id.'/" />'.
-      '</frameset>');
+    $response->setContent(hsprintf(
+      '<frameset cols="33%%, 34%%, 33%%">'.
+        '<frame src="/xhpast/input/%s/" />'.
+        '<frame src="/xhpast/tree/%s/" />'.
+        '<frame src="/xhpast/stream/%s/" />'.
+      '</frameset>',
+      $id,
+      $id,
+      $id));
 
     return $response;
   }

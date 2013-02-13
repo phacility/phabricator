@@ -148,15 +148,35 @@ calling @{function:phutil_safe_html} on it. This is **dangerous**, because if
 you are wrong and the string is not actually safe, you have introduced an XSS
 vulnerability. Consequently, you should avoid calling this if possible.
 
-You can use @{function@libphutil:phutil_escape_html} to explicitly escape an
-HTML string. You should not normally need to use it.
-
 You can use @{function@libphutil:phutil_escape_html_newlines} to escape HTML
-while converting newlines to `<br />`.
+while converting newlines to `<br />`. You should not need to explicitly use
+@{function@libphutil:phutil_escape_html} anywhere.
+
+If you need to apply a string function (such as `trim()`) to safe HTML, use
+@{method@libphutil:PhutilSafeHTML::applyFunction}.
 
 If you need to extract the content of a @{class@libphutil:PhutilSafeHTML}
 object, you should call `getHTMLContent()`, not cast it to a string. Eventually,
 we would like to remove the string cast entirely.
+
+Functions @{function@libphutil:phutil_tag} and @{function@libphutil:hsprintf}
+are not safe if you pass the user input for the tag or attribute name. All the
+following examples are dangerous:
+
+  counterexample
+  phutil_tag($evil);
+
+  phutil_tag('span', array($evil => $evil2));
+
+  // Use PhutilURI to check if $evil is valid HTTP link.
+  phutil_tag('a', array('href' => $evil));
+
+  phutil_tag('span', array('onmouseover' => $evil));
+
+  hsprintf('<%s>%s</%s>', $evil, $evil2, $evil);
+
+  // We have a lint rule disallowing this.
+  hsprintf($evil);
 
 = Deprecated Functions =
 

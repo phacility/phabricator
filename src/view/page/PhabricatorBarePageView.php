@@ -55,13 +55,13 @@ class PhabricatorBarePageView extends AphrontPageView {
   protected function willRenderPage() {
     // We render this now to resolve static resources so they can appear in the
     // document head.
-    $this->bodyContent = implode('', $this->renderChildren());
+    $this->bodyContent = phutil_implode_html('', $this->renderChildren());
   }
 
   protected function getHead() {
     $framebust = null;
     if (!$this->getFrameable()) {
-      $framebust = '(top != self) && top.location.replace(self.location.href);';
+      $framebust = '(top == self) || top.location.replace(self.location.href);';
     }
 
     $viewport_tag = null;
@@ -78,22 +78,12 @@ class PhabricatorBarePageView extends AphrontPageView {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
-    $head = array(
+    return hsprintf(
+      '%s<script type="text/javascript">%s window.__DEV__=%s;</script>%s',
       $viewport_tag,
-
-      '<script type="text/javascript">'.
-        $framebust.
-        'window.__DEV__='.
-        (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')
-          ? '1'
-          : '0').
-        ';'.
-      '</script>',
-
-      $response->renderResourcesOfType('css'),
-    );
-
-    return implode("\n", $head);
+      $framebust,
+      (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') ? '1' : '0'),
+      $response->renderResourcesOfType('css'));
   }
 
   protected function getBody() {

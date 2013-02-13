@@ -79,19 +79,26 @@ final class PhabricatorInlineSummaryView extends AphrontView {
 
         $where = idx($item, 'where');
 
-        $colspan = ($has_where ? '' : ' colspan="2"');
-        $rows[] =
+        $colspan = ($has_where ? null : 2);
+        $rows[] = hsprintf(
           '<tr>'.
-            '<td class="inline-line-number">'.$lines.'</td>'.
-            ($has_where
-              ? hsprintf('<td class="inline-which-diff">%s</td>', $where)
-              : null).
-            '<td class="inline-summary-content"'.$colspan.'>'.
-              '<div class="phabricator-remarkup">'.
-                $item['content'].
-              '</div>'.
-            '</td>'.
-          '</tr>';
+            '<td class="inline-line-number">%s</td>'.
+            '%s'.
+            '%s'.
+          '</tr>',
+          $lines,
+          ($has_where
+            ? hsprintf('<td class="inline-which-diff">%s</td>', $where)
+            : null),
+          phutil_tag(
+            'td',
+            array(
+              'class' => 'inline-summary-content',
+              'colspan' => $colspan,
+            ),
+            hsprintf(
+              '<div class="phabricator-remarkup">%s</div>',
+              $item['content'])));
       }
     }
 
@@ -100,7 +107,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
       array(
         'class' => 'phabricator-inline-summary-table',
       ),
-      new PhutilSafeHTML(implode("\n", $rows)));
+      phutil_implode_html("\n", $rows));
   }
 
 }

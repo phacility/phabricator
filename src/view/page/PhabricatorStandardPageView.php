@@ -205,15 +205,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
-    $head = array(
+    return hsprintf(
+      '%s<style type="text/css">.PhabricatorMonospaced { font: %s; }</style>%s',
       parent::getHead(),
-      '<style type="text/css">'.
-        '.PhabricatorMonospaced { font: '.$monospaced.'; }'.
-      '</style>',
-      $response->renderSingleResource('javelin-magical-init'),
-    );
-
-    return implode("\n", $head);
+      phutil_safe_html($monospaced),
+      $response->renderSingleResource('javelin-magical-init'));
   }
 
   public function setGlyph($glyph) {
@@ -232,8 +228,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     $console = $request->getApplicationConfiguration()->getConsole();
 
     if ($console) {
-      $response = str_replace(
-        '<darkconsole />',
+      $response = PhutilSafeHTML::applyFunction(
+        'str_replace',
+        hsprintf('<darkconsole />'),
         $console->render($request),
         $response);
     }
@@ -288,20 +285,22 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     return
-      phutil_render_tag(
+      phutil_tag(
         'div',
         array(
           'id' => 'base-page',
           'class' => 'phabricator-standard-page',
         ),
-        $developer_warning.
-        $setup_warning.
-        $header_chrome.
-        '<div class="phabricator-standard-page-body">'.
-          ($console ? '<darkconsole />' : null).
-          parent::getBody().
-          '<div style="clear: both;"></div>'.
-        '</div>');
+        hsprintf(
+          '%s%s%s'.
+          '<div class="phabricator-standard-page-body">'.
+            '%s%s<div style="clear: both;"></div>'.
+          '</div>',
+        $developer_warning,
+        $setup_warning,
+        $header_chrome,
+        ($console ? hsprintf('<darkconsole />') : null),
+        parent::getBody()));
   }
 
   protected function getTail() {
@@ -350,7 +349,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $response->renderHTMLFooter(),
     );
 
-    return implode("\n", $tail);
+    return phutil_implode_html("\n", $tail);
   }
 
   protected function getBodyClasses() {

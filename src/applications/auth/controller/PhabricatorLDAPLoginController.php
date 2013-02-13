@@ -131,7 +131,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild('<h1>'.pht('LDAP login').'</h1>');
+    $panel->appendChild(phutil_tag('h1', array(), pht('LDAP login')));
     $panel->appendChild($ldap_form);
 
     $error_view = null;

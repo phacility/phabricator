@@ -51,48 +51,52 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
           'class' => 'bright-link',
         ),
         'Installation Guide');
-      return
+      return hsprintf(
         '<div class="dark-console-no-content">'.
           'The "xhprof" PHP extension is not available. Install xhprof '.
           'to enable the XHProf console plugin. You can find instructions in '.
-          'the '.$install_guide.'.'.
-        '</div>';
+          'the %s.'.
+        '</div>',
+        $install_guide);
     }
 
     $result = array();
 
-    $header =
+    $header = hsprintf(
       '<div class="dark-console-panel-header">'.
-        phutil_tag(
-          'a',
-          array(
-            'href'  => $profile_uri,
-            'class' => $run
-              ? 'disabled button'
-              : 'green button',
-          ),
-          'Profile Page').
+        '%s'.
         '<h1>XHProf Profiler</h1>'.
-      '</div>';
+      '</div>',
+      phutil_tag(
+        'a',
+        array(
+          'href'  => $profile_uri,
+          'class' => $run
+            ? 'disabled button'
+            : 'green button',
+        ),
+        'Profile Page'));
     $result[] = $header;
 
     if ($run) {
-      $result[] =
-        '<a href="/xhprof/profile/'.$run.'/" '.
+      $result[] = hsprintf(
+        '<a href="/xhprof/profile/%s/" '.
           'class="bright-link" '.
           'style="float: right; margin: 1em 2em 0 0;'.
             'font-weight: bold;" '.
           'target="_blank">Profile Permalink</a>'.
-        '<iframe src="/xhprof/profile/'.$run.'/?frame=true"></iframe>';
+        '<iframe src="/xhprof/profile/%s/?frame=true"></iframe>',
+        $run,
+        $run);
     } else {
-      $result[] =
+      $result[] = hsprintf(
         '<div class="dark-console-no-content">'.
           'Profiling was not enabled for this page. Use the button above '.
           'to enable it.'.
-        '</div>';
+        '</div>');
     }
 
-    return implode("\n", $result);
+    return phutil_implode_html("\n", $result);
   }
 
 

@@ -181,7 +181,7 @@ final class PhabricatorSlowvotePollController
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
 
     $panel->appendChild($form);
-    $panel->appendChild('<br /><br />');
+    $panel->appendChild(hsprintf('<br /><br />'));
     $panel->appendChild($result_markup);
 
     return $this->buildStandardPageResponse(

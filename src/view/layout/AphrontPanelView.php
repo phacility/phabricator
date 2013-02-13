@@ -89,8 +89,7 @@ final class AphrontPanelView extends AphrontView {
       $header,
       $caption);
 
-    // TODO: [HTML] Make HTML safe.
-    $table = phutil_safe_html(implode('', $this->renderChildren()));
+    $table = phutil_implode_html('', $this->renderChildren());
 
     require_celerity_resource('aphront-panel-view-css');
 

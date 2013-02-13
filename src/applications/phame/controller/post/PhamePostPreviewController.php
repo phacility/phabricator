@@ -23,7 +23,7 @@ extends PhameController {
       PhamePost::MARKUP_FIELD_BODY,
       $user);
 
-    $content = '<div class="phabricator-remarkup">'.$content.'</div>';
+    $content = hsprintf('<div class="phabricator-remarkup">%s</div>', $content);
 
     return id(new AphrontAjaxResponse())->setContent($content);
   }

@@ -20,32 +20,32 @@ final class DifferentialChangesetOneUpRenderer
       switch ($type) {
         case 'old':
         case 'new':
-          $out[] = '<tr>';
+          $out[] = hsprintf('<tr>');
           if ($type == 'old') {
             if ($p['htype']) {
               $class = 'left old';
             } else {
               $class = 'left';
             }
-            $out[] = '<th>'.$p['line'].'</th>';
-            $out[] = '<th></th>';
-            $out[] = '<td class="'.$class.'">'.$p['render'].'</td>';
+            $out[] = hsprintf('<th>%s</th>', $p['line']);
+            $out[] = hsprintf('<th></th>');
+            $out[] = hsprintf('<td class="%s">%s</td>', $class, $p['render']);
           } else if ($type == 'new') {
             if ($p['htype']) {
               $class = 'right new';
-              $out[] = '<th />';
+              $out[] = hsprintf('<th />');
             } else {
               $class = 'right';
-              $out[] = '<th>'.$p['oline'].'</th>';
+              $out[] = hsprintf('<th>%s</th>', $p['oline']);
             }
-            $out[] = '<th>'.$p['line'].'</th>';
-            $out[] = '<td class="'.$class.'">'.$p['render'].'</td>';
+            $out[] = hsprintf('<th>%s</th>', $p['line']);
+            $out[] = hsprintf('<td class="%s">%s</td>', $class, $p['render']);
           }
-          $out[] = '</tr>';
+          $out[] = hsprintf('</tr>');
           break;
         case 'inline':
-          $out[] = '<tr><th /><th />';
-          $out[] = '<td>';
+          $out[] = hsprintf('<tr><th /><th />');
+          $out[] = hsprintf('<td>');
 
           $inline = $this->buildInlineComment(
             $p['comment'],
@@ -53,16 +53,16 @@ final class DifferentialChangesetOneUpRenderer
           $inline->setBuildScaffolding(false);
           $out[] = $inline->render();
 
-          $out[] = '</td></tr>';
+          $out[] = hsprintf('</td></tr>');
           break;
         default:
-          $out[] = '<tr><th /><th /><td>'.$type.'</td></tr>';
+          $out[] = hsprintf('<tr><th /><th /><td>%s</td></tr>', $type);
           break;
       }
     }
 
     if ($out) {
-      return $this->wrapChangeInTable(implode('', $out));
+      return $this->wrapChangeInTable(phutil_implode_html('', $out));
     }
     return null;
   }

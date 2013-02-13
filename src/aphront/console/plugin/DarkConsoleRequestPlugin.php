@@ -62,6 +62,6 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
       $out[] = $table->render();
     }
 
-    return implode("\n", $out);
+    return phutil_implode_html("\n", $out);
   }
 }

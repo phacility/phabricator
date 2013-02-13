@@ -186,11 +186,11 @@ final class PhabricatorOAuthDiagnosticsController
 
     $panel_view = new AphrontPanelView();
     $panel_view->setHeader($title);
-    $panel_view->appendChild(
+    $panel_view->appendChild(hsprintf(
       '<p class="aphront-panel-instructions">These tests may be able to '.
-      'help diagnose the root cause of problems you experience with '.
-      $provider->getProviderName() .
-      ' Authentication. Reload the page to run the tests again.</p>');
+      'help diagnose the root cause of problems you experience with %s '.
+      'Authentication. Reload the page to run the tests again.</p>',
+      $provider->getProviderName()));
     $panel_view->appendChild($table_view);
 
     return $this->buildStandardPageResponse(

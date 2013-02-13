@@ -67,7 +67,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
           'href' => $this->getHref(),
         ),
       ),
-      phutil_safe_html($this->title));
+      $this->title);
   }
 
   public function render() {
@@ -77,7 +77,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
       array(
         'class' => 'phabricator-feed-story-head',
       ),
-      nonempty(phutil_safe_html($this->title), 'Untitled Story'));
+      nonempty($this->title, 'Untitled Story'));
 
     $body = null;
     $foot = null;
@@ -89,7 +89,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
         array(
           'class' => 'phabricator-feed-story-body',
         ),
-        phutil_safe_html(implode('', $this->renderChildren())));
+        $this->renderChildren());
 
       if ($this->epoch) {
         $foot = phabricator_datetime($this->epoch, $this->user);

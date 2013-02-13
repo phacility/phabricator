@@ -111,7 +111,7 @@ final class ManiphestSavedQueryListController extends ManiphestController {
         'Save Default Query'));
     $panel->appendChild($table);
 
-    $form = phabricator_render_form(
+    $form = phabricator_form(
       $user,
       array(
         'method' => 'POST',

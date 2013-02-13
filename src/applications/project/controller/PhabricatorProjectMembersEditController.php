@@ -112,7 +112,7 @@ final class PhabricatorProjectMembersEditController
     $panel->setHeader($header_name);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
-    $panel->appendChild('<br />');
+    $panel->appendChild(phutil_tag('br'));
     $panel->appendChild($faux_form);
 
     $nav = $this->buildLocalNavigation($project);

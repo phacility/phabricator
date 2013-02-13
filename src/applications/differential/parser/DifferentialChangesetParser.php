@@ -1100,7 +1100,7 @@ final class DifferentialChangesetParser {
    * indicator of how well tested a change is.
    */
   public function renderModifiedCoverage() {
-    $na = '<em>-</em>';
+    $na = phutil_tag('em', array(), '-');
 
     $coverage = $this->getCoverage();
     if (!$coverage) {

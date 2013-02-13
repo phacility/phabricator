@@ -437,10 +437,10 @@ final class HeraldTranscriptController extends HeraldController {
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Rule Details');
-    $panel->appendChild(
-      '<ul class="herald-explain-list">'.
-        implode("\n", $rule_markup).
-      '</ul>');
+    $panel->appendChild(phutil_tag(
+      'ul',
+      array('class' => 'herald-explain-list'),
+      $rule_markup));
 
     return $panel;
   }

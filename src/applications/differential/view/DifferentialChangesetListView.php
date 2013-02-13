@@ -221,15 +221,20 @@ final class DifferentialChangesetListView extends AphrontView {
       ),
       array('Changes discarded. ', $link));
 
-    $template =
-      '<table><tr>'.
-      '<th></th><td>%s</td>'.
-      '<th></th><td colspan="3">%s</td>'.
-      '</tr></table>';
-
     return array(
-      'l' => sprintf($template, $div, ''),
-      'r' => sprintf($template, '', $div),
+      'l' => hsprintf(
+        '<table><tr>'.
+          '<th></th><td>%s</td>'.
+          '<th></th><td colspan="3"></td>'.
+        '</tr></table>',
+        $div),
+
+      'r' => hsprintf(
+        '<table><tr>'.
+          '<th></th><td></td>'.
+          '<th></th><td colspan="3">%s</td>'.
+        '</tr></table>',
+        $div),
     );
   }
 
