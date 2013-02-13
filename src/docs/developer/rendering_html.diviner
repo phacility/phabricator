@@ -168,10 +168,10 @@ following examples are dangerous:
 
   phutil_tag('span', array($evil => $evil2));
 
-  // Use PhutilURI to check if $evil is valid HTTP link.
-  phutil_tag('a', array('href' => $evil));
-
   phutil_tag('span', array('onmouseover' => $evil));
+
+  // Use PhutilURI to check if $evil is valid HTTP link.
+  hsprintf('<a href="%s">', $evil);
 
   hsprintf('<%s>%s</%s>', $evil, $evil2, $evil);
 

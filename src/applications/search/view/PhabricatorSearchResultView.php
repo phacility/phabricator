@@ -93,7 +93,7 @@ final class PhabricatorSearchResultView extends AphrontView {
 
   private function emboldenQuery($str) {
     if (!$this->query) {
-      return phutil_escape_html($str);
+      return $str;
     }
 
     $query = $this->query->getQuery();

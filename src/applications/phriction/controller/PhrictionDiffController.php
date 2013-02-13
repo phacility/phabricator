@@ -116,7 +116,7 @@ final class PhrictionDiffController
             'href' => '/phriction/history/'.$document->getSlug().'/',
           ),
           'History'),
-        phutil_escape_html("Changes Between Version {$l} and Version {$r}"),
+        "Changes Between Version {$l} and Version {$r}",
       ));
 
     $comparison_table = $this->renderComparisonTable(
