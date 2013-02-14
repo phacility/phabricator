@@ -48,15 +48,14 @@ abstract class PhabricatorBotHandler {
     $reply = id(new PhabricatorBotMessage())
       ->setCommand('MESSAGE');
 
-    if ($original_message->isPublic()) {
+    if ($original_message->getTarget()->isPublic()) {
       // This is a public target, like a chatroom. Send the response to the
       // chatroom.
       $reply->setTarget($original_message->getTarget());
     } else {
       // This is a private target, like a private message. Send the response
       // back to the sender (presumably, we are the target).
-      $reply->setTarget($original_message->getSender())
-        ->setPublic(false);
+      $reply->setTarget($original_message->getSender());
     }
 
     $reply->setBody($body);

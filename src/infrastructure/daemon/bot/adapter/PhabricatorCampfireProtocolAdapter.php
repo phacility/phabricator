@@ -115,11 +115,34 @@ final class PhabricatorCampfireProtocolAdapter
       $buffer = substr($buffer, $until + 2);
 
       $m_obj = json_decode($message, true);
+      $command = null;
+      switch ($m_obj['type']) {
+        case 'TextMessage':
+          $command = 'MESSAGE';
+          break;
+        case 'PasteMessage':
+          $command = 'PASTE';
+          break;
+        default:
+          // For now, ignore anything which we don't otherwise know about.
+          break;
+      }
+
+      if ($command === null) {
+        continue;
+      }
+
+      // TODO: These should be usernames, not user IDs.
+      $sender = id(new PhabricatorBotUser())
+        ->setName($m_obj['user_id']);
+
+      $target = id(new PhabricatorBotChannel())
+        ->setName($m_obj['room_id']);
 
       return id(new PhabricatorBotMessage())
-        ->setCommand('MESSAGE')
-        ->setSender($m_obj['user_id'])
-        ->setTarget($m_obj['room_id'])
+        ->setCommand($command)
+        ->setSender($sender)
+        ->setTarget($target)
         ->setBody($m_obj['body']);
     }
 
@@ -159,7 +182,13 @@ final class PhabricatorCampfireProtocolAdapter
     unset($this->inRooms[$room_id]);
   }
 
-  private function speak($message, $room_id, $type='TextMessage') {
+  private function speak(
+    $message,
+    PhabricatorBotTarget $channel,
+    $type = 'TextMessage') {
+
+    $room_id = $channel->getName();
+
     $this->performPost(
       "/room/{$room_id}/speak.json",
       array(

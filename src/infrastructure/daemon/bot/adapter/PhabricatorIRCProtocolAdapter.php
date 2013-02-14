@@ -128,7 +128,7 @@ final class PhabricatorIRCProtocolAdapter
     switch ($message->getCommand()) {
     case 'MESSAGE':
       $data = $irc_command.' '.
-        $message->getTarget().' :'.
+        $message->getTarget()->getName().' :'.
         $message->getBody()."\r\n";
       break;
     default:
@@ -164,15 +164,18 @@ final class PhabricatorIRCProtocolAdapter
     $command = $this->getBotCommand($matches['command']);
     list($target, $body) = $this->parseMessageData($command, $matches['data']);
 
+    if (!strlen($matches['sender'])) {
+      $sender = null;
+    } else {
+      $sender = id(new PhabricatorBotUser())
+       ->setName($matches['sender']);
+    }
+
     $bot_message = id(new PhabricatorBotMessage())
-      ->setSender(idx($matches, 'sender'))
+      ->setSender($sender)
       ->setCommand($command)
       ->setTarget($target)
       ->setBody($body);
-
-    if (!empty($target) && strncmp($target, '#', 1) !== 0) {
-      $bot_message->setPublic(false);
-    }
 
     return $bot_message;
   }
@@ -201,8 +204,18 @@ final class PhabricatorIRCProtocolAdapter
     case 'MESSAGE':
       $matches = null;
       if (preg_match('/^(\S+)\s+:?(.*)$/', $data, $matches)) {
+
+        $target_name = $matches[1];
+        if (strncmp($target_name, '#', 1) === 0) {
+          $target = id(new PhabricatorBotChannel())
+            ->setName($target_name);
+        } else {
+          $target = id(new PhabricatorBotUser())
+            ->setName($target_name);
+        }
+
         return array(
-          $matches[1],
+          $target,
           rtrim($matches[2], "\r\n"));
       }
       break;

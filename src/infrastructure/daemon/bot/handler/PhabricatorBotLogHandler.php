@@ -13,21 +13,20 @@ final class PhabricatorBotLogHandler extends PhabricatorBotHandler {
 
     switch ($message->getCommand()) {
       case 'MESSAGE':
-        $reply_to = $message->getReplyTo();
-        if (!$reply_to) {
-          break;
-        }
-        if (!$message->isPublic()) {
+        $target = $message->getTarget();
+        if (!$target->isPublic()) {
           // Don't log private messages, although maybe we should for debugging?
           break;
         }
 
+        $target_name = $target->getName();
+
         $logs = array(
           array(
-            'channel' => $reply_to,
+            'channel' => $target_name,
             'type'    => 'mesg',
             'epoch'   => time(),
-            'author'  => $message->getSender(),
+            'author'  => $message->getSender()->getName(),
             'message' => $message->getBody(),
           ),
         );
@@ -54,7 +53,7 @@ final class PhabricatorBotLogHandler extends PhabricatorBotHandler {
 
         if ($tell) {
           $response = $this->getURI(
-            '/chatlog/channel/'.phutil_escape_uri($reply_to).'/');
+            '/chatlog/channel/'.phutil_escape_uri($target_name).'/');
 
           $this->replyTo($message, $response);
         }
