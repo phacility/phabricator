@@ -58,7 +58,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
       $classes[] = 'phabricator-notification-unread';
     }
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
@@ -72,7 +72,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
 
   public function render() {
 
-    $head = phutil_render_tag(
+    $head = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-feed-story-head',
@@ -84,7 +84,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
     $image_style = null;
 
     if (!$this->oneLine) {
-      $body = phutil_render_tag(
+      $body = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-feed-story-body',
@@ -111,7 +111,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
 
     require_celerity_resource('phabricator-feed-css');
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => $this->oneLine

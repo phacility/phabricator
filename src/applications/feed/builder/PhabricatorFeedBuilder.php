@@ -40,8 +40,8 @@ final class PhabricatorFeedBuilder {
 
       if ($date !== $last_date) {
         if ($last_date !== null) {
-          $null_view->appendChild(
-            '<div class="phabricator-feed-story-date-separator"></div>');
+          $null_view->appendChild(hsprintf(
+            '<div class="phabricator-feed-story-date-separator"></div>'));
         }
         $last_date = $date;
         $null_view->appendChild(
@@ -59,10 +59,9 @@ final class PhabricatorFeedBuilder {
       $null_view->appendChild($view);
     }
 
-    return id(new AphrontNullView())->appendChild(
-      '<div class="phabricator-feed-frame">'.
-        $null_view->render().
-      '</div>');
+    return id(new AphrontNullView())->appendChild(hsprintf(
+      '<div class="phabricator-feed-frame">%s</div>',
+      $null_view->render()));
   }
 
 }

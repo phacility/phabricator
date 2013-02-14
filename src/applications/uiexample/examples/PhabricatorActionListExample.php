@@ -104,7 +104,7 @@ final class PhabricatorActionListExample extends PhabricatorUIExample {
 
     return array(
       $view,
-      '<div style="clear: both;"></div>',
+      hsprintf('<div style="clear: both;"></div>'),
       $notices,
     );
   }

@@ -44,15 +44,15 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
         return pht(
           '%s renamed this mock from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
-          phutil_escape_html($old),
-          phutil_escape_html($new));
+          $old,
+          $new);
         break;
       case PholioTransactionType::TYPE_DESCRIPTION:
         return pht(
           '%s updated the description of this mock. '.
           'The old description was: %s',
           $this->renderHandleLink($author_phid),
-          phutil_escape_html($old));
+          $old);
     }
 
     return parent::getTitle();

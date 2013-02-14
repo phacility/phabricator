@@ -3,7 +3,7 @@
 final class AphrontNullView extends AphrontView {
 
   public function render() {
-    return $this->renderChildren();
+    return phutil_implode_html('', $this->renderChildren());
   }
 
 }

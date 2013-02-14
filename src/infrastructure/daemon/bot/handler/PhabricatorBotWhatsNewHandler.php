@@ -13,11 +13,6 @@ final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
 
     switch ($message->getCommand()) {
       case 'MESSAGE':
-        $reply_to = $message->getReplyTo();
-        if (!$reply_to) {
-          break;
-        }
-
         $message_body = $message->getBody();
 
         $prompt = '~what( i|\')?s new\?~i';
@@ -27,17 +22,17 @@ final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
           }
           $this->floodblock = time() + 60;
 
-          $this->getLatest($reply_to);
+          $this->getLatest($message);
         }
         break;
     }
   }
 
-  public function getLatest($reply_to) {
+  public function getLatest(PhabricatorBotMessage $message) {
     $latest = $this->getConduit()->callMethodSynchronous(
       'feed.query',
       array(
-        'limit'=>5
+        'limit' => 5
       ));
 
     $phids = array();
@@ -112,11 +107,7 @@ final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
       // $content = "{$bold}{$user}{$reset} {$gray}{$action} {$blue}{$bold}".
         // "{$title}{$reset} - {$gray}{$uri}{$reset}";
       $content = "{$user} {$action} {$title} - {$uri}";
-      $this->writeMessage(
-        id(new PhabricatorBotMessage())
-        ->setCommand('MESSAGE')
-        ->setTarget($reply_to)
-        ->setBody($content));
+      $this->replyTo($message, $content);
     }
     return;
   }

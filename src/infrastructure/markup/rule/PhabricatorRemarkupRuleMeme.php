@@ -9,7 +9,7 @@ final class PhabricatorRemarkupRuleMeme
   private $images;
 
   public function apply($text) {
-    return preg_replace_callback(
+    return $this->replaceHTML(
       '@{meme,([^}]+)}$@m',
       array($this, 'markupMeme'),
       $text);

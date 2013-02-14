@@ -29,7 +29,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
     $file = $this->getValue();
 
     if ($file === null) {
-      return phutil_render_tag(
+      return phutil_tag(
         'img',
         array(
           'src' => PhabricatorUser::getDefaultProfileImageURI()
@@ -58,7 +58,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
       )
     );
 
-    return javelin_render_tag(
+    return javelin_tag(
       'div',
       array(
         'id' => $c_id,
@@ -66,32 +66,34 @@ final class AphrontFormCropControl extends AphrontFormControl {
         'mustcapture' => true,
         'class' => 'crop-box'
       ),
-      javelin_render_tag(
-        'img',
-        array(
-          'src' => $file->getBestURI(),
-          'class' => 'crop-image',
-          'sigil' => 'crop-image'
+      array(
+        javelin_tag(
+          'img',
+          array(
+            'src' => $file->getBestURI(),
+            'class' => 'crop-image',
+            'sigil' => 'crop-image'
+          ),
+          ''
         ),
-        ''
-      ).
-      javelin_render_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => 'image_x',
-          'sigil' => 'crop-x',
+        javelin_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'image_x',
+            'sigil' => 'crop-x',
+          ),
+          ''
         ),
-        ''
-      ).
-      javelin_render_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => 'image_y',
-          'sigil' => 'crop-y',
+        javelin_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'image_y',
+            'sigil' => 'crop-y',
+          ),
+          ''
         ),
-        ''
       )
     );
   }

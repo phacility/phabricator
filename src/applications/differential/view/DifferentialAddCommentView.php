@@ -155,35 +155,35 @@ final class DifferentialAddCommentView extends AphrontView {
         'inline'    => 'inline-comment-preview',
       ));
 
-    $warning_container = '<div id="warnings">';
+    $warning_container = array();
     foreach ($warnings as $warning) {
       if ($warning) {
-        $warning_container .= $warning->render();
+        $warning_container[] = $warning->render();
       }
     }
-    $warning_container .= '</div>';
 
     $header = id(new PhabricatorHeaderView())
       ->setHeader($is_serious ? pht('Add Comment') : pht('Leap Into Action'));
 
-    return
-      id(new PhabricatorAnchorView())
-        ->setAnchorName('comment')
-        ->setNavigationMarker(true)
-        ->render().
+    return hsprintf(
+      '%s'.
       '<div class="differential-add-comment-panel">'.
-        $header->render().
-        $form->render().
-        $warning_container.
+        '%s%s%s'.
         '<div class="aphront-panel-preview aphront-panel-flush">'.
           '<div id="comment-preview">'.
-            '<span class="aphront-panel-preview-loading-text">'.
-              pht('Loading comment preview...').
-            '</span>'.
+            '<span class="aphront-panel-preview-loading-text">%s</span>'.
           '</div>'.
           '<div id="inline-comment-preview">'.
           '</div>'.
         '</div>'.
-      '</div>';
+      '</div>',
+      id(new PhabricatorAnchorView())
+        ->setAnchorName('comment')
+        ->setNavigationMarker(true)
+        ->render(),
+      $header->render(),
+      $form->render(),
+      phutil_tag('div', array('id' => 'warnings'), $warning_container),
+      pht('Loading comment preview...'));
   }
 }

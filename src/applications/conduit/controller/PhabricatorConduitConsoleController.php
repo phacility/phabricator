@@ -109,7 +109,7 @@ final class PhabricatorConduitConsoleController
           ->setValue('Call Method'));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Conduit API: '.phutil_escape_html($this->method));
+    $panel->setHeader('Conduit API: '.$this->method);
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
 

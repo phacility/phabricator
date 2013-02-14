@@ -456,7 +456,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     if ($files) {
       $file_display = mpull($files, 'getName');
-      $file_display = array_interleave(phutil_tag('br'), $file_display);
+      $file_display = phutil_implode_html(phutil_tag('br'), $file_display);
 
       $form->appendChild(
         id(new AphrontFormMarkupControl())
@@ -512,7 +512,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $panel->appendChild($form);
     $panel->setNoBackground();
 
-    $description_preview_panel =
+    $description_preview_panel = hsprintf(
       '<div class="aphront-panel-preview aphront-panel-preview-full">
         <div class="maniphest-description-preview-header">
           Description Preview
@@ -522,7 +522,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             Loading preview...
           </div>
         </div>
-      </div>';
+      </div>');
 
     Javelin::initBehavior(
       'maniphest-description-preview',
@@ -542,7 +542,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       array(
         $error_view,
         $panel,
-        $description_preview_panel
+        $description_preview_panel,
       ),
       array(
         'title' => $header_name,

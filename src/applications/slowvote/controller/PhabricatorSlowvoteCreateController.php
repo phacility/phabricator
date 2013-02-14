@@ -27,16 +27,16 @@ final class PhabricatorSlowvoteCreateController
       $poll->setMethod($request->getInt('method'));
 
       if (!strlen($poll->getQuestion())) {
-        $e_question = 'Required';
-        $errors[] = 'You must ask a poll question.';
+        $e_question = pht('Required');
+        $errors[] = pht('You must ask a poll question.');
       } else {
         $e_question = null;
       }
 
       $responses = array_filter($responses);
       if (empty($responses)) {
-        $errors[] = 'You must offer at least one response.';
-        $e_response = 'Required';
+        $errors[] = pht('You must offer at least one response.');
+        $e_response = pht('Required');
       } else {
         $e_response = null;
       }
@@ -59,18 +59,26 @@ final class PhabricatorSlowvoteCreateController
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     }
 
+    $instructions =
+      phutil_tag(
+        'p',
+        array(
+          'class' => 'aphront-form-instructions',
+        ),
+        pht('Resolve issues and build consensus through '.
+          'protracted deliberation.')
+      );
+
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">Resolve issues and build '.
-        'consensus through protracted deliberation.</p>'))
+      ->appendChild($instructions)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Question')
+          ->setLabel(pht('Question'))
           ->setName('question')
           ->setValue($poll->getQuestion())
           ->setError($e_question));
@@ -78,7 +86,7 @@ final class PhabricatorSlowvoteCreateController
     for ($ii = 0; $ii < 10; $ii++) {
       $n = ($ii + 1);
       $response = id(new AphrontFormTextControl())
-        ->setLabel("Response {$n}")
+        ->setLabel(pht("Response %d", $n))
         ->setName('response[]')
         ->setValue(idx($responses, $ii, ''));
 
@@ -90,57 +98,69 @@ final class PhabricatorSlowvoteCreateController
     }
 
     $poll_type_options = array(
-      PhabricatorSlowvotePoll::METHOD_PLURALITY => 'Plurality (Single Choice)',
-      PhabricatorSlowvotePoll::METHOD_APPROVAL  => 'Approval (Multiple Choice)',
+      PhabricatorSlowvotePoll::METHOD_PLURALITY =>
+        pht('Plurality (Single Choice)'),
+      PhabricatorSlowvotePoll::METHOD_APPROVAL  =>
+        pht('Approval (Multiple Choice)'),
     );
 
     $response_type_options = array(
       PhabricatorSlowvotePoll::RESPONSES_VISIBLE
-        => 'Allow anyone to see the responses',
+        => pht('Allow anyone to see the responses'),
       PhabricatorSlowvotePoll::RESPONSES_VOTERS
-        => 'Require a vote to see the responses',
+        => pht('Require a vote to see the responses'),
       PhabricatorSlowvotePoll::RESPONSES_OWNER
-        => 'Only I can see the responses',
+        => pht('Only I can see the responses'),
     );
 
     $form
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Vote Type')
+          ->setLabel(pht('Vote Type'))
           ->setName('method')
           ->setValue($poll->getMethod())
           ->setOptions($poll_type_options))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Responses')
+          ->setLabel(pht('Responses'))
           ->setName('response_visibility')
           ->setValue($poll->getResponseVisibility())
           ->setOptions($response_type_options))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
-          ->setLabel('Shuffle')
+          ->setLabel(pht('Shuffle'))
           ->addCheckbox(
             'shuffle',
             1,
-            'Show choices in random order',
+            pht('Show choices in random order'),
             $poll->getShuffle()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Create Slowvote')
+          ->setValue(pht('Create Slowvote'))
           ->addCancelButton('/vote/'));
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setHeader('Create Slowvote');
+    $panel->setHeader(pht('Create Slowvote'));
+    $panel->setNoBackground();
     $panel->appendChild($form);
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Create Slowvote'))
+        ->setHref($this->getApplicationURI().'create/')
+      );
+
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         $error_view,
         $panel,
       ),
       array(
-        'title' => 'Create Slowvote',
+        'title' => pht('Create Slowvote'),
+        'device' => true,
       ));
   }
 

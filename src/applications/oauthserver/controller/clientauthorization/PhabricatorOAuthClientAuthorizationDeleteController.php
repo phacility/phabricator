@@ -37,20 +37,17 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
       ->loadOneWhere('phid = %s',
                      $client_phid);
     if ($client) {
-      $client_name = phutil_escape_html($client->getName());
-      $title .= ' for '.$client_name;
+      $title .= ' for '.$client->getName();
     } else {
       // the client does not exist so token is dead already (but
       // let's let the user clean this up anyway in that case)
-      $client_name = '';
     }
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($current_user);
     $dialog->setTitle($title);
-    $dialog->appendChild(
-      '<p>Are you sure you want to delete this client authorization?</p>'
-    );
+    $dialog->appendChild(phutil_tag('p', array(), pht(
+      'Are you sure you want to delete this client authorization?')));
     $dialog->addSubmitButton();
     $dialog->addCancelButton($authorization->getEditURI());
     return id(new AphrontDialogResponse())->setDialog($dialog);

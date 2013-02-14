@@ -147,13 +147,13 @@ final class PhabricatorSlowvotePollController
 
     if ($viewer_choices) {
       $instructions =
-        'Your vote has been recorded... but there is still ample time to '.
+        pht('Your vote has been recorded... but there is still ample time to '.
         'rethink your position. Have you thoroughly considered all possible '.
-        'eventualities?';
+        'eventualities?');
     } else {
       $instructions =
-        'This is a weighty matter indeed. Consider your choices with the '.
-        'greatest of care.';
+        pht('This is a weighty matter indeed. Consider your choices with the '.
+        'greatest of care.');
     }
 
     $form = id(new AphrontFormView())
@@ -163,31 +163,32 @@ final class PhabricatorSlowvotePollController
         $instructions))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel('Vote')
+          ->setLabel(pht('Vote'))
           ->setValue($option_markup))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Comments')
+          ->setLabel(pht('Comments'))
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
           ->setName('comments')
           ->setValue($comment_text))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Cautiously Engage in Deliberations'));
+          ->setValue(pht('Engage in Deliberations')));
 
 
     $panel = new AphrontPanelView();
-    $panel->setHeader(phutil_escape_html($poll->getQuestion()));
+    $panel->setHeader($poll->getQuestion());
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-
+    $panel->setNoBackground();
     $panel->appendChild($form);
-    $panel->appendChild('<br /><br />');
+    $panel->appendChild(hsprintf('<br /><br />'));
     $panel->appendChild($result_markup);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $panel,
       array(
         'title' => 'V'.$poll->getID().' '.$poll->getQuestion(),
+        'device' => true,
       ));
   }
 
@@ -203,8 +204,7 @@ final class PhabricatorSlowvotePollController
     foreach ($comments as $comment) {
       $handle = $handles[$comment->getAuthorPHID()];
 
-      $markup = phutil_safe_html(
-        $engine->markupText($comment->getCommentText()));
+      $markup = $engine->markupText($comment->getCommentText());
 
       require_celerity_resource('phabricator-remarkup-css');
 
@@ -373,13 +373,13 @@ final class PhabricatorSlowvotePollController
     }
 
     $result_markup = id(new AphrontFormLayoutView())
-      ->appendChild(phutil_tag('h1', array(), 'Ongoing Deliberation'));
+      ->appendChild(phutil_tag('h1', array(), pht('Ongoing Deliberation')));
 
     if (!$can_see_responses) {
       if ($need_vote) {
-        $reason = "You must vote to see the results.";
+        $reason = pht("You must vote to see the results.");
       } else {
-        $reason = "The results are not public.";
+        $reason = pht("The results are not public.");
       }
       $result_markup
         ->appendChild(hsprintf(
@@ -416,7 +416,7 @@ final class PhabricatorSlowvotePollController
               )));
         }
       } else {
-        $user_markup = 'This option has failed to appeal to anyone.';
+        $user_markup = pht('This option has failed to appeal to anyone.');
       }
 
       $comment_markup = $this->renderComments(
@@ -450,7 +450,7 @@ final class PhabricatorSlowvotePollController
         $comments,
         $handles);
       $result_markup->appendChild(
-        phutil_tag('h1', array(), 'Motions Proposed for Consideration'));
+        phutil_tag('h1', array(), pht('Motions Proposed for Consideration')));
       $result_markup->appendChild($comment_markup);
     }
 

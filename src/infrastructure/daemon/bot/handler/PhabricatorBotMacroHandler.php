@@ -8,7 +8,6 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
   private $macros;
   private $regexp;
 
-  private $buffer = array();
   private $next   = 0;
 
   private function init() {
@@ -46,64 +45,35 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
     }
 
     switch ($message->getCommand()) {
-    case 'MESSAGE':
-      $reply_to = $message->getReplyTo();
-      if (!$reply_to) {
+      case 'MESSAGE':
+        $message_body = $message->getBody();
+
+        $matches = null;
+        if (!preg_match($this->regexp, $message_body, $matches)) {
+          return;
+        }
+
+        $macro = $matches[1];
+
+        $ascii = idx($this->macros[$macro], 'ascii');
+        if ($ascii === false) {
+          return;
+        }
+
+        if (!$ascii) {
+          $this->macros[$macro]['ascii'] = $this->rasterize(
+            $this->macros[$macro],
+            $this->getConfig('macro.size', 48),
+            $this->getConfig('macro.aspect', 0.66));
+          $ascii = $this->macros[$macro]['ascii'];
+        }
+
+        $target_name = $message->getTarget()->getName();
+        foreach ($ascii as $line) {
+          $this->replyTo($message, $line);
+        }
         break;
-      }
-
-      $message_body = $message->getBody();
-
-      $matches = null;
-      if (!preg_match($this->regexp, $message_body, $matches)) {
-        return;
-      }
-
-      $macro = $matches[1];
-
-      $ascii = idx($this->macros[$macro], 'ascii');
-      if ($ascii === false) {
-        return;
-      }
-
-      if (!$ascii) {
-        $this->macros[$macro]['ascii'] = $this->rasterize(
-          $this->macros[$macro],
-          $this->getConfig('macro.size', 48),
-          $this->getConfig('macro.aspect', 0.66));
-        $ascii = $this->macros[$macro]['ascii'];
-      }
-
-      foreach ($ascii as $line) {
-        $this->buffer[$reply_to][] = $line;
-      }
-      break;
     }
-  }
-
-  public function runBackgroundTasks() {
-    if (microtime(true) < $this->next) {
-      return;
-    }
-
-    foreach ($this->buffer as $channel => $lines) {
-      if (empty($lines)) {
-        unset($this->buffer[$channel]);
-        continue;
-      }
-      foreach ($lines as $key => $line) {
-        $this->writeMessage(
-          id(new PhabricatorBotMessage())
-          ->setCommand('MESSAGE')
-          ->setTarget($channel)
-          ->setBody($line));
-        unset($this->buffer[$channel][$key]);
-        break 2;
-      }
-    }
-
-    $sleep = $this->getConfig('macro.sleep', 0.25);
-    $this->next = microtime(true) + ((mt_rand(75, 150) / 100) * $sleep);
   }
 
   public function rasterize($macro, $size, $aspect) {

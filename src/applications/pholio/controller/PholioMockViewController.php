@@ -145,7 +145,7 @@ final class PholioMockViewController extends PholioController {
       foreach ($subscribers as $subscriber) {
         $sub_view[] = $this->getHandle($subscriber)->renderLink();
       }
-      $sub_view = array_interleave(', ', $sub_view);
+      $sub_view = phutil_implode_html(', ', $sub_view);
     } else {
       $sub_view = phutil_tag('em', array(), pht('None'));
     }

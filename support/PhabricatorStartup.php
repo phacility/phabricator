@@ -17,6 +17,7 @@ final class PhabricatorStartup {
 
   private static $startTime;
   private static $globals = array();
+  private static $capturingOutput;
 
 
 /* -(  Accessing Request Information  )-------------------------------------- */
@@ -78,6 +79,8 @@ final class PhabricatorStartup {
     self::verifyRewriteRules();
 
     self::detectPostMaxSizeTriggered();
+
+    self::beginOutputCapture();
   }
 
 
@@ -149,6 +152,26 @@ final class PhabricatorStartup {
     phutil_load_library($phabricator_root.'/src');
   }
 
+/* -(  Output Capture  )----------------------------------------------------- */
+
+
+  public static function beginOutputCapture() {
+    if (self::$capturingOutput) {
+      self::didFatal("Already capturing output!");
+    }
+    self::$capturingOutput = true;
+    ob_start();
+  }
+
+
+  public static function endOutputCapture() {
+    if (!self::$capturingOutput) {
+      return null;
+    }
+    self::$capturingOutput = false;
+    return ob_get_clean();
+  }
+
 
 /* -(  In Case of Apocalypse  )---------------------------------------------- */
 
@@ -157,6 +180,7 @@ final class PhabricatorStartup {
    * @task apocalypse
    */
   public static function didFatal($message) {
+    self::endOutputCapture();
     $access_log = self::getGlobal('log.access');
 
     if ($access_log) {

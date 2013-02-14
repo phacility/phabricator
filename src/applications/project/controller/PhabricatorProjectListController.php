@@ -12,14 +12,7 @@ final class PhabricatorProjectListController
   public function processRequest() {
     $request = $this->getRequest();
 
-    $nav = new AphrontSideNavFilterView();
-    $nav
-      ->setBaseURI(new PhutilURI('/project/filter/'))
-      ->addLabel('User')
-      ->addFilter('active',   'Active')
-      ->addLabel('All')
-      ->addFilter('all',      'All Projects')
-      ->addFilter('allactive','Active Projects');
+    $nav = $this->buildSideNavView($this->filter);
     $this->filter = $nav->selectFilter($this->filter, 'active');
 
     $pager = new AphrontPagerView();
@@ -33,21 +26,19 @@ final class PhabricatorProjectListController
 
     $view_phid = $request->getUser()->getPHID();
 
-    $status_filter = PhabricatorProjectQuery::STATUS_ANY;
-
     switch ($this->filter) {
       case 'active':
-        $table_header = 'Your Projects';
+        $table_header = pht('Your Projects');
         $query->withMemberPHIDs(array($view_phid));
         $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
         break;
       case 'allactive':
-        $status_filter = PhabricatorProjectQuery::STATUS_ACTIVE;
-        $table_header = 'Active Projects';
-        // fallthrough
+        $table_header = pht('Active Projects');
+        $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
+        break;
       case 'all':
-        $table_header = 'All Projects';
-        $query->withStatus($status_filter);
+        $table_header = pht('All Projects');
+        $query->withStatus(PhabricatorProjectQuery::STATUS_ANY);
         break;
     }
 
@@ -88,7 +79,6 @@ final class PhabricatorProjectListController
 
       $group = idx($groups, $phid, array());
       $task_count = count($group);
-
       $population = count($members);
 
       if ($profile) {
@@ -98,57 +88,64 @@ final class PhabricatorProjectListController
         $blurb = null;
       }
 
+      $tasks_href = pht('%d Open Task(s)', $task_count);
 
       $rows[] = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/project/view/'.$project->getID().'/',
-          ),
-          $project->getName()),
-        phutil_escape_html(
-          PhabricatorProjectStatus::getNameForStatus($project->getStatus())),
-        phutil_escape_html($blurb),
-        phutil_escape_html($population),
+        $project->getName(),
+        '/project/view/'.$project->getID().'/',
+        PhabricatorProjectStatus::getNameForStatus($project->getStatus()),
+        PhabricatorProjectStatus::getIconForStatus($project->getStatus()),
+        $blurb,
+        pht('%d Member(s)', $population),
         phutil_tag(
           'a',
           array(
             'href' => '/maniphest/view/all/?projects='.$phid,
           ),
-          $task_count),
+          $tasks_href),
+        '/project/edit/'.$project->getID().'/',
       );
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
+    $list = new PhabricatorObjectItemListView();
+    $list->setStackable();
+    foreach ($rows as $row) {
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($row[0])
+        ->setHref($row[1])
+        ->addIcon($row[3], $row[2])
+        ->addIcon('edit', pht('Edit Project'), $row[7]);
+      if ($row[4]) {
+        $item->addAttribute($row[4]);
+      }
+      $item->addAttribute($row[5]);
+      $item->addAttribute($row[6]);
+      $list->addItem($item);
+    }
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($table_header);
+
+    $nav->appendChild(
       array(
-        'Project',
-        'Status',
-        'Description',
-        'Population',
-        'Open Tasks',
-      ));
-    $table->setColumnClasses(
-      array(
-        'pri',
-        '',
-        'wide',
-        '',
-        ''
+        $header,
+        $list,
+        $pager,
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader($table_header);
-    $panel->setCreateButton('Create New Project', '/project/create/');
-    $panel->appendChild($table);
-    $panel->appendChild($pager);
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($table_header)
+        ->setHref($this->getApplicationURI())
+      );
+    $nav->setCrumbs($crumbs);
 
-    $nav->appendChild($panel);
-
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Projects',
+        'title' => pht('Projects'),
+        'device' => true,
       ));
   }
 }

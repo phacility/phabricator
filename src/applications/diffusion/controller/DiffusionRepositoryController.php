@@ -63,12 +63,15 @@ final class DiffusionRepositoryController extends DiffusionController {
     $all = phutil_tag(
       'a',
       array(
-        'href' => "/diffusion/{$callsign}/history/",
+        'href' => $drequest->generateURI(
+          array(
+            'action' => 'history',
+          )),
       ),
       'View Full Commit History');
 
     $panel = new AphrontPanelView();
-    $panel->setHeader("Recent Commits &middot; {$all}");
+    $panel->setHeader(hsprintf("Recent Commits &middot; %s", $all));
     $panel->appendChild($history_table);
     $panel->setNoBackground();
 
@@ -125,9 +128,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $rows = array();
     foreach ($properties as $key => $value) {
-      $rows[] = array(
-        phutil_escape_html($key),
-        phutil_escape_html($value));
+      $rows[] = array($key, $value);
     }
 
     $table = new AphrontTableView($rows);

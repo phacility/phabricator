@@ -44,14 +44,14 @@ final class PonderAddAnswerView extends AphrontView {
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Make it so'));
 
-    $preview =
+    $preview = hsprintf(
       '<div class="aphront-panel-flush">'.
         '<div id="answer-preview">'.
           '<span class="aphront-panel-preview-loading-text">'.
             'Loading answer preview...'.
           '</span>'.
         '</div>'.
-      '</div>';
+      '</div>');
 
     Javelin::initBehavior(
       'ponder-feedback-preview',

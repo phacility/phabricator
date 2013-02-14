@@ -13,7 +13,7 @@ final class PhabricatorBotMessage {
     $this->public = true;
   }
 
-  public function setSender($sender) {
+  public function setSender(PhabricatorBotTarget $sender = null) {
     $this->sender = $sender;
     return $this;
   }
@@ -40,7 +40,7 @@ final class PhabricatorBotMessage {
     return $this->body;
   }
 
-  public function setTarget($target) {
+  public function setTarget(PhabricatorBotTarget $target = null) {
     $this->target = $target;
     return $this;
   }
@@ -49,20 +49,4 @@ final class PhabricatorBotMessage {
     return $this->target;
   }
 
-  public function isPublic() {
-    return $this->public;
-  }
-
-  public function setPublic($is_public) {
-    $this->public = $is_public;
-    return $this;
-  }
-
-  public function getReplyTo() {
-    if ($this->public) {
-      return $this->target;
-    } else {
-      return $this->sender;
-    }
-  }
 }

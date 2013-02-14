@@ -32,10 +32,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
       $name = $spec->getName();
       $value = $spec->formatValueForDisplay($user, $fact->getValueX());
 
-      $rows[] = array(
-        phutil_escape_html($name),
-        phutil_escape_html($value),
-      );
+      $rows[] = array($name, $value);
     }
 
     $table = new AphrontTableView($rows);

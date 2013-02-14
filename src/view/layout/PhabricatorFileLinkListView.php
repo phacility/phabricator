@@ -31,10 +31,7 @@ final class PhabricatorFileLinkListView extends AphrontView {
       $file_links[] = $view->render();
     }
 
-    return $this->renderHTMLView(
-      array_interleave(
-        phutil_tag('br'),
-        $file_links));
+    return phutil_implode_html(phutil_tag('br'), $file_links);
   }
 }
 

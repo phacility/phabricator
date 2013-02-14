@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCampfireProtocolAdapter
-extends PhabricatorBaseProtocolAdapter {
+  extends PhabricatorBaseProtocolAdapter {
 
   private $readBuffers;
   private $authtoken;
@@ -12,10 +12,10 @@ extends PhabricatorBaseProtocolAdapter {
   private $inRooms = array();
 
   public function connect() {
-    $this->server = idx($this->config, 'server');
-    $this->authtoken = idx($this->config, 'authtoken');
-    $ssl = idx($this->config, 'ssl', false);
-    $rooms = idx($this->config, 'join');
+    $this->server = $this->getConfig('server');
+    $this->authtoken = $this->getConfig('authtoken');
+    $ssl = $this->getConfig('ssl', false);
+    $rooms = $this->getConfig('join');
 
     // First, join the room
     if (!$rooms) {
@@ -115,11 +115,34 @@ extends PhabricatorBaseProtocolAdapter {
       $buffer = substr($buffer, $until + 2);
 
       $m_obj = json_decode($message, true);
+      $command = null;
+      switch ($m_obj['type']) {
+        case 'TextMessage':
+          $command = 'MESSAGE';
+          break;
+        case 'PasteMessage':
+          $command = 'PASTE';
+          break;
+        default:
+          // For now, ignore anything which we don't otherwise know about.
+          break;
+      }
+
+      if ($command === null) {
+        continue;
+      }
+
+      // TODO: These should be usernames, not user IDs.
+      $sender = id(new PhabricatorBotUser())
+        ->setName($m_obj['user_id']);
+
+      $target = id(new PhabricatorBotChannel())
+        ->setName($m_obj['room_id']);
 
       return id(new PhabricatorBotMessage())
-        ->setCommand('MESSAGE')
-        ->setSender($m_obj['user_id'])
-        ->setTarget($m_obj['room_id'])
+        ->setCommand($command)
+        ->setSender($sender)
+        ->setTarget($target)
         ->setBody($m_obj['body']);
     }
 
@@ -129,11 +152,23 @@ extends PhabricatorBaseProtocolAdapter {
 
   public function writeMessage(PhabricatorBotMessage $message) {
     switch ($message->getCommand()) {
-    case 'MESSAGE':
-      $this->speak(
-        $message->getBody(),
-        $message->getTarget());
-      break;
+      case 'MESSAGE':
+        $this->speak(
+          $message->getBody(),
+          $message->getTarget());
+        break;
+      case 'SOUND':
+        $this->speak(
+          $message->getBody(),
+          $message->getTarget(),
+          'SoundMessage');
+        break;
+      case 'PASTE':
+        $this->speak(
+          $message->getBody(),
+          $message->getTarget(),
+          'PasteMessage');
+        break;
     }
   }
 
@@ -147,12 +182,18 @@ extends PhabricatorBaseProtocolAdapter {
     unset($this->inRooms[$room_id]);
   }
 
-  private function speak($message, $room_id) {
+  private function speak(
+    $message,
+    PhabricatorBotTarget $channel,
+    $type = 'TextMessage') {
+
+    $room_id = $channel->getName();
+
     $this->performPost(
       "/room/{$room_id}/speak.json",
       array(
         'message' => array(
-          'type' => 'TextMessage',
+          'type' => $type,
           'body' => $message)));
   }
 

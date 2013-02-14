@@ -123,7 +123,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
   }
 
   protected function render404Page() {
-    return '<h2>404 Not Found</h2>';
+    return hsprintf('<h2>404 Not Found</h2>');
   }
 
   final public function getResourceURI($resource) {

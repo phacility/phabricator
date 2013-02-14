@@ -244,7 +244,7 @@ final class ManiphestReportController extends ManiphestController {
       ));
 
     if ($handle) {
-      $header = "Task Burn Rate for Project ".$handle->renderLink();
+      $header = pht("Task Burn Rate for Project %s", $handle->renderLink());
       $caption = hsprintf(
         "<p>NOTE: This table reflects tasks <em>currently</em> in ".
         "the project. If a task was opened in the past but added to ".
@@ -363,9 +363,9 @@ final class ManiphestReportController extends ManiphestController {
     $fmt = number_format($delta);
     if ($delta > 0) {
       $fmt = '+'.$fmt;
-      $fmt = '<span class="red">'.$fmt.'</span>';
+      $fmt = hsprintf('<span class="red">%s</span>', $fmt);
     } else {
-      $fmt = '<span class="green">'.$fmt.'</span>';
+      $fmt = hsprintf('<span class="green">%s</span>', $fmt);
     }
 
     return array(

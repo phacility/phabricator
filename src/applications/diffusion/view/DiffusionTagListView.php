@@ -79,7 +79,6 @@ final class DiffusionTagListView extends DiffusionView {
           $description = $tag->getDescription();
         }
       }
-      $description = phutil_escape_html($description);
 
       $rows[] = array(
         $tag_link,

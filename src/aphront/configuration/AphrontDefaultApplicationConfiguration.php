@@ -122,6 +122,7 @@ class AphrontDefaultApplicationConfiguration
   protected function getResourceURIMapRules() {
     return array(
       '/res/' => array(
+        '(?:(?P<mtime>[0-9]+)T/)?'.
         '(?P<package>pkg/)?'.
         '(?P<hash>[a-f0-9]{8})/'.
         '(?P<path>.+\.(?:css|js|jpg|png|swf|gif))'
@@ -209,7 +210,7 @@ class AphrontDefaultApplicationConfiguration
 
     if ($ex instanceof AphrontUsageException) {
       $error = new AphrontErrorView();
-      $error->setTitle(phutil_escape_html($ex->getTitle()));
+      $error->setTitle($ex->getTitle());
       $error->appendChild($ex->getMessage());
 
       $view = new PhabricatorStandardPageView();
@@ -226,8 +227,8 @@ class AphrontDefaultApplicationConfiguration
     // Always log the unhandled exception.
     phlog($ex);
 
-    $class    = phutil_escape_html(get_class($ex));
-    $message  = phutil_escape_html($ex->getMessage());
+    $class    = get_class($ex);
+    $message  = $ex->getMessage();
 
     if ($ex instanceof AphrontQuerySchemaException) {
       $message .=
@@ -243,11 +244,13 @@ class AphrontDefaultApplicationConfiguration
       $trace = null;
     }
 
-    $content =
+    $content = hsprintf(
       '<div class="aphront-unhandled-exception">'.
-        '<div class="exception-message">'.$message.'</div>'.
-        $trace.
-      '</div>';
+        '<div class="exception-message">%s</div>'.
+        '%s'.
+      '</div>',
+      $message,
+      $trace);
 
     $dialog = new AphrontDialogView();
     $dialog
@@ -347,17 +350,17 @@ class AphrontDefaultApplicationConfiguration
             ),
             $relative);
         }
-        $file_name = $file_name.' : '.(int)$part['line'];
+        $file_name = hsprintf('%s : %d', $file_name, $part['line']);
       } else {
-        $file_name = '<em>(Internal)</em>';
+        $file_name = phutil_tag('em', array(), '(Internal)');
       }
 
 
       $rows[] = array(
         $depth--,
-        phutil_escape_html($lib),
+        $lib,
         $file_name,
-        phutil_escape_html($where),
+        $where,
       );
     }
     $table = new AphrontTableView($rows);
@@ -376,11 +379,12 @@ class AphrontDefaultApplicationConfiguration
         'wide',
       ));
 
-    return
+    return hsprintf(
       '<div class="exception-trace">'.
         '<div class="exception-trace-header">Stack Trace</div>'.
-        $table->render().
-      '</div>';
+        '%s',
+      '</div>',
+      $table->render());
   }
 
 }

@@ -8,13 +8,13 @@ final class PhabricatorRemarkupRuleCountdown extends PhutilRemarkupRule {
   const KEY_RULE_COUNTDOWN = 'rule.countdown';
 
   public function apply($text) {
-    return preg_replace_callback(
+    return $this->replaceHTML(
       "@\B{C(\d+)}\B@",
       array($this, 'markupCountdown'),
       $text);
   }
 
-  private function markupCountdown($matches) {
+  protected function markupCountdown($matches) {
     $countdown = id(new PhabricatorTimer())->load($matches[1]);
     if (!$countdown) {
       return $matches[0];
@@ -46,20 +46,17 @@ final class PhabricatorRemarkupRuleCountdown extends PhutilRemarkupRule {
 
     foreach ($metadata as $id => $info) {
       list($time, $token) = $info;
+      $prefix = 'phabricator-timer-';
       $count = phutil_tag(
         'span',
         array(
           'id' => $id,
         ),
         array(
-          javelin_tag('span',
-            array('sigil' => 'phabricator-timer-days'), '').'d',
-          javelin_tag('span',
-            array('sigil' => 'phabricator-timer-hours'), '').'h',
-          javelin_tag('span',
-            array('sigil' => 'phabricator-timer-minutes'), '').'m',
-          javelin_tag('span',
-            array('sigil' => 'phabricator-timer-seconds'), '').'s',
+          javelin_tag('span', array('sigil' => $prefix.'days'), ''), 'd',
+          javelin_tag('span', array('sigil' => $prefix.'hours'), ''), 'h',
+          javelin_tag('span', array('sigil' => $prefix.'minutes'), ''), 'm',
+          javelin_tag('span', array('sigil' => $prefix.'seconds'), ''), 's',
         ));
       Javelin::initBehavior('countdown-timer', array(
         'timestamp' => $time,

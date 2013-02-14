@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorIRCProtocolAdapter
-extends PhabricatorBaseProtocolAdapter {
+  extends PhabricatorBaseProtocolAdapter {
 
   private $socket;
 
@@ -13,12 +13,12 @@ extends PhabricatorBaseProtocolAdapter {
     'PRIVMSG' => 'MESSAGE');
 
   public function connect() {
-    $nick = idx($this->config, 'nick', 'phabot');
-    $server = idx($this->config, 'server');
-    $port = idx($this->config, 'port', 6667);
-    $pass = idx($this->config, 'pass');
-    $ssl = idx($this->config, 'ssl', false);
-    $user = idx($this->config, 'user', $nick);
+    $nick = $this->getConfig('nick', 'phabot');
+    $server = $this->getConfig('server');
+    $port = $this->getConfig('port', 6667);
+    $pass = $this->getConfig('pass');
+    $ssl = $this->getConfig('ssl', false);
+    $user = $this->getConfig('user', $nick);
 
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
@@ -41,21 +41,11 @@ extends PhabricatorBaseProtocolAdapter {
     }
 
     $this->socket = $socket;
-    $this->writeMessage(
-      id(new PhabricatorBotMessage())
-      ->setCommand('USER')
-      ->setBody("{$user} 0 * :{$user}"));
+    $this->write("USER {$user} 0 * :{$user}");
     if ($pass) {
-      $this->writeMessage(
-        id(new PhabricatorBotMessage())
-        ->setCommand('PASS')
-        ->setBody("{$pass}"));
+      $this->write("PASS {$pass}");
     }
-
-    $this->writeMessage(
-      id(new PhabricatorBotMessage())
-      ->setCommand('NICK')
-      ->setBody("{$nick}"));
+    $this->write("NICK {$nick}");
   }
 
   public function getNextMessages($poll_frequency) {
@@ -111,33 +101,31 @@ extends PhabricatorBaseProtocolAdapter {
       } while (strlen($this->writeBuffer));
     }
 
-    while ($m = $this->processReadBuffer()) {
-      $messages[] = $m;
+    while (($m = $this->processReadBuffer()) !== false) {
+      if ($m !== null) {
+        $messages[] = $m;
+      }
     }
 
     return $messages;
   }
 
   private function write($message) {
-    $this->writeBuffer .= $message;
+    $this->writeBuffer .= $message."\r\n";
     return $this;
   }
 
   public function writeMessage(PhabricatorBotMessage $message) {
-    $irc_command = $this->getIRCCommand($message->getCommand());
     switch ($message->getCommand()) {
-    case 'MESSAGE':
-      $data = $irc_command.' '.
-        $message->getTarget().' :'.
-        $message->getBody()."\r\n";
-      break;
-    default:
-      $data = $irc_command.' '.
-        $message->getBody()."\r\n";
-      break;
+      case 'MESSAGE':
+      case 'PASTE':
+        $name = $message->getTarget()->getName();
+        $body = $message->getBody();
+        $this->write("PRIVMSG {$name} :{$body}");
+        return true;
+      default:
+        return false;
     }
-
-    return $this->write($data);
   }
 
   private function processReadBuffer() {
@@ -161,20 +149,52 @@ extends PhabricatorBaseProtocolAdapter {
       throw new Exception("Unexpected message from server: {$message}");
     }
 
+    if ($this->handleIRCProtocol($matches)) {
+      return null;
+    }
+
     $command = $this->getBotCommand($matches['command']);
     list($target, $body) = $this->parseMessageData($command, $matches['data']);
 
+    if (!strlen($matches['sender'])) {
+      $sender = null;
+    } else {
+      $sender = id(new PhabricatorBotUser())
+       ->setName($matches['sender']);
+    }
+
     $bot_message = id(new PhabricatorBotMessage())
-      ->setSender(idx($matches, 'sender'))
+      ->setSender($sender)
       ->setCommand($command)
       ->setTarget($target)
       ->setBody($body);
 
-    if (!empty($target) && strncmp($target, '#', 1) !== 0) {
-      $bot_message->setPublic(false);
+    return $bot_message;
+  }
+
+  private function handleIRCProtocol(array $matches) {
+    $data = $matches['data'];
+    switch ($matches['command']) {
+      case '422': // Error - no MOTD
+      case '376': // End of MOTD
+        $nickpass = $this->getConfig('nickpass');
+        if ($nickpass) {
+          $this->write("PRIVMSG nickserv :IDENTIFY {$nickpass}");
+        }
+        $join = $this->getConfig('join');
+        if (!$join) {
+          throw new Exception("Not configured to join any channels!");
+        }
+        foreach ($join as $channel) {
+          $this->write("JOIN {$channel}");
+        }
+        return true;
+      case 'PING':
+        $this->write("PONG {$data}");
+        return true;
     }
 
-    return $bot_message;
+    return false;
   }
 
   private function getBotCommand($irc_command) {
@@ -186,26 +206,26 @@ extends PhabricatorBaseProtocolAdapter {
     return $irc_command;
   }
 
-  private function getIRCCommand($original_bot_command) {
-    foreach (self::$commandTranslations as $irc_command=>$bot_command) {
-      if ($bot_command === $original_bot_command) {
-        return $irc_command;
-      }
-    }
-
-    return $original_bot_command;
-  }
-
   private function parseMessageData($command, $data) {
     switch ($command) {
-    case 'MESSAGE':
-      $matches = null;
-      if (preg_match('/^(\S+)\s+:?(.*)$/', $data, $matches)) {
-        return array(
-          $matches[1],
-          rtrim($matches[2], "\r\n"));
-      }
-      break;
+      case 'MESSAGE':
+        $matches = null;
+        if (preg_match('/^(\S+)\s+:?(.*)$/', $data, $matches)) {
+
+          $target_name = $matches[1];
+          if (strncmp($target_name, '#', 1) === 0) {
+            $target = id(new PhabricatorBotChannel())
+              ->setName($target_name);
+          } else {
+            $target = id(new PhabricatorBotUser())
+              ->setName($target_name);
+          }
+
+          return array(
+            $target,
+            rtrim($matches[2], "\r\n"));
+        }
+        break;
     }
 
     // By default we assume there is no target, only a body
@@ -215,7 +235,7 @@ extends PhabricatorBaseProtocolAdapter {
   }
 
   public function __destruct() {
-    $this->write("QUIT Goodbye.\r\n");
+    $this->write("QUIT Goodbye.");
     fclose($this->socket);
   }
 }

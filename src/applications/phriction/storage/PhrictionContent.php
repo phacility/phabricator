@@ -75,20 +75,19 @@ final class PhrictionContent extends PhrictionDAO
       $engine);
 
     if ($toc) {
-      $toc =
+      $toc = hsprintf(
         '<div class="phabricator-remarkup-toc">'.
-          '<div class="phabricator-remarkup-toc-header">'.
-            pht('Table of Contents').
-          '</div>'.
-          $toc.
-        '</div>';
+          '<div class="phabricator-remarkup-toc-header">%s</div>'.
+          '%s'.
+        '</div>',
+        pht('Table of Contents'),
+        $toc);
     }
 
-    return
-      '<div class="phabricator-remarkup">'.
-        $toc.
-        $output.
-      '</div>';
+    return hsprintf(
+      '<div class="phabricator-remarkup">%s%s</div>',
+      $toc,
+      $output);
   }
 
 

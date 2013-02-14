@@ -156,7 +156,7 @@ abstract class DiffusionView extends AphrontView {
         ),
         $email->getDisplayName());
     }
-    return phutil_escape_html($name);
+    return hsprintf('%s', $name);
   }
 
 }

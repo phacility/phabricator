@@ -38,7 +38,7 @@ final class PhabricatorMetaMTAReceivedListController
         $mail->getRelatedPHID()
           ? $handles[$mail->getRelatedPHID()]->renderLink()
           : '-',
-        phutil_escape_html($mail->getMessage()),
+        $mail->getMessage(),
       );
     }
 

@@ -170,13 +170,13 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
         // in public channels, so we avoid spamming the chat over and over
         // again for discsussions of a specific revision, for example.
 
-        $reply_to = $original_message->getReplyTo();
-        if (empty($this->recentlyMentioned[$reply_to])) {
-          $this->recentlyMentioned[$reply_to] = array();
+        $target_name = $original_message->getTarget()->getName();
+        if (empty($this->recentlyMentioned[$target_name])) {
+          $this->recentlyMentioned[$target_name] = array();
         }
 
         $quiet_until = idx(
-          $this->recentlyMentioned[$reply_to],
+          $this->recentlyMentioned[$target_name],
           $phid,
           0) + (60 * 10);
 
@@ -185,7 +185,7 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
           continue;
         }
 
-        $this->recentlyMentioned[$reply_to][$phid] = time();
+        $this->recentlyMentioned[$target_name][$phid] = time();
         $this->replyTo($original_message, $description);
       }
       break;

@@ -25,16 +25,21 @@ final class DifferentialDiffViewController extends DifferentialController {
           'href' => PhabricatorEnv::getURI('/D'.$diff->getRevisionID()),
         ),
         'D'.$diff->getRevisionID());
-      $top_panel->appendChild(
-        "<h1>".pht('This diff belongs to revision %s', $link)."</h1>");
+      $top_panel->appendChild(phutil_tag(
+        'h1',
+        array(),
+        pht('This diff belongs to revision %s', $link)));
     } else {
       $action_panel = new AphrontPanelView();
       $action_panel->setHeader('Preview Diff');
       $action_panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-      $action_panel->appendChild(
-        '<p class="aphront-panel-instructions">'.pht('Review the diff for '.
-        'correctness. When you are satisfied, either <strong>create a new '.
-        'revision</strong> or <strong>update an existing revision</strong>.'));
+      $action_panel->appendChild(hsprintf(
+        '<p class="aphront-panel-instructions">%s</p>',
+        pht(
+          'Review the diff for correctness. When you are satisfied, either '.
+          '<strong>create a new revision</strong> or <strong>update '.
+          'an existing revision</strong>.',
+          hsprintf(''))));
 
       // TODO: implmenent optgroup support in AphrontFormSelectControl?
       $select = array();

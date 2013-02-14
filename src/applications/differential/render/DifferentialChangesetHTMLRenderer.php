@@ -21,27 +21,34 @@ abstract class DifferentialChangesetHTMLRenderer
         return null;
       }
     } else {
+      $none = hsprintf('');
       switch ($change) {
 
         case DifferentialChangeType::TYPE_ADD:
           switch ($file) {
             case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was <strong>added</strong>.');
+              $message = pht('This file was <strong>added</strong>.', $none);
               break;
             case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was <strong>added</strong>.');
+              $message = pht('This image was <strong>added</strong>.', $none);
               break;
             case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was <strong>added</strong>.');
+              $message = pht(
+                'This directory was <strong>added</strong>.',
+                $none);
               break;
             case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was <strong>added</strong>.');
+              $message = pht(
+                'This binary file was <strong>added</strong>.',
+                $none);
               break;
             case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was <strong>added</strong>.');
+              $message = pht('This symlink was <strong>added</strong>.', $none);
               break;
             case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was <strong>added</strong>.');
+              $message = pht(
+                'This submodule was <strong>added</strong>.',
+                $none);
               break;
           }
           break;
@@ -49,22 +56,30 @@ abstract class DifferentialChangesetHTMLRenderer
         case DifferentialChangeType::TYPE_DELETE:
           switch ($file) {
             case DifferentialChangeType::FILE_TEXT:
-              $message = pht('This file was <strong>deleted</strong>.');
+              $message = pht('This file was <strong>deleted</strong>.', $none);
               break;
             case DifferentialChangeType::FILE_IMAGE:
-              $message = pht('This image was <strong>deleted</strong>.');
+              $message = pht('This image was <strong>deleted</strong>.', $none);
               break;
             case DifferentialChangeType::FILE_DIRECTORY:
-              $message = pht('This directory was <strong>deleted</strong>.');
+              $message = pht(
+                'This directory was <strong>deleted</strong>.',
+                $none);
               break;
             case DifferentialChangeType::FILE_BINARY:
-              $message = pht('This binary file was <strong>deleted</strong>.');
+              $message = pht(
+                'This binary file was <strong>deleted</strong>.',
+                $none);
               break;
             case DifferentialChangeType::FILE_SYMLINK:
-              $message = pht('This symlink was <strong>deleted</strong>.');
+              $message = pht(
+                'This symlink was <strong>deleted</strong>.',
+                $none);
               break;
             case DifferentialChangeType::FILE_SUBMODULE:
-              $message = pht('This submodule was <strong>deleted</strong>.');
+              $message = pht(
+                'This submodule was <strong>deleted</strong>.',
+                $none);
               break;
           }
           break;
@@ -235,10 +250,9 @@ abstract class DifferentialChangesetHTMLRenderer
       }
     }
 
-    return
-      '<div class="differential-meta-notice">'.
-        $message.
-      '</div>';
+    return hsprintf(
+      '<div class="differential-meta-notice">%s</div>',
+      $message);
   }
 
   protected function renderPropertyChangeHeader() {
@@ -279,15 +293,20 @@ abstract class DifferentialChangesetHTMLRenderer
       }
     }
 
-    return
-      '<table class="differential-property-table">'.
-        '<tr class="property-table-header">'.
-          '<th>'.pht('Property Changes').'</th>'.
-          '<td class="oval">'.pht('Old Value').'</td>'.
-          '<td class="nval">'.pht('New Value').'</td>'.
-        '</tr>'.
-        implode('', $rows).
-      '</table>';
+    array_unshift($rows, hsprintf(
+      '<tr class="property-table-header">'.
+        '<th>%s</th>'.
+        '<td class="oval">%s</td>'.
+        '<td class="nval">%s</td>'.
+      '</tr>',
+      pht('Property Changes'),
+      pht('Old Value'),
+      pht('New Value')));
+
+    return phutil_tag(
+      'table',
+      array('class' => 'differential-property-table'),
+      $rows);
   }
 
   public function renderShield($message, $force = 'default') {
@@ -351,9 +370,6 @@ abstract class DifferentialChangesetHTMLRenderer
     if (!$content) {
       return null;
     }
-
-    // TODO: [HTML] After TwoUpRenderer gets refactored, fix this.
-    $content = phutil_safe_html($content);
 
     return javelin_tag(
       'table',

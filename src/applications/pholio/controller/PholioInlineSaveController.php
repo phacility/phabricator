@@ -13,8 +13,7 @@ final class PholioInlineSaveController extends PholioController {
       ->setViewer($user)
       ->requireCapabilities(
         array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
+          PhabricatorPolicyCapability::CAN_VIEW
         ))
       ->withIDs(array($request->getInt('mockID')))
       ->executeOne();

@@ -102,10 +102,10 @@ final class ManiphestTransactionListView extends ManiphestView {
       $views[] = $view->render();
     }
 
-    return
-      '<div class="maniphest-transaction-list-view">'.
-        implode("\n", $views).
-      '</div>';
+    return phutil_tag(
+      'div',
+      array('class' => 'maniphest-transaction-list-view'),
+      $views);
   }
 
 }

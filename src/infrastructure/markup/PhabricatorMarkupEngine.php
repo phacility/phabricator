@@ -41,7 +41,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
-  private $version = 2;
+  private $version = 4;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -160,7 +160,7 @@ final class PhabricatorMarkupEngine {
         "Call process() before getOutput().");
     }
 
-    return new PhutilSafeHTML($this->objects[$key]['output']);
+    return $this->objects[$key]['output'];
   }
 
 
@@ -424,7 +424,6 @@ final class PhabricatorMarkupEngine {
 
     $rules[] = new PhabricatorRemarkupRuleMention();
 
-    $rules[] = new PhutilRemarkupRuleEscapeHTML();
     $rules[] = new PhutilRemarkupRuleBold();
     $rules[] = new PhutilRemarkupRuleItalic();
     $rules[] = new PhutilRemarkupRuleDel();
@@ -450,7 +449,6 @@ final class PhabricatorMarkupEngine {
     foreach ($blocks as $block) {
       if ($block instanceof PhutilRemarkupEngineRemarkupLiteralBlockRule) {
         $literal_rules = array();
-        $literal_rules[] = new PhutilRemarkupRuleEscapeHTML();
         $literal_rules[] = new PhutilRemarkupRuleLinebreaks();
         $block->setMarkupRules($literal_rules);
       } else if (

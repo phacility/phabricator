@@ -42,6 +42,7 @@ final class ConduitAPI_chatlog_record_Method
     foreach ($logs as $log) {
       $obj = clone $template;
       $obj->setChannel(idx($log, 'channel'));
+      $obj->setChannelID(0);
       $obj->setType(idx($log, 'type'));
       $obj->setAuthor(idx($log, 'author'));
       $obj->setEpoch(idx($log, 'epoch'));

@@ -63,7 +63,7 @@ final class PhabricatorProjectCreateController
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     }
 
@@ -77,13 +77,13 @@ final class PhabricatorProjectCreateController
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($project->getName())
           ->setError($e_name))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Blurb')
+          ->setLabel(pht('Blurb'))
           ->setName('blurb')
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setValue($profile->getBlurb()));
@@ -92,10 +92,10 @@ final class PhabricatorProjectCreateController
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
-        ->setTitle('Create a New Project')
+        ->setTitle(pht('Create a New Project'))
         ->appendChild($error_view)
         ->appendChild($form)
-        ->addSubmitButton('Create Project')
+        ->addSubmitButton(pht('Create Project'))
         ->addCancelButton('/project/');
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -104,22 +104,32 @@ final class PhabricatorProjectCreateController
       $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Create')
+            ->setValue(pht('Create'))
             ->addCancelButton('/project/'));
 
       $panel = new AphrontPanelView();
       $panel
         ->setWidth(AphrontPanelView::WIDTH_FORM)
-        ->setHeader('Create a New Project')
+        ->setHeader(pht('Create a New Project'))
+        ->setNoBackground()
         ->appendChild($form);
 
-      return $this->buildStandardPageResponse(
+      $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Create Project'))
+          ->setHref($this->getApplicationURI().'create/')
+        );
+
+      return $this->buildApplicationPage(
         array(
+          $crumbs,
           $error_view,
           $panel,
         ),
         array(
-          'title' => 'Create new Project',
+          'title' => pht('Create New Project'),
+          'device' => true
         ));
     }
   }

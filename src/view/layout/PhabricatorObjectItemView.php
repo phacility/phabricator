@@ -48,10 +48,11 @@ final class PhabricatorObjectItemView extends AphrontView {
     return $this->header;
   }
 
-  public function addIcon($icon, $label = null) {
+  public function addIcon($icon, $label = null, $href = null) {
     $this->icons[] = array(
       'icon'  => $icon,
       'label' => $label,
+      'href' => $href,
     );
     return $this;
   }
@@ -100,12 +101,23 @@ final class PhabricatorObjectItemView extends AphrontView {
           ),
           $spec['label']);
 
+
+        if ($spec['href']) {
+          $icon_href = phutil_tag(
+            'a',
+            array('href' => $spec['href']),
+            array($label, $icon)
+          );
+        } else {
+          $icon_href = array($label, $icon);
+        }
+
         $icon_list[] = phutil_tag(
           'li',
           array(
             'class' => 'phabricator-object-item-icon',
           ),
-          array($label, $icon));
+          $icon_href);
       }
 
       $icons = phutil_tag(
@@ -166,11 +178,11 @@ final class PhabricatorObjectItemView extends AphrontView {
       array(
         'class' => 'phabricator-object-item-content',
       ),
-      $this->renderHTMLView(
+      $this->renderSingleView(
         array(
           $header,
           $attrs,
-          $this->renderHTMLChildren(),
+          $this->renderChildren(),
         )));
 
     return phutil_tag(

@@ -231,7 +231,7 @@ final class AphrontSideNavFilterView extends AphrontView {
         ),
         '');
 
-      $local_menu = $this->renderHTMLView(
+      $local_menu = $this->renderSingleView(
         array(
           $menu_background,
           phutil_tag(
@@ -277,21 +277,26 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     $nav_classes = array_merge($nav_classes, $this->classes);
 
-    return phutil_render_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => implode(' ', $nav_classes),
         'id'    => $main_id,
       ),
-      $local_menu.
-      $flex_bar.
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'phabricator-nav-content',
-          'id' => $content_id,
-        ),
-        $crumbs.$this->renderChildren()));
+      array(
+        $local_menu,
+        $flex_bar,
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-nav-content',
+            'id' => $content_id,
+          ),
+          array(
+            $crumbs,
+            phutil_implode_html('', $this->renderChildren()),
+          ))
+      ));
   }
 
 }

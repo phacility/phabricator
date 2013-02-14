@@ -32,15 +32,13 @@ extends PhabricatorOAuthClientBaseController {
         ->setURI('/oauthserver/client/?deleted=1');
     }
 
-    $client_name = phutil_escape_html($client->getName());
-    $title .= ' '.$client_name;
+    $title .= ' '.$client->getName();
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($current_user);
     $dialog->setTitle($title);
-    $dialog->appendChild(
-      '<p>Are you sure you want to delete this client?</p>'
-    );
+    $dialog->appendChild(phutil_tag('p', array(), pht(
+      'Are you sure you want to delete this client?')));
     $dialog->addSubmitButton();
     $dialog->addCancelButton($client->getEditURI());
     return id(new AphrontDialogResponse())->setDialog($dialog);

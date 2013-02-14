@@ -30,6 +30,7 @@ try {
 
   $response = PhabricatorSetupCheck::willProcessRequest();
   if ($response) {
+    PhabricatorStartup::endOutputCapture();
     $sink->writeResponse($response);
     return;
   }
@@ -102,8 +103,21 @@ try {
     $response = $application->willSendResponse($response, $controller);
     $response->setRequest($request);
 
-    $sink->writeResponse($response);
+    $unexpected_output = PhabricatorStartup::endOutputCapture();
+    if ($unexpected_output) {
+      $unexpected_output = "Unexpected output:\n\n{$unexpected_output}";
+      phlog($unexpected_output);
 
+      if ($response instanceof AphrontWebpageResponse) {
+        echo hsprintf(
+          '<div style="background: #eeddff; white-space: pre-wrap;
+                       z-index: 200000; position: relative; padding: 8px;
+                       font-family: monospace;">%s</div>',
+          $unexpected_output);
+      }
+    }
+
+    $sink->writeResponse($response);
   } catch (Exception $ex) {
     $write_guard->dispose();
     if ($access_log) {
