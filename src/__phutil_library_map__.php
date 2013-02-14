@@ -731,6 +731,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarViewStatusController' => 'applications/calendar/controller/PhabricatorCalendarViewStatusController.php',
     'PhabricatorCampfireProtocolAdapter' => 'infrastructure/daemon/bot/adapter/PhabricatorCampfireProtocolAdapter.php',
     'PhabricatorChangesetResponse' => 'infrastructure/diff/PhabricatorChangesetResponse.php',
+    'PhabricatorChatLogChannel' => 'applications/chatlog/storage/PhabricatorChatLogChannel.php',
     'PhabricatorChatLogChannelListController' => 'applications/chatlog/controller/PhabricatorChatLogChannelListController.php',
     'PhabricatorChatLogChannelLogController' => 'applications/chatlog/controller/PhabricatorChatLogChannelLogController.php',
     'PhabricatorChatLogConstants' => 'applications/chatlog/constants/PhabricatorChatLogConstants.php',
@@ -2183,6 +2184,11 @@ phutil_register_library_map(array(
     'PhabricatorCalendarViewStatusController' => 'PhabricatorCalendarController',
     'PhabricatorCampfireProtocolAdapter' => 'PhabricatorBaseProtocolAdapter',
     'PhabricatorChangesetResponse' => 'AphrontProxyResponse',
+    'PhabricatorChatLogChannel' =>
+    array(
+      0 => 'PhabricatorChatLogDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorChatLogChannelListController' => 'PhabricatorChatLogController',
     'PhabricatorChatLogChannelLogController' => 'PhabricatorChatLogController',
     'PhabricatorChatLogController' => 'PhabricatorController',
