@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorCampfireProtocolAdapter
-extends PhabricatorBaseProtocolAdapter {
+  extends PhabricatorBaseProtocolAdapter {
 
   private $readBuffers;
   private $authtoken;
@@ -12,10 +12,10 @@ extends PhabricatorBaseProtocolAdapter {
   private $inRooms = array();
 
   public function connect() {
-    $this->server = idx($this->config, 'server');
-    $this->authtoken = idx($this->config, 'authtoken');
-    $ssl = idx($this->config, 'ssl', false);
-    $rooms = idx($this->config, 'join');
+    $this->server = $this->getConfig('server');
+    $this->authtoken = $this->getConfig('authtoken');
+    $ssl = $this->getConfig('ssl', false);
+    $rooms = $this->getConfig('join');
 
     // First, join the room
     if (!$rooms) {

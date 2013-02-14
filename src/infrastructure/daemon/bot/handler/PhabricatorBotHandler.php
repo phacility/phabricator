@@ -39,7 +39,7 @@ abstract class PhabricatorBotHandler {
     return;
   }
 
-  public function replyTo($original_message, $body) {
+  public function replyTo(PhabricatorBotMessage $original_message, $body) {
     if ($original_message->getCommand() != 'MESSAGE') {
       throw new Exception(
         "Handler is trying to reply to something which is not a message!");

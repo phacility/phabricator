@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorIRCProtocolAdapter
-extends PhabricatorBaseProtocolAdapter {
+  extends PhabricatorBaseProtocolAdapter {
 
   private $socket;
 
@@ -13,12 +13,12 @@ extends PhabricatorBaseProtocolAdapter {
     'PRIVMSG' => 'MESSAGE');
 
   public function connect() {
-    $nick = idx($this->config, 'nick', 'phabot');
-    $server = idx($this->config, 'server');
-    $port = idx($this->config, 'port', 6667);
-    $pass = idx($this->config, 'pass');
-    $ssl = idx($this->config, 'ssl', false);
-    $user = idx($this->config, 'user', $nick);
+    $nick = $this->getConfig('nick', 'phabot');
+    $server = $this->getConfig('server');
+    $port = $this->getConfig('port', 6667);
+    $pass = $this->getConfig('pass');
+    $ssl = $this->getConfig('ssl', false);
+    $user = $this->getConfig('user', $nick);
 
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
