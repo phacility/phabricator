@@ -38,6 +38,34 @@ cd $ROOT/phabricator
 ../arcanist/bin/arc unit src/infrastructure/__tests__/
 
 
+### DETECT OS AND SET APACHE START/STOP COMMANDS ##################################
+
+OS=`uname`
+HTTPD_START_COMMAND="sudo /etc/init.d/httpd start"
+HTTPD_STOP_COMMAND="sudo /etc/init.d/httpd stop"
+
+if [ "{$OS}" == "Darwin" ]; then
+    #OS=mac
+    HTTPD_START_COMMAND="sudo /usr/sbin/apachectl -k start"
+    HTTPD_STOP_COMMAND="sudo /usr/sbin/apachectl -k stop"
+else
+    if [ "${OS}" = "Linux" ] ; then
+        if [ -f /etc/redhat-release ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/httpd start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/httpd  stop"
+        elif [ -f /etc/mandrake-release ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/httpd start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/httpd  stop"
+        elif [ -f /etc/debian_version ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/apache2 start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/apache2  stop"
+        elif [ -f /etc/debian_version ] ; then
+            HTTPD_START_COMMAND="sudo /etc/init.d/apache2 start"
+            HTTPD_STOP_COMMAND="sudo /etc/init.d/apache2  stop"
+        fi
+    fi
+fi
+
 ### CYCLE APACHE AND DAEMONS ###################################################
 
 # Stop daemons.
