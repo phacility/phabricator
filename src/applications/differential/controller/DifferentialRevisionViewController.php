@@ -228,7 +228,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
-    $revision_detail->setDiff(reset($diffs));
+    $revision_detail->setDiff(end($diffs));
     $revision_detail->setAuxiliaryFields($aux_fields);
 
     $actions = $this->getRevisionActions($revision);

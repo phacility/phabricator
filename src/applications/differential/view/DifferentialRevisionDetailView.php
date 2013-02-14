@@ -69,13 +69,24 @@ final class DifferentialRevisionDetailView extends AphrontView {
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
       switch ($local_vcs) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $next_step = phutil_tag('tt', array(), 'arc land');
+          $bookmark = $this->getDiff()->getBookmark();
+          $command = ($bookmark != ''
+            ? csprintf('arc land %s', $bookmark)
+            : 'arc land');
           break;
+
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $branch = $this->getDiff()->getBranch();
+          $command = ($branch != ''
+            ? csprintf('arc land %s', $branch)
+            : 'arc land');
+          break;
+
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $next_step = phutil_tag('tt', array(), 'arc commit');
+          $command = 'arc commit';
           break;
       }
+      $next_step = phutil_tag('tt', array(), $command);
     }
     if ($next_step) {
       $properties->addProperty(pht('Next Step'), $next_step);
