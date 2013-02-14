@@ -79,7 +79,6 @@ final class PhabricatorProjectListController
 
       $group = idx($groups, $phid, array());
       $task_count = count($group);
-
       $population = count($members);
 
       if ($profile) {
@@ -89,51 +88,48 @@ final class PhabricatorProjectListController
         $blurb = null;
       }
 
+      $tasks_href = pht('%d Open Task(s)', $task_count);
 
       $rows[] = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/project/view/'.$project->getID().'/',
-          ),
-          $project->getName()),
+        $project->getName(),
+        '/project/view/'.$project->getID().'/',
         PhabricatorProjectStatus::getNameForStatus($project->getStatus()),
+        PhabricatorProjectStatus::getIconForStatus($project->getStatus()),
         $blurb,
-        $population,
+        pht('%d Member(s)', $population),
         phutil_tag(
           'a',
           array(
             'href' => '/maniphest/view/all/?projects='.$phid,
           ),
-          $task_count),
+          $tasks_href),
+        '/project/edit/'.$project->getID().'/',
       );
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Project'),
-        pht('Status'),
-        pht('Description'),
-        pht('Population'),
-        pht('Open Tasks'),
-      ));
-    $table->setColumnClasses(
-      array(
-        'pri',
-        '',
-        'wide',
-        '',
-        ''
-      ));
+    $list = new PhabricatorObjectItemListView();
+    $list->setStackable();
+    foreach ($rows as $row) {
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($row[0])
+        ->setHref($row[1])
+        ->addIcon($row[3], $row[2])
+        ->addIcon('edit', pht('Edit Project'), $row[7])
+        ->addAttribute($row[4])
+        ->addAttribute($row[5])
+        ->addAttribute($row[6]);
+      $list->addItem($item);
+    }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader($table_header);
-    $panel->appendChild($table);
-    $panel->setNoBackground();
-    $panel->appendChild($pager);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($table_header);
 
-    $nav->appendChild($panel);
+    $nav->appendChild(
+      array(
+        $header,
+        $list,
+        $pager,
+      ));
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addCrumb(
