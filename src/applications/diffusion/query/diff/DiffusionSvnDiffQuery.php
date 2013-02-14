@@ -140,7 +140,7 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
     return $repository->getRemoteCommandFuture(
       'cat %s%s@%d',
       $repository->getRemoteURI(),
-      $ref,
+      phutil_escape_uri($ref),
       $rev);
   }
 
