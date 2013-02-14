@@ -5,6 +5,7 @@ final class PhabricatorChatLogEvent
   implements PhabricatorPolicyInterface {
 
   protected $channel;
+  protected $channelID;
   protected $epoch;
   protected $author;
   protected $type;

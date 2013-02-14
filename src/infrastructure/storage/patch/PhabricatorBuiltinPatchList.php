@@ -1113,6 +1113,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130214.chatlogchannel.sql'),
       ),
+      '20130214.chatlogchannelid.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130214.chatlogchannelid.sql'),
+      ),
     );
   }
 
