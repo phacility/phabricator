@@ -75,7 +75,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
       require $this->getPath($__template__);
     }
 
-    return ob_get_clean();
+    return phutil_safe_html(ob_get_clean());
   }
 
   private function getDefaultScope() {
