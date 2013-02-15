@@ -14,6 +14,7 @@ final class PholioMockListController extends PholioController {
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+    $viewer_phid = $user->getPHID();
 
     $query = id(new PholioMockQuery())
       ->setViewer($user)
@@ -26,7 +27,11 @@ final class PholioMockListController extends PholioController {
       case 'view/all':
       default:
         $title = pht('All Mocks');
-        break;
+      break;
+      case 'view/my':
+        $title = pht('My Mocks');
+        $query->withAuthorPHIDs(array($viewer_phid));
+      break;
     }
 
     $pager = new AphrontCursorPagerView();

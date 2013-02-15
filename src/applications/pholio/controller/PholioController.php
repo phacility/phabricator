@@ -11,6 +11,7 @@ abstract class PholioController extends PhabricatorController {
 
     $nav->addLabel('Mocks');
     $nav->addFilter('view/all', pht('All Mocks'));
+    $nav->addFilter('view/my', pht('My Mocks'));
 
     if ($for_app) {
       $nav->addFilter('new/', pht('Create Mock'));

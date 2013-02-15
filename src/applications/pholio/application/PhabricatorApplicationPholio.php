@@ -10,7 +10,7 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Design Review';
+    return pht('Design Review');
   }
 
   public function getIconName() {
