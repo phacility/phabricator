@@ -91,7 +91,7 @@ table.aphront-calendar-view td div.aphront-calendar-day {
   overflow: hidden;
 }
 
-.aphront-calendar-event a {
+.aphront-calendar-event a:link {
   color: #fff;
 }
 

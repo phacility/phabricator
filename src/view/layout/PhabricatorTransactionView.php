@@ -137,7 +137,7 @@ final class PhabricatorTransactionView extends AphrontView {
 
   private function renderTransactionContent() {
     $content = $this->renderChildren();
-    if (!$content) {
+    if ($this->isEmptyContent($content)) {
       return null;
     }
     return phutil_tag(
