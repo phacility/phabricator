@@ -1,0 +1,18 @@
+CREATE TABLE {$NAMESPACE}_token.token_given (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  objectPHID VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  authorPHID VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  tokenPHID VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_all` (objectPHID, authorPHID),
+  KEY `key_author` (authorPHID),
+  KEY `key_token` (tokenPHID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE {$NAMESPACE}_token.token_count (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  objectPHID VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  tokenCount INT NOT NULL,
+  UNIQUE KEY `key_objectPHID` (objectPHID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

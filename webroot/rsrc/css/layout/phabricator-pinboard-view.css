@@ -5,6 +5,7 @@
 .phabricator-pinboard-view {
   padding: 20px;
   overflow: hidden;
+  margin: 1em 0;
 }
 
 .phabricator-pinboard-item-view {

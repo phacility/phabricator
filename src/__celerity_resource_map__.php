@@ -532,6 +532,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-menu.png',
     'type' => 'png',
   ),
+  '/rsrc/image/sprite-tokens.png' =>
+  array(
+    'hash' => '67c46fd75c885b76ecbfe46e71a476cc',
+    'uri' => '/res/67c46fd7/rsrc/image/sprite-tokens.png',
+    'disk' => '/rsrc/image/sprite-tokens.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/texture/dark-menu-hover.png' =>
   array(
     'hash' => 'a214a732644be34872e895b338b5d639',
@@ -2861,7 +2868,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-pinboard-view-css' =>
   array(
-    'uri' => '/res/fdb2470f/rsrc/css/layout/phabricator-pinboard-view.css',
+    'uri' => '/res/b954ccbf/rsrc/css/layout/phabricator-pinboard-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3336,7 +3343,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-conpher-css' =>
   array(
-    'uri' => '/res/89821322/rsrc/css/sprite-conph.css',
+    'uri' => '/res/f640f0c5/rsrc/css/sprite-conph.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3370,6 +3377,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/sprite-menu.css',
   ),
+  'sprite-tokens-css' =>
+  array(
+    'uri' => '/res/9ae0de5b/rsrc/css/sprite-tokens.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/sprite-tokens.css',
+  ),
   'stripe-core' =>
   array(
     'uri' => '/res/3b0f0ad4/rsrc/js/stripe/stripe_core.js',
@@ -3396,6 +3412,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
+  ),
+  'tokens-css' =>
+  array(
+    'uri' => '/res/c1f6113c/rsrc/css/application/tokens/tokens.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/tokens/tokens.css',
   ),
 ), array(
   'packages' =>

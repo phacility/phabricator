@@ -88,14 +88,19 @@ JX.install('Workflow', {
         return;
       }
 
-      var t = event.getTarget();
+      // Get the button (which is sometimes actually another tag, like an <a />)
+      // which triggered the event. In particular, this makes sure we get the
+      // right node if there is a <button> with an <img /> inside it or
+      // or something similar.
+      var t = event.getNode('jx-workflow-button') ||
+              event.getNode('tag:button');
       if (t.name == '__cancel__' || t.name == '__close__') {
         JX.Workflow._pop();
       } else {
-
         var form = event.getNode('jx-dialog');
         var data = JX.DOM.convertFormToListOfPairs(form);
-        data.push([t.name, true]);
+
+        data.push([t.name, t.value || true]);
 
         var active = JX.Workflow._getActiveWorkflow();
         var e = active.invoke('submit', {form: form, data: data});

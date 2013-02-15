@@ -163,6 +163,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'conpherence',
       ),
+      'db.config' => array(
+        'type'    => 'db',
+        'name'    => 'config',
+      ),
+      'db.token' => array(
+        'type'    => 'db',
+        'name'    => 'token',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1068,10 +1076,6 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20121220.generalcache.sql'),
       ),
-      'db.config' => array(
-        'type'    => 'db',
-        'name'    => 'config',
-      ),
       '20121226.config.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20121226.config.sql'),
@@ -1116,6 +1120,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130214.chatlogchannelid.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130214.chatlogchannelid.sql'),
+      ),
+      '20130214.token.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130214.token.sql'),
       ),
     );
   }

@@ -4,7 +4,10 @@
  * @group maniphest
  */
 final class ManiphestTask extends ManiphestDAO
-  implements PhabricatorMarkupInterface {
+  implements
+    PhabricatorMarkupInterface,
+    PhabricatorPolicyInterface,
+    PhabricatorTokenReceiverInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -259,6 +262,25 @@ final class ManiphestTask extends ManiphestDAO
    */
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getID();
+  }
+
+
+/* -(  Policy Interface  )--------------------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+    return false;
   }
 
 }

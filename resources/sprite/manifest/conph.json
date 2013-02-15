@@ -4,72 +4,72 @@
     "conpher_calendar_off"     : {
       "name" : "conpher_calendar_off",
       "rule" : ".conpher_calendar_off",
-      "hash" : "a8228ab90fd90f4c2500d9285179bf26"
+      "hash" : "9ead08702b8028d28aedfa1a0dfbe43a"
     },
     "conpher_calendar_on"      : {
       "name" : "conpher_calendar_on",
       "rule" : ".conpher_calendar_on, .device-desktop .conpher_calendar_off:hover ",
-      "hash" : "931243bc3c414782ddb2d1d9607908ba"
+      "hash" : "f00d0854260ab1bc1a9b4f7f21a64f56"
     },
     "conpher_conversation_off" : {
       "name" : "conpher_conversation_off",
       "rule" : ".conpher_conversation_off",
-      "hash" : "931abb0377898297a9a603a6d280b977"
+      "hash" : "97f9e8131c741dbba8091a92776036dd"
     },
     "conpher_conversation_on"  : {
       "name" : "conpher_conversation_on",
       "rule" : ".conpher_conversation_on, .device-desktop .conpher_conversation_off:hover ",
-      "hash" : "0b8a39dc5019dac1975b7be2ca0ccbfa"
+      "hash" : "01d5bae305a37debbc44f4131f0863dc"
     },
     "conpher_files_off"        : {
       "name" : "conpher_files_off",
       "rule" : ".conpher_files_off",
-      "hash" : "de1aee01b9b47b354e6ac280ae68bae1"
+      "hash" : "b6a89827978cf06618d4ba572953049a"
     },
     "conpher_files_on"         : {
       "name" : "conpher_files_on",
       "rule" : ".conpher_files_on, .device-desktop .conpher_files_off:hover ",
-      "hash" : "9ccbbd5e86fd4ec87a11aee0c9ec8c60"
+      "hash" : "05f38d8b45077a8a9b5bd21ecc15f958"
     },
     "conpher_list_off"         : {
       "name" : "conpher_list_off",
       "rule" : ".conpher_list_off",
-      "hash" : "2611311d0c2aec04416433be74d3a30e"
+      "hash" : "6f9b685a553e58aa67668494a88f864c"
     },
     "conpher_list_on"          : {
       "name" : "conpher_list_on",
       "rule" : ".conpher_list_on, .device-desktop .conpher_list_off:hover ",
-      "hash" : "cee6de0301c84b0d195282642642afa0"
+      "hash" : "7d495ee16be1162affd3a480ee4b86d4"
     },
     "conpher_more_off"         : {
       "name" : "conpher_more_off",
       "rule" : ".conpher_more_off",
-      "hash" : "3b7099bdde20a13864b48552b11e92c3"
+      "hash" : "c65da03207be1e69ceaa09f15a95d8f4"
     },
     "conpher_more_on"          : {
       "name" : "conpher_more_on",
       "rule" : ".conpher_more_on, .device-desktop .conpher_more_off:hover ",
-      "hash" : "b146f0cff9c2e5f0b57f7ebcfe0704d3"
+      "hash" : "70464cdbd30a77cad597c593ca40ab1f"
     },
     "conpher_people_off"       : {
       "name" : "conpher_people_off",
       "rule" : ".conpher_people_off",
-      "hash" : "641a6a21aa32a12416e85caf8a22e340"
+      "hash" : "a40f1f129d2e3c33134a4103161c0792"
     },
     "conpher_people_on"        : {
       "name" : "conpher_people_on",
       "rule" : ".conpher_people_on, .device-desktop .conpher_people_off:hover ",
-      "hash" : "f13745fd7036564eefb1c0ebc3502a92"
+      "hash" : "fd99a5b329ebe0144acc8fe669f0d936"
     },
     "conpher_settings_off"     : {
       "name" : "conpher_settings_off",
       "rule" : ".conpher_settings_off",
-      "hash" : "aa9ab000d9e33e3c50c2fe70367f30b4"
+      "hash" : "e4b389edbeb7825e4304faf7d20f7469"
     },
     "conpher_settings_on"      : {
       "name" : "conpher_settings_on",
       "rule" : ".conpher_settings_on, .device-desktop .conpher_settings_off:hover ",
-      "hash" : "a5fe22965997f9559800ca7db5ea32c8"
+      "hash" : "8ad76234fffb3f4cc59238ec3b4a6999"
     }
   },
   "scales"  : [
