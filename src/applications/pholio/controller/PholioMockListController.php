@@ -25,7 +25,7 @@ final class PholioMockListController extends PholioController {
     switch ($filter) {
       case 'view/all':
       default:
-        $title = 'All Mocks';
+        $title = pht('All Mocks');
         break;
     }
 
@@ -44,21 +44,26 @@ final class PholioMockListController extends PholioController {
           ->setImageSize(220, 165));
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
     $content = array(
-      $header,
       $board,
       $pager,
     );
 
     $nav->appendChild($content);
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title)
+        ->setHref($this->getApplicationURI())
+      );
+    $nav->setCrumbs($crumbs);
+
     return $this->buildApplicationPage(
       $nav,
       array(
         'title' => $title,
+        'device' => true,
       ));
   }
 

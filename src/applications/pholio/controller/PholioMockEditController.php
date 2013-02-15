@@ -87,7 +87,7 @@ final class PholioMockEditController extends PholioController {
         }
 
         if (!$files) {
-          $e_images = 'Required';
+          $e_images = pht('Required');
           $errors[] = pht('You must add at least one image to the mock.');
         } else {
           $mock->setCoverPHID(head($files)->getPHID());
@@ -211,6 +211,7 @@ final class PholioMockEditController extends PholioController {
       $nav,
       array(
         'title' => $title,
+        'device' => true,
       ));
   }
 
