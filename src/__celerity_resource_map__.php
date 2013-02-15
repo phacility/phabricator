@@ -1864,21 +1864,9 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/phame/phame-post-preview.js',
   ),
-  'javelin-behavior-pholio-edit-inline-comment' =>
-  array(
-    'uri' => '/res/61759cd8/rsrc/js/application/pholio/behavior-pholio-edit-inline-comment.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-dom',
-    ),
-    'disk' => '/rsrc/js/application/pholio/behavior-pholio-edit-inline-comment.js',
-  ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/e5f432ac/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/efec5d7a/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2873,7 +2861,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-pinboard-view-css' =>
   array(
-    'uri' => '/res/3a24d210/rsrc/css/layout/phabricator-pinboard-view.css',
+    'uri' => '/res/fdb2470f/rsrc/css/layout/phabricator-pinboard-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3222,7 +3210,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/9de6e0b2/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/3b87f5ae/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(
