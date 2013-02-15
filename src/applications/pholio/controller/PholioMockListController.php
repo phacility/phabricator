@@ -40,7 +40,8 @@ final class PholioMockListController extends PholioController {
         id(new PhabricatorPinboardItemView())
           ->setHeader($mock->getName())
           ->setURI('/M'.$mock->getID())
-          ->setImageURI($mock->getCoverFile()->getThumb160x120URI()));
+          ->setImageURI($mock->getCoverFile()->getThumb220x165URI())
+          ->setImageSize(220, 165));
     }
 
     $header = id(new PhabricatorHeaderView())
