@@ -10,11 +10,16 @@
 
 JX.behavior('conpherence-menu', function(config) {
 
+  function onwidgetresponse(context, response) {
+    var widgets = JX.$H(response.widgets);
+    var widgetsRoot = JX.$(config.widgets_pane);
+    JX.DOM.setContent(widgetsRoot, widgets);
+  }
+
   function onresponse(context, response) {
     var header = JX.$H(response.header);
     var messages = JX.$H(response.messages);
     var form = JX.$H(response.form);
-    var widgets = JX.$H(response.widgets);
     var headerRoot = JX.$(config.header);
     var messagesRoot = JX.$(config.messages);
     var formRoot = JX.$(config.form_pane);
@@ -24,7 +29,6 @@ JX.behavior('conpherence-menu', function(config) {
     JX.DOM.setContent(messagesRoot, messages);
     messagesRoot.scrollTop = messagesRoot.scrollHeight;
     JX.DOM.setContent(formRoot, form);
-    JX.DOM.setContent(widgetsRoot, widgets);
 
     var conpherences = JX.DOM.scry(
       menuRoot,
@@ -92,12 +96,25 @@ JX.behavior('conpherence-menu', function(config) {
 
       var selected = e.getData().selected;
       var data = JX.Stratcom.getData(selected);
-
       var uri = config.base_uri + 'view/' + data.id + '/';
+      var widget_uri = config.base_uri + 'widget/' + data.id + '/';
       new JX.Workflow(uri, {})
         .setHandler(JX.bind(null, onresponse, selected))
         .start();
+      new JX.Workflow(widget_uri, {})
+        .setHandler(JX.bind(null, onwidgetresponse, selected))
+        .start();
     }
   );
+
+  JX.Stratcom.listen('click', 'show-older-messages', function(e) {
+    e.kill();
+    console.log(document.URL);
+  new JX.Request('/conpherence/view/1/', function(r) {
+    console.log('100');
+  })
+.setData({offset: 100}) // get the next page
+.send();
+});
 
 });
