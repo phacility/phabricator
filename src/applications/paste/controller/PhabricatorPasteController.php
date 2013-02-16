@@ -44,7 +44,7 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     PhabricatorPaste $paste,
     $max_lines = null) {
 
-    $lines = explode("\n", rtrim($paste->getContent()));
+    $lines = phutil_split_lines($paste->getContent());
 
     return id(new PhabricatorSourceCodeView())
       ->setLimit($max_lines)
