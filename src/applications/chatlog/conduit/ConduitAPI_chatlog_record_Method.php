@@ -40,9 +40,28 @@ final class ConduitAPI_chatlog_record_Method
 
     $objs = array();
     foreach ($logs as $log) {
+      $channel_name = idx($log, 'channel');
+      $service_name = idx($log, 'serviceName');
+      $service_type = idx($log, 'serviceType');
+
+      $channel = id(new PhabricatorChatLogChannel())
+                 ->loadOneWhere(
+                   'channelName = %s AND serviceName = %s
+                    AND serviceType = %s', $channel_name,
+                    $service_name, $service_type
+                    );
+
+      if (!$channel) {
+        $channel = id(new PhabricatorChatLogChannel())
+                   ->setChannelName($channel_name)
+                   ->setserviceName($service_name)
+                   ->setServiceType($service_type)
+                   ->save();
+      }
+
       $obj = clone $template;
-      $obj->setChannel(idx($log, 'channel'));
-      $obj->setChannelID(0);
+      $obj->setChannel($channel_name);
+      $obj->setChannelID($channel->getID());
       $obj->setType(idx($log, 'type'));
       $obj->setAuthor(idx($log, 'author'));
       $obj->setEpoch(idx($log, 'epoch'));
