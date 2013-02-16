@@ -149,7 +149,11 @@ final class PhabricatorBotFeedNotificationHandler
         }
 
         $channels = $this->getConfig('join');
-        foreach ($channels as $channel) {
+        foreach ($channels as $channel_name) {
+
+          $channel = id(new PhabricatorBotChannel())
+            ->setName($channel_name);
+
           $this->writeMessage(
             id(new PhabricatorBotMessage())
             ->setCommand('MESSAGE')
