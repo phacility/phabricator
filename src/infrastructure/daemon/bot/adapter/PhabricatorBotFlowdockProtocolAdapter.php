@@ -1,25 +1,23 @@
 <?php
 
-final class PhabricatorCampfireProtocolAdapter
+final class PhabricatorBotFlowdockProtocolAdapter
   extends PhabricatorBotBaseStreamingProtocolAdapter {
 
   protected function buildStreamingUrl($channel) {
+    $organization = $this->getConfig('organization');
     $ssl = $this->getConfig('ssl');
 
     $url = ($ssl) ? "https://" : "http://";
-    $url .= "streaming.campfirenow.com/room/{$channel}/live.json";
+    $url .= "stream.flowdock.com/flows/{$organization}/{$channel}";
 
     return $url;
   }
 
   protected function processMessage($m_obj) {
       $command = null;
-      switch ($m_obj['type']) {
-        case 'TextMessage':
+      switch ($m_obj['event']) {
+        case 'message':
           $command = 'MESSAGE';
-          break;
-        case 'PasteMessage':
-          $command = 'PASTE';
           break;
         default:
           // For now, ignore anything which we don't otherwise know about.
@@ -32,16 +30,16 @@ final class PhabricatorCampfireProtocolAdapter
 
       // TODO: These should be usernames, not user IDs.
       $sender = id(new PhabricatorBotUser())
-        ->setName($m_obj['user_id']);
+        ->setName($m_obj['user']);
 
       $target = id(new PhabricatorBotChannel())
-        ->setName($m_obj['room_id']);
+        ->setName($m_obj['flow']);
 
       return id(new PhabricatorBotMessage())
         ->setCommand($command)
         ->setSender($sender)
         ->setTarget($target)
-        ->setBody($m_obj['body']);
+        ->setBody($m_obj['content']);
   }
 
   public function writeMessage(PhabricatorBotMessage $message) {
@@ -51,51 +49,23 @@ final class PhabricatorCampfireProtocolAdapter
           $message->getBody(),
           $message->getTarget());
         break;
-      case 'SOUND':
-        $this->speak(
-          $message->getBody(),
-          $message->getTarget(),
-          'SoundMessage');
-        break;
-      case 'PASTE':
-        $this->speak(
-          $message->getBody(),
-          $message->getTarget(),
-          'PasteMessage');
-        break;
     }
-  }
-
-  protected function joinRoom($room_id) {
-    $this->performPost("/room/{$room_id}/join.json");
-    $this->inRooms[$room_id] = true;
-  }
-
-  private function leaveRoom($room_id) {
-    $this->performPost("/room/{$room_id}/leave.json");
-    unset($this->inRooms[$room_id]);
   }
 
   private function speak(
-    $message,
-    PhabricatorBotTarget $channel,
-    $type = 'TextMessage') {
+    $body,
+    PhabricatorBotTarget $flow) {
 
-    $room_id = $channel->getName();
+    list($organization, $room_id) = explode(":", $flow->getName());
 
     $this->performPost(
-      "/room/{$room_id}/speak.json",
+      "/flows/{$organization}/{$room_id}/messages",
       array(
-        'message' => array(
-          'type' => $type,
-          'body' => $message)));
+        'event' => 'message',
+        'content' => $body));
   }
 
   public function __destruct() {
-    foreach ($this->inRooms as $room_id => $ignored) {
-      $this->leaveRoom($room_id);
-    }
-
     if ($this->readHandles) {
       foreach ($this->readHandles as $read_handle) {
         curl_multi_remove_handle($this->multiHandle, $read_handle);
