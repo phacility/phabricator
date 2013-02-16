@@ -30,7 +30,7 @@ $sheets = array(
   'icon' => $generator->buildIconSheet(),
   'menu' => $generator->buildMenuSheet(),
   'apps' => $generator->buildAppsSheet(),
-  'conph' => $generator->buildConpherenceSheet(),
+  'conpher' => $generator->buildConpherenceSheet(),
   'apps-large' => $generator->buildAppsLargeSheet(),
   'tokens' => $generator->buildTokenSheet(),
 // TODO: @chad: should we actually remove this?

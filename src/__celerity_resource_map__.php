@@ -483,18 +483,18 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-apps.png',
     'type' => 'png',
   ),
-  '/rsrc/image/sprite-conph-X2.png' =>
+  '/rsrc/image/sprite-conpher-X2.png' =>
   array(
-    'hash' => '8f79b9888577dab95d6019d1b7f2a204',
-    'uri' => '/res/8f79b988/rsrc/image/sprite-conph-X2.png',
-    'disk' => '/rsrc/image/sprite-conph-X2.png',
+    'hash' => '88f5bf563e90d99ebe1b4ec552a963fc',
+    'uri' => '/res/88f5bf56/rsrc/image/sprite-conpher-X2.png',
+    'disk' => '/rsrc/image/sprite-conpher-X2.png',
     'type' => 'png',
   ),
-  '/rsrc/image/sprite-conph.png' =>
+  '/rsrc/image/sprite-conpher.png' =>
   array(
-    'hash' => 'a6329b4baa648b57c00de65f6758cbd2',
-    'uri' => '/res/a6329b4b/rsrc/image/sprite-conph.png',
-    'disk' => '/rsrc/image/sprite-conph.png',
+    'hash' => '08dcc68a6b2a89ecce11322f9ffe9d69',
+    'uri' => '/res/08dcc68a/rsrc/image/sprite-conpher.png',
+    'disk' => '/rsrc/image/sprite-conpher.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-gradient.png' =>
@@ -3343,12 +3343,12 @@ celerity_register_resource_map(array(
   ),
   'sprite-conpher-css' =>
   array(
-    'uri' => '/res/f640f0c5/rsrc/css/sprite-conph.css',
+    'uri' => '/res/6277b31f/rsrc/css/sprite-conpher.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/css/sprite-conph.css',
+    'disk' => '/rsrc/css/sprite-conpher.css',
   ),
   'sprite-gradient-css' =>
   array(
