@@ -9,22 +9,29 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       ->setArguments(
         array(
           array(
-            'name'      => 'atomizer',
-            'param'     => 'class',
-            'help'      => 'Specify a subclass of DivinerAtomizer.',
+            'name' => 'atomizer',
+            'param' => 'class',
+            'help' => pht('Specify a subclass of DivinerAtomizer.'),
           ),
           array(
-            'name'      => 'files',
-            'wildcard'  => true,
+            'name' => 'book',
+            'param' => 'path',
+            'help' => pht('Path to a Diviner book configuration.'),
           ),
           array(
-            'name'      => 'ugly',
-            'help'      => 'Produce ugly (but faster) output.',
+            'name' => 'files',
+            'wildcard' => true,
+          ),
+          array(
+            'name' => 'ugly',
+            'help' => pht('Produce ugly (but faster) output.'),
           ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $this->readBookConfiguration($args);
+
     $console = PhutilConsole::getConsole();
 
     $atomizer_class = $args->getArg('atomizer');
@@ -81,6 +88,11 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
     }
 
     $all_atoms = array_mergev($all_atoms);
+
+    foreach ($all_atoms as $atom) {
+      $atom->setBook($this->getConfig('name'));
+    }
+
     $all_atoms = mpull($all_atoms, 'toDictionary');
     $all_atoms = ipull($all_atoms, null, 'hash');
 
