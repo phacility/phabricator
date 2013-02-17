@@ -680,6 +680,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationTransactionController' => 'applications/transactions/controller/PhabricatorApplicationTransactionController.php',
     'PhabricatorApplicationTransactionEditor' => 'applications/transactions/editor/PhabricatorApplicationTransactionEditor.php',
     'PhabricatorApplicationTransactionFeedStory' => 'applications/transactions/feed/PhabricatorApplicationTransactionFeedStory.php',
+    'PhabricatorApplicationTransactionInterface' => 'applications/transactions/interface/PhabricatorApplicationTransactionInterface.php',
     'PhabricatorApplicationTransactionNoEffectException' => 'applications/transactions/exception/PhabricatorApplicationTransactionNoEffectException.php',
     'PhabricatorApplicationTransactionNoEffectResponse' => 'applications/transactions/response/PhabricatorApplicationTransactionNoEffectResponse.php',
     'PhabricatorApplicationTransactionQuery' => 'applications/transactions/query/PhabricatorApplicationTransactionQuery.php',
@@ -2390,6 +2391,7 @@ phutil_register_library_map(array(
     array(
       0 => 'PhabricatorFileDAO',
       1 => 'PhabricatorSubscribableInterface',
+      2 => 'PhabricatorApplicationTransactionInterface',
     ),
     'PhabricatorFileInfoController' => 'PhabricatorFileController',
     'PhabricatorFileLinkListView' => 'AphrontView',

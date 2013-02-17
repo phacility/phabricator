@@ -8,7 +8,8 @@ final class PholioMock extends PholioDAO
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
@@ -122,5 +123,18 @@ final class PholioMock extends PholioDAO
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getID();
   }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PholioMockEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return new PholioTransaction();
+  }
+
 
 }
