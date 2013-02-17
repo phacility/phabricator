@@ -248,7 +248,7 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleList($add));
         } else {
           return pht(
-            '%s removed %d subscribers: %s.',
+            '%s removed %d subscriber(s): %s.',
             $this->renderHandleLink($author_phid),
             count($rem),
             $this->renderHandleList($rem));
