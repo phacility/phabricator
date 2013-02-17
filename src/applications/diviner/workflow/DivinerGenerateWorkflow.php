@@ -392,6 +392,10 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $atom_cache = $this->getAtomCache();
     $atom = $atom_cache->getAtom($node_hash);
 
+    if (!$atom) {
+      throw new Exception("No such atom with node hash '{$node_hash}'!");
+    }
+
     $ref = DivinerAtomRef::newFromDictionary($atom['ref']);
     return $ref->toHash();
   }
