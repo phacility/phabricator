@@ -53,13 +53,14 @@ final class DivinerStaticPublisher extends DivinerPublisher {
 
       $cache->removeAtomPathsFromCache($hash);
       $cache->deleteRenderCache($hash);
+      $cache->deleteAtomFromIndex($hash);
     }
-
-    $cache->writePathMap();
   }
 
   protected function createDocumentsByHash(array $hashes) {
     $indexes = array();
+
+    $cache = $this->getPublishCache();
 
     foreach ($hashes as $hash) {
       $atom = $this->getAtomFromGraphHash($hash);
@@ -76,12 +77,50 @@ final class DivinerStaticPublisher extends DivinerPublisher {
           $indexes[$index] = $atom;
           $paths[] = $index;
         }
+
+        $this->addAtomToIndex($hash, $atom);
       }
 
-      $this->getPublishCache()->addAtomPathsToCache($hash, $paths);
+      $cache->addAtomPathsToCache($hash, $paths);
     }
 
-    $this->getPublishCache()->writePathMap();
+    foreach ($indexes as $index => $atoms) {
+      // TODO: Publish disambiguation pages.
+    }
+
+    $this->publishIndex();
+
+    $cache->writePathMap();
+    $cache->writeIndex();
+  }
+
+  private function publishIndex() {
+    $index = $this->getPublishCache()->getIndex();
+    $refs = array();
+    foreach ($index as $hash => $dictionary) {
+      $refs[$hash] = DivinerAtomRef::newFromDictionary($dictionary);
+    }
+
+    $content = $this->getRenderer()->renderAtomIndex($refs);
+
+    $path = implode(
+      DIRECTORY_SEPARATOR,
+      array(
+        $this->getConfig('root'),
+        'docs',
+        $this->getConfig('name'),
+        'index.html',
+      ));
+
+    Filesystem::writeFile($path, $content);
+  }
+
+  private function addAtomToIndex($hash, DivinerAtom $atom) {
+    $ref = $atom->getRef();
+    $ref->setIndex($this->getAtomSimilarIndex($atom));
+    $ref->setSummary($this->getRenderer()->renderAtomSummary($atom));
+
+    $this->getPublishCache()->addAtomToIndex($hash, $ref->toDictionary());
   }
 
   private function writeDocument(DivinerAtom $atom, $content) {

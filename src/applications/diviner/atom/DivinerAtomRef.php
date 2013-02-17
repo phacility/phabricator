@@ -6,6 +6,39 @@ final class DivinerAtomRef {
   private $context;
   private $type;
   private $name;
+  private $group;
+  private $summary;
+  private $index;
+
+  public function getSortKey() {
+    return implode(
+      "\0",
+      array(
+        $this->getName(),
+        $this->getType(),
+        $this->getContext(),
+        $this->getBook(),
+        $this->getIndex(),
+      ));
+  }
+
+  public function setIndex($index) {
+    $this->index = $index;
+    return $this;
+  }
+
+  public function getIndex() {
+    return $this->index;
+  }
+
+  public function setSummary($summary) {
+    $this->summary = $summary;
+    return $this;
+  }
+
+  public function getSummary() {
+    return $this->summary;
+  }
 
   public function setName($name) {
     $normal_name = self::normalizeString($name);
@@ -53,17 +86,34 @@ final class DivinerAtomRef {
     return $this->book;
   }
 
+  public function setGroup($group) {
+    $this->group = $group;
+    return $this;
+  }
+
+  public function getGroup() {
+    return $this->group;
+  }
+
   public function toDictionary() {
     return array(
       'book'    => $this->getBook(),
       'context' => $this->getContext(),
       'type'    => $this->getType(),
       'name'    => $this->getName(),
+      'group'   => $this->getGroup(),
+      'index'   => $this->getIndex(),
+      'summary' => $this->getSummary(),
     );
   }
 
   public function toHash() {
     $dict = $this->toDictionary();
+
+    unset($dict['group']);
+    unset($dict['index']);
+    unset($dict['summary']);
+
     ksort($dict);
     return md5(serialize($dict)).'S';
   }
@@ -74,6 +124,9 @@ final class DivinerAtomRef {
     $obj->context = idx($dict, 'context');
     $obj->type = idx($dict, 'type');
     $obj->name = idx($dict, 'name');
+    $obj->group = idx($dict, 'group');
+    $obj->index = idx($dict, 'index');
+    $obj->summary = idx($dict, 'summary');
     return $obj;
   }
 

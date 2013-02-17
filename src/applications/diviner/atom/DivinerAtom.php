@@ -284,11 +284,17 @@ final class DivinerAtom {
   }
 
   public function getRef() {
+    $group = null;
+    if ($this->docblockMeta) {
+      $group = $this->getDocblockMetaValue('group');
+    }
+
     return id(new DivinerAtomRef())
       ->setBook($this->getBook())
       ->setContext($this->getContext())
       ->setType($this->getType())
-      ->setName($this->getName());
+      ->setName($this->getName())
+      ->setGroup($group);
   }
 
   public static function newFromDictionary(array $dictionary) {

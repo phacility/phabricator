@@ -3,6 +3,7 @@
 final class DivinerPublishCache extends DivinerDiskCache {
 
   private $pathMap;
+  private $index;
 
   public function __construct($cache_directory) {
     return parent::__construct($cache_directory, 'diviner-publish-cache');
@@ -41,5 +42,32 @@ final class DivinerPublishCache extends DivinerDiskCache {
     return $this;
   }
 
+
+/* -(  Index  )-------------------------------------------------------------- */
+
+  public function getIndex() {
+    if ($this->index === null) {
+      $this->index = $this->getCache()->getKey('index', array());
+    }
+    return $this->index;
+  }
+
+  public function writeIndex() {
+    $this->getCache()->setKey('index', $this->getIndex());
+  }
+
+  public function deleteAtomFromIndex($hash) {
+    $index = $this->getIndex();
+    unset($index[$hash]);
+    $this->index = $index;
+    return $this;
+  }
+
+  public function addAtomToIndex($hash, array $data) {
+    $index = $this->getIndex();
+    $index[$hash] = $data;
+    $this->index = $index;
+    return $this;
+  }
 
 }
