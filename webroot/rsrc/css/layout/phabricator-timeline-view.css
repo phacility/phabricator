@@ -250,3 +250,10 @@
   padding: 4px 1.25%;
   border: solid #c0c5d1 1px 0;
 }
+
+.phabricator-timeline-change-details {
+  padding: 10px 0;
+  border-style: solid;
+  border-color: #efefef;
+  border-width: 1px 0;
+}

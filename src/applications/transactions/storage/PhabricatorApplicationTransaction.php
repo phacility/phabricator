@@ -321,6 +321,13 @@ abstract class PhabricatorApplicationTransaction
     return array();
   }
 
+  public function hasChangeDetails() {
+    return false;
+  }
+
+  public function renderChangeDetails() {
+    return null;
+  }
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

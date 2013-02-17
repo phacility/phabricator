@@ -57,7 +57,7 @@ $package_spec = array(
     'phabricator-textareautils',
     'phabricator-file-upload',
     'javelin-behavior-global-drag-and-drop',
-    'javelin-behavior-phabricator-home-reveal-tiles',
+    'javelin-behavior-phabricator-reveal-content',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',

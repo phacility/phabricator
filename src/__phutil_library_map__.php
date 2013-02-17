@@ -684,6 +684,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationTransactionNoEffectResponse' => 'applications/transactions/response/PhabricatorApplicationTransactionNoEffectResponse.php',
     'PhabricatorApplicationTransactionQuery' => 'applications/transactions/query/PhabricatorApplicationTransactionQuery.php',
     'PhabricatorApplicationTransactionResponse' => 'applications/transactions/response/PhabricatorApplicationTransactionResponse.php',
+    'PhabricatorApplicationTransactionTextDiffDetailView' => 'applications/transactions/view/PhabricatorApplicationTransactionTextDiffDetailView.php',
     'PhabricatorApplicationTransactionView' => 'applications/transactions/view/PhabricatorApplicationTransactionView.php',
     'PhabricatorApplicationTransactions' => 'applications/transactions/application/PhabricatorApplicationTransactions.php',
     'PhabricatorApplicationUIExamples' => 'applications/uiexample/application/PhabricatorApplicationUIExamples.php',
@@ -2168,6 +2169,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationTransactionNoEffectResponse' => 'AphrontProxyResponse',
     'PhabricatorApplicationTransactionQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorApplicationTransactionResponse' => 'AphrontProxyResponse',
+    'PhabricatorApplicationTransactionTextDiffDetailView' => 'AphrontView',
     'PhabricatorApplicationTransactionView' => 'AphrontView',
     'PhabricatorApplicationTransactions' => 'PhabricatorApplication',
     'PhabricatorApplicationUIExamples' => 'PhabricatorApplication',
@@ -2222,7 +2224,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarHoliday' => 'PhabricatorCalendarDAO',
     'PhabricatorCalendarHolidayTestCase' => 'PhabricatorTestCase',
     'PhabricatorCalendarViewStatusController' => 'PhabricatorCalendarController',
-    'PhabricatorCampfireProtocolAdapter' => 'PhabricatorBaseProtocolAdapter',
+    'PhabricatorCampfireProtocolAdapter' => 'PhabricatorBotBaseStreamingProtocolAdapter',
     'PhabricatorChangesetResponse' => 'AphrontProxyResponse',
     'PhabricatorChatLogChannel' =>
     array(

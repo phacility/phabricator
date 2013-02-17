@@ -59,8 +59,17 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         ->setTransactionPHID($xaction->getPHID())
         ->setUserHandle($xaction->getHandle($xaction->getAuthorPHID()))
         ->setIcon($xaction->getIcon())
-        ->setColor($xaction->getColor())
-        ->setTitle($xaction->getTitle());
+        ->setColor($xaction->getColor());
+
+      $title = $xaction->getTitle();
+      if ($xaction->hasChangeDetails()) {
+        $title = array(
+          $title,
+          ' ',
+          $this->buildChangeDetails($xaction),
+        );
+      }
+      $event->setTitle($title);
 
       if ($this->isPreview) {
         $event->setIsPreview(true);
@@ -72,7 +81,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
         $anchor++;
       }
-
 
       $has_deleted_comment = $xaction->getComment() &&
         $xaction->getComment()->getIsDeleted();
@@ -152,6 +160,61 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
     return $engine;
   }
+
+  private function buildChangeDetails(
+    PhabricatorApplicationTransaction $xaction) {
+
+    Javelin::initBehavior('phabricator-reveal-content');
+
+    $show_id = celerity_generate_unique_node_id();
+    $hide_id = celerity_generate_unique_node_id();
+    $content_id = celerity_generate_unique_node_id();
+
+    $show_more = javelin_tag(
+      'a',
+      array(
+        'href' => '#',
+        'sigil' => 'reveal-content',
+        'mustcapture' => true,
+        'id' => $show_id,
+        'meta' => array(
+          'hideIDs' => array($show_id),
+          'showIDs' => array($hide_id, $content_id),
+        ),
+      ),
+      pht('(Show Details)'));
+
+    $hide_more = javelin_tag(
+      'a',
+      array(
+        'href' => '#',
+        'sigil' => 'reveal-content',
+        'mustcapture' => true,
+        'id' => $hide_id,
+        'style' => 'display: none',
+        'meta' => array(
+          'hideIDs' => array($hide_id, $content_id),
+          'showIDs' => array($show_id),
+        ),
+      ),
+      pht('(Hide Details)'));
+
+    $content = phutil_tag(
+      'div',
+      array(
+        'id'    => $content_id,
+        'style' => 'display: none',
+        'class' => 'phabricator-timeline-change-details',
+      ),
+      $xaction->renderChangeDetails());
+
+    return array(
+      $show_more,
+      $hide_more,
+      $content,
+    );
+  }
+
 
 }
 
