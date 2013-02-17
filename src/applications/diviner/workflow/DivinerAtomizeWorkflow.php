@@ -59,9 +59,14 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
 
     $file_atomizer = new DivinerFileAtomizer();
 
+    foreach (array($atomizer, $file_atomizer) as $configure) {
+      $configure->setBook($this->getConfig('name'));
+    }
+
     $all_atoms = array();
     foreach ($files as $file) {
-      $data = Filesystem::readFile($file);
+      $abs_path = Filesystem::resolvePath($file, $this->getConfig('root'));
+      $data = Filesystem::readFile($abs_path);
 
       if (!$this->shouldAtomizeFile($file, $data)) {
         $console->writeLog("Skipping %s...\n", $file);
@@ -88,10 +93,6 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
     }
 
     $all_atoms = array_mergev($all_atoms);
-
-    foreach ($all_atoms as $atom) {
-      $atom->setBook($this->getConfig('name'));
-    }
 
     $all_atoms = mpull($all_atoms, 'toDictionary');
     $all_atoms = ipull($all_atoms, null, 'hash');

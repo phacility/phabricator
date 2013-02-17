@@ -6,6 +6,7 @@
 abstract class DivinerAtomizer {
 
   private $book;
+  private $fileName;
 
   /**
    * If you make a significant change to an atomizer, you can bump this
@@ -15,7 +16,12 @@ abstract class DivinerAtomizer {
     return 1;
   }
 
-  abstract public function atomize($file_name, $file_data);
+  final public function atomize($file_name, $file_data) {
+    $this->fileName = $file_name;
+    return $this->executeAtomize($file_name, $file_data);
+  }
+
+  abstract protected function executeAtomize($file_name, $file_data);
 
   final public function setBook($book) {
     $this->book = $book;
@@ -29,6 +35,7 @@ abstract class DivinerAtomizer {
   protected function newAtom($type) {
     return id(new DivinerAtom())
       ->setBook($this->getBook())
+      ->setFile($this->fileName)
       ->setType($type);
   }
 

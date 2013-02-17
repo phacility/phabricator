@@ -2,7 +2,7 @@
 
 final class DivinerArticleAtomizer extends DivinerAtomizer {
 
-  public function atomize($file_name, $file_data) {
+  protected function executeAtomize($file_name, $file_data) {
     $atom = $this->newAtom(DivinerAtom::TYPE_ARTICLE)
       ->setLine(1)
       ->setLength(count(explode("\n", $file_data)))

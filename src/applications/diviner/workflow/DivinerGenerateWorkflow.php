@@ -198,7 +198,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
 
   private function findFilesInProject() {
-    $file_hashes = id(new FileFinder($this->getConfig('root')))
+    $raw_hashes = id(new FileFinder($this->getConfig('root')))
       ->excludePath('*/.*')
       ->withType('f')
       ->setGenerateChecksums(true)
@@ -206,11 +206,13 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
     $version = $this->getDivinerAtomWorldVersion();
 
-    foreach ($file_hashes as $file => $md5_hash) {
+    $file_hashes = array();
+    foreach ($raw_hashes as $file => $md5_hash) {
+      $rel_file = Filesystem::readablePath($file, $this->getConfig('root'));
       // We want the hash to change if the file moves or Diviner gets updated,
       // not just if the file content changes. Derive a hash from everything
       // we care about.
-      $file_hashes[$file] = md5("{$file}\0{$md5_hash}\0{$version}").'F';
+      $file_hashes[$rel_file] = md5("{$rel_file}\0{$md5_hash}\0{$version}").'F';
     }
 
     return $file_hashes;

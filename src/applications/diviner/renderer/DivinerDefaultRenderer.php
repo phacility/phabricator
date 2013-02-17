@@ -172,7 +172,10 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
   }
 
   protected function getBlockMarkupEngine() {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
+    return PhabricatorMarkupEngine::newMarkupEngine(
+      array(
+        'preserve-linebreaks' => false,
+      ));
   }
 
   protected function getInlineMarkupEngine() {
