@@ -113,8 +113,11 @@ abstract class DivinerPublisher {
     $deleted = array_diff_key($existing_map, $hashes_map);
     $created = array_diff_key($hashes_map, $existing_map);
 
-    $this->createDocumentsByHash(array_keys($created));
+    echo pht('Deleting %d documents.', count($deleted))."\n";
     $this->deleteDocumentsByHash(array_keys($deleted));
+
+    echo pht('Creating %d documents.', count($created))."\n";
+    $this->createDocumentsByHash(array_keys($created));
   }
 
   protected function shouldGenerateDocumentForAtom(DivinerAtom $atom) {
