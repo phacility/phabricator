@@ -2912,6 +2912,7 @@ phutil_register_library_map(array(
       2 => 'PhabricatorPolicyInterface',
       3 => 'PhabricatorSubscribableInterface',
       4 => 'PhabricatorTokenReceiverInterface',
+      5 => 'PhabricatorApplicationTransactionInterface',
     ),
     'PholioMockCommentController' => 'PholioController',
     'PholioMockEditController' => 'PholioController',
