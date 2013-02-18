@@ -1129,6 +1129,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130217.cachettl.sql'),
       ),
+      '20130218.updatechannelid.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('20130218.updatechannelid.php'),
+      ),
     );
   }
 
