@@ -91,12 +91,17 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
   protected function renderAtomDescription(DivinerAtom $atom) {
     $text = $this->getAtomDescription($atom);
     $engine = $this->getBlockMarkupEngine();
+
+    $this->pushAtomStack($atom);
+      $description = $engine->markupText($text);
+    $this->popAtomStack($atom);
+
     return phutil_tag(
       'div',
       array(
         'class' => 'atom-description',
       ),
-      $engine->markupText($text));
+      $description);
   }
 
   protected function getAtomDescription(DivinerAtom $atom) {
@@ -106,12 +111,17 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
   public function renderAtomSummary(DivinerAtom $atom) {
     $text = $this->getAtomSummary($atom);
     $engine = $this->getInlineMarkupEngine();
+
+    $this->pushAtomStack($atom);
+      $summary = $engine->markupText($text);
+    $this->popAtomStack();
+
     return phutil_tag(
       'span',
       array(
         'class' => 'atom-summary',
       ),
-      $engine->markupText($text));
+      $summary);
   }
 
   protected function getAtomSummary(DivinerAtom $atom) {
@@ -172,15 +182,66 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
   }
 
   protected function getBlockMarkupEngine() {
-    return PhabricatorMarkupEngine::newMarkupEngine(
+    $engine = PhabricatorMarkupEngine::newMarkupEngine(
       array(
         'preserve-linebreaks' => false,
       ));
+    $engine->setConfig('diviner.renderer', $this);
+    return $engine;
   }
 
   protected function getInlineMarkupEngine() {
     return $this->getBlockMarkupEngine();
   }
 
+  public function normalizeAtomRef(DivinerAtomRef $ref) {
+    if (!strlen($ref->getBook())) {
+      $ref->setBook($this->getConfig('name'));
+    }
+
+    if ($ref->getBook() != $this->getConfig('name')) {
+      // If the ref is from a different book, we can't normalize it. Just return
+      // it as-is if it has enough information to resolve.
+      if ($ref->getName() && $ref->getType()) {
+        return $ref;
+      } else {
+        return null;
+      }
+    }
+
+    $atom = $this->getPublisher()->findAtomByRef($ref);
+    if ($atom) {
+      return $atom->getRef();
+    }
+
+    return null;
+  }
+
+  protected function getAtomHrefDepth(DivinerAtom $atom) {
+    if ($atom->getContext()) {
+      return 4;
+    } else {
+      return 3;
+    }
+  }
+
+  public function getHrefForAtomRef(DivinerAtomRef $ref) {
+    $atom = $this->peekAtomStack();
+    $depth = $this->getAtomHrefDepth($atom);
+    $href = str_repeat('../', $depth);
+
+    $book = $ref->getBook();
+    $type = $ref->getType();
+    $name = $ref->getName();
+    $context = $ref->getContext();
+
+    $href .= $book.'/'.$type.'/';
+    if ($context !== null) {
+      $href .= $context.'/';
+    }
+    $href .= $name.'/';
+
+    return $href;
+  }
 
 }

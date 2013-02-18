@@ -285,8 +285,10 @@ final class DivinerAtom {
 
   public function getRef() {
     $group = null;
+    $title = null;
     if ($this->docblockMeta) {
       $group = $this->getDocblockMetaValue('group');
+      $title = $this->getDocblockMetaValue('title');
     }
 
     return id(new DivinerAtomRef())
@@ -294,6 +296,7 @@ final class DivinerAtom {
       ->setContext($this->getContext())
       ->setType($this->getType())
       ->setName($this->getName())
+      ->setTitle($title)
       ->setGroup($group);
   }
 

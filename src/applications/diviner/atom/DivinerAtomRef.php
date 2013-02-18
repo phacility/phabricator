@@ -9,6 +9,7 @@ final class DivinerAtomRef {
   private $group;
   private $summary;
   private $index;
+  private $title;
 
   public function getSortKey() {
     return implode(
@@ -47,7 +48,7 @@ final class DivinerAtomRef {
         "Atom names must not be in the form '/@\d+/'. This pattern is ".
         "reserved for disambiguating atoms with similar names.");
     }
-    $this->name = $name;
+    $this->name = $normal_name;
     return $this;
   }
 
@@ -78,7 +79,11 @@ final class DivinerAtomRef {
   }
 
   public function setBook($book) {
-    $this->book = self::normalizeString($book);
+    if ($book === null) {
+      $this->book = $book;
+    } else {
+      $this->book = self::normalizeString($book);
+    }
     return $this;
   }
 
@@ -95,6 +100,15 @@ final class DivinerAtomRef {
     return $this->group;
   }
 
+  public function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+
+  public function getTitle() {
+    return $this->title;
+  }
+
   public function toDictionary() {
     return array(
       'book'    => $this->getBook(),
@@ -104,6 +118,7 @@ final class DivinerAtomRef {
       'group'   => $this->getGroup(),
       'index'   => $this->getIndex(),
       'summary' => $this->getSummary(),
+      'title'   => $this->getTitle(),
     );
   }
 
@@ -113,6 +128,7 @@ final class DivinerAtomRef {
     unset($dict['group']);
     unset($dict['index']);
     unset($dict['summary']);
+    unset($dict['title']);
 
     ksort($dict);
     return md5(serialize($dict)).'S';
@@ -120,13 +136,14 @@ final class DivinerAtomRef {
 
   public static function newFromDictionary(array $dict) {
     $obj = new DivinerAtomRef();
-    $obj->book = idx($dict, 'book');
-    $obj->context = idx($dict, 'context');
-    $obj->type = idx($dict, 'type');
-    $obj->name = idx($dict, 'name');
+    $obj->setBook(idx($dict, 'book'));
+    $obj->setContext(idx($dict, 'context'));
+    $obj->setType(idx($dict, 'type'));
+    $obj->setName(idx($dict, 'name'));
     $obj->group = idx($dict, 'group');
     $obj->index = idx($dict, 'index');
     $obj->summary = idx($dict, 'summary');
+    $obj->title = idx($dict, 'title');
     return $obj;
   }
 
@@ -163,8 +180,8 @@ final class DivinerAtomRef {
     // Replace all spaces with underscores.
     $str = preg_replace('/ +/', '_', $str);
 
-    // Replace control characters with "@".
-    $str = preg_replace('/[\x00-\x19]/', '@', $str);
+    // Replace control characters with "X".
+    $str = preg_replace('/[\x00-\x19]/', 'X', $str);
 
     // Replace specific problematic names with alternative names.
     $alternates = array(

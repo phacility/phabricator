@@ -3,6 +3,7 @@
 final class DivinerStaticPublisher extends DivinerPublisher {
 
   private $publishCache;
+  private $atomNameMap;
 
   private function getPublishCache() {
     if (!$this->publishCache) {
@@ -113,6 +114,48 @@ final class DivinerStaticPublisher extends DivinerPublisher {
       ));
 
     Filesystem::writeFile($path, $content);
+  }
+
+  public function findAtomByRef(DivinerAtomRef $ref) {
+    if ($ref->getBook() != $this->getConfig('name')) {
+      return null;
+    }
+
+    if ($this->atomNameMap === null) {
+      $name_map = array();
+      foreach ($this->getPublishCache()->getIndex() as $hash => $dict) {
+        $name_map[$dict['name']][$hash] = $dict;
+      }
+      $this->atomNameMap = $name_map;
+    }
+
+    $name = $ref->getName();
+    if (empty($this->atomNameMap[$name])) {
+      return null;
+    }
+
+    $candidates = $this->atomNameMap[$name];
+    foreach ($candidates as $key => $dict) {
+      $candidates[$key] = DivinerAtomRef::newFromDict($dict);
+      if ($ref->getType()) {
+        if ($candidates[$key]->getType() != $ref->getType()) {
+          unset($candidates[$key]);
+        }
+      }
+
+      if ($ref->getContext()) {
+        if ($candidates[$key]->getContext() != $ref->getContext()) {
+          unset($candidates[$key]);
+        }
+      }
+    }
+
+    // If we have exactly one uniquely identifiable atom, return it.
+    if (count($candidates) == 1) {
+      return $this->getAtomFromNodeHash(last_key($candidates));
+    }
+
+    return null;
   }
 
   private function addAtomToIndex($hash, DivinerAtom $atom) {

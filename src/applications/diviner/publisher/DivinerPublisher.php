@@ -10,6 +10,7 @@ abstract class DivinerPublisher {
   private $symbolReverseMap;
 
   public function setRenderer(DivinerRenderer $renderer) {
+    $renderer->setPublisher($this);
     $this->renderer = $renderer;
     return $this;
   }
@@ -103,6 +104,7 @@ abstract class DivinerPublisher {
   abstract protected function loadAllPublishedHashes();
   abstract protected function deleteDocumentsByHash(array $hashes);
   abstract protected function createDocumentsByHash(array $hashes);
+  abstract public function findAtomByRef(DivinerAtomRef $ref);
 
   final public function publishAtoms(array $hashes) {
     $existing = $this->loadAllPublishedHashes();
