@@ -11,6 +11,11 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
   private $active;
   private $inRooms = array();
 
+  public function getServiceName() {
+    $uri = new PhutilURI($this->server);
+    return $uri->getDomain();
+  }
+
   public function connect() {
     $this->server = $this->getConfig('server');
     $this->authtoken = $this->getConfig('authtoken');

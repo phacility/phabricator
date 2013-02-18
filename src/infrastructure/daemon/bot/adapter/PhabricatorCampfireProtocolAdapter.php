@@ -3,6 +3,10 @@
 final class PhabricatorCampfireProtocolAdapter
   extends PhabricatorBotBaseStreamingProtocolAdapter {
 
+  public function getServiceType() {
+    return 'Campfire';
+  }
+
   protected function buildStreamingUrl($channel) {
     $ssl = $this->getConfig('ssl');
 

@@ -44,19 +44,20 @@ final class ConduitAPI_chatlog_record_Method
       $service_name = idx($log, 'serviceName');
       $service_type = idx($log, 'serviceType');
 
-      $channel = id(new PhabricatorChatLogChannel())
-                 ->loadOneWhere(
-                   'channelName = %s AND serviceName = %s
-                    AND serviceType = %s', $channel_name,
-                    $service_name, $service_type
-                    );
+      $channel = id(new PhabricatorChatLogChannel())->loadOneWhere(
+        'channelName = %s AND serviceName = %s AND serviceType = %s',
+        $channel_name,
+        $service_name,
+        $service_type);
 
       if (!$channel) {
         $channel = id(new PhabricatorChatLogChannel())
-                   ->setChannelName($channel_name)
-                   ->setserviceName($service_name)
-                   ->setServiceType($service_type)
-                   ->save();
+          ->setChannelName($channel_name)
+          ->setserviceName($service_name)
+          ->setServiceType($service_type)
+          ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+          ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+          ->save();
       }
 
       $obj = clone $template;

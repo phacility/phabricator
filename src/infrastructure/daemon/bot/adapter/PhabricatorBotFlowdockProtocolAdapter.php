@@ -3,6 +3,10 @@
 final class PhabricatorBotFlowdockProtocolAdapter
   extends PhabricatorBotBaseStreamingProtocolAdapter {
 
+  public function getServiceType() {
+    return 'Flowdock';
+  }
+
   protected function buildStreamingUrl($channel) {
     $organization = $this->getConfig('organization');
     $ssl = $this->getConfig('ssl');

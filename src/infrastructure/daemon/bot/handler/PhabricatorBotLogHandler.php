@@ -28,6 +28,8 @@ final class PhabricatorBotLogHandler extends PhabricatorBotHandler {
             'epoch'   => time(),
             'author'  => $message->getSender()->getName(),
             'message' => $message->getBody(),
+            'serviceName' => $this->getServiceName(),
+            'serviceType' => $this->getServiceType(),
           ),
         );
 
