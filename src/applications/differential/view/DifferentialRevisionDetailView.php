@@ -71,27 +71,25 @@ final class DifferentialRevisionDetailView extends AphrontView {
       switch ($local_vcs) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $bookmark = $this->getDiff()->getBookmark();
-          $command = ($bookmark != ''
+          $next_step = ($bookmark != ''
             ? csprintf('arc land %s', $bookmark)
             : 'arc land');
           break;
 
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $branch = $this->getDiff()->getBranch();
-          $command = ($branch != ''
+          $next_step = ($branch != ''
             ? csprintf('arc land %s', $branch)
             : 'arc land');
           break;
 
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $command = 'arc commit';
+          $next_step = 'arc commit';
           break;
-      }
-      if ($command) {
-        $next_step = phutil_tag('tt', array(), $command);
       }
     }
     if ($next_step) {
+      $next_step = phutil_tag('tt', array(), $next_step);
       $properties->addProperty(pht('Next Step'), $next_step);
     }
 
