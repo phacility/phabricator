@@ -67,6 +67,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
     $next_step = null;
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
+      $command = null;
       switch ($local_vcs) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $bookmark = $this->getDiff()->getBookmark();
