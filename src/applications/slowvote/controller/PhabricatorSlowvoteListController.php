@@ -92,8 +92,7 @@ final class PhabricatorSlowvoteListController
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($views[$view])
-        ->setHref($this->getApplicationURI())
-      );
+        ->setHref($this->getApplicationURI()));
     $side_nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(

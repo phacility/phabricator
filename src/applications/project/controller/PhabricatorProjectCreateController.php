@@ -118,8 +118,7 @@ final class PhabricatorProjectCreateController
       $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName(pht('Create Project'))
-          ->setHref($this->getApplicationURI().'create/')
-        );
+          ->setHref($this->getApplicationURI().'create/'));
 
       return $this->buildApplicationPage(
         array(

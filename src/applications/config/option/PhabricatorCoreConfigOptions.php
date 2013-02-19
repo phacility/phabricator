@@ -131,8 +131,7 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('phabricator.uninstalled-applications', 'set', array())
         ->setLocked(true)
         ->setDescription(
-          pht('Array containing list of Uninstalled applications.')
-          ),
+          pht('Array containing list of Uninstalled applications.')),
       );
   }
 

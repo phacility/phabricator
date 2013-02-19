@@ -159,8 +159,7 @@ final class DifferentialChangesetParser {
     return $parser->parseHunksForHighlightMasks(
       $changeset->getHunks(),
       $this->originalLeft->getHunks(),
-      $this->originalRight->getHunks()
-    );
+      $this->originalRight->getHunks());
   }
 
   /**
@@ -890,8 +889,7 @@ final class DifferentialChangesetParser {
       $mask_force,
       $feedback_mask,
       $range_start,
-      $range_len
-    );
+      $range_len);
 
     $renderer
       ->setGaps($gaps)
@@ -901,8 +899,7 @@ final class DifferentialChangesetParser {
     $html = $renderer->renderTextChange(
       $range_start,
       $range_len,
-      $rows
-    );
+      $rows);
 
     return $renderer->renderChangesetTable($html);
   }

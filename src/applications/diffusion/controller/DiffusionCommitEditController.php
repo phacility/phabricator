@@ -24,8 +24,7 @@ final class DiffusionCommitEditController extends DiffusionController {
     $edge_type          = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT;
     $current_proj_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $commit_phid,
-      $edge_type
-    );
+      $edge_type);
     $handles = $this->loadViewerHandles($current_proj_phids);
     $proj_t_values = mpull($handles, 'getFullName', 'getPHID');
 

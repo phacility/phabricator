@@ -34,8 +34,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
         array(
           'src' => PhabricatorUser::getDefaultProfileImageURI()
         ),
-        ''
-      );
+        '');
     }
 
     $c_id = celerity_generate_unique_node_id();
@@ -43,8 +42,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
     $scale = PhabricatorImageTransformer::getScaleForCrop(
       $file,
       $this->getWidth(),
-      $this->getHeight()
-    );
+      $this->getHeight());
 
     Javelin::initBehavior(
       'aphront-crop',
@@ -55,8 +53,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
         'scale' => $scale,
         'imageH' => $metadata[PhabricatorFile::METADATA_IMAGE_HEIGHT],
         'imageW' => $metadata[PhabricatorFile::METADATA_IMAGE_WIDTH],
-      )
-    );
+      ));
 
     return javelin_tag(
       'div',
@@ -74,8 +71,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
             'class' => 'crop-image',
             'sigil' => 'crop-image'
           ),
-          ''
-        ),
+          ''),
         javelin_tag(
           'input',
           array(
@@ -83,8 +79,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
             'name' => 'image_x',
             'sigil' => 'crop-x',
           ),
-          ''
-        ),
+          ''),
         javelin_tag(
           'input',
           array(
@@ -92,10 +87,8 @@ final class AphrontFormCropControl extends AphrontFormControl {
             'name' => 'image_y',
             'sigil' => 'crop-y',
           ),
-          ''
-        ),
-      )
-    );
+          ''),
+      ));
   }
 
 }

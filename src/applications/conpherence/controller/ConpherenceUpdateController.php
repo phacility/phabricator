@@ -56,8 +56,7 @@ final class ConpherenceUpdateController extends
           $message = $request->getStr('text');
           $xactions = $editor->generateTransactionsFromText(
             $conpherence,
-            $message
-          );
+            $message);
           break;
         case 'metadata':
           $xactions = array();
@@ -82,20 +81,17 @@ final class ConpherenceUpdateController extends
                 0,
                 0,
                 ConpherenceImageData::HEAD_WIDTH,
-                ConpherenceImageData::HEAD_HEIGHT
-              );
+                ConpherenceImageData::HEAD_HEIGHT);
               // this is handled outside the editor for now. no particularly
               // good reason to move it inside
               $conpherence->setImagePHIDs(
                 array(
                   ConpherenceImageData::SIZE_HEAD => $header_file->getPHID(),
-                )
-              );
+                ));
               $conpherence->setImages(
                 array(
                   ConpherenceImageData::SIZE_HEAD => $header_file,
-                )
-              );
+                ));
             } else {
               $e_file[] = $orig_file;
               $errors[] =
@@ -112,14 +108,12 @@ final class ConpherenceUpdateController extends
               $top,
               $left,
               ConpherenceImageData::HEAD_WIDTH,
-              ConpherenceImageData::HEAD_HEIGHT
-            );
+              ConpherenceImageData::HEAD_HEIGHT);
             $image_phid = $xformed->getPHID();
 
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PICTURE_CROP
-              )
+                ConpherenceTransactionType::TYPE_PICTURE_CROP)
               ->setNewValue($image_phid);
           }
           if ($title != $conpherence->getTitle()) {
@@ -143,15 +137,13 @@ final class ConpherenceUpdateController extends
         }
       } else if (empty($errors)) {
         $errors[] = pht(
-          'That was a non-update. Try cancel.'
-        );
+          'That was a non-update. Try cancel.');
       }
     }
 
     if ($updated) {
       return id(new AphrontRedirectResponse())->setURI(
-        $this->getApplicationURI($conpherence_id.'/')
-      );
+        $this->getApplicationURI($conpherence_id.'/'));
     }
 
     if ($errors) {
@@ -166,8 +158,7 @@ final class ConpherenceUpdateController extends
         id(new AphrontFormTextControl())
         ->setLabel(pht('Title'))
         ->setName('title')
-        ->setValue($conpherence->getTitle())
-      );
+        ->setValue($conpherence->getTitle()));
 
     $image = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
     if ($image) {
@@ -180,28 +171,23 @@ final class ConpherenceUpdateController extends
             array(
               'src' =>
               $conpherence->loadImageURI(ConpherenceImageData::SIZE_HEAD),
-              ))
-            )
-          )
+              ))))
           ->appendChild(
             id(new AphrontFormCropControl())
             ->setLabel(pht('Crop Image'))
             ->setValue($image)
             ->setWidth(ConpherenceImageData::HEAD_WIDTH)
-            ->setHeight(ConpherenceImageData::HEAD_HEIGHT)
-          )
+            ->setHeight(ConpherenceImageData::HEAD_HEIGHT))
           ->appendChild(
             id(new ConpherenceFormDragAndDropUploadControl())
-            ->setLabel(pht('Change Image'))
-          );
+            ->setLabel(pht('Change Image')));
 
     } else {
 
       $form
         ->appendChild(
           id(new ConpherenceFormDragAndDropUploadControl())
-          ->setLabel(pht('Image'))
-        );
+          ->setLabel(pht('Image')));
     }
 
     require_celerity_resource('conpherence-update-css');
@@ -216,7 +202,6 @@ final class ConpherenceUpdateController extends
         ->appendChild($error_view)
         ->appendChild($form)
         ->addSubmitButton()
-        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/'))
-      );
+        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')));
   }
 }

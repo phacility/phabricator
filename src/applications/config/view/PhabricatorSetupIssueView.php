@@ -64,9 +64,10 @@ final class PhabricatorSetupIssueView extends AphrontView {
       // TODO: We should do a better job of detecting how to install extensions
       // on the current system.
       $install_commands = hsprintf(
-        "\$ sudo apt-get install php5-<em>extname</em>  # Debian / Ubuntu\n".
-        "\$ sudo yum install php-<em>extname</em>       # Red Hat / Derivatives"
-      );
+        "\$ sudo apt-get install php5-<em>extname</em>  ".
+        "# Debian / Ubuntu\n".
+        "\$ sudo yum install php-<em>extname</em>       ".
+        "# Red Hat / Derivatives");
 
       $fallback_info = pht(
         "If those commands don't work, try Google. The process of installing ".

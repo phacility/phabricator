@@ -40,8 +40,7 @@ final class DiffusionCommitController extends DiffusionController {
         ->setTitle('Error displaying commit.')
         ->appendChild('Failed to load the commit because the commit has not '.
                       'been parsed yet.'),
-          array('title' => 'Commit Still Parsing')
-        );
+          array('title' => 'Commit Still Parsing'));
     }
 
     $commit_data = $drequest->loadCommitData();
@@ -83,8 +82,7 @@ final class DiffusionCommitController extends DiffusionController {
       $commit_properties = $this->loadCommitProperties(
         $commit,
         $commit_data,
-        $parent_query->loadParents()
-      );
+        $parent_query->loadParents());
       $property_list = id(new PhabricatorPropertyListView())
         ->setHasKeyboardShortcuts(true);
       foreach ($commit_properties as $key => $value) {
@@ -280,8 +278,7 @@ final class DiffusionCommitController extends DiffusionController {
 
       $change_list_title = DiffusionView::nameCommit(
         $repository,
-        $commit->getCommitIdentifier()
-      );
+        $commit->getCommitIdentifier());
       $change_list = new DifferentialChangesetListView();
       $change_list->setTitle($change_list_title);
       $change_list->setChangesets($changesets);
@@ -320,8 +317,7 @@ final class DiffusionCommitController extends DiffusionController {
     $commit_id = 'r'.$callsign.$commit->getCommitIdentifier();
     $short_name = DiffusionView::nameCommit(
       $repository,
-      $commit->getCommitIdentifier()
-    );
+      $commit->getCommitIdentifier());
 
     $crumbs = $this->buildCrumbs(array(
       'commit' => true,
@@ -351,8 +347,7 @@ final class DiffusionCommitController extends DiffusionController {
       $content,
       array(
         'title' => $commit_id
-      )
-    );
+      ));
   }
 
   private function loadCommitProperties(
@@ -373,11 +368,9 @@ final class DiffusionCommitController extends DiffusionController {
       ->execute();
 
     $task_phids = array_keys(
-      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK]
-    );
+      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK]);
     $proj_phids = array_keys(
-      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]
-    );
+      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]);
 
     $phids = array_merge($task_phids, $proj_phids);
     if ($data->getCommitDetail('authorPHID')) {

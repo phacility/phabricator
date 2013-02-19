@@ -61,8 +61,7 @@ final class PhabricatorMailingListsListController
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('All Lists'))
-        ->setHref($this->getApplicationURI())
-      );
+        ->setHref($this->getApplicationURI()));
     $nav->setCrumbs($crumbs);
 
     $panel = new AphrontPanelView();

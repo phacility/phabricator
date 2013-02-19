@@ -59,8 +59,7 @@ final class PonderAnswerEditor extends PhabricatorEditor {
 
     $content = $answer->getContent();
     $at_mention_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      array($content)
-    );
+      array($content));
     $subeditor->subscribeImplicit($at_mention_phids);
     $subeditor->save();
 
@@ -83,8 +82,7 @@ final class PonderAnswerEditor extends PhabricatorEditor {
       $other_subs =
         array_diff(
           $subscribers,
-          $at_mention_phids
-        );
+          $at_mention_phids);
 
       // 'Answered' emails for subscribers who are not @mentiond (and excluding
       // author depending on their MetaMTA settings).

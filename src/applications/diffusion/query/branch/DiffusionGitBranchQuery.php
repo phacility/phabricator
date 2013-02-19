@@ -13,8 +13,7 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
     list($stdout) = $repository->execxLocalCommand(
       'for-each-ref %C --sort=-creatordate --format=%s refs/remotes',
       $count ? '--count='.(int)$count : null,
-      '%(refname:short) %(objectname)'
-    );
+      '%(refname:short) %(objectname)');
 
     $branch_list = self::parseGitRemoteBranchOutput(
       $stdout,

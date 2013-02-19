@@ -50,8 +50,7 @@ final class ConduitAPI_differential_updateunitresults_Method
     $diff_property = id(new DifferentialDiffProperty())->loadOneWhere(
       'diffID = %d AND name = %s',
       $diff_id,
-      'arc:unit'
-      );
+      'arc:unit');
 
     if (!$diff_property) {
       throw new ConduitException('ERR_NO_RESULTS');

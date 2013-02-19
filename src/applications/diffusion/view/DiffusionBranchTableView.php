@@ -45,8 +45,7 @@ final class DiffusionBranchTableView extends DiffusionView {
                 'branch' => $branch->getName(),
               ))
           ),
-          'History'
-        ),
+          'History'),
         phutil_tag(
           'a',
           array(

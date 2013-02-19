@@ -28,8 +28,7 @@ final class DifferentialPeopleMenuEventListener extends PhutilEventListener {
       ->setIsExternal(true)
       ->setHref($href)
       ->setName($name)
-      ->setKey($name)
-    );
+      ->setKey($name));
 
     $event->setValue('menu', $menu);
   }

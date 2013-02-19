@@ -193,8 +193,7 @@ final class PhabricatorOAuthServer {
       // check if the scope includes "offline_access", which makes the
       // token valid despite being expired
       if (isset(
-        $token_scope[PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS]
-      )) {
+        $token_scope[PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS])) {
         $valid = true;
       }
     }

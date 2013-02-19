@@ -124,13 +124,11 @@ final class PhabricatorProjectMembersEditController
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($project->getName())
-        ->setHref('/project/view/'.$project->getID().'/')
-      );
+        ->setHref('/project/view/'.$project->getID().'/'));
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Members'))
-        ->setHref($this->getApplicationURI())
-      );
+        ->setHref($this->getApplicationURI()));
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(

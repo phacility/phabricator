@@ -123,8 +123,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
       id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
       ->setName($status_name)
-      ->setBackgroundColor($status_color)
-    );
+      ->setBackgroundColor($status_color));
 
     return $view;
   }

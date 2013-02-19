@@ -91,8 +91,7 @@ final class PhabricatorConfigAllController
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 
 }

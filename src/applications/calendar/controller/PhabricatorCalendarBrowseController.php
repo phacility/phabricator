@@ -44,8 +44,7 @@ final class PhabricatorCalendarBrowseController
         $details = "\n\n".rtrim($status->getDescription());
       }
       $event->setDescription(
-        $status->getTerseSummary($user).$details
-      );
+        $status->getTerseSummary($user).$details);
       $event->setEventID($status->getID());
       $month_view->addEvent($event);
     }

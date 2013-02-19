@@ -85,8 +85,7 @@ final class PhabricatorCalendarEditStatusController
                                                        $user,
                                                        'Y'),
             $redirect => true,
-          )
-        );
+          ));
         return id(new AphrontRedirectResponse())
           ->setURI($uri);
       }
@@ -125,8 +124,7 @@ final class PhabricatorCalendarEditStatusController
     } else {
       $submit->addCancelButton(
         $this->getApplicationURI('status/delete/'.$status->getID().'/'),
-        pht('Delete Status')
-      );
+        pht('Delete Status'));
     }
     $form->appendChild($submit);
 
@@ -138,16 +136,14 @@ final class PhabricatorCalendarEditStatusController
         id(new PhabricatorHeaderView())->setHeader($page_title),
         $error_view,
         $form,
-      )
-    );
+      ));
 
     return $this->buildApplicationPage(
       $nav,
       array(
         'title' => $page_title,
         'device' => true
-      )
-    );
+      ));
   }
 
 }

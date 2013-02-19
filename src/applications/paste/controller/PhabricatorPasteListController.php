@@ -66,8 +66,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 
   private function buildPasteList(array $pastes) {

@@ -188,14 +188,12 @@ abstract class DiffusionController extends PhabricatorController {
       $crumb = new PhabricatorCrumbView();
       if ($spec['commit']) {
         $crumb->setName(
-          "Tags for r{$callsign}{$raw_commit}"
-        );
+          "Tags for r{$callsign}{$raw_commit}");
         $crumb->setHref($drequest->generateURI(
           array(
             'action' => 'commit',
             'commit' => $raw_commit,
-          ))
-        );
+          )));
       } else {
         $crumb->setName('Tags');
       }
@@ -264,8 +262,7 @@ abstract class DiffusionController extends PhabricatorController {
       $crumb->setHref($drequest->generateURI(
         array(
           'path' => '',
-        ) + $uri_params)
-      );
+        ) + $uri_params));
       $crumb_list[] = $crumb;
 
       $path_parts = explode('/', $path);

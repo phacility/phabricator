@@ -76,8 +76,10 @@ final class PhabricatorMetaMTASendController
             'deliver outbound email. This completely disables outbound email! '.
             'All outbound email will be thrown in a deep, dark hole until you '.
             'configure a real adapter.',
-          phutil_tag('tt', array(), 'PhabricatorMailImplementationTestAdapter'))
-        ));
+          phutil_tag(
+            'tt',
+            array(),
+            'PhabricatorMailImplementationTestAdapter'))));
     }
 
     $phdlink_href = PhabricatorEnv::getDoclink(
@@ -123,8 +125,10 @@ final class PhabricatorMetaMTASendController
           ->setName('mailtags')
           ->setCaption(pht(
             'Example: %s',
-            phutil_tag('tt', array(), 'differential-cc, differential-comment'))
-          ))
+            phutil_tag(
+              'tt',
+              array(),
+              'differential-cc, differential-comment'))))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())
           ->setLabel(pht('Attach Files'))

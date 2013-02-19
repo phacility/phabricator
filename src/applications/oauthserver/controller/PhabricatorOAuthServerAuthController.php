@@ -29,8 +29,7 @@ extends PhabricatorAuthController {
     if (!$client_phid) {
       $response->setError('invalid_request');
       $response->setErrorDescription(
-        'Required parameter client_id not specified.'
-      );
+        'Required parameter client_id not specified.');
       return $response;
     }
     $server->setUser($current_user);
@@ -43,8 +42,7 @@ extends PhabricatorAuthController {
       if (!$client) {
         $response->setError('invalid_request');
         $response->setErrorDescription(
-          'Client with id '.$client_phid.' not found.'
-        );
+          'Client with id '.$client_phid.' not found.');
         return $response;
       }
       $server->setClient($client);
@@ -58,8 +56,7 @@ extends PhabricatorAuthController {
             'The specified redirect URI is invalid. The redirect URI '.
             'must be a fully-qualified domain with no fragments and '.
             'must have the same domain and at least the same query '.
-            'parameters as the redirect URI the client registered.'
-          );
+            'parameters as the redirect URI the client registered.');
           return $response;
         }
         $uri              = $redirect_uri;
@@ -73,8 +70,7 @@ extends PhabricatorAuthController {
       if (empty($response_type)) {
         $response->setError('invalid_request');
         $response->setErrorDescription(
-          'Required parameter response_type not specified.'
-        );
+          'Required parameter response_type not specified.');
         return $response;
       }
       if ($response_type != 'code') {
@@ -82,16 +78,14 @@ extends PhabricatorAuthController {
         $response->setErrorDescription(
           'The authorization server does not support obtaining an '.
           'authorization code using the specified response_type. '.
-          'You must specify the response_type as "code".'
-        );
+          'You must specify the response_type as "code".');
         return $response;
       }
       if ($scope) {
         if (!PhabricatorOAuthServerScope::validateScopesList($scope)) {
           $response->setError('invalid_scope');
           $response->setErrorDescription(
-            'The requested scope is invalid, unknown, or malformed.'
-          );
+            'The requested scope is invalid, unknown, or malformed.');
           return $response;
         }
         $scope = PhabricatorOAuthServerScope::scopesListToDict($scope);
@@ -136,8 +130,7 @@ extends PhabricatorAuthController {
       $response->setError('server_error');
       $response->setErrorDescription(
         'The authorization server encountered an unexpected condition '.
-        'which prevented it from fulfilling the request. '
-      );
+        'which prevented it from fulfilling the request. ');
       return $response;
     }
 
@@ -162,8 +155,7 @@ extends PhabricatorAuthController {
       if (!PhabricatorOAuthServerScope::validateScopesDict($desired_scopes)) {
         $response->setError('invalid_scope');
         $response->setErrorDescription(
-          'The requested scope is invalid, unknown, or malformed.'
-        );
+          'The requested scope is invalid, unknown, or malformed.');
         return $response;
       }
     } else {
@@ -185,16 +177,13 @@ extends PhabricatorAuthController {
       ->setUser($current_user)
       ->appendChild(
         id(new AphrontFormStaticControl())
-        ->setValue($description)
-      )
+        ->setValue($description))
       ->appendChild(
-        PhabricatorOAuthServerScope::getCheckboxControl($desired_scopes)
-      )
+        PhabricatorOAuthServerScope::getCheckboxControl($desired_scopes))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue('Authorize')
-        ->addCancelButton($cancel_uri)
-      );
+        ->addCancelButton($cancel_uri));
 
     $panel->appendChild($form);
 

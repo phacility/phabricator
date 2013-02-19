@@ -108,8 +108,7 @@ final class PhabricatorFeedStoryPublisher {
     foreach ($uris as $uri) {
       $task = PhabricatorWorker::scheduleTask(
         'FeedPublisherWorker',
-        array('chrono_key' => $chrono_key, 'uri' => $uri)
-      );
+        array('chrono_key' => $chrono_key, 'uri' => $uri));
     }
 
     return $story;

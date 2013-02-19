@@ -78,8 +78,7 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
           ));
         $revisions = array_select_keys(
           ipull($revisions, null, 'id'),
-          $revision_ids
-        );
+          $revision_ids);
         foreach ($revisions as $revision) {
           $output[$revision['phid']] =
             'D'.$revision['id'].' '.$revision['title'].' - '.

@@ -76,8 +76,7 @@ final class ConduitAPI_differential_finishpostponedlinters_Method
     $messages_property = id(new DifferentialDiffProperty())->loadOneWhere(
       'diffID = %d AND name = %s',
       $diff_id,
-      'arc:lint'
-    );
+      'arc:lint');
     if ($messages_property) {
       $messages = $messages_property->getData();
     } else {

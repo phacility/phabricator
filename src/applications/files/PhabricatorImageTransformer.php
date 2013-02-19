@@ -69,15 +69,13 @@ final class PhabricatorImageTransformer {
       $top,
       $left,
       $width,
-      $height
-    );
+      $height);
 
     return PhabricatorFile::newFromFileData(
       $image,
       array(
         'name' => 'conpherence-'.$file->getName(),
-      )
-    );
+      ));
   }
 
   private function crudelyCropTo(PhabricatorFile $file, $x, $min_y, $max_y) {
@@ -126,8 +124,7 @@ final class PhabricatorImageTransformer {
       0, 0,
       $orig_x, $orig_y,
       $w, $h,
-      $orig_w, $orig_h
-    );
+      $orig_w, $orig_h);
 
     return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
@@ -409,8 +406,7 @@ final class PhabricatorImageTransformer {
 
     list($err) = exec_manual(
                  'convert %s -coalesce -resize %sX%s\! %s'
-                  , $input, $sdx, $sdy, $resized
-                  );
+                  , $input, $sdx, $sdy, $resized);
 
     if (!$err) {
       $new_data = Filesystem::readFile($resized);

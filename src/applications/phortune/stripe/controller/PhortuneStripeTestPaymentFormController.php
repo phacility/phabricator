@@ -69,8 +69,7 @@ extends PhortuneStripeBaseController {
         ),
         array(
           'title' => $title,
-        )
-      );
+        ));
   }
 
   /**
@@ -120,8 +119,7 @@ extends PhortuneStripeBaseController {
           $error = sprintf(
             'error_type: %s error_message: %s',
             $type,
-            $msg
-          );
+            $msg);
           $this->logStripeError($error);
           break;
       }

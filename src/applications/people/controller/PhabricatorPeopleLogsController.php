@@ -154,8 +154,8 @@ final class PhabricatorPeopleLogsController
     $rows = array();
     foreach ($logs as $log) {
       $rows[] = array(
-        phabricator_date($log->getDateCreated(),$user),
-        phabricator_time($log->getDateCreated(),$user),
+        phabricator_date($log->getDateCreated(), $user),
+        phabricator_time($log->getDateCreated(), $user),
         $log->getAction(),
         $log->getActorPHID() ? $handles[$log->getActorPHID()]->getName() : null,
         $handles[$log->getUserPHID()]->getName(),

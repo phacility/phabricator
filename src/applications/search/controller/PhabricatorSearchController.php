@@ -115,8 +115,7 @@ final class PhabricatorSearchController
       $query->getParameter('author', array()),
       $query->getParameter('owner', array()),
       $query->getParameter('subscribers', array()),
-      $query->getParameter('project', array())
-    );
+      $query->getParameter('project', array()));
 
     $handles = $this->loadViewerHandles($phids);
 

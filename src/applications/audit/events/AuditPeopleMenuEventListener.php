@@ -28,8 +28,7 @@ final class AuditPeopleMenuEventListener extends PhutilEventListener {
       ->setIsExternal(true)
       ->setName($name)
       ->setHref($href)
-      ->setKey($name)
-    );
+      ->setKey($name));
 
     $event->setValue('menu', $menu);
   }

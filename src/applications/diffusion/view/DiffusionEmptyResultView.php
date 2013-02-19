@@ -49,8 +49,7 @@ final class DiffusionEmptyResultView extends DiffusionView {
             'text' => 'existed',
             'commit' => $existed,
             'params' => array('view' => $this->view),
-          )
-        );
+          ));
 
         $title = 'Path Was Deleted';
         $body = hsprintf(

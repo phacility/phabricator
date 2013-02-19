@@ -59,8 +59,7 @@ final class ConpherenceListController extends
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 
   private function renderEmptyMainPane() {
@@ -77,16 +76,14 @@ final class ConpherenceListController extends
             'class' => 'conpherence-header-pane',
             'id' => 'conpherence-header-pane',
           ),
-          ''
-        ),
+          ''),
         phutil_tag(
           'div',
           array(
             'class' => 'conpherence-widget-pane',
             'id' => 'conpherence-widget-pane'
           ),
-          ''
-        ),
+          ''),
         javelin_tag(
           'div',
           array(
@@ -100,19 +97,15 @@ final class ConpherenceListController extends
                 'class' => 'conpherence-messages',
                 'id' => 'conpherence-messages'
               ),
-              ''
-            ),
+              ''),
             phutil_tag(
               'div',
               array(
                 'id' => 'conpherence-form'
               ),
-              ''
-            )
-          )
-        )
-      )
-    );
+              '')
+          ))
+      ));
   }
 
 

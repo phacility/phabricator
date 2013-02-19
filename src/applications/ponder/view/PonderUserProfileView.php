@@ -67,8 +67,7 @@ final class PonderUserProfileView extends AphrontView {
       $href = id(new PhutilURI('/Q' . $question->getID()))
         ->setFragment('A' . $answer->getID());
       $item->setHeader(
-        'A'.$answer->getID().' '.self::abbreviate($answer->getContent())
-      );
+        'A'.$answer->getID().' '.self::abbreviate($answer->getContent()));
       $item->setHref($href);
 
       $item->addAttribute(

@@ -175,8 +175,7 @@ final class PhabricatorSettingsPanelEmailPreferences
           'adding CCs to a task, closing it, and adding a comment) you will '.
           'still receive an email as long as at least one of the changes '.
           'is set to notify you.'.
-        '</p>'
-        ));
+        '</p>'));
 
     $mailtags = $preferences->getPreference('mailtags', array());
 

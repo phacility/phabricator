@@ -42,8 +42,7 @@ final class PhabricatorRemarkupRuleImageMacro
           $style = sprintf(
             'height: %dpx; width: %dpx;',
             $height,
-            $width
-          );
+            $width);
         }
       }
 

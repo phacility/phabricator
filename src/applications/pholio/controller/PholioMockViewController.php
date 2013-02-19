@@ -78,8 +78,7 @@ final class PholioMockViewController extends PholioController {
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($title)
-        ->setHref($this->getApplicationURI().'M'.$this->id)
-      );
+        ->setHref($this->getApplicationURI().'M'.$this->id));
 
     $content = array(
       $crumbs,

@@ -73,8 +73,7 @@ final class ConpherenceParticipantQuery
       $where[] = qsprintf(
         $conn_r,
         'participationStatus = %d',
-        $this->participationStatus
-      );
+        $this->participationStatus);
     }
 
     if ($this->dateTouched) {
@@ -83,8 +82,7 @@ final class ConpherenceParticipantQuery
           $conn_r,
           'dateTouched %Q %d',
           $this->dateTouchedSort,
-          $this->dateTouched
-        );
+          $this->dateTouched);
       }
     }
 

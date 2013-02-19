@@ -106,8 +106,7 @@ final class PhabricatorObjectItemView extends AphrontView {
           $icon_href = phutil_tag(
             'a',
             array('href' => $spec['href']),
-            array($label, $icon)
-          );
+            array($label, $icon));
         } else {
           $icon_href = array($label, $icon);
         }

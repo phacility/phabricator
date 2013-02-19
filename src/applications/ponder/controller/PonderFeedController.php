@@ -62,8 +62,7 @@ final class PonderFeedController extends PonderController {
           $user,
           $user->getPHID(),
           $this->answerOffset,
-          self::PROFILE_ANSWER_PAGE_SIZE + 1
-        );
+          self::PROFILE_ANSWER_PAGE_SIZE + 1);
 
         $side_nav->appendChild(
           id(new PonderUserProfileView())
@@ -71,8 +70,7 @@ final class PonderFeedController extends PonderController {
           ->setAnswers($answers)
           ->setAnswerOffset($this->answerOffset)
           ->setPageSize(self::PROFILE_ANSWER_PAGE_SIZE)
-          ->setURI(new PhutilURI("/ponder/profile/"), "aoff")
-        );
+          ->setURI(new PhutilURI("/ponder/profile/"), "aoff"));
         break;
     }
 

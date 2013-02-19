@@ -34,8 +34,7 @@ final class DifferentialSearchIndexer
     foreach ($aux_fields as $aux_field) {
       $doc->addField(
         $aux_field->getKeyForSearchIndex(),
-        $aux_field->getValueForSearchIndex()
-      );
+        $aux_field->getValueForSearchIndex());
     }
 
     $doc->addRelationship(

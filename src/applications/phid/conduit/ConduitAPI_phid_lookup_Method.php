@@ -33,7 +33,7 @@ final class ConduitAPI_phid_lookup_Method
         $phids[$name] = $phid;
       }
     }
-    
+
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
     $result = array();

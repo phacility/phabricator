@@ -70,8 +70,7 @@ final class PhabricatorSlowvoteCreateController
           'class' => 'aphront-form-instructions',
         ),
         pht('Resolve issues and build consensus through '.
-          'protracted deliberation.')
-      );
+          'protracted deliberation.'));
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -149,8 +148,7 @@ final class PhabricatorSlowvoteCreateController
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Create Slowvote'))
-        ->setHref($this->getApplicationURI().'create/')
-      );
+        ->setHref($this->getApplicationURI().'create/'));
 
     return $this->buildApplicationPage(
       array(

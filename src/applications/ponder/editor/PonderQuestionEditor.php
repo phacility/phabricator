@@ -37,8 +37,7 @@ final class PonderQuestionEditor extends PhabricatorEditor {
 
     $content = $question->getContent();
     $at_mention_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      array($content)
-    );
+      array($content));
     $subeditor->subscribeImplicit($at_mention_phids);
     $subeditor->save();
 

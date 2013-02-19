@@ -22,29 +22,25 @@ extends PhabricatorAuthController {
     if ($grant_type != 'authorization_code') {
       $response->setError('unsupported_grant_type');
       $response->setErrorDescription(
-        'Only grant_type authorization_code is supported.'
-      );
+        'Only grant_type authorization_code is supported.');
       return $response;
     }
     if (!$code) {
       $response->setError('invalid_request');
       $response->setErrorDescription(
-        'Required parameter code missing.'
-      );
+        'Required parameter code missing.');
       return $response;
     }
     if (!$client_phid) {
       $response->setError('invalid_request');
       $response->setErrorDescription(
-        'Required parameter client_id missing.'
-      );
+        'Required parameter client_id missing.');
       return $response;
     }
     if (!$client_secret) {
       $response->setError('invalid_request');
       $response->setErrorDescription(
-        'Required parameter client_secret missing.'
-      );
+        'Required parameter client_secret missing.');
       return $response;
     }
     // one giant try / catch around all the exciting database stuff so we
@@ -56,8 +52,7 @@ extends PhabricatorAuthController {
       if (!$auth_code) {
         $response->setError('invalid_grant');
         $response->setErrorDescription(
-          'Authorization code '.$code.' not found.'
-        );
+          'Authorization code '.$code.' not found.');
         return $response;
       }
 
@@ -72,16 +67,14 @@ extends PhabricatorAuthController {
           $response->setError('invalid_grant');
           $response->setErrorDescription(
             'Redirect uri in request must exactly match redirect uri '.
-            'from authorization code.'
-          );
+            'from authorization code.');
           return $response;
         }
       } else if ($redirect_uri) {
         $response->setError('invalid_grant');
         $response->setErrorDescription(
           'Redirect uri in request and no redirect uri in authorization '.
-          'code. The two must exactly match.'
-        );
+          'code. The two must exactly match.');
         return $response;
       }
 
@@ -91,8 +84,7 @@ extends PhabricatorAuthController {
       if (!$client) {
         $response->setError('invalid_client');
         $response->setErrorDescription(
-          'Client with client_id '.$client_phid.' not found.'
-        );
+          'Client with client_id '.$client_phid.' not found.');
         return $response;
       }
       $server->setClient($client);
@@ -103,8 +95,7 @@ extends PhabricatorAuthController {
       if (!$user) {
         $response->setError('invalid_grant');
         $response->setErrorDescription(
-          'User with phid '.$user_phid.' not found.'
-        );
+          'User with phid '.$user_phid.' not found.');
         return $response;
       }
       $server->setUser($user);
@@ -117,8 +108,7 @@ extends PhabricatorAuthController {
       if (!$is_good_code) {
         $response->setError('invalid_grant');
         $response->setErrorDescription(
-          'Invalid authorization code '.$code.'.'
-        );
+          'Invalid authorization code '.$code.'.');
         return $response;
       }
 
@@ -136,8 +126,7 @@ extends PhabricatorAuthController {
       $response->setError('server_error');
       $response->setErrorDescription(
         'The authorization server encountered an unexpected condition '.
-        'which prevented it from fulfilling the request.'
-      );
+        'which prevented it from fulfilling the request.');
       return $response;
     }
   }

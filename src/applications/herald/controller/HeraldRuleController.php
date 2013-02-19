@@ -208,8 +208,7 @@ final class HeraldRuleController extends HeraldController {
 
     $repetition_policy_param = $request->getStr('repetition_policy');
     $rule->setRepetitionPolicy(
-      HeraldRepetitionPolicyConfig::toInt($repetition_policy_param)
-    );
+      HeraldRepetitionPolicyConfig::toInt($repetition_policy_param));
 
     $e_name = true;
     $errors = array();

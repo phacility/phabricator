@@ -44,8 +44,7 @@ final class ConpherenceNewController extends ConpherenceController {
 
       $file_phids =
         PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-          array($message)
-        );
+          array($message));
       if ($file_phids) {
         $files = id(new PhabricatorFileQuery())
           ->setViewer($user)
@@ -70,14 +69,12 @@ final class ConpherenceNewController extends ConpherenceController {
           ->attachComment(
             id(new ConpherenceTransactionComment())
             ->setContent($message)
-            ->setConpherencePHID($conpherence->getPHID())
-          );
+            ->setConpherencePHID($conpherence->getPHID()));
         $content_source = PhabricatorContentSource::newForSource(
           PhabricatorContentSource::SOURCE_WEB,
           array(
             'ip' => $request->getRemoteAddr()
-          )
-        );
+          ));
         id(new ConpherenceEditor())
           ->setContentSource($content_source)
           ->setContinueOnNoEffect(true)
@@ -151,16 +148,14 @@ final class ConpherenceNewController extends ConpherenceController {
         ->setUser($user)
         ->setDatasource('/typeahead/common/users/')
         ->setLabel(pht('To'))
-        ->setError($e_participants)
-      )
+        ->setError($e_participants))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setName('message')
         ->setValue($message)
         ->setLabel(pht('Message'))
         ->setPlaceHolder(pht('Drag and drop to include files...'))
-        ->setError($e_message)
-      );
+        ->setError($e_message));
 
     if ($request->isAjax()) {
       $form->setTitle($title);
@@ -172,8 +167,7 @@ final class ConpherenceNewController extends ConpherenceController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue(pht('Submit'))
-        ->addCancelButton($cancel_uri)
-      );
+        ->addCancelButton($cancel_uri));
 
     $this->loadStartingConpherences();
     $this->setSelectedConpherencePHID(null);
@@ -194,7 +188,6 @@ final class ConpherenceNewController extends ConpherenceController {
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 }

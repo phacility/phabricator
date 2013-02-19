@@ -424,8 +424,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               $mailer->addAttachment(
                 $attachment->getData(),
                 $attachment->getFilename(),
-                $attachment->getMimeType()
-              );
+                $attachment->getMimeType());
             }
             break;
           case 'body':

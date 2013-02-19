@@ -22,8 +22,7 @@ final class PhabricatorFilesManagementMetadataWorkflow
             'name'      => 'dry-run',
             'help'      => 'Show what would be updated.',
           ),
-        )
-      );
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {

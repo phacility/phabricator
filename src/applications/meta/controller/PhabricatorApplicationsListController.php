@@ -39,8 +39,7 @@ final class PhabricatorApplicationsListController
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 
 

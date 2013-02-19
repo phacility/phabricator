@@ -94,8 +94,7 @@ final class PhabricatorPeopleProfileController
           ->setIsExternal(true)
           ->setName($name)
           ->setHref($href)
-          ->setType(PhabricatorMenuItemView::TYPE_LINK)
-        );
+          ->setType(PhabricatorMenuItemView::TYPE_LINK));
       }
     }
 
@@ -149,16 +148,14 @@ final class PhabricatorPeopleProfileController
       $nav->addFilter(
         null,
         pht('Edit Profile...'),
-        '/settings/panel/profile/'
-      );
+        '/settings/panel/profile/');
     }
 
     if ($viewer->getIsAdmin()) {
       $nav->addFilter(
         null,
         pht('Administrate User...'),
-        '/people/edit/'.$user->getID().'/'
-      );
+        '/people/edit/'.$user->getID().'/');
     }
 
     return $this->buildApplicationPage(
@@ -172,8 +169,7 @@ final class PhabricatorPeopleProfileController
 
     $blurb = nonempty(
       $profile->getBlurb(),
-      '//'.pht('Nothing is known about this rare specimen.').'//'
-    );
+      '//'.pht('Nothing is known about this rare specimen.').'//');
 
     $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
     $blurb = $engine->markupText($blurb);

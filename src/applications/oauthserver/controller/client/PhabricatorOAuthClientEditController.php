@@ -88,8 +88,7 @@ extends PhabricatorOAuthClientBaseController {
           'Redirect URI must be a fully qualified domain name '.
           'with no fragments. See '.
           'http://tools.ietf.org/html/draft-ietf-oauth-v2-23#section-3.1.2 '.
-          'for more information on the correct format.'
-        );
+          'for more information on the correct format.');
         $bad_redirect = true;
       } else {
         $client->save();
@@ -124,20 +123,17 @@ extends PhabricatorOAuthClientBaseController {
         id(new AphrontFormTextControl())
         ->setLabel('Name')
         ->setName('name')
-        ->setValue($client->getName())
-      );
+        ->setValue($client->getName()));
     if ($this->isClientEdit()) {
       $form
         ->appendChild(
           id(new AphrontFormTextControl())
           ->setLabel('ID')
-          ->setValue($phid)
-        )
+          ->setValue($phid))
         ->appendChild(
           id(new AphrontFormStaticControl())
           ->setLabel('Secret')
-          ->setValue($client->getSecret())
-        );
+          ->setValue($client->getSecret()));
     }
     $form
       ->appendChild(
@@ -145,8 +141,7 @@ extends PhabricatorOAuthClientBaseController {
         ->setLabel('Redirect URI')
         ->setName('redirect_uri')
         ->setValue($client->getRedirectURI())
-        ->setError($bad_redirect)
-      );
+        ->setError($bad_redirect));
     if ($this->isClientEdit()) {
       $created = phabricator_datetime($client->getDateCreated(),
                                       $current_user);
@@ -156,27 +151,23 @@ extends PhabricatorOAuthClientBaseController {
         ->appendChild(
           id(new AphrontFormStaticControl())
           ->setLabel('Created')
-          ->setValue($created)
-        )
+          ->setValue($created))
         ->appendChild(
           id(new AphrontFormStaticControl())
           ->setLabel('Last Updated')
-          ->setValue($updated)
-        );
+          ->setValue($updated));
     }
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue($submit_button)
-      );
+        ->setValue($submit_button));
 
     $panel->appendChild($form);
     return $this->buildStandardPageResponse(
       array($error,
             $panel
       ),
-      array('title' => $title)
-    );
+      array('title' => $title));
   }
 
 }

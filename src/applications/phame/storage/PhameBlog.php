@@ -104,8 +104,7 @@ final class PhameBlog extends PhameDAO
 
     $this->bloggerPHIDs = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getPHID(),
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER
-    );
+      PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER);
 
     return $this;
   }

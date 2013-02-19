@@ -25,8 +25,7 @@ final class ConpherenceFormDragAndDropUploadControl extends AphrontFormControl {
         'form_pane' => 'conpherence-form',
         'upload_uri' => '/file/dropupload/',
         'activated_class' => 'conpherence-dialogue-upload-photo',
-      )
-    );
+      ));
     require_celerity_resource('conpherence-update-css');
 
     return phutil_tag(
@@ -35,8 +34,7 @@ final class ConpherenceFormDragAndDropUploadControl extends AphrontFormControl {
         'id'    => $drop_id,
         'class' => 'conpherence-dialogue-drag-photo',
       ),
-      pht('Drag and drop an image here to upload it.')
-    );
+      pht('Drag and drop an image here to upload it.'));
   }
 
 }

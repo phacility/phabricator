@@ -130,8 +130,7 @@ final class ConpherenceThread extends ConpherenceDAO
     return array_slice(
       $this->transactions,
       $length - $begin - $amount,
-      $amount
-      );
+      $amount);
   }
 
   public function attachFilePHIDs(array $file_phids) {
@@ -209,8 +208,7 @@ final class ConpherenceThread extends ConpherenceDAO
           if ($snippet === null) {
             $snippet = phutil_utf8_shorten(
               $transaction->getComment()->getContent(),
-              48
-            );
+              48);
             if ($transaction->getAuthorPHID() == $user->getPHID()) {
               $snippet = "\xE2\x86\xB0  " . $snippet;
             }

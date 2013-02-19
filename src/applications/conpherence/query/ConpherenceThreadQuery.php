@@ -101,8 +101,7 @@ final class ConpherenceThreadQuery
       $conpherence_participants = mpull(
         $conpherence_participants,
         null,
-        'getParticipantPHID'
-      );
+        'getParticipantPHID');
       $current_conpherence->attachParticipants($conpherence_participants);
     }
 
@@ -163,20 +162,17 @@ final class ConpherenceThreadQuery
     $start_of_week = phabricator_format_local_time(
       strtotime('today'),
       $this->getViewer(),
-      'U'
-    );
+      'U');
     $end_of_week = phabricator_format_local_time(
       strtotime('midnight +1 week'),
       $this->getViewer(),
-      'U'
-    );
+      'U');
     $statuses = id(new PhabricatorUserStatus())
       ->loadAllWhere(
         'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
         $participant_phids,
         $start_of_week,
-        $end_of_week
-      );
+        $end_of_week);
     $statuses = mgroup($statuses, 'getUserPHID');
 
     // attached files
@@ -208,15 +204,13 @@ final class ConpherenceThreadQuery
   private function loadOrigPics(array $conpherences) {
     return $this->loadPics(
       $conpherences,
-      ConpherenceImageData::SIZE_ORIG
-    );
+      ConpherenceImageData::SIZE_ORIG);
   }
 
   private function loadHeaderPics(array $conpherences) {
     return $this->loadPics(
       $conpherences,
-      ConpherenceImageData::SIZE_HEAD
-    );
+      ConpherenceImageData::SIZE_HEAD);
   }
 
   private function loadPics(array $conpherences, $size) {

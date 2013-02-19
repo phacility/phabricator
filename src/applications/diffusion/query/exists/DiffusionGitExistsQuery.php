@@ -8,8 +8,7 @@ final class DiffusionGitExistsQuery extends DiffusionExistsQuery {
 
     list($err, $merge_base) = $repository->execLocalCommand(
       'cat-file -t %s',
-      $request->getCommit()
-    );
+      $request->getCommit());
 
     return !$err;
   }

@@ -112,8 +112,7 @@ final class PhamePostEditController
         ->setName('title')
         ->setValue($post->getTitle())
         ->setID('post-title')
-        ->setError($e_title)
-      )
+        ->setError($e_title))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('Phame Title')
@@ -123,8 +122,7 @@ final class PhamePostEditController
         ->setCaption('Up to 64 alphanumeric characters '.
                      'with underscores for spaces. '.
                      'Formatting is enforced.')
-        ->setError($e_phame_title)
-      )
+        ->setError($e_phame_title))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setLabel('Body')
@@ -133,20 +131,17 @@ final class PhamePostEditController
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setID('post-body')
         ->setUser($user)
-        ->setDisableMacros(true)
-      )
+        ->setDisableMacros(true))
       ->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel('Comments Widget')
         ->setName('comments_widget')
         ->setvalue($post->getCommentsWidget())
-        ->setOptions($post->getCommentsWidgetOptionsForSelect())
-      )
+        ->setOptions($post->getCommentsWidgetOptionsForSelect()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->addCancelButton($cancel_uri)
-        ->setValue($submit_button)
-      );
+        ->setValue($submit_button));
 
     $preview_panel = hsprintf(
       '<div class="aphront-panel-preview">

@@ -17,8 +17,7 @@ final class PholioInlineController extends PholioController {
 
     $inline_comments = id(new PholioTransactionComment())->loadAllWhere(
       'imageid = %d AND transactionphid IS NOT NULL',
-      $this->id
-    );
+      $this->id);
 
     $inline_comments = array_merge(
       $inline_comments,
@@ -31,8 +30,7 @@ final class PholioInlineController extends PholioController {
     foreach ($inline_comments as $inline_comment) {
       $author = id(new PhabricatorUser())->loadOneWhere(
         'phid = %s',
-        $inline_comment->getAuthorPHID()
-      );
+        $inline_comment->getAuthorPHID());
       $inlines[] = array(
         'phid' => $inline_comment->getPHID(),
         'userphid' => $author->getPHID(),

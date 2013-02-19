@@ -72,8 +72,7 @@ final class PhabricatorApplicationDetailViewController
   private function buildPropertyView(PhabricatorApplication $selected) {
     $properties = id(new PhabricatorPropertyListView())
               ->addProperty(
-                pht('Description'), $selected->getShortDescription()
-                );
+                pht('Description'), $selected->getShortDescription());
 
     return $properties;
   }
@@ -92,8 +91,7 @@ final class PhabricatorApplicationDetailViewController
                ->setIcon('delete')
                ->setWorkflow(true)
                ->setHref(
-                $this->getApplicationURI(get_class($selected).'/uninstall/'))
-               );
+                $this->getApplicationURI(get_class($selected).'/uninstall/')));
       } else {
         $view->addAction(
                id(new PhabricatorActionView())
@@ -101,8 +99,7 @@ final class PhabricatorApplicationDetailViewController
                ->setIcon('new')
                ->setWorkflow(true)
                ->setHref(
-                 $this->getApplicationURI(get_class($selected).'/install/'))
-               );
+                 $this->getApplicationURI(get_class($selected).'/install/')));
       }
     } else {
       $view->addAction(
@@ -112,8 +109,7 @@ final class PhabricatorApplicationDetailViewController
              ->setWorkflow(true)
              ->setDisabled(true)
              ->setHref(
-               $this->getApplicationURI(get_class($selected).'/uninstall/'))
-             );
+               $this->getApplicationURI(get_class($selected).'/uninstall/')));
     }
     return $view;
   }
