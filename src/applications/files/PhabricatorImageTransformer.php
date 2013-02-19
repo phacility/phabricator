@@ -61,8 +61,7 @@ final class PhabricatorImageTransformer {
     $top,
     $left,
     $width,
-    $height
-  ) {
+    $height) {
 
     $image = $this->crasslyCropTo(
       $file,
