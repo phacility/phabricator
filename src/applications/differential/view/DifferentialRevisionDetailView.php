@@ -86,7 +86,9 @@ final class DifferentialRevisionDetailView extends AphrontView {
           $command = 'arc commit';
           break;
       }
-      $next_step = phutil_tag('tt', array(), $command);
+      if ($command) {
+        $next_step = phutil_tag('tt', array(), $command);
+      }
     }
     if ($next_step) {
       $properties->addProperty(pht('Next Step'), $next_step);
