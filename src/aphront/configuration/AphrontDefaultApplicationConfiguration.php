@@ -382,7 +382,7 @@ class AphrontDefaultApplicationConfiguration
     return hsprintf(
       '<div class="exception-trace">'.
         '<div class="exception-trace-header">Stack Trace</div>'.
-        '%s',
+        '%s'.
       '</div>',
       $table->render());
   }

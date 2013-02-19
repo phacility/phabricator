@@ -355,6 +355,7 @@ final class PhabricatorMarkupEngine {
         'uri.allowed-protocols'),
       'syntax-highlighter.engine' => PhabricatorEnv::getEnvConfig(
         'syntax-highlighter.engine'),
+      'preserve-linebreaks' => true,
     );
   }
 
@@ -368,7 +369,7 @@ final class PhabricatorMarkupEngine {
 
     $engine = new PhutilRemarkupEngine();
 
-    $engine->setConfig('preserve-linebreaks', true);
+    $engine->setConfig('preserve-linebreaks', $options['preserve-linebreaks']);
     $engine->setConfig('pygments.enabled', $options['pygments']);
     $engine->setConfig(
       'uri.allowed-protocols',
@@ -421,6 +422,8 @@ final class PhabricatorMarkupEngine {
       $rules[] = new PhabricatorRemarkupRuleImageMacro();
       $rules[] = new PhabricatorRemarkupRuleMeme();
     }
+
+    $rules[] = new DivinerRemarkupRuleSymbol();
 
     $rules[] = new PhabricatorRemarkupRuleMention();
 

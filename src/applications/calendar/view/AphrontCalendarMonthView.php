@@ -131,7 +131,7 @@ final class AphrontCalendarMonthView extends AphrontView {
         $row[] = $empty_box;
       }
       foreach ($row as $cell) {
-        $table[] = phutil_tag('p', array(), $cell);
+        $table[] = phutil_tag('td', array(), $cell);
       }
       $table[] = hsprintf('</tr>');
     }

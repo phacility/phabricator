@@ -176,6 +176,33 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildTokenSheet() {
+    $tokens = $this->getDirectoryList('tokens_1x');
+
+    $template = id(new PhutilSprite())
+      ->setSourceSize(16, 16);
+
+    $sprites = array();
+    foreach ($tokens as $token) {
+      $path = $this->getPath('tokens_1x/'.$token.'.png');
+
+      $sprite = id(clone $template)
+        ->setName('token-'.$token)
+        ->setTargetCSS('.token-'.$token)
+        ->setSourceFile($path, 1);
+
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('tokens', false);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+
   public function buildConpherenceSheet() {
     $icons = $this->getDirectoryList('conpher_1x');
     $scales = array(
@@ -186,7 +213,7 @@ final class CeleritySpriteGenerator {
       ->setSourceSize(32, 32);
 
     $sprites = array();
-      foreach ($icons as $icon) {
+    foreach ($icons as $icon) {
       $color = preg_match('/_on/', $icon) ? 'on' : 'off';
 
       $prefix = 'conpher_';

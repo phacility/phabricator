@@ -248,7 +248,7 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleList($add));
         } else {
           return pht(
-            '%s removed %d subscribers: %s.',
+            '%s removed %d subscriber(s): %s.',
             $this->renderHandleLink($author_phid),
             count($rem),
             $this->renderHandleList($rem));
@@ -321,6 +321,13 @@ abstract class PhabricatorApplicationTransaction
     return array();
   }
 
+  public function hasChangeDetails() {
+    return false;
+  }
+
+  public function renderChangeDetails() {
+    return null;
+  }
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

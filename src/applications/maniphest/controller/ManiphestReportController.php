@@ -57,12 +57,16 @@ final class ManiphestReportController extends ManiphestController {
     }
 
     $nav->appendChild($core);
-    $base_nav->appendChild($nav);
+    $nav->setCrumbs(
+      $this->buildApplicationCrumbs()
+        ->addCrumb(
+          id(new PhabricatorCrumbView())
+            ->setName(pht('Reports'))));
 
     return $this->buildStandardPageResponse(
-      $base_nav,
+      $nav,
       array(
-        'title' => 'Maniphest Reports',
+        'title' => pht('Maniphest Reports'),
       ));
   }
 

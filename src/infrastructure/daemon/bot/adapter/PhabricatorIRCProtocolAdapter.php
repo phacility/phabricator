@@ -8,6 +8,14 @@ final class PhabricatorIRCProtocolAdapter
   private $writeBuffer;
   private $readBuffer;
 
+  public function getServiceType() {
+    return 'IRC';
+  }
+
+  public function getServiceName() {
+    return $this->getConfig('network', $this->getConfig('server'));
+  }
+
   // Hash map of command translations
   public static $commandTranslations = array(
     'PRIVMSG' => 'MESSAGE');

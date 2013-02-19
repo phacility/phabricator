@@ -15,6 +15,7 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       $n_parse  = $this->collectParseCaches();
       $n_markup = $this->collectMarkupCaches();
       $n_tasks  = $this->collectArchivedTasks();
+      $n_cache_ttl = $this->collectGeneralCacheTTL();
       $n_cache  = $this->collectGeneralCaches();
 
       $collected = array(
@@ -23,6 +24,7 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
         'Differential Parse Cache'    => $n_parse,
         'Markup Cache'                => $n_markup,
         'Archived Tasks'              => $n_tasks,
+        'General Cache TTL'           => $n_cache_ttl,
         'General Cache Entries'       => $n_cache,
       );
       $collected = array_filter($collected);
@@ -169,6 +171,21 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
   }
 
 
+  private function collectGeneralCacheTTL() {
+    $cache = new PhabricatorKeyValueDatabaseCache();
+    $conn_w = $cache->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE cacheExpires < %d
+        ORDER BY cacheExpires ASC LIMIT 100',
+      $cache->getTableName(),
+      time());
+
+    return $conn_w->getAffectedRows();
+  }
+
+
   private function collectGeneralCaches() {
     $key = 'gcdaemon.ttl.general-cache';
     $ttl = PhabricatorEnv::getEnvConfig($key);
@@ -188,5 +205,6 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
 
     return $conn_w->getAffectedRows();
   }
+
 
 }

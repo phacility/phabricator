@@ -5,7 +5,8 @@
  */
 abstract class DivinerAtomizer {
 
-  private $project;
+  private $book;
+  private $fileName;
 
   /**
    * If you make a significant change to an atomizer, you can bump this
@@ -15,28 +16,34 @@ abstract class DivinerAtomizer {
     return 1;
   }
 
-  abstract public function atomize($file_name, $file_data);
+  final public function atomize($file_name, $file_data) {
+    $this->fileName = $file_name;
+    return $this->executeAtomize($file_name, $file_data);
+  }
 
-  final public function setProject($project) {
-    $this->project = $project;
+  abstract protected function executeAtomize($file_name, $file_data);
+
+  final public function setBook($book) {
+    $this->book = $book;
     return $this;
   }
 
-  final public function getProject() {
-    return $this->project;
+  final public function getBook() {
+    return $this->book;
   }
 
   protected function newAtom($type) {
     return id(new DivinerAtom())
-      ->setProject($this->getProject())
+      ->setBook($this->getBook())
+      ->setFile($this->fileName)
       ->setType($type);
   }
 
-  protected function newRef($type, $name, $project = null, $context = null) {
-    $project = coalesce($project, $this->getProject());
+  protected function newRef($type, $name, $book = null, $context = null) {
+    $book = coalesce($book, $this->getBook());
 
     return id(new DivinerAtomRef())
-      ->setProject($project)
+      ->setBook($book)
       ->setContext($context)
       ->setType($type)
       ->setName($name);

@@ -58,17 +58,49 @@ final class PhabricatorSubscriptionsEditController
         $handle->getURI());
     }
 
-    $editor = id(new PhabricatorSubscriptionsEditor())
-      ->setActor($user)
-      ->setObject($object);
+    if ($object instanceof PhabricatorApplicationTransactionInterface) {
+      if ($is_add) {
+        $xaction_value = array(
+          '+' => array($user->getPHID()),
+        );
+      } else {
+        $xaction_value = array(
+          '-' => array($user->getPHID()),
+        );
+      }
 
-    if ($is_add) {
-      $editor->subscribeExplicit(array($user->getPHID()), $explicit = true);
+      $xaction = id($object->getApplicationTransactionObject())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue($xaction_value);
+
+      $editor = id($object->getApplicationTransactionEditor())
+        ->setActor($user)
+        ->setContinueOnNoEffect(true)
+        ->setContentSource(
+          PhabricatorContentSource::newForSource(
+            PhabricatorContentSource::SOURCE_WEB,
+            array(
+              'ip' => $request->getRemoteAddr(),
+            )));
+
+      $editor->applyTransactions($object, array($xaction));
     } else {
-      $editor->unsubscribe(array($user->getPHID()));
-    }
 
-    $editor->save();
+      // TODO: Eventually, get rid of this once everything implements
+      // PhabriatorApplicationTransactionInterface.
+
+      $editor = id(new PhabricatorSubscriptionsEditor())
+        ->setActor($user)
+        ->setObject($object);
+
+      if ($is_add) {
+        $editor->subscribeExplicit(array($user->getPHID()), $explicit = true);
+      } else {
+        $editor->unsubscribe(array($user->getPHID()));
+      }
+
+      $editor->save();
+    }
 
     // TODO: We should just render the "Unsubscribe" action and swap it out
     // in the document for Ajax requests.

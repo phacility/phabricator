@@ -4,7 +4,7 @@
  */
 
 .sprite-conpher {
-  background-image: url(/rsrc/image/sprite-conph.png);
+  background-image: url(/rsrc/image/sprite-conpher.png);
   background-repeat: no-repeat;
 }
 
@@ -12,7 +12,7 @@
 only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-conpher {
-    background-image: url(/rsrc/image/sprite-conph-X2.png);
+    background-image: url(/rsrc/image/sprite-conpher-X2.png);
     background-size: 132px 132px;
   }
 }

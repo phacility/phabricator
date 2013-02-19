@@ -10,6 +10,14 @@
   height: 100%;
   margin: 0px 320px 0px 0px;
 }
+.conpherence-show-older-messages {
+  display: block;
+  background: #e0e3ec;
+  margin: 10px;
+  text-align: center;
+  padding: 10px;
+  color: #18559D;
+}
 
 .conpherence-message-pane .conpherence-messages {
   position: fixed;

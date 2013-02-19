@@ -1,7 +1,9 @@
 <?php
 
 final class PhabricatorFileImageMacro extends PhabricatorFileDAO
-  implements PhabricatorSubscribableInterface {
+  implements
+    PhabricatorSubscribableInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $filePHID;
   protected $phid;
@@ -21,6 +23,14 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
 
   public function isAutomaticallySubscribed($phid) {
     return false;
+  }
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorMacroEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return new PhabricatorMacroTransaction();
   }
 
 }

@@ -120,6 +120,10 @@ final class PhabricatorBot extends PhabricatorDaemon {
     }
   }
 
+  public function getAdapter() {
+    return $this->protocolAdapter;
+  }
+
   public function getConduit() {
     if (empty($this->conduit)) {
       throw new Exception(

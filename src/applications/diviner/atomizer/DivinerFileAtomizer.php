@@ -2,7 +2,7 @@
 
 final class DivinerFileAtomizer extends DivinerAtomizer {
 
-  public function atomize($file_name, $file_data) {
+  protected function executeAtomize($file_name, $file_data) {
     $atom = $this->newAtom(DivinerAtom::TYPE_FILE)
       ->setName($file_name)
       ->setFile($file_name)

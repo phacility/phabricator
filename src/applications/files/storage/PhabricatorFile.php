@@ -121,7 +121,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file = id(new PhabricatorFile())->loadOneWhere(
       'name = %s AND contentHash = %s LIMIT 1',
       self::normalizeFileName(idx($params, 'name')),
-      PhabricatorHash::digest($data));
+      self::hashFileContent($data));
 
     if (!$file) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -231,7 +231,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file->setName($file_name);
     $file->setByteSize(strlen($data));
     $file->setAuthorPHID($authorPHID);
-    $file->setContentHash(PhabricatorHash::digest($data));
+    $file->setContentHash(self::hashFileContent($data));
 
     $file->setStorageEngine($engine_identifier);
     $file->setStorageHandle($data_handle);
@@ -373,7 +373,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public static function hashFileContent($data) {
-    return PhabricatorHash::digest($data);
+    return sha1($data);
   }
 
   public function loadFileData() {

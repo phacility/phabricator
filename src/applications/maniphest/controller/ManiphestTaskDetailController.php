@@ -424,7 +424,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $viewer = $this->getRequest()->getUser();
 
-    $view = new PhabricatorPropertyListView();
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($task);
 
     $view->addProperty(
       pht('Assigned To'),
@@ -510,6 +512,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
         pht('Files'),
         $file_view->render());
     }
+
+    $view->invokeWillRenderEvent();
 
     if (strlen($task->getDescription())) {
       $view->addSectionHeader(pht('Description'));

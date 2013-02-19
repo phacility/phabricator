@@ -3,18 +3,16 @@
  */
 
 .phabricator-pinboard-view {
-  padding: 0 2%;
+  padding: 20px;
   overflow: hidden;
-}
-
-.device-phone .phabricator-pinboard-view {
-  padding: 0;
+  margin: 1em 0;
 }
 
 .phabricator-pinboard-item-view {
-  margin: 0 10px 20px;
-  border: 1px solid #aaaaaa;
+  margin: 0 20px 20px 0;
+  border: 1px solid #ccc;
   background: #ffffff;
+  border-radius: 3px;
 
   display: block;
   float: left;
@@ -26,28 +24,29 @@
 /* On phones, show a single column of items. */
 .device-phone .phabricator-pinboard-item-view {
   float: none;
-  margin: 0 auto 20px;
+  margin: 0 auto 10px;
 
   /* NOTE: This needs to be changed if we use images other than 160px wide. */
-  width: 200px;
+  width: 240px;
 }
 
 .phabricator-pinboard-item-header {
-  padding: 5px 20px;
+  padding: 5px 10px;
   display: block;
   background: #f3f3f3;
   font-weight: bold;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .phabricator-pinboard-item-image-link {
-  padding: 20px;
+  padding: 10px;
   display: block;
 }
 
 .phabricator-pinboard-item-content {
-  padding: 5px 20px;
+  padding: 0 10px 5px;
   overflow: hidden;
-  background: #f3f3f3;
-  color: #666666;
-  font-size: smaller;
+  color: #777;
+  font-size: 11px;
 }

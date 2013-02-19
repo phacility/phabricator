@@ -70,6 +70,39 @@ final class PhabricatorConfigTransaction
     return parent::getIcon();
   }
 
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_EDIT:
+        return true;
+    }
+    return parent::hasChangeDetails();
+  }
+
+  public function renderChangeDetails() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    if ($old['deleted']) {
+      $old_text = '';
+    } else {
+      // NOTE: Here and below, we're adding a synthetic "\n" to prevent the
+      // differ from complaining about missing trailing newlines.
+      $old_text = PhabricatorConfigJSON::prettyPrintJSON($old['value'])."\n";
+    }
+
+    if ($new['deleted']) {
+      $new_text = '';
+    } else {
+      $new_text = PhabricatorConfigJSON::prettyPrintJSON($new['value'])."\n";
+    }
+
+    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setOldText($old_text)
+      ->setNewText($new_text);
+
+    return $view->render();
+  }
+
   public function getColor() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

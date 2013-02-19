@@ -4,9 +4,16 @@ final class PhabricatorPropertyListView extends AphrontView {
 
   private $parts = array();
   private $hasKeyboardShortcuts;
+  private $object;
+  private $invokedWillRenderEvent;
 
   protected function canAppendChild() {
     return false;
+  }
+
+  public function setObject($object) {
+    $this->object = $object;
+    return $this;
   }
 
   public function setHasKeyboardShortcuts($has_keyboard_shortcuts) {
@@ -52,7 +59,25 @@ final class PhabricatorPropertyListView extends AphrontView {
     return $this;
   }
 
+  public function invokeWillRenderEvent() {
+    if ($this->object && $this->getUser() && !$this->invokedWillRenderEvent) {
+      $event = new PhabricatorEvent(
+        PhabricatorEventType::TYPE_UI_WILLRENDERPROPERTIES,
+        array(
+          'object'  => $this->object,
+          'view'    => $this,
+        ));
+      $event->setUser($this->getUser());
+      PhutilEventEngine::dispatchEvent($event);
+    }
+    $this->invokedWillRenderEvent = true;
+  }
+
+
+
   public function render() {
+    $this->invokeWillRenderEvent();
+
     require_celerity_resource('phabricator-property-list-view-css');
 
     $items = array();

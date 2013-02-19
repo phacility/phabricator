@@ -252,7 +252,7 @@ abstract class DifferentialChangesetRenderer {
     // TODO: Both these steps should happen earlier.
     $result = str_replace("\t", '  ', $result);
 
-    return $result;
+    return phutil_safe_html($result);
   }
 
   abstract public function isOneUpRenderer();

@@ -22,15 +22,31 @@ final class DivinerAtom {
   private $context;
   private $extends = array();
   private $links = array();
-  private $project;
+  private $book;
 
-  public function setProject($project) {
-    $this->project = $project;
+  /**
+   * Returns a sorting key which imposes an unambiguous, stable order on atoms.
+   */
+  public function getSortKey() {
+    return implode(
+      "\0",
+      array(
+        $this->getBook(),
+        $this->getType(),
+        $this->getContext(),
+        $this->getName(),
+        $this->getFile(),
+        sprintf('%08', $this->getLine()),
+      ));
+  }
+
+  public function setBook($book) {
+    $this->book = $book;
     return $this;
   }
 
-  public function getProject() {
-    return $this->project;
+  public function getBook() {
+    return $this->book;
   }
 
   public function setContext($context) {
@@ -82,6 +98,18 @@ final class DivinerAtom {
       throw new Exception("Call setDocblockRaw() before getDocblockMeta()!");
     }
     return $this->docblockMeta;
+  }
+
+  public function getDocblockMetaValue($key, $default = null) {
+    $meta = $this->getDocblockMeta();
+    return idx($meta, $key, $default);
+  }
+
+  public function setDocblockMetaValue($key, $value) {
+    $meta = $this->getDocblockMeta();
+    $meta[$key] = $value;
+    $this->docblockMeta = $meta;
+    return $this;
   }
 
   public function setType($type) {
@@ -235,6 +263,7 @@ final class DivinerAtom {
     // getAtomSerializationVersion().
 
     return array(
+      'book'        => $this->getBook(),
       'type'        => $this->getType(),
       'name'        => $this->getName(),
       'file'        => $this->getFile(),
@@ -255,15 +284,25 @@ final class DivinerAtom {
   }
 
   public function getRef() {
+    $group = null;
+    $title = null;
+    if ($this->docblockMeta) {
+      $group = $this->getDocblockMetaValue('group');
+      $title = $this->getDocblockMetaValue('title');
+    }
+
     return id(new DivinerAtomRef())
-      ->setProject($this->getProject())
+      ->setBook($this->getBook())
       ->setContext($this->getContext())
       ->setType($this->getType())
-      ->setName($this->getName());
+      ->setName($this->getName())
+      ->setTitle($title)
+      ->setGroup($group);
   }
 
   public static function newFromDictionary(array $dictionary) {
     $atom = id(new DivinerAtom())
+      ->setBook(idx($dictionary, 'book'))
       ->setType(idx($dictionary, 'type'))
       ->setName(idx($dictionary, 'name'))
       ->setFile(idx($dictionary, 'file'))

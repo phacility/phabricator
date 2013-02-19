@@ -101,7 +101,6 @@ abstract class ConpherenceController extends PhabricatorController {
     $read_conpherences = $this->getReadConpherences();
 
     $user = $this->getRequest()->getUser();
-
     $menu = new PhabricatorMenuView();
     $nav = AphrontSideNavFilterView::newFromMenu($menu);
     $nav->addClass('conpherence-menu');
@@ -114,12 +113,9 @@ abstract class ConpherenceController extends PhabricatorController {
     );
     $nav->addLabel(pht('Unread'));
     $nav = $this->addConpherencesToNav($unread_conpherences, $nav);
-
     $nav->addLabel(pht('Read'));
     $nav = $this->addConpherencesToNav($read_conpherences, $nav, true);
-
     $nav->selectFilter($filter);
-
     return $nav;
   }
 

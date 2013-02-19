@@ -1,0 +1,27 @@
+/**
+ * @provides tokens-css
+ */
+
+.token-icon {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
+button.token-button {
+  background: #f6f6f6;
+  border: 1px solid #333333;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  padding: 16px;
+  margin: 8px;
+  text-shadow: none;
+  box-shadow: none;
+  box-sizing: content-box;
+}
+
+.token-grid {
+  text-align: center;
+}

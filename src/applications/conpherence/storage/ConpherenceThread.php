@@ -117,6 +117,23 @@ final class ConpherenceThread extends ConpherenceDAO
     return $this->transactions;
   }
 
+  public function getTransactionsFrom($begin = 0, $amount = null) {
+    $length = count($this->transactions);
+    if ($amount === null) {
+      $amount === $length;
+    }
+    if ($this->transactions === null) {
+      throw new Exception(
+        'You must attachTransactions first!'
+      );
+    }
+    return array_slice(
+      $this->transactions,
+      $length - $begin - $amount,
+      $amount
+      );
+  }
+
   public function attachFilePHIDs(array $file_phids) {
     $this->filePHIDs = $file_phids;
     return $this;

@@ -74,7 +74,15 @@ final class PholioMockViewController extends PholioController {
 
     $add_comment = $this->buildAddCommentView($mock);
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title)
+        ->setHref($this->getApplicationURI().'M'.$this->id)
+      );
+
     $content = array(
+      $crumbs,
       $header,
       $actions,
       $properties,
@@ -82,7 +90,6 @@ final class PholioMockViewController extends PholioController {
       $xaction_view,
       $add_comment,
     );
-
 
     return $this->buildApplicationPage(
       $content,
@@ -122,7 +129,9 @@ final class PholioMockViewController extends PholioController {
 
     $user = $this->getRequest()->getUser();
 
-    $properties = new PhabricatorPropertyListView();
+    $properties = id(new PhabricatorPropertyListView())
+      ->setUser($user)
+      ->setObject($mock);
 
     $properties->addProperty(
       pht('Author'),
@@ -153,6 +162,8 @@ final class PholioMockViewController extends PholioController {
     $properties->addProperty(
       pht('Subscribers'),
       $sub_view);
+
+    $properties->invokeWillRenderEvent();
 
     $properties->addTextContent(
       $engine->getOutput($mock, PholioMock::MARKUP_FIELD_DESCRIPTION));

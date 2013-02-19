@@ -58,7 +58,10 @@ final class DifferentialRevisionDetailView extends AphrontView {
       $actions->addAction($obj);
     }
 
-    $properties = new PhabricatorPropertyListView();
+    $properties = id(new PhabricatorPropertyListView())
+      ->setUser($user)
+      ->setObject($revision);
+
     $status = $revision->getStatus();
     $local_vcs = $this->getDiff()->getSourceControlSystem();
 

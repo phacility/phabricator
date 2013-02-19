@@ -33,6 +33,14 @@ abstract class PhabricatorBotHandler {
     return (string)$base_uri;
   }
 
+  final protected function getServiceName() {
+    return $this->bot->getAdapter()->getServiceName();
+  }
+
+  final protected function getServiceType() {
+    return $this->bot->getAdapter()->getServiceType();
+  }
+
   abstract public function receiveMessage(PhabricatorBotMessage $message);
 
   public function runBackgroundTasks() {

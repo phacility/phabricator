@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialRevision extends DifferentialDAO {
+final class DifferentialRevision extends DifferentialDAO
+  implements PhabricatorTokenReceiverInterface, PhabricatorPolicyInterface {
 
   protected $title;
   protected $originalTitle;
@@ -309,6 +310,27 @@ final class DifferentialRevision extends DifferentialDAO {
   public function attachHashes(array $hashes) {
     $this->hashes = $hashes;
     return $this;
+  }
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+    return false;
+  }
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
   }
 
 }

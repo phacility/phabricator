@@ -48,4 +48,9 @@ class PhabricatorApplicationTransactionFeedStory
     return $view;
   }
 
+  public function renderText() {
+    // TODO: This is grotesque; the feed notification handler relies on it.
+    return strip_tags($this->renderView()->render());
+  }
+
 }

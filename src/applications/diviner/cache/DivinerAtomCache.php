@@ -1,8 +1,6 @@
 <?php
 
-final class DivinerAtomCache {
-
-  private $cache;
+final class DivinerAtomCache extends DivinerDiskCache {
 
   private $fileHashMap;
   private $atomMap;
@@ -15,44 +13,17 @@ final class DivinerAtomCache {
   private $writeAtoms = array();
 
   public function __construct($cache_directory) {
-    $dir_cache = id(new PhutilKeyValueCacheDirectory())
-      ->setCacheDirectory($cache_directory);
-    $profiled_cache = id(new PhutilKeyValueCacheProfiler($dir_cache))
-      ->setProfiler(PhutilServiceProfiler::getInstance())
-      ->setName('diviner-atom-cache');
-    $this->cache = $profiled_cache;
-  }
-
-  private function getCache() {
-    return $this->cache;
+    return parent::__construct($cache_directory, 'diviner-atom-cache');
   }
 
   public function delete() {
-    $this->getCache()->destroyCache();
+    parent::delete();
     $this->fileHashMap = null;
     $this->atomMap = null;
     $this->atoms = array();
 
     return $this;
   }
-
-  /**
-   * Convert a long-form hash key like `ccbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaN` into
-   * a shortened directory form, like `cc/bb/aaaaaaaaN`. In conjunction with
-   * @{class:PhutilKeyValueCacheDirectory}, this gives us nice directories
-   * inside .divinercache instead of a million hash files with huge names at
-   * top level.
-   */
-  private function getHashKey($hash) {
-    return implode(
-      '/',
-      array(
-        substr($hash, 0, 2),
-        substr($hash, 2, 2),
-        substr($hash, 4, 8),
-      ));
-  }
-
 
 /* -(  File Hash Map  )------------------------------------------------------ */
 

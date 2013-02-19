@@ -170,9 +170,20 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())
           ->setObject($object)
-          ->setActor($this->requireActor())
-          ->subscribeExplicit($xaction->getNewValue())
-          ->save();
+          ->setActor($this->requireActor());
+
+        $old_map = array_fuse($xaction->getOldValue());
+        $new_map = array_fuse($xaction->getNewValue());
+
+        $subeditor->unsubscribe(
+          array_keys(
+            array_diff_key($old_map, $new_map)));
+
+        $subeditor->subscribeExplicit(
+          array_keys(
+            array_diff_key($new_map, $old_map)));
+
+        $subeditor->save();
         break;
     }
     return $this->applyCustomExternalTransaction($object, $xaction);
