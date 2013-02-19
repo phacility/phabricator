@@ -327,4 +327,10 @@ final class DifferentialRevision extends DifferentialDAO
     return false;
   }
 
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
+  }
+
 }

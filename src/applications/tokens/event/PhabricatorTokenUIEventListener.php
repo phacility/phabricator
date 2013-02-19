@@ -44,7 +44,7 @@ final class PhabricatorTokenUIEventListener
         ->setUser($user)
         ->setWorkflow(true)
         ->setHref('/token/give/'.$object->getPHID().'/')
-        ->setName(pht('Give Token'))
+        ->setName(pht('Award Token'))
         ->setIcon('like');
     } else {
       $token_action = id(new PhabricatorActionView())

@@ -137,4 +137,13 @@ final class PholioMock extends PholioDAO
   }
 
 
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
+  }
+
 }

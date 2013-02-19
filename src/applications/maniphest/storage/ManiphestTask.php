@@ -283,4 +283,17 @@ final class ManiphestTask extends ManiphestDAO
     return false;
   }
 
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+  public function getUsersToNotifyOfTokenGiven() {
+    // Sort of ambiguous who this was intended for; just let them both know.
+    return array_filter(
+      array_unique(
+        array(
+          $this->getAuthorPHID(),
+          $this->getOwnerPHID(),
+        )));
+  }
+
 }

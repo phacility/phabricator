@@ -5,18 +5,18 @@ final class PhabricatorTokenGivenEditor
 
   public function addToken($object_phid, $token_phid) {
     $token = $this->validateToken($token_phid);
-    $handle = $this->validateObject($object_phid);
+    $object = $this->validateObject($object_phid);
 
     $actor = $this->requireActor();
 
     $token_given = id(new PhabricatorTokenGiven())
       ->setAuthorPHID($actor->getPHID())
-      ->setObjectPHID($handle->getPHID())
+      ->setObjectPHID($object->getPHID())
       ->setTokenPHID($token->getPHID());
 
     $token_given->openTransaction();
 
-      $this->executeDeleteToken($handle);
+      $this->executeDeleteToken($object);
 
       $token_given->save();
 
@@ -25,26 +25,48 @@ final class PhabricatorTokenGivenEditor
         'INSERT INTO %T (objectPHID, tokenCount) VALUES (%s, 1)
           ON DUPLICATE KEY UPDATE tokenCount = tokenCount + 1',
         id(new PhabricatorTokenCount())->getTableName(),
-        $handle->getPHID());
+        $object->getPHID());
 
     $token_given->saveTransaction();
+
+    $subscribed_phids = $object->getUsersToNotifyOfTokenGiven();
+    if ($subscribed_phids) {
+      $related_phids = $subscribed_phids;
+      $related_phids[] = $actor->getPHID();
+
+      $story_type = 'PhabricatorTokenGivenFeedStory';
+      $story_data = array(
+        'authorPHID' => $actor->getPHID(),
+        'tokenPHID' => $token->getPHID(),
+        'objectPHID' => $object->getPHID(),
+      );
+
+      id(new PhabricatorFeedStoryPublisher())
+        ->setStoryType($story_type)
+        ->setStoryData($story_data)
+        ->setStoryTime(time())
+        ->setStoryAuthorPHID($actor->getPHID())
+        ->setRelatedPHIDs($related_phids)
+        ->setPrimaryObjectPHID($object->getPHID())
+        ->setSubscribedPHIDs($subscribed_phids)
+        ->publish();
+    }
 
     return $token_given;
   }
 
   public function deleteToken($object_phid) {
-    $handle = $this->validateObject($object_phid);
-
-    return $this->executeDeleteToken($handle);
+    $object = $this->validateObject($object_phid);
+    return $this->executeDeleteToken($object);
   }
 
-  private function executeDeleteToken(PhabricatorObjectHandle $handle) {
+  private function executeDeleteToken($object) {
     $actor = $this->requireActor();
 
     $token_given = id(new PhabricatorTokenGiven())->loadOneWhere(
       'authorPHID = %s AND objectPHID = %s',
       $actor->getPHID(),
-      $handle->getPHID());
+      $object->getPHID());
     if (!$token_given) {
       return;
     }
@@ -58,7 +80,7 @@ final class PhabricatorTokenGivenEditor
         'INSERT INTO %T (objectPHID, tokenCount) VALUES (%s, 0)
           ON DUPLICATE KEY UPDATE tokenCount = tokenCount - 1',
         id(new PhabricatorTokenCount())->getTableName(),
-        $handle->getPHID());
+        $object->getPHID());
 
     $token_given->saveTransaction();
   }
@@ -77,15 +99,16 @@ final class PhabricatorTokenGivenEditor
   }
 
   private function validateObject($object_phid) {
-    $handle = PhabricatorObjectHandleData::loadOneHandle(
-      $object_phid,
-      $this->requireActor());
+    $objects = id(new PhabricatorObjectHandleData(array($object_phid)))
+      ->setViewer($this->requireActor())
+      ->loadObjects();
+    $object = head($objects);
 
-    if (!$handle->isComplete()) {
+    if (!$object) {
       throw new Exception("No such object!");
     }
 
-    return $handle;
+    return $object;
   }
 
 }
