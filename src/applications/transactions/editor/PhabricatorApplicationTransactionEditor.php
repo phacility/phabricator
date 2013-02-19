@@ -220,8 +220,9 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $this->validateEditParameters($object, $xactions);
 
-
     $actor = $this->requireActor();
+
+    $xactions = $this->applyImplicitCC($object, $xactions);
 
     $mention_xaction = $this->buildMentionTransaction($object, $xactions);
     if ($mention_xaction) {
@@ -641,6 +642,73 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xactions;
   }
 
+
+/* -(  Implicit CCs  )------------------------------------------------------- */
+
+
+  /**
+   * When a user interacts with an object, we might want to add them to CC.
+   */
+  final public function applyImplicitCC(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    if (!($object instanceof PhabricatorSubscribableInterface)) {
+      // If the object isn't subscribable, we can't CC them.
+      return $xactions;
+    }
+
+    $actor_phid = $this->requireActor()->getPHID();
+    if ($object->isAutomaticallySubscribed($actor_phid)) {
+      // If they're auto-subscribed, don't CC them.
+      return $xactions;
+    }
+
+    $should_cc = false;
+    foreach ($xactions as $xaction) {
+      if ($this->shouldImplyCC($object, $xaction)) {
+        $should_cc = true;
+        break;
+      }
+    }
+
+    if (!$should_cc) {
+      // Only some types of actions imply a CC (like adding a comment).
+      return $xactions;
+    }
+
+    if ($object->getPHID()) {
+      $unsub = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $object->getPHID(),
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+      $unsub = array_fuse($unsub);
+      if (isset($unsub[$actor_phid])) {
+        // If the user has previously unsubscribed from this object explicitly,
+        // don't implicitly CC them.
+        return $xactions;
+      }
+    }
+
+    $xaction = newv(get_class(head($xactions)), array());
+    $xaction->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);
+    $xaction->setNewValue(array('+' => array($actor_phid)));
+
+    array_unshift($xactions, $xaction);
+
+    return $xactions;
+  }
+
+  protected function shouldImplyCC(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return true;
+      default:
+        return false;
+    }
+  }
 
 
 /* -(  Sending Mail  )------------------------------------------------------- */
