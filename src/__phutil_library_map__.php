@@ -1446,8 +1446,11 @@ phutil_register_library_map(array(
     'PholioController' => 'applications/pholio/controller/PholioController.php',
     'PholioDAO' => 'applications/pholio/storage/PholioDAO.php',
     'PholioImage' => 'applications/pholio/storage/PholioImage.php',
+    'PholioInlineCommentView' => 'applications/pholio/view/PholioInlineCommentView.php',
     'PholioInlineController' => 'applications/pholio/controller/PholioInlineController.php',
+    'PholioInlineDeleteController' => 'applications/pholio/controller/PholioInlineDeleteController.php',
     'PholioInlineSaveController' => 'applications/pholio/controller/PholioInlineSaveController.php',
+    'PholioInlineViewController' => 'applications/pholio/controller/PholioInlineViewController.php',
     'PholioMock' => 'applications/pholio/storage/PholioMock.php',
     'PholioMockCommentController' => 'applications/pholio/controller/PholioMockCommentController.php',
     'PholioMockEditController' => 'applications/pholio/controller/PholioMockEditController.php',
@@ -2917,8 +2920,11 @@ phutil_register_library_map(array(
       0 => 'PholioDAO',
       1 => 'PhabricatorMarkupInterface',
     ),
+    'PholioInlineCommentView' => 'AphrontView',
     'PholioInlineController' => 'PholioController',
+    'PholioInlineDeleteController' => 'PholioController',
     'PholioInlineSaveController' => 'PholioController',
+    'PholioInlineViewController' => 'PholioController',
     'PholioMock' =>
     array(
       0 => 'PholioDAO',

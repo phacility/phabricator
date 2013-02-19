@@ -11,10 +11,6 @@ final class PholioInlineSaveController extends PholioController {
 
     $mock = id(new PholioMockQuery())
       ->setViewer($user)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW
-        ))
       ->withIDs(array($request->getInt('mockID')))
       ->executeOne();
 
@@ -46,8 +42,22 @@ final class PholioInlineSaveController extends PholioController {
     $draft->setContent($request->getStr('comment'));
 
     $draft->save();
+    $inlineID = $draft->getID();
 
-    return id(new AphrontAjaxResponse())->setContent(array());
+    if ($request->isAjax()) {
+      $inline_view = id(new PholioInlineCommentView())
+        ->setInlineComment($draft)
+        ->setEditable(true)
+        ->setHandle(
+          PhabricatorObjectHandleData::loadOneHandle($user->getPHID()));
+
+      return id(new AphrontAjaxResponse())
+        ->setContent(array('contentHTML' => $inline_view->render()));
+
+    } else {
+      return id(new AphrontRedirectResponse())->setUri('/M'.$mock->getID());
+    }
+
   }
 
 }

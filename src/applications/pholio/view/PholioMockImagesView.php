@@ -6,6 +6,7 @@ final class PholioMockImagesView extends AphrontView {
 
   public function setMock(PholioMock $mock) {
     $this->mock = $mock;
+    return $this;
   }
 
   public function render() {
