@@ -11,6 +11,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'meme-'.$file->getName(),
+        'ttl' => time() + 60 * 60 * 24,
       ));
   }
 

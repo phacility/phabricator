@@ -1137,6 +1137,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130218.longdaemon.sql'),
       ),
+      '20130215.phabricatorfileaddttl.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130215.phabricatorfileaddttl.sql'),
+      ),
     );
   }
 
