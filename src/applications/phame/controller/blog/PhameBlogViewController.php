@@ -133,8 +133,10 @@ final class PhameBlogViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
+        ->setUser($user)
         ->setIcon('world')
         ->setHref($this->getApplicationURI('live/'.$blog->getID().'/'))
+        ->setRenderAsForm(true)
         ->setName(pht('View Live')));
 
     $actions->addAction(

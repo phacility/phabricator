@@ -139,9 +139,11 @@ final class PhamePostViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
+        ->setUser($user)
         ->setIcon('world')
         ->setHref($live_uri)
         ->setName(pht('View Live'))
+        ->setRenderAsForm(true)
         ->setDisabled(!$can_view_live)
         ->setWorkflow(!$can_view_live));
 
