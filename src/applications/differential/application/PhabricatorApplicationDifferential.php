@@ -77,6 +77,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     $revisions = id(new DifferentialRevisionQuery())
       ->withResponsibleUsers(array($user->getPHID()))
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->needRelationships(true)
       ->execute();
 
     list($blocking, $active, $waiting) =
