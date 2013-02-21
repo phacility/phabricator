@@ -85,7 +85,10 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_table->setUser($this->getRequest()->getUser());
 
     $browse_panel = new AphrontPanelView();
-    $browse_panel->setHeader('Browse Repository');
+    $browse_panel->setHeader(phutil_tag(
+      'a',
+      array('href' => $drequest->generateURI(array('action' => 'browse'))),
+      'Browse Repository'));
     $browse_panel->appendChild($browse_table);
     $browse_panel->setNoBackground();
 
