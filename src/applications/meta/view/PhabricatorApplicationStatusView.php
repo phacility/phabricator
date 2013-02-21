@@ -17,9 +17,17 @@ final class PhabricatorApplicationStatusView extends AphrontView {
     return $this;
   }
 
+  public function getType() {
+    return $this->type;
+  }
+
   public function setText($text) {
     $this->text = $text;
     return $this;
+  }
+
+  public function getText() {
+    return $this->text;
   }
 
   public function setCount($count) {
@@ -32,9 +40,14 @@ final class PhabricatorApplicationStatusView extends AphrontView {
   }
 
   public function render() {
+    $type = $this->type;
+    if (!$this->count) {
+      $type = self::TYPE_EMPTY;
+    }
+
     $classes = array(
       'phabricator-application-status',
-      'phabricator-application-status-type-'.$this->type,
+      'phabricator-application-status-type-'.$type,
     );
 
     return phutil_tag(

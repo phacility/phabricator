@@ -57,16 +57,29 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       }
 
       $count = 0;
+      $text = array();
       if ($this->status) {
+        $attention = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
         foreach ($this->status as $status) {
-          $count += $status->getCount();
+          if ($status->getType() == $attention) {
+            $count += $status->getCount();
+          }
+          if ($status->getCount()) {
+            $text[] = $status->getText();
+          }
         }
       }
 
-      if ($count) {
-        $content[] = phutil_tag(
+      if ($text) {
+        Javelin::initBehavior('phabricator-tooltips');
+        $content[] = javelin_tag(
           'span',
           array(
+            'sigil' => 'has-tooltip',
+            'meta' => array(
+              'tip' => implode("\n", $text),
+              'size' => 240,
+            ),
             'class' => 'phabricator-application-launch-attention',
           ),
           $count);

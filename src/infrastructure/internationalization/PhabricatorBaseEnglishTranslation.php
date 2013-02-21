@@ -125,6 +125,11 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d Problem Commits',
       ),
 
+      '%d Review(s) Blocking Others' => array(
+        '%d Review Blocking Others',
+        '%d Reviews Blocking Others',
+      ),
+
       '%d Review(s) Need Attention' => array(
         '%d Review Needs Attention',
         '%d Reviews Need Attention',

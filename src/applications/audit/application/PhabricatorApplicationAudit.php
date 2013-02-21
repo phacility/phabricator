@@ -56,9 +56,7 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
       ->execute();
 
     $count = count($audits);
-    $type = $count
-      ? PhabricatorApplicationStatusView::TYPE_INFO
-      : PhabricatorApplicationStatusView::TYPE_EMPTY;
+    $type = PhabricatorApplicationStatusView::TYPE_INFO;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Commit(s) Awaiting Audit', $count))
@@ -71,9 +69,7 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
       ->execute();
 
     $count = count($commits);
-    $type = $count
-      ? PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION
-      : PhabricatorApplicationStatusView::TYPE_EMPTY;
+    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Problem Commit(s)', $count))
