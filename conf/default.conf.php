@@ -58,6 +58,9 @@ return array(
   // configuration file to directly set $_SERVER['HTTPS'] to the correct value.
   'security.require-https' => false,
 
+  // Is Phabricator permitted to make outbound HTTP requests?
+  'security.allow-outbound-http' => true,
+
 
 // -- Internationalization -------------------------------------------------- //
 

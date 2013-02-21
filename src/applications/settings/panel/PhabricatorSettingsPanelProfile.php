@@ -205,17 +205,22 @@ final class PhabricatorSettingsPanelProfile
           ->setLabel('Change Image')
           ->setName('image')
           ->setError($e_image)
-          ->setCaption('Supported formats: '.implode(', ', $supported_formats)))
-      ->appendChild(
+          ->setCaption(
+            'Supported formats: '.implode(', ', $supported_formats)));
+
+    if (PhabricatorEnv::getEnvConfig('security.allow-outbound-http')) {
+      $form->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Import Gravatar')
           ->setName('gravatar')
           ->setError($e_image)
-          ->setCaption('Enter gravatar email address'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Save')
-          ->addCancelButton('/p/'.$user->getUsername().'/'));
+          ->setCaption('Enter gravatar email address'));
+    }
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue('Save')
+        ->addCancelButton('/p/'.$user->getUsername().'/'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Edit Profile Details');
