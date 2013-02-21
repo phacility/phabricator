@@ -44,44 +44,44 @@ final class PhabricatorPeopleLogsController
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Filter Actor')
+          ->setLabel(pht('Filter Actor'))
           ->setName('actor')
           ->setLimit(1)
           ->setValue($actor_value)
           ->setDatasource('/typeahead/common/accounts/'))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Filter User')
+          ->setLabel(pht('Filter User'))
           ->setName('user')
           ->setLimit(1)
           ->setValue($user_value)
           ->setDatasource('/typeahead/common/accounts/'))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Show Activity')
+          ->setLabel(pht('Show Activity'))
           ->setName('activity')
           ->setValue($filter_activity)
           ->setOptions(
             array(
-              ''        => 'All Activity',
-              'admin'   => 'Admin Activity',
+              ''        => pht('All Activity'),
+              'admin'   => pht('Admin Activity'),
             )))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Filter IP')
+          ->setLabel(pht('Filter IP'))
           ->setName('ip')
           ->setValue($filter_ip)
           ->setCaption(
-            'Enter an IP (or IP prefix) to show only activity by that remote '.
-            'address.'))
+            pht('Enter an IP (or IP prefix) to show only activity by that '.
+            'remote address.')))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Filter Session')
+          ->setLabel(pht('Filter Session'))
           ->setName('session')
           ->setValue($filter_session))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Filter Logs'));
+          ->setValue(pht('Filter Logs')));
 
     $log_table = new PhabricatorUserLog();
     $conn_r = $log_table->establishConnection('r');
@@ -183,15 +183,15 @@ final class PhabricatorPeopleLogsController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Date',
-        'Time',
-        'Action',
-        'Actor',
-        'User',
-        'Old',
-        'New',
-        'IP',
-        'Session',
+        pht('Date'),
+        pht('Time'),
+        pht('Action'),
+        pht('Actor'),
+        pht('User'),
+        pht('Old'),
+        pht('New'),
+        pht('IP'),
+        pht('Session'),
       ));
     $table->setColumnClasses(
       array(
@@ -207,12 +207,18 @@ final class PhabricatorPeopleLogsController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Activity Logs');
+    $panel->setHeader(pht('Activity Logs'));
+    $panel->setNoBackground();
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
     $filter = new AphrontListFilterView();
     $filter->appendChild($form);
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Activity Logs'))
+          ->setHref('/people/logs/'));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('logs');
@@ -221,12 +227,13 @@ final class PhabricatorPeopleLogsController
         $filter,
         $panel,
       ));
-
+    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Activity Logs',
+        'title' => pht('Activity Logs'),
+        'device' => true,
       ));
   }
 }

@@ -29,7 +29,7 @@ final class PhabricatorEmailVerificationController
       array(
         'href' => '/',
       ),
-      'Continue to Phabricator');
+      pht('Continue to Phabricator'));
     $home_link = hsprintf(
       '<br /><p><strong>%s</strong></p>',
       $home_link);
@@ -39,26 +39,28 @@ final class PhabricatorEmailVerificationController
       array(
         'href' => '/settings/panel/email/',
       ),
-      'Return to Email Settings');
+      pht('Return to Email Settings'));
     $settings_link = hsprintf(
       '<br /><p><strong>%s</strong></p>',
       $settings_link);
 
     if (!$email) {
       $content = id(new AphrontErrorView())
-        ->setTitle('Unable To Verify')
+        ->setTitle(pht('Unable To Verify'))
         ->appendChild(phutil_tag(
           'p',
           array(),
-          'The verification code is incorrect, the email address has been '.
+          pht('The verification code is incorrect, the email address has been '.
             'removed, or the email address is owned by another user. Make '.
-            'sure you followed the link in the email correctly.'));
+            'sure you followed the link in the email correctly.')));
     } else if ($email->getIsVerified()) {
+      $inst = pht('This email address has already been verified.');
       $content = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle('Address Already Verified')
+        ->setTitle(pht('Address Already Verified'))
         ->appendChild(hsprintf(
-          '<p>This email address has already been verified.</p>%s',
+          '<p>%s</p>%s',
+          $inst,
           $settings_link));
     } else {
 
@@ -67,11 +69,13 @@ final class PhabricatorEmailVerificationController
         $email->save();
       unset($guard);
 
+      $inst = pht('This email address has now been verified. Thanks!');
       $content = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle('Address Verified')
+        ->setTitle(pht('Address Verified'))
         ->appendChild(hsprintf(
-          '<p>This email address has now been verified. Thanks!</p>%s%s',
+          '<p>%s</p>%s%s',
+          $inst,
           $home_link,
           $settings_link));
     }
@@ -79,7 +83,8 @@ final class PhabricatorEmailVerificationController
     return $this->buildApplicationPage(
       $content,
       array(
-        'title' => 'Verify Email',
+        'title' => pht('Verify Email'),
+        'device' => true,
       ));
   }
 

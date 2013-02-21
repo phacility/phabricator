@@ -20,27 +20,41 @@ final class PhabricatorPeopleEditController
     $request = $this->getRequest();
     $admin = $request->getUser();
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     if ($this->id) {
       $user = id(new PhabricatorUser())->load($this->id);
       if (!$user) {
         return new Aphront404Response();
       }
       $base_uri = '/people/edit/'.$user->getID().'/';
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Edit User'))
+          ->setHref('/people/edit/'));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($user->getFullName())
+          ->setHref($base_uri));
     } else {
       $user = new PhabricatorUser();
       $base_uri = '/people/edit/';
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Create New User'))
+          ->setHref($base_uri));
     }
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($base_uri));
-    $nav->addLabel('User Information');
-    $nav->addFilter('basic', 'Basic Information');
-    $nav->addFilter('role',  'Edit Roles');
-    $nav->addFilter('cert',  'Conduit Certificate');
-    $nav->addFilter('profile', 'View Profile', '/p/'.$user->getUsername().'/');
-    $nav->addLabel('Special');
-    $nav->addFilter('rename', 'Change Username');
-    $nav->addFilter('delete', 'Delete User');
+    $nav->addLabel(pht('User Information'));
+    $nav->addFilter('basic', pht('Basic Information'));
+    $nav->addFilter('role', pht('Edit Roles'));
+    $nav->addFilter('cert', pht('Conduit Certificate'));
+    $nav->addFilter('profile',
+      pht('View Profile'), '/p/'.$user->getUsername().'/');
+    $nav->addLabel(pht('Special'));
+    $nav->addFilter('rename', pht('Change Username'));
+    $nav->addFilter('delete', pht('Delete User'));
 
     if (!$user->getID()) {
       $this->view = 'basic';
@@ -53,9 +67,9 @@ final class PhabricatorPeopleEditController
     if ($request->getStr('saved')) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $notice->setTitle('Changes Saved');
+      $notice->setTitle(pht('Changes Saved'));
       $notice->appendChild(
-        phutil_tag('p', array(), 'Your changes were saved.'));
+        phutil_tag('p', array(), pht('Your changes were saved.')));
       $content[] = $notice;
     }
 
@@ -93,10 +107,12 @@ final class PhabricatorPeopleEditController
       $nav->appendChild($content);
     }
 
+    $nav->setCrumbs($crumbs);
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Edit User',
+        'title' => pht('Edit User'),
+        'device' => true,
       ));
   }
 
@@ -123,10 +139,10 @@ final class PhabricatorPeopleEditController
 
         $new_email = $request->getStr('email');
         if (!strlen($new_email)) {
-          $errors[] = 'Email is required.';
-          $e_email = 'Required';
+          $errors[] = pht('Email is required.');
+          $e_email = pht('Required');
         } else if (!PhabricatorUserEmail::isAllowedAddress($new_email)) {
-          $e_email = 'Invalid';
+          $e_email = pht('Invalid');
           $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
         } else {
           $e_email = null;
@@ -136,18 +152,18 @@ final class PhabricatorPeopleEditController
       $user->setRealName($request->getStr('realname'));
 
       if (!strlen($user->getUsername())) {
-        $errors[] = "Username is required.";
-        $e_username = 'Required';
+        $errors[] = pht("Username is required.");
+        $e_username = pht('Required');
       } else if (!PhabricatorUser::validateUsername($user->getUsername())) {
         $errors[] = PhabricatorUser::describeValidUsername();
-        $e_username = 'Invalid';
+        $e_username = pht('Invalid');
       } else {
         $e_username = null;
       }
 
       if (!strlen($user->getRealName())) {
-        $errors[] = 'Real name is required.';
-        $e_realname = 'Required';
+        $errors[] = pht('Real name is required.');
+        $e_realname = pht('Required');
       } else {
         $e_realname = null;
       }
@@ -184,7 +200,7 @@ final class PhabricatorPeopleEditController
             ->setURI('/people/edit/'.$user->getID().'/?saved=true');
           return $response;
         } catch (AphrontQueryDuplicateKeyException $ex) {
-          $errors[] = 'Username and email must be unique.';
+          $errors[] = pht('Username and email must be unique.');
 
           $same_username = id(new PhabricatorUser())
             ->loadOneWhere('username = %s', $user->getUsername());
@@ -192,11 +208,11 @@ final class PhabricatorPeopleEditController
             ->loadOneWhere('address = %s', $new_email);
 
           if ($same_username) {
-            $e_username = 'Duplicate';
+            $e_username = pht('Duplicate');
           }
 
           if ($same_email) {
-            $e_email = 'Duplicate';
+            $e_email = pht('Duplicate');
           }
         }
       }
@@ -205,7 +221,7 @@ final class PhabricatorPeopleEditController
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 
@@ -226,14 +242,14 @@ final class PhabricatorPeopleEditController
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Username')
+          ->setLabel(pht('Username'))
           ->setName('username')
           ->setValue($user->getUsername())
           ->setError($e_username)
           ->setDisabled($is_immutable))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Real Name')
+          ->setLabel(pht('Real Name'))
           ->setName('realname')
           ->setValue($user->getRealName())
           ->setError($e_realname));
@@ -241,7 +257,7 @@ final class PhabricatorPeopleEditController
     if (!$user->getID()) {
       $form->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Email')
+          ->setLabel(pht('Email'))
           ->setName('email')
           ->setDisabled($is_immutable)
           ->setValue($new_email)
@@ -250,14 +266,15 @@ final class PhabricatorPeopleEditController
     } else {
       $email = $user->loadPrimaryEmail();
       if ($email) {
-        $status = $email->getIsVerified() ? 'Verified' : 'Unverified';
+        $status = $email->getIsVerified() ?
+          pht('Verified') : pht('Unverified');
       } else {
-        $status = 'No Email Address';
+        $status = pht('No Email Address');
       }
 
       $form->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Email')
+          ->setLabel(pht('Email'))
           ->setValue($status));
 
       $form->appendChild(
@@ -265,7 +282,7 @@ final class PhabricatorPeopleEditController
         ->addCheckbox(
           'welcome',
           1,
-          'Re-send "Welcome to Phabricator" email.',
+          pht('Re-send "Welcome to Phabricator" email.'),
           false));
 
     }
@@ -276,39 +293,39 @@ final class PhabricatorPeopleEditController
       $form
         ->appendChild(
           id(new AphrontFormSelectControl())
-            ->setLabel('Role')
+            ->setLabel(pht('Role'))
             ->setName('role')
             ->setValue('user')
             ->setOptions(
               array(
-                'user'  => 'Normal User',
-                'agent' => 'System Agent',
+                'user'  => pht('Normal User'),
+                'agent' => pht('System Agent'),
               ))
             ->setCaption(
-              'You can create a "system agent" account for bots, scripts, '.
-              'etc.'))
+              pht('You can create a "system agent" account for bots, '.
+              'scripts, etc.')))
         ->appendChild(
           id(new AphrontFormCheckboxControl())
             ->addCheckbox(
               'welcome',
               1,
-              'Send "Welcome to Phabricator" email.',
+              pht('Send "Welcome to Phabricator" email.'),
               $welcome_checked));
     } else {
       $roles = array();
 
       if ($user->getIsSystemAgent()) {
-        $roles[] = 'System Agent';
+        $roles[] = pht('System Agent');
       }
       if ($user->getIsAdmin()) {
-        $roles[] = 'Admin';
+        $roles[] = pht('Admin');
       }
       if ($user->getIsDisabled()) {
-        $roles[] = 'Disabled';
+        $roles[] = pht('Disabled');
       }
 
       if (!$roles) {
-        $roles[] = 'Normal User';
+        $roles[] = pht('Normal User');
       }
 
       $roles = implode(', ', $roles);
@@ -322,16 +339,17 @@ final class PhabricatorPeopleEditController
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new AphrontPanelView();
     if ($user->getID()) {
-      $panel->setHeader('Edit User');
+      $panel->setHeader(pht('Edit User'));
     } else {
-      $panel->setHeader('Create New User');
+      $panel->setHeader(pht('Create New User'));
     }
 
     $panel->appendChild($form);
+    $panel->setNoBackground();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
     return array($error_view, $panel);
@@ -355,7 +373,7 @@ final class PhabricatorPeopleEditController
       $logs = array();
 
       if ($is_self) {
-        $errors[] = "You can not edit your own role.";
+        $errors[] = pht("You can not edit your own role.");
       } else {
         $new_admin = (bool)$request->getBool('is_admin');
         $old_admin = (bool)$user->getIsAdmin();
@@ -383,7 +401,7 @@ final class PhabricatorPeopleEditController
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 
@@ -393,9 +411,9 @@ final class PhabricatorPeopleEditController
       ->setAction($request->getRequestURI()->alter('saved', null));
 
     if ($is_self) {
+      $inst = pht('NOTE: You can not edit your own role.');
       $form->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">NOTE: You can not edit your own '.
-        'role.</p>'));
+        '<p class="aphront-form-instructions">%s</p>', $inst));
     }
 
     $form
@@ -405,7 +423,7 @@ final class PhabricatorPeopleEditController
           ->addCheckbox(
             'is_admin',
             1,
-            'Administrator',
+            pht('Administrator'),
             $user->getIsAdmin())
           ->setDisabled($is_self))
       ->appendChild(
@@ -413,7 +431,7 @@ final class PhabricatorPeopleEditController
           ->addCheckbox(
             'is_disabled',
             1,
-            'Disabled',
+            pht('Disabled'),
             $user->getIsDisabled())
           ->setDisabled($is_self))
       ->appendChild(
@@ -421,7 +439,7 @@ final class PhabricatorPeopleEditController
           ->addCheckbox(
             'is_agent',
             1,
-            'System Agent (Bot/Script User)',
+            pht('System Agent (Bot/Script User)'),
             $user->getIsSystemAgent())
           ->setDisabled(true));
 
@@ -429,12 +447,13 @@ final class PhabricatorPeopleEditController
       $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Edit Role'));
+            ->setValue(pht('Edit Role')));
     }
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Edit Role');
+    $panel->setHeader(pht('Edit Role'));
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
     $panel->appendChild($form);
 
     return array($error_view, $panel);
@@ -444,37 +463,38 @@ final class PhabricatorPeopleEditController
     $request = $this->getRequest();
     $admin = $request->getUser();
 
+    $inst = pht('You can use this certificate '.
+        'to write scripts or bots which interface with Phabricator over '.
+        'Conduit.');
     $form = new AphrontFormView();
     $form
       ->setUser($admin)
       ->setAction($request->getRequestURI())
       ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">You can use this certificate '.
-        'to write scripts or bots which interface with Phabricator over '.
-        'Conduit.</p>'));
+        '<p class="aphront-form-instructions">%s</p>', $inst));
 
     if ($user->getIsSystemAgent()) {
       $form
         ->appendChild(
           id(new AphrontFormTextControl())
-            ->setLabel('Username')
+            ->setLabel(pht('Username'))
             ->setValue($user->getUsername()))
         ->appendChild(
           id(new AphrontFormTextAreaControl())
-            ->setLabel('Certificate')
+            ->setLabel(pht('Certificate'))
             ->setValue($user->getConduitCertificate()));
     } else {
       $form->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Certificate')
+          ->setLabel(pht('Certificate'))
           ->setValue(
-            'You may only view the certificates of System Agents.'));
+            pht('You may only view the certificates of System Agents.')));
     }
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Conduit Certificate');
+    $panel->setHeader(pht('Conduit Certificate'));
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-
+    $panel->setNoBackground();
     $panel->appendChild($form);
 
     return array($panel);
@@ -492,13 +512,13 @@ final class PhabricatorPeopleEditController
 
       $username = $request->getStr('username');
       if (!strlen($username)) {
-        $e_username = 'Required';
-        $errors[] = 'New username is required.';
+        $e_username = pht('Required');
+        $errors[] = pht('New username is required.');
       } else if ($username == $user->getUsername()) {
-        $e_username = 'Invalid';
-        $errors[] = 'New username must be different from old username.';
+        $e_username = pht('Invalid');
+        $errors[] = pht('New username must be different from old username.');
       } else if (!PhabricatorUser::validateUsername($username)) {
-        $e_username = 'Invalid';
+        $e_username = pht('Invalid');
         $errors[] = PhabricatorUser::describeValidUsername();
       }
 
@@ -512,19 +532,33 @@ final class PhabricatorPeopleEditController
           return id(new AphrontRedirectResponse())
             ->setURI($request->getRequestURI()->alter('saved', true));
         } catch (AphrontQueryDuplicateKeyException $ex) {
-          $e_username = 'Not Unique';
-          $errors[] = 'Another user already has that username.';
+          $e_username = pht('Not Unique');
+          $errors[] = pht('Another user already has that username.');
         }
       }
     }
 
     if ($errors) {
       $errors = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     } else {
       $errors = null;
     }
+
+    $inst1 = pht('Be careful when renaming users!');
+    $inst2 = pht('The old username will no longer be tied to the user, so '.
+          'anything which uses it (like old commit messages) will no longer '.
+          'associate correctly. And if you give a user a username which some '.
+          'other user used to have, username lookups will begin returning '.
+          'the wrong user.');
+    $inst3 = pht('It is generally safe to rename newly created users (and '.
+          'test users and so on), but less safe to rename established users '.
+          'and unsafe to reissue a username.');
+    $inst4 = pht('Users who rely on password auth will need to reset their '.
+          'passwordafter their username is changed (their username is part '.
+          'of the salt in the password hash). They will receive an email '.
+          'with instructions on how to do this.');
 
     $form = new AphrontFormView();
     $form
@@ -532,41 +566,33 @@ final class PhabricatorPeopleEditController
       ->setAction($request->getRequestURI())
       ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">'.
-          '<strong>Be careful when renaming users!</strong> '.
-          'The old username will no longer be tied to the user, so anything '.
-          'which uses it (like old commit messages) will no longer associate '.
-          'correctly. And if you give a user a username which some other user '.
-          'used to have, username lookups will begin returning the wrong '.
-          'user.'.
+          '<strong>%s</strong> '.
+          '%s'.
         '</p>'.
         '<p class="aphront-form-instructions">'.
-          'It is generally safe to rename newly created users (and test users '.
-          'and so on), but less safe to rename established users and unsafe '.
-          'to reissue a username.'.
+          '%s'.
         '</p>'.
         '<p class="aphront-form-instructions">'.
-          'Users who rely on password auth will need to reset their password '.
-          'after their username is changed (their username is part of the '.
-          'salt in the password hash). They will receive an email with '.
-          'instructions on how to do this.'.
-        '</p>'))
+          '%s'.
+        '</p>', $inst1, $inst2, $inst3, $inst4))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Old Username')
+          ->setLabel(pht('Old Username'))
           ->setValue($user->getUsername()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('New Username')
+          ->setLabel(pht('New Username'))
           ->setValue($username)
           ->setName('username')
           ->setError($e_username))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Change Username'));
+          ->setValue(pht('Change Username')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Change Username');
+    $panel->setHeader(pht('Change Username'));
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
     $panel->appendChild($form);
 
     return array($errors, $panel);
@@ -576,13 +602,15 @@ final class PhabricatorPeopleEditController
     $request = $this->getRequest();
     $admin = $request->getUser();
 
+    $far1 = pht('As you stare into the gaping maw of the abyss, something '.
+        'hold you back.');
+    $far2 = pht('You can not delete your own account.');
+
     if ($user->getPHID() == $admin->getPHID()) {
       $error = new AphrontErrorView();
-      $error->setTitle('You Shall Journey No Farther');
+      $error->setTitle(pht('You Shall Journey No Farther'));
       $error->appendChild(hsprintf(
-        '<p>As you stare into the gaping maw of the abyss, something holds '.
-        'you back.</p>'.
-        '<p>You can not delete your own account.</p>'));
+        '<p>%s</p><p>%s</p>', $far1, $far2));
       return $error;
     }
 
@@ -594,11 +622,11 @@ final class PhabricatorPeopleEditController
 
       $username = $request->getStr('username');
       if (!strlen($username)) {
-        $e_username = 'Required';
-        $errors[] = 'You must type the username to confirm deletion.';
+        $e_username = pht('Required');
+        $errors[] = pht('You must type the username to confirm deletion.');
       } else if ($username != $user->getUsername()) {
-        $e_username = 'Invalid';
-        $errors[] = 'You must type the username correctly.';
+        $e_username = pht('Invalid');
+        $errors[] = pht('You must type the username correctly.');
       }
 
       if (!$errors) {
@@ -612,11 +640,22 @@ final class PhabricatorPeopleEditController
 
     if ($errors) {
       $errors = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     } else {
       $errors = null;
     }
+
+    $str1 = pht('Be careful when deleting users!');
+    $str2 = pht('If this user interacted with anything, it is generally '.
+        'better to disable them, not delete them. If you delete them, it will '.
+        'no longer be possible to search for their objects, for example, '.
+        'and you will lose other information about their history. Disabling '.
+        'them instead will prevent them from logging in but not destroy '.
+        'any of their data.');
+    $str3 = pht('It is generally safe to delete newly created users (and '.
+          'test users and so on), but less safe to delete established users. '.
+          'If possible, disable them instead.');
 
     $form = new AphrontFormView();
     $form
@@ -624,37 +663,30 @@ final class PhabricatorPeopleEditController
       ->setAction($request->getRequestURI())
       ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">'.
-          '<strong>Be careful when deleting users!</strong> '.
-          'If this user interacted with anything, it is generally better '.
-          'to disable them, not delete them. If you delete them, it will '.
-          'no longer be possible to search for their objects, for example, '.
-          'and you will lose other information about their history. Disabling '.
-          'them instead will prevent them from logging in but not destroy '.
-          'any of their data.'.
+          '<strong>%s</strong> %s'.
         '</p>'.
         '<p class="aphront-form-instructions">'.
-          'It is generally safe to delete newly created users (and test users '.
-          'and so on), but less safe to delete established users. If '.
-          'possible, disable them instead.'.
-        '</p>'))
+          '%s'.
+        '</p>', $str1, $str2, $str3))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Username')
+          ->setLabel(pht('Username'))
           ->setValue($user->getUsername()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Confirm')
+          ->setLabel(pht('Confirm'))
           ->setValue($username)
           ->setName('username')
-          ->setCaption("Type the username again to confirm deletion.")
+          ->setCaption(pht("Type the username again to confirm deletion."))
           ->setError($e_username))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Delete User'));
+          ->setValue(pht('Delete User')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Delete User');
+    $panel->setHeader(pht('Delete User'));
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
     $panel->appendChild($form);
 
     return array($errors, $panel);
@@ -668,13 +700,13 @@ final class PhabricatorPeopleEditController
           'article/User_Guide_Account_Roles.html'),
         'target' => '_blank',
       ),
-      'User Guide: Account Roles');
+      pht('User Guide: Account Roles'));
 
-    return hsprintf(
-      '<p class="aphront-form-instructions">'.
-        'For a detailed explanation of account roles, see %s.'.
-      '</p>',
+    $inst = pht('For a detailed explanation of account roles, see %s.',
       $roles_link);
+    return hsprintf(
+      '<p class="aphront-form-instructions">%s</p>',
+      $inst);
   }
 
 }

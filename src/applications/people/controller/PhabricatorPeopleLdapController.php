@@ -22,23 +22,23 @@ final class PhabricatorPeopleLdapController
       ->setUser($admin)
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('LDAP username')
+        ->setLabel(pht('LDAP username'))
         ->setName('username'))
       ->appendChild(
         id(new AphrontFormPasswordControl())
-        ->setLabel('Password')
+        ->setLabel(pht('Password'))
         ->setName('password'))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('LDAP query')
-        ->setCaption('A filter such as (objectClass=*)')
+        ->setLabel(pht('LDAP query'))
+        ->setCaption(pht('A filter such as (objectClass=*)'))
         ->setName('query'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue('Search'));
+        ->setValue(pht('Search')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Import LDAP Users');
+    $panel->setHeader(pht('Import LDAP Users'));
     $panel->appendChild($form);
 
 
@@ -59,7 +59,8 @@ final class PhabricatorPeopleLdapController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Import Ldap Users',
+        'title' => pht('Import Ldap Users'),
+        'device' => true,
       ));
   }
 
@@ -71,8 +72,8 @@ final class PhabricatorPeopleLdapController
 
     $panel = new AphrontErrorView();
     $panel->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-    $panel->setTitle("Import Successful");
-    $errors = array("Successfully imported users from LDAP");
+    $panel->setTitle(pht("Import Successful"));
+    $errors = array(pht("Successfully imported users from LDAP"));
 
 
     foreach ($usernames as $username) {
@@ -92,9 +93,9 @@ final class PhabricatorPeopleLdapController
         $ldap_info->setLDAPUsername($username);
         $ldap_info->setUserID($user->getID());
         $ldap_info->save();
-        $errors[] = 'Successfully added ' . $username;
+        $errors[] = pht('Successfully added %s', $username);
       } catch (Exception $ex) {
-        $errors[] = 'Failed to add ' . $username . ' ' . $ex->getMessage();
+        $errors[] = pht('Failed to add %s %s', $username, $ex->getMessage());
       }
     }
 
@@ -127,23 +128,23 @@ final class PhabricatorPeopleLdapController
       $table = new AphrontTableView($results);
       $table->setHeaders(
         array(
-          'Username',
-          'Email',
-          'RealName',
-          'Import?',
+          pht('Username'),
+          pht('Email'),
+          pht('Real Name'),
+          pht('Import?'),
         ));
       $form->appendChild($table);
       $form->setAction($request->getRequestURI()
         ->alter('import', 'true')->alter('search', null))
         ->appendChild(
           id(new AphrontFormSubmitControl())
-          ->setValue('Import'));
+          ->setValue(pht('Import')));
 
 
       $panel->appendChild($form);
     } catch (Exception $ex) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('LDAP Search Failed');
+      $error_view->setTitle(pht('LDAP Search Failed'));
       $error_view->setErrors(array($ex->getMessage()));
       return $error_view;
     }
