@@ -110,7 +110,6 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   private function renderHeader(DifferentialRevision $revision) {
     $view = id(new PhabricatorHeaderView())
-      ->setObjectName('D'.$revision->getID())
       ->setHeader($revision->getTitle());
 
     $status = $revision->getStatus();

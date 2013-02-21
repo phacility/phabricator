@@ -32,7 +32,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         ->setHref($this->getApplicationURI("/info/{$phid}/")));
 
     $header = id(new PhabricatorHeaderView())
-      ->setObjectName('F'.$file->getID())
       ->setHeader($file->getName());
 
     $ttl = $file->getTTL();
