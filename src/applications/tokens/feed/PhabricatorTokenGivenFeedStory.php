@@ -19,7 +19,7 @@ final class PhabricatorTokenGivenFeedStory
     $view->setViewed($this->getHasViewed());
 
     $href = $this->getHandle($this->getPrimaryObjectPHID())->getURI();
-    $view->setHref($view);
+    $view->setHref($href);
 
     $title = pht(
       '%s awarded %s a token.',
