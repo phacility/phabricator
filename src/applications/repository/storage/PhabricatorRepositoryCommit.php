@@ -9,6 +9,7 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
   protected $mailKey;
   protected $authorPHID;
   protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
+  protected $summary = '';
 
   private $commitData;
   private $audits;
