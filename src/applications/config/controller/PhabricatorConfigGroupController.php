@@ -46,8 +46,7 @@ final class PhabricatorConfigGroupController
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 
   private function buildOptionList(array $options) {

@@ -48,9 +48,9 @@ final class DifferentialLocalCommitsView extends AphrontView {
 
       $row = array();
       if (idx($commit, 'commit')) {
-        $commit_hash = substr($commit['commit'], 0, 16);
+        $commit_hash = self::formatCommit($commit['commit']);
       } else if (isset($commit['rev'])) {
-        $commit_hash = substr($commit['rev'], 0, 16);
+        $commit_hash = self::formatCommit($commit['rev']);
       } else {
         $commit_hash = null;
       }
@@ -58,7 +58,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
 
       if ($has_tree) {
         $tree = idx($commit, 'tree');
-        $tree = substr($tree, 0, 16);
+        $tree = self::formatCommit($tree);
         $row[] = phutil_tag('td', array(), $tree);
       }
 
@@ -72,7 +72,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
         if (is_array($parent)) {
           $parent = idx($parent, 'rev');
         }
-        $parents[$k] = substr($parent, 0, 16);
+        $parents[$k] = self::formatCommit($parent);
       }
       $parents = phutil_implode_html(phutil_tag('br'), $parents);
       $row[] = phutil_tag('td', array(), $parents);
@@ -141,4 +141,9 @@ final class DifferentialLocalCommitsView extends AphrontView {
       $headers,
       phutil_implode_html("\n", $rows));
   }
+
+  private static function formatCommit($commit) {
+    return substr($commit, 0, 12);
+  }
+
 }

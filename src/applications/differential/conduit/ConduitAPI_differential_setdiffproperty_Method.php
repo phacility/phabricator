@@ -51,8 +51,7 @@ final class ConduitAPI_differential_setdiffproperty_Method
     $messages_property = id(new DifferentialDiffProperty())->loadOneWhere(
       'diffID = %d AND name = %s',
       $diff_id,
-      'arc:lint'
-    );
+      'arc:lint');
     if ($messages_property) {
       $results = $messages_property->getData();
     } else {

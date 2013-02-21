@@ -28,8 +28,7 @@ final class PhabricatorCalendarDeleteStatusController
       $uri->setQueryParams(
         array(
           'deleted' => true,
-        )
-      );
+        ));
       return id(new AphrontRedirectResponse())
         ->setURI($uri);
     }
@@ -40,12 +39,10 @@ final class PhabricatorCalendarDeleteStatusController
     $dialog->appendChild(phutil_tag(
       'p',
       array(),
-      pht('Permanently delete this status? This action can not be undone.')
-    ));
+      pht('Permanently delete this status? This action can not be undone.')));
     $dialog->addSubmitButton(pht('Delete'));
     $dialog->addCancelButton(
-      $this->getApplicationURI('status/edit/'.$status->getID().'/')
-    );
+      $this->getApplicationURI('status/edit/'.$status->getID().'/'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
 

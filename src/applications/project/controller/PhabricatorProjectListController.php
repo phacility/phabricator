@@ -137,8 +137,7 @@ final class PhabricatorProjectListController
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($table_header)
-        ->setHref($this->getApplicationURI())
-      );
+        ->setHref($this->getApplicationURI()));
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(

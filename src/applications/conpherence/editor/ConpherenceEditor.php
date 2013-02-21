@@ -12,8 +12,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $files = array();
     $file_phids =
       PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-        array($text)
-      );
+        array($text));
     // Since these are extracted from text, we might be re-including the
     // same file -- e.g. a mock under discussion. Filter files we
     // already have.
@@ -36,8 +35,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       ->attachComment(
         id(new ConpherenceTransactionComment())
         ->setContent($text)
-        ->setConpherencePHID($conpherence->getPHID())
-      );
+        ->setConpherencePHID($conpherence->getPHID()));
     return $xactions;
   }
 
@@ -99,14 +97,12 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       case ConpherenceTransactionType::TYPE_PICTURE:
         $object->setImagePHID(
           $xaction->getNewValue(),
-          ConpherenceImageData::SIZE_ORIG
-        );
+          ConpherenceImageData::SIZE_ORIG);
         break;
       case ConpherenceTransactionType::TYPE_PICTURE_CROP:
         $object->setImagePHID(
           $xaction->getNewValue(),
-          ConpherenceImageData::SIZE_HEAD
-        );
+          ConpherenceImageData::SIZE_HEAD);
         break;
     }
   }
@@ -127,8 +123,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           $editor->addEdge(
             $object->getPHID(),
             $edge_type,
-            $file_phid
-          );
+            $file_phid);
         }
         $editor->save();
         // fallthrough
@@ -205,8 +200,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     if (!$title) {
       $title = pht(
         '%s sent you a message.',
-        $this->getActor()->getUserName()
-      );
+        $this->getActor()->getUserName());
     }
     $phid = $object->getPHID();
 

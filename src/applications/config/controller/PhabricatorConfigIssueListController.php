@@ -41,8 +41,7 @@ final class PhabricatorConfigIssueListController
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 
   private function buildIssueList(array $issues) {

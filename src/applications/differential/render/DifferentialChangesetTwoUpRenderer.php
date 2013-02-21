@@ -27,9 +27,7 @@ final class DifferentialChangesetTwoUpRenderer
             'colspan' => 6,
             'class' => 'show-more'
           ),
-          pht('Context not available.')
-        )
-      );
+          pht('Context not available.')));
     }
 
     $html = array();
@@ -375,9 +373,7 @@ final class DifferentialChangesetTwoUpRenderer
           'img',
           array(
             'src' => $old_file->getBestURI(),
-          )
-        )
-      );
+          )));
     }
 
     $new = null;
@@ -391,9 +387,7 @@ final class DifferentialChangesetTwoUpRenderer
           'img',
           array(
             'src' => $new_file->getBestURI(),
-          )
-        )
-      );
+          )));
     }
 
     $html_old = array();

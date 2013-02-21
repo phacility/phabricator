@@ -49,8 +49,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
 
     $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $commit->getPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT
-    );
+      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT);
     if ($project_phids) {
       foreach ($project_phids as $project_phid) {
         $doc->addRelationship(

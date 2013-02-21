@@ -269,13 +269,13 @@ final class PhabricatorLDAPProvider {
 
     $rows = array();
 
-    for($i = 0; $i < $entries['count']; $i++) {
+    for ($i = 0; $i < $entries['count']; $i++) {
       $row = array();
       $entry = $entries[$i];
 
       // Get username, email and realname
       $username = $entry[$this->getSearchAttribute()][0];
-      if(empty($username)) {
+      if (empty($username)) {
         continue;
       }
       $row[] = $username;

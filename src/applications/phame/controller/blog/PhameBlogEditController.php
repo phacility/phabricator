@@ -114,8 +114,7 @@ final class PhameBlogEditController
         ->setName('name')
         ->setValue($blog->getName())
         ->setID('blog-name')
-        ->setError($e_name)
-      )
+        ->setError($e_name))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setLabel('Description')
@@ -151,20 +150,17 @@ final class PhameBlogEditController
         ->setName('custom_domain')
         ->setValue($blog->getDomain())
         ->setCaption('Must include at least one dot (.), e.g. blog.example.com')
-        ->setError($e_custom_domain)
-      )
+        ->setError($e_custom_domain))
       ->appendChild(
         id(new AphrontFormSelectControl())
         ->setLabel('Skin')
         ->setName('skin')
         ->setValue($blog->getSkin())
-        ->setOptions($skins)
-      )
+        ->setOptions($skins))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->addCancelButton($cancel_uri)
-        ->setValue($submit_button)
-      );
+        ->setValue($submit_button));
 
     if ($errors) {
       $error_view = id(new AphrontErrorView())

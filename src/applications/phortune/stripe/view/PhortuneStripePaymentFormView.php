@@ -61,30 +61,24 @@ final class PhortuneStripePaymentFormView extends AphrontView {
                           'Discover, JCB, and Diners Club.',
                 'size' => 440,
               )
-            )
-          )
-        )
-      )
+            ))))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('Card Number')
         ->setDisableAutocomplete(true)
         ->setSigil('number-input')
-        ->setError($this->getCardNumberError())
-      )
+        ->setError($this->getCardNumberError()))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('CVC')
         ->setDisableAutocomplete(true)
         ->setSigil('cvc-input')
-        ->setError($this->getCardCVCError())
-      )
+        ->setError($this->getCardCVCError()))
       ->appendChild(
         id(new PhortuneMonthYearExpiryControl())
         ->setLabel('Expiration')
         ->setUser($this->getUser())
-        ->setError($this->getCardExpirationError())
-      )
+        ->setError($this->getCardExpirationError()))
       ->appendChild(
         javelin_tag(
           'input',
@@ -92,9 +86,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
             'hidden' => true,
             'name'   => 'stripeToken',
             'sigil'  => 'stripe-token-input',
-          )
-        )
-      )
+          )))
       ->appendChild(
         javelin_tag(
           'input',
@@ -102,9 +94,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
             'hidden' => true,
             'name'   => 'cardErrors',
             'sigil'  => 'card-errors-input'
-          )
-        )
-      )
+          )))
       ->appendChild(
         phutil_tag(
           'input',
@@ -112,21 +102,17 @@ final class PhortuneStripePaymentFormView extends AphrontView {
             'hidden' => true,
             'name'   => 'stripeKey',
             'value'  => $this->getStripeKey(),
-          )
-        )
-      )
+          )))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue('Submit Payment')
-      );
+        ->setValue('Submit Payment'));
 
     Javelin::initBehavior(
       'stripe-payment-form',
       array(
         'stripePublishKey' => $this->getStripeKey(),
         'root'             => $form_id,
-      )
-    );
+      ));
 
     return $form->render();
   }

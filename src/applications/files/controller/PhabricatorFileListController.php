@@ -89,12 +89,10 @@ final class PhabricatorFileListController extends PhabricatorFileController {
       $id = $file->getID();
       $phid = $file->getPHID();
       $name = $file->getName();
-
       $file_name = "F{$id} {$name}";
       $file_uri = $this->getApplicationURI("/info/{$phid}/");
 
       $date_created = phabricator_date($file->getDateCreated(), $user);
-
       $author_phid = $file->getAuthorPHID();
       if ($author_phid) {
         $author_link = $this->getHandle($author_phid)->renderLink();
@@ -109,6 +107,11 @@ final class PhabricatorFileListController extends PhabricatorFileController {
         ->setHref($file_uri)
         ->addAttribute($uploaded)
         ->addIcon('none', phabricator_format_bytes($file->getByteSize()));
+
+      $ttl = $file->getTTL();
+      if ($ttl !== null) {
+        $item->addIcon('blame', pht('Temporary'));
+      }
 
       if (isset($highlighted_ids[$id])) {
         $item->setEffect('highlighted');

@@ -50,8 +50,7 @@ final class PonderQuestionSummaryView extends AphrontView {
           "href" => '/Q' . $question->getID(),
         ),
           'Q' . $question->getID() .
-          ' ' . $question->getTitle()
-      ));
+          ' ' . $question->getTitle()));
 
     $rhs = hsprintf(
       '<div class="ponder-metadata">'.

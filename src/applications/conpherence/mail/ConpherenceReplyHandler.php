@@ -49,8 +49,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
       $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
       $file_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $conpherence->getPHID(),
-        $edge_type
-      );
+        $edge_type);
       $conpherence->attachFilePHIDs($file_phids);
       $participants = id(new ConpherenceParticipant())
         ->loadAllWhere('conpherencePHID = %s', $conpherence->getPHID());
@@ -75,8 +74,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     $body = $this->enhanceBodyWithAttachments(
       $body,
       $file_phids,
-      '{F%d}'
-    );
+      '{F%d}');
 
     $xactions = array();
     if ($this->getMailAddedParticipantPHIDs()) {
@@ -89,9 +87,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
       $xactions,
       $editor->generateTransactionsFromText(
         $conpherence,
-        $body
-      )
-    );
+        $body));
 
     $editor->applyTransactions($conpherence, $xactions);
 

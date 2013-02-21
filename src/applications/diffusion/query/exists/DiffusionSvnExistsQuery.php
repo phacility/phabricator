@@ -8,8 +8,7 @@ final class DiffusionSvnExistsQuery extends DiffusionExistsQuery {
 
     list($info) = $repository->execxRemoteCommand(
       'info %s',
-      $repository->getRemoteURI()
-    );
+      $repository->getRemoteURI());
 
     $matches = null;
     $exists  = false;

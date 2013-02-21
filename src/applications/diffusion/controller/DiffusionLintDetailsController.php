@@ -107,17 +107,15 @@ final class DiffusionLintDetailsController extends DiffusionController {
     $conn = $branch->establishConnection('r');
 
     $where = array(
-      qsprintf(
-        $conn,
-        'branchID = %d',
-        $branch->getID())
+      qsprintf($conn, 'branchID = %d', $branch->getID()),
     );
+
     if ($drequest->getPath() != '') {
-      $is_dir = (substr($drequest->getPath(), -1) == '/');
-      $where[] = qsprintf(
-        $conn,
-        'path '.($is_dir ? 'LIKE %>' : '= %s'),
-        '/'.$drequest->getPath());
+      $path = '/'.$drequest->getPath();
+      $is_dir = (substr($path, -1) == '/');
+      $where[] = ($is_dir
+        ? qsprintf($conn, 'path LIKE %>', $path)
+        : qsprintf($conn, 'path = %s', $path));
     }
 
     if ($drequest->getLint() != '') {

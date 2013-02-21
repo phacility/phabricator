@@ -170,16 +170,14 @@ final class AphrontCalendarMonthView extends AphrontView {
       $prev_link = phutil_tag(
         'a',
         array('href' => (string) $uri->setQueryParams($query)),
-        "\xE2\x86\x90"
-      );
+        "\xE2\x86\x90");
 
       list($next_year, $next_month) = $this->getNextYearAndMonth();
       $query = array('year' => $next_year, 'month' => $next_month);
       $next_link = phutil_tag(
         'a',
         array('href' => (string) $uri->setQueryParams($query)),
-        "\xE2\x86\x92"
-      );
+        "\xE2\x86\x92");
 
       $left_th = phutil_tag('th', array(), $prev_link);
       $right_th = phutil_tag('th', array(), $next_link);

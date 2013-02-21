@@ -903,6 +903,9 @@ final class DifferentialRevisionQuery {
     foreach ($revisions as $revision) {
       $needs_review = ($revision->getStatus() == $status_review);
       $filter_is_author = in_array($revision->getAuthorPHID(), $user_phids);
+      if (!$revision->getReviewers()) {
+        $needs_review = false;
+      }
 
       // If exactly one of "needs review" and "the user is the author" is
       // true, the user needs to act on it. Otherwise, they're waiting on

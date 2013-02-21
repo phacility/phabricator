@@ -36,8 +36,7 @@ final class PhabricatorApplicationUninstallController
       if ($selected->canUninstall()) {
         $dialog->setTitle('Confirmation')
                ->appendChild(
-                 'Install '. $selected->getName(). ' application ?'
-                 )
+                 'Install '. $selected->getName(). ' application ?')
                ->addSubmitButton('Install');
 
       } else {
@@ -48,15 +47,13 @@ final class PhabricatorApplicationUninstallController
       if ($selected->canUninstall()) {
         $dialog->setTitle('Confirmation')
                ->appendChild(
-                 'Really Uninstall '. $selected->getName(). ' application ?'
-                 )
+                 'Really Uninstall '. $selected->getName(). ' application ?')
                ->addSubmitButton('Uninstall');
       } else {
         $dialog->setTitle('Information')
                ->appendChild(
                  'This application cannot be uninstalled,
-                 because it is required for Phabricator to work.'
-                 );
+                 because it is required for Phabricator to work.');
       }
     }
     return id(new AphrontDialogResponse())->setDialog($dialog);

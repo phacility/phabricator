@@ -13,8 +13,23 @@ final class PholioImage extends PholioDAO
   protected $name = '';
   protected $description = '';
   protected $sequence;
+  protected $inlineComments;
 
   private $file;
+
+  public function attachInlineComments(array $inline_comments) {
+    assert_instances_of($inline_comments, 'PholioTransactionComment');
+    $this->inlineComments = $inline_comments;
+    return $this;
+  }
+
+  public function getInlineComments() {
+    if ($this->inlineComments === null) {
+      throw new Exception("Call attachImages() before getImages()!");
+    }
+    return $this->inlineComments;
+  }
+
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
 

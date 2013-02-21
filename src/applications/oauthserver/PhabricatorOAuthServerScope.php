@@ -29,8 +29,7 @@ final class PhabricatorOAuthServerScope {
         $name = $scope,
         $value = 1,
         $label = self::getCheckboxLabel($scope),
-        $checked = isset($current_scopes[$scope])
-      );
+        $checked = isset($current_scopes[$scope]));
     }
     $checkboxes->setLabel('Scope');
 

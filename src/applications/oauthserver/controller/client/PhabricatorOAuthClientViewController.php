@@ -33,8 +33,7 @@ extends PhabricatorOAuthClientBaseController {
       $message = 'No client found with id '.$phid.'.';
       return $this->buildStandardPageResponse(
         $this->buildErrorView($message),
-        array('title' => $title)
-      );
+        array('title' => $title));
     }
 
     $panel = new AphrontPanelView();
@@ -45,27 +44,23 @@ extends PhabricatorOAuthClientBaseController {
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel('Name')
-        ->setValue($client->getName())
-      )
+        ->setValue($client->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel('ID')
-        ->setValue($phid)
-      );
+        ->setValue($phid));
     if ($current_user->getPHID() == $client->getCreatorPHID()) {
       $form
         ->appendChild(
           id(new AphrontFormStaticControl())
           ->setLabel('Secret')
-          ->setValue($client->getSecret())
-        );
+          ->setValue($client->getSecret()));
     }
     $form
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel('Redirect URI')
-        ->setValue($client->getRedirectURI())
-      );
+        ->setValue($client->getRedirectURI()));
     $created = phabricator_datetime($client->getDateCreated(),
                                     $current_user);
     $updated = phabricator_datetime($client->getDateModified(),
@@ -74,13 +69,11 @@ extends PhabricatorOAuthClientBaseController {
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel('Created')
-        ->setValue($created)
-      )
+        ->setValue($created))
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel('Last Updated')
-        ->setValue($updated)
-      );
+        ->setValue($updated));
     $panel->appendChild($form);
     $admin_panel = null;
     if ($client->getCreatorPHID() == $current_user->getPHID()) {
@@ -100,8 +93,7 @@ extends PhabricatorOAuthClientBaseController {
         ->setAction('/oauthserver/test/')
         ->appendChild(
           id(new AphrontFormSubmitControl())
-          ->setValue('Create Scopeless Test Authorization')
-        );
+          ->setValue('Create Scopeless Test Authorization'));
       $admin_panel = id(new AphrontPanelView())
         ->setHeader('Admin Tools')
         ->appendChild($create_authorization_form);
@@ -112,7 +104,6 @@ extends PhabricatorOAuthClientBaseController {
             $panel,
             $admin_panel
     ),
-    array('title' => $title)
-  );
+    array('title' => $title));
   }
 }

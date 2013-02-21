@@ -38,8 +38,7 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
 
     $limit = nonempty(
       $request->getValue('limit'),
-      self::DEFAULT_LIMIT
-    );
+      self::DEFAULT_LIMIT);
 
     $history = DiffusionHistoryQuery::newFromDiffusionRequest($drequest)
     ->setLimit($limit)

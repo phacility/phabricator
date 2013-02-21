@@ -12,6 +12,7 @@ final class PholioMockQuery
 
   private $needCoverFiles;
   private $needImages;
+  private $needInlineComments;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -92,6 +93,11 @@ final class PholioMockQuery
     return $this;
   }
 
+  public function needInlineComments($need_inline_comments) {
+    $this->needInlineComments = $need_inline_comments;
+    return $this;
+  }
+
   public function loadImages(array $mocks) {
     assert_instances_of($mocks, 'PholioMock');
 
@@ -105,8 +111,19 @@ final class PholioMockQuery
       'phid IN (%Ls)',
       $file_phids), null, 'getPHID');
 
+    if ($this->needInlineComments) {
+      $all_inline_comments = id(new PholioTransactionComment())
+        ->loadAllWhere('imageid IN (%Ld)',
+          mpull($all_images, 'getID'));
+      $all_inline_comments = mgroup($all_inline_comments, 'getImageID');
+    }
+
     foreach ($all_images as $image) {
       $image->attachFile($all_files[$image->getFilePHID()]);
+      if ($this->needInlineComments) {
+        $inlines = idx($all_images, $image->getID(), array());
+        $image->attachInlineComments($inlines);
+      }
     }
 
     $image_groups = mgroup($all_images, 'getMockID');

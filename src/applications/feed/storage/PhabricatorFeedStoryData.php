@@ -28,7 +28,7 @@ final class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
       // We're on a 32-bit machine.
       if (function_exists('bcadd')) {
         // Try to use the 'bc' extension.
-        return bcdiv($this->chronologicalKey, bcpow(2,32));
+        return bcdiv($this->chronologicalKey, bcpow(2, 32));
       } else {
         // Do the math in MySQL. TODO: If we formalize a bc dependency, get
         // rid of this.

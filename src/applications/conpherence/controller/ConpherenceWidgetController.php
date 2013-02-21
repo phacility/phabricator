@@ -60,8 +60,7 @@ final class ConpherenceWidgetController extends
           'widgets-tasks' => 1,
           'widgets-calendar' => 1,
         )
-      )
-    );
+      ));
 
     $conpherence = $this->getConpherence();
 
@@ -82,8 +81,7 @@ final class ConpherenceWidgetController extends
             'id' => 'widgets-files-toggle',
             'class' => 'sprite-conpher conpher_files_off first-icon'
           ),
-          ''
-        ),
+          ''),
         javelin_tag(
           'a',
           array(
@@ -95,8 +93,7 @@ final class ConpherenceWidgetController extends
             'id' => 'widgets-tasks-toggle',
             'class' => 'sprite-conpher conpher_list_off conpher_list_on',
           ),
-          ''
-        ),
+          ''),
         javelin_tag(
           'a',
           array(
@@ -108,10 +105,8 @@ final class ConpherenceWidgetController extends
             'id' => 'widgets-calendar-toggle',
             'class' => 'sprite-conpher conpher_calendar_off',
           ),
-          ''
-        )
-      )
-    ).
+          '')
+      )).
     phutil_tag(
       'div',
       array(
@@ -119,16 +114,14 @@ final class ConpherenceWidgetController extends
         'id' => 'widgets-files',
         'style' => 'display: none;'
       ),
-      $this->renderFilesWidgetPaneContent()
-    ).
+      $this->renderFilesWidgetPaneContent()).
     phutil_tag(
       'div',
       array(
         'class' => 'widgets-body',
         'id' => 'widgets-tasks',
       ),
-      $this->renderTaskWidgetPaneContent()
-    ).
+      $this->renderTaskWidgetPaneContent()).
     phutil_tag(
       'div',
       array(
@@ -136,8 +129,7 @@ final class ConpherenceWidgetController extends
         'id' => 'widgets-calendar',
         'style' => 'display: none;'
       ),
-      $this->renderCalendarWidgetPaneContent()
-    );
+      $this->renderCalendarWidgetPaneContent());
 
     return array('widgets' => $widgets);
   }
@@ -156,8 +148,7 @@ final class ConpherenceWidgetController extends
           array(
             'src' => $thumb
           ),
-          ''
-        ),
+          ''),
         $file->getName()
       );
     }
@@ -193,8 +184,7 @@ final class ConpherenceWidgetController extends
             array(
               'href' => '/T'.$task->getID()
             ),
-            $task->getTitle()
-          )
+            $task->getTitle())
         );
       }
       $table = id(new AphrontTableView($data))
@@ -244,12 +234,10 @@ final class ConpherenceWidgetController extends
           $epoch_range = phabricator_format_local_time(
             $status->getDateFrom(),
             $user,
-            $time_str
-          ) . ' - ' . phabricator_format_local_time(
+            $time_str) . ' - ' . phabricator_format_local_time(
             $status->getDateTo(),
             $user,
-            $time_str
-          );
+            $time_str);
 
           $content[] = phutil_tag(
             'div',
@@ -262,31 +250,26 @@ final class ConpherenceWidgetController extends
                 array(
                   'class' => 'epoch-range'
                 ),
-              $epoch_range
-              ),
+              $epoch_range),
               phutil_tag(
                 'div',
                 array(
                   'class' => 'icon',
                 ),
-                ''
-              ),
+                ''),
               phutil_tag(
                 'div',
                 array(
                   'class' => 'description'
                 ),
-                $status->getTerseSummary($user)
-              ),
+                $status->getTerseSummary($user)),
               phutil_tag(
                 'div',
                 array(
                   'class' => 'participant'
                 ),
-                $handles[$status->getUserPHID()]->getName()
-              )
-            )
-          );
+                $handles[$status->getUserPHID()]->getName())
+            ));
         }
       }
     }

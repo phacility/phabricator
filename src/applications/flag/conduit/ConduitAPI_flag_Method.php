@@ -7,8 +7,7 @@ abstract class ConduitAPI_flag_Method extends ConduitAPIMethod {
 
   protected function attachHandleToFlag($flag) {
     $flag->attachHandle(
-      PhabricatorObjectHandleData::loadOneHandle($flag->getObjectPHID())
-    );
+      PhabricatorObjectHandleData::loadOneHandle($flag->getObjectPHID()));
   }
 
   protected function buildFlagInfoDictionary($flag) {

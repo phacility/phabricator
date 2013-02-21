@@ -50,8 +50,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   private function loadExcludeMailRecipientPHIDs() {
     $addresses = array_merge(
       $this->getToAddresses(),
-      $this->getCCAddresses()
-    );
+      $this->getCCAddresses());
 
     return $this->loadPHIDsFromAddresses($addresses);
   }
@@ -173,8 +172,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     if ($message_id_hash) {
       $messages = $this->loadAllWhere(
         'messageIDHash = %s',
-        $message_id_hash
-      );
+        $message_id_hash);
       $messages_count = count($messages);
       if ($messages_count > 1) {
         $first_message = reset($messages);
@@ -183,8 +181,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
             'Ignoring email with message id hash "%s" that has been seen %d '.
             'times, including this message.',
             $message_id_hash,
-            $messages_count
-          );
+            $messages_count);
           return $this->setMessage($message)->save();
         }
       }

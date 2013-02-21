@@ -93,8 +93,7 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
   protected function renderHeader() {
     return $this->renderTemplate(
       'header.php',
-      array()
-    );
+      array());
   }
 
   protected function renderFooter() {

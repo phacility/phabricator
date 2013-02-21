@@ -107,8 +107,7 @@ final class PonderQuestionAskController extends PonderController {
       array(
         'device' => true,
         'title'  => 'Ask a Question',
-      )
-    );
+      ));
   }
 
 }

@@ -14,7 +14,7 @@ final class DiffusionChangeController extends DiffusionController {
       // TODO: Refine this.
       return new Aphront404Response();
     }
-    
+
     $repository = $drequest->getRepository();
     $callsign = $repository->getCallsign();
     $commit = $drequest->getRawCommit();

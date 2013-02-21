@@ -249,8 +249,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     if (!empty($phid_groups)) {
       throw id(new ConduitException('ERR-INVALID-PARAMETER'))
         ->setErrorDescription(
-          'One or more PHIDs were invalid for '.$field.'.'
-      );
+          'One or more PHIDs were invalid for '.$field.'.');
     }
 
     return true;

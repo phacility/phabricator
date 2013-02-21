@@ -193,8 +193,7 @@ final class PhabricatorOAuthServer {
       // check if the scope includes "offline_access", which makes the
       // token valid despite being expired
       if (isset(
-        $token_scope[PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS]
-      )) {
+        $token_scope[PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS])) {
         $valid = true;
       }
     }
@@ -207,15 +206,19 @@ final class PhabricatorOAuthServer {
    * for details on what makes a given redirect URI "valid".
    */
   public function validateRedirectURI(PhutilURI $uri) {
-    if (PhabricatorEnv::isValidRemoteWebResource($uri)) {
-      if ($uri->getFragment()) {
-        return false;
-      }
-      if ($uri->getDomain()) {
-        return true;
-      }
+    if (!PhabricatorEnv::isValidRemoteWebResource($uri)) {
+      return false;
     }
-    return false;
+
+    if ($uri->getFragment()) {
+      return false;
+    }
+
+    if (!$uri->getDomain()) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -223,18 +226,45 @@ final class PhabricatorOAuthServer {
    * its own right. Further, it must have the same domain and (at least) the
    * same query parameters as the primary URI.
    */
-  public function validateSecondaryRedirectURI(PhutilURI $secondary_uri,
-                                               PhutilURI $primary_uri) {
-    $valid = $this->validateRedirectURI($secondary_uri);
-    if ($valid) {
-      $valid_domain    = ($secondary_uri->getDomain() ==
-                          $primary_uri->getDomain());
-      $good_params     = $primary_uri->getQueryParams();
-      $test_params     = $secondary_uri->getQueryParams();
-      $missing_params  = array_diff_key($good_params, $test_params);
-      $valid           = $valid_domain && empty($missing_params);
+  public function validateSecondaryRedirectURI(
+    PhutilURI $secondary_uri,
+    PhutilURI $primary_uri) {
+
+    // The secondary URI must be valid.
+    if (!$this->validateRedirectURI($secondary_uri)) {
+      return false;
     }
-    return $valid;
+
+    // Both URIs must point at the same domain.
+    if ($secondary_uri->getDomain() != $primary_uri->getDomain()) {
+      return false;
+    }
+
+    // Any query parameters present in the first URI must be exactly present
+    // in the second URI.
+    $need_params = $primary_uri->getQueryParams();
+    $have_params = $secondary_uri->getQueryParams();
+
+    foreach ($need_params as $key => $value) {
+      if (!array_key_exists($key, $have_params)) {
+        return false;
+      }
+      if ((string)$have_params[$key] != (string)$value) {
+        return false;
+      }
+    }
+
+    // If the first URI is HTTPS, the second URI must also be HTTPS. This
+    // defuses an attack where a third party with control over the network
+    // tricks you into using HTTP to authenticate over a link which is supposed
+    // to be HTTPS only and sniffs all your token cookies.
+    if (strtolower($primary_uri->getProtocol()) == 'https') {
+      if (strtolower($secondary_uri->getProtocol()) != 'https') {
+        return false;
+      }
+    }
+
+    return true;
   }
 
 }

@@ -158,8 +158,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         array(
           'href' => $this->getApplicationURI('?parent='.$paste->getID())
         ),
-        pht('Fork')
-      );
+        pht('Fork'));
       $form
         ->appendChild(
           id(new AphrontFormMarkupControl())

@@ -18,8 +18,7 @@ final class PhabricatorOAuthServerTestCase
       $this->assertEqual(
         $expected,
         $result,
-        "Validation of redirect URI '{$input}'"
-      );
+        "Validation of redirect URI '{$input}'");
     }
   }
 
@@ -41,8 +40,7 @@ final class PhabricatorOAuthServerTestCase
         $expected,
         $server->validateSecondaryRedirectURI($uri, $primary_uri),
         "Validation of redirect URI '{$input}' ".
-        "relative to '{$primary_uri}'"
-      );
+        "relative to '{$primary_uri}'");
     }
 
     $primary_uri = new PhutilURI('http://www.google.com/?auth');
@@ -60,8 +58,37 @@ final class PhabricatorOAuthServerTestCase
         $expected,
         $server->validateSecondaryRedirectURI($uri, $primary_uri),
         "Validation of secondary redirect URI '{$input}' ".
-        "relative to '{$primary_uri}'"
-      );
+        "relative to '{$primary_uri}'");
+    }
+
+    $primary_uri = new PhutilURI('https://secure.example.com/');
+    $tests = array(
+      'https://secure.example.com/' => true,
+      'http://secure.example.com/'  => false,
+    );
+    foreach ($tests as $input => $expected) {
+      $uri = new PhutilURI($input);
+      $this->assertEqual(
+        $expected,
+        $server->validateSecondaryRedirectURI($uri, $primary_uri),
+        "Validation (https): {$input}");
+    }
+
+    $primary_uri = new PhutilURI('http://example.com/?z=2&y=3');
+    $tests = array(
+      'http://example.com?z=2&y=3'      => true,
+      'http://example.com?y=3&z=2'      => true,
+      'http://example.com?y=3&z=2&x=1'  => true,
+      'http://example.com?y=2&z=3'      => false,
+      'http://example.com?y&x'          => false,
+      'http://example.com?z=2&x=3'      => false,
+    );
+    foreach ($tests as $input => $expected) {
+      $uri = new PhutilURI($input);
+      $this->assertEqual(
+        $expected,
+        $server->validateSecondaryRedirectURI($uri, $primary_uri),
+        "Validation (params): {$input}");
     }
 
   }

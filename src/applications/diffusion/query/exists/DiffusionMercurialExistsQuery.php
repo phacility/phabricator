@@ -8,8 +8,7 @@ final class DiffusionMercurialExistsQuery extends DiffusionExistsQuery {
 
     list($err, $stdout) = $repository->execLocalCommand(
       'id --rev %s',
-      $request->getCommit()
-    );
+      $request->getCommit());
 
     return !$err;
 

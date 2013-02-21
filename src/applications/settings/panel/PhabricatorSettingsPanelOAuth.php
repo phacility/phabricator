@@ -110,24 +110,20 @@ final class PhabricatorSettingsPanelOAuth
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' ID')
-            ->setValue($oauth_info->getOAuthUID())
-          )
+            ->setValue($oauth_info->getOAuthUID()))
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' Name')
-            ->setValue($oauth_info->getAccountName())
-          )
+            ->setValue($oauth_info->getAccountName()))
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' URI')
-            ->setValue($oauth_info->getAccountURI())
-          );
+            ->setValue($oauth_info->getAccountURI()));
 
       if (!$expires || $expires > time()) {
         $form->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Refresh Profile Image from '.$provider_name)
-          );
+            ->setValue('Refresh Profile Image from '.$provider_name));
       }
 
       if (!$provider->isProviderLinkPermanent()) {
@@ -202,8 +198,7 @@ final class PhabricatorSettingsPanelOAuth
         $token_form
           ->appendChild(
             id(new AphrontFormSubmitControl())
-              ->setValue('Refresh '.$provider_name.' Token')
-            );
+              ->setValue('Refresh '.$provider_name.' Token'));
       }
 
       $forms['Account Token Information'] = $token_form;

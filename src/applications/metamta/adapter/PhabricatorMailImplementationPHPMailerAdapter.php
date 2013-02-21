@@ -76,8 +76,7 @@ final class PhabricatorMailImplementationPHPMailerAdapter
       $data,
       $filename,
       'base64',
-      $mimetype
-    );
+      $mimetype);
     return $this;
   }
 

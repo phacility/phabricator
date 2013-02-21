@@ -34,12 +34,13 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
         }
         break;
       case PhabricatorProjectTransactionType::TYPE_STATUS:
+        $old_name = PhabricatorProjectStatus::getNameForStatus($old);
+        $new_name = PhabricatorProjectStatus::getNameForStatus($new);
         $action = hsprintf(
           'changed project %s status from %s to %s.',
           $this->linkTo($proj_phid),
-          $this->renderString(PhabricatorProjectStatus::getNameForStatus($old)),
-          $this->renderString(PhabricatorProjectStatus::getNameForStatus($new))
-        );
+          $this->renderString($old_name),
+          $this->renderString($new_name));
         break;
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
         $add = array_diff($new, $old);

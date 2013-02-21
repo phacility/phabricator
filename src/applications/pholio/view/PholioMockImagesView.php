@@ -6,6 +6,7 @@ final class PholioMockImagesView extends AphrontView {
 
   public function setMock(PholioMock $mock) {
     $this->mock = $mock;
+    return $this;
   }
 
   public function render() {
@@ -44,8 +45,7 @@ final class PholioMockImagesView extends AphrontView {
         'sigil' => 'mock-wrapper',
         'class' => 'pholio-mock-wrapper'
       ),
-      $main_image_tag
-    );
+      $main_image_tag);
 
 
     $inline_comments_holder = javelin_tag(

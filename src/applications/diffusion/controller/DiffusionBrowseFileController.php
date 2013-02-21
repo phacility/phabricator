@@ -779,6 +779,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $data,
       array(
         'name' => basename($path),
+        'ttl' => time() + 60 * 60 * 24,
       ));
   }
 

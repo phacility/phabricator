@@ -66,33 +66,26 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
             array(
               'href' => $client->getViewURI(),
             ),
-            $client->getName()))
-      )
+            $client->getName())))
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel('Created')
-        ->setValue($created)
-      )
+        ->setValue($created))
       ->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel('Last Updated')
-        ->setValue($updated)
-      )
+        ->setValue($updated))
       ->appendChild(
         PhabricatorOAuthServerScope::getCheckboxControl(
-          $authorization->getScope()
-        )
-      )
+          $authorization->getScope()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue('Save OAuth Client Authorization')
-        ->addCancelButton('/oauthserver/clientauthorization/')
-      );
+        ->addCancelButton('/oauthserver/clientauthorization/'));
 
     $panel->appendChild($form);
     return $this->buildStandardPageResponse(
       $panel,
-      array('title' => $title)
-    );
+      array('title' => $title));
   }
 }

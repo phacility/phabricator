@@ -157,16 +157,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
               'p',
               array(),
               pht('All specified reviewers are disabled and this revision '.
-                  'needs review. You may want to add some new reviewers.')
-            ));
+                  'needs review. You may want to add some new reviewers.')));
         } else {
           $reviewer_warning->appendChild(
             phutil_tag(
               'p',
               array(),
               pht('This revision has no specified reviewers and needs '.
-                  'review. You may want to add some reviewers.')
-            ));
+                  'review. You may want to add some reviewers.')));
         }
       }
     }
@@ -228,7 +226,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
-    $revision_detail->setDiff(reset($diffs));
+    $revision_detail->setDiff(end($diffs));
     $revision_detail->setAuxiliaryFields($aux_fields);
 
     $actions = $this->getRevisionActions($revision);

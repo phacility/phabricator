@@ -149,14 +149,12 @@ final class ManiphestTaskListController extends ManiphestController {
         id(new AphrontFormTextControl())
           ->setName('set_search')
           ->setLabel('Search')
-          ->setValue($search_text)
-      );
+          ->setValue($search_text));
       $form->appendChild(
         id(new AphrontFormTextControl())
           ->setName('set_tasks')
           ->setLabel('Task IDs')
-          ->setValue(join(',', $task_ids))
-      );
+          ->setValue(join(',', $task_ids)));
 
       $tokens = array();
       foreach ($owner_phids as $phid) {

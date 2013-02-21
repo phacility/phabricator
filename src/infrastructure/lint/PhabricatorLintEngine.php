@@ -1,6 +1,9 @@
 <?php
 
-final class PhabricatorLintEngine extends PhutilLintEngine {
+/**
+ * @concrete-extensible
+ */
+class PhabricatorLintEngine extends PhutilLintEngine {
 
   public function buildLinters() {
     $linters = parent::buildLinters();

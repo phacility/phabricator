@@ -40,8 +40,7 @@ final class PhabricatorSearchManagementIndexWorkflow
             'name'      => 'objects',
             'wildcard'  => true,
           ),
-        )
-      );
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {

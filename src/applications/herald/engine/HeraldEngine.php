@@ -52,8 +52,7 @@ final class HeraldEngine {
             ->setRuleOwner($rule->getAuthorPHID())
             ->setReason(
               "This rule is only supposed to be repeated a single time, ".
-              "and it has already been applied."
-            );
+              "and it has already been applied.");
           $this->transcript->addRuleTranscript($xscript);
           $rule_matches = false;
         } else {

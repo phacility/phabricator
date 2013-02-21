@@ -54,8 +54,7 @@ final class PhabricatorConfigIssueViewController
       array(
         'title' => $title,
         'device' => true,
-      )
-    );
+      ));
   }
 
   private function renderIssue(PhabricatorSetupIssue $issue) {

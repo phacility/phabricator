@@ -107,8 +107,11 @@ final class PhabricatorBot extends PhabricatorDaemon {
 
   private function routeMessage(PhabricatorBotMessage $message) {
     $ignore = $this->getConfig('ignore');
-    if ($ignore && in_array($message->getSender(), $ignore)) {
-      return;
+    if ($ignore) {
+      $sender = $message->getSender();
+      if ($sender && in_array($sender->getName(), $ignore)) {
+        return;
+      }
     }
 
     foreach ($this->handlers as $handler) {

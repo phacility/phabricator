@@ -624,7 +624,11 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $links[] = $this->handles[$phid]->renderLink();
       }
     }
-    return phutil_implode_html(', ', $links);
+    if ($this->forEmail) {
+      return implode(', ', $links);
+    } else {
+      return phutil_implode_html(', ', $links);
+    }
   }
 
   private function renderString($string) {

@@ -59,7 +59,7 @@ final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
           $phids[] = $uid;
           break;
       }
-      array_push($phids,$uid);
+      array_push($phids, $uid);
     }
 
     $infs = $this->getConduit()->callMethodSynchronous(

@@ -23,8 +23,7 @@ final class DifferentialRevisionStatsController extends DifferentialController {
       $phid,
       $phid,
       $this->filter,
-      $phid
-    );
+      $phid);
     return $table->loadAllFromArray($rows);
   }
 
@@ -46,8 +45,7 @@ final class DifferentialRevisionStatsController extends DifferentialController {
       $phid,
       $phid,
       $this->filter,
-      $phid
-    );
+      $phid);
 
     return $table->loadAllFromArray($rows);
   }
@@ -60,8 +58,7 @@ final class DifferentialRevisionStatsController extends DifferentialController {
     $diff_teml = new DifferentialDiff();
     $diffs = $diff_teml->loadAllWhere(
       'revisionID in (%Ld)',
-      array_keys($revisions)
-    );
+      array_keys($revisions));
     return $diffs;
   }
 

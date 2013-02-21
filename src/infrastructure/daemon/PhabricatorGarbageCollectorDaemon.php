@@ -17,6 +17,7 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       $n_tasks  = $this->collectArchivedTasks();
       $n_cache_ttl = $this->collectGeneralCacheTTL();
       $n_cache  = $this->collectGeneralCaches();
+      $n_files  = $this->collectExpiredFiles();
 
       $collected = array(
         'Herald Transcript'           => $n_herald,
@@ -26,6 +27,7 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
         'Archived Tasks'              => $n_tasks,
         'General Cache TTL'           => $n_cache_ttl,
         'General Cache Entries'       => $n_cache,
+        'Temporary Files'             => $n_files,
       );
       $collected = array_filter($collected);
 
@@ -206,5 +208,15 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
     return $conn_w->getAffectedRows();
   }
 
+  private function collectExpiredFiles() {
+    $files = id(new PhabricatorFile())->loadAllWhere('ttl < %d LIMIT 100',
+      time());
+
+    foreach ($files as $file) {
+      $file->delete();
+    }
+
+    return count($files);
+  }
 
 }

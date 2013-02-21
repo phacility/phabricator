@@ -51,8 +51,7 @@ final class PonderCommentEditor extends PhabricatorEditor {
 
     $content = $comment->getContent();
     $at_mention_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      array($content)
-    );
+      array($content));
     $subeditor->subscribeImplicit($at_mention_phids);
     $subeditor->save();
 
@@ -86,8 +85,7 @@ final class PonderCommentEditor extends PhabricatorEditor {
       $other_subs =
         array_diff(
           array_intersect($thread, $subscribers),
-          $at_mention_phids
-        );
+          $at_mention_phids);
 
       // 'Comment' emails for subscribers who are in the same comment thread,
       // including the author of the parent question and/or answer, excluding

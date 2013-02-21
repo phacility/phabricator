@@ -63,8 +63,7 @@ final class ConpherenceViewController extends
     $conpherence = $this->getConpherence();
     $display_data = $conpherence->getDisplayData(
       $user,
-      ConpherenceImageData::SIZE_HEAD
-    );
+      ConpherenceImageData::SIZE_HEAD);
     $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
     $class_mod = $display_data['image_class'];
 
@@ -74,8 +73,7 @@ final class ConpherenceViewController extends
       array(
         'class' => 'upload-photo'
       ),
-      pht('Drop photo here to change this Conpherence photo.')
-    ).
+      pht('Drop photo here to change this Conpherence photo.')).
     javelin_tag(
       'a',
       array(
@@ -83,30 +81,26 @@ final class ConpherenceViewController extends
         'href' => $edit_href,
         'sigil' => 'workflow edit-action',
       ),
-      ''
-    ).
+      '').
     phutil_tag(
       'div',
       array(
         'class' => $class_mod.'header-image',
         'style' => 'background-image: url('.$display_data['image'].');'
       ),
-      ''
-    ).
+      '').
     phutil_tag(
       'div',
       array(
         'class' => $class_mod.'title',
       ),
-      $display_data['title']
-    ).
+      $display_data['title']).
     phutil_tag(
       'div',
       array(
         'class' => $class_mod.'subtitle',
       ),
-      $display_data['subtitle']
-    );
+      $display_data['subtitle']);
 
     return array('header' => $header);
   }
@@ -154,12 +148,10 @@ final class ConpherenceViewController extends
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setUser($user)
-        ->setName('text')
-      )
+        ->setName('text'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue(pht('Pontificate'))
-      )->render();
+        ->setValue(pht('Pontificate')))->render();
 
     $scrollbutton = javelin_tag(
       'a',

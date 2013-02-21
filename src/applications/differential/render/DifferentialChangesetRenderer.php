@@ -259,14 +259,12 @@ abstract class DifferentialChangesetRenderer {
   abstract public function renderTextChange(
     $range_start,
     $range_len,
-    $rows
-  );
+    $rows);
   abstract public function renderFileChange(
     $old = null,
     $new = null,
     $id = 0,
-    $vs = 0
-  );
+    $vs = 0);
 
   abstract protected function renderChangeTypeHeader($force);
 

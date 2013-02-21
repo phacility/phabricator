@@ -12,8 +12,7 @@ final class DiffusionGitTagListQuery extends DiffusionTagListQuery {
       'for-each-ref %C --sort=-creatordate --format=%s refs/tags',
       $count ? '--count='.(int)$count : null,
       '%(objectname) %(objecttype) %(refname) %(*objectname) %(*objecttype) '.
-        '%(subject)%01%(creator)'
-    );
+        '%(subject)%01%(creator)');
 
     $stdout = trim($stdout);
     if (!strlen($stdout)) {

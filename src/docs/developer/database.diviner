@@ -145,6 +145,7 @@ There are three simple steps to update the schema:
 
 # Create a `.sql` file in `resources/sql/patches/`. This file should:
  - Contain the approprate MySQL commands to update the schema.
+ - Be named as `YYYYMMDD.patchname.ext`. For example, `20130217.example.sql`.
  - Use `${NAMESPACE}` rather than `phabricator` for database names.
  - Use `COLLATE utf8_bin` for any columns that are to be used as identifiers,
 such as PHID columns. Otherwise, use `COLLATE utf8_general_ci`.

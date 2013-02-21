@@ -126,4 +126,23 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     $this->assertEqual($data, $second_file->loadFileData());
   }
 
+  public function testReadWriteTtlFiles() {
+    $engine = new PhabricatorTestStorageEngine();
+
+    $data = Filesystem::readRandomCharacters(64);
+
+    $ttl = (time() + 60 * 60 * 24);
+
+    $params = array(
+      'name' => 'test.dat',
+      'ttl'  => ($ttl),
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    $file = PhabricatorFile::newFromFileData($data, $params);
+    $this->assertEqual($ttl, $file->getTTL());
+  }
+
 }
