@@ -21,7 +21,7 @@ final class PholioMockImagesView extends AphrontView {
       'mockID' => $this->mock->getID());
     Javelin::initBehavior('pholio-mock-view', $config);
 
-    $mockview = "";
+    $mockview = '';
 
     $main_image = head($this->mock->getImages());
 
@@ -55,7 +55,7 @@ final class PholioMockImagesView extends AphrontView {
         'sigil' => 'mock-inline-comments',
         'class' => 'pholio-mock-inline-comments'
       ),
-      "");
+      '');
 
     $mockview[] = phutil_tag(
       'div',
@@ -70,18 +70,31 @@ final class PholioMockImagesView extends AphrontView {
       foreach ($this->mock->getImages() as $image) {
         $thumbfile = $image->getFile();
 
-        $tag = javelin_tag(
+        $dimensions = PhabricatorImageTransformer::getPreviewDimensions(
+          $thumbfile,
+          140);
+
+        $tag = phutil_tag(
           'img',
           array(
-            'src' => $thumbfile->getThumb160x120URI(),
-            'sigil' => 'mock-thumbnail',
+            'width' => $dimensions['sdx'],
+            'height' => $dimensions['sdy'],
+            'src' => $thumbfile->getPreview140URI(),
             'class' => 'pholio-mock-carousel-thumbnail',
+            'style' => 'top: '.floor((140 - $dimensions['sdy'] ) / 2).'px',
+        ));
+
+        $thumbnails[] = javelin_tag(
+          'div',
+          array(
+            'sigil' => 'mock-thumbnail',
+            'class' => 'pholio-mock-carousel-thumb-item',
             'meta' => array(
               'fullSizeURI' => $thumbfile->getBestURI(),
               'imageID' => $image->getID()
             ),
-        ));
-        $thumbnails[] = $tag;
+          ),
+          $tag);
       }
 
       $mockview[] = phutil_tag(

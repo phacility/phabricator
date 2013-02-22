@@ -8,14 +8,32 @@
 }
 
 .pholio-mock-carousel {
-  background-color: #282828;
+  background-color: #202020;
   text-align: center;
+  border-top: 1px solid #101010;
+}
+
+.pholio-mock-carousel-thumb-item {
+  display: inline-block;
+  cursor: pointer;
+  width: 140px;
+  height: 140px;
+  padding: 5px;
+  margin: 3px;
+  background: #282828;
+  vertical-align: middle;
+  border: 1px solid #383838;
+  position: relative;
+}
+
+.device-desktop .pholio-mock-carousel-thumb-item:hover {
+  background: #383838;
+  border-color: #686868;
 }
 
 .pholio-mock-carousel-thumbnail {
-  margin-right: 5px;
-  display: inline-block;
-  cursor: pointer;
+  margin: auto;
+  position: relative;
 }
 
 .pholio-mock-image {

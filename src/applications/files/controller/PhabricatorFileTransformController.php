@@ -52,6 +52,9 @@ final class PhabricatorFileTransformController
       case 'thumb-220x165':
         $xformed_file = $this->executeThumbTransform($file, 220, 165);
         break;
+      case 'preview-140':
+        $xformed_file = $this->executePreviewTransform($file, 140);
+        break;
       case 'preview-220':
         $xformed_file = $this->executePreviewTransform($file, 220);
         break;
