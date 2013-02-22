@@ -133,8 +133,10 @@ EXAMPLE;
         ->setValue($pref_monospaced_textareas_value)
         ->addButton('enabled', 'Enabled',
           'Show all textareas using the monospaced font defined above.')
-        ->addButton('disabled', 'Disabled', null))
-      ->appendChild(
+        ->addButton('disabled', 'Disabled', null));
+
+    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
+      $form->appendChild(
         id(new AphrontFormRadioButtonControl())
         ->setLabel('Dark Console')
         ->setName($pref_dark_console)
@@ -142,11 +144,12 @@ EXAMPLE;
             $pref_dark_console_value : 0)
         ->addButton(1, 'Enabled',
           'Enabling and using the built-in debugging console.')
-        ->addButton(0, 'Disabled', null))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Save Preferences'));
+        ->addButton(0, 'Disabled', null));
+    }
 
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue('Save Preferences'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Display Preferences');
