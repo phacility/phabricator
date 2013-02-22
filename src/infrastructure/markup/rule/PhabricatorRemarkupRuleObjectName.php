@@ -15,7 +15,7 @@ abstract class PhabricatorRemarkupRuleObjectName
   public function apply($text) {
     $prefix = $this->getObjectNamePrefix();
     $id = $this->getObjectIDPattern();
-    return $this->replaceHTML(
+    return preg_replace_callback(
       "@\b({$prefix})({$id})(?:#([-\w\d]+))?\b@",
       array($this, 'markupObjectNameLink'),
       $text);

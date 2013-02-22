@@ -21,7 +21,7 @@ final class PhabricatorRemarkupRuleMention
   const REGEX = '/(?<!\w)@([a-zA-Z0-9._-]*[a-zA-Z0-9_-])/';
 
   public function apply($text) {
-    return $this->replaceHTML(
+    return preg_replace_callback(
       self::REGEX,
       array($this, 'markupMention'),
       $text);

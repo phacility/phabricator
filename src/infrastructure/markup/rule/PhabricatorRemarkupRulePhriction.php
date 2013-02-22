@@ -7,7 +7,7 @@ final class PhabricatorRemarkupRulePhriction
   extends PhutilRemarkupRule {
 
   public function apply($text) {
-    return $this->replaceHTML(
+    return preg_replace_callback(
       '@\B\\[\\[([^|\\]]+)(?:\\|([^\\]]+))?\\]\\]\B@U',
       array($this, 'markupDocumentLink'),
       $text);

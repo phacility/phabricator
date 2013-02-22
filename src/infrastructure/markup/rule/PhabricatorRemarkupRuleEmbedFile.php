@@ -10,7 +10,7 @@ final class PhabricatorRemarkupRuleEmbedFile
   const KEY_EMBED_FILE_PHIDS = 'phabricator.embedded-file-phids';
 
   public function apply($text) {
-    return $this->replaceHTML(
+    return preg_replace_callback(
       "@{F(\d+)([^}]+?)?}@",
       array($this, 'markupEmbedFile'),
       $text);

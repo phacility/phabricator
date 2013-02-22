@@ -13,7 +13,7 @@ abstract class PhabricatorRemarkupRuleObjectHandle
 
   public function apply($text) {
     $prefix = $this->getObjectNamePrefix();
-    return $this->replaceHTML(
+    return preg_replace_callback(
       "@\B{{$prefix}(\d+)}\B@",
       array($this, 'markupObjectHandle'),
       $text);
