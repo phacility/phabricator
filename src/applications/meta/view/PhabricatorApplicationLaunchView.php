@@ -72,8 +72,24 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       $warning = PhabricatorApplicationStatusView::TYPE_WARNING;
       if (!empty($counts[$attention]) || !empty($counts[$warning])) {
         $count = idx($counts, $attention, 0);
+        $count1 = $count2 = '';
+        if ($count > 0) {
+          $count1 = phutil_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-attention-count',
+          ),
+          $count);
+        }
+
+
         if (!empty($counts[$warning])) {
-          $count .= '/'.$counts[$warning];
+          $count2 = phutil_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-warning-count',
+          ),
+          $counts[$warning]);
         }
 
         Javelin::initBehavior('phabricator-tooltips');
@@ -87,7 +103,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
             ),
             'class' => 'phabricator-application-launch-attention',
           ),
-          $count);
+          array($count1, $count2));
       }
 
       $classes = array();
