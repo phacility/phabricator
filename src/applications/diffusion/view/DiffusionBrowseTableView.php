@@ -18,12 +18,11 @@ final class DiffusionBrowseTableView extends DiffusionView {
   }
 
   public function renderLastModifiedColumns(
+    DiffusionRequest $drequest,
     array $handles,
     PhabricatorRepositoryCommit $commit = null,
     PhabricatorRepositoryCommitData $data = null) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
-
-    $drequest = $this->getDiffusionRequest();
 
     if ($commit) {
       $epoch = $commit->getEpoch();
@@ -162,6 +161,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $drequest = clone $request;
         $drequest->setPath($request->getPath().$path->getPath().$dir_slash);
         $dict = $this->renderLastModifiedColumns(
+          $drequest,
           $this->handles,
           $commit,
           $path->getLastCommitData());
