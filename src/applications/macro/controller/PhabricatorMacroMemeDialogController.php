@@ -28,8 +28,16 @@ final class PhabricatorMacroMemeDialogController
       }
 
       if (!$errors) {
+        $options = new PhutilSimpleOptions();
+        $data = array(
+          'src' => $name,
+          'above' => $above,
+          'below' => $below,
+        );
+        $string = $options->unparse($data, $escape = '}');
+
         $result = array(
-          'text' => "{meme, src={$name}, above={$above}, below={$below}}",
+          'text' => "{meme, {$string}}",
         );
         return id(new AphrontAjaxResponse())->setContent($result);
       }

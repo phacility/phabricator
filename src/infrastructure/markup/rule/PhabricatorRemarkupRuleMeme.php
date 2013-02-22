@@ -10,7 +10,7 @@ final class PhabricatorRemarkupRuleMeme
 
   public function apply($text) {
     return preg_replace_callback(
-      '@{meme,([^}]+)}$@m',
+      '@{meme,((?:[^}\\\\]+|\\\\.)+)}$@m',
       array($this, 'markupMeme'),
       $text);
   }
