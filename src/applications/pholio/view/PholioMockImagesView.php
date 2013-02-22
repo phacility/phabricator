@@ -14,28 +14,38 @@ final class PholioMockImagesView extends AphrontView {
       throw new Exception("Call setMock() before render()!");
     }
 
+    $mock = $this->mock;
+
     $main_image_id = celerity_generate_unique_node_id();
     require_celerity_resource('javelin-behavior-pholio-mock-view');
+
+    $images = array();
+    foreach ($mock->getImages() as $image) {
+      $images[] = array(
+        'id'      => $image->getID(),
+        'fullURI' => $image->getFile()->getBestURI(),
+      );
+    }
+
     $config = array(
       'mainID' => $main_image_id,
-      'mockID' => $this->mock->getID());
+      'mockID' => $mock->getID(),
+      'images' => $images,
+
+    );
     Javelin::initBehavior('pholio-mock-view', $config);
 
     $mockview = '';
 
-    $main_image = head($this->mock->getImages());
+    $main_image = head($mock->getImages());
 
     $main_image_tag = javelin_tag(
       'img',
       array(
         'id' => $main_image_id,
-        'src' => $main_image->getFile()->getBestURI(),
         'sigil' => 'mock-image',
         'class' => 'pholio-mock-image',
-        'meta' => array(
-          'fullSizeURI' => $main_image->getFile()->getBestURI(),
-          'imageID' => $main_image->getID(),
-        ),
+        'style' => 'display: none;',
     ));
 
     $main_image_tag = javelin_tag(
@@ -64,9 +74,9 @@ final class PholioMockImagesView extends AphrontView {
         ),
       array($main_image_tag, $inline_comments_holder));
 
-    if (count($this->mock->getImages()) > 1) {
+    if (count($mock->getImages()) > 1) {
       $thumbnails = array();
-      foreach ($this->mock->getImages() as $image) {
+      foreach ($mock->getImages() as $image) {
         $thumbfile = $image->getFile();
 
         $dimensions = PhabricatorImageTransformer::getPreviewDimensions(
@@ -89,8 +99,7 @@ final class PholioMockImagesView extends AphrontView {
             'sigil' => 'mock-thumbnail',
             'class' => 'pholio-mock-carousel-thumb-item',
             'meta' => array(
-              'fullSizeURI' => $thumbfile->getBestURI(),
-              'imageID' => $image->getID()
+              'imageID' => $image->getID(),
             ),
           ),
           $tag);

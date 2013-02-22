@@ -19,26 +19,41 @@ JX.behavior('pholio-mock-view', function(config) {
 
   var selection_border;
   var selection_fill;
+  var active_image;
+
+  function get_image(id) {
+    for (var ii = 0; ii < config.images.length; ii++) {
+      if (config.images[ii].id == id) {
+        return config.images[ii];
+      }
+    }
+    return null;
+  }
+
+  function select_image(image_id) {
+    var image = get_image(image_id);
+    active_image = image;
+
+    var main = JX.$(config.mainID);
+    main.src = image.fullURI;
+    JX.DOM.show(main);
+
+    // NOTE: This is to clear inline comment reticles.
+    JX.DOM.setContent(wrapper, main);
+
+    load_inline_comments();
+  }
 
   JX.Stratcom.listen(
-    'click', // Listen for clicks...
-    'mock-thumbnail', // ...on nodes with sigil "mock-thumbnail".
+    'click',
+    'mock-thumbnail',
     function(e) {
-      var data = e.getNodeData('mock-thumbnail');
-
-      var main = JX.$(config.mainID);
-      JX.Stratcom.addData(
-        main,
-        {
-          fullSizeURI: data['fullSizeURI'],
-          imageID: data['imageID']
-        });
-
-      main.src = data.fullSizeURI;
-
-      JX.DOM.setContent(wrapper,main);
-      load_inline_comments();
+      e.kill();
+      select_image(e.getNodeData('mock-thumbnail').imageID);
     });
+
+  // Select and show the first image.
+  select_image(config.images[0].id);
 
   function draw_rectangle(nodes, current, init) {
     for (var ii = 0; ii < nodes.length; ii++) {
@@ -143,11 +158,11 @@ JX.behavior('pholio-mock-view', function(config) {
     });
 
     function load_inline_comments() {
-      var data = JX.Stratcom.getData(JX.$(config.mainID));
       var comment_holder = JX.$('mock-inline-comments');
       JX.DOM.setContent(comment_holder, '');
 
-      var inline_comments_uri = "/pholio/inline/" + data['imageID'] + "/";
+      var id = active_image.id;
+      var inline_comments_uri = "/pholio/inline/" + id + "/";
       var inline_comments = new JX.Request(inline_comments_uri, function(r) {
 
         if (r.length > 0) {
@@ -339,7 +354,7 @@ JX.behavior('pholio-mock-view', function(config) {
         var commentToAdd = {
           mockID: config.mockID,
           op: 'save',
-          imageID: imageData['imageID'],
+          imageID: active_image.id,
           startX: Math.min(startPos.x, endPos.x),
           startY: Math.min(startPos.y, endPos.y),
           endX: Math.max(startPos.x,endPos.x),
