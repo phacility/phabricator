@@ -61,7 +61,6 @@ final class ConduitAPI_chatlog_record_Method
       }
 
       $obj = clone $template;
-      $obj->setChannel($channel_name);
       $obj->setChannelID($channel->getID());
       $obj->setType(idx($log, 'type'));
       $obj->setAuthor(idx($log, 'author'));

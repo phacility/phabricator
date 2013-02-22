@@ -30,7 +30,9 @@ final class PhabricatorApplicationChatLog extends PhabricatorApplication {
     return array(
       '/chatlog/' => array(
        ''         => 'PhabricatorChatLogChannelListController',
-        ),
+       'channel/(?P<channelID>[^/]+)/' =>
+          'PhabricatorChatLogChannelLogController',
+       ),
 
     );
   }

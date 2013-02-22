@@ -4,24 +4,23 @@ final class PhabricatorChatLogChannelListController
   extends PhabricatorChatLogController {
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
-    $table = new PhabricatorChatLogEvent();
-
-    $channels = queryfx_all(
-      $table->establishConnection('r'),
-      'SELECT DISTINCT channel FROM %T',
-      $table->getTableName());
+    $channels = id(new PhabricatorChatLogChannelQuery())
+                ->setViewer($user)
+                ->execute();
 
     $rows = array();
     foreach ($channels as $channel) {
-      $name = $channel['channel'];
       $rows[] = array(
         phutil_tag(
           'a',
           array(
-            'href' => '/chatlog/channel/'.phutil_escape_uri($name).'/',
+            'href' =>
+                 '/chatlog/channel/'.$channel->getID().'/',
           ),
-          $name));
+          $channel->getChannelName()));
     }
 
     $table = new AphrontTableView($rows);

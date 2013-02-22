@@ -3,10 +3,10 @@
 final class PhabricatorChatLogChannelLogController
   extends PhabricatorChatLogController {
 
-  private $channel;
+  private $channelID;
 
   public function willProcessRequest(array $data) {
-    $this->channel = $data['channel'];
+    $this->channelID = $data['channelID'];
   }
 
   public function processRequest() {
@@ -22,7 +22,7 @@ final class PhabricatorChatLogChannelLogController
 
     $query = id(new PhabricatorChatLogQuery())
       ->setViewer($user)
-      ->withChannels(array($this->channel));
+      ->withChannelIDs(array($this->channelID));
 
 
     list($after, $before, $map) = $this->getPagingParameters($request, $query);
@@ -140,9 +140,9 @@ final class PhabricatorChatLogChannelLogController
       array(
         hsprintf(
           '<div class="phabricator-chat-log-panel">%s<br />%s%s</div>',
-          $form,
+          $form->render(),
           phutil_tag('table', array('class' => 'phabricator-chat-log'), $out),
-          $pager),
+          $pager->render()),
       ),
       array(
         'title' => 'Channel Log',

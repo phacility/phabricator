@@ -33,9 +33,9 @@ final class ConduitAPI_chatlog_query_Method
 
     $query = new PhabricatorChatLogQuery();
 
-    $channels = $request->getValue('channels');
-    if ($channels) {
-      $query->withChannels($channels);
+    $channel_ids = $request->getValue('channelIDs');
+    if ($channel_ids) {
+      $query->withChannelIDs($channel_ids);
     }
 
     $limit = $request->getValue('limit');
@@ -49,12 +49,12 @@ final class ConduitAPI_chatlog_query_Method
     $results = array();
     foreach ($logs as $log) {
       $results[] = array(
-        'channel'       => $log->getChannel(),
-        'epoch'         => $log->getEpoch(),
-        'author'        => $log->getAuthor(),
-        'type'          => $log->getType(),
-        'message'       => $log->getMessage(),
-        'loggedByPHID'  => $log->getLoggedByPHID(),
+        'channelID'       => $log->getChannelID(),
+        'epoch'           => $log->getEpoch(),
+        'author'          => $log->getAuthor(),
+        'type'            => $log->getType(),
+        'message'         => $log->getMessage(),
+        'loggedByPHID'    => $log->getLoggedByPHID(),
       );
     }
 

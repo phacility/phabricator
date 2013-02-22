@@ -754,6 +754,7 @@ phutil_register_library_map(array(
     'PhabricatorChatLogChannel' => 'applications/chatlog/storage/PhabricatorChatLogChannel.php',
     'PhabricatorChatLogChannelListController' => 'applications/chatlog/controller/PhabricatorChatLogChannelListController.php',
     'PhabricatorChatLogChannelLogController' => 'applications/chatlog/controller/PhabricatorChatLogChannelLogController.php',
+    'PhabricatorChatLogChannelQuery' => 'applications/chatlog/PhabricatorChatLogChannelQuery.php',
     'PhabricatorChatLogConstants' => 'applications/chatlog/constants/PhabricatorChatLogConstants.php',
     'PhabricatorChatLogController' => 'applications/chatlog/controller/PhabricatorChatLogController.php',
     'PhabricatorChatLogDAO' => 'applications/chatlog/storage/PhabricatorChatLogDAO.php',
@@ -2253,6 +2254,7 @@ phutil_register_library_map(array(
     ),
     'PhabricatorChatLogChannelListController' => 'PhabricatorChatLogController',
     'PhabricatorChatLogChannelLogController' => 'PhabricatorChatLogController',
+    'PhabricatorChatLogChannelQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorChatLogController' => 'PhabricatorController',
     'PhabricatorChatLogDAO' => 'PhabricatorLiskDAO',
     'PhabricatorChatLogEvent' =>
