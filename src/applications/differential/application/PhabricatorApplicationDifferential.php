@@ -95,7 +95,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
       ->setCount($blocking);
 
     $active = count($active);
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+    $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Review(s) Need Attention', $active))

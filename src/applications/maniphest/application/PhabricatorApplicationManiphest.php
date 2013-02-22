@@ -99,7 +99,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     $query->execute();
 
     $count = $query->getRowCount();
-    $type = PhabricatorApplicationStatusView::TYPE_INFO;
+    $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Assigned Task(s)', $count))

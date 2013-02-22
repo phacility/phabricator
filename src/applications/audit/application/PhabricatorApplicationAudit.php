@@ -49,20 +49,6 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
 
     $phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
 
-    $audits = id(new PhabricatorAuditQuery())
-      ->withAuditorPHIDs($phids)
-      ->withStatus(PhabricatorAuditQuery::STATUS_OPEN)
-      ->withAwaitingUser($user)
-      ->execute();
-
-    $count = count($audits);
-    $type = PhabricatorApplicationStatusView::TYPE_INFO;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Commit(s) Awaiting Audit', $count))
-      ->setCount($count);
-
-
     $commits = id(new PhabricatorAuditCommitQuery())
       ->withAuthorPHIDs($phids)
       ->withStatus(PhabricatorAuditQuery::STATUS_OPEN)
@@ -73,6 +59,19 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
       ->setText(pht('%d Problem Commit(s)', $count))
+      ->setCount($count);
+
+    $audits = id(new PhabricatorAuditQuery())
+      ->withAuditorPHIDs($phids)
+      ->withStatus(PhabricatorAuditQuery::STATUS_OPEN)
+      ->withAwaitingUser($user)
+      ->execute();
+
+    $count = count($audits);
+    $type = PhabricatorApplicationStatusView::TYPE_WARNING;
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType($type)
+      ->setText(pht('%d Commit(s) Awaiting Audit', $count))
       ->setCount($count);
 
     return $status;

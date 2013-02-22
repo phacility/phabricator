@@ -59,9 +59,9 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       $count = 0;
       $text = array();
       if ($this->status) {
-        $attention = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+        $info = PhabricatorApplicationStatusView::TYPE_INFO;
         foreach ($this->status as $status) {
-          if ($status->getType() == $attention) {
+          if ($status->getType() != $info) {
             $count += $status->getCount();
           }
           if ($status->getCount()) {
@@ -70,7 +70,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         }
       }
 
-      if ($text) {
+      if ($count) {
         Javelin::initBehavior('phabricator-tooltips');
         $content[] = javelin_tag(
           'span',
