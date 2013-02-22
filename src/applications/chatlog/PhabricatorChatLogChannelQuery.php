@@ -4,9 +4,15 @@ final class PhabricatorChatLogChannelQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $channels;
+  private $channelIDs;
 
   public function withChannelNames(array $channels) {
     $this->channels = $channels;
+    return $this;
+  }
+
+  public function withIDs(array $channel_ids) {
+    $this->channelIDs = $channel_ids;
     return $this;
   }
 
@@ -31,6 +37,14 @@ final class PhabricatorChatLogChannelQuery
     $where = array();
 
     $where[] = $this->buildPagingClause($conn_r);
+
+    if ($this->channelIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->channelIDs);
+
+    }
 
     if ($this->channels) {
       $where[] = qsprintf(

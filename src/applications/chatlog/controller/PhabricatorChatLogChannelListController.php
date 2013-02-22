@@ -39,12 +39,13 @@ final class PhabricatorChatLogChannelListController
         '',
       ));
 
-    $title = pht('Channel List.');
+    $title = pht('Channel List');
 
     $header = id(new PhabricatorHeaderView())
       ->setHeader($title);
 
     $panel = id(new AphrontPanelView())
+            ->appendChild($table)
             ->setNoBackground(true);
 
     $crumbs = $this
@@ -54,16 +55,12 @@ final class PhabricatorChatLogChannelListController
           ->setName(pht('Channel List'))
           ->setHref($this->getApplicationURI()));
 
-    $panel->appendChild(
+    return $this->buildStandardPageResponse(
       array(
         $crumbs,
         $header,
-        $table
-      ));
-
-
-    return $this->buildStandardPageResponse(
-      $panel,
+        $panel,
+      ),
       array(
         'title' => 'Channel List',
       ));
