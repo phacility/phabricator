@@ -174,7 +174,9 @@ return array(
   // Phabricator supports PHP extensions MySQL and MySQLi. It is possible to
   // implement also other access mechanism (e.g. PDO_MySQL). The class must
   // extend AphrontMySQLDatabaseConnectionBase.
-  'mysql.implementation' => 'AphrontMySQLDatabaseConnection',
+  'mysql.implementation' => (extension_loaded('mysqli')
+    ? 'AphrontMySQLiDatabaseConnection'
+    : 'AphrontMySQLDatabaseConnection'),
 
 
 // -- Notifications --------------------------------------------------------- //
