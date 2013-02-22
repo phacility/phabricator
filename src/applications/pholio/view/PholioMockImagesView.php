@@ -47,7 +47,6 @@ final class PholioMockImagesView extends AphrontView {
       ),
       $main_image_tag);
 
-
     $inline_comments_holder = javelin_tag(
       'div',
       array(
