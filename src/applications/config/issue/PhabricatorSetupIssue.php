@@ -9,6 +9,7 @@ final class PhabricatorSetupIssue {
   private $summary;
   private $shortName;
 
+  private $isIgnored = false;
   private $phpExtensions = array();
   private $phabricatorConfig = array();
   private $phpConfig = array();
@@ -110,4 +111,12 @@ final class PhabricatorSetupIssue {
     return $this->message;
   }
 
+  public function setIsIgnored($is_ignored) {
+    $this->isIgnored = $is_ignored;
+    return $this;
+  }
+
+  public function getIsIgnored() {
+    return $this->isIgnored;
+  }
 }

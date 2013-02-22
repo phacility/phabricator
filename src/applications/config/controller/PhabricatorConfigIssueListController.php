@@ -11,7 +11,8 @@ final class PhabricatorConfigIssueListController
     $nav->selectFilter('issue/');
 
     $issues = PhabricatorSetupCheck::runAllChecks();
-    PhabricatorSetupCheck::setOpenSetupIssueCount(count($issues));
+    PhabricatorSetupCheck::setOpenSetupIssueCount(
+      PhabricatorSetupCheck::countUnignoredIssues($issues));
 
     $list = $this->buildIssueList($issues);
     $list->setNoDataString(pht("There are no open setup issues."));
@@ -48,15 +49,25 @@ final class PhabricatorConfigIssueListController
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PhabricatorObjectItemListView();
     $list->setStackable();
+    $ignored_items = array();
 
     foreach ($issues as $issue) {
-      $href = $this->getApplicationURI('/issue/'.$issue->getIssueKey().'/');
-      $item = id(new PhabricatorObjectItemView())
-        ->setHeader($issue->getName())
-        ->setHref($href)
-        ->setBarColor('yellow')
-        ->addIcon('warning', pht('Setup Warning'))
-        ->addAttribute($issue->getSummary());
+        $href = $this->getApplicationURI('/issue/'.$issue->getIssueKey().'/');
+        $item = id(new PhabricatorObjectItemView())
+          ->setHeader($issue->getName())
+          ->setHref($href)
+          ->setBarColor('yellow')
+          ->addAttribute($issue->getSummary());
+      if (!$issue->getIsIgnored()) {
+        $item->addIcon('warning', pht('Setup Warning'));
+        $list->addItem($item);
+      } else {
+        $item->addIcon('none', pht('Ignored'));
+        $ignored_items[] = $item;
+      }
+    }
+
+    foreach ($ignored_items as $item) {
       $list->addItem($item);
     }
 

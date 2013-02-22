@@ -154,6 +154,9 @@ return array(
   // Map of additional configuration values to mask.
   'config.mask' => array(),
 
+  // Ignore setup warnings of the following issues.
+  'config.ignore-issues' => array(),
+
 // --  MySQL  --------------------------------------------------------------- //
 
   // Class providing database configuration. It must implement
