@@ -56,21 +56,26 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
           $application->getShortDescription());
       }
 
-      $count = 0;
+      $counts = array();
       $text = array();
       if ($this->status) {
-        $info = PhabricatorApplicationStatusView::TYPE_INFO;
         foreach ($this->status as $status) {
-          if ($status->getType() != $info) {
-            $count += $status->getCount();
-          }
+          $type = $status->getType();
+          $counts[$type] = idx($counts, $type, 0) + $status->getCount();
           if ($status->getCount()) {
             $text[] = $status->getText();
           }
         }
       }
 
-      if ($count) {
+      $attention = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+      $warning = PhabricatorApplicationStatusView::TYPE_WARNING;
+      if (!empty($counts[$attention]) || !empty($counts[$warning])) {
+        $count = idx($counts, $attention, 0);
+        if (!empty($counts[$warning])) {
+          $count .= '/'.$counts[$warning];
+        }
+
         Javelin::initBehavior('phabricator-tooltips');
         $content[] = javelin_tag(
           'span',
@@ -134,12 +139,17 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       $classes[] = 'application-tile-full';
     }
 
+    $title = null;
+    if ($application && !$this->fullWidth) {
+      $title = $application->getShortDescription();
+    }
+
     $app_button = phutil_tag(
       $application ? 'a' : 'div',
       array(
         'class' => implode(' ', $classes),
         'href'  => $application ? $application->getBaseURI() : null,
-        'title' => $application ? $application->getShortDescription() : null,
+        'title' => $title,
       ),
       $this->renderSingleView(
         array(
