@@ -61,6 +61,7 @@ final class PholioMockImagesView extends AphrontView {
       'div',
         array(
           'class' => 'pholio-mock-image-container',
+          'id' => 'pholio-mock-image-container'
         ),
       array($main_image_tag, $inline_comments_holder));
 

@@ -23,6 +23,8 @@ final class PholioInlineDeleteController extends PholioController {
     if ($inline_comment == null) {
       return new Aphront404Response();
     }  else {
+
+      $inline_comment->delete();
       return id(new AphrontAjaxResponse())
         ->setContent(array('success' => true));
     }

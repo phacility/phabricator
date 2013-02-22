@@ -5,6 +5,12 @@
  */
 final class PholioInlineSaveController extends PholioController {
 
+  private $operation;
+
+  public function getOperation() {
+    return $this->operation;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -18,46 +24,84 @@ final class PholioInlineSaveController extends PholioController {
       return new Aphront404Response();
     }
 
-    $draft = id(new PholioTransactionComment());
-    $draft->setImageID($request->getInt('imageID'));
-    $draft->setX($request->getInt('startX'));
-    $draft->setY($request->getInt('startY'));
+    $this->operation = $request->getBool('op');
 
-    $draft->setCommentVersion(1);
-    $draft->setAuthorPHID($user->getPHID());
-    $draft->setEditPolicy($user->getPHID());
-    $draft->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
+    if ($this->getOperation() == 'save') {
+      $new_content = $request->getStr('comment');
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_WEB,
-      array(
-        'ip' => $request->getRemoteAddr(),
-      ));
+      if (strlen(trim($new_content)) == 0) {
+          return id(new AphrontAjaxResponse())
+            ->setContent(array('success' => false));
+      }
 
-    $draft->setContentSource($content_source);
+      $draft = id(new PholioTransactionComment());
+      $draft->setImageID($request->getInt('imageID'));
+      $draft->setX($request->getInt('startX'));
+      $draft->setY($request->getInt('startY'));
 
-    $draft->setWidth($request->getInt('endX') - $request->getInt('startX'));
-    $draft->setHeight($request->getInt('endY') - $request->getInt('startY'));
+      $draft->setCommentVersion(1);
+      $draft->setAuthorPHID($user->getPHID());
+      $draft->setEditPolicy($user->getPHID());
+      $draft->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
 
-    $draft->setContent($request->getStr('comment'));
+      $content_source = PhabricatorContentSource::newForSource(
+        PhabricatorContentSource::SOURCE_WEB,
+        array(
+          'ip' => $request->getRemoteAddr(),
+        ));
 
-    $draft->save();
-    $inlineID = $draft->getID();
+      $draft->setContentSource($content_source);
 
-    if ($request->isAjax()) {
-      $inline_view = id(new PholioInlineCommentView())
-        ->setInlineComment($draft)
-        ->setEditable(true)
-        ->setHandle(
-          PhabricatorObjectHandleData::loadOneHandle($user->getPHID()));
+      $draft->setWidth($request->getInt('endX') - $request->getInt('startX'));
+      $draft->setHeight($request->getInt('endY') - $request->getInt('startY'));
 
-      return id(new AphrontAjaxResponse())
-        ->setContent(array('contentHTML' => $inline_view->render()));
+      $draft->setContent($new_content);
 
-    } else {
-      return id(new AphrontRedirectResponse())->setUri('/M'.$mock->getID());
+      $draft->save();
+
+      if ($request->isAjax()) {
+        $inline_view = id(new PholioInlineCommentView())
+          ->setInlineComment($draft)
+          ->setEditable(true)
+          ->setHandle(
+            PhabricatorObjectHandleData::loadOneHandle($user->getPHID()));
+
+        return id(new AphrontAjaxResponse())
+          ->setContent(array(
+            'success' => true,
+            'phid' => $draft->getPHID(),
+            'contentHTML' => $inline_view->render()
+            ));
+
+      } else {
+        return id(new AphrontRedirectResponse())->setUri('/M'.$mock->getID());
+      }
+    }
+    else {
+      $dialog = new PholioInlineCommentSaveView();
+
+      $dialog->setUser($user);
+      $dialog->setSubmitURI($request->getRequestURI());
+
+      $dialog->setTitle(pht('Make inline comment'));
+
+      $dialog->addHiddenInput('op', 'save');
+
+      $dialog->appendChild($this->renderTextArea(''));
+
+      return id(new AphrontAjaxResponse())->setContent($dialog->render());
     }
 
+  }
+
+  private function renderTextArea($text) {
+    return javelin_tag(
+      'textarea',
+      array(
+        'class' => 'pholio-inline-comment-dialog-textarea',
+        'name' => 'text',
+      ),
+      $text);
   }
 
 }

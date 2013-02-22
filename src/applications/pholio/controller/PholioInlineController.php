@@ -38,6 +38,7 @@ final class PholioInlineController extends PholioController {
       }
 
       $inlines[] = array(
+        'id' => $inline_comment->getID(),
         'phid' => $inline_comment->getPHID(),
         'transactionphid' => $inline_comment->getTransactionPHID(),
         'x' => $inline_comment->getX(),

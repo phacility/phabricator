@@ -29,7 +29,11 @@ final class PholioInlineViewController extends PholioController {
     }
 
     return id(new AphrontAjaxResponse())->setContent(
-      array('contentHTML' => $inline_view->render()));
+      array(
+        'id' => $inline_comment->getID(),
+        'phid' => $inline_comment->getPHID(),
+        'contentHTML' => $inline_view->render()
+      ));
   }
 
 }

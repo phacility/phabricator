@@ -9,6 +9,8 @@
  */
 JX.behavior('pholio-mock-view', function(config) {
   var is_dragging = false;
+  var is_typing = false;
+
   var wrapper = JX.$('mock-wrapper');
   var image;
   var imageData;
@@ -37,7 +39,6 @@ JX.behavior('pholio-mock-view', function(config) {
       JX.DOM.setContent(wrapper,main);
       load_inline_comments();
     });
-
 
   function draw_rectangle(nodes, current, init) {
     for (var ii = 0; ii < nodes.length; ii++) {
@@ -68,6 +69,12 @@ JX.behavior('pholio-mock-view', function(config) {
   JX.Stratcom.listen('mousedown', 'mock-wrapper', function(e) {
     if (!e.isNormalMouseEvent()) {
       return;
+    }
+
+    if (is_typing) {
+      JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
+      JX.DOM.remove(selection_fill);
+      JX.DOM.remove(selection_border);
     }
 
     image = JX.$(config.mainID);
@@ -112,37 +119,27 @@ JX.behavior('pholio-mock-view', function(config) {
         return;
       }
       is_dragging = false;
+      is_typing = true;
 
       endPos = getRealXY(JX.$V(wrapper), JX.$V(e));
 
-      comment = window.prompt("Add your comment");
-      if (comment == null || comment == "") {
-        JX.DOM.remove(selection_border);
-        JX.DOM.remove(selection_fill);
-        return;
-      }
+      var create_inline = new JX.Request("/pholio/inline/save/", function(r) {
+        JX.DOM.appendContent(JX.$('pholio-mock-image-container'), JX.$H(r));
 
-      selection_fill.title = comment;
+        var dialog = JX.$('pholio-new-inline-comment-dialog');
 
-      var saveURL = "/pholio/inline/save/";
+        var wrapperVector = JX.$V(wrapper);
+        var wrapperDimensions = JX.Vector.getDim(wrapper);
 
-      var inlineComment = new JX.Request(saveURL, function(r) {
-        JX.DOM.appendContent(
-          JX.$('mock-inline-comments'),
-          JX.$H(r.contentHTML));
-      });
+        JX.$V(
+          wrapperVector.x + Math.max(startPos.x,endPos.x),
+          wrapperVector.y + Math.max(startPos.y,endPos.y)
+        ).setPos(dialog);
 
-      var commentToAdd = {
-        mockID: config.mockID,
-        imageID: imageData['imageID'],
-        startX: Math.min(startPos.x, endPos.x),
-        startY: Math.min(startPos.y, endPos.y),
-        endX: Math.max(startPos.x,endPos.x),
-        endY: Math.max(startPos.y,endPos.y),
-        comment: comment};
+        });
+      create_inline.addData({mockID: config.mockID});
+      create_inline.send();
 
-      inlineComment.addData(commentToAdd);
-      inlineComment.send();
     });
 
     function load_inline_comments() {
@@ -150,8 +147,8 @@ JX.behavior('pholio-mock-view', function(config) {
       var comment_holder = JX.$('mock-inline-comments');
       JX.DOM.setContent(comment_holder, '');
 
-      var inline_comments_url = "/pholio/inline/" + data['imageID'] + "/";
-      var inline_comments = new JX.Request(inline_comments_url, function(r) {
+      var inline_comments_uri = "/pholio/inline/" + data['imageID'] + "/";
+      var inline_comments = new JX.Request(inline_comments_uri, function(r) {
 
         if (r.length > 0) {
           for(i=0; i < r.length; i++) {
@@ -197,28 +194,6 @@ JX.behavior('pholio-mock-view', function(config) {
         }
 
         JX.Stratcom.listen(
-          'click',
-          'inline-delete',
-          function(e) {
-            var data = e.getNodeData('inline-delete');
-            e.kill();
-            JX.DOM.hide(
-              JX.$(data.phid + "_comment"),
-              JX.$(data.phid + "_fill"),
-              JX.$(data.phid + "_selection")
-            );
-          });
-
-        JX.Stratcom.listen(
-          'click',
-          'inline-edit',
-          function(e) {
-            e.kill();
-            alert("WIP");
-          }
-        );
-
-        JX.Stratcom.listen(
           'mouseover',
           'image_selection',
           function(e) {
@@ -239,9 +214,161 @@ JX.behavior('pholio-mock-view', function(config) {
             JX.DOM.alterClass(inline_comment,
               'pholio-mock-inline-comment-highlight', false);
         });
+
       });
 
       inline_comments.send();
+    }
+
+    JX.Stratcom.listen(
+      'click',
+      'inline-delete',
+      function(e) {
+        var data = e.getNodeData('inline-delete');
+        e.kill();
+        interrupt_typing();
+
+        JX.DOM.hide(
+          JX.$(data.phid + "_comment"),
+          JX.$(data.phid + "_fill"),
+          JX.$(data.phid + "_selection"));
+
+        var deleteURI = '/pholio/inline/delete/' + data.id + '/';
+        var del = new JX.Request(deleteURI, function(r) {
+
+          });
+        del.send();
+
+      });
+
+    JX.Stratcom.listen(
+      'click',
+      'inline-edit',
+      function(e) {
+        var data = e.getNodeData('inline-edit');
+        e.kill();
+
+        interrupt_typing();
+
+        var editURI = "/pholio/inline/edit/" + data.id + '/';
+
+        var edit_dialog = new JX.Request(editURI, function(r) {
+          var dialog = JX.$N(
+            'div',
+            {
+              className: 'pholio-edit-inline-popup'
+            },
+            JX.$H(r));
+
+          JX.DOM.setContent(JX.$(data.phid + '_comment'), dialog);
+        });
+
+        edit_dialog.send();
+      });
+
+    JX.Stratcom.listen(
+      'click',
+      'inline-edit-cancel',
+      function(e) {
+        var data = e.getNodeData('inline-edit-cancel');
+        e.kill();
+        load_inline_comment(data.id);
+    });
+
+    JX.Stratcom.listen(
+      'click',
+      'inline-edit-submit',
+      function(e) {
+        var data = e.getNodeData('inline-edit-submit');
+        var editURI = "/pholio/inline/edit/" + data.id + '/';
+        e.kill();
+
+        var edit = new JX.Request(editURI, function(r) {
+          load_inline_comment(data.id);
+        });
+        edit.addData({
+          op: 'update',
+          content: JX.DOM.find(JX.$(data.phid + '_comment'), 'textarea').value
+        });
+        edit.send();
+    });
+
+    JX.Stratcom.listen(
+      'click',
+      'inline-save-cancel',
+      function(e) {
+        e.kill();
+
+        interrupt_typing();
+      }
+    );
+
+    JX.Stratcom.listen(
+      'click',
+      'inline-save-submit',
+      function(e) {
+        e.kill();
+
+        var new_content = JX.DOM.find(
+          JX.$('pholio-new-inline-comment-dialog'),
+          'textarea').value;
+
+        if (new_content == null || new_content.length == 0) {
+          alert("Empty comment")
+          return;
+        }
+
+        var saveURI = "/pholio/inline/save/";
+
+        var inlineComment = new JX.Request(saveURI, function(r) {
+          if (!r.success) return;
+
+          JX.DOM.appendContent(
+            JX.$('mock-inline-comments'),
+            JX.$H(r.contentHTML));
+
+            JX.Stratcom.addSigil(selection_fill, 'image_selection');
+            selection_fill.id = r.phid + '_fill';
+            JX.Stratcom.addData(selection_fill, {phid: r.phid});
+            selection_border.id = r.phid + '_selection';
+
+            JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
+            is_typing = false;
+          });
+
+        var commentToAdd = {
+          mockID: config.mockID,
+          op: 'save',
+          imageID: imageData['imageID'],
+          startX: Math.min(startPos.x, endPos.x),
+          startY: Math.min(startPos.y, endPos.y),
+          endX: Math.max(startPos.x,endPos.x),
+          endY: Math.max(startPos.y,endPos.y),
+          comment: new_content
+        };
+
+        inlineComment.addData(commentToAdd);
+        inlineComment.send();
+
+
+      }
+    );
+
+    function load_inline_comment(id) {
+      var viewInlineURI = '/pholio/inline/view/' + id + '/';
+      var inline_comment = new JX.Request(viewInlineURI, function(r) {
+        JX.DOM.replace(JX.$(r.phid + '_comment'), JX.$H(r.contentHTML));
+      });
+      inline_comment.send();
+    }
+
+    function interrupt_typing() {
+      if (is_typing == true) {
+        JX.DOM.remove(selection_fill);
+        JX.DOM.remove(selection_border);
+        JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
+        is_typing = false;
+      }
     }
 
     load_inline_comments();

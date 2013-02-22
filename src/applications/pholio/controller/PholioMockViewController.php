@@ -63,6 +63,7 @@ final class PholioMockViewController extends PholioController {
     $properties = $this->buildPropertyView($mock, $engine, $subscribers);
 
     require_celerity_resource('pholio-css');
+    require_celerity_resource('pholio-inline-comments-css');
 
     $output = new PholioMockImagesView();
     $output->setMock($mock);
