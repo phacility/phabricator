@@ -54,7 +54,7 @@ final class PholioMockViewController extends PholioController {
     }
     $engine->process();
 
-    $title = 'M'.$mock->getID().' '.$mock->getName();
+    $title = $mock->getName();
 
     $header = id(new PhabricatorHeaderView())
       ->setHeader($title);
@@ -78,8 +78,8 @@ final class PholioMockViewController extends PholioController {
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref($this->getApplicationURI().'M'.$this->id));
+        ->setName('M'.$mock->getID())
+        ->setHref('/M'.$mock->getID()));
 
     $content = array(
       $crumbs,
@@ -98,7 +98,7 @@ final class PholioMockViewController extends PholioController {
     return $this->buildApplicationPage(
       $content,
       array(
-        'title' => $title,
+        'title' => 'M'.$mock->getID().' '.$title,
         'device' => true,
         'pageObjects' => array($mock->getPHID()),
       ));
