@@ -4,9 +4,11 @@ final class PhabricatorChatLogChannelLogController
   extends PhabricatorChatLogController {
 
   private $channelID;
+  private $channelName;
 
   public function willProcessRequest(array $data) {
     $this->channelID = $data['channelID'];
+    $this->channelName = $data['channelName'];
   }
 
   public function processRequest() {
@@ -24,6 +26,16 @@ final class PhabricatorChatLogChannelLogController
       ->setViewer($user)
       ->withChannelIDs(array($this->channelID));
 
+    $channels = id(new PhabricatorChatLogChannelQuery())
+                ->setViewer($user)
+                ->execute();
+
+    foreach ($channels as $channel) {
+      if ($channel->getID() == $this->channelID) {
+        $this->channelName = $channel->getChannelName();
+        break;
+      }
+    }
 
     list($after, $before, $map) = $this->getPagingParameters($request, $query);
 
@@ -122,10 +134,18 @@ final class PhabricatorChatLogChannelLogController
         array($author, $message, $timestamp));
     }
 
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($this->channelName)
+          ->setHref($uri));
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setMethod('GET')
       ->setAction($uri)
+      ->appendChild($crumbs)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Date')

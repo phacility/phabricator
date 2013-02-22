@@ -20,21 +20,47 @@ final class PhabricatorChatLogChannelListController
             'href' =>
                  '/chatlog/channel/'.$channel->getID().'/',
           ),
-          $channel->getChannelName()));
+          $channel->getChannelName()),
+          $channel->getServiceName(),
+          $channel->getServiceType());
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
         'Channel',
+        'Service Name',
+        'Service Type',
       ));
     $table->setColumnClasses(
       array(
-        'pri wide',
+        '',
+        '',
+        '',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->appendChild($table);
+    $title = pht('Channel List.');
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
+
+    $panel = id(new AphrontPanelView())
+            ->setNoBackground(true);
+
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Channel List'))
+          ->setHref($this->getApplicationURI()));
+
+    $panel->appendChild(
+      array(
+        $crumbs,
+        $header,
+        $table
+      ));
+
 
     return $this->buildStandardPageResponse(
       $panel,
