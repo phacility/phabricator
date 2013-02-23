@@ -140,14 +140,13 @@ a.phabricator-application-launch-container:hover {
   border-radius: 10px;
   color: white;
   font-weight: bold;
-  padding: 1px 6px 2px 0;
+  padding: 1px 0 2px;
   border: 2px solid #333;
   font-size: 11px;
   box-shadow: 0 0px 2px #000;
 }
 
 .phabricator-application-attention-count {
-  margin-right: -2px;
   background-color: rgb(0, 122, 255);
   border-radius: 10px;
   color: white;
@@ -158,7 +157,11 @@ a.phabricator-application-launch-container:hover {
 }
 
 .phabricator-application-warning-count {
-  padding-left: 5px;
+  padding: 6px;
+}
+
+.phabricator-application-attention-count + .phabricator-application-warning-count {
+  margin-left: -2px;
 }
 
 .phabricator-application-launch-attention {
