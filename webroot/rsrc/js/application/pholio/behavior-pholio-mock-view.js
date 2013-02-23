@@ -21,6 +21,8 @@ JX.behavior('pholio-mock-view', function(config) {
   var selection_fill;
   var active_image;
 
+  var inline_comments = {};
+
   function get_image(id) {
     for (var ii = 0; ii < config.images.length; ii++) {
       if (config.images[ii].id == id) {
@@ -171,212 +173,234 @@ JX.behavior('pholio-mock-view', function(config) {
 
     });
 
-    function load_inline_comments() {
-      var comment_holder = JX.$('mock-inline-comments');
-      JX.DOM.setContent(comment_holder, '');
-
-      var id = active_image.id;
-      var inline_comments_uri = "/pholio/inline/" + id + "/";
-      var inline_comments = new JX.Request(inline_comments_uri, function(r) {
-
-        if (r.length > 0) {
-          for(i=0; i < r.length; i++) {
-            var inlineSelection = JX.$N(
-              'div',
-              {
-                id: r[i].phid + "_selection",
-                className: 'pholio-mock-select-border'
-              });
-
-            JX.Stratcom.addData(
-              inlineSelection,
-              {phid: r[i].phid});
-
-            JX.Stratcom.addSigil(inlineSelection, "image_selection");
-            JX.DOM.appendContent(comment_holder, JX.$H(r[i].contentHTML));
-
-            JX.DOM.appendContent(wrapper, inlineSelection);
-
-            JX.$V(r[i].x, r[i].y).setPos(inlineSelection);
-            JX.$V(r[i].width, r[i].height).setDim(inlineSelection);
-
-            if (r[i].transactionphid == null) {
-
-              var inlineDraft = JX.$N(
-                'div',
-                {
-                  className: 'pholio-mock-select-fill',
-                  id: r[i].phid + "_fill"
-                });
-
-              JX.$V(r[i].x, r[i].y).setPos(inlineDraft);
-              JX.$V(r[i].width, r[i].height).setDim(inlineDraft);
-
-              JX.Stratcom.addData(
-                inlineDraft,
-                {phid: r[i].phid});
-
-              JX.Stratcom.addSigil(inlineDraft, "image_selection");
-              JX.DOM.appendContent(wrapper, inlineDraft);
-            }
-          }
-        }
-
-      });
-
-      inline_comments.send();
+  function redraw_inlines(id) {
+    if (!active_image) {
+      return;
     }
 
-    JX.Stratcom.listen(
-      'click',
-      'inline-delete',
-      function(e) {
-        var data = e.getNodeData('inline-delete');
-        e.kill();
-        interrupt_typing();
+    if (active_image.id != id) {
+      return;
+    }
 
-        JX.DOM.hide(
-          JX.$(data.phid + "_comment"),
-          JX.$(data.phid + "_fill"),
-          JX.$(data.phid + "_selection"));
+    var comment_holder = JX.$('mock-inline-comments');
+    JX.DOM.setContent(comment_holder, '');
 
-        var deleteURI = '/pholio/inline/delete/' + data.id + '/';
-        var del = new JX.Request(deleteURI, function(r) {
+    var inlines = inline_comments[active_image.id];
+    if (!inlines || !inlines.length) {
+      return;
+    }
 
-          });
-        del.send();
+    for (var ii = 0; ii < inlines.length; ii++) {
+      var inline = inlines[ii];
 
-      });
-
-    JX.Stratcom.listen(
-      'click',
-      'inline-edit',
-      function(e) {
-        var data = e.getNodeData('inline-edit');
-        e.kill();
-
-        interrupt_typing();
-
-        var editURI = "/pholio/inline/edit/" + data.id + '/';
-
-        var edit_dialog = new JX.Request(editURI, function(r) {
-          var dialog = JX.$N(
-            'div',
-            {
-              className: 'pholio-edit-inline-popup'
-            },
-            JX.$H(r));
-
-          JX.DOM.setContent(JX.$(data.phid + '_comment'), dialog);
+      var inlineSelection = JX.$N(
+        'div',
+        {
+          id: inline.phid + "_selection",
+          className: 'pholio-mock-select-border'
         });
 
-        edit_dialog.send();
+      JX.Stratcom.addData(
+        inlineSelection,
+        {phid: inline.phid});
+
+      JX.Stratcom.addSigil(inlineSelection, "image_selection");
+      JX.DOM.appendContent(comment_holder, JX.$H(inline.contentHTML));
+
+      JX.DOM.appendContent(wrapper, inlineSelection);
+
+      position_inline_rectangle(inline, inlineSelection);
+
+      if (inline.transactionphid == null) {
+
+        var inlineDraft = JX.$N(
+          'div',
+          {
+            className: 'pholio-mock-select-fill',
+            id: inline.phid + "_fill"
+          });
+
+        position_inline_rectangle(inline, inlineDraft);
+
+        JX.Stratcom.addData(
+          inlineDraft,
+          {phid: inline.phid});
+
+        JX.Stratcom.addSigil(inlineDraft, "image_selection");
+        JX.DOM.appendContent(wrapper, inlineDraft);
+      }
+    }
+  }
+
+  function position_inline_rectangle(inline, rect) {
+    JX.$V(inline.x, inline.y).setPos(rect);
+    JX.$V(inline.width, inline.height).setDim(rect);
+  }
+
+
+  function load_inline_comments() {
+    var comment_holder = JX.$('mock-inline-comments');
+    JX.DOM.setContent(comment_holder, '');
+
+    var id = active_image.id;
+    var inline_comments_uri = "/pholio/inline/" + id + "/";
+
+    new JX.Request(inline_comments_uri, function(r) {
+      inline_comments[id] = r;
+      redraw_inlines(id);
+    }).send();
+  }
+
+  JX.Stratcom.listen(
+    'click',
+    'inline-delete',
+    function(e) {
+      var data = e.getNodeData('inline-delete');
+      e.kill();
+      interrupt_typing();
+
+      JX.DOM.hide(
+        JX.$(data.phid + "_comment"),
+        JX.$(data.phid + "_fill"),
+        JX.$(data.phid + "_selection"));
+
+      var deleteURI = '/pholio/inline/delete/' + data.id + '/';
+      var del = new JX.Request(deleteURI, function(r) {
+
+        });
+      del.send();
+
+    });
+
+  JX.Stratcom.listen(
+    'click',
+    'inline-edit',
+    function(e) {
+      var data = e.getNodeData('inline-edit');
+      e.kill();
+
+      interrupt_typing();
+
+      var editURI = "/pholio/inline/edit/" + data.id + '/';
+
+      var edit_dialog = new JX.Request(editURI, function(r) {
+        var dialog = JX.$N(
+          'div',
+          {
+            className: 'pholio-edit-inline-popup'
+          },
+          JX.$H(r));
+
+        JX.DOM.setContent(JX.$(data.phid + '_comment'), dialog);
       });
 
-    JX.Stratcom.listen(
-      'click',
-      'inline-edit-cancel',
-      function(e) {
-        var data = e.getNodeData('inline-edit-cancel');
-        e.kill();
+      edit_dialog.send();
+    });
+
+  JX.Stratcom.listen(
+    'click',
+    'inline-edit-cancel',
+    function(e) {
+      var data = e.getNodeData('inline-edit-cancel');
+      e.kill();
+      load_inline_comment(data.id);
+  });
+
+  JX.Stratcom.listen(
+    'click',
+    'inline-edit-submit',
+    function(e) {
+      var data = e.getNodeData('inline-edit-submit');
+      var editURI = "/pholio/inline/edit/" + data.id + '/';
+      e.kill();
+
+      var edit = new JX.Request(editURI, function(r) {
         load_inline_comment(data.id);
-    });
-
-    JX.Stratcom.listen(
-      'click',
-      'inline-edit-submit',
-      function(e) {
-        var data = e.getNodeData('inline-edit-submit');
-        var editURI = "/pholio/inline/edit/" + data.id + '/';
-        e.kill();
-
-        var edit = new JX.Request(editURI, function(r) {
-          load_inline_comment(data.id);
-        });
-        edit.addData({
-          op: 'update',
-          content: JX.DOM.find(JX.$(data.phid + '_comment'), 'textarea').value
-        });
-        edit.send();
-    });
-
-    JX.Stratcom.listen(
-      'click',
-      'inline-save-cancel',
-      function(e) {
-        e.kill();
-
-        interrupt_typing();
-      }
-    );
-
-    JX.Stratcom.listen(
-      'click',
-      'inline-save-submit',
-      function(e) {
-        e.kill();
-
-        var new_content = JX.DOM.find(
-          JX.$('pholio-new-inline-comment-dialog'),
-          'textarea').value;
-
-        if (new_content == null || new_content.length == 0) {
-          alert("Empty comment")
-          return;
-        }
-
-        var saveURI = "/pholio/inline/save/";
-
-        var inlineComment = new JX.Request(saveURI, function(r) {
-          if (!r.success) return;
-
-          JX.DOM.appendContent(
-            JX.$('mock-inline-comments'),
-            JX.$H(r.contentHTML));
-
-            JX.Stratcom.addSigil(selection_fill, 'image_selection');
-            selection_fill.id = r.phid + '_fill';
-            JX.Stratcom.addData(selection_fill, {phid: r.phid});
-            selection_border.id = r.phid + '_selection';
-
-            JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
-            is_typing = false;
-          });
-
-        var commentToAdd = {
-          mockID: config.mockID,
-          op: 'save',
-          imageID: active_image.id,
-          startX: Math.min(startPos.x, endPos.x),
-          startY: Math.min(startPos.y, endPos.y),
-          endX: Math.max(startPos.x,endPos.x),
-          endY: Math.max(startPos.y,endPos.y),
-          comment: new_content
-        };
-
-        inlineComment.addData(commentToAdd);
-        inlineComment.send();
-
-
-      }
-    );
-
-    function load_inline_comment(id) {
-      var viewInlineURI = '/pholio/inline/view/' + id + '/';
-      var inline_comment = new JX.Request(viewInlineURI, function(r) {
-        JX.DOM.replace(JX.$(r.phid + '_comment'), JX.$H(r.contentHTML));
       });
-      inline_comment.send();
-    }
+      edit.addData({
+        op: 'update',
+        content: JX.DOM.find(JX.$(data.phid + '_comment'), 'textarea').value
+      });
+      edit.send();
+  });
 
-    function interrupt_typing() {
-      if (is_typing == true) {
-        JX.DOM.remove(selection_fill);
-        JX.DOM.remove(selection_border);
-        JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
-        is_typing = false;
+  JX.Stratcom.listen(
+    'click',
+    'inline-save-cancel',
+    function(e) {
+      e.kill();
+
+      interrupt_typing();
+    }
+  );
+
+  JX.Stratcom.listen(
+    'click',
+    'inline-save-submit',
+    function(e) {
+      e.kill();
+
+      var new_content = JX.DOM.find(
+        JX.$('pholio-new-inline-comment-dialog'),
+        'textarea').value;
+
+      if (new_content == null || new_content.length == 0) {
+        alert("Empty comment")
+        return;
       }
-    }
 
-    load_inline_comments();
+      var saveURI = "/pholio/inline/save/";
+
+      var inlineComment = new JX.Request(saveURI, function(r) {
+        if (!r.success) return;
+
+        JX.DOM.appendContent(
+          JX.$('mock-inline-comments'),
+          JX.$H(r.contentHTML));
+
+          JX.Stratcom.addSigil(selection_fill, 'image_selection');
+          selection_fill.id = r.phid + '_fill';
+          JX.Stratcom.addData(selection_fill, {phid: r.phid});
+          selection_border.id = r.phid + '_selection';
+
+          JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
+          is_typing = false;
+        });
+
+      var commentToAdd = {
+        mockID: config.mockID,
+        op: 'save',
+        imageID: active_image.id,
+        startX: Math.min(startPos.x, endPos.x),
+        startY: Math.min(startPos.y, endPos.y),
+        endX: Math.max(startPos.x,endPos.x),
+        endY: Math.max(startPos.y,endPos.y),
+        comment: new_content
+      };
+
+      inlineComment.addData(commentToAdd);
+      inlineComment.send();
+
+
+    }
+  );
+
+  function load_inline_comment(id) {
+    var viewInlineURI = '/pholio/inline/view/' + id + '/';
+    var inline_comment = new JX.Request(viewInlineURI, function(r) {
+      JX.DOM.replace(JX.$(r.phid + '_comment'), JX.$H(r.contentHTML));
+    });
+    inline_comment.send();
+  }
+
+  function interrupt_typing() {
+    if (is_typing == true) {
+      JX.DOM.remove(selection_fill);
+      JX.DOM.remove(selection_border);
+      JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
+      is_typing = false;
+    }
+  }
+
+  load_inline_comments();
 });
