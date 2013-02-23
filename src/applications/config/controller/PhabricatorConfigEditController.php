@@ -401,7 +401,7 @@ final class PhabricatorConfigEditController
     }
 
     $control
-      ->setLabel('Value')
+      ->setLabel(pht('Value'))
       ->setError($e_value)
       ->setValue($display_value)
       ->setName('value');
