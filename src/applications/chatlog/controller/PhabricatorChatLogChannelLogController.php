@@ -143,12 +143,12 @@ final class PhabricatorChatLogChannelLogController
       ->setAction($uri)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Date')
+          ->setLabel(pht('Date'))
           ->setName('date')
           ->setValue($request->getStr('date')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Jump'));
+          ->setValue(pht('Jump')));
 
 
     return $this->buildStandardPageResponse(
@@ -161,7 +161,7 @@ final class PhabricatorChatLogChannelLogController
           $pager->render()),
       ),
       array(
-        'title' => 'Channel Log',
+        'title' => pht('Channel Log'),
       ));
   }
 

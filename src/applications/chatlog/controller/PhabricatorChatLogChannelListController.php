@@ -28,9 +28,9 @@ final class PhabricatorChatLogChannelListController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Channel',
-        'Service Name',
-        'Service Type',
+        pht('Channel'),
+        pht('Service Name'),
+        pht('Service Type'),
       ));
     $table->setColumnClasses(
       array(
@@ -62,7 +62,7 @@ final class PhabricatorChatLogChannelListController
         $panel,
       ),
       array(
-        'title' => 'Channel List',
+        'title' => pht('Channel List'),
       ));
   }
 }
