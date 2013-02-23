@@ -38,20 +38,43 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
 
+    active_image.tag = this;
+    redraw_image();
+  }
+
+  function redraw_image() {
+    if (!active_image || !active_image.tag) {
+      return;
+    }
+
+    var tag = active_image.tag;
+
     // If the image is too wide for the viewport, scale it down so it fits.
     // (If it is too tall, we just let the user scroll.)
     var w = JX.Vector.getDim(panel);
     w.x -= 40;
-    if (w.x < this.naturalWidth) {
-      var scale = w.x / this.naturalWidth;
-      this.width = Math.floor(scale * this.naturalWidth);
-      this.height = Math.floor(scale * this.naturalHeight);
+    if (w.x < tag.naturalWidth) {
+      var scale = w.x / tag.naturalWidth;
+      tag.width = Math.floor(scale * tag.naturalWidth);
+      tag.height = Math.floor(scale * tag.naturalHeight);
+    } else {
+      tag.width = tag.naturalWidth;
+      tag.height = tag.naturalHeight;
     }
 
-    active_image.tag = this;
+    var new_y = (JX.Vector.getViewport().y * 0.85) - 150;
+    new_y = Math.max(320, new_y);
+
+    if (tag.height + 40 < new_y) {
+      panel.style.height = new_y + 'px';
+      viewport.style.top = Math.floor(((new_y + 40) - tag.height) / 2) + 'px';
+    } else {
+      panel.style.height = '';
+      viewport.style.top = '';
+    }
 
     // NOTE: This also clears inline comment reticles.
-    JX.DOM.setContent(viewport, this);
+    JX.DOM.setContent(viewport, tag);
 
     redraw_inlines(active_image.id);
   }
@@ -439,5 +462,8 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   load_inline_comments();
+
+  JX.Stratcom.listen('resize', null, redraw_image);
+  redraw_image();
 
 });
