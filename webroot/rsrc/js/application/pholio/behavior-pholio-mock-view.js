@@ -127,6 +127,20 @@ JX.behavior('pholio-mock-view', function(config) {
   });
 
   JX.Stratcom.listen(
+    ['mouseover', 'mouseout'],
+    'image_selection',
+    function(e) {
+      var data = e.getNodeData('image_selection');
+      var comment = JX.$(data.phid + "_comment");
+      var highlight = (e.getType() == 'mouseover');
+
+      JX.DOM.alterClass(
+        comment,
+        'pholio-mock-inline-comment-highlight',
+        highlight);
+  });
+
+  JX.Stratcom.listen(
     'mouseup',
     null,
     function(e) {
@@ -207,28 +221,6 @@ JX.behavior('pholio-mock-view', function(config) {
             }
           }
         }
-
-        JX.Stratcom.listen(
-          'mouseover',
-          'image_selection',
-          function(e) {
-            var data = e.getNodeData('image_selection');
-
-            var inline_comment = JX.$(data.phid + "_comment");
-            JX.DOM.alterClass(inline_comment,
-              'pholio-mock-inline-comment-highlight', true);
-        });
-
-        JX.Stratcom.listen(
-          'mouseout',
-          'image_selection',
-          function(e) {
-          var data = e.getNodeData('image_selection');
-
-          var inline_comment = JX.$(data.phid + "_comment");
-            JX.DOM.alterClass(inline_comment,
-              'pholio-mock-inline-comment-highlight', false);
-        });
 
       });
 
