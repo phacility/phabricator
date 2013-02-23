@@ -12,8 +12,6 @@ JX.behavior('pholio-mock-view', function(config) {
   var is_typing = false;
 
   var wrapper = JX.$('mock-wrapper');
-  var image;
-  var imageData;
   var startPos;
   var endPos;
 
@@ -75,7 +73,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
   function getRealXY(parent, point) {
     var pos = {x: (point.x - parent.x), y: (point.y - parent.y)};
-    var dim = JX.Vector.getDim(image);
+    var dim = JX.Vector.getDim(JX.$(config.mainID));
 
     pos.x = Math.max(0, Math.min(pos.x, dim.x));
     pos.y = Math.max(0, Math.min(pos.y, dim.y));
@@ -93,9 +91,6 @@ JX.behavior('pholio-mock-view', function(config) {
       JX.DOM.remove(selection_fill);
       JX.DOM.remove(selection_border);
     }
-
-    image = JX.$(config.mainID);
-    imageData = JX.Stratcom.getData(image);
 
     e.getRawEvent().target.draggable = false;
     is_dragging = true;
