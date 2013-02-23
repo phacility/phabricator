@@ -38,7 +38,8 @@
 }
 
 .pholio-mock-image {
-  display: inline-block;
+  margin: auto;
+  cursor: crosshair;
 }
 
 .pholio-mock-select-border {
@@ -55,12 +56,15 @@
   box-sizing: border-box;
 }
 
-.pholio-mock-wrapper {
+.pholio-mock-image-panel {
+  padding: 20px;
+  margin-right: 320px;
+}
+
+.pholio-mock-image-viewport {
   position: relative;
-  margin: 20px 340px 20px 20px;
+  margin: auto;
   display: inline-block;
-  cursor: crosshair;
-  padding: 0px;
 }
 
 .pholio-mock-inline-comments {

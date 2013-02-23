@@ -1873,16 +1873,17 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/e2778b8e/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/b7c2b169/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-dom',
-      3 => 'javelin-vector',
-      4 => 'javelin-magical-init',
-      5 => 'javelin-request',
+      1 => 'javelin-util',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-dom',
+      4 => 'javelin-vector',
+      5 => 'javelin-magical-init',
+      6 => 'javelin-request',
     ),
     'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
   ),
@@ -3217,7 +3218,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/ecd07cd8/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/4ca7889f/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(

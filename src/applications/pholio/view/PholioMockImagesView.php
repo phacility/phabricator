@@ -16,10 +16,12 @@ final class PholioMockImagesView extends AphrontView {
 
     $mock = $this->mock;
 
-    $main_image_id = celerity_generate_unique_node_id();
     require_celerity_resource('javelin-behavior-pholio-mock-view');
 
     $images = array();
+    $panel_id = celerity_generate_unique_node_id();
+    $viewport_id = celerity_generate_unique_node_id();
+
     foreach ($mock->getImages() as $image) {
       $images[] = array(
         'id'      => $image->getID(),
@@ -28,8 +30,9 @@ final class PholioMockImagesView extends AphrontView {
     }
 
     $config = array(
-      'mainID' => $main_image_id,
       'mockID' => $mock->getID(),
+      'panelID' => $panel_id,
+      'viewportID' => $viewport_id,
       'images' => $images,
 
     );
@@ -37,25 +40,22 @@ final class PholioMockImagesView extends AphrontView {
 
     $mockview = '';
 
-    $main_image = head($mock->getImages());
-
-    $main_image_tag = javelin_tag(
-      'img',
-      array(
-        'id' => $main_image_id,
-        'sigil' => 'mock-image',
-        'class' => 'pholio-mock-image',
-        'style' => 'display: none;',
-    ));
-
-    $main_image_tag = javelin_tag(
+    $mock_wrapper = phutil_tag(
       'div',
       array(
-        'id' => 'mock-wrapper',
-        'sigil' => 'mock-wrapper',
-        'class' => 'pholio-mock-wrapper'
+        'id' => $viewport_id,
+        'class' => 'pholio-mock-image-viewport'
       ),
-      $main_image_tag);
+      '');
+
+    $mock_wrapper = javelin_tag(
+      'div',
+      array(
+        'id' => $panel_id,
+        'sigil' => 'mock-panel',
+        'class' => 'pholio-mock-image-panel',
+      ),
+      $mock_wrapper);
 
     $inline_comments_holder = javelin_tag(
       'div',
@@ -72,7 +72,7 @@ final class PholioMockImagesView extends AphrontView {
           'class' => 'pholio-mock-image-container',
           'id' => 'pholio-mock-image-container'
         ),
-      array($main_image_tag, $inline_comments_holder));
+      array($mock_wrapper, $inline_comments_holder));
 
     if (count($mock->getImages()) > 1) {
       $thumbnails = array();

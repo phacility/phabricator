@@ -1,6 +1,7 @@
 /**
  * @provides javelin-behavior-pholio-mock-view
  * @requires javelin-behavior
+ *           javelin-util
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-vector
@@ -10,9 +11,10 @@
 JX.behavior('pholio-mock-view', function(config) {
   var is_dragging = false;
 
-  var wrapper = JX.$('mock-wrapper');
   var drag_begin;
   var drag_end;
+  var panel = JX.$(config.panelID);
+  var viewport = JX.$(config.viewportID);
 
   var selection_border;
   var selection_fill;
@@ -29,16 +31,38 @@ JX.behavior('pholio-mock-view', function(config) {
     return null;
   }
 
+  function onload_image(id) {
+    if (active_image.id != id) {
+      // The user has clicked another image before this one loaded, so just
+      // bail.
+      return;
+    }
+
+    // If the image is too wide for the viewport, scale it down so it fits.
+    // (If it is too tall, we just let the user scroll.)
+    var w = JX.Vector.getDim(panel);
+    w.x -= 40;
+    if (w.x < this.naturalWidth) {
+      var scale = w.x / this.naturalWidth;
+      this.width = Math.floor(scale * this.naturalWidth);
+      this.height = Math.floor(scale * this.naturalHeight);
+    }
+
+    active_image.tag = this;
+
+    // NOTE: This also clears inline comment reticles.
+    JX.DOM.setContent(viewport, this);
+
+    redraw_inlines(active_image.id);
+  }
+
   function select_image(image_id) {
-    var image = get_image(image_id);
-    active_image = image;
+    active_image = get_image(image_id);
+    active_image.tag = null;
 
-    var main = JX.$(config.mainID);
-    main.src = image.fullURI;
-    JX.DOM.show(main);
-
-    // NOTE: This is to clear inline comment reticles.
-    JX.DOM.setContent(wrapper, main);
+    var img = JX.$N('img', {className: 'pholio-mock-image'});
+    img.onload = JX.bind(img, onload_image, active_image.id);
+    img.src = active_image.fullURI;
 
     load_inline_comments();
   }
@@ -54,7 +78,7 @@ JX.behavior('pholio-mock-view', function(config) {
   // Select and show the first image.
   select_image(config.images[0].id);
 
-  JX.Stratcom.listen('mousedown', 'mock-wrapper', function(e) {
+  JX.Stratcom.listen('mousedown', 'mock-panel', function(e) {
     if (!e.isNormalMouseEvent()) {
       return;
     }
@@ -111,8 +135,8 @@ JX.behavior('pholio-mock-view', function(config) {
 
         var dialog = JX.$('pholio-new-inline-comment-dialog');
 
-        var wrapperVector = JX.$V(wrapper);
-        var wrapperDimensions = JX.Vector.getDim(wrapper);
+        var viewportVector = JX.$V(viewport);
+        var viewportDimensions = JX.Vector.getDim(viewport);
 
         JX.$V(
           // TODO: This is a little funky for now.
@@ -145,6 +169,13 @@ JX.behavior('pholio-mock-view', function(config) {
 
     for (var ii = 0; ii < inlines.length; ii++) {
       var inline = inlines[ii];
+      JX.DOM.appendContent(comment_holder, JX.$H(inline.contentHTML));
+
+      if (!active_image.tag) {
+        // The image itself hasn't loaded yet, so we can't draw the inline
+        // reticles.
+        continue;
+      }
 
       var inlineSelection = JX.$N(
         'div',
@@ -158,9 +189,8 @@ JX.behavior('pholio-mock-view', function(config) {
         {phid: inline.phid});
 
       JX.Stratcom.addSigil(inlineSelection, "image_selection");
-      JX.DOM.appendContent(comment_holder, JX.$H(inline.contentHTML));
 
-      JX.DOM.appendContent(wrapper, inlineSelection);
+      JX.DOM.appendContent(viewport, inlineSelection);
 
       position_inline_rectangle(inline, inlineSelection);
 
@@ -180,27 +210,36 @@ JX.behavior('pholio-mock-view', function(config) {
           {phid: inline.phid});
 
         JX.Stratcom.addSigil(inlineDraft, "image_selection");
-        JX.DOM.appendContent(wrapper, inlineDraft);
+        JX.DOM.appendContent(viewport, inlineDraft);
       }
     }
   }
 
   function position_inline_rectangle(inline, rect) {
-    JX.$V(inline.x, inline.y).setPos(rect);
-    JX.$V(inline.width, inline.height).setDim(rect);
+    var scale = active_image.tag.width / active_image.tag.naturalWidth;
+
+    JX.$V(scale * inline.x, scale * inline.y).setPos(rect);
+    JX.$V(scale * inline.width, scale * inline.height).setDim(rect);
   }
 
   function get_image_xy(p) {
-    var main = JX.$(config.mainID);
-    var mainp = JX.$V(main);
+    var img = active_image.tag;
+    var imgp = JX.$V(img);
 
-    var x = Math.max(0, Math.min(p.x - mainp.x, main.naturalWidth));
-    var y = Math.max(0, Math.min(p.y - mainp.y, main.naturalHeight));
+    var scale = 1 / get_image_scale();
+
+    var x = scale * Math.max(0, Math.min(p.x - imgp.x, img.width));
+    var y = scale * Math.max(0, Math.min(p.y - imgp.y, img.height));
 
     return {
       x: x,
       y: y
     };
+  }
+
+  function get_image_scale() {
+    var img = active_image.tag;
+    return img.width / img.naturalWidth;
   }
 
   function redraw_selection() {
@@ -220,10 +259,17 @@ JX.behavior('pholio-mock-view', function(config) {
       Math.max(drag_begin.x, drag_end.x) - p.x,
       Math.max(drag_begin.y, drag_end.y) - p.y);
 
+    var scale = get_image_scale();
+
+    p.x *= scale;
+    p.y *= scale;
+    d.x *= scale;
+    d.y *= scale;
+
     var nodes = [selection_border, selection_fill];
     for (var ii = 0; ii < nodes.length; ii++) {
       var node = nodes[ii];
-      wrapper.appendChild(node);
+      viewport.appendChild(node);
       p.setPos(node);
       d.setDim(node);
     }
@@ -393,4 +439,5 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   load_inline_comments();
+
 });
