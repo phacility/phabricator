@@ -62,7 +62,7 @@ Facebook to login once the accounts are linked.
 
 To configure Facebook OAuth, create a new Facebook Application:
 
-https://www.facebook.com/developers/createapp.php
+https://developers.facebook.com/apps
 
 You should set these things in your application:
 
