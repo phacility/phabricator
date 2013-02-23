@@ -59,25 +59,18 @@ final class PholioInlineSaveController extends PholioController {
 
       $draft->save();
 
-      if ($request->isAjax()) {
-        $inline_view = id(new PholioInlineCommentView())
-          ->setInlineComment($draft)
-          ->setEditable(true)
-          ->setHandle(
-            PhabricatorObjectHandleData::loadOneHandle($user->getPHID()));
+      $inline_view = id(new PholioInlineCommentView())
+        ->setInlineComment($draft)
+        ->setEditable(true)
+        ->setHandle(
+          PhabricatorObjectHandleData::loadOneHandle($user->getPHID()));
 
-        return id(new AphrontAjaxResponse())
-          ->setContent(array(
-            'success' => true,
-            'phid' => $draft->getPHID(),
-            'contentHTML' => $inline_view->render()
-            ));
-
-      } else {
-        return id(new AphrontRedirectResponse())->setUri('/M'.$mock->getID());
-      }
-    }
-    else {
+      return id(new AphrontAjaxResponse())
+        ->setContent(
+          $draft->toDictionary() + array(
+            'contentHTML' => $inline_view->render(),
+          ));
+    } else {
       $dialog = new PholioInlineCommentSaveView();
 
       $dialog->setUser($user);

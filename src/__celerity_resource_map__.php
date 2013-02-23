@@ -1873,7 +1873,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/a6fae7ae/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/e2778b8e/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(

@@ -9,11 +9,10 @@
  */
 JX.behavior('pholio-mock-view', function(config) {
   var is_dragging = false;
-  var is_typing = false;
 
   var wrapper = JX.$('mock-wrapper');
-  var startPos;
-  var endPos;
+  var drag_begin;
+  var drag_end;
 
   var selection_border;
   var selection_fill;
@@ -55,72 +54,31 @@ JX.behavior('pholio-mock-view', function(config) {
   // Select and show the first image.
   select_image(config.images[0].id);
 
-  function draw_rectangle(nodes, current, init) {
-    for (var ii = 0; ii < nodes.length; ii++) {
-      var node = nodes[ii];
-
-      JX.$V(
-        Math.abs(current.x-init.x),
-        Math.abs(current.y-init.y))
-      .setDim(node);
-
-      JX.$V(
-        (current.x-init.x < 0) ? current.x:init.x,
-        (current.y-init.y < 0) ? current.y:init.y)
-      .setPos(node);
-    }
-  }
-
-  function getRealXY(parent, point) {
-    var pos = {x: (point.x - parent.x), y: (point.y - parent.y)};
-    var dim = JX.Vector.getDim(JX.$(config.mainID));
-
-    pos.x = Math.max(0, Math.min(pos.x, dim.x));
-    pos.y = Math.max(0, Math.min(pos.y, dim.y));
-
-    return pos;
-  }
-
   JX.Stratcom.listen('mousedown', 'mock-wrapper', function(e) {
     if (!e.isNormalMouseEvent()) {
       return;
     }
 
-    if (is_typing) {
-      JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
-      JX.DOM.remove(selection_fill);
-      JX.DOM.remove(selection_border);
-    }
-
-    e.getRawEvent().target.draggable = false;
-    is_dragging = true;
-
-    startPos = getRealXY(JX.$V(wrapper),JX.$V(e));
-
-    selection_border = JX.$N(
-      'div',
-      {className: 'pholio-mock-select-border'});
-
-    selection_fill = JX.$N(
-      'div',
-      {className: 'pholio-mock-select-fill'});
-
-    JX.$V(startPos.x, startPos.y).setPos(selection_border);
-    JX.$V(startPos.x, startPos.y).setPos(selection_fill);
-
-    JX.DOM.appendContent(wrapper, [selection_border, selection_fill]);
-  });
-
-  JX.enableDispatch(document.body, 'mousemove');
-  JX.Stratcom.listen('mousemove',null, function(e) {
-    if (!is_dragging) {
+    if (drag_begin) {
       return;
     }
 
-    draw_rectangle(
-      [selection_border, selection_fill],
-      getRealXY(JX.$V(wrapper),
-      JX.$V(e)), startPos);
+    e.kill();
+
+    is_dragging = true;
+    drag_begin = get_image_xy(JX.$V(e));
+    drag_end = drag_begin;
+
+    redraw_selection();
+  });
+
+  JX.enableDispatch(document.body, 'mousemove');
+  JX.Stratcom.listen('mousemove', null, function(e) {
+    if (!is_dragging) {
+      return;
+    }
+    drag_end = get_image_xy(JX.$V(e));
+    redraw_selection();
   });
 
   JX.Stratcom.listen(
@@ -145,9 +103,8 @@ JX.behavior('pholio-mock-view', function(config) {
         return;
       }
       is_dragging = false;
-      is_typing = true;
 
-      endPos = getRealXY(JX.$V(wrapper), JX.$V(e));
+      drag_end = get_image_xy(JX.$V(e));
 
       var create_inline = new JX.Request("/pholio/inline/save/", function(r) {
         JX.DOM.appendContent(JX.$('pholio-mock-image-container'), JX.$H(r));
@@ -158,8 +115,9 @@ JX.behavior('pholio-mock-view', function(config) {
         var wrapperDimensions = JX.Vector.getDim(wrapper);
 
         JX.$V(
-          wrapperVector.x + Math.max(startPos.x,endPos.x),
-          wrapperVector.y + Math.max(startPos.y,endPos.y)
+          // TODO: This is a little funky for now.
+          Math.max(drag_begin.x, drag_end.x),
+          Math.max(drag_begin.y, drag_end.y)
         ).setPos(dialog);
 
         });
@@ -206,7 +164,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
       position_inline_rectangle(inline, inlineSelection);
 
-      if (inline.transactionphid == null) {
+      if (!inline.transactionphid) {
 
         var inlineDraft = JX.$N(
           'div',
@@ -232,6 +190,49 @@ JX.behavior('pholio-mock-view', function(config) {
     JX.$V(inline.width, inline.height).setDim(rect);
   }
 
+  function get_image_xy(p) {
+    var main = JX.$(config.mainID);
+    var mainp = JX.$V(main);
+
+    var x = Math.max(0, Math.min(p.x - mainp.x, main.naturalWidth));
+    var y = Math.max(0, Math.min(p.y - mainp.y, main.naturalHeight));
+
+    return {
+      x: x,
+      y: y
+    };
+  }
+
+  function redraw_selection() {
+    selection_border = selection_border || JX.$N(
+      'div',
+      {className: 'pholio-mock-select-border'});
+
+    selection_fill = selection_fill || JX.$N(
+      'div',
+      {className: 'pholio-mock-select-fill'});
+
+    var p = JX.$V(
+      Math.min(drag_begin.x, drag_end.x),
+      Math.min(drag_begin.y, drag_end.y));
+
+    var d = JX.$V(
+      Math.max(drag_begin.x, drag_end.x) - p.x,
+      Math.max(drag_begin.y, drag_end.y) - p.y);
+
+    var nodes = [selection_border, selection_fill];
+    for (var ii = 0; ii < nodes.length; ii++) {
+      var node = nodes[ii];
+      wrapper.appendChild(node);
+      p.setPos(node);
+      d.setDim(node);
+    }
+  }
+
+  function clear_selection() {
+    selection_fill && JX.DOM.remove(selection_fill);
+    selection_border && JX.DOM.remove(selection_border);
+  }
 
   function load_inline_comments() {
     var comment_holder = JX.$('mock-inline-comments');
@@ -324,7 +325,6 @@ JX.behavior('pholio-mock-view', function(config) {
     'inline-save-cancel',
     function(e) {
       e.kill();
-
       interrupt_typing();
     }
   );
@@ -347,36 +347,28 @@ JX.behavior('pholio-mock-view', function(config) {
       var saveURI = "/pholio/inline/save/";
 
       var inlineComment = new JX.Request(saveURI, function(r) {
-        if (!r.success) return;
+        if (!inline_comments[active_image.id]) {
+          inline_comments[active_image.id] = [];
+        }
+        inline_comments[active_image.id].push(r);
 
-        JX.DOM.appendContent(
-          JX.$('mock-inline-comments'),
-          JX.$H(r.contentHTML));
-
-          JX.Stratcom.addSigil(selection_fill, 'image_selection');
-          selection_fill.id = r.phid + '_fill';
-          JX.Stratcom.addData(selection_fill, {phid: r.phid});
-          selection_border.id = r.phid + '_selection';
-
-          JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
-          is_typing = false;
-        });
+        interrupt_typing();
+        redraw_inlines(active_image.id);
+      });
 
       var commentToAdd = {
         mockID: config.mockID,
         op: 'save',
         imageID: active_image.id,
-        startX: Math.min(startPos.x, endPos.x),
-        startY: Math.min(startPos.y, endPos.y),
-        endX: Math.max(startPos.x,endPos.x),
-        endY: Math.max(startPos.y,endPos.y),
+        startX: Math.min(drag_begin.x, drag_end.x),
+        startY: Math.min(drag_begin.y, drag_end.y),
+        endX: Math.max(drag_begin.x, drag_end.x),
+        endY: Math.max(drag_begin.y, drag_end.y),
         comment: new_content
       };
 
       inlineComment.addData(commentToAdd);
       inlineComment.send();
-
-
     }
   );
 
@@ -389,12 +381,15 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function interrupt_typing() {
-    if (is_typing == true) {
-      JX.DOM.remove(selection_fill);
-      JX.DOM.remove(selection_border);
+    clear_selection();
+
+    try {
       JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
-      is_typing = false;
+    } catch (x) {
+      // TODO: For now, ignore this.
     }
+
+    drag_begin = null;
   }
 
   load_inline_comments();

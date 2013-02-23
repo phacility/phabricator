@@ -29,10 +29,8 @@ final class PholioInlineViewController extends PholioController {
     }
 
     return id(new AphrontAjaxResponse())->setContent(
-      array(
-        'id' => $inline_comment->getID(),
-        'phid' => $inline_comment->getPHID(),
-        'contentHTML' => $inline_view->render()
+      $inline_comment->toDictionary() + array(
+        'contentHTML' => $inline_view->render(),
       ));
   }
 
