@@ -154,6 +154,18 @@ final class PhabricatorSecurityConfigOptions
             "inline. This has mild security implications (you'll leak ".
             "referrers to YouTube) and is pretty silly (but sort of ".
             "awesome).")),
+        $this->newOption('security.allow-outbound-http', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht("Allow"),
+            pht("Disallow"),
+          ))
+        ->setSummary(
+          pht("Allow outbound HTTP requests"))
+        ->setDescription(
+          pht(
+            "If you enable this, you are allowing Phabricator to potentially ".
+            "make requests to external servers.")),
     );
   }
 

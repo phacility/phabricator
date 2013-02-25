@@ -333,7 +333,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
 
-  public static function newFromFileDownload($uri, array $params) {
+  public static function newFromFileDownload($uri, array $params = array()) {
+    // Make sure we're allowed to make a request first
+    if (!PhabricatorEnv::getEnvConfig('security.allow-outbound-http')) {
+      throw new Exception("Outbound HTTP requests are disabled!");
+    }
+
     $uri = new PhutilURI($uri);
 
     $protocol = $uri->getProtocol();
@@ -351,6 +356,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     list($file_data) = id(new HTTPSFuture($uri))
         ->setTimeout($timeout)
         ->resolvex();
+
+    $params = $params + array(
+      'name' => basename($uri),
+    );
 
     return self::newFromFileData($file_data, $params);
   }
@@ -444,6 +453,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function getThumb160x120URI() {
     $path = '/file/xform/thumb-160x120/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
+  }
+
+  public function getPreview140URI() {
+    $path = '/file/xform/preview-140/'.$this->getPHID().'/'
       .$this->getSecretKey().'/';
     return PhabricatorEnv::getCDNURI($path);
   }

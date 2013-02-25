@@ -13,8 +13,8 @@ final class PholioImage extends PholioDAO
   protected $name = '';
   protected $description = '';
   protected $sequence;
-  protected $inlineComments;
 
+  private $inlineComments;
   private $file;
 
   public function attachInlineComments(array $inline_comments) {

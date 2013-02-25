@@ -43,7 +43,9 @@ final class PhabricatorMySQLConfigOptions
       $this->newOption(
         'mysql.implementation',
         'class',
-        'AphrontMySQLDatabaseConnection')
+        (extension_loaded('mysqli')
+          ? 'AphrontMySQLiDatabaseConnection'
+          : 'AphrontMySQLDatabaseConnection'))
         ->setLocked(true)
         ->setBaseClass('AphrontMySQLDatabaseConnectionBase')
         ->setSummary(

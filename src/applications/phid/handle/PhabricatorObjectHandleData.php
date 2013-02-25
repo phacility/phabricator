@@ -328,6 +328,7 @@ final class PhabricatorObjectHandleData {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
             $handle->setType($type);
+
             $repository = null;
             if (!empty($objects[$phid])) {
               $repository = $objects[$phid]->loadOneRelative(
@@ -335,6 +336,7 @@ final class PhabricatorObjectHandleData {
                 'id',
                 'getRepositoryID');
             }
+
             if (!$repository) {
               $handle->setName('Unknown Commit');
             } else {
@@ -342,17 +344,17 @@ final class PhabricatorObjectHandleData {
               $callsign = $repository->getCallsign();
               $commit_identifier = $commit->getCommitIdentifier();
 
-              // In case where the repository for the commit was deleted,
-              // we don't have info about the repository anymore.
-              if ($repository) {
-                $name = $repository->formatCommitName($commit_identifier);
-                $handle->setName($name);
+              $name = $repository->formatCommitName($commit_identifier);
+              $handle->setName($name);
+
+              $summary = $commit->getSummary();
+              if (strlen($summary)) {
+                $handle->setFullName($name.': '.$summary);
               } else {
-                $handle->setName('Commit '.'r'.$callsign.$commit_identifier);
+                $handle->setFullName($name);
               }
 
               $handle->setURI('/r'.$callsign.$commit_identifier);
-              $handle->setFullName('r'.$callsign.$commit_identifier);
               $handle->setTimestamp($commit->getEpoch());
               $handle->setComplete(true);
             }

@@ -16,4 +16,16 @@ final class PholioTransactionComment
     return new PholioTransaction();
   }
 
+  public function toDictionary() {
+    return array(
+      'id' => $this->getID(),
+      'phid' => $this->getPHID(),
+      'transactionphid' => $this->getTransactionPHID(),
+      'x' => $this->getX(),
+      'y' => $this->getY(),
+      'width' => $this->getWidth(),
+      'height' => $this->getHeight(),
+    );
+  }
+
 }

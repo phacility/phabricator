@@ -37,14 +37,9 @@ final class PholioInlineController extends PholioController {
           $inline_view->setEditable(true);
       }
 
-      $inlines[] = array(
-        'phid' => $inline_comment->getPHID(),
-        'transactionphid' => $inline_comment->getTransactionPHID(),
-        'x' => $inline_comment->getX(),
-        'y' => $inline_comment->getY(),
-        'width' => $inline_comment->getWidth(),
-        'height' => $inline_comment->getHeight(),
-        'contentHTML' => $inline_view->render());
+      $inlines[] = $inline_comment->toDictionary() + array(
+        'contentHTML' => $inline_view->render(),
+      );
     }
 
     return id(new AphrontAjaxResponse())->setContent($inlines);

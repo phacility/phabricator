@@ -74,7 +74,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private function buildHeaderView(PhabricatorPaste $paste) {
     return id(new PhabricatorHeaderView())
-      ->setObjectName('P'.$paste->getID())
       ->setHeader($paste->getTitle());
   }
 

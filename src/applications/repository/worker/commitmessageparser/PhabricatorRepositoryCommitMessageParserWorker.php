@@ -77,8 +77,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     if ($author_phid != $commit->getAuthorPHID()) {
       $commit->setAuthorPHID($author_phid);
-      $commit->save();
     }
+
+    $commit->setSummary($data->getSummary());
+    $commit->save();
 
     $conn_w = id(new DifferentialRevision())->establishConnection('w');
 

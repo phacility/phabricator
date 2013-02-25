@@ -133,7 +133,7 @@ JX.install('Event', {
       var r = this.getRawEvent();
       return r.which == 3 || r.button == 2;
     },
-    
+
     /**
      * Determine if a mouse event is a normal event (left mouse button, no
      * modifier keys).
@@ -142,14 +142,15 @@ JX.install('Event', {
      * @task info
      */
     isNormalMouseEvent : function() {
-      var supportedEvents = ['click','mouseup','mousedown'];
+      var supportedEvents = ['click', 'mouseup', 'mousedown'];
 
       if (supportedEvents.indexOf(this.getType()) == -1) {
         return false;
       }
 
       var r = this.getRawEvent();
-      if (r.metaKey || r.altKey || r.ctrlkey || r.shiftKey) {
+
+      if (r.metaKey || r.altKey || r.ctrlKey || r.shiftKey) {
         return false;
       }
 

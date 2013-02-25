@@ -29,20 +29,20 @@ final class PhabricatorPeopleListController
     foreach ($users as $user) {
       $primary_email = $user->loadPrimaryEmail();
       if ($primary_email && $primary_email->getIsVerified()) {
-        $email = 'Verified';
+        $email = pht('Verified');
       } else {
-        $email = 'Unverified';
+        $email = pht('Unverified');
       }
 
       $status = array();
       if ($user->getIsDisabled()) {
-        $status[] = 'Disabled';
+        $status[] = pht('Disabled');
       }
       if ($user->getIsAdmin()) {
-        $status[] = 'Admin';
+        $status[] = pht('Admin');
       }
       if ($user->getIsSystemAgent()) {
-        $status[] = 'System Agent';
+        $status[] = pht('System Agent');
       }
       $status = implode(', ', $status);
 
@@ -64,19 +64,19 @@ final class PhabricatorPeopleListController
             'class' => 'button grey small',
             'href'  => '/people/edit/'.$user->getID().'/',
           ),
-          'Administrate User'),
+          pht('Administrate User')),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Join Date',
-        'Time',
-        'Username',
-        'Real Name',
-        'Roles',
-        'Email',
+        pht('Join Date'),
+        pht('Time'),
+        pht('Username'),
+        pht('Real Name'),
+        pht('Roles'),
+        pht('Email'),
         '',
       ));
     $table->setColumnClasses(
@@ -101,19 +101,12 @@ final class PhabricatorPeopleListController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('People ('.number_format($count).')');
+    $panel->setHeader(pht('People (%d)', number_format($count)));
+    $panel->setNoBackground();
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
     if ($is_admin) {
-      $panel->addButton(
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/people/edit/',
-            'class' => 'button green',
-          ),
-          'Create New Account'));
       if (PhabricatorEnv::getEnvConfig('ldap.auth-enabled')) {
         $panel->addButton(
           phutil_tag(
@@ -122,18 +115,25 @@ final class PhabricatorPeopleListController
               'href' => '/people/ldap/',
               'class' => 'button green'
             ),
-            'Import from LDAP'));
+            pht('Import from LDAP')));
       }
     }
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('User Directory'))
+          ->setHref('/people/'));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('people');
     $nav->appendChild($panel);
+    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'People',
+        'title' => pht('People'),
+        'device' => true,
       ));
   }
 }

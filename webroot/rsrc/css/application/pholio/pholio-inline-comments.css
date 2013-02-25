@@ -1,0 +1,36 @@
+/**
+ * @provides pholio-inline-comments-css
+ */
+.pholio-inline-comment-dialog-title {
+  font-weight:    bold;
+  color:          #333333;
+  border-bottom:  1px solid #ccccaa;
+  padding-bottom: 2px;
+  margin-bottom:  6px;
+}
+
+.pholio-inline-comment-dialog-buttons {
+  padding: 2px 0px;
+}
+
+.pholio-inline-comment-dialog-buttons button {
+  float: right;
+  margin-left: 6px;
+}
+
+.pholio-inline-comment-dialog {
+  padding: 8px 18px 8px 12px;
+}
+
+.pholio-inline-comment-dialog-textarea {
+  width: 99%;
+  height: 12em;
+}
+
+.pholio-new-inline-comment {
+  position: absolute;
+  border: 1px solid #aa8;
+  background: #f9f9f1;
+  z-index: 100;
+  padding: 8px 18px 8px 12px;
+}

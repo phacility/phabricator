@@ -60,7 +60,7 @@ final class PhabricatorCalendarBrowseController
     return $this->buildApplicationPage(
      $nav,
      array(
-        'title' => 'Calendar',
+        'title' => pht('Calendar'),
         'device' => true,
       ));
   }

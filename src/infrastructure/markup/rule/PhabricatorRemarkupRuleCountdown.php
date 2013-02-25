@@ -8,7 +8,7 @@ final class PhabricatorRemarkupRuleCountdown extends PhutilRemarkupRule {
   const KEY_RULE_COUNTDOWN = 'rule.countdown';
 
   public function apply($text) {
-    return $this->replaceHTML(
+    return preg_replace_callback(
       "@\B{C(\d+)}\B@",
       array($this, 'markupCountdown'),
       $text);

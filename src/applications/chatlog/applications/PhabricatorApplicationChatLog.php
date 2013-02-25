@@ -7,7 +7,7 @@ final class PhabricatorApplicationChatLog extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Chat Log';
+    return pht('Chat Log');
   }
 
   public function getIconName() {
@@ -30,7 +30,9 @@ final class PhabricatorApplicationChatLog extends PhabricatorApplication {
     return array(
       '/chatlog/' => array(
        ''         => 'PhabricatorChatLogChannelListController',
-        ),
+       'channel/(?P<channelID>[^/]+)/' =>
+          'PhabricatorChatLogChannelLogController',
+       ),
 
     );
   }

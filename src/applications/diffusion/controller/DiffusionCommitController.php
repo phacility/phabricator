@@ -75,7 +75,7 @@ final class DiffusionCommitController extends DiffusionController {
         $drequest);
 
       $headsup_view = id(new PhabricatorHeaderView())
-        ->setHeader('Commit Detail');
+        ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')));
 
       $headsup_actions = $this->renderHeadsupActionList($commit, $repository);
 
@@ -504,7 +504,7 @@ final class DiffusionCommitController extends DiffusionController {
     $view->setAudits($audits);
     $view->setCommits(array($commit));
     $view->setUser($user);
-    $view->setShowDescriptions(false);
+    $view->setShowCommits(false);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = $this->loadViewerHandles($phids);

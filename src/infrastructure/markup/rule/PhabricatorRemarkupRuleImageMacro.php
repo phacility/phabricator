@@ -9,7 +9,7 @@ final class PhabricatorRemarkupRuleImageMacro
   private $images;
 
   public function apply($text) {
-    return $this->replaceHTML(
+    return preg_replace_callback(
       '@^([a-zA-Z0-9:_\-]+)$@m',
       array($this, 'markupImageMacro'),
       $text);

@@ -68,10 +68,10 @@ final class PhabricatorCalendarEditStatusController
           ->setDescription($description)
           ->save();
       } catch (PhabricatorUserStatusInvalidEpochException $e) {
-        $errors[] = 'Start must be before end.';
+        $errors[] = pht('Start must be before end.');
       } catch (PhabricatorUserStatusOverlapException $e) {
-        $errors[] = 'There is already a status within the specified '.
-                    'timeframe. Edit or delete this existing status.';
+        $errors[] = pht('There is already a status within the specified '.
+                    'timeframe. Edit or delete this existing status.');
       }
 
       if (!$errors) {
@@ -94,7 +94,7 @@ final class PhabricatorCalendarEditStatusController
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Status can not be set!')
+        ->setTitle(pht('Status can not be set!'))
         ->setErrors($errors);
     }
 

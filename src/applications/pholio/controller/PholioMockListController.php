@@ -43,7 +43,7 @@ final class PholioMockListController extends PholioController {
     foreach ($mocks as $mock) {
       $board->addItem(
         id(new PhabricatorPinboardItemView())
-          ->setHeader($mock->getName())
+          ->setHeader('M'.$mock->getID().' '.$mock->getName())
           ->setURI('/M'.$mock->getID())
           ->setImageURI($mock->getCoverFile()->getThumb220x165URI())
           ->setImageSize(220, 165));

@@ -4,43 +4,65 @@ final class PhabricatorChatLogChannelListController
   extends PhabricatorChatLogController {
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
-    $table = new PhabricatorChatLogEvent();
-
-    $channels = queryfx_all(
-      $table->establishConnection('r'),
-      'SELECT DISTINCT channel FROM %T',
-      $table->getTableName());
+    $channels = id(new PhabricatorChatLogChannelQuery())
+                ->setViewer($user)
+                ->execute();
 
     $rows = array();
     foreach ($channels as $channel) {
-      $name = $channel['channel'];
       $rows[] = array(
         phutil_tag(
           'a',
           array(
-            'href' => '/chatlog/channel/'.phutil_escape_uri($name).'/',
+            'href' =>
+                 '/chatlog/channel/'.$channel->getID().'/',
           ),
-          $name));
+          $channel->getChannelName()),
+          $channel->getServiceName(),
+          $channel->getServiceType());
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Channel',
+        pht('Channel'),
+        pht('Service Name'),
+        pht('Service Type'),
       ));
     $table->setColumnClasses(
       array(
-        'pri wide',
+        '',
+        '',
+        '',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->appendChild($table);
+    $title = pht('Channel List');
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
+
+    $panel = id(new AphrontPanelView())
+            ->appendChild($table)
+            ->setNoBackground(true);
+
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Channel List'))
+          ->setHref($this->getApplicationURI()));
 
     return $this->buildStandardPageResponse(
-      $panel,
       array(
-        'title' => 'Channel List',
+        $crumbs,
+        $header,
+        $panel,
+      ),
+      array(
+        'title' => pht('Channel List'),
       ));
   }
 }

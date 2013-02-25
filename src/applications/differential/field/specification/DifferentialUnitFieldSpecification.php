@@ -112,6 +112,9 @@ final class DifferentialUnitFieldSpecification
 
         $userdata = idx($test, 'userdata');
         if ($userdata) {
+          if ($userdata !== false) {
+            $userdata = str_replace("\000", '', $userdata);
+          }
           $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
           $userdata = $engine->markupText($userdata);
           $rows[] = array(

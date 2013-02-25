@@ -1125,6 +1125,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130214.token.sql'),
       ),
+      '20130215.phabricatorfileaddttl.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130215.phabricatorfileaddttl.sql'),
+      ),
       '20130217.cachettl.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130217.cachettl.sql'),
@@ -1137,9 +1141,17 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130218.longdaemon.sql'),
       ),
-      '20130215.phabricatorfileaddttl.sql' => array(
+      '20130219.commitsummary.sql' => array(
         'type'    => 'sql',
-        'name'    => $this->getPatchPath('20130215.phabricatorfileaddttl.sql'),
+        'name'    => $this->getPatchPath('20130219.commitsummary.sql'),
+      ),
+      '20130219.commitsummarymig.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('20130219.commitsummarymig.php'),
+      ),
+      '20130222.dropchannel.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130222.dropchannel.sql'),
       ),
     );
   }

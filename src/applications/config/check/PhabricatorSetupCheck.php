@@ -13,7 +13,6 @@ abstract class PhabricatorSetupCheck {
   final protected function newIssue($key) {
     $issue = id(new PhabricatorSetupIssue())
       ->setIssueKey($key);
-
     $this->issues[$key] = $issue;
 
     return $issue;
@@ -36,6 +35,17 @@ abstract class PhabricatorSetupCheck {
   final public static function setOpenSetupIssueCount($count) {
     $cache = PhabricatorCaches::getSetupCache();
     $cache->setKey('phabricator.setup.issues', $count);
+  }
+
+  final public static function countUnignoredIssues(array $all_issues) {
+    assert_instances_of($all_issues, 'PhabricatorSetupIssue');
+    $count = 0;
+    foreach ($all_issues as $issue) {
+      if (!$issue->getIsIgnored()) {
+        $count++;
+      }
+    }
+    return $count;
   }
 
   final public static function getConfigNeedsRepair() {
@@ -69,7 +79,7 @@ abstract class PhabricatorSetupCheck {
             ->setView($view);
         }
       }
-      self::setOpenSetupIssueCount(count($issues));
+      self::setOpenSetupIssueCount(self::countUnignoredIssues($issues));
     }
 
     // Try to repair configuration unless we have a clean bill of health on it.
@@ -108,6 +118,13 @@ abstract class PhabricatorSetupCheck {
         if ($issue->getIsFatal()) {
           break 2;
         }
+      }
+    }
+
+    foreach (PhabricatorEnv::getEnvConfig('config.ignore-issues')
+              as $ignorable => $derp) {
+      if (isset($issues[$ignorable])) {
+        $issues[$ignorable]->setIsIgnored(true);
       }
     }
 

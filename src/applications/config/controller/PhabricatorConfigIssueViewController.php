@@ -14,7 +14,8 @@ final class PhabricatorConfigIssueViewController
     $user = $request->getUser();
 
     $issues = PhabricatorSetupCheck::runAllChecks();
-    PhabricatorSetupCheck::setOpenSetupIssueCount(count($issues));
+    PhabricatorSetupCheck::setOpenSetupIssueCount(
+      PhabricatorSetupCheck::countUnignoredIssues($issues));
 
     if (empty($issues[$this->issueKey])) {
       $content = id(new AphrontErrorView())

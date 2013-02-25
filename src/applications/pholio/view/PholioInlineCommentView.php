@@ -40,7 +40,8 @@ final class PholioInlineCommentView extends AphrontView {
           'href' => '/pholio/inline/edit/'.$this->inlineComment->getID(),
           'sigil' => 'inline-edit',
           'meta' => array(
-            'phid' => $this->inlineComment->getPHID()
+            'phid' => $this->inlineComment->getPHID(),
+            'id' => $this->inlineComment->getID()
           )
         ),
         pht('Edit'));
@@ -51,7 +52,8 @@ final class PholioInlineCommentView extends AphrontView {
           'href' => '/pholio/inline/delete/'.$this->inlineComment->getID(),
           'sigil' => 'inline-delete',
           'meta' => array(
-              'phid' => $this->inlineComment->getPHID()
+              'phid' => $this->inlineComment->getPHID(),
+              'id' => $this->inlineComment->getID()
           )
         ),
         pht('Delete'));

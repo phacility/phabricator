@@ -25,8 +25,8 @@ final class DiffusionLastModifiedController extends DiffusionController {
 
     $view = new DiffusionBrowseTableView();
     $view->setUser($request->getUser());
-    $view->setDiffusionRequest($drequest);
     $output = $view->renderLastModifiedColumns(
+      $drequest,
       $handles,
       $commit,
       $commit_data);

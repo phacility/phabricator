@@ -24,6 +24,7 @@ final class PhabricatorMacroEditController
     $e_name = true;
     $e_file = true;
     $file = null;
+    $can_fetch = PhabricatorEnv::getEnvConfig('security.allow-outbound-http');
 
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -57,6 +58,17 @@ final class PhabricatorMacroEditController
             'name' => $request->getStr('name'),
             'authorPHID' => $user->getPHID(),
           ));
+      } else if ($request->getStr('url')) {
+        try {
+          $file = PhabricatorFile::newFromFileDownload(
+            $request->getStr('url'),
+            array(
+              'name' => $request->getStr('name'),
+              'authorPHID' => $user->getPHID(),
+            ));
+        } catch (Exception $ex) {
+          $errors[] = pht('Could not fetch URL: %s', $ex->getMessage());
+        }
       } else if ($request->getStr('phid')) {
         $file = id(new PhabricatorFile())->loadOneWhere(
           'phid = %s',
@@ -167,6 +179,15 @@ final class PhabricatorMacroEditController
         $other_label = pht('File');
       }
 
+      if ($can_fetch) {
+        $form->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel(pht('URL'))
+            ->setName('url')
+            ->setValue($request->getStr('url'))
+            ->setError($e_file));
+      }
+
       $form->appendChild(
         id(new AphrontFormFileControl())
           ->setLabel($other_label)
@@ -221,7 +242,18 @@ final class PhabricatorMacroEditController
       $upload_form = id(new AphrontFormView())
         ->setFlexible(true)
         ->setEncType('multipart/form-data')
-        ->setUser($request->getUser())
+        ->setUser($request->getUser());
+
+      if ($can_fetch) {
+        $upload_form
+          ->appendChild(
+            id(new AphrontFormTextControl())
+              ->setLabel(pht('URL'))
+              ->setName('url')
+              ->setValue($request->getStr('url')));
+      }
+
+      $upload_form
         ->appendChild(
           id(new AphrontFormFileControl())
             ->setLabel(pht('File'))

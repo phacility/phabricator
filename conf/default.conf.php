@@ -58,6 +58,9 @@ return array(
   // configuration file to directly set $_SERVER['HTTPS'] to the correct value.
   'security.require-https' => false,
 
+  // Is Phabricator permitted to make outbound HTTP requests?
+  'security.allow-outbound-http' => true,
+
 
 // -- Internationalization -------------------------------------------------- //
 
@@ -151,6 +154,9 @@ return array(
   // Map of additional configuration values to mask.
   'config.mask' => array(),
 
+  // Ignore setup warnings of the following issues.
+  'config.ignore-issues' => array(),
+
 // --  MySQL  --------------------------------------------------------------- //
 
   // Class providing database configuration. It must implement
@@ -171,7 +177,9 @@ return array(
   // Phabricator supports PHP extensions MySQL and MySQLi. It is possible to
   // implement also other access mechanism (e.g. PDO_MySQL). The class must
   // extend AphrontMySQLDatabaseConnectionBase.
-  'mysql.implementation' => 'AphrontMySQLDatabaseConnection',
+  'mysql.implementation' => (extension_loaded('mysqli')
+    ? 'AphrontMySQLiDatabaseConnection'
+    : 'AphrontMySQLDatabaseConnection'),
 
 
 // -- Notifications --------------------------------------------------------- //

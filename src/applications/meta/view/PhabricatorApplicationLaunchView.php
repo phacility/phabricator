@@ -56,20 +56,54 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
           $application->getShortDescription());
       }
 
-      $count = 0;
+      $counts = array();
+      $text = array();
       if ($this->status) {
         foreach ($this->status as $status) {
-          $count += $status->getCount();
+          $type = $status->getType();
+          $counts[$type] = idx($counts, $type, 0) + $status->getCount();
+          if ($status->getCount()) {
+            $text[] = $status->getText();
+          }
         }
       }
 
-      if ($count) {
-        $content[] = phutil_tag(
+      $attention = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+      $warning = PhabricatorApplicationStatusView::TYPE_WARNING;
+      if (!empty($counts[$attention]) || !empty($counts[$warning])) {
+        $count = idx($counts, $attention, 0);
+        $count1 = $count2 = '';
+        if ($count > 0) {
+          $count1 = phutil_tag(
           'span',
           array(
-            'class' => 'phabricator-application-launch-attention',
+            'class' => 'phabricator-application-attention-count',
           ),
           $count);
+        }
+
+
+        if (!empty($counts[$warning])) {
+          $count2 = phutil_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-warning-count',
+          ),
+          $counts[$warning]);
+        }
+
+        Javelin::initBehavior('phabricator-tooltips');
+        $content[] = javelin_tag(
+          'span',
+          array(
+            'sigil' => 'has-tooltip',
+            'meta' => array(
+              'tip' => implode("\n", $text),
+              'size' => 240,
+            ),
+            'class' => 'phabricator-application-launch-attention',
+          ),
+          array($count1, $count2));
       }
 
       $classes = array();
@@ -121,12 +155,17 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       $classes[] = 'application-tile-full';
     }
 
+    $title = null;
+    if ($application && !$this->fullWidth) {
+      $title = $application->getShortDescription();
+    }
+
     $app_button = phutil_tag(
       $application ? 'a' : 'div',
       array(
         'class' => implode(' ', $classes),
         'href'  => $application ? $application->getBaseURI() : null,
-        'title' => $application ? $application->getShortDescription() : null,
+        'title' => $title,
       ),
       $this->renderSingleView(
         array(

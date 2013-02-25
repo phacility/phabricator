@@ -1,28 +1,28 @@
 <?php
 
-final class PhabricatorChatLogQuery
+final class PhabricatorChatLogChannelQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $channels;
   private $channelIDs;
-  private $maximumEpoch;
 
-  public function withChannelIDs(array $channel_ids) {
+  public function withChannelNames(array $channels) {
+    $this->channels = $channels;
+    return $this;
+  }
+
+  public function withIDs(array $channel_ids) {
     $this->channelIDs = $channel_ids;
     return $this;
   }
 
-  public function withMaximumEpoch($epoch) {
-    $this->maximumEpoch = $epoch;
-    return $this;
-  }
-
   public function loadPage() {
-    $table  = new PhabricatorChatLogEvent();
+    $table  = new PhabricatorChatLogChannel();
     $conn_r = $table->establishConnection('r');
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T e %Q %Q %Q',
+      'SELECT * FROM %T c %Q %Q %Q',
       $table->getTableName(),
       $this->buildWhereClause($conn_r),
       $this->buildOrderClause($conn_r),
@@ -38,18 +38,19 @@ final class PhabricatorChatLogQuery
 
     $where[] = $this->buildPagingClause($conn_r);
 
-    if ($this->maximumEpoch) {
-      $where[] = qsprintf(
-        $conn_r,
-        'epoch <= %d',
-        $this->maximumEpoch);
-    }
-
     if ($this->channelIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'channelID IN (%Ld)',
+        'id IN (%Ld)',
         $this->channelIDs);
+
+    }
+
+    if ($this->channels) {
+      $where[] = qsprintf(
+        $conn_r,
+        'channelName IN (%Ls)',
+        $this->channels);
     }
 
     return $this->formatWhereClause($where);

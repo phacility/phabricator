@@ -352,7 +352,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
   private function buildHeaderView(ManiphestTask $task) {
     $view = id(new PhabricatorHeaderView())
-      ->setObjectName('T'.$task->getID())
       ->setHeader($task->getTitle());
 
     $status = $task->getStatus();

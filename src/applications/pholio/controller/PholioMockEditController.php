@@ -51,6 +51,8 @@ final class PholioMockEditController extends PholioController {
     $v_name = $mock->getName();
     $v_desc = $mock->getDescription();
     $v_view = $mock->getViewPolicy();
+    $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $mock->getPHID());
 
     if ($request->isFormPost()) {
       $xactions = array();
@@ -58,14 +60,17 @@ final class PholioMockEditController extends PholioController {
       $type_name = PholioTransactionType::TYPE_NAME;
       $type_desc = PholioTransactionType::TYPE_DESCRIPTION;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
+      $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
 
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
       $v_view = $request->getStr('can_view');
+      $v_cc   = $request->getArr('cc');
 
       $xactions[$type_name] = $v_name;
       $xactions[$type_desc] = $v_desc;
       $xactions[$type_view] = $v_view;
+      $xactions[$type_cc]   = array('=' => $v_cc);
 
       if (!strlen($request->getStr('name'))) {
         $e_name = 'Required';
@@ -165,6 +170,12 @@ final class PholioMockEditController extends PholioController {
     // NOTE: Make this show up correctly on the rendered form.
     $mock->setViewPolicy($v_view);
 
+    $handles = id(new PhabricatorObjectHandleData($v_cc))
+      ->setViewer($user)
+      ->loadHandles();
+
+    $cc_tokens = mpull($handles, 'getFullName', 'getPHID');
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFlexible(true)
@@ -185,6 +196,13 @@ final class PholioMockEditController extends PholioController {
           ->setName('file_phids')
           ->setLabel(pht('Images'))
           ->setError($e_images))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('CC'))
+          ->setName('cc')
+          ->setValue($cc_tokens)
+          ->setUser($user)
+          ->setDatasource('/typeahead/common/mailable/'))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)

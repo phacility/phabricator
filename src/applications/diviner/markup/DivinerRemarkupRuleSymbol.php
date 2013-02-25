@@ -19,7 +19,7 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
     //   @{name | title}
     //   @{type @ book : name @ context | title}
 
-    return $this->replaceHTML(
+    return preg_replace_callback(
       '/(?:^|\B)@{'.
         '(?:(?P<type>[^:]+?):)?'.
         '(?P<name>[^}|]+?)'.

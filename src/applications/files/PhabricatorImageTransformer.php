@@ -181,11 +181,17 @@ final class PhabricatorImageTransformer {
   }
 
   public static function getPreviewDimensions(PhabricatorFile $file, $size) {
-    $data = $file->loadFileData();
-    $src = imagecreatefromstring($data);
+    $metadata = $file->getMetadata();
+    $x = idx($metadata, PhabricatorFile::METADATA_IMAGE_WIDTH);
+    $y = idx($metadata, PhabricatorFile::METADATA_IMAGE_HEIGHT);
 
-    $x = imagesx($src);
-    $y = imagesy($src);
+    if (!$x || !$y) {
+      $data = $file->loadFileData();
+      $src = imagecreatefromstring($data);
+
+      $x = imagesx($src);
+      $y = imagesy($src);
+    }
 
     $scale = min($size / $x, $size / $y, 1);
 

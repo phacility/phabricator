@@ -95,13 +95,6 @@ class AphrontDefaultApplicationConfiguration
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
 
-      '/chatlog/' => array(
-        '' =>
-          'PhabricatorChatLogChannelListController',
-        'channel/(?P<channel>[^/]+)/' =>
-          'PhabricatorChatLogChannelLogController',
-      ),
-
       '/notification/' => array(
         '(?:(?P<filter>all|unread)/)?'
           => 'PhabricatorNotificationListController',

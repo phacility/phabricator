@@ -2,7 +2,11 @@
 
 final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
 
-  const SUMMARY_MAX_LENGTH = 100;
+  /**
+   * NOTE: We denormalize this into the commit table; make sure the sizes
+   * match up.
+   */
+  const SUMMARY_MAX_LENGTH = 80;
 
   protected $commitID;
   protected $authorName    = '';
@@ -20,9 +24,9 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
 
   public function getSummary() {
     $message = $this->getCommitMessage();
-    $lines = explode("\n", $message);
-    $summary = head($lines);
 
+    $summary = phutil_split_lines($message, $retain_endings = false);
+    $summary = head($summary);
     $summary = phutil_utf8_shorten($summary, self::SUMMARY_MAX_LENGTH);
 
     return $summary;
