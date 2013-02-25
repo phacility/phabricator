@@ -2,20 +2,33 @@
 
 abstract class PhabricatorCountdownController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
+  public function buildSideNavView() {
+    $user = $this->getRequest()->getUser();
 
-    $page = $this->buildStandardPageView();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $page->setApplicationName('Countdown');
-    $page->setBaseURI('/countdown/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9A\xB2");
-    $page->setShowChrome(idx($data, 'chrome', true));
+    $nav->addFilter('', pht('All Timers'),
+      $this->getApplicationURI(''));
+    $nav->addFilter('', pht('Create Timer'),
+      $this->getApplicationURI('edit/'));
 
-    $page->appendChild($view);
+    return $nav;
+  }
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView()->getMenu();
+  }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PhabricatorMenuItemView())
+        ->setName(pht('Create Timer'))
+        ->setHref($this->getApplicationURI('edit/'))
+        ->setIcon('create'));
+
+    return $crumbs;
   }
 }

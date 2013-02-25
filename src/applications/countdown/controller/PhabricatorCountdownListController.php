@@ -34,7 +34,7 @@ final class PhabricatorCountdownListController
             'class' => 'small button grey',
             'href' => '/countdown/edit/'.$timer->getID().'/'
           ),
-          'Edit');
+          pht('Edit'));
 
         $delete_button = javelin_tag(
           'a',
@@ -43,7 +43,7 @@ final class PhabricatorCountdownListController
             'href' => '/countdown/delete/'.$timer->getID().'/',
             'sigil' => 'workflow'
           ),
-          'Delete');
+          pht('Delete'));
       }
       $rows[] = array(
         $timer->getID(),
@@ -63,10 +63,10 @@ final class PhabricatorCountdownListController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'ID',
-        'Author',
-        'Title',
-        'End Date',
+        pht('ID'),
+        pht('Author'),
+        pht('Title'),
+        pht('End Date'),
         '',
         ''
       ));
@@ -83,13 +83,25 @@ final class PhabricatorCountdownListController
 
     $panel = id(new AphrontPanelView())
       ->appendChild($table)
-      ->setHeader('Timers')
-      ->setCreateButton('Create Timer', '/countdown/edit/')
+      ->setHeader(pht('Timers'))
+      ->setNoBackground()
       ->appendChild($pager);
 
-    return $this->buildStandardPageResponse($panel,
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('All Timers'))
+          ->setHref($this->getApplicationURI()));
+
+    return $this->buildApplicationPage(
       array(
-        'title' => 'Countdown',
+        $crumbs,
+        $panel
+      ),
+      array(
+        'title' => pht('Countdown'),
+        'device' => true,
       ));
   }
 }
