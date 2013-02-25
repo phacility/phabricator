@@ -53,6 +53,11 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           'The old description was: %s',
           $this->renderHandleLink($author_phid),
           $old);
+        break;
+      case PholioTransactionType::TYPE_INLINE:
+        return pht(
+          '%s added an inline comment.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
