@@ -685,6 +685,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/list-filter-view.css',
   ),
+  'aphront-notes' =>
+  array(
+    'uri' => '/res/4b741bc0/rsrc/css/core/aphront-notes.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/core/aphront-notes.css',
+  ),
   'aphront-pager-view-css' =>
   array(
     'uri' => '/res/43fb79f0/rsrc/css/aphront/pager-view.css',
