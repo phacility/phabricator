@@ -2122,7 +2122,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-magical-init' =>
   array(
-    'uri' => '/res/4f3c705c/rsrc/js/javelin/core/init.js',
+    'uri' => '/res/2f1554da/rsrc/js/javelin/core/init.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2552,7 +2552,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-application-launch-view-css' =>
   array(
-    'uri' => '/res/8aee0702/rsrc/css/application/base/phabricator-application-launch-view.css',
+    'uri' => '/res/13c3d7f3/rsrc/css/application/base/phabricator-application-launch-view.css',
     'type' => 'css',
     'requires' =>
     array(
