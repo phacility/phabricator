@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-menu {
     background-image: url(/rsrc/image/sprite-menu-X2.png);
-    background-size: 140px 88px;
+    background-size: 140px 96px;
   }
 }
 
@@ -23,37 +23,37 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .alert-notifications:hover .phabricator-main-menu-alert-icon {
-  background-position: -15px 0px;
+  background-position: -19px 0px;
 }
 
 .alert-notifications.alert-unread .phabricator-main-menu-alert-icon {
-  background-position: -30px 0px;
+  background-position: -38px 0px;
 }
 
 .phabricator-crumb-divider {
-  background-position: 0px -56px;
+  background-position: 0px -64px;
 }
 
 .menu-icon-eye {
-  background-position: -10px -56px;
+  background-position: -10px -64px;
 }
 
 .menu-icon-app {
-  background-position: -35px -56px;
+  background-position: -35px -64px;
 }
 
 .phabricator-main-menu-logo-image {
-  background-position: 0px -30px;
+  background-position: 0px -38px;
 }
 
 .alert-notifications .phabricator-main-menu-message-icon {
-  background-position: 0px -15px;
+  background-position: 0px -19px;
 }
 
 .alert-notifications:hover .phabricator-main-menu-message-icon {
-  background-position: -15px -15px;
+  background-position: -19px -19px;
 }
 
 .alert-notifications.message-unread .phabricator-main-menu-message-icon {
-  background-position: -30px -15px;
+  background-position: -38px -19px;
 }
