@@ -21,14 +21,15 @@ foreach ($events as $event) {
   $event_row = queryfx_one(
     $conn_w,
     'SELECT channel FROM %T WHERE id = %d',
-    $event->getTable(),
-    $event->getChannelID());
+    $event->getTableName(),
+    $event->getID());
   $event_channel = $event_row['channel'];
 
   $matched = queryfx_one(
     $conn_w,
     'SELECT * FROM %T WHERE
       channelName = %s AND serviceName = %s AND serviceType = %s',
+    $channel_table->getTableName(),
     $event_channel,
     '',
     '');
