@@ -368,3 +368,42 @@ table.aphront-form-control-checkbox-layout th {
   padding: 12px;
   float: right;
 }
+
+.aphront-form-control-counted-togglebuttons {
+  padding-top: 7px;
+}
+
+.aphront-form-control-counted-togglebuttons .toggle {
+  position: relative;
+}
+
+.aphront-form-control-counted-togglebuttons .toggle-fixed {
+  cursor: pointer;
+}
+
+.aphront-form-control-counted-togglebuttons .toggle .counter {
+  font-size: smaller;
+  display: none;
+  position: absolute;
+  top: -9px;
+  right: -8px;
+  padding: 0px 3px;
+  border-radius: 3px;
+}
+
+.aphront-form-control-counted-togglebuttons:hover .toggle .counter {
+  display: block;
+}
+
+.aphront-form-control-counted-togglebuttons .toggle .counter {
+  background: gray;
+  color: #ddd;
+}
+
+.aphront-form-control-counted-togglebuttons .toggle-selected .counter {
+  color: white;
+}
+
+.aphront-form-control-counted-togglebuttons .toggle.disabled:hover {
+  background-color: #a7a7a7;
+}
