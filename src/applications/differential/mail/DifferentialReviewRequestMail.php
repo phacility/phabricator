@@ -2,6 +2,8 @@
 
 abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
+  const MAX_AFFECTED_FILES = 1000;
+
   protected $comments;
 
   private $patch;
@@ -58,7 +60,12 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     $changesets = $this->getChangesets();
     if ($changesets) {
       $body[] = 'AFFECTED FILES';
-      foreach ($changesets as $changeset) {
+      $max = self::MAX_AFFECTED_FILES;
+      foreach (array_values($changesets) as $i => $changeset) {
+        if ($i == $max) {
+          $body[] = '  ('.(count($changesets) - $max).' more files)';
+          break;
+        }
         $body[] = '  '.$changeset->getFilename();
       }
       $body[] = null;
