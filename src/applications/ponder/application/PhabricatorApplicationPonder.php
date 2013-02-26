@@ -31,6 +31,12 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
     return $status;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PonderRemarkupRule(),
+    );
+  }
+
   public function getApplicationGroup() {
     return self::GROUP_COMMUNICATION;
   }

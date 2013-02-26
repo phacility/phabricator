@@ -22,6 +22,12 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
     return $this->getBaseURI().'create/';
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorPasteRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/P(?P<id>[1-9]\d*)' => 'PhabricatorPasteViewController',

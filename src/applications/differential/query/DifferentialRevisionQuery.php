@@ -60,6 +60,16 @@ final class DifferentialRevisionQuery {
   private $needDiffIDs        = false;
   private $needCommitPHIDs    = false;
   private $needHashes         = false;
+  private $viewer;
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
 
 
 /* -(  Query Configuration  )------------------------------------------------ */

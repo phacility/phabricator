@@ -400,23 +400,18 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhutilRemarkupRuleHyperlink();
     $rules[] = new PhrictionRemarkupRule();
 
-    $rules[] = new PhabricatorRemarkupRuleDifferentialHandle();
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      $rules[] = new PhabricatorRemarkupRuleManiphestHandle();
-    }
-
     $rules[] = new PhabricatorRemarkupRuleEmbedFile();
 
-    $rules[] = new DifferentialRemarkupRule();
     $rules[] = new DiffusionRemarkupRule();
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      $rules[] = new ManiphestRemarkupRule();
-    }
-    $rules[] = new PhabricatorPasteRemarkupRule();
 
     $rules[] = new PhabricatorCountdownRemarkupRule();
 
-    $rules[] = new PonderRemarkupRule();
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      foreach ($application->getRemarkupRules() as $rule) {
+        $rules[] = $rule;
+      }
+    }
 
     if ($options['macros']) {
       $rules[] = new PhabricatorRemarkupRuleImageMacro();

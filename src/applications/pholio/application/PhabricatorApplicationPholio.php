@@ -34,6 +34,12 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return true;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PholioRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/M(?P<id>[1-9]\d*)' => 'PholioMockViewController',
