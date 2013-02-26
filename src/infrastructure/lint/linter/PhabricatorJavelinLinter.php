@@ -4,7 +4,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
 
   private $symbols = array();
 
-  private $haveSymbolsBinary;
+  private $symbolsBinary;
   private $haveWarnedAboutBinary;
 
   const LINT_PRIVATE_ACCESS = 1;
@@ -13,18 +13,21 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
   const LINT_UNKNOWN_DEPENDENCY = 4;
   const LINT_MISSING_BINARY = 5;
 
+  private function getBinaryPath() {
+    if ($this->symbolsBinary === null) {
+      list($err, $stdout) = exec_manual('which javelinsymbols');
+      $this->symbolsBinary = ($err ? false : rtrim($stdout));
+    }
+    return $this->symbolsBinary;
+  }
+
   public function willLintPaths(array $paths) {
+    if (!$this->getBinaryPath()) {
+      return;
+    }
 
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/scripts/__init_script__.php';
-
-    if ($this->haveSymbolsBinary === null) {
-      list($err) = exec_manual('which javelinsymbols');
-      $this->haveSymbolsBinary = !$err;
-      if (!$this->haveSymbolsBinary) {
-        return;
-      }
-    }
 
     $futures = array();
     foreach ($paths as $path) {
@@ -61,6 +64,19 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
     );
   }
 
+  public function getCacheGranularity() {
+    return ArcanistLinter::GRANULARITY_REPOSITORY;
+  }
+
+  public function getCacheVersion() {
+    $version = '0';
+    $binary_path = $this->getBinaryPath();
+    if ($binary_path) {
+      $version .= '-'.md5_file($binary_path);
+    }
+    return $version;
+  }
+
   private function shouldIgnorePath($path) {
     return preg_match('@/__tests__/|externals/javelinjs/src/docs/@', $path);
   }
@@ -70,7 +86,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
       return;
     }
 
-    if (!$this->haveSymbolsBinary) {
+    if (!$this->symbolsBinary) {
       if (!$this->haveWarnedAboutBinary) {
         $this->haveWarnedAboutBinary = true;
         // TODO: Write build documentation for the Javelin binaries and point
