@@ -52,6 +52,7 @@ final class PhabricatorEnv {
 
   private static $sourceStack;
   private static $repairSource;
+  private static $overrideSource;
   private static $requestBaseURI;
 
   /**
@@ -159,6 +160,15 @@ final class PhabricatorEnv {
       self::$sourceStack->pushSource(self::$repairSource);
     }
     self::$repairSource->setKeys(array($key => $value));
+  }
+
+  public static function overrideConfig($key, $value) {
+    if (!self::$overrideSource) {
+      self::$overrideSource = id(new PhabricatorConfigDictionarySource(array()))
+        ->setName(pht("Overridden Config"));
+      self::$sourceStack->pushSource(self::$overrideSource);
+    }
+    self::$overrideSource->setKeys(array($key => $value));
   }
 
   public static function getUnrepairedEnvConfig($key, $default = null) {
