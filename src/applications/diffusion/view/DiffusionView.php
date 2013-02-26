@@ -113,10 +113,15 @@ abstract class DiffusionView extends AphrontView {
 
   final public static function linkCommit(
     PhabricatorRepository $repository,
-    $commit) {
+    $commit,
+    $summary = '') {
 
     $commit_name = self::nameCommit($repository, $commit);
     $callsign = $repository->getCallsign();
+
+    if (strlen($summary)) {
+      $commit_name .= ': ' . $summary;
+    }
 
     return phutil_tag(
       'a',
