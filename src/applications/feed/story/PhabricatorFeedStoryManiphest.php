@@ -26,6 +26,7 @@ final class PhabricatorFeedStoryManiphest
     $action = $data->getValue('action');
     switch ($action) {
       case ManiphestAction::ACTION_CREATE:
+      case ManiphestAction::ACTION_COMMENT:
         $full_size = true;
         break;
       default:
@@ -35,7 +36,20 @@ final class PhabricatorFeedStoryManiphest
 
     if ($full_size) {
       $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
-      $content = $this->renderSummary($data->getValue('description'));
+
+      switch ($action) {
+        case ManiphestAction::ACTION_COMMENT:
+          // I'm just fetching the comments here
+          // Don't repeat this at home!
+          $comments = $data->getValue('comments');
+          $content = $this->renderSummary($comments);
+          break;
+        default:
+          // I think this is just for create
+          $content = $this->renderSummary($data->getValue('description'));
+          break;
+      }
+
       $view->appendChild($content);
     } else {
       $view->setOneLineStory(true);
