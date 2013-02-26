@@ -3,11 +3,11 @@
 /**
  * @group markup
  */
-final class PhabricatorRemarkupRulePaste
+final class PonderRemarkupRule
   extends PhabricatorRemarkupRuleObjectName {
 
   protected function getObjectNamePrefix() {
-    return 'P';
+    return 'Q(?![1-4]\b)';
   }
-
 }
+

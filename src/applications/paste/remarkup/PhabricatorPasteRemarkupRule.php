@@ -3,11 +3,11 @@
 /**
  * @group markup
  */
-final class PhabricatorRemarkupRuleDifferential
+final class PhabricatorPasteRemarkupRule
   extends PhabricatorRemarkupRuleObjectName {
 
   protected function getObjectNamePrefix() {
-    return 'D';
+    return 'P';
   }
 
 }

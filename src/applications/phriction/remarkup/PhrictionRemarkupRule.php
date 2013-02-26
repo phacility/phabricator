@@ -3,7 +3,7 @@
 /**
  * @group markup
  */
-final class PhabricatorRemarkupRulePhriction
+final class PhrictionRemarkupRule
   extends PhutilRemarkupRule {
 
   public function apply($text) {

@@ -3,11 +3,11 @@
 /**
  * @group markup
  */
-final class PonderRuleQuestion
+final class DifferentialRemarkupRule
   extends PhabricatorRemarkupRuleObjectName {
 
   protected function getObjectNamePrefix() {
-    return 'Q(?![1-4]\b)';
+    return 'D';
   }
-}
 
+}

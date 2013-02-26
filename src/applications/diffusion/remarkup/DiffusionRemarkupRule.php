@@ -3,7 +3,7 @@
 /**
  * @group markup
  */
-final class PhabricatorRemarkupRuleDiffusion
+final class DiffusionRemarkupRule
   extends PhabricatorRemarkupRuleObjectName {
 
   protected function getObjectNamePrefix() {
