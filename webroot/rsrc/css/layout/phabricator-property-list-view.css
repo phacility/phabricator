@@ -93,6 +93,10 @@
   border-bottom: 1px solid #dbdbdb;
 }
 
+.phabricator-property-list-image-content {
+  background: #282828;
+}
+
 
 /* In the common case where we immediately follow a header, move back up 30px
    so we snuggle next to the header. */
