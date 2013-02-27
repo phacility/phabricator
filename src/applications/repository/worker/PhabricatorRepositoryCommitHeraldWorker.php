@@ -78,8 +78,10 @@ final class PhabricatorRepositoryCommitHeraldWorker
       ));
 
     // TODO: This is complicated and needs to be sorted out properly for
-    // repository policy stuff. We might need an omniscient user here?
-    $viewer = new PhabricatorUser();
+    // repository policy stuff. We might need an omniscient user here? This
+    // fakes a logged-in user.
+    $viewer = id(new PhabricatorUser())
+      ->setPHID('PHID-USER-XXX');
 
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->setViewer($viewer)
