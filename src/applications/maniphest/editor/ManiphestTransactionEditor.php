@@ -226,6 +226,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $phids = array_keys($phids);
 
     $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getActor())
       ->loadHandles();
 
     $view = new ManiphestTransactionDetailView();
