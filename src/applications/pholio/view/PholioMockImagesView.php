@@ -108,6 +108,7 @@ final class PholioMockImagesView extends AphrontView {
       $mockview[] = phutil_tag(
         'div',
         array(
+          'id' => 'pholio-mock-carousel',
           'class' => 'pholio-mock-carousel',
         ),
         $thumbnails);

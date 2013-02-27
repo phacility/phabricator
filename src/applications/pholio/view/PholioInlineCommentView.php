@@ -85,7 +85,11 @@ final class PholioInlineCommentView extends AphrontView {
       'div',
       array(
         'id' => $this->inlineComment->getPHID()."_comment",
-        'class' => 'pholio-inline-comment'
+        'class' => 'pholio-inline-comment',
+        'sigil' => 'inline_comment',
+        'meta' => array(
+          'phid' => $this->inlineComment->getPHID()
+        )
       ),
       array($comment_header, $comment_body));
 

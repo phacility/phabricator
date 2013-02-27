@@ -87,6 +87,20 @@ JX.behavior('pholio-mock-view', function(config) {
     img.onload = JX.bind(img, onload_image, active_image.id);
     img.src = active_image.fullURI;
 
+    var thumbs = JX.DOM.scry(
+      JX.$('pholio-mock-carousel'),
+      'div',
+      'mock-thumbnail');
+
+    for(var k in thumbs) {
+      var thumb_meta = JX.Stratcom.getData(thumbs[k]);
+
+      JX.DOM.alterClass(
+        thumbs[k],
+        'pholio-mock-carousel-thumb-current',
+        (active_image.id == thumb_meta.imageID));
+    }
+
     load_inline_comments();
   }
 
@@ -138,6 +152,20 @@ JX.behavior('pholio-mock-view', function(config) {
 
       JX.DOM.alterClass(
         comment,
+        'pholio-mock-inline-comment-highlight',
+        highlight);
+  });
+
+  JX.Stratcom.listen(
+    ['mouseover', 'mouseout'],
+    'inline_comment',
+    function(e) {
+      var data = e.getNodeData('inline_comment');
+      var selection = JX.$(data.phid + "_selection");
+      var highlight = (e.getType() == 'mouseover');
+
+      JX.DOM.alterClass(
+        selection,
         'pholio-mock-inline-comment-highlight',
         highlight);
   });
