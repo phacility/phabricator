@@ -41,7 +41,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
-  private $version = 4;
+  private $version = 5;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -401,9 +401,6 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhrictionRemarkupRule();
 
     $rules[] = new PhabricatorRemarkupRuleEmbedFile();
-
-    $rules[] = new DiffusionRemarkupRule();
-
     $rules[] = new PhabricatorCountdownRemarkupRule();
 
     $applications = PhabricatorApplication::getAllInstalledApplications();

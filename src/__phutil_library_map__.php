@@ -374,6 +374,7 @@ phutil_register_library_map(array(
     'DiffusionCommitController' => 'applications/diffusion/controller/DiffusionCommitController.php',
     'DiffusionCommitEditController' => 'applications/diffusion/controller/DiffusionCommitEditController.php',
     'DiffusionCommitParentsQuery' => 'applications/diffusion/query/parents/DiffusionCommitParentsQuery.php',
+    'DiffusionCommitQuery' => 'applications/diffusion/query/DiffusionCommitQuery.php',
     'DiffusionCommitTagsController' => 'applications/diffusion/controller/DiffusionCommitTagsController.php',
     'DiffusionCommitTagsQuery' => 'applications/diffusion/query/committags/DiffusionCommitTagsQuery.php',
     'DiffusionContainsQuery' => 'applications/diffusion/query/contains/DiffusionContainsQuery.php',
@@ -1186,7 +1187,6 @@ phutil_register_library_map(array(
     'PhabricatorRemarkupRuleMeme' => 'applications/macro/remarkup/PhabricatorRemarkupRuleMeme.php',
     'PhabricatorRemarkupRuleMention' => 'applications/people/remarkup/PhabricatorRemarkupRuleMention.php',
     'PhabricatorRemarkupRuleObject' => 'infrastructure/markup/rule/PhabricatorRemarkupRuleObject.php',
-    'PhabricatorRemarkupRuleObjectName' => 'infrastructure/markup/rule/PhabricatorRemarkupRuleObjectName.php',
     'PhabricatorRemarkupRuleYoutube' => 'infrastructure/markup/rule/PhabricatorRemarkupRuleYoutube.php',
     'PhabricatorRepository' => 'applications/repository/storage/PhabricatorRepository.php',
     'PhabricatorRepositoryArcanistProject' => 'applications/repository/storage/PhabricatorRepositoryArcanistProject.php',
@@ -1898,6 +1898,7 @@ phutil_register_library_map(array(
     'DiffusionCommitController' => 'DiffusionController',
     'DiffusionCommitEditController' => 'DiffusionController',
     'DiffusionCommitParentsQuery' => 'DiffusionQuery',
+    'DiffusionCommitQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DiffusionCommitTagsController' => 'DiffusionController',
     'DiffusionCommitTagsQuery' => 'DiffusionQuery',
     'DiffusionContainsQuery' => 'DiffusionQuery',
@@ -1953,7 +1954,7 @@ phutil_register_library_map(array(
     'DiffusionPathValidateController' => 'DiffusionController',
     'DiffusionPeopleMenuEventListener' => 'PhutilEventListener',
     'DiffusionRawDiffQuery' => 'DiffusionQuery',
-    'DiffusionRemarkupRule' => 'PhabricatorRemarkupRuleObjectName',
+    'DiffusionRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'DiffusionRepositoryController' => 'DiffusionController',
     'DiffusionSetupException' => 'AphrontUsageException',
     'DiffusionSvnBrowseQuery' => 'DiffusionBrowseQuery',
@@ -2661,7 +2662,6 @@ phutil_register_library_map(array(
     'PhabricatorRemarkupRuleMeme' => 'PhutilRemarkupRule',
     'PhabricatorRemarkupRuleMention' => 'PhutilRemarkupRule',
     'PhabricatorRemarkupRuleObject' => 'PhutilRemarkupRule',
-    'PhabricatorRemarkupRuleObjectName' => 'PhutilRemarkupRule',
     'PhabricatorRemarkupRuleYoutube' => 'PhutilRemarkupRule',
     'PhabricatorRepository' =>
     array(
@@ -2673,7 +2673,11 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryArcanistProjectEditController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryAuditRequest' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositoryBranch' => 'PhabricatorRepositoryDAO',
-    'PhabricatorRepositoryCommit' => 'PhabricatorRepositoryDAO',
+    'PhabricatorRepositoryCommit' =>
+    array(
+      0 => 'PhabricatorRepositoryDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorRepositoryCommitChangeParserWorker' => 'PhabricatorRepositoryCommitParserWorker',
     'PhabricatorRepositoryCommitData' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositoryCommitHeraldWorker' => 'PhabricatorRepositoryCommitParserWorker',

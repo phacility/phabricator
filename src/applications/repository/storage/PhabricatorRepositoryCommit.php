@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
+final class PhabricatorRepositoryCommit
+  extends PhabricatorRepositoryDAO
+  implements PhabricatorPolicyInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -14,6 +16,19 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
   private $commitData;
   private $audits;
   private $isUnparsed;
+  private $repository;
+
+  public function attachRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getRepository() {
+    if ($this->repository === null) {
+      throw new Exception("Call attachRepository() before getRepository()!");
+    }
+    return $this->repository;
+  }
 
   public function setIsUnparsed($is_unparsed) {
     $this->isUnparsed = $is_unparsed;
@@ -138,4 +153,22 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
 
     return $this->setAuditStatus($status);
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return $this->getRepository()->getPolicy($capability);
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
+  }
+
 }

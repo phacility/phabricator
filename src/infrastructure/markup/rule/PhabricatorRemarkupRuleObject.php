@@ -36,9 +36,9 @@ abstract class PhabricatorRemarkupRuleObject
     return $result;
   }
 
-  protected function renderObjectRef($object, $handle, $anchor) {
+  protected function renderObjectRef($object, $handle, $anchor, $id) {
     $href = $handle->getURI();
-    $text = $this->getObjectNamePrefix().$object->getID();
+    $text = $this->getObjectNamePrefix().$id;
     if ($anchor) {
       $matches = null;
       if (preg_match('@^#(?:comment-)?(\d{1,7})$@', $anchor, $matches)) {
@@ -172,7 +172,11 @@ abstract class PhabricatorRemarkupRuleObject
       $object = $objects[$spec['id']];
       switch ($spec['type']) {
         case 'ref':
-          $view = $this->renderObjectRef($object, $handle, $spec['anchor']);
+          $view = $this->renderObjectRef(
+            $object,
+            $handle,
+            $spec['anchor'],
+            $spec['id']);
           break;
         case 'embed':
           $view = $this->renderObjectEmbed($object, $handle, $spec['options']);

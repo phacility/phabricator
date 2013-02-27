@@ -1153,6 +1153,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130222.dropchannel.sql'),
       ),
+      '20130226.commitkey.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130226.commitkey.sql'),
+      ),
     );
   }
 
