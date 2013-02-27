@@ -22,19 +22,21 @@ final class PhabricatorWorkerTaskDetailController
       $title = pht('Task Does Not Exist');
 
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('No Such Task');
+      $error_view->setTitle(pht('No Such Task'));
       $error_view->appendChild(phutil_tag(
         'p',
         array(),
-        'This task may have recently been garbage collected.'));
+        pht('This task may have recently been garbage collected.')));
       $error_view->setSeverity(AphrontErrorView::SEVERITY_NODATA);
 
       $content = $error_view;
     } else {
-      $title = 'Task '.$task->getID();
+      $title = pht('Task %d', $task->getID());
 
       $header = id(new PhabricatorHeaderView())
-        ->setHeader('Task '.$task->getID().' ('.$task->getTaskClass().')');
+        ->setHeader(pht('Task %d (%s)',
+          $task->getID(),
+          $task->getTaskClass()));
 
       $actions    = $this->buildActionListView($task);
       $properties = $this->buildPropertyListView($task);

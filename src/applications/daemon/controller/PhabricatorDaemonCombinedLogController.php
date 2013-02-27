@@ -37,7 +37,7 @@ final class PhabricatorDaemonCombinedLogController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Combined Daemon Log',
+        'title' => pht('Combined Daemon Log'),
       ));
   }
 

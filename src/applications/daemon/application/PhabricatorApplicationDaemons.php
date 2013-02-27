@@ -3,11 +3,11 @@
 final class PhabricatorApplicationDaemons extends PhabricatorApplication {
 
   public function getName() {
-    return 'Daemons';
+    return pht('Daemons');
   }
 
   public function getShortDescription() {
-    return 'Manage Daemons';
+    return pht('Manage Daemons');
   }
 
   public function getBaseURI() {
