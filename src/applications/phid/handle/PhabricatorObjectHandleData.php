@@ -447,6 +447,8 @@ final class PhabricatorObjectHandleData {
             } else {
               $repository = $objects[$phid];
               $handle->setName($repository->getCallsign());
+              $handle->setFullName("r" . $repository->getCallsign() .
+                " (" . $repository->getName() . ")");
               $handle->setURI('/diffusion/'.$repository->getCallsign().'/');
               $handle->setComplete(true);
             }

@@ -52,6 +52,10 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
           $title = pht('Choose A Project');
           $message = pht('Choose a project to view audits for.');
           break;
+        case 'repository':
+          $title = pht('Choose A Repository');
+          $message = pht('Choose a repository to view audits for.');
+          break;
         case 'package':
         case 'packagecommits':
           $title = pht('Choose a Package');
@@ -88,6 +92,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $nav->addFilter('user', pht('By User'));
     $nav->addFilter('project', pht('By Project'));
     $nav->addFilter('package', pht('By Package'));
+    $nav->addFilter('repository', pht('By Repository'));
 
     $nav->addLabel(pht('Commits'));
     $nav->addFilter('commits', pht('All'));
@@ -110,6 +115,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $show_user    = false;
     $show_project = false;
     $show_package = false;
+    $show_repository = false;
 
     switch ($this->filter) {
       case 'audits':
@@ -128,6 +134,10 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
         $show_project = true;
         $show_status = true;
         break;
+      case 'repository':
+        $show_repository = true;
+        $show_status = true;
+        break;
       case 'package':
       case 'packagecommits':
         $show_package = true;
@@ -135,7 +145,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
         break;
     }
 
-    if ($show_user || $show_project || $show_package) {
+    if ($show_user || $show_project || $show_package || $show_repository) {
       if ($show_user) {
         $uri = '/typeahead/common/users/';
         $label = pht('User');
@@ -145,6 +155,9 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       } else if ($show_package) {
         $uri = '/typeahead/common/packages/';
         $label = pht('Package');
+      } else if ($show_repository) {
+        $uri = '/typeahead/common/repositories/';
+        $label = pht('Repository');
       }
 
       $tok_value = null;
@@ -239,6 +252,11 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
           throw new Exception("PHID must be a project PHID!");
         }
         break;
+      case 'repository':
+        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_REPO) {
+          throw new Exception("PHID must be a repository PHID!");
+        }
+        break;
       case 'audits':
       case 'commits':
         break;
@@ -258,6 +276,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       case 'user':
       case 'package':
       case 'project':
+      case 'repository':
         $views[] = $this->buildAuditView($handle);
         break;
       case 'commits':
@@ -288,6 +307,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $awaiting = null;
 
     $phids = null;
+    $repository_phids = null;
     switch ($this->filter) {
       case 'user':
       case 'active':
@@ -304,6 +324,9 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       case 'package':
         $phids = array($handle->getPHID());
         break;
+      case 'repository':
+        $repository_phids = array($handle->getPHID());
+        break;
       case 'audits';
         break;
       default:
@@ -312,6 +335,10 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     if ($phids) {
       $query->withAuditorPHIDs($phids);
+    }
+
+    if ($repository_phids) {
+      $query->withRepositoryPHIDs($repository_phids);
     }
 
     if ($awaiting) {
@@ -323,6 +350,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       case 'user':
       case 'project':
       case 'package':
+      case 'repository':
         switch ($this->filterStatus) {
           case 'open':
             $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
@@ -335,7 +363,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     if ($handle) {
-      $handle_name = $handle->getName();
+      $handle_name = $handle->getFullName();
     } else {
       $handle_name = null;
     }
@@ -360,6 +388,10 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       case 'package':
         $header = pht("Audits for Package %s", $handle_name);
         $nodata = pht("No matching audits in package %s.", $handle_name);
+        break;
+      case 'repository':
+        $header = pht("Audits in Repository %s", $handle_name);
+        $nodata = pht("No matching audits in repository %s.", $handle_name);
         break;
     }
 
