@@ -381,7 +381,9 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $commit_phid = $commit->getPHID();
     $phids = array($commit_phid);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getActor())
+      ->loadHandles();
     $handle = $handles[$commit_phid];
 
     $name = $handle->getName();
