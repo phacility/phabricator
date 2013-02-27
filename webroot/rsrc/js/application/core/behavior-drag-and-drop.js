@@ -97,7 +97,7 @@ JX.behavior('aphront-drag-and-drop', function(config) {
       }
     } else {
       status = JX.$H(
-        'Uploading <strong>' + parseInt(pending, 10) + '<strong> files...');
+        'Uploading <strong>' + parseInt(pending, 10) + '</strong> files...');
     }
     status = JX.$N(
       'div',
