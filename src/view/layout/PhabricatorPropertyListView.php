@@ -59,6 +59,14 @@ final class PhabricatorPropertyListView extends AphrontView {
     return $this;
   }
 
+  public function addImageContent($content) {
+    $this->parts[] = array(
+      'type'    => 'image',
+      'content' => $content,
+    );
+    return $this;
+  }
+
   public function invokeWillRenderEvent() {
     if ($this->object && $this->getUser() && !$this->invokedWillRenderEvent) {
       $event = new PhabricatorEvent(
@@ -91,6 +99,7 @@ final class PhabricatorPropertyListView extends AphrontView {
           $items[] = $this->renderSectionPart($part);
           break;
         case 'text':
+        case 'image':
           $items[] = $this->renderTextPart($part);
           break;
         default:
@@ -166,10 +175,15 @@ final class PhabricatorPropertyListView extends AphrontView {
   }
 
   private function renderTextPart(array $part) {
+    $classes = array();
+    $classes[] = 'phabricator-property-list-text-content';
+    if ($part['type'] == 'image') {
+      $classes[] = 'phabricator-property-list-image-content';
+    }
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-property-list-text-content',
+        'class' => implode($classes, ' '),
       ),
       $part['content']);
   }

@@ -73,6 +73,12 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return 0.100;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new DifferentialRemarkupRule(),
+    );
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     $revisions = id(new DifferentialRevisionQuery())
       ->withResponsibleUsers(array($user->getPHID()))

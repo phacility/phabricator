@@ -152,6 +152,10 @@ abstract class PhabricatorApplication {
     }
   }
 
+  public function getRemarkupRules() {
+    return array();
+  }
+
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 

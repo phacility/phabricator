@@ -3,7 +3,7 @@
 /**
  * @group markup
  */
-final class PhabricatorRemarkupRuleCountdown extends PhutilRemarkupRule {
+final class PhabricatorCountdownRemarkupRule extends PhutilRemarkupRule {
 
   const KEY_RULE_COUNTDOWN = 'rule.countdown';
 

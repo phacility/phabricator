@@ -6,6 +6,16 @@
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements PhabricatorPolicyInterface {
 
+  /**
+   * Shortest hash we'll recognize in raw "a829f32" form.
+   */
+  const MINIMUM_UNQUALIFIED_HASH = 7;
+
+  /**
+   * Shortest hash we'll recognize in qualified "rXab7ef2f8" form.
+   */
+  const MINIMUM_QUALIFIED_HASH = 5;
+
   const TABLE_PATH = 'repository_path';
   const TABLE_PATHCHANGE = 'repository_pathchange';
   const TABLE_FILESYSTEM = 'repository_filesystem';

@@ -71,39 +71,39 @@ final class PhabricatorWorkerTaskUpdateController
     switch ($this->action) {
       case 'retry':
         if ($can_retry) {
-          $dialog->setTitle('Really retry task?');
+          $dialog->setTitle(pht('Really retry task?'));
           $dialog->appendChild(phutil_tag('p', array(), pht(
             'The task will be put back in the queue and executed again.')));
           $dialog->addSubmitButton('Retry Task');
         } else {
-          $dialog->setTitle('Can Not Retry');
+          $dialog->setTitle(pht('Can Not Retry'));
           $dialog->appendChild(phutil_tag('p', array(), pht(
             'Only archived, unsuccessful tasks can be retried.')));
         }
         break;
       case 'cancel':
         if ($can_cancel) {
-          $dialog->setTitle('Really cancel task?');
+          $dialog->setTitle(pht('Really cancel task?'));
           $dialog->appendChild(phutil_tag('p', array(), pht(
             'The work this task represents will never be performed if you '.
             'cancel it. Are you sure you want to cancel it?')));
-          $dialog->addSubmitButton('Cancel Task');
+          $dialog->addSubmitButton(pht('Cancel Task'));
         } else {
-          $dialog->setTitle('Can Not Cancel');
+          $dialog->setTitle(pht('Cannot Cancel'));
           $dialog->appendChild(phutil_tag('p', array(), pht(
             'Only active tasks can be cancelled.')));
         }
         break;
       case 'release':
         if ($can_release) {
-          $dialog->setTitle('Really free task lease?');
+          $dialog->setTitle(pht('Really free task lease?'));
           $dialog->appendChild(phutil_tag('p', array(), pht(
             'If the process which owns the task lease is still doing work '.
             'on it, the work may be performed twice. Are you sure you '.
             'want to free the lease?')));
-          $dialog->addSubmitButton('Free Lease');
+          $dialog->addSubmitButton(pht('Free Lease'));
         } else {
-          $dialog->setTitle('Can Not Free Lease');
+          $dialog->setTitle(pht('Cannot Free Lease'));
           $dialog->appendChild(phutil_tag('p', array(), pht(
             'Only active, leased tasks may have their leases freed.')));
         }

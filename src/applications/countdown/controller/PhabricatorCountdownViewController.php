@@ -38,10 +38,10 @@ final class PhabricatorCountdownViewController
         <div class="phabricator-timer-pane">
           <table class="phabricator-timer-table">
             <tr>
-              <th>Days</th>
-              <th>Hours</th>
-              <th>Minutes</th>
-              <th>Seconds</th>
+              <th>%s</th>
+              <th>%s</th>
+              <th>%s</th>
+              <th>%s</th>
             </tr>
             <tr>%s%s%s%s</tr>
           </table>
@@ -51,6 +51,10 @@ final class PhabricatorCountdownViewController
       $container,
       $timer->getTitle(),
       phabricator_datetime($timer->getDatePoint(), $user),
+      pht('Days'),
+      pht('Hours'),
+      pht('Minutes'),
+      pht('Seconds'),
       javelin_tag('td', array('sigil' => 'phabricator-timer-days'), ''),
       javelin_tag('td', array('sigil' => 'phabricator-timer-hours'), ''),
       javelin_tag('td', array('sigil' => 'phabricator-timer-minutes'), ''),
@@ -64,11 +68,22 @@ final class PhabricatorCountdownViewController
 
     $panel = $content;
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($timer->getTitle())
+          ->setHref($this->getApplicationURI($this->id.'/')));
+
+    return $this->buildApplicationPage(
       array(
-        'title' => 'Countdown: '.$timer->getTitle(),
-        'chrome' => $chrome_visible
+        ($chrome_visible ? $crumbs : ''),
+        $panel,
+      ),
+      array(
+        'title' => pht('Countdown: %s', $timer->getTitle()),
+        'chrome' => $chrome_visible,
+        'device' => true,
       ));
   }
 

@@ -66,7 +66,7 @@ final class PhabricatorDaemonConsoleController
     $daemon_table->setDaemonLogs($logs);
 
     $daemon_panel = new AphrontPanelView();
-    $daemon_panel->setHeader('Active Daemons');
+    $daemon_panel->setHeader(pht('Active Daemons'));
     $daemon_panel->appendChild($daemon_table);
     $daemon_panel->setNoBackground();
 
@@ -87,18 +87,18 @@ final class PhabricatorDaemonConsoleController
             'href' => '/daemon/task/'.$task->getID().'/',
             'class' => 'button small grey',
           ),
-          'View Task'),
+          pht('View Task')),
       );
     }
 
     $leased_table = new AphrontTableView($rows);
     $leased_table->setHeaders(
       array(
-        'ID',
-        'Class',
-        'Owner',
-        'Expires',
-        'Failures',
+        pht('ID'),
+        pht('Class'),
+        pht('Owner'),
+        pht('Expires'),
+        pht('Failures'),
         '',
       ));
     $leased_table->setColumnClasses(
@@ -110,7 +110,7 @@ final class PhabricatorDaemonConsoleController
         'n',
         'action',
       ));
-    $leased_table->setNoDataString('No tasks are leased by workers.');
+    $leased_table->setNoDataString(pht('No tasks are leased by workers.'));
 
     $leased_panel = new AphrontPanelView();
     $leased_panel->setHeader('Leased Tasks');
@@ -135,18 +135,18 @@ final class PhabricatorDaemonConsoleController
     $queued_table = new AphrontTableView($rows);
     $queued_table->setHeaders(
       array(
-        'Class',
-        'Count',
+        pht('Class'),
+        pht('Count'),
       ));
     $queued_table->setColumnClasses(
       array(
         'wide',
         'n',
       ));
-    $queued_table->setNoDataString('Task queue is empty.');
+    $queued_table->setNoDataString(pht('Task queue is empty.'));
 
     $queued_panel = new AphrontPanelView();
-    $queued_panel->setHeader('Queued Tasks');
+    $queued_panel->setHeader(pht('Queued Tasks'));
     $queued_panel->appendChild($queued_table);
     $queued_panel->setNoBackground();
 
@@ -163,7 +163,7 @@ final class PhabricatorDaemonConsoleController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Console',
+        'title' => pht('Console'),
       ));
   }
 

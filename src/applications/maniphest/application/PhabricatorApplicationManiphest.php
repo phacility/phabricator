@@ -38,7 +38,13 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
 
   public function getEventListeners() {
     return array(
-      new ManiphestPeopleMenuEventListener()
+      new ManiphestPeopleMenuEventListener(),
+    );
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new ManiphestRemarkupRule(),
     );
   }
 

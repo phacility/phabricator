@@ -146,9 +146,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     if ($file->isViewableImage()) {
 
-      // TODO: Clean this up after Pholio (dark backgrounds, standardization,
-      // etc.)
-
       $image = phutil_tag(
         'img',
         array(
@@ -163,7 +160,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         ),
         $image);
 
-      $view->addTextContent($linked_image);
+      $view->addImageContent($linked_image);
     }
 
     return $view;

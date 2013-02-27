@@ -130,7 +130,6 @@ final class DiffusionHomeController extends DiffusionController {
             'href' => '/diffusion/'.$repository->getCallsign().'/',
           ),
           $repository->getName()),
-        $repository->getDetail('description'),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
         $size,
@@ -138,7 +137,8 @@ final class DiffusionHomeController extends DiffusionController {
         $commit
           ? DiffusionView::linkCommit(
               $repository,
-              $commit->getCommitIdentifier())
+              $commit->getCommitIdentifier(),
+              $commit->getSummary())
           : '-',
         $date,
         $time,
@@ -166,7 +166,6 @@ final class DiffusionHomeController extends DiffusionController {
     $table->setHeaders(
       array(
         'Repository',
-        'Description',
         'VCS',
         'Commits',
         'Lint',
@@ -177,17 +176,15 @@ final class DiffusionHomeController extends DiffusionController {
     $table->setColumnClasses(
       array(
         'pri',
-        'wide',
         '',
         'n',
         'n',
-        'n',
+        'wide',
         '',
         'right',
       ));
     $table->setColumnVisibility(
       array(
-        true,
         true,
         true,
         true,

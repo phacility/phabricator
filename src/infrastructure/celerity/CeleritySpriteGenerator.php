@@ -88,20 +88,20 @@ final class CeleritySpriteGenerator {
 
     $sources = array(
       'seen_read_all' => array(
-        'x' => 14,
-        'y' => 14,
+        'x' => 18,
+        'y' => 18,
         'css' =>
           '.alert-notifications .phabricator-main-menu-alert-icon',
       ),
       'seen_have_unread' => array(
-        'x' => 14,
-        'y' => 14,
+        'x' => 18,
+        'y' => 18,
         'css' =>
           '.alert-notifications:hover .phabricator-main-menu-alert-icon',
       ),
       'unseen_any' => array(
-        'x' => 14,
-        'y' => 14,
+        'x' => 18,
+        'y' => 18,
         'css' =>
           '.alert-notifications.alert-unread .phabricator-main-menu-alert-icon',
       ),
@@ -126,20 +126,20 @@ final class CeleritySpriteGenerator {
         'css' => '.phabricator-main-menu-logo-image',
       ),
       'conf-off' => array(
-        'x' => 14,
-        'y' => 14,
+        'x' => 18,
+        'y' => 18,
         'css' =>
           '.alert-notifications .phabricator-main-menu-message-icon',
       ),
       'conf-hover' => array(
-        'x' => 14,
-        'y' => 14,
+        'x' => 18,
+        'y' => 18,
         'css' =>
           '.alert-notifications:hover .phabricator-main-menu-message-icon',
       ),
       'conf-unseen' => array(
-        'x' => 14,
-        'y' => 14,
+        'x' => 18,
+        'y' => 18,
         'css' =>
           '.alert-notifications.message-unread '.
           '.phabricator-main-menu-message-icon',

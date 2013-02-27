@@ -33,29 +33,29 @@ final class PhabricatorDaemonLogViewController
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Daemon')
+          ->setLabel(pht('Daemon'))
           ->setValue($log->getDaemon()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Host')
+          ->setLabel(pht('Host'))
           ->setValue($log->getHost()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('PID')
+          ->setLabel(pht('PID'))
           ->setValue($log->getPID()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Started')
+          ->setLabel(pht('Started'))
           ->setValue(
             phabricator_datetime($log->getDateCreated(), $user)))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Argv')
+          ->setLabel(pht('Argv'))
           ->setValue($argv));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Daemon Details');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setHeader(pht('Daemon Details'));
+    $panel->setNoBackground();
     $panel->appendChild($form);
 
     $content[] = $panel;
@@ -65,7 +65,8 @@ final class PhabricatorDaemonLogViewController
     $event_view->setEvents($events);
 
     $log_panel = new AphrontPanelView();
-    $log_panel->setHeader('Daemon Logs');
+    $log_panel->setHeader(pht('Daemon Logs'));
+    $log_panel->setNoBackground();
     $log_panel->appendChild($event_view);
 
     $content[] = $log_panel;
@@ -77,7 +78,7 @@ final class PhabricatorDaemonLogViewController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Daemon Log',
+        'title' => pht('Daemon Log'),
       ));
   }
 

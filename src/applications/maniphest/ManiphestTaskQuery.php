@@ -58,7 +58,16 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
   private $rowCount         = null;
 
   private $groupByProjectResults = null; // See comment at bottom for details
+  private $viewer;
 
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
 
   public function withAuthors(array $authors) {
     $this->authorPHIDs = $authors;

@@ -12,7 +12,7 @@ final class PhabricatorCountdownEditController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $action_label = 'Create Timer';
+    $action_label = pht('Create Timer');
 
     if ($this->id) {
       $timer = id(new PhabricatorTimer())->load($this->id);
@@ -26,7 +26,7 @@ final class PhabricatorCountdownEditController
         return new Aphront403Response();
       }
 
-      $action_label = 'Update Timer';
+      $action_label = pht('Update Timer');
     } else {
       $timer = new PhabricatorTimer();
       $timer->setDatePoint(time());
@@ -42,8 +42,8 @@ final class PhabricatorCountdownEditController
 
       $e_text = null;
       if (!strlen($title)) {
-        $e_text = 'Required';
-        $errors[] = 'You must give it a name.';
+        $e_text = pht('Required');
+        $errors[] = pht('You must give it a name.');
       }
 
       // If the user types something like "5 PM", convert it to a timestamp
@@ -54,9 +54,9 @@ final class PhabricatorCountdownEditController
         $date = new DateTime($datepoint, $timezone);
         $timestamp = $date->format('U');
       } catch (Exception $e) {
-        $errors[] = 'You entered an incorrect date. You can enter date like'.
-          ' \'2011-06-26 13:33:37\' to create an event at'.
-          ' 13:33:37 on the 26th of June 2011.';
+        $errors[] = pht('You entered an incorrect date. You can enter date'.
+          ' like \'2011-06-26 13:33:37\' to create an event at'.
+          ' 13:33:37 on the 26th of June 2011.');
         $timestamp = null;
       }
 
@@ -71,8 +71,8 @@ final class PhabricatorCountdownEditController
       } else {
         $error_view = id(new AphrontErrorView())
           ->setErrors($errors)
-          ->setTitle('It\'s not The Final Countdown (du nu nuuu nun)' .
-            ' until you fix these problem');
+          ->setTitle(pht('It\'s not The Final Countdown (du nu nuuu nun)' .
+            ' until you fix these problem'));
       }
     }
 
@@ -89,19 +89,17 @@ final class PhabricatorCountdownEditController
       ->setAction($request->getRequestURI()->getPath())
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Title')
+          ->setLabel(pht('Title'))
           ->setValue($timer->getTitle())
           ->setName('title'))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('End date')
+          ->setLabel(pht('End date'))
           ->setValue($display_datepoint)
           ->setName('datepoint')
-          ->setCaption(hsprintf(
-            'Examples: '.
-            '<tt>2011-12-25</tt> or '.
-            '<tt>3 hours</tt> or '.
-            '<tt>June 8 2011, 5 PM</tt>.')))
+          ->setCaption(pht('Examples: '.
+            '2011-12-25 or 3 hours or '.
+            'June 8 2011, 5 PM.')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/countdown/')
@@ -110,15 +108,25 @@ final class PhabricatorCountdownEditController
     $panel = id(new AphrontPanelView())
       ->setWidth(AphrontPanelView::WIDTH_FORM)
       ->setHeader($action_label)
+      ->setNoBackground()
       ->appendChild($form);
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($action_label)
+          ->setHref($this->getApplicationURI('edit/')));
+
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         $error_view,
         $panel,
       ),
       array(
-        'title' => 'Edit Countdown',
+        'title' => pht('Edit Countdown'),
+        'device' => true,
       ));
   }
 }

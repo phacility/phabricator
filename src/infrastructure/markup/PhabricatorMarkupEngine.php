@@ -41,7 +41,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
-  private $version = 4;
+  private $version = 5;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -398,25 +398,17 @@ final class PhabricatorMarkupEngine {
     }
 
     $rules[] = new PhutilRemarkupRuleHyperlink();
-    $rules[] = new PhabricatorRemarkupRulePhriction();
-
-    $rules[] = new PhabricatorRemarkupRuleDifferentialHandle();
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      $rules[] = new PhabricatorRemarkupRuleManiphestHandle();
-    }
+    $rules[] = new PhrictionRemarkupRule();
 
     $rules[] = new PhabricatorRemarkupRuleEmbedFile();
+    $rules[] = new PhabricatorCountdownRemarkupRule();
 
-    $rules[] = new PhabricatorRemarkupRuleDifferential();
-    $rules[] = new PhabricatorRemarkupRuleDiffusion();
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      $rules[] = new PhabricatorRemarkupRuleManiphest();
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      foreach ($application->getRemarkupRules() as $rule) {
+        $rules[] = $rule;
+      }
     }
-    $rules[] = new PhabricatorRemarkupRulePaste();
-
-    $rules[] = new PhabricatorRemarkupRuleCountdown();
-
-    $rules[] = new PonderRuleQuestion();
 
     if ($options['macros']) {
       $rules[] = new PhabricatorRemarkupRuleImageMacro();

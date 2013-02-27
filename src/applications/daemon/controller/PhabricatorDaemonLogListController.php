@@ -25,7 +25,7 @@ final class PhabricatorDaemonLogListController
     $daemon_table->setDaemonLogs($logs);
 
     $daemon_panel = new AphrontPanelView();
-    $daemon_panel->setHeader('All Daemons');
+    $daemon_panel->setHeader(pht('All Daemons'));
     $daemon_panel->appendChild($daemon_table);
     $daemon_panel->appendChild($pager);
     $daemon_panel->setNoBackground();
@@ -37,7 +37,7 @@ final class PhabricatorDaemonLogListController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'All Daemons',
+        'title' => pht('All Daemons'),
       ));
   }
 

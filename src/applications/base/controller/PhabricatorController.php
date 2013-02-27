@@ -170,6 +170,8 @@ abstract class PhabricatorController extends AphrontController {
       $page->setDeviceReady(true);
     }
 
+    $page->setShowChrome(idx($options, 'chrome', true));
+
     $application_menu = $this->buildApplicationMenu();
     if ($application_menu) {
       $page->setApplicationMenu($application_menu);
