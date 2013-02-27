@@ -47,10 +47,10 @@ final class PhabricatorObjectHandleData {
         return mpull($users, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
-        $commit_dao = new PhabricatorRepositoryCommit();
-        $commits = $commit_dao->putInSet(new LiskDAOSet())->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
+        $commits = id(new DiffusionCommitQuery())
+          ->setViewer($this->viewer)
+          ->withPHIDs($phids)
+          ->execute();
         return mpull($commits, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_TASK:
@@ -329,17 +329,10 @@ final class PhabricatorObjectHandleData {
             $handle->setPHID($phid);
             $handle->setType($type);
 
-            $repository = null;
-            if (!empty($objects[$phid])) {
-              $repository = $objects[$phid]->loadOneRelative(
-                new PhabricatorRepository(),
-                'id',
-                'getRepositoryID');
-            }
-
-            if (!$repository) {
+            if (empty($objects[$phid])) {
               $handle->setName('Unknown Commit');
             } else {
+              $repository = $objects[$phid]->getRepository();
               $commit = $objects[$phid];
               $callsign = $repository->getCallsign();
               $commit_identifier = $commit->getCommitIdentifier();
@@ -358,6 +351,7 @@ final class PhabricatorObjectHandleData {
               $handle->setTimestamp($commit->getEpoch());
               $handle->setComplete(true);
             }
+
             $handles[$phid] = $handle;
           }
           break;

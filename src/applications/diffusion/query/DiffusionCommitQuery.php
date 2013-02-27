@@ -4,6 +4,7 @@ final class DiffusionCommitQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $identifiers;
+  private $phids;
 
   /**
    * Load commits by partial or full identifiers, e.g. "rXab82393", "rX1234",
@@ -13,6 +14,11 @@ final class DiffusionCommitQuery
    */
   public function withIdentifiers(array $identifiers) {
     $this->identifiers = $identifiers;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -132,6 +138,13 @@ final class DiffusionCommitQuery
         // nothing.
         $where[] = qsprintf($conn_r, '1 = 0');
       }
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     return $this->formatWhereClause($where);

@@ -41,14 +41,14 @@ abstract class PhabricatorRemarkupRuleObject
     $text = $this->getObjectNamePrefix().$id;
     if ($anchor) {
       $matches = null;
-      if (preg_match('@^#(?:comment-)?(\d{1,7})$@', $anchor, $matches)) {
+      if (preg_match('@^(?:comment-)?(\d{1,7})$@', $anchor, $matches)) {
         // Maximum length is 7 because 12345678 could be a file hash in
         // Differential.
-        $href = $href."#comment-".$matches[1];
-        $text = $text."#".$matches[1];
+        $href = $href.'#comment-'.$matches[1];
+        $text = $text.'#'.$matches[1];
       } else {
-        $href = $href.$anchor;
-        $text = $text.$anchor;
+        $href = $href.'#'.$anchor;
+        $text = $text.'#'.$anchor;
       }
     }
 
@@ -92,8 +92,11 @@ abstract class PhabricatorRemarkupRuleObject
       array($this, 'markupObjectEmbed'),
       $text);
 
+    // NOTE: The "(?<!#)" prevents us from linking "#abcdef" or similar. The
+    // "\b" allows us to link "(abcdef)" or similar without linking things
+    // in the middle of words.
     $text = preg_replace_callback(
-      '@\b'.$prefix.'('.$id.')(?:#([-\w\d]+))?\b@',
+      '@(?<!#)\b'.$prefix.'('.$id.')(?:#([-\w\d]+))?\b@',
       array($this, 'markupObjectReference'),
       $text);
 
