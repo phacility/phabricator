@@ -5,7 +5,6 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
   private $filter;
   private $name;
   private $filterStatus;
-  private $filterConcern;
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
