@@ -9,11 +9,9 @@ final class DiffusionMercurialLastModifiedQuery
 
     $path = $drequest->getPath();
 
-    // TODO: Share some of this with History query.
     list($hash) = $repository->execxLocalCommand(
-      'log --template %s --limit 1 -b %s --rev %s:0 -- %s',
+      'log --template %s --limit 1 --rev %s:0 -- %s',
       '{node}',
-      $drequest->getBranch(),
       $drequest->getCommit(),
       nonempty(ltrim($path, '/'), '.'));
 
