@@ -398,6 +398,7 @@ abstract class DifferentialMail {
 
     $body = array();
     foreach ($aux_fields as $field) {
+      $field->setUser(id(new PhabricatorUser())->setPHID('PHID-USER-XXX'));
       $field->setRevision($this->getRevision());
       // TODO: Introduce and use getRequiredHandlePHIDsForMail() and load all
       // handles in prepareBody().
