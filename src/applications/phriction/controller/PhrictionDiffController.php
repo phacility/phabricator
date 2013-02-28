@@ -48,8 +48,8 @@ final class PhrictionDiffController
     $text_l = $content_l->getContent();
     $text_r = $content_r->getContent();
 
-    $text_l = wordwrap($text_l, 80);
-    $text_r = wordwrap($text_r, 80);
+    $text_l = phutil_utf8_hard_wrap($text_l, 80);
+    $text_r = phutil_utf8_hard_wrap($text_r, 80);
 
 
     $engine = new PhabricatorDifferenceEngine();

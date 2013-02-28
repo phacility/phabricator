@@ -23,10 +23,8 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
     // TODO: On mobile, or perhaps by default, we should switch to 1-up once
     // that is built.
 
-    // TODO: This should be utf8-aware, but we don't currently have a plain-text
-    // utf8 hard-wrap function. See T2554.
-    $old = wordwrap($old, 80);
-    $new = wordwrap($new, 80);
+    $old = phutil_utf8_hard_wrap($old, 80);
+    $new = phutil_utf8_hard_wrap($new, 80);
 
     $engine = new PhabricatorDifferenceEngine();
     $changeset = $engine->generateChangesetFromFileContent($old, $new);
