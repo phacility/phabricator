@@ -5,6 +5,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
   private $filter;
   private $name;
   private $filterStatus;
+  private $filterConcern;
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
@@ -38,6 +39,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     $this->filterStatus = $request->getStr('status', 'all');
+
     $handle = $this->loadHandle();
 
     $nav->appendChild($this->buildListFilters($handle));
@@ -187,6 +189,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
             array(
               'all'   => pht('All'),
               'open'  => pht('Open'),
+              'concern' => pht('Concern Raised'),
             )));
     }
 
@@ -346,19 +349,18 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     switch ($this->filter) {
-      case 'audits':
-      case 'user':
-      case 'project':
-      case 'package':
-      case 'repository':
+      case 'active':
+        $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+        break;
+      default:
         switch ($this->filterStatus) {
           case 'open':
             $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
             break;
+          case 'concern':
+            $query->withStatus(PhabricatorAuditQuery::STATUS_CONCERN);
+            break;
         }
-        break;
-      case 'active':
-        $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
         break;
     }
 
@@ -454,13 +456,15 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     switch ($this->filter) {
       case 'active':
-        $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+        $query->withStatus(PhabricatorAuditCommitQuery::STATUS_OPEN);
         break;
-      case 'author':
-      case 'packagecommits':
+      default:
         switch ($this->filterStatus) {
           case 'open':
-            $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+            $query->withStatus(PhabricatorAuditCommitQuery::STATUS_OPEN);
+            break;
+          case 'concern':
+            $query->withStatus(PhabricatorAuditCommitQuery::STATUS_CONCERN);
             break;
         }
         break;

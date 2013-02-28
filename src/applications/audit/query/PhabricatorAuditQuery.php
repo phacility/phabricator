@@ -18,6 +18,7 @@ final class PhabricatorAuditQuery {
   private $status     = 'status-any';
   const STATUS_ANY    = 'status-any';
   const STATUS_OPEN   = 'status-open';
+  const STATUS_CONCERN = 'status-concern';
 
   private $commits;
 
@@ -190,6 +191,12 @@ final class PhabricatorAuditQuery {
 
     $status = $this->status;
     switch ($status) {
+      case self::STATUS_CONCERN:
+        $where[] = qsprintf(
+          $conn_r,
+          'req.auditStatus = %s',
+          PhabricatorAuditStatusConstants::CONCERNED);
+        break;
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,

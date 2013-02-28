@@ -16,6 +16,7 @@ final class PhabricatorAuditCommitQuery {
   private $status     = 'status-any';
   const STATUS_ANY    = 'status-any';
   const STATUS_OPEN   = 'status-open';
+  const STATUS_CONCERN = 'status-concern';
 
   public function withAuthorPHIDs(array $author_phids) {
     $this->authorPHIDs = $author_phids;
@@ -177,11 +178,17 @@ final class PhabricatorAuditCommitQuery {
 
     $status = $this->status;
     switch ($status) {
-      case self::STATUS_OPEN:
+      case self::STATUS_CONCERN:
         $where[] = qsprintf(
           $conn_r,
           'c.auditStatus = %s',
           PhabricatorAuditCommitStatusConstants::CONCERN_RAISED);
+        break;
+      case self::STATUS_OPEN:
+        $where[] = qsprintf(
+          $conn_r,
+          'c.auditStatus IN (%Ls)',
+          PhabricatorAuditCommitStatusConstants::getOpenStatusConstants());
         break;
       case self::STATUS_ANY:
         break;
