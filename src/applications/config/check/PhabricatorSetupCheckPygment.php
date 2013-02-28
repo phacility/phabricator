@@ -7,7 +7,7 @@ final class PhabricatorSetupCheckPygment extends PhabricatorSetupCheck {
     $pygment = PhabricatorEnv::getEnvConfig('pygments.enabled');
 
     if ($pygment) {
-      list($err) = exec_manual('pgymentize -h');
+      list($err) = exec_manual('pygmentize -h');
       if ($err) {
         $summary = pht(
           'You enabled pygments but the pygmentize script is not '.
