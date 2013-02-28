@@ -271,8 +271,8 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $views = array();
     switch ($this->filter) {
       case 'active':
-        $views[] = $this->buildAuditView($handle);
         $views[] = $this->buildCommitView($handle);
+        $views[] = $this->buildAuditView($handle);
         break;
       case 'audits':
       case 'user':
@@ -455,7 +455,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     switch ($this->filter) {
       case 'active':
-        $query->withStatus(PhabricatorAuditCommitQuery::STATUS_OPEN);
+        $query->withStatus(PhabricatorAuditCommitQuery::STATUS_CONCERN);
         break;
       default:
         switch ($this->filterStatus) {
