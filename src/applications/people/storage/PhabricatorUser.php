@@ -26,6 +26,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
   protected $isDisabled = 0;
 
   private $preferences = null;
+  private $omnipotent = false;
 
   protected function readField($field) {
     switch ($field) {
@@ -659,6 +660,37 @@ EOBODY;
     return id(new PhabricatorUser())->loadOneWhere(
       'phid = %s',
       $email->getUserPHID());
+  }
+
+
+/* -(  Omnipotence  )-------------------------------------------------------- */
+
+
+  /**
+   * Returns true if this user is omnipotent. Omnipotent users bypass all policy
+   * checks.
+   *
+   * @return bool True if the user bypasses policy checks.
+   */
+  public function isOmnipotent() {
+    return $this->omnipotent;
+  }
+
+
+  /**
+   * Get an omnipotent user object for use in contexts where there is no acting
+   * user, notably daemons.
+   *
+   * @return PhabricatorUser An omnipotent user.
+   */
+  public static function getOmnipotentUser() {
+    static $user = null;
+    if (!$user) {
+      $user = new PhabricatorUser();
+      $user->omnipotent = true;
+      $user->makeEphemeral();
+    }
+    return $user;
   }
 
 }

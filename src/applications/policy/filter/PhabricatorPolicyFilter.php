@@ -173,6 +173,10 @@ final class PhabricatorPolicyFilter {
 
     $viewer = $this->viewer;
 
+    if ($viewer->isOmnipotent()) {
+      return true;
+    }
+
     if ($object->hasAutomaticCapability($capability, $viewer)) {
       return true;
     }

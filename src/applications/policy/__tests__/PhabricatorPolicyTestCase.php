@@ -155,6 +155,24 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
 
 
   /**
+   * Test that omnipotent users bypass policies.
+   */
+  public function testOmnipotence() {
+    $results = array(
+      $this->buildObject(PhabricatorPolicies::POLICY_NOONE),
+    );
+
+    $query = new PhabricatorPolicyAwareTestQuery();
+    $query->setResults($results);
+    $query->setViewer(PhabricatorUser::getOmnipotentUser());
+
+    $this->assertEqual(
+      1,
+      count($query->execute()));
+  }
+
+
+  /**
    * Test an object for visibility across multiple user specifications.
    */
   private function expectVisibility(
