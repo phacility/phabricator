@@ -44,11 +44,11 @@ final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
     }
 
     list($stdout) = $repository->execxLocalCommand(
-      'log --debug --template %s --limit %d %C --rev %s::0 %C',
+      'log --debug --template %s --limit %d %C --rev %s %C',
       '{node};{parents}\\n',
       ($this->getOffset() + $this->getLimit()), // No '--skip' in Mercurial.
       $branch_arg,
-      $commit_hash,
+      hgsprintf('reverse(%s::%s)', '0', $commit_hash),
       $path_arg);
 
     $lines = explode("\n", trim($stdout));
