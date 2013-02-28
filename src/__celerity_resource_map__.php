@@ -2924,7 +2924,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-property-list-view-css' =>
   array(
-    'uri' => '/res/dfee0687/rsrc/css/layout/phabricator-property-list-view.css',
+    'uri' => '/res/a04cc81d/rsrc/css/layout/phabricator-property-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3218,7 +3218,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/4ca7889f/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/5cff78f4/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(

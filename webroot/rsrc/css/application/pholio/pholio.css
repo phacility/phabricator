@@ -59,7 +59,9 @@
 
 .pholio-mock-image-panel {
   padding: 20px;
-  margin-right: 320px;
+  margin-right: 319px;
+  border-top: 1px solid #333;
+  border-right: 1px solid #333;
 }
 
 .pholio-mock-image-viewport {
@@ -71,6 +73,7 @@
 .pholio-mock-inline-comments {
   width: 320px;
   border-left: 1px solid #101010;
+  border-top: 1px solid #333;
   position: absolute;
   top: 0;
   bottom: 0;

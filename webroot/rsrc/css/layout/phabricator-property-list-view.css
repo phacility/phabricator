@@ -95,6 +95,8 @@
 
 .phabricator-property-list-image-content {
   background: #282828;
+  border-color: #101010;
+  color: #fff;
 }
 
 
