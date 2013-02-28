@@ -11,6 +11,10 @@
   position:       relative;
 }
 
+.dark-console a {
+  color: #cccccc;
+}
+
 .dark-console-requests,
 .dark-console-tabs {
   position: absolute;
@@ -57,7 +61,6 @@
   overflow: hidden;
   background: #444444;
   margin: 3px 0;
-  color: #cccccc;
   border-color: #666666;
   border-width: 1px 0;
   border-style: solid;
