@@ -147,18 +147,27 @@ final class DiffusionHomeController extends DiffusionController {
 
     $repository_tool_uri = PhabricatorEnv::getProductionURI('/repository/');
     $repository_tool     = phutil_tag('a',
-                                             array(
-                                               'href' => $repository_tool_uri,
-                                             ),
-                                             'repository tool');
-    $no_repositories_txt = 'This instance of Phabricator does not have any '.
-                           'configured repositories. ';
+      array(
+       'href' => $repository_tool_uri,
+      ),
+      'repository tool');
+    $preface = pht('This instance of Phabricator does not have any '.
+                   'configured repositories.');
     if ($user->getIsAdmin()) {
-      $no_repositories_txt .= 'To setup one or more repositories, visit the '.
-                              $repository_tool.'.';
+      $no_repositories_txt = hsprintf(
+        '%s %s',
+        $preface,
+        pht(
+          'To setup one or more repositories, visit the %s.',
+          $repository_tool));
     } else {
-      $no_repositories_txt .= 'Ask an administrator to setup one or more '.
-                              'repositories via the '.$repository_tool.'.';
+      $no_repositories_txt = hsprintf(
+        '%s %s',
+        $preface,
+        pht(
+          'Ask an administrator to setup one or more repositories '.
+          'via the %s.',
+          $repository_tool));
     }
 
     $table = new AphrontTableView($rows);
