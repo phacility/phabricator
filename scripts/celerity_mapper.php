@@ -50,6 +50,7 @@ $package_spec = array(
     'javelin-behavior-phabricator-search-typeahead',
     'javelin-behavior-konami',
     'javelin-behavior-aphlict-dropdown',
+    'javelin-behavior-history-install',
 
     'javelin-behavior-phabricator-active-nav',
     'javelin-behavior-phabricator-nav',

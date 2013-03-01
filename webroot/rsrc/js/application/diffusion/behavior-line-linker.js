@@ -3,7 +3,7 @@
  * @requires javelin-behavior
  *           javelin-stratcom
  *           javelin-dom
- *           javelin-uri
+ *           javelin-history
  */
 
 JX.behavior('diffusion-line-linker', function() {
@@ -31,28 +31,34 @@ JX.behavior('diffusion-line-linker', function() {
     });
 
   JX.Stratcom.listen(
-    'mouseover',
-    'diffusion-source',
+    'click',
+    'diffusion-line-link',
     function(e) {
-      if (!origin || e.getNode('diffusion-source') !== root) {
-        return;
-      }
-      target = e.getNode('tag:tr');
-
-      var highlighting = false;
-      var source = null;
-      var trs = JX.DOM.scry(root, 'tr');
-      for (var i = 0; i < trs.length; i++) {
-        if (!highlighting && (trs[i] === origin || trs[i] === target)) {
-          highlighting = true;
-          source = trs[i];
-        }
-        JX.DOM.alterClass(trs[i], 'highlighted', highlighting);
-        if (trs[i] === (source === origin ? target : origin)) {
-          highlighting = false;
-        }
-      }
+      e.kill();
     });
+
+  var highlight = function(e) {
+    if (!origin || e.getNode('diffusion-source') !== root) {
+      return;
+    }
+    target = e.getNode('tag:tr');
+
+    var highlighting = false;
+    var source = null;
+    var trs = JX.DOM.scry(root, 'tr');
+    for (var i = 0; i < trs.length; i++) {
+      if (!highlighting && (trs[i] === origin || trs[i] === target)) {
+        highlighting = true;
+        source = trs[i];
+      }
+      JX.DOM.alterClass(trs[i], 'highlighted', highlighting);
+      if (trs[i] === (source === origin ? target : origin)) {
+        highlighting = false;
+      }
+    }
+  };
+
+  JX.Stratcom.listen('mouseover', 'diffusion-source', highlight);
 
   JX.Stratcom.listen(
     'mouseup',
@@ -61,6 +67,8 @@ JX.behavior('diffusion-line-linker', function() {
       if (!origin) {
         return;
       }
+
+      highlight(e);
 
       var o = getRowNumber(origin);
       var t = getRowNumber(target);
@@ -72,7 +80,7 @@ JX.behavior('diffusion-line-linker', function() {
       origin = null;
       target = null;
       e.kill();
-      JX.$U(uri).go();
+      JX.History.replace(uri);
     });
 
 });

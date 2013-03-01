@@ -153,6 +153,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     Javelin::initBehavior('aphront-form-disable-on-submit');
     Javelin::initBehavior('toggle-class', array());
     Javelin::initBehavior('konami', array());
+    Javelin::initBehavior('history-install');
 
     $current_token = null;
     if ($user) {
