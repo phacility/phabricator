@@ -41,7 +41,7 @@ final class PhabricatorPasteQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorPaste();
     $conn_r = $table->establishConnection('r');
 

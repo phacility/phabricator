@@ -50,7 +50,7 @@ final class PholioMockQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PholioMock();
     $conn_r = $table->establishConnection('r');
 

@@ -24,7 +24,7 @@ final class PhabricatorApplicationTransactionCommentQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = $this->template;
     $conn_r = $table->establishConnection('r');
 

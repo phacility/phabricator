@@ -26,7 +26,7 @@ final class PhabricatorRepositoryQuery
     return true;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorRepository();
     $conn_r = $table->establishConnection('r');
 

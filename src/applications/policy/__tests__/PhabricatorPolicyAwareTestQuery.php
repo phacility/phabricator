@@ -18,7 +18,7 @@ final class PhabricatorPolicyAwareTestQuery
     $this->offset = 0;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     if ($this->getRawResultLimit()) {
       return array_slice(
         $this->results,

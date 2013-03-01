@@ -16,7 +16,7 @@ final class PhabricatorChatLogQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table  = new PhabricatorChatLogEvent();
     $conn_r = $table->establishConnection('r');
 

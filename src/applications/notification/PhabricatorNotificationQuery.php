@@ -45,7 +45,7 @@ final class PhabricatorNotificationQuery
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
-  public function loadPage() {
+  protected function loadPage() {
     if (!$this->userPHID) {
       throw new Exception("Call setUser() before executing the query");
     }

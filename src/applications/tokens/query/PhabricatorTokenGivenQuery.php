@@ -22,7 +22,7 @@ final class PhabricatorTokenGivenQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorTokenGiven();
     $conn_r = $table->establishConnection('r');
 

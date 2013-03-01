@@ -45,7 +45,7 @@ abstract class PhabricatorApplicationTransactionQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = $this->getTemplateApplicationTransaction();
     $conn_r = $table->establishConnection('r');
 

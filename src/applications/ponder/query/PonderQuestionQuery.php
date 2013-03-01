@@ -84,7 +84,7 @@ final class PonderQuestionQuery
     }
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $question = new PonderQuestion();
     $conn_r = $question->establishConnection('r');
 
