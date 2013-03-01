@@ -79,7 +79,7 @@ final class PhabricatorTagView extends AphrontView {
 
   public function render() {
     if (!$this->type) {
-      throw new Exception("You must call setType() before render()!");
+      throw new Exception(pht("You must call setType() before render()!"));
     }
 
     require_celerity_resource('phabricator-tag-view-css');

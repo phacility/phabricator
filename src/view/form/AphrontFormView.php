@@ -71,7 +71,7 @@ final class AphrontFormView extends AphrontView {
       ->appendChild($this->renderChildren());
 
     if (!$this->user) {
-      throw new Exception('You must pass the user to AphrontFormView.');
+      throw new Exception(pht('You must pass the user to AphrontFormView.'));
     }
 
     $sigils = $this->sigils;

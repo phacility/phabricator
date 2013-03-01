@@ -128,7 +128,7 @@ abstract class AphrontFormControl extends AphrontView {
         $error = phutil_tag(
           'div',
           array('class' => 'aphront-form-error aphront-form-required'),
-          'Required');
+          pht('Required'));
       } else {
         $error = phutil_tag(
           'div',

@@ -103,7 +103,7 @@ final class PhabricatorPropertyListView extends AphrontView {
           $items[] = $this->renderTextPart($part);
           break;
         default:
-          throw new Exception("Unknown part type '{$type}'!");
+          throw new Exception(pht("Unknown part type '%s'!", $type));
       }
     }
 

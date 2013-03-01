@@ -95,8 +95,8 @@ function phabricator_format_local_time($epoch, $user, $format) {
     // NOTE: DateTime throws an empty exception if the format is invalid,
     // just replace it with a useful one.
     throw new Exception(
-      "Construction of a DateTime() with epoch '{$epoch}' ".
-      "raised an exception.");
+      pht("Construction of a DateTime() with epoch '%s' ".
+      "raised an exception.", $epoch));
   }
 
   $date->setTimeZone($zone);

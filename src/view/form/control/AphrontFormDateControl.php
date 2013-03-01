@@ -23,7 +23,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
     $user = $this->user;
     if (!$this->user) {
       throw new Exception(
-        "Call setUser() before readValueFromRequest()!");
+        pht("Call setUser() before readValueFromRequest()!"));
     }
 
     $user_zone = $user->getTimezoneIdentifier();
@@ -184,18 +184,18 @@ final class AphrontFormDateControl extends AphrontFormControl {
     $days = array_fuse($days);
 
     $months = array(
-      1 => 'Jan',
-      2 => 'Feb',
-      3 => 'Mar',
-      4 => 'Apr',
-      5 => 'May',
-      6 => 'Jun',
-      7 => 'Jul',
-      8 => 'Aug',
-      9 => 'Sep',
-      10 => 'Oct',
-      11 => 'Nov',
-      12 => 'Dec',
+      1 => pht('Jan'),
+      2 => pht('Feb'),
+      3 => pht('Mar'),
+      4 => pht('Apr'),
+      5 => pht('May'),
+      6 => pht('Jun'),
+      7 => pht('Jul'),
+      8 => pht('Aug'),
+      9 => pht('Sep'),
+      10 => pht('Oct'),
+      11 => pht('Nov'),
+      12 => pht('Dec'),
     );
 
     $years = range($this->getMinYear(), $this->getMaxYear());

@@ -30,7 +30,7 @@ final class AphrontFormImageControl extends AphrontFormControl {
         array(
           'for' => $id,
         ),
-        'Use Default Image instead'));
+        pht('Use Default Image instead')));
   }
 
 }

@@ -59,7 +59,8 @@ final class PhabricatorMenuView extends AphrontTagView {
     }
 
     if (!$this->getItem($key)) {
-      throw new Exception("No such key '{$key}' to add menu item after!");
+      throw new Exception(pht("No such key '%s' to add menu item after!",
+        $key));
     }
 
     $result = array();
@@ -99,7 +100,7 @@ final class PhabricatorMenuView extends AphrontTagView {
 
     $other = $this->getItem($key);
     if ($other->getType() != PhabricatorMenuItemView::TYPE_LABEL) {
-      throw new Exception("Menu item '{$key}' is not a label!");
+      throw new Exception(pht("Menu item '%s' is not a label!", $key));
     }
 
     $seen = false;
@@ -122,7 +123,7 @@ final class PhabricatorMenuView extends AphrontTagView {
 
   private function requireKey($key) {
     if (!$this->getItem($key)) {
-      throw new Exception("No menu item with key '{$key}' exists!");
+      throw new Exception(pht("No menu item with key '%s' exists!", $key));
     }
   }
 
@@ -153,7 +154,7 @@ final class PhabricatorMenuView extends AphrontTagView {
       if ($key !== null) {
         if (isset($key_map[$key])) {
           throw new Exception(
-            "Menu contains duplicate items with key '{$key}'!");
+            pht("Menu contains duplicate items with key '%s'!", $key));
         }
         $key_map[$key] = $item;
       }

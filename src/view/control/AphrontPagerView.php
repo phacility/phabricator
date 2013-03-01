@@ -99,7 +99,7 @@ final class AphrontPagerView extends AphrontView {
   public function render() {
     if (!$this->uri) {
       throw new Exception(
-        "You must call setURI() before you can call render().");
+        pht("You must call setURI() before you can call render()."));
     }
 
     require_celerity_resource('aphront-pager-view-css');
@@ -140,11 +140,11 @@ final class AphrontPagerView extends AphrontView {
     $next_index = null;
 
     if ($min > 0) {
-      $links[] = array(0, 'First', null);
+      $links[] = array(0, pht('First'), null);
     }
 
     if ($page > 0) {
-      $links[] = array($page - 1, 'Prev', null);
+      $links[] = array($page - 1, pht('Prev'), null);
       $prev_index = $page - 1;
     }
 
@@ -153,12 +153,12 @@ final class AphrontPagerView extends AphrontView {
     }
 
     if ($page < $last && $last > 0) {
-      $links[] = array($page + 1, 'Next', null);
+      $links[] = array($page + 1, pht('Next'), null);
       $next_index = $page + 1;
     }
 
     if ($max < ($last - 1)) {
-      $links[] = array($last, 'Last', null);
+      $links[] = array($last, pht('Last'), null);
     }
 
     $base_uri = $this->uri;

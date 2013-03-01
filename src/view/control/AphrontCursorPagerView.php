@@ -82,7 +82,7 @@ final class AphrontCursorPagerView extends AphrontView {
   public function render() {
     if (!$this->uri) {
       throw new Exception(
-        "You must call setURI() before you can call render().");
+        pht("You must call setURI() before you can call render()."));
     }
 
     $links = array();
@@ -95,7 +95,7 @@ final class AphrontCursorPagerView extends AphrontView {
             ->alter('before', null)
             ->alter('after', null),
         ),
-        "\xC2\xAB First");
+        "\xC2\xAB ". pht("First"));
     }
 
     if ($this->prevPageID) {
@@ -106,7 +106,7 @@ final class AphrontCursorPagerView extends AphrontView {
             ->alter('after', null)
             ->alter('before', $this->prevPageID),
         ),
-        "\xE2\x80\xB9 Prev");
+        "\xE2\x80\xB9 " . pht("Prev"));
     }
 
     if ($this->nextPageID) {

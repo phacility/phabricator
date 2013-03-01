@@ -21,12 +21,12 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     $this->capability = $capability;
 
     $labels = array(
-      PhabricatorPolicyCapability::CAN_VIEW => 'Visible To',
-      PhabricatorPolicyCapability::CAN_EDIT => 'Editable By',
-      PhabricatorPolicyCapability::CAN_JOIN => 'Joinable By',
+      PhabricatorPolicyCapability::CAN_VIEW => pht('Visible To'),
+      PhabricatorPolicyCapability::CAN_EDIT => pht('Editable By'),
+      PhabricatorPolicyCapability::CAN_JOIN => pht('Joinable By'),
     );
 
-    $this->setLabel(idx($labels, $this->capability, 'Unknown Policy'));
+    $this->setLabel(idx($labels, $this->capability, pht('Unknown Policy')));
 
     return $this;
   }
@@ -52,10 +52,10 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
   protected function renderInput() {
     if (!$this->object) {
-      throw new Exception("Call setPolicyObject() before rendering!");
+      throw new Exception(pht("Call setPolicyObject() before rendering!"));
     }
     if (!$this->capability) {
-      throw new Exception("Call setCapability() before rendering!");
+      throw new Exception(pht("Call setCapability() before rendering!"));
     }
 
     $policy = $this->object->getPolicy($this->capability);
