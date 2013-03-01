@@ -74,7 +74,7 @@ final class PholioMockImagesView extends AphrontView {
         ),
       array($mock_wrapper, $inline_comments_holder));
 
-    if (count($mock->getImages()) > 1) {
+    if (count($mock->getImages()) > 0) {
       $thumbnails = array();
       foreach ($mock->getImages() as $image) {
         $thumbfile = $image->getFile();

@@ -123,7 +123,13 @@ final class PholioMock extends PholioDAO
   }
 
   public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
-    return $output;
+    require_celerity_resource('phabricator-remarkup-css');
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $output);
   }
 
   public function shouldUseMarkupCache($field) {

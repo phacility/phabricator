@@ -16,18 +16,14 @@ final class PholioInlineViewController extends PholioController {
     $user = $request->getUser();
 
     $inline_comment = id(new PholioTransactionComment())->load($this->id);
-    $handle = PhabricatorObjectHandleData::loadOneHandle(
-      $inline_comment->getAuthorPHID(),
-      $user);
+    $handle = head($this->loadViewerHandles(
+                array($inline_comment->getAuthorPHID())));
 
     $inline_view = id(new PholioInlineCommentView())
+      ->setUser($user)
       ->setHandle($handle)
-      ->setInlineComment($inline_comment);
-
-    if ($inline_comment->getEditPolicy(PhabricatorPolicyCapability::CAN_EDIT)
-      == $user->getPHID() && $inline_comment->getTransactionPHID() === null) {
-      $inline_view->setEditable(true);
-    }
+      ->setInlineComment($inline_comment)
+      ->setEngine(new PhabricatorMarkupEngine());
 
     return id(new AphrontAjaxResponse())->setContent(
       $inline_comment->toDictionary() + array(

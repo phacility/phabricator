@@ -11,6 +11,7 @@ final class PholioTransactionComment
   protected $y;
   protected $width;
   protected $height;
+  protected $content;
 
   public function getApplicationTransactionObject() {
     return new PholioTransaction();
@@ -28,4 +29,8 @@ final class PholioTransactionComment
     );
   }
 
+  public function shouldUseMarkupCache($field) {
+    // Only cache submitted comments.
+    return ($this->getTransactionPHID() != null);
+  }
 }
