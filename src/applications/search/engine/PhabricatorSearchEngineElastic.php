@@ -25,7 +25,9 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     $type = $doc->getDocumentType();
     $phid = $doc->getPHID();
-    $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
+    $handle = PhabricatorObjectHandleData::loadOneHandle(
+      $phid,
+      PhabricatorUser::getOmnipotentUser());
 
     // URL is not used internally but it can be useful externally.
     $spec = array(

@@ -14,13 +14,9 @@ final class PhabricatorObjectHandleData {
     return $this;
   }
 
-  public static function loadOneHandle($phid, $viewer = null) {
+  public static function loadOneHandle($phid, PhabricatorUser $viewer) {
     $query = new PhabricatorObjectHandleData(array($phid));
-
-    if ($viewer) {
-      $query->setViewer($viewer);
-    }
-
+    $query->setViewer($viewer);
     $handles = $query->loadHandles();
     return $handles[$phid];
   }
@@ -37,6 +33,11 @@ final class PhabricatorObjectHandleData {
   }
 
   private function loadObjectsOfType($type, array $phids) {
+    if (!$this->viewer) {
+      throw new Exception(
+        "You must provide a viewer to load handles or objects.");
+    }
+
     switch ($type) {
 
       case PhabricatorPHIDConstants::PHID_TYPE_USER:
@@ -73,15 +74,10 @@ final class PhabricatorObjectHandleData {
         return mpull($files, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
-        $object = new PhabricatorProject();
-        if ($this->viewer) {
-          $projects = id(new PhabricatorProjectQuery())
-            ->setViewer($this->viewer)
-            ->withPHIDs($phids)
-            ->execute();
-        } else {
-          $projects = $object->loadAllWhere('phid IN (%Ls)', $phids);
-        }
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer($this->viewer)
+          ->withPHIDs($phids)
+          ->execute();
         return mpull($projects, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_REPO:
@@ -260,10 +256,8 @@ final class PhabricatorObjectHandleData {
               $handle->setComplete(true);
               if (isset($statuses[$phid])) {
                 $handle->setStatus($statuses[$phid]->getTextStatus());
-                if ($this->viewer) {
-                  $handle->setTitle(
-                    $statuses[$phid]->getTerseSummary($this->viewer));
-                }
+                $handle->setTitle(
+                  $statuses[$phid]->getTerseSummary($this->viewer));
               }
               $handle->setDisabled($user->getIsDisabled());
 

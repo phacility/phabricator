@@ -1,6 +1,6 @@
 <?php
 
-abstract class PackageMail {
+abstract class PackageMail extends PhabricatorMail {
 
   protected $package;
   protected $handles;
@@ -80,7 +80,9 @@ abstract class PackageMail {
       $this->mailTo,
       array($package->getActorPHID()),
       array_keys($this->paths));
-    $this->handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $this->handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getActor())
+      ->loadHandles();
   }
 
   final protected function renderSummarySection() {

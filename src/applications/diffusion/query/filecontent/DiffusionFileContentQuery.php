@@ -85,9 +85,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
       }
 
       $loader = new PhabricatorObjectHandleData(array_unique($phids));
-      if ($this->viewer) {
-        $loader->setViewer($this->viewer);
-      }
+      $loader->setViewer($this->viewer);
       $handles = $loader->loadHandles();
 
       foreach ($commits_data as $data) {

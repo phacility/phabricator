@@ -29,6 +29,7 @@ final class ConduitAPI_phid_query_Method
     $phids = $request->getValue('phids');
 
     $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($request->getUser())
       ->loadHandles();
 
     $result = array();

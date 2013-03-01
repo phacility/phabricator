@@ -63,7 +63,9 @@ final class PholioInlineSaveController extends PholioController {
         ->setInlineComment($draft)
         ->setEditable(true)
         ->setHandle(
-          PhabricatorObjectHandleData::loadOneHandle($user->getPHID()));
+          PhabricatorObjectHandleData::loadOneHandle(
+            $user->getPHID(),
+            $user));
 
       return id(new AphrontAjaxResponse())
         ->setContent(

@@ -611,7 +611,11 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       }
     }
 
+    // TODO: This should use the query's viewer once this class extends
+    // PhabricatorPolicyQuery (T603).
+
     $handles = id(new PhabricatorObjectHandleData(array_keys($project_phids)))
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->loadHandles();
 
     $max = 1;

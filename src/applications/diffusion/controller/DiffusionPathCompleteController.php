@@ -32,6 +32,7 @@ final class DiffusionPathCompleteController extends DiffusionController {
       ));
 
     $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+    $browse_query->setViewer($request->getUser());
     $paths = $browse_query->loadPaths();
 
     $output = array();

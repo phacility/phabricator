@@ -126,8 +126,11 @@ final class HeraldHomeController extends HeraldController {
   }
 
   private function renderAuthorFilter($phid) {
+    $user = $this->getRequest()->getUser();
     if ($phid) {
-      $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
+      $handle = PhabricatorObjectHandleData::loadOneHandle(
+        $phid,
+        $user);
       $tokens = array(
         $phid => $handle->getFullName(),
       );
@@ -136,7 +139,7 @@ final class HeraldHomeController extends HeraldController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($user)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setName('set_phid')

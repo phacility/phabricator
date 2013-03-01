@@ -214,6 +214,12 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return $ids;
   }
 
+  private function getActor() {
+    // TODO: This should be cleaner, but we'd likely need to move the whole
+    // thing to an Editor (T603).
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function save() {
 
     if ($this->getID()) {
@@ -294,6 +300,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
               'path'        => $path,
             ));
           $query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+          $query->setViewer($this->getActor());
           $query->needValidityOnly(true);
           $valid = $query->loadPaths();
           $is_directory = true;
@@ -344,13 +351,16 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
         $add_paths,
         $remove_paths);
     }
+    $mail->setActor($this->getActor());
     $mail->send();
 
     return $ret;
   }
 
   public function delete() {
-    $mails = id(new PackageDeleteMail($this))->prepareMails();
+    $mails = id(new PackageDeleteMail($this))
+      ->setActor($this->getActor())
+      ->prepareMails();
 
     $this->openTransaction();
     foreach ($this->loadOwners() as $owner) {

@@ -163,6 +163,7 @@ final class DifferentialManiphestTasksFieldSpecification
     }
 
     $handles = id(new PhabricatorObjectHandleData($this->maniphestTasks))
+      ->setViewer($this->getUser())
       ->loadHandles();
     $body = array();
     $body[] = 'MANIPHEST TASKS';

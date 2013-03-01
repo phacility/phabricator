@@ -437,7 +437,9 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $email_cc = array_keys($email_cc);
 
     $phids = array_merge($email_to, $email_cc);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getActor())
+      ->loadHandles();
 
     // NOTE: Always set $is_new to false, because the "first" mail in the
     // thread is the Herald notification of the commit.

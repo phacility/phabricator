@@ -55,6 +55,7 @@ final class PonderSearchIndexer
     $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $question->getPHID());
     $handles = id(new PhabricatorObjectHandleData($subscribers))
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->loadHandles();
 
     foreach ($handles as $phid => $handle) {

@@ -47,7 +47,9 @@ final class DifferentialArcanistProjectFieldSpecification
     if ($diff) {
       $phid = $diff->getArcanistProjectPHID();
       if ($phid) {
-        $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
+        $handle = PhabricatorObjectHandleData::loadOneHandle(
+          $phid,
+          $this->getUser());
         return "ARCANIST PROJECT\n  ".$handle->getName();
       }
     }

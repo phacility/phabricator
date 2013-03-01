@@ -213,6 +213,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    * write code like this:
    *
    *   $query = new PhabricatorEdgeQuery();
+   *   $query->setViewer($viewer);
    *   $query->withSourcePHIDs(mpull($objects, 'getPHID'));
    *   $query->withEdgeTypes(array($some_type));
    *   $query->execute();
@@ -220,6 +221,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    *   // Gets all of the destinations.
    *   $all_phids = $query->getDestinationPHIDs();
    *   $handles = id(new PhabricatorObjectHandleData($all_phids))
+   *     ->setViewer($viewer)
    *     ->loadHandles();
    *
    *   foreach ($objects as $object) {

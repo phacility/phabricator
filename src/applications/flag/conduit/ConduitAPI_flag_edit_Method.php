@@ -54,7 +54,7 @@ final class ConduitAPI_flag_edit_Method extends ConduitAPI_flag_Method {
         ->setNote($request->getValue('note', ''));
       $new = true;
     }
-    $this->attachHandleToFlag($flag);
+    $this->attachHandleToFlag($flag, $request->getUser());
     $flag->save();
     $ret = $this->buildFlagInfoDictionary($flag);
     $ret['new'] = $new;

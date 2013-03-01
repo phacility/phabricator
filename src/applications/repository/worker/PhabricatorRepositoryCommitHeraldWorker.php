@@ -157,7 +157,9 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $mails = $reply_handler->multiplexMail(
       $template,
-      id(new PhabricatorObjectHandleData($email_phids))->loadHandles(),
+      id(new PhabricatorObjectHandleData($email_phids))
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->loadHandles(),
       array());
 
     foreach ($mails as $mail) {

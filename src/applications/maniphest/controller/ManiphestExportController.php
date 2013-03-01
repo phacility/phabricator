@@ -73,7 +73,9 @@ final class ManiphestExportController extends ManiphestController {
     $query->setParameter('order',   'p');
     $query->setParameter('group',   'n');
 
-    list($tasks, $handles) = ManiphestTaskListController::loadTasks($query);
+    list($tasks, $handles) = ManiphestTaskListController::loadTasks(
+      $query,
+      $user);
     // Ungroup tasks.
     $tasks = array_mergev($tasks);
 

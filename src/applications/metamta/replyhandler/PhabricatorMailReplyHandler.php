@@ -88,7 +88,10 @@ abstract class PhabricatorMailReplyHandler {
     $template->setRelatedPHID($mail->getRelatedPHID());
     $phid = $this->getActor()->getPHID();
     $tos = array(
-      $phid => PhabricatorObjectHandleData::loadOneHandle($phid)
+      $phid => PhabricatorObjectHandleData::loadOneHandle(
+        $phid,
+        // TODO: This could be cleaner (T603).
+        PhabricatorUser::getOmnipotentUser()),
     );
     $mails = $this->multiplexMail($template, $tos, array());
 

@@ -17,7 +17,8 @@ final class PholioInlineViewController extends PholioController {
 
     $inline_comment = id(new PholioTransactionComment())->load($this->id);
     $handle = PhabricatorObjectHandleData::loadOneHandle(
-      $inline_comment->getAuthorPHID());
+      $inline_comment->getAuthorPHID(),
+      $user);
 
     $inline_view = id(new PholioInlineCommentView())
       ->setHandle($handle)

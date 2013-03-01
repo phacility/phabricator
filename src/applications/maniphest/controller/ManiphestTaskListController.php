@@ -89,7 +89,9 @@ final class ManiphestTaskListController extends ManiphestController {
 
     // Execute the query.
 
-    list($tasks, $handles, $total_count) = self::loadTasks($query);
+    list($tasks, $handles, $total_count) = self::loadTasks(
+      $query,
+      $user);
 
     // Extract information we need to render the filters from the query.
 
@@ -416,7 +418,10 @@ final class ManiphestTaskListController extends ManiphestController {
       ));
   }
 
-  public static function loadTasks(PhabricatorSearchQuery $search_query) {
+  public static function loadTasks(
+    PhabricatorSearchQuery $search_query,
+    PhabricatorUser $viewer) {
+
     $any_project = false;
     $search_text = $search_query->getParameter('fullTextSearch');
     $user_phids = $search_query->getParameter('userPHIDs', array());
@@ -552,6 +557,7 @@ final class ManiphestTaskListController extends ManiphestController {
       $any_project_phids,
       array_mergev(mpull($data, 'getProjectPHIDs')));
     $handles = id(new PhabricatorObjectHandleData($handle_phids))
+      ->setViewer($viewer)
       ->loadHandles();
 
     switch ($search_query->getParameter('group')) {

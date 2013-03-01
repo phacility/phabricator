@@ -131,6 +131,8 @@ final class PhameBlog extends PhameDAO
     }
 
     $bloggers = id(new PhabricatorObjectHandleData($blogger_phids))
+      // TODO: This should be Query-based (T603).
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->loadHandles();
 
     $this->attachBloggers($bloggers);

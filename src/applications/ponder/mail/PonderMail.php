@@ -1,6 +1,6 @@
 <?php
 
-abstract class PonderMail {
+abstract class PonderMail extends PhabricatorMail {
 
   protected $to = array();
   protected $actorHandle;
@@ -8,9 +8,6 @@ abstract class PonderMail {
   protected $target;
 
   protected $isFirstMailAboutQuestion;
-
-  // protected $replyHandler;
-
   protected $parentMessageID;
 
   protected function renderSubject() {
@@ -87,6 +84,7 @@ abstract class PonderMail {
     $thread_id = $this->getThreadID();
 
     $handles = id(new PhabricatorObjectHandleData($email_to))
+      ->setViewer($this->getActor())
       ->loadHandles();
 
     $reply_handler = new PonderReplyHandler();

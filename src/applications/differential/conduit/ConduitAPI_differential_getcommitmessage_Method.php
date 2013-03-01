@@ -49,6 +49,7 @@ final class ConduitAPI_differential_getcommitmessage_Method
       ->getFieldSpecifications();
 
     foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setUser($request->getUser());
       $aux_field->setRevision($revision);
       if (!$aux_field->shouldAppearOnCommitMessage()) {
         unset($aux_fields[$key]);
@@ -87,7 +88,9 @@ final class ConduitAPI_differential_getcommitmessage_Method
       $aux_phids[$field_key] = $field->getRequiredHandlePHIDsForCommitMessage();
     }
     $phids = array_unique(array_mergev($aux_phids));
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($request->getUser())
+      ->loadHandles();
     foreach ($aux_fields as $field_key => $field) {
       $field->setHandles(array_select_keys($handles, $aux_phids[$field_key]));
     }

@@ -22,8 +22,7 @@ final class PholioInlineController extends PholioController {
       $user->getPHID());
 
     $author_phids = mpull($inline_comments, 'getAuthorPHID');
-    $authors = id(new PhabricatorObjectHandleData($author_phids))
-      ->loadHandles();
+    $authors = $this->loadViewerHandles($author_phids);
 
     $inlines = array();
 

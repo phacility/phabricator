@@ -25,7 +25,9 @@ abstract class HeraldObjectAdapter {
         'Object already flagged.');
     }
 
-    $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
+    $handle = PhabricatorObjectHandleData::loadOneHandle(
+      $phid,
+      $user);
 
     $flag = new PhabricatorFlag();
     $flag->setOwnerPHID($user->getPHID());

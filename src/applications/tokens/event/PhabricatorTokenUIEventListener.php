@@ -93,6 +93,7 @@ final class PhabricatorTokenUIEventListener
 
     $author_phids = mpull($tokens_given, 'getAuthorPHID');
     $handles = id(new PhabricatorObjectHandleData($author_phids))
+      ->setViewer($user)
       ->loadHandles();
 
     $list = array();

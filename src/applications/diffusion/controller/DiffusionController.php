@@ -98,6 +98,8 @@ abstract class DiffusionController extends PhabricatorController {
   }
 
   protected function buildOpenRevisions() {
+    $user = $this->getRequest()->getUser();
+
     $drequest = $this->getDiffusionRequest();
     $repository = $drequest->getRepository();
     $path = $drequest->getPath();
@@ -122,7 +124,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
-      ->setFields(DifferentialRevisionListView::getDefaultFields())
+      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
       ->setUser($this->getRequest()->getUser())
       ->loadAssets();
 

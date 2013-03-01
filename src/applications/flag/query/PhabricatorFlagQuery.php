@@ -84,9 +84,7 @@ final class PhabricatorFlagQuery {
     if ($this->needHandles || $this->needObjects) {
       $phids = ipull($data, 'objectPHID');
       $query = new PhabricatorObjectHandleData($phids);
-      if ($this->viewer) {
-        $query->setViewer($this->viewer);
-      }
+      $query->setViewer($this->viewer);
 
       if ($this->needHandles) {
         $handles = $query->loadHandles();

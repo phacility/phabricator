@@ -19,6 +19,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history = $history_query->loadHistory();
 
     $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+    $browse_query->setUser($this->getRequest()->getUser());
     $browse_results = $browse_query->loadPaths();
 
     $phids = array();

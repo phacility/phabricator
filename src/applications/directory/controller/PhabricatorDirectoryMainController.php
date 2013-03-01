@@ -210,7 +210,7 @@ final class PhabricatorDirectoryMainController
     $revision_view = id(new DifferentialRevisionListView())
       ->setHighlightAge(true)
       ->setRevisions(array_merge($blocking, $active))
-      ->setFields(DifferentialRevisionListView::getDefaultFields())
+      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
       ->setUser($user)
       ->loadAssets();
     $phids = array_merge(

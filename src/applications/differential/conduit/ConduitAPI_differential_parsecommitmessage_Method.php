@@ -36,10 +36,10 @@ final class ConduitAPI_differential_parsecommitmessage_Method
       ->getFieldSpecifications();
 
     foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setUser($request->getUser());
       if (!$aux_field->shouldAppearOnCommitMessage()) {
         unset($aux_fields[$key]);
       }
-      $aux_field->setUser($request->getUser());
     }
 
     $aux_fields = mpull($aux_fields, null, 'getCommitMessageKey');
