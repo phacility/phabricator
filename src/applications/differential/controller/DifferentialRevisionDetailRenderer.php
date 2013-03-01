@@ -1,8 +1,18 @@
 <?php
 
 abstract class DifferentialRevisionDetailRenderer {
+  private $user;
   private $diff;
   private $vsDiff;
+
+  final public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  final protected function getUser() {
+    return $this->user;
+  }
 
   final public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
