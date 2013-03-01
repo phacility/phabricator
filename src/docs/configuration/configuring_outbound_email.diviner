@@ -8,6 +8,7 @@ Instructions for configuring Phabricator to send mail.
 Phabricator can send outbound email via several different adapters:
 
   - by running ##sendmail## on the local host with SMTP; or
+  - by running postfix on the local host with SMTP; or
   - by using Amazon SES (Simple Email Service); or
   - by using SendGrid's REST API; or
   - via a custom adapter you write; or
@@ -78,8 +79,10 @@ do any of this, consider using Amazon SES.
 = Adapter: SMTP =
 
 For most situations of using SMTP to send email, you could actually use
-'sendmail' to do it. But some SMTP server requires authentication and the
-'sendmail' mailer doesn't work. You could configure to use SMTP then.
+'sendmail' or 'postfix' to do it. But some SMTP server requires authentication 
+and the 'sendmail' mailer doesn't work. If you want to try with postfix, for install
+instructions, consult the documentation for postfix as MTA and you could configure 
+to use SMTP then.
 
 To configure Phabricator to use SMTP, set these configuration keys:
 
