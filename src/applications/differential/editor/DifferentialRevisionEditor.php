@@ -427,6 +427,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
             $revision,
             $actor_handle,
             $changesets))
+          ->setActor($this->getActor())
           ->setIsFirstMailAboutRevision($is_new)
           ->setIsFirstMailToRecipients(true)
           ->setToPHIDs(array_keys($add['rev']));
