@@ -75,7 +75,11 @@ final class DiffusionLintSaveRunner {
 
     if ($this->lintCommit) {
       try {
-        $all_files = $api->getChangedFiles($this->lintCommit);
+        $commit = $this->lintCommit;
+        if ($this->svnRoot) {
+          $commit = $api->getCanonicalRevisionName('@'.$commit);
+        }
+        $all_files = $api->getChangedFiles($commit);
       } catch (ArcanistCapabilityNotSupportedException $ex) {
         $this->lintCommit = null;
       }
