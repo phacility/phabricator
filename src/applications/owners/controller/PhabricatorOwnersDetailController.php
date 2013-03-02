@@ -142,7 +142,7 @@ final class PhabricatorOwnersDetailController
 
     $attention_query = id(new PhabricatorAuditCommitQuery())
       ->withPackagePHIDs(array($package->getPHID()))
-      ->withStatus(PhabricatorAuditCommitQuery::STATUS_OPEN)
+      ->withStatus(PhabricatorAuditCommitQuery::STATUS_CONCERN)
       ->needCommitData(true)
       ->needAudits(true)
       ->setLimit(10);
