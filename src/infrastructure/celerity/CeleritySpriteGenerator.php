@@ -115,10 +115,20 @@ final class CeleritySpriteGenerator {
         'y' => 20,
         'css' => '.menu-icon-eye',
       ),
+      'eye_blue' => array(
+        'x' => 24,
+        'y' => 20,
+        'css' => '.menu-icon-eye-blue',
+      ),
       'app' => array(
         'x' => 24,
         'y' => 20,
         'css' => '.menu-icon-app',
+      ),
+      'app_blue' => array(
+        'x' => 24,
+        'y' => 20,
+        'css' => '.menu-icon-app-blue',
       ),
       'logo' => array(
         'x' => 139,

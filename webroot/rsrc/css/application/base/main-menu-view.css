@@ -77,12 +77,6 @@
   display: block;
   width: 40px;
   height: 28px;
-  background-color: #22292d;
-  border-radius: 6px;
-
-  border: 1px solid #111111;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    0 1px 0 rgba(255, 255, 255, 0.075);
 }
 
 .phabricator-menu-button-icon {
@@ -94,11 +88,11 @@
 }
 
 .phabricator-expand-core-menu {
-  left: 10px;
+  left: 5px;
 }
 
 .phabricator-expand-application-menu {
-  right: 10px;
+  right: 5px;
 }
 
 .device-desktop .phabricator-main-menu-expand-button {
@@ -108,13 +102,6 @@
 .device .phabricator-main-menu-expand-button {
   display: block;
 }
-
-.phabricator-core-menu-expanded .phabricator-expand-core-menu,
-.phabricator-application-menu-expanded .phabricator-expand-application-menu {
-  background-color: #55595d;
-}
-
-
 
 
 /* - Search --------------------------------------------------------------------
@@ -155,7 +142,7 @@
 
 .device .phabricator-main-menu-search-container {
   padding: 0;
-  margin: 0 18px 0 60px;
+  margin: 0 8px 0 52px;
 }
 
 .phabricator-main-menu-search input {
