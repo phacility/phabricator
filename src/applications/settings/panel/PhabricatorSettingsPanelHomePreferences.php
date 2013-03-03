@@ -71,6 +71,7 @@ final class PhabricatorSettingsPanelHomePreferences
       $full = PhabricatorApplication::TILE_FULL;
 
       $key = get_class($app);
+      // Won't pht() for dynamic string (Applcation Name)
       $form->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel($app->getName())
@@ -88,14 +89,14 @@ final class PhabricatorSettingsPanelHomePreferences
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save Preferences'));
+          ->setValue(pht('Save Preferences')));
 
     $error_view = null;
     if ($request->getStr('saved') === 'true') {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Preferences Saved')
+        ->setTitle(pht('Preferences Saved'))
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(array('Your preferences have been saved.'));
+        ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
     return array(

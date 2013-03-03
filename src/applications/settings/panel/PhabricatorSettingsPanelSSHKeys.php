@@ -58,8 +58,8 @@ final class PhabricatorSettingsPanelSSHKeys
       $entire_key = $request->getStr('key');
 
       if (!strlen($entire_key)) {
-        $errors[] = 'You must provide an SSH Public Key.';
-        $e_key = 'Required';
+        $errors[] = pht('You must provide an SSH Public Key.');
+        $e_key = pht('Required');
       } else {
         $parts = str_replace("\n", '', trim($entire_key));
         $parts = preg_split('/\s+/', $parts);
@@ -71,19 +71,19 @@ final class PhabricatorSettingsPanelSSHKeys
           if (preg_match('/private\s*key/i', $entire_key)) {
             // Try to give the user a better error message if it looks like
             // they uploaded a private key.
-            $e_key = 'Invalid';
-            $errors[] = 'Provide your public key, not your private key!';
+            $e_key = pht('Invalid');
+            $errors[] = pht('Provide your public key, not your private key!');
           } else {
-            $e_key = 'Invalid';
-            $errors[] = 'Provided public key is not properly formatted.';
+            $e_key = pht('Invalid');
+            $errors[] = pht('Provided public key is not properly formatted.');
           }
         }
 
         if (!$errors) {
           list($type, $body, $comment) = $parts;
           if (!preg_match('/^ssh-dsa|ssh-rsa$/', $type)) {
-            $e_key = 'Invalid';
-            $errors[] = 'Public key should be "ssh-dsa" or "ssh-rsa".';
+            $e_key = pht('Invalid');
+            $errors[] = pht('Public key should be "ssh-dsa" or "ssh-rsa".');
           } else {
             $key->setKeyType($type);
             $key->setKeyBody($body);
@@ -96,8 +96,8 @@ final class PhabricatorSettingsPanelSSHKeys
       }
 
       if (!strlen($key->getName())) {
-        $errors[] = 'You must name this public key.';
-        $e_name = 'Required';
+        $errors[] = pht('You must name this public key.');
+        $e_name = pht('Required');
       } else {
         $e_name = null;
       }
@@ -108,9 +108,9 @@ final class PhabricatorSettingsPanelSSHKeys
           return id(new AphrontRedirectResponse())
             ->setURI($this->getPanelURI());
         } catch (AphrontQueryDuplicateKeyException $ex) {
-          $e_key = 'Duplicate';
-          $errors[] = 'This public key is already associated with a user '.
-                      'account.';
+          $e_key = pht('Duplicate');
+          $errors[] = pht('This public key is already associated with a user '.
+                      'account.');
         }
       }
     }
@@ -118,18 +118,18 @@ final class PhabricatorSettingsPanelSSHKeys
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     }
 
     $is_new = !$key->getID();
 
     if ($is_new) {
-      $header = 'Add New SSH Public Key';
-      $save = 'Add Key';
+      $header = pht('Add New SSH Public Key');
+      $save = pht('Add Key');
     } else {
-      $header = 'Edit SSH Public Key';
-      $save   = 'Save Changes';
+      $header = pht('Edit SSH Public Key');
+      $save   = pht('Save Changes');
     }
 
     $form = id(new AphrontFormView())
@@ -137,13 +137,13 @@ final class PhabricatorSettingsPanelSSHKeys
       ->addHiddenInput('edit', $is_new ? 'true' : $key->getID())
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($key->getName())
           ->setError($e_name))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Public Key')
+          ->setLabel(pht('Public Key'))
           ->setName('key')
           ->setValue($entire_key)
           ->setError($e_key))
@@ -193,19 +193,19 @@ final class PhabricatorSettingsPanelSSHKeys
             'class' => 'small grey button',
             'sigil' => 'workflow',
           ),
-          'Delete'),
+          pht('Delete')),
       );
     }
 
     $table = new AphrontTableView($rows);
-    $table->setNoDataString("You haven't added any SSH Public Keys.");
+    $table->setNoDataString(pht("You haven't added any SSH Public Keys."));
     $table->setHeaders(
       array(
-        'Name',
-        'Comment',
-        'Type',
-        'Created',
-        'Time',
+        pht('Name'),
+        pht('Comment'),
+        pht('Type'),
+        pht('Created'),
+        pht('Time'),
         '',
       ));
     $table->setColumnClasses(
@@ -226,8 +226,8 @@ final class PhabricatorSettingsPanelSSHKeys
           'href' => $this->getPanelURI('?edit=true'),
           'class' => 'green button',
         ),
-        'Add New Public Key'));
-    $panel->setHeader('SSH Public Keys');
+        pht('Add New Public Key')));
+    $panel->setHeader(pht('SSH Public Keys'));
     $panel->appendChild($table);
     $panel->setNoBackground();
 
@@ -251,12 +251,12 @@ final class PhabricatorSettingsPanelSSHKeys
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addHiddenInput('delete', $key->getID())
-      ->setTitle('Really delete SSH Public Key?')
+      ->setTitle(pht('Really delete SSH Public Key?'))
       ->appendChild(phutil_tag('p', array(), pht(
         'The key "%s" will be permanently deleted, and you will not longer be '.
           'able to use the corresponding private key to authenticate.',
         $name)))
-      ->addSubmitButton('Delete Public Key')
+      ->addSubmitButton(pht('Delete Public Key'))
       ->addCancelButton($this->getPanelURI());
 
     return id(new AphrontDialogResponse())

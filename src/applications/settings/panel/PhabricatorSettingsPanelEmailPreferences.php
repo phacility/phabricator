@@ -71,23 +71,23 @@ final class PhabricatorSettingsPanelEmailPreferences
       if ($request->getStr('saved')) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Changes Saved');
+        $notice->setTitle(pht('Changes Saved'));
         $notice->appendChild(
-          phutil_tag('p', array(), 'Your changes have been saved.'));
+          phutil_tag('p', array(), pht('Your changes have been saved.')));
       }
     } else {
       $notice = new AphrontErrorView();
-      $notice->setTitle('Form Errors');
+      $notice->setTitle(pht('Form Errors'));
       $notice->setErrors($errors);
     }
 
     $re_prefix_default = PhabricatorEnv::getEnvConfig('metamta.re-prefix')
-      ? 'Enabled'
-      : 'Disabled';
+      ? pht('Enabled')
+      : pht('Disabled');
 
     $vary_default = PhabricatorEnv::getEnvConfig('metamta.vary-subjects')
-      ? 'Vary'
-      : 'Do Not Vary';
+      ? pht('Vary')
+      : pht('Do Not Vary');
 
     $re_prefix_value = $preferences->getPreference($pref_re_prefix);
     if ($re_prefix_value === null) {
@@ -112,14 +112,14 @@ final class PhabricatorSettingsPanelEmailPreferences
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Self Actions')
+          ->setLabel(pht('Self Actions'))
           ->setName($pref_no_self_mail)
           ->setOptions(
             array(
-              '0' => 'Send me an email when I take an action',
-              '1' => 'Do not send me an email when I take an action',
+              '0' => pht('Send me an email when I take an action'),
+              '1' => pht('Do not send me an email when I take an action'),
             ))
-          ->setCaption('You can disable email about your own actions.')
+          ->setCaption(pht('You can disable email about your own actions.'))
           ->setValue($preferences->getPreference($pref_no_self_mail, 0)));
 
     if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
@@ -127,9 +127,9 @@ final class PhabricatorSettingsPanelEmailPreferences
         ->setName($pref_re_prefix)
         ->setOptions(
           array(
-            'default'   => 'Use Server Default ('.$re_prefix_default.')',
-            'true'      => 'Enable "Re:" prefix',
-            'false'     => 'Disable "Re:" prefix',
+            'default'   => pht('Use Server Default (%s)', $re_prefix_default),
+            'true'      => pht('Enable "Re:" prefix'),
+            'false'     => pht('Disable "Re:" prefix'),
           ))
         ->setValue($re_prefix_value);
 
@@ -137,9 +137,9 @@ final class PhabricatorSettingsPanelEmailPreferences
         ->setName($pref_vary)
         ->setOptions(
           array(
-            'default'   => 'Use Server Default ('.$vary_default.')',
-            'true'      => 'Vary Subjects',
-            'false'     => 'Do Not Vary Subjects',
+            'default'   => pht('Use Server Default (%s)', $vary_default),
+            'true'      => pht('Vary Subjects'),
+            'false'     => pht('Do Not Vary Subjects'),
           ))
         ->setValue($vary_value);
     } else {
@@ -153,29 +153,29 @@ final class PhabricatorSettingsPanelEmailPreferences
     $form
       ->appendChild(
         $re_control
-          ->setLabel('Add "Re:" Prefix')
+          ->setLabel(pht('Add "Re:" Prefix'))
           ->setCaption(
-            'Enable this option to fix threading in Mail.app on OS X Lion, '.
-            'or if you like "Re:" in your email subjects.'))
+            pht('Enable this option to fix threading in Mail.app on OS X Lion,'.
+            ' or if you like "Re:" in your email subjects.')))
       ->appendChild(
         $vary_control
-          ->setLabel('Vary Subjects')
+          ->setLabel(pht('Vary Subjects'))
           ->setCaption(
-            'This option adds more information to email subjects, but may '.
-            'break threading in some clients.'));
+            pht('This option adds more information to email subjects, but may '.
+            'break threading in some clients.')));
 
     $form
       ->appendChild(hsprintf(
         '<br />'.
+        '<p class="aphront-form-instructions">%s</p>'.
         '<p class="aphront-form-instructions">'.
-          'You can customize what mail you receive from Phabricator here.'.
-        '</p>'.
-        '<p class="aphront-form-instructions">'.
-          '<strong>NOTE:</strong> If an update makes several changes (like '.
+          '<strong>%s</strong> %s</p>',
+        pht('You can customize what mail you receive from Phabricator here.'),
+        pht('NOTE:'),
+        pht('If an update makes several changes (like '.
           'adding CCs to a task, closing it, and adding a comment) you will '.
           'still receive an email as long as at least one of the changes '.
-          'is set to notify you.'.
-        '</p>'));
+          'is set to notify you.')));
 
     $mailtags = $preferences->getPreference('mailtags', array());
 
@@ -184,23 +184,23 @@ final class PhabricatorSettingsPanelEmailPreferences
         $this->buildMailTagCheckboxes(
           $this->getDifferentialMailTags(),
           $mailtags)
-          ->setLabel('Differential'));
+          ->setLabel(pht('Differential')));
 
     if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
       $form->appendChild(
         $this->buildMailTagCheckboxes(
           $this->getManiphestMailTags(),
           $mailtags)
-          ->setLabel('Maniphest'));
+          ->setLabel(pht('Maniphest')));
     }
 
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save Preferences'));
+          ->setValue(pht('Save Preferences')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Email Preferences');
+    $panel->setHeader(pht('Email Preferences'));
     $panel->appendChild($form);
     $panel->setNoBackground();
 

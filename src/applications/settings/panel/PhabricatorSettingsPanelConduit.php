@@ -22,9 +22,9 @@ final class PhabricatorSettingsPanelConduit
       if (!$request->isDialogFormPost()) {
         $dialog = new AphrontDialogView();
         $dialog->setUser($user);
-        $dialog->setTitle('Really regenerate session?');
+        $dialog->setTitle(pht('Really regenerate session?'));
         $dialog->setSubmitURI($this->getPanelURI());
-        $dialog->addSubmitButton('Regenerate');
+        $dialog->addSubmitButton(pht('Regenerate'));
         $dialog->addCancelbutton($this->getPanelURI());
         $dialog->appendChild(phutil_tag('p', array(), pht(
           'Really destroy the old certificate? Any established '.
@@ -52,13 +52,13 @@ final class PhabricatorSettingsPanelConduit
     if ($request->getStr('regenerated')) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $notice->setTitle('Certificate Regenerated');
+      $notice->setTitle(pht('Certificate Regenerated'));
       $notice->appendChild(phutil_tag(
         'p',
         array(),
-        'Your old certificate has been destroyed and you have been issued '.
+        pht('Your old certificate has been destroyed and you have been issued '.
         'a new certificate. Sessions established under the old certificate '.
-        'are no longer valid.'));
+        'are no longer valid.')));
       $notice = $notice->render();
     } else {
       $notice = null;
@@ -68,19 +68,23 @@ final class PhabricatorSettingsPanelConduit
     $cert_form
       ->setUser($user)
       ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">This certificate allows you to '.
-        'authenticate over Conduit, the Phabricator API. Normally, you just '.
-        'run <tt>arc install-certificate</tt> to install it.'))
+        '<p class="aphront-form-instructions">%s</p>',
+        pht('This certificate allows you to authenticate over Conduit, '.
+          'the Phabricator API. Normally, you just run %s to install it.',
+          hsprintf('<tt>%s</tt>', 'arc install-certificate'))))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Certificate')
+          ->setLabel(pht('Certificate'))
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
           ->setValue($user->getConduitCertificate()));
 
     $cert = new AphrontPanelView();
-    $cert->setHeader('Arcanist Certificate');
+    $cert->setHeader(pht('Arcanist Certificate'));
     $cert->appendChild($cert_form);
     $cert->setNoBackground();
+
+    $regen_instruction = pht('You can regenerate this certificate, which '.
+      'will invalidate the old certificate and create a new one.');
 
     $regen_form = new AphrontFormView();
     $regen_form
@@ -88,15 +92,13 @@ final class PhabricatorSettingsPanelConduit
       ->setAction($this->getPanelURI())
       ->setWorkflow(true)
       ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">You can regenerate this '.
-        'certificate, which will invalidate the old certificate and create '.
-        'a new one.</p>'))
+        '<p class="aphront-form-instructions">%s</p>', $regen_instruction))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Regenerate Certificate'));
+          ->setValue(pht('Regenerate Certificate')));
 
     $regen = new AphrontPanelView();
-    $regen->setHeader('Regenerate Certificate');
+    $regen->setHeader(pht('Regenerate Certificate'));
     $regen->appendChild($regen_form);
     $regen->setNoBackground();
 

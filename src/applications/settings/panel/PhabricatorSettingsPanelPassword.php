@@ -64,8 +64,8 @@ final class PhabricatorSettingsPanelPassword
       if (!$valid_token) {
         $envelope = new PhutilOpaqueEnvelope($request->getStr('old_pw'));
         if (!$user->comparePassword($envelope)) {
-          $errors[] = 'The old password you entered is incorrect.';
-          $e_old = 'Invalid';
+          $errors[] = pht('The old password you entered is incorrect.');
+          $e_old = pht('Invalid');
         }
       }
 
@@ -73,13 +73,13 @@ final class PhabricatorSettingsPanelPassword
       $conf = $request->getStr('conf_pw');
 
       if (strlen($pass) < $min_len) {
-        $errors[] = 'Your new password is too short.';
-        $e_new = 'Too Short';
+        $errors[] = pht('Your new password is too short.');
+        $e_new = pht('Too Short');
       }
 
       if ($pass !== $conf) {
-        $errors[] = 'New password and confirmation do not match.';
-        $e_conf = 'Invalid';
+        $errors[] = pht('New password and confirmation do not match.');
+        $e_conf = pht('Invalid');
       }
 
       if (!$errors) {
@@ -113,19 +113,19 @@ final class PhabricatorSettingsPanelPassword
       if ($request->getStr('saved')) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Changes Saved');
+        $notice->setTitle(pht('Changes Saved'));
         $notice->appendChild(
-          phutil_tag('p', array(), 'Your password has been updated.'));
+          phutil_tag('p', array(), pht('Your password has been updated.')));
       }
     } else {
       $notice = new AphrontErrorView();
-      $notice->setTitle('Error Changing Password');
+      $notice->setTitle(pht('Error Changing Password'));
       $notice->setErrors($errors);
     }
 
     $len_caption = null;
     if ($min_len) {
-      $len_caption = 'Minimum password length: '.$min_len.' characters.';
+      $len_caption = pht('Minimum password length: %d characters.', $min_len);
     }
 
     $form = new AphrontFormView();
@@ -136,7 +136,7 @@ final class PhabricatorSettingsPanelPassword
     if (!$valid_token) {
       $form->appendChild(
         id(new AphrontFormPasswordControl())
-          ->setLabel('Old Password')
+          ->setLabel(pht('Old Password'))
           ->setError($e_old)
           ->setName('old_pw'));
     }
@@ -144,23 +144,23 @@ final class PhabricatorSettingsPanelPassword
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
-          ->setLabel('New Password')
+          ->setLabel(pht('New Password'))
           ->setError($e_new)
           ->setName('new_pw'));
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
-          ->setLabel('Confirm Password')
+          ->setLabel(pht('Confirm Password'))
           ->setCaption($len_caption)
           ->setError($e_conf)
           ->setName('conf_pw'));
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Change Password');
+    $panel->setHeader(pht('Change Password'));
     $panel->appendChild($form);
     $panel->setNoBackground();
 

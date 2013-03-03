@@ -85,58 +85,59 @@ final class PhabricatorSettingsPanelOAuth
     if (!$oauth_info) {
       $form
         ->appendChild(hsprintf(
-          '<p class="aphront-form-instructions">There is currently no %s '.
+          '<p class="aphront-form-instructions">%s</p>',
+          pht('There is currently no %s '.
             'account linked to your Phabricator account. You can link an '.
-            'account, which will allow you to use it to log into Phabricator.'.
-            '</p>',
-          $provider_name));
+            'account, which will allow you to use it to log into Phabricator.',
+            $provider_name)));
 
       $this->prepareAuthForm($form);
 
       $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Link '.$provider_name." Account \xC2\xBB"));
+            ->setValue(pht('Link %s Account \xC2\xBB', $provider_name)));
     } else {
       $expires = $oauth_info->getTokenExpires();
 
       $form
         ->appendChild(hsprintf(
-          '<p class="aphront-form-instructions">Your account is linked with '.
+          '<p class="aphront-form-instructions">%s</p>',
+          pht('Your account is linked with '.
             'a %s account. You may use your %s credentials to log into '.
-            'Phabricator.</p>',
-          $provider_name,
-          $provider_name))
+            'Phabricator.',
+            $provider_name,
+            $provider_name)))
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel($provider_name.' ID')
+            ->setLabel(pht('%s ID', $provider_name))
             ->setValue($oauth_info->getOAuthUID()))
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel($provider_name.' Name')
+            ->setLabel(pht('%s Name', $provider_name))
             ->setValue($oauth_info->getAccountName()))
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel($provider_name.' URI')
+            ->setLabel(pht('%s URI', $provider_name))
             ->setValue($oauth_info->getAccountURI()));
 
       if (!$expires || $expires > time()) {
         $form->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue('Refresh Profile Image from '.$provider_name));
+            ->setValue(pht('Refresh Profile Image from %s', $provider_name)));
       }
 
       if (!$provider->isProviderLinkPermanent()) {
-        $unlink = 'Unlink '.$provider_name.' Account';
+        $unlink = pht('Unlink %s Account');
         $unlink_form = new AphrontFormView();
         $unlink_form
           ->setUser($user)
           ->appendChild(hsprintf(
-            '<p class="aphront-form-instructions">You may unlink this account '.
-              'from your %s account. This will prevent you from logging in '.
-              'with your %s credentials.</p>',
-            $provider_name,
-            $provider_name))
+            '<p class="aphront-form-instructions">%s</p>',
+            pht('You may unlink this account from your %s account. This will '.
+              'prevent you from logging in with your %s credentials.',
+              $provider_name,
+              $provider_name)))
           ->appendChild(
             id(new AphrontFormSubmitControl())
               ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));
@@ -145,17 +146,17 @@ final class PhabricatorSettingsPanelOAuth
 
       if ($expires) {
         if ($expires <= time()) {
-          $expires_text = "Expired";
+          $expires_text = pht("Expired");
         } else {
           $expires_text = phabricator_datetime($expires, $user);
         }
       } else {
-        $expires_text = 'No Information Available';
+        $expires_text = pht('No Information Available');
       }
 
       $scope = $oauth_info->getTokenScope();
       if (!$scope) {
-        $scope = 'No Information Available';
+        $scope = pht('No Information Available');
       }
 
       $status = $oauth_info->getTokenStatus();
@@ -164,14 +165,17 @@ final class PhabricatorSettingsPanelOAuth
       $rappable_status = PhabricatorUserOAuthInfo::getRappableTokenStatus(
         $status);
       $beat = self::getBeat();
-      $rap = hsprintf(
-        "%s Yo yo yo<br />".
-        'My name\'s DJ Token and I\'m here to say<br />'.
+
+      // The plenty %2$s are supposed to point at the line break
+      $rap = pht(
+        '%1$s Yo yo yo %2$s'.
+        'My name\'s DJ Token and I\'m here to say %2$s'.
         // pronounce as "dollar rappable status" for meter to work
-        "%s, hey hey hey hey<br />".
-        'I rap \'bout tokens, that might be why<br />'.
+        '%3$s, hey hey hey hey %2$s'.
+        'I rap \'bout tokens, that might be why %2$s'.
         'I\'m such a cool and popular guy',
         $beat,
+        hsprintf('<br />'),
         $rappable_status);
 
       $token_form = new AphrontFormView();
@@ -182,15 +186,15 @@ final class PhabricatorSettingsPanelOAuth
           $rap))
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel('Token Status')
+            ->setLabel(pht('Token Status'))
             ->setValue($readable_status))
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel('Expires')
+            ->setLabel(pht('Expires'))
             ->setValue($expires_text))
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel('Scope')
+            ->setLabel(pht('Scope'))
             ->setValue($scope));
 
       if ($expires <= time()) {
@@ -198,14 +202,14 @@ final class PhabricatorSettingsPanelOAuth
         $token_form
           ->appendChild(
             id(new AphrontFormSubmitControl())
-              ->setValue('Refresh '.$provider_name.' Token'));
+              ->setValue(pht('Refresh %s Token', $provider_name)));
       }
 
       $forms['Account Token Information'] = $token_form;
     }
 
     $panel = new AphrontPanelView();
-    $panel->setHeader($provider_name.' Account Settings');
+    $panel->setHeader(pht('%s Account Settings', $provider_name));
     $panel->setNoBackground();
 
     foreach ($forms as $name => $form) {
@@ -258,25 +262,26 @@ final class PhabricatorSettingsPanelOAuth
         $user->setProfileImagePHID($small_xformed->getPHID());
         $user->save();
       } else {
-        $error = 'Unable to retrieve image.';
+        $error = pht('Unable to retrieve image.');
       }
     } catch (Exception $e) {
       if ($e instanceof PhabricatorOAuthProviderException) {
-        $error = sprintf('Unable to retrieve image from %s',
+        // Check plz
+        $error = pht('Unable to retrieve image from %s',
                          $provider->getProviderName());
       } else {
-        $error = 'Unable to save image.';
+        $error = pht('Unable to save image.');
       }
     }
     $notice = new AphrontErrorView();
     if ($error) {
       $notice
-        ->setTitle('Error Refreshing Profile Picture')
+        ->setTitle(pht('Error Refreshing Profile Picture'))
         ->setErrors(array($error));
     } else {
       $notice
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle('Successfully Refreshed Profile Picture');
+        ->setTitle(pht('Successfully Refreshed Profile Picture'));
     }
     return $notice;
   }
@@ -284,12 +289,12 @@ final class PhabricatorSettingsPanelOAuth
   private static function getBeat() {
     // Gangsta's Paradise (karaoke version).
     // Chosen because it's the only thing I listen to.
-    $song_id = "Gangsta's Paradise";
+    $song_id = pht("Gangsta's Paradise");
 
     // Make a musical note which you can click for the beat.
     $beat = hsprintf(
       '<a href="javascript:void(0);" onclick="%s">&#9835;</a>',
-      jsprintf('alert(%s); return 0;', "Think about {$song_id}."));
+      jsprintf('alert(%s); return 0;', pht("Think about %s.", $song_id)));
     return $beat;
   }
 }

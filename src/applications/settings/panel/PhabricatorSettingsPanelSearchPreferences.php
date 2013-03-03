@@ -40,27 +40,27 @@ final class PhabricatorSettingsPanelSearchPreferences
         id(new AphrontFormCheckboxControl())
           ->addCheckbox($pref_jump,
             1,
-            'Enable jump nav functionality in all search boxes.',
+            pht('Enable jump nav functionality in all search boxes.'),
             $preferences->getPreference($pref_jump, 1))
           ->addCheckbox($pref_shortcut,
             1,
-            "Press '/' to focus the search input.",
+            pht("Press '/' to focus the search input."),
             $preferences->getPreference($pref_shortcut, 1)))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Search Preferences');
+    $panel->setHeader(pht('Search Preferences'));
     $panel->appendChild($form);
     $panel->setNoBackground();
 
     $error_view = null;
     if ($request->getStr('saved') === 'true') {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Preferences Saved')
+        ->setTitle(pht('Preferences Saved'))
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setErrors(array('Your preferences have been saved.'));
+        ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
     return array(
