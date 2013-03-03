@@ -66,14 +66,7 @@ final class PholioMockImagesView extends AphrontView {
       ),
       '');
 
-    $mockview[] = phutil_tag(
-      'div',
-        array(
-          'class' => 'pholio-mock-image-container',
-          'id' => 'pholio-mock-image-container'
-        ),
-      array($mock_wrapper, $inline_comments_holder));
-
+    $carousel_holder = '';
     if (count($mock->getImages()) > 0) {
       $thumbnails = array();
       foreach ($mock->getImages() as $image) {
@@ -105,7 +98,7 @@ final class PholioMockImagesView extends AphrontView {
           $tag);
       }
 
-      $mockview[] = phutil_tag(
+      $carousel_holder = phutil_tag(
         'div',
         array(
           'id' => 'pholio-mock-carousel',
@@ -113,6 +106,14 @@ final class PholioMockImagesView extends AphrontView {
         ),
         $thumbnails);
     }
+
+    $mockview[] = phutil_tag(
+      'div',
+        array(
+          'class' => 'pholio-mock-image-container',
+          'id' => 'pholio-mock-image-container'
+        ),
+      array($mock_wrapper, $carousel_holder, $inline_comments_holder));
 
     return $this->renderSingleView($mockview);
   }

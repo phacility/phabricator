@@ -12,6 +12,7 @@
   background-color: #202020;
   text-align: center;
   border-top: 1px solid #101010;
+  margin-right: 320px;
 }
 
 .pholio-mock-carousel-thumb-item {
@@ -71,34 +72,39 @@
 }
 
 .pholio-mock-inline-comments {
-  width: 320px;
+  width: 300px;
   border-left: 1px solid #101010;
   border-top: 1px solid #333;
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
+  padding: 10px;
+  background: #eeedf0;
   overflow-x: auto;
   text-align: left;
+  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.2);
 }
 
 .pholio-inline-comment {
-  border: 1px solid #aa8;
-  background: #f9f9f1;
-  margin: 2px;
+  border: 1px solid #f7f7f7;
+  border-bottom: 1px solid #d6d6d6;
+  background: #fff;
+  margin: 0 0 5px 0;
   padding: 8px 10px;
 }
 
 .pholio-inline-comment-header {
-  border-bottom: 1px solid #cca;
   color: #333;
+  border-bottom: 1px solid #d7d7d7;
   font-weight: bold;
   padding-bottom: 6px;
   margin-bottom: 4px;
 }
 
 .pholio-mock-inline-comment-highlight {
-  background-color: #F0B160;
+  background-color: #e0e3ec;
+  border-color: #cacdd5;
 }
 
 .pholio-inline-head-links a {
