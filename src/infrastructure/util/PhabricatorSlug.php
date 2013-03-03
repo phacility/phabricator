@@ -3,14 +3,11 @@
 final class PhabricatorSlug {
 
   public static function normalize($slug) {
-
-    // TODO: We need to deal with unicode at some point, this is just a very
-    // basic proof-of-concept implementation.
-
-    $slug = strtolower($slug);
     $slug = preg_replace('@/+@', '/', $slug);
     $slug = trim($slug, '/');
-    $slug = preg_replace('@[^a-z0-9/]+@', '_', $slug);
+    $slug = phutil_utf8_strtolower($slug);
+    $slug = preg_replace("@[\\x00-\\x19#%&+=\\\\?<> ]+@", '_', $slug);
+    $slug = preg_replace('@_+@', '_', $slug);
     $slug = trim($slug, '_');
 
     return $slug.'/';
@@ -20,8 +17,8 @@ final class PhabricatorSlug {
     $parts = explode('/', trim($slug, '/'));
     $default_title = end($parts);
     $default_title = str_replace('_', ' ', $default_title);
-    $default_title = ucwords($default_title);
-    $default_title = nonempty($default_title, 'Untitled Document');
+    $default_title = phutil_utf8_ucwords($default_title);
+    $default_title = nonempty($default_title, pht('Untitled Document'));
     return $default_title;
   }
 
