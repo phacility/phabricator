@@ -2869,7 +2869,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-pinboard-view-css' =>
   array(
-    'uri' => '/res/79be6f49/rsrc/css/layout/phabricator-pinboard-view.css',
+    'uri' => '/res/549998d0/rsrc/css/layout/phabricator-pinboard-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2924,7 +2924,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-property-list-view-css' =>
   array(
-    'uri' => '/res/fd680994/rsrc/css/layout/phabricator-property-list-view.css',
+    'uri' => '/res/a04cc81d/rsrc/css/layout/phabricator-property-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
