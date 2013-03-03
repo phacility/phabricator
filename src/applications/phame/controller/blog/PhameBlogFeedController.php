@@ -70,7 +70,7 @@ final class PhameBlogFeedController extends PhameController {
         '/phame/post/view/'.$post->getID().'/'));
 
       $content[] = hsprintf(
-        '<author><name>%s</name>%s</author>',
+        '<author><name>%s</name></author>',
         $bloggers[$post->getBloggerPHID()]->getFullName());
 
       $content[] = phutil_tag(
