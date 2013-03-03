@@ -49,8 +49,9 @@ final class PhrictionDiffController
     $text_r = $content_r->getContent();
 
     $text_l = phutil_utf8_hard_wrap($text_l, 80);
+    $text_l = implode("\n", $text_l);
     $text_r = phutil_utf8_hard_wrap($text_r, 80);
-
+    $text_r = implode("\n", $text_r);
 
     $engine = new PhabricatorDifferenceEngine();
     $changeset = $engine->generateChangesetFromFileContent($text_l, $text_r);

@@ -24,7 +24,9 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
     // that is built.
 
     $old = phutil_utf8_hard_wrap($old, 80);
+    $old = implode("\n", $old);
     $new = phutil_utf8_hard_wrap($new, 80);
+    $new = implode("\n", $new);
 
     $engine = new PhabricatorDifferenceEngine();
     $changeset = $engine->generateChangesetFromFileContent($old, $new);

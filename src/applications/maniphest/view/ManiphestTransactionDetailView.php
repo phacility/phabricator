@@ -571,7 +571,9 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $id = $transaction->getID();
 
         $old_text = phutil_utf8_hard_wrap($transaction->getOldValue(), 80);
+        $old_text = implode("\n", $old_text);
         $new_text = phutil_utf8_hard_wrap($transaction->getNewValue(), 80);
+        $new_text = implode("\n", $new_text);
 
         $engine = new PhabricatorDifferenceEngine();
         $changeset = $engine->generateChangesetFromFileContent($old_text,
