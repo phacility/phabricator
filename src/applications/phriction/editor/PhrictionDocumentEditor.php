@@ -83,13 +83,13 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     return $this->updateDocument($document, $content, $new_content);
   }
 
-  public function stub() {
+  private function stub() {
     $actor = $this->requireActor();
     $document = $this->document;
     $content  = $this->content;
     $new_content = $this->buildContentTemplate($document, $content);
 
-    $new_content->setChangeType(PhrictionChangeType::CHANGE_PARENT);
+    $new_content->setChangeType(PhrictionChangeType::CHANGE_STUB);
     $new_content->setContent('');
 
     return $this->updateDocument($document, $content, $new_content);
@@ -164,7 +164,7 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
             "You can not delete a document which doesn't exist yet!");
         }
         break;
-      case PhrictionChangeType::CHANGE_PARENT:
+      case PhrictionChangeType::CHANGE_STUB:
         $doc_status = PhrictionDocumentStatus::STATUS_STUB;
         $feed_action = null;
         break;
@@ -198,10 +198,11 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
       $ancestors = id(new PhrictionDocument())->loadAllWhere(
         'slug IN (%Ls)',
         $ancestral_slugs);
+      $ancestors = mpull($ancestors, null, 'getSlug');
       foreach ($ancestral_slugs as $slug) {
         // We check for change type to prevent near-infinite recursion
         if (!isset($ancestors[$slug]) &&
-          $new_content->getChangeType() != PhrictionChangeType::CHANGE_PARENT) {
+          $new_content->getChangeType() != PhrictionChangeType::CHANGE_STUB) {
 
           id(PhrictionDocumentEditor::newForSlug($slug))
             ->setActor($this->getActor())
