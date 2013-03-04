@@ -32,8 +32,14 @@ final class PhrictionListController
     $header = id(new PhabricatorHeaderView())
       ->setHeader($views[$this->view]);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(id(new PhabricatorCrumbView())
+      ->setName($views[$this->view])
+      ->setHref($this->getApplicationURI('list/' . $this->view)));
+
     $nav->appendChild(
       array(
+        $crumbs,
         $header,
       ));
 
