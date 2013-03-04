@@ -18,7 +18,8 @@ final class PholioMockListController extends PholioController {
 
     $query = id(new PholioMockQuery())
       ->setViewer($user)
-      ->needCoverFiles(true);
+      ->needCoverFiles(true)
+      ->needTokenCounts(true);
 
     $nav = $this->buildSideNav();
     $filter = $nav->selectFilter('view/'.$this->view, 'view/all');
@@ -65,6 +66,7 @@ final class PholioMockListController extends PholioController {
           'div',
           array(),
           pht('Created on %s', $datetime)));
+
       $board->addItem($item);
     }
 

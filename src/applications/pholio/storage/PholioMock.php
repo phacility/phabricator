@@ -24,6 +24,7 @@ final class PholioMock extends PholioDAO
 
   private $images;
   private $coverFile;
+  private $tokenCount;
 
   public function getConfiguration() {
     return array(
@@ -65,6 +66,18 @@ final class PholioMock extends PholioDAO
       throw new Exception("Call attachCoverFile() before getCoverFile()!");
     }
     return $this->coverFile;
+  }
+
+  public function getTokenCount() {
+    if ($this->tokenCount === null) {
+      throw new Exception("Call attachTokenCount() before getTokenCount()!");
+    }
+    return $this->tokenCount;
+  }
+
+  public function attachTokenCount($count) {
+    $this->tokenCount = $count;
+    return $this;
   }
 
 

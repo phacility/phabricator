@@ -1343,6 +1343,7 @@ phutil_register_library_map(array(
     'PhabricatorToken' => 'applications/tokens/storage/PhabricatorToken.php',
     'PhabricatorTokenController' => 'applications/tokens/controller/PhabricatorTokenController.php',
     'PhabricatorTokenCount' => 'applications/tokens/storage/PhabricatorTokenCount.php',
+    'PhabricatorTokenCountQuery' => 'applications/tokens/query/PhabricatorTokenCountQuery.php',
     'PhabricatorTokenDAO' => 'applications/tokens/storage/PhabricatorTokenDAO.php',
     'PhabricatorTokenGiveController' => 'applications/tokens/controller/PhabricatorTokenGiveController.php',
     'PhabricatorTokenGiven' => 'applications/tokens/storage/PhabricatorTokenGiven.php',
@@ -2813,6 +2814,7 @@ phutil_register_library_map(array(
     ),
     'PhabricatorTokenController' => 'PhabricatorController',
     'PhabricatorTokenCount' => 'PhabricatorTokenDAO',
+    'PhabricatorTokenCountQuery' => 'PhabricatorOffsetPagedQuery',
     'PhabricatorTokenDAO' => 'PhabricatorLiskDAO',
     'PhabricatorTokenGiveController' => 'PhabricatorTokenController',
     'PhabricatorTokenGiven' =>
