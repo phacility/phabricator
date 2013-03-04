@@ -196,12 +196,21 @@ final class PhrictionDocumentController
 
     $action_view = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($document)
-      ->addAction(
+      ->setObject($document);
+
+    if (!$document->getID()) {
+      return $action_view->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Edit Document'))
-          ->setIcon('edit')
-          ->setHref('/phriction/edit/'.$document->getID().'/'));
+          ->setName(pht('Create this document'))
+          ->setIcon('create')
+          ->setHref('/phriction/edit/?slug='.$slug));
+    }
+
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Document'))
+        ->setIcon('edit')
+        ->setHref('/phriction/edit/'.$document->getID().'/'));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
       $action_view->addAction(
