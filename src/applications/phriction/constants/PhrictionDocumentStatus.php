@@ -7,6 +7,7 @@ final class PhrictionDocumentStatus extends PhrictionConstants {
 
   const STATUS_EXISTS     = 0;
   const STATUS_DELETED    = 1;
+  const STATUS_MOVED      = 2;
   const STATUS_STUB       = 3;
 
   public static function getConduitConstant($const) {
