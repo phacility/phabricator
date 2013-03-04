@@ -10,6 +10,7 @@ final class PonderAnsweredMail extends PonderMail {
     $this->setQuestion($question);
     $this->setTarget($target);
     $this->setActorHandle($actor);
+    $this->setActor($actor);
   }
 
   protected function renderVaryPrefix() {

@@ -323,3 +323,10 @@
   margin: auto;
   max-width: 95%;
 }
+
+/* phabricator-remarkup-dark assumes a dark backround with light text,
+   so here are custom rules to override remarkup defaults. */
+
+div.phabricator-remarkup-dark blockquote {
+  color: #999;
+}

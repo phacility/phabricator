@@ -42,6 +42,10 @@ final class PhrictionDocument extends PhrictionDAO
     if ($slug == '/') {
       return $prefix;
     } else {
+      // NOTE: The effect here is to escape non-latin characters, since modern
+      // browsers deal with escaped UTF8 characters in a reasonable way (showing
+      // the user a readable URI) but older programs may not.
+      $slug = phutil_escape_uri($slug);
       return $prefix.$slug;
     }
   }

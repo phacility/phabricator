@@ -50,7 +50,7 @@ final class ConduitAPI_flag_delete_Method extends ConduitAPI_flag_Method {
     } else {
       throw new ConduitException('ERR_NEED_PARAM');
     }
-    $this->attachHandleToFlag($flag);
+    $this->attachHandleToFlag($flag, $request->getUser());
     $ret = $this->buildFlagInfoDictionary($flag);
     $flag->delete();
     return $ret;

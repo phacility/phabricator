@@ -430,7 +430,7 @@ final class DifferentialRevisionListController extends DifferentialController {
 
     $template = id(new DifferentialRevisionListView())
       ->setUser($user)
-      ->setFields(DifferentialRevisionListView::getDefaultFields());
+      ->setFields(DifferentialRevisionListView::getDefaultFields($user));
 
     $views = array();
     switch ($filter) {
@@ -462,6 +462,7 @@ final class DifferentialRevisionListController extends DifferentialController {
         // looking at your own requests.
         if (in_array($user->getPHID(), $user_phids)) {
           $flags = id(new PhabricatorFlagQuery())
+            ->setViewer($user)
             ->withOwnerPHIDs(array($user->getPHID()))
             ->withTypes(array(PhabricatorPHIDConstants::PHID_TYPE_DREV))
             ->needHandles(true)

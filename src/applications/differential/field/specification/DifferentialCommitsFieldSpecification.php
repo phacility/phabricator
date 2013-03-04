@@ -47,7 +47,9 @@ final class DifferentialCommitsFieldSpecification
     }
 
     $body = array();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getUser())
+      ->loadHandles();
     $body[] = pht('COMMIT(S)', count($handles));
 
     foreach ($handles as $handle) {

@@ -81,17 +81,17 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $request = $matches[1];
 
     $map = array(
-      'users'           => 'Type a user name...',
-      'usersorprojects' => 'Type a user or project name...',
-      'searchowner'     => 'Type a user name...',
-      'accounts'        => 'Type a user name...',
-      'mailable'        => 'Type a user or mailing list...',
-      'allmailable'     => 'Type a user or mailing list...',
-      'searchproject'   => 'Type a project name...',
-      'projects'        => 'Type a project name...',
-      'repositories'    => 'Type a repository name...',
-      'packages'        => 'Type a package name...',
-      'arcanistproject' => 'Type an arc project name...',
+      'users'           => pht('Type a user name...'),
+      'usersorprojects' => pht('Type a user or project name...'),
+      'searchowner'     => pht('Type a user name...'),
+      'accounts'        => pht('Type a user name...'),
+      'mailable'        => pht('Type a user or mailing list...'),
+      'allmailable'     => pht('Type a user or mailing list...'),
+      'searchproject'   => pht('Type a project name...'),
+      'projects'        => pht('Type a project name...'),
+      'repositories'    => pht('Type a repository name...'),
+      'packages'        => pht('Type a package name...'),
+      'arcanistproject' => pht('Type an arc project name...'),
     );
 
     return idx($map, $request);

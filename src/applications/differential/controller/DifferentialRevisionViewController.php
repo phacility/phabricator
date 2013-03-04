@@ -846,10 +846,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
   private function renderOtherRevisions(array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
 
+    $user = $this->getRequest()->getUser();
+
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
-      ->setFields(DifferentialRevisionListView::getDefaultFields())
-      ->setUser($this->getRequest()->getUser())
+      ->setFields(DifferentialRevisionListView::getDefaultFields($user))
+      ->setUser($user)
       ->loadAssets();
 
     $phids = $view->getRequiredHandlePHIDs();

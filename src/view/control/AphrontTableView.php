@@ -275,7 +275,7 @@ final class AphrontTableView extends AphrontView {
       $table[] = hsprintf(
         '<tr class="no-data"><td colspan="%s">%s</td></tr>',
         $colspan,
-        coalesce($this->noDataString, 'No data available.'));
+        coalesce($this->noDataString, pht('No data available.')));
     }
 
     $table_class = 'aphront-table-view';

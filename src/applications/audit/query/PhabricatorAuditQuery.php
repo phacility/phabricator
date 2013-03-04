@@ -8,6 +8,8 @@ final class PhabricatorAuditQuery {
   private $auditorPHIDs;
   private $commitPHIDs;
 
+  private $repositoryPHIDs;
+
   private $needCommits;
   private $needCommitData;
 
@@ -16,6 +18,7 @@ final class PhabricatorAuditQuery {
   private $status     = 'status-any';
   const STATUS_ANY    = 'status-any';
   const STATUS_OPEN   = 'status-open';
+  const STATUS_CONCERN = 'status-concern';
 
   private $commits;
 
@@ -26,6 +29,11 @@ final class PhabricatorAuditQuery {
 
   public function withAuditorPHIDs(array $auditor_phids) {
     $this->auditorPHIDs = $auditor_phids;
+    return $this;
+  }
+
+  public function withRepositoryPHIDs(array $repository_phids) {
+    $this->repositoryPHIDs = $repository_phids;
     return $this;
   }
 
@@ -119,13 +127,23 @@ final class PhabricatorAuditQuery {
           awaiting.auditorPHID = %s',
         id(new PhabricatorRepositoryAuditRequest())->getTableName(),
         $this->awaitingUser->getPHID());
+    }
 
-      // Join the commit table so we can get the commit author into the result
-      // row and filter by it later.
+    if ($this->awaitingUser || $this->repositoryPHIDs) {
+      // Join the commit table so we can get the commit author or repository id
+      // into the result row and filter by it later.
       $joins[] = qsprintf(
         $conn_r,
         'JOIN %T commit ON req.commitPHID = commit.phid',
         id(new PhabricatorRepositoryCommit())->getTableName());
+    }
+
+    if ($this->repositoryPHIDs) {
+      // Join in the repository table so we can filter by repository PHID
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T repository ON repository.id = commit.repositoryID',
+        id(new PhabricatorRepository())->getTableName());
     }
 
     if ($joins) {
@@ -163,8 +181,22 @@ final class PhabricatorAuditQuery {
         $this->awaitingUser->getPHID());
     }
 
+    if ($this->repositoryPHIDs) {
+      // Filter only for a single repository
+      $where[] = qsprintf(
+        $conn_r,
+        'repository.phid IN (%Ls)',
+        $this->repositoryPHIDs);
+    }
+
     $status = $this->status;
     switch ($status) {
+      case self::STATUS_CONCERN:
+        $where[] = qsprintf(
+          $conn_r,
+          'req.auditStatus = %s',
+          PhabricatorAuditStatusConstants::CONCERNED);
+        break;
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,

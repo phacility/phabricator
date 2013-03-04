@@ -295,6 +295,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     }
 
     $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($user)
       ->loadHandles();
 
     $engine->process();

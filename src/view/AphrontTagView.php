@@ -111,7 +111,8 @@ abstract class AphrontTagView extends AphrontView {
     if (!is_array($attributes)) {
       $class = get_class($this);
       throw new Exception(
-        "View '{$class}' did not return an array from getTagAttributes()!");
+        pht("View '%s' did not return an array from getTagAttributes()!",
+          $class));
     }
 
     $sigils = $this->sigils;

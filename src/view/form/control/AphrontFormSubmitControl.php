@@ -4,7 +4,11 @@ final class AphrontFormSubmitControl extends AphrontFormControl {
 
   protected $cancelButton;
 
-  public function addCancelButton($href, $label = 'Cancel') {
+  public function addCancelButton($href, $label = null) {
+    if (!$label) {
+      $label = pht('Cancel');
+    }
+
     $this->cancelButton = phutil_tag(
       'a',
       array(

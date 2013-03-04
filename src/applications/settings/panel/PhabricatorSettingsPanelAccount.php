@@ -26,8 +26,8 @@ final class PhabricatorSettingsPanelAccount
       if ($editable) {
         $user->setRealName($request->getStr('realname'));
         if (!strlen($user->getRealName())) {
-          $errors[] = 'Real name must be nonempty.';
-          $e_realname = 'Required';
+          $errors[] = pht('Real name must be nonempty.');
+          $e_realname = pht('Required');
         }
       }
 
@@ -35,7 +35,7 @@ final class PhabricatorSettingsPanelAccount
       if (in_array($new_timezone, DateTimeZone::listIdentifiers(), true)) {
         $user->setTimezoneIdentifier($new_timezone);
       } else {
-        $errors[] = 'The selected timezone is not a valid timezone.';
+        $errors[] = pht('The selected timezone is not a valid timezone.');
       }
 
       if (!$errors) {
@@ -50,14 +50,14 @@ final class PhabricatorSettingsPanelAccount
       if ($request->getStr('saved')) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Changes Saved');
+        $notice->setTitle(pht('Changes Saved'));
         $notice->appendChild(
-          phutil_tag('p', array(), 'Your changes have been saved.'));
+          phutil_tag('p', array(), pht('Your changes have been saved.')));
         $notice = $notice->render();
       }
     } else {
       $notice = new AphrontErrorView();
-      $notice->setTitle('Form Errors');
+      $notice->setTitle(pht('Form Errors'));
       $notice->setErrors($errors);
       $notice = $notice->render();
     }
@@ -70,27 +70,27 @@ final class PhabricatorSettingsPanelAccount
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Username')
+          ->setLabel(pht('Username'))
           ->setValue($user->getUsername()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Real Name')
+          ->setLabel(pht('Real Name'))
           ->setName('realname')
           ->setError($e_realname)
           ->setValue($user->getRealName())
           ->setDisabled(!$editable))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Timezone')
+          ->setLabel(pht('Timezone'))
           ->setName('timezone')
           ->setOptions($timezone_id_map)
           ->setValue($user->getTimezoneIdentifier()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Account Settings');
+    $panel->setHeader(pht('Account Settings'));
     $panel->appendChild($form);
     $panel->setNoBackground();
 

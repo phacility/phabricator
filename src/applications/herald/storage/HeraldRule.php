@@ -76,6 +76,7 @@ final class HeraldRule extends HeraldDAO {
     }
 
     $handles = id(new PhabricatorObjectHandleData(array_keys($users)))
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->loadHandles();
 
     foreach ($rules as $key => $rule) {

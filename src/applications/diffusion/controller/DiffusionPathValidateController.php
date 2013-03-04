@@ -27,6 +27,7 @@ final class DiffusionPathValidateController extends DiffusionController {
       ));
 
     $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+    $browse_query->setViewer($request->getUser());
     $browse_query->needValidityOnly(true);
     $valid = $browse_query->loadPaths();
 

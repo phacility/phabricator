@@ -24,4 +24,11 @@ final class PhabricatorAuditCommitStatusConstants {
     return idx(self::getStatusNameMap(), $code, 'Unknown');
   }
 
+  public static function getOpenStatusConstants() {
+    return array(
+      self::CONCERN_RAISED,
+      self::NEEDS_AUDIT,
+    );
+  }
+
 }

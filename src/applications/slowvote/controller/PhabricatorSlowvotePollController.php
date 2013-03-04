@@ -98,6 +98,7 @@ final class PhabricatorSlowvotePollController
       ));
 
     $query = new PhabricatorObjectHandleData($phids);
+    $query->setViewer($user);
     $handles = $query->loadHandles();
     $objects = $query->loadObjects();
 

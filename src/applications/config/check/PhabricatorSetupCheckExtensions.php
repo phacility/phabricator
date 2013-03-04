@@ -7,12 +7,10 @@ final class PhabricatorSetupCheckExtensions extends PhabricatorSetupCheck {
   }
 
   protected function executeChecks() {
-    // TODO: Require 'mysql' OR 'mysqli'.
     // TODO: Make 'mbstring' and 'iconv' soft requirements.
     // TODO: Make 'curl' a soft requirement.
 
     $required = array(
-      'mysql',
       'hash',
       'json',
       'openssl',
@@ -30,6 +28,10 @@ final class PhabricatorSetupCheckExtensions extends PhabricatorSetupCheck {
       if (!extension_loaded($extension)) {
         $need[] = $extension;
       }
+    }
+
+    if (!extension_loaded('mysqli') && !extension_loaded('mysql')) {
+      $need[] = 'mysqli or mysql';
     }
 
     if (!$need) {

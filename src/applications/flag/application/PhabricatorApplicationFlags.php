@@ -28,6 +28,7 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
     $status = array();
 
     $flags = id(new PhabricatorFlagQuery())
+      ->setViewer($user)
       ->withOwnerPHIDs(array($user->getPHID()))
       ->execute();
 

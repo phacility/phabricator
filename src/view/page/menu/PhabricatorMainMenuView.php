@@ -119,6 +119,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderPhabricatorMenuButton($header_id) {
+    $button_id = celerity_generate_unique_node_id();
     return javelin_tag(
       'a',
       array(
@@ -128,6 +129,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-core-menu-expanded',
+            $button_id => 'menu-icon-eye-blue',
           ),
         ),
       ),
@@ -135,11 +137,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         'span',
         array(
           'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-eye',
+          'id' => $button_id,
         ),
         ''));
   }
 
   public function renderApplicationMenuButton($header_id) {
+    $button_id = celerity_generate_unique_node_id();
     return javelin_tag(
       'a',
       array(
@@ -149,6 +153,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
+            $button_id => 'menu-icon-app-blue',
           ),
         ),
       ),
@@ -156,6 +161,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'span',
         array(
           'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-app',
+          'id' => $button_id,
         ),
         ''));
   }

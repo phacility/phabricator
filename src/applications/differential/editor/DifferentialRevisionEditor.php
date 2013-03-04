@@ -346,6 +346,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $phids = array($this->getActorPHID());
 
     $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getActor())
       ->loadHandles();
     $actor_handle = $handles[$this->getActorPHID()];
 
@@ -362,6 +363,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
             $revision,
             $actor_handle,
             $changesets))
+          ->setActor($this->getActor())
           ->setIsFirstMailAboutRevision($is_new)
           ->setIsFirstMailToRecipients($is_new)
           ->setComments($this->getComments())
@@ -425,6 +427,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
             $revision,
             $actor_handle,
             $changesets))
+          ->setActor($this->getActor())
           ->setIsFirstMailAboutRevision($is_new)
           ->setIsFirstMailToRecipients(true)
           ->setToPHIDs(array_keys($add['rev']));
@@ -456,6 +459,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
             $revision,
             $actor_handle,
             $changesets))
+          ->setActor($this->getActor())
           ->setIsFirstMailToRecipients(true)
           ->setToPHIDs(array_keys($add['ccs']));
       }

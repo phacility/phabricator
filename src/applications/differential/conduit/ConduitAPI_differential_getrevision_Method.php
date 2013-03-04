@@ -61,6 +61,7 @@ final class ConduitAPI_differential_getrevision_Method
     $commit_dicts = array();
     $commit_phids = $revision->loadCommitPHIDs();
     $handles = id(new PhabricatorObjectHandleData($commit_phids))
+      ->setViewer($request->getUser())
       ->loadHandles();
 
     foreach ($commit_phids as $commit_phid) {
@@ -70,7 +71,9 @@ final class ConduitAPI_differential_getrevision_Method
       );
     }
 
-    $auxiliary_fields = $this->loadAuxiliaryFields($revision);
+    $auxiliary_fields = $this->loadAuxiliaryFields(
+      $revision,
+      $request->getUser());
 
     $dict = array(
       'id' => $revision->getID(),
@@ -94,10 +97,13 @@ final class ConduitAPI_differential_getrevision_Method
     return $dict;
   }
 
-  private function loadAuxiliaryFields(DifferentialRevision $revision) {
+  private function loadAuxiliaryFields(
+    DifferentialRevision $revision,
+    PhabricatorUser $user) {
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
     foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setUser($user);
       if (!$aux_field->shouldAppearOnConduitView()) {
         unset($aux_fields[$key]);
       }

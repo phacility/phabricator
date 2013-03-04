@@ -59,7 +59,9 @@ final class PackageModifyMail extends PackageMail {
       array(
         $this->getPackage()->getActorPHID(),
       ));
-    $this->handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $this->handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getActor())
+      ->loadHandles();
   }
 
   protected function renderDescriptionSection() {

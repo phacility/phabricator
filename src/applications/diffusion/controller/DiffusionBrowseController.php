@@ -10,6 +10,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $is_file = true;
     } else {
       $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+      $browse_query->setViewer($this->getRequest()->getUser());
       $results = $browse_query->loadPaths();
       $reason = $browse_query->getReasonForEmptyResultSet();
       $is_file = ($reason == DiffusionBrowseQuery::REASON_IS_FILE);

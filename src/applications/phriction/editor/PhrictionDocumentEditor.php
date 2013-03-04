@@ -83,6 +83,18 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     return $this->updateDocument($document, $content, $new_content);
   }
 
+  private function stub() {
+    $actor = $this->requireActor();
+    $document = $this->document;
+    $content  = $this->content;
+    $new_content = $this->buildContentTemplate($document, $content);
+
+    $new_content->setChangeType(PhrictionChangeType::CHANGE_STUB);
+    $new_content->setContent('');
+
+    return $this->updateDocument($document, $content, $new_content);
+  }
+
   public function save() {
     $actor = $this->requireActor();
 
@@ -152,6 +164,10 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
             "You can not delete a document which doesn't exist yet!");
         }
         break;
+      case PhrictionChangeType::CHANGE_STUB:
+        $doc_status = PhrictionDocumentStatus::STATUS_STUB;
+        $feed_action = null;
+        break;
       default:
         throw new Exception(
           "Unsupported content change type '{$change_type}'!");
@@ -176,6 +192,28 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     id(new PhabricatorSearchIndexer())
       ->indexDocumentByPHID($document->getPHID());
 
+    // Stub out empty parent documents if they don't exist
+    $ancestral_slugs = PhabricatorSlug::getAncestry($document->getSlug());
+    if ($ancestral_slugs) {
+      $ancestors = id(new PhrictionDocument())->loadAllWhere(
+        'slug IN (%Ls)',
+        $ancestral_slugs);
+      $ancestors = mpull($ancestors, null, 'getSlug');
+      foreach ($ancestral_slugs as $slug) {
+        // We check for change type to prevent near-infinite recursion
+        if (!isset($ancestors[$slug]) &&
+          $new_content->getChangeType() != PhrictionChangeType::CHANGE_STUB) {
+
+          id(PhrictionDocumentEditor::newForSlug($slug))
+            ->setActor($this->getActor())
+            ->setTitle(PhabricatorSlug::getDefaultTitle($slug))
+            ->setContent('')
+            ->setDescription(pht('Empty Parent Document'))
+            ->stub();
+        }
+      }
+    }
+
     $project_phid = null;
     $slug = $document->getSlug();
     if (PhrictionDocument::isProjectSlug($slug)) {
@@ -196,19 +234,21 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
       $related_phids[] = $project_phid;
     }
 
-    id(new PhabricatorFeedStoryPublisher())
-      ->setRelatedPHIDs($related_phids)
-      ->setStoryAuthorPHID($this->getActor()->getPHID())
-      ->setStoryTime(time())
-      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PHRICTION)
-      ->setStoryData(
-        array(
-          'phid'    => $document->getPHID(),
-          'action'  => $feed_action,
-          'content' => phutil_utf8_shorten($new_content->getContent(), 140),
-          'project' => $project_phid,
-        ))
-      ->publish();
+    if ($feed_action) {
+      id(new PhabricatorFeedStoryPublisher())
+        ->setRelatedPHIDs($related_phids)
+        ->setStoryAuthorPHID($this->getActor()->getPHID())
+        ->setStoryTime(time())
+        ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PHRICTION)
+        ->setStoryData(
+          array(
+            'phid'    => $document->getPHID(),
+            'action'  => $feed_action,
+            'content' => phutil_utf8_shorten($new_content->getContent(), 140),
+            'project' => $project_phid,
+          ))
+        ->publish();
+    }
 
     return $this;
   }

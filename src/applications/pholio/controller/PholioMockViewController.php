@@ -170,7 +170,7 @@ final class PholioMockViewController extends PholioController {
 
     $properties->invokeWillRenderEvent();
 
-    $properties->addTextContent(
+    $properties->addImageContent(
       $engine->getOutput($mock, PholioMock::MARKUP_FIELD_DESCRIPTION));
 
     return $properties;

@@ -22,9 +22,15 @@ final class PhabricatorSettingsPanelDiffPreferences
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
 
     if ($request->isFormPost()) {
-      $preferences->setPreference(
-        $pref_filetree,
-        $request->getInt($pref_filetree));
+      $filetree = $request->getInt($pref_filetree);
+
+      if ($filetree && !$preferences->getPreference($pref_filetree)) {
+        $preferences->setPreference(
+          PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED,
+          false);
+      }
+
+      $preferences->setPreference($pref_filetree, $filetree);
 
       $preferences->save();
       return id(new AphrontRedirectResponse())

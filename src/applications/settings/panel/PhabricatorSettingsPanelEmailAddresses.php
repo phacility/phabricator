@@ -59,7 +59,7 @@ final class PhabricatorSettingsPanelEmailAddresses
           'href'  => $uri->alter('verify', $email->getID()),
           'sigil' => 'workflow',
         ),
-        'Verify');
+        pht('Verify'));
 
       $button_make_primary = javelin_tag(
         'a',
@@ -68,7 +68,7 @@ final class PhabricatorSettingsPanelEmailAddresses
           'href'  => $uri->alter('primary', $email->getID()),
           'sigil' => 'workflow',
         ),
-        'Make Primary');
+        pht('Make Primary'));
 
       $button_remove = javelin_tag(
         'a',
@@ -77,14 +77,14 @@ final class PhabricatorSettingsPanelEmailAddresses
           'href'    => $uri->alter('delete', $email->getID()),
           'sigil'   => 'workflow'
         ),
-        'Remove');
+        pht('Remove'));
 
       $button_primary = phutil_tag(
         'a',
         array(
           'class' => 'button small disabled',
         ),
-        'Primary');
+        pht('Primary'));
 
       if (!$email->getIsVerified()) {
         $action = $button_verify;
@@ -112,9 +112,9 @@ final class PhabricatorSettingsPanelEmailAddresses
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Email',
-        'Status',
-        'Remove',
+        pht('Email'),
+        pht('Status'),
+        pht('Remove'),
       ));
     $table->setColumnClasses(
       array(
@@ -140,9 +140,9 @@ final class PhabricatorSettingsPanelEmailAddresses
             'class'     => 'green button',
             'sigil'     => 'workflow',
           ),
-          'Add New Address'));
+          pht('Add New Address')));
     }
-    $view->setHeader('Email Addresses');
+    $view->setHeader(pht('Email Addresses'));
     $view->appendChild($table);
     $view->setNoBackground();
 
@@ -167,10 +167,10 @@ final class PhabricatorSettingsPanelEmailAddresses
       }
 
       if (!strlen($email)) {
-        $e_email = 'Required';
-        $errors[] = 'Email is required.';
+        $e_email = pht('Required');
+        $errors[] = pht('Email is required.');
       } else if (!PhabricatorUserEmail::isAllowedAddress($email)) {
-        $e_email = 'Invalid';
+        $e_email = pht('Invalid');
         $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
       }
 
@@ -190,17 +190,17 @@ final class PhabricatorSettingsPanelEmailAddresses
           $dialog = id(new AphrontDialogView())
             ->setUser($user)
             ->addHiddenInput('new',  'verify')
-            ->setTitle('Verification Email Sent')
+            ->setTitle(pht('Verification Email Sent'))
             ->appendChild(phutil_tag('p', array(), pht(
               'A verification email has been sent. Click the link in the '.
               'email to verify your address.')))
             ->setSubmitURI($uri)
-            ->addSubmitButton('Done');
+            ->addSubmitButton(pht('Done'));
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
         } catch (AphrontQueryDuplicateKeyException $ex) {
-          $email = 'Duplicate';
-          $errors[] = 'Another user already has this email.';
+          $email = pht('Duplicate');
+          $errors[] = pht('Another user already has this email.');
         }
       }
     }
@@ -213,7 +213,7 @@ final class PhabricatorSettingsPanelEmailAddresses
     $form = id(new AphrontFormLayoutView())
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Email')
+          ->setLabel(pht('Email'))
           ->setName('email')
           ->setValue($request->getStr('email'))
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
@@ -222,10 +222,10 @@ final class PhabricatorSettingsPanelEmailAddresses
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addHiddenInput('new', 'true')
-      ->setTitle('New Address')
+      ->setTitle(pht('New Address'))
       ->appendChild($errors)
       ->appendChild($form)
-      ->addSubmitButton('Save')
+      ->addSubmitButton(pht('Save'))
       ->addCancelButton($uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -263,11 +263,11 @@ final class PhabricatorSettingsPanelEmailAddresses
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addHiddenInput('delete', $email_id)
-      ->setTitle("Really delete address '{$address}'?")
+      ->setTitle(pht("Really delete address '%s'?", $address))
       ->appendChild(phutil_tag('p', array(), pht(
         'Are you sure you want to delete this address? You will no '.
         'longer be able to use it to login.')))
-      ->addSubmitButton('Delete')
+      ->addSubmitButton(pht('Delete'))
       ->addCancelButton($uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -300,11 +300,11 @@ final class PhabricatorSettingsPanelEmailAddresses
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addHiddenInput('verify', $email_id)
-      ->setTitle("Send Another Verification Email?")
+      ->setTitle(pht("Send Another Verification Email?"))
       ->appendChild(hsprintf(
-        '<p>Send another copy of the verification email to %s?</p>',
-        $address))
-      ->addSubmitButton('Send Email')
+        '<p>%s</p>',
+        pht('Send another copy of the verification email to %s?', $address)))
+      ->addSubmitButton(pht('Send Email'))
       ->addCancelButton($uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -341,12 +341,12 @@ final class PhabricatorSettingsPanelEmailAddresses
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addHiddenInput('primary', $email_id)
-      ->setTitle("Change primary email address?")
+      ->setTitle(pht("Change primary email address?"))
       ->appendChild(hsprintf(
-        '<p>If you change your primary address, Phabricator will send all '.
-          'email to %s.</p>',
+        '<p>If you change your primary address, Phabricator will send'.
+          ' all email to %s.</p>',
         $address))
-      ->addSubmitButton('Change Primary Address')
+      ->addSubmitButton(pht('Change Primary Address'))
       ->addCancelButton($uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

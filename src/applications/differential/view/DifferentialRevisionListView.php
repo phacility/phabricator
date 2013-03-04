@@ -55,6 +55,7 @@ final class DifferentialRevisionListView extends AphrontView {
     }
 
     $this->flags = id(new PhabricatorFlagQuery())
+      ->setViewer($user)
       ->withOwnerPHIDs(array($user->getPHID()))
       ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
       ->execute();
@@ -184,10 +185,11 @@ final class DifferentialRevisionListView extends AphrontView {
     return $table->render();
   }
 
-  public static function getDefaultFields() {
+  public static function getDefaultFields(PhabricatorUser $user) {
     $selector = DifferentialFieldSelector::newSelector();
     $fields = $selector->getFieldSpecifications();
     foreach ($fields as $key => $field) {
+      $field->setUser($user);
       if (!$field->shouldAppearOnRevisionList()) {
         unset($fields[$key]);
       }

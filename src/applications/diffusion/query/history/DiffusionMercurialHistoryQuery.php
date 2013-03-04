@@ -27,18 +27,28 @@ final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
     // If we don't have a path component in the query, omit it from the command
     // entirely to avoid these inconsistencies.
 
-    $path_arg = '';
+    // NOTE: When viewing the history of a file, we don't use "-b", because
+    // Mercurial stops history at the branchpoint but we're interested in all
+    // ancestors. When viewing history of a branch, we do use "-b", and thus
+    // stop history (this is more consistent with the Mercurial worldview of
+    // branches).
+
     if (strlen($path)) {
       $path_arg = csprintf('-- %s', $path);
+      $branch_arg = '';
+    } else {
+      $path_arg = '';
+      // NOTE: --branch used to be called --only-branch; use -b for
+      // compatibility.
+      $branch_arg = csprintf('-b %s', $drequest->getBranch());
     }
 
-    // NOTE: --branch used to be called --only-branch; use -b for compatibility.
     list($stdout) = $repository->execxLocalCommand(
-      'log --debug --template %s --limit %d -b %s --rev %s:0 %C',
+      'log --debug --template %s --limit %d %C --rev %s %C',
       '{node};{parents}\\n',
       ($this->getOffset() + $this->getLimit()), // No '--skip' in Mercurial.
-      $drequest->getBranch(),
-      $commit_hash,
+      $branch_arg,
+      hgsprintf('reverse(%s::%s)', '0', $commit_hash),
       $path_arg);
 
     $lines = explode("\n", trim($stdout));

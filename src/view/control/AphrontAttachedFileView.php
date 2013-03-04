@@ -30,7 +30,7 @@ final class AphrontAttachedFileView extends AphrontView {
         'target'  => '_blank',
       ),
       $file->getName());
-    $size = number_format($file->getByteSize()).' bytes';
+    $size = number_format($file->getByteSize()).' ' .pht('bytes');
 
     $remove = javelin_tag(
       'a',

@@ -13,8 +13,10 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       'derp//derp'        => 'derp/derp/',
       'DERP//DERP'        => 'derp/derp/',
       'a B c'             => 'a_b_c/',
-      '-1~2.3abcd'        => '1_2_3abcd/',
-      "T\x95O\x95D\x95O"  => 't_o_d_o/',
+      '-1~2.3abcd'        => '-1~2.3abcd/',
+      "T\x00O\x00D\x00O"  => "t_o_d_o/",
+      'x#%&+=\\?<> y'     => 'x_y/',
+      "\xE2\x98\x83"      => "\xE2\x98\x83/",
     );
 
     foreach ($slugs as $slug => $normal) {

@@ -31,12 +31,20 @@ final class AphrontDialogView extends AphrontView {
     return $this->title;
   }
 
-  public function addSubmitButton($text = 'Okay') {
+  public function addSubmitButton($text = null) {
+    if (!$text) {
+      $text = pht('Okay');
+    }
+
     $this->submitButton = $text;
     return $this;
   }
 
-  public function addCancelButton($uri, $text = 'Cancel') {
+  public function addCancelButton($uri, $text = null) {
+    if (!$text) {
+      $text = pht('Cancel');
+    }
+
     $this->cancelURI = $uri;
     $this->cancelText = $text;
     return $this;
@@ -102,7 +110,7 @@ final class AphrontDialogView extends AphrontView {
 
     if (!$this->user) {
       throw new Exception(
-        "You must call setUser() when rendering an AphrontDialogView.");
+        pht("You must call setUser() when rendering an AphrontDialogView."));
     }
 
     $more = $this->class;

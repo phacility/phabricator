@@ -130,6 +130,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
           case ManiphestTransactionType::TYPE_OWNER:
             if ($new) {
               $handles = id(new PhabricatorObjectHandleData(array($new)))
+                ->setViewer($this->getActor())
                 ->loadHandles();
               $task->setOwnerOrdering($handles[$new]->getName());
             } else {
@@ -226,6 +227,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $phids = array_keys($phids);
 
     $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getActor())
       ->loadHandles();
 
     $view = new ManiphestTransactionDetailView();

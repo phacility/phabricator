@@ -78,7 +78,7 @@ Now the bot should be able to connect to Phabricator via Conduit.
 
 The bot is a Phabricator daemon, so start it with ##phd##:
 
-  ./bin/phd launch pharicatorbot <absolute_path_to_config_file>
+  ./bin/phd launch phabricatorbot <absolute_path_to_config_file>
 
 If you have issues you can try ##debug## instead of ##launch##, see
 @{article:Managing Daemons with phd} for more information.

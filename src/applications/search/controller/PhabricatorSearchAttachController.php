@@ -27,6 +27,7 @@ final class PhabricatorSearchAttachController
     $user = $request->getUser();
 
     $handle_data = new PhabricatorObjectHandleData(array($this->phid));
+    $handle_data->setViewer($user);
     $handles = $handle_data->loadHandles();
     $handle = $handles[$this->phid];
 

@@ -9,12 +9,10 @@ final class DiffusionMercurialLastModifiedQuery
 
     $path = $drequest->getPath();
 
-    // TODO: Share some of this with History query.
     list($hash) = $repository->execxLocalCommand(
-      'log --template %s --limit 1 -b %s --rev %s:0 -- %s',
+      'log --template %s --limit 1 --rev %s -- %s',
       '{node}',
-      $drequest->getBranch(),
-      $drequest->getCommit(),
+      hgsprintf('reverse(%s::%s)', '0', $drequest->getCommit()),
       nonempty(ltrim($path, '/'), '.'));
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(

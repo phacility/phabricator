@@ -169,7 +169,7 @@ final class PhabricatorObjectItemView extends AphrontView {
       case null:
         break;
       default:
-        throw new Exception("Invalid effect!");
+        throw new Exception(pht("Invalid effect!"));
     }
 
     $content = phutil_tag(

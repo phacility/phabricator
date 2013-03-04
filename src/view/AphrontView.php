@@ -22,7 +22,7 @@ abstract class AphrontView extends Phobject {
     if (!$this->canAppendChild()) {
       $class = get_class($this);
       throw new Exception(
-        "View '{$class}' does not support children.");
+        pht("View '%s' does not support children.", $class));
     }
     $this->children[] = $child;
     return $this;

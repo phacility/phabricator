@@ -51,7 +51,7 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
 
     $commits = id(new PhabricatorAuditCommitQuery())
       ->withAuthorPHIDs($phids)
-      ->withStatus(PhabricatorAuditQuery::STATUS_OPEN)
+      ->withStatus(PhabricatorAuditCommitQuery::STATUS_CONCERN)
       ->execute();
 
     $count = count($commits);

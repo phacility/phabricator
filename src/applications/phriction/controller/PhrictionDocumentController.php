@@ -140,6 +140,14 @@ final class PhrictionDocumentController
           pht('This document has been deleted. You can edit it to put new '.
           'content here, or use history to revert to an earlier version.'));
         $core_content = $notice->render();
+      } else if ($doc_status == PhrictionDocumentStatus::STATUS_STUB) {
+        $notice = new AphrontErrorView();
+        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $notice->setTitle('Empty Document');
+        $notice->appendChild(
+          pht('This document is empty. You can edit it to put some proper '.
+          'content here.'));
+        $core_content = $notice->render();
       } else {
         throw new Exception("Unknown document status '{$doc_status}'!");
       }
@@ -196,12 +204,21 @@ final class PhrictionDocumentController
 
     $action_view = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($document)
-      ->addAction(
+      ->setObject($document);
+
+    if (!$document->getID()) {
+      return $action_view->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Edit Document'))
-          ->setIcon('edit')
-          ->setHref('/phriction/edit/'.$document->getID().'/'));
+          ->setName(pht('Create this document'))
+          ->setIcon('create')
+          ->setHref('/phriction/edit/?slug='.$slug));
+    }
+
+    $action_view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Document'))
+        ->setIcon('edit')
+        ->setHref('/phriction/edit/'.$document->getID().'/'));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
       $action_view->addAction(
@@ -235,14 +252,17 @@ final class PhrictionDocumentController
       'SELECT d.slug, d.depth, c.title FROM %T d JOIN %T c
         ON d.contentID = c.id
         WHERE d.slug LIKE %> AND d.depth IN (%d, %d)
-          AND d.status = %d
+          AND d.status IN (%Ld)
         ORDER BY d.depth, c.title LIMIT %d',
       $document_dao->getTableName(),
       $content_dao->getTableName(),
       ($slug == '/' ? '' : $slug),
       $d_child,
       $d_grandchild,
-      PhrictionDocumentStatus::STATUS_EXISTS,
+      array(
+        PhrictionDocumentStatus::STATUS_EXISTS,
+        PhrictionDocumentStatus::STATUS_STUB,
+      ),
       $limit);
 
     if (!$children) {

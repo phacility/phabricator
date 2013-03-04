@@ -6,6 +6,11 @@
       "rule" : ".menu-icon-app",
       "hash" : "fc525b5b3e3ecaeda3baccc18ace5a0a"
     },
+    "app_blue"         : {
+      "name" : "app_blue",
+      "rule" : ".menu-icon-app-blue",
+      "hash" : "b92f3961cf38ba4d95fa26d7a54031c0"
+    },
     "arrow-right"      : {
       "name" : "arrow-right",
       "rule" : ".phabricator-crumb-divider",
@@ -30,6 +35,11 @@
       "name" : "eye",
       "rule" : ".menu-icon-eye",
       "hash" : "553eb617c19b74b428558e606ff9b066"
+    },
+    "eye_blue"         : {
+      "name" : "eye_blue",
+      "rule" : ".menu-icon-eye-blue",
+      "hash" : "3ae3de9e694152bd6dbba58aebc46a45"
     },
     "logo"             : {
       "name" : "logo",
