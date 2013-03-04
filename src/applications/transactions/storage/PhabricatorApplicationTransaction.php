@@ -325,7 +325,7 @@ abstract class PhabricatorApplicationTransaction
     return false;
   }
 
-  public function renderChangeDetails() {
+  public function renderChangeDetails(PhabricatorUser $viewer) {
     return null;
   }
 

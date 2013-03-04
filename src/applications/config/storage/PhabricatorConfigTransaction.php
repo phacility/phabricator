@@ -78,7 +78,7 @@ final class PhabricatorConfigTransaction
     return parent::hasChangeDetails();
   }
 
-  public function renderChangeDetails() {
+  public function renderChangeDetails(PhabricatorUser $viewer) {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
@@ -97,6 +97,7 @@ final class PhabricatorConfigTransaction
     }
 
     $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setUser($viewer)
       ->setOldText($old_text)
       ->setNewText($new_text);
 

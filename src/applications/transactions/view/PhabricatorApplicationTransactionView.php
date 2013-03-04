@@ -206,7 +206,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         'style' => 'display: none',
         'class' => 'phabricator-timeline-change-details',
       ),
-      $xaction->renderChangeDetails());
+      $xaction->renderChangeDetails($this->getUser()));
 
     return array(
       $show_more,
