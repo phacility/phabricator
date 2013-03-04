@@ -186,6 +186,7 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
       array(
         'preserve-linebreaks' => false,
       ));
+    $engine->setConfig('viewer', new PhabricatorUser());
     $engine->setConfig('diviner.renderer', $this);
     return $engine;
   }

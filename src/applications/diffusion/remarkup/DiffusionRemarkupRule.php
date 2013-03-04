@@ -23,10 +23,6 @@ final class DiffusionRemarkupRule
     $viewer = $this->getEngine()->getConfig('viewer');
     $min_qualified = PhabricatorRepository::MINIMUM_QUALIFIED_HASH;
 
-    if (!$viewer) {
-      return array();
-    }
-
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withIdentifiers($ids)

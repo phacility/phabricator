@@ -461,6 +461,7 @@ final class PhabricatorMarkupEngine {
     $mentions = array();
 
     $engine = self::newDifferentialMarkupEngine();
+    $engine->setConfig('viewer', PhabricatorUser::getOmnipotentUser());
 
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
@@ -478,6 +479,7 @@ final class PhabricatorMarkupEngine {
     $files = array();
 
     $engine = self::newDifferentialMarkupEngine();
+    $engine->setConfig('viewer', PhabricatorUser::getOmnipotentUser());
 
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);

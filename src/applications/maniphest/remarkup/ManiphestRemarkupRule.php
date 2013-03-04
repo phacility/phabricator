@@ -13,10 +13,6 @@ final class ManiphestRemarkupRule
   protected function loadObjects(array $ids) {
     $viewer = $this->getEngine()->getConfig('viewer');
 
-    if (!$viewer) {
-      return array();
-    }
-
     return id(new ManiphestTaskQuery())
       ->setViewer($viewer)
       ->withTaskIDs($ids)

@@ -33,9 +33,12 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
 
     $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
 
+    $markup_engine = new PhabricatorMarkupEngine();
+    $markup_engine->setViewer($this->getUser());
+
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
-    $parser->setMarkupEngine(new PhabricatorMarkupEngine());
+    $parser->setMarkupEngine($markup_engine);
     $parser->setWhitespaceMode($whitespace_mode);
 
     return $parser->render(0, PHP_INT_MAX, array());

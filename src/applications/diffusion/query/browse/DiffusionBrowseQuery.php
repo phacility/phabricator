@@ -137,6 +137,7 @@ abstract class DiffusionBrowseQuery {
     } else {
       // Markup extensionless files as remarkup so we get links and such.
       $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
+      $engine->setConfig('viewer', $this->getViewer());
       $readme_content = $engine->markupText($readme_content);
 
       $class = 'phabricator-remarkup';

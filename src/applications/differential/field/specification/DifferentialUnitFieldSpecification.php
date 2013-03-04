@@ -116,6 +116,7 @@ final class DifferentialUnitFieldSpecification
             $userdata = str_replace("\000", '', $userdata);
           }
           $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+          $engine->setConfig('viewer', $this->getUser());
           $userdata = $engine->markupText($userdata);
           $rows[] = array(
             'style' => 'details',
