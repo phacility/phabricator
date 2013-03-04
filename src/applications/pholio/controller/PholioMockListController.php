@@ -66,7 +66,6 @@ final class PholioMockListController extends PholioController {
           'div',
           array(),
           pht('Created on %s', $datetime)));
-
       $board->addItem($item);
     }
 
