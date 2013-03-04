@@ -27,3 +27,6 @@
 
 # Impact Font
 /resources/font/impact.ttf
+
+# User-accessible hook for adhoc debugging scripts
+/support/debug.php
