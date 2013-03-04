@@ -10,16 +10,21 @@
 
 .phabricator-pinboard-item-view {
   margin: 0 20px 20px 0;
-  border: 1px solid #ccc;
+  border: 1px solid #d7d7d7;
   background: #ffffff;
   border-radius: 3px;
 
   display: block;
   float: left;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   text-align: left;
 }
 
+.phabricator-pinboard-item-view:hover {
+  cursor: pointer;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.30);
+  margin-top: -1px;
+}
 
 /* On phones, show a single column of items. */
 .device-phone .phabricator-pinboard-item-view {
@@ -33,10 +38,14 @@
 .phabricator-pinboard-item-header {
   padding: 5px 10px;
   display: block;
-  background: #f3f3f3;
+  background: #edf0f4;
   font-weight: bold;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
+}
+
+.phabricator-pinboard-item-header a {
+  color: #333;
 }
 
 .phabricator-pinboard-item-image-link {
