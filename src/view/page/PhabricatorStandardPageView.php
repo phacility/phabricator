@@ -12,6 +12,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $glyph;
   private $menuContent;
   private $showChrome = true;
+  private $layDownSomeDust = false;
   private $disableConsole;
   private $searchDefaultScope;
   private $pageObjects = array();
@@ -54,8 +55,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return $this;
   }
 
+  public function setDust($is_dusty) {
+    $this->layDownSomeDust = $is_dusty;
+    return $this;
+  }
+
   public function getShowChrome() {
     return $this->showChrome;
+  }
+
+  public function getDust() {
+    return $this->layDownSomeDust;
   }
 
   public function setSearchDefaultScope($search_default_scope) {
@@ -364,6 +374,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     if (!$this->getShowChrome()) {
       $classes[] = 'phabricator-chromeless-page';
+    }
+
+    if ($this->getDust()) {
+      $classes[] = 'make-me-sneeze';
     }
 
     $agent = AphrontRequest::getHTTPHeader('User-Agent');

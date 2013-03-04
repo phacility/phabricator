@@ -68,6 +68,7 @@ final class PholioMockListController extends PholioController {
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 

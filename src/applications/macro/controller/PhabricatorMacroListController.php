@@ -160,6 +160,7 @@ final class PhabricatorMacroListController
       array(
         'device' => true,
         'title' => pht('Image Macros'),
+        'dust' => true,
       ));
   }
 }
