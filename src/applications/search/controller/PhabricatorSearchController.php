@@ -221,7 +221,7 @@ final class PhabricatorSearchController
       $results = $pager->sliceResults($results);
 
       if (!$request->getInt('page')) {
-        $jump = PhabricatorPHID::fromObjectName($query->getQuery());
+        $jump = PhabricatorPHID::fromObjectName($query->getQuery(), $user);
         if ($jump) {
           array_unshift($results, $jump);
         }
