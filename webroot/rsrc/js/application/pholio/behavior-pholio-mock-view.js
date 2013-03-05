@@ -7,6 +7,7 @@
  *           javelin-vector
  *           javelin-magical-init
  *           javelin-request
+ *           phabricator-keyboard-shortcut
  */
 JX.behavior('pholio-mock-view', function(config) {
   var is_dragging = false;
@@ -73,13 +74,21 @@ JX.behavior('pholio-mock-view', function(config) {
     };
   })();
 
-  function get_image(id) {
+  function get_image_index(id) {
     for (var ii = 0; ii < config.images.length; ii++) {
       if (config.images[ii].id == id) {
-        return config.images[ii];
+        return ii;
       }
     }
     return null;
+  }
+
+  function get_image(id) {
+    var idx = get_image_index(id);
+    if (idx === null) {
+      return idx;
+    }
+    return config.images[idx];
   }
 
   function onload_image(id) {
@@ -91,6 +100,16 @@ JX.behavior('pholio-mock-view', function(config) {
 
     active_image.tag = this;
     redraw_image();
+  }
+
+  function switch_image(delta) {
+    if (!active_image) {
+      return;
+    }
+    var idx = get_image_index(active_image.id)
+    JX.log(idx);
+    idx = (idx + delta + config.images.length) % config.images.length;
+    select_image(config.images[idx].id);
   }
 
   function redraw_image() {
@@ -553,4 +572,19 @@ JX.behavior('pholio-mock-view', function(config) {
   JX.Stratcom.listen('resize', null, redraw_image);
   redraw_image();
 
+
+/* -(  Keyboard Shortcuts  )------------------------------------------------ */
+
+
+  new JX.KeyboardShortcut('j', 'Show next image.')
+    .setHandler(function() {
+      switch_image(1);
+    })
+    .register();
+
+  new JX.KeyboardShortcut('k', 'Show previous image.')
+    .setHandler(function() {
+      switch_image(-1);
+    })
+    .register();
 });
