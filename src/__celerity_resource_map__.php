@@ -560,6 +560,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/texture/dust_background.jpg',
     'type' => 'jpg',
   ),
+  '/rsrc/image/texture/pholio-background.gif' =>
+  array(
+    'hash' => 'cf4561af116edf393dc583e5119fb412',
+    'uri' => '/res/cf4561af/rsrc/image/texture/pholio-background.gif',
+    'disk' => '/rsrc/image/texture/pholio-background.gif',
+    'type' => 'gif',
+  ),
   '/rsrc/image/texture/table_header.png' =>
   array(
     'hash' => '4ed3f56a30d3749e8f62052b9735a316',
@@ -3229,7 +3236,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/08c8c85a/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/5bbb9e67/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(

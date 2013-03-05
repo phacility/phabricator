@@ -6,10 +6,11 @@
   text-align: center;
   vertical-align: middle;
   position: relative;
+  background: url('/rsrc/image/texture/pholio-background.gif');
 }
 
 .pholio-mock-carousel {
-  background-color: #202020;
+  background-color: #282828;
   text-align: center;
   border-top: 1px solid #101010;
   margin-right: 320px;
@@ -22,7 +23,7 @@
   height: 140px;
   padding: 5px;
   margin: 3px;
-  background: #282828;
+  background: #181818;
   vertical-align: middle;
   border: 1px solid #383838;
   position: relative;
@@ -80,31 +81,31 @@
   bottom: 0;
   right: 0;
   padding: 10px;
-  background: #eeedf0;
+  background: #282828;
   overflow-x: auto;
   text-align: left;
-  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.2);
 }
 
 .pholio-inline-comment {
-  border: 1px solid #f7f7f7;
-  border-bottom: 1px solid #d6d6d6;
-  background: #fff;
+  border: 1px solid #333;
+  border-bottom: 1px solid #555;
+  background: #353535;
   margin: 0 0 5px 0;
   padding: 8px 10px;
+  color: #ccc;
 }
 
 .pholio-inline-comment-header {
-  color: #333;
-  border-bottom: 1px solid #d7d7d7;
+  color: #fff;
+  border-bottom: 1px solid #555;
   font-weight: bold;
   padding-bottom: 6px;
   margin-bottom: 4px;
 }
 
 .pholio-mock-inline-comment-highlight {
-  background-color: #e0e3ec;
-  border-color: #cacdd5;
+  background-color: #222;
+  border-color: #555;
 }
 
 .pholio-inline-head-links a {
