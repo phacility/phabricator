@@ -14,16 +14,19 @@
 
 .pholio-mock-inline-comments {
   color: #cccccc;
-  width: 320px;
-  border-left: 1px solid #101010;
   border-top: 1px solid #333;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
   background: #282828;
   overflow-x: auto;
   text-align: left;
+}
+
+.device-desktop .pholio-mock-inline-comments {
+  border-left: 1px solid #101010;
+  position: absolute;
+  width: 320px;
+  top: 0;
+  bottom: 0;
+  right: 0;
 }
 
 .pholio-inline-comment-dialog-title {

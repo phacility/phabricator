@@ -1891,7 +1891,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/59c4d3ae/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/45324e3b/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1904,7 +1904,9 @@ celerity_register_resource_map(array(
       6 => 'javelin-request',
       7 => 'javelin-history',
       8 => 'javelin-workflow',
-      9 => 'phabricator-keyboard-shortcut',
+      9 => 'javelin-mask',
+      10 => 'javelin-behavior-device',
+      11 => 'phabricator-keyboard-shortcut',
     ),
     'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
   ),
@@ -3239,7 +3241,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/8883529b/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/3d3cc404/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3248,7 +3250,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-inline-comments-css' =>
   array(
-    'uri' => '/res/a0f7ddc4/rsrc/css/application/pholio/pholio-inline-comments.css',
+    'uri' => '/res/8fe0edc7/rsrc/css/application/pholio/pholio-inline-comments.css',
     'type' => 'css',
     'requires' =>
     array(

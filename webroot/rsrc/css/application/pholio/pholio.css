@@ -13,6 +13,9 @@
   background-color: #282828;
   text-align: center;
   border-top: 1px solid #101010;
+}
+
+.device-desktop .pholio-mock-carousel {
   margin-right: 320px;
 }
 
@@ -61,9 +64,12 @@
 
 .pholio-mock-image-panel {
   padding: 20px;
-  margin-right: 319px;
   border-top: 1px solid #333;
+}
+
+.device-desktop .pholio-mock-image-panel {
   border-right: 1px solid #333;
+  margin-right: 319px;
 }
 
 .pholio-mock-image-viewport {
@@ -104,4 +110,19 @@
 
 .pholio-image-title {
   color: #ffffff;
+}
+
+.pholio-device-lightbox {
+  position: absolute;
+  overflow: auto;
+  z-index: 99;
+}
+
+.pholio-device-lightbox img {
+  display: block;
+  margin: auto;
+}
+
+.pholio-device-lightbox-loading {
+  background: url(/rsrc/image/darkload.gif) no-repeat center;
 }

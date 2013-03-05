@@ -9,6 +9,8 @@
  *           javelin-request
  *           javelin-history
  *           javelin-workflow
+ *           javelin-mask
+ *           javelin-behavior-device
  *           phabricator-keyboard-shortcut
  */
 JX.behavior('pholio-mock-view', function(config) {
@@ -250,6 +252,10 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
 
+    if (JX.Device.getDevice() != 'desktop') {
+      return;
+    }
+
     if (drag_begin) {
       return;
     }
@@ -262,6 +268,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
     redraw_selection();
   });
+
 
   JX.enableDispatch(document.body, 'mousemove');
   JX.Stratcom.listen('mousemove', null, function(e) {
@@ -630,6 +637,71 @@ JX.behavior('pholio-mock-view', function(config) {
     return JX.$N(
       'div',
       {className: 'pholio-mock-select-fill'});
+  }
+
+
+/* -(  Device Lightbox  )---------------------------------------------------- */
+
+  // On devices, we show images full-size when the user taps them instead of
+  // attempting to implement inlines.
+
+  var lightbox = null;
+
+  JX.Stratcom.listen('click', 'mock-viewport', function(e) {
+    if (!e.isNormalMouseEvent()) {
+      return;
+    }
+    if (JX.Device.getDevice() == 'desktop') {
+      return;
+    }
+    lightbox_attach();
+    e.kill();
+  });
+
+  JX.Stratcom.listen('click', 'pholio-device-lightbox', lightbox_detach);
+  JX.Stratcom.listen('resize', null, lightbox_resize);
+
+  function lightbox_attach() {
+    JX.DOM.alterClass(document.body, 'lightbox-attached', true);
+    JX.Mask.show('jx-dark-mask');
+
+    lightbox = lightbox_render();
+    var image = JX.$N('img');
+    image.onload = lightbox_loaded;
+    setTimeout(function() {
+      image.src = active_image.fullURI;
+    }, 1000);
+    JX.DOM.setContent(lightbox, image);
+    JX.DOM.alterClass(lightbox, 'pholio-device-lightbox-loading', true);
+
+    lightbox_resize();
+
+    document.body.appendChild(lightbox);
+  }
+
+  function lightbox_detach() {
+    JX.DOM.remove(lightbox);
+    JX.Mask.hide();
+    JX.DOM.alterClass(document.body, 'lightbox-attached', false);
+    lightbox = null;
+  }
+
+  function lightbox_resize(e) {
+    if (!lightbox) {
+      return;
+    }
+    JX.Vector.getScroll().setPos(lightbox);
+    JX.Vector.getViewport().setDim(lightbox);
+  }
+
+  function lightbox_loaded() {
+    JX.DOM.alterClass(lightbox, 'pholio-device-lightbox-loading', false);
+  }
+
+  function lightbox_render() {
+    var el = JX.$N('div', {className: 'pholio-device-lightbox'});
+    JX.Stratcom.addSigil(el, 'pholio-device-lightbox');
+    return el;
   }
 
 });
