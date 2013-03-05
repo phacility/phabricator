@@ -8,6 +8,10 @@
   margin: 1em 0;
 }
 
+.device-phone .phabricator-pinboard-view {
+  padding: 0;
+}
+
 .phabricator-pinboard-item-view {
   margin: 0 16px 16px 0;
   border: 1px solid #d5d9df;
@@ -15,7 +19,7 @@
   border-radius: 3px;
 
   float: left;
-  width: 240px;
+  width: 300px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   text-align: left;
 }
@@ -28,7 +32,7 @@
 /* On phones, show a single column of items. */
 .device-phone .phabricator-pinboard-item-view {
   float: none;
-  margin: 0 auto 10px;
+  margin: 0 auto 16px;
 }
 
 .phabricator-pinboard-item-header {

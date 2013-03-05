@@ -120,8 +120,8 @@ final class PhabricatorMacroListController
 
       $item = new PhabricatorPinboardItemView();
       if ($file) {
-        $item->setImageURI($file->getThumb220x165URI());
-        $item->setImageSize(220, 165);
+        $item->setImageURI($file->getThumb280x210URI());
+        $item->setImageSize(280, 210);
         if ($file->getAuthorPHID()) {
           $author_handle = $this->getHandle($file->getAuthorPHID());
           $item->appendChild(
