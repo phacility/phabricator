@@ -8,6 +8,7 @@
  *           javelin-magical-init
  *           javelin-request
  *           javelin-history
+ *           javelin-workflow
  *           phabricator-keyboard-shortcut
  */
 JX.behavior('pholio-mock-view', function(config) {
@@ -288,27 +289,24 @@ JX.behavior('pholio-mock-view', function(config) {
         return;
       }
       is_dragging = false;
-
       drag_end = get_image_xy(JX.$V(e));
 
-      var create_inline = new JX.Request("/pholio/inline/save/", function(r) {
-        JX.DOM.appendContent(JX.$('pholio-mock-image-container'), JX.$H(r));
-
-        var dialog = JX.$('pholio-new-inline-comment-dialog');
-
-        var viewportVector = JX.$V(viewport);
-        var viewportDimensions = JX.Vector.getDim(viewport);
+      var data = {mockID: config.mockID};
+      var handler = function(r) {
+        var dialog = JX.$H(r).getFragment().firstChild;
+        JX.DOM.appendContent(viewport, dialog);
 
         JX.$V(
-          // TODO: This is a little funky for now.
-          Math.max(drag_begin.x, drag_end.x),
-          Math.max(drag_begin.y, drag_end.y)
+          Math.min(drag_begin.x, drag_end.x),
+          Math.max(drag_begin.y, drag_end.y) + 4
         ).setPos(dialog);
 
-        });
-      create_inline.addData({mockID: config.mockID});
-      create_inline.send();
+        JX.DOM.focus(JX.DOM.find(dialog, 'textarea'));
+      }
 
+      new JX.Workflow('/pholio/inline/save/', data)
+        .setHandler(handler)
+        .start();
     });
 
   function redraw_inlines(id) {
@@ -508,18 +506,23 @@ JX.behavior('pholio-mock-view', function(config) {
     function(e) {
       e.kill();
 
-      var new_content = JX.DOM.find(
-        JX.$('pholio-new-inline-comment-dialog'),
-        'textarea').value;
-
-      if (new_content == null || new_content.length == 0) {
-        alert("Empty comment")
+      var form = JX.$('pholio-new-inline-comment-dialog');
+      var text = JX.DOM.find(form, 'textarea').value;
+      if (!text.length) {
+        interrupt_typing();
         return;
       }
 
-      var saveURI = "/pholio/inline/save/";
+      var data = {
+        mockID: config.mockID,
+        imageID: active_image.id,
+        startX: Math.min(drag_begin.x, drag_end.x),
+        startY: Math.min(drag_begin.y, drag_end.y),
+        endX: Math.max(drag_begin.x, drag_end.x),
+        endY: Math.max(drag_begin.y, drag_end.y)
+      };
 
-      var inlineComment = new JX.Request(saveURI, function(r) {
+      var handler = function(r) {
         if (!inline_comments[active_image.id]) {
           inline_comments[active_image.id] = [];
         }
@@ -527,21 +530,11 @@ JX.behavior('pholio-mock-view', function(config) {
 
         interrupt_typing();
         redraw_inlines(active_image.id);
-      });
-
-      var commentToAdd = {
-        mockID: config.mockID,
-        op: 'save',
-        imageID: active_image.id,
-        startX: Math.min(drag_begin.x, drag_end.x),
-        startY: Math.min(drag_begin.y, drag_end.y),
-        endX: Math.max(drag_begin.x, drag_end.x),
-        endY: Math.max(drag_begin.y, drag_end.y),
-        comment: new_content
       };
 
-      inlineComment.addData(commentToAdd);
-      inlineComment.send();
+      JX.Workflow.newFromForm(form, data)
+        .setHandler(handler)
+        .start();
     }
   );
 

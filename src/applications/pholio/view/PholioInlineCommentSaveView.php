@@ -38,6 +38,8 @@ final class PholioInlineCommentSaveView extends AphrontView {
         'action'    => $this->uri,
         'method'    => 'POST',
         'sigil'     => 'inline-save-form',
+        'class'     => 'pholio-new-inline-comment',
+        'id'        => 'pholio-new-inline-comment-dialog'
       ),
       $this->renderSingleView(
         array(
@@ -117,8 +119,6 @@ final class PholioInlineCommentSaveView extends AphrontView {
     return javelin_tag(
       'div',
       array(
-        'class' => 'pholio-new-inline-comment',
-        'id' => 'pholio-new-inline-comment-dialog'
       ),
       $this->renderSingleView(
         array(
