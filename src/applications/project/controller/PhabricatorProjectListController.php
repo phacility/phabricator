@@ -145,6 +145,7 @@ final class PhabricatorProjectListController
       array(
         'title' => pht('Projects'),
         'device' => true,
+        'dust' => true,
       ));
   }
 }
