@@ -2898,7 +2898,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-pinboard-view-css' =>
   array(
-    'uri' => '/res/b7425941/rsrc/css/layout/phabricator-pinboard-view.css',
+    'uri' => '/res/61ecd7cf/rsrc/css/layout/phabricator-pinboard-view.css',
     'type' => 'css',
     'requires' =>
     array(

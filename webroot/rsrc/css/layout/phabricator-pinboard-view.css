@@ -62,3 +62,23 @@
   color: #777;
   font-size: 11px;
 }
+
+.phabricator-pinboard-item-count {
+  float: left;
+  margin-left: 10px;
+}
+
+.phabricator-pinboard-icons {
+  padding: 0 10px 10px 0;
+  color: #aaa;
+  border-bottom: 1px solid #e7e7e7;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.phabricator-pinboard-icon {
+  height: 14px;
+  width: 14px;
+  float: left;
+  padding-left: 2px;
+}
