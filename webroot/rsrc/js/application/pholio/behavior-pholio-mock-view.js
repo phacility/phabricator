@@ -213,7 +213,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
     var thumbs = JX.DOM.scry(
       JX.$('pholio-mock-carousel'),
-      'div',
+      'a',
       'mock-thumbnail');
 
     for(var k in thumbs) {

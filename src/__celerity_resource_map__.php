@@ -1891,7 +1891,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/c320fd85/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/59c4d3ae/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3239,7 +3239,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/580babaa/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/8883529b/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(

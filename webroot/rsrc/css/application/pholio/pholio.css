@@ -30,7 +30,7 @@
 }
 
 .device-desktop .pholio-mock-carousel-thumb-item:hover,
-  .pholio-mock-carousel-thumb-current {
+.pholio-mock-carousel-thumb-current {
   background: #383838;
   border-color: #686868;
 }
