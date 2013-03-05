@@ -41,6 +41,22 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
               $option->getKey()));
         }
         break;
+      case 'function':
+        if (!is_callable($value)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' is of type function, but value is not a function.",
+              $option->getKey()));
+        }
+        break;
+      case 'array':
+        if (!is_array($value)) {
+          throw new PhabricatorConfigValidationException(
+            pht(
+              "Option '%s' is of type array, but value is not an array.",
+              $option->getKey()));
+        }
+        break;
       case 'class':
         $symbols = id(new PhutilSymbolLoader())
           ->setType('class')

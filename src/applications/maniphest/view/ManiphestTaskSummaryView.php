@@ -106,7 +106,7 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       $html .= '<td class="' . $class . '">' . $value . '</td>';
     }
 
-    return javelin_render_tag(
+    return javelin_tag(
       'table',
       array(
         'class' => 'maniphest-task-summary',
@@ -115,11 +115,11 @@ final class ManiphestTaskSummaryView extends ManiphestView {
           'taskID' => $task->getID(),
         ),
       ),
-      '<tr>'.
+      phutil_safe_html('<tr>'.
         $handle.
         $batch.
         $html.
-      '</tr>');
+      '</tr>'));
   }
 
 }
