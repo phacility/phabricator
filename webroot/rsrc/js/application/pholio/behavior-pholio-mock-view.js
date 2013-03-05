@@ -32,14 +32,17 @@ JX.behavior('pholio-mock-view', function(config) {
     var loading = false;
     var stageElement = JX.$(config.panelID);
     var viewElement = JX.$(config.viewportID);
+    var gutterElement = JX.$('mock-inline-comments');
     var reticles = [];
+    var cards = [];
+    var inline_phid_map = {};
 
     function begin_load() {
       if (loading) {
         return;
       }
       loading = true;
-      clear_reticles();
+      clear_stage();
       draw_loading();
     }
 
@@ -55,23 +58,70 @@ JX.behavior('pholio-mock-view', function(config) {
       JX.DOM.alterClass(stageElement, 'pholio-image-loading', loading);
     }
 
-    function add_reticle(reticle) {
+    function add_inline_node(node, phid) {
+      inline_phid_map[phid] = (inline_phid_map[phid] || []);
+      inline_phid_map[phid].push(node);
+    }
+
+    function add_reticle(reticle, phid) {
+      mark_ref(reticle, phid);
+
       reticles.push(reticle);
+      add_inline_node(reticle, phid);
+
       viewElement.appendChild(reticle);
     }
 
-    function clear_reticles() {
+    function clear_stage() {
       for (var ii = 0; ii < reticles.length; ii++) {
         JX.DOM.remove(reticles[ii]);
       }
+      for (var ii = 0; ii < cards.length; ii++) {
+        JX.DOM.remove(cards[ii]);
+      }
       reticles = [];
+      cards = [];
+      inline_phid_map = {};
+    }
+
+    function highlight_inline(phid, show) {
+      var nodes = inline_phid_map[phid] || [];
+      var cls = 'pholio-mock-inline-comment-highlight';
+      for (var ii = 0; ii < nodes.length; ii++) {
+        JX.DOM.alterClass(nodes[ii], cls, show);
+      }
+    }
+
+    function remove_inline(phid) {
+      var nodes = inline_phid_map[phid] || [];
+      for (var ii = 0; ii < nodes.length; ii++) {
+        JX.DOM.remove(nodes[ii]);
+      }
+      delete inline_phid_map[phid];
+    }
+
+    function mark_ref(node, phid) {
+      JX.Stratcom.addSigil(node, 'pholio-inline-ref');
+      JX.Stratcom.addData(node, {phid: phid});
+    }
+
+    function add_card(card, phid) {
+      mark_ref(card, phid);
+
+      cards.push(card);
+      add_inline_node(card, phid);
+
+      gutterElement.appendChild(card);
     }
 
     return {
       beginLoad: begin_load,
       endLoad: end_load,
       addReticle: add_reticle,
-      clearReticles: clear_reticles
+      clearStage: clear_stage,
+      highlightInline: highlight_inline,
+      removeInline: remove_inline,
+      addCard: add_card
     };
   })();
 
@@ -223,31 +273,12 @@ JX.behavior('pholio-mock-view', function(config) {
 
   JX.Stratcom.listen(
     ['mouseover', 'mouseout'],
-    'image_selection',
+    'pholio-inline-ref',
     function(e) {
-      var data = e.getNodeData('image_selection');
-      var comment = JX.$(data.phid + "_comment");
-      var highlight = (e.getType() == 'mouseover');
-
-      JX.DOM.alterClass(
-        comment,
-        'pholio-mock-inline-comment-highlight',
-        highlight);
-  });
-
-  JX.Stratcom.listen(
-    ['mouseover', 'mouseout'],
-    'inline_comment',
-    function(e) {
-      var data = e.getNodeData('inline_comment');
-      var selection = JX.$(data.phid + "_selection");
-      var highlight = (e.getType() == 'mouseover');
-
-      JX.DOM.alterClass(
-        selection,
-        'pholio-mock-inline-comment-highlight',
-        highlight);
-  });
+      var phid = e.getNodeData('pholio-inline-ref').phid;
+      var show = (e.getType() == 'mouseover');
+      stage.highlightInline(phid, show);
+    });
 
   JX.Stratcom.listen(
     'mouseup',
@@ -289,10 +320,9 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
 
+    stage.clearStage();
     var comment_holder = JX.$('mock-inline-comments');
     JX.DOM.setContent(comment_holder, render_image_info(active_image));
-    stage.clearReticles();
-
 
     var inlines = inline_comments[active_image.id];
     if (!inlines || !inlines.length) {
@@ -301,7 +331,9 @@ JX.behavior('pholio-mock-view', function(config) {
 
     for (var ii = 0; ii < inlines.length; ii++) {
       var inline = inlines[ii];
-      JX.DOM.appendContent(comment_holder, JX.$H(inline.contentHTML));
+      var card = JX.$H(inline.contentHTML).getFragment().firstChild;
+
+      stage.addCard(card, inline.phid);
 
       if (!active_image.tag) {
         // The image itself hasn't loaded yet, so we can't draw the inline
@@ -309,41 +341,14 @@ JX.behavior('pholio-mock-view', function(config) {
         continue;
       }
 
-      var inlineSelection = JX.$N(
-        'div',
-        {
-          id: inline.phid + "_selection",
-          className: 'pholio-mock-select-border'
-        });
-
-      JX.Stratcom.addData(
-        inlineSelection,
-        {phid: inline.phid});
-
-      JX.Stratcom.addSigil(inlineSelection, "image_selection");
-
-      stage.addReticle(inlineSelection);
-
-      position_inline_rectangle(inline, inlineSelection);
+      var inline_selection = render_reticle_fill();
+      stage.addReticle(inline_selection, inline.phid);
+      position_inline_rectangle(inline, inline_selection);
 
       if (!inline.transactionphid) {
-
-        var inlineDraft = JX.$N(
-          'div',
-          {
-            className: 'pholio-mock-select-fill',
-            id: inline.phid + "_fill"
-          });
-
-        position_inline_rectangle(inline, inlineDraft);
-
-        JX.Stratcom.addData(
-          inlineDraft,
-          {phid: inline.phid});
-
-        JX.Stratcom.addSigil(inlineDraft, "image_selection");
-
-        stage.addReticle(inlineDraft);
+        var inline_draft = render_reticle_border();
+        stage.addReticle(inline_draft, inline.phid);
+        position_inline_rectangle(inline, inline_draft);
       }
     }
   }
@@ -376,13 +381,8 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function redraw_selection() {
-    selection_border = selection_border || JX.$N(
-      'div',
-      {className: 'pholio-mock-select-border'});
-
-    selection_fill = selection_fill || JX.$N(
-      'div',
-      {className: 'pholio-mock-select-fill'});
+    selection_border = selection_border || render_reticle_border();
+    selection_fill = selection_fill || render_reticle_fill();
 
     var p = JX.$V(
       Math.min(drag_begin.x, drag_end.x),
@@ -399,7 +399,7 @@ JX.behavior('pholio-mock-view', function(config) {
     d.x *= scale;
     d.y *= scale;
 
-    var nodes = [selection_border, selection_fill];
+    var nodes = [selection_fill, selection_border];
     for (var ii = 0; ii < nodes.length; ii++) {
       var node = nodes[ii];
       viewport.appendChild(node);
@@ -431,10 +431,7 @@ JX.behavior('pholio-mock-view', function(config) {
       e.kill();
       interrupt_typing();
 
-      JX.DOM.hide(
-        JX.$(data.phid + "_comment"),
-        JX.$(data.phid + "_fill"),
-        JX.$(data.phid + "_selection"));
+      stage.removeInline(data.phid);
 
       var deleteURI = '/pholio/inline/delete/' + data.id + '/';
       var del = new JX.Request(deleteURI, function(r) {
@@ -628,6 +625,18 @@ JX.behavior('pholio-mock-view', function(config) {
     info = JX.$N('div', {className: 'pholio-image-info'}, info);
 
     return info;
+  }
+
+  function render_reticle_border() {
+    return JX.$N(
+      'div',
+      {className: 'pholio-mock-select-border'});
+  }
+
+  function render_reticle_fill() {
+    return JX.$N(
+      'div',
+      {className: 'pholio-mock-select-fill'});
   }
 
 });

@@ -45,7 +45,7 @@
   cursor: crosshair;
 }
 
-.pholio-mock-select-border {
+.pholio-mock-select-fill {
   position: absolute;
   background: #ffffff;
   opacity: 0.25;
@@ -53,7 +53,7 @@
   border: 1px solid #000000;
 }
 
-.pholio-mock-select-fill {
+.pholio-mock-select-border {
   position: absolute;
   border: 1px dashed #ffffff;
   box-sizing: border-box;
@@ -78,11 +78,6 @@
   font-weight: bold;
   padding-bottom: 6px;
   margin-bottom: 4px;
-}
-
-.pholio-mock-inline-comment-highlight {
-  background-color: #222;
-  border-color: #555;
 }
 
 .pholio-image-loading img {

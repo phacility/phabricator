@@ -79,3 +79,12 @@
   font-weight: normal;
   color: #2178db;
 }
+
+.device-desktop .pholio-mock-inline-comment-highlight.pholio-mock-select-fill {
+  opacity: 0.5;
+}
+
+.device-desktop .pholio-mock-inline-comment-highlight.pholio-inline-comment {
+  background: #555555;
+  border-color: #aaaaaa;
+}
