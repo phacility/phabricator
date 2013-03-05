@@ -166,18 +166,34 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function redraw_image() {
+
+    // Force the stage to scale as a function of the viewport size. Broadly,
+    // we make the stage 95% of the height of the viewport, then scale images
+    // to fit within it.
+    var new_y = (JX.Vector.getViewport().y * 0.90) - 150;
+    new_y = Math.max(320, new_y);
+    panel.style.height = new_y + 'px';
+
     if (!active_image || !active_image.tag) {
       return;
     }
 
     var tag = active_image.tag;
 
-    // If the image is too wide for the viewport, scale it down so it fits.
-    // (If it is too tall, we just let the user scroll.)
+    // If the image is too wide or tall for the viewport, scale it down so it
+    // fits.
     var w = JX.Vector.getDim(panel);
     w.x -= 40;
+    w.y -= 40;
+    var scale = 1;
     if (w.x < tag.naturalWidth) {
-      var scale = w.x / tag.naturalWidth;
+      scale = Math.min(scale, w.x / tag.naturalWidth);
+    }
+    if (w.y < tag.naturalHeight) {
+      scale = Math.min(scale, w.y / tag.naturalHeight);
+    }
+
+    if (scale < 1) {
       tag.width = Math.floor(scale * tag.naturalWidth);
       tag.height = Math.floor(scale * tag.naturalHeight);
     } else {
@@ -185,16 +201,7 @@ JX.behavior('pholio-mock-view', function(config) {
       tag.height = tag.naturalHeight;
     }
 
-    var new_y = (JX.Vector.getViewport().y * 0.85) - 150;
-    new_y = Math.max(320, new_y);
-
-    if (tag.height + 40 < new_y) {
-      panel.style.height = new_y + 'px';
-      viewport.style.top = Math.floor(((new_y + 40) - tag.height) / 2) + 'px';
-    } else {
-      panel.style.height = '';
-      viewport.style.top = '';
-    }
+    viewport.style.top = Math.floor((new_y - tag.height) / 2) + 'px';
 
     stage.endLoad();
 
