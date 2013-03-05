@@ -68,10 +68,11 @@ final class PholioMockImagesView extends AphrontView {
 
     $mockview = '';
 
-    $mock_wrapper = phutil_tag(
+    $mock_wrapper = javelin_tag(
       'div',
       array(
         'id' => $viewport_id,
+        'sigil' => 'mock-viewport',
         'class' => 'pholio-mock-image-viewport'
       ),
       '');

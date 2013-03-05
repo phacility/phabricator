@@ -194,7 +194,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
   select_image(config.selectedID);
 
-  JX.Stratcom.listen('mousedown', 'mock-panel', function(e) {
+  JX.Stratcom.listen('mousedown', 'mock-viewport', function(e) {
     if (!e.isNormalMouseEvent()) {
       return;
     }
