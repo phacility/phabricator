@@ -604,6 +604,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/attached-file-view.css',
   ),
+  'aphront-bars' =>
+  array(
+    'uri' => '/res/d7bd9032/rsrc/css/core/aphront-bars.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/core/aphront-bars.css',
+  ),
   'aphront-calendar-view-css' =>
   array(
     'uri' => '/res/73061a31/rsrc/css/aphront/calendar-view.css',
