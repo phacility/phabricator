@@ -7,6 +7,7 @@
  *           javelin-vector
  *           javelin-magical-init
  *           javelin-request
+ *           javelin-history
  *           phabricator-keyboard-shortcut
  */
 JX.behavior('pholio-mock-view', function(config) {
@@ -175,6 +176,10 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     load_inline_comments();
+
+    if (image_id != config.selectedID) {
+      JX.History.replace(active_image.pageURI);
+    }
   }
 
   JX.Stratcom.listen(
@@ -188,8 +193,7 @@ JX.behavior('pholio-mock-view', function(config) {
       select_image(e.getNodeData('mock-thumbnail').imageID);
     });
 
-  // Select and show the first image.
-  select_image(config.images[0].id);
+  select_image(config.selectedID);
 
   JX.Stratcom.listen('mousedown', 'mock-panel', function(e) {
     if (!e.isNormalMouseEvent()) {

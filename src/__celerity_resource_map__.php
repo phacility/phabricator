@@ -1891,7 +1891,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/d993bd2b/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/e9e31577/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1902,7 +1902,8 @@ celerity_register_resource_map(array(
       4 => 'javelin-vector',
       5 => 'javelin-magical-init',
       6 => 'javelin-request',
-      7 => 'phabricator-keyboard-shortcut',
+      7 => 'javelin-history',
+      8 => 'phabricator-keyboard-shortcut',
     ),
     'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
   ),

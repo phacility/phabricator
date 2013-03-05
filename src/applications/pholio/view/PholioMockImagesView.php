@@ -3,6 +3,16 @@
 final class PholioMockImagesView extends AphrontView {
 
   private $mock;
+  private $imageID;
+
+  public function setImageID($image_id) {
+    $this->imageID = $image_id;
+    return $this;
+  }
+
+  public function getImageID() {
+    return $this->imageID;
+  }
 
   public function setMock(PholioMock $mock) {
     $this->mock = $mock;
@@ -22,10 +32,18 @@ final class PholioMockImagesView extends AphrontView {
     $panel_id = celerity_generate_unique_node_id();
     $viewport_id = celerity_generate_unique_node_id();
 
+    $ids = mpull($mock->getImages(), 'getID');
+    if ($this->imageID && isset($ids[$this->imageID])) {
+      $selected_id = $this->imageID;
+    } else {
+      $selected_id = head_key($ids);
+    }
+
     foreach ($mock->getImages() as $image) {
       $images[] = array(
         'id'      => $image->getID(),
         'fullURI' => $image->getFile()->getBestURI(),
+        'pageURI' => '/M'.$mock->getID().'/'.$image->getID().'/',
       );
     }
 
@@ -34,7 +52,7 @@ final class PholioMockImagesView extends AphrontView {
       'panelID' => $panel_id,
       'viewportID' => $viewport_id,
       'images' => $images,
-
+      'selectedID' => $selected_id,
     );
     Javelin::initBehavior('pholio-mock-view', $config);
 
@@ -87,10 +105,11 @@ final class PholioMockImagesView extends AphrontView {
         ));
 
         $thumbnails[] = javelin_tag(
-          'div',
+          'a',
           array(
             'sigil' => 'mock-thumbnail',
             'class' => 'pholio-mock-carousel-thumb-item',
+            'href' => '/M'.$mock->getID().'/'.$image->getID().'/',
             'meta' => array(
               'imageID' => $image->getID(),
             ),
