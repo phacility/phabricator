@@ -88,3 +88,25 @@
 .pholio-image-loading img {
   opacity: 0.50;
 }
+
+.pholio-image-info {
+  border-bottom: 1px solid #101010;
+  margin-bottom: 5px;
+}
+
+.pholio-image-info-item {
+  padding: 0 10px;
+  margin: 8px 0;
+}
+
+.pholio-visible-size {
+  color: #ffffff;
+}
+
+.pholio-image-description {
+  color: #777777;
+}
+
+.pholio-image-title {
+  color: #ffffff;
+}

@@ -108,7 +108,6 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
     var idx = get_image_index(active_image.id)
-    JX.log(idx);
     idx = (idx + delta + config.images.length) % config.images.length;
     select_image(config.images[idx].id);
   }
@@ -291,8 +290,9 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     var comment_holder = JX.$('mock-inline-comments');
-    JX.DOM.setContent(comment_holder, '');
+    JX.DOM.setContent(comment_holder, render_image_info(active_image));
     stage.clearReticles();
+
 
     var inlines = inline_comments[active_image.id];
     if (!inlines || !inlines.length) {
@@ -414,9 +414,6 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function load_inline_comments() {
-    var comment_holder = JX.$('mock-inline-comments');
-    JX.DOM.setContent(comment_holder, '');
-
     var id = active_image.id;
     var inline_comments_uri = "/pholio/inline/" + id + "/";
 
@@ -577,7 +574,7 @@ JX.behavior('pholio-mock-view', function(config) {
   redraw_image();
 
 
-/* -(  Keyboard Shortcuts  )------------------------------------------------ */
+/* -(  Keyboard Shortcuts  )------------------------------------------------- */
 
 
   new JX.KeyboardShortcut('j', 'Show next image.')
@@ -591,4 +588,46 @@ JX.behavior('pholio-mock-view', function(config) {
       switch_image(-1);
     })
     .register();
+
+
+/* -(  Render  )------------------------------------------------------------- */
+
+
+  function render_image_info(image) {
+    var info = [];
+
+    var title = JX.$N(
+      'div',
+      {className: 'pholio-image-title'},
+      image.title);
+    info.push(title);
+
+    var desc = JX.$N(
+      'div',
+      {className: 'pholio-image-description'},
+      image.desc);
+    info.push(desc);
+
+    var visible = null;
+    if (image.tag) {
+      var area = Math.round(100 * (image.tag.width / image.width));
+      area = ['(' + area + '%' + ')'];
+      visible = [' ', JX.$N('span', {className: 'pholio-visible-size'}, area)];
+    }
+    info.push([image.width, '\u00d7', image.height, 'px', visible]);
+
+    var full_link = JX.$N(
+      'a',
+      {href: image.fullURI, target: '_blank'},
+      'View Full Image');
+    info.push(full_link);
+
+    for (var ii = 0; ii < info.length; ii++) {
+      info[ii] = JX.$N('div', {className: 'pholio-image-info-item'}, info[ii]);
+    }
+    info = JX.$N('div', {className: 'pholio-image-info'}, info);
+
+    return info;
+  }
+
 });
