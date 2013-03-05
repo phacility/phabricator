@@ -84,3 +84,7 @@
   background-color: #222;
   border-color: #555;
 }
+
+.pholio-image-loading img {
+  opacity: 0.50;
+}

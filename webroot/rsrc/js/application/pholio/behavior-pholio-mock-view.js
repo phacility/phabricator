@@ -22,6 +22,57 @@ JX.behavior('pholio-mock-view', function(config) {
 
   var inline_comments = {};
 
+
+/* -(  Stage  )-------------------------------------------------------------- */
+
+
+  var stage = (function() {
+    var loading = false;
+    var stageElement = JX.$(config.panelID);
+    var viewElement = JX.$(config.viewportID);
+    var reticles = [];
+
+    function begin_load() {
+      if (loading) {
+        return;
+      }
+      loading = true;
+      clear_reticles();
+      draw_loading();
+    }
+
+    function end_load() {
+      if (!loading) {
+        return;
+      }
+      loading = false;
+      draw_loading();
+    }
+
+    function draw_loading() {
+      JX.DOM.alterClass(stageElement, 'pholio-image-loading', loading);
+    }
+
+    function add_reticle(reticle) {
+      reticles.push(reticle);
+      viewElement.appendChild(reticle);
+    }
+
+    function clear_reticles() {
+      for (var ii = 0; ii < reticles.length; ii++) {
+        JX.DOM.remove(reticles[ii]);
+      }
+      reticles = [];
+    }
+
+    return {
+      beginLoad: begin_load,
+      endLoad: end_load,
+      addReticle: add_reticle,
+      clearReticles: clear_reticles
+    };
+  })();
+
   function get_image(id) {
     for (var ii = 0; ii < config.images.length; ii++) {
       if (config.images[ii].id == id) {
@@ -73,7 +124,8 @@ JX.behavior('pholio-mock-view', function(config) {
       viewport.style.top = '';
     }
 
-    // NOTE: This also clears inline comment reticles.
+    stage.endLoad();
+
     JX.DOM.setContent(viewport, tag);
 
     redraw_inlines(active_image.id);
@@ -82,6 +134,8 @@ JX.behavior('pholio-mock-view', function(config) {
   function select_image(image_id) {
     active_image = get_image(image_id);
     active_image.tag = null;
+
+    stage.beginLoad();
 
     var img = JX.$N('img', {className: 'pholio-mock-image'});
     img.onload = JX.bind(img, onload_image, active_image.id);
@@ -105,9 +159,12 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   JX.Stratcom.listen(
-    'click',
+    ['mousedown', 'click'],
     'mock-thumbnail',
     function(e) {
+      if (!e.isNormalMouseEvent()) {
+        return;
+      }
       e.kill();
       select_image(e.getNodeData('mock-thumbnail').imageID);
     });
@@ -212,6 +269,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
     var comment_holder = JX.$('mock-inline-comments');
     JX.DOM.setContent(comment_holder, '');
+    stage.clearReticles();
 
     var inlines = inline_comments[active_image.id];
     if (!inlines || !inlines.length) {
@@ -241,7 +299,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
       JX.Stratcom.addSigil(inlineSelection, "image_selection");
 
-      JX.DOM.appendContent(viewport, inlineSelection);
+      stage.addReticle(inlineSelection);
 
       position_inline_rectangle(inline, inlineSelection);
 
@@ -261,7 +319,8 @@ JX.behavior('pholio-mock-view', function(config) {
           {phid: inline.phid});
 
         JX.Stratcom.addSigil(inlineDraft, "image_selection");
-        JX.DOM.appendContent(viewport, inlineDraft);
+
+        stage.addReticle(inlineDraft);
       }
     }
   }
