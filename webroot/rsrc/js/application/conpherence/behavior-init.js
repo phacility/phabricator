@@ -8,7 +8,7 @@ JX.behavior('conpherence-init', function(config) {
   // select the current message
   var selectedConpherence = false;
   if (config.selected_conpherence_id) {
-    var selected = JX.$(config.selected_conpherence_id);
+    var selected = JX.$(config.selected_conpherence_id + '-nav-item');
     JX.Stratcom.invoke(
       'conpherence-initial-selected',
       null,

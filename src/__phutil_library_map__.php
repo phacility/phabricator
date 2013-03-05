@@ -216,6 +216,7 @@ phutil_register_library_map(array(
     'ConpherenceParticipantQuery' => 'applications/conpherence/query/ConpherenceParticipantQuery.php',
     'ConpherenceParticipationStatus' => 'applications/conpherence/constants/ConpherenceParticipationStatus.php',
     'ConpherencePeopleMenuEventListener' => 'applications/conpherence/events/ConpherencePeopleMenuEventListener.php',
+    'ConpherencePontificateControl' => 'applications/conpherence/view/ConpherencePontificateControl.php',
     'ConpherenceReplyHandler' => 'applications/conpherence/mail/ConpherenceReplyHandler.php',
     'ConpherenceThread' => 'applications/conpherence/storage/ConpherenceThread.php',
     'ConpherenceThreadQuery' => 'applications/conpherence/query/ConpherenceThreadQuery.php',
@@ -1759,6 +1760,7 @@ phutil_register_library_map(array(
     'ConpherenceParticipantQuery' => 'PhabricatorOffsetPagedQuery',
     'ConpherenceParticipationStatus' => 'ConpherenceConstants',
     'ConpherencePeopleMenuEventListener' => 'PhutilEventListener',
+    'ConpherencePontificateControl' => 'AphrontFormControl',
     'ConpherenceReplyHandler' => 'PhabricatorMailReplyHandler',
     'ConpherenceThread' =>
     array(

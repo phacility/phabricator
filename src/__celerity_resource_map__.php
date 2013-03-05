@@ -1162,6 +1162,21 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/conpherence/behavior-menu.js',
   ),
+  'javelin-behavior-conpherence-pontificate' =>
+  array(
+    'uri' => '/res/7fb8cf6e/rsrc/js/application/conpherence/behavior-pontificate.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-workflow',
+      3 => 'javelin-util',
+      4 => 'javelin-stratcom',
+      5 => 'javelin-uri',
+    ),
+    'disk' => '/rsrc/js/application/conpherence/behavior-pontificate.js',
+  ),
   'javelin-behavior-conpherence-widget-pane' =>
   array(
     'uri' => '/res/4fb51b46/rsrc/js/application/conpherence/behavior-widget-pane.js',

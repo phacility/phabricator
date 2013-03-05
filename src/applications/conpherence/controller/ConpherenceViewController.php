@@ -59,99 +59,40 @@ final class ConpherenceViewController extends
 
   private function renderHeaderPaneContent() {
     require_celerity_resource('conpherence-header-pane-css');
-    $user = $this->getRequest()->getUser();
     $conpherence = $this->getConpherence();
-    $display_data = $conpherence->getDisplayData(
-      $user,
-      ConpherenceImageData::SIZE_HEAD);
-    $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-    $class_mod = $display_data['image_class'];
-
-    $header =
-    phutil_tag(
-      'div',
-      array(
-        'class' => 'upload-photo'
-      ),
-      pht('Drop photo here to change this Conpherence photo.')).
-    javelin_tag(
-      'a',
-      array(
-        'class' => 'edit',
-        'href' => $edit_href,
-        'sigil' => 'workflow edit-action',
-      ),
-      '').
-    phutil_tag(
-      'div',
-      array(
-        'class' => $class_mod.'header-image',
-        'style' => 'background-image: url('.$display_data['image'].');'
-      ),
-      '').
-    phutil_tag(
-      'div',
-      array(
-        'class' => $class_mod.'title',
-      ),
-      $display_data['title']).
-    phutil_tag(
-      'div',
-      array(
-        'class' => $class_mod.'subtitle',
-      ),
-      $display_data['subtitle']);
-
+    $header = $this->buildHeaderPaneContent($conpherence);
     return array('header' => $header);
   }
+
 
   private function renderMessagePaneContent() {
     require_celerity_resource('conpherence-message-pane-css');
     $user = $this->getRequest()->getUser();
     $conpherence = $this->getConpherence();
-    $handles = $conpherence->getHandles();
-    $rendered_transactions = array();
 
+    $data = $this->renderConpherenceTransactions($conpherence);
+    $latest_transaction_id = $data['latest_transaction_id'];
+    $transactions = $data['transactions'];
 
-    $transactions = $conpherence->getTransactionsFrom(0, 100);
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
-    foreach ($transactions as $transaction) {
-      if ($transaction->getComment()) {
-        $engine->addObject(
-          $transaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-    foreach ($transactions as $transaction) {
-      if ($transaction->shouldHide()) {
-        continue;
-      }
-      $rendered_transactions[] = id(new ConpherenceTransactionView())
-        ->setUser($user)
-        ->setConpherenceTransaction($transaction)
-        ->setHandles($handles)
-        ->setMarkupEngine($engine)
-        ->render();
-    }
-    $transactions = phutil_implode_html(' ', $rendered_transactions);
+    $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
+    $form_id = celerity_generate_unique_node_id();
 
     $form =
       id(new AphrontFormView())
-      ->setWorkflow(true)
-      ->setAction($this->getApplicationURI('update/'.$conpherence->getID().'/'))
+      ->setID($form_id)
+      ->setAction($update_uri)
       ->setFlexible(true)
       ->setUser($user)
       ->addHiddenInput('action', 'message')
+      ->addHiddenInput('latest_transaction_id', $latest_transaction_id)
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setUser($user)
         ->setName('text'))
       ->appendChild(
-        id(new AphrontFormSubmitControl())
-        ->setValue(pht('Pontificate')))->render();
+        id(new ConpherencePontificateControl())
+        ->setFormID($form_id))
+      ->render();
 
     $scrollbutton = javelin_tag(
       'a',
