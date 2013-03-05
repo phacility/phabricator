@@ -2,7 +2,7 @@
 
 final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
 
-  protected function executeQuery() {
+  public function getFileContentFuture() {
     $drequest = $this->getRequest();
 
     $repository = $drequest->getRepository();
@@ -10,23 +10,26 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     $commit = $drequest->getCommit();
 
     if ($this->getNeedsBlame()) {
-      list($corpus) = $repository->execxLocalCommand(
+      return $repository->getLocalCommandFuture(
         '--no-pager blame -c -l --date=short %s -- %s',
         $commit,
         $path);
     } else {
-      list($corpus) = $repository->execxLocalCommand(
+      return $repository->getLocalCommandFuture(
         'cat-file blob %s:%s',
         $commit,
         $path);
     }
+  }
+
+  protected function executeQueryFromFuture(Future $future) {
+    list($corpus) = $future->resolvex();
 
     $file_content = new DiffusionFileContent();
     $file_content->setCorpus($corpus);
 
     return $file_content;
   }
-
 
   protected function tokenizeLine($line) {
     $m = array();

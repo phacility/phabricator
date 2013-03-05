@@ -202,11 +202,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $rows = array();
         foreach ($text_list as $k => $line) {
           $rev = $rev_list[$k];
-          if (isset($blame_dict[$rev]['handle'])) {
-            $author = $blame_dict[$rev]['handle']->getName();
-          } else {
-            $author = $blame_dict[$rev]['author'];
-          }
+          $author = $blame_dict[$rev]['author'];
           $rows[] =
             sprintf("%-10s %-20s %s", substr($rev, 0, 7), $author, $line);
         }
@@ -430,11 +426,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
     DiffusionFileContentQuery $file_query,
     $selected) {
 
+    $handles = array();
     if ($blame_dict) {
       $epoch_list  = ipull(ifilter($blame_dict, 'epoch'), 'epoch');
       $epoch_min   = min($epoch_list);
       $epoch_max   = max($epoch_list);
       $epoch_range = ($epoch_max - $epoch_min) + 1;
+      $handles     = $this->loadViewerHandles(ipull($blame_dict, 'authorPHID'));
     }
 
     $line_arr = array();
@@ -499,8 +497,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
           $display_line['color'] = $color;
           $display_line['commit'] = $rev;
 
-          if (isset($blame['handle'])) {
-            $author_link = $blame['handle']->renderLink();
+          $author_phid = idx($blame, 'authorPHID');
+          if ($author_phid && $handles[$author_phid]) {
+            $author_link = $handles[$author_phid]->renderLink();
           } else {
             $author_link = phutil_tag(
               'span',

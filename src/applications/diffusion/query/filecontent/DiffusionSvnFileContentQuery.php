@@ -2,7 +2,7 @@
 
 final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
 
-  protected function executeQuery() {
+  public function getFileContentFuture() {
     $drequest = $this->getRequest();
 
     $repository = $drequest->getRepository();
@@ -11,13 +11,17 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
 
     $remote_uri = $repository->getRemoteURI();
 
+    return $repository->getRemoteCommandFuture(
+      '%C %s%s@%s',
+      $this->getNeedsBlame() ? 'blame --force' : 'cat',
+      $remote_uri,
+      phutil_escape_uri($path),
+      $commit);
+  }
+
+  protected function executeQueryFromFuture(Future $future) {
     try {
-      list($corpus) = $repository->execxRemoteCommand(
-        '%C %s%s@%s',
-        $this->getNeedsBlame() ? 'blame --force' : 'cat',
-        $remote_uri,
-        phutil_escape_uri($path),
-        $commit);
+      list($corpus) = $future->resolvex();
     } catch (CommandException $ex) {
       $stderr = $ex->getStdErr();
       if (preg_match('/path not found$/', trim($stderr))) {
