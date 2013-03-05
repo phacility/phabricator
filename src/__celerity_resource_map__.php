@@ -3236,7 +3236,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/5bbb9e67/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/b74040b8/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3245,7 +3245,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-inline-comments-css' =>
   array(
-    'uri' => '/res/647d658d/rsrc/css/application/pholio/pholio-inline-comments.css',
+    'uri' => '/res/241b121c/rsrc/css/application/pholio/pholio-inline-comments.css',
     'type' => 'css',
     'requires' =>
     array(

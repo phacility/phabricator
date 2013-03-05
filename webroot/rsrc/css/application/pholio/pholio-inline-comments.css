@@ -1,6 +1,32 @@
 /**
  * @provides pholio-inline-comments-css
  */
+
+.pholio-inline-comment {
+  border: 1px solid #555555;
+  background: #353535;
+  margin: 0 0 5px 0;
+  padding: 8px 10px;
+  color: #ccc;
+
+  font-family: Verdana;
+  font-size: 11px;
+}
+
+.pholio-mock-inline-comments {
+  width: 300px;
+  border-left: 1px solid #101010;
+  border-top: 1px solid #333;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  padding: 10px;
+  background: #282828;
+  overflow-x: auto;
+  text-align: left;
+}
+
 .pholio-inline-comment-dialog-title {
   font-weight: bold;
   color: #fff;
@@ -36,4 +62,21 @@
 
 .pholio-inline-comment-dialog-buttons a {
   display: none;
+}
+
+.pholio-inline-comment-draft {
+  border-style: dashed;
+  border-color: #777777;
+  background: #464646;
+}
+
+.pholio-inline-head-links {
+  float: right;
+  font-weight: normal;
+  color: #777777;
+}
+
+.pholio-inline-head-links a {
+  font-weight: normal;
+  color: #2178db;
 }

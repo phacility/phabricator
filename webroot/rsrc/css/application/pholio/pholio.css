@@ -72,29 +72,6 @@
   display: inline-block;
 }
 
-.pholio-mock-inline-comments {
-  width: 300px;
-  border-left: 1px solid #101010;
-  border-top: 1px solid #333;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  padding: 10px;
-  background: #282828;
-  overflow-x: auto;
-  text-align: left;
-}
-
-.pholio-inline-comment {
-  border: 1px solid #333;
-  border-bottom: 1px solid #555;
-  background: #353535;
-  margin: 0 0 5px 0;
-  padding: 8px 10px;
-  color: #ccc;
-}
-
 .pholio-inline-comment-header {
   color: #fff;
   border-bottom: 1px solid #555;
@@ -106,9 +83,4 @@
 .pholio-mock-inline-comment-highlight {
   background-color: #222;
   border-color: #555;
-}
-
-.pholio-inline-head-links a {
-  font-weight: normal;
-  margin-left: 5px;
 }
