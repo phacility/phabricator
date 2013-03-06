@@ -60,9 +60,21 @@ final class PhabricatorConfigIssueListController
           ->addAttribute($issue->getSummary());
       if (!$issue->getIsIgnored()) {
         $item->addIcon('warning', pht('Setup Warning'));
+        $link = javelin_tag(
+                 'a',
+                 array('href'  => '/config/ignore/'.$issue->getIssueKey().'/',
+                       'sigil' => 'workflow'),
+                 pht('Ignore'));
+        $item->addAttribute($link);
         $list->addItem($item);
       } else {
         $item->addIcon('none', pht('Ignored'));
+        $link = javelin_tag(
+                 'a',
+                 array('href'  => '/config/unignore/'.$issue->getIssueKey().'/',
+                       'sigil' => 'workflow'),
+                 pht('Unignore'));
+        $item->addAttribute($link);
         $ignored_items[] = $item;
       }
     }

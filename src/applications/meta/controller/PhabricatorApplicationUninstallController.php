@@ -61,50 +61,18 @@ final class PhabricatorApplicationUninstallController
 
   public function manageApplication() {
     $key = 'phabricator.uninstalled-applications';
+    $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
+    $list = $config_entry->getValue();
+    $uninstalled = PhabricatorEnv::getEnvConfig($key);
 
-    $config_entry = id(new PhabricatorConfigEntry())
-                 ->loadOneWhere(
-                   'configKey = %s AND namespace = %s',
-                    $key,
-                   'default');
-
-    if (!$config_entry) {
-      $config_entry = id(new PhabricatorConfigEntry())
-                   ->setConfigKey($key)
-                   ->setNamespace('default');
-  }
-
-  $list = $config_entry->getValue();
-
-  $uninstalled = PhabricatorEnv::getEnvConfig($key);
-
-  if ($uninstalled[$this->application]) {
-    unset($list[$this->application]);
-  } else {
+    if ($uninstalled[$this->application]) {
+      unset($list[$this->application]);
+    } else {
       $list[$this->application] = true;
-  }
+    }
 
-  $xaction = id(new PhabricatorConfigTransaction())
-            ->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT)
-            ->setNewValue(
-              array(
-                 'deleted' => false,
-                 'value' => $list
-              ));
-
-  $editor = id(new PhabricatorConfigEditor())
-         ->setActor($this->getRequest()->getUser())
-         ->setContinueOnNoEffect(true)
-         ->setContentSource(
-           PhabricatorContentSource::newForSource(
-             PhabricatorContentSource::SOURCE_WEB,
-             array(
-               'ip' => $this->getRequest()->getRemoteAddr(),
-             )));
-
-
-  $editor->applyTransactions($config_entry, array($xaction));
-
+    PhabricatorConfigEditor::storeNewValue(
+     $config_entry, $list, $this->getRequest());
   }
 
 }
