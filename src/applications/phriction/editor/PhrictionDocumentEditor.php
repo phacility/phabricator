@@ -66,33 +66,44 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     return $this->document;
   }
 
-  public function delete() {
-    $actor = $this->requireActor();
+  public function moveAway($new_doc_id) {
+    return $this->execute(
+      PhrictionChangeType::CHANGE_MOVE_AWAY, true, $new_doc_id);
+  }
 
-    // TODO: Should we do anything about deleting an already-deleted document?
-    // We currently allow it.
+  public function moveHere($old_doc_id) {
+    return $this->execute(
+      PhrictionChangeType::CHANGE_MOVE_HERE, false, $old_doc_id);
+  }
+
+  private function execute(
+    $change_type, $del_new_content = true, $doc_ref = null) {
+
+    $actor = $this->requireActor();
 
     $document = $this->document;
     $content  = $this->content;
 
     $new_content = $this->buildContentTemplate($document, $content);
+    $new_content->setChangeType($change_type);
 
-    $new_content->setChangeType(PhrictionChangeType::CHANGE_DELETE);
-    $new_content->setContent('');
+    if ($del_new_content) {
+      $new_content->setContent('');
+    }
+
+    if ($doc_ref) {
+      $new_content->setChangeRef($doc_ref);
+    }
 
     return $this->updateDocument($document, $content, $new_content);
   }
 
+  public function delete() {
+    return $this->execute(PhrictionChangeType::CHANGE_DELETE, true);
+  }
+
   private function stub() {
-    $actor = $this->requireActor();
-    $document = $this->document;
-    $content  = $this->content;
-    $new_content = $this->buildContentTemplate($document, $content);
-
-    $new_content->setChangeType(PhrictionChangeType::CHANGE_STUB);
-    $new_content->setContent('');
-
-    return $this->updateDocument($document, $content, $new_content);
+    return $this->execute(PhrictionChangeType::CHANGE_STUB, true);
   }
 
   public function save() {
@@ -166,6 +177,14 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
         break;
       case PhrictionChangeType::CHANGE_STUB:
         $doc_status = PhrictionDocumentStatus::STATUS_STUB;
+        $feed_action = null;
+        break;
+      case PhrictionChangeType::CHANGE_MOVE_AWAY:
+        $doc_status = PhrictionDocumentStatus::STATUS_MOVED;
+        $feed_action = PhrictionActionConstants::ACTION_MOVE_AWAY;
+        break;
+      case PhrictionChangeType::CHANGE_MOVE_HERE:
+        $doc_status = PhrictionDocumentStatus::STATUS_EXISTS;
         $feed_action = null;
         break;
       default:

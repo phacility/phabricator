@@ -13,7 +13,6 @@ final class PhrictionDocumentController
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -148,14 +147,43 @@ final class PhrictionDocumentController
           pht('This document is empty. You can edit it to put some proper '.
           'content here.'));
         $core_content = $notice->render();
+      } else if ($doc_status == PhrictionDocumentStatus::STATUS_MOVED) {
+        $new_doc_id = $content->getChangeRef();
+        $new_doc = new PhrictionDocument();
+        $new_doc->load($new_doc_id);
+
+        $slug_uri = PhrictionDocument::getSlugURI($new_doc->getSlug());
+
+        $notice = new AphrontErrorView();
+        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $notice->setTitle(pht('Document Moved'));
+        $notice->appendChild(phutil_tag('p', array(),
+          pht('This document has been moved to %s. You can edit it to put new '.
+          'content here, or use history to revert to an earlier version.',
+            phutil_tag('a', array('href' => $slug_uri), $slug_uri))));
+        $core_content = $notice->render();
       } else {
         throw new Exception("Unknown document status '{$doc_status}'!");
       }
 
+      $move_notice = null;
+      if ($content->getChangeType() == PhrictionChangeType::CHANGE_MOVE_HERE) {
+        $from_doc_id = $content->getChangeRef();
+        $from_doc = id(new PhrictionDocument())->load($from_doc_id);
+        $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
+
+        $move_notice = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+          ->appendChild(pht('This document was moved from %s',
+            phutil_tag('a', array('href' => $slug_uri), $slug_uri)))
+          ->render();
+      }
+
       $page_content = hsprintf(
-        '<div class="phriction-content">%s%s%s</div>',
+        '<div class="phriction-content">%s%s%s%s</div>',
         $index_link,
         $byline,
+        $move_notice,
         $core_content);
     }
 
@@ -221,6 +249,13 @@ final class PhrictionDocumentController
         ->setHref('/phriction/edit/'.$document->getID().'/'));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
+      $action_view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Move Document'))
+          ->setIcon('move')
+          ->setHref('/phriction/move/'.$document->getID().'/')
+          ->setWorkflow(true));
+
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Document'))

@@ -115,9 +115,13 @@ final class PhrictionListController
       case 'active':
         $data = queryfx_all(
           $conn,
-          'SELECT * FROM %T WHERE status != %d ORDER BY id DESC LIMIT %d, %d',
+          'SELECT * FROM %T WHERE status NOT IN (%Ld) ORDER BY id DESC '.
+            'LIMIT %d, %d',
           $document_dao->getTableName(),
-          PhrictionDocumentStatus::STATUS_DELETED,
+          array(
+            PhrictionDocumentStatus::STATUS_DELETED,
+            PhrictionDocumentStatus::STATUS_MOVED,
+          ),
           $pager->getOffset(),
           $pager->getPageSize() + 1);
         break;
