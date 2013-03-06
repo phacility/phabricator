@@ -24,7 +24,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
 
     $external_arrow = "\xE2\x86\x97";
     $tasks_uri = '/maniphest/view/all/?projects='.$project->getPHID();
-    $slug = PhabricatorSlug::normalize($project->getName());
+    $slug = PhabricatorSlug::normalize($project->getPhrictionSlug());
     $phriction_uri = '/w/projects/'.$slug;
 
     $edit_uri = '/project/edit/'.$id.'/';
