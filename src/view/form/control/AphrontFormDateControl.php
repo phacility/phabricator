@@ -61,40 +61,53 @@ final class AphrontFormDateControl extends AphrontFormControl {
     } else {
       // TODO: We could eventually allow these to be customized per install or
       // per user or both, but let's wait and see.
-      switch ($this->initialTime) {
-        case self::TIME_START_OF_DAY:
-        default:
-          $time = '12:00 AM';
-          break;
-        case self::TIME_START_OF_BUSINESS:
-          $time = '9:00 AM';
-          break;
-        case self::TIME_END_OF_BUSINESS:
-          $time = '5:00 PM';
-          break;
-        case self::TIME_END_OF_DAY:
-          $time = '11:59 PM';
-          break;
-      }
-
-      $today = $this->formatTime(time(), 'Y-m-d');
-      try {
-        $date = new DateTime("{$today} {$time}", $zone);
-        $value = $date->format('U');
-      } catch (Exception $ex) {
-        $value = null;
-      }
-
-      if ($value) {
-        $this->setValue($value);
-      } else {
-        $this->setValue(null);
-      }
+      $this->setValueToInitialTime();
     }
 
     $this->setError($err);
 
     return $this->getValue();
+  }
+
+  public function setValueToInitialTime() {
+    $user = $this->user;
+    if (!$this->user) {
+      throw new Exception(
+        "Call setUser() before readValueFromRequest()!");
+    }
+
+    $user_zone = $user->getTimezoneIdentifier();
+    $zone = new DateTimeZone($user_zone);
+
+    switch ($this->initialTime) {
+      case self::TIME_START_OF_DAY:
+      default:
+        $time = '12:00 AM';
+        break;
+      case self::TIME_START_OF_BUSINESS:
+        $time = '9:00 AM';
+        break;
+      case self::TIME_END_OF_BUSINESS:
+        $time = '5:00 PM';
+        break;
+      case self::TIME_END_OF_DAY:
+        $time = '11:59 PM';
+        break;
+    }
+
+    $today = $this->formatTime(time(), 'Y-m-d');
+    try {
+      $date = new DateTime("{$today} {$time}", $zone);
+      $value = $date->format('U');
+    } catch (Exception $ex) {
+      $value = null;
+    }
+
+    if ($value) {
+      return $this->setValue($value);
+    } else {
+      return $this->setValue(null);
+    }
   }
 
   protected function getCustomControlClass() {
@@ -110,6 +123,9 @@ final class AphrontFormDateControl extends AphrontFormControl {
 
     $readable = $this->formatTime($epoch, 'Y!m!d!g:i A');
     $readable = explode('!', $readable, 4);
+    if (count($readable) < 4) {
+      return;
+    }
 
     $this->valueYear  = $readable[0];
     $this->valueMonth = $readable[1];

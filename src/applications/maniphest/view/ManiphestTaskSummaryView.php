@@ -96,68 +96,15 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       ),
       '');
 
-    $task_id = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-number',
-      ),
-      'T'.$task->getID());
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
+    $task->loadAndAttachAuxiliaryAttributes();
+    $get_fields = PhabricatorEnv::getEnvConfig('maniphest.task-list.get-fields');
 
-    $task_status = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-status',
-      ),
-      idx($status_map, $task->getStatus(), 'Unknown'));
-
-    $task_owner = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-owner',
-      ),
-      $task->getOwnerPHID()
-        ? $handles[$task->getOwnerPHID()]->renderLink()
-        : phutil_tag('em', array(), pht('None')));
-
-    $task_name = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-name',
-      ),
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/T'.$task->getID(),
-        ),
-        $task->getTitle()));
-
-    $task_projects = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-projects',
-      ),
-      $projects_view->render());
-
-    $task_updated = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-updated',
-      ),
-      phabricator_date($task->getDateModified(), $this->user));
-
-    $row = phutil_tag(
-      'tr',
-      array(),
-      array(
-        $handle,
-        $batch,
-        $task_id,
-        $task_status,
-        $task_owner,
-        $task_name,
-        $task_projects,
-        $task_updated,
-      ));
+    $html = '';
+    foreach ($get_fields($task, $handles, $status_map, $projects_view, $this->user, $aux_fields) as $class => $value) {
+      $html .= '<td class="' . $class . '">' . $value . '</td>';
+    }
 
     return javelin_tag(
       'table',
@@ -168,7 +115,11 @@ final class ManiphestTaskSummaryView extends ManiphestView {
           'taskID' => $task->getID(),
         ),
       ),
-      $row);
+      phutil_safe_html('<tr>'.
+        $handle.
+        $batch.
+        $html.
+      '</tr>'));
   }
 
 }

@@ -70,6 +70,19 @@
   width: 100px;
 }
 
+.maniphest-task-summary td.right { text-align: right; }
+.maniphest-task-summary td.small { width: 50px; }
+.maniphest-task-summary td.medium { width: 120px; }
+.maniphest-task-summary td.large { width: 200px; }
+
+.maniphest-task-summary td.italic { font-style: italic; }
+.maniphest-task-summary td.bold { font-weight: bold; }
+
+.maniphest-task-summary td.red { color: red; }
+.maniphest-task-summary td.orangered { color: orangered; }
+.maniphest-task-summary td.green { color: green; }
+.maniphest-task-summary td.purple { color: #066; }
+
 .maniphest-task-summary td.maniphest-task-name {
   font-weight: bold;
   white-space: normal;

@@ -109,15 +109,27 @@ final class ManiphestTaskEditController extends ManiphestController {
         $errors[] = pht('Title is required.');
       }
 
+      // Load existing values for read-only fields.
+      $task->loadAndAttachAuxiliaryAttributes();
       foreach ($aux_fields as $aux_field) {
-        $aux_field->setValueFromRequest($request);
+        $aux_key = $aux_field->getAuxiliaryKey();
+        $value = $task->getAuxiliaryAttribute($aux_key);
+        if ($aux_field->isReadonly()) {
+          $aux_field->setValueFromStorage($value);
+        }
+      }
+
+      foreach ($aux_fields as $aux_field) {
+        if (!$aux_field->isReadonly()) {
+          $aux_field->setValueFromRequest($request);
+        }
 
         if ($aux_field->isRequired() && !strlen($aux_field->getValue())) {
           $errors[] = $aux_field->getLabel() . ' is required.';
           $aux_field->setError('Required');
         }
 
-        if (strlen($aux_field->getValue())) {
+        if (!is_array($aux_field->getValue()) && strlen($aux_field->getValue())) {
           try {
             $aux_field->validate();
           } catch (Exception $e) {
@@ -436,16 +448,25 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setDatasource('/typeahead/common/projects/'));
 
     if ($aux_fields) {
-      foreach ($aux_fields as $aux_field) {
+      $aux_groups = $extensions->getGroupedAuxiliaryFieldSpecifications($aux_fields);
+      $extensions->renderGroupedFields($aux_groups, $task, $user, array('task' => $task, 'form' => $form, 'user' => $user), false, false, function($data, $group) {
+        $data['form']->appendChild("
+<div class='aphront-form-control aphront-form-control-text'>
+  <label class='aphront-form-label'></label>
+  <div class='aphront-form-input'>
+    <h4 class='maniphest-aux-group'>$group</h4>
+  </div>
+</div>");
+      }, function($data, $aux_field) {
         if ($aux_field->isRequired() &&
             !$aux_field->getError() &&
             !$aux_field->getValue()) {
           $aux_field->setError(true);
         }
 
-        $aux_control = $aux_field->renderControl();
-        $form->appendChild($aux_control);
-      }
+        $aux_control = $aux_field->renderControl($data['user']);
+        $data['form']->appendChild($aux_control);
+      });
     }
 
     require_celerity_resource('aphront-error-view-css');

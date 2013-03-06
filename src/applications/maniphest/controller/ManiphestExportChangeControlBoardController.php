@@ -3,7 +3,7 @@
 /**
  * @group maniphest
  */
-final class ManiphestExportController extends ManiphestController {
+final class ManiphestExportChangeControlBoardController extends ManiphestController {
 
   private $key;
 
@@ -16,11 +16,13 @@ final class ManiphestExportController extends ManiphestController {
    * @phutil-external-symbol class PHPExcel
    * @phutil-external-symbol class PHPExcel_IOFactory
    * @phutil-external-symbol class PHPExcel_Style_NumberFormat
-   * @phutil-external-symbol class PHPExcel_Cell_DataType
    */
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
 
     $ok = @include_once 'PHPExcel.php';
     if (!$ok) {
@@ -28,9 +30,9 @@ final class ManiphestExportController extends ManiphestController {
       $dialog->setUser($user);
 
       $dialog->setTitle('Excel Export Not Configured');
-      $dialog->appendChild(hsprintf(
+      $dialog->appendChild(
         '<p>This system does not have PHPExcel installed. This software '.
-        'component is required to export tasks to Excel. Have your system '.
+        'component is required to export change control board to Excel. Have your system '.
         'administrator install it from:</p>'.
         '<br />'.
         '<p>'.
@@ -38,14 +40,30 @@ final class ManiphestExportController extends ManiphestController {
         '</p>'.
         '<br />'.
         '<p>Your PHP "include_path" needs to be updated to include the '.
-        'PHPExcel Classes/ directory.</p>'));
+        'PHPExcel Classes/ directory.</p>');
 
       $dialog->addCancelButton('/maniphest/');
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    // TODO: PHPExcel has a dependency on the PHP zip extension. We should test
-    // for that here, since it fatals if we don't have the ZipArchive class.
+    $ccb_enabled = PhabricatorEnv::getEnvConfig('maniphest.change-control-board.enabled');
+    $ccb_get_headers = PhabricatorEnv::getEnvConfig('maniphest.change-control-board.get-columns');
+    $ccb_get_fields = PhabricatorEnv::getEnvConfig('maniphest.change-control-board.get-fields');
+    $ccb_filter = PhabricatorEnv::getEnvConfig('maniphest.change-control-board.filter');
+    $ccb_filename = PhabricatorEnv::getEnvConfig('maniphest.change-control-board.filename');
+
+    if (!$ccb_enabled) {
+      $dialog = new AphrontDialogView();
+      $dialog->setUser($user);
+
+      $dialog->setTitle('Change Control Board Not Enabled');
+      $dialog->appendChild(
+        '<p>This system does not have Change Control Board enabled.  Please enable '.
+        'and configure it in the Phabricator configuration file.</p>');
+
+      $dialog->addCancelButton('/maniphest/');
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
 
     $query = id(new PhabricatorSearchQuery())->loadOneWhere(
       'queryKey = %s',
@@ -58,9 +76,9 @@ final class ManiphestExportController extends ManiphestController {
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
 
-      $dialog->setTitle('Export Tasks to Excel');
-      $dialog->appendChild(phutil_tag('p', array(), pht(
-        'Do you want to export the query results to Excel?')));
+      $dialog->setTitle('Export Change Control Board');
+      $dialog->appendChild(
+        '<p>Do you want to export the change control board results to Excel?</p>');
 
       $dialog->addCancelButton('/maniphest/');
       $dialog->addSubmitButton('Export to Excel');
@@ -73,9 +91,7 @@ final class ManiphestExportController extends ManiphestController {
     $query->setParameter('order',   'p');
     $query->setParameter('group',   'n');
 
-    list($tasks, $handles) = ManiphestTaskListController::loadTasks(
-      $query,
-      $user);
+    list($tasks, $handles) = ManiphestTaskListController::loadTasks($query, $aux_fields);
     // Ungroup tasks.
     $tasks = array_mergev($tasks);
 
@@ -84,25 +100,27 @@ final class ManiphestExportController extends ManiphestController {
     $handles += $project_handles;
 
     $workbook = new PHPExcel();
-    $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
+
     $sheet = $workbook->setActiveSheetIndex(0);
     $sheet->setTitle('Tasks');
 
-    $widths = array(
-      null,
-      15,
-      null,
-      10,
-      15,
-      15,
-      60,
-      30,
-      20,
-      100,
-    );
-    foreach ($aux_fields as $aux_field) {
-      $widths[count($widths)] = 10 + (count($aux_field->getLabel()) * 3);
+    $headers = $ccb_get_headers();
+
+    $widths = array();
+    $is_date = array();
+    $i = 0;
+    foreach ($headers as $name => $settings) {
+      if (array_key_exists('width', $settings)) {
+        $widths[$i] = $settings['width'];
+      } else {
+        $widths[$i] = null;
+      }
+      if (array_key_exists('date', $settings)) {
+        $is_date[$i] = $settings['date'];
+      } else {
+        $is_date[$i] = false;
+      }
+      $i++;
     }
 
     foreach ($widths as $col => $width) {
@@ -117,44 +135,14 @@ final class ManiphestExportController extends ManiphestController {
     $date_format = null;
 
     $rows = array();
-    $_row = array(
-      'ID',
-      'Owner',
-      'Status',
-      'Priority',
-      'Date Created',
-      'Date Updated',
-      'Title',
-      'Projects',
-      'URI',
-      'Description',
-    );
-    foreach ($aux_fields as $aux_field) {
-      $_row[count($_row)] = $aux_field->getLabel();
+    $first_row = array();
+    $i = 0;
+    foreach ($headers as $name => $settings) {
+      $first_row[$i++] = $name;
     }
-    $rows[] = $_row;
+    $rows[] = $first_row;
 
-    $is_date = array(
-      false,
-      false,
-      false,
-      false,
-      true,
-      true,
-      false,
-      false,
-      false,
-      false,
-    );
-    foreach ($aux_fields as $aux_field) {
-      $is_date[count($is_date)] = false;
-    }
-
-    $header_format = array(
-      'font'  => array(
-        'bold' => true,
-      ),
-    );
+    $header_format = PhabricatorEnv::getEnvConfig('maniphest.change-control-board.header-format');
 
     foreach ($tasks as $task) {
       $task_owner = null;
@@ -168,34 +156,28 @@ final class ManiphestExportController extends ManiphestController {
       }
       $projects = implode(', ', $projects);
 
-      // Auxiliary attributes.
+      // Check if current status is one of the deployment statuses.
       $task->loadAndAttachAuxiliaryAttributes();
-
-      $_row = array(
-        'T'.$task->getID(),
-        $task_owner,
-        idx($status_map, $task->getStatus(), '?'),
-        idx($pri_map, $task->getPriority(), '?'),
-        $this->computeExcelDate($task->getDateCreated()),
-        $this->computeExcelDate($task->getDateModified()),
-        $task->getTitle(),
-        $projects,
-        PhabricatorEnv::getProductionURI('/T'.$task->getID()),
-        phutil_utf8_shorten($task->getDescription(), 512),
-      );
-      foreach ($aux_fields as $aux_field) {
-        $aux_field->setValue($task->getAuxiliaryAttribute($aux_field->getAuxiliaryKey()));
-        $_row[count($_row)] = $aux_field->renderForDetailView($user);
+      if (!$ccb_filter($task)) {
+        continue;
       }
-      $rows[] = $_row;
+
+      $rows[] = $ccb_get_fields(array(
+        "ccb" => $this,
+        "task" => $task,
+        "task_owner" => $task_owner,
+        "status_map" => $status_map,
+        "pri_map" => $pri_map,
+        "projects" => $projects,
+        "aux_fields" => $aux_fields,
+      ));
     }
 
     foreach ($rows as $row => $cols) {
       foreach ($cols as $col => $spec) {
         $cell_name = $this->col($col).($row + 1);
-        $sheet
-          ->setCellValue($cell_name, $spec, $return_cell = true)
-          ->setDataType(PHPExcel_Cell_DataType::TYPE_STRING);
+        $sheet->setCellValue($cell_name, $spec);
+        $sheet->getStyle($cell_name)->getAlignment()->setWrapText(true);
 
         if ($row == 0) {
           $sheet->getStyle($cell_name)->applyFromArray($header_format);
@@ -221,8 +203,20 @@ final class ManiphestExportController extends ManiphestController {
 
     return id(new AphrontFileResponse())
       ->setMimeType($mime)
-      ->setDownload('maniphest_tasks_'.date('Ymd').'.xlsx')
+      ->setDownload($ccb_filename . 'change_control_board_'.date('Ymd').'.xlsx')
       ->setContent($data);
+  }
+
+  public function renderAuxiliaryAttribute($task, $field, $aux_fields) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    foreach ($aux_fields as $aux_field) {
+      if ($aux_field->getAuxiliaryKey() == $field) {
+        $aux_field->setValue($task->getAuxiliaryAttribute($aux_field->getAuxiliaryKey()));
+        return $aux_field->renderForDetailView($user);
+      }
+    }
+    return $aux_field->getAuxiliaryKey();
   }
 
   private function computeExcelDate($epoch) {

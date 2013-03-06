@@ -48,7 +48,9 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $template = new AphrontTokenizerTemplateView();
     $template->setName($name);
     $template->setID($id);
-    $template->setValue($values);
+    if (is_array($values)) {
+      $template->setValue($values);
+    }
 
     $username = null;
     if ($this->user) {

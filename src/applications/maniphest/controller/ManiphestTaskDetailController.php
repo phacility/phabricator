@@ -329,7 +329,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $header = $this->buildHeaderView($task);
     $actions = $this->buildActionView($task);
-    $properties = $this->buildPropertyView($task, $aux_fields, $edges, $engine);
+    $properties = $this->buildPropertyView($task, $extensions, $aux_fields, $edges, $engine, $user);
 
     return $this->buildApplicationPage(
       array(
@@ -417,9 +417,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
   private function buildPropertyView(
     ManiphestTask $task,
+    ManiphestTaskExtensions $extensions,
     array $aux_fields,
     array $edges,
-    PhabricatorMarkupEngine $engine) {
+    PhabricatorMarkupEngine $engine,
+    PhabricatorUser $user) {
 
     $viewer = $this->getRequest()->getUser();
 
@@ -466,16 +468,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
         : phutil_tag('em', array(), pht('None')));
 
-    foreach ($aux_fields as $aux_field) {
-      $aux_key = $aux_field->getAuxiliaryKey();
-      $aux_field->setValue($task->getAuxiliaryAttribute($aux_key));
-      $value = $aux_field->renderForDetailView();
-      if (strlen($value)) {
-        $view->addProperty($aux_field->getLabel(), $value);
-      }
-    }
-
-
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
         => pht('Dependent Tasks'),
@@ -514,6 +506,30 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view->invokeWillRenderEvent();
 
+    $aux_groups = $extensions->getGroupedAuxiliaryFieldSpecifications($aux_fields);
+    $extensions->renderGroupedFields($aux_groups, $task, $user, array('task' => $task, 'view' => $view, 'user' => $user), true, true, function($data, $group) {
+      $data['view']->addProperty("", "<h4 class='maniphest-aux-group'>$group</h4>");
+    }, function($data, $aux_field) {
+      $aux_key = $aux_field->getAuxiliaryKey();
+      $aux_field->setValue($data['task']->getAuxiliaryAttribute($aux_key));
+      $value = $aux_field->renderForDetailView($data['user']);
+      if (strlen($value)) {
+        if (strpos($value, 'http') === 0) {
+          $data['view']->addProperty(
+            $aux_field->getLabel(),
+            phutil_render_tag(
+              'a',
+               array(
+                 'href' => $value,
+                 'target' => '_blank',
+                 ),
+               phutil_escape_html($value)));
+        } else {
+          $data['view']->addProperty($aux_field->getLabel(), $value);
+        }
+      }
+    });
+     
     if (strlen($task->getDescription())) {
       $view->addSectionHeader(pht('Description'));
       $view->addTextContent(
@@ -523,6 +539,24 @@ final class ManiphestTaskDetailController extends ManiphestController {
             'class' => 'phabricator-remarkup',
           ),
           $engine->getOutput($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION)));
+    }
+
+    foreach ($aux_fields as $aux_field) {
+      if ($aux_field->getFieldType() != ManiphestAuxiliaryFieldDefaultSpecification::TYPE_DESC)
+        continue;
+      $aux_key = $aux_field->getAuxiliaryKey();
+      $aux_field->setValue($task->getAuxiliaryAttribute($aux_key));
+
+      if (strlen($aux_field->getValue())) {
+        $view->addSectionHeader(pht($aux_field->getLabel()));
+        $view->addTextContent(
+          phutil_render_tag(
+            'div',
+            array(
+              'class' => 'phabricator-remarkup',
+            ),
+            PhabricatorMarkupEngine::renderOneObject($aux_field, ManiphestTask::MARKUP_FIELD_DESCRIPTION, $user)));
+      }
     }
 
     return $view;

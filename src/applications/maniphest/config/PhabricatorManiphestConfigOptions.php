@@ -111,6 +111,41 @@ final class PhabricatorManiphestConfigOptions
             'create a task, even if the sender is not a system user. The '.
             'original email address will be stored in an `From Email` field '.
             'on the task.')),
+      $this->newOption(
+        'maniphest.change-control-board.enabled',
+        'bool',
+        null)
+        ->setSummary(pht('Whether the Change Control Board feature is enabled.')),
+      $this->newOption(
+        'maniphest.change-control-board.filename',
+        'string',
+        null)
+        ->setSummary(pht('The filename prefix for Change Control Board exports.')),
+      $this->newOption(
+        'maniphest.change-control-board.filter',
+        'function',
+        null)
+        ->setSummary(pht('The filter to apply to rows being exported by the Change Control Board.')),
+      $this->newOption(
+        'maniphest.change-control-board.get-columns',
+        'function',
+        null)
+        ->setSummary(pht('The function that returns the columns to export in the Change Control Board.')),
+      $this->newOption(
+        'maniphest.change-control-board.get-fields',
+        'function',
+        null)
+        ->setSummary(pht('The function that returns the field data to export in the Change Control Board.')),
+      $this->newOption(
+        'maniphest.change-control-board.header-format',
+        'array',
+        null)
+        ->setSummary(pht('The settings array for PHPExcel that defines how headers are formatted in the Change Control Board.')),
+      $this->newOption(
+        'maniphest.task-list.get-fields',
+        'function',
+        null)
+        ->setSummary(pht('The function that returns what fields are to be shown in Maniphest task lists.')),
     );
   }
 

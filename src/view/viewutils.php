@@ -92,11 +92,24 @@ function phabricator_format_local_time($epoch, $user, $format) {
   try {
     $date = new DateTime('@'.$epoch);
   } catch (Exception $ex) {
-    // NOTE: DateTime throws an empty exception if the format is invalid,
-    // just replace it with a useful one.
-    throw new Exception(
+    try {
+      // FIXME: Also try Australian and broken formats..
+      $date = DateTime::createFromFormat("d/m/Y", $epoch);
+      if ($date == null) {
+        $date = DateTime::createFromFormat("h:m a", $epoch);
+        if ($date == null) {
+          throw new Exception(
+            "Construction of a DateTime() with epoch '{$epoch}' ".
+            "raised an exception.");
+        }
+      }
+    } catch (Exception $ex) {
+      // NOTE: DateTime throws an empty exception if the format is invalid,
+      // just replace it with a useful one.
+      throw new Exception(
       pht("Construction of a DateTime() with epoch '%s' ".
       "raised an exception.", $epoch));
+    }
   }
 
   $date->setTimeZone($zone);
