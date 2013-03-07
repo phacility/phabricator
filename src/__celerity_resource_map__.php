@@ -687,7 +687,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-notes' =>
   array(
-    'uri' => '/res/4b741bc0/rsrc/css/core/aphront-notes.css',
+    'uri' => '/res/f8f3dcfa/rsrc/css/core/aphront-notes.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2980,7 +2980,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-project-tag-css' =>
   array(
-    'uri' => '/res/6b0a5223/rsrc/css/application/projects/project-tag.css',
+    'uri' => '/res/1b5efcb2/rsrc/css/application/projects/project-tag.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3702,7 +3702,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/cd1d650a/javelin.pkg.js',
       'type' => 'js',
     ),
-    'e30a3fa8' =>
+    'eb35a026' =>
     array(
       'name' => 'maniphest.pkg.css',
       'symbols' =>
@@ -3712,7 +3712,7 @@ celerity_register_resource_map(array(
         2 => 'aphront-attached-file-view-css',
         3 => 'phabricator-project-tag-css',
       ),
-      'uri' => '/res/pkg/e30a3fa8/maniphest.pkg.css',
+      'uri' => '/res/pkg/eb35a026/maniphest.pkg.css',
       'type' => 'css',
     ),
     '7707de41' =>
@@ -3732,7 +3732,7 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-attached-file-view-css' => 'e30a3fa8',
+    'aphront-attached-file-view-css' => 'eb35a026',
     'aphront-crumbs-view-css' => '09aa1f68',
     'aphront-dialog-view-css' => '09aa1f68',
     'aphront-error-view-css' => '09aa1f68',
@@ -3829,8 +3829,8 @@ celerity_register_resource_map(array(
     'javelin-vector' => 'cd1d650a',
     'javelin-workflow' => 'cd1d650a',
     'lightbox-attachment-css' => '09aa1f68',
-    'maniphest-task-summary-css' => 'e30a3fa8',
-    'maniphest-transaction-detail-css' => 'e30a3fa8',
+    'maniphest-task-summary-css' => 'eb35a026',
+    'maniphest-transaction-detail-css' => 'eb35a026',
     'phabricator-busy' => 'f24c209c',
     'phabricator-content-source-view-css' => '8aaacd1b',
     'phabricator-core-buttons-css' => '09aa1f68',
@@ -3857,7 +3857,7 @@ celerity_register_resource_map(array(
     'phabricator-object-selector-css' => '8aaacd1b',
     'phabricator-paste-file-upload' => 'f24c209c',
     'phabricator-prefab' => 'f24c209c',
-    'phabricator-project-tag-css' => 'e30a3fa8',
+    'phabricator-project-tag-css' => 'eb35a026',
     'phabricator-remarkup-css' => '09aa1f68',
     'phabricator-shaped-request' => '322728f3',
     'phabricator-side-menu-view-css' => '09aa1f68',
