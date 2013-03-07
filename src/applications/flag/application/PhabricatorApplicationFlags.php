@@ -3,7 +3,7 @@
 final class PhabricatorApplicationFlags extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return 'Reminders';
+    return pht('Reminders');
   }
 
   public function getBaseURI() {
