@@ -122,21 +122,12 @@ final class PhrictionMoveController
     $descr_caption = $is_serious ? pht('A reason for the move.') :
       pht('You better give a good reason for this.');
 
-    if ($request->isAjax()) {
-      $form = new AphrontFormLayoutView();
-    } else {
-      $form = new AphrontFormView();
-      $form->setAction($submit_uri)
-        // Append title so the user can verify that he's touching
-        // the right document
-        ->appendChild(
-          id(new AphrontFormStaticControl())
-            ->setLabel(pht('Title'))
-            ->setValue($content->getTitle()));
-    }
-
-    $form
+    $form = id(new AphrontFormLayoutView())
       ->setUser($user)
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel(pht('Title'))
+          ->setValue($content->getTitle()))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('New URI'))
@@ -152,37 +143,14 @@ final class PhrictionMoveController
           ->setName('description')
           ->setCaption($descr_caption));
 
-    if ($request->isAjax()) {
-      $dialog = new AphrontDialogView();
-      $dialog->setUser($user);
-      $dialog->setTitle(pht('Move Document'));
-      $dialog->appendChild($form);
-      $dialog->setSubmitURI($submit_uri);
-      $dialog->addSubmitButton(pht('Move Document'));
-      $dialog->addCancelButton($cancel_uri);
+    $dialog = id(new AphrontDialogView())
+      ->setUser($user)
+      ->setTitle(pht('Move Document'))
+      ->appendChild($form)
+      ->setSubmitURI($submit_uri)
+      ->addSubmitButton(pht('Move Document'))
+      ->addCancelButton($cancel_uri);
 
-      return id(new AphrontDialogResponse())->setDialog($dialog);
-    } else {
-      $form->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($cancel_uri)
-          ->setValue(pht('Move Document'))
-          ->setDisabled($e_block));
-
-      $panel = id(new AphrontPanelView())
-        ->setNoBackground()
-        ->setHeader(pht('Move Phriction Document'))
-        ->appendChild($form);
-
-      return $this->buildApplicationPage(
-        array(
-          $error_view,
-          $panel,
-        ),
-        array(
-          'title' => pht('Move Document'),
-          'device' => true,
-        ));
-    }
+    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 }
