@@ -49,10 +49,8 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
         break;
       case PholioTransactionType::TYPE_DESCRIPTION:
         return pht(
-          '%s updated the description of this mock. '.
-          'The old description was: %s',
-          $this->renderHandleLink($author_phid),
-          $old);
+          "%s updated the mock's description.",
+          $this->renderHandleLink($author_phid));
         break;
       case PholioTransactionType::TYPE_INLINE:
         return pht(
@@ -61,6 +59,26 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     }
 
     return parent::getTitle();
+  }
+
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case PholioTransactionType::TYPE_DESCRIPTION:
+        return true;
+    }
+    return parent::hasChangeDetails();
+  }
+
+  public function renderChangeDetails(PhabricatorUser $viewer) {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setUser($viewer)
+      ->setOldText($old)
+      ->setNewText($new);
+
+    return $view->render();
   }
 
 

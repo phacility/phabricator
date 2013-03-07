@@ -31,13 +31,13 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
       $flag_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setHref('/flag/delete/'.$flag->getID().'/')
-        ->setName('Remove '.$color.' Flag')
+        ->setName(pht('Remove %s Flag', $color))
         ->setIcon('flag-'.$flag->getColor());
     } else {
       $flag_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setHref('/flag/edit/'.$object->getPHID().'/')
-        ->setName('Flag For Later')
+        ->setName(pht('Flag For Later'))
         ->setIcon('flag-ghost');
 
       if (!$user->isLoggedIn()) {

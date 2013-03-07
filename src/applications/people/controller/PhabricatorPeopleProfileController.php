@@ -171,10 +171,11 @@ final class PhabricatorPeopleProfileController
       $profile->getBlurb(),
       '//'.pht('Nothing is known about this rare specimen.').'//');
 
-    $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
-    $blurb = $engine->markupText($blurb);
-
     $viewer = $this->getRequest()->getUser();
+
+    $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
+    $engine->setConfig('viewer', $viewer);
+    $blurb = $engine->markupText($blurb);
 
     $content = hsprintf(
       '<div class="phabricator-profile-info-group">

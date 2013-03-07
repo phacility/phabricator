@@ -44,21 +44,24 @@ final class PholioMockCommentController extends PholioController {
       ));
 
     $xactions = array();
-    $xactions[] = id(new PholioTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-      ->attachComment(
-        id(new PholioTransactionComment())
-          ->setContent($comment));
 
-    $inlineComments = id(new PholioTransactionComment())->loadAllWhere(
+    $inline_comments = id(new PholioTransactionComment())->loadAllWhere(
       'authorphid = %s AND transactionphid IS NULL AND imageid IN (%Ld)',
       $user->getPHID(),
       mpull($mock->getImages(), 'getID'));
 
-    foreach ($inlineComments as $inlineComment) {
+    if (!$inline_comments || strlen($comment)) {
+      $xactions[] = id(new PholioTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new PholioTransactionComment())
+            ->setContent($comment));
+    }
+
+    foreach ($inline_comments as $inline_comment) {
       $xactions[] = id(new PholioTransaction())
         ->setTransactionType(PholioTransactionType::TYPE_INLINE)
-        ->attachComment($inlineComment);
+        ->attachComment($inline_comment);
     }
 
     $editor = id(new PholioMockEditor())

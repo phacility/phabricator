@@ -372,7 +372,7 @@ final class AphrontRequest {
    * @return  dict<string, string>  Original request parameters.
    */
   public function getPassthroughRequestParameters() {
-    return self::flattenData($this->getPassthruRequestData());
+    return self::flattenData($this->getPassthroughRequestData());
   }
 
   /**

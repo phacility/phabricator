@@ -42,7 +42,7 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/M(?P<id>[1-9]\d*)' => 'PholioMockViewController',
+      '/M(?P<id>[1-9]\d*)(?:/(?P<imageID>\d+)/)?' => 'PholioMockViewController',
       '/pholio/' => array(
         '' => 'PholioMockListController',
         'view/(?P<view>\w+)/'   => 'PholioMockListController',

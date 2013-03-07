@@ -23,4 +23,20 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO {
       PhabricatorPHIDConstants::PHID_TYPE_CONF);
   }
 
+  public static function loadConfigEntry($key) {
+    $config_entry = id(new PhabricatorConfigEntry())
+                 ->loadOneWhere(
+                   'configKey = %s AND namespace = %s',
+                    $key,
+                   'default');
+
+    if (!$config_entry) {
+      $config_entry = id(new PhabricatorConfigEntry())
+                   ->setConfigKey($key)
+                   ->setNamespace('default');
+    }
+
+    return $config_entry;
+  }
+
 }

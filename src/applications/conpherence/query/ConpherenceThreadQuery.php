@@ -37,7 +37,7 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new ConpherenceThread();
     $conn_r = $table->establishConnection('r');
 
@@ -113,7 +113,7 @@ final class ConpherenceThreadQuery
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array_keys($conpherences))
       ->needHandles(true)
-      ->loadPage();
+      ->execute();
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
       $current_transactions = $transactions[$phid];

@@ -42,7 +42,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
     $dialog = new AphrontDialogView();
     $dialog->setUser($user);
 
-    $dialog->setTitle("Flag {$type_name}");
+    $dialog->setTitle(pht("Flag %s", $type_name));
 
     require_celerity_resource('phabricator-flag-css');
 
@@ -53,9 +53,10 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
     if ($is_new) {
       $form
         ->appendChild(hsprintf(
-          "<p>You can flag this %s if you want to remember to look ".
-          "at it later.</p><br />",
-          $type_name));
+          "<p>%s</p><br />",
+          pht('You can flag this %s if you want to remember to look ".
+            "at it later.',
+            $type_name)));
     }
 
     $radio = new AphrontFormRadioButtonControl();
@@ -68,20 +69,20 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
       ->appendChild(
         $radio
           ->setName('color')
-          ->setLabel('Flag Color')
+          ->setLabel(pht('Flag Color'))
           ->setValue($flag->getColor()))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setName('note')
-          ->setLabel('Note')
+          ->setLabel(pht('Note'))
           ->setValue($flag->getNote()));
 
     $dialog->appendChild($form);
 
     $dialog->addCancelButton($handle->getURI());
     $dialog->addSubmitButton(
-      $is_new ? "Flag {$type_name}" : 'Save');
+      $is_new ? pht("Flag %s") : pht('Save'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

@@ -45,6 +45,18 @@
   white-space: nowrap;
 }
 
+.diffusion-blame-link {
+  min-width: 25px;
+}
+
+.diffusion-rev-link {
+  min-width: 90px;
+}
+
+.diffusion-author-link {
+  min-width: 120px;
+}
+
 .diffusion-blame-link a,
 .diffusion-rev-link a,
 .diffusion-author-link a,

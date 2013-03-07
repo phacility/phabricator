@@ -11,6 +11,8 @@ final class DiffusionLintDetailsController extends DiffusionController {
     $messages = $this->loadLintMessages($branch, $limit, $offset);
     $is_dir = (substr('/'.$drequest->getPath(), -1) == '/');
 
+    $authors = $this->loadViewerHandles(ipull($messages, 'authorPHID'));
+
     $rows = array();
     foreach ($messages as $message) {
       $path = hsprintf(
@@ -31,9 +33,15 @@ final class DiffusionLintDetailsController extends DiffusionController {
         )),
         $message['line']);
 
+      $author = $message['authorPHID'];
+      if ($author && $authors[$author]) {
+        $author = $authors[$author]->renderLink();
+      }
+
       $rows[] = array(
         $path,
         $line,
+        $author,
         ArcanistLintSeverity::getStringForSeverity($message['severity']),
         $message['name'],
         $message['description'],
@@ -44,11 +52,12 @@ final class DiffusionLintDetailsController extends DiffusionController {
       ->setHeaders(array(
         'Path',
         'Line',
+        'Author',
         'Severity',
         'Name',
         'Description',
       ))
-      ->setColumnClasses(array('', 'n', '', '', ''))
+      ->setColumnClasses(array('', 'n'))
       ->setColumnVisibility(array($is_dir));
 
     $content = array();

@@ -5,6 +5,7 @@ final class DiffusionLintSaveRunner {
   private $severity = ArcanistLintSeverity::SEVERITY_ADVICE;
   private $all = false;
   private $chunkSize = 256;
+  private $needsBlame = false;
 
   private $svnRoot;
   private $lintCommit;
@@ -12,6 +13,7 @@ final class DiffusionLintSaveRunner {
   private $conn;
   private $deletes = array();
   private $inserts = array();
+  private $blame = array();
 
 
   public function setArc($path) {
@@ -34,6 +36,11 @@ final class DiffusionLintSaveRunner {
     return $this;
   }
 
+  public function setNeedsBlame($boolean) {
+    $this->needsBlame = $boolean;
+    return $this;
+  }
+
 
   public function run($dir) {
     $working_copy = ArcanistWorkingCopyIdentity::newFromPath($dir);
@@ -44,7 +51,7 @@ final class DiffusionLintSaveRunner {
       $svn_fetch = $api->getGitConfig('svn-remote.svn.fetch');
       list($this->svnRoot) = explode(':', $svn_fetch);
       if ($this->svnRoot != '') {
-        $this->svnRoot = '/' . $this->svnRoot;
+        $this->svnRoot = '/'.$this->svnRoot;
       }
     }
 
@@ -75,7 +82,11 @@ final class DiffusionLintSaveRunner {
 
     if ($this->lintCommit) {
       try {
-        $all_files = $api->getChangedFiles($this->lintCommit);
+        $commit = $this->lintCommit;
+        if ($this->svnRoot) {
+          $commit = $api->getCanonicalRevisionName('@'.$commit);
+        }
+        $all_files = $api->getChangedFiles($commit);
       } catch (ArcanistCapabilityNotSupportedException $ex) {
         $this->lintCommit = null;
       }
@@ -94,8 +105,6 @@ final class DiffusionLintSaveRunner {
       $all_files = $api->getAllFiles();
     }
 
-    $this->deletes = array();
-    $this->inserts = array();
     $count = 0;
 
     $files = array();
@@ -119,8 +128,15 @@ final class DiffusionLintSaveRunner {
 
     $this->runArcLint($files);
     $this->saveLintMessages();
-    $this->branch->setLintCommit($api->getUnderlyingWorkingCopyRevision());
+
+    $this->lintCommit = $api->getUnderlyingWorkingCopyRevision();
+    $this->branch->setLintCommit($this->lintCommit);
     $this->branch->save();
+
+    if ($this->blame) {
+      $this->blameAuthors();
+      $this->blame = array();
+    }
 
     return $count;
   }
@@ -152,22 +168,26 @@ final class DiffusionLintSaveRunner {
           }
 
           foreach ($messages as $message) {
+            $line = idx($message, 'line', 0);
+
             $this->inserts[] = qsprintf(
               $this->conn,
               '(%d, %s, %d, %s, %s, %s, %s)',
               $this->branch->getID(),
               $this->svnRoot.'/'.$path,
-              idx($message, 'line', 0),
+              $line,
               idx($message, 'code', ''),
               idx($message, 'severity', ''),
               idx($message, 'name', ''),
               idx($message, 'description', ''));
+
+            if ($line && $this->needsBlame) {
+              $this->blame[$path][$line] = true;
+            }
           }
 
           if (count($this->deletes) >= 1024 || count($this->inserts) >= 256) {
-            $this->saveLintMessages($this->branch);
-            $this->deletes = array();
-            $this->inserts = array();
+            $this->saveLintMessages();
           }
         }
       }
@@ -201,6 +221,67 @@ final class DiffusionLintSaveRunner {
     }
 
     $this->conn->saveTransaction();
+
+    $this->deletes = array();
+    $this->inserts = array();
+  }
+
+
+  private function blameAuthors() {
+    $repository = id(new PhabricatorRepository())->load(
+      $this->branch->getRepositoryID());
+
+    $queries = array();
+    $futures = array();
+    foreach ($this->blame as $path => $lines) {
+      $drequest = DiffusionRequest::newFromDictionary(array(
+        'repository' => $repository,
+        'branch' => $this->branch->getName(),
+        'path' => $path,
+        'commit' => $this->lintCommit,
+      ));
+      $query = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
+        ->setNeedsBlame(true);
+      $queries[$path] = $query;
+      $futures[$path] = $query->getFileContentFuture();
+    }
+
+    $authors = array();
+
+    foreach (Futures($futures)->limit(8) as $path => $future) {
+      $queries[$path]->loadFileContentFromFuture($future);
+      list(, $rev_list, $blame_dict) = $queries[$path]->getBlameData();
+      foreach (array_keys($this->blame[$path]) as $line) {
+        $commit_identifier = $rev_list[$line - 1];
+        $author = idx($blame_dict[$commit_identifier], 'authorPHID');
+        if ($author) {
+          $authors[$author][$path][] = $line;
+        }
+      }
+    }
+
+    if ($authors) {
+      $this->conn->openTransaction();
+
+      foreach ($authors as $author => $paths) {
+        $where = array();
+        foreach ($paths as $path => $lines) {
+          $where[] = qsprintf(
+            $this->conn,
+            '(path = %s AND line IN (%Ld))',
+            $this->svnRoot.'/'.$path,
+            $lines);
+        }
+        queryfx(
+          $this->conn,
+          'UPDATE %T SET authorPHID = %s WHERE %Q',
+          PhabricatorRepository::TABLE_LINTMESSAGE,
+          $author,
+          implode(' OR ', $where));
+      }
+
+      $this->conn->saveTransaction();
+    }
   }
 
 }

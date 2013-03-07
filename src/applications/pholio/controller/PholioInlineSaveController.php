@@ -24,14 +24,13 @@ final class PholioInlineSaveController extends PholioController {
       return new Aphront404Response();
     }
 
-    $this->operation = $request->getBool('op');
+    $this->operation = $request->getStr('op');
 
     if ($this->getOperation() == 'save') {
-      $new_content = $request->getStr('comment');
+      $new_content = $request->getStr('text');
 
-      if (strlen(trim($new_content)) == 0) {
-          return id(new AphrontAjaxResponse())
-            ->setContent(array('success' => false));
+      if (!strlen($new_content)) {
+        throw new Exception("Content must not be empty.");
       }
 
       $draft = id(new PholioTransactionComment());
@@ -78,7 +77,7 @@ final class PholioInlineSaveController extends PholioController {
       $dialog->setUser($user);
       $dialog->setSubmitURI($request->getRequestURI());
 
-      $dialog->setTitle(pht('Make inline comment'));
+      $dialog->setTitle(pht('Add Inline Comment'));
 
       $dialog->addHiddenInput('op', 'save');
 

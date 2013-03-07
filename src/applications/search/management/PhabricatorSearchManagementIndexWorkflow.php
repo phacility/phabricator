@@ -93,7 +93,9 @@ final class PhabricatorSearchManagementIndexWorkflow
   private function loadPHIDsByNames(array $names) {
     $phids = array();
     foreach ($names as $name) {
-      $phid = PhabricatorPHID::fromObjectName($name);
+      $phid = PhabricatorPHID::fromObjectName(
+        $name,
+        PhabricatorUser::getOmnipotentUser());
       if (!$phid) {
         throw new PhutilArgumentUsageException(
           "'{$name}' is not the name of a known object.");

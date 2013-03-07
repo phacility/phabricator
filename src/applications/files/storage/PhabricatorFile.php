@@ -475,6 +475,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return PhabricatorEnv::getCDNURI($path);
   }
 
+  public function getThumb280x210URI() {
+    $path = '/file/xform/thumb-280x210/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
+  }
+
   public function isViewableInBrowser() {
     return ($this->getViewableMimeType() !== null);
   }

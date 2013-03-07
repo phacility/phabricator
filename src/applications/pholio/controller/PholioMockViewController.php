@@ -6,9 +6,11 @@
 final class PholioMockViewController extends PholioController {
 
   private $id;
+  private $imageID;
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
+    $this->imageID = idx($data, 'imageID');
   }
 
   public function processRequest() {
@@ -67,6 +69,7 @@ final class PholioMockViewController extends PholioController {
 
     $output = new PholioMockImagesView();
     $output->setMock($mock);
+    $output->setImageID($this->imageID);
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($this->getRequest()->getUser())

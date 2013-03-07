@@ -1,0 +1,100 @@
+/**
+ * @provides aphront-bars
+ */
+
+/**
+ * Progress bars
+ */
+
+div.aphront-bar.progress {
+  border: 0px;
+}
+
+div.aphront-bar.progress div {
+  width: 100px;
+  border: 1px solid;
+  border-top-color: #A4A4A4;
+  border-right-color: #BBB;
+  border-bottom-color: #D5D5D5;
+  border-left-color: #BBB;
+  background: white;
+  float: left;
+  margin-right: 1em;
+}
+
+div.aphront-bar.progress div div {
+  height: 10px;
+}
+
+div.aphront-bar.progress span {
+  color: #555;
+}
+
+
+/**
+ * Glyph bars
+ */
+
+div.aphront-bar.glyph {
+  clear: both;
+}
+
+div.aphront-bar.glyph div.glyphs {
+  padding: 0;
+  margin: 0;
+
+  float: left;
+  position: relative;
+  color: #aaa;
+  font-family: monospace;
+  height: 1.3em;
+}
+
+div.aphront-bar.glyph div.glyphs.starstar {
+  /* http://daringfireball.net/2005/08/star_star */
+  font-family: "Hiragino Kaku Gothic Pro", "Osaka", "Zapf Dingbats";
+}
+
+div.aphront-bar.glyph div.glyphs div.fg {
+  padding: 0;
+  margin: 0;
+  float: left;
+  position: absolute;
+  overflow: hidden;
+}
+
+div.aphront-bar.glyph div.caption {
+  padding: 0;
+  margin: 0;
+  float: left;
+  margin-left: 1.5em;
+  color: #666;
+}
+
+
+/**
+ * Common color classes
+ */
+div.aphront-bar.progress.color-default div div {
+  background: #6D84B4;
+}
+
+div.aphront-bar.glyph.color-default div.glyphs div.fg {
+  color: #6D84B4;
+}
+
+div.aphront-bar.progress.color-warning div div {
+  background: #FFCC5F;
+}
+
+div.aphront-bar.glyph.color-warning div.glyphs div.fg {
+  color: #FFCC5F;
+}
+
+div.aphront-bar.progress.color-danger div div {
+  background: #FF6E6E;
+}
+
+div.aphront-bar.glyph.color-danger div.glyphs div.fg {
+  color: #FF6E6E;
+}

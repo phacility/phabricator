@@ -109,6 +109,8 @@ class AphrontDefaultApplicationConfiguration
           'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
         ),
       ),
+
+      '/debug/' => 'PhabricatorDebugController',
     );
   }
 

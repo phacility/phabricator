@@ -78,25 +78,24 @@ final class PhabricatorConfigTransaction
     return parent::hasChangeDetails();
   }
 
-  public function renderChangeDetails() {
+  public function renderChangeDetails(PhabricatorUser $viewer) {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
     if ($old['deleted']) {
       $old_text = '';
     } else {
-      // NOTE: Here and below, we're adding a synthetic "\n" to prevent the
-      // differ from complaining about missing trailing newlines.
-      $old_text = PhabricatorConfigJSON::prettyPrintJSON($old['value'])."\n";
+      $old_text = PhabricatorConfigJSON::prettyPrintJSON($old['value']);
     }
 
     if ($new['deleted']) {
       $new_text = '';
     } else {
-      $new_text = PhabricatorConfigJSON::prettyPrintJSON($new['value'])."\n";
+      $new_text = PhabricatorConfigJSON::prettyPrintJSON($new['value']);
     }
 
     $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setUser($viewer)
       ->setOldText($old_text)
       ->setNewText($new_text);
 

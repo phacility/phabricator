@@ -41,7 +41,7 @@ final class PhabricatorFlagListView extends AphrontView {
             array(
               'class' => 'small grey',
             ),
-            'Edit Flag')),
+            pht('Edit Flag'))),
         phabricator_form(
           $user,
           array(
@@ -54,7 +54,7 @@ final class PhabricatorFlagListView extends AphrontView {
             array(
               'class' => 'small grey',
             ),
-            'Remove Flag')),
+            pht('Remove Flag'))),
       );
     }
 
@@ -62,9 +62,9 @@ final class PhabricatorFlagListView extends AphrontView {
     $table->setHeaders(
       array(
         '',
-        'Flagged Object',
-        'Note',
-        'Flagged On',
+        pht('Flagged Object'),
+        pht('Note'),
+        pht('Flagged On'),
         '',
         '',
       ));
@@ -77,7 +77,7 @@ final class PhabricatorFlagListView extends AphrontView {
         'narrow action',
         'narrow action',
       ));
-    $table->setNoDataString('No flags.');
+    $table->setNoDataString(pht('No flags.'));
 
     return $table->render();
   }

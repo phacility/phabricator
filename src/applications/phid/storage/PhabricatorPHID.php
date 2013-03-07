@@ -24,7 +24,7 @@ final class PhabricatorPHID {
     return "PHID-{$type_str}-{$uniq}";
   }
 
-  public static function fromObjectName($name) {
+  public static function fromObjectName($name, PhabricatorUser $viewer) {
     $object = null;
     $match = null;
     if (preg_match('/^PHID-[A-Z]+-.{20}$/', $name)) {
@@ -56,10 +56,18 @@ final class PhabricatorPHID {
       $object = id(new DifferentialRevision())->load($match[1]);
     } else if (preg_match('/^t(\d+)$/i', $name, $match)) {
       $object = id(new ManiphestTask())->load($match[1]);
+    } else if (preg_match('/^m(\d+)$/i', $name, $match)) {
+      $objects = id(new PholioMockQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($match[1]))
+        ->execute();
+      $object = head($objects);
     }
+
     if ($object) {
       return $object->getPHID();
     }
+
     return null;
   }
 }

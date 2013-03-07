@@ -12,6 +12,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $viewer = $request->getUser();
     $query = $request->getStr('q');
 
     $need_rich_data = false;
@@ -199,9 +200,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
     }
 
     if ($need_projs) {
-      $projs = id(new PhabricatorProject())->loadAllWhere(
-        'status != %d',
-        PhabricatorProjectStatus::STATUS_ARCHIVED);
+      $projs = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withStatus(PhabricatorProjectQuery::STATUS_OPEN)
+        ->execute();
       foreach ($projs as $proj) {
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($proj->getName())

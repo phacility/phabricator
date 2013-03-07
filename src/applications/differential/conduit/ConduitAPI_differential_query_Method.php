@@ -196,6 +196,8 @@ final class ConduitAPI_differential_query_Method
       }
 
       $id = $revision->getID();
+      $auxiliary_fields = $this->loadAuxiliaryFields(
+                                 $revision, $request->getUser());
       $result = array(
         'id'            => $id,
         'phid'          => $revision->getPHID(),
@@ -217,6 +219,7 @@ final class ConduitAPI_differential_query_Method
         'reviewers'     => array_values($revision->getReviewers()),
         'ccs'           => array_values($revision->getCCPHIDs()),
         'hashes'        => $revision->getHashes(),
+        'auxiliary'     => $auxiliary_fields,
       );
 
       // TODO: This is a hacky way to put permissions on this field until we
@@ -230,4 +233,24 @@ final class ConduitAPI_differential_query_Method
 
     return $results;
   }
+
+  private function loadAuxiliaryFields(
+    DifferentialRevision $revision,
+    PhabricatorUser $user) {
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setUser($user);
+      if (!$aux_field->shouldAppearOnConduitView()) {
+        unset($aux_fields[$key]);
+      }
+    }
+
+    $aux_fields = DifferentialAuxiliaryField::loadFromStorage(
+      $revision,
+      $aux_fields);
+
+    return mpull($aux_fields, 'getValueForConduit', 'getKeyForConduit');
+  }
+
 }

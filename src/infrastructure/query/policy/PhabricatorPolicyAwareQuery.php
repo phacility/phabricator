@@ -170,7 +170,11 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         $this->rawResultLimit = 0;
       }
 
-      $page = $this->loadPage();
+      try {
+        $page = $this->loadPage();
+      } catch (PhabricatorEmptyQueryException $ex) {
+        $page = array();
+      }
 
       $visible = $this->willFilterPage($page);
       $visible = $filter->apply($visible);

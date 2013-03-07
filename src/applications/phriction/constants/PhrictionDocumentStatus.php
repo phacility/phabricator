@@ -12,8 +12,9 @@ final class PhrictionDocumentStatus extends PhrictionConstants {
 
   public static function getConduitConstant($const) {
     static $map = array(
-      self::STATUS_EXISTS   => 'exists',
+      self::STATUS_EXISTS    => 'exists',
       self::STATUS_DELETED   => 'deleted',
+      self::STATUS_MOVED     => 'moved',
       self::STATUS_STUB      => 'stubbed',
     );
 

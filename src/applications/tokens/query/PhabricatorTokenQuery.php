@@ -10,7 +10,7 @@ final class PhabricatorTokenQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $tokens = $this->getBuiltinTokens();
 
     if ($this->phids) {

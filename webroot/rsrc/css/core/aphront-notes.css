@@ -1,0 +1,26 @@
+/**
+ * @provides aphront-notes
+ */
+
+div.aphront-note {
+  margin: 1em;
+  background: #ffc;
+  border: 1px solid #ccc;
+}
+
+div.aphront-note div.title {
+  margin: 0;
+  padding: 0.2em 0.5em 0.2em;
+  background: #ffd;
+  border-bottom: 1px solid #ccc;
+  color: #888;
+  font-size: smaller;
+}
+
+div.aphront-note div.inner {
+  overflow: auto;
+  padding: 0.5em;
+  max-height: 25em;
+  color: #333;
+  font-size: smaller;
+}

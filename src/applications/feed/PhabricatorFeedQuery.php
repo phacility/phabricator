@@ -10,7 +10,7 @@ final class PhabricatorFeedQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
 
     $story_table = new PhabricatorFeedStoryData();
     $conn = $story_table->establishConnection('r');

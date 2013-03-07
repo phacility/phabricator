@@ -37,6 +37,7 @@ final class PhabricatorXHPASTViewRunController
         id(new AphrontFormTextAreaControl())
           ->setLabel('Source')
           ->setName('source')
+          ->setValue("<?php\n\n")
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL))
       ->appendChild(
         id(new AphrontFormSubmitControl())

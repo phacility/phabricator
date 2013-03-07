@@ -3,7 +3,7 @@
 final class DiffusionMercurialFileContentQuery
   extends DiffusionFileContentQuery {
 
-  protected function executeQuery() {
+  public function getFileContentFuture() {
     $drequest = $this->getRequest();
 
     $repository = $drequest->getRepository();
@@ -13,16 +13,20 @@ final class DiffusionMercurialFileContentQuery
     if ($this->getNeedsBlame()) {
       // NOTE: We're using "--number" instead of "--changeset" because there is
       // no way to get "--changeset" to show us the full commit hashes.
-      list($corpus) = $repository->execxLocalCommand(
+      return $repository->getLocalCommandFuture(
         'annotate --user --number --rev %s -- %s',
         $commit,
         $path);
     } else {
-      list($corpus) = $repository->execxLocalCommand(
+      return $repository->getLocalCommandFuture(
         'cat --rev %s -- %s',
         $commit,
         $path);
     }
+  }
+
+  protected function executeQueryFromFuture(Future $future) {
+    list($corpus) = $future->resolvex();
 
     $file_content = new DiffusionFileContent();
     $file_content->setCorpus($corpus);

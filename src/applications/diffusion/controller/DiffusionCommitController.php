@@ -67,6 +67,7 @@ final class DiffusionCommitController extends DiffusionController {
       $content[] = $top_anchor;
     } else {
       $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+      $engine->setConfig('viewer', $user);
 
       require_celerity_resource('diffusion-commit-view-css');
       require_celerity_resource('phabricator-remarkup-css');

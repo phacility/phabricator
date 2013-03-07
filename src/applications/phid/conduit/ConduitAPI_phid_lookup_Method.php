@@ -28,7 +28,7 @@ final class ConduitAPI_phid_lookup_Method
     $names = $request->getValue('names');
     $phids = array();
     foreach ($names as $name) {
-      $phid = PhabricatorPHID::fromObjectName($name);
+      $phid = PhabricatorPHID::fromObjectName($name, $request->getUser());
       if ($phid) {
         $phids[$name] = $phid;
       }

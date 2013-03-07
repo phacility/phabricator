@@ -181,13 +181,13 @@ final class PhabricatorAuditCommitQuery {
       case self::STATUS_CONCERN:
         $where[] = qsprintf(
           $conn_r,
-          'c.auditStatus = %s',
+          'c.auditStatus = %d',
           PhabricatorAuditCommitStatusConstants::CONCERN_RAISED);
         break;
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,
-          'c.auditStatus IN (%Ls)',
+          'c.auditStatus IN (%Ld)',
           PhabricatorAuditCommitStatusConstants::getOpenStatusConstants());
         break;
       case self::STATUS_ANY:

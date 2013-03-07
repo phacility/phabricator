@@ -130,6 +130,7 @@ final class PhabricatorConfigEditController
     }
 
     $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($user);
     $engine->addObject($option, 'description');
     $engine->process();
     $description = phutil_tag(

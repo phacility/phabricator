@@ -4,7 +4,6 @@
 
 .phabricator-object-item-list-view {
   padding: 8px 6px;
-  background: #f4f5f6;
 }
 
 .phabricator-object-item-list-view.phabricator-object-list-stackable .phabricator-object-item {
@@ -28,6 +27,11 @@
 
 .phabricator-object-list-stackable .phabricator-object-item {
   border-width: 1px;
+}
+
+.device-desktop .phabricator-object-list-stackable .phabricator-object-item:hover {
+  border-width: 1px;
+  background: #e9ecf5;
 }
 
 .device-desktop .phabricator-object-item {

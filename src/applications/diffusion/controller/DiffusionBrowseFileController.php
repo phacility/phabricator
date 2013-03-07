@@ -35,7 +35,10 @@ final class DiffusionBrowseFileController extends DiffusionController {
         ->setURI($request->getRequestURI()->alter('view', $selected));
     }
 
-    $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
+    $needs_blame = ($selected == 'plainblame');
+    if ($selected == 'blame' && $request->isAjax()) {
+      $needs_blame = true;
+    }
 
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
       $this->diffusionRequest);
@@ -58,6 +61,10 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $drequest,
       $path,
       $data);
+
+    if ($request->isAjax()) {
+      return id(new AphrontAjaxResponse())->setContent($corpus);
+    }
 
     require_celerity_resource('diffusion-source-css');
 
@@ -195,11 +202,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $rows = array();
         foreach ($text_list as $k => $line) {
           $rev = $rev_list[$k];
-          if (isset($blame_dict[$rev]['handle'])) {
-            $author = $blame_dict[$rev]['handle']->getName();
-          } else {
-            $author = $blame_dict[$rev]['author'];
-          }
+          $author = $blame_dict[$rev]['author'];
           $rows[] =
             sprintf("%-10s %-20s %s", substr($rev, 0, 7), $author, $line);
         }
@@ -228,6 +231,18 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
         $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
           $needs_blame, $drequest, $file_query, $selected);
+
+        $corpus_table = javelin_tag(
+          'table',
+          array(
+            'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
+            'sigil' => 'diffusion-source',
+          ),
+          $rows);
+
+        if ($this->getRequest()->isAjax()) {
+          return $corpus_table;
+        }
 
         $id = celerity_generate_unique_node_id();
 
@@ -260,14 +275,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
             ));
         }
 
-        $corpus_table = javelin_tag(
-          'table',
-          array(
-            'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
-            'sigil' => 'diffusion-source',
-          ),
-          $rows);
-
         $corpus = phutil_tag(
           'div',
           array(
@@ -275,6 +282,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
             'id' => $id,
           ),
           $corpus_table);
+
+        Javelin::initBehavior('load-blame', array('id' => $id));
 
         break;
     }
@@ -417,11 +426,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
     DiffusionFileContentQuery $file_query,
     $selected) {
 
+    $handles = array();
     if ($blame_dict) {
       $epoch_list  = ipull(ifilter($blame_dict, 'epoch'), 'epoch');
       $epoch_min   = min($epoch_list);
       $epoch_max   = max($epoch_list);
       $epoch_range = ($epoch_max - $epoch_min) + 1;
+      $handles     = $this->loadViewerHandles(ipull($blame_dict, 'authorPHID'));
     }
 
     $line_arr = array();
@@ -449,7 +460,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $color = null;
     foreach ($text_list as $k => $line) {
       $display_line = array(
-        'color'       => null,
         'epoch'       => null,
         'commit'      => null,
         'author'      => null,
@@ -459,7 +469,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         'data'        => $line,
       );
 
-      if ($needs_blame) {
+      if ($selected == 'blame') {
         // If the line's rev is same as the line above, show empty content
         // with same color; otherwise generate blame info. The newer a change
         // is, the more saturated the color.
@@ -487,8 +497,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
           $display_line['color'] = $color;
           $display_line['commit'] = $rev;
 
-          if (isset($blame['handle'])) {
-            $author_link = $blame['handle']->renderLink();
+          $author_phid = idx($blame, 'authorPHID');
+          if ($author_phid && $handles[$author_phid]) {
+            $author_link = $handles[$author_phid]->renderLink();
           } else {
             $author_link = phutil_tag(
               'span',
@@ -568,7 +579,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $rows = $this->renderInlines(
       idx($inlines, 0, array()),
-      $needs_blame,
+      ($selected == 'blame'),
       $engine);
 
     foreach ($display as $line) {
@@ -581,8 +592,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
         ));
 
       $blame = array();
-      if ($line['color']) {
-        $color = $line['color'];
+      $style = null;
+      if (array_key_exists('color', $line)) {
+        if ($line['color']) {
+          $style = 'background: '.$line['color'].';';
+        }
 
         $before_link = null;
         $commit_link = null;
@@ -667,7 +681,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'th',
           array(
             'class' => 'diffusion-blame-link',
-            'style' => 'background: '.$color,
+            'style' => $style,
           ),
           $before_link);
 
@@ -675,7 +689,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'th',
           array(
             'class' => 'diffusion-rev-link',
-            'style' => 'background: '.$color,
+            'style' => $style,
           ),
           $commit_link);
 
@@ -683,7 +697,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'th',
           array(
             'class' => 'diffusion-rev-link',
-            'style' => 'background: '.$color,
+            'style' => $style,
           ),
           $revision_link);
 
@@ -691,7 +705,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'th',
           array(
             'class' => 'diffusion-author-link',
-            'style' => 'background: '.$color,
+            'style' => $style,
           ),
           idx($line, 'author'));
       }
@@ -708,7 +722,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         array(
           'class' => 'diffusion-line-link',
           'sigil' => 'diffusion-line-link',
-          'style' => isset($color) ? 'background: '.$color : null,
+          'style' => $style,
         ),
         $line_link);
 
@@ -753,7 +767,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
       $rows = array_merge($rows, $this->renderInlines(
         idx($inlines, $line['line'], array()),
-        $needs_blame,
+        ($selected == 'blame'),
         $engine));
     }
 

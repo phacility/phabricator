@@ -49,6 +49,7 @@ final class DifferentialBlameRevisionFieldSpecification
       return null;
     }
     $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+    $engine->setConfig('viewer', $this->getUser());
     return $engine->markupText($this->value);
   }
 

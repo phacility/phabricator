@@ -53,7 +53,7 @@ final class PhabricatorProjectQuery
     return true;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorProject();
     $conn_r = $table->establishConnection('r');
 

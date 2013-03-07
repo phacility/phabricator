@@ -5,6 +5,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
   private $imageURI;
   private $uri;
   private $header;
+  private $iconBlock = array();
 
   private $imageWidth;
   private $imageHeight;
@@ -27,6 +28,11 @@ final class PhabricatorPinboardItemView extends AphrontView {
   public function setImageSize($x, $y) {
     $this->imageWidth = $x;
     $this->imageHeight = $y;
+    return $this;
+  }
+
+  public function addIconCount($icon, $count) {
+    $this->iconBlock[] = array($icon, $count);
     return $this;
   }
 
@@ -55,6 +61,33 @@ final class PhabricatorPinboardItemView extends AphrontView {
           'height'  => $this->imageHeight,
         )));
 
+    $icons = array();
+    if ($this->iconBlock) {
+      $icon_list = array();
+      foreach ($this->iconBlock as $block) {
+        $icon = phutil_tag(
+          'span',
+          array(
+            'class' =>
+              'phabricator-pinboard-icon sprite-icon action-'.$block[0].'-grey',
+          ),
+          '');
+        $count = phutil_tag('span', array(), $block[1]);
+        $icon_list[] = phutil_tag(
+          'span',
+          array(
+            'class' => 'phabricator-pinboard-item-count',
+          ),
+          array($icon, $count));
+      }
+      $icons = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-pinboard-icons',
+        ),
+        $icon_list);
+    }
+
     $content = $this->renderChildren();
     if ($content) {
       $content = phutil_tag(
@@ -74,6 +107,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
         array(
           $header,
           $image,
+          $icons,
           $content,
         )));
   }

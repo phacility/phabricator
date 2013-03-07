@@ -20,38 +20,62 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
       $message = $original_message->getBody();
       $matches = null;
 
-      $pattern =
-        '@'.
-        '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
-        '(D|T|P|V|F)(\d+)'.
-        '(?:\b|$)'.
-        '@';
-
-      $revision_ids = array();
-      $task_ids = array();
       $paste_ids = array();
       $commit_names = array();
       $vote_ids = array();
       $file_ids = array();
+      $object_names = array();
+      $output = array();
+
+      $pattern =
+        '@'.
+        '(?<!/)(?:^|\b)'.
+        '(R2D2)'.
+        '(?:\b|$)'.
+        '@';
 
       if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {
           switch ($match[1]) {
-          case 'D':
-            $revision_ids[] = $match[2];
-            break;
-          case 'T':
-            $task_ids[] = $match[2];
-            break;
-          case 'P':
-            $paste_ids[] = $match[2];
-            break;
-          case 'V':
-            $vote_ids[] = $match[2];
-            break;
-          case 'F':
-            $file_ids[] = $match[2];
-            break;
+            case 'R2D2':
+              $output[$match[1]] = pht('beep hoop bop');
+              break;
+          }
+        }
+      }
+
+      $pattern =
+        '@'.
+        '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
+        '([A-Z])(\d+)'.
+        '(?:\b|$)'.
+        '@';
+
+      if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          switch ($match[1]) {
+            case 'P':
+              $paste_ids[] = $match[2];
+              break;
+            case 'V':
+              $vote_ids[] = $match[2];
+              break;
+            case 'F':
+              $file_ids[] = $match[2];
+              break;
+            default:
+              $name = $match[1].$match[2];
+              switch ($name) {
+                case 'T1000':
+                  $output[$name] = pht(
+                    'T1000: A mimetic poly-alloy assassin controlled by '.
+                    'Skynet');
+                  break;
+                default:
+                  $object_names[] = $name;
+                  break;
+              }
+              break;
           }
         }
       }
@@ -68,39 +92,14 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
         }
       }
 
-      $output = array();
-
-      if ($revision_ids) {
-        $revisions = $this->getConduit()->callMethodSynchronous(
-          'differential.query',
+      if ($object_names) {
+        $objects = $this->getConduit()->callMethodSynchronous(
+          'phid.lookup',
           array(
-            'ids'   => $revision_ids,
+            'names' => $object_names,
           ));
-        $revisions = array_select_keys(
-          ipull($revisions, null, 'id'),
-          $revision_ids);
-        foreach ($revisions as $revision) {
-          $output[$revision['phid']] =
-            'D'.$revision['id'].' '.$revision['title'].' - '.
-            $revision['uri'];
-        }
-      }
-
-      if ($task_ids) {
-        foreach ($task_ids as $task_id) {
-          if ($task_id == 1000) {
-            $output[1000] = 'T1000: A nanomorph mimetic poly-alloy'
-              .'(liquid metal) assassin controlled by Skynet: '
-              .'http://en.wikipedia.org/wiki/T-1000';
-            continue;
-          }
-          $task = $this->getConduit()->callMethodSynchronous(
-            'maniphest.info',
-            array(
-              'task_id' => $task_id,
-            ));
-          $output[$task['phid']] = 'T'.$task['id'].': '.$task['title'].
-            ' (Priority: '.$task['priority'].') - '.$task['uri'];
+        foreach ($objects as $object) {
+          $output[$object['phid']] = $object['fullName'].' - '.$object['uri'];
         }
       }
 

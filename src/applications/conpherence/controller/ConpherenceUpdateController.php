@@ -35,7 +35,7 @@ final class ConpherenceUpdateController extends
       ->executeOne();
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
 
-    $updated = false;
+    $latest_transaction_id = null;
     $error_view = null;
     $e_file = array();
     $errors = array();
@@ -54,6 +54,7 @@ final class ConpherenceUpdateController extends
       switch ($action) {
         case 'message':
           $message = $request->getStr('text');
+          $latest_transaction_id = $request->getInt('latest_transaction_id');
           $xactions = $editor->generateTransactionsFromText(
             $conpherence,
             $message);
@@ -129,7 +130,16 @@ final class ConpherenceUpdateController extends
       if ($xactions) {
         try {
           $xactions = $editor->applyTransactions($conpherence, $xactions);
-          $updated = true;
+          if ($latest_transaction_id) {
+            $content = $this->loadAndRenderNewTransactions(
+              $conpherence_id,
+              $latest_transaction_id);
+            return id(new AphrontAjaxResponse())
+              ->setContent($content);
+          } else {
+            return id(new AphrontRedirectResponse())->setURI(
+              $this->getApplicationURI($conpherence_id.'/'));
+          }
         } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
           return id(new PhabricatorApplicationTransactionNoEffectResponse())
             ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
@@ -139,11 +149,6 @@ final class ConpherenceUpdateController extends
         $errors[] = pht(
           'That was a non-update. Try cancel.');
       }
-    }
-
-    if ($updated) {
-      return id(new AphrontRedirectResponse())->setURI(
-        $this->getApplicationURI($conpherence_id.'/'));
     }
 
     if ($errors) {
@@ -181,9 +186,7 @@ final class ConpherenceUpdateController extends
           ->appendChild(
             id(new ConpherenceFormDragAndDropUploadControl())
             ->setLabel(pht('Change Image')));
-
     } else {
-
       $form
         ->appendChild(
           id(new ConpherenceFormDragAndDropUploadControl())
@@ -204,4 +207,44 @@ final class ConpherenceUpdateController extends
         ->addSubmitButton()
         ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')));
   }
+
+  private function loadAndRenderNewTransactions(
+    $conpherence_id,
+    $latest_transaction_id) {
+
+    $user = $this->getRequest()->getUser();
+    $conpherence = id(new ConpherenceThreadQuery())
+      ->setViewer($user)
+      ->setAfterID($latest_transaction_id)
+      ->needHeaderPics(true)
+      ->withIDs(array($conpherence_id))
+      ->executeOne();
+
+    $data = $this->renderConpherenceTransactions($conpherence);
+    $rendered_transactions = $data['transactions'];
+    $new_latest_transaction_id = $data['latest_transaction_id'];
+
+    $selected = true;
+    $nav_item = $this->buildConpherenceMenuItem(
+      $conpherence,
+      '-nav-item',
+      $selected);
+    $menu_item = $this->buildConpherenceMenuItem(
+      $conpherence,
+      '-menu-item',
+      $selected);
+
+    $header = $this->buildHeaderPaneContent($conpherence);
+
+    $content = array(
+      'transactions' => $rendered_transactions,
+      'latest_transaction_id' => $new_latest_transaction_id,
+      'menu_item' => $menu_item->render(),
+      'nav_item' => $nav_item->render(),
+      'conpherence_phid' => $conpherence->getPHID(),
+      'header' => $header
+    );
+    return $content;
+  }
+
 }

@@ -56,21 +56,34 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     return $config;
   }
 
-  protected function willRunTests() {
+  public function willRunTestCases(array $test_cases) {
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/scripts/__init_script__.php';
 
     $config = $this->getComputedConfiguration();
-
-    if ($config[self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK]) {
-      LiskDAO::beginIsolateAllLiskEffectsToCurrentProcess();
-    }
 
     if ($config[self::PHABRICATOR_TESTCONFIG_BUILD_STORAGE_FIXTURES]) {
       ++self::$storageFixtureReferences;
       if (!self::$storageFixture) {
         self::$storageFixture = $this->newStorageFixture();
       }
+    }
+  }
+
+  public function didRunTestCases(array $test_cases) {
+    if (self::$storageFixture) {
+      self::$storageFixtureReferences--;
+      if (!self::$storageFixtureReferences) {
+        self::$storageFixture = null;
+      }
+    }
+  }
+
+  protected function willRunTests() {
+    $config = $this->getComputedConfiguration();
+
+    if ($config[self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK]) {
+      LiskDAO::beginIsolateAllLiskEffectsToCurrentProcess();
     }
 
     $this->env = PhabricatorEnv::beginScopedEnv();
@@ -81,13 +94,6 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
     if ($config[self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK]) {
       LiskDAO::endIsolateAllLiskEffectsToCurrentProcess();
-    }
-
-    if (self::$storageFixture) {
-      self::$storageFixtureReferences--;
-      if (!self::$storageFixtureReferences) {
-        self::$storageFixture = null;
-      }
     }
 
     try {

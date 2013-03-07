@@ -29,6 +29,8 @@ final class PhabricatorApplicationConfig extends PhabricatorApplication {
         'all/'                      => 'PhabricatorConfigAllController',
         'edit/(?P<key>[\w\.\-]+)/'  => 'PhabricatorConfigEditController',
         'group/(?P<key>[^/]+)/'     => 'PhabricatorConfigGroupController',
+        '(?P<verb>ignore|unignore)/(?P<key>[^/]+)/'
+          => 'PhabricatorConfigIgnoreController',
         'issue/' => array(
           '' => 'PhabricatorConfigIssueListController',
           '(?P<key>[^/]+)/' => 'PhabricatorConfigIssueViewController',

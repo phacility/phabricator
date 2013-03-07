@@ -13,19 +13,19 @@ final class PhabricatorFlagColor extends PhabricatorFlagConstants {
 
   public static function getColorNameMap() {
     return array(
-      self::COLOR_RED       => 'Red',
-      self::COLOR_ORANGE    => 'Orange',
-      self::COLOR_YELLOW    => 'Yellow',
-      self::COLOR_GREEN     => 'Green',
-      self::COLOR_BLUE      => 'Blue',
-      self::COLOR_PINK      => 'Pink',
-      self::COLOR_PURPLE    => 'Purple',
-      self::COLOR_CHECKERED => 'Checkered',
+      self::COLOR_RED       => pht('Red'),
+      self::COLOR_ORANGE    => pht('Orange'),
+      self::COLOR_YELLOW    => pht('Yellow'),
+      self::COLOR_GREEN     => pht('Green'),
+      self::COLOR_BLUE      => pht('Blue'),
+      self::COLOR_PINK      => pht('Pink'),
+      self::COLOR_PURPLE    => pht('Purple'),
+      self::COLOR_CHECKERED => pht('Checkered'),
     );
   }
 
   public static function getColorName($color) {
-    return idx(self::getColorNameMap(), $color, 'Unknown');
+    return idx(self::getColorNameMap(), $color, pht('Unknown'));
   }
 
   public static function getCSSClass($color) {

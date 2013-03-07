@@ -39,6 +39,10 @@ $args = id(new PhutilArgumentParser($argv))
       'default' => 256,
       'help' => "Number of paths passed to `arc` at once.",
     ),
+    array(
+      'name' => 'blame',
+      'help' => "Assign lint errors to authors who last modified the line.",
+    ),
   ));
 
 echo "Saving lint errors to database...\n";
@@ -48,6 +52,7 @@ $count = id(new DiffusionLintSaveRunner())
   ->setArc($args->getArg('arc'))
   ->setSeverity($args->getArg('severity'))
   ->setChunkSize($args->getArg('chunk-size'))
+  ->setNeedsBlame($args->getArg('blame'))
   ->run('.');
 
 echo "\nProcessed {$count} files.\n";

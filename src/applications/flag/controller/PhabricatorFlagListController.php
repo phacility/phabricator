@@ -33,7 +33,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => 'Flags',
+        'title' => pht('Flags'),
       ));
   }
 

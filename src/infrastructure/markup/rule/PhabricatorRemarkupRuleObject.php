@@ -24,14 +24,7 @@ abstract class PhabricatorRemarkupRuleObject
     $query = new PhabricatorObjectHandleData($phids);
 
     $viewer = $this->getEngine()->getConfig('viewer');
-    if ($viewer) {
-      $query->setViewer($viewer);
-    } else {
-      // TODO: This needs to be fixed; all markup engines need to set viewers --
-      // but there are a lot of them (T603).
-      $query->setViewer(PhabricatorUser::getOmnipotentUser());
-      phlog("Warning: Loading handles without a viewing user.");
-    }
+    $query->setViewer($viewer);
     $handles = $query->loadHandles();
 
     $result = array();

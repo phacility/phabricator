@@ -731,7 +731,7 @@ final class ManiphestTaskListController extends ManiphestController {
       $numeric_task_ids = array();
 
       foreach ($task_ids as $task_id) {
-        $task_id = preg_replace('/[^\d]+/', '', $task_id);
+        $task_id = preg_replace('/\D+/', '', $task_id);
         if (!empty($task_id)) {
           $numeric_task_ids[] = $task_id;
         }
