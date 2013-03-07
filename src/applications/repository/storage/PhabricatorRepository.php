@@ -434,9 +434,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     // with the credentials in the URI or something zany like that.
 
     if ($uri instanceof PhutilGitURI) {
-      $uri->setUser(null);
+      if (!$this->getDetail('show-user', false)) {
+        $uri->setUser(null);
+      }
     } else {
-      $uri->setUser(null);
+      if (!$this->getDetail('show-user', false)) {
+        $uri->setUser(null);
+      }
       $uri->setPass(null);
     }
 

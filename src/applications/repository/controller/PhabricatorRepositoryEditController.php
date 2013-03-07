@@ -265,6 +265,8 @@ final class PhabricatorRepositoryEditController
       $repository->setDetail('http-login', $request->getStr('http-login'));
       $repository->setDetail('http-pass',  $request->getStr('http-pass'));
 
+      $repository->setDetail('show-user', $request->getInt('show-user'));
+
       if ($repository->getDetail('ssh-key') &&
           $repository->getDetail('ssh-keyfile')) {
         $errors[] =
@@ -436,6 +438,14 @@ final class PhabricatorRepositoryEditController
           ->setID('remote-uri')
           ->setValue($repository->getDetail('remote-uri'))
           ->setError($e_uri));
+
+    $inset->appendChild(
+      id(new AphrontFormCheckboxControl())
+      ->addCheckbox(
+        'show-user',
+        1,
+        pht('Permit users to view the username of this connection.'),
+        $repository->getDetail('show-user') == 1));
 
     $inset->appendChild(hsprintf(
       '<div class="aphront-form-instructions">'.
