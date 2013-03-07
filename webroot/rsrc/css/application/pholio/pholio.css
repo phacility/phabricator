@@ -126,3 +126,39 @@
 .pholio-device-lightbox-loading {
   background: url(/rsrc/image/darkload.gif) no-repeat center;
 }
+
+.pholio-mock-embed {
+  display: inline-block;
+  background-color: #282828;
+  padding: 5px;
+  color: #fff;
+}
+
+.pholio-mock-embed-head {
+  border-bottom: 1px solid #3d3d3d;
+  padding: 2px;
+  margin:2px;
+}
+
+.pholio-mock-embed-footer {
+  margin: 2px;
+  color: #aaa;
+}
+
+.pholio-mock-embed-icons {
+  float: left;
+  margin-left: 10px;
+}
+
+.pholio-mock-embed-icon {
+  height: 14px;
+  width: 14px;
+  float: left;
+  padding-left: 2px;
+  margin-right: 2px;
+}
+
+.pholio-mock-embed-head a {
+  color: #fff;
+  font-weight: bold;
+}

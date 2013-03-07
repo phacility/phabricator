@@ -3283,7 +3283,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/3d3cc404/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/4535277b/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(
