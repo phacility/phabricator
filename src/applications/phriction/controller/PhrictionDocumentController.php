@@ -44,14 +44,23 @@ final class PhrictionDocumentController
         }
       }
       $create_uri = '/phriction/edit/?slug='.$slug;
-      $page_content = hsprintf(
-        '<div class="phriction-content">'.
-          '<em>No content here!</em><br />'.
-          'No document found at <tt>%s</tt>. '.
-          'You can <strong><a href="%s">create a new document</a></strong>.'.
-        '</div>',
-        $slug,
+
+      $no_content_head = pht('No content here!');
+      $no_content_body = pht(
+        'No document found at %s. You can <strong>'.
+        '<a href="%s">create a new document here</a></strong>.',
+        phutil_tag('tt', array(), $slug),
         $create_uri);
+
+      $no_content_text = hsprintf(
+        '<em>%s</em><br />%s',
+        $no_content_head,
+        $no_content_body);
+
+      $page_content = phutil_tag(
+        'div',
+        array('class' => 'phriction-content'),
+        $no_content_text);
       $page_title = pht('Page Not Found');
     } else {
       $version = $request->getInt('v');
@@ -99,19 +108,20 @@ final class PhrictionDocumentController
       $age = floor($age / (60 * 60 * 24));
 
       if ($age < 1) {
-        $when = 'today';
+        $when = pht('today');
       } else if ($age == 1) {
-        $when = 'yesterday';
+        $when = pht('yesterday');
       } else {
-        $when = "{$age} days ago";
+        $when = pht("%d days ago", $age);
       }
 
 
       $project_info = null;
       if ($project_phid) {
         $project_info = hsprintf(
-          '<br />This document is about the project %s.',
-          $handles[$project_phid]->renderLink());
+          '<br />%s',
+          pht('This document is about the project %s.',
+            $handles[$project_phid]->renderLink()));
       }
 
       $index_link = phutil_tag(
@@ -122,32 +132,36 @@ final class PhrictionDocumentController
         pht('Document Index'));
 
       $byline = hsprintf(
-        '<div class="phriction-byline">Last updated %s by %s.%s</div>',
-        $when,
-        $handles[$content->getAuthorPHID()]->renderLink(),
+        '<div class="phriction-byline">%s.%s</div>',
+        pht('Last updated %s by %s.',
+          $when,
+          $handles[$content->getAuthorPHID()]->renderLink()),
         $project_info);
 
 
       $doc_status = $document->getStatus();
-      if ($doc_status == PhrictionDocumentStatus::STATUS_EXISTS) {
+      $current_status = $content->getChangeType();
+      if ($current_status == PhrictionChangeType::CHANGE_EDIT ||
+        $current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
+
         $core_content = $content->renderContent($user);
-      } else if ($doc_status == PhrictionDocumentStatus::STATUS_DELETED) {
+      } else if ($current_status == PhrictionChangeType::CHANGE_DELETE) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Document Deleted');
+        $notice->setTitle(pht('Document Deleted'));
         $notice->appendChild(
           pht('This document has been deleted. You can edit it to put new '.
           'content here, or use history to revert to an earlier version.'));
         $core_content = $notice->render();
-      } else if ($doc_status == PhrictionDocumentStatus::STATUS_STUB) {
+      } else if ($current_status == PhrictionChangeType::CHANGE_STUB) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Empty Document');
+        $notice->setTitle(pht('Empty Document'));
         $notice->appendChild(
           pht('This document is empty. You can edit it to put some proper '.
           'content here.'));
         $core_content = $notice->render();
-      } else if ($doc_status == PhrictionDocumentStatus::STATUS_MOVED) {
+      } else if ($current_status == PhrictionChangeType::CHANGE_MOVE_AWAY) {
         $new_doc_id = $content->getChangeRef();
         $new_doc = new PhrictionDocument();
         $new_doc->load($new_doc_id);
@@ -167,7 +181,7 @@ final class PhrictionDocumentController
       }
 
       $move_notice = null;
-      if ($content->getChangeType() == PhrictionChangeType::CHANGE_MOVE_HERE) {
+      if ($current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
         $from_doc_id = $content->getChangeRef();
         $from_doc = id(new PhrictionDocument())->load($from_doc_id);
         $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
@@ -237,7 +251,7 @@ final class PhrictionDocumentController
     if (!$document->getID()) {
       return $action_view->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht('Create this document'))
+          ->setName(pht('Create This Document'))
           ->setIcon('create')
           ->setHref('/phriction/edit/?slug='.$slug));
     }
