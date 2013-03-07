@@ -303,6 +303,11 @@ JX.behavior('pholio-mock-view', function(config) {
         return;
       }
       is_dragging = false;
+      if (!config.loggedIn) {
+        new JX.Workflow(config.logInLink).start();
+        return;
+      }
+
       drag_end = get_image_xy(JX.$V(e));
 
       var data = {mockID: config.mockID};

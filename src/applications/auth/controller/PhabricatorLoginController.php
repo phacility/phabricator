@@ -70,11 +70,15 @@ final class PhabricatorLoginController
       ));
     }
 
-    $next_uri_path = $this->getRequest()->getPath();
-    if ($next_uri_path == '/login/') {
-      $next_uri = '/';
-    } else {
-      $next_uri = $this->getRequest()->getRequestURI();
+
+    $next_uri = $request->getStr('next');
+    if (!$next_uri) {
+      $next_uri_path = $this->getRequest()->getPath();
+      if ($next_uri_path == '/login/') {
+        $next_uri = '/';
+      } else {
+        $next_uri = $this->getRequest()->getRequestURI();
+      }
     }
 
     if (!$request->isFormPost()) {
@@ -139,10 +143,9 @@ final class PhabricatorLoginController
           $request->setCookie('phusr', $user->getUsername());
           $request->setCookie('phsid', $session_key);
 
-          $uri = new PhutilURI('/login/validate/');
-          $uri->setQueryParams(
-            array(
-              'phusr' => $user->getUsername(),
+          $uri = id(new PhutilURI('/login/validate/'))
+            ->setQueryParams(
+              array('phusr' => $user->getUsername()
             ));
 
           return id(new AphrontRedirectResponse())

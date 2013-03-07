@@ -8,6 +8,10 @@ final class PholioMockViewController extends PholioController {
   private $id;
   private $imageID;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
     $this->imageID = idx($data, 'imageID');
@@ -67,9 +71,11 @@ final class PholioMockViewController extends PholioController {
     require_celerity_resource('pholio-css');
     require_celerity_resource('pholio-inline-comments-css');
 
-    $output = new PholioMockImagesView();
-    $output->setMock($mock);
-    $output->setImageID($this->imageID);
+    $output = id(new PholioMockImagesView())
+      ->setRequestURI($request->getRequestURI())
+      ->setUser($user)
+      ->setMock($mock)
+      ->setImageID($this->imageID);
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($this->getRequest()->getUser())
@@ -201,7 +207,8 @@ final class PholioMockViewController extends PholioController {
       ->setUser($user)
       ->setDraft($draft)
       ->setSubmitButtonName($button_name)
-      ->setAction($this->getApplicationURI('/comment/'.$mock->getID().'/'));
+      ->setAction($this->getApplicationURI('/comment/'.$mock->getID().'/'))
+      ->setRequestURI($this->getRequest()->getRequestURI());
 
     return array(
       $header,

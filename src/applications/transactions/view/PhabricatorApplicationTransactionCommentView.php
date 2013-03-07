@@ -15,6 +15,15 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $statusID;
   private $commentID;
   private $draft;
+  private $requestURI;
+
+  public function setRequestURI(PhutilURI $request_uri) {
+    $this->requestURI = $request_uri;
+    return $this;
+  }
+  public function getRequestURI() {
+    return $this->requestURI;
+  }
 
   public function setDraft(PhabricatorDraft $draft) {
     $this->draft = $draft;
@@ -44,6 +53,26 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   }
 
   public function render() {
+
+    $user = $this->getUser();
+    if (!$user->isLoggedIn()) {
+      $uri = id(new PhutilURI('/login/'))
+        ->setQueryParam('next', (string) $this->getRequestURI());
+      return self::renderSingleView(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'login-to-comment'
+          ),
+          javelin_tag(
+            'a',
+            array(
+              'class' => 'button',
+              'sigil' => 'workflow',
+              'href' => $uri
+            ),
+            pht('Login to Comment'))));
+    }
 
     $data = array();
 
