@@ -403,4 +403,8 @@ final class PhrictionDocumentController
     return $item;
   }
 
+  protected function getDocumentSlug() {
+    return $this->slug;
+  }
+
 }
