@@ -176,6 +176,16 @@ final class PholioMockEditController extends PholioController {
 
     $cc_tokens = mpull($handles, 'getFullName', 'getPHID');
 
+    $images_controller = '';
+    if ($is_new) {
+      $images_controller =
+          id(new AphrontFormDragAndDropUploadControl($request))
+            ->setValue($files)
+            ->setName('file_phids')
+            ->setLabel(pht('Images'))
+            ->setError($e_images);
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFlexible(true)
@@ -191,12 +201,7 @@ final class PholioMockEditController extends PholioController {
           ->setValue($v_desc)
           ->setLabel(pht('Description'))
           ->setUser($user))
-      ->appendChild(
-        id(new AphrontFormDragAndDropUploadControl($request))
-          ->setValue($files)
-          ->setName('file_phids')
-          ->setLabel(pht('Images'))
-          ->setError($e_images))
+      ->appendChild($images_controller)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CC'))
