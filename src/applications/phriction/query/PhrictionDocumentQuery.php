@@ -83,7 +83,7 @@ final class PhrictionDocumentQuery
     if ($project_slugs) {
       $projects = id(new PhabricatorProjectQuery())
         ->setViewer($this->getViewer())
-        ->withSlugs($project_slugs)
+        ->withPhrictionSlugs($project_slugs)
         ->execute();
       $projects = mpull($projects, null, 'getPhrictionSlug');
       foreach ($documents as $key => $document) {
