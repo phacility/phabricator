@@ -96,7 +96,6 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_DATE:
         $control = new AphrontFormDateControl();
         $control->setUser($this->getUser());
-        $control->setValue(time());
         break;
       default:
         $label = $this->getLabel();
@@ -114,9 +113,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
           (bool)$this->getValue());
         break;
       case self::TYPE_DATE:
-        if ($this->getValue()) {
-          $control->setValue($this->getValue());
-        }
+        $control->setValue($this->getValue());
         $control->setName('auxiliary_date_'.$this->getAuxiliaryKey());
         break;
       default:
@@ -177,6 +174,21 @@ class ManiphestAuxiliaryFieldDefaultSpecification
               '%s must be a valid date.',
               $this->getLabel()));
         }
+        break;
+    }
+  }
+
+  public function setDefaultValue($value) {
+    switch ($this->getFieldType()) {
+      case self::TYPE_DATE:
+        $value = strtotime($value);
+        if ($value <= 0) {
+          $value = time();
+        }
+        $this->setValue($value);
+        break;
+      default:
+        $this->setValue((string)$value);
         break;
     }
   }

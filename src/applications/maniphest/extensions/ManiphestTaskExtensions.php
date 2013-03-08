@@ -24,12 +24,18 @@ abstract class ManiphestTaskExtensions {
     }
 
     $task->loadAndAttachAuxiliaryAttributes();
+
     foreach ($aux_fields as $aux) {
       $aux->setUser($viewer);
       $aux->setTask($task);
 
-      $key = $aux->getAuxiliaryKey();
-      $aux->setValueFromStorage($task->getAuxiliaryAttribute($key));
+      // If we're creating a new task, we don't bother loading any stored data.
+      // This allows any defaults configured by the Extensions object to
+      // survive.
+      if ($task->getID()) {
+        $key = $aux->getAuxiliaryKey();
+        $aux->setValueFromStorage($task->getAuxiliaryAttribute($key));
+      }
     }
 
     return $aux_fields;

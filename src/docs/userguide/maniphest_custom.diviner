@@ -54,6 +54,8 @@ the field. These options are available:
     show next to the checkbox.
   - **checkbox-value**: If type is set to **bool**, the value to show on
     the detail view when the checkbox is selected.
+  - **default**: Default field value. For **date**, you can use a string like
+    `"July 4, 1990"`, `"5PM today"`, or any other valid input to `strtotime()`.
   - **copy**: When a user creates a task, the UI gives them an option to
     "Create Another Similar Task". Some fields from the original task are copied
     into the new task, while others are not; by default, fields are not copied.

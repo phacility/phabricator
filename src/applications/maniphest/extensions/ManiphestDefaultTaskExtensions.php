@@ -26,6 +26,9 @@ final class ManiphestDefaultTaskExtensions
       }
 
       $spec->setShouldCopyWhenCreatingSimilarTask(idx($info, 'copy'));
+
+      $spec->setDefaultValue(idx($info, 'default'));
+
       $specs[] = $spec;
     }
 
