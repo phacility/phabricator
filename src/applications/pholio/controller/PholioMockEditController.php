@@ -183,6 +183,7 @@ final class PholioMockEditController extends PholioController {
             ->setValue($files)
             ->setName('file_phids')
             ->setLabel(pht('Images'))
+            ->setActivatedClass('aphront-textarea-drag-and-drop')
             ->setError($e_images);
     }
 
