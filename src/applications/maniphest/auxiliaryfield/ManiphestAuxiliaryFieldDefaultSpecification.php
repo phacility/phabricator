@@ -15,11 +15,12 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   private $error;
   private $shouldCopyWhenCreatingSimilarTask;
 
-  const TYPE_SELECT = 'select';
-  const TYPE_STRING = 'string';
-  const TYPE_INT    = 'int';
-  const TYPE_BOOL   = 'bool';
-  const TYPE_DATE   = 'date';
+  const TYPE_SELECT   = 'select';
+  const TYPE_STRING   = 'string';
+  const TYPE_INT      = 'int';
+  const TYPE_BOOL     = 'bool';
+  const TYPE_DATE     = 'date';
+  const TYPE_REMARKUP = 'remarkup';
 
   public function getFieldType() {
     return $this->fieldType;
@@ -95,6 +96,10 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
       case self::TYPE_DATE:
         $control = new AphrontFormDateControl();
+        $control->setUser($this->getUser());
+        break;
+      case self::TYPE_REMARKUP:
+        $control = new PhabricatorRemarkupControl();
         $control->setUser($this->getUser());
         break;
       default:
@@ -193,6 +198,14 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     }
   }
 
+  public function getMarkupFields() {
+    switch ($this->getFieldType()) {
+      case self::TYPE_REMARKUP:
+        return array('default');
+    }
+    return parent::getMarkupFields();
+  }
+
   public function renderForDetailView() {
     switch ($this->getFieldType()) {
       case self::TYPE_BOOL:
@@ -202,11 +215,13 @@ class ManiphestAuxiliaryFieldDefaultSpecification
           return null;
         }
       case self::TYPE_SELECT:
-        $display = idx($this->getSelectOptions(), $this->getValue());
-        return $display;
+        return idx($this->getSelectOptions(), $this->getValue());
       case self::TYPE_DATE:
-        $display = phabricator_datetime($this->getValue(), $this->getUser());
-        return $display;
+        return phabricator_datetime($this->getValue(), $this->getUser());
+      case self::TYPE_REMARKUP:
+        return $this->getMarkupEngine()->getOutput(
+          $this,
+          'default');
     }
     return parent::renderForDetailView();
   }
@@ -246,6 +261,10 @@ class ManiphestAuxiliaryFieldDefaultSpecification
           $desc = "changed field '{$label}' ".
                   "from '{$old_display}' to '{$new_display}'";
         }
+        break;
+      case self::TYPE_REMARKUP:
+        // TODO: After we get ApplicationTransactions, straighten this out.
+        $desc = "updated field '{$label}'";
         break;
       default:
         if (!strlen($old)) {

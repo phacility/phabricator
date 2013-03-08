@@ -126,10 +126,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $engine->addObject($xaction, ManiphestTransaction::MARKUP_FIELD_BODY);
       }
     }
-    $engine->process();
 
     $extensions = ManiphestTaskExtensions::newExtensions();
     $aux_fields = $extensions->loadFields($task, $user);
+
+    foreach ($aux_fields as $aux_field) {
+      foreach ($aux_field->getMarkupFields() as $markup_field) {
+        $engine->addObject($aux_field, $markup_field);
+        $aux_field->setMarkupEngine($engine);
+      }
+    }
+
+    $engine->process();
 
     $transaction_types = ManiphestTransactionType::getTransactionTypeMap();
     $resolution_types = ManiphestTaskStatus::getTaskStatusMap();

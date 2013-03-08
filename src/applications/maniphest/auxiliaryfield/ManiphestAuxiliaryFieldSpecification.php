@@ -3,7 +3,8 @@
 /**
  * @group maniphest
  */
-abstract class ManiphestAuxiliaryFieldSpecification {
+abstract class ManiphestAuxiliaryFieldSpecification
+  implements PhabricatorMarkupInterface {
 
   const RENDER_TARGET_HTML  = 'html';
   const RENDER_TARGET_TEXT  = 'text';
@@ -14,6 +15,7 @@ abstract class ManiphestAuxiliaryFieldSpecification {
   private $value;
   private $user;
   private $task;
+  private $markupEngine;
 
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
@@ -157,5 +159,53 @@ abstract class ManiphestAuxiliaryFieldSpecification {
     return 'updated a custom field';
   }
 
+
+  public function getMarkupFields() {
+    return array();
+  }
+
+  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
+    $this->markupEngine = $engine;
+    return $this;
+  }
+
+  public function getMarkupEngine() {
+    return $this->markupEngine;
+  }
+
+
+/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    $hash = PhabricatorHash::digestForIndex($this->getMarkupText($field));
+    return 'maux:'.$this->getAuxiliaryKey().':'.$hash;
+  }
+
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newManiphestMarkupEngine();
+  }
+
+
+  public function getMarkupText($field) {
+    return $this->getValue();
+  }
+
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $output);
+  }
+
+  public function shouldUseMarkupCache($field) {
+    return true;
+  }
 
 }

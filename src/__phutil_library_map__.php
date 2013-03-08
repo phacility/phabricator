@@ -2084,6 +2084,7 @@ phutil_register_library_map(array(
     'LiskMigrationIterator' => 'PhutilBufferedIterator',
     'ManiphestAction' => 'ManiphestConstants',
     'ManiphestAuxiliaryFieldDefaultSpecification' => 'ManiphestAuxiliaryFieldSpecification',
+    'ManiphestAuxiliaryFieldSpecification' => 'PhabricatorMarkupInterface',
     'ManiphestAuxiliaryFieldTypeException' => 'Exception',
     'ManiphestAuxiliaryFieldValidationException' => 'Exception',
     'ManiphestBatchEditController' => 'ManiphestController',
