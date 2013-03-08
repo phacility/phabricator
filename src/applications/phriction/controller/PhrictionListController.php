@@ -43,14 +43,36 @@ final class PhrictionListController
         $header,
       ));
 
-    $pager = new AphrontPagerView();
-    $pager->setURI($request->getRequestURI(), 'page');
-    $pager->setOffset($request->getInt('page'));
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
 
-    $documents = $this->loadDocuments($pager);
+    $query = id(new PhrictionDocumentQuery())
+      ->setViewer($user);
 
-    $content = mpull($documents, 'getContent');
-    $phids = mpull($content, 'getAuthorPHID');
+    switch ($this->view) {
+      case 'active':
+        $query->withStatus(PhrictionDocumentQuery::STATUS_OPEN);
+        break;
+      case 'all':
+        $query->withStatus(PhrictionDocumentQuery::STATUS_NONSTUB);
+        break;
+      case 'updates':
+        $query->withStatus(PhrictionDocumentQuery::STATUS_NONSTUB);
+        $query->setOrder(PhrictionDocumentQuery::ORDER_UPDATED);
+        break;
+      default:
+        throw new Exception("Unknown view '{$this->view}'!");
+    }
+
+    $documents = $query->executeWithCursorPager($pager);
+
+    $phids = array();
+    foreach ($documents as $document) {
+      $phids[] = $document->getContent()->getAuthorPHID();
+      if ($document->hasProject()) {
+        $phids[] = $document->getProject()->getPHID();
+      }
+    }
 
     $handles = $this->loadViewerHandles($phids);
 
@@ -101,71 +123,6 @@ final class PhrictionListController
       array(
         'title' => pht('Phriction Main'),
       ));
-  }
-
-  private function loadDocuments(AphrontPagerView $pager) {
-
-    // TODO: Do we want/need a query object for this?
-
-    $document_dao = new PhrictionDocument();
-    $content_dao = new PhrictionContent();
-    $conn = $document_dao->establishConnection('r');
-
-    switch ($this->view) {
-      case 'active':
-        $data = queryfx_all(
-          $conn,
-          'SELECT * FROM %T WHERE status NOT IN (%Ld) ORDER BY id DESC '.
-            'LIMIT %d, %d',
-          $document_dao->getTableName(),
-          array(
-            PhrictionDocumentStatus::STATUS_DELETED,
-            PhrictionDocumentStatus::STATUS_MOVED,
-          ),
-          $pager->getOffset(),
-          $pager->getPageSize() + 1);
-        break;
-      case 'all':
-        $data = queryfx_all(
-          $conn,
-          'SELECT * FROM %T ORDER BY id DESC LIMIT %d, %d',
-          $document_dao->getTableName(),
-          $pager->getOffset(),
-          $pager->getPageSize() + 1);
-        break;
-      case 'updates':
-
-        // TODO: This query is a little suspicious, verify we don't need to key
-        // or change it once we get more data.
-
-        $data = queryfx_all(
-          $conn,
-          'SELECT d.* FROM %T d JOIN %T c ON c.documentID = d.id
-            GROUP BY c.documentID
-            ORDER BY MAX(c.id) DESC LIMIT %d, %d',
-          $document_dao->getTableName(),
-          $content_dao->getTableName(),
-          $pager->getOffset(),
-          $pager->getPageSize() + 1);
-        break;
-      default:
-        throw new Exception("Unknown view '{$this->view}'!");
-    }
-
-    $data = $pager->sliceResults($data);
-
-    $documents = $document_dao->loadAllFromArray($data);
-    if ($documents) {
-      $content = $content_dao->loadAllWhere(
-        'documentID IN (%Ld)',
-        mpull($documents, 'getID'));
-      $content = mpull($content, null, 'getDocumentID');
-      foreach ($documents as $document) {
-        $document->attachContent($content[$document->getID()]);
-      }
-    }
-
-    return $documents;
   }
 
 }

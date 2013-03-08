@@ -6,6 +6,7 @@ final class PhabricatorProjectQuery
   private $ids;
   private $phids;
   private $memberPHIDs;
+  private $slugs;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -33,6 +34,11 @@ final class PhabricatorProjectQuery
 
   public function withMemberPHIDs(array $member_phids) {
     $this->memberPHIDs = $member_phids;
+    return $this;
+  }
+
+  public function withPhrictionSlugs(array $slugs) {
+    $this->slugs = $slugs;
     return $this;
   }
 
@@ -153,6 +159,13 @@ final class PhabricatorProjectQuery
         $conn_r,
         'e.dst IN (%Ls)',
         $this->memberPHIDs);
+    }
+
+    if ($this->slugs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phrictionSlug IN (%Ls)',
+        $this->slugs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
