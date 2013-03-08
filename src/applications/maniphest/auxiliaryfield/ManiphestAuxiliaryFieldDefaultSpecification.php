@@ -19,6 +19,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   const TYPE_STRING = 'string';
   const TYPE_INT    = 'int';
   const TYPE_BOOL   = 'bool';
+  const TYPE_DATE   = 'date';
 
   public function getFieldType() {
     return $this->fieldType;
@@ -92,6 +93,11 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_BOOL:
         $control = new AphrontFormCheckboxControl();
         break;
+      case self::TYPE_DATE:
+        $control = new AphrontFormDateControl();
+        $control->setUser($this->getUser());
+        $control->setValue(time());
+        break;
       default:
         $label = $this->getLabel();
         throw new ManiphestAuxiliaryFieldTypeException(
@@ -99,15 +105,24 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
     }
 
-    if ($type == self::TYPE_BOOL) {
-      $control->addCheckbox(
-        'auxiliary['.$this->getAuxiliaryKey().']',
-        1,
-        $this->getCheckboxLabel(),
-        (bool)$this->getValue());
-    } else {
-      $control->setValue($this->getValue());
-      $control->setName('auxiliary['.$this->getAuxiliaryKey().']');
+    switch ($type) {
+      case self::TYPE_BOOL:
+        $control->addCheckbox(
+          'auxiliary['.$this->getAuxiliaryKey().']',
+          1,
+          $this->getCheckboxLabel(),
+          (bool)$this->getValue());
+        break;
+      case self::TYPE_DATE:
+        if ($this->getValue()) {
+          $control->setValue($this->getValue());
+        }
+        $control->setName('auxiliary_date_'.$this->getAuxiliaryKey());
+        break;
+      default:
+        $control->setValue($this->getValue());
+        $control->setName('auxiliary['.$this->getAuxiliaryKey().']');
+        break;
     }
 
     $control->setLabel($this->getLabel());
@@ -117,9 +132,18 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     return $control;
   }
 
-  public function setValueFromRequest($request) {
-    $aux_post_values = $request->getArr('auxiliary');
-    return $this->setValue(idx($aux_post_values, $this->getAuxiliaryKey(), ''));
+  public function setValueFromRequest(AphrontRequest $request) {
+    switch ($this->getFieldType()) {
+      case self::TYPE_DATE:
+        $control = $this->renderControl();
+        $value = $control->readValueFromRequest($request);
+        break;
+      default:
+        $aux_post_values = $request->getArr('auxiliary');
+        $value = idx($aux_post_values, $this->getAuxiliaryKey(), '');
+        break;
+    }
+    return $this->setValue($value);
   }
 
   public function getValueForStorage() {
@@ -135,8 +159,9 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_INT:
         if (!is_numeric($this->getValue())) {
           throw new ManiphestAuxiliaryFieldValidationException(
-            $this->getLabel().' must be an integer value.'
-          );
+            pht(
+              '%s must be an integer value.',
+              $this->getLabel()));
         }
         break;
       case self::TYPE_BOOL:
@@ -145,6 +170,14 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         return true;
       case self::TYPE_SELECT:
         return true;
+      case self::TYPE_DATE:
+        if ($this->getValue() <= 0) {
+          throw new ManiphestAuxiliaryFieldValidationException(
+            pht(
+              '%s must be a valid date.',
+              $this->getLabel()));
+        }
+        break;
     }
   }
 
@@ -159,10 +192,12 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_SELECT:
         $display = idx($this->getSelectOptions(), $this->getValue());
         return $display;
+      case self::TYPE_DATE:
+        $display = phabricator_datetime($this->getValue(), $this->getUser());
+        return $display;
     }
     return parent::renderForDetailView();
   }
-
 
   public function renderTransactionDescription(
     ManiphestTransaction $transaction,
@@ -186,6 +221,16 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         if ($old === null) {
           $desc = "set field '{$label}' to '{$new_display}'";
         } else {
+          $desc = "changed field '{$label}' ".
+                  "from '{$old_display}' to '{$new_display}'";
+        }
+        break;
+      case self::TYPE_DATE:
+        $new_display = phabricator_datetime($new, $this->getUser());
+        if ($old === null) {
+          $desc = "set field '{$label}' to '{$new_display}'";
+        } else {
+          $old_display = phabricator_datetime($old, $this->getUser());
           $desc = "changed field '{$label}' ".
                   "from '{$old_display}' to '{$new_display}'";
         }
