@@ -66,6 +66,15 @@ final class PhabricatorDaemonLogListView extends AphrontView {
           $symbol = '?';
       }
 
+      if ($status != PhabricatorDaemonLog::STATUS_RUNNING &&
+          $log->getDateModified() + (3 * 86400) < time()) {
+        // Don't show rows that haven't been running for more than
+        // three days.  We should probably prune these out of the
+        // DB similar to the code above, but we don't need to be
+        // conservative and do it only on the same host
+        continue;
+      }
+
       $running = phutil_tag(
         'span',
         array(
