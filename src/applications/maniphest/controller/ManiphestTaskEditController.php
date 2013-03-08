@@ -70,10 +70,9 @@ final class ManiphestTaskEditController extends ManiphestController {
     $e_title = true;
 
     $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
+    $aux_fields = $extensions->loadFields($task, $user);
 
     if ($request->isFormPost()) {
-
       $changes = array();
 
       $new_title = $request->getStr('title');
@@ -185,7 +184,6 @@ final class ManiphestTaskEditController extends ManiphestController {
         }
 
         if ($aux_fields) {
-          $task->loadAndAttachAuxiliaryAttributes();
           foreach ($aux_fields as $aux_field) {
             $transaction = clone $template;
             $transaction->setTransactionType(
@@ -253,15 +251,6 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setURI($redirect_uri);
       }
     } else {
-      if ($aux_fields) {
-        $task->loadAndAttachAuxiliaryAttributes();
-        foreach ($aux_fields as $aux_field) {
-          $aux_key = $aux_field->getAuxiliaryKey();
-          $value = $task->getAuxiliaryAttribute($aux_key);
-          $aux_field->setValueFromStorage($value);
-        }
-      }
-
       if (!$task->getID()) {
         $task->setCCPHIDs(array(
           $user->getPHID(),

@@ -12,6 +12,26 @@ abstract class ManiphestAuxiliaryFieldSpecification {
   private $auxiliaryKey;
   private $caption;
   private $value;
+  private $user;
+  private $task;
+
+  public function setTask(ManiphestTask $task) {
+    $this->task = $task;
+    return $this;
+  }
+
+  public function getTask() {
+    return $this->task;
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->user;
+  }
 
   public function setLabel($val) {
     $this->label = $val;

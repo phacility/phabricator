@@ -129,10 +129,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $engine->process();
 
     $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
-    if ($aux_fields) {
-      $task->loadAndAttachAuxiliaryAttributes();
-    }
+    $aux_fields = $extensions->loadFields($task, $user);
 
     $transaction_types = ManiphestTransactionType::getTransactionTypeMap();
     $resolution_types = ManiphestTaskStatus::getTaskStatusMap();
@@ -467,8 +464,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         : phutil_tag('em', array(), pht('None')));
 
     foreach ($aux_fields as $aux_field) {
-      $aux_key = $aux_field->getAuxiliaryKey();
-      $aux_field->setValue($task->getAuxiliaryAttribute($aux_key));
       $value = $aux_field->renderForDetailView();
       if (strlen($value)) {
         $view->addProperty($aux_field->getLabel(), $value);
