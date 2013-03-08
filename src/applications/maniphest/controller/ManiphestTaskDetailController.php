@@ -35,6 +35,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
       'taskID = %d ORDER BY id ASC',
       $task->getID());
 
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->loadFields($task, $user);
+
     $e_commit = PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT;
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
     $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
@@ -82,7 +85,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $phids = array_keys($phids);
+
+    $phids = array_merge(
+      $phids,
+      array_mergev(mpull($aux_fields, 'getRequiredHandlePHIDs')));
+
     $this->loadHandles($phids);
+
+    $handles = $this->getLoadedHandles();
+    foreach ($aux_fields as $aux_field) {
+      $aux_field->setHandles($handles);
+    }
 
     $context_bar = null;
 
@@ -126,9 +139,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $engine->addObject($xaction, ManiphestTransaction::MARKUP_FIELD_BODY);
       }
     }
-
-    $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->loadFields($task, $user);
 
     foreach ($aux_fields as $aux_field) {
       foreach ($aux_field->getMarkupFields() as $markup_field) {

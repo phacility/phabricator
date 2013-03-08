@@ -21,6 +21,8 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   const TYPE_BOOL     = 'bool';
   const TYPE_DATE     = 'date';
   const TYPE_REMARKUP = 'remarkup';
+  const TYPE_USER     = 'user';
+  const TYPE_USERS    = 'users';
 
   public function getFieldType() {
     return $this->fieldType;
@@ -102,6 +104,14 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         $control = new PhabricatorRemarkupControl();
         $control->setUser($this->getUser());
         break;
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        $control = new AphrontFormTokenizerControl();
+        $control->setDatasource('/typeahead/common/users/');
+        if ($type == self::TYPE_USER) {
+          $control->setLimit(1);
+        }
+        break;
       default:
         $label = $this->getLabel();
         throw new ManiphestAuxiliaryFieldTypeException(
@@ -121,6 +131,15 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         $control->setValue($this->getValue());
         $control->setName('auxiliary_date_'.$this->getAuxiliaryKey());
         break;
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        $control->setName('auxiliary_tokenizer_'.$this->getAuxiliaryKey());
+        $value = array();
+        foreach ($this->getValue() as $phid) {
+          $value[$phid] = $this->getHandle($phid)->getFullName();
+        }
+        $control->setValue($value);
+        break;
       default:
         $control->setValue($this->getValue());
         $control->setName('auxiliary['.$this->getAuxiliaryKey().']');
@@ -135,10 +154,19 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   }
 
   public function setValueFromRequest(AphrontRequest $request) {
-    switch ($this->getFieldType()) {
+    $type = $this->getFieldType();
+    switch ($type) {
       case self::TYPE_DATE:
         $control = $this->renderControl();
         $value = $control->readValueFromRequest($request);
+        break;
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        $name = 'auxiliary_tokenizer_'.$this->getAuxiliaryKey();
+        $value = $request->getArr($name);
+        if ($type == self::TYPE_USER) {
+          $value = array_slice($value, 0, 1);
+        }
         break;
       default:
         $aux_post_values = $request->getArr('auxiliary');
@@ -149,17 +177,34 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   }
 
   public function getValueForStorage() {
-    return $this->getValue();
+    switch ($this->getFieldType()) {
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        return json_encode($this->getValue());
+      default:
+        return $this->getValue();
+    }
   }
 
   public function setValueFromStorage($value) {
+    switch ($this->getFieldType()) {
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        $value = json_decode($value, true);
+        if (!is_array($value)) {
+          $value = array();
+        }
+        break;
+      default:
+        break;
+    }
     return $this->setValue($value);
   }
 
   public function validate() {
     switch ($this->getFieldType()) {
       case self::TYPE_INT:
-        if (!is_numeric($this->getValue())) {
+        if ($this->getValue() && !is_numeric($this->getValue())) {
           throw new ManiphestAuxiliaryFieldValidationException(
             pht(
               '%s must be an integer value.',
@@ -173,10 +218,19 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_SELECT:
         return true;
       case self::TYPE_DATE:
-        if ($this->getValue() <= 0) {
+        if ((int)$this->getValue() <= 0) {
           throw new ManiphestAuxiliaryFieldValidationException(
             pht(
               '%s must be a valid date.',
+              $this->getLabel()));
+        }
+        break;
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        if (!is_array($this->getValue())) {
+          throw new ManiphestAuxiliaryFieldValidationException(
+            pht(
+              '%s is not a valid list of user PHIDs.',
               $this->getLabel()));
         }
         break;
@@ -189,6 +243,15 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         $value = strtotime($value);
         if ($value <= 0) {
           $value = time();
+        }
+        $this->setValue($value);
+        break;
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        if (!is_array($value)) {
+          $value = array();
+        } else {
+          $value = array_values($value);
         }
         $this->setValue($value);
         break;
@@ -222,8 +285,28 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         return $this->getMarkupEngine()->getOutput(
           $this,
           'default');
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        return $this->renderHandleList($this->getValue());
     }
     return parent::renderForDetailView();
+  }
+
+  public function getRequiredHandlePHIDs() {
+    switch ($this->getFieldType()) {
+      case self::TYPE_USER;
+      case self::TYPE_USERS:
+        return $this->getValue();
+    }
+    return parent::getRequiredHandlePHIDs();
+  }
+
+  protected function renderHandleList(array $phids) {
+    $links = array();
+    foreach ($phids as $phid) {
+      $links[] = $this->getHandle($phid)->renderLink();
+    }
+    return phutil_implode_html(', ', $links);
   }
 
   public function renderTransactionDescription(
@@ -264,6 +347,12 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
       case self::TYPE_REMARKUP:
         // TODO: After we get ApplicationTransactions, straighten this out.
+        $desc = "updated field '{$label}'";
+        break;
+      case self::TYPE_USER:
+      case self::TYPE_USERS:
+        // TODO: As above, this is a mess that should get straightened out,
+        // but it will be easier after T2217.
         $desc = "updated field '{$label}'";
         break;
       default:

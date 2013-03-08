@@ -16,6 +16,7 @@ abstract class ManiphestAuxiliaryFieldSpecification
   private $user;
   private $task;
   private $markupEngine;
+  private $handles;
 
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
@@ -159,6 +160,25 @@ abstract class ManiphestAuxiliaryFieldSpecification
     return 'updated a custom field';
   }
 
+  public function getRequiredHandlePHIDs() {
+    return array();
+  }
+
+  public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
+    $this->handles = array_select_keys(
+      $handles,
+      $this->getRequiredHandlePHIDs());
+    return $this;
+  }
+
+  public function getHandle($phid) {
+    if (empty($this->handles[$phid])) {
+      throw new Exception(
+        "Field is requesting a handle ('{$phid}') it did not require.");
+    }
+    return $this->handles[$phid];
+  }
 
   public function getMarkupFields() {
     return array();
