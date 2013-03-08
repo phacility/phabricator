@@ -55,6 +55,8 @@ final class ConpherenceWidgetController extends
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
+        'form_pane' => 'conpherence-form',
+        'file_widget' => 'widgets-files',
         'widgetRegistery' => array(
           'widgets-files' => 1,
           'widgets-tasks' => 1,
@@ -106,59 +108,36 @@ final class ConpherenceWidgetController extends
             'class' => 'sprite-conpher conpher_calendar_off',
           ),
           '')
-      )).
-    phutil_tag(
-      'div',
-      array(
-        'class' => 'widgets-body',
-        'id' => 'widgets-files',
-        'style' => 'display: none;'
-      ),
-      $this->renderFilesWidgetPaneContent()).
-    phutil_tag(
-      'div',
-      array(
-        'class' => 'widgets-body',
-        'id' => 'widgets-tasks',
-      ),
-      $this->renderTaskWidgetPaneContent()).
-    phutil_tag(
-      'div',
-      array(
-        'class' => 'widgets-body',
-        'id' => 'widgets-calendar',
-        'style' => 'display: none;'
-      ),
-      $this->renderCalendarWidgetPaneContent());
+        )).
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'widgets-body',
+          'id' => 'widgets-files',
+          'style' => 'display: none;'
+        ),
+        id(new ConpherenceFileWidgetView())
+        ->setConpherence($conpherence)
+        ->setUpdateURI(
+          $this->getApplicationURI('update/'.$conpherence->getID().'/'))
+        ->render()).
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'widgets-body',
+          'id' => 'widgets-tasks',
+        ),
+        $this->renderTaskWidgetPaneContent()).
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'widgets-body',
+          'id' => 'widgets-calendar',
+          'style' => 'display: none;'
+        ),
+        $this->renderCalendarWidgetPaneContent());
 
     return array('widgets' => $widgets);
-  }
-
-  private function renderFilesWidgetPaneContent() {
-    $conpherence = $this->getConpherence();
-    $widget_data = $conpherence->getWidgetData();
-    $files = $widget_data['files'];
-
-    $table_data = array();
-    foreach ($files as $file) {
-      $thumb = $file->getThumb60x45URI();
-      $table_data[] = array(
-        phutil_tag(
-          'img',
-          array(
-            'src' => $thumb
-          ),
-          ''),
-        $file->getName()
-      );
-    }
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Attached Files'));
-    $table = id(new AphrontTableView($table_data))
-        ->setNoDataString(pht('No files attached to conpherence.'))
-        ->setHeaders(array('', pht('Name')))
-        ->setColumnClasses(array('', 'wide'));
-    return new PhutilSafeHTML($header->render() . $table->render());
   }
 
   private function renderTaskWidgetPaneContent() {

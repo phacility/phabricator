@@ -48,6 +48,16 @@ final class PhabricatorFileLinkView extends AphrontView {
     return $this->fileName;
   }
 
+  public function getMetadata() {
+    return array(
+      'phid'     => $this->getFilePHID(),
+      'viewable' => $this->getFileViewable(),
+      'uri'      => $this->getFileViewURI(),
+      'dUri'     => $this->getFileDownloadURI(),
+      'name'     => $this->getFileName(),
+    );
+  }
+
   public function render() {
     require_celerity_resource('phabricator-remarkup-css');
     require_celerity_resource('lightbox-attachment-css');
@@ -57,14 +67,8 @@ final class PhabricatorFileLinkView extends AphrontView {
     $mustcapture = false;
     if ($this->getFileViewable()) {
       $mustcapture = true;
-      $sigil       = 'lightboxable';
-      $meta        = array(
-        'phid'     => $this->getFilePHID(),
-        'viewable' => $this->getFileViewable(),
-        'uri'      => $this->getFileViewURI(),
-        'dUri'     => $this->getFileDownloadURI(),
-        'name'     => $this->getFileName(),
-      );
+      $sigil = 'lightboxable';
+      $meta = $this->getMetadata();
     }
 
     return javelin_tag(

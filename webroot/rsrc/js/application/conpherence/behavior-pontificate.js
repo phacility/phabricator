@@ -2,7 +2,8 @@
  * @provides javelin-behavior-conpherence-pontificate
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-request
+ *           javelin-util
+ *           javelin-workflow
  */
 
 JX.behavior('conpherence-pontificate', function(config) {
@@ -33,6 +34,12 @@ JX.behavior('conpherence-pontificate', function(config) {
         JX.DOM.setContent(
           JX.$(config.header),
           JX.$H(r.header)
+        );
+
+        // update the file widget
+        JX.DOM.setContent(
+          JX.$(config.file_widget),
+          JX.$H(r.file_widget)
         );
 
         // clear the textarea

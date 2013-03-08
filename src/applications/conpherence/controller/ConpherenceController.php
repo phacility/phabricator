@@ -241,7 +241,10 @@ abstract class ConpherenceController extends PhabricatorController {
       array(
         'class' => 'edit',
         'href' => $edit_href,
-        'sigil' => 'workflow edit-action',
+        'sigil' => 'conpherence-edit-metadata',
+        'meta' => array(
+          'action' => 'metadata'
+        )
       ),
       '').
     phutil_tag(
@@ -340,6 +343,7 @@ abstract class ConpherenceController extends PhabricatorController {
         'header' => 'conpherence-header-pane',
         'menu_pane' => 'conpherence-menu',
         'form_pane' => 'conpherence-form',
+        'file_widget' => 'widgets-files',
       ));
   }
 }

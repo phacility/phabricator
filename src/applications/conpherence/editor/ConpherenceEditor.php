@@ -119,8 +119,18 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         $editor = id(new PhabricatorEdgeEditor())
           ->setActor($this->getActor());
         $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
-        foreach ($xaction->getNewValue() as $file_phid) {
+        $old = array_fill_keys($xaction->getOldValue(), true);
+        $new = array_fill_keys($xaction->getNewValue(), true);
+        $add_edges = array_keys(array_diff_key($new, $old));
+        $remove_edges = array_keys(array_diff_key($old, $new));
+        foreach ($add_edges as $file_phid) {
           $editor->addEdge(
+            $object->getPHID(),
+            $edge_type,
+            $file_phid);
+        }
+        foreach ($remove_edges as $file_phid) {
+          $editor->removeEdge(
             $object->getPHID(),
             $edge_type,
             $file_phid);

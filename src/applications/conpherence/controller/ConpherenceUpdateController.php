@@ -35,7 +35,9 @@ final class ConpherenceUpdateController extends
       ->executeOne();
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
 
+    $action = $request->getStr('action', 'metadata');
     $latest_transaction_id = null;
+    $fancy_ajax_style = true;
     $error_view = null;
     $e_file = array();
     $errors = array();
@@ -50,7 +52,6 @@ final class ConpherenceUpdateController extends
         ->setContentSource($content_source)
         ->setActor($user);
 
-      $action = $request->getStr('action');
       switch ($action) {
         case 'message':
           $message = $request->getStr('text');
@@ -65,6 +66,7 @@ final class ConpherenceUpdateController extends
           $left = $request->getInt('image_x');
           $file_id = $request->getInt('file_id');
           $title = $request->getStr('title');
+          $updated = false;
           if ($file_id) {
             $orig_file = id(new PhabricatorFileQuery())
               ->setViewer($user)
@@ -101,6 +103,8 @@ final class ConpherenceUpdateController extends
             }
             // use the existing title in this image upload case
             $title = $conpherence->getTitle();
+            $updated = true;
+            $fancy_ajax_style = false;
           } else if ($top !== null || $left !== null) {
             $file = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
             $xformer = new PhabricatorImageTransformer();
@@ -115,12 +119,18 @@ final class ConpherenceUpdateController extends
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
                 ConpherenceTransactionType::TYPE_PICTURE_CROP)
-              ->setNewValue($image_phid);
+                ->setNewValue($image_phid);
+            $updated = true;
           }
           if ($title != $conpherence->getTitle()) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
               ->setNewValue($title);
+            $updated = true;
+          }
+          if (!$updated && $request->isContinueRequest()) {
+            $errors[] = pht(
+              'That was a non-update. Try cancel.');
           }
           break;
         default:
@@ -130,24 +140,21 @@ final class ConpherenceUpdateController extends
       if ($xactions) {
         try {
           $xactions = $editor->applyTransactions($conpherence, $xactions);
-          if ($latest_transaction_id) {
-            $content = $this->loadAndRenderNewTransactions(
+          if ($fancy_ajax_style) {
+            $content = $this->loadAndRenderUpdates(
               $conpherence_id,
               $latest_transaction_id);
             return id(new AphrontAjaxResponse())
               ->setContent($content);
           } else {
-            return id(new AphrontRedirectResponse())->setURI(
-              $this->getApplicationURI($conpherence_id.'/'));
+            return id(new AphrontRedirectResponse())
+              ->setURI($this->getApplicationURI($conpherence->getID().'/'));
           }
         } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
           return id(new PhabricatorApplicationTransactionNoEffectResponse())
             ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
             ->setException($ex);
         }
-      } else if (empty($errors)) {
-        $errors[] = pht(
-          'That was a non-update. Try cancel.');
       }
     }
 
@@ -158,7 +165,29 @@ final class ConpherenceUpdateController extends
         ->setErrors($errors);
     }
 
+    switch ($action) {
+      case 'metadata':
+      default:
+        $dialogue = $this->renderMetadataDialogue($conpherence, $error_view);
+        break;
+    }
+
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialogue
+        ->setUser($user)
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->setSubmitURI($this->getApplicationURI('update/'.$conpherence_id.'/'))
+        ->addSubmitButton()
+        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')));
+
+  }
+
+  private function renderMetadataDialogue(
+    ConpherenceThread $conpherence,
+    $error_view) {
+
     $form = id(new AphrontFormLayoutView())
+      ->appendChild($error_view)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Title'))
@@ -177,15 +206,15 @@ final class ConpherenceUpdateController extends
               'src' =>
               $conpherence->loadImageURI(ConpherenceImageData::SIZE_HEAD),
               ))))
-          ->appendChild(
-            id(new AphrontFormCropControl())
-            ->setLabel(pht('Crop Image'))
-            ->setValue($image)
-            ->setWidth(ConpherenceImageData::HEAD_WIDTH)
-            ->setHeight(ConpherenceImageData::HEAD_HEIGHT))
-          ->appendChild(
-            id(new ConpherenceFormDragAndDropUploadControl())
-            ->setLabel(pht('Change Image')));
+              ->appendChild(
+                id(new AphrontFormCropControl())
+                ->setLabel(pht('Crop Image'))
+                ->setValue($image)
+                ->setWidth(ConpherenceImageData::HEAD_WIDTH)
+                ->setHeight(ConpherenceImageData::HEAD_HEIGHT))
+                ->appendChild(
+                  id(new ConpherenceFormDragAndDropUploadControl())
+                  ->setLabel(pht('Change Image')));
     } else {
       $form
         ->appendChild(
@@ -194,57 +223,57 @@ final class ConpherenceUpdateController extends
     }
 
     require_celerity_resource('conpherence-update-css');
-    return id(new AphrontDialogResponse())
-      ->setDialog(
-        id(new AphrontDialogView())
-        ->setUser($user)
-        ->setTitle(pht('Update Conpherence'))
-        ->setWidth(AphrontDialogView::WIDTH_FORM)
-        ->setSubmitURI($this->getApplicationURI('update/'.$conpherence_id.'/'))
-        ->addHiddenInput('action', 'metadata')
-        ->appendChild($error_view)
-        ->appendChild($form)
-        ->addSubmitButton()
-        ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')));
+    return id(new AphrontDialogView())
+      ->setTitle(pht('Update Conpherence'))
+      ->addHiddenInput('action', 'metadata')
+      ->addHiddenInput('__continue__', true)
+      ->appendChild($form);
   }
 
-  private function loadAndRenderNewTransactions(
+  private function loadAndRenderUpdates(
     $conpherence_id,
     $latest_transaction_id) {
 
-    $user = $this->getRequest()->getUser();
-    $conpherence = id(new ConpherenceThreadQuery())
-      ->setViewer($user)
-      ->setAfterID($latest_transaction_id)
-      ->needHeaderPics(true)
-      ->withIDs(array($conpherence_id))
-      ->executeOne();
+      $user = $this->getRequest()->getUser();
+      $conpherence = id(new ConpherenceThreadQuery())
+        ->setViewer($user)
+        ->setAfterID($latest_transaction_id)
+        ->needHeaderPics(true)
+        ->needWidgetData(true)
+        ->withIDs(array($conpherence_id))
+        ->executeOne();
 
-    $data = $this->renderConpherenceTransactions($conpherence);
-    $rendered_transactions = $data['transactions'];
-    $new_latest_transaction_id = $data['latest_transaction_id'];
+      $data = $this->renderConpherenceTransactions($conpherence);
+      $rendered_transactions = $data['transactions'];
+      $new_latest_transaction_id = $data['latest_transaction_id'];
 
-    $selected = true;
-    $nav_item = $this->buildConpherenceMenuItem(
-      $conpherence,
-      '-nav-item',
-      $selected);
-    $menu_item = $this->buildConpherenceMenuItem(
-      $conpherence,
-      '-menu-item',
-      $selected);
+      $selected = true;
+      $nav_item = $this->buildConpherenceMenuItem(
+        $conpherence,
+        '-nav-item',
+        $selected);
+      $menu_item = $this->buildConpherenceMenuItem(
+        $conpherence,
+        '-menu-item',
+        $selected);
 
-    $header = $this->buildHeaderPaneContent($conpherence);
+      $header = $this->buildHeaderPaneContent($conpherence);
 
-    $content = array(
-      'transactions' => $rendered_transactions,
-      'latest_transaction_id' => $new_latest_transaction_id,
-      'menu_item' => $menu_item->render(),
-      'nav_item' => $nav_item->render(),
-      'conpherence_phid' => $conpherence->getPHID(),
-      'header' => $header
-    );
-    return $content;
+      $file_widget = id(new ConpherenceFileWidgetView())
+        ->setConpherence($conpherence)
+        ->setUpdateURI(
+          $this->getApplicationURI('update/'.$conpherence->getID().'/'));
+
+      $content = array(
+        'transactions' => $rendered_transactions,
+        'latest_transaction_id' => $new_latest_transaction_id,
+        'menu_item' => $menu_item->render(),
+        'nav_item' => $nav_item->render(),
+        'conpherence_phid' => $conpherence->getPHID(),
+        'header' => $header,
+        'file_widget' => $file_widget->render()
+      );
+      return $content;
+    }
+
   }
-
-}
