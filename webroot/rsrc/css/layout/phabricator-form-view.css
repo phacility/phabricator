@@ -4,15 +4,11 @@
 
 .phabricator-form-view {
   padding: .75em;
-  overflow: hidden;
-
   background: #f9f9f9;
-
   border-width: 1px 0;
   border-style: solid;
   border-color: #dbdbdb;
 }
-
 
 .device .phabricator-form-view .aphront-form-control .aphront-form-label {
   display: block;
