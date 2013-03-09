@@ -20,6 +20,18 @@ JX.install('KeyboardShortcutManager', {
 
   statics : {
     _instance : null,
+
+    /**
+     * Some keys don't invoke keypress events in some browsers. We handle these
+     * on keydown instead of keypress.
+     */
+    _downkeys : {
+      left: 1,
+      right: 1,
+      up: 1,
+      down: 1
+    },
+
     getInstance : function() {
       if (!JX.KeyboardShortcutManager._instance) {
         JX.KeyboardShortcutManager._instance = new JX.KeyboardShortcutManager();
@@ -98,6 +110,11 @@ JX.install('KeyboardShortcutManager', {
       this._focusReticle = null;
     },
     _onkeypress : function(e) {
+      if (!(this._getKey(e) in JX.KeyboardShortcutManager._downkeys)) {
+        this._onkeyhit(e);
+      }
+    },
+    _onkeyhit : function(e) {
       var raw = e.getRawEvent();
 
       if (raw.altKey || raw.ctrlKey || raw.metaKey) {
@@ -113,8 +130,8 @@ JX.install('KeyboardShortcutManager', {
         // focused.
         return;
       }
-      // TODO: This likely needs to be refined to deal with arrow keys, etc.
-      var key = String.fromCharCode(raw.charCode);
+
+      var key = this._getKey(e);
 
       var shortcuts = this._shortcuts;
       for (var ii = 0; ii < shortcuts.length; ii++) {
@@ -130,9 +147,16 @@ JX.install('KeyboardShortcutManager', {
     },
     _onkeydown : function(e) {
       this._handleTooltipKeyEvent(e, true);
+
+      if (this._getKey(e) in JX.KeyboardShortcutManager._downkeys) {
+        this._onkeyhit(e);
+      }
     },
     _onkeyup : function(e) {
       this._handleTooltipKeyEvent(e, false);
+    },
+    _getKey : function(e) {
+      return e.getSpecialKey() || String.fromCharCode(e.getRawEvent().charCode);
     },
     _handleTooltipKeyEvent : function(e, is_keydown) {
       if (e.getRawEvent().keyCode != 18) {

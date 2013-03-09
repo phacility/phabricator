@@ -21,10 +21,21 @@ final class PhabricatorHelpKeyboardShortcutController
       'description' => 'Close any dialog, including this one.',
     );
 
+    $stroke_map = array(
+      'left' => "\xE2\x86\x90",
+      'right' => "\xE2\x86\x92",
+      'up' => "\xE2\x86\x91",
+      'down' => "\xE2\x86\x93",
+      'return' => "\xE2\x8F\x8E",
+      'tab' => "\xE2\x87\xA5",
+      'delete' => "\xE2\x8C\xAB",
+    );
+
     $rows = array();
     foreach ($keys as $shortcut) {
       $keystrokes = array();
       foreach ($shortcut['keys'] as $stroke) {
+        $stroke = idx($stroke_map, $stroke, $stroke);
         $keystrokes[] = phutil_tag('kbd', array(), $stroke);
       }
       $keystrokes = phutil_implode_html(' or ', $keystrokes);

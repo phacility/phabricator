@@ -586,13 +586,13 @@ JX.behavior('pholio-mock-view', function(config) {
 /* -(  Keyboard Shortcuts  )------------------------------------------------- */
 
 
-  new JX.KeyboardShortcut('j', 'Show next image.')
+  new JX.KeyboardShortcut(['j', 'right'], 'Show next image.')
     .setHandler(function() {
       switch_image(1);
     })
     .register();
 
-  new JX.KeyboardShortcut('k', 'Show previous image.')
+  new JX.KeyboardShortcut(['k', 'left'], 'Show previous image.')
     .setHandler(function() {
       switch_image(-1);
     })
