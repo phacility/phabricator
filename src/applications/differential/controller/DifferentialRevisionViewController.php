@@ -537,20 +537,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
           'sigil' => 'workflow',
         );
       }
-
-      if ($user->getIsAdmin()) {
-        $links[] = array(
-          'icon'  => 'file',
-          'name'  => pht('MetaMTA Transcripts'),
-          'href'  => "/mail/?phid={$revision_phid}",
-        );
-      }
-
-      $links[] = array(
-        'icon'  => 'file',
-        'name'  => pht('Herald Transcripts'),
-        'href'  => "/herald/transcript/?phid={$revision_phid}",
-      );
     }
 
     $request_uri = $this->getRequest()->getRequestURI();
