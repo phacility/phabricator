@@ -20,6 +20,7 @@ from XSS and render correctly. Broadly:
   - Combine elements with arrays, not string concatenation.
   - @{class:AphrontView} subclasses should return a
     @{class@libphutil:PhutilSafeHTML} object from their `render()` method.
+  - @{class:AphrontView} subclasses act like tags when rendering.
   - @{function:pht} has some special rules.
   - There are some other things that you should be aware of.
   - Do not use @{function:phutil_render_tag} or @{function:javelin_render_tag},
@@ -123,6 +124,10 @@ Subclasses of @{class:AphrontView} in Phabricator should return a
 return `phutil_tag()` or `javelin_tag()`:
 
   return phutil_tag('div', ...);
+
+You can use an @{class:AphrontView} subclass like you would a tag:
+
+  phutil_tag('div', array(), $view);
 
 = Internationalization: pht() =
 

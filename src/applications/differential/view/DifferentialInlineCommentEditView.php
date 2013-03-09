@@ -55,11 +55,10 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'method'    => 'POST',
         'sigil'     => 'inline-edit-form',
       ),
-      $this->renderSingleView(
-        array(
-          $this->renderInputs(),
-          $this->renderBody(),
-        )));
+      array(
+        $this->renderInputs(),
+        $this->renderBody(),
+      ));
 
     return hsprintf(
       '<table>'.
@@ -130,12 +129,11 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       array(
         'class' => 'differential-inline-comment-edit-buttons',
       ),
-      $this->renderSingleView(
-        array(
-          $formatting,
-          $buttons,
-          phutil_tag('div', array('style' => 'clear: both'), ''),
-        )));
+      array(
+        $formatting,
+        $buttons,
+        phutil_tag('div', array('style' => 'clear: both'), ''),
+      ));
 
     return javelin_tag(
       'div',
@@ -148,12 +146,11 @@ final class DifferentialInlineCommentEditView extends AphrontView {
           'length' => $this->length,
         ),
       ),
-      $this->renderSingleView(
-        array(
-          $title,
-          $body,
-          $edit,
-        )));
+      array(
+        $title,
+        $body,
+        $edit,
+      ));
   }
 
 }

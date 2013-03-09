@@ -145,8 +145,7 @@ final class PhabricatorPropertyListView extends AphrontView {
 
     $shortcuts = null;
     if ($this->hasKeyboardShortcuts) {
-      $shortcuts =
-        id(new AphrontKeyboardShortcutsAvailableView())->render();
+      $shortcuts = new AphrontKeyboardShortcutsAvailableView();
     }
 
     return array(

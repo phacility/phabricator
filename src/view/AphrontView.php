@@ -1,6 +1,7 @@
 <?php
 
-abstract class AphrontView extends Phobject {
+abstract class AphrontView extends Phobject
+  implements PhutilSafeHTMLProducerInterface {
 
   protected $user;
   protected $children = array();
@@ -64,5 +65,9 @@ abstract class AphrontView extends Phobject {
   }
 
   abstract public function render();
+
+  public function producePhutilSafeHTML() {
+    return $this->render();
+  }
 
 }

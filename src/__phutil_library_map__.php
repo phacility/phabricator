@@ -1652,7 +1652,11 @@ phutil_register_library_map(array(
     'AphrontTokenizerTemplateView' => 'AphrontView',
     'AphrontTypeaheadTemplateView' => 'AphrontView',
     'AphrontUsageException' => 'AphrontException',
-    'AphrontView' => 'Phobject',
+    'AphrontView' =>
+    array(
+      0 => 'Phobject',
+      1 => 'PhutilSafeHTMLProducerInterface',
+    ),
     'AphrontWebpageResponse' => 'AphrontHTMLResponse',
     'AuditPeopleMenuEventListener' => 'PhutilEventListener',
     'CelerityPhabricatorResourceController' => 'CelerityResourceController',
