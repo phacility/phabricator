@@ -195,6 +195,12 @@ class ManiphestAuxiliaryFieldDefaultSpecification
           $value = array();
         }
         break;
+      case self::TYPE_DATE:
+        $value = (int)$value;
+        if ($value <= 0) {
+          return $this->setDefaultValue($value);
+        }
+        break;
       default:
         break;
     }
@@ -336,11 +342,22 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         }
         break;
       case self::TYPE_DATE:
-        $new_display = phabricator_datetime($new, $this->getUser());
+        // NOTE: Although it should be impossible to get bad data in these
+        // fields normally, users can change the type of an existing field and
+        // leave us with uninterpretable data in old transactions.
+        if ((int)$new <= 0) {
+          $new_display = "(invalid epoch timestamp: {$new})";
+        } else {
+          $new_display = phabricator_datetime($new, $this->getUser());
+        }
         if ($old === null) {
           $desc = "set field '{$label}' to '{$new_display}'";
         } else {
-          $old_display = phabricator_datetime($old, $this->getUser());
+          if ((int)$old <= 0) {
+            $old_display = "(invalid epoch timestamp: {$old})";
+          } else {
+            $old_display = phabricator_datetime($old, $this->getUser());
+          }
           $desc = "changed field '{$label}' ".
                   "from '{$old_display}' to '{$new_display}'";
         }
