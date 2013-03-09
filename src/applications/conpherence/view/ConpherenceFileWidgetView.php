@@ -58,7 +58,7 @@ final class ConpherenceFileWidgetView extends AphrontView {
         ->setNoDataString(pht('No files attached to conpherence.'))
         ->setHeaders(array('', pht('Name')))
         ->setColumnClasses(array('', 'wide wrap'));
-    return $this->renderSingleView(array($header, $table));
+    return array($header, $table);
 
   }
 

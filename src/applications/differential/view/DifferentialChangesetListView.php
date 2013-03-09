@@ -187,19 +187,18 @@ final class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    return $this->renderSingleView(
-      array(
-        id(new PhabricatorHeaderView())
-          ->setHeader($this->getTitle())
-          ->render(),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'differential-review-stage',
-            'id'    => 'differential-review-stage',
-          ),
-          $output),
-      ));
+    return array(
+      id(new PhabricatorHeaderView())
+        ->setHeader($this->getTitle())
+        ->render(),
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'differential-review-stage',
+          'id'    => 'differential-review-stage',
+        ),
+        $output),
+    );
   }
 
   /**

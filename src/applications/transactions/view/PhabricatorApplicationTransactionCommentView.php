@@ -58,20 +58,19 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     if (!$user->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
         ->setQueryParam('next', (string) $this->getRequestURI());
-      return self::renderSingleView(
-        phutil_tag(
-          'div',
+      return phutil_tag(
+        'div',
+        array(
+          'class' => 'login-to-comment'
+        ),
+        javelin_tag(
+          'a',
           array(
-            'class' => 'login-to-comment'
+            'class' => 'button',
+            'sigil' => 'workflow',
+            'href' => $uri
           ),
-          javelin_tag(
-            'a',
-            array(
-              'class' => 'button',
-              'sigil' => 'workflow',
-              'href' => $uri
-            ),
-            pht('Login to Comment'))));
+          pht('Login to Comment')));
     }
 
     $data = array();
@@ -97,11 +96,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'draftKey'      => $this->getDraft()->getDraftKey(),
       ));
 
-    return self::renderSingleView(
-      array(
-        $comment,
-        $preview,
-      ));
+    return array($comment, $preview);
   }
 
   private function renderCommentPanel() {
@@ -157,11 +152,10 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'id'    => $this->getPreviewPanelID(),
         'style' => 'display: none',
       ),
-      self::renderSingleView(
-        array(
-          $header,
-          $preview,
-        )));
+      array(
+        $header,
+        $preview,
+      ));
   }
 
   private function getPreviewPanelID() {

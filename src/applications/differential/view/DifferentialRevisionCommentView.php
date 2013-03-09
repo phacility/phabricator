@@ -210,7 +210,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $xaction_view->appendChild(hsprintf(
         '<div class="differential-comment-core">%s%s</div>',
         $content,
-        $this->renderSingleView($inline_render)));
+        $inline_render));
     }
 
     return $xaction_view->render();

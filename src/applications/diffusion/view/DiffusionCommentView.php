@@ -144,7 +144,7 @@ final class DiffusionCommentView extends AphrontView {
         $engine->getOutput(
           $comment,
           PhabricatorAuditComment::MARKUP_FIELD_BODY),
-        $this->renderSingleView($this->renderInlines()));
+        $this->renderInlines());
     }
   }
 

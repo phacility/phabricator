@@ -52,7 +52,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
         "\xE2\x80\xA6");
     }
 
-    return $this->renderSingleView($tags);
+    return $tags;
   }
 
 }

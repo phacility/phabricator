@@ -15,7 +15,7 @@ final class AphrontCrumbsView extends AphrontView {
 
     $out = array();
     foreach ($this->crumbs as $crumb) {
-      $out[] = $this->renderSingleView($crumb);
+      $out[] = $crumb;
     }
     $out = phutil_implode_html(
       hsprintf('<span class="aphront-crumbs-spacer">'."\xC2\xBB".'</span>'),

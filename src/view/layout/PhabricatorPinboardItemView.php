@@ -103,13 +103,12 @@ final class PhabricatorPinboardItemView extends AphrontView {
       array(
         'class' => 'phabricator-pinboard-item-view',
       ),
-      $this->renderSingleView(
-        array(
-          $header,
-          $image,
-          $icons,
-          $content,
-        )));
+      array(
+        $header,
+        $image,
+        $icons,
+        $content,
+      ));
   }
 
 }

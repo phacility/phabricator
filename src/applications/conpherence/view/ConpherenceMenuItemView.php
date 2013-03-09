@@ -139,14 +139,13 @@ final class ConpherenceMenuItemView extends AphrontTagView {
         (int)$this->unreadCount);
     }
 
-    return $this->renderSingleView(
-      array(
-        $image,
-        $title,
-        $subtitle,
-        $message,
-        $epoch,
-        $unread_count,
-      ));
+    return array(
+      $image,
+      $title,
+      $subtitle,
+      $message,
+      $epoch,
+      $unread_count,
+    );
   }
 }

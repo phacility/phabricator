@@ -23,7 +23,7 @@ final class PhabricatorTimelineView extends AphrontView {
     $events = array();
     foreach ($this->events as $event) {
       $events[] = $spacer;
-      $events[] = $this->renderSingleView($event);
+      $events[] = $event;
     }
     $events[] = $spacer;
 

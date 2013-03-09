@@ -55,7 +55,7 @@ final class PhabricatorCrumbsView extends AphrontView {
         array(
           'class' => 'phabricator-crumbs-actions',
         ),
-        $this->renderSingleView($actions));
+        $actions);
     }
 
     if ($this->crumbs) {
@@ -68,11 +68,10 @@ final class PhabricatorCrumbsView extends AphrontView {
         'class' => 'phabricator-crumbs-view '.
                    'sprite-gradient gradient-breadcrumbs',
       ),
-      $this->renderSingleView(
-        array(
-          $action_view,
-          $this->crumbs,
-        )));
+      array(
+        $action_view,
+        $this->crumbs,
+      ));
   }
 
 }

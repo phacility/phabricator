@@ -119,7 +119,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
           : 'phabricator-feed-story',
         'style' => $image_style,
       ),
-      $this->renderSingleView(array($head, $body, $foot)));
+      array($head, $body, $foot));
   }
 
 }

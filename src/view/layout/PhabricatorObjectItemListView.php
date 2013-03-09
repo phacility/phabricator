@@ -48,7 +48,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
     }
 
     if ($this->items) {
-      $items = $this->renderSingleView($this->items);
+      $items = $this->items;
     } else {
       $string = nonempty($this->noDataString, pht('No data.'));
       $items = id(new AphrontErrorView())
@@ -58,7 +58,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
 
     $pager = null;
     if ($this->pager) {
-      $pager = $this->renderSingleView($this->pager);
+      $pager = $this->pager;
     }
 
     $classes[] = 'phabricator-object-item-list-view';
@@ -71,12 +71,11 @@ final class PhabricatorObjectItemListView extends AphrontView {
       array(
         'class' => implode(' ', $classes),
       ),
-      $this->renderSingleView(
-        array(
-          $header,
-          $items,
-          $pager,
-        )));
+      array(
+        $header,
+        $items,
+        $pager,
+      ));
   }
 
 }

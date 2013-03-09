@@ -42,7 +42,7 @@ final class PhabricatorActionListView extends AphrontView {
       array(
         'class' => 'phabricator-action-list-view',
       ),
-      $this->renderSingleView($actions));
+      $actions);
   }
 
 
