@@ -20,7 +20,7 @@ JX.behavior('phabricator-gesture', function(config) {
   var p1;
 
   JX.Stratcom.listen(
-    ['touchstart', 'mousedown'],
+    ['touchstart', 'touchcancel', 'mousedown'],
     'touchable',
     function(e) {
       if (JX.Device.getDevice() == 'desktop') {
@@ -29,14 +29,12 @@ JX.behavior('phabricator-gesture', function(config) {
       if (JX.Stratcom.pass()) {
         return;
       }
-
-      if (target && e.getType() == 'touchstart') {
-        // This corresponds to a second finger touching while the first finger
-        // is held: stop the swipe.
-        var event_data = get_swipe_data();
-        var event_target = target;
-        stop_swipe();
-        JX.DOM.invoke(event_target, 'gesture.swipe.cancel', event_data);
+      if (target) {
+        try {
+          JX.DOM.invoke(target, 'gesture.swipe.cancel', get_swipe_data());
+        } finally {
+          stop_swipe();
+        }
         return;
       }
 
@@ -89,30 +87,30 @@ JX.behavior('phabricator-gesture', function(config) {
     });
 
   JX.Stratcom.listen(
-    ['touchend', 'touchcancel', 'mouseup'],
+    ['touchend', 'mouseup'],
     null,
     function(e) {
       if (!target) {
         return;
       }
 
-      // NOTE: Clear the event state first so we don't keep swiping if a
-      // handler throws.
-      var event_target = target;
-      var event_data = get_swipe_data();
-      stop_swipe();
-
-      JX.DOM.invoke(event_target, 'gesture.swipe.end', event_data);
+      try {
+        if (swiping) {
+          JX.DOM.invoke(target, 'gesture.swipe.end', get_swipe_data());
+        }
+      } finally {
+        stop_swipe();
+      }
     });
 
   function get_swipe_data() {
-    var dir = (p1.x > p0.x) ? 'left' : 'right';
+    var direction = (p1.x > p0.x) ? 'right' : 'left';
     var length = Math.abs(p1.x - p0.x);
 
     return {
       p0: p0,
       p1: p1,
-      dir: dir,
+      direction: direction,
       length: length
     };
   }

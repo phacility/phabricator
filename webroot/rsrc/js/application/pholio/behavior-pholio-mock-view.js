@@ -598,6 +598,16 @@ JX.behavior('pholio-mock-view', function(config) {
     })
     .register();
 
+  JX.DOM.listen(panel, 'gesture.swipe.end', null, function(e) {
+    var data = e.getData();
+
+    if (data.length <= (JX.Vector.getDim(panel) / 2)) {
+      // If the user didn't move their finger far enough, don't switch.
+      return;
+    }
+
+    switch_image(data.direction == 'right' ? -1 : 1);
+  });
 
 /* -(  Render  )------------------------------------------------------------- */
 

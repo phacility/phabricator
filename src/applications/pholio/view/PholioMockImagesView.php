@@ -94,7 +94,7 @@ final class PholioMockImagesView extends AphrontView {
       'div',
       array(
         'id' => $panel_id,
-        'sigil' => 'mock-panel',
+        'sigil' => 'mock-panel touchable',
         'class' => 'pholio-mock-image-panel',
       ),
       $mock_wrapper);
