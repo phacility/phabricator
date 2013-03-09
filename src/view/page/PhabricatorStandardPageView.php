@@ -154,6 +154,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     Javelin::initBehavior('toggle-class', array());
     Javelin::initBehavior('konami', array());
     Javelin::initBehavior('history-install');
+    Javelin::initBehavior('phabricator-gesture');
 
     $current_token = null;
     if ($user) {
