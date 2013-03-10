@@ -302,6 +302,7 @@ JX.behavior('pholio-mock-view', function(config) {
       if (!is_dragging) {
         return;
       }
+
       is_dragging = false;
       if (!config.loggedIn) {
         new JX.Workflow(config.logInLink).start();
@@ -309,6 +310,8 @@ JX.behavior('pholio-mock-view', function(config) {
       }
 
       drag_end = get_image_xy(JX.$V(e));
+
+      resize_selection(16);
 
       var data = {mockID: config.mockID};
       var handler = function(r) {
@@ -327,6 +330,50 @@ JX.behavior('pholio-mock-view', function(config) {
         .setHandler(handler)
         .start();
     });
+
+  function resize_selection(min_size) {
+    var start = {
+      x: Math.min(drag_begin.x, drag_end.x),
+      y: Math.min(drag_begin.y, drag_end.y)
+    };
+    var end = {
+      x: Math.max(drag_begin.x, drag_end.x),
+      y: Math.max(drag_begin.y, drag_end.y)
+    };
+
+    var width = end.x - start.x;
+    var height = end.y - start.y;
+
+    if (width < min_size) {
+      var addon = (min_size-width)/2;
+
+      start.x = Math.max(0, start.x - addon);
+      end.x = Math.min(active_image.tag.naturalWidth, end.x + addon);
+
+      if (start.x == 0) {
+        end.x = Math.min(min_size, active_image.tag.naturalWidth);
+      } else if (end.x == active_image.tag.naturalWidth) {
+        start.x = Math.max(0, active_image.tag.naturalWidth - min_size);
+      }
+    }
+
+    if (height < min_size) {
+      var addon = (min_size-height)/2;
+
+      start.y = Math.max(0, start.y - addon);
+      end.y = Math.min(active_image.tag.naturalHeight, end.y + addon);
+
+      if (start.y == 0) {
+        end.y = Math.min(min_size, active_image.tag.naturalHeight);
+      } else if (end.y == active_image.tag.naturalHeight) {
+        start.y = Math.max(0, active_image.tag.naturalHeight - min_size);
+      }
+    }
+
+    drag_begin = start;
+    drag_end = end;
+    redraw_selection();
+  }
 
   function redraw_inlines(id) {
     if (!active_image) {
