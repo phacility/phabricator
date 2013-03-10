@@ -79,31 +79,69 @@ abstract class DifferentialFreeformFieldSpecification
     return $tasks_statuses;
   }
 
-  public function didWriteRevision(DifferentialRevisionEditor $editor) {
-    $message = $this->renderValueForCommitMessage(false);
-    $tasks = $this->findMentionedTasks($message);
-    if (!$tasks) {
-      return;
+  private function findDependentRevisions($message) {
+    $dependents = array();
+
+    $matches = null;
+    preg_match_all(
+      '/\b(?i:depends\s+on)\s+D(\d+(,\s+D\d++)*)\b/',
+      $message,
+      $matches);
+
+    foreach ($matches[1] as $revisions) {
+      foreach (preg_split('/,\s+D/', $revisions) as $id) {
+        $dependents[$id] = $id;
+      }
     }
 
-    $revision_phid = $editor->getRevision()->getPHID();
-    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+    return $dependents;
+  }
 
-    $add_phids = id(new ManiphestTask())
-      ->loadAllWhere('id IN (%Ld)', array_keys($tasks));
-    $add_phids = mpull($add_phids, 'getPHID');
+  public function didWriteRevision(DifferentialRevisionEditor $editor) {
+    $message = $this->renderValueForCommitMessage(false);
+
+    $tasks = $this->findMentionedTasks($message);
+    if ($tasks) {
+      $tasks = id(new ManiphestTask())
+        ->loadAllWhere('id IN (%Ld)', array_keys($tasks));
+      $this->saveFieldEdges(
+        $editor->getRevision(),
+        PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
+        mpull($tasks, 'getPHID'));
+    }
+
+    $dependents = $this->findDependentRevisions($message);
+    if ($dependents) {
+      $dependents = id(new DifferentialRevision())
+        ->loadAllWhere('id IN (%Ld)', $dependents);
+      $this->saveFieldEdges(
+        $editor->getRevision(),
+        PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
+        mpull($dependents, 'getPHID'));
+    }
+  }
+
+  private function saveFieldEdges(
+    DifferentialRevision $revision,
+    $edge_type,
+    array $add_phids) {
+
+    $revision_phid = $revision->getPHID();
 
     $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $revision_phid,
       $edge_type);
 
     $add_phids = array_diff($add_phids, $old_phids);
+    if (!$add_phids) {
+      return;
+    }
 
     $edge_editor = id(new PhabricatorEdgeEditor())->setActor($this->getUser());
     foreach ($add_phids as $phid) {
       $edge_editor->addEdge($revision_phid, $edge_type, $phid);
     }
-    // NOTE: Deletes only through Maniphest Tasks field.
+    // NOTE: Deletes only through the fields.
     $edge_editor->save();
   }
 
