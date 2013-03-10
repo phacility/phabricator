@@ -6,9 +6,6 @@
   padding: 8px 6px;
 }
 
-.phabricator-object-item-list-view.phabricator-object-list-stackable .phabricator-object-item {
-  margin: -1px 0 0 0;
-}
 
 .device-desktop .phabricator-object-item-list-view {
   padding: 20px;
@@ -25,29 +22,70 @@
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
 }
 
-.phabricator-object-list-stackable .phabricator-object-item {
-  border-width: 1px;
-}
-
-.device-desktop .phabricator-object-list-stackable .phabricator-object-item:hover {
-  border-width: 1px;
-  background: #e9ecf5;
-}
-
 .device-desktop .phabricator-object-item {
   margin: 0 0 5px 0;
 }
 
 .phabricator-object-item-name {
   display: block;
-  padding: 8px 10px 2px;
+  padding: 8px 10px 8px;
   font-weight: bold;
   font-size: 14px;
+}
+
+.phabricator-object-item-with-attrs .phabricator-object-item-name {
+  padding-bottom: 2px;
 }
 
 .phabricator-object-item-content {
   overflow: hidden;
 }
+
+
+/* - Stackable List ------------------------------------------------------------
+
+  Tighter, stacking list.
+
+*/
+
+.phabricator-object-item-list-view.phabricator-object-list-stackable
+  .phabricator-object-item {
+  margin: -1px 0 0 0;
+}
+
+.phabricator-object-list-stackable .phabricator-object-item {
+  border-width: 1px;
+}
+
+.device-desktop .phabricator-object-list-stackable
+  .phabricator-object-item:hover {
+  border-width: 1px;
+  background: #e9ecf5;
+}
+
+
+/* - Card List -----------------------------------------------------------------
+
+  Rounded card list.
+
+*/
+
+.phabricator-object-list-cards .phabricator-object-item {
+  border-radius: 3px;
+  border-left-width: 4px;
+  background: #f6f6f6;
+}
+
+
+.phabricator-object-list-cards .phabricator-object-item-name {
+  display: block;
+  padding: 6px 10px 6px;
+  font-weight: normal;
+  font-size: 13px;
+  color: #555555;
+  max-height: 2em;
+}
+
 
 /* - Attribute List ------------------------------------------------------------
 
@@ -91,7 +129,8 @@
   width: 120px;
 }
 
-.device-desktop .phabricator-object-item-content {
+.device-desktop .phabricator-object-item-with-icons
+  .phabricator-object-item-content {
   margin-right: 132px;
 }
 
@@ -99,7 +138,7 @@
   width: 18px;
 }
 
-.device .phabricator-object-item-content {
+.device .phabricator-object-item-with-icons .phabricator-object-item-content {
   margin-right: 30px;
 }
 
@@ -188,5 +227,79 @@
 */
 
 .phabricator-object-item-highlighted {
-  background: #ffff88;
+  background: #ffffb2;
+}
+
+.phabricator-object-item-selected {
+  background: #bfdcff;
+}
+
+
+/* - Foot ----------------------------------------------------------------------
+
+  This goes at the bottom.
+
+*/
+
+.phabricator-object-item-foot {
+  clear: both;
+  padding: 0;
+}
+
+
+/* - Foot Icons ----------------------------------------------------------------
+
+  Object counts shown in the footer.
+
+*/
+
+.phabricator-object-item-foot-icons {
+  margin-left: 10px;
+}
+
+.phabricator-object-item-foot-icon {
+  display: inline-block;
+  background: #909090;
+  color: #ffffff;
+  font-weight: bold;
+  margin-right: 3px;
+  padding: 1px 4px 0 22px;
+  height: 19px;
+  vertical-align: middle;
+  position: relative;
+}
+
+.phabricator-object-item-with-handle-icons .phabricator-object-item-foot-icon {
+  margin-top: 8px;
+}
+
+.phabricator-object-item-foot-icon .sprite-icon {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  left: 4px;
+  top: 3px;
+}
+
+
+/* - Handle Icons --------------------------------------------------------------
+
+  Shows owners, reviewers, etc.
+
+*/
+
+.phabricator-object-item-handle-icons {
+  float: right;
+  height: 28px;
+  margin-right: 10px;
+}
+
+.phabricator-object-item-handle-icon {
+  margin-left: 3px;
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  background: #f3f3f3;
+  background-size: 28px 28px;
+  background-repeat: no-repeat;
 }

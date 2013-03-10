@@ -6,6 +6,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
   private $items;
   private $pager;
   private $stackable;
+  private $cards;
   private $noDataString;
 
   public function setHeader($header) {
@@ -28,8 +29,13 @@ final class PhabricatorObjectItemListView extends AphrontView {
     return $this;
   }
 
-  public function setStackable() {
-    $this->stackable = true;
+  public function setStackable($stackable) {
+    $this->stackable = $stackable;
+    return $this;
+  }
+
+  public function setCards($cards) {
+    $this->cards = $cards;
     return $this;
   }
 
@@ -64,6 +70,9 @@ final class PhabricatorObjectItemListView extends AphrontView {
     $classes[] = 'phabricator-object-item-list-view';
     if ($this->stackable) {
       $classes[] = 'phabricator-object-list-stackable';
+    }
+    if ($this->cards) {
+      $classes[] = 'phabricator-object-list-cards';
     }
 
     return phutil_tag(
