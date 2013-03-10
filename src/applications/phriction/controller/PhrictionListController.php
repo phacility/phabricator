@@ -78,15 +78,54 @@ final class PhrictionListController
 
     $rows = array();
     foreach ($documents as $document) {
+      $project_link = 'None';
+      if ($document->hasProject()) {
+        $project_phid = $document->getProject()->getPHID();
+        $project_link = $handles[$project_phid]->renderLink();
+      }
+
       $content = $document->getContent();
+
+      $change_type = null;
+      if ($this->view == 'updates') {
+        $change_type = $content->getChangeType();
+        switch ($content->getChangeType()) {
+          case PhrictionChangeType::CHANGE_DELETE:
+          case PhrictionChangeType::CHANGE_EDIT:
+            $change_type = PhrictionChangeType::getChangeTypeLabel(
+              $change_type);
+            break;
+          case PhrictionChangeType::CHANGE_MOVE_HERE:
+          case PhrictionChangeType::CHANGE_MOVE_AWAY:
+            $change_ref = $content->getChangeRef();
+            $ref_doc = $documents[$change_ref];
+            $ref_doc_slug = PhrictionDocument::getSlugURI(
+              $ref_doc->getSlug());
+            $ref_doc_link = hsprintf('<br /><a href="%s">%s</a>', $ref_doc_slug,
+              phutil_utf8_shorten($ref_doc_slug, 15));
+
+            if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
+              $change_type = pht('Moved from %s', $ref_doc_link);
+            } else {
+              $change_type = pht('Moved to %s', $ref_doc_link);
+            }
+            break;
+          default:
+            throw new Exception("Unknown change type!");
+            break;
+        }
+      }
+
       $rows[] = array(
         $handles[$content->getAuthorPHID()]->renderLink(),
+        $change_type,
         phutil_tag(
           'a',
           array(
             'href' => PhrictionDocument::getSlugURI($document->getSlug()),
           ),
           $content->getTitle()),
+        $project_link,
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
       );
@@ -96,7 +135,9 @@ final class PhrictionListController
     $document_table->setHeaders(
       array(
         pht('Last Editor'),
+        pht('Change Type'),
         pht('Title'),
+        pht('Project'),
         pht('Last Update'),
         pht('Time'),
       ));
@@ -104,12 +145,22 @@ final class PhrictionListController
     $document_table->setColumnClasses(
       array(
         '',
+        '',
         'wide pri',
+        '',
         'right',
         'right',
       ));
 
-    $view_header = $views[$this->view];
+    $document_table->setColumnVisibility(
+      array(
+        true,
+        $this->view == 'updates',
+        true,
+        true,
+        true,
+        true,
+      ));
 
     $panel = new AphrontPanelView();
     $panel->setNoBackground();
@@ -122,6 +173,7 @@ final class PhrictionListController
       $nav,
       array(
         'title' => pht('Phriction Main'),
+        'dust' => true,
       ));
   }
 
