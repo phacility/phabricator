@@ -163,7 +163,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
     $classes = array();
     $classes[] = 'phabricator-timeline-event-view';
     $classes[] = 'phabricator-timeline-border';
-    if ($content) {
+    if (!$this->isEmptyContent($content)) {
       $classes[] = 'phabricator-timeline-major-event';
       $content = phutil_tag(
         'div',
