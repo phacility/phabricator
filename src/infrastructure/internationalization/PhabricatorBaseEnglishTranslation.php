@@ -279,6 +279,13 @@ abstract class PhabricatorBaseEnglishTranslation
         'You have %d unresolved setup issues...',
       ),
 
+      '%s added %d inline comment(s).' => array(
+        array(
+          '%s added an inline comment.',
+          '%s added inline comments.',
+        ),
+      ),
+
     );
   }
 

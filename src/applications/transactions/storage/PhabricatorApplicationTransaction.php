@@ -26,10 +26,15 @@ abstract class PhabricatorApplicationTransaction
 
   private $handles;
   private $renderingTarget = self::TARGET_HTML;
+  private $transactionGroup = array();
 
   abstract public function getApplicationTransactionType();
   abstract public function getApplicationTransactionCommentObject();
   abstract public function getApplicationObjectTypeName();
+
+  public function getApplicationTransactionViewObject() {
+    return new PhabricatorApplicationTransactionView();
+  }
 
   public function generatePHID() {
     $type = PhabricatorPHIDConstants::PHID_TYPE_XACT;
@@ -328,6 +333,17 @@ abstract class PhabricatorApplicationTransaction
   public function renderChangeDetails(PhabricatorUser $viewer) {
     return null;
   }
+
+  public function attachTransactionGroup(array $group) {
+    assert_instances_of($group, 'PhabricatorApplicationTransaction');
+    $this->transactionGroup = $group;
+    return $this;
+  }
+
+  public function getTransactionGroup() {
+    return $this->transactionGroup;
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

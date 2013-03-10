@@ -77,7 +77,7 @@ final class PholioMockViewController extends PholioController {
       ->setMock($mock)
       ->setImageID($this->imageID);
 
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
+    $xaction_view = id(new PholioTransactionView())
       ->setUser($this->getRequest()->getUser())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
