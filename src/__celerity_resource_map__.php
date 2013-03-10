@@ -1963,7 +1963,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/fb05d457/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/eefc43b3/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(

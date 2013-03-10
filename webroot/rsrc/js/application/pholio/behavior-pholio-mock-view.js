@@ -674,13 +674,37 @@ JX.behavior('pholio-mock-view', function(config) {
       image.desc);
     info.push(desc);
 
-    var visible = null;
+    // Render image dimensions and visible size. If we have this infomation
+    // from the server we can display some of it immediately; otherwise, we need
+    // to wait for the image to load so we can read dimension information from
+    // it.
+
+    var image_x = image.width;
+    var image_y = image.height;
+    var display_x = null;
     if (image.tag) {
-      var area = Math.round(100 * (image.tag.width / image.width));
-      area = ['(' + area + '%' + ')'];
-      visible = [' ', JX.$N('span', {className: 'pholio-visible-size'}, area)];
+      image_x = image.tag.naturalWidth;
+      image_y = image.tag.naturalHeight;
+      display_x = image.tag.width;
     }
-    info.push([image.width, '\u00d7', image.height, 'px', visible]);
+
+    var visible = [];
+    if (image_x) {
+      visible.push([image_x, '\u00d7', image_y, 'px']);
+      if (display_x) {
+        var area = Math.round(100 * (display_x / image_x));
+        visible.push(' ');
+        visible.push(
+          JX.$N(
+            'span',
+            {className: 'pholio-visible-size'},
+            ['(', area, '%', ')']));
+      }
+    }
+
+    if (visible.length) {
+      info.push(visible);
+    }
 
     var full_link = JX.$N(
       'a',
@@ -772,5 +796,29 @@ JX.behavior('pholio-mock-view', function(config) {
     JX.Stratcom.addSigil(el, 'pholio-device-lightbox');
     return el;
   }
+
+
+/* -(  Preload  )------------------------------------------------------------ */
+
+  var preload = [];
+  for (var ii = 0; ii < config.images.length; ii++) {
+    preload.push(config.images[ii].fullURI);
+  }
+
+  function preload_next() {
+    next_src = preload[0];
+    if (!next_src) {
+      return;
+    }
+    preload.splice(0, 1);
+
+    var img = JX.$N('img');
+    img.onload = preload_next;
+    img.onerror = preload_next;
+    img.src = next_src;
+  }
+
+  preload_next();
+
 
 });
