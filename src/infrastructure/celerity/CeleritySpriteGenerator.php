@@ -256,6 +256,38 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildDocsSheet() {
+    $icons = $this->getDirectoryList('docs_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(32, 32);
+
+    $sprites = array();
+    $prefix = 'docs_';
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName($prefix.$icon)
+        ->setTargetCSS('.'.$prefix.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('docs', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
   public function buildGradientSheet() {
     $gradients = $this->getDirectoryList('gradients');
 

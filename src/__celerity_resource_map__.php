@@ -497,6 +497,20 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-conpher.png',
     'type' => 'png',
   ),
+  '/rsrc/image/sprite-docs-X2.png' =>
+  array(
+    'hash' => '57d3286ce88133f3ec9240e35f6bb897',
+    'uri' => '/res/57d3286c/rsrc/image/sprite-docs-X2.png',
+    'disk' => '/rsrc/image/sprite-docs-X2.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/sprite-docs.png' =>
+  array(
+    'hash' => 'b2b089072d6eddd831402a77c02b5736',
+    'uri' => '/res/b2b08907/rsrc/image/sprite-docs.png',
+    'disk' => '/rsrc/image/sprite-docs.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/sprite-gradient.png' =>
   array(
     'hash' => '92aebaab67dcc6baf2ea99294368d895',
@@ -3454,6 +3468,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/sprite-conpher.css',
+  ),
+  'sprite-docs-css' =>
+  array(
+    'uri' => '/res/b32f93bc/rsrc/css/sprite-docs.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/sprite-docs.css',
   ),
   'sprite-gradient-css' =>
   array(
