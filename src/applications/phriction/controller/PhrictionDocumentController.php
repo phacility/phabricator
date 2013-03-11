@@ -132,7 +132,7 @@ final class PhrictionDocumentController
         pht('Document Index'));
 
       $byline = hsprintf(
-        '<div class="phriction-byline">%s.%s</div>',
+        '<div class="phriction-byline">%s%s</div>',
         pht('Last updated %s by %s.',
           $when,
           $handles[$content->getAuthorPHID()]->renderLink()),
