@@ -43,28 +43,89 @@ final class PhrictionListController
         $header,
       ));
 
-    $pager = new AphrontPagerView();
-    $pager->setURI($request->getRequestURI(), 'page');
-    $pager->setOffset($request->getInt('page'));
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
 
-    $documents = $this->loadDocuments($pager);
+    $query = id(new PhrictionDocumentQuery())
+      ->setViewer($user);
 
-    $content = mpull($documents, 'getContent');
-    $phids = mpull($content, 'getAuthorPHID');
+    switch ($this->view) {
+      case 'active':
+        $query->withStatus(PhrictionDocumentQuery::STATUS_OPEN);
+        break;
+      case 'all':
+        $query->withStatus(PhrictionDocumentQuery::STATUS_NONSTUB);
+        break;
+      case 'updates':
+        $query->withStatus(PhrictionDocumentQuery::STATUS_NONSTUB);
+        $query->setOrder(PhrictionDocumentQuery::ORDER_UPDATED);
+        break;
+      default:
+        throw new Exception("Unknown view '{$this->view}'!");
+    }
+
+    $documents = $query->executeWithCursorPager($pager);
+
+    $phids = array();
+    foreach ($documents as $document) {
+      $phids[] = $document->getContent()->getAuthorPHID();
+      if ($document->hasProject()) {
+        $phids[] = $document->getProject()->getPHID();
+      }
+    }
 
     $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($documents as $document) {
+      $project_link = 'None';
+      if ($document->hasProject()) {
+        $project_phid = $document->getProject()->getPHID();
+        $project_link = $handles[$project_phid]->renderLink();
+      }
+
       $content = $document->getContent();
+
+      $change_type = null;
+      if ($this->view == 'updates') {
+        $change_type = $content->getChangeType();
+        switch ($content->getChangeType()) {
+          case PhrictionChangeType::CHANGE_DELETE:
+          case PhrictionChangeType::CHANGE_EDIT:
+            $change_type = PhrictionChangeType::getChangeTypeLabel(
+              $change_type);
+            break;
+          case PhrictionChangeType::CHANGE_MOVE_HERE:
+          case PhrictionChangeType::CHANGE_MOVE_AWAY:
+            $change_ref = $content->getChangeRef();
+            $ref_doc = $documents[$change_ref];
+            $ref_doc_slug = PhrictionDocument::getSlugURI(
+              $ref_doc->getSlug());
+            $ref_doc_link = hsprintf('<br /><a href="%s">%s</a>', $ref_doc_slug,
+              phutil_utf8_shorten($ref_doc_slug, 15));
+
+            if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
+              $change_type = pht('Moved from %s', $ref_doc_link);
+            } else {
+              $change_type = pht('Moved to %s', $ref_doc_link);
+            }
+            break;
+          default:
+            throw new Exception("Unknown change type!");
+            break;
+        }
+      }
+
       $rows[] = array(
         $handles[$content->getAuthorPHID()]->renderLink(),
+        $change_type,
         phutil_tag(
           'a',
           array(
             'href' => PhrictionDocument::getSlugURI($document->getSlug()),
           ),
           $content->getTitle()),
+        $project_link,
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
       );
@@ -74,7 +135,9 @@ final class PhrictionListController
     $document_table->setHeaders(
       array(
         pht('Last Editor'),
+        pht('Change Type'),
         pht('Title'),
+        pht('Project'),
         pht('Last Update'),
         pht('Time'),
       ));
@@ -82,12 +145,22 @@ final class PhrictionListController
     $document_table->setColumnClasses(
       array(
         '',
+        '',
         'wide pri',
+        '',
         'right',
         'right',
       ));
 
-    $view_header = $views[$this->view];
+    $document_table->setColumnVisibility(
+      array(
+        true,
+        $this->view == 'updates',
+        true,
+        true,
+        true,
+        true,
+      ));
 
     $panel = new AphrontPanelView();
     $panel->setNoBackground();
@@ -100,72 +173,8 @@ final class PhrictionListController
       $nav,
       array(
         'title' => pht('Phriction Main'),
+        'dust' => true,
       ));
-  }
-
-  private function loadDocuments(AphrontPagerView $pager) {
-
-    // TODO: Do we want/need a query object for this?
-
-    $document_dao = new PhrictionDocument();
-    $content_dao = new PhrictionContent();
-    $conn = $document_dao->establishConnection('r');
-
-    switch ($this->view) {
-      case 'active':
-        $data = queryfx_all(
-          $conn,
-          'SELECT * FROM %T WHERE status NOT IN (%Ld) ORDER BY id DESC '.
-            'LIMIT %d, %d',
-          $document_dao->getTableName(),
-          array(
-            PhrictionDocumentStatus::STATUS_DELETED,
-            PhrictionDocumentStatus::STATUS_MOVED,
-          ),
-          $pager->getOffset(),
-          $pager->getPageSize() + 1);
-        break;
-      case 'all':
-        $data = queryfx_all(
-          $conn,
-          'SELECT * FROM %T ORDER BY id DESC LIMIT %d, %d',
-          $document_dao->getTableName(),
-          $pager->getOffset(),
-          $pager->getPageSize() + 1);
-        break;
-      case 'updates':
-
-        // TODO: This query is a little suspicious, verify we don't need to key
-        // or change it once we get more data.
-
-        $data = queryfx_all(
-          $conn,
-          'SELECT d.* FROM %T d JOIN %T c ON c.documentID = d.id
-            GROUP BY c.documentID
-            ORDER BY MAX(c.id) DESC LIMIT %d, %d',
-          $document_dao->getTableName(),
-          $content_dao->getTableName(),
-          $pager->getOffset(),
-          $pager->getPageSize() + 1);
-        break;
-      default:
-        throw new Exception("Unknown view '{$this->view}'!");
-    }
-
-    $data = $pager->sliceResults($data);
-
-    $documents = $document_dao->loadAllFromArray($data);
-    if ($documents) {
-      $content = $content_dao->loadAllWhere(
-        'documentID IN (%Ld)',
-        mpull($documents, 'getID'));
-      $content = mpull($content, null, 'getDocumentID');
-      foreach ($documents as $document) {
-        $document->attachContent($content[$document->getID()]);
-      }
-    }
-
-    return $documents;
   }
 
 }

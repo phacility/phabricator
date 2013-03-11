@@ -485,7 +485,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
             $color = '#ffd'; // Render as warning.
           } else {
             $color_ratio = ($blame['epoch'] - $epoch_min) / $epoch_range;
-            $color_value = 0xF6 * (1.0 - $color_ratio);
+            $color_value = 0xE6 * (1.0 - $color_ratio);
             $color = sprintf(
               '#%02x%02x%02x',
               $color_value,

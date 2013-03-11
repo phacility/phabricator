@@ -48,7 +48,7 @@ final class PhabricatorConfigIssueListController
   private function buildIssueList(array $issues) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PhabricatorObjectItemListView();
-    $list->setStackable();
+    $list->setStackable(true);
     $ignored_items = array();
 
     foreach ($issues as $issue) {

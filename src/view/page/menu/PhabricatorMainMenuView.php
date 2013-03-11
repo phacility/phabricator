@@ -56,7 +56,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         array(
           'class' => 'phabricator-main-menu-alerts',
         ),
-        self::renderSingleView($alerts));
+        $alerts);
     }
 
     $application_menu = $this->getApplicationMenu();
@@ -72,17 +72,15 @@ final class PhabricatorMainMenuView extends AphrontView {
         'id'    => $header_id,
       ),
       array(
-        self::renderSingleView(array(
-          $this->renderPhabricatorMenuButton($header_id),
-          $application_menu
-            ? $this->renderApplicationMenuButton($header_id)
-            : null,
-          $this->renderPhabricatorLogo(),
-          $alerts,
-          $phabricator_menu,
-          $application_menu,
-        )),
-        self::renderSingleView($menus),
+        $this->renderPhabricatorMenuButton($header_id),
+        $application_menu
+          ? $this->renderApplicationMenuButton($header_id)
+          : null,
+        $this->renderPhabricatorLogo(),
+        $alerts,
+        $phabricator_menu,
+        $application_menu,
+        $menus,
       ));
   }
 

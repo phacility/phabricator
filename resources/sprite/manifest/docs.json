@@ -1,0 +1,51 @@
+{
+  "version" : 1,
+  "sprites" : {
+    "docs_audio" : {
+      "name" : "docs_audio",
+      "rule" : ".docs_audio",
+      "hash" : "d3fccd15fc53b04b6caf22a3bb5f4634"
+    },
+    "docs_doc"   : {
+      "name" : "docs_doc",
+      "rule" : ".docs_doc",
+      "hash" : "31496e2953350c276a6b8619b071f299"
+    },
+    "docs_file"  : {
+      "name" : "docs_file",
+      "rule" : ".docs_file",
+      "hash" : "3d88ce46362e723cf76bf552550c82a6"
+    },
+    "docs_image" : {
+      "name" : "docs_image",
+      "rule" : ".docs_image",
+      "hash" : "8eaa89c50f3be46c87706d649bd304af"
+    },
+    "docs_movie" : {
+      "name" : "docs_movie",
+      "rule" : ".docs_movie",
+      "hash" : "859f7df4027e145290607d78d9500b45"
+    },
+    "docs_pdf"   : {
+      "name" : "docs_pdf",
+      "rule" : ".docs_pdf",
+      "hash" : "c423839d6b35baf59e79c0cd8d3e580f"
+    },
+    "docs_place" : {
+      "name" : "docs_place",
+      "rule" : ".docs_place",
+      "hash" : "8ee9e4dad7df830c487227083e0091f5"
+    },
+    "docs_zip"   : {
+      "name" : "docs_zip",
+      "rule" : ".docs_zip",
+      "hash" : "91d6be2027be6a7791477ac12cd94b6d"
+    }
+  },
+  "scales"  : [
+    1,
+    2
+  ],
+  "header"  : "\/**\n * @provides sprite-docs-css\n * @generated\n *\/\n\n.sprite-docs {\n  background-image: url(\/rsrc\/image\/sprite-docs.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-docs {\n    background-image: url(\/rsrc\/image\/sprite-docs-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type"    : "standard"
+}

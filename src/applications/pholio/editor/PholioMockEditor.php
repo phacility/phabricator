@@ -158,4 +158,16 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
   }
 
 
+  protected function shouldImplyCC(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PholioTransactionType::TYPE_INLINE:
+        return true;
+    }
+
+    return parent::shouldImplyCC($object, $xaction);
+  }
+
 }

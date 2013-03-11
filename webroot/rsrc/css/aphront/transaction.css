@@ -51,3 +51,14 @@
   padding:        .3em 1em;
   overflow:       auto;
 }
+
+.phabricator-transaction-subheader {
+  color: #888888;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+div.phabricator-remarkup + .phabricator-transaction-subheader {
+  margin-top: 12px;
+}

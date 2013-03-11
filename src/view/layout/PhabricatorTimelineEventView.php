@@ -138,7 +138,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
         ),
         array($title, $extra));
 
-      $title = $this->renderSingleView(array($icon, $title));
+      $title = array($icon, $title);
     }
 
     $wedge = phutil_tag(
@@ -163,7 +163,7 @@ final class PhabricatorTimelineEventView extends AphrontView {
     $classes = array();
     $classes[] = 'phabricator-timeline-event-view';
     $classes[] = 'phabricator-timeline-border';
-    if ($content) {
+    if (!$this->isEmptyContent($content)) {
       $classes[] = 'phabricator-timeline-major-event';
       $content = phutil_tag(
         'div',
@@ -275,16 +275,15 @@ final class PhabricatorTimelineEventView extends AphrontView {
             ->setAnchorName($this->anchor)
             ->render();
 
-          $date = $this->renderSingleView(
-            array(
-              $anchor,
-              phutil_tag(
-                'a',
-                array(
-                  'href' => '#'.$this->anchor,
-                ),
-                $date),
-            ));
+          $date = array(
+            $anchor,
+            phutil_tag(
+              'a',
+              array(
+                'href' => '#'.$this->anchor,
+              ),
+              $date),
+          );
         }
         $extra[] = $date;
       }

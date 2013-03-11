@@ -363,3 +363,8 @@ table.aphront-form-control-checkbox-layout th {
 .picker-open .calendar-button {
   border-left: 1px solid white;
 }
+
+.login-to-comment {
+  padding: 12px;
+  float: right;
+}

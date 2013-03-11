@@ -42,17 +42,33 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   }
 
   public function buildEvents() {
-    $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
-    $engine = $this->getOrBuildEngine();
-
     $user = $this->getUser();
 
     $anchor = $this->anchorOffset;
     $events = array();
-    foreach ($this->transactions as $xaction) {
+
+    $xactions = $this->transactions;
+    foreach ($xactions as $key => $xaction) {
       if ($xaction->shouldHide()) {
-        continue;
+        unset($xactions[$key]);
       }
+    }
+
+    $last = null;
+    $last_key = null;
+    $groups = array();
+    foreach ($xactions as $key => $xaction) {
+      if ($last && $this->shouldGroupTransactions($last, $xaction)) {
+        $groups[$last_key][] = $xaction;
+        unset($xactions[$key]);
+      } else {
+        $last = $xaction;
+        $last_key = $key;
+      }
+    }
+
+    foreach ($xactions as $key => $xaction) {
+      $xaction->attachTransactionGroup(idx($groups, $key, array()));
 
       $event = id(new PhabricatorTimelineEventView())
         ->setUser($user)
@@ -103,12 +119,9 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         }
       }
 
-      if ($xaction->hasComment()) {
-        $event->appendChild(
-          $engine->getOutput($xaction->getComment(), $field));
-      } else if ($has_deleted_comment) {
-        $event->appendChild(phutil_tag('em', array(), pht(
-          'This comment has been deleted.')));
+      $content = $this->renderTransactionContent($xaction);
+      if ($content) {
+        $event->appendChild($content);
       }
 
       $events[] = $event;
@@ -141,7 +154,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   }
 
 
-  private function getOrBuildEngine() {
+  protected function getOrBuildEngine() {
     if ($this->engine) {
       return $this->engine;
     }
@@ -215,6 +228,32 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     );
   }
 
+  protected function shouldGroupTransactions(
+    PhabricatorApplicationTransaction $u,
+    PhabricatorApplicationTransaction $v) {
+    return false;
+  }
+
+  protected function renderTransactionContent(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $field = PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT;
+    $engine = $this->getOrBuildEngine();
+    $comment = $xaction->getComment();
+
+    if ($comment) {
+      if ($comment->getIsDeleted()) {
+        return phutil_tag(
+          'em',
+          array(),
+          pht('This comment has been deleted.'));
+      } else {
+        return $engine->getOutput($comment, $field);
+      }
+    }
+
+    return null;
+  }
 
 }
 

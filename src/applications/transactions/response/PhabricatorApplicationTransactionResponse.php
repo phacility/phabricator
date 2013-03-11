@@ -47,7 +47,14 @@ final class PhabricatorApplicationTransactionResponse
   }
 
   public function reduceProxyResponse() {
-    $view = id(new PhabricatorApplicationTransactionView())
+    if ($this->getTransactions()) {
+      $view = head($this->getTransactions())
+        ->getApplicationTransactionViewObject();
+    } else {
+      $view = new PhabricatorApplicationTransactionView();
+    }
+
+    $view
       ->setUser($this->getViewer())
       ->setTransactions($this->getTransactions())
       ->setIsPreview($this->isPreview);
@@ -69,5 +76,6 @@ final class PhabricatorApplicationTransactionResponse
 
     return $this->getProxy()->setContent($content);
   }
+
 
 }

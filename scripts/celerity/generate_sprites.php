@@ -33,8 +33,7 @@ $sheets = array(
   'conpher' => $generator->buildConpherenceSheet(),
   'apps-large' => $generator->buildAppsLargeSheet(),
   'tokens' => $generator->buildTokenSheet(),
-// TODO: @chad: should we actually remove this?
-//  'apps-xlarge' => $generator->buildAppsXLargeSheet(),
+  'docs' => $generator->buildDocsSheet(),
   'gradient' => $generator->buildGradientSheet(),
 );
 

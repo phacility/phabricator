@@ -4,6 +4,15 @@ final class PholioMockImagesView extends AphrontView {
 
   private $mock;
   private $imageID;
+  private $requestURI;
+
+  public function setRequestURI(PhutilURI $request_uri) {
+    $this->requestURI = $request_uri;
+    return $this;
+  }
+  public function getRequestURI() {
+    return $this->requestURI;
+  }
 
   public function setImageID($image_id) {
     $this->imageID = $image_id;
@@ -57,12 +66,16 @@ final class PholioMockImagesView extends AphrontView {
       );
     }
 
+    $login_uri = id(new PhutilURI('/login/'))
+      ->setQueryParam('next', (string) $this->getRequestURI());
     $config = array(
       'mockID' => $mock->getID(),
       'panelID' => $panel_id,
       'viewportID' => $viewport_id,
       'images' => $images,
       'selectedID' => $selected_id,
+      'loggedIn' => $this->getUser()->isLoggedIn(),
+      'logInLink' => (string) $login_uri
     );
     Javelin::initBehavior('pholio-mock-view', $config);
 
@@ -81,7 +94,7 @@ final class PholioMockImagesView extends AphrontView {
       'div',
       array(
         'id' => $panel_id,
-        'sigil' => 'mock-panel',
+        'sigil' => 'mock-panel touchable',
         'class' => 'pholio-mock-image-panel',
       ),
       $mock_wrapper);
@@ -145,6 +158,6 @@ final class PholioMockImagesView extends AphrontView {
         ),
       array($mock_wrapper, $carousel_holder, $inline_comments_holder));
 
-    return $this->renderSingleView($mockview);
+    return $mockview;
   }
 }

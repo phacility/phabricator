@@ -81,13 +81,13 @@ final class ConpherenceTransactionView extends AphrontView {
         break;
     }
 
-    $transaction_view
-      ->appendChild(phutil_tag(
+    $transaction_view->appendChild(
+      phutil_tag(
         'div',
         array(
           'class' => $content_class
         ),
-        $this->renderSingleView($content)));
+        $content));
 
     return $transaction_view->render();
   }

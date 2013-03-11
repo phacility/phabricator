@@ -97,3 +97,13 @@
   font-size: 11px;
   width: 260px;
 }
+
+.conpherence-widget-pane .widget-icon {
+  display: block;
+  height: 14px;
+  width: 14px;
+}
+
+.conpherence-widget-pane .phabricator-remarkup-embed-layout-link {
+  padding-bottom: 1px;
+}

@@ -6,6 +6,21 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
     return $this->getValue('projectPHID');
   }
 
+  public function getRequiredHandlePHIDs() {
+    $req_phids = array();
+    $data = $this->getStoryData();
+    switch ($data->getValue('type')) {
+      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+          $old = $data->getValue('old');
+          $new = $data->getValue('new');
+          $add = array_diff($new, $old);
+          $rem = array_diff($old, $new);
+          $req_phids = array_merge($add, $rem);
+        break;
+    }
+    return array_merge($req_phids, parent::getRequiredHandlePHIDs());
+  }
+
   public function renderView() {
     $data = $this->getStoryData();
 

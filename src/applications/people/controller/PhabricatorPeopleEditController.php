@@ -54,6 +54,7 @@ final class PhabricatorPeopleEditController
       pht('View Profile'), '/p/'.$user->getUsername().'/');
     $nav->addLabel(pht('Special'));
     $nav->addFilter('rename', pht('Change Username'));
+    $nav->addFilter('picture', pht('Set Account Picture'));
     $nav->addFilter('delete', pht('Delete User'));
 
     if (!$user->getID()) {
@@ -85,6 +86,9 @@ final class PhabricatorPeopleEditController
         break;
       case 'rename':
         $response = $this->processRenameRequest($user);
+        break;
+      case 'picture':
+        $response = $this->processSetAccountPicture($user);
         break;
       case 'delete':
         $response = $this->processDeleteRequest($user);
@@ -707,6 +711,134 @@ final class PhabricatorPeopleEditController
     return hsprintf(
       '<p class="aphront-form-instructions">%s</p>',
       $inst);
+  }
+
+  private function processSetAccountPicture(PhabricatorUser $user) {
+    $request = $this->getRequest();
+    $admin = $request->getUser();
+
+    $profile = id(new PhabricatorUserProfile())->loadOneWhere(
+      'userPHID = %s',
+      $user->getPHID());
+    if (!$profile) {
+      $profile = new PhabricatorUserProfile();
+      $profile->setUserPHID($user->getPHID());
+      $profile->setTitle('');
+      $profile->setBlurb('');
+    }
+
+
+
+    $supported_formats = PhabricatorFile::getTransformableImageFormats();
+
+    $e_image = null;
+    $errors = array();
+
+    if ($request->isFormPost()) {
+      $default_image = $request->getExists('default_image');
+
+      if ($default_image) {
+        $profile->setProfileImagePHID(null);
+        $user->setProfileImagePHID(null);
+      } else if ($request->getFileExists('image')) {
+        $file = null;
+        $file = PhabricatorFile::newFromPHPUpload(
+          $_FILES['image'],
+          array(
+            'authorPHID' => $admin->getPHID(),
+          ));
+
+        $okay = $file->isTransformableImage();
+
+        if ($okay) {
+          $xformer = new PhabricatorImageTransformer();
+
+          // Generate the large picture for the profile page.
+          $large_xformed = $xformer->executeProfileTransform(
+            $file,
+            $width = 280,
+            $min_height = 140,
+            $max_height = 420);
+          $profile->setProfileImagePHID($large_xformed->getPHID());
+
+          // Generate the small picture for comments, etc.
+          $small_xformed = $xformer->executeProfileTransform(
+            $file,
+            $width = 50,
+            $min_height = 50,
+            $max_height = 50);
+          $user->setProfileImagePHID($small_xformed->getPHID());
+        } else {
+          $e_image = pht('Not Supported');
+          $errors[] =
+            pht('This server only supports these image formats:').
+              ' ' .implode(', ', $supported_formats);
+        }
+      }
+
+     if (!$errors) {
+       $user->save();
+       $profile->save();
+        $response = id(new AphrontRedirectResponse())
+          ->setURI('/people/edit/'.$user->getID().'/picture/');
+        return $response;
+      }
+    }
+
+
+    $error_view = null;
+    if ($errors) {
+      $error_view = new AphrontErrorView();
+      $error_view->setTitle(pht('Form Errors'));
+      $error_view->setErrors($errors);
+    } else {
+      if ($request->getStr('saved')) {
+        $error_view = new AphrontErrorView();
+        $error_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $error_view->setTitle(pht('Changes Saved'));
+        $error_view->appendChild(
+          phutil_tag('p', array(), pht('Your changes have been saved.')));
+        $error_view = $error_view->render();
+      }
+    }
+
+    $img_src = $user->loadProfileImageURI();
+
+    $form = new AphrontFormView();
+    $form
+      ->setUser($admin)
+      ->setAction($request->getRequestURI())
+      ->setEncType('multipart/form-data')
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Profile Image'))
+          ->setValue(
+            phutil_tag(
+              'img',
+              array(
+                'src' => $img_src,
+              ))))
+      ->appendChild(
+        id(new AphrontFormImageControl())
+          ->setLabel(pht('Change Image'))
+          ->setName('image')
+          ->setError($e_image)
+          ->setCaption(
+            pht('Supported formats: %s', implode(', ', $supported_formats))));
+
+      $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Save'))
+        ->addCancelButton('/people/edit/'.$user->getID().'/'));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader(pht('Set Profile Picture'));
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setNoBackground();
+    $panel->appendChild($form);
+
+    return array($error_view, $panel);
+
   }
 
 }

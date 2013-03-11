@@ -118,7 +118,7 @@ final class PholioInlineCommentView extends AphrontView {
       $classes[] = 'pholio-inline-comment-draft';
     }
 
-    $comment_block = javelin_tag(
+    return javelin_tag(
       'div',
       array(
         'id' => "{$phid}_comment",
@@ -129,8 +129,5 @@ final class PholioInlineCommentView extends AphrontView {
         )
       ),
       array($comment_header, $comment_body));
-
-
-    return $this->renderSingleView($comment_block);
   }
 }

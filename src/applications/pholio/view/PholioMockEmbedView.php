@@ -94,13 +94,11 @@ final class PholioMockEmbedView extends AphrontView {
       $icon_list);
 
 
-    $mock_view = phutil_tag(
+    return phutil_tag(
       'div',
       array(
         'class' => 'pholio-mock-embed'
       ),
       array($mock_header, $mock_body, $mock_footer));
-
-    return $this->renderSingleView($mock_view);
   }
 }

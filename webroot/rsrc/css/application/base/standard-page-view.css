@@ -54,12 +54,12 @@
   float: right;
 }
 
-.handle-status-closed:link {
+a.handle-status-closed {
   text-decoration: line-through;
   color: #676767;
 }
 
-.handle-status-closed:hover {
+a.handle-status-closed:hover {
   text-decoration: line-through;
   color: #19558D;
 }

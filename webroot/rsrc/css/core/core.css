@@ -99,15 +99,8 @@ h2 {
 a {
   -moz-outline-style: none;
   text-decoration: none;
+  color: #18559D;
   cursor: pointer;
-}
-
-a:visited {
-  color: #18559D;
-}
-
-a:link {
-  color: #18559D;
 }
 
 a:hover {

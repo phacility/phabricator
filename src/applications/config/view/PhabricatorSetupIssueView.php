@@ -115,12 +115,11 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue',
       ),
-      $this->renderSingleView(
-        array(
-          $name,
-          $description,
-          $next,
-        )));
+      array(
+        $name,
+        $description,
+        $next,
+      ));
   }
 
   private function renderPhabricatorConfig(array $configs) {
@@ -188,13 +187,12 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-config',
       ),
-      self::renderSingleView(
-        array(
-          $table_info,
-          $table,
-          $update_info,
-          $update,
-        )));
+      array(
+        $table_info,
+        $table,
+        $update_info,
+        $update,
+      ));
   }
 
   private function renderPHPConfig(array $configs) {
@@ -294,12 +292,11 @@ final class PhabricatorSetupIssueView extends AphrontView {
       array(
         'class' => 'setup-issue-config',
       ),
-      $this->renderSingleView(
-        array(
-          $table_info,
-          $table,
-          $info,
-        )));
+      array(
+        $table_info,
+        $table,
+        $info,
+      ));
   }
 
   private function renderValueTable(array $dict) {

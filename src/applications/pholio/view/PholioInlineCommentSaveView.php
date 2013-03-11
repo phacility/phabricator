@@ -41,11 +41,10 @@ final class PholioInlineCommentSaveView extends AphrontView {
         'class'     => 'pholio-new-inline-comment',
         'id'        => 'pholio-new-inline-comment-dialog'
       ),
-      $this->renderSingleView(
-        array(
-          $this->renderInputs(),
-          $this->renderBody(),
-        )));
+      array(
+        $this->renderInputs(),
+        $this->renderBody(),
+      ));
 
     return $content;
   }
@@ -109,23 +108,21 @@ final class PholioInlineCommentSaveView extends AphrontView {
       array(
         'class' => 'pholio-inline-comment-dialog-buttons',
       ),
-      $this->renderSingleView(
-        array(
-          $formatting,
-          $buttons,
-          phutil_tag('div', array('style' => 'clear: both'), ''),
-        )));
+      array(
+        $formatting,
+        $buttons,
+        phutil_tag('div', array('style' => 'clear: both'), ''),
+      ));
 
     return javelin_tag(
       'div',
       array(
       ),
-      $this->renderSingleView(
-        array(
-          $title,
-          $body,
-          $edit,
-        )));
+      array(
+        $title,
+        $body,
+        $edit,
+      ));
   }
 
 }

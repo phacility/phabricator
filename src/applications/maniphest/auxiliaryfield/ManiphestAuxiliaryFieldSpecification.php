@@ -3,7 +3,8 @@
 /**
  * @group maniphest
  */
-abstract class ManiphestAuxiliaryFieldSpecification {
+abstract class ManiphestAuxiliaryFieldSpecification
+  implements PhabricatorMarkupInterface {
 
   const RENDER_TARGET_HTML  = 'html';
   const RENDER_TARGET_TEXT  = 'text';
@@ -12,6 +13,28 @@ abstract class ManiphestAuxiliaryFieldSpecification {
   private $auxiliaryKey;
   private $caption;
   private $value;
+  private $user;
+  private $task;
+  private $markupEngine;
+  private $handles;
+
+  public function setTask(ManiphestTask $task) {
+    $this->task = $task;
+    return $this;
+  }
+
+  public function getTask() {
+    return $this->task;
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->user;
+  }
 
   public function setLabel($val) {
     $this->label = $val;
@@ -137,5 +160,72 @@ abstract class ManiphestAuxiliaryFieldSpecification {
     return 'updated a custom field';
   }
 
+  public function getRequiredHandlePHIDs() {
+    return array();
+  }
+
+  public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
+    $this->handles = array_select_keys(
+      $handles,
+      $this->getRequiredHandlePHIDs());
+    return $this;
+  }
+
+  public function getHandle($phid) {
+    if (empty($this->handles[$phid])) {
+      throw new Exception(
+        "Field is requesting a handle ('{$phid}') it did not require.");
+    }
+    return $this->handles[$phid];
+  }
+
+  public function getMarkupFields() {
+    return array();
+  }
+
+  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
+    $this->markupEngine = $engine;
+    return $this;
+  }
+
+  public function getMarkupEngine() {
+    return $this->markupEngine;
+  }
+
+
+/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    $hash = PhabricatorHash::digestForIndex($this->getMarkupText($field));
+    return 'maux:'.$this->getAuxiliaryKey().':'.$hash;
+  }
+
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newManiphestMarkupEngine();
+  }
+
+
+  public function getMarkupText($field) {
+    return $this->getValue();
+  }
+
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $output);
+  }
+
+  public function shouldUseMarkupCache($field) {
+    return true;
+  }
 
 }

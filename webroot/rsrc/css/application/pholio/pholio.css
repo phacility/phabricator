@@ -38,6 +38,25 @@
   border-color: #686868;
 }
 
+.device .pholio-mock-carousel-thumb-item {
+  width: 5px;
+  height: 5px;
+  padding: 0px;
+  border-radius: 5px;
+  margin: 5px 2px;
+  background: #383838;
+  border-color: #686868;
+}
+
+.device .pholio-mock-carousel-thumb-current {
+  background: #dfdfdf;
+  border-color: #ffffff;
+}
+
+.device .pholio-mock-carousel-thumb-item img {
+  display: none;
+}
+
 .pholio-mock-carousel-thumbnail {
   margin: auto;
   position: relative;

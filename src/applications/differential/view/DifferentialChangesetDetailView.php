@@ -92,17 +92,16 @@ final class DifferentialChangesetDetailView extends AphrontView {
         'class' => $class,
         'id'    => $id,
       ),
-      $this->renderSingleView(
-        array(
-          id(new PhabricatorAnchorView())
-            ->setAnchorName($changeset->getAnchorName())
-            ->setNavigationMarker(true)
-            ->render(),
-          $buttons,
-          phutil_tag('h1', array(), $display_filename),
-          phutil_tag('div', array('style' => 'clear: both'), ''),
-          $this->renderChildren(),
-        )));
+      array(
+        id(new PhabricatorAnchorView())
+          ->setAnchorName($changeset->getAnchorName())
+          ->setNavigationMarker(true)
+          ->render(),
+        $buttons,
+        phutil_tag('h1', array(), $display_filename),
+        phutil_tag('div', array('style' => 'clear: both'), ''),
+        $this->renderChildren(),
+      ));
   }
 
 }

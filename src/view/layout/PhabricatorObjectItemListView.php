@@ -6,6 +6,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
   private $items;
   private $pager;
   private $stackable;
+  private $cards;
   private $noDataString;
 
   public function setHeader($header) {
@@ -28,8 +29,13 @@ final class PhabricatorObjectItemListView extends AphrontView {
     return $this;
   }
 
-  public function setStackable() {
-    $this->stackable = true;
+  public function setStackable($stackable) {
+    $this->stackable = $stackable;
+    return $this;
+  }
+
+  public function setCards($cards) {
+    $this->cards = $cards;
     return $this;
   }
 
@@ -48,7 +54,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
     }
 
     if ($this->items) {
-      $items = $this->renderSingleView($this->items);
+      $items = $this->items;
     } else {
       $string = nonempty($this->noDataString, pht('No data.'));
       $items = id(new AphrontErrorView())
@@ -58,12 +64,15 @@ final class PhabricatorObjectItemListView extends AphrontView {
 
     $pager = null;
     if ($this->pager) {
-      $pager = $this->renderSingleView($this->pager);
+      $pager = $this->pager;
     }
 
     $classes[] = 'phabricator-object-item-list-view';
     if ($this->stackable) {
       $classes[] = 'phabricator-object-list-stackable';
+    }
+    if ($this->cards) {
+      $classes[] = 'phabricator-object-list-cards';
     }
 
     return phutil_tag(
@@ -71,12 +80,11 @@ final class PhabricatorObjectItemListView extends AphrontView {
       array(
         'class' => implode(' ', $classes),
       ),
-      $this->renderSingleView(
-        array(
-          $header,
-          $items,
-          $pager,
-        )));
+      array(
+        $header,
+        $items,
+        $pager,
+      ));
   }
 
 }

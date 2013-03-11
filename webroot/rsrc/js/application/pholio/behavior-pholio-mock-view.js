@@ -302,8 +302,16 @@ JX.behavior('pholio-mock-view', function(config) {
       if (!is_dragging) {
         return;
       }
+
       is_dragging = false;
+      if (!config.loggedIn) {
+        new JX.Workflow(config.logInLink).start();
+        return;
+      }
+
       drag_end = get_image_xy(JX.$V(e));
+
+      resize_selection(16);
 
       var data = {mockID: config.mockID};
       var handler = function(r) {
@@ -322,6 +330,50 @@ JX.behavior('pholio-mock-view', function(config) {
         .setHandler(handler)
         .start();
     });
+
+  function resize_selection(min_size) {
+    var start = {
+      x: Math.min(drag_begin.x, drag_end.x),
+      y: Math.min(drag_begin.y, drag_end.y)
+    };
+    var end = {
+      x: Math.max(drag_begin.x, drag_end.x),
+      y: Math.max(drag_begin.y, drag_end.y)
+    };
+
+    var width = end.x - start.x;
+    var height = end.y - start.y;
+
+    if (width < min_size) {
+      var addon = (min_size-width)/2;
+
+      start.x = Math.max(0, start.x - addon);
+      end.x = Math.min(active_image.tag.naturalWidth, end.x + addon);
+
+      if (start.x == 0) {
+        end.x = Math.min(min_size, active_image.tag.naturalWidth);
+      } else if (end.x == active_image.tag.naturalWidth) {
+        start.x = Math.max(0, active_image.tag.naturalWidth - min_size);
+      }
+    }
+
+    if (height < min_size) {
+      var addon = (min_size-height)/2;
+
+      start.y = Math.max(0, start.y - addon);
+      end.y = Math.min(active_image.tag.naturalHeight, end.y + addon);
+
+      if (start.y == 0) {
+        end.y = Math.min(min_size, active_image.tag.naturalHeight);
+      } else if (end.y == active_image.tag.naturalHeight) {
+        start.y = Math.max(0, active_image.tag.naturalHeight - min_size);
+      }
+    }
+
+    drag_begin = start;
+    drag_end = end;
+    redraw_selection();
+  }
 
   function redraw_inlines(id) {
     if (!active_image) {
@@ -581,18 +633,28 @@ JX.behavior('pholio-mock-view', function(config) {
 /* -(  Keyboard Shortcuts  )------------------------------------------------- */
 
 
-  new JX.KeyboardShortcut('j', 'Show next image.')
+  new JX.KeyboardShortcut(['j', 'right'], 'Show next image.')
     .setHandler(function() {
       switch_image(1);
     })
     .register();
 
-  new JX.KeyboardShortcut('k', 'Show previous image.')
+  new JX.KeyboardShortcut(['k', 'left'], 'Show previous image.')
     .setHandler(function() {
       switch_image(-1);
     })
     .register();
 
+  JX.DOM.listen(panel, 'gesture.swipe.end', null, function(e) {
+    var data = e.getData();
+
+    if (data.length <= (JX.Vector.getDim(panel) / 2)) {
+      // If the user didn't move their finger far enough, don't switch.
+      return;
+    }
+
+    switch_image(data.direction == 'right' ? -1 : 1);
+  });
 
 /* -(  Render  )------------------------------------------------------------- */
 
@@ -612,13 +674,37 @@ JX.behavior('pholio-mock-view', function(config) {
       image.desc);
     info.push(desc);
 
-    var visible = null;
+    // Render image dimensions and visible size. If we have this infomation
+    // from the server we can display some of it immediately; otherwise, we need
+    // to wait for the image to load so we can read dimension information from
+    // it.
+
+    var image_x = image.width;
+    var image_y = image.height;
+    var display_x = null;
     if (image.tag) {
-      var area = Math.round(100 * (image.tag.width / image.width));
-      area = ['(' + area + '%' + ')'];
-      visible = [' ', JX.$N('span', {className: 'pholio-visible-size'}, area)];
+      image_x = image.tag.naturalWidth;
+      image_y = image.tag.naturalHeight;
+      display_x = image.tag.width;
     }
-    info.push([image.width, '\u00d7', image.height, 'px', visible]);
+
+    var visible = [];
+    if (image_x) {
+      visible.push([image_x, '\u00d7', image_y, 'px']);
+      if (display_x) {
+        var area = Math.round(100 * (display_x / image_x));
+        visible.push(' ');
+        visible.push(
+          JX.$N(
+            'span',
+            {className: 'pholio-visible-size'},
+            ['(', area, '%', ')']));
+      }
+    }
+
+    if (visible.length) {
+      info.push(visible);
+    }
 
     var full_link = JX.$N(
       'a',
@@ -710,5 +796,29 @@ JX.behavior('pholio-mock-view', function(config) {
     JX.Stratcom.addSigil(el, 'pholio-device-lightbox');
     return el;
   }
+
+
+/* -(  Preload  )------------------------------------------------------------ */
+
+  var preload = [];
+  for (var ii = 0; ii < config.images.length; ii++) {
+    preload.push(config.images[ii].fullURI);
+  }
+
+  function preload_next() {
+    next_src = preload[0];
+    if (!next_src) {
+      return;
+    }
+    preload.splice(0, 1);
+
+    var img = JX.$N('img');
+    img.onload = preload_next;
+    img.onerror = preload_next;
+    img.src = next_src;
+  }
+
+  preload_next();
+
 
 });

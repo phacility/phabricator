@@ -44,7 +44,8 @@ Each array key must be unique, and is used to organize the internal storage of
 the field. These options are available:
 
   - **label**: Display label for the field on the edit and detail interfaces.
-  - **type**: Field type, one of **int**, **string**, **bool** or **select**.
+  - **type**: Field type: one of **int**, **string**, **bool**, **select**,
+    **remarkup**, **user**, **users**, or **date**.
   - **caption**: A caption to display underneath the field (optional).
   - **required**: True if the user should be required to provide a value.
   - **options**: If type is set to **select**, provide options for the dropdown
@@ -53,6 +54,10 @@ the field. These options are available:
     show next to the checkbox.
   - **checkbox-value**: If type is set to **bool**, the value to show on
     the detail view when the checkbox is selected.
+  - **default**: Default field value.
+    - For **date**, you can use a string like `"July 4, 1990"`, `"5PM today"`,
+      or any other valid input to `strtotime()`.
+    - For **user** and **users**, you can use an array of user PHIDs.
   - **copy**: When a user creates a task, the UI gives them an option to
     "Create Another Similar Task". Some fields from the original task are copied
     into the new task, while others are not; by default, fields are not copied.

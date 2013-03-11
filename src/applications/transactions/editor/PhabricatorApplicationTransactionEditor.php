@@ -429,9 +429,12 @@ abstract class PhabricatorApplicationTransactionEditor
       $phids = array_diff($phids, $this->subscribers);
     }
 
-    if (!$phids) {
-      return null;
+    foreach ($phids as $key => $phid) {
+      if ($object->isAutomaticallySubscribed($phid)) {
+        unset($phids[$key]);
+      }
     }
+    $phids = array_values($phids);
 
     $xaction = newv(get_class(head($xactions)), array());
     $xaction->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);

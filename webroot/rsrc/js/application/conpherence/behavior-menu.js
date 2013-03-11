@@ -2,13 +2,16 @@
  * @provides javelin-behavior-conpherence-menu
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-workflow
- *           javelin-util
+ *           javelin-request
  *           javelin-stratcom
  *           javelin-uri
+ *           javelin-util
+ *           javelin-workflow
  */
 
 JX.behavior('conpherence-menu', function(config) {
+
+  var root = JX.$(config.form_pane);
 
   function onwidgetresponse(context, response) {
     var widgets = JX.$H(response.widgets);
@@ -107,14 +110,39 @@ JX.behavior('conpherence-menu', function(config) {
     }
   );
 
+  JX.Stratcom.listen('click', 'conpherence-edit-metadata', function (e) {
+    e.kill();
+    var form = JX.DOM.find(root, 'form');
+    var data = e.getNodeData('conpherence-edit-metadata');
+    new JX.Workflow.newFromForm(form, data)
+      .setHandler(function (r) {
+        // update the header
+        JX.DOM.setContent(
+          JX.$(config.header),
+          JX.$H(r.header)
+        );
+
+        // update the menu entry as well
+        JX.DOM.replace(
+          JX.$(r.conpherence_phid + '-nav-item'),
+          JX.$H(r.nav_item)
+        );
+        JX.DOM.replace(
+          JX.$(r.conpherence_phid + '-menu-item'),
+          JX.$H(r.menu_item)
+        );
+      })
+      .start();
+  });
+
   JX.Stratcom.listen('click', 'show-older-messages', function(e) {
     e.kill();
     console.log(document.URL);
-  new JX.Request('/conpherence/view/1/', function(r) {
-    console.log('100');
-  })
-.setData({offset: 100}) // get the next page
-.send();
-});
+    new JX.Request('/conpherence/view/1/', function(r) {
+      console.log('100');
+    })
+    .setData({offset: 100}) // get the next page
+    .send();
+  });
 
 });
