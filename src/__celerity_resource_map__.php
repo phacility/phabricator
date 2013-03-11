@@ -763,6 +763,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/tooltip.css',
   ),
+  'aphront-two-column-view-css' =>
+  array(
+    'uri' => '/res/7afa129f/rsrc/css/aphront/two-column.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/two-column.css',
+  ),
   'aphront-typeahead-control-css' =>
   array(
     'uri' => '/res/ef59c20c/rsrc/css/aphront/typeahead.css',
