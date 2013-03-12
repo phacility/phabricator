@@ -273,15 +273,11 @@ abstract class PhabricatorApplication {
     $show_beta = PhabricatorEnv::getEnvConfig(
       'phabricator.show-beta-applications');
 
-    $uninstalled = PhabricatorEnv::getEnvConfig(
-      'phabricator.uninstalled-applications');
-
     if (empty($applications)) {
       $all_applications = self::getAllApplications();
       $apps = array();
       foreach ($all_applications as $app) {
-        $class = get_class($app);
-        if (isset($uninstalled[$class])) {
+        if (!$app->isInstalled()) {
           continue;
         }
 
