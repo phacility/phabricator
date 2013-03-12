@@ -7,49 +7,41 @@ final class PhabricatorNoteExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'Show little scrollable boxes of text.';
+    return pht('Bounded boxes of text.');
   }
 
   public function renderExample() {
     $short_note = id(new AphrontNoteView())
-      ->setTitle('Short note')
-      ->appendChild('This is a short note');
+      ->setTitle(pht('Short note'))
+      ->appendChild('xxxx xx x xxxxx xxxx');
 
     $longer_note = id(new AphrontNoteView())
-      ->setTitle('Longer note')
+      ->setTitle(pht('Longer note'))
       ->appendChild($this->buildParagraphs(2));
 
     $wide_url = 'protocol://www.'.str_repeat('x', 100).'.com/';
 
     $oversize_note = id(new AphrontNoteView())
-      ->setTitle('Oversize note')
+      ->setTitle(pht('Oversize note'))
       ->appendChild(
           $this->buildParagraphs(2).
           $wide_url."\n\n".
-          $this->buildParagraphs(5));
+          $this->buildParagraphs(15));
 
     $out = array();
 
     $out[] = id(new AphrontPanelView())
-      ->setHeader('Unbounded Oversize Note')
-      ->setCaption(
-          'The rest of these examples are contrained by a table, but this one '.
-          'is left free (it still constrains its max height though).')
+      ->setHeader(pht('Unbounded Oversize Note'))
       ->appendChild($oversize_note);
 
     $out[] = id(new AphrontPanelView())
-      ->setHeader("Short notes")
-      ->setCaption(
-          'Two notes of equal size, spacing out an 80% wide table.')
+      ->setHeader(pht('Short notes'))
       ->appendChild(
           $this->renderTable(
             array(array($short_note, $short_note))));
 
     $out[] = id(new AphrontPanelView())
-      ->setHeader("Mixed notes")
-      ->setCaption(
-          'Two rows of notes with unequal height, spacing out their '.
-          'rows vertically.')
+      ->setHeader(pht('Mixed notes'))
       ->appendChild(
           $this->renderTable(
             array(
@@ -58,10 +50,7 @@ final class PhabricatorNoteExample extends PhabricatorUIExample {
             )));
 
     $out[] = id(new AphrontPanelView())
-      ->setHeader("Oversize notes")
-      ->setCaption(
-          'Two rows each with a very large note, '.
-          'showing scrolling behavior.')
+      ->setHeader(pht('Oversize notes'))
       ->appendChild(
           $this->renderTable(
             array(
