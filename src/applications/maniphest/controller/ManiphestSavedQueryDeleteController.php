@@ -30,15 +30,17 @@ final class ManiphestSavedQueryDeleteController extends ManiphestController {
     }
 
     $name = $query->getName();
+    $inst = pht(
+      'Really delete the query "%s"? It will be lost forever!', $name);
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Really delete this query?')
+      ->setTitle(pht('Really delete this query?'))
       ->appendChild(hsprintf(
-        '<p>Really delete the query "%s"? It will be lost forever!</p>',
-        $name))
+        '<p>%s</p>',
+        $inst))
       ->addCancelButton('/maniphest/custom/')
-      ->addSubmitButton('Delete');
+      ->addSubmitButton(pht('Delete'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

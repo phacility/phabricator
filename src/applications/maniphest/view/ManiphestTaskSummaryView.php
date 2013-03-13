@@ -63,6 +63,7 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       $batch = phutil_tag(
         'td',
         array(
+          'rowspan' => 2,
           'class' => 'maniphest-task-batch',
         ),
         javelin_tag(
@@ -91,36 +92,14 @@ final class ManiphestTaskSummaryView extends ManiphestView {
     $handle = javelin_tag(
       'td',
       array(
+        'rowspan' => 2,
         'class' => 'maniphest-task-handle '.$pri_class.' '.$control_class,
         'sigil' => $control_sigil,
       ),
       '');
 
-    $task_id = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-number',
-      ),
-      'T'.$task->getID());
-
-    $task_status = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-status',
-      ),
-      idx($status_map, $task->getStatus(), 'Unknown'));
-
-    $task_owner = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-owner',
-      ),
-      $task->getOwnerPHID()
-        ? $handles[$task->getOwnerPHID()]->renderLink()
-        : phutil_tag('em', array(), pht('None')));
-
     $task_name = phutil_tag(
-      'td',
+      'span',
       array(
         'class' => 'maniphest-task-name',
       ),
@@ -131,6 +110,50 @@ final class ManiphestTaskSummaryView extends ManiphestView {
         ),
         $task->getTitle()));
 
+    $task_updated = phutil_tag(
+      'span',
+      array(
+        'class' => 'maniphest-task-updated',
+      ),
+      phabricator_date($task->getDateModified(), $this->user));
+
+    $task_info = phutil_tag(
+      'td',
+      array(
+        'colspan' => 2,
+        'class' => 'maniphest-task-number',
+      ),
+      array(
+        'T'.$task->getID(),
+        $task_name,
+        $task_updated,
+      ));
+
+    $owner = '';
+    if ($handles[$task->getOwnerPHID()]) {
+      $owner = pht('Assigned to %s',
+        $handles[$task->getOwnerPHID()]->renderLink());
+    }
+
+    $task_owner = phutil_tag(
+      'span',
+      array(
+        'class' => 'maniphest-task-owner',
+      ),
+      $task->getOwnerPHID()
+        ? $owner
+        : phutil_tag('em', array(), pht('None')));
+
+    $task_status = phutil_tag(
+      'td',
+      array(
+        'class' => 'maniphest-task-status',
+      ),
+      array(
+        idx($status_map, $task->getStatus(), pht('Unknown')),
+        $task_owner,
+      ));
+
     $task_projects = phutil_tag(
       'td',
       array(
@@ -138,25 +161,21 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       ),
       $projects_view->render());
 
-    $task_updated = phutil_tag(
-      'td',
-      array(
-        'class' => 'maniphest-task-updated',
-      ),
-      phabricator_date($task->getDateModified(), $this->user));
+    $row1 = phutil_tag(
+      'tr',
+        array(),
+        array(
+          $handle,
+          $batch,
+          $task_info,
+      ));
 
-    $row = phutil_tag(
+    $row2 = phutil_tag(
       'tr',
       array(),
       array(
-        $handle,
-        $batch,
-        $task_id,
         $task_status,
-        $task_owner,
-        $task_name,
         $task_projects,
-        $task_updated,
       ));
 
     return javelin_tag(
@@ -168,7 +187,10 @@ final class ManiphestTaskSummaryView extends ManiphestView {
           'taskID' => $task->getID(),
         ),
       ),
-      $row);
+      array(
+        $row1,
+        $row2,
+      ));
   }
 
 }

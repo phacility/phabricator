@@ -162,6 +162,7 @@ final class DifferentialRevisionListController extends DifferentialController {
 
     $filter_form = id(new AphrontFormView())
       ->setMethod('GET')
+      ->setNoShading(true)
       ->setAction('/differential/filter/'.$this->filter.'/')
       ->setUser($user);
     foreach ($controls as $control) {
@@ -199,6 +200,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       $side_nav,
       array(
         'title' => pht('Differential Home'),
+        'dust' => true,
       ));
   }
 

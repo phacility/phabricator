@@ -34,11 +34,11 @@ final class ManiphestReportController extends ManiphestController {
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/maniphest/report/'));
-    $nav->addLabel('Open Tasks');
-    $nav->addFilter('user',           'By User');
-    $nav->addFilter('project',        'By Project');
-    $nav->addLabel('Burnup');
-    $nav->addFilter('burn',           'Burnup Rate');
+    $nav->addLabel(pht('Open Tasks'));
+    $nav->addFilter('user', pht('By User'));
+    $nav->addFilter('project', pht('By Project'));
+    $nav->addLabel(pht('Burnup'));
+    $nav->addFilter('burn', pht('Burnup Rate'));
 
     $this->view = $nav->selectFilter($this->view, 'user');
 
@@ -210,20 +210,20 @@ final class ManiphestReportController extends ManiphestController {
 
     if ($week) {
       $rows[] = $this->formatBurnRow(
-        'Week To Date',
+        pht('Week To Date'),
         $week);
       $rowc[] = 'week';
     }
 
     if ($month) {
       $rows[] = $this->formatBurnRow(
-        'Month To Date',
+        pht('Month To Date'),
         $month);
       $rowc[] = 'month';
     }
 
     $rows[] = $this->formatBurnRow(
-      'All Time',
+      pht('All Time'),
       $period);
     $rowc[] = 'aggregate';
 
@@ -234,10 +234,10 @@ final class ManiphestReportController extends ManiphestController {
     $table->setRowClasses($rowc);
     $table->setHeaders(
       array(
-        'Period',
-        'Opened',
-        'Closed',
-        'Change',
+        pht('Period'),
+        pht('Opened'),
+        pht('Closed'),
+        pht('Change'),
       ));
     $table->setColumnClasses(
       array(
@@ -248,16 +248,17 @@ final class ManiphestReportController extends ManiphestController {
       ));
 
     if ($handle) {
-      $header = pht("Task Burn Rate for Project %s", $handle->renderLink());
-      $caption = hsprintf(
-        "<p>NOTE: This table reflects tasks <em>currently</em> in ".
+      $inst = pht(
+        "NOTE: This table reflects tasks <em>currently</em> in ".
         "the project. If a task was opened in the past but added to ".
         "the project recently, it is counted on the day it was ".
         "opened, not the day it was categorized. If a task was part ".
         "of this project in the past but no longer is, it is not ".
-        "counted at all.</p>");
+        "counted at all.");
+      $header = pht("Task Burn Rate for Project %s", $handle->renderLink());
+      $caption = hsprintf("<p>%s</p>", $inst);
     } else {
-      $header = "Task Burn Rate for All Tasks";
+      $header = pht("Task Burn Rate for All Tasks");
       $caption = null;
     }
 
@@ -315,7 +316,7 @@ final class ManiphestReportController extends ManiphestController {
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/searchproject/')
-          ->setLabel('Project')
+          ->setLabel(pht('Project'))
           ->setLimit(1)
           ->setName('set_project')
           ->setValue($tokens));
@@ -325,10 +326,10 @@ final class ManiphestReportController extends ManiphestController {
       $form
         ->appendChild(
           id(new AphrontFormTextControl())
-            ->setLabel('"Recently" Means')
+            ->setLabel(pht('Recently Means'))
             ->setName('set_window')
             ->setCaption(
-              'Configure the cutoff for the "Recently Closed" column.')
+              pht('Configure the cutoff for the "Recently Closed" column.'))
             ->setValue($window_str)
             ->setError($window_error));
     }
@@ -336,7 +337,7 @@ final class ManiphestReportController extends ManiphestController {
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Filter By Project'));
+          ->setValue(pht('Filter By Project')));
 
     $filter = new AphrontListFilterView();
     $filter->appendChild($form);
@@ -419,9 +420,9 @@ final class ManiphestReportController extends ManiphestController {
           array(
             'href' => $base_link.ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
           ),
-          phutil_tag('em', array(), '(Up For Grabs)'));
-        $col_header = 'User';
-        $header = 'Open Tasks by User and Priority ('.$date.')';
+          phutil_tag('em', array(), pht('(Up For Grabs)')));
+        $col_header = pht('User');
+        $header = pht('Open Tasks by User and Priority (%s)', $date);
         break;
       case 'project':
         $result = array();
@@ -456,9 +457,9 @@ final class ManiphestReportController extends ManiphestController {
           array(
             'href' => $base_link.ManiphestTaskOwner::PROJECT_NO_PROJECT,
           ),
-          phutil_tag('em', array(), '(No Project)'));
-        $col_header = 'Project';
-        $header = 'Open Tasks by Project and Priority ('.$date.')';
+          phutil_tag('em', array(), pht('(No Project)')));
+        $col_header = pht('Project');
+        $header = pht('Open Tasks by Project and Priority (%s)', $date);
         break;
     }
 
@@ -584,36 +585,37 @@ final class ManiphestReportController extends ManiphestController {
       array(
         'sigil' => 'has-tooltip',
         'meta'  => array(
-          'tip' => 'Oldest open task.',
+          'tip' => pht('Oldest open task.'),
           'size' => 200,
         ),
       ),
-      'Oldest (All)');
+      pht('Oldest (All)'));
     $cclass[] = 'n';
     $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
         'meta'  => array(
-          'tip' => 'Oldest open task, excluding those with Low or Wishlist '.
-                   'priority.',
+          'tip' => pht('Oldest open task, excluding those with Low or '.
+                   'Wishlist priority.'),
           'size' => 200,
         ),
       ),
-      'Oldest (Pri)');
+      pht('Oldest (Pri)'));
     $cclass[] = 'n';
 
     list($ignored, $window_epoch) = $this->getWindow();
+    $edate = phabricator_datetime($window_epoch, $user);
     $cname[] = javelin_tag(
       'span',
       array(
         'sigil' => 'has-tooltip',
         'meta'  => array(
-          'tip'  => 'Closed after '.phabricator_datetime($window_epoch, $user),
+          'tip'  => pht('Closed after %s', $edate),
           'size' => 260
         ),
       ),
-      'Recently Closed');
+      pht('Recently Closed'));
     $cclass[] = 'n';
 
     $table = new AphrontTableView($rows);

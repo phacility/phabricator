@@ -42,8 +42,8 @@ final class ManiphestSavedQueryEditController extends ManiphestController {
       $e_name = null;
       $query->setName($request->getStr('name'));
       if (!strlen($query->getName())) {
-        $e_name = 'Required';
-        $errors[] = 'Saved query name is required.';
+        $e_name = pht('Required');
+        $errors[] = pht('Saved query name is required.');
       }
 
       if (!$errors) {
@@ -54,17 +54,17 @@ final class ManiphestSavedQueryEditController extends ManiphestController {
 
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     } else {
       $error_view = null;
     }
 
     if ($query->getID()) {
-      $header = 'Edit Saved Query';
+      $header = pht('Edit Saved Query');
       $cancel_uri = '/maniphest/custom/';
     } else {
-      $header = 'New Saved Query';
+      $header = pht('New Saved Query');
       $cancel_uri = '/maniphest/view/custom/?key='.$key;
     }
 
@@ -74,14 +74,14 @@ final class ManiphestSavedQueryEditController extends ManiphestController {
       ->addHiddenInput('id',  $query->getID())
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setValue($query->getName())
           ->setName('name')
           ->setError($e_name))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new AphrontPanelView();
     $panel->setHeader($header);
@@ -94,10 +94,11 @@ final class ManiphestSavedQueryEditController extends ManiphestController {
     $nav->appendChild($error_view);
     $nav->appendChild($panel);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Saved Queries',
+        'title' => pht('Saved Queries'),
+        'device' => true,
       ));
   }
 
