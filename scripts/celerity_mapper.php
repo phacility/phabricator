@@ -70,7 +70,6 @@ $package_spec = array(
     'aphront-form-view-css',
     'aphront-panel-view-css',
     'aphront-table-view-css',
-    'aphront-crumbs-view-css',
     'aphront-tokenizer-control-css',
     'aphront-typeahead-control-css',
     'aphront-list-filter-view-css',
