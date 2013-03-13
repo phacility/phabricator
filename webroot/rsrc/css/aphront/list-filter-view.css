@@ -2,11 +2,23 @@
  * @provides aphront-list-filter-view-css
  */
 
+.aphront-filter-table-wrapper {
+  border-left: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  border-bottom: 1px solid #c0c5d1;
+  margin: 0 20px;
+}
+
+.device-phone .aphront-filter-table-wrapper {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
 .aphront-list-filter-view {
-  background: #f4f5f8;
-  border-bottom: 1px solid #d4dae0;
+  background: #fff;
   width: 100%;
-  margin-bottom: 1em;
+  box-shadow: inset 0px 2px 1px rgba(150,150,150,0.25);
 }
 
 .aphront-list-filter-view-controls {
@@ -15,6 +27,7 @@
 
 .aphront-list-filter-view-controls .aphront-form-view {
   border-width: 0;
+  border-bottom: 1px solid #c0c5d1;
   padding: 12px 0 6px;
 }
 

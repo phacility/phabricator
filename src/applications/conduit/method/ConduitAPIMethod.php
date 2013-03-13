@@ -75,6 +75,17 @@ abstract class ConduitAPIMethod {
     return false;
   }
 
+
+  /**
+   * Optionally, return a @{class:PhabricatorApplication} which this call is
+   * part of. The call will be disabled when the application is uninstalled.
+   *
+   * @return PhabricatorApplication|null  Related application.
+   */
+  public function getApplication() {
+    return null;
+  }
+
   public static function getAPIMethodNameFromClassName($class_name) {
     $match = null;
     $is_valid = preg_match(

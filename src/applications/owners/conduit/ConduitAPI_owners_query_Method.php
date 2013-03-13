@@ -4,7 +4,7 @@
  * @group conduit
  */
 final class ConduitAPI_owners_query_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_owners_Method {
 
   public function getMethodDescription() {
     return 'Query for packages by one of the following: repository/path, ' .

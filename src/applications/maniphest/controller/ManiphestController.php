@@ -10,7 +10,7 @@ abstract class ManiphestController extends PhabricatorController {
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 
-    $page->setApplicationName('Maniphest');
+    $page->setApplicationName(pht('Maniphest'));
     $page->setBaseURI('/maniphest/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\x93");
@@ -22,7 +22,7 @@ abstract class ManiphestController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  protected function buildBaseSideNav() {
+  protected function buildBaseSideNav($filter = null, $for_app = false) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/maniphest/view/'));
 
@@ -50,26 +50,34 @@ abstract class ManiphestController extends PhabricatorController {
           $query->getName(),
           '/maniphest/view/custom/?key='.$query->getQueryKey());
       }
-      $nav->addFilter('saved',  'Edit...', '/maniphest/custom/');
+      $nav->addFilter('saved',  pht('Edit...'), '/maniphest/custom/');
     }
 
-    $nav->addLabel('User Tasks');
-    $nav->addFilter('action',       'Assigned');
-    $nav->addFilter('created',      'Created');
-    $nav->addFilter('subscribed',   'Subscribed');
-    $nav->addFilter('triage',       'Need Triage');
-    $nav->addLabel('User Projects');
-    $nav->addFilter('projecttriage', 'Need Triage');
-    $nav->addFilter('projectall',   'All Tasks');
+    if ($for_app) {
+      $nav->addFilter('', pht('Create Task'),
+        $this->getApplicationURI('task/create/'));
+    }
+
+    $nav->addLabel(pht('User Tasks'));
+    $nav->addFilter('action', pht('Assigned'));
+    $nav->addFilter('created', pht('Created'));
+    $nav->addFilter('subscribed', pht('Subscribed'));
+    $nav->addFilter('triage', pht('Need Triage'));
+    $nav->addLabel(pht('User Projects'));
+    $nav->addFilter('projecttriage', pht('Need Triage'));
+    $nav->addFilter('projectall', pht('All Tasks'));
     $nav->addLabel('All Tasks');
-    $nav->addFilter('alltriage',    'Need Triage');
-    $nav->addFilter('all',          'All Tasks');
-    $nav->addLabel('Custom');
-    $nav->addFilter('custom',       'Custom Query');
-    $nav->addLabel('Reports');
-    $nav->addFilter('report',       'Reports', '/maniphest/report/');
+    $nav->addFilter('alltriage', pht('Need Triage'));
+    $nav->addFilter('all', pht('All Tasks'));
+    $nav->addLabel(pht('Custom'));
+    $nav->addFilter('custom', pht('Custom Query'));
+    $nav->addFilter('report', pht('Reports'), '/maniphest/report/');
 
     return $nav;
+  }
+
+  public function buildApplicationMenu() {
+    return $this->buildBaseSideNav(null, true)->getMenu();
   }
 
   protected function getDefaultQuery() {

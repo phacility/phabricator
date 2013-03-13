@@ -5,6 +5,11 @@
  */
 abstract class ConduitAPI_differential_Method extends ConduitAPIMethod {
 
+  public function getApplication() {
+    return PhabricatorApplication::getByClass(
+      'PhabricatorApplicationDifferential');
+  }
+
   protected function buildDiffInfoDictionary(DifferentialDiff $diff) {
     $uri = '/differential/diff/'.$diff->getID().'/';
     $uri = PhabricatorEnv::getProductionURI($uri);
@@ -14,7 +19,6 @@ abstract class ConduitAPI_differential_Method extends ConduitAPIMethod {
       'uri' => $uri,
     );
   }
-
 
   protected function buildInlineInfoDictionary(
     DifferentialInlineComment $inline,

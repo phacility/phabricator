@@ -63,16 +63,14 @@ abstract class PhabricatorApplication {
   }
 
   public function isInstalled() {
-    $uninstalled =
-      PhabricatorEnv::getEnvConfig('phabricator.uninstalled-applications');
+    $uninstalled = PhabricatorEnv::getEnvConfig(
+      'phabricator.uninstalled-applications');
 
-      if (!$this->canUninstall()) {
-        return true;
-      } else if (isset($uninstalled[get_class($this)])) {
-        return false;
-      } else {
-        return true;
-      }
+    if (!$this->canUninstall()) {
+      return true;
+    }
+
+    return empty($uninstalled[get_class($this)]);
   }
 
   public function isBeta() {
@@ -234,7 +232,6 @@ abstract class PhabricatorApplication {
 /* -(  Application Management  )--------------------------------------------- */
 
   public static function getByClass($class_name) {
-
     $selected = null;
     $applications = PhabricatorApplication::getAllApplications();
 
@@ -273,19 +270,14 @@ abstract class PhabricatorApplication {
   public static function getAllInstalledApplications() {
     static $applications;
 
-    $show_beta =
-      PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
-
-    $uninstalled =
-      PhabricatorEnv::getEnvConfig('phabricator.uninstalled-applications');
-
+    $show_beta = PhabricatorEnv::getEnvConfig(
+      'phabricator.show-beta-applications');
 
     if (empty($applications)) {
       $all_applications = self::getAllApplications();
       $apps = array();
       foreach ($all_applications as $app) {
-        $class = get_class($app);
-        if (isset($uninstalled[$class])) {
+        if (!$app->isInstalled()) {
           continue;
         }
 

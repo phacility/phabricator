@@ -27,18 +27,26 @@ final class ManiphestExportController extends ManiphestController {
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
 
-      $dialog->setTitle('Excel Export Not Configured');
-      $dialog->appendChild(hsprintf(
-        '<p>This system does not have PHPExcel installed. This software '.
+      $inst1 = pht(
+        'This system does not have PHPExcel installed. This software '.
         'component is required to export tasks to Excel. Have your system '.
-        'administrator install it from:</p>'.
+        'administrator install it from:');
+
+      $inst2 = pht(
+        'Your PHP "include_path" needs to be updated to include the '.
+        'PHPExcel Classes directory.');
+
+      $dialog->setTitle(pht('Excel Export Not Configured'));
+      $dialog->appendChild(hsprintf(
+        '<p>%s</p>'.
         '<br />'.
         '<p>'.
           '<a href="http://www.phpexcel.net/">http://www.phpexcel.net/</a>'.
         '</p>'.
         '<br />'.
-        '<p>Your PHP "include_path" needs to be updated to include the '.
-        'PHPExcel Classes/ directory.</p>'));
+        '<p>%s</p>',
+        $inst1,
+        $inst2));
 
       $dialog->addCancelButton('/maniphest/');
       return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -58,12 +66,12 @@ final class ManiphestExportController extends ManiphestController {
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
 
-      $dialog->setTitle('Export Tasks to Excel');
+      $dialog->setTitle(pht('Export Tasks to Excel'));
       $dialog->appendChild(phutil_tag('p', array(), pht(
         'Do you want to export the query results to Excel?')));
 
       $dialog->addCancelButton('/maniphest/');
-      $dialog->addSubmitButton('Export to Excel');
+      $dialog->addSubmitButton(pht('Export to Excel'));
       return id(new AphrontDialogResponse())->setDialog($dialog);
 
     }
@@ -85,7 +93,7 @@ final class ManiphestExportController extends ManiphestController {
 
     $workbook = new PHPExcel();
     $sheet = $workbook->setActiveSheetIndex(0);
-    $sheet->setTitle('Tasks');
+    $sheet->setTitle(pht('Tasks'));
 
     $widths = array(
       null,
@@ -113,16 +121,16 @@ final class ManiphestExportController extends ManiphestController {
 
     $rows = array();
     $rows[] = array(
-      'ID',
-      'Owner',
-      'Status',
-      'Priority',
-      'Date Created',
-      'Date Updated',
-      'Title',
-      'Projects',
-      'URI',
-      'Description',
+      pht('ID'),
+      pht('Owner'),
+      pht('Status'),
+      pht('Priority'),
+      pht('Date Created'),
+      pht('Date Updated'),
+      pht('Title'),
+      pht('Projects'),
+      pht('URI'),
+      pht('Description'),
     );
 
     $is_date = array(

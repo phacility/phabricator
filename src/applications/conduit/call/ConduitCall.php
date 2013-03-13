@@ -93,8 +93,16 @@ final class ConduitCall {
 
     if (!($method instanceof ConduitAPIMethod)) {
       throw new ConduitException(
-        "Method '{$method}' is not valid; the implementation must be ".
+        "Method '{$method_class}' is not valid; the implementation must be ".
         "a subclass of ConduitAPIMethod.");
+    }
+
+    $application = $method->getApplication();
+    if ($application && !$application->isInstalled()) {
+      $app_name = $application->getName();
+      throw new ConduitException(
+        "Method '{$method_class}' belongs to application '{$app_name}', ".
+        "which is not installed.");
     }
 
     return $method;

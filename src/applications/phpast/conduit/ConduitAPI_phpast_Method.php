@@ -3,12 +3,11 @@
 /**
  * @group conduit
  */
-abstract class ConduitAPI_macro_Method extends ConduitAPIMethod {
+abstract class ConduitAPI_phpast_Method extends ConduitAPIMethod {
 
   public function getApplication() {
     return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationMacro');
+      'PhabricatorApplicationPHPAST');
   }
-
 
 }

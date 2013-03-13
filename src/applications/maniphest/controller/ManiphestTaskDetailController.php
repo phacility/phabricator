@@ -107,7 +107,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         'href' => '/maniphest/task/create/?parent='.$parent_task->getID(),
         'class' => 'green button',
       ),
-      'Create Another Subtask'));
+      pht('Create Another Subtask')));
       $context_bar->appendChild(hsprintf(
         'Created a subtask of <strong>%s</strong>',
         $this->getHandle($parent_task->getPHID())->renderLink()));
@@ -120,15 +120,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
           'href' => '/maniphest/task/create/?template='.$task->getID(),
           'class' => 'green button',
         ),
-        'Similar Task'));
+        pht('Similar Task')));
       $context_bar->addButton(phutil_tag(
         'a',
         array(
           'href' => '/maniphest/task/create/',
           'class' => 'green button',
         ),
-        'Empty Task'));
-      $context_bar->appendChild('New task created.');
+        pht('Empty Task')));
+      $context_bar->appendChild(pht('New task created.'));
     }
 
     $engine = new PhabricatorMarkupEngine();
@@ -201,20 +201,20 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->addHiddenInput('taskID', $task->getID())
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Action')
+          ->setLabel(pht('Action'))
           ->setName('action')
           ->setOptions($transaction_types)
           ->setID('transaction-action'))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Resolution')
+          ->setLabel(pht('Resolution'))
           ->setName('resolution')
           ->setControlID('resolution')
           ->setControlStyle('display: none')
           ->setOptions($resolution_types))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Assign To')
+          ->setLabel(pht('Assign To'))
           ->setName('assign_to')
           ->setControlID('assign_to')
           ->setControlStyle('display: none')
@@ -222,7 +222,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setDisableBehavior(true))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('CCs')
+          ->setLabel(pht('CCs'))
           ->setName('ccs')
           ->setControlID('ccs')
           ->setControlStyle('display: none')
@@ -230,7 +230,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setDisableBehavior(true))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Priority')
+          ->setLabel(pht('Priority'))
           ->setName('priority')
           ->setOptions($priority_map)
           ->setControlID('priority')
@@ -238,7 +238,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setValue($task->getPriority()))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Projects')
+          ->setLabel(pht('Projects'))
           ->setName('projects')
           ->setControlID('projects')
           ->setControlStyle('display: none')
@@ -246,25 +246,25 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setDisableBehavior(true))
       ->appendChild(
         id(new AphrontFormFileControl())
-          ->setLabel('File')
+          ->setLabel(pht('File'))
           ->setName('file')
           ->setControlID('file')
           ->setControlStyle('display: none'))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setLabel('Comments')
+          ->setLabel(pht('Comments'))
           ->setName('comments')
           ->setValue($draft_text)
           ->setID('transaction-comments')
           ->setUser($user))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())
-          ->setLabel('Attached Files')
+          ->setLabel(pht('Attached Files'))
           ->setName('files')
           ->setActivatedClass('aphront-panel-view-drag-and-drop'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? 'Submit' : 'Avast!'));
+          ->setValue($is_serious ? pht('Submit') : pht('Avast!')));
 
     $control_map = array(
       ManiphestTransactionType::TYPE_STATUS   => 'resolution',
@@ -280,7 +280,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         'id'          => 'projects-tokenizer',
         'src'         => '/typeahead/common/projects/',
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-        'placeholder' => 'Type a project name...',
+        'placeholder' => pht('Type a project name...'),
       ),
       ManiphestTransactionType::TYPE_OWNER => array(
         'id'          => 'assign-tokenizer',
@@ -288,13 +288,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
         'value'       => $default_claim,
         'limit'       => 1,
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-        'placeholder' => 'Type a user name...',
+        'placeholder' => pht('Type a user name...'),
       ),
       ManiphestTransactionType::TYPE_CCS => array(
         'id'          => 'cc-tokenizer',
         'src'         => '/typeahead/common/mailable/',
         'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-        'placeholder' => 'Type a user or mailing list...',
+        'placeholder' => pht('Type a user or mailing list...'),
       ),
     );
 

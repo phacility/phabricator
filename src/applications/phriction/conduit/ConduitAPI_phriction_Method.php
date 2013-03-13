@@ -5,6 +5,11 @@
  */
 abstract class ConduitAPI_phriction_Method extends ConduitAPIMethod {
 
+  public function getApplication() {
+    return PhabricatorApplication::getByClass(
+      'PhabricatorApplicationPhriction');
+  }
+
   final protected function buildDocumentInfoDictionary(PhrictionDocument $doc) {
     $content = $doc->getContent();
     return $this->buildDocumentContentDictionary($doc, $content);

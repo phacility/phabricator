@@ -14,7 +14,6 @@
   padding: 1em;
 }
 
-
 .aphront-form-view label.aphront-form-label {
   padding-top: 4px;
   width: 19%;
@@ -22,7 +21,7 @@
   text-align: right;
   font-weight: bold;
   font-size: 13px;
-  color: #666666;
+  color: #666;
 }
 
 .device-phone .aphront-form-view label.aphront-form-label {
@@ -30,6 +29,8 @@
   float: none;
   text-align: left;
   width: 100%;
+  color: #777;
+  margin-bottom: 3px;
 }
 
 .aphront-form-input {
@@ -159,7 +160,7 @@
 }
 
 .aphront-form-control-togglebuttons .aphront-form-input {
-  padding-top: 5px;
+  padding: 2px 0 0 0;
 }
 
 table.aphront-form-control-radio-layout,

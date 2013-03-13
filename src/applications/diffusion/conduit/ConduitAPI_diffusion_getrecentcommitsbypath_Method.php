@@ -4,7 +4,7 @@
  * @group conduit
  */
 final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_diffusion_Method {
 
   const DEFAULT_LIMIT = 10;
 

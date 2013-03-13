@@ -112,15 +112,15 @@ final class ManiphestTaskEditController extends ManiphestController {
         $aux_field->setValueFromRequest($request);
 
         if ($aux_field->isRequired() && !$aux_field->getValue()) {
-          $errors[] = $aux_field->getLabel() . ' is required.';
-          $aux_field->setError('Required');
+          $errors[] = pht('%s is required.', $aux_field->getLabel());
+          $aux_field->setError(pht('Required'));
         }
 
         try {
           $aux_field->validate();
         } catch (Exception $e) {
           $errors[] = $e->getMessage();
-          $aux_field->setError('Invalid');
+          $aux_field->setError(pht('Invalid'));
         }
       }
 
@@ -501,18 +501,22 @@ final class ManiphestTaskEditController extends ManiphestController {
     $panel->setHeader($header_name);
     $panel->appendChild($form);
     $panel->setNoBackground();
+    $inst1 = pht('Description Preview');
+    $inst2 = pht('Loading preview...');
 
     $description_preview_panel = hsprintf(
       '<div class="aphront-panel-preview aphront-panel-preview-full">
         <div class="maniphest-description-preview-header">
-          Description Preview
+          %s
         </div>
         <div id="description-preview">
           <div class="aphront-panel-preview-loading-text">
-            Loading preview...
+            %s
           </div>
         </div>
-      </div>');
+      </div>',
+      $inst1,
+      $inst2);
 
     Javelin::initBehavior(
       'maniphest-description-preview',
@@ -537,7 +541,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       array(
         'title' => $header_name,
         'pageObjects' => $page_objects,
-        'device' => true
+        'device' => true,
       ));
   }
 }

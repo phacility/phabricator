@@ -3,7 +3,8 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_phpast_version_Method extends ConduitAPIMethod {
+final class ConduitAPI_phpast_version_Method
+  extends ConduitAPI_phpast_Method {
 
   public function getMethodDescription() {
     return "Get server xhpast version.";

@@ -120,6 +120,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setNoShading(true)
       ->setAction(
           $request->getRequestURI()
             ->alter('key', null)
@@ -142,7 +143,7 @@ final class ManiphestTaskListController extends ManiphestController {
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/searchowner/')
           ->setName('set_users')
-          ->setLabel('Users')
+          ->setLabel(pht('Users'))
           ->setValue($tokens));
     }
 
@@ -150,12 +151,12 @@ final class ManiphestTaskListController extends ManiphestController {
       $form->appendChild(
         id(new AphrontFormTextControl())
           ->setName('set_search')
-          ->setLabel('Search')
+          ->setLabel(pht('Search'))
           ->setValue($search_text));
       $form->appendChild(
         id(new AphrontFormTextControl())
           ->setName('set_tasks')
-          ->setLabel('Task IDs')
+          ->setLabel(pht('Task IDs'))
           ->setValue(join(',', $task_ids)));
 
       $tokens = array();
@@ -166,7 +167,7 @@ final class ManiphestTaskListController extends ManiphestController {
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/searchowner/')
           ->setName('set_owners')
-          ->setLabel('Owners')
+          ->setLabel(pht('Owners'))
           ->setValue($tokens));
 
       $tokens = array();
@@ -177,7 +178,7 @@ final class ManiphestTaskListController extends ManiphestController {
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
           ->setName('set_authors')
-          ->setLabel('Authors')
+          ->setLabel(pht('Authors'))
           ->setValue($tokens));
     }
 
@@ -189,14 +190,14 @@ final class ManiphestTaskListController extends ManiphestController {
 
       $caption = null;
       if ($this->view == 'custom') {
-        $caption = 'Find tasks in ALL of these projects ("AND" query).';
+        $caption = pht('Find tasks in ALL of these projects ("AND" query).');
       }
 
       $form->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/searchproject/')
           ->setName('set_projects')
-          ->setLabel('Projects')
+          ->setLabel(pht('Projects'))
           ->setCaption($caption)
           ->setValue($tokens));
     }
@@ -210,8 +211,8 @@ final class ManiphestTaskListController extends ManiphestController {
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/projects/')
           ->setName('set_aprojects')
-          ->setLabel('Any Projects')
-          ->setCaption('Find tasks in ANY of these projects ("OR" query).')
+          ->setLabel(pht('Any Projects'))
+          ->setCaption(pht('Find tasks in ANY of these projects ("OR" query).'))
           ->setValue($atokens));
 
       $tokens = array();
@@ -222,8 +223,8 @@ final class ManiphestTaskListController extends ManiphestController {
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/projects/')
           ->setName('set_xprojects')
-          ->setLabel('Exclude Projects')
-          ->setCaption('Find tasks NOT in any of these projects.')
+          ->setLabel(pht('Exclude Projects'))
+          ->setCaption(pht('Find tasks NOT in any of these projects.'))
           ->setValue($tokens));
 
       $priority = ManiphestTaskPriority::getLowestPriority();
@@ -233,7 +234,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
       $form->appendChild(
           id(new AphrontFormSelectControl())
-            ->setLabel('Min Priority')
+            ->setLabel(pht('Min Priority'))
             ->setName('set_lpriority')
             ->setValue($priority)
             ->setOptions(array_reverse(
@@ -246,7 +247,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
       $form->appendChild(
           id(new AphrontFormSelectControl())
-            ->setLabel('Max Priority')
+            ->setLabel(pht('Max Priority'))
             ->setName('set_hpriority')
             ->setValue($priority)
             ->setOptions(ManiphestTaskPriority::getTaskPriorityMap()));
@@ -259,7 +260,7 @@ final class ManiphestTaskListController extends ManiphestController {
       ->appendChild($this->renderOrderControl($q_order));
 
     $submit = id(new AphrontFormSubmitControl())
-      ->setValue('Filter Tasks');
+      ->setValue(pht('Filter Tasks'));
 
     // Only show "Save..." for novel queries which have some kind of query
     // parameters set.
@@ -268,7 +269,7 @@ final class ManiphestTaskListController extends ManiphestController {
         && $request->getRequestURI()->getQueryParams()) {
       $submit->addCancelButton(
         '/maniphest/custom/edit/?key='.$query->getQueryKey(),
-        'Save Custom Query...');
+        pht('Save Custom Query...'));
     }
 
     $form->appendChild($submit);
@@ -285,8 +286,6 @@ final class ManiphestTaskListController extends ManiphestController {
       $filter->appendChild($form);
     }
 
-    $nav->appendChild($filter);
-
     $have_tasks = false;
     foreach ($tasks as $group => $list) {
       if (count($list)) {
@@ -302,10 +301,13 @@ final class ManiphestTaskListController extends ManiphestController {
       '<div class="maniphest-list-container">'));
 
     if (!$have_tasks) {
+      $no_tasks = pht('No matching tasks.');
       $list_container->appendChild(hsprintf(
         '<h1 class="maniphest-task-group-header">'.
-          'No matching tasks.'.
-        '</h1>'));
+          '%s'.
+        '</h1>',
+        $no_tasks));
+      $result_count = null;
     } else {
       $pager = new AphrontPagerView();
       $pager->setURI($request->getRequestURI(), 'offset');
@@ -317,13 +319,16 @@ final class ManiphestTaskListController extends ManiphestController {
       $max = min($pager->getOffset() + $page_size, $total_count);
       $tot = $total_count;
 
-      $list_container->appendChild(hsprintf(
-        '<div class="maniphest-total-result-count">'.
-          "Displaying tasks %s - %s of %s.".
-        '</div>',
+      $results = pht('Displaying tasks %s - %s of %s.',
         number_format($cur),
         number_format($max),
-        number_format($tot)));
+        number_format($tot));
+      $result_count = phutil_tag(
+        'div',
+        array(
+          'class' => 'maniphest-total-result-count'
+        ),
+        $results);
 
       $selector = new AphrontNullView();
 
@@ -333,8 +338,7 @@ final class ManiphestTaskListController extends ManiphestController {
         ($order == 'priority') &&
         ($group == 'none' || $group == 'priority');
 
-      $lists = new AphrontNullView();
-      $lists->appendChild(hsprintf('<div class="maniphest-group-container">'));
+      $lists = array();
       foreach ($tasks as $group => $list) {
         $task_list = new ManiphestTaskListView();
         $task_list->setShowBatchControls(true);
@@ -359,18 +363,19 @@ final class ManiphestTaskListController extends ManiphestController {
             ),
             $group.' ('.$count.')');
 
-
-        $panel = new AphrontPanelView();
-        $panel->appendChild($header);
-        $panel->appendChild($task_list);
-        $panel->setNoBackground();
-
-        $lists->appendChild($panel);
+        $lists[] =
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'maniphest-task-group'
+            ),
+            array(
+              $header,
+              $task_list,
+            ));
       }
-      $lists->appendChild(hsprintf('</div>'));
+
       $selector->appendChild($lists);
-
-
       $selector->appendChild($this->renderBatchEditor($query));
 
       $form_id = celerity_generate_unique_node_id();
@@ -394,7 +399,8 @@ final class ManiphestTaskListController extends ManiphestController {
         ));
     }
 
-    $list_container->appendChild(hsprintf('</div>'));
+    $nav->appendChild($filter);
+    $nav->appendChild($result_count);
     $nav->appendChild($list_container);
 
     $title = pht('Task List');
@@ -411,10 +417,12 @@ final class ManiphestTaskListController extends ManiphestController {
 
     $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => $title,
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -653,7 +661,7 @@ final class ManiphestTaskListController extends ManiphestController {
         'class'       => 'grey button',
         'id'          => 'batch-select-all',
       ),
-      'Select All');
+      pht('Select All'));
 
     $select_none = javelin_tag(
       'a',
@@ -663,7 +671,7 @@ final class ManiphestTaskListController extends ManiphestController {
         'class'       => 'grey button',
         'id'          => 'batch-select-none',
       ),
-      'Clear Selection');
+      pht('Clear Selection'));
 
     $submit = phutil_tag(
       'button',
@@ -672,7 +680,7 @@ final class ManiphestTaskListController extends ManiphestController {
         'disabled'    => 'disabled',
         'class'       => 'disabled',
       ),
-      "Batch Edit Selected Tasks \xC2\xBB");
+      pht("Batch Edit Selected \xC2\xBB"));
 
     $export = javelin_tag(
       'a',
@@ -680,22 +688,25 @@ final class ManiphestTaskListController extends ManiphestController {
         'href' => '/maniphest/export/'.$search_query->getQueryKey().'/',
         'class' => 'grey button',
       ),
-      'Export Tasks to Excel...');
+      pht('Export to Excel'));
 
     return hsprintf(
       '<div class="maniphest-batch-editor">'.
-        '<div class="batch-editor-header">Batch Task Editor</div>'.
+        '<div class="batch-editor-header">%s</div>'.
         '<table class="maniphest-batch-editor-layout">'.
           '<tr>'.
             '<td>%s%s</td>'.
             '<td>%s</td>'.
-            '<td id="batch-select-status-cell">0 Selected Tasks</td>'.
+            '<td id="batch-select-status-cell">%s</td>'.
             '<td class="batch-select-submit-cell">%s</td>'.
           '</tr>'.
         '</table>'.
       '</table>',
-      $select_all, $select_none,
+      pht('Batch Task Editor'),
+      $select_all,
+      $select_none,
       $export,
+      pht('0 Selected'),
       $submit);
   }
 
@@ -871,35 +882,35 @@ final class ManiphestTaskListController extends ManiphestController {
 
   private function getStatusButtonMap() {
     return array(
-      'o'   => 'Open',
-      'c'   => 'Closed',
-      'oc'  => 'All',
+      'o'   => pht('Open'),
+      'c'   => pht('Closed'),
+      'oc'  => pht('All'),
     );
   }
 
   private function getGroupButtonMap() {
     return array(
-      'p' => 'Priority',
-      'o' => 'Owner',
-      's' => 'Status',
-      'j' => 'Project',
-      'n' => 'None',
+      'p' => pht('Priority'),
+      'o' => pht('Owner'),
+      's' => pht('Status'),
+      'j' => pht('Project'),
+      'n' => pht('None'),
     );
   }
 
   private function getOrderButtonMap() {
     return array(
-      'p' => 'Priority',
-      'u' => 'Updated',
-      'c' => 'Created',
-      't' => 'Title',
+      'p' => pht('Priority'),
+      'u' => pht('Updated'),
+      'c' => pht('Created'),
+      't' => pht('Title'),
     );
   }
 
   public function renderStatusControl($value) {
     $request = $this->getRequest();
     return id(new AphrontFormToggleButtonsControl())
-      ->setLabel('Status')
+      ->setLabel(pht('Status'))
       ->setValue($this->getStatusRequestValue($value))
       ->setBaseURI($request->getRequestURI(), $this->getStatusRequestKey())
       ->setButtons($this->getStatusButtonMap());
@@ -908,7 +919,7 @@ final class ManiphestTaskListController extends ManiphestController {
   public function renderOrderControl($value) {
     $request = $this->getRequest();
     return id(new AphrontFormToggleButtonsControl())
-      ->setLabel('Order')
+      ->setLabel(pht('Order'))
       ->setValue($this->getOrderRequestValue($value))
       ->setBaseURI($request->getRequestURI(), $this->getOrderRequestKey())
       ->setButtons($this->getOrderButtonMap());
@@ -917,7 +928,7 @@ final class ManiphestTaskListController extends ManiphestController {
   public function renderGroupControl($value) {
     $request = $this->getRequest();
     return id(new AphrontFormToggleButtonsControl())
-      ->setLabel('Group')
+      ->setLabel(pht('Group'))
       ->setValue($this->getGroupRequestValue($value))
       ->setBaseURI($request->getRequestURI(), $this->getGroupRequestKey())
       ->setButtons($this->getGroupButtonMap());

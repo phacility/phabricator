@@ -102,7 +102,8 @@ final class ConduitAPI_differential_getcommitmessage_Method
       $label = $field->renderLabelForCommitMessage();
       if (!strlen($value)) {
         if ($field_key === 'title') {
-          $commit_message[] = '<<Enter Revision Title>>';
+          $commit_message[] =
+            DifferentialTitleFieldSpecification::getDefaultRevisionTitle();
         } else {
           if ($field->shouldAppearOnCommitMessageTemplate() && $is_edit) {
             $commit_message[] = $label.': ';

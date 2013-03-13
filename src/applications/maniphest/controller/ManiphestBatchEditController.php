@@ -60,11 +60,11 @@ final class ManiphestBatchEditController extends ManiphestController {
         'sources' => array(
           'project' => array(
             'src'           => '/typeahead/common/projects/',
-            'placeholder'   => 'Type a project name...',
+            'placeholder'   => pht('Type a project name...'),
           ),
           'owner' => array(
             'src'           => '/typeahead/common/searchowner/',
-            'placeholder'   => 'Type a user name...',
+            'placeholder'   => pht('Type a user name...'),
             'limit'         => 1,
           ),
         ),
@@ -96,7 +96,8 @@ final class ManiphestBatchEditController extends ManiphestController {
           'name' => 'actions',
           'id'   => 'batch-form-actions',
         )));
-    $form->appendChild(phutil_tag('p', array(), 'These tasks will be edited:'));
+    $form->appendChild(
+      phutil_tag('p', array(), pht('These tasks will be edited:')));
     $form->appendChild($list);
     $form->appendChild(
       id(new AphrontFormInsetView())
@@ -109,7 +110,7 @@ final class ManiphestBatchEditController extends ManiphestController {
               'sigil' => 'add-action',
               'mustcapture' => true,
             ),
-            'Add Another Action'))
+            pht('Add Another Action')))
         ->setContent(javelin_tag(
           'table',
           array(
@@ -119,7 +120,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           '')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Update Tasks')
+          ->setValue(pht('Update Tasks'))
           ->addCancelButton('/maniphest/', 'Done'));
 
     $panel->appendChild($form);
@@ -128,7 +129,7 @@ final class ManiphestBatchEditController extends ManiphestController {
     return $this->buildStandardPageResponse(
       $panel,
       array(
-        'title' => 'Batch Editor',
+        'title' => pht('Batch Editor'),
       ));
   }
 

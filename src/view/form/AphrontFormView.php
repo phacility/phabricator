@@ -10,10 +10,16 @@ final class AphrontFormView extends AphrontView {
   private $workflow;
   private $id;
   private $flexible;
+  private $noShading;
   private $sigils = array();
 
   public function setFlexible($flexible) {
     $this->flexible = $flexible;
+    return $this;
+  }
+
+  public function setNoShading($shading) {
+    $this->noShading = $shading;
     return $this;
   }
 
@@ -60,7 +66,7 @@ final class AphrontFormView extends AphrontView {
 
     $layout = new AphrontFormLayoutView();
 
-    if (!$this->flexible) {
+    if ((!$this->flexible) && (!$this->noShading)) {
       $layout
         ->setBackgroundShading(true)
         ->setPadded(true);
