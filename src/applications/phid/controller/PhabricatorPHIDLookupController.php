@@ -26,7 +26,7 @@ final class PhabricatorPHIDLookupController
         $rows[] = array(
           $handle->getPHID(),
           $handle->getType(),
-          $handle->getName(),
+          $handle->getFullName(),
           $link,
         );
       }
