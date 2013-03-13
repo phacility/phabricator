@@ -130,7 +130,7 @@ final class ManiphestTaskSummaryView extends ManiphestView {
       ));
 
     $owner = '';
-    if ($handles[$task->getOwnerPHID()]) {
+    if ($task->getOwnerPHID()) {
       $owner = pht('Assigned to %s',
         $handles[$task->getOwnerPHID()]->renderLink());
     }
