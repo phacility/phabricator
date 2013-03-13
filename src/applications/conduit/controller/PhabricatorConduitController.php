@@ -86,6 +86,12 @@ abstract class PhabricatorConduitController extends PhabricatorController {
       $group_name = head(explode('.', $method_name));
 
       $method_object = newv($method_class, array());
+
+      $application = $method_object->getApplication();
+      if ($application && !$application->isInstalled()) {
+        continue;
+      }
+
       $status = $method_object->getMethodStatus();
 
       $key = sprintf(

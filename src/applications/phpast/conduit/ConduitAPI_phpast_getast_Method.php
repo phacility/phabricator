@@ -3,7 +3,8 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_phpast_getast_Method extends ConduitAPIMethod {
+final class ConduitAPI_phpast_getast_Method
+  extends ConduitAPI_phpast_Method {
 
   public function getMethodDescription() {
     return "Parse a piece of PHP code.";

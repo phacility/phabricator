@@ -4,7 +4,7 @@
  * @group conduit
  */
 final class ConduitAPI_file_download_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
     return "Download a file from the server.";

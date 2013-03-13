@@ -4,7 +4,7 @@
  * @group conduit
  */
 final class ConduitAPI_feed_publish_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_feed_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;

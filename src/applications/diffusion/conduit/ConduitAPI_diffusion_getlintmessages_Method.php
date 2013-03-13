@@ -4,7 +4,7 @@
  * @group conduit
  */
 final class ConduitAPI_diffusion_getlintmessages_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_diffusion_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;

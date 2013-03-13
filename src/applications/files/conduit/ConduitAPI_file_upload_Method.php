@@ -3,7 +3,7 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_file_upload_Method extends ConduitAPIMethod {
+final class ConduitAPI_file_upload_Method extends ConduitAPI_file_Method {
 
   public function getMethodDescription() {
     return "Upload a file to the server.";

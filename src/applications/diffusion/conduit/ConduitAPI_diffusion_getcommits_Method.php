@@ -4,7 +4,7 @@
  * @group conduit
  */
 final class ConduitAPI_diffusion_getcommits_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_diffusion_Method {
 
   public function getMethodDescription() {
     return "Retrieve Diffusion commit information.";

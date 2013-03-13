@@ -5,6 +5,11 @@
  */
 abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
+  public function getApplication() {
+    return PhabricatorApplication::getByClass(
+      'PhabricatorApplicationManiphest');
+  }
+
   public function defineErrorTypes() {
     return array(
       'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.'
