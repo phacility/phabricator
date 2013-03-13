@@ -307,6 +307,7 @@ final class ManiphestTaskListController extends ManiphestController {
           '%s'.
         '</h1>',
         $no_tasks));
+      $result_count = null;
     } else {
       $pager = new AphrontPagerView();
       $pager->setURI($request->getRequestURI(), 'offset');
