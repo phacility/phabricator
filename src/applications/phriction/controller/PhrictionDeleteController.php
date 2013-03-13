@@ -21,45 +21,29 @@ final class PhrictionDeleteController extends PhrictionController {
       return new Aphront404Response();
     }
 
-    $error_view = null;
+    $e_text = null;
     $disallowed_states = array(
       PhrictionDocumentStatus::STATUS_DELETED, // Stupid
       PhrictionDocumentStatus::STATUS_MOVED, // Makes no sense
     );
     if (in_array($document->getStatus(), $disallowed_states)) {
-      $is_serious =
-        PhabricatorEnv::getEnvConfig('phabricator.serious-business');
-
-      if ($is_serious) {
-        $e_text = pht('An already moved or deleted document can not be '.
-          'deleted');
-      } else {
-        $e_text = pht('I\'m not sure if you got the notice, but you can\'t '.
-          'delete an already deleted or moved document.');
-      }
-
-      $error_view = new AphrontErrorView();
-      $error_view->setSeverity(AphrontErrorView::SEVERITY_ERROR);
-      $error_view->setTitle(pht('Can not delete page'));
-      $error_view->appendChild($e_text);
-
-      $error_view = $error_view->render();
+      $e_text = pht('An already moved or deleted document can not be deleted');
     }
 
     $document_uri = PhrictionDocument::getSlugURI($document->getSlug());
 
-    if (!$error_view && $request->isFormPost()) {
+    if (!$e_text && $request->isFormPost()) {
         $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
           ->setActor($user)
           ->delete();
         return id(new AphrontRedirectResponse())->setURI($document_uri);
     }
 
-    if ($error_view) {
+    if ($e_text) {
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
-        ->setTitle(pht('Error!'))
-        ->appendChild($error_view)
+        ->setTitle(pht('Can not delete document!'))
+        ->appendChild($e_text)
         ->addCancelButton($document_uri);
     } else {
       $dialog = id(new AphrontDialogView())
