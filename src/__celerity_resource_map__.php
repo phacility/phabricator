@@ -2644,6 +2644,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/owners/owners-path-editor.css',
   ),
+  'paste-css' =>
+  array(
+    'uri' => '/res/5081cf13/rsrc/css/application/paste/paste.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/paste/paste.css',
+  ),
   'path-typeahead' =>
   array(
     'uri' => '/res/50246fb6/rsrc/js/application/herald/PathTypeahead.js',
