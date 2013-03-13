@@ -483,18 +483,18 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-apps.png',
     'type' => 'png',
   ),
-  '/rsrc/image/sprite-conpher-X2.png' =>
+  '/rsrc/image/sprite-conpherence-X2.png' =>
   array(
-    'hash' => '88f5bf563e90d99ebe1b4ec552a963fc',
-    'uri' => '/res/88f5bf56/rsrc/image/sprite-conpher-X2.png',
-    'disk' => '/rsrc/image/sprite-conpher-X2.png',
+    'hash' => '5e47868b00933a9afb6c844e464e6b23',
+    'uri' => '/res/5e47868b/rsrc/image/sprite-conpherence-X2.png',
+    'disk' => '/rsrc/image/sprite-conpherence-X2.png',
     'type' => 'png',
   ),
-  '/rsrc/image/sprite-conpher.png' =>
+  '/rsrc/image/sprite-conpherence.png' =>
   array(
-    'hash' => '08dcc68a6b2a89ecce11322f9ffe9d69',
-    'uri' => '/res/08dcc68a/rsrc/image/sprite-conpher.png',
-    'disk' => '/rsrc/image/sprite-conpher.png',
+    'hash' => 'ca51f1be25213262d68e626e4cab7f0f',
+    'uri' => '/res/ca51f1be/rsrc/image/sprite-conpherence.png',
+    'disk' => '/rsrc/image/sprite-conpherence.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-docs-X2.png' =>
@@ -828,7 +828,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-widget-pane-css' =>
   array(
-    'uri' => '/res/2b4113f7/rsrc/css/application/conpherence/widget-pane.css',
+    'uri' => '/res/f728d1fc/rsrc/css/application/conpherence/widget-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1219,7 +1219,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-widget-pane' =>
   array(
-    'uri' => '/res/4fb51b46/rsrc/js/application/conpherence/behavior-widget-pane.js',
+    'uri' => '/res/43a0fe1b/rsrc/js/application/conpherence/behavior-widget-pane.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3478,14 +3478,14 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/sprite-apps-xlarge.css',
   ),
-  'sprite-conpher-css' =>
+  'sprite-conpherence-css' =>
   array(
-    'uri' => '/res/6277b31f/rsrc/css/sprite-conpher.css',
+    'uri' => '/res/f6793453/rsrc/css/sprite-conpherence.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/css/sprite-conpher.css',
+    'disk' => '/rsrc/css/sprite-conpherence.css',
   ),
   'sprite-docs-css' =>
   array(

@@ -4,42 +4,42 @@
     "docs_audio" : {
       "name" : "docs_audio",
       "rule" : ".docs_audio",
-      "hash" : "d3fccd15fc53b04b6caf22a3bb5f4634"
+      "hash" : "0fd0cf04e62a9034a6a841af658a4d50"
     },
     "docs_doc"   : {
       "name" : "docs_doc",
       "rule" : ".docs_doc",
-      "hash" : "31496e2953350c276a6b8619b071f299"
+      "hash" : "ddd84bcff5663198c4e61d48bcf506da"
     },
     "docs_file"  : {
       "name" : "docs_file",
       "rule" : ".docs_file",
-      "hash" : "3d88ce46362e723cf76bf552550c82a6"
+      "hash" : "63c992ea4aef4e8d61e245cc013390b9"
     },
     "docs_image" : {
       "name" : "docs_image",
       "rule" : ".docs_image",
-      "hash" : "8eaa89c50f3be46c87706d649bd304af"
+      "hash" : "51598daa10ad2e01fa17d8975fff835a"
     },
     "docs_movie" : {
       "name" : "docs_movie",
       "rule" : ".docs_movie",
-      "hash" : "859f7df4027e145290607d78d9500b45"
+      "hash" : "c86eb4788c9db504b3438b85306188ff"
     },
     "docs_pdf"   : {
       "name" : "docs_pdf",
       "rule" : ".docs_pdf",
-      "hash" : "c423839d6b35baf59e79c0cd8d3e580f"
+      "hash" : "d959e463bd5c2a8b197572d8952bc3c5"
     },
     "docs_place" : {
       "name" : "docs_place",
       "rule" : ".docs_place",
-      "hash" : "8ee9e4dad7df830c487227083e0091f5"
+      "hash" : "9560ce2beca498a490d895cb68830c4e"
     },
     "docs_zip"   : {
       "name" : "docs_zip",
       "rule" : ".docs_zip",
-      "hash" : "91d6be2027be6a7791477ac12cd94b6d"
+      "hash" : "c1e4a791a9b6f73d079000f2f5401a65"
     }
   },
   "scales"  : [

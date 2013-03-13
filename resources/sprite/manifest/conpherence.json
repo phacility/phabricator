@@ -1,0 +1,81 @@
+{
+  "version" : 1,
+  "sprites" : {
+    "conpherence_calendar_off"     : {
+      "name" : "conpherence_calendar_off",
+      "rule" : ".conpherence_calendar_off",
+      "hash" : "62e3019d4c3bb98e7c461807f1924ece"
+    },
+    "conpherence_calendar_on"      : {
+      "name" : "conpherence_calendar_on",
+      "rule" : ".conpherence_calendar_on, .device-desktop .conpherence_calendar_off:hover ",
+      "hash" : "20915b1dc735a7f375fea268eabedce9"
+    },
+    "conpherence_conversation_off" : {
+      "name" : "conpherence_conversation_off",
+      "rule" : ".conpherence_conversation_off",
+      "hash" : "00e1a4d1d894dc9f6006d2891067ec41"
+    },
+    "conpherence_conversation_on"  : {
+      "name" : "conpherence_conversation_on",
+      "rule" : ".conpherence_conversation_on, .device-desktop .conpherence_conversation_off:hover ",
+      "hash" : "3b0e73c170dec96cc742fbfb7a019bd6"
+    },
+    "conpherence_files_off"        : {
+      "name" : "conpherence_files_off",
+      "rule" : ".conpherence_files_off",
+      "hash" : "b162fbbd989960ed861d1d2fb401e4de"
+    },
+    "conpherence_files_on"         : {
+      "name" : "conpherence_files_on",
+      "rule" : ".conpherence_files_on, .device-desktop .conpherence_files_off:hover ",
+      "hash" : "604c4c6742261f5b6cb7d8287e316832"
+    },
+    "conpherence_list_off"         : {
+      "name" : "conpherence_list_off",
+      "rule" : ".conpherence_list_off",
+      "hash" : "97285879c041cda402b6dcd02c0a6cde"
+    },
+    "conpherence_list_on"          : {
+      "name" : "conpherence_list_on",
+      "rule" : ".conpherence_list_on, .device-desktop .conpherence_list_off:hover ",
+      "hash" : "07b1f76bc65f07687886f0631049dca7"
+    },
+    "conpherence_more_off"         : {
+      "name" : "conpherence_more_off",
+      "rule" : ".conpherence_more_off",
+      "hash" : "2e3488e8f93b3061d42227a64a312008"
+    },
+    "conpherence_more_on"          : {
+      "name" : "conpherence_more_on",
+      "rule" : ".conpherence_more_on, .device-desktop .conpherence_more_off:hover ",
+      "hash" : "f1883d5452fe123e095bf68e8ee71e4a"
+    },
+    "conpherence_people_off"       : {
+      "name" : "conpherence_people_off",
+      "rule" : ".conpherence_people_off",
+      "hash" : "ff4c03ef5e1075bb5a7a304b9cbaad0e"
+    },
+    "conpherence_people_on"        : {
+      "name" : "conpherence_people_on",
+      "rule" : ".conpherence_people_on, .device-desktop .conpherence_people_off:hover ",
+      "hash" : "c0cf79b6f60d62361d7b98a44fe487e9"
+    },
+    "conpherence_settings_off"     : {
+      "name" : "conpherence_settings_off",
+      "rule" : ".conpherence_settings_off",
+      "hash" : "1e27646bfccf217225d433b2f97c4ae9"
+    },
+    "conpherence_settings_on"      : {
+      "name" : "conpherence_settings_on",
+      "rule" : ".conpherence_settings_on, .device-desktop .conpherence_settings_off:hover ",
+      "hash" : "cd3feeb358744dac4c74d7509fd37ca9"
+    }
+  },
+  "scales"  : [
+    1,
+    2
+  ],
+  "header"  : "\/**\n * @provides sprite-conpherence-css\n * @generated\n *\/\n\n.sprite-conpherence {\n  background-image: url(\/rsrc\/image\/sprite-conpherence.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-conpherence {\n    background-image: url(\/rsrc\/image\/sprite-conpherence-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type"    : "standard"
+}

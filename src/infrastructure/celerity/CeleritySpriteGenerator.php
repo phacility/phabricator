@@ -214,7 +214,8 @@ final class CeleritySpriteGenerator {
 
 
   public function buildConpherenceSheet() {
-    $icons = $this->getDirectoryList('conpher_1x');
+    $name = 'conpherence';
+    $icons = $this->getDirectoryList($name.'_1x');
     $scales = array(
       '1x' => 1,
       '2x' => 2,
@@ -226,7 +227,7 @@ final class CeleritySpriteGenerator {
     foreach ($icons as $icon) {
       $color = preg_match('/_on/', $icon) ? 'on' : 'off';
 
-      $prefix = 'conpher_';
+      $prefix = $name.'_';
 
       $sprite = id(clone $template)
         ->setName($prefix.$icon);
@@ -247,7 +248,7 @@ final class CeleritySpriteGenerator {
       $sprites[] = $sprite;
     }
 
-    $sheet = $this->buildSheet('conpher', true);
+    $sheet = $this->buildSheet($name, true);
     $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);

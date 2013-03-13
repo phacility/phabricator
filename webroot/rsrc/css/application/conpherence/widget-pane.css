@@ -22,11 +22,14 @@
 
 .conpherence-widget-pane .widgets-header {
   height: 40px;
-  width: 127px;
+}
+
+.device-desktop .conpherence-widget-pane .widgets-header {
+  width: 196px;
   margin: 0px auto 0px auto;
 }
 
-.conpherence-widget-pane .widgets-header .sprite-conpher {
+.conpherence-widget-pane .widgets-header .sprite-conpherence {
   display: block;
   width: 29px;
   height: 33px;
@@ -34,8 +37,12 @@
   float: left;
   clear: none;
 }
-.conpherence-widget-pane .widgets-header .first-icon {
-  margin-left: 0px;
+
+.device-desktop .conpherence-widget-pane .widgets-header
+#widgets-conpherence-list-toggle,
+.device-desktop .conpherence-widget-pane .widgets-header
+#widgets-conpherence-conversation-toggle {
+  display: none;
 }
 
 .conpherence-widget-pane .widgets-body {
