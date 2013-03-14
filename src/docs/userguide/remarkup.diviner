@@ -425,3 +425,18 @@ Some general notes about this syntax:
   - you can use other Remarkup rules (like **bold**, //italics//, etc.) inside
     table cells.
 
+= Embedding Pholio mocks =
+
+You can embed a Pholio mock by using braces to refer to it:
+
+  {M123}         # Embed the mock M123
+
+By default the first four images from the mock set are displayed. This behavior
+can be overridden with the **image** option. With the **image** option you can
+provide one or more imageIDs to display.
+
+You can set the image (or images) to display like this:
+
+  {M123, image=12345}
+
+  {M123, image=12345 & 6789}

@@ -3,9 +3,15 @@
 final class PholioMockEmbedView extends AphrontView {
 
   private $mock;
+  private $images = array();
 
   public function setMock(PholioMock $mock) {
     $this->mock = $mock;
+    return $this;
+  }
+
+  public function setImages(array $images) {
+    $this->images = $images;
     return $this;
   }
 
@@ -31,8 +37,18 @@ final class PholioMockEmbedView extends AphrontView {
       ),
       $mock_link);
 
+    $images_to_show = array();
+    if (!empty($this->images)) {
+      $images_to_show = array_intersect_key(
+        $this->mock->getImages(), array_flip($this->images));
+    }
+
+    if (empty($images_to_show)) {
+      $images_to_show = array_slice($this->mock->getImages(), 0, 4);
+    }
+
     $thumbnails = array();
-    foreach (array_slice($this->mock->getImages(), 0, 4) as $image) {
+    foreach ($images_to_show as $image) {
       $thumbfile = $image->getFile();
 
       $dimensions = PhabricatorImageTransformer::getPreviewDimensions(
