@@ -17,7 +17,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
   }
 
   public function setHighlights(array $highlights) {
-    $this->highlights = $highlights;
+    $this->highlights = array_fuse($highlights);
     return $this;
   }
 
@@ -31,7 +31,6 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
     $rows = array();
     foreach ($this->lines as $line) {
-
       $hit_limit = $this->limit &&
                    ($line_number == $this->limit) &&
                    (count($this->lines) != $this->limit);
@@ -50,7 +49,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
       }
 
       $row_attributes = array();
-      if (in_array($line_number, $this->highlights)) {
+      if (isset($this->highlights[$line_number])) {
         $row_attributes['class'] = 'phabricator-source-highlight';
       }
 

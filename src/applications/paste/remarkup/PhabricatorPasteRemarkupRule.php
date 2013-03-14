@@ -32,9 +32,9 @@ final class PhabricatorPasteRemarkupRule
 
       foreach ($opts as $key => $value) {
         if ($key == 'lines') {
-          // placeholder for now
+          $embed_paste->setLines(preg_replace('/[^0-9]/', '', $value));
         } else if ($key == 'highlight') {
-          $highlights = explode('&', preg_replace('/\s+/', '', $value));
+          $highlights = preg_split('/,|&/', preg_replace('/\s+/', '', $value));
 
           $to_highlight = array();
           foreach ($highlights as $highlight) {

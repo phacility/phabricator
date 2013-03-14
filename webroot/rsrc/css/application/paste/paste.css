@@ -17,3 +17,7 @@
   color: #282828;
   font-weight: bold;
 }
+
+.paste-embed-body {
+  overflow-y: auto;
+}
