@@ -26,6 +26,34 @@ final class PhabricatorPasteRemarkupRule
       ->setPaste($object)
       ->setHandle($handle);
 
+    if (strlen($options)) {
+      $parser = new PhutilSimpleOptions();
+      $opts = $parser->parse(substr($options, 1));
+
+      foreach ($opts as $key => $value) {
+        if ($key == 'lines') {
+          // placeholder for now
+        } else if ($key == 'highlight') {
+          $highlights = explode('&', preg_replace('/\s+/', '', $value));
+
+          $to_highlight = array();
+          foreach ($highlights as $highlight) {
+            $highlight = explode('-', $highlight);
+
+            if (!empty($highlight)) {
+              sort($highlight);
+              $to_highlight = array_merge(
+                $to_highlight,
+                range(head($highlight), last($highlight)));
+            }
+          }
+
+          $embed_paste->setHighlights(array_unique($to_highlight));
+        }
+      }
+
+    }
+
     return $embed_paste->render();
 
   }

@@ -3,14 +3,13 @@
  */
 
 .paste-embed {
-  display: inline-block;
   padding: 5px;
   background: #f7f7f7;
+  border: 1px solid #dbdbdb;
 }
 
 .paste-embed-head {
-  border-bottom: 1px solid #3d3d3d;
-  padding: 2px;
+  border-bottom: 1px solid #dbdbdb;
   margin:2px;
 }
 

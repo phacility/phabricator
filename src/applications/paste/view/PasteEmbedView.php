@@ -4,6 +4,7 @@ final class PasteEmbedView extends AphrontView {
 
   private $paste;
   private $handle;
+  private $highlights = array();
 
   public function setPaste(PhabricatorPaste $paste) {
     $this->paste = $paste;
@@ -12,6 +13,11 @@ final class PasteEmbedView extends AphrontView {
 
   public function setHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
+    return $this;
+  }
+
+  public function setHighlights(array $highlights) {
+    $this->highlights = $highlights;
     return $this;
   }
 
@@ -41,7 +47,8 @@ final class PasteEmbedView extends AphrontView {
       'div',
       array(),
       id(new PhabricatorSourceCodeView())
-      ->setLines($lines));
+      ->setLines($lines)
+      ->setHighlights($this->highlights));
 
     return phutil_tag(
       'div',

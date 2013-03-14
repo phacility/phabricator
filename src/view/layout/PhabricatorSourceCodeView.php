@@ -4,6 +4,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
   private $lines;
   private $limit;
+  private $highlights = array();
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -12,6 +13,11 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
   public function setLines(array $lines) {
     $this->lines = $lines;
+    return $this;
+  }
+
+  public function setHighlights(array $highlights) {
+    $this->highlights = $highlights;
     return $this;
   }
 
@@ -25,6 +31,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
     $rows = array();
     foreach ($this->lines as $line) {
+
       $hit_limit = $this->limit &&
                    ($line_number == $this->limit) &&
                    (count($this->lines) != $this->limit);
@@ -42,15 +49,21 @@ final class PhabricatorSourceCodeView extends AphrontView {
         $content_line = hsprintf("\xE2\x80\x8B%s", $line);
       }
 
+      $row_attributes = array();
+      if (in_array($line_number, $this->highlights)) {
+        $row_attributes['class'] = 'phabricator-source-highlight';
+      }
+
       // TODO: Provide nice links.
 
-      $rows[] = hsprintf(
-        '<tr>'.
+      $rows[] = phutil_tag(
+        'tr',
+        $row_attributes,
+        hsprintf(
           '<th class="phabricator-source-line">%s</th>'.
-          '<td class="phabricator-source-code">%s</td>'.
-        '</tr>',
-        $content_number,
-        $content_line);
+          '<td class="phabricator-source-code">%s</td>',
+          $content_number,
+          $content_line));
 
       if ($hit_limit) {
         break;
