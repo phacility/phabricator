@@ -330,3 +330,13 @@
 div.phabricator-remarkup-dark blockquote {
   color: #999;
 }
+
+div.phabricator-remarkup-dark tt {
+  color: #EEE;
+  background: #444;
+}
+
+div.phabricator-remarkup-dark .remarkup-note,
+div.phabricator-remarkup-dark table {
+  color: #000;
+}
