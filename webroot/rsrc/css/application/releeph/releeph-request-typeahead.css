@@ -1,0 +1,27 @@
+/**
+ * @provides releeph-request-typeahead-css
+ */
+
+.releeph-request-typeahead .commit-id {
+  color: #aaf; /* blue... */
+  font-family: monospace;
+  font-size: 100%;
+  display: block;
+  float: left;
+}
+
+.releeph-request-typeahead .author-info {
+  color: #080; /* ...and green, for search results! */
+  text-align: right;
+  display: block;
+  float: right;
+  padding-left: 1em;
+}
+
+.releeph-request-typeahead .focused .author-info {
+  color: #8b8;
+}
+
+.releeph-request-typeahead .summary {
+  clear: both;
+}

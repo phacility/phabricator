@@ -1,0 +1,29 @@
+/**
+ * @provides releeph-preview-branch
+ */
+
+.releeph-preview-branch {
+  min-height: 4em;
+  position: relative;
+}
+
+.releeph-preview-branch .error {
+  padding-left: 22px;
+  background-repeat: no-repeat;
+  background-size: 16px auto;
+  background-image: url(/rsrc/custom/image/releeph/releeph_warning.png);
+  float: left;
+  position: absolute;
+  top: 2.5em;
+}
+
+.releeph-preview-branch .name {
+  clear: both;
+  float: left;
+  position: absolute;
+  font-family: monospace;
+  font-size: 9pt !important;
+  background: white;
+  top: 0.7em;
+  padding: 2px;
+}

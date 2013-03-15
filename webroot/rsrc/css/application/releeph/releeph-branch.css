@@ -1,0 +1,79 @@
+/**
+ * @provides releeph-branch
+ */
+
+.releeph-branch-box {
+  margin-bottom: .5em;
+  padding: .5em .5em .5em;
+
+  border: 2px solid #d5d5d5;
+  /*border-top-color: #D5D5D5;
+  border-right-color: #BBB;
+  border-bottom-color: #A4A4A4;
+  border-left-color: #BBB;*/
+
+  background: #bbb;
+}
+
+/* Types of branch */
+
+.releeph-branch-box-named {
+  background: #ddd;
+}
+
+.releeph-branch-box-latest {
+  background: #ffd;
+}
+
+/* Branch symbolic name and full name */
+
+.releeph-branch-box .names {
+  width: 25em;
+  float: left;
+  margin-bottom: 1em;
+}
+
+.releeph-branch-box .names h1 {
+  font-size: 125%;
+  padding: 0px;
+}
+
+.releeph-branch-box .names h2 {
+  font-weight: normal;
+  font-size: 85%;
+}
+
+/* Date info */
+
+.releeph-branch-box .date-info {
+  width: 10%;
+  float: left;
+  color: #555;
+  margin-bottom: .3em;
+}
+
+/* Statistics table */
+
+.releeph-branch-box .request-statistics {
+  float: right;
+  padding-right: 2em;
+  font-size: 85%;
+}
+
+.releeph-branch-box .request-statistics th {
+  width: 1em;
+  text-align: right;
+  padding-right: .4em;
+  padding-left: .4em;
+}
+
+.releeph-branch-box .request-statistics td {
+  white-space: nowrap;
+  font-style: italic;
+}
+
+/* Buttons */
+
+.releeph-branch-box .buttons {
+  float: right;
+}

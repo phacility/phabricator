@@ -171,6 +171,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'token',
       ),
+      'db.releeph' => array(
+        'type'    => 'db',
+        'name'    => 'releeph',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1164,6 +1168,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130304.lintauthor.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130304.lintauthor.sql'),
+      ),
+      'releeph.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('releeph.sql'),
       ),
     );
   }

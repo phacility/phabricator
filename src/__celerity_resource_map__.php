@@ -1977,7 +1977,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/eefc43b3/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/ecf5f969/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2061,6 +2061,54 @@ celerity_register_resource_map(array(
       3 => 'phabricator-busy',
     ),
     'disk' => '/rsrc/js/application/core/behavior-refresh-csrf.js',
+  ),
+  'javelin-behavior-releeph-preview-branch' =>
+  array(
+    'uri' => '/res/a77ebc86/rsrc/js/application/releeph/releeph-preview-branch.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-uri',
+      4 => 'javelin-util',
+    ),
+    'disk' => '/rsrc/js/application/releeph/releeph-preview-branch.js',
+  ),
+  'javelin-behavior-releeph-request-state-change' =>
+  array(
+    'uri' => '/res/38f96ba8/rsrc/js/application/releeph/releeph-request-state-change.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-util',
+      4 => 'phabricator-keyboard-shortcut',
+      5 => 'phabricator-notification',
+    ),
+    'disk' => '/rsrc/js/application/releeph/releeph-request-state-change.js',
+  ),
+  'javelin-behavior-releeph-request-typeahead' =>
+  array(
+    'uri' => '/res/b52096e2/rsrc/js/application/releeph/releeph-request-typeahead.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-typeahead',
+      4 => 'javelin-tokenizer',
+      5 => 'javelin-typeahead-preloaded-source',
+      6 => 'javelin-typeahead-ondemand-source',
+      7 => 'javelin-dom',
+      8 => 'javelin-stratcom',
+      9 => 'javelin-util',
+    ),
+    'disk' => '/rsrc/js/application/releeph/releeph-request-typeahead.js',
   ),
   'javelin-behavior-repository-crossreference' =>
   array(
@@ -2637,7 +2685,7 @@ celerity_register_resource_map(array(
   ),
   'paste-css' =>
   array(
-    'uri' => '/res/5081cf13/rsrc/css/application/paste/paste.css',
+    'uri' => '/res/044639be/rsrc/css/application/paste/paste.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3099,7 +3147,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-source-code-view-css' =>
   array(
-    'uri' => '/res/9373e769/rsrc/css/layout/phabricator-source-code-view.css',
+    'uri' => '/res/979d5280/rsrc/css/layout/phabricator-source-code-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3336,7 +3384,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/bc10bf21/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/b0947e46/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3432,6 +3480,87 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/js/raphael/g.raphael.line.js',
+  ),
+  'releeph-branch' =>
+  array(
+    'uri' => '/res/6ad6420d/rsrc/css/application/releeph/releeph-branch.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-branch.css',
+  ),
+  'releeph-colors' =>
+  array(
+    'uri' => '/res/dff4b26a/rsrc/css/application/releeph/releeph-colors.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-colors.css',
+  ),
+  'releeph-core' =>
+  array(
+    'uri' => '/res/853f4a73/rsrc/css/application/releeph/releeph-core.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-core.css',
+  ),
+  'releeph-intents' =>
+  array(
+    'uri' => '/res/4e73e9dd/rsrc/css/application/releeph/releeph-intents.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-intents.css',
+  ),
+  'releeph-preview-branch' =>
+  array(
+    'uri' => '/res/65e5dece/rsrc/css/application/releeph/releeph-preview-branch.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-preview-branch.css',
+  ),
+  'releeph-project' =>
+  array(
+    'uri' => '/res/b9376e59/rsrc/css/application/releeph/releeph-project.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-project.css',
+  ),
+  'releeph-request-differential-create-dialog' =>
+  array(
+    'uri' => '/res/4df30ce1/rsrc/css/application/releeph/releeph-request-differential-create-dialog.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-request-differential-create-dialog.css',
+  ),
+  'releeph-request-typeahead-css' =>
+  array(
+    'uri' => '/res/9c9a1acf/rsrc/css/application/releeph/releeph-request-typeahead.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-request-typeahead.css',
+  ),
+  'releeph-status' =>
+  array(
+    'uri' => '/res/588529df/rsrc/css/application/releeph/releeph-status.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/releeph/releeph-status.css',
   ),
   'setup-issue-css' =>
   array(

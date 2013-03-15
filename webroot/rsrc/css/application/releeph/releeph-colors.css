@@ -1,0 +1,35 @@
+/**
+ * @provides releeph-colors
+ */
+
+.releeph-border-color-failed {
+  border-color: #d2d;
+}
+
+.releeph-border-color-requested {
+  border-color: #ddd;
+}
+
+.releeph-border-color-comment {
+  border-color: #ddd;
+}
+
+.releeph-border-color-needs-pick {
+  border-color: #096;
+}
+
+.releeph-border-color-rejected {
+  border-color: #d00;
+}
+
+.releeph-border-color-needs-revert {
+  border-color: #d00;
+}
+
+.releeph-border-color-abandoned {
+  border-color: #222;
+}
+
+.releeph-border-color-picked {
+  border-color: #069;
+}

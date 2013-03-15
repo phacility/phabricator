@@ -32,6 +32,8 @@ abstract class PhabricatorBaseEnglishTranslation
       'COMMIT(S)' => array('COMMIT', 'COMMITS'),
 
       '%d line(s)' => array('%d line', '%d lines'),
+      '%d path(s)' => array('%d path', '%d paths'),
+      '%d diff(s)' => array('%d diff', '%d diffs'),
 
       'added %d commit(s): %s' => array(
         'added commit: %2$s',
@@ -285,6 +287,10 @@ abstract class PhabricatorBaseEnglishTranslation
           '%s added inline comments.',
         ),
       ),
+
+      '%d comment(s)' => array('%d comment', '%d comments'),
+      '%d rejection(s)' => array('%d rejection', '%d rejections'),
+      '%d update(s)' => array('%d update', '%d updates'),
 
     );
   }
