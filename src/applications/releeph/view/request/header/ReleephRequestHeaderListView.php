@@ -66,9 +66,7 @@ final class ReleephRequestHeaderListView
       ),
       $views);
 
-    return $this->renderSingleView(array(
-      $error_view,
-      $list));
+    return array($error_view, $list);
   }
 
   /**
