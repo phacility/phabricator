@@ -54,7 +54,7 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
   }
 
   public function arrangeFieldsForSelectForm(array $fields) {
-    self::selectFields($fields, array(
+    return self::selectFields($fields, array(
       'ReleephStatusFieldSpecification',
       'ReleephSeverityFieldSpecification',
       'ReleephRequestorFieldSpecification',
@@ -62,7 +62,7 @@ final class ReleephDefaultFieldSelector extends ReleephFieldSelector {
   }
 
   public function sortFieldsForCommitMessage(array $fields) {
-    self::selectFields($fields, array(
+    return self::selectFields($fields, array(
       'ReleephCommitMessageFieldSpecification',
       'ReleephRequestorFieldSpecification',
       'ReleephIntentFieldSpecification',
