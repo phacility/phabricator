@@ -4,67 +4,67 @@
     "gradient-black-dark"      : {
       "name" : "gradient-black-dark",
       "rule" : ".gradient-black-dark, button.black, a.black, a.black:visited",
-      "hash" : "c5fc370719ddefa744559b5bea733cd4"
+      "hash" : "17425d8c9c53672ab2edbd236e6efd7a"
     },
     "gradient-black-light"     : {
       "name" : "gradient-black-light",
       "rule" : ".gradient-black-light, button.black:active, a.black:active",
-      "hash" : "fcf75d291cc3466aa674b836dbab2162"
+      "hash" : "c4fb2231553d2894fd2c97beaa8bfe39"
     },
     "gradient-blue-dark"       : {
       "name" : "gradient-blue-dark",
       "rule" : ".gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit",
-      "hash" : "dcec881b58c1e8fc28025cbb9036dc20"
+      "hash" : "f467612edcdbf984672287c6086492c4"
     },
     "gradient-blue-light"      : {
       "name" : "gradient-blue-light",
       "rule" : ".gradient-blue-light, button:active, a.button:active",
-      "hash" : "1922b362bbb1632d06a83c231f2926f9"
+      "hash" : "471d47c102def6db46b345310aac5a03"
     },
     "gradient-breadcrumbs"     : {
       "name" : "gradient-breadcrumbs",
       "rule" : ".gradient-breadcrumbs",
-      "hash" : "8d9c85f11baec88ffd3aae0daf9937e9"
+      "hash" : "3d0f8634df5bc29eaf2a5a01bae79cf1"
     },
     "gradient-dark-menu-label" : {
       "name" : "gradient-dark-menu-label",
       "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label",
-      "hash" : "e2e955d71c33452a0d65a824c6c2e302"
+      "hash" : "e0d4a455142f9c4745d36ad8b7dd3f78"
     },
     "gradient-green-dark"      : {
       "name" : "gradient-green-dark",
       "rule" : ".gradient-green-dark, button.green, a.green, a.green:visited",
-      "hash" : "00851dc4b3f6a63b8896ca92d864a024"
+      "hash" : "a6719fe55b2b0e527ed32985691eab34"
     },
     "gradient-green-light"     : {
       "name" : "gradient-green-light",
       "rule" : ".gradient-green-light, button.green:active, a.green:active",
-      "hash" : "488092e4b8fb59aba7d63399c6648254"
+      "hash" : "124969cc7805bbd754005bc702e24c54"
     },
     "gradient-grey-dark"       : {
       "name" : "gradient-grey-dark",
       "rule" : ".gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled",
-      "hash" : "bf36ff8e84c2a129dbed4c1e5ad7a49c"
+      "hash" : "fac28a773098fc62bf571e12b843f71a"
     },
     "gradient-grey-light"      : {
       "name" : "gradient-grey-light",
       "rule" : ".gradient-grey-light, button.grey:active, a.grey:active, button.grey_active, a.dropdown-open",
-      "hash" : "1f495f34364c0660606b17143a40cc4f"
+      "hash" : "83c6128f59fc2e426c912c2f73f5b92b"
     },
     "gradient-menu-hover"      : {
       "name" : "gradient-menu-hover",
       "rule" : ".gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover",
-      "hash" : "a6f433a7bd6807ff0040c6d17703b418"
+      "hash" : "e6e064156d66952180e99b00996ffc38"
     },
     "gradient-menu-label"      : {
       "name" : "gradient-menu-label",
       "rule" : ".gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label",
-      "hash" : "e22a5bec2de71eff694dafa2da0dfebd"
+      "hash" : "04b9943f5b06c8cb21fe6b96714e6662"
     },
     "gradient-menu-selected"   : {
       "name" : "gradient-menu-selected",
       "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus",
-      "hash" : "1bc22a3463a03110db6fb82b6fbdb390"
+      "hash" : "9b4b039fba177b90bc26f0e6eece339d"
     }
   },
   "scales"  : [

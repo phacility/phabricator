@@ -70,10 +70,11 @@
 
 */
 
+/* Hard to sprite since we can't have other sprites appearing in tall cells */
 .phabricator-object-list-cards .phabricator-object-item {
   border-radius: 3px;
   border-left-width: 4px;
-  background: #f6f6f6;
+  background: #e8e8e8 url('/rsrc/image/texture/card-gradient.png') repeat-x;
 }
 
 
