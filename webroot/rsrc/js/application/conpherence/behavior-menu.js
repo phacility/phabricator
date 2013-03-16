@@ -11,8 +11,6 @@
 
 JX.behavior('conpherence-menu', function(config) {
 
-  var root = JX.$(config.form_pane);
-
   function onwidgetresponse(context, response) {
     var widgets = JX.$H(response.widgets);
     var widgetsRoot = JX.$(config.widgets_pane);
@@ -112,6 +110,7 @@ JX.behavior('conpherence-menu', function(config) {
 
   JX.Stratcom.listen('click', 'conpherence-edit-metadata', function (e) {
     e.kill();
+    var root = JX.$(config.form_pane);
     var form = JX.DOM.find(root, 'form');
     var data = e.getNodeData('conpherence-edit-metadata');
     new JX.Workflow.newFromForm(form, data)
@@ -144,5 +143,17 @@ JX.behavior('conpherence-menu', function(config) {
     .setData({offset: 100}) // get the next page
     .send();
   });
+
+  // select the current message
+  var selectedConpherence = false;
+  if (config.selected_conpherence_id) {
+    var selected = JX.$(config.selected_conpherence_id + '-nav-item');
+    JX.Stratcom.invoke(
+      'conpherence-initial-selected',
+      null,
+      { selected : selected }
+    );
+    selectedConpherence = true;
+  }
 
 });

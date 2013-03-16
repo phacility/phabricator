@@ -63,7 +63,7 @@ final class ConpherenceListController extends
   }
 
   private function renderEmptyMainPane() {
-    $this->initJavelinBehaviors();
+    $this->initJavelinBehaviors(true);
     return phutil_tag(
       'div',
       array(

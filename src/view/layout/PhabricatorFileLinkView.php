@@ -7,6 +7,15 @@ final class PhabricatorFileLinkView extends AphrontView {
   private $fileViewURI;
   private $fileViewable;
   private $filePHID;
+  private $customClass;
+
+  public function setCustomClass($custom_class) {
+    $this->customClass = $custom_class;
+    return $this;
+  }
+  public function getCustomClass() {
+    return $this->customClass;
+  }
 
   public function setFilePHID($file_phid) {
     $this->filePHID = $file_phid;
@@ -71,11 +80,16 @@ final class PhabricatorFileLinkView extends AphrontView {
       $meta = $this->getMetadata();
     }
 
+    $class = 'phabricator-remarkup-embed-layout-link';
+    if ($this->getCustomClass()) {
+      $class = $this->getCustomClass();
+    }
+
     return javelin_tag(
       'a',
       array(
         'href'        => $this->getFileViewURI(),
-        'class'       => 'phabricator-remarkup-embed-layout-link',
+        'class'       => $class,
         'sigil'       => $sigil,
         'meta'        => $meta,
         'mustcapture' => $mustcapture,

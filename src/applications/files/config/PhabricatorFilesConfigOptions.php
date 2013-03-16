@@ -38,6 +38,35 @@ final class PhabricatorFilesConfigOptions
       'image/vnd.microsoft.icon'  => true,
     );
 
+    // largely lifted from http://en.wikipedia.org/wiki/Internet_media_type
+    $icon_default = array(
+      // audio file icon
+      'audio/basic' => 'docs_audio',
+      'audio/L24' => 'docs_audio',
+      'audio/mp4' => 'docs_audio',
+      'audio/mpeg' => 'docs_audio',
+      'audio/ogg' => 'docs_audio',
+      'audio/vorbis' => 'docs_audio',
+      'audio/vnd.rn-realaudio' => 'docs_audio',
+      'audio/vnd.wave' => 'docs_audio',
+      'audio/webm' => 'docs_audio',
+      // movie file icon
+      'video/mpeg' => 'docs_movie',
+      'video/mp4' => 'docs_movie',
+      'video/ogg' => 'docs_movie',
+      'video/quicktime' => 'docs_movie',
+      'video/webm' => 'docs_movie',
+      'video/x-matroska' => 'docs_movie',
+      'video/x-ms-wmv' => 'docs_movie',
+      'video/x-flv' => 'docs_movie',
+      // pdf file icon
+      'application/pdf' => 'docs_pdf',
+      // zip file icon
+      'application/zip' => 'docs_zip',
+      // msword icon
+      'application/msword' => 'docs_doc',
+    ) + array_fill_keys(array_keys($image_default), 'docs_image');
+
     return array(
       $this->newOption('files.viewable-mime-types', 'wild', $viewable_default)
         ->setSummary(
@@ -58,6 +87,12 @@ final class PhabricatorFilesConfigOptions
           pht(
             'List of MIME types which can be used as the `src` for an '.
             '`<img />` tag.')),
+      $this->newOption('files.icon-mime-types', 'wild', $icon_default)
+        ->setSummary(pht('Configure which MIME types map to which icons.'))
+        ->setDescription(
+          pht(
+            'Map of MIME type to icon name. MIME types which can not be '.
+            'found default to icon `doc_files`.')),
       $this->newOption('storage.mysql-engine.max-size', 'int', 1000000)
         ->setSummary(
           pht(

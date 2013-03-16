@@ -234,46 +234,47 @@ final class ConpherenceUpdateController extends
     $conpherence_id,
     $latest_transaction_id) {
 
-      $user = $this->getRequest()->getUser();
-      $conpherence = id(new ConpherenceThreadQuery())
-        ->setViewer($user)
-        ->setAfterID($latest_transaction_id)
-        ->needHeaderPics(true)
-        ->needWidgetData(true)
-        ->withIDs(array($conpherence_id))
-        ->executeOne();
+    $user = $this->getRequest()->getUser();
+    $conpherence = id(new ConpherenceThreadQuery())
+      ->setViewer($user)
+      ->setAfterID($latest_transaction_id)
+      ->needHeaderPics(true)
+      ->needWidgetData(true)
+      ->withIDs(array($conpherence_id))
+      ->executeOne();
 
-      $data = $this->renderConpherenceTransactions($conpherence);
-      $rendered_transactions = $data['transactions'];
-      $new_latest_transaction_id = $data['latest_transaction_id'];
+    $data = $this->renderConpherenceTransactions($conpherence);
+    $rendered_transactions = $data['transactions'];
+    $new_latest_transaction_id = $data['latest_transaction_id'];
 
-      $selected = true;
-      $nav_item = $this->buildConpherenceMenuItem(
-        $conpherence,
-        '-nav-item',
-        $selected);
-      $menu_item = $this->buildConpherenceMenuItem(
-        $conpherence,
-        '-menu-item',
-        $selected);
+    $selected = true;
+    $nav_item = $this->buildConpherenceMenuItem(
+      $conpherence,
+      '-nav-item',
+      $selected);
+    $menu_item = $this->buildConpherenceMenuItem(
+      $conpherence,
+      '-menu-item',
+      $selected);
 
-      $header = $this->buildHeaderPaneContent($conpherence);
+    $header = $this->buildHeaderPaneContent($conpherence);
 
-      $file_widget = id(new ConpherenceFileWidgetView())
-        ->setConpherence($conpherence)
-        ->setUpdateURI(
-          $this->getApplicationURI('update/'.$conpherence->getID().'/'));
+    $file_widget = id(new ConpherenceFileWidgetView())
+      ->setUser($this->getRequest()->getUser())
+      ->setConpherence($conpherence)
+      ->setUpdateURI(
+        $this->getApplicationURI('update/'.$conpherence->getID().'/'));
 
-      $content = array(
-        'transactions' => $rendered_transactions,
-        'latest_transaction_id' => $new_latest_transaction_id,
-        'menu_item' => $menu_item->render(),
-        'nav_item' => $nav_item->render(),
-        'conpherence_phid' => $conpherence->getPHID(),
-        'header' => $header,
-        'file_widget' => $file_widget->render()
-      );
-      return $content;
-    }
-
+    $content = array(
+      'transactions' => $rendered_transactions,
+      'latest_transaction_id' => $new_latest_transaction_id,
+      'menu_item' => $menu_item->render(),
+      'nav_item' => $nav_item->render(),
+      'conpherence_phid' => $conpherence->getPHID(),
+      'header' => $header,
+      'file_widget' => $file_widget->render()
+    );
+    return $content;
   }
+
+}

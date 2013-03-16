@@ -170,12 +170,19 @@ final class ConpherenceThreadQuery
 
     // attached files
     $files = array();
+    $file_author_phids = array();
+    $authors = array();
     if ($file_phids) {
       $files = id(new PhabricatorFileQuery())
         ->setViewer($this->getViewer())
         ->withPHIDs($file_phids)
         ->execute();
       $files = mpull($files, null, 'getPHID');
+      $file_author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
+      $authors = id(new PhabricatorObjectHandleData($file_author_phids))
+        ->setViewer($this->getViewer())
+        ->loadHandles();
+      $authors = mpull($authors, null, 'getPHID');
     }
 
     foreach ($conpherences as $phid => $conpherence) {
@@ -183,9 +190,23 @@ final class ConpherenceThreadQuery
       $statuses = array_select_keys($statuses, $participant_phids);
       $statuses = array_mergev($statuses);
       $statuses = msort($statuses, 'getDateFrom');
+
+      $conpherence_files = array();
+      $files_authors = array();
+      foreach ($conpherence->getFilePHIDs() as $curr_phid) {
+        $conpherence_files[$curr_phid] = $files[$curr_phid];
+        // some files don't have authors so be careful
+        $current_author = null;
+        $current_author_phid = idx($file_author_phids, $curr_phid);
+        if ($current_author_phid) {
+          $current_author = $authors[$current_author_phid];
+        }
+        $files_authors[$curr_phid] = $current_author;
+      }
       $widget_data = array(
         'statuses' => $statuses,
-        'files' => array_select_keys($files, $conpherence->getFilePHIDs()),
+        'files' => $conpherence_files,
+        'files_authors' => $files_authors
       );
       $conpherence->attachWidgetData($widget_data);
     }

@@ -586,6 +586,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return idx($mime_map, $mime_type);
   }
 
+  public function getDisplayIconForMimeType() {
+    $mime_map = PhabricatorEnv::getEnvConfig('files.icon-mime-types');
+    $mime_type = $this->getMimeType();
+    return idx($mime_map, $mime_type, 'docs_file');
+  }
+
   public function validateSecretKey($key) {
     return ($key == $this->getSecretKey());
   }

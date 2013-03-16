@@ -1174,21 +1174,9 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/conpherence/behavior-drag-and-drop-photo.js',
   ),
-  'javelin-behavior-conpherence-init' =>
-  array(
-    'uri' => '/res/700bba2e/rsrc/js/application/conpherence/behavior-init.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-stratcom',
-    ),
-    'disk' => '/rsrc/js/application/conpherence/behavior-init.js',
-  ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/cb1a5cf0/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/e5da1c05/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
