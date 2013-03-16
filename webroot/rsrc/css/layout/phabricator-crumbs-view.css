@@ -11,8 +11,9 @@
   height: 31px;
   overflow: hidden;
   vertical-align: top;
+  border-bottom: 1px solid #aaa;
 
-  box-shadow: 0 1px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 
   /* TODO: Position this over the slider for Differential's file tree view.
      Remove this once that gets sorted out. */
@@ -26,6 +27,10 @@
   font-weight: bold;
   text-decoration: none;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.phabricator-crumbs-view + .phabricator-header-shell {
+  border-top: none;
 }
 
 .phabricator-crumbs-view a:hover {
