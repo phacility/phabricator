@@ -194,7 +194,13 @@ final class ConpherenceThreadQuery
       $conpherence_files = array();
       $files_authors = array();
       foreach ($conpherence->getFilePHIDs() as $curr_phid) {
-        $conpherence_files[$curr_phid] = $files[$curr_phid];
+        $curr_file = idx($files, $curr_phid);
+        if (!$curr_file) {
+          // this file was deleted or user doesn't have permission to see it
+          // this is generally weird
+          continue;
+        }
+        $conpherence_files[$curr_phid] = $curr_file;
         // some files don't have authors so be careful
         $current_author = null;
         $current_author_phid = idx($file_author_phids, $curr_phid);
