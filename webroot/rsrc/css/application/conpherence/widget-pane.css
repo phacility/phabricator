@@ -87,6 +87,8 @@
   position: relative;
   top: -4px;
   left: 20px;
+  overflow-x: hidden;
+  width: 270px;
   font-weight: bold;
 }
 .conpherence-widget-pane #widgets-files .file-uploaded-by {

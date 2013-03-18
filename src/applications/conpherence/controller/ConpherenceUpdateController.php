@@ -77,7 +77,7 @@ final class ConpherenceUpdateController extends
               $xactions[] = id(new ConpherenceTransaction())
                 ->setTransactionType(ConpherenceTransactionType::TYPE_PICTURE)
                 ->setNewValue($orig_file->getPHID());
-              // do 2 transformations "crudely"
+              // do a transformation "crudely"
               $xformer = new PhabricatorImageTransformer();
               $header_file = $xformer->executeConpherenceTransform(
                 $orig_file,
@@ -105,7 +105,14 @@ final class ConpherenceUpdateController extends
             $title = $conpherence->getTitle();
             $updated = true;
             $fancy_ajax_style = false;
-          } else if ($top !== null || $left !== null) {
+          }
+
+          // all other metadata updates are continue requests
+          if (!$request->isContinueRequest()) {
+            break;
+          }
+
+          if ($top !== null || $left !== null) {
             $file = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
             $xformer = new PhabricatorImageTransformer();
             $xformed = $xformer->executeConpherenceTransform(
@@ -128,7 +135,7 @@ final class ConpherenceUpdateController extends
               ->setNewValue($title);
             $updated = true;
           }
-          if (!$updated && $request->isContinueRequest()) {
+          if (!$updated) {
             $errors[] = pht(
               'That was a non-update. Try cancel.');
           }
