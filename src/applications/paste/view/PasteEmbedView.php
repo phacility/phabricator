@@ -4,6 +4,8 @@ final class PasteEmbedView extends AphrontView {
 
   private $paste;
   private $handle;
+  private $highlights = array();
+  private $lines = 30;
 
   public function setPaste(PhabricatorPaste $paste) {
     $this->paste = $paste;
@@ -13,6 +15,15 @@ final class PasteEmbedView extends AphrontView {
   public function setHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
     return $this;
+  }
+
+  public function setHighlights(array $highlights) {
+    $this->highlights = $highlights;
+    return $this;
+  }
+
+  public function setLines($lines) {
+    $this->lines = $lines;
   }
 
   public function render() {
@@ -37,17 +48,21 @@ final class PasteEmbedView extends AphrontView {
       ),
       $link);
 
+    $body_attributes = array('class' => 'paste-embed-body');
+    if ($this->lines != null) {
+      $body_attributes['style'] = 'max-height: '.$this->lines * (1.15).'em;';
+    }
+
     $body = phutil_tag(
       'div',
-      array(),
+      $body_attributes,
       id(new PhabricatorSourceCodeView())
-      ->setLines($lines));
+      ->setLines($lines)
+      ->setHighlights($this->highlights));
 
     return phutil_tag(
       'div',
-      array(
-        'class' => 'paste-embed'
-      ),
+      array('class' => 'paste-embed'),
       array($head, $body));
 
   }

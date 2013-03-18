@@ -13,8 +13,14 @@ JX.behavior('conpherence-widget-pane', function(config) {
     function(e) {
       e.kill();
       var data = e.getNodeData('conpherence-change-widget');
+      // abort if this widget isn't exactly involved in this toggle business
+      if (!config.widgetRegistery[data.widget]) {
+        return;
+      }
       for (var widget in config.widgetRegistery) {
-        if (widget == data.widget) {
+        if (!config.widgetRegistery[widget]) {
+          continue;
+        } else if (widget == data.widget) {
           JX.$(widget).style.display = 'block';
           JX.DOM.alterClass(e.getTarget(), data.toggleClass, true);
         } else {

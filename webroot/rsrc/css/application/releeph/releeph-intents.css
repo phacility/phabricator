@@ -1,0 +1,37 @@
+/**
+ * @provides releeph-intents
+ */
+
+.releeph-intents .intents {
+  clear: left;
+  width: 100%;
+  margin-top: 3px;
+}
+
+.releeph-intents .arrow {
+  float: left;
+  clear: left;
+  margin-right: 0.4em;
+  padding: 8px;
+  background: transparent 0 0 no-repeat;
+}
+
+.releeph-intents .arrow.want {
+  background-image: url('/rsrc/custom/image/icon/tango/go-next.png');
+}
+
+.releeph-intents .arrow.pass {
+  background-image: url('/rsrc/custom/image/icon/tango/go-previous-gray.png');
+}
+
+.releeph-intents a {
+  margin-right: 0.4em;
+}
+
+.releeph-intents .pusher {
+  font-weight: bold;
+}
+
+.releeph-intents .requestor {
+  font-weight: normal;
+}

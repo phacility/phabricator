@@ -1,0 +1,199 @@
+/**
+ * @provides releeph-core
+ */
+
+.releeph-request-header {
+  margin: .5em 2em 3em;
+
+  /**
+   * Copied from the old .differential-panel, present in commit
+   * f04d8ab1a747dc9719d378d9286088b677ce224c
+   *
+   * (As is the <h1> code below)
+   */
+  max-width:    1120px;
+  border:       1px solid #666622;
+  background:   #efefdf;
+  padding:      15px 20px;
+  font-size:    13px;
+}
+
+.releeph-request-header h1 {
+  width: 100%;
+  border-bottom: 1px solid #aaaa99;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.releeph-request-header .focus-char {
+  left: -10px;
+  display: none;
+  float: left;
+  position: absolute;
+  top: 0px;
+  left: -1em;
+
+  font-weight: bold;
+
+  color: #880;
+  font-family: "Hiragino Kaku Gothic Pro", "Osaka", "Zapf Dingbats";
+}
+
+.releeph-request-header.focus .focus-char {
+  display: block;
+}
+
+.releeph-request-header-border {
+  border-width: 1px 10px 1px;
+  border-color: #ddd;
+}
+
+
+/* Laying out properties / fields */
+
+.releeph-request-header table.panes {
+  width: 100%;
+}
+
+.releeph-request-header table.panes td.side {
+  width: 50%;
+  max-width: 1em;
+}
+
+.releeph-request-header table.panes td.side.left {
+  padding-right: 20px;
+  border-right: 3px solid #bbb;
+}
+
+.releeph-request-header table.panes td.side.right {
+  padding-left: 20px;
+}
+
+.releeph-request-header table.panes td.side table.fields {
+  width: 100%;
+}
+
+.releeph-request-header table.panes td.side table.fields tr {
+  vertical-align: middle;
+}
+
+.releeph-request-header table.panes td.side table.fields th {
+  font-weight: bold;
+  text-align: right;
+  padding-right: 1em;
+  white-space: nowrap;
+}
+
+.releeph-request-header table.panes td.side table.fields td {
+  width: 100%; /* wide! */
+  max-width: 1em;
+}
+
+
+/* Buttons */
+
+.releeph-request-header .button-divider {
+  clear: both;
+  margin-top: 1.5em;
+  border-top: 1px solid #bbb;
+}
+
+.releeph-request-header .buttons {
+  width: 100%;
+}
+
+.releeph-request-header .buttons tr {
+  padding: 1em;
+  margin: 3em;
+}
+
+.releeph-request-header .buttons td {
+  padding: 1em .5em 0.2em;
+}
+
+.releeph-request-header .buttons td.wide {
+  width: 100%;
+}
+
+/* Colors: match differential colors */
+
+.releeph-request-comment {
+  border-color: #ddd;
+}
+
+.releeph-request-comment-pusher {
+  background:   #8DEE8D;
+  border-color: #096;
+}
+
+.releeph-request-comment-pusher div {
+  background:   #8DEE8D;
+}
+
+/* The diff size bar */
+
+.releeph-request-header .diff-bar {
+  border: 0px;
+}
+
+.releeph-request-header .diff-bar div {
+  width: 100px;
+  border: 1px solid;
+  border-top-color: #A4A4A4;
+  border-right-color: #BBB;
+  border-bottom-color: #D5D5D5;
+  border-left-color: #BBB;
+  background: white;
+  float: left;
+  margin-right: 1em;
+}
+
+.releeph-request-header .diff-bar div div {
+  height: 10px;
+}
+
+.releeph-request-header .diff-bar span {
+  color: #555;
+}
+
+/* Rendering pick / commit errors, etc. */
+
+.releeph-request-pick-failed-event h1:before {
+  content: '\2014  ';
+}
+
+.releeph-request-pick-failed-event h1:after {
+  content: ' \2014';
+}
+
+.releeph-request-pick-failed-event h1 {
+  padding: 3px 10px 3px;
+  margin-bottom: 0.5em;
+  background: #ffb;
+  font-size: small;
+}
+
+.releeph-request-pick-failed-event div {
+  font-family: monospace;
+  margin-bottom: 1.5em;
+  padding-left: 1em;
+  width: 70em;
+}
+
+/* History view of request */
+
+.releeph-request-event-list {
+  margin: .5em 2em .5em;
+}
+
+
+/* Shorten long header-text */
+
+.releeph-header-text-truncated {
+  width: 100%;
+  float: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

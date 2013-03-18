@@ -91,7 +91,7 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function setValueFromParsedCommitMessage($value) {
-    $this->reviewers = nonempty($value, array());
+    $this->reviewers = array_unique(nonempty($value), array());
     return $this;
   }
 

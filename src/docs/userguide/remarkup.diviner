@@ -261,29 +261,51 @@ You can also link directly to a comment in Maniphest and Differential:
 
   T123#4        # Link to comment #4 of T123
 
+= Embedding Objects
+
 You can also generate full-name references to some objects by using braces:
 
   {D123}        # Link to Differential revision D123 with the full name
   {T123}        # Link to Maniphest task T123 with the full name
 
 These references will also show when an object changes state (for instance, a
-task or revision is closed).
+task or revision is closed). Some types of objects support rich embedding.
 
-= Quoting Text =
+== Embedding Mocks (Pholio)
 
-To quote text, preface it with an ">":
+You can embed a Pholio mock by using braces to refer to it:
 
-  > This is quoted text.
+  {M123}
 
-This appears like this:
+By default the first four images from the mock set are displayed. This behavior
+can be overridden with the **image** option. With the **image** option you can
+provide one or more image IDs to display.
 
-> This is quoted text.
+You can set the image (or images) to display like this:
 
-= Embedding Images =
+  {M123, image=12345}
+  {M123, image=12345 & 6789}
 
-You can embed an image by using braces to refer to it:
+== Embedding Pastes
 
-  {F123}         # Embed the image file F123
+You can embed a Paste using braces:
+
+  {P123}
+
+You can adjust the embed height with the `lines` option:
+
+  {P123, lines=15}
+
+You can highlight specific lines with the `highlight` option:
+
+  {P123, highlight=15}
+  {P123, highlight="23-25, 31"}
+
+== Embedding Images
+
+You can embed an image or other file by using braces to refer to it:
+
+  {F123}
 
 In most interfaces, you can drag-and-drop an image from your computer into the
 text area to upload and reference it.
@@ -304,6 +326,22 @@ Valid options are:
   - **size** thumb (default), full
   - **name** with `layout=link` or for non-images, use this name for the link
     text
+
+== Embedding Countdowns
+
+You can embed a countdown by using braces:
+
+  {C123}
+
+= Quoting Text =
+
+To quote text, preface it with an ">":
+
+  > This is quoted text.
+
+This appears like this:
+
+> This is quoted text.
 
 = Embedding Media =
 
@@ -424,4 +462,3 @@ Some general notes about this syntax:
     not);
   - you can use other Remarkup rules (like **bold**, //italics//, etc.) inside
     table cells.
-

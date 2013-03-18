@@ -674,6 +674,13 @@ JX.behavior('pholio-mock-view', function(config) {
       image.desc);
     info.push(desc);
 
+    var embed = JX.$N(
+      'div',
+      {className: 'pholio-image-embedding'},
+      JX.$H('Embed this image:<br />{M' + config.mockID +
+        ', image=' + image.id + '}'));
+    info.push(embed);
+
     // Render image dimensions and visible size. If we have this infomation
     // from the server we can display some of it immediately; otherwise, we need
     // to wait for the image to load so we can read dimension information from

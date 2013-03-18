@@ -30,6 +30,10 @@
   user-select: none;
 }
 
+.phabricator-source-highlight {
+  background: #ff0;
+}
+
 .phabricator-source-code-summary {
   padding-bottom: 8px;
 }

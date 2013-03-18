@@ -1,0 +1,25 @@
+/**
+ * @provides releeph-project
+ */
+
+/**
+ * ...from aphront-transaction.css
+ */
+
+.releeph-pusher {
+  background: 2px 2px no-repeat;
+  margin-top: 1em;
+  margin-bottom: 1.25em;
+  margin-right: 1em;
+  min-height: 50px;
+  padding: 2px 0px;
+
+  background-color: white;
+  border: 2px solid gray;
+  float: left;
+}
+
+.releeph-pusher-body {
+  margin-left: 54px;
+  padding: 1em;
+}

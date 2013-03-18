@@ -101,24 +101,22 @@ final class PhrictionDiffController
     $revert_l = $this->renderRevertButton($content_l, $current);
     $revert_r = $this->renderRevertButton($content_r, $current);
 
-    $crumbs = new AphrontCrumbsView();
-    $crumbs->setCrumbs(
-      array(
-        'Phriction',
-        phutil_tag(
-          'a',
-          array(
-            'href' => PhrictionDocument::getSlugURI($slug),
-          ),
-          $current->getTitle()),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/phriction/history/'.$document->getSlug().'/',
-          ),
-          'History'),
-        "Changes Between Version {$l} and Version {$r}",
-      ));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumb_views = $this->renderBreadcrumbs($slug);
+    foreach ($crumb_views as $view) {
+      $crumbs->addCrumb($view);
+    }
+
+
+    $title = "Version $l vs $r";
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
+
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title));
+
 
     $comparison_table = $this->renderComparisonTable(
       array(
@@ -170,7 +168,7 @@ final class PhrictionDiffController
 
 
     $output = hsprintf(
-      '<div class="phriction-document-history-diff">'.
+      '<br><div class="phriction-document-history-diff">'.
         '%s<br /><br />%s'.
         '<table class="phriction-revert-table">'.
           '<tr><td>%s</td><td>%s</td>'.
@@ -183,14 +181,18 @@ final class PhrictionDiffController
       $revert_r,
       $output);
 
-    return $this->buildStandardPageResponse(
+
+    return $this->buildApplicationPage(
       array(
         $crumbs,
+        $header,
         $output,
       ),
       array(
         'title'     => pht('Document History'),
+        'device'    => true,
       ));
+
   }
 
   private function renderRevertButton(

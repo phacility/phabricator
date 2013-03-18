@@ -228,7 +228,7 @@ final class CelerityStaticResourceResponse {
     // the map script). In production, we can assume the map script gets run
     // after changes, and safely skip this.
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
-      $root = dirname(phutil_get_library_root('phabricator')).'/webroot/';
+      $root = dirname(phutil_get_library_root('phabricator')).'/webroot';
       if (isset($resource['disk'])) {
         $mtime = (int)filemtime($root.$resource['disk']);
       } else {

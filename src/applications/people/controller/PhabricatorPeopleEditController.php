@@ -54,7 +54,9 @@ final class PhabricatorPeopleEditController
       pht('View Profile'), '/p/'.$user->getUsername().'/');
     $nav->addLabel(pht('Special'));
     $nav->addFilter('rename', pht('Change Username'));
-    $nav->addFilter('picture', pht('Set Account Picture'));
+    if ($user->getIsSystemAgent()) {
+      $nav->addFilter('picture', pht('Set Account Picture'));
+    }
     $nav->addFilter('delete', pht('Delete User'));
 
     if (!$user->getID()) {

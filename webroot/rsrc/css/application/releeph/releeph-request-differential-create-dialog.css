@@ -1,0 +1,17 @@
+/**
+ * @provides releeph-request-differential-create-dialog
+ */
+
+.releeph-request-differential-create-dialog h1 {
+  color: gray;
+  font-style: italic;
+  font-size: 16px;
+  margin-top: 0.8em;
+}
+
+.releeph-request-differential-create-dialog a {
+  font-weight: bold;
+  margin-left: 2em;
+  display: block;
+  margin-top: 1em;
+}

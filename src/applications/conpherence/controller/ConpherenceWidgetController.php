@@ -51,16 +51,21 @@ final class ConpherenceWidgetController extends
 
   private function renderWidgetPaneContent() {
     require_celerity_resource('conpherence-widget-pane-css');
-    require_celerity_resource('sprite-conpher-css');
+    require_celerity_resource('sprite-conpherence-css');
+    $can_toggle = 1;
+    $cant_toggle = 0;
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
         'form_pane' => 'conpherence-form',
         'file_widget' => 'widgets-files',
         'widgetRegistery' => array(
-          'widgets-files' => 1,
-          'widgets-tasks' => 1,
-          'widgets-calendar' => 1,
+          'widgets-conpherence-list' => $cant_toggle,
+          'widgets-conversation' => $cant_toggle,
+          'widgets-people' => $can_toggle,
+          'widgets-files' => $can_toggle,
+          'widgets-calendar' => $can_toggle,
+          'widgets-settings' => $can_toggle,
         )
       ));
 
@@ -71,108 +76,132 @@ final class ConpherenceWidgetController extends
       array(
         'class' => 'widgets-header'
       ),
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'widgets-header-icon-holder'
+        ),
+        array(
+          javelin_tag(
+            'a',
+            array(
+              'sigil' => 'conpherence-change-widget',
+              'meta'  => array(
+                'widget' => 'widgets-conpherence-list',
+                'toggleClass' => 'conpherence_list_on'
+              ),
+              'id' => 'widgets-conpherence-list-toggle',
+              'class' => 'sprite-conpherence conpherence_list_off',
+            ),
+            ''),
+          javelin_tag(
+            'a',
+            array(
+              'sigil' => 'conpherence-change-widget',
+              'meta'  => array(
+                'widget' => 'widgets-conversation',
+                'toggleClass' => 'conpherence_conversation_on'
+              ),
+              'id' => 'widgets-conpherence-conversation-toggle',
+              'class' => 'sprite-conpherence conpherence_conversation_off',
+            ),
+            ''),
+          javelin_tag(
+            'a',
+            array(
+              'sigil' => 'conpherence-change-widget',
+              'meta'  => array(
+                'widget' => 'widgets-people',
+                'toggleClass' => 'conpherence_people_on'
+              ),
+              'id' => 'widgets-people-toggle',
+              'class' => 'sprite-conpherence conpherence_people_off'
+            ),
+            ''),
+          javelin_tag(
+            'a',
+            array(
+              'sigil' => 'conpherence-change-widget',
+              'meta'  => array(
+                'widget' => 'widgets-files',
+                'toggleClass' => 'conpherence_files_on'
+              ),
+              'id' => 'widgets-files-toggle',
+              'class' =>
+              'sprite-conpherence conpherence_files_on conpherence_files_off'
+            ),
+            ''),
+          javelin_tag(
+            'a',
+            array(
+              'sigil' => 'conpherence-change-widget',
+              'meta'  => array(
+                'widget' => 'widgets-calendar',
+                'toggleClass' => 'conpherence_calendar_on'
+              ),
+              'id' => 'widgets-calendar-toggle',
+              'class' => 'sprite-conpherence conpherence_calendar_off',
+            ),
+            ''),
+          javelin_tag(
+            'a',
+            array(
+              'sigil' => 'conpherence-change-widget',
+              'meta'  => array(
+                'widget' => 'widgets-settings',
+                'toggleClass' => 'conpherence_settings_on'
+              ),
+              'id' => 'widgets-settings-toggle',
+              'class' => 'sprite-conpherence conpherence_settings_off',
+            ),
+            '')
+        ))).
+    phutil_tag(
+      'div',
       array(
-        javelin_tag(
-          'a',
-          array(
-            'sigil' => 'conpherence-change-widget',
-            'meta'  => array(
-              'widget' => 'widgets-files',
-              'toggleClass' => 'conpher_files_on'
-            ),
-            'id' => 'widgets-files-toggle',
-            'class' => 'sprite-conpher conpher_files_off first-icon'
-          ),
-          ''),
-        javelin_tag(
-          'a',
-          array(
-            'sigil' => 'conpherence-change-widget',
-            'meta'  => array(
-              'widget' => 'widgets-tasks',
-              'toggleClass' => 'conpher_list_on'
-            ),
-            'id' => 'widgets-tasks-toggle',
-            'class' => 'sprite-conpher conpher_list_off conpher_list_on',
-          ),
-          ''),
-        javelin_tag(
-          'a',
-          array(
-            'sigil' => 'conpherence-change-widget',
-            'meta'  => array(
-              'widget' => 'widgets-calendar',
-              'toggleClass' => 'conpher_calendar_on'
-            ),
-            'id' => 'widgets-calendar-toggle',
-            'class' => 'sprite-conpher conpher_calendar_off',
-          ),
-          '')
-        )).
+        'class' => 'widgets-body',
+        'id' => 'widgets-people',
+        'style' => 'display: none;'
+      ),
+      $this->renderPeopleWidgetPaneContent()).
       phutil_tag(
         'div',
         array(
           'class' => 'widgets-body',
           'id' => 'widgets-files',
-          'style' => 'display: none;'
         ),
         id(new ConpherenceFileWidgetView())
+        ->setUser($this->getRequest()->getUser())
         ->setConpherence($conpherence)
         ->setUpdateURI(
           $this->getApplicationURI('update/'.$conpherence->getID().'/'))
-        ->render()).
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'widgets-body',
-          'id' => 'widgets-tasks',
-        ),
-        $this->renderTaskWidgetPaneContent()).
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'widgets-body',
-          'id' => 'widgets-calendar',
-          'style' => 'display: none;'
-        ),
-        $this->renderCalendarWidgetPaneContent());
+          ->render()).
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'widgets-body',
+              'id' => 'widgets-calendar',
+              'style' => 'display: none;'
+            ),
+            $this->renderCalendarWidgetPaneContent()).
+            phutil_tag(
+              'div',
+              array(
+                'class' => 'widgets-body',
+                'id' => 'widgets-settings',
+                'style' => 'display: none'
+              ),
+              $this->renderSettingsWidgetPaneContent());
 
     return array('widgets' => $widgets);
   }
 
-  private function renderTaskWidgetPaneContent() {
-    $conpherence = $this->getConpherence();
-    $widget_data = $conpherence->getWidgetData();
-    $tasks = $widget_data['tasks'];
-    $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
-    $handles = $conpherence->getHandles();
-    $content = array();
-    foreach ($tasks as $owner_phid => $actual_tasks) {
-      $handle = $handles[$owner_phid];
-      $content[] = id(new PhabricatorHeaderView())
-        ->setHeader($handle->getName())
-        ->render();
-      $actual_tasks = msort($actual_tasks, 'getPriority');
-      $actual_tasks = array_reverse($actual_tasks);
-      $data = array();
-      foreach ($actual_tasks as $task) {
-        $data[] = array(
-          idx($priority_map, $task->getPriority(), pht('???')),
-          phutil_tag(
-            'a',
-            array(
-              'href' => '/T'.$task->getID()
-            ),
-            $task->getTitle())
-        );
-      }
-      $table = id(new AphrontTableView($data))
-        ->setNoDataString(pht('No open tasks.'))
-        ->setHeaders(array(pht('Pri'), pht('Title')))
-        ->setColumnClasses(array('', 'wide'));
-      $content[] = $table->render();
-    }
-    return new PhutilSafeHTML(implode('', $content));
+  private function renderPeopleWidgetPaneContent() {
+    return 'TODO - people';
+  }
+
+  private function renderSettingsWidgetPaneContent() {
+    return 'TODO - settings';
   }
 
   private function renderCalendarWidgetPaneContent() {
@@ -203,53 +232,53 @@ final class ConpherenceWidgetController extends
           break;
         }
         if ($status->getDateFrom() < $epoch_end &&
-            $status->getDateTo() > $epoch_start) {
-          $timespan = $status->getDateTo() - $status->getDateFrom();
-          if ($timespan > $one_day) {
-            $time_str = 'm/d';
-          } else {
-            $time_str = 'h:i A';
-          }
-          $epoch_range = phabricator_format_local_time(
-            $status->getDateFrom(),
-            $user,
-            $time_str) . ' - ' . phabricator_format_local_time(
-            $status->getDateTo(),
-            $user,
-            $time_str);
+          $status->getDateTo() > $epoch_start) {
+            $timespan = $status->getDateTo() - $status->getDateFrom();
+            if ($timespan > $one_day) {
+              $time_str = 'm/d';
+            } else {
+              $time_str = 'h:i A';
+            }
+            $epoch_range = phabricator_format_local_time(
+              $status->getDateFrom(),
+              $user,
+              $time_str) . ' - ' . phabricator_format_local_time(
+                $status->getDateTo(),
+                $user,
+                $time_str);
 
-          $content[] = phutil_tag(
-            'div',
-            array(
-              'class' => 'user-status '.$status->getTextStatus(),
-            ),
-            array(
-              phutil_tag(
-                'div',
-                array(
-                  'class' => 'epoch-range'
-                ),
-              $epoch_range),
-              phutil_tag(
-                'div',
-                array(
-                  'class' => 'icon',
-                ),
-                ''),
-              phutil_tag(
-                'div',
-                array(
-                  'class' => 'description'
-                ),
-                $status->getTerseSummary($user)),
-              phutil_tag(
-                'div',
-                array(
-                  'class' => 'participant'
-                ),
-                $handles[$status->getUserPHID()]->getName())
-            ));
-        }
+            $content[] = phutil_tag(
+              'div',
+              array(
+                'class' => 'user-status '.$status->getTextStatus(),
+              ),
+              array(
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'epoch-range'
+                  ),
+                  $epoch_range),
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'icon',
+                  ),
+                  ''),
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'description'
+                  ),
+                  $status->getTerseSummary($user)),
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'participant'
+                  ),
+                  $handles[$status->getUserPHID()]->getName())
+                ));
+          }
       }
     }
 

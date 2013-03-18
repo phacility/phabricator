@@ -53,6 +53,7 @@ final class PhrictionMoveController
     $disallowed_statuses = array(
       PhrictionDocumentStatus::STATUS_DELETED, // Stupid
       PhrictionDocumentStatus::STATUS_MOVED, // Plain stupid
+      PhrictionDocumentStatus::STATUS_STUB, // Utterly stupid
     );
     if (in_array($document->getStatus(), $disallowed_statuses)) {
       $error_view = new AphrontErrorView();

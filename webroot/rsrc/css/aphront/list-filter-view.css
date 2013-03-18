@@ -18,7 +18,7 @@
 .aphront-list-filter-view {
   background: #fff;
   width: 100%;
-  box-shadow: inset 0px 2px 1px rgba(150,150,150,0.25);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .aphront-list-filter-view-controls {

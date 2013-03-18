@@ -150,13 +150,6 @@ final class ConpherenceThreadQuery
     $participant_phids = array_mergev($participant_phids);
     $file_phids = array_mergev($file_phids);
 
-    // open tasks of all participants
-    $tasks = id(new ManiphestTaskQuery())
-      ->withOwners($participant_phids)
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->execute();
-    $tasks = mgroup($tasks, 'getOwnerPHID');
-
     // statuses of everyone currently in the conpherence
     // for a rolling one week window
     $start_of_week = phabricator_format_local_time(
@@ -177,12 +170,19 @@ final class ConpherenceThreadQuery
 
     // attached files
     $files = array();
+    $file_author_phids = array();
+    $authors = array();
     if ($file_phids) {
       $files = id(new PhabricatorFileQuery())
         ->setViewer($this->getViewer())
         ->withPHIDs($file_phids)
         ->execute();
       $files = mpull($files, null, 'getPHID');
+      $file_author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
+      $authors = id(new PhabricatorObjectHandleData($file_author_phids))
+        ->setViewer($this->getViewer())
+        ->loadHandles();
+      $authors = mpull($authors, null, 'getPHID');
     }
 
     foreach ($conpherences as $phid => $conpherence) {
@@ -190,10 +190,29 @@ final class ConpherenceThreadQuery
       $statuses = array_select_keys($statuses, $participant_phids);
       $statuses = array_mergev($statuses);
       $statuses = msort($statuses, 'getDateFrom');
+
+      $conpherence_files = array();
+      $files_authors = array();
+      foreach ($conpherence->getFilePHIDs() as $curr_phid) {
+        $curr_file = idx($files, $curr_phid);
+        if (!$curr_file) {
+          // this file was deleted or user doesn't have permission to see it
+          // this is generally weird
+          continue;
+        }
+        $conpherence_files[$curr_phid] = $curr_file;
+        // some files don't have authors so be careful
+        $current_author = null;
+        $current_author_phid = idx($file_author_phids, $curr_phid);
+        if ($current_author_phid) {
+          $current_author = $authors[$current_author_phid];
+        }
+        $files_authors[$curr_phid] = $current_author;
+      }
       $widget_data = array(
-        'tasks' => array_select_keys($tasks, $participant_phids),
         'statuses' => $statuses,
-        'files' => array_select_keys($files, $conpherence->getFilePHIDs()),
+        'files' => $conpherence_files,
+        'files_authors' => $files_authors
       );
       $conpherence->attachWidgetData($widget_data);
     }
