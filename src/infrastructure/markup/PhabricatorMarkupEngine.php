@@ -41,7 +41,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
-  private $version = 6;
+  private $version = 7;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -427,6 +427,7 @@ final class PhabricatorMarkupEngine {
     $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupLiteralBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupHeaderBlockRule();
+    $blocks[] = new PhutilRemarkupEngineRemarkupHorizontalRuleBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupListBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupCodeBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupNoteBlockRule();
