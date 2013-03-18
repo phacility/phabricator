@@ -165,6 +165,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $new_file->setStorageHandle($copy_of_storage_handle);
       $new_file->setStorageFormat($copy_of_storage_format);
       $new_file->setMimeType($copy_of_mimeType);
+      $new_file->copyDimensions($file);
 
       $new_file->save();
 
@@ -631,6 +632,20 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     if ($save) {
       $this->save();
+    }
+
+    return $this;
+  }
+
+  public function copyDimensions(PhabricatorFile $file) {
+    $metadata = $file->getMetadata();
+    $width = idx($metadata, self::METADATA_IMAGE_WIDTH);
+    if ($width) {
+      $this->metadata[self::METADATA_IMAGE_WIDTH] = $width;
+    }
+    $height = idx($metadata, self::METADATA_IMAGE_HEIGHT);
+    if ($height) {
+      $this->metadata[self::METADATA_IMAGE_HEIGHT] = $height;
     }
 
     return $this;
