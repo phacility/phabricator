@@ -5,7 +5,7 @@ final class ReleephRequestDifferentialCreateController
 
   private $revision;
 
-  public function willProcessRequest($data) {
+  public function willProcessRequest(array $data) {
     $diff_rev_id = $data['diffRevID'];
     $diff_rev = id(new DifferentialRevision())->load($diff_rev_id);
     if (!$diff_rev) {
