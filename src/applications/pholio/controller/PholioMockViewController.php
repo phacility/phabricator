@@ -129,7 +129,7 @@ final class PholioMockViewController extends PholioController {
       id(new PhabricatorActionView())
         ->setIcon('edit')
         ->setName(pht('Edit Mock'))
-        ->setHref($this->getApplicationURI('/edit/'.$mock->getID()))
+        ->setHref($this->getApplicationURI('/edit/'.$mock->getID().'/'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
