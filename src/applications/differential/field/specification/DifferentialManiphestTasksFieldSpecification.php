@@ -92,7 +92,7 @@ final class DifferentialManiphestTasksFieldSpecification
   }
 
   public function setValueFromParsedCommitMessage($value) {
-    $this->maniphestTasks = array_unique(nonempty($value), array());
+    $this->maniphestTasks = array_unique(nonempty($value, array()));
     return $this;
   }
 
