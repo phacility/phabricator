@@ -46,18 +46,16 @@ final class PhabricatorPeopleListController
             phabricator_time($user->getDateCreated(), $viewer)))
         ->addAttribute($email);
 
-      if ($is_admin) {
-        if ($user->getIsDisabled()) {
-          $item->addIcon('disable', pht('Disabled'));
-        }
+      if ($user->getIsDisabled()) {
+        $item->addIcon('disable', pht('Disabled'));
+      }
 
-        if ($user->getIsAdmin()) {
-          $item->addIcon('highlight', pht('Admin'));
-        }
+      if ($user->getIsAdmin()) {
+        $item->addIcon('highlight', pht('Admin'));
+      }
 
-        if ($user->getIsSystemAgent()) {
-          $item->addIcon('computer', pht('System Agent'));
-        }
+      if ($user->getIsSystemAgent()) {
+        $item->addIcon('computer', pht('System Agent'));
       }
 
       $list->addItem($item);

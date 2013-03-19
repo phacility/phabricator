@@ -7,6 +7,12 @@ final class PhabricatorPeopleProfileController
   private $page;
   private $profileUser;
 
+  public function shouldRequireAdmin() {
+    // Default for people app is true
+    // We desire public access here
+    return false;
+  }
+
   public function willProcessRequest(array $data) {
     $this->username = idx($data, 'username');
     $this->page = idx($data, 'page');

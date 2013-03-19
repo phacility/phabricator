@@ -3,10 +3,6 @@
 final class PhabricatorPeopleEditController
   extends PhabricatorPeopleController {
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   private $id;
   private $view;
 
