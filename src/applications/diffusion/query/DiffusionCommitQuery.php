@@ -112,6 +112,9 @@ final class DiffusionCommitQuery
           }
 
           if ($repo->isSVN()) {
+            if (!ctype_digit($ref['identifier'])) {
+              continue;
+            }
             $sql[] = qsprintf(
               $conn_r,
               '(repositoryID = %d AND commitIdentifier = %d)',
