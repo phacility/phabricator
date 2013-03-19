@@ -102,7 +102,7 @@ final class PhrictionMoveController
           ->setDescription($content->getDescription());
 
         // Move it!
-        $target_editor->moveHere($document->getID());
+        $target_editor->moveHere($document->getID(), $document->getPHID());
 
         // Retrieve the target doc directly from the editor
         // No need to load it per Sql again

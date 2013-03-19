@@ -16,8 +16,8 @@ final class PhrictionActionConstants extends PhrictionConstants {
       self::ACTION_CREATE   => 'created',
       self::ACTION_EDIT     => 'edited',
       self::ACTION_DELETE   => 'deleted',
-      self::ACTION_MOVE_AWAY => 'moved a document to',
-      self::ACTION_MOVE_HERE => 'moved a document from',
+      self::ACTION_MOVE_AWAY => 'moved',
+      self::ACTION_MOVE_HERE => 'moved',
     );
 
     return idx($map, $action, "brazenly {$action}'d");
