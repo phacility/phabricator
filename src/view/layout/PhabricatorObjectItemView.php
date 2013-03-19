@@ -288,16 +288,19 @@ final class PhabricatorObjectItemView extends AphrontView {
   private function renderHandleIcon(PhabricatorObjectHandle $handle, $label) {
     Javelin::initBehavior('phabricator-tooltips');
 
+    $options = array(
+      'class' => 'phabricator-object-item-handle-icon',
+      'style' => 'background: url('.$handle->getImageURI().')',
+    );
+
+    if (strlen($label)) {
+      $options['sigil'] = 'has-tooltip';
+      $options['meta']  = array('tip' => $label);
+    }
+
     return javelin_tag(
       'span',
-      array(
-        'class' => 'phabricator-object-item-handle-icon',
-        'sigil' => 'has-tooltip',
-        'style' => 'background: url('.$handle->getImageURI().')',
-        'meta' => array(
-          'tip' => $label,
-        ),
-      ),
+      $options,
       '');
   }
 
