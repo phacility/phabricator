@@ -88,6 +88,10 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->setLabel(pht('Whole File'))
           ->setName('whole-file'))
       ->appendChild(
+        id(new AphrontFormFileControl())
+          ->setLabel(pht('Whole File'))
+          ->setName('whole-file'))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
           ->setValue(pht("Create Diff")));
