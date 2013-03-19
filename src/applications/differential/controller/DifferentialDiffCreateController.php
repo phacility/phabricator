@@ -14,7 +14,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
       } elseif ($request->getFileExists('whole-file')) {
         $file = PhabricatorFile::readUploadedFileData($_FILES['whole-file']);
         $context_lines = "-L '".$_FILES['whole-file']['name']." ".date("Y-m-d")."'";
-        $context_lines." -L '".$_FILES['whole-file']['name']." ".date("Y-m-d")."'";
+        $context_lines = $context_lines." -L '".$_FILES['whole-file']['name']." ".date("Y-m-d")."'";
         $diff = ArcanistDiffUtils::renderDifferences("", $file, 3, $context_lines);
       } else {
         $diff = $request->getStr('diff');
