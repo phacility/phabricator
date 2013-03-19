@@ -657,6 +657,21 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       'differential.allow-self-accept');
 
     $reviewer_phids_map = array_fill_keys($reviewer_phids, true);
+
+    // Allow projects to be added as reviewers by adding each member of the project
+    foreach ($added_reviewers as $k => $user_phid) {
+      if (phid_get_type($user_phid) == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+        unset($added_reviewers[$k]);
+        $new_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $user_phid,
+          PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
+
+        foreach ($new_phids as $new_phid) {
+          array_push($added_reviewers, $new_phid);
+        }
+      }
+    }
+
     foreach ($added_reviewers as $k => $user_phid) {
       if (!$allow_self_accept && $user_phid == $revision->getAuthorPHID()) {
         unset($added_reviewers[$k]);
