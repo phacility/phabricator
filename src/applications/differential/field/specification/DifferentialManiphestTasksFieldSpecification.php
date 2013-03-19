@@ -173,4 +173,11 @@ final class DifferentialManiphestTasksFieldSpecification
     return implode("\n", $body);
   }
 
+  public function getCommitMessageTips() {
+    return array(
+      'Use "Fixes T123" in your summary to mark that the current '.
+      'revision completes a given task.'
+      );
+  }
+
 }
