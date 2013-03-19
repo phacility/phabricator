@@ -340,3 +340,7 @@ div.phabricator-remarkup-dark .remarkup-note,
 div.phabricator-remarkup-dark table {
   color: #000;
 }
+
+div.phabricator-remarkup-dark hr {
+  border-color: #555;
+}
