@@ -39,7 +39,7 @@ final class ConpherenceFileWidgetView extends AphrontView {
         '');
       $file_view = id(new PhabricatorFileLinkView())
         ->setFilePHID($file->getPHID())
-        ->setFileName(phutil_utf8_shorten($file->getName(), 38))
+        ->setFileName(phutil_utf8_shorten($file->getName(), 28))
         ->setFileViewable($file->isViewableImage())
         ->setFileViewURI($file->getBestURI())
         ->setCustomClass('file-title');
