@@ -229,6 +229,10 @@ JX.install('Event', {
     _keymap : {
       8     : 'delete',
       9     : 'tab',
+      // On Windows and Linux, Chrome sends '10' for return. On Mac OS X, it
+      // sends 13. Other browsers evidence varying degrees of diversity in their
+      // behavior. Treat '10' and '13' identically.
+      10    : 'return',
       13    : 'return',
       27    : 'esc',
       37    : 'left',

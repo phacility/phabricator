@@ -1493,6 +1493,7 @@ phutil_register_library_map(array(
     'PholioInlineDeleteController' => 'applications/pholio/controller/PholioInlineDeleteController.php',
     'PholioInlineEditController' => 'applications/pholio/controller/PholioInlineEditController.php',
     'PholioInlineSaveController' => 'applications/pholio/controller/PholioInlineSaveController.php',
+    'PholioInlineThumbController' => 'applications/pholio/controller/PholioInlineThumbController.php',
     'PholioInlineViewController' => 'applications/pholio/controller/PholioInlineViewController.php',
     'PholioMock' => 'applications/pholio/storage/PholioMock.php',
     'PholioMockCommentController' => 'applications/pholio/controller/PholioMockCommentController.php',
@@ -3093,6 +3094,7 @@ phutil_register_library_map(array(
     'PholioInlineDeleteController' => 'PholioController',
     'PholioInlineEditController' => 'PholioController',
     'PholioInlineSaveController' => 'PholioController',
+    'PholioInlineThumbController' => 'PholioController',
     'PholioInlineViewController' => 'PholioController',
     'PholioMock' =>
     array(

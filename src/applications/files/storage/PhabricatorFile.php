@@ -22,6 +22,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $storageHandle;
 
   protected $ttl;
+  protected $isExplicitUpload = 1;
 
   public function getConfiguration() {
     return array(

@@ -84,11 +84,12 @@
   float: left;
 }
 .conpherence-widget-pane #widgets-files .file-title {
+  display: block;
   position: relative;
   top: -4px;
   left: 20px;
   overflow-x: hidden;
-  width: 270px;
+  width: 256px;
   font-weight: bold;
 }
 .conpherence-widget-pane #widgets-files .file-uploaded-by {

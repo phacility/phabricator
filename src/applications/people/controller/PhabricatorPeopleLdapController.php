@@ -3,10 +3,6 @@
 final class PhabricatorPeopleLdapController
   extends PhabricatorPeopleController {
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   private $view;
 
   public function processRequest() {

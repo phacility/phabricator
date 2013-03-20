@@ -48,9 +48,12 @@ final class ConduitAPI_differential_getcommitmessage_Method
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
 
+    $pro_tips = array();
+
     foreach ($aux_fields as $key => $aux_field) {
       $aux_field->setUser($request->getUser());
       $aux_field->setRevision($revision);
+      $pro_tips[] = $aux_field->getCommitMessageTips();
       if (!$aux_field->shouldAppearOnCommitMessage()) {
         unset($aux_fields[$key]);
       }
@@ -125,6 +128,26 @@ final class ConduitAPI_differential_getcommitmessage_Method
         }
       }
     }
+
+    if ($is_edit) {
+      $pro_tips = array_mergev($pro_tips);
+
+      if (!empty($pro_tips)) {
+        shuffle($pro_tips);
+        $pro_tip = "Tip: ".$pro_tips[0];
+        $pro_tip = wordwrap($pro_tip, 78, "\n", true);
+
+        $lines = explode("\n", $pro_tip);
+
+        foreach ($lines as $key => $line) {
+          $lines[$key] = "# ".$line;
+        }
+
+        $pro_tip = implode("\n", $lines);
+        $commit_message[] = $pro_tip;
+      }
+    }
+
     $commit_message = implode("\n\n", $commit_message);
 
     return $commit_message;

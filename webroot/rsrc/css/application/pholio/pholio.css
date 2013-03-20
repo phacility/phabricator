@@ -182,3 +182,18 @@
   color: #fff;
   font-weight: bold;
 }
+
+.pholio-transaction-inline-comment {
+  display: table-row;
+}
+
+.pholio-transaction-inline-comment img {
+  display: table-cell;
+  padding-bottom: 2px;
+}
+
+.pholio-transaction-inline-comment p {
+  display: table-cell;
+  vertical-align: middle;
+  padding-bottom: 2px;
+}

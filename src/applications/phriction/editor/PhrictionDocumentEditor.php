@@ -14,6 +14,9 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
   private $newContent;
   private $description;
 
+  // For the Feed Story when moving documents
+  private $fromDocumentPHID;
+
   private function __construct() {
     // <restricted>
   }
@@ -71,7 +74,8 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
       PhrictionChangeType::CHANGE_MOVE_AWAY, true, $new_doc_id);
   }
 
-  public function moveHere($old_doc_id) {
+  public function moveHere($old_doc_id, $old_doc_phid) {
+    $this->fromDocumentPHID = $old_doc_phid;
     return $this->execute(
       PhrictionChangeType::CHANGE_MOVE_HERE, false, $old_doc_id);
   }
@@ -181,11 +185,11 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
         break;
       case PhrictionChangeType::CHANGE_MOVE_AWAY:
         $doc_status = PhrictionDocumentStatus::STATUS_MOVED;
-        $feed_action = PhrictionActionConstants::ACTION_MOVE_AWAY;
+        $feed_action = null;
         break;
       case PhrictionChangeType::CHANGE_MOVE_HERE:
         $doc_status = PhrictionDocumentStatus::STATUS_EXISTS;
-        $feed_action = null;
+        $feed_action = PhrictionActionConstants::ACTION_MOVE_HERE;
         break;
       default:
         throw new Exception(
@@ -253,6 +257,10 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
       $related_phids[] = $project_phid;
     }
 
+    if ($this->fromDocumentPHID) {
+      $related_phids[] = $this->fromDocumentPHID;
+    }
+
     if ($feed_action) {
       id(new PhabricatorFeedStoryPublisher())
         ->setRelatedPHIDs($related_phids)
@@ -261,10 +269,11 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
         ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PHRICTION)
         ->setStoryData(
           array(
-            'phid'    => $document->getPHID(),
-            'action'  => $feed_action,
-            'content' => phutil_utf8_shorten($new_content->getContent(), 140),
-            'project' => $project_phid,
+            'phid'      => $document->getPHID(),
+            'action'    => $feed_action,
+            'content'   => phutil_utf8_shorten($new_content->getContent(), 140),
+            'project'   => $project_phid,
+            'movedFromPHID' => $this->fromDocumentPHID,
           ))
         ->publish();
     }

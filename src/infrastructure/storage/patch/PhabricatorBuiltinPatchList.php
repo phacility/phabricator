@@ -1173,6 +1173,11 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('releeph.sql'),
       ),
+      '20130319.phabricatorfileexplicitupload.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath(
+                       '20130319.phabricatorfileexplicitupload.sql'),
+      ),
     );
   }
 
