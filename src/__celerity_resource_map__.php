@@ -3379,7 +3379,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-css' =>
   array(
-    'uri' => '/res/b0947e46/rsrc/css/application/pholio/pholio.css',
+    'uri' => '/res/b03fae38/rsrc/css/application/pholio/pholio.css',
     'type' => 'css',
     'requires' =>
     array(
