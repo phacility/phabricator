@@ -23,6 +23,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   protected $relatedPHID;
 
   private $excludePHIDs = array();
+  private $overrideNoSelfMail = false;
 
   public function __construct() {
 
@@ -113,6 +114,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
   private function getExcludeMailRecipientPHIDs() {
     return $this->excludePHIDs;
+  }
+
+  public function getOverrideNoSelfMailPreference() {
+    return $this->overrideNoSelfMail;
+  }
+
+  public function setOverrideNoSelfMailPreference($override) {
+    $this->overrideNoSelfMail = $override;
+    return $this;
   }
 
   public function getTranslation(array $objects) {
@@ -822,7 +832,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $from_user = id(new PhabricatorUser())->loadOneWhere(
         'phid = %s',
         $from);
-      if ($from_user) {
+      if ($from_user && !$this->getOverrideNoSelfMailPreference()) {
         $pref_key = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
         $exclude_self = $from_user
           ->loadPreferences()
