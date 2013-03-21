@@ -1,0 +1,201 @@
+<?php
+
+final class PhluxEditController extends PhluxController {
+
+  private $key;
+
+  public function willProcessRequest(array $data) {
+    $this->key = idx($data, 'key');
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $is_new = ($this->key === null);
+    if ($is_new) {
+      $var = new PhluxVariable();
+      $var->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+      $var->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+    } else {
+      $var = id(new PhluxVariableQuery())
+        ->setViewer($user)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->withKeys(array($this->key))
+        ->executeOne();
+      if (!$var) {
+        return new Aphront404Response();
+      }
+      $view_uri = $this->getApplicationURI('/view/'.$this->key.'/');
+    }
+
+    $e_key = ($is_new ? true : null);
+    $e_value = true;
+    $errors = array();
+
+    $key = $var->getVariableKey();
+
+    $display_value = null;
+    $value = $var->getVariableValue();
+
+    if ($request->isFormPost()) {
+      if ($is_new) {
+        $key = $request->getStr('key');
+        if (!strlen($key)) {
+          $errors[] = pht('Variable key is required.');
+          $e_key = pht('Required');
+        } else if (!preg_match('/^[a-z0-9.-]+$/', $key)) {
+          $errors[] = pht(
+            'Variable key "%s" must contain only lowercase letters, digits, '.
+            'period, and hyphen.',
+            $key);
+          $e_key = pht('Invalid');
+        }
+      }
+
+      $raw_value = $request->getStr('value');
+      $value = json_decode($raw_value, true);
+      if ($value === null && strtolower($raw_value) !== 'null') {
+        $e_value = pht('Invalid');
+        $errors[] = pht('Variable value must be valid JSON.');
+        $display_value = $raw_value;
+      }
+
+      if (!$errors) {
+        $editor = id(new PhluxVariableEditor())
+          ->setActor($user)
+          ->setContinueOnNoEffect(true)
+          ->setContentSource(
+            PhabricatorContentSource::newForSource(
+              PhabricatorContentSource::SOURCE_WEB,
+              array(
+                'ip' => $request->getRemoteAddr(),
+              )));
+
+        $xactions = array();
+        $xactions[] = id(new PhluxTransaction())
+          ->setTransactionType(PhluxTransaction::TYPE_EDIT_KEY)
+          ->setNewValue($key);
+
+        $xactions[] = id(new PhluxTransaction())
+          ->setTransactionType(PhluxTransaction::TYPE_EDIT_VALUE)
+          ->setNewValue($value);
+
+        $xactions[] = id(new PhluxTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($request->getStr('viewPolicy'));
+
+        $xactions[] = id(new PhluxTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($request->getStr('editPolicy'));
+
+        try {
+          $editor->applyTransactions($var, $xactions);
+          $view_uri = $this->getApplicationURI('/view/'.$key.'/');
+          return id(new AphrontRedirectResponse())->setURI($view_uri);
+        } catch (AphrontQueryDuplicateKeyException $ex) {
+          $e_key = pht('Not Unique');
+          $errors[] = pht('Variable key must be unique.');
+        }
+      }
+    }
+
+    if ($display_value === null) {
+      if (is_array($value) &&
+          (array_keys($value) !== array_keys(array_values($value)))) {
+        $json = new PhutilJSON();
+        $display_value = $json->encodeFormatted($value);
+      } else {
+        $display_value = json_encode($value);
+      }
+    }
+
+    if ($errors) {
+      $errors = id(new AphrontErrorView())
+        ->setErrors($errors);
+    }
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($var)
+      ->execute();
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setValue($var->getVariableKey())
+          ->setLabel(pht('Key'))
+          ->setName('key')
+          ->setError($e_key)
+          ->setCaption(pht('Lowercase letters, digits, dot and hyphen only.'))
+          ->setDisabled(!$is_new))
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setValue($display_value)
+          ->setLabel(pht('Value'))
+          ->setName('value')
+          ->setCaption(pht('Enter value as JSON.'))
+          ->setError($e_value))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('viewPolicy')
+          ->setPolicyObject($var)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicies($policies))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('editPolicy')
+          ->setPolicyObject($var)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicies($policies));
+
+    if ($is_new) {
+      $form->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue(pht('Create Variable')));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue(pht('Update Variable'))
+          ->addCancelButton($view_uri));
+    }
+
+    $crumbs = $this->buildApplicationCrumbs();
+
+    if ($is_new) {
+      $title = pht('Create Variable');
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($title)
+          ->setHref($request->getRequestURI()));
+    } else {
+      $title = pht('Edit %s', $this->key);
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($title)
+          ->setHref($request->getRequestURI()));
+    }
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $header,
+        $errors,
+        $form,
+      ),
+      array(
+        'title' => $title,
+        'device' => true,
+        'dust' => true,
+      ));
+  }
+
+}

@@ -184,6 +184,13 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($posts, null, 'getPHID');
 
+      case PhabricatorPHIDConstants::PHID_TYPE_PVAR:
+        $vars = id(new PhluxVariableQuery())
+          ->withPHIDs($phids)
+          ->setViewer($this->viewer)
+          ->execute();
+        return mpull($vars, null, 'getPHID');
+
     }
   }
 
@@ -613,6 +620,25 @@ final class PhabricatorObjectHandleData {
               $handle->setName($macro->getName());
               $handle->setFullName('Image Macro "'.$macro->getName().'"');
               $handle->setURI('/macro/view/'.$macro->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_PVAR:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName('Unknown Variable');
+            } else {
+              $var = $objects[$phid];
+              $key = $var->getVariableKey();
+              $handle->setName($key);
+              $handle->setFullName('Phlux Variable "'.$key.'"');
+              $handle->setURI('/phlux/view/'.$key.'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

@@ -175,6 +175,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'releeph',
       ),
+      'db.phlux' => array(
+        'type' => 'db',
+        'name' => 'phlux',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1177,6 +1181,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath(
                        '20130319.phabricatorfileexplicitupload.sql'),
+      ),
+      '20130320.phlux.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130320.phlux.sql'),
       ),
     );
   }
