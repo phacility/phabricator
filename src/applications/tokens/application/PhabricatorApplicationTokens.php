@@ -14,6 +14,10 @@ final class PhabricatorApplicationTokens extends PhabricatorApplication {
     return '/token/';
   }
 
+  public function getIconName() {
+    return 'token';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x99\xA6";
   }
