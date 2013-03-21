@@ -36,6 +36,7 @@ final class PhabricatorApplicationTokens extends PhabricatorApplication {
         '' => 'PhabricatorTokenGivenController',
         'given/' => 'PhabricatorTokenGivenController',
         'give/(?<phid>[^/]+)/' => 'PhabricatorTokenGiveController',
+        'leaders/' => 'PhabricatorTokenLeaderController',
       ),
     );
   }

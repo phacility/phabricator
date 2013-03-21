@@ -8,9 +8,9 @@ abstract class PhabricatorTokenController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     $nav->addFilter('given/', pht('Tokens Given'));
+    $nav->addFilter('leaders/', pht('Leader Board'));
 
     return $nav;
   }
-
 
 }
