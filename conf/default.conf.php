@@ -847,7 +847,12 @@ return array(
   'phabricator.show-beta-applications' => false,
 
   // Contains a list of uninstalled applications
-   'phabricator.uninstalled-applications' => array(),
+  'phabricator.uninstalled-applications' => array(),
+
+// -- Welcome Screen -------------------------------------------------------- //
+
+  // The custom HTML content for the Phabricator welcome screen.
+  'welcome.html' => null,
 
 // -- Files ----------------------------------------------------------------- //
 

@@ -40,6 +40,11 @@ final class PhabricatorDirectoryMainController
       $tasks_panel = null;
     }
 
+    if (PhabricatorEnv::getEnvConfig('welcome.html') !== null) {
+      $welcome_panel = $this->buildWelcomePanel();
+    } else {
+      $welcome_panel = null;
+    }
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
     $audit_panel = $this->buildAuditPanel();
@@ -47,6 +52,7 @@ final class PhabricatorDirectoryMainController
 
     $content = array(
       $jump_panel,
+      $welcome_panel,
       $unbreak_panel,
       $triage_panel,
       $revision_panel,
@@ -221,6 +227,16 @@ final class PhabricatorDirectoryMainController
     $revision_view->setHandles($handles);
 
     $panel->appendChild($revision_view);
+    $panel->setNoBackground();
+
+    return $panel;
+  }
+
+  private function buildWelcomePanel() {
+    $panel = new AphrontPanelView();
+    $panel->appendChild(
+      phutil_safe_html(
+        PhabricatorEnv::getEnvConfig('welcome.html')));
     $panel->setNoBackground();
 
     return $panel;
