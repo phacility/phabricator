@@ -3166,6 +3166,7 @@ phutil_register_library_map(array(
     array(
       0 => 'PhrictionDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorSubscribableInterface',
     ),
     'PhrictionDocumentController' => 'PhrictionController',
     'PhrictionDocumentEditor' => 'PhabricatorEditor',

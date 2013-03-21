@@ -278,7 +278,70 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
         ->publish();
     }
 
+    // TODO: Migrate to ApplicationTransactions fast, so we get rid of this code
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $document->getPHID());
+    $this->sendMailToSubscribers($subscribers, $content);
+
     return $this;
+  }
+
+  private function sendMailToSubscribers(array $subscribers, $old_content) {
+    if (!$subscribers) {
+      return;
+    }
+
+    $author_phid = $this->getActor()->getPHID();
+    $document = $this->document;
+    $content = $document->getContent();
+
+    $old_title = $old_content->getTitle();
+    $title = $content->getTitle();
+
+    // TODO: Currently, this produces something like
+    // Phrictioh Document Xyz was Edit
+    // I'm too lazy to build my own action string everywhere
+    // Plus, it does not have pht() anyway
+    $action = PhrictionChangeType::getChangeTypeLabel(
+      $content->getChangeType());
+    $name = pht("Phriction Document %s was %s", $title, $action);
+
+    $body = array($name);
+    // Content may have changed, you never know
+    if ($content->getChangeType() == PhrictionChangeType::CHANGE_EDIT) {
+
+      if ($old_title != $title) {
+        $body[] = pht('Title was changed from "%s" to "%s"',
+          $old_title, $title);
+      }
+
+      // The Remarkup text renderer comes in handy
+      // TODO: Consider sending a diff instead?
+      $body[] = pht("Content was changed to \n%s", $content->getContent());
+    }
+
+    $body = implode("\n\n", $body);
+
+    $subject_prefix = $this->getMailSubjectPrefix();
+
+    $mail = new PhabricatorMetaMTAMail();
+    $mail->setSubject($name)
+      ->setSubjectPrefix($subject_prefix)
+      ->setVarySubjectPrefix('['.$action.']')
+      ->addHeader('Thread-Topic', $name)
+      ->setFrom($author_phid)
+      ->addTos($subscribers)
+      ->setBody($body)
+      ->setRelatedPHID($document->getPHID())
+      ->setIsBulk(true);
+
+    $mail->saveAndSend();
+  }
+
+  /* --( For less copy-pasting when switching to ApplicationTransactions )--- */
+
+  protected function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.phriction.subject-prefix');
   }
 
 }

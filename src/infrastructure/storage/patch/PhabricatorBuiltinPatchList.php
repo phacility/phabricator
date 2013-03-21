@@ -1186,6 +1186,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130320.phlux.sql'),
       ),
+      '20130317.phrictionedge.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130317.phrictionedge.sql'),
+      ),
     );
   }
 
