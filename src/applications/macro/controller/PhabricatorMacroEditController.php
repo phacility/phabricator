@@ -11,8 +11,19 @@ final class PhabricatorMacroEditController
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
     if ($this->id) {
-      $macro = id(new PhabricatorFileImageMacro())->load($this->id);
+      $macro = id(new PhabricatorMacroQuery())
+        ->setViewer($user)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->withIDs(array($this->id))
+        ->executeOne();
       if (!$macro) {
         return new Aphront404Response();
       }
@@ -26,8 +37,6 @@ final class PhabricatorMacroEditController
     $file = null;
     $can_fetch = PhabricatorEnv::getEnvConfig('security.allow-outbound-http');
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
     if ($request->isFormPost()) {
       $original = clone $macro;
 
@@ -81,6 +90,7 @@ final class PhabricatorMacroEditController
           $e_file = pht('Invalid');
         } else {
           $macro->setFilePHID($file->getPHID());
+          $macro->attachFile($file);
           $e_file = null;
         }
       }
@@ -136,12 +146,9 @@ final class PhabricatorMacroEditController
       $error_view = null;
     }
 
-
     $current_file = null;
     if ($macro->getFilePHID()) {
-      $current_file = id(new PhabricatorFile())->loadOneWhere(
-        'phid = %s',
-        $macro->getFilePHID());
+      $current_file = $macro->getFile();
     }
 
     $form = new AphrontFormView();

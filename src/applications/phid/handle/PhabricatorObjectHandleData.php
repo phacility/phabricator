@@ -158,9 +158,10 @@ final class PhabricatorObjectHandleData {
         return mpull($xactions, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
-        $macros = id(new PhabricatorFileImageMacro())->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
+        $macros = id(new PhabricatorMacroQuery())
+          ->setViewer($this->viewer)
+          ->withPHIDs($phids)
+          ->execute();
         return mpull($macros, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_PSTE:

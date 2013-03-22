@@ -9,7 +9,8 @@ final class PhabricatorMacroQuery
   private $ids;
   private $phids;
   private $authors;
-  private $name;
+  private $names;
+  private $nameLike;
 
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
@@ -31,7 +32,12 @@ final class PhabricatorMacroQuery
   }
 
   public function withNameLike($name) {
-    $this->name = $name;
+    $this->nameLike = $name;
+    return $this;
+  }
+
+  public function withNames(array $names) {
+    $this->names = $names;
     return $this;
   }
 
@@ -94,11 +100,18 @@ final class PhabricatorMacroQuery
         $this->authors);
     }
 
-    if ($this->name) {
+    if ($this->nameLike) {
       $where[] = qsprintf(
         $conn,
         'm.name LIKE %~',
-        $this->name);
+        $this->nameLike);
+    }
+
+    if ($this->names) {
+      $where[] = qsprintf(
+        $conn,
+        'm.name IN (%Ls)',
+        $this->names);
     }
 
     if ($this->status == self::STATUS_ACTIVE) {

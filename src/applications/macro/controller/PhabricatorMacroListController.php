@@ -14,10 +14,6 @@ final class PhabricatorMacroListController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $macro_table = new PhabricatorFileImageMacro();
-    $file_table = new PhabricatorFile();
-    $conn = $macro_table->establishConnection('r');
-
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request);
 

@@ -18,8 +18,12 @@ final class PhabricatorRemarkupRuleImageMacro
   public function markupImageMacro($matches) {
     if ($this->images === null) {
       $this->images = array();
-      $rows = id(new PhabricatorFileImageMacro())->loadAllWhere(
-        'isDisabled = 0');
+
+      $viewer = $this->getEngine()->getConfig('viewer');
+      $rows = id(new PhabricatorMacroQuery())
+        ->setViewer($viewer)
+        ->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE)
+        ->execute();
       foreach ($rows as $row) {
         $this->images[$row->getName()] = $row->getFilePHID();
       }

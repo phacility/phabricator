@@ -13,14 +13,15 @@ final class PhabricatorMacroViewController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $macro = id(new PhabricatorFileImageMacro())->load($this->id);
+    $macro = id(new PhabricatorMacroQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$macro) {
       return new Aphront404Response();
     }
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $macro->getFilePHID());
+    $file = $macro->getFile();
 
     $title_short = pht('Macro "%s"', $macro->getName());
     $title_long  = pht('Image Macro "%s"', $macro->getName());
