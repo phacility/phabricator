@@ -35,8 +35,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
       '/releeph/' => array(
         '' => 'ReleephProjectListController',
         'project/' => array(
-          '' => 'ReleephProjectListController',
-          'inactive/' => 'ReleephProjectListController',
+          '(?:(?P<filter>active|inactive)/)?' => 'ReleephProjectListController',
           'create/' => 'ReleephProjectCreateController',
           '(?P<projectID>[1-9]\d*)/' => array(
             '' => 'ReleephProjectViewController',
