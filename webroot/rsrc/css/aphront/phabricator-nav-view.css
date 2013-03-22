@@ -18,7 +18,10 @@
   position: fixed;
   top: 0;
   left: 0;
-  bottom: 0;
+  /* On the iPhone, scrolling down causes the revealed area to fill with white,
+     then draw with the texture after the action completes. Just make the
+     element extend off the bottom of the screen to prevent this. */
+  bottom: -480px;
   width: 205px;
   background: #33383b;
   box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.05);
