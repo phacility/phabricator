@@ -22,9 +22,14 @@ final class PhabricatorTokenReceiverQuery
     if (!$phids) {
       return array();
     }
+
     $objects = id(new PhabricatorObjectHandleData($phids))
       ->setViewer($this->getViewer())
       ->loadObjects();
+
+    // Reorder the objects in the input order.
+    $objects = array_select_keys($objects, $phids);
+
     return $objects;
   }
 
