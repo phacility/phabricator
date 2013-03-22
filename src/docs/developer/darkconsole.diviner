@@ -14,21 +14,22 @@ DarkConsole was originally implemented as part of the Facebook Lite site;
 its name is a bit of play on that (and a reference to the dark color palette
 its design uses).
 
-= Enabling DarkConsole =
+= Warning =
 
 Because DarkConsole exposes some configuration and debugging information, it is
 disabled by default (and **you should not enable it in production**). It has
-some simple safeguards to prevent leaking credential information but enabling it
-in production may compromise the integrity of an install.
+some simple safeguards to prevent leaking credential information, but enabling
+it in production may compromise the integrity of an install.
 
-You enable DarkConsole in your configuration, by setting ##darkconsole.enabled##
-to ##true##, and then clicking the "Enable DarkConsole" link in the page footer.
+= Enabling DarkConsole =
+
+You enable DarkConsole in your configuration, by setting `darkconsole.enabled`
+to `true`, and then turning it on in `Settings` -> `Display Preferences`.
 Once DarkConsole is enabled, you can show or hide it by pressing ##`## on your
 keyboard.
 
-Since the "Enable DarkConsole" link is not available to logged-out users (and
-stored as a per-user preference), you can also set ##darkconsole.always-on## if
-you need to access DarkConsole on logged-out pages.
+Since the setting is not available to logged-out users, you can also set
+`darkconsole.always-on` if you need to access DarkConsole on logged-out pages.
 
 DarkConsole has a number of tabs, each of which is powered by a "plugin". You
 can use them to access different debugging and performance features.
@@ -57,7 +58,3 @@ The "XHProf" plugin gives you access to the XHProf profiler. To use it, you need
 to install the corresponding PHP plugin -- see instructions in the
 @{article:Installation Guide}. Once it is installed, you can use XHProf to
 profile the runtime performance of a page.
-
-= Plugin: Config =
-
-The "Config" plugin shows active Phabricator configuration values.
