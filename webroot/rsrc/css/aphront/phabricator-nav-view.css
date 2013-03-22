@@ -37,6 +37,11 @@
   display: block;
 }
 
+.device .phabricator-side-menu-home .phabricator-nav-column-background,
+.device .phabricator-side-menu-home .phabricator-nav-local {
+  display: block;
+}
+
 .phabricator-nav-local {
   width: 205px;
   position: absolute;
@@ -80,6 +85,17 @@
   width: 240px;
 }
 
-.device-desktop .phabricator-side-menu-home .phabricator-nav-content {
+.device-desktop .phabricator-side-menu-home .phabricator-nav-content,
+.device-tablet .phabricator-side-menu-home .phabricator-nav-content {
   margin-left: 240px;
 }
+
+.device-phone .phabricator-side-menu-home .phabricator-nav-content {
+  display: none;
+}
+
+.device-phone .phabricator-side-menu-home .phabricator-nav-column-background,
+.device-phone .phabricator-side-menu-home .phabricator-nav-local {
+  width: 100%;
+}
+

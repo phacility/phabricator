@@ -110,24 +110,24 @@ final class CeleritySpriteGenerator {
         'y' => 31,
         'css' => '.phabricator-crumb-divider',
       ),
-      'eye' => array(
+      'search' => array(
         'x' => 24,
-        'y' => 20,
-        'css' => '.menu-icon-eye',
+        'y' => 24,
+        'css' => '.menu-icon-search',
       ),
-      'eye_blue' => array(
+      'search_blue' => array(
         'x' => 24,
-        'y' => 20,
-        'css' => '.menu-icon-eye-blue',
+        'y' => 24,
+        'css' => '.menu-icon-search-blue',
       ),
       'app' => array(
         'x' => 24,
-        'y' => 20,
+        'y' => 24,
         'css' => '.menu-icon-app',
       ),
       'app_blue' => array(
         'x' => 24,
-        'y' => 20,
+        'y' => 24,
         'css' => '.menu-icon-app-blue',
       ),
       'logo' => array(

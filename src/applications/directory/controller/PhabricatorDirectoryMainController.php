@@ -65,10 +65,11 @@ final class PhabricatorDirectoryMainController
     $nav->appendChild($content);
     $nav->appendChild(new PhabricatorGlobalUploadTargetView());
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => 'Phabricator',
+        'device' => true,
       ));
   }
 
