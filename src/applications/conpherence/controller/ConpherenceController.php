@@ -104,23 +104,31 @@ abstract class ConpherenceController extends PhabricatorController {
     $nav->addClass('conpherence-menu');
     $nav->setMenuID('conpherence-menu');
 
-    $nav->addButton(
-      'new',
-      pht('New Conversation'),
-      $this->getApplicationURI('new/'));
-    $nav->addLabel(pht('Unread'));
-    $nav = $this->addConpherencesToNav(
-      $unread_conpherences,
-      $nav,
-      false,
-      $for_application);
-    $nav->addLabel(pht('Read'));
-    $nav = $this->addConpherencesToNav(
-      $read_conpherences,
-      $nav,
-      true,
-      $for_application);
-    $nav->selectFilter($filter);
+    if (!$for_application) {
+      $nav->addButton(
+        'new',
+        pht('New Conversation'),
+        $this->getApplicationURI('new/'));
+      $nav->addLabel(pht('Unread'));
+      $nav = $this->addConpherencesToNav(
+        $unread_conpherences,
+        $nav,
+        false,
+        $for_application);
+      $nav->addLabel(pht('Read'));
+      $nav = $this->addConpherencesToNav(
+        $read_conpherences,
+        $nav,
+        true,
+        $for_application);
+      $nav->selectFilter($filter);
+    } else {
+      $nav->addFilter(
+        'new',
+        pht('New Conversation'),
+        $this->getApplicationURI('new/'));
+
+    }
     return $nav;
   }
 
