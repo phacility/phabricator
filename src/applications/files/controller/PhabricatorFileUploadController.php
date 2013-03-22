@@ -18,6 +18,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
           array(
             'name'        => $request->getStr('name'),
             'authorPHID'  => $user->getPHID(),
+            'isExplicitUpload' => true,
           ));
       }
 

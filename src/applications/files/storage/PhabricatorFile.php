@@ -247,6 +247,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     // TODO: This is probably YAGNI, but allows for us to do encryption or
     // compression later if we want.
     $file->setStorageFormat(self::STORAGE_FORMAT_RAW);
+    $file->setIsExplicitUpload(idx($params, 'isExplicitUpload') ? 1 : 0);
 
     if (isset($params['mime-type'])) {
       $file->setMimeType($params['mime-type']);

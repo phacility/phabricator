@@ -30,6 +30,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     switch ($this->getFilter()) {
       case 'my':
         $query->withAuthorPHIDs(array($user->getPHID()));
+        $query->showOnlyExplicitUploads(true);
         $header = pht('Files You Uploaded');
         break;
       case 'all':
