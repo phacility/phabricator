@@ -89,7 +89,7 @@ final class PhabricatorMacroQuery
     if ($this->phids) {
       $where[] = qsprintf(
         $conn,
-        'm.phid IN (%Ld)',
+        'm.phid IN (%Ls)',
         $this->phids);
     }
 
