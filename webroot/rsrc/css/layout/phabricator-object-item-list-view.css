@@ -355,8 +355,8 @@
 }
 
 .phabricator-object-list-cards .phabricator-object-item-with-attrs
-  .phabricator-object-item-name {
-  padding: 4px 10px 4px;
+  .phabricator-object-item-link {
+  padding: 4px 0;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-selected {
