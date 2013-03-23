@@ -35,6 +35,14 @@ final class PhabricatorRemarkupRuleImageMacro
       $phid = $this->images[$name];
 
       $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
+
+      if ($this->getEngine()->isTextMode()) {
+        if ($file) {
+          $name .= ' <'.$file->getBestURI().'>';
+        }
+        return $this->getEngine()->storeText($name);
+      }
+
       $style = null;
       $src_uri = null;
       if ($file) {

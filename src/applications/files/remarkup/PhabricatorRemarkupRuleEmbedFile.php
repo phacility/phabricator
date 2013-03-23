@@ -27,9 +27,15 @@ final class PhabricatorRemarkupRuleEmbedFile
     if (!$file) {
       return $matches[0];
     }
-    $phid = $file->getPHID();
 
     $engine = $this->getEngine();
+
+    if ($engine->isTextMode()) {
+      return $engine->storeText($file->getBestURI());
+    }
+
+    $phid = $file->getPHID();
+
     $token = $engine->storeText('');
     $metadata_key = self::KEY_RULE_EMBED_FILE;
     $metadata = $engine->getTextMetadata($metadata_key, array());

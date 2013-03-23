@@ -29,6 +29,11 @@ final class PhabricatorRemarkupRuleMention
 
   protected function markupMention($matches) {
     $engine = $this->getEngine();
+
+    if ($engine->isTextMode()) {
+      return $engine->storeText($matches[0]);
+    }
+
     $token = $engine->storeText('');
 
     // Store the original text exactly so we can preserve casing if it doesn't
