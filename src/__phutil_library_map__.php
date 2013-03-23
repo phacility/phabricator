@@ -639,7 +639,6 @@ phutil_register_library_map(array(
     'ManiphestTaskQuery' => 'applications/maniphest/ManiphestTaskQuery.php',
     'ManiphestTaskStatus' => 'applications/maniphest/constants/ManiphestTaskStatus.php',
     'ManiphestTaskSubscriber' => 'applications/maniphest/storage/ManiphestTaskSubscriber.php',
-    'ManiphestTaskSummaryView' => 'applications/maniphest/view/ManiphestTaskSummaryView.php',
     'ManiphestTransaction' => 'applications/maniphest/storage/ManiphestTransaction.php',
     'ManiphestTransactionDetailView' => 'applications/maniphest/view/ManiphestTransactionDetailView.php',
     'ManiphestTransactionEditor' => 'applications/maniphest/editor/ManiphestTransactionEditor.php',
@@ -2264,7 +2263,6 @@ phutil_register_library_map(array(
     'ManiphestTaskQuery' => 'PhabricatorQuery',
     'ManiphestTaskStatus' => 'ManiphestConstants',
     'ManiphestTaskSubscriber' => 'ManiphestDAO',
-    'ManiphestTaskSummaryView' => 'ManiphestView',
     'ManiphestTransaction' =>
     array(
       0 => 'ManiphestDAO',
@@ -2748,7 +2746,7 @@ phutil_register_library_map(array(
     'PhabricatorObjectHandleStatus' => 'PhabricatorObjectHandleConstants',
     'PhabricatorObjectItemListExample' => 'PhabricatorUIExample',
     'PhabricatorObjectItemListView' => 'AphrontView',
-    'PhabricatorObjectItemView' => 'AphrontView',
+    'PhabricatorObjectItemView' => 'AphrontTagView',
     'PhabricatorObjectListView' => 'AphrontView',
     'PhabricatorOffsetPagedQuery' => 'PhabricatorQuery',
     'PhabricatorOwnersConfigOptions' => 'PhabricatorApplicationConfigOptions',
