@@ -347,10 +347,10 @@
 
 .phabricator-object-list-cards .phabricator-object-item-name {
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-link {
-  white-space: nowrap;
   padding: 6px 0;
 }
 

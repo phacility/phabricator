@@ -97,8 +97,11 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         '%s Line(s)',
         new PhutilNumber($line_count));
 
+      $title = nonempty($paste->getTitle(), pht('(An Untitled Masterwork)'));
+
       $item = id(new PhabricatorObjectItemView())
-        ->setHeader($paste->getFullName())
+        ->setObjectName('P'.$paste->getID())
+        ->setHeader($title)
         ->setHref('/P'.$paste->getID())
         ->setObject($paste)
         ->addAttribute(pht('Created %s by %s', $created, $author))
