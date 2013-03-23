@@ -15,18 +15,27 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
   var origin   = null;
   var targets  = null;
   var target   = null;
-  var droptarget = JX.$N('div', {className: 'maniphest-subpriority-target'});
+  var droptarget = JX.$N('li', {className: 'maniphest-subpriority-target'});
 
   var ondrag = function(e) {
     if (dragging || sending) {
       return;
     }
 
+    if (!e.isNormalMouseEvent()) {
+      return;
+    }
+
+    // Can't grab onto slippery nodes.
+    if (e.getNode('slippery')) {
+      return;
+    }
+
     dragging = e.getNode('maniphest-task');
     origin = JX.$V(e);
 
-    var tasks = JX.DOM.scry(JX.$(config.root), 'table', 'maniphest-task');
-    var heads = JX.DOM.scry(JX.$(config.root), 'h1',  'task-group');
+    var tasks = JX.DOM.scry(document.body, 'li', 'maniphest-task');
+    var heads = JX.DOM.scry(document.body, 'h1',  'task-group');
 
     var nodes = tasks.concat(heads);
 
@@ -107,10 +116,19 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
 
       if (cur_target) {
         if (cur_target.nextSibling) {
-          cur_target.parentNode.insertBefore(
-            droptarget,
-            cur_target.nextSibling);
+          if (JX.DOM.isType(cur_target, 'h1')) {
+            // Dropping at the beginning of a priority list.
+            cur_target.nextSibling.insertBefore(
+              droptarget,
+              cur_target.nextSibling.firstChild);
+          } else {
+            // Dropping in the middle of a priority list.
+            cur_target.parentNode.insertBefore(
+              droptarget,
+              cur_target.nextSibling);
+          }
         } else {
+          // Dropping at the end of a priority list.
           cur_target.parentNode.appendChild(droptarget);
         }
       }
@@ -180,9 +198,10 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
     JX.DOM.alterClass(sending, 'maniphest-task-loading', true);
 
     var onresponse = function(r) {
-      JX.DOM.alterClass(sending, 'maniphest-task-loading', false);
-      var handle = JX.DOM.find(sending, 'td', 'maniphest-task-handle');
-      handle.className = r.className;
+      var nodes = JX.$H(r.tasks).getFragment().firstChild;
+      var task = JX.DOM.find(nodes, 'li', 'maniphest-task');
+      JX.DOM.replace(sending, task);
+
       sending = null;
     };
 
@@ -196,8 +215,8 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
   // NOTE: Javelin does not dispatch mousemove by default.
   JX.enableDispatch(document.body, 'mousemove');
 
-  JX.Stratcom.listen('mousedown', 'maniphest-task-handle',  ondrag);
-  JX.Stratcom.listen('mousemove', null,                     onmove);
-  JX.Stratcom.listen('mouseup',   null,                     ondrop);
+  JX.Stratcom.listen('mousedown', 'maniphest-task', ondrag);
+  JX.Stratcom.listen('mousemove', null,             onmove);
+  JX.Stratcom.listen('mouseup',   null,             ondrop);
 
 });

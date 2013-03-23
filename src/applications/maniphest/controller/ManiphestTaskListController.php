@@ -378,23 +378,12 @@ final class ManiphestTaskListController extends ManiphestController {
       $selector->appendChild($lists);
       $selector->appendChild($this->renderBatchEditor($query));
 
-      $form_id = celerity_generate_unique_node_id();
-      $selector = phabricator_form(
-        $user,
-        array(
-          'method' => 'POST',
-          'action' => '/maniphest/batch/',
-          'id'     => $form_id,
-        ),
-        $selector->render());
-
       $list_container->appendChild($selector);
       $list_container->appendChild($pager);
 
       Javelin::initBehavior(
         'maniphest-subpriority-editor',
         array(
-          'root'  => $form_id,
           'uri'   =>  '/maniphest/subpriority/',
         ));
     }
@@ -644,6 +633,8 @@ final class ManiphestTaskListController extends ManiphestController {
   }
 
   private function renderBatchEditor(PhabricatorSearchQuery $search_query) {
+    $user = $this->getRequest()->getUser();
+
     Javelin::initBehavior(
       'maniphest-batch-selector',
       array(
@@ -651,6 +642,8 @@ final class ManiphestTaskListController extends ManiphestController {
         'selectNone'  => 'batch-select-none',
         'submit'      => 'batch-select-submit',
         'status'      => 'batch-select-status-cell',
+        'idContainer' => 'batch-select-id-container',
+        'formID'      => 'batch-select-form',
       ));
 
     $select_all = javelin_tag(
@@ -690,7 +683,14 @@ final class ManiphestTaskListController extends ManiphestController {
       ),
       pht('Export to Excel'));
 
-    return hsprintf(
+    $hidden = phutil_tag(
+      'div',
+      array(
+        'id' => 'batch-select-id-container',
+      ),
+      '');
+
+    $editor = hsprintf(
       '<div class="maniphest-batch-editor">'.
         '<div class="batch-editor-header">%s</div>'.
         '<table class="maniphest-batch-editor-layout">'.
@@ -698,16 +698,28 @@ final class ManiphestTaskListController extends ManiphestController {
             '<td>%s%s</td>'.
             '<td>%s</td>'.
             '<td id="batch-select-status-cell">%s</td>'.
-            '<td class="batch-select-submit-cell">%s</td>'.
+            '<td class="batch-select-submit-cell">%s%s</td>'.
           '</tr>'.
         '</table>'.
-      '</table>',
+      '</div>',
       pht('Batch Task Editor'),
       $select_all,
       $select_none,
       $export,
-      pht('0 Selected'),
-      $submit);
+      '',
+      $submit,
+      $hidden);
+
+    $editor = phabricator_form(
+      $user,
+      array(
+        'method' => 'POST',
+        'action' => '/maniphest/batch/',
+        'id'     => 'batch-select-form',
+      ),
+      $editor);
+
+    return $editor;
   }
 
   private function buildQueryFromRequest() {

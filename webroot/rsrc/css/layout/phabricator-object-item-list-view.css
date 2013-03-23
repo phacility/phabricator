@@ -38,7 +38,7 @@
 }
 
 .phabricator-object-item-name {
-  display: block;
+  display: inline-block;
   font-weight: bold;
   font-size: 14px;
   padding: 0 10px;
@@ -49,9 +49,9 @@
   padding: 8px 0;
 }
 
-
 .phabricator-object-item-objname {
   color: #222222;
+  cursor: text;
 }
 
 .phabricator-object-item-with-attrs .phabricator-object-item-name {
