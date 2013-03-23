@@ -2,6 +2,7 @@
 
 final class PhabricatorObjectItemView extends AphrontView {
 
+  private $objectName;
   private $header;
   private $href;
   private $attributes = array();
@@ -11,6 +12,21 @@ final class PhabricatorObjectItemView extends AphrontView {
   private $effect;
   private $footIcons = array();
   private $handleIcons = array();
+  private $grippable;
+
+  public function setObjectName($name) {
+    $this->objectName = $name;
+    return $this;
+  }
+
+  public function setGrippable($grippable) {
+    $this->grippable = $grippable;
+    return $this;
+  }
+
+  public function getGrippable() {
+    return $this->grippable;
+  }
 
   public function setEffect($effect) {
     $this->effect = $effect;
@@ -94,15 +110,38 @@ final class PhabricatorObjectItemView extends AphrontView {
     $item_classes = array();
     $content_classes[] = 'phabricator-object-item-content';
 
-    $header = phutil_tag(
+    $header_name = null;
+    if ($this->objectName) {
+      $header_name = array(
+        phutil_tag(
+          'span',
+          array(
+            'class' => 'phabricator-object-item-objname',
+          ),
+          $this->objectName),
+        ' ',
+      );
+    }
+
+    $header_link = phutil_tag(
       $this->href ? 'a' : 'div',
       array(
         'href' => $this->href,
-        'class' => 'phabricator-object-item-name',
+        'class' => 'phabricator-object-item-link',
       ),
       $this->header);
 
-    $icons = null;
+    $header = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-object-item-name',
+      ),
+      array(
+        $header_name,
+        $header_link,
+      ));
+
+    $icons = array();
     if ($this->icons) {
       $icon_list = array();
       foreach ($this->icons as $spec) {
@@ -141,13 +180,36 @@ final class PhabricatorObjectItemView extends AphrontView {
           $icon_href);
       }
 
-      $icons = phutil_tag(
+      $icons[] = phutil_tag(
         'ul',
         array(
           'class' => 'phabricator-object-item-icons',
         ),
         $icon_list);
       $item_classes[] = 'phabricator-object-item-with-icons';
+    }
+
+    if ($this->handleIcons) {
+      $handle_bar = array();
+      foreach ($this->handleIcons as $icon) {
+        $handle_bar[] = $this->renderHandleIcon($icon['icon'], $icon['label']);
+      }
+      $icons[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-handle-icons',
+        ),
+        $handle_bar);
+      $item_classes[] = 'phabricator-object-item-with-handle-icons';
+    }
+
+    if ($icons) {
+      $icons = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-icon-pane',
+        ),
+        $icons);
     }
 
     $attrs = null;
@@ -181,42 +243,19 @@ final class PhabricatorObjectItemView extends AphrontView {
       $item_classes[] = 'phabricator-object-item-with-attrs';
     }
 
-    $foot = array();
-
-    if ($this->handleIcons) {
-      $handle_bar = array();
-      foreach ($this->handleIcons as $icon) {
-        $handle_bar[] = $this->renderHandleIcon($icon['icon'], $icon['label']);
-      }
-      $foot[] = phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-object-item-handle-icons',
-        ),
-        $handle_bar);
-      $item_classes[] = 'phabricator-object-item-with-handle-icons';
-    }
-
+    $foot = null;
     if ($this->footIcons) {
       $foot_bar = array();
       foreach ($this->footIcons as $icon) {
         $foot_bar[] = $this->renderFootIcon($icon['icon'], $icon['label']);
       }
-      $foot[] = phutil_tag(
+      $foot = phutil_tag(
         'div',
         array(
           'class' => 'phabricator-object-item-foot-icons',
         ),
         $foot_bar);
-    }
-
-    if ($foot) {
-      $foot = phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-object-item-foot',
-        ),
-        $foot);
+      $item_classes[] = 'phabricator-object-item-with-foot-icons';
     }
 
     $item_classes[] = 'phabricator-object-item';
@@ -237,6 +276,17 @@ final class PhabricatorObjectItemView extends AphrontView {
         throw new Exception(pht("Invalid effect!"));
     }
 
+    $grippable = null;
+    if ($this->getGrippable()) {
+      $item_classes[] = 'phabricator-object-item-grippable';
+      $grippable = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-grip',
+        ),
+        '');
+    }
+
     $content = phutil_tag(
       'div',
       array(
@@ -246,6 +296,7 @@ final class PhabricatorObjectItemView extends AphrontView {
         $header,
         $attrs,
         $this->renderChildren(),
+        $foot,
       ));
 
     return phutil_tag(
@@ -253,11 +304,16 @@ final class PhabricatorObjectItemView extends AphrontView {
       array(
         'class' => implode(' ', $item_classes),
       ),
-      array(
-        $icons,
-        $content,
-        $foot,
-      ));
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-frame',
+        ),
+        array(
+          $grippable,
+          $icons,
+          $content,
+        )));
   }
 
   private function renderFootIcon($icon, $label) {

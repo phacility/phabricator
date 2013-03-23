@@ -28,16 +28,19 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $list->addItem(
       id(new PhabricatorObjectItemView())
+        ->setObjectName('FRUIT1')
         ->setHeader(pht('Apple'))
         ->setHref('#'));
 
     $list->addItem(
       id(new PhabricatorObjectItemView())
+        ->setObjectName('FRUIT2')
         ->setHeader(pht('Banana'))
         ->setHref('#'));
 
     $list->addItem(
       id(new PhabricatorObjectItemView())
+        ->setObjectName('FRUIT3')
         ->setHeader(pht('Cherry'))
         ->setHref('#'));
 
@@ -85,28 +88,64 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $list->addItem(
       id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Business Card')));
+        ->setHeader(pht('Business Card'))
+        ->setBarColor('red'));
     $list->addItem(
       id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Playing Card')));
+        ->setHeader(pht('Playing Card'))
+        ->setBarColor('orange')
+        ->addIcon('comment', pht('Royal Flush!')));
     $list->addItem(
       id(new PhabricatorObjectItemView())
-        ->setHeader(pht('House of Cards')));
+        ->setHeader(pht('House of Cards'))
+        ->setBarColor('yellow'));
     $list->addItem(
       id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Cardigan')));
+        ->setHeader(pht('Cardigan'))
+        ->setBarColor('green'));
     $list->addItem(
       id(new PhabricatorObjectItemView())
         ->setHeader(pht('Cardamom'))
-        ->addFootIcon('highlight-white', 'Spice'));
+        ->addFootIcon('highlight-white', 'Spice')
+        ->setBarColor('blue'));
     $list->addItem(
       id(new PhabricatorObjectItemView())
         ->setHeader(pht(
           'The human cardiovascular system includes the heart, lungs, and '.
           'some other parts; most of these parts are pretty squishy'))
         ->addFootIcon('search-white', pht('Respiration!'))
-        ->addHandleIcon($handle, pht('You have a cardiovascular system!')));
+        ->addHandleIcon($handle, pht('You have a cardiovascular system!'))
+        ->setBarColor('magenta'));
 
+
+    $out[] = array($head, $list);
+
+
+    $head = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Grippable List'));
+    $list = new PhabricatorObjectItemListView();
+    $list->setCards(true);
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht('Grab ahold!'))
+        ->setHref('#')
+        ->setGrippable(true)
+        ->setBarColor('red'));
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht('Hold on tight!'))
+        ->setHref('#')
+        ->setGrippable(true)
+        ->setBarColor('yellow'));
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht("Don't let go!"))
+        ->setHref('#')
+        ->setGrippable(true)
+        ->setBarColor('green'));
 
     $out[] = array($head, $list);
 
@@ -128,6 +167,28 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
         ->addFootIcon('love-white', pht('Heart'))
         ->addHandleIcon($handle, pht('You hold all the cards.'))
         ->addHandleIcon($handle, pht('You make all the rules.')));
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht('Just A Handle'))
+        ->setHref('#')
+        ->addHandleIcon($handle, pht('Handle Here')));
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht('Poor Use of Space'))
+        ->setHref('#')
+        ->addAttribute('North West')
+        ->addHandleIcon($handle, pht('South East')));
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht('Crowded Eastern Edge'))
+        ->setHref('#')
+        ->addIcon('computer', pht('Stuff'))
+        ->addIcon('computer', pht('Stuff'))
+        ->addIcon('computer', pht('Stuff'))
+        ->addHandleIcon($handle, pht('More Stuff')));
 
     $out[] = array($head, $list);
 
