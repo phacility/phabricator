@@ -31,6 +31,8 @@
   border-width: 1px 1px 1px 0;
   overflow: hidden;
   position: relative;
+  border-bottom-right-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .device-desktop .phabricator-object-item {
@@ -341,7 +343,7 @@
 .phabricator-object-list-cards .phabricator-object-item {
   border-radius: 3px;
   border-left-width: 6px;
-  background: #e8e8e8 url('/rsrc/image/texture/card-gradient.png') repeat-x;
+  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-frame {
