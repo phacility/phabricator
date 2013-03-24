@@ -52,12 +52,7 @@ final class PhabricatorPeopleProfileController
 
     require_celerity_resource('phabricator-profile-css');
 
-    $profile = id(new PhabricatorUserProfile())->loadOneWhere(
-      'userPHID = %s',
-      $user->getPHID());
-    if (!$profile) {
-      $profile = new PhabricatorUserProfile();
-    }
+    $profile = $user->loadUserProfile();
     $username = phutil_escape_uri($user->getUserName());
 
     $menu = new PhabricatorMenuView();

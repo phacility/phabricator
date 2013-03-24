@@ -8,6 +8,8 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
   private $ids;
 
   private $needPrimaryEmail;
+  private $needProfile;
+  private $needProfileImage;
 
   public function withIds(array $ids) {
     $this->ids = $ids;
@@ -35,6 +37,16 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
+  public function needProfile($need) {
+    $this->needProfile = $need;
+    return $this;
+  }
+
+  public function needProfileImage($need) {
+    $this->needProfileImage = $need;
+    return $this;
+  }
+
   public function execute() {
     $table  = new PhabricatorUser();
     $conn_r = $table->establishConnection('r');
@@ -56,6 +68,41 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
     }
 
     $users = $table->loadAllFromArray($data);
+
+    if ($this->needProfile) {
+      $user_list = mpull($users, null, 'getPHID');
+      $profiles = new PhabricatorUserProfile();
+      $profiles = $profiles->loadAllWhere('userPHID IN (%Ls)',
+        array_keys($user_list));
+
+      $profiles = mpull($profiles, null, 'getUserPHID');
+      foreach ($user_list as $user_phid => $user) {
+        $profile = idx($profiles, $user_phid);
+        if (!$profile) {
+          $profile = new PhabricatorUserProfile();
+          $profile->setUserPHID($user_phid);
+        }
+
+        $user->attachUserProfile($profile);
+      }
+    }
+
+    if ($this->needProfileImage) {
+      // Change this once we migrate this to CursorPagedPolicyAwareQuery
+      $files = id(new PhabricatorFile())
+        ->loadAllWhere('phid IN (%Ls)', mpull($users, 'getProfileImagePHID'));
+      $files = mpull($files, null, 'getPHID');
+      foreach ($users as $user) {
+        $image_phid = $user->getProfileImagePHID();
+        if (isset($files[$image_phid])) {
+          $profile_image_uri = $files[$image_phid]->getBestURI();
+        } else {
+          $profile_image_uri = PhabricatorUser::getDefaultProfileImageURI();
+        }
+        $user->attachProfileImageURI($profile_image_uri);
+      }
+    }
+
     return $users;
   }
 
@@ -105,4 +152,5 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
 
     return $this->formatWhereClause($where);
   }
+
 }
