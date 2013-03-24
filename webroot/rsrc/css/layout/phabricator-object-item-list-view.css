@@ -326,7 +326,6 @@
   width: 28px;
   height: 28px;
   display: inline-block;
-  background: #f3f3f3;
   background-size: 28px 28px;
   background-repeat: no-repeat;
 }
@@ -341,9 +340,14 @@
 /* Hard to sprite since we can't have other sprites appearing in tall cells */
 .phabricator-object-list-cards .phabricator-object-item {
   border-radius: 3px;
-  border-left-width: 4px;
+  border-left-width: 6px;
   background: #e8e8e8 url('/rsrc/image/texture/card-gradient.png') repeat-x;
 }
+
+.phabricator-object-list-cards .phabricator-object-item-frame {
+  min-height: 47px;
+}
+
 
 .phabricator-object-list-cards .phabricator-object-item-name {
   font-size: 13px;

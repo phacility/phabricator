@@ -79,6 +79,8 @@ final class ManiphestTaskListView extends ManiphestView {
 
       if ($this->showSubpriorityControls) {
         $item->setGrippable(true);
+      }
+      if ($this->showSubpriorityControls || $this->showBatchControls) {
         $item->addSigil('maniphest-task');
       }
 

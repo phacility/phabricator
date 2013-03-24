@@ -373,7 +373,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     $options = array(
       'class' => 'phabricator-object-item-handle-icon',
-      'style' => 'background: url('.$handle->getImageURI().')',
+      'style' => 'background-image: url('.$handle->getImageURI().')',
     );
 
     if (strlen($label)) {
