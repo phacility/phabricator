@@ -14,6 +14,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/actions/edit.png',
     'type' => 'png',
   ),
+  '/rsrc/image/apple-touch-icon.png' =>
+  array(
+    'hash' => '3380adf2dd4a5efa0885618bc5943640',
+    'uri' => '/res/3380adf2/rsrc/image/apple-touch-icon.png',
+    'disk' => '/rsrc/image/apple-touch-icon.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/avatar.png' =>
   array(
     'hash' => '1c5f255071537f05406adee86717ff27',
