@@ -60,8 +60,12 @@
   top: 9px;
 }
 
-.device .phabricator-main-menu-logo {
-  display: none;
+.device-phone .phabricator-main-menu-logo {
+  margin-left: -45px;
+}
+
+.device .phabricator-main-menu-logo:hover {
+  background-color: transparent;
 }
 
 /* - Expand/Collapse Button ----------------------------------------------------
@@ -71,36 +75,21 @@
 
 */
 
-.phabricator-main-menu-expand-button {
-  position: absolute;
-  top: 7px;
-  display: block;
-  width: 40px;
-  height: 28px;
-}
-
 .phabricator-menu-button-icon {
-  position: absolute;
   width: 24px;
-  height: 20px;
-  top: 5px;
-  left: 8px;
+  height: 24px;
+  float: left;
+  margin: 10px 10px 0 5px;
 }
 
-.phabricator-expand-core-menu {
-  left: 5px;
+.phabricator-expand-application-menu,
+.phabricator-expand-search-menu {
+  float: right;
 }
 
-.phabricator-expand-application-menu {
-  right: 5px;
-}
-
+.device-desktop .phabricator-main-menu-search-button,
 .device-desktop .phabricator-main-menu-expand-button {
   display: none;
-}
-
-.device .phabricator-main-menu-expand-button {
-  display: block;
 }
 
 
@@ -196,7 +185,6 @@
   top: 3px;
 }
 
-
 .phabricator-main-menu-search-target div.jx-typeahead-results {
   border-radius: 4px;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.35);
@@ -246,10 +234,6 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   Alert menus are like icon menus but don't obey collapse rules.
 
 */
-
-.device .phabricator-main-menu-alerts {
-  margin-left: 60px;
-}
 
 .phabricator-main-menu-alerts {
   display: inline-block;
@@ -335,22 +319,20 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 */
 
-.phabricator-core-menu-icon {
-  position: absolute;
-  display: block;
-  width: 28px;
-  height: 28px;
-}
-
 .phabricator-core-menu-profile-image {
   background-size: 28px 28px;
 }
 
-.device .phabricator-core-menu {
+.device .phabricator-search-menu {
   display: none;
 }
 
-.device .phabricator-core-menu-expanded .phabricator-core-menu {
+.device-desktop .phabricator-search-menu {
+  float: right;
+  margin-right: 110px;
+}
+
+.device .phabricator-search-menu-expanded .phabricator-search-menu {
   display: block;
   padding-top: 44px;
 }
@@ -361,23 +343,23 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   line-height: 28px;
 }
 
-.device .phabricator-core-menu
-   .phabricator-menu-item-type-link .phabricator-menu-item-name {
-  margin-left: 40px;
+.device .phabricator-menu-item-type-link
+  .phabricator-core-menu-icon + .phabricator-menu-item-name {
+  margin-left: 36px;
 }
 
-.device-desktop .phabricator-core-menu {
+.device-desktop .phabricator-application-menu {
   position: absolute;
   right: 0;
   top: 0;
   vertical-align: top;
 }
 
-.device-desktop .phabricator-core-menu .phabricator-menu-item-name {
+.device-desktop .phabricator-application-menu .phabricator-menu-item-name {
   display: none;
 }
 
-.device-desktop .phabricator-core-menu .phabricator-menu-item-view {
+.device-desktop .phabricator-application-menu .phabricator-menu-item-view {
   display: block;
   float: left;
   position: relative;
@@ -385,7 +367,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   height: 44px;
 }
 
-.device-desktop .phabricator-core-menu .phabricator-core-item-device {
+.device-desktop .phabricator-application-menu .phabricator-core-item-device {
   display: none;
 }
 
@@ -398,13 +380,12 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   left: 6px;
 }
 
-.device-desktop .phabricator-core-menu .phabricator-core-menu-item-profile {
-  border-width: 0 1px;
-  border-style: solid;
-  border-color: #44494d;
-  margin: 0 8px;
+.phabricator-core-menu-icon {
+  position: absolute;
+  display: block;
+  width: 28px;
+  height: 28px;
 }
-
 
 /* - Application Menu ----------------------------------------------------------
 
@@ -417,11 +398,11 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   padding-top: 44px;
 }
 
-.phabricator-application-menu {
+.device .phabricator-application-menu,
+.device-desktop .phabricator-dark-menu .phabricator-menu-item-type-label {
   display: none;
 }
 
-.phabricator-application-menu .phabricator-menu-item-type-link
-  .phabricator-menu-item-name {
+.phabricator-application-menu .phabricator-menu-item-name {
   padding-left: 12px;
 }

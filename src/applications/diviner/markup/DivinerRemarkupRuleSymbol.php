@@ -100,14 +100,20 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
           $href = $renderer->getHrefForAtomRef($ref);
         }
       } else {
-        // Here, we're generating commment text or something like that. Just
+        // Here, we're generating comment text or something like that. Just
         // link to Diviner and let it sort things out.
 
         $href = id(new PhutilURI('/diviner/find/'))
           ->setQueryParams($ref_dict + array('jump' => true));
       }
 
-      if ($href) {
+      if ($this->getEngine()->isTextMode()) {
+        if ($href) {
+          $link = $title.' <'.PhabricatorEnv::getProductionURI($href).'>';
+        } else {
+          $link = $title;
+        }
+      } else if ($href) {
         $link = phutil_tag(
           'a',
           array(

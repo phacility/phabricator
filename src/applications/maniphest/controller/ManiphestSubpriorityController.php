@@ -7,6 +7,7 @@ final class ManiphestSubpriorityController extends ManiphestController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     if (!$request->validateCSRF()) {
       return new Aphront403Response();
@@ -50,15 +51,26 @@ final class ManiphestSubpriorityController extends ManiphestController {
     $task->setSubpriority($new_sub);
     $task->save();
 
-    $pri_class = ManiphestTaskSummaryView::getPriorityClass(
-      $task->getPriority());
-    $class = 'maniphest-task-handle maniphest-active-handle '.$pri_class;
+    $phids = $task->getProjectPHIDs();
+    if ($task->getOwnerPHID()) {
+      $phids[] = $task->getOwnerPHID();
+    }
 
-    $response = array(
-      'className' => $class,
-    );
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($user)
+      ->loadHandles();
 
-    return id(new AphrontAjaxResponse())->setContent($response);
+    $view = id(new ManiphestTaskListView())
+      ->setUser($user)
+      ->setShowSubpriorityControls(true)
+      ->setShowBatchControls(true)
+      ->setHandles($handles)
+      ->setTasks(array($task));
+
+    return id(new AphrontAjaxResponse())->setContent(
+      array(
+        'tasks' => $view,
+      ));
   }
 
 }

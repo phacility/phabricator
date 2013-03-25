@@ -135,7 +135,15 @@ final class PhabricatorCoreConfigOptions
         ->setLocked(true)
         ->setDescription(
           pht('Array containing list of Uninstalled applications.')),
+      $this->newOption('welcome.html', 'string', null)
+        ->setLocked(true)
+        ->setDescription(
+          pht('Custom HTML to show on the main Phabricator dashboard.')),
+      $this->newOption('phabricator.cache-namespace', 'string', null)
+        ->setLocked(true)
+        ->setDescription(pht('Cache namespace.')),
       );
+
   }
 
   protected function didValidateOption(

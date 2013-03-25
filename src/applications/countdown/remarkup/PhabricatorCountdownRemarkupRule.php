@@ -19,9 +19,19 @@ final class PhabricatorCountdownRemarkupRule extends PhutilRemarkupRule {
     if (!$countdown) {
       return $matches[0];
     }
-    $id = celerity_generate_unique_node_id();
 
     $engine = $this->getEngine();
+
+    if ($engine->isTextMode()) {
+      $date = $countdown->getDatepoint();
+      $viewer = $engine->getConfig('viewer');
+      if ($viewer) {
+        $date = phabricator_datetime($date, $viewer);
+      }
+      return $engine->storeText($date);
+    }
+
+    $id = celerity_generate_unique_node_id();
     $token = $engine->storeText('');
 
     $metadata_key = self::KEY_RULE_COUNTDOWN;

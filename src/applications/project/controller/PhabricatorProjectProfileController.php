@@ -240,6 +240,8 @@ final class PhabricatorProjectProfileController
     PhabricatorProject $project,
     PhabricatorProjectProfile $profile) {
 
+    $user = $this->getRequest()->getUser();
+
     $query = id(new ManiphestTaskQuery())
       ->withAnyProjects(array($project->getPHID()))
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
@@ -250,23 +252,16 @@ final class PhabricatorProjectProfileController
     $count = $query->getRowCount();
 
     $phids = mpull($tasks, 'getOwnerPHID');
+    $phids = array_merge(
+      $phids,
+      array_mergev(mpull($tasks, 'getProjectPHIDs')));
     $phids = array_filter($phids);
     $handles = $this->loadViewerHandles($phids);
 
-    $task_views = array();
-    foreach ($tasks as $task) {
-      $view = id(new ManiphestTaskSummaryView())
-        ->setTask($task)
-        ->setHandles($handles)
-        ->setUser($this->getRequest()->getUser());
-      $task_views[] = $view->render();
-    }
-
-    if (empty($tasks)) {
-      $task_views = phutil_tag('em', array(), pht('No open tasks.'));
-    } else {
-      $task_views = phutil_implode_html('', $task_views);
-    }
+    $task_list = new ManiphestTaskListView();
+    $task_list->setUser($user);
+    $task_list->setTasks($tasks);
+    $task_list->setHandles($handles);
 
     $open = number_format($count);
 
@@ -286,7 +281,7 @@ final class PhabricatorProjectProfileController
         '</div>
       </div>',
       pht('Open Tasks (%s)', $open),
-      $task_views,
+      $task_list,
       $more_link);
 
     return $content;

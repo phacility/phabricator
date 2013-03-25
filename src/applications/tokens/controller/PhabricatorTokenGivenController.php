@@ -72,6 +72,7 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 

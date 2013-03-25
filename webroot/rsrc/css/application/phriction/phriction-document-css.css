@@ -64,11 +64,8 @@
   font-size: 11px;
 }
 
-
 .phriction-document-history-diff {
-  margin:           0 0 0 2em;
-  padding-bottom:   2em;
-  max-width:        1162px;
+  padding: 0 2em 2em;
 }
 
 .phriction-revert-table {

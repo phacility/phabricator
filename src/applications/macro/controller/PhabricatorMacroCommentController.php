@@ -17,7 +17,10 @@ final class PhabricatorMacroCommentController
       return new Aphront400Response();
     }
 
-    $macro = id(new PhabricatorFileImageMacro())->load($this->id);
+    $macro = id(new PhabricatorMacroQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$macro) {
       return new Aphront404Response();
     }

@@ -116,6 +116,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_MOCK  => 'PholioMock',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO  => 'PhabricatorFileImageMacro',
       PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
+      PhabricatorPHIDConstants::PHID_TYPE_WIKI  => 'PhrictionDocument',
 
     );
 

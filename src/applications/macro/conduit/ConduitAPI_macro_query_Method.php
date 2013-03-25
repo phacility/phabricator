@@ -24,24 +24,14 @@ final class ConduitAPI_macro_query_Method extends ConduitAPI_macro_Method {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-
-    $macros = id(new PhabricatorFileImageMacro())->loadAll();
-
-    $files = array();
-    if ($macros) {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid IN (%Ls)',
-        mpull($macros, 'getFilePHID'));
-      $files = mpull($files, null, 'getPHID');
-    }
+    $macros = id(new PhabricatorMacroQuery())
+      ->setViewer($request->getUser())
+      ->execute();
 
     $results = array();
     foreach ($macros as $macro) {
-      if (empty($files[$macro->getFilePHID()])) {
-        continue;
-      }
       $results[$macro->getName()] = array(
-        'uri' => $files[$macro->getFilePHID()]->getBestURI(),
+        'uri' => $macro->getFile()->getBestURI(),
       );
     }
 

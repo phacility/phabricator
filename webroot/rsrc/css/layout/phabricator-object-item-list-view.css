@@ -6,20 +6,33 @@
   padding: 8px 6px;
 }
 
-
 .device-desktop .phabricator-object-item-list-view {
   padding: 20px;
+}
+
+.device-desktop .phabricator-object-list-flush {
+  padding: 0;
 }
 
 .phabricator-object-item {
   background: #ffffff;
   border-style: solid;
   border-color: #c0c5d1;
-  border-width: 1px 1px 1px 3px;
+  border-width: 0 0 0 3px;
   margin: 5px 0;
 
   overflow: hidden;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
+}
+
+.phabricator-object-item-frame {
+  border-style: solid;
+  border-color: #c0c5d1;
+  border-width: 1px 1px 1px 0;
+  overflow: hidden;
+  position: relative;
+  border-bottom-right-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .device-desktop .phabricator-object-item {
@@ -27,10 +40,20 @@
 }
 
 .phabricator-object-item-name {
-  display: block;
-  padding: 8px 10px 8px;
+  display: inline-block;
   font-weight: bold;
   font-size: 14px;
+  padding: 0 10px;
+}
+
+.phabricator-object-item-link {
+  display: inline-block;
+  padding: 8px 0;
+}
+
+.phabricator-object-item-objname {
+  color: #222222;
+  cursor: text;
 }
 
 .phabricator-object-item-with-attrs .phabricator-object-item-name {
@@ -39,6 +62,23 @@
 
 .phabricator-object-item-content {
   overflow: hidden;
+}
+
+.phabricator-object-item-grippable {
+  cursor: move;
+}
+
+.phabricator-object-item-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 15px;
+  background: url(/rsrc/image/texture/grip.png) center center no-repeat;
+}
+
+.phabricator-object-item-grippable .phabricator-object-item-frame {
+  padding-left: 9px;
 }
 
 
@@ -54,37 +94,12 @@
 }
 
 .phabricator-object-list-stackable .phabricator-object-item {
-  border-width: 1px;
+  border-left-width: 1px;
 }
 
 .device-desktop .phabricator-object-list-stackable
   .phabricator-object-item:hover {
-  border-width: 1px;
   background: #e9ecf5;
-}
-
-
-/* - Card List -----------------------------------------------------------------
-
-  Rounded card list.
-
-*/
-
-/* Hard to sprite since we can't have other sprites appearing in tall cells */
-.phabricator-object-list-cards .phabricator-object-item {
-  border-radius: 3px;
-  border-left-width: 4px;
-  background: #e8e8e8 url('/rsrc/image/texture/card-gradient.png') repeat-x;
-}
-
-
-.phabricator-object-list-cards .phabricator-object-item-name {
-  display: block;
-  padding: 6px 10px 6px;
-  font-weight: normal;
-  font-size: 13px;
-  color: #555555;
-  max-height: 2em;
 }
 
 
@@ -116,9 +131,17 @@
 
 */
 
+.phabricator-object-icon-pane {
+  float: right;
+}
+
+.phabricator-object-item-with-handle-icons .phabricator-object-item-icons {
+  padding-bottom: 34px;
+}
+
 .phabricator-object-item-icons {
   float: right;
-  padding: 10px 10px 0;
+  padding: 6px 10px 0;
 }
 
 /* NOTE: The main content is an "overflow: hidden" div which we give a right
@@ -126,11 +149,13 @@
    the width + padding of the icon div, so the icons have some space even if
    the content is wider than available space. */
 
-.device-desktop .phabricator-object-item-icons {
+.device-desktop .phabricator-object-icon-pane {
   width: 120px;
 }
 
 .device-desktop .phabricator-object-item-with-icons
+  .phabricator-object-item-content,
+.device-desktop .phabricator-object-item-with-handle-icons
   .phabricator-object-item-content {
   margin-right: 132px;
 }
@@ -139,16 +164,18 @@
   width: 18px;
 }
 
-.device .phabricator-object-item-with-icons .phabricator-object-item-content {
+.device .phabricator-object-item-with-icons .phabricator-object-item-content,
+.device .phabricator-object-item-with-handle-icons
+  .phabricator-object-item-content {
   margin-right: 30px;
 }
 
 .device .phabricator-object-item-icon-label {
   display: none;
-  vertical-align: middle;
 }
 
 .phabricator-object-item-icon {
+  vertical-align: middle;
   position: relative;
   font-size: 11px;
   color: #666666;
@@ -162,6 +189,10 @@
 
 .device-desktop .phabricator-object-item-icon {
   padding-right: 22px;
+}
+
+.device-desktop .phabricator-object-item-icon-none {
+  padding-right: 0;
 }
 
 .phabricator-object-item-icon-image {
@@ -212,6 +243,10 @@
   border-left-color: #67009b;
 }
 
+.phabricator-object-item-bar-color-magenta {
+  border-left-color: #cc00c0;
+}
+
 .phabricator-object-item-bar-color-grey {
   border-left-color: #999999;
 }
@@ -236,18 +271,6 @@
 }
 
 
-/* - Foot ----------------------------------------------------------------------
-
-  This goes at the bottom.
-
-*/
-
-.phabricator-object-item-foot {
-  clear: both;
-  padding: 0;
-}
-
-
 /* - Foot Icons ----------------------------------------------------------------
 
   Object counts shown in the footer.
@@ -256,6 +279,12 @@
 
 .phabricator-object-item-foot-icons {
   margin-left: 10px;
+  bottom: 0;
+  position: absolute;
+}
+
+.phabricator-object-item-with-foot-icons .phabricator-object-item-content {
+  padding-bottom: 22px;
 }
 
 .phabricator-object-item-foot-icon {
@@ -268,10 +297,6 @@
   height: 19px;
   vertical-align: middle;
   position: relative;
-}
-
-.phabricator-object-item-with-handle-icons .phabricator-object-item-foot-icon {
-  margin-top: 8px;
 }
 
 .phabricator-object-item-foot-icon .sprite-icon {
@@ -290,9 +315,12 @@
 */
 
 .phabricator-object-item-handle-icons {
-  float: right;
   height: 28px;
   margin-right: 10px;
+  bottom: 0;
+  right: 0;
+  text-align: right;
+  position: absolute;
 }
 
 .phabricator-object-item-handle-icon {
@@ -300,7 +328,52 @@
   width: 28px;
   height: 28px;
   display: inline-block;
-  background: #f3f3f3;
   background-size: 28px 28px;
   background-repeat: no-repeat;
+}
+
+
+/* - Card List -----------------------------------------------------------------
+
+  Rounded card list.
+
+*/
+
+/* Hard to sprite since we can't have other sprites appearing in tall cells */
+.phabricator-object-list-cards .phabricator-object-item {
+  border-radius: 3px;
+  border-left-width: 6px;
+  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
+}
+
+.phabricator-object-list-cards .phabricator-object-item-frame {
+  min-height: 47px;
+}
+
+
+.phabricator-object-list-cards .phabricator-object-item-name {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.phabricator-object-list-cards .phabricator-object-item-link {
+  padding: 6px 0;
+}
+
+.phabricator-object-list-cards .phabricator-object-item-with-attrs
+  .phabricator-object-item-link {
+  padding: 4px 0;
+}
+
+.phabricator-object-list-cards .phabricator-object-item-selected {
+  background: #bfdcff;
+}
+
+.phabricator-object-list-cards .phabricator-object-item-selected
+  .phabricator-object-item-frame {
+  border-color: #99ccff;
+}
+
+.phabricator-object-list-cards .phabricator-object-item-attributes {
+  padding-bottom: 4px;
 }

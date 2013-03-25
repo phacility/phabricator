@@ -29,14 +29,16 @@ final class PhrictionRemarkupRule
 
     if ($this->getEngine()->getState('toc')) {
       $text = $name;
+    } else if ($this->getEngine()->isTextMode()) {
+      return PhabricatorEnv::getProductionURI($href);
     } else {
       $text = phutil_tag(
-          'a',
-          array(
-            'href'  => $href,
-            'class' => 'phriction-link',
-          ),
-          $name);
+        'a',
+        array(
+          'href'  => $href,
+          'class' => 'phriction-link',
+        ),
+        $name);
     }
 
     return $this->getEngine()->storeText($text);

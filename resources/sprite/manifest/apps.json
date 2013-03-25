@@ -16,6 +16,11 @@
       "rule" : ".app-calendar-dark",
       "hash" : "756d60566639ad1424444436a95c6a3f"
     },
+    "app-chatlog-dark"      : {
+      "name" : "app-chatlog-dark",
+      "rule" : ".app-chatlog-dark",
+      "hash" : "339c4ddd72761c8cd3b9f9adbe1b0e09"
+    },
     "app-conduit-dark"      : {
       "name" : "app-conduit-dark",
       "rule" : ".app-conduit-dark",
@@ -76,6 +81,11 @@
       "rule" : ".app-flags-dark",
       "hash" : "6382f373f7b0e70522d80ce06ef62813"
     },
+    "app-harbormaster-dark" : {
+      "name" : "app-harbormaster-dark",
+      "rule" : ".app-harbormaster-dark",
+      "hash" : "693886513474ea91f904d8adaa0e8e2b"
+    },
     "app-help-dark"         : {
       "name" : "app-help-dark",
       "rule" : ".app-help-dark",
@@ -131,6 +141,11 @@
       "rule" : ".app-people-dark",
       "hash" : "0b3995fcd043b506a408de6e25ad5292"
     },
+    "app-phage-dark"        : {
+      "name" : "app-phage-dark",
+      "rule" : ".app-phage-dark",
+      "hash" : "386dc818291076fa196580ee522c2774"
+    },
     "app-phame-dark"        : {
       "name" : "app-phame-dark",
       "rule" : ".app-phame-dark",
@@ -141,10 +156,20 @@
       "rule" : ".app-phid-dark",
       "hash" : "5a0ac05bbf36a7aeb36753d093c3c9f8"
     },
+    "app-phlux-dark"        : {
+      "name" : "app-phlux-dark",
+      "rule" : ".app-phlux-dark",
+      "hash" : "ee8d71e2a68b9a9704ccdc4276199d79"
+    },
     "app-pholio-dark"       : {
       "name" : "app-pholio-dark",
       "rule" : ".app-pholio-dark",
       "hash" : "7d3befd1c12dd464a5f5edbef4574a5c"
+    },
+    "app-phortune-dark"     : {
+      "name" : "app-phortune-dark",
+      "rule" : ".app-phortune-dark",
+      "hash" : "cdc79c02273af8491c1d6b9fed029a55"
     },
     "app-phpast-dark"       : {
       "name" : "app-phpast-dark",
@@ -190,6 +215,11 @@
       "name" : "app-slowvote-dark",
       "rule" : ".app-slowvote-dark",
       "hash" : "e51cc1e6887f2deaff02d9c60aae36e0"
+    },
+    "app-token-dark"        : {
+      "name" : "app-token-dark",
+      "rule" : ".app-token-dark",
+      "hash" : "960f497d9417746e2818b8fec0c1bf8b"
     },
     "app-uiexamples-dark"   : {
       "name" : "app-uiexamples-dark",

@@ -25,7 +25,7 @@ final class PhabricatorApplicationMacro extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/macro/' => array(
-        '' => 'PhabricatorMacroListController',
+        '((?P<filter>all|active|my)/)?' => 'PhabricatorMacroListController',
         'create/' => 'PhabricatorMacroEditController',
         'view/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroViewController',
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorMacroCommentController',

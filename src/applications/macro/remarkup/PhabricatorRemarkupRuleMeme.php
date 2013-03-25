@@ -30,11 +30,18 @@ final class PhabricatorRemarkupRuleMeme
       ->alter('uppertext', $options['above'])
       ->alter('lowertext', $options['below']);
 
-    $img = phutil_tag(
-      'img',
-      array(
-        'src' => (string)$uri,
-      ));
+    if ($this->getEngine()->isTextMode()) {
+      $img =
+        ($options['above'] != '' ? "\"{$options['above']}\"\n" : '').
+        $options['src'].' <'.PhabricatorEnv::getProductionURI($uri).'>'.
+        ($options['below'] != '' ? "\n\"{$options['below']}\"" : '');
+    } else {
+      $img = phutil_tag(
+        'img',
+        array(
+          'src' => (string)$uri,
+        ));
+    }
 
     return $this->getEngine()->storeText($img);
   }

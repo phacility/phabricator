@@ -18,13 +18,7 @@ final class PhabricatorSettingsPanelProfile
   public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
-    $profile = id(new PhabricatorUserProfile())->loadOneWhere(
-      'userPHID = %s',
-      $user->getPHID());
-    if (!$profile) {
-      $profile = new PhabricatorUserProfile();
-      $profile->setUserPHID($user->getPHID());
-    }
+    $profile = $user->loadUserProfile();
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
 

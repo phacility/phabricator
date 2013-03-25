@@ -30,6 +30,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     switch ($this->getFilter()) {
       case 'my':
         $query->withAuthorPHIDs(array($user->getPHID()));
+        $query->showOnlyExplicitUploads(true);
         $header = pht('Files You Uploaded');
         break;
       case 'all':
@@ -89,7 +90,6 @@ final class PhabricatorFileListController extends PhabricatorFileController {
       $id = $file->getID();
       $phid = $file->getPHID();
       $name = $file->getName();
-      $file_name = "F{$id} {$name}";
       $file_uri = $this->getApplicationURI("/info/{$phid}/");
 
       $date_created = phabricator_date($file->getDateCreated(), $user);
@@ -103,7 +103,8 @@ final class PhabricatorFileListController extends PhabricatorFileController {
 
       $item = id(new PhabricatorObjectItemView())
         ->setObject($file)
-        ->setHeader($file_name)
+        ->setObjectName("F{$id}")
+        ->setHeader($name)
         ->setHref($file_uri)
         ->addAttribute($uploaded)
         ->addIcon('none', phabricator_format_bytes($file->getByteSize()));

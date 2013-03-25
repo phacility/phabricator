@@ -5,6 +5,9 @@
  */
 final class PhabricatorCaches {
 
+  public static function getNamespace() {
+    return PhabricatorEnv::getEnvConfig('phabricator.cache-namespace');
+  }
 
 /* -(  Setup Cache  )-------------------------------------------------------- */
 
@@ -42,6 +45,12 @@ final class PhabricatorCaches {
     // In most cases, we should have APC. This is an ideal cache for our
     // purposes -- it's fast and empties on server restart.
     $apc = new PhutilKeyValueCacheAPC();
+
+    if (PhabricatorCaches::getNamespace()) {
+      $apc = id(new PhutilKeyValueCacheNamespace($apc))
+        ->setNamespace(PhabricatorCaches::getNamespace());
+    }
+
     if ($apc->isAvailable()) {
       return array($apc);
     }
@@ -51,6 +60,12 @@ final class PhabricatorCaches {
     $disk_path = self::getSetupCacheDiskCachePath();
     if ($disk_path) {
       $disk = new PhutilKeyValueCacheOnDisk();
+
+      if (PhabricatorCaches::getNamespace()) {
+        $disk = id(new PhutilKeyValueCacheNamespace($disk))
+          ->setNamespace(PhabricatorCaches::getNamespace());
+      }
+
       $disk->setCacheFile($disk_path);
       if ($disk->isAvailable()) {
         return array($disk);

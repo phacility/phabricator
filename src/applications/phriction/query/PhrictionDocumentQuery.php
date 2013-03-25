@@ -135,6 +135,7 @@ final class PhrictionDocumentQuery
           $conn,
           'status NOT IN (%Ld)',
           array(
+            PhrictionDocumentStatus::STATUS_MOVED,
             PhrictionDocumentStatus::STATUS_STUB,
           ));
         break;
