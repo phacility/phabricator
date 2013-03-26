@@ -25,10 +25,6 @@ JX.behavior('conpherence-pontificate', function(config) {
           JX.$(r.conpherence_phid + '-nav-item'),
           JX.$H(r.nav_item)
         );
-        JX.DOM.replace(
-          JX.$(r.conpherence_phid + '-menu-item'),
-          JX.$H(r.menu_item)
-        );
 
         // update the header
         JX.DOM.setContent(

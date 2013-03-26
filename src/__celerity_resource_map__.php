@@ -1190,7 +1190,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/bcd715e1/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/e04bb055/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1206,7 +1206,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-pontificate' =>
   array(
-    'uri' => '/res/fe634761/rsrc/js/application/conpherence/behavior-pontificate.js',
+    'uri' => '/res/abc4d947/rsrc/js/application/conpherence/behavior-pontificate.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1219,7 +1219,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-widget-pane' =>
   array(
-    'uri' => '/res/52b80633/rsrc/js/application/conpherence/behavior-widget-pane.js',
+    'uri' => '/res/45d53f1f/rsrc/js/application/conpherence/behavior-widget-pane.js',
     'type' => 'js',
     'requires' =>
     array(

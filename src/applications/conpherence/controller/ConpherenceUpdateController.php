@@ -268,11 +268,6 @@ final class ConpherenceUpdateController extends
     $selected = true;
     $nav_item = $this->buildConpherenceMenuItem(
       $conpherence,
-      '-nav-item',
-      $selected);
-    $menu_item = $this->buildConpherenceMenuItem(
-      $conpherence,
-      '-menu-item',
       $selected);
 
     $header = $this->buildHeaderPaneContent($conpherence);
@@ -286,7 +281,6 @@ final class ConpherenceUpdateController extends
     $content = array(
       'transactions' => $rendered_transactions,
       'latest_transaction_id' => $new_latest_transaction_id,
-      'menu_item' => $menu_item->render(),
       'nav_item' => $nav_item->render(),
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => $header,

@@ -126,10 +126,6 @@ JX.behavior('conpherence-menu', function(config) {
           JX.$(r.conpherence_phid + '-nav-item'),
           JX.$H(r.nav_item)
         );
-        JX.DOM.replace(
-          JX.$(r.conpherence_phid + '-menu-item'),
-          JX.$H(r.menu_item)
-        );
       })
       .start();
   });
