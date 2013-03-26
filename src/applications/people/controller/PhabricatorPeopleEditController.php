@@ -334,7 +334,7 @@ final class PhabricatorPeopleEditController
 
       $form->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Roles')
+          ->setLabel(pht('Roles'))
           ->setValue($roles));
     }
 
