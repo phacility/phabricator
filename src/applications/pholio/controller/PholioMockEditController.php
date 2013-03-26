@@ -219,11 +219,14 @@ final class PholioMockEditController extends PholioController {
           ->setName('can_view'))
       ->appendChild($submit);
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title)
+        ->setHref($this->getApplicationURI()));
 
     $content = array(
-      $header,
+      $crumbs,
       $error_view,
       $form,
     );

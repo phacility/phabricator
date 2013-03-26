@@ -43,12 +43,8 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $list->setPager($pager);
     $list->setNoDataString($nodata);
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
     $nav->appendChild(
       array(
-        $header,
         $list,
       ));
 
@@ -66,6 +62,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 

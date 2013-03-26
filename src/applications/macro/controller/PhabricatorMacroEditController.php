@@ -152,7 +152,6 @@ final class PhabricatorMacroEditController
     }
 
     $form = new AphrontFormView();
-    $form->setFlexible(true);
     $form->addHiddenInput('name_form', 1);
     $form->setUser($request->getUser());
 
@@ -237,10 +236,6 @@ final class PhabricatorMacroEditController
         ->setHref($request->getRequestURI())
         ->setName($crumb));
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
-
     $upload = null;
     if ($macro->getID()) {
       $upload_header = id(new PhabricatorHeaderView())
@@ -272,16 +267,22 @@ final class PhabricatorMacroEditController
       $upload = array($upload_header, $upload_form);
     }
 
+    $panel = new AphrontPanelView();
+    $panel->setHeader(pht('Create New Macro'));
+    $panel->setNoBackground();
+    $panel->appendChild($form);
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
         $error_view,
-        $form,
+        $panel,
         $upload,
       ),
       array(
         'title' => $title,
+        'device' => true,
       ));
   }
 }
