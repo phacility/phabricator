@@ -7,6 +7,10 @@ final class PholioInlineThumbController extends PholioController {
 
   private $imageid;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->imageid = idx($data, 'imageid');
   }
