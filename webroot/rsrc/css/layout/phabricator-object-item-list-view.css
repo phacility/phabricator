@@ -59,10 +59,6 @@
   cursor: text;
 }
 
-.phabricator-object-item-with-attrs .phabricator-object-item-name {
-  padding-bottom: 2px;
-}
-
 .phabricator-object-item-content {
   overflow: hidden;
 }
@@ -370,8 +366,4 @@
 .phabricator-object-list-cards .phabricator-object-item-selected
   .phabricator-object-item-frame {
   border-color: #99ccff;
-}
-
-.phabricator-object-list-cards .phabricator-object-item-attributes {
-  padding-bottom: 4px;
 }
