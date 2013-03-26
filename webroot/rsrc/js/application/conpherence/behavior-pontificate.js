@@ -52,13 +52,6 @@ JX.behavior('conpherence-pontificate', function(config) {
 
   JX.DOM.listen(
     root,
-    ['submit', 'didSyntheticSubmit'],
-    null,
-    onsubmit
-  );
-
-  JX.DOM.listen(
-    root,
     ['click'],
     'conpherence-pontificate',
     onsubmit

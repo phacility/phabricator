@@ -60,6 +60,17 @@ final class ConpherenceUpdateController extends
             $conpherence,
             $message);
           break;
+        case 'notifications':
+          $notifications = $request->getStr('notifications');
+          $participant = $conpherence->getParticipant($user->getPHID());
+          $participant->setSettings(array('notifications' => $notifications));
+          $participant->save();
+          $result = pht(
+            'Updated notification settings to "%s".',
+            ConpherenceSettings::getHumanString($notifications));
+          return id(new AphrontAjaxResponse())
+            ->setContent($result);
+          break;
         case 'metadata':
           $xactions = array();
           $top = $request->getInt('image_y');

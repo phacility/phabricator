@@ -159,13 +159,15 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         }
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+        $participants = array();
         foreach ($xaction->getNewValue() as $participant) {
           if ($participant == $this->getActor()->getPHID()) {
             $status = ConpherenceParticipationStatus::UP_TO_DATE;
           } else {
             $status = ConpherenceParticipationStatus::BEHIND;
           }
-          id(new ConpherenceParticipant())
+          $participants[] =
+            id(new ConpherenceParticipant())
             ->setConpherencePHID($object->getPHID())
             ->setParticipantPHID($participant)
             ->setParticipationStatus($status)
@@ -173,6 +175,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             ->setBehindTransactionPHID($xaction->getPHID())
             ->save();
         }
+        $participants = mpull($participants, null, 'getParticipantPHID');
+        $object->attachParticipants($participants);
         break;
      }
   }
@@ -221,7 +225,28 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $participants = $object->getParticipants();
-    return array_keys($participants);
+    $preferences = id(new PhabricatorUserPreferences())
+      ->loadAllWhere('userPHID in (%Ls)', array_keys($participants));
+    $preferences = mpull($preferences, null, 'getUserPHID');
+    $to_phids = array();
+    foreach ($participants as $phid => $participant) {
+      $default = ConpherenceSettings::EMAIL_ALWAYS;
+      $preference = idx($preferences, $phid);
+      if ($preference) {
+        $default = $preference->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_CONPH_NOTIFICATIONS,
+          ConpherenceSettings::EMAIL_ALWAYS);
+      }
+      $settings = $participant->getSettings();
+      $notifications = idx(
+        $settings,
+        'notifications',
+        $default);
+      if ($notifications == ConpherenceSettings::EMAIL_ALWAYS) {
+        $to_phids[] = $phid;
+      }
+    }
+    return $to_phids;
   }
 
   protected function getMailCC(PhabricatorLiskDAO $object) {
@@ -251,5 +276,4 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   protected function supportsSearch() {
     return false;
   }
-
 }

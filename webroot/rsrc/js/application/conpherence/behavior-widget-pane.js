@@ -1,8 +1,11 @@
 /**
- * @provides javelin-behavior-conpherence-widget-pane
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
+ *           javelin-workflow
+ *           javelin-util
+ *           phabricator-notification
+ * @provides javelin-behavior-conpherence-widget-pane
  */
 
 JX.behavior('conpherence-widget-pane', function(config) {
@@ -34,6 +37,31 @@ JX.behavior('conpherence-widget-pane', function(config) {
         }
       }
     }
+  );
+
+  var settingsRoot = JX.$(config.settings_widget);
+
+  var onsubmitSettings = function (e) {
+    e.kill();
+    var form = JX.DOM.find(settingsRoot, 'form');
+    var button = JX.DOM.find(form, 'button');
+    JX.Workflow.newFromForm(form)
+    .setHandler(JX.bind(this, function (r) {
+      new JX.Notification()
+      .setDuration(6000)
+      .setContent(r)
+      .show();
+      button.disabled = '';
+      JX.DOM.alterClass(button, 'disabled', false);
+    }))
+    .start();
+  };
+
+  JX.DOM.listen(
+    settingsRoot,
+    ['click'],
+    'notifications-update',
+    onsubmitSettings
   );
 
 });

@@ -8,6 +8,15 @@ final class ConpherenceWidgetController extends
 
   private $conpherenceID;
   private $conpherence;
+  private $userPreferences;
+
+  public function setUserPreferences(PhabricatorUserPreferences $pref) {
+    $this->userPreferences = $pref;
+    return $this;
+  }
+  public function getUserPreferences() {
+    return $this->userPreferences;
+  }
 
   public function setConpherence(ConpherenceThread $conpherence) {
     $this->conpherence = $conpherence;
@@ -44,6 +53,8 @@ final class ConpherenceWidgetController extends
       ->executeOne();
     $this->setConpherence($conpherence);
 
+    $this->setUserPreferences($user->loadPreferences());
+
     $widgets = $this->renderWidgetPaneContent();
     $content = $widgets;
     return id(new AphrontAjaxResponse())->setContent($content);
@@ -57,8 +68,8 @@ final class ConpherenceWidgetController extends
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
-        'form_pane' => 'conpherence-form',
         'file_widget' => 'widgets-files',
+        'settings_widget' => 'widgets-settings',
         'widgetRegistery' => array(
           'widgets-conpherence-list' => $cant_toggle,
           'widgets-conversation' => $cant_toggle,
@@ -201,7 +212,63 @@ final class ConpherenceWidgetController extends
   }
 
   private function renderSettingsWidgetPaneContent() {
-    return 'TODO - settings';
+    $user = $this->getRequest()->getUser();
+    $conpherence = $this->getConpherence();
+    $participants = $conpherence->getParticipants();
+    $participant = $participants[$user->getPHID()];
+    $default = ConpherenceSettings::EMAIL_ALWAYS;
+    $preference = $this->getUserPreferences();
+    if ($preference) {
+      $default = $preference->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_CONPH_NOTIFICATIONS,
+        ConpherenceSettings::EMAIL_ALWAYS);
+    }
+    $settings = $participant->getSettings();
+    $notifications = idx(
+      $settings,
+      'notifications',
+      $default);
+    $options = id(new AphrontFormRadioButtonControl())
+      ->addButton(
+        ConpherenceSettings::EMAIL_ALWAYS,
+        ConpherenceSettings::getHumanString(
+          ConpherenceSettings::EMAIL_ALWAYS),
+        '')
+      ->addButton(
+        ConpherenceSettings::NOTIFICATIONS_ONLY,
+        ConpherenceSettings::getHumanString(
+          ConpherenceSettings::NOTIFICATIONS_ONLY),
+        '')
+      ->setName('notifications')
+      ->setValue($notifications);
+
+    $href = $this->getApplicationURI(
+      'update/'.$conpherence->getID().'/');
+    $layout = array(
+      $options,
+      phutil_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => 'action',
+          'value' => 'notifications'
+        )),
+      javelin_tag(
+        'button',
+        array(
+          'sigil' => 'notifications-update',
+          'class' => 'notifications-update grey',
+        ),
+        pht('Update Notifications'))
+    );
+
+    return phabricator_form(
+      $user,
+      array(
+        'method' => 'POST',
+        'action' => $href,
+      ),
+      $layout);
   }
 
   private function renderCalendarWidgetPaneContent() {
