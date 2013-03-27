@@ -60,6 +60,17 @@ final class ConpherenceUpdateController extends
             $conpherence,
             $message);
           break;
+        case 'notifications':
+          $notifications = $request->getStr('notifications');
+          $participant = $conpherence->getParticipant($user->getPHID());
+          $participant->setSettings(array('notifications' => $notifications));
+          $participant->save();
+          $result = pht(
+            'Updated notification settings to "%s".',
+            ConpherenceSettings::getHumanString($notifications));
+          return id(new AphrontAjaxResponse())
+            ->setContent($result);
+          break;
         case 'metadata':
           $xactions = array();
           $top = $request->getInt('image_y');
@@ -257,11 +268,6 @@ final class ConpherenceUpdateController extends
     $selected = true;
     $nav_item = $this->buildConpherenceMenuItem(
       $conpherence,
-      '-nav-item',
-      $selected);
-    $menu_item = $this->buildConpherenceMenuItem(
-      $conpherence,
-      '-menu-item',
       $selected);
 
     $header = $this->buildHeaderPaneContent($conpherence);
@@ -275,7 +281,6 @@ final class ConpherenceUpdateController extends
     $content = array(
       'transactions' => $rendered_transactions,
       'latest_transaction_id' => $new_latest_transaction_id,
-      'menu_item' => $menu_item->render(),
       'nav_item' => $nav_item->render(),
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => $header,

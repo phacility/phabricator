@@ -10,7 +10,7 @@
   padding: 20px;
 }
 
-.device-desktop .phabricator-object-list-flush {
+.phabricator-object-item-list-view.phabricator-object-list-flush {
   padding: 0;
 }
 
@@ -31,6 +31,9 @@
   border-width: 1px 1px 1px 0;
   overflow: hidden;
   position: relative;
+}
+
+.phabricator-object-list-cards .phabricator-object-item-frame {
   border-bottom-right-radius: 3px;
   border-top-right-radius: 3px;
 }
@@ -54,10 +57,6 @@
 .phabricator-object-item-objname {
   color: #222222;
   cursor: text;
-}
-
-.phabricator-object-item-with-attrs .phabricator-object-item-name {
-  padding-bottom: 2px;
 }
 
 .phabricator-object-item-content {
@@ -136,7 +135,7 @@
 }
 
 .phabricator-object-item-with-handle-icons .phabricator-object-item-icons {
-  padding-bottom: 34px;
+  padding-bottom: 30px;
 }
 
 .phabricator-object-item-icons {
@@ -360,11 +359,6 @@
   padding: 6px 0;
 }
 
-.phabricator-object-list-cards .phabricator-object-item-with-attrs
-  .phabricator-object-item-link {
-  padding: 4px 0;
-}
-
 .phabricator-object-list-cards .phabricator-object-item-selected {
   background: #bfdcff;
 }
@@ -372,8 +366,4 @@
 .phabricator-object-list-cards .phabricator-object-item-selected
   .phabricator-object-item-frame {
   border-color: #99ccff;
-}
-
-.phabricator-object-list-cards .phabricator-object-item-attributes {
-  padding-bottom: 4px;
 }

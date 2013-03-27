@@ -36,13 +36,9 @@ final class PhluxListController extends PhluxController {
         ->setName($title)
         ->setHref($this->getApplicationURI()));
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
         $view,
         $pager,
       ),

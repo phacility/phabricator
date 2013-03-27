@@ -131,7 +131,7 @@ final class PhabricatorPeopleProfileController
       ->setDescription($profile->getTitle());
 
     if ($user->getIsDisabled()) {
-      $header->setStatus('Disabled');
+      $header->setStatus(pht('Disabled'));
     } else {
       $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
         array($user->getPHID()));
@@ -180,33 +180,38 @@ final class PhabricatorPeopleProfileController
 
     $content = hsprintf(
       '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Basic Information</h1>
+        <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
-              <th>PHID</th>
+              <th>%s</th>
               <td>%s</td>
             </tr>
             <tr>
-              <th>User Since</th>
+              <th>%s</th>
               <td>%s</td>
             </tr>
           </table>
         </div>
       </div>'.
       '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Flavor Text</h1>
+        <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
-              <th>Blurb</th>
+              <th>%s</th>
               <td>%s</td>
             </tr>
           </table>
         </div>
       </div>',
+      pht('Basic Information'),
+      pht('PHID'),
       $user->getPHID(),
+      pht('User Since'),
       phabricator_datetime($user->getDateCreated(), $viewer),
+      pht('Flavor Text'),
+      pht('Blurb'),
       $blurb);
 
     return $content;
@@ -230,9 +235,10 @@ final class PhabricatorPeopleProfileController
 
     return hsprintf(
       '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Activity Feed</h1>
+        <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">%s</div>
       </div>',
+      pht('Activity Feed'),
       $view->render());
   }
 }

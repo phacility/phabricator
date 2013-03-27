@@ -65,13 +65,24 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     $panel = new AphrontPanelView();
     $panel->setHeader(pht('Create New Diff'));
+    $panel->setNoBackground();
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Create Diff'))
+        ->setHref('/differential/diff/create/'));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $panel
+      ),
       array(
         'title' => pht('Create Diff'),
+        'device' => true,
       ));
   }
 

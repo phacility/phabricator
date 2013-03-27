@@ -146,9 +146,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       $handles = $this->loadViewerHandles($phids);
 
       foreach ($views as $view) {
-        if (empty($view['special'])) {
-          $view['view']->setHandles($handles);
-        }
+        $view['view']->setHandles($handles);
         $panel = new AphrontPanelView();
         $panel->setHeader($view['title']);
         $panel->appendChild($view['view']);
@@ -459,29 +457,6 @@ final class DifferentialRevisionListController extends DifferentialController {
           'title' => pht('Action Required'),
           'view'  => $view,
         );
-
-        // Flags are sort of private, so only show the flag panel if you're
-        // looking at your own requests.
-        if (in_array($user->getPHID(), $user_phids)) {
-          $flags = id(new PhabricatorFlagQuery())
-            ->setViewer($user)
-            ->withOwnerPHIDs(array($user->getPHID()))
-            ->withTypes(array(PhabricatorPHIDConstants::PHID_TYPE_DREV))
-            ->needHandles(true)
-            ->execute();
-
-          if ($flags) {
-            $view = id(new PhabricatorFlagListView())
-              ->setFlags($flags)
-              ->setUser($user);
-
-            $views[] = array(
-              'title'   => pht('Flagged Revisions'),
-              'view'    => $view,
-              'special' => true,
-            );
-          }
-        }
 
         $view = id(clone $template)
           ->setRevisions($waiting)

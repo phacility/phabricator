@@ -148,9 +148,9 @@ abstract class PhabricatorController extends AphrontController {
     $page = $this->buildStandardPageView();
 
     $application = $this->getCurrentApplication();
+    $page->setTitle(idx($options, 'title'));
     if ($application) {
       $page->setApplicationName($application->getName());
-      $page->setTitle(idx($options, 'title'));
       if ($application->getTitleGlyph()) {
         $page->setGlyph($application->getTitleGlyph());
       }

@@ -46,7 +46,6 @@ final class DifferentialRevisionStatsView extends AphrontView {
 
     $dates = array();
     $counts = array();
-    $lines = array();
     $days_with_diffs = array();
     $count_active = array();
     $response_time = array();
@@ -62,7 +61,6 @@ final class DifferentialRevisionStatsView extends AphrontView {
              ) as $age) {
       $dates[$age] = strtotime($age . ' ago 23:59:59');
       $counts[$age] = 0;
-      $lines[$age] = 0;
       $count_active[$age] = 0;
       $response_time[$age] = array();
     }
@@ -96,9 +94,6 @@ final class DifferentialRevisionStatsView extends AphrontView {
         }
 
         if (!$revision_seen) {
-          if ($rev) {
-            $lines[$age] += $rev->getLineCount();
-          }
           $counts[$age]++;
           if (!$old_daycount) {
             $count_active[$age]++;
@@ -125,13 +120,9 @@ final class DifferentialRevisionStatsView extends AphrontView {
 
       $row_array[$age] = array(
         pht('Revisions per week') => number_format($counts[$age] / $weeks, 2),
-        pht('Lines per week') => number_format($lines[$age] / $weeks, 1),
         pht('Active days per week') =>
           number_format($count_active[$age] / $weeks, 1),
         pht('Revisions') => number_format($counts[$age]),
-        pht('Lines') => number_format($lines[$age]),
-        pht('Lines per diff') => number_format($lines[$age] /
-                                          ($counts[$age] + 0.0001)),
         pht('Active days') => number_format($count_active[$age]),
       );
 

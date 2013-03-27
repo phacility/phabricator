@@ -26,6 +26,11 @@
   width: 100%;
 }
 
+.conpherence-widget-pane .aphront-form-inset {
+  border: 0;
+  background: url('/rsrc/image/texture/dust_background.jpg');
+}
+
 .conpherence-widget-pane .widgets-header {
   background-color: #d8dce2;
   box-shadow: 0px 2px 2px rgba(0,0,0,0.15);
@@ -185,4 +190,9 @@
 
 .conpherence-widget-pane .phabricator-remarkup-embed-layout-link {
   padding-bottom: 1px;
+}
+
+/* settings widget */
+.conpherence-widget-pane .notifications-update {
+  margin: 2px 0px 0px 8px;
 }

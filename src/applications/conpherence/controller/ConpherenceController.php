@@ -113,14 +113,12 @@ abstract class ConpherenceController extends PhabricatorController {
       $nav = $this->addConpherencesToNav(
         $unread_conpherences,
         $nav,
-        false,
-        $for_application);
+        false);
       $nav->addLabel(pht('Read'));
       $nav = $this->addConpherencesToNav(
         $read_conpherences,
         $nav,
-        true,
-        $for_application);
+        true);
       $nav->selectFilter($filter);
     } else {
       $nav->addFilter(
@@ -135,11 +133,9 @@ abstract class ConpherenceController extends PhabricatorController {
   private function addConpherencesToNav(
     array $conpherences,
     AphrontSideNavFilterView $nav,
-    $read = false,
-    $for_application = false) {
+    $read = false) {
 
     $user = $this->getRequest()->getUser();
-    $id_suffix = $for_application ? '-menu-item' : '-nav-item';
     foreach ($conpherences as $conpherence) {
       $selected = false;
       if ($this->getSelectedConpherencePHID() == $conpherence->getPHID()) {
@@ -147,7 +143,6 @@ abstract class ConpherenceController extends PhabricatorController {
      }
       $item = $this->buildConpherenceMenuItem(
         $conpherence,
-        $id_suffix,
         $selected);
 
       $nav->addCustomBlock($item->render());
@@ -192,7 +187,6 @@ abstract class ConpherenceController extends PhabricatorController {
 
   protected function buildConpherenceMenuItem(
     $conpherence,
-    $id_suffix,
     $selected) {
 
     $user = $this->getRequest()->getUser();
@@ -216,7 +210,7 @@ abstract class ConpherenceController extends PhabricatorController {
       ->setImageURI($image)
       ->setMessageText($snippet)
       ->setUnreadCount($unread_count)
-      ->setID($conpherence->getPHID().$id_suffix)
+      ->setID($conpherence->getPHID().'-nav-item')
       ->addSigil('conpherence-menu-click')
       ->setMetadata(array('id' => $conpherence->getID()));
 

@@ -48,12 +48,8 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     $side_nav = $this->buildSideNavView();
     $side_nav->selectFilter($this->getFilter());
 
-    $header_view = id(new PhabricatorHeaderView())
-      ->setHeader($header);
-
     $side_nav->appendChild(
       array(
-        $header_view,
         $file_list,
         $pager,
         new PhabricatorGlobalUploadTargetView(),
@@ -72,6 +68,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
       array(
         'title' => 'Files',
         'device' => true,
+        'dust' => true,
       ));
   }
 

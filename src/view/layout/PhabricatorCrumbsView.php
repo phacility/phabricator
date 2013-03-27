@@ -37,6 +37,13 @@ final class PhabricatorCrumbsView extends AphrontView {
             ),
             '');
         }
+        $name = phutil_tag(
+          'span',
+            array(
+              'class' => 'phabricator-crumbs-action-name'
+            ),
+          $action->getName()
+        );
         $actions[] = javelin_tag(
           'a',
           array(
@@ -46,7 +53,7 @@ final class PhabricatorCrumbsView extends AphrontView {
           ),
           array(
             $icon,
-            $action->getName(),
+            $name,
           ));
       }
 

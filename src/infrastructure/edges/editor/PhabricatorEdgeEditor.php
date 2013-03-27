@@ -33,7 +33,8 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
   /**
    * Add a new edge (possibly also adding its inverse). Changes take effect when
    * you call @{method:save}. If the edge already exists, it will not be
-   * overwritten. Removals queued with @{method:removeEdge} are executed before
+   * overwritten, but if data is attached to the edge it will be updated.
+   * Removals queued with @{method:removeEdge} are executed before
    * adds, so the effect of removing and adding the same edge is to overwrite
    * any existing edge.
    *
@@ -280,8 +281,8 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       foreach (array_chunk($sql, 256) as $chunk) {
         queryfx(
           $conn_w,
-          'INSERT IGNORE INTO %T (src, type, dst, dateCreated, seq, dataID)
-            VALUES %Q',
+          'INSERT INTO %T (src, type, dst, dateCreated, seq, dataID)
+            VALUES %Q ON DUPLICATE KEY UPDATE dataID = VALUES(dataID)',
           PhabricatorEdgeConfig::TABLE_NAME_EDGE,
           implode(', ', $chunk));
       }

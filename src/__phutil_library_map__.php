@@ -240,6 +240,7 @@ phutil_register_library_map(array(
     'ConpherencePeopleMenuEventListener' => 'applications/conpherence/events/ConpherencePeopleMenuEventListener.php',
     'ConpherencePontificateControl' => 'applications/conpherence/view/ConpherencePontificateControl.php',
     'ConpherenceReplyHandler' => 'applications/conpherence/mail/ConpherenceReplyHandler.php',
+    'ConpherenceSettings' => 'applications/conpherence/constants/ConpherenceSettings.php',
     'ConpherenceThread' => 'applications/conpherence/storage/ConpherenceThread.php',
     'ConpherenceThreadQuery' => 'applications/conpherence/query/ConpherenceThreadQuery.php',
     'ConpherenceTransaction' => 'applications/conpherence/storage/ConpherenceTransaction.php',
@@ -1301,6 +1302,7 @@ phutil_register_library_map(array(
     'PhabricatorSettingsPanel' => 'applications/settings/panel/PhabricatorSettingsPanel.php',
     'PhabricatorSettingsPanelAccount' => 'applications/settings/panel/PhabricatorSettingsPanelAccount.php',
     'PhabricatorSettingsPanelConduit' => 'applications/settings/panel/PhabricatorSettingsPanelConduit.php',
+    'PhabricatorSettingsPanelConpherencePreferences' => 'applications/settings/panel/PhabricatorSettingsPanelConpherencePreferences.php',
     'PhabricatorSettingsPanelDiffPreferences' => 'applications/settings/panel/PhabricatorSettingsPanelDiffPreferences.php',
     'PhabricatorSettingsPanelDisplayPreferences' => 'applications/settings/panel/PhabricatorSettingsPanelDisplayPreferences.php',
     'PhabricatorSettingsPanelEmailAddresses' => 'applications/settings/panel/PhabricatorSettingsPanelEmailAddresses.php',
@@ -1907,6 +1909,7 @@ phutil_register_library_map(array(
     'ConpherencePeopleMenuEventListener' => 'PhutilEventListener',
     'ConpherencePontificateControl' => 'AphrontFormControl',
     'ConpherenceReplyHandler' => 'PhabricatorMailReplyHandler',
+    'ConpherenceSettings' => 'ConpherenceConstants',
     'ConpherenceThread' =>
     array(
       0 => 'ConpherenceDAO',
@@ -2907,6 +2910,7 @@ phutil_register_library_map(array(
     'PhabricatorSettingsMainController' => 'PhabricatorController',
     'PhabricatorSettingsPanelAccount' => 'PhabricatorSettingsPanel',
     'PhabricatorSettingsPanelConduit' => 'PhabricatorSettingsPanel',
+    'PhabricatorSettingsPanelConpherencePreferences' => 'PhabricatorSettingsPanel',
     'PhabricatorSettingsPanelDiffPreferences' => 'PhabricatorSettingsPanel',
     'PhabricatorSettingsPanelDisplayPreferences' => 'PhabricatorSettingsPanel',
     'PhabricatorSettingsPanelEmailAddresses' => 'PhabricatorSettingsPanel',

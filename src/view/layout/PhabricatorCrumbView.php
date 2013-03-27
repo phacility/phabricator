@@ -67,6 +67,8 @@ final class PhabricatorCrumbView extends AphrontView {
           'class' => 'sprite-menu phabricator-crumb-divider',
         ),
         '');
+    } else {
+      $classes[] = 'phabricator-last-crumb';
     }
 
     return phutil_tag(
