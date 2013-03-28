@@ -95,6 +95,40 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setNoDataString(
         pht('No payment methods associated with this account.'));
 
+    $methods = id(new PhortunePaymentMethodQuery())
+      ->setViewer($user)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->withStatus(PhortunePaymentMethodQuery::STATUS_OPEN)
+      ->execute();
+
+    if ($methods) {
+      $this->loadHandles(mpull($methods, 'getAuthorPHID'));
+    }
+
+    foreach ($methods as $method) {
+      $item = new PhabricatorObjectItemView();
+      $item->setHeader($method->getName());
+
+      switch ($method->getStatus()) {
+        case PhortunePaymentMethod::STATUS_ACTIVE:
+          $item->addAttribute(pht('Active'));
+          $item->setBarColor('green');
+          break;
+      }
+
+      $item->addAttribute(
+        pht(
+          'Added %s by %s',
+          phabricator_datetime($method->getDateCreated(), $user),
+          $this->getHandle($method->getAuthorPHID())->renderLink()));
+
+      if ($method->getExpiresEpoch() < time() + (60 * 60 * 24 * 30)) {
+        $item->addAttribute(pht('Expires Soon!'));
+      }
+
+      $list->addItem($item);
+    }
+
     return array(
       $header,
       $actions,

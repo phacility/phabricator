@@ -1206,6 +1206,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130322.phortune.sql'),
       ),
+      '20130323.phortunepayment.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130323.phortunepayment.sql'),
+      ),
     );
   }
 

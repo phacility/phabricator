@@ -7,9 +7,15 @@
 final class PhortunePaymentMethod extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
+  const STATUS_ACTIVE     = 'payment:active';
+  const STATUS_FAILED     = 'payment:failed';
+  const STATUS_REMOVED    = 'payment:removed';
+
   protected $name;
+  protected $status;
   protected $accountPHID;
   protected $authorPHID;
+  protected $expiresEpoch;
   protected $metadata;
 
   private $account;

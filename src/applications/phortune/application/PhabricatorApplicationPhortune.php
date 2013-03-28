@@ -32,16 +32,13 @@ final class PhabricatorApplicationPhortune extends PhabricatorApplication {
         '' => 'PhortuneLandingController',
         '(?P<accountID>\d+)/' => array(
           '' => 'PhortuneAccountViewController',
+          'paymentmethod/' => array(
+            'edit/' => 'PhortunePaymentMethodEditController',
+          ),
         ),
-
         'account/' => array(
           '' => 'PhortuneAccountListController',
           'edit/(?:(?P<id>\d+)/)?' => 'PhortuneAccountEditController',
-        ),
-        'paymentmethod/' => array(
-          '' => 'PhortunePaymentMethodListController',
-          'view/(?P<id>\d+)/' => 'PhortunePaymentMethodViewController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhortunePaymentMethodEditController',
         ),
         'stripe/' => array(
           'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
