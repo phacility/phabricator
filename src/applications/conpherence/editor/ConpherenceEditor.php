@@ -192,7 +192,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         return $v;
       case ConpherenceTransactionType::TYPE_FILES:
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-        return $this->mergePHIDTransactions($u, $v);
+        return $this->mergePHIDOrEdgeTransactions($u, $v);
     }
 
     return parent::mergeTransactions($u, $v);

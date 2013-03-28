@@ -101,6 +101,26 @@ abstract class PhabricatorApplicationTransactionEditor
         return $object->getViewPolicy();
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return $object->getEditPolicy();
+      case PhabricatorTransactions::TYPE_EDGE:
+        $edge_type = $xaction->getMetadataValue('edge:type');
+        if (!$edge_type) {
+          throw new Exception("Edge transaction has no 'edge:type'!");
+        }
+
+        $old_edges = array();
+        if ($object->getPHID()) {
+          $edge_src = $object->getPHID();
+
+          $old_edges = id(new PhabricatorEdgeQuery())
+            ->setViewer($this->getActor())
+            ->withSourcePHIDs(array($edge_src))
+            ->withEdgeTypes(array($edge_type))
+            ->needEdgeData(true)
+            ->execute();
+
+          $old_edges = $old_edges[$edge_src][$edge_type];
+        }
+        return $old_edges;
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -115,6 +135,8 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return $xaction->getNewValue();
+      case PhabricatorTransactions::TYPE_EDGE:
+        return $this->getEdgeTransactionNewValue($xaction);
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
     }
@@ -180,7 +202,46 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $subeditor->save();
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+        $src = $object->getPHID();
+        $type = $xaction->getMetadataValue('edge:type');
+
+        foreach ($new as $dst_phid => $edge) {
+          $new[$dst_phid]['src'] = $src;
+        }
+
+        $editor = id(new PhabricatorEdgeEditor())
+          ->setActor($this->getActor());
+
+        foreach ($old as $dst_phid => $edge) {
+          if (!empty($new[$dst_phid])) {
+            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
+              continue;
+            }
+          }
+          $editor->removeEdge($src, $type, $dst_phid);
+        }
+
+        foreach ($new as $dst_phid => $edge) {
+          if (!empty($old[$dst_phid])) {
+            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
+              continue;
+            }
+          }
+
+          $data = array(
+            'data' => $edge['data'],
+          );
+
+          $editor->addEdge($src, $type, $dst_phid, $data);
+        }
+
+        $editor->save();
+        break;
     }
+
     return $this->applyCustomExternalTransaction($object, $xaction);
   }
 
@@ -460,7 +521,14 @@ abstract class PhabricatorApplicationTransactionEditor
 
     switch ($type) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        return $this->mergePHIDTransactions($u, $v);
+        return $this->mergePHIDOrEdgeTransactions($u, $v);
+      case PhabricatorTransactions::TYPE_EDGE:
+        $u_type = $u->getMetadataValue('edge:type');
+        $v_type = $v->getMetadataValue('edge:type');
+        if ($u_type == $v_type) {
+          return $this->mergePHIDOrEdgeTransactions($u, $v);
+        }
+        return null;
     }
 
     // By default, do not merge the transactions.
@@ -516,7 +584,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return array_values($result);
   }
 
-  protected function mergePHIDTransactions(
+  protected function mergePHIDOrEdgeTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
 
@@ -528,7 +596,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return $u;
   }
-
 
   protected function getPHIDTransactionNewValue(
     PhabricatorApplicationTransaction $xaction) {
@@ -576,6 +643,110 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return array_values($result);
+  }
+
+  protected function getEdgeTransactionNewValue(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $new = $xaction->getNewValue();
+    $new_add = idx($new, '+', array());
+    unset($new['+']);
+    $new_rem = idx($new, '-', array());
+    unset($new['-']);
+    $new_set = idx($new, '=', null);
+    unset($new['=']);
+
+    if ($new) {
+      throw new Exception(
+        "Invalid 'new' value for Edge transaction. Value should contain only ".
+        "keys '+' (add edges), '-' (remove edges) and '=' (set edges).");
+    }
+
+    $old = $xaction->getOldValue();
+
+    $lists = array($new_set, $new_add, $new_rem);
+    foreach ($lists as $list) {
+      $this->checkEdgeList($list);
+    }
+
+    $result = array();
+    foreach ($old as $dst_phid => $edge) {
+      if ($new_set !== null && empty($new_set[$dst_phid])) {
+        continue;
+      }
+      $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
+        $xaction,
+        $edge);
+    }
+
+    if ($new_set !== null) {
+      foreach ($new_set as $dst_phid => $edge) {
+        $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
+          $xaction,
+          $edge);
+      }
+    }
+
+    foreach ($new_add as $dst_phid => $edge) {
+      $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
+        $xaction,
+        $edge);
+    }
+
+    foreach ($new_rem as $dst_phid => $edge) {
+      unset($result[$dst_phid]);
+    }
+
+    return $result;
+  }
+
+  private function checkEdgeList($list) {
+    if (!$list) {
+      return;
+    }
+    foreach ($list as $key => $item) {
+      if (phid_get_type($key) === PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
+        throw new Exception(
+          "Edge transactions must have destination PHIDs as in edge ".
+          "lists (found key '{$key}').");
+      }
+      if (!is_array($item) && $item !== $key) {
+        throw new Exception(
+          "Edge transactions must have PHIDs or edge specs as values ".
+          "(found value '{$item}').");
+      }
+    }
+  }
+
+  protected function normalizeEdgeTransactionValue(
+    PhabricatorApplicationTransaction $xaction,
+    $edge) {
+
+    if (!is_array($edge)) {
+      $edge = array(
+        'dst' => $edge,
+      );
+    }
+
+    $edge_type = $xaction->getMetadataValue('edge:type');
+
+    if (empty($edge['type'])) {
+      $edge['type'] = $edge_type;
+    } else {
+      if ($edge['type'] != $edge_type) {
+        $this_type = $edge['type'];
+        throw new Exception(
+          "Edge transaction includes edge of type '{$this_type}', but ".
+          "transaction is of type '{$edge_type}'. Each edge transaction must ".
+          "alter edges of only one type.");
+      }
+    }
+
+    if (!isset($edge['data'])) {
+      $edge['data'] = null;
+    }
+
+    return $edge;
   }
 
   protected function sortTransactions(array $xactions) {
