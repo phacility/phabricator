@@ -104,12 +104,6 @@ class AphrontDefaultApplicationConfiguration
         'clear/' => 'PhabricatorNotificationClearController',
       ),
 
-      '/phortune/' => array(
-        'stripe/' => array(
-          'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
-        ),
-      ),
-
       '/debug/' => 'PhabricatorDebugController',
     );
   }

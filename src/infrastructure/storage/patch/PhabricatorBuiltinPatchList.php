@@ -179,6 +179,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'phlux',
       ),
+      'db.phortune' => array(
+        'type' => 'db',
+        'name' => 'phortune',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1197,6 +1201,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130310.xactionmeta.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130310.xactionmeta.sql'),
+      ),
+      '20130322.phortune.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130322.phortune.sql'),
       ),
     );
   }

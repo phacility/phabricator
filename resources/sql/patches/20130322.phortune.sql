@@ -1,0 +1,46 @@
+CREATE TABLE {$NAMESPACE}_phortune.phortune_account (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  name VARCHAR(255) NOT NULL,
+  balanceInCents BIGINT NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (phid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE {$NAMESPACE}_phortune.phortune_accounttransaction (
+  id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  phid VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  authorPHID VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  objectPHID VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  viewPolicy VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  editPolicy VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  commentPHID VARCHAR(64) COLLATE utf8_bin,
+  commentVersion INT UNSIGNED NOT NULL,
+  transactionType VARCHAR(32) NOT NULL COLLATE utf8_bin,
+  oldValue LONGTEXT NOT NULL COLLATE utf8_bin,
+  newValue LONGTEXT NOT NULL COLLATE utf8_bin,
+  contentSource LONGTEXT NOT NULL COLLATE utf8_bin,
+  metadata LONGTEXT NOT NULL COLLATE utf8_bin,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (phid),
+  KEY `key_object` (objectPHID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE {$NAMESPACE}_phortune.edge (
+  src VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  type INT UNSIGNED NOT NULL COLLATE utf8_bin,
+  dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
+  dateCreated INT UNSIGNED NOT NULL,
+  seq INT UNSIGNED NOT NULL,
+  dataID INT UNSIGNED,
+  PRIMARY KEY (src, type, dst),
+  KEY (src, type, dateCreated, seq)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE {$NAMESPACE}_phortune.edgedata (
+  id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  data LONGTEXT NOT NULL COLLATE utf8_bin
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
