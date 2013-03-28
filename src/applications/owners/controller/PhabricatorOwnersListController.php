@@ -108,6 +108,25 @@ final class PhabricatorOwnersListController
         $header = 'Owned Packages';
         $nodata = 'No owned packages';
         break;
+      case 'projects':
+        $projects = id(new PhabricatorProjectQuery())
+          ->setViewer($user)
+          ->withMemberPHIDs(array($user->getPHID()))
+          ->withStatus(PhabricatorProjectQuery::STATUS_ANY)
+          ->execute();
+        $owner_phids = mpull($projects, 'getPHID');
+        $data = queryfx_all(
+          $package->establishConnection('r'),
+          'SELECT p.* FROM %T p JOIN %T o ON p.id = o.packageID
+            WHERE o.userPHID IN (%Ls) GROUP BY p.id',
+          $package->getTableName(),
+          $owner->getTableName(),
+          $owner_phids);
+        $packages = $package->loadAllFromArray($data);
+
+        $header = 'Owned Packages';
+        $nodata = 'No owned packages';
+        break;
       case 'all':
         $packages = $package->loadAll();
 
