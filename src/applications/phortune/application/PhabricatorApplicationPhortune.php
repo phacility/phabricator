@@ -43,6 +43,11 @@ final class PhabricatorApplicationPhortune extends PhabricatorApplication {
         'stripe/' => array(
           'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
         ),
+        'product/' => array(
+          '' => 'PhortuneProductListController',
+          'view/(?P<id>\d+)/' => 'PhortuneProductViewController',
+          'edit/(?:(?P<id>\d+)/)?' => 'PhortuneProductEditController',
+        ),
       ),
     );
   }

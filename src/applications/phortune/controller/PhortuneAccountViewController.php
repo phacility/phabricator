@@ -54,6 +54,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     $properties->addProperty(pht('Balance'), $account->getBalanceInCents());
 
     $payment_methods = $this->buildPaymentMethodsSection($account);
+    $purchase_history = $this->buildPurchaseHistorySection($account);
     $account_history = $this->buildAccountHistorySection($account);
 
     return $this->buildApplicationPage(
@@ -63,6 +64,7 @@ final class PhortuneAccountViewController extends PhortuneController {
         $actions,
         $properties,
         $payment_methods,
+        $purchase_history,
         $account_history,
       ),
       array(
@@ -133,6 +135,19 @@ final class PhortuneAccountViewController extends PhortuneController {
       $header,
       $actions,
       $list,
+    );
+  }
+
+  private function buildPurchaseHistorySection(PhortuneAccount $account) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Purchase History'));
+
+    return array(
+      $header,
+
     );
   }
 

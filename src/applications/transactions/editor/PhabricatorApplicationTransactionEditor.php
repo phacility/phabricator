@@ -262,6 +262,15 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this;
   }
 
+  public function setContentSourceFromRequest(AphrontRequest $request) {
+    return $this->setContentSource(
+      PhabricatorContentSource::newForSource(
+        PhabricatorContentSource::SOURCE_WEB,
+        array(
+          'ip' => $request->getRemoteAddr(),
+        )));
+  }
+
   public function getContentSource() {
     return $this->contentSource;
   }
