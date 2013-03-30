@@ -183,6 +183,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'phortune',
       ),
+      'db.phrequent' => array(
+        'type' => 'db',
+        'name' => 'phrequent',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1213,6 +1217,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130324.phortuneproduct.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130324.phortuneproduct.sql'),
+      ),
+      '20130330.phrequent.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130330.phrequent.sql'),
       ),
     );
   }
