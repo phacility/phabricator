@@ -45,26 +45,15 @@ final class PhabricatorApplicationPhrequent extends PhabricatorApplication {
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 
-    // TODO: Show number of timers that are currently
-    // running for a user.
+    // Show number of objects that are currently
+    // being tracked for a user.
 
-    /*
-
-    $query = id(new ManiphestTaskQuery())
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withOwners(array($user->getPHID()))
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
-
-    $count = $query->getRowCount();
-    $type = PhabricatorApplicationStatusView::TYPE_WARNING;
+    $count = PhrequentUserTimeQuery::getUserTotalObjectsTracked($user);
+    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Assigned Task(s)', $count))
+      ->setText(pht('%d Object(s) Tracked', $count))
       ->setCount($count);
-
-    */
 
     return $status;
   }

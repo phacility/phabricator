@@ -79,6 +79,22 @@ final class PhrequentUserTimeQuery extends PhabricatorOffsetPagedQuery {
 
 /* -(  Helper Functions ) --------------------------------------------------- */
 
+  public static function getUserTotalObjectsTracked(
+    PhabricatorUser $user) {
+
+    $usertime_dao = new PhrequentUserTime();
+    $conn = $usertime_dao->establishConnection('r');
+
+    $count = queryfx_one(
+      $conn,
+      'SELECT COUNT(usertime.id) N FROM %T usertime '.
+      'WHERE usertime.userPHID = %s '.
+      'AND usertime.dateEnded IS NULL',
+      $usertime_dao->getTableName(),
+      $user->getPHID());
+    return $count['N'];
+  }
+
   public static function isUserTrackingObject(
     PhabricatorUser $user,
     $phid) {
