@@ -80,7 +80,7 @@ final class DifferentialManiphestTasksFieldSpecification
   }
 
   public function shouldAppearOnCommitMessageTemplate() {
-    return PhabricatorEnv::getEnvConfig('maniphest.enabled');
+    return false;
   }
 
   public function shouldAppearOnCommitMessage() {
