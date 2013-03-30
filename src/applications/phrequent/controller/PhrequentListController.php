@@ -66,7 +66,7 @@ final class PhrequentListController extends PhrequentController {
 
       if ($usertime->getDateEnded() !== null) {
         $time_spent = $usertime->getDateEnded() - $usertime->getDateStarted();
-        $time_ended = phabricator_date($usertime->getDateEnded(), $user);
+        $time_ended = phabricator_datetime($usertime->getDateEnded(), $user);
       } else {
         $time_spent = time() - $usertime->getDateStarted();
         $time_ended = phutil_tag(
@@ -101,7 +101,7 @@ final class PhrequentListController extends PhrequentController {
             'href' => $usertime_user->getURI()
           ),
           $usertime_user->getFullName()),
-        phabricator_date($usertime->getDateStarted(), $user),
+        phabricator_datetime($usertime->getDateStarted(), $user),
         $time_ended,
         $time_spent == 0 ? 'none' :
           phabricator_format_relative_time_detailed($time_spent),
