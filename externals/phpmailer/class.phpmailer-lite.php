@@ -532,36 +532,20 @@ class PHPMailerLite {
     } else {
       $sendmail = sprintf("%s -oi -t", escapeshellcmd($this->Sendmail));
     }
+
     if ($this->SingleTo === true) {
       foreach ($this->SingleToArray as $key => $val) {
-        if(!@$mail = popen($sendmail, 'w')) {
-          throw new phpmailerException($this->Lang('execute') . $this->Sendmail, self::STOP_CRITICAL);
-        }
-        fputs($mail, "To: " . $val . "\n");
-        fputs($mail, $header);
-        fputs($mail, $body);
-        $result = pclose($mail);
-        // implement call back function if it exists
-        $isSent = ($result == 0) ? 1 : 0;
-        $this->doCallback($isSent,$val,$this->cc,$this->bcc,$this->Subject,$body);
-        if($result != 0) {
-          throw new phpmailerException($this->Lang('execute') . $this->Sendmail, self::STOP_CRITICAL);
-        }
+        $mail = new ExecFuture('%C', $sendmail);
+        $mail->write("To: {$val}\n", true);
+        $mail->write($header.$body);
+        $mail->resolvex();
       }
     } else {
-      if(!@$mail = popen($sendmail, 'w')) {
-        throw new phpmailerException($this->Lang('execute') . $this->Sendmail, self::STOP_CRITICAL);
-      }
-      fputs($mail, $header);
-      fputs($mail, $body);
-      $result = pclose($mail);
-      // implement call back function if it exists
-      $isSent = ($result == 0) ? 1 : 0;
-      $this->doCallback($isSent,$this->to,$this->cc,$this->bcc,$this->Subject,$body);
-      if($result != 0) {
-        throw new phpmailerException($this->Lang('execute') . $this->Sendmail, self::STOP_CRITICAL);
-      }
+      $mail = new ExecFuture('%C', $sendmail);
+      $mail->write($header.$body);
+      $mail->resolvex();
     }
+
     return true;
   }
 
