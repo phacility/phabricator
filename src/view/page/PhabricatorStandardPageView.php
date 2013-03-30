@@ -114,6 +114,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phabricator-core-css');
     require_celerity_resource('phabricator-zindex-css');
     require_celerity_resource('phabricator-core-buttons-css');
+    require_celerity_resource('spacing-css');
     require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
 

@@ -3585,6 +3585,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/config/setup-issue.css',
   ),
+  'spacing-css' =>
+  array(
+    'uri' => '/res/59e4c9b1/rsrc/css/core/spacing.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/core/spacing.css',
+  ),
   'sprite-apps-css' =>
   array(
     'uri' => '/res/c53973fc/rsrc/css/sprite-apps.css',
