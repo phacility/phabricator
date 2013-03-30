@@ -101,15 +101,20 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
 
     $panel = id(new PhabricatorWorkpanelView)
           ->setCards($list)
-          ->setHeader('Business Stuff');
+          ->setHeader('Business Stuff')
+          ->setFooterAction(
+            id(new PhabricatorMenuItemView())
+              ->setName(pht('Add Task'))
+              ->setIcon('new')
+              ->setHref('/maniphest/task/create/'));
 
     $panel2 = id(new PhabricatorWorkpanelView)
           ->setCards($list2)
           ->setHeader('Under Duress');
 
     $panel3 = id(new PhabricatorWorkpanelView)
-      ->setCards($list3)
-      ->setHeader('Spicy Thai Chicken');
+          ->setCards($list3)
+          ->setHeader('Spicy Thai Chicken');
 
     $board = id(new PhabricatorWorkboardView)
           ->addPanel($panel)
@@ -122,7 +127,7 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
           ->addPanel($panel)
           ->addPanel($panel2)
           ->addPanel($panel2)
-          ->addPanel($panel2)
+          ->addPanel($panel)
           ->addPanel($panel2)
           ->addPanel($panel3);
 

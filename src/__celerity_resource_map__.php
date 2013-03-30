@@ -3396,7 +3396,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-workpanel-view-css' =>
   array(
-    'uri' => '/res/96a4b5cd/rsrc/css/layout/phabricator-workpanel-view.css',
+    'uri' => '/res/db76713b/rsrc/css/layout/phabricator-workpanel-view.css',
     'type' => 'css',
     'requires' =>
     array(

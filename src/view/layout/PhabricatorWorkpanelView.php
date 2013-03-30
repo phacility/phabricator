@@ -22,7 +22,7 @@ final class PhabricatorWorkpanelView extends AphrontView {
     return $this;
   }
 
-  public function setFooterAction($footer_action) {
+  public function setFooterAction(PhabricatorMenuItemView $footer_action) {
     $this->footerAction = $footer_action;
     return $this;
   }
@@ -32,15 +32,13 @@ final class PhabricatorWorkpanelView extends AphrontView {
 
     $footer = '';
     if ($this->footerAction) {
-      $action = $this->footerAction;
-      $footer = javelin_tag(
-        'a',
+      $footer_tag = $this->footerAction;
+      $footer = phutil_tag(
+        'div',
           array(
-            'href' => $action->getHref(),
-            'class' => 'phabricator-workpanel-footer-action',
-            'sigil' => $action->getWorkflow() ? 'workflow' : null,
+            'class' => 'phabricator-workpanel-footer-action mst ps'
           ),
-          $action->getName());
+          $footer_tag);
     }
 
     $header = phutil_tag(
