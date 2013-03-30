@@ -65,14 +65,10 @@ final class PhabricatorDirectoryMainController
     $nav->appendChild($content);
     $nav->appendChild(new PhabricatorGlobalUploadTargetView());
 
-    $title = PhabricatorEnv::getEnvConfig('phabricator.serious-business') ?
-      'Phabricator' :
-      pht('Bacon Ice Cream for Breakfast');
-
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => $title,
+        'title' => 'Phabricator',
         'device' => true,
       ));
   }
