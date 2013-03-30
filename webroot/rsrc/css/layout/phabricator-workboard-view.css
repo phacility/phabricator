@@ -1,0 +1,54 @@
+/**
+ * @provides phabricator-workboard-view-css
+ */
+
+.phabricator-workboard-view-outer {
+  padding: 8px;
+  overflow-x: scroll;
+  border-radius: 5px;
+  background: rgba(150,150,150,.1);
+  box-shadow: inset 0 0 5px rgba(0,0,0,.5);
+}
+
+.device-phone .phabricator-workboard-view-outer {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* math here is based on panel width and margins */
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-1-up {
+  width: 310px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-2-up {
+  width: 620px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-3-up {
+  width: 930px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-4-up {
+  width: 1008px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-5-up {
+  width: 1250px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-6-up {
+  width: 1500px;
+}
+
+.device-phone .phabricator-workboard-fixed .phabricator-workboard-view-inner {
+   width: 100%;
+}

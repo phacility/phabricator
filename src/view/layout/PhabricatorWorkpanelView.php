@@ -1,0 +1,78 @@
+<?php
+
+final class PhabricatorWorkpanelView extends AphrontView {
+
+  private $cards = array();
+  private $header;
+  private $headerAction;
+  private $footerAction;
+
+  public function setCards(PhabricatorObjectItemListView $cards) {
+    $this->cards[] = $cards;
+    return $this;
+  }
+
+  public function setHeader($header) {
+    $this->header = $header;
+    return $this;
+  }
+
+  public function setHeaderAction($header_action) {
+    $this->headerAction = $header_action;
+    return $this;
+  }
+
+  public function setFooterAction($footer_action) {
+    $this->footerAction = $footer_action;
+    return $this;
+  }
+
+  public function render() {
+    require_celerity_resource('phabricator-workpanel-view-css');
+
+    $footer = '';
+    if ($this->footerAction) {
+      $action = $this->footerAction;
+      $footer = javelin_tag(
+        'a',
+          array(
+            'href' => $action->getHref(),
+            'class' => 'phabricator-workpanel-footer-action',
+            'sigil' => $action->getWorkflow() ? 'workflow' : null,
+          ),
+          $action->getName());
+    }
+
+    $header = phutil_tag(
+      'div',
+        array(
+          'class' => 'phabricator-workpanel-header'
+        ),
+      $this->header);
+
+    $body = phutil_tag(
+      'div',
+        array(
+          'class' => 'phabricator-workpanel-body'
+        ),
+      $this->cards);
+
+    $view = phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-workpanel-view-inner',
+      ),
+      array(
+        $header,
+        $body,
+        $footer,
+      ));
+
+    return phutil_tag(
+      'div',
+        array(
+          'class' => 'phabricator-workpanel-view'
+        ),
+        $view);
+  }
+}
