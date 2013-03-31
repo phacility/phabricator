@@ -137,6 +137,7 @@ class AphrontDefaultApplicationConfiguration
       $response->setErrorInfo($ex->getMessage());
 
       return id(new AphrontJSONResponse())
+        ->setAddJSONShield(false)
         ->setContent($response->toDictionary());
     }
 
