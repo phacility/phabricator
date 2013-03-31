@@ -114,6 +114,17 @@ final class PhrequentUserTimeQuery extends PhabricatorOffsetPagedQuery {
     return $count['N'] > 0;
   }
 
+  public static function loadUserStack(PhabricatorUser $user) {
+    if (!$user->isLoggedIn()) {
+      return array();
+    }
+
+    return id(new PhrequentUserTime())->loadAllWhere(
+      'userPHID = %s AND dateEnded IS NULL
+        ORDER BY dateStarted DESC, id DESC',
+      $user->getPHID());
+  }
+
   public static function getTotalTimeSpentOnObject($phid) {
     $usertime_dao = new PhrequentUserTime();
     $conn = $usertime_dao->establishConnection('r');

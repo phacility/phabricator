@@ -1,7 +1,7 @@
 <?php
 
 final class PhrequentTrackController
-  extends PhabricatorApplicationsController {
+  extends PhrequentController {
 
   private $verb;
   private $phid;
@@ -25,6 +25,7 @@ final class PhrequentTrackController
     } else if ($this->isStoppingTracking()) {
       $this->stopTracking($user, $this->phid);
     }
+
     return id(new AphrontRedirectResponse());
   }
 

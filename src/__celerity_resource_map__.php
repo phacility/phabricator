@@ -448,6 +448,20 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/menu_texture.png',
     'type' => 'png',
   ),
+  '/rsrc/image/phrequent_active.png' =>
+  array(
+    'hash' => '716cddc08630eaa33934b2008723cac0',
+    'uri' => '/res/716cddc0/rsrc/image/phrequent_active.png',
+    'disk' => '/rsrc/image/phrequent_active.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/phrequent_inactive.png' =>
+  array(
+    'hash' => 'f9099683873c01c5de1dc6650bd668fe',
+    'uri' => '/res/f9099683/rsrc/image/phrequent_inactive.png',
+    'disk' => '/rsrc/image/phrequent_inactive.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/search.png' =>
   array(
     'hash' => 'ff7da044e6f923b8f569dec11f97e5e5',
@@ -3438,6 +3452,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/pholio/pholio-inline-comments.css',
+  ),
+  'phrequent-css' =>
+  array(
+    'uri' => '/res/8fc8f63c/rsrc/css/application/phrequent/phrequent.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/phrequent/phrequent.css',
   ),
   'phriction-document-css' =>
   array(
