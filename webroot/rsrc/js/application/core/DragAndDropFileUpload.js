@@ -37,14 +37,12 @@ JX.install('PhabricatorDragAndDropFileUpload', {
     _depth : 0,
     _updateDepth : function(delta) {
       if (this._depth == 0 && delta > 0) {
-        JX.log('begin: ' + this._depth + ' @ ' + delta);
         this.invoke('didBeginDrag');
       }
 
       this._depth += delta;
 
       if (this._depth == 0 && delta < 0) {
-        JX.log('end: ' + this._depth + ' @ ' + delta);
         this.invoke('didEndDrag');
       }
     },
