@@ -3249,7 +3249,7 @@ phutil_register_library_map(array(
     'PhrequentController' => 'PhabricatorController',
     'PhrequentDAO' => 'PhabricatorLiskDAO',
     'PhrequentListController' => 'PhrequentController',
-    'PhrequentTrackController' => 'PhabricatorApplicationsController',
+    'PhrequentTrackController' => 'PhrequentController',
     'PhrequentUIEventListener' => 'PhutilEventListener',
     'PhrequentUserTime' => 'PhrequentDAO',
     'PhrequentUserTimeQuery' => 'PhabricatorOffsetPagedQuery',
