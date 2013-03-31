@@ -63,6 +63,9 @@ final class ManiphestTaskEditController extends ManiphestController {
       $parent_id = $request->getInt('parent');
       if ($parent_id) {
         $parent_task = id(new ManiphestTask())->load($parent_id);
+        if (!$template_id) {
+          $template_id = $parent_id;
+        }
       }
     }
 
