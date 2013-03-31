@@ -448,6 +448,48 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/menu_texture.png',
     'type' => 'png',
   ),
+  '/rsrc/image/people/harding.png' =>
+  array(
+    'hash' => '818b035ace2c480aa8df7b7f11cef58b',
+    'uri' => '/res/818b035a/rsrc/image/people/harding.png',
+    'disk' => '/rsrc/image/people/harding.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/people/jefferson.png' =>
+  array(
+    'hash' => '55fe807ff02f9320e595fb59442e2038',
+    'uri' => '/res/55fe807f/rsrc/image/people/jefferson.png',
+    'disk' => '/rsrc/image/people/jefferson.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/people/lincoln.png' =>
+  array(
+    'hash' => '2363337947ab52fd5fda79e4a004e930',
+    'uri' => '/res/23633379/rsrc/image/people/lincoln.png',
+    'disk' => '/rsrc/image/people/lincoln.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/people/mckinley.png' =>
+  array(
+    'hash' => '0b7b05dd47c49a0874670e5e8200bba8',
+    'uri' => '/res/0b7b05dd/rsrc/image/people/mckinley.png',
+    'disk' => '/rsrc/image/people/mckinley.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/people/taft.png' =>
+  array(
+    'hash' => 'f3e47d45b59b0b009fd536dabae9a151',
+    'uri' => '/res/f3e47d45/rsrc/image/people/taft.png',
+    'disk' => '/rsrc/image/people/taft.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/people/washington.png' =>
+  array(
+    'hash' => '01412761cab769f7993d69eba986d949',
+    'uri' => '/res/01412761/rsrc/image/people/washington.png',
+    'disk' => '/rsrc/image/people/washington.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/phrequent_active.png' =>
   array(
     'hash' => '716cddc08630eaa33934b2008723cac0',
@@ -3401,7 +3443,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-workboard-view-css' =>
   array(
-    'uri' => '/res/98971c26/rsrc/css/layout/phabricator-workboard-view.css',
+    'uri' => '/res/b70667c6/rsrc/css/layout/phabricator-workboard-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3410,7 +3452,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-workpanel-view-css' =>
   array(
-    'uri' => '/res/db76713b/rsrc/css/layout/phabricator-workpanel-view.css',
+    'uri' => '/res/d2eea288/rsrc/css/layout/phabricator-workpanel-view.css',
     'type' => 'css',
     'requires' =>
     array(

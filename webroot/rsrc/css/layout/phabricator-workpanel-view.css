@@ -70,6 +70,7 @@
 
 .device-desktop .phabricator-workpanel-view .phabricator-workpanel-footer-action:hover {
  background-color: rgba(100,100,100,.1);
+ border-radius: 3px;
 }
 
 .phabricator-workpanel-view .phabricator-menu-item-icon {

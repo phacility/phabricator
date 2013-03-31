@@ -99,7 +99,7 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange'));
 
-    $panel = id(new PhabricatorWorkpanelView)
+    $panel = id(new PhabricatorWorkpanelView())
           ->setCards($list)
           ->setHeader('Business Stuff')
           ->setFooterAction(
@@ -108,21 +108,21 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
               ->setIcon('new')
               ->setHref('/maniphest/task/create/'));
 
-    $panel2 = id(new PhabricatorWorkpanelView)
+    $panel2 = id(new PhabricatorWorkpanelView())
           ->setCards($list2)
           ->setHeader('Under Duress');
 
-    $panel3 = id(new PhabricatorWorkpanelView)
+    $panel3 = id(new PhabricatorWorkpanelView())
           ->setCards($list3)
           ->setHeader('Spicy Thai Chicken');
 
-    $board = id(new PhabricatorWorkboardView)
+    $board = id(new PhabricatorWorkboardView())
           ->addPanel($panel)
           ->addPanel($panel2)
           ->addPanel($panel2)
           ->addPanel($panel3);
 
-    $board2 = id(new PhabricatorWorkboardView)
+    $board2 = id(new PhabricatorWorkboardView())
           ->setFlexLayout(true)
           ->addPanel($panel)
           ->addPanel($panel2)
@@ -131,12 +131,44 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
           ->addPanel($panel2)
           ->addPanel($panel3);
 
+    $action = new PhabricatorWorkboardActionView();
+    $action->setHref('/maniphest/task/create');
+    $action->setImage('/rsrc/image/actions/edit.png');
+
+    $person1 = new PhabricatorWorkboardActionView();
+    $person1->setHref('http://en.wikipedia.org/wiki/George_Washington');
+    $person1->setImage(
+      celerity_get_resource_uri('/rsrc/image/people/washington.png'));
+
+    $person2 = new PhabricatorWorkboardActionView();
+    $person2->setHref('http://en.wikipedia.org/wiki/Warren_G._Harding');
+    $person2->setImage(
+      celerity_get_resource_uri('/rsrc/image/people/harding.png'));
+
+    $person3 = new PhabricatorWorkboardActionView();
+    $person3->setHref('http://en.wikipedia.org/wiki/William_Howard_Taft');
+    $person3->setImage(
+      celerity_get_resource_uri('/rsrc/image/people/taft.png'));
+
+    $board3 = id(new PhabricatorWorkboardView())
+          ->setFlexLayout(true)
+          ->addPanel($panel)
+          ->addPanel($panel)
+          ->addPanel($panel2)
+          ->addPanel($panel3)
+          ->addAction($action)
+          ->addAction($person1)
+          ->addAction($person2)
+          ->addAction($person3);
+
     $head1 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Fixed Panel'));
 
     $head2 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Fluid Panel'));
 
+    $head3 = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Action Panel'));
 
     $wrap1 = phutil_tag(
       'div',
@@ -152,6 +184,13 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
         ),
         $board2);
 
+    $wrap3 = phutil_tag(
+      'div',
+        array(
+          'class' => 'ml'
+        ),
+        $board3);
+
     return phutil_tag(
       'div',
         array(),
@@ -159,7 +198,9 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
           $head1,
           $wrap1,
           $head2,
-          $wrap2
+          $wrap2,
+          $head3,
+          $wrap3
         ));
   }
 }
