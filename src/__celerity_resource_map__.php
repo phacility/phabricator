@@ -1206,7 +1206,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-pontificate' =>
   array(
-    'uri' => '/res/e5a0ce39/rsrc/js/application/conpherence/behavior-pontificate.js',
+    'uri' => '/res/a5f5b42c/rsrc/js/application/conpherence/behavior-pontificate.js',
     'type' => 'js',
     'requires' =>
     array(

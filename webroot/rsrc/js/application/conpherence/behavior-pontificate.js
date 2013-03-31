@@ -49,6 +49,9 @@ JX.behavior('conpherence-pontificate', function(config) {
     .start();
   };
 
-  JX.Stratcom.listen('click', 'conpherence-pontificate', onsubmit);
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
+    'conpherence-pontificate',
+    onsubmit);
 
 });
