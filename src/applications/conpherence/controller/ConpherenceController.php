@@ -105,10 +105,14 @@ abstract class ConpherenceController extends PhabricatorController {
     $nav->setMenuID('conpherence-menu');
 
     if (!$for_application) {
-      $nav->addButton(
-        'new',
-        pht('New Conversation'),
-        $this->getApplicationURI('new/'));
+      $nav->addMenuItem(
+        id(new PhabricatorMenuItemView())
+          ->setName(pht('New Conversation'))
+          ->setWorkflow(true)
+          ->setKey('new')
+          ->setHref($this->getApplicationURI('new/'))
+          ->setType(PhabricatorMenuItemView::TYPE_BUTTON));
+
       $nav->addLabel(pht('Unread'));
       $nav = $this->addConpherencesToNav(
         $unread_conpherences,
