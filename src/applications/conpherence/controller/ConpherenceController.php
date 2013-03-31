@@ -173,7 +173,7 @@ abstract class ConpherenceController extends PhabricatorController {
   protected function buildConpherenceMenuItem($conpherence) {
 
     $user = $this->getRequest()->getUser();
-    $uri = $this->getApplicationURI('view/'.$conpherence->getID().'/');
+    $uri = $this->getApplicationURI($conpherence->getID().'/');
     $data = $conpherence->getDisplayData(
       $user,
       null);

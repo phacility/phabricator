@@ -1,4 +1,4 @@
-<</**
+/**
  * @provides javelin-behavior-conpherence-menu
  * @requires javelin-behavior
  *           javelin-dom
@@ -6,6 +6,7 @@
  *           javelin-stratcom
  *           javelin-workflow
  *           javelin-behavior-device
+ *           javelin-history
  */
 
 JX.behavior('conpherence-menu', function(config) {
@@ -99,6 +100,10 @@ JX.behavior('conpherence-menu', function(config) {
     'click',
     'conpherence-menu-click',
     function(e) {
+      if (!e.isNormalClick()) {
+        return;
+      }
+
       e.kill();
       selectthread(e.getNode('conpherence-menu-click'));
     });
