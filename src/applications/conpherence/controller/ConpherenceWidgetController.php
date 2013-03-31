@@ -175,11 +175,12 @@ final class ConpherenceWidgetController extends
         'style' => 'display: none;'
       ),
       $this->renderPeopleWidgetPaneContent()).
-      phutil_tag(
+      javelin_tag(
         'div',
         array(
           'class' => 'widgets-body',
           'id' => 'widgets-files',
+          'sigil' => 'conpherence-widget-files',
         ),
         id(new ConpherenceFileWidgetView())
         ->setUser($this->getRequest()->getUser())
