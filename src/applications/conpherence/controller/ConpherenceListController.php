@@ -48,7 +48,10 @@ final class ConpherenceListController extends
     $this->loadStartingConpherences($current_selection_epoch);
     $nav = $this->buildSideNavView();
 
-    $main_pane = $this->renderEmptyMainPane();
+    $main_pane = id(new ConpherenceLayoutView())
+      ->setBaseURI($this->getApplicationURI())
+      ->setSelectedConpherencePHID($this->getSelectedConpherencePHID());
+
     $nav->appendChild(
       array(
         $main_pane,
@@ -61,55 +64,5 @@ final class ConpherenceListController extends
         'device' => true,
       ));
   }
-
-  private function renderEmptyMainPane() {
-    $this->initJavelinBehaviors(true);
-    return javelin_tag(
-      'div',
-      array(
-        'id' => 'conpherence-main-pane',
-        'sigil' => 'conpherence-layout'
-      ),
-      array(
-        javelin_tag(
-          'div',
-          array(
-            'class' => 'conpherence-header-pane',
-            'id' => 'conpherence-header-pane',
-            'sigil' => 'conpherence-header',
-          ),
-          ''),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'conpherence-widget-pane',
-            'id' => 'conpherence-widget-pane'
-          ),
-          ''),
-        javelin_tag(
-          'div',
-          array(
-            'class' => 'conpherence-message-pane',
-            'id' => 'conpherence-message-pane'
-          ),
-          array(
-            javelin_tag(
-              'div',
-              array(
-                'class' => 'conpherence-messages',
-                'id' => 'conpherence-messages',
-                'sigil' => 'conpherence-messages',
-              ),
-              ''),
-            phutil_tag(
-              'div',
-              array(
-                'id' => 'conpherence-form'
-              ),
-              '')
-          ))
-      ));
-  }
-
 
 }

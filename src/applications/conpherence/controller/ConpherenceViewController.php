@@ -75,11 +75,11 @@ final class ConpherenceViewController extends
     $transactions = $data['transactions'];
 
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-    $form_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior('conpherence-pontificate');
 
     $form =
       id(new AphrontFormView())
-      ->setID($form_id)
       ->setAction($update_uri)
       ->setFlexible(true)
       ->addSigil('conpherence-pontificate')

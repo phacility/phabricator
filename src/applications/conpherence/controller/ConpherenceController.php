@@ -314,32 +314,4 @@ abstract class ConpherenceController extends PhabricatorController {
     );
 
   }
-
-  protected function initJavelinBehaviors($more_than_menu = false) {
-
-    Javelin::initBehavior('conpherence-menu',
-      array(
-        'base_uri' => $this->getApplicationURI(''),
-        'header' => 'conpherence-header-pane',
-        'messages' => 'conpherence-messages',
-        'messages_pane' => 'conpherence-message-pane',
-        'widgets_pane' => 'conpherence-widget-pane',
-        'form_pane' => 'conpherence-form',
-        'menu_pane' => 'conpherence-menu',
-        'selected_conpherence_id' => $this->getSelectedConpherencePHID(),
-        'fancy_ajax' => (bool) $this->getSelectedConpherencePHID()
-      ));
-
-    if ($more_than_menu) {
-      Javelin::initBehavior('conpherence-drag-and-drop-photo',
-        array(
-          'target' => 'conpherence-header-pane',
-          'form_pane' => 'conpherence-form',
-          'upload_uri' => '/file/dropupload/',
-          'activated_class' => 'conpherence-header-upload-photo',
-        ));
-    }
-
-    Javelin::initBehavior('conpherence-pontificate');
-  }
 }
