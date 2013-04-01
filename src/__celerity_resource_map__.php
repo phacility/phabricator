@@ -1253,7 +1253,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/ec121ad7/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/2377a63e/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1261,9 +1261,8 @@ celerity_register_resource_map(array(
       1 => 'javelin-dom',
       2 => 'javelin-request',
       3 => 'javelin-stratcom',
-      4 => 'javelin-uri',
-      5 => 'javelin-util',
-      6 => 'javelin-workflow',
+      4 => 'javelin-workflow',
+      5 => 'javelin-behavior-device',
     ),
     'disk' => '/rsrc/js/application/conpherence/behavior-menu.js',
   ),

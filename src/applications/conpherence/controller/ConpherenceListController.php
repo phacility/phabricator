@@ -27,6 +27,7 @@ final class ConpherenceListController extends
 
     $conpherence_id = $this->getConpherenceID();
     $current_selection_epoch = null;
+    $selected_phid = null;
     if ($conpherence_id) {
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
@@ -39,7 +40,7 @@ final class ConpherenceListController extends
       if ($conpherence->getTitle()) {
         $title = $conpherence->getTitle();
       }
-      $this->setSelectedConpherencePHID($conpherence->getPHID());
+      $selected_phid = $conpherence->getPHID();
 
       $participant = $conpherence->getParticipant($user->getPHID());
       $current_selection_epoch = $participant->getDateTouched();
@@ -50,7 +51,7 @@ final class ConpherenceListController extends
 
     $main_pane = id(new ConpherenceLayoutView())
       ->setBaseURI($this->getApplicationURI())
-      ->setSelectedConpherencePHID($this->getSelectedConpherencePHID());
+      ->setSelectedConpherencePHID($selected_phid);
 
     $nav->appendChild(
       array(

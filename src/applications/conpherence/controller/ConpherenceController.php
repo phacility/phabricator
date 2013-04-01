@@ -5,7 +5,6 @@
  */
 abstract class ConpherenceController extends PhabricatorController {
   private $conpherences;
-  private $selectedConpherencePHID;
   private $readConpherences;
   private $unreadConpherences;
 
@@ -25,14 +24,6 @@ abstract class ConpherenceController extends PhabricatorController {
   }
   public function getReadConpherences() {
     return $this->readConpherences;
-  }
-
-  public function setSelectedConpherencePHID($phid) {
-    $this->selectedConpherencePHID = $phid;
-    return $this;
-  }
-  public function getSelectedConpherencePHID() {
-    return $this->selectedConpherencePHID;
   }
 
   /**
@@ -86,10 +77,6 @@ abstract class ConpherenceController extends PhabricatorController {
       array_keys($read));
     $this->setReadConpherences($read_conpherences);
 
-    if (!$this->getSelectedConpherencePHID()) {
-      $this->setSelectedConpherencePHID(reset($all_conpherence_phids));
-    }
-
     return $this;
   }
 
@@ -141,13 +128,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
     $user = $this->getRequest()->getUser();
     foreach ($conpherences as $conpherence) {
-      $selected = false;
-      if ($this->getSelectedConpherencePHID() == $conpherence->getPHID()) {
-        $selected = true;
-     }
-      $item = $this->buildConpherenceMenuItem(
-        $conpherence,
-        $selected);
+      $item = $this->buildConpherenceMenuItem($conpherence);
 
       $nav->addCustomBlock($item->render());
     }
@@ -189,9 +170,7 @@ abstract class ConpherenceController extends PhabricatorController {
     return $crumbs;
   }
 
-  protected function buildConpherenceMenuItem(
-    $conpherence,
-    $selected) {
+  protected function buildConpherenceMenuItem($conpherence) {
 
     $user = $this->getRequest()->getUser();
     $uri = $this->getApplicationURI('view/'.$conpherence->getID().'/');
@@ -216,13 +195,11 @@ abstract class ConpherenceController extends PhabricatorController {
       ->setUnreadCount($unread_count)
       ->setID($conpherence->getPHID().'-nav-item')
       ->addSigil('conpherence-menu-click')
-      ->setMetadata(array('id' => $conpherence->getID()));
-
-    if ($selected) {
-      $item
-        ->addClass('conpherence-selected')
-        ->addClass('hide-unread-count');
-    }
+      ->setMetadata(
+        array(
+          'id' => $conpherence->getID(),
+          'phid' => $conpherence->getPHID(),
+          ));
 
     return $item;
   }

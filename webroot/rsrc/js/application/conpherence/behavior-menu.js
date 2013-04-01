@@ -4,20 +4,73 @@
  *           javelin-dom
  *           javelin-request
  *           javelin-stratcom
- *           javelin-uri
- *           javelin-util
  *           javelin-workflow
+ *           javelin-behavior-device
  */
 
 JX.behavior('conpherence-menu', function(config) {
 
-  function onwidgetresponse(context, response) {
+  var thread = {
+    selected: null,
+    node: null,
+    visible: null
+  };
+
+  function selectthread(node) {
+    if (node === thread.node) {
+      return;
+    }
+
+    if (thread.node) {
+      JX.DOM.alterClass(thread.node, 'conpherence-selected', false);
+      JX.DOM.alterClass(thread.node, 'hide-unread-count', false);
+    }
+
+    JX.DOM.alterClass(node, 'conpherence-selected', true);
+    JX.DOM.alterClass(node, 'hide-unread-count', true);
+
+    thread.node = node;
+
+    var data = JX.Stratcom.getData(node);
+    thread.selected = data.phid;
+
+    // TODO: These URIs don't work yet, so don't push them until they do.
+    // JX.History.push(config.base_uri + 'view/' + data.id + '/');
+
+    redrawthread();
+  }
+
+  function redrawthread() {
+    if (!thread.node) {
+      return;
+    }
+    if (thread.visible == thread.selected) {
+      return;
+    }
+
+    var data = JX.Stratcom.getData(thread.node);
+
+    var uri = config.base_uri + 'view/' + data.id + '/';
+    var widget_uri = config.base_uri + 'widget/' + data.id + '/';
+
+    new JX.Workflow(uri, {})
+      .setHandler(onresponse)
+      .start();
+
+    new JX.Workflow(widget_uri, {})
+      .setHandler(onwidgetresponse)
+      .start();
+
+    thread.visible = thread.selected;
+  }
+
+  function onwidgetresponse(response) {
     var widgets = JX.$H(response.widgets);
     var widgetsRoot = JX.$(config.widgets_pane);
     JX.DOM.setContent(widgetsRoot, widgets);
   }
 
-  function onresponse(context, response) {
+  function onresponse(response) {
     var header = JX.$H(response.header);
     var messages = JX.$H(response.messages);
     var form = JX.$H(response.form);
@@ -30,30 +83,6 @@ JX.behavior('conpherence-menu', function(config) {
     JX.DOM.setContent(messagesRoot, messages);
     messagesRoot.scrollTop = messagesRoot.scrollHeight;
     JX.DOM.setContent(formRoot, form);
-
-    var conpherences = JX.DOM.scry(
-      menuRoot,
-      'a',
-      'conpherence-menu-click'
-    );
-
-    for (var i = 0; i < conpherences.length; i++) {
-      var current = conpherences[i];
-      if (current.id == context.id) {
-        JX.DOM.alterClass(current, 'conpherence-selected', true);
-        JX.DOM.alterClass(current, 'hide-unread-count', true);
-      } else {
-        JX.DOM.alterClass(current, 'conpherence-selected', false);
-      }
-    }
-
-    // TODO - update the browser URI T2086
-
-    JX.Stratcom.invoke(
-      'conpherence-selected-loaded',
-      null,
-      {}
-    );
   }
 
   JX.Stratcom.listen(
@@ -61,52 +90,8 @@ JX.behavior('conpherence-menu', function(config) {
     'conpherence-menu-click',
     function(e) {
       e.kill();
-      var selected = e.getNode(['conpherence-menu-click']);
-      if (config.fancy_ajax) {
-        JX.Stratcom.invoke(
-          'conpherence-selected',
-          null,
-          { selected : selected }
-        );
-      } else {
-        var data = JX.Stratcom.getData(selected);
-        var uri = new JX.URI(config.base_uri + data.id + '/');
-        uri.go();
-      }
-    }
-  );
-
-  JX.Stratcom.listen(
-    'conpherence-initial-selected',
-    null,
-    function(e) {
-      var selected = e.getData().selected;
-      e.kill();
-      JX.Stratcom.invoke(
-        'conpherence-selected',
-        null,
-        { selected : selected }
-      );
-    }
-  );
-
-  JX.Stratcom.listen(
-    'conpherence-selected',
-    null,
-    function(e) {
-
-      var selected = e.getData().selected;
-      var data = JX.Stratcom.getData(selected);
-      var uri = config.base_uri + 'view/' + data.id + '/';
-      var widget_uri = config.base_uri + 'widget/' + data.id + '/';
-      new JX.Workflow(uri, {})
-        .setHandler(JX.bind(null, onresponse, selected))
-        .start();
-      new JX.Workflow(widget_uri, {})
-        .setHandler(JX.bind(null, onwidgetresponse, selected))
-        .start();
-    }
-  );
+      selectthread(e.getNode('conpherence-menu-click'));
+    });
 
   JX.Stratcom.listen('click', 'conpherence-edit-metadata', function (e) {
     e.kill();
@@ -143,16 +128,42 @@ JX.behavior('conpherence-menu', function(config) {
     }).setData({ offset: last_offset+1 }).send();
   });
 
-  // select the current message
-  var selectedConpherence = false;
+
+  // On mobile, we just show a thread list, so we don't want to automatically
+  // select or load any threads. On Desktop, we automatically select the first
+  // thread.
+
+  function ondevicechange() {
+    if (JX.Device.getDevice() != 'desktop') {
+      return;
+    }
+
+    // If there's no thread selected yet, select the first thread.
+    if (!thread.selected) {
+      var threads = JX.DOM.scry(document.body, 'a', 'conpherence-menu-click');
+      if (threads.length) {
+        selectthread(threads[0]);
+      }
+    }
+
+    // We might have a selected but undrawn thread for
+    redrawthread();
+  }
+
+  JX.Stratcom.listen('phabricator-device-change', null, ondevicechange);
+  ondevicechange();
+
+
+  // If there's a currently visible thread, select it.
   if (config.selected_conpherence_id) {
-    var selected = JX.$(config.selected_conpherence_id + '-nav-item');
-    JX.Stratcom.invoke(
-      'conpherence-initial-selected',
-      null,
-      { selected : selected }
-    );
-    selectedConpherence = true;
+    var threads = JX.DOM.scry(document.body, 'a', 'conpherence-menu-click');
+    for (var ii = 0; ii < threads.length; ii++) {
+      var data = JX.Stratcom.getData(threads[ii]);
+      if (data.phid == config.selected_conpherence_id) {
+        selectthread(threads[ii]);
+        break;
+      }
+    }
   }
 
 });
