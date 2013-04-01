@@ -6,6 +6,24 @@ final class ConpherenceLayoutView extends AphrontView {
   private $baseURI;
   private $threadView;
   private $role;
+  private $header;
+  private $messages;
+  private $replyForm;
+
+  public function setMessages($messages) {
+    $this->messages = $messages;
+    return $this;
+  }
+
+  public function setReplyForm($reply_form) {
+    $this->replyForm = $reply_form;
+    return $this;
+  }
+
+  public function setHeader($header) {
+    $this->header = $header;
+    return $this;
+  }
 
   public function setRole($role) {
     $this->role = $role;
@@ -32,6 +50,7 @@ final class ConpherenceLayoutView extends AphrontView {
   }
 
   public function render() {
+    require_celerity_resource('conpherence-menu-css');
 
     Javelin::initBehavior('conpherence-menu',
       array(
@@ -87,7 +106,7 @@ final class ConpherenceLayoutView extends AphrontView {
                 'id' => 'conpherence-header-pane',
                 'sigil' => 'conpherence-header',
               ),
-              ''),
+              nonempty($this->header, '')),
             phutil_tag(
               'div',
               array(
@@ -109,13 +128,13 @@ final class ConpherenceLayoutView extends AphrontView {
                     'id' => 'conpherence-messages',
                     'sigil' => 'conpherence-messages',
                   ),
-                  ''),
+                  nonempty($this->messages, '')),
                 phutil_tag(
                   'div',
                   array(
                     'id' => 'conpherence-form'
                   ),
-                  '')
+                  nonempty($this->replyForm, ''))
               )),
           )),
       ));

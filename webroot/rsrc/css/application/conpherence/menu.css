@@ -38,6 +38,24 @@ div.conpherence-layout .phabricator-nav-column-background {
   display: none;
 }
 
+.device .conpherence-role-thread .conpherence-menu-pane,
+.device .conpherence-role-thread .phabricator-nav-column-background,
+.device .conpherence-role-thread .conpherence-widget-pane {
+  display: none;
+}
+
+.device .conpherence-role-thread .conpherence-content-pane {
+  margin-left: 0;
+}
+
+.device .conpherence-role-thread .conpherence-message-pane,
+.device .conpherence-role-thread .conpherence-messages,
+.device .conpherence-role-thread .phabricator-form-view {
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
 
 .conpherence-menu .conpherence-menu-item-view {
   display: block;

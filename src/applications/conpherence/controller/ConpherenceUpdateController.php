@@ -3,8 +3,8 @@
 /**
  * @group conpherence
  */
-final class ConpherenceUpdateController extends
-  ConpherenceController {
+final class ConpherenceUpdateController
+  extends ConpherenceController {
 
   private $conpherenceID;
 
@@ -265,10 +265,10 @@ final class ConpherenceUpdateController extends
     $rendered_transactions = $data['transactions'];
     $new_latest_transaction_id = $data['latest_transaction_id'];
 
-    $selected = true;
-    $nav_item = $this->buildConpherenceMenuItem(
-      $conpherence,
-      $selected);
+    $nav_item = id(new ConpherenceThreadListView())
+      ->setUser($user)
+      ->setBaseURI($this->getApplicationURI())
+      ->renderSingleThread($conpherence);
 
     $header = $this->buildHeaderPaneContent($conpherence);
 
@@ -281,9 +281,9 @@ final class ConpherenceUpdateController extends
     $content = array(
       'transactions' => $rendered_transactions,
       'latest_transaction_id' => $new_latest_transaction_id,
-      'nav_item' => $nav_item->render(),
+      'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),
-      'header' => $header,
+      'header' => hsprintf('%s', $header),
       'file_widget' => $file_widget->render()
     );
     return $content;

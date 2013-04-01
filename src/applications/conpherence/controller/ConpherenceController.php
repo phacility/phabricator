@@ -92,45 +92,44 @@ abstract class ConpherenceController extends PhabricatorController {
     $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
     $class_mod = $display_data['image_class'];
 
-    $header =
-    phutil_tag(
-      'div',
-      array(
-        'class' => 'upload-photo'
-      ),
-      pht('Drop photo here to change this Conpherence photo.')).
-    javelin_tag(
-      'a',
-      array(
-        'class' => 'edit',
-        'href' => $edit_href,
-        'sigil' => 'conpherence-edit-metadata',
-        'meta' => array(
-          'action' => 'metadata'
-        )
-      ),
-      '').
-    phutil_tag(
-      'div',
-      array(
-        'class' => $class_mod.'header-image',
-        'style' => 'background-image: url('.$display_data['image'].');'
-      ),
-      '').
-    phutil_tag(
-      'div',
-      array(
-        'class' => $class_mod.'title',
-      ),
-      $display_data['title']).
-    phutil_tag(
-      'div',
-      array(
-        'class' => $class_mod.'subtitle',
-      ),
-      $display_data['subtitle']);
-
-    return $header;
+    return array(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'upload-photo'
+        ),
+        pht('Drop photo here to change this Conpherence photo.')),
+      javelin_tag(
+        'a',
+        array(
+          'class' => 'edit',
+          'href' => $edit_href,
+          'sigil' => 'conpherence-edit-metadata',
+          'meta' => array(
+            'action' => 'metadata'
+          )
+        ),
+        ''),
+      phutil_tag(
+        'div',
+        array(
+          'class' => $class_mod.'header-image',
+          'style' => 'background-image: url('.$display_data['image'].');'
+        ),
+        ''),
+      phutil_tag(
+        'div',
+        array(
+          'class' => $class_mod.'title',
+        ),
+        $display_data['title']),
+      phutil_tag(
+        'div',
+        array(
+          'class' => $class_mod.'subtitle',
+        ),
+        $display_data['subtitle']),
+    );
   }
 
   protected function renderConpherenceTransactions(

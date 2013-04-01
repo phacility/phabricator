@@ -46,6 +46,16 @@ final class ConpherenceThreadListView extends AphrontView {
     return $menu;
   }
 
+  public function renderSingleThread(ConpherenceThread $thread) {
+    return $this->renderThread($thread);
+  }
+
+  private function renderThreadItem(ConpherenceThread $thread) {
+    return id(new PhabricatorMenuItemView())
+      ->setType(PhabricatorMenuItemView::TYPE_CUSTOM)
+      ->setName($this->renderThread($thread));
+  }
+
   private function renderThread(ConpherenceThread $thread) {
     $user = $this->getUser();
 
@@ -58,7 +68,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $image = $data['image'];
     $snippet = $data['snippet'];
 
-    $item = id(new ConpherenceMenuItemView())
+    return id(new ConpherenceMenuItemView())
       ->setUser($user)
       ->setTitle($title)
       ->setSubtitle($subtitle)
@@ -73,10 +83,6 @@ final class ConpherenceThreadListView extends AphrontView {
         array(
           'id' => $thread->getID(),
           ));
-
-    return id(new PhabricatorMenuItemView())
-      ->setType(PhabricatorMenuItemView::TYPE_CUSTOM)
-      ->setName($item);
   }
 
   private function addThreadsToMenu(
@@ -85,7 +91,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $read = false) {
 
     foreach ($conpherences as $conpherence) {
-      $item = $this->renderThread($conpherence);
+      $item = $this->renderThreadItem($conpherence);
       $menu->addMenuItem($item);
     }
 

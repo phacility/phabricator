@@ -8,15 +8,6 @@
   width: 100%;
 }
 
-.device .conpherence-header-pane {
-  position: fixed;
-  top: 44px;
-}
-
-.device-phone .conpherence-header-pane {
-  display: none;
-}
-
 .conpherence-header-pane .edit {
   float: right;
   margin: 16px 16px 0px 0px;
