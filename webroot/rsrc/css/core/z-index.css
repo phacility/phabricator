@@ -30,6 +30,10 @@
   z-index: 4;
 }
 
+.conpherence-menu-pane {
+  z-index: 4;
+}
+
 .phabricator-nav-drag {
   z-index: 4;
 }

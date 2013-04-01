@@ -2,10 +2,6 @@
  * @provides conpherence-header-pane-css
  */
 
-#conpherence-main-pane {
-  position: relative;
-}
-
 .conpherence-header-pane {
   border-bottom: 1px solid #ccc;
   height: 80px;

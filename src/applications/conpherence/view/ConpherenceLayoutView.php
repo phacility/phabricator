@@ -4,6 +4,11 @@ final class ConpherenceLayoutView extends AphrontView {
 
   private $thread;
   private $baseURI;
+  private $threadView;
+
+  public function getThreadView() {
+    return $this->threadView;
+  }
 
   public function setBaseURI($base_uri) {
     $this->baseURI = $base_uri;
@@ -12,6 +17,11 @@ final class ConpherenceLayoutView extends AphrontView {
 
   public function setThread(ConpherenceThread $thread) {
     $this->thread = $thread;
+    return $this;
+  }
+
+  public function setThreadView(ConpherenceThreadListView $thead_view) {
+    $this->threadView = $thead_view;
     return $this;
   }
 
@@ -40,47 +50,67 @@ final class ConpherenceLayoutView extends AphrontView {
     return javelin_tag(
       'div',
       array(
-        'id' => 'conpherence-main-pane',
-        'sigil' => 'conpherence-layout'
+        'sigil' => 'conpherence-layout',
+        'class' => 'conpherence-layout',
       ),
       array(
         javelin_tag(
           'div',
           array(
-            'class' => 'conpherence-header-pane',
-            'id' => 'conpherence-header-pane',
-            'sigil' => 'conpherence-header',
-          ),
-          ''),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'conpherence-widget-pane',
-            'id' => 'conpherence-widget-pane'
+            'class' => 'phabricator-nav-column-background',
           ),
           ''),
         javelin_tag(
           'div',
           array(
-            'class' => 'conpherence-message-pane',
-            'id' => 'conpherence-message-pane'
+            'class' => 'conpherence-menu-pane phabricator-side-menu',
+            'sigil' => 'conpherence-menu-pane',
+          ),
+          nonempty($this->threadView, '')),
+        javelin_tag(
+          'div',
+          array(
+            'class' => 'conpherence-content-pane',
           ),
           array(
             javelin_tag(
               'div',
               array(
-                'class' => 'conpherence-messages',
-                'id' => 'conpherence-messages',
-                'sigil' => 'conpherence-messages',
+                'class' => 'conpherence-header-pane',
+                'id' => 'conpherence-header-pane',
+                'sigil' => 'conpherence-header',
               ),
               ''),
             phutil_tag(
               'div',
               array(
-                'id' => 'conpherence-form'
+                'class' => 'conpherence-widget-pane',
+                'id' => 'conpherence-widget-pane'
               ),
-              '')
-          ))
+              ''),
+            javelin_tag(
+              'div',
+              array(
+                'class' => 'conpherence-message-pane',
+                'id' => 'conpherence-message-pane'
+              ),
+              array(
+                javelin_tag(
+                  'div',
+                  array(
+                    'class' => 'conpherence-messages',
+                    'id' => 'conpherence-messages',
+                    'sigil' => 'conpherence-messages',
+                  ),
+                  ''),
+                phutil_tag(
+                  'div',
+                  array(
+                    'id' => 'conpherence-form'
+                  ),
+                  '')
+              )),
+          )),
       ));
   }
 

@@ -5,26 +5,6 @@
  */
 abstract class ConpherenceController extends PhabricatorController {
   private $conpherences;
-  private $readConpherences;
-  private $unreadConpherences;
-
-  public function setUnreadConpherences(array $conpherences) {
-    assert_instances_of($conpherences, 'ConpherenceThread');
-    $this->unreadConpherences = $conpherences;
-    return $this;
-  }
-  public function getUnreadConpherences() {
-    return $this->unreadConpherences;
-  }
-
-  public function setReadConpherences(array $conpherences) {
-    assert_instances_of($conpherences, 'ConpherenceThread');
-    $this->readConpherences = $conpherences;
-    return $this;
-  }
-  public function getReadConpherences() {
-    return $this->readConpherences;
-  }
 
   /**
    * Try for a full set of unread conpherences, and if we fail
@@ -70,88 +50,22 @@ abstract class ConpherenceController extends PhabricatorController {
     $unread_conpherences = array_select_keys(
       $all_conpherences,
       array_keys($unread));
-    $this->setUnreadConpherences($unread_conpherences);
 
     $read_conpherences = array_select_keys(
       $all_conpherences,
       array_keys($read));
-    $this->setReadConpherences($read_conpherences);
 
-    return $this;
-  }
-
-  public function buildSideNavView($filter = null, $for_application = false) {
-    require_celerity_resource('conpherence-menu-css');
-    $unread_conpherences = $this->getUnreadConpherences();
-    $read_conpherences = $this->getReadConpherences();
-
-    $user = $this->getRequest()->getUser();
-    $menu = new PhabricatorMenuView();
-    $nav = AphrontSideNavFilterView::newFromMenu($menu);
-    $nav->addClass('conpherence-menu');
-    $nav->setMenuID('conpherence-menu');
-
-    if (!$for_application) {
-      $nav->addMenuItem(
-        id(new PhabricatorMenuItemView())
-          ->setName(pht('New Conversation'))
-          ->setWorkflow(true)
-          ->setKey('new')
-          ->setHref($this->getApplicationURI('new/'))
-          ->setType(PhabricatorMenuItemView::TYPE_BUTTON));
-
-      $nav->addLabel(pht('Unread'));
-      $nav = $this->addConpherencesToNav(
-        $unread_conpherences,
-        $nav,
-        false);
-      $nav->addLabel(pht('Read'));
-      $nav = $this->addConpherencesToNav(
-        $read_conpherences,
-        $nav,
-        true);
-      $nav->selectFilter($filter);
-    } else {
-      $nav->addFilter(
-        'new',
-        pht('New Conversation'),
-        $this->getApplicationURI('new/'));
-
-    }
-    return $nav;
-  }
-
-  private function addConpherencesToNav(
-    array $conpherences,
-    AphrontSideNavFilterView $nav,
-    $read = false) {
-
-    $user = $this->getRequest()->getUser();
-    foreach ($conpherences as $conpherence) {
-      $item = $this->buildConpherenceMenuItem($conpherence);
-
-      $nav->addCustomBlock($item->render());
-    }
-    if (empty($conpherences) || $read) {
-      $nav->addCustomBlock($this->getNoConpherencesBlock());
-    }
-
-    return $nav;
-  }
-
-  private function getNoConpherencesBlock() {
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'no-conpherences-menu-item'
-      ),
-      pht('No more conpherences.'));
+    return array($unread_conpherences, $read_conpherences);
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(
-      $filter = null,
-      $for_application = true)->getMenu();
+    $nav = new PhabricatorMenuView();
+
+    $nav->newLink(
+      pht('New Conversation'),
+      $this->getApplicationURI('new/'));
+
+    return $nav;
   }
 
   public function buildApplicationCrumbs() {
@@ -168,39 +82,6 @@ abstract class ConpherenceController extends PhabricatorController {
           ->setName(pht('Conpherence')));
 
     return $crumbs;
-  }
-
-  protected function buildConpherenceMenuItem($conpherence) {
-
-    $user = $this->getRequest()->getUser();
-    $uri = $this->getApplicationURI($conpherence->getID().'/');
-    $data = $conpherence->getDisplayData(
-      $user,
-      null);
-    $title = $data['title'];
-    $subtitle = $data['subtitle'];
-    $unread_count = $data['unread_count'];
-    $epoch = $data['epoch'];
-    $image = $data['image'];
-    $snippet = $data['snippet'];
-
-    $item = id(new ConpherenceMenuItemView())
-      ->setUser($user)
-      ->setTitle($title)
-      ->setSubtitle($subtitle)
-      ->setHref($uri)
-      ->setEpoch($epoch)
-      ->setImageURI($image)
-      ->setMessageText($snippet)
-      ->setUnreadCount($unread_count)
-      ->setID($conpherence->getPHID().'-nav-item')
-      ->addSigil('conpherence-menu-click')
-      ->setMetadata(
-        array(
-          'id' => $conpherence->getID(),
-          ));
-
-    return $item;
   }
 
   protected function buildHeaderPaneContent(ConpherenceThread $conpherence) {

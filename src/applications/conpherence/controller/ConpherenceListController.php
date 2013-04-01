@@ -3,8 +3,8 @@
 /**
  * @group conpherence
  */
-final class ConpherenceListController extends
-  ConpherenceController {
+final class ConpherenceListController
+  extends ConpherenceController {
 
   private $conpherenceID;
 
@@ -45,23 +45,25 @@ final class ConpherenceListController extends
       $current_selection_epoch = $participant->getDateTouched();
     }
 
-    $this->loadStartingConpherences($current_selection_epoch);
-    $nav = $this->buildSideNavView();
+    list($unread, $read) = $this->loadStartingConpherences(
+      $current_selection_epoch);
+
+    $thread_view = id(new ConpherenceThreadListView())
+      ->setUser($user)
+      ->setBaseURI($this->getApplicationURI())
+      ->setUnreadThreads($unread)
+      ->setReadThreads($read);
 
     $main_pane = id(new ConpherenceLayoutView())
-      ->setBaseURI($this->getApplicationURI());
+      ->setBaseURI($this->getApplicationURI())
+      ->setThreadView($thread_view);
 
     if ($conpherence) {
       $main_pane->setThread($conpherence);
     }
 
-    $nav->appendChild(
-      array(
-        $main_pane,
-      ));
-
     return $this->buildApplicationPage(
-      $nav,
+      $main_pane,
       array(
         'title' => $title,
         'device' => true,
