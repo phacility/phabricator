@@ -55,22 +55,26 @@ JX.behavior('conpherence-menu', function(config) {
     if (!thread.node) {
       return;
     }
+
     if (thread.visible == thread.selected) {
       return;
     }
 
     var data = JX.Stratcom.getData(thread.node);
 
-    var uri = config.base_uri + 'view/' + data.id + '/';
-    var widget_uri = config.base_uri + 'widget/' + data.id + '/';
+    if (thread.visible !== null || !config.hasThread) {
+      var uri = config.base_uri + 'view/' + data.id + '/';
+      new JX.Workflow(uri, {})
+        .setHandler(onresponse)
+        .start();
+    }
 
-    new JX.Workflow(uri, {})
-      .setHandler(onresponse)
-      .start();
-
-    new JX.Workflow(widget_uri, {})
-      .setHandler(onwidgetresponse)
-      .start();
+    if (thread.visible !== null || !config.hasWidgets) {
+      var widget_uri = config.base_uri + 'widget/' + data.id + '/';
+      new JX.Workflow(widget_uri, {})
+        .setHandler(onwidgetresponse)
+        .start();
+    }
 
     thread.visible = thread.selected;
   }
@@ -158,25 +162,47 @@ JX.behavior('conpherence-menu', function(config) {
       return;
     }
 
-    // If there's no thread selected yet, select the first thread.
-    if (!thread.selected) {
-      var threads = JX.DOM.scry(document.body, 'a', 'conpherence-menu-click');
-      if (threads.length) {
-        selectthread(threads[0]);
-      }
+    if (!config.hasThreadList) {
+      loadthreads();
+    } else {
+      didloadthreads();
     }
-
-    // We might have a selected but undrawn thread for
-    redrawthread();
   }
 
   JX.Stratcom.listen('phabricator-device-change', null, ondevicechange);
   ondevicechange();
 
 
-  // If there's a currently visible thread, select it.
-  if (config.selectedID) {
-    selectthreadid(config.selectedID);
+  function loadthreads() {
+    var uri = config.base_uri + config.selectedID + '/';
+    new JX.Workflow(uri)
+      .setHandler(onthreadresponse)
+      .start();
+  }
+
+  function onthreadresponse(r) {
+    var layout = JX.$(config.layoutID);
+    var menu = JX.DOM.find(layout, 'div', 'conpherence-menu-pane');
+    JX.DOM.setContent(menu, JX.$H(r));
+
+    config.selectedID && selectthreadid(config.selectedID);
+  }
+
+  function didloadthreads() {
+    // If there's no thread selected yet, select the current thread or the
+    // first thread.
+    if (!thread.selected) {
+      if (config.selectedID) {
+        selectthreadid(config.selectedID);
+      } else {
+        var threads = JX.DOM.scry(document.body, 'a', 'conpherence-menu-click');
+        if (threads.length) {
+          selectthread(threads[0]);
+        }
+      }
+    }
+
+    redrawthread();
   }
 
 });

@@ -52,6 +52,8 @@ final class ConpherenceLayoutView extends AphrontView {
   public function render() {
     require_celerity_resource('conpherence-menu-css');
 
+    $layout_id = celerity_generate_unique_node_id();
+
     Javelin::initBehavior('conpherence-menu',
       array(
         'base_uri' => $this->baseURI,
@@ -61,8 +63,12 @@ final class ConpherenceLayoutView extends AphrontView {
         'widgets_pane' => 'conpherence-widget-pane',
         'form_pane' => 'conpherence-form',
         'menu_pane' => 'conpherence-menu',
+        'layoutID' => $layout_id,
         'selectedID' => ($this->thread ? $this->thread->getID() : null),
         'role' => $this->role,
+        'hasThreadList' => (bool)$this->threadView,
+        'hasThread' => (bool)$this->messages,
+        'hasWidgets' => false,
       ));
 
     Javelin::initBehavior('conpherence-drag-and-drop-photo',
@@ -76,6 +82,7 @@ final class ConpherenceLayoutView extends AphrontView {
     return javelin_tag(
       'div',
       array(
+        'id'    => $layout_id,
         'sigil' => 'conpherence-layout',
         'class' => 'conpherence-layout conpherence-role-'.$this->role,
       ),

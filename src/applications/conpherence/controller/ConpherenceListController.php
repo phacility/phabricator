@@ -54,6 +54,10 @@ final class ConpherenceListController
       ->setUnreadThreads($unread)
       ->setReadThreads($read);
 
+    if ($request->isAjax()) {
+      return id(new AphrontAjaxResponse())->setContent($thread_view);
+    }
+
     $layout = id(new ConpherenceLayoutView())
       ->setBaseURI($this->getApplicationURI())
       ->setThreadView($thread_view)
