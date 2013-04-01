@@ -3793,6 +3793,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
   ),
+  'spacing-css' =>
+  array(
+      'uri' => '/res/4fc2a8f9/rsrc/css/core/spacing.css',
+      'type' => 'css',
+      'requires' =>
+      array(
+      ),
+      'disk' => '/rsrc/css/core/spacing.css',
+  ),
   'tokens-css' =>
   array(
     'uri' => '/res/6b3c65c7/rsrc/css/application/tokens/tokens.css',
@@ -3846,6 +3855,7 @@ celerity_register_resource_map(array(
         33 => 'phabricator-crumbs-view-css',
         34 => 'phabricator-object-item-list-view-css',
         35 => 'global-drag-and-drop-css',
+        36 => 'spacing-css',
       ),
       'uri' => '/res/pkg/4fc2a8f9/core.pkg.css',
       'type' => 'css',
@@ -4176,5 +4186,6 @@ celerity_register_resource_map(array(
     'sprite-icon-css' => '4fc2a8f9',
     'sprite-menu-css' => '4fc2a8f9',
     'syntax-highlighting-css' => '4fc2a8f9',
+    'spacing-css' => '4fc2a8f9',
   ),
 ));
