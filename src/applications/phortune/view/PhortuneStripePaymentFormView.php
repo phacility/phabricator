@@ -39,7 +39,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
   }
 
   public function render() {
-    $form_id  = celerity_generate_unique_node_id();
+    $form_id = celerity_generate_unique_node_id();
     require_celerity_resource('stripe-payment-form-css');
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips');
@@ -105,7 +105,7 @@ final class PhortuneStripePaymentFormView extends AphrontView {
           )))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue('Submit Payment'));
+        ->setValue('Add Payment Method'));
 
     Javelin::initBehavior(
       'stripe-payment-form',

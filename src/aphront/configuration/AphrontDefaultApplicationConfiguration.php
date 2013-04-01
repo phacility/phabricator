@@ -104,12 +104,6 @@ class AphrontDefaultApplicationConfiguration
         'clear/' => 'PhabricatorNotificationClearController',
       ),
 
-      '/phortune/' => array(
-        'stripe/' => array(
-          'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
-        ),
-      ),
-
       '/debug/' => 'PhabricatorDebugController',
     );
   }
@@ -143,6 +137,7 @@ class AphrontDefaultApplicationConfiguration
       $response->setErrorInfo($ex->getMessage());
 
       return id(new AphrontJSONResponse())
+        ->setAddJSONShield(false)
         ->setContent($response->toDictionary());
     }
 

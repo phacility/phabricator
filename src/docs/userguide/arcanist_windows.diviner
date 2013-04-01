@@ -77,6 +77,11 @@ And this for GitPad (you may need to adjust the path):
   name=GitPad
   $ arc set-config editor "\"C:\Users\yourusername\AppData\Roaming\GitPad\GitPad.exe\""
 
+And this for Sublime Text (you may need to adjust the path):
+
+  name=Sublime Text
+  $ arc set-config editor "\"C:\Program Files\Sublime Text 2\sublime_text.exe\" -w"
+
 = Detailed PHP Install Instructions =
 
 While multiple versions of PHP should work, you can follow these specific

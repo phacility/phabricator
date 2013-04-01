@@ -82,6 +82,8 @@ final class ConpherenceViewController extends
       ->setID($form_id)
       ->setAction($update_uri)
       ->setFlexible(true)
+      ->addSigil('conpherence-pontificate')
+      ->setWorkflow(true)
       ->setUser($user)
       ->addHiddenInput('action', 'message')
       ->addHiddenInput('latest_transaction_id', $latest_transaction_id)
@@ -90,8 +92,8 @@ final class ConpherenceViewController extends
         ->setUser($user)
         ->setName('text'))
       ->appendChild(
-        id(new ConpherencePontificateControl())
-        ->setFormID($form_id))
+        id(new AphrontFormSubmitControl())
+          ->setValue(pht('Pontificate')))
       ->render();
 
     $scrollbutton = javelin_tag(

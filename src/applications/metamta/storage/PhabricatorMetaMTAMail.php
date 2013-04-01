@@ -165,17 +165,23 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public function addAttachment(PhabricatorMetaMTAAttachment $attachment) {
-    $this->parameters['attachments'][] = $attachment;
+    $this->parameters['attachments'][] = $attachment->toDictionary();
     return $this;
   }
 
   public function getAttachments() {
-    return $this->getParam('attachments');
+    $dicts = $this->getParam('attachments');
+
+    $result = array();
+    foreach ($dicts as $dict) {
+      $result[] = PhabricatorMetaMTAAttachment::newFromDictionary($dict);
+    }
+    return $result;
   }
 
   public function setAttachments(array $attachments) {
     assert_instances_of($attachments, 'PhabricatorMetaMTAAttachment');
-    $this->setParam('attachments', $attachments);
+    $this->setParam('attachments', mpull($attachments, 'toDictionary'));
     return $this;
   }
 
@@ -430,6 +436,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             }
             break;
           case 'attachments':
+            $value = $this->getAttachments();
             foreach ($value as $attachment) {
               $mailer->addAttachment(
                 $attachment->getData(),
@@ -715,13 +722,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $is_mailable = false;
       switch ($value) {
         case PhabricatorPHIDConstants::PHID_TYPE_USER:
-          $user = $users[$phid];
+          $user = idx($users, $phid);
           if ($user) {
             $name = $this->getUserName($user);
             $is_mailable = !$user->getIsDisabled()
                         && !$user->getIsSystemAgent();
           }
-          $email = $user_emails[$phid] ?
+          $email = isset($user_emails[$phid]) ?
                    $user_emails[$phid]->getAddress() :
                    $default;
           break;

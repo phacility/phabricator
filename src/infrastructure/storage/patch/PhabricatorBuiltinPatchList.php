@@ -179,6 +179,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'phlux',
       ),
+      'db.phortune' => array(
+        'type' => 'db',
+        'name' => 'phortune',
+      ),
+      'db.phrequent' => array(
+        'type' => 'db',
+        'name' => 'phrequent',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1193,6 +1201,30 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130317.phrictionedge.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130317.phrictionedge.sql'),
+      ),
+      '20130321.token.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130321.token.sql'),
+      ),
+      '20130310.xactionmeta.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130310.xactionmeta.sql'),
+      ),
+      '20130322.phortune.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130322.phortune.sql'),
+      ),
+      '20130323.phortunepayment.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130323.phortunepayment.sql'),
+      ),
+      '20130324.phortuneproduct.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130324.phortuneproduct.sql'),
+      ),
+      '20130330.phrequent.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130330.phrequent.sql'),
       ),
     );
   }

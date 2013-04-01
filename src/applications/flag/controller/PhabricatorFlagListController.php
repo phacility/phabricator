@@ -7,6 +7,16 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
     $user = $request->getUser();
 
     $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/flag/view/'));
+    $nav->addLabel(pht('Flags'));
+    $nav->addFilter('all', pht('Your Flags'));
+    $nav->selectFilter('all', 'all');
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(id(new PhabricatorCrumbView)
+      ->setName(pht('Flags'))
+      ->setHref($request->getRequestURI()));
+    $nav->setCrumbs($crumbs);
 
     $filter_form = new AphrontFormView();
     $filter_form->setUser($user);
@@ -26,6 +36,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
 
     $filter = new AphrontListFilterView();
     $filter->appendChild($filter_form);
+    $nav->appendChild($filter);
 
     $query = new PhabricatorFlagQuery();
     $query->withOwnerPHIDs(array($user->getPHID()));
@@ -56,11 +67,6 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
     $view->setFlags($flags);
     $view->setUser($user);
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Flags'));
-
-    $nav->appendChild($header);
-    $nav->appendChild($filter);
     $nav->appendChild($view);
 
     return $this->buildApplicationPage(

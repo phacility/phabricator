@@ -1,0 +1,131 @@
+/**
+ * @provides spacing-css
+ */
+
+.pl {
+  padding: 20px;
+}
+
+.pm {
+  padding: 10px;
+}
+
+.ps {
+  padding: 5px;
+}
+
+.ml {
+  margin: 20px;
+}
+
+.mm {
+  margin: 10px;
+}
+
+.ms {
+  margin: 5px;
+}
+
+/* left */
+
+.pll {
+  padding-left: 20px;
+}
+
+.pml {
+  padding-left: 10px
+}
+
+.psl {
+  padding-left: 5px;
+}
+
+.mll {
+  margin-left: 20px;
+}
+
+.mml {
+  margin-left: 10px;
+}
+
+.msl {
+  margin-left: 5px;
+}
+
+/* Right */
+
+.plr {
+  padding-right: 20px;
+}
+
+.pmr {
+  padding-right: 10px;
+}
+
+.psr {
+  padding-right: 5px;
+}
+
+.mlr {
+  margin-right: 20px;
+}
+
+.mmr {
+  margin-right: 10px;
+}
+
+.msr {
+  margin-right: 5px;
+}
+
+/* Bottom */
+
+.plb {
+  padding-bottom: 20px;
+}
+
+.pmb {
+  padding-bottom: 10px;
+}
+
+.psb {
+  padding-bottom: 5px;
+}
+
+.mlb {
+  margin-bottom: 20px;
+}
+
+.mmb {
+  margin-bottom: 10px;
+}
+
+.msb {
+  margin-bottom: 5px;
+}
+
+/* Top */
+
+.plt {
+  padding-top: 20px;
+}
+
+.pmt {
+  padding-top: 10px;
+}
+
+.pst {
+  padding-top: 5px;
+}
+
+.mlt {
+  margin-top: 20px;
+}
+
+.mmt {
+  margin-top: 10px;
+}
+
+.mst {
+  margin-top: 5px;
+}

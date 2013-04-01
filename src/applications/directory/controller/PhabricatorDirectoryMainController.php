@@ -65,14 +65,10 @@ final class PhabricatorDirectoryMainController
     $nav->appendChild($content);
     $nav->appendChild(new PhabricatorGlobalUploadTargetView());
 
-    $title = PhabricatorEnv::getEnvConfig('phabricator.serious-business') ?
-      'Phabricator' :
-      pht('Bacon Ice Cream for Breakfast');
-
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => $title,
+        'title' => 'Phabricator',
         'device' => true,
       ));
   }
@@ -342,22 +338,28 @@ final class PhabricatorDirectoryMainController
           'it. See %s or type <tt>help</tt>.',
         $doc_link));
 
+    $form = phabricator_form(
+      $user,
+      array(
+        'action' => '/jump/',
+        'method' => 'POST',
+        'class'  => 'phabricator-jump-nav-form',
+      ),
+      array(
+        $jump_input,
+        $jump_caption,
+      ));
+
     $panel = new AphrontPanelView();
     $panel->setHeader('Jump Nav');
-    $panel->appendChild(
-      phabricator_form(
-        $user,
-        array(
-          'action' => '/jump/',
-          'method' => 'POST',
-          'class'  => 'phabricator-jump-nav-form',
-        ),
-        array(
-          $jump_input,
-          $jump_caption,
-        )));
+    $panel->setNoBackground();
+    // $panel->appendChild();
 
-    return $panel;
+    $list_filter = new AphrontListFilterView();
+    $list_filter->appendChild(phutil_tag('h1', array(), 'Jump Nav'));
+    $list_filter->appendChild($form);
+
+    return $list_filter;
   }
 
   private function renderMiniPanel($title, $body) {

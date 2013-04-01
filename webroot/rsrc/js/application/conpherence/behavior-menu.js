@@ -132,12 +132,15 @@ JX.behavior('conpherence-menu', function(config) {
 
   JX.Stratcom.listen('click', 'show-older-messages', function(e) {
     e.kill();
-    console.log(document.URL);
-    new JX.Request('/conpherence/view/1/', function(r) {
-      console.log('100');
-    })
-    .setData({offset: 100}) // get the next page
-    .send();
+    var last_offset = e.getNodeData('show-older-messages').offset;
+    var conf_id = e.getNodeData('show-older-messages').ID;
+    JX.DOM.remove(e.getNode('show-older-messages'));
+    var messages_root = JX.$(config.messages);
+    new JX.Request('/conpherence/view/'+conf_id+'/', function(r) {
+      var messages = JX.$H(r.messages);
+      JX.DOM.prependContent(messages_root,
+      JX.$H(messages));
+    }).setData({ offset: last_offset+1 }).send();
   });
 
   // select the current message

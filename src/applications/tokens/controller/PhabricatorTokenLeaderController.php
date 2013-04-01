@@ -6,11 +6,13 @@ final class PhabricatorTokenLeaderController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
-    $pager = id(new AphrontCursorPagerView())
-      ->readFromRequest($request);
+
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'page');
+    $pager->setOffset($request->getInt('page'));
 
     $query = id(new PhabricatorTokenReceiverQuery());
-    $objects = $query->setViewer($user)->execute();
+    $objects = $query->setViewer($user)->executeWithOffsetPager($pager);
     $counts = $query->getTokenCounts();
 
     $handles = array();

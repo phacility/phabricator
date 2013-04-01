@@ -105,10 +105,14 @@ abstract class ConpherenceController extends PhabricatorController {
     $nav->setMenuID('conpherence-menu');
 
     if (!$for_application) {
-      $nav->addButton(
-        'new',
-        pht('New Conversation'),
-        $this->getApplicationURI('new/'));
+      $nav->addMenuItem(
+        id(new PhabricatorMenuItemView())
+          ->setName(pht('New Conversation'))
+          ->setWorkflow(true)
+          ->setKey('new')
+          ->setHref($this->getApplicationURI('new/'))
+          ->setType(PhabricatorMenuItemView::TYPE_BUTTON));
+
       $nav->addLabel(pht('Unread'));
       $nav = $this->addConpherencesToNav(
         $unread_conpherences,
@@ -325,6 +329,7 @@ abstract class ConpherenceController extends PhabricatorController {
         'selected_conpherence_id' => $this->getSelectedConpherencePHID(),
         'fancy_ajax' => (bool) $this->getSelectedConpherencePHID()
       ));
+
     if ($more_than_menu) {
       Javelin::initBehavior('conpherence-drag-and-drop-photo',
         array(
@@ -333,14 +338,8 @@ abstract class ConpherenceController extends PhabricatorController {
           'upload_uri' => '/file/dropupload/',
           'activated_class' => 'conpherence-header-upload-photo',
         ));
-      Javelin::initBehavior('conpherence-pontificate',
-        array(
-          'messages' => 'conpherence-messages',
-          'header' => 'conpherence-header-pane',
-          'menu_pane' => 'conpherence-menu',
-          'form_pane' => 'conpherence-form',
-          'file_widget' => 'widgets-files',
-        ));
     }
+
+    Javelin::initBehavior('conpherence-pontificate');
   }
 }

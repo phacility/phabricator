@@ -37,4 +37,20 @@ final class PhabricatorMetaMTAAttachment {
     $this->mimetype = $mimetype;
     return $this;
   }
+
+  public function toDictionary() {
+    return array(
+      'filename' => $this->getFilename(),
+      'mimetype' => $this->getMimetype(),
+      'data' => $this->getData(),
+    );
+  }
+
+  public static function newFromDictionary(array $dict) {
+    return new PhabricatorMetaMTAAttachment(
+      idx($dict, 'data'),
+      idx($dict, 'filename'),
+      idx($dict, 'mimetype'));
+  }
+
 }

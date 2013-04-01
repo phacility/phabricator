@@ -1,0 +1,95 @@
+/**
+ * @provides phabricator-workboard-view-css
+ */
+
+.phabricator-workboard-view {
+  width: 100%;
+}
+
+.phabricator-workboard-view-outer {
+  padding: 8px;
+  min-height: 120px;
+  overflow-x: scroll;
+  border-radius: 5px;
+  background: rgba(150,150,150,.1);
+  box-shadow: inset 0 0 5px rgba(0,0,0,.5);
+}
+
+.phabricator-workboard-action-list {
+  width: 60px;
+  float: left;
+  min-height: 60px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  margin-top: 40px;
+  background: rgba(150,150,150,.2);
+}
+
+.device-phone .phabricator-workboard-view-outer {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.device-phone .phabricator-workboard-action-list {
+  width: 100%;
+  float: none;
+  display: block;
+  border-radius: 3px;
+  margin: 0 0 5px;
+  overflow: hidden;
+}
+
+.device-phone .phabricator-workboard-action-list li {
+  display: inline;
+  float: left;
+  margin: 0px;
+}
+
+.device-phone .phabricator-workboard-action-item-link {
+  margin-right: 0;
+}
+
+/* math here is based on panel width and margins */
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-1-up {
+  width: 310px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-2-up {
+  width: 620px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-3-up {
+  width: 930px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-4-up {
+  width: 1008px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-5-up {
+  width: 1250px;
+}
+
+.phabricator-workboard-fixed
+  .phabricator-workboard-view-inner.workboard-6-up {
+  width: 1500px;
+}
+
+.device-phone .phabricator-workboard-fixed .phabricator-workboard-view-inner {
+   width: 100%;
+}
+
+.phabricator-workboard-action-item-link {
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin: 5px 4px 5px 5px;
+}

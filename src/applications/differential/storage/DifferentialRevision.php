@@ -1,7 +1,10 @@
 <?php
 
 final class DifferentialRevision extends DifferentialDAO
-  implements PhabricatorTokenReceiverInterface, PhabricatorPolicyInterface {
+  implements
+    PhabricatorTokenReceiverInterface,
+    PhabricatorPolicyInterface,
+    PhrequentTrackableInterface {
 
   protected $title;
   protected $originalTitle;

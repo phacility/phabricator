@@ -121,25 +121,22 @@ final class ConpherenceNewController extends ConpherenceController {
 
     $submit_uri = $this->getApplicationURI('new/');
     $cancel_uri = $this->getApplicationURI();
-    if ($request->isAjax()) {
-      // TODO - we can get a better cancel_uri once we get better at crazy
-      // ajax jonx T2086
-      if ($participant_prefill) {
-        $handle = $handles[$participant_prefill];
-        $cancel_uri = $handle->getURI();
-      }
-      $form = id(new AphrontDialogView())
-        ->setSubmitURI($submit_uri)
-        ->addSubmitButton()
-        ->setWidth(AphrontDialogView::WIDTH_FORM)
-        ->addCancelButton($cancel_uri);
-    } else {
-      $form = id(new AphrontFormView())
-        ->setID('conpherence-message-pane')
-        ->setAction($submit_uri);
+
+    // TODO - we can get a better cancel_uri once we get better at crazy
+    // ajax jonx T2086
+    if ($participant_prefill) {
+      $handle = $handles[$participant_prefill];
+      $cancel_uri = $handle->getURI();
     }
 
-    $form
+    $dialog = id(new AphrontDialogView())
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setUser($user)
+      ->setTitle($title)
+      ->addCancelButton($cancel_uri)
+      ->addSubmitButton(pht('Create Conversation'));
+
+    $form = id(new AphrontFormLayoutView())
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -154,40 +151,10 @@ final class ConpherenceNewController extends ConpherenceController {
         ->setName('message')
         ->setValue($message)
         ->setLabel(pht('Message'))
-        ->setPlaceHolder(pht('Drag and drop to include files...'))
         ->setError($e_message));
 
-    if ($request->isAjax()) {
-      $form->setTitle($title);
-      return id(new AphrontDialogResponse())
-        ->setDialog($form);
-    }
+    $dialog->appendChild($form);
 
-    $form
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-        ->setValue(pht('Submit'))
-        ->addCancelButton($cancel_uri));
-
-    $this->loadStartingConpherences();
-    $this->setSelectedConpherencePHID(null);
-    $this->initJavelinBehaviors();
-    $nav = $this->buildSideNavView('new');
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
-    $nav->appendChild(
-      array(
-        $header,
-        $error_view,
-        $form,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
+    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 }

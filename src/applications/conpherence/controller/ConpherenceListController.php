@@ -64,17 +64,19 @@ final class ConpherenceListController extends
 
   private function renderEmptyMainPane() {
     $this->initJavelinBehaviors(true);
-    return phutil_tag(
+    return javelin_tag(
       'div',
       array(
-        'id' => 'conpherence-main-pane'
+        'id' => 'conpherence-main-pane',
+        'sigil' => 'conpherence-layout'
       ),
       array(
-        phutil_tag(
+        javelin_tag(
           'div',
           array(
             'class' => 'conpherence-header-pane',
             'id' => 'conpherence-header-pane',
+            'sigil' => 'conpherence-header',
           ),
           ''),
         phutil_tag(
@@ -91,11 +93,12 @@ final class ConpherenceListController extends
             'id' => 'conpherence-message-pane'
           ),
           array(
-            phutil_tag(
+            javelin_tag(
               'div',
               array(
                 'class' => 'conpherence-messages',
-                'id' => 'conpherence-messages'
+                'id' => 'conpherence-messages',
+                'sigil' => 'conpherence-messages',
               ),
               ''),
             phutil_tag(
