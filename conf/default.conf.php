@@ -1303,6 +1303,7 @@ return array(
   // Set the default monospaced font style for users who haven't set a custom
   // style.
   'style.monospace' => '10px "Menlo", "Consolas", "Monaco", monospace',
+  'style.monospace.windows' => '11px "Menlo", "Consolas", "Monaco", monospace',
 
 
 // -- Debugging ------------------------------------------------------------- //
