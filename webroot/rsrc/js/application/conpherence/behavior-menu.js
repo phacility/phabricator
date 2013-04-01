@@ -63,7 +63,7 @@ JX.behavior('conpherence-menu', function(config) {
     var data = JX.Stratcom.getData(thread.node);
 
     if (thread.visible !== null || !config.hasThread) {
-      var uri = config.base_uri + 'view/' + data.id + '/';
+      var uri = config.base_uri + data.id + '/';
       new JX.Workflow(uri, {})
         .setHandler(onresponse)
         .start();
@@ -96,8 +96,14 @@ JX.behavior('conpherence-menu', function(config) {
     var menuRoot = JX.$(config.menu_pane);
     JX.DOM.setContent(headerRoot, header);
     JX.DOM.setContent(messagesRoot, messages);
-    messagesRoot.scrollTop = messagesRoot.scrollHeight;
     JX.DOM.setContent(formRoot, form);
+
+    didredrawthread();
+  }
+
+  function didredrawthread() {
+    var messagesRoot = JX.$(config.messages);
+    messagesRoot.scrollTop = messagesRoot.scrollHeight;
   }
 
   JX.Stratcom.listen(
@@ -145,7 +151,7 @@ JX.behavior('conpherence-menu', function(config) {
     var conf_id = e.getNodeData('show-older-messages').ID;
     JX.DOM.remove(e.getNode('show-older-messages'));
     var messages_root = JX.$(config.messages);
-    new JX.Request('/conpherence/view/'+conf_id+'/', function(r) {
+    new JX.Request(config.base_uri + conf_id + '/', function(r) {
       var messages = JX.$H(r.messages);
       JX.DOM.prependContent(messages_root,
       JX.$H(messages));
@@ -164,6 +170,7 @@ JX.behavior('conpherence-menu', function(config) {
 
     if (!config.hasThreadList) {
       loadthreads();
+      didredrawthread();
     } else {
       didloadthreads();
     }
@@ -174,7 +181,7 @@ JX.behavior('conpherence-menu', function(config) {
 
 
   function loadthreads() {
-    var uri = config.base_uri + config.selectedID + '/';
+    var uri = config.base_uri + 'thread/' + config.selectedID + '/';
     new JX.Workflow(uri)
       .setHandler(onthreadresponse)
       .start();
