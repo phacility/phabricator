@@ -1,4 +1,4 @@
-/**
+<</**
  * @provides javelin-behavior-conpherence-menu
  * @requires javelin-behavior
  *           javelin-dom
@@ -16,6 +16,17 @@ JX.behavior('conpherence-menu', function(config) {
     visible: null
   };
 
+  function selectthreadid(id) {
+    var threads = JX.DOM.scry(document.body, 'a', 'conpherence-menu-click');
+    for (var ii = 0; ii < threads.length; ii++) {
+      var data = JX.Stratcom.getData(threads[ii]);
+      if (data.id == id) {
+        selectthread(threads[ii]);
+        return;
+      }
+    }
+  }
+
   function selectthread(node) {
     if (node === thread.node) {
       return;
@@ -32,10 +43,9 @@ JX.behavior('conpherence-menu', function(config) {
     thread.node = node;
 
     var data = JX.Stratcom.getData(node);
-    thread.selected = data.phid;
+    thread.selected = data.id;
 
-    // TODO: These URIs don't work yet, so don't push them until they do.
-    // JX.History.push(config.base_uri + 'view/' + data.id + '/');
+    JX.History.replace(config.base_uri + data.id + '/');
 
     redrawthread();
   }
@@ -155,15 +165,8 @@ JX.behavior('conpherence-menu', function(config) {
 
 
   // If there's a currently visible thread, select it.
-  if (config.selected_conpherence_id) {
-    var threads = JX.DOM.scry(document.body, 'a', 'conpherence-menu-click');
-    for (var ii = 0; ii < threads.length; ii++) {
-      var data = JX.Stratcom.getData(threads[ii]);
-      if (data.phid == config.selected_conpherence_id) {
-        selectthread(threads[ii]);
-        break;
-      }
-    }
+  if (config.selectedID) {
+    selectthreadid(config.selectedID);
   }
 
 });

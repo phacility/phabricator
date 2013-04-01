@@ -198,7 +198,6 @@ abstract class ConpherenceController extends PhabricatorController {
       ->setMetadata(
         array(
           'id' => $conpherence->getID(),
-          'phid' => $conpherence->getPHID(),
           ));
 
     return $item;

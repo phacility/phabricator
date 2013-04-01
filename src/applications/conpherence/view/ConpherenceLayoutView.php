@@ -2,7 +2,7 @@
 
 final class ConpherenceLayoutView extends AphrontView {
 
-  private $selectedConpherencePHID;
+  private $thread;
   private $baseURI;
 
   public function setBaseURI($base_uri) {
@@ -10,8 +10,8 @@ final class ConpherenceLayoutView extends AphrontView {
     return $this;
   }
 
-  public function setSelectedConpherencePHID($selected_conpherence_phid) {
-    $this->selectedConpherencePHID = $selected_conpherence_phid;
+  public function setThread(ConpherenceThread $thread) {
+    $this->thread = $thread;
     return $this;
   }
 
@@ -26,8 +26,7 @@ final class ConpherenceLayoutView extends AphrontView {
         'widgets_pane' => 'conpherence-widget-pane',
         'form_pane' => 'conpherence-form',
         'menu_pane' => 'conpherence-menu',
-        'selected_conpherence_id' => $this->selectedConpherencePHID,
-        'fancy_ajax' => (bool)$this->selectedConpherencePHID,
+        'selectedID' => ($this->thread ? $this->thread->getID() : null),
       ));
 
     Javelin::initBehavior('conpherence-drag-and-drop-photo',
