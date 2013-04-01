@@ -29,6 +29,16 @@ div.conpherence-layout .phabricator-nav-column-background {
   width: 300px;
 }
 
+.device .conpherence-role-list .conpherence-menu-pane,
+.device .conpherence-role-list .phabricator-nav-column-background {
+  width: 100%;
+}
+
+.device .conpherence-role-list .conpherence-content-pane {
+  display: none;
+}
+
+
 .conpherence-menu .conpherence-menu-item-view {
   display: block;
   height: 70px;
@@ -47,7 +57,7 @@ div.conpherence-layout .phabricator-nav-column-background {
   border-left: 2px solid #66CCFF;
 }
 
-.conpherence-menu .conpherence-menu-item-view:hover {
+.device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
   background-image: url('/rsrc/image/texture/dark-menu-hover.png');
 }
 

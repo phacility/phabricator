@@ -104,6 +104,11 @@ JX.behavior('conpherence-menu', function(config) {
         return;
       }
 
+      // On devices, just follow the link normally.
+      if (JX.Device.getDevice() != 'desktop') {
+        return;
+      }
+
       e.kill();
       selectthread(e.getNode('conpherence-menu-click'));
     });

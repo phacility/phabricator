@@ -5,6 +5,12 @@ final class ConpherenceLayoutView extends AphrontView {
   private $thread;
   private $baseURI;
   private $threadView;
+  private $role;
+
+  public function setRole($role) {
+    $this->role = $role;
+    return $this;
+  }
 
   public function getThreadView() {
     return $this->threadView;
@@ -37,6 +43,7 @@ final class ConpherenceLayoutView extends AphrontView {
         'form_pane' => 'conpherence-form',
         'menu_pane' => 'conpherence-menu',
         'selectedID' => ($this->thread ? $this->thread->getID() : null),
+        'role' => $this->role,
       ));
 
     Javelin::initBehavior('conpherence-drag-and-drop-photo',
@@ -51,7 +58,7 @@ final class ConpherenceLayoutView extends AphrontView {
       'div',
       array(
         'sigil' => 'conpherence-layout',
-        'class' => 'conpherence-layout',
+        'class' => 'conpherence-layout conpherence-role-'.$this->role,
       ),
       array(
         javelin_tag(

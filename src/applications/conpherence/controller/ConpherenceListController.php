@@ -54,16 +54,17 @@ final class ConpherenceListController
       ->setUnreadThreads($unread)
       ->setReadThreads($read);
 
-    $main_pane = id(new ConpherenceLayoutView())
+    $layout = id(new ConpherenceLayoutView())
       ->setBaseURI($this->getApplicationURI())
-      ->setThreadView($thread_view);
+      ->setThreadView($thread_view)
+      ->setRole('list');
 
     if ($conpherence) {
-      $main_pane->setThread($conpherence);
+      $layout->setThread($conpherence);
     }
 
     return $this->buildApplicationPage(
-      $main_pane,
+      $layout,
       array(
         'title' => $title,
         'device' => true,
