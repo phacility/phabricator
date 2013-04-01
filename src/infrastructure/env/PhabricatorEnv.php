@@ -54,6 +54,7 @@ final class PhabricatorEnv {
   private static $repairSource;
   private static $overrideSource;
   private static $requestBaseURI;
+  private static $cache;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -112,6 +113,8 @@ final class PhabricatorEnv {
   }
 
   private static function buildConfigurationSourceStack() {
+    self::dropConfigCache();
+
     $stack = new PhabricatorConfigStackSource();
     self::$sourceStack = $stack;
 
@@ -160,6 +163,7 @@ final class PhabricatorEnv {
       self::$sourceStack->pushSource(self::$repairSource);
     }
     self::$repairSource->setKeys(array($key => $value));
+    self::dropConfigCache();
   }
 
   public static function overrideConfig($key, $value) {
@@ -169,6 +173,7 @@ final class PhabricatorEnv {
       self::$sourceStack->pushSource(self::$overrideSource);
     }
     self::$overrideSource->setKeys(array($key => $value));
+    self::dropConfigCache();
   }
 
   public static function getUnrepairedEnvConfig($key, $default = null) {
@@ -220,8 +225,17 @@ final class PhabricatorEnv {
    * @task read
    */
   public static function getEnvConfig($key) {
+    if (isset(self::$cache[$key])) {
+      return self::$cache[$key];
+    }
+
+    if (array_key_exists($key, self::$cache)) {
+      return self::$cache[$key];
+    }
+
     $result = self::$sourceStack->getKeys(array($key));
     if (array_key_exists($key, $result)) {
+      self::$cache[$key] = $result[$key];
       return $result[$key];
     } else {
       throw new Exception("No config value specified for key '{$key}'.");
@@ -335,6 +349,7 @@ final class PhabricatorEnv {
    * @task test
    */
   private static function pushTestEnvironment() {
+    self::dropConfigCache();
     $source = new PhabricatorConfigDictionarySource(array());
     self::$sourceStack->pushSource($source);
     return spl_object_hash($source);
@@ -345,6 +360,7 @@ final class PhabricatorEnv {
    * @task test
    */
   public static function popTestEnvironment($key) {
+    self::dropConfigCache();
     $source = self::$sourceStack->popSource();
     $stack_key = spl_object_hash($source);
     if ($stack_key !== $key) {
@@ -476,6 +492,10 @@ final class PhabricatorEnv {
     foreach ($tmp as $source) {
       self::$sourceStack->pushSource($source);
     }
+  }
+
+  private static function dropConfigCache() {
+    self::$cache = array();
   }
 
 }
