@@ -54,14 +54,32 @@ final class ConpherenceViewController extends
     $header = $this->renderHeaderPaneContent();
     $messages = $this->renderMessagePaneContent();
     $content = $header + $messages;
-    return id(new AphrontAjaxResponse())->setContent($content);
+
+    if ($request->isAjax()) {
+      return id(new AphrontAjaxResponse())->setContent($content);
+    }
+
+    $layout = id(new ConpherenceLayoutView())
+      ->setBaseURI($this->getApplicationURI())
+      ->setThread($conpherence)
+      ->setHeader($header)
+      ->setMessages($messages['messages'])
+      ->setReplyForm($messages['form'])
+      ->setRole('thread');
+
+    return $this->buildApplicationPage(
+      $layout,
+      array(
+        'title' => $conpherence->getTitle(),
+        'device' => true,
+      ));
   }
 
   private function renderHeaderPaneContent() {
     require_celerity_resource('conpherence-header-pane-css');
     $conpherence = $this->getConpherence();
     $header = $this->buildHeaderPaneContent($conpherence);
-    return array('header' => $header);
+    return array('header' => hsprintf('%s', $header));
   }
 
 
@@ -75,11 +93,11 @@ final class ConpherenceViewController extends
     $transactions = $data['transactions'];
 
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-    $form_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior('conpherence-pontificate');
 
     $form =
       id(new AphrontFormView())
-      ->setID($form_id)
       ->setAction($update_uri)
       ->setFlexible(true)
       ->addSigil('conpherence-pontificate')
@@ -107,7 +125,7 @@ final class ConpherenceViewController extends
       pht('Show Older Messages'));
 
     return array(
-      'messages' => $scrollbutton.$transactions,
+      'messages' => hsprintf('%s%s', $scrollbutton, $transactions),
       'form' => $form
     );
 

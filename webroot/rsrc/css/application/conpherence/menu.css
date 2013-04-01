@@ -2,37 +2,60 @@
  * @provides conpherence-menu-css
  */
 
-.no-conpherences-menu-item {
-  color: #a1a5a9;
-  border-top: solid 1px #3B3D3E;
-  padding: 20px 0;
-  margin: 0px auto;
-  width: 300px;
-  text-align: center;
-}
-
-.conpherence-menu .phabricator-nav-column-background,
-.conpherence-menu .phabricator-nav-local {
-  width: 300px;
-}
-.conpherence-menu .phabricator-nav-local {
+.conpherence-layout {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   top: 44px;
-  bottom: 0px;
 }
 
-.conpherence-menu .phabricator-nav-drag {
-  left: 300px;
-}
-
-.device-desktop .conpherence-menu .phabricator-nav-content {
-  margin-left: 300px !important;
-}
-
-.conpherence-menu .phabricator-menu-view {
+.conpherence-menu-pane {
+  width: 300px;
+  position: absolute;
   overflow-x: hidden;
   overflow-y: auto;
-  margin-bottom: 0;
+  top: 0;
+  bottom: 0;
 }
+
+.conpherence-content-pane {
+  margin-left: 300px;
+  position: relative;
+}
+
+div.conpherence-layout .phabricator-nav-column-background {
+  display: block;
+  width: 300px;
+}
+
+.device .conpherence-role-list .conpherence-menu-pane,
+.device .conpherence-role-list .phabricator-nav-column-background {
+  width: 100%;
+}
+
+.device .conpherence-role-list .conpherence-content-pane {
+  display: none;
+}
+
+.device .conpherence-role-thread .conpherence-menu-pane,
+.device .conpherence-role-thread .phabricator-nav-column-background,
+.device .conpherence-role-thread .conpherence-widget-pane {
+  display: none;
+}
+
+.device .conpherence-role-thread .conpherence-content-pane {
+  margin-left: 0;
+}
+
+.device .conpherence-role-thread .conpherence-message-pane,
+.device .conpherence-role-thread .conpherence-messages,
+.device .conpherence-role-thread .phabricator-form-view {
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
 
 .conpherence-menu .conpherence-menu-item-view {
   display: block;
@@ -52,7 +75,7 @@
   border-left: 2px solid #66CCFF;
 }
 
-.conpherence-menu .conpherence-menu-item-view:hover {
+.device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
   background-image: url('/rsrc/image/texture/dark-menu-hover.png');
 }
 
@@ -121,4 +144,13 @@
   right: 12px;
   color: white;
   font-size: 12px;
+}
+
+.no-conpherences-menu-item {
+  color: #a1a5a9;
+  border-top: solid 1px #3B3D3E;
+  padding: 20px 0;
+  margin: 0px auto;
+  width: 300px;
+  text-align: center;
 }

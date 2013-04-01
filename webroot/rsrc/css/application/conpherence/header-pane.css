@@ -2,23 +2,10 @@
  * @provides conpherence-header-pane-css
  */
 
-#conpherence-main-pane {
-  position: relative;
-}
-
 .conpherence-header-pane {
   border-bottom: 1px solid #ccc;
   height: 80px;
   width: 100%;
-}
-
-.device .conpherence-header-pane {
-  position: fixed;
-  top: 44px;
-}
-
-.device-phone .conpherence-header-pane {
-  display: none;
 }
 
 .conpherence-header-pane .edit {

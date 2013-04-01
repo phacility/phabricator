@@ -103,12 +103,24 @@ final class PhabricatorSyntaxHighlightingConfigOptions
         'style.monospace',
         'string',
         '10px "Menlo", "Consolas", "Monaco", monospace')
+        ->setLocked(true)
         ->setSummary(
           pht("Default monospace font."))
         ->setDescription(
           pht(
             "Set the default monospaced font style for users who haven't set ".
             "a custom style.")),
+      $this->newOption(
+        'style.monospace.windows',
+        'string',
+        '11px "Menlo", "Consolas", "Monaco", monospace')
+        ->setLocked(true)
+        ->setSummary(
+          pht("Default monospace font for clients on Windows."))
+        ->setDescription(
+          pht(
+            "Set the default monospaced font style for users who haven't set ".
+            "a custom style and are using Windows.")),
     );
   }
 
