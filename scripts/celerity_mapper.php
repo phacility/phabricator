@@ -89,6 +89,7 @@ $package_spec = array(
     'sprite-gradient-css',
     'sprite-menu-css',
     'sprite-apps-large-css',
+    'spacing-css',
 
     'phabricator-main-menu-view',
     'phabricator-notification-css',
