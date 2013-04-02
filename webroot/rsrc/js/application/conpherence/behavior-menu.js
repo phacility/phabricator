@@ -163,8 +163,15 @@ JX.behavior('conpherence-menu', function(config) {
   // select or load any threads. On Desktop, we automatically select the first
   // thread.
 
+  var old_device = null;
   function ondevicechange() {
-    if (JX.Device.getDevice() != 'desktop') {
+    var new_device = JX.Device.getDevice();
+    if (new_device === old_device) {
+      return;
+    }
+    old_device = new_device;
+
+    if (new_device != 'desktop') {
       return;
     }
 
