@@ -11,6 +11,7 @@ final class ConpherenceThreadQuery
   private $needWidgetData;
   private $needHeaderPics;
   private $needOrigPics;
+  private $needAllTransactions;
 
   public function needOrigPics($need_orig_pics) {
     $this->needOrigPics = $need_orig_pics;
@@ -24,6 +25,11 @@ final class ConpherenceThreadQuery
 
   public function needWidgetData($need_widget_data) {
     $this->needWidgetData = $need_widget_data;
+    return $this;
+  }
+
+  public function needAllTransactions($need_all_transactions) {
+    $this->needAllTransactions = $need_all_transactions;
     return $this;
   }
 
@@ -54,8 +60,13 @@ final class ConpherenceThreadQuery
     if ($conpherences) {
       $conpherences = mpull($conpherences, null, 'getPHID');
       $this->loadParticipants($conpherences);
-      $this->loadTransactionsAndHandles($conpherences);
+
+      if ($this->needAllTransactions) {
+        $this->loadTransactionsAndHandles($conpherences);
+      }
+
       $this->loadFilePHIDs($conpherences);
+
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
       }

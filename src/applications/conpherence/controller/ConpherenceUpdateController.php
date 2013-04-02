@@ -32,6 +32,7 @@ final class ConpherenceUpdateController
       ->withIDs(array($conpherence_id))
       ->needOrigPics(true)
       ->needHeaderPics(true)
+      ->needAllTransactions(true)
       ->executeOne();
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
 
@@ -258,6 +259,7 @@ final class ConpherenceUpdateController
       ->setAfterID($latest_transaction_id)
       ->needHeaderPics(true)
       ->needWidgetData(true)
+      ->needAllTransactions(true)
       ->withIDs(array($conpherence_id))
       ->executeOne();
 

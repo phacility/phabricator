@@ -50,6 +50,7 @@ final class ConpherenceWidgetController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needWidgetData(true)
+      ->needAllTransactions(true)
       ->executeOne();
     $this->setConpherence($conpherence);
 

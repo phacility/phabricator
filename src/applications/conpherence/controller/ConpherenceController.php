@@ -46,6 +46,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $all_conpherences = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withPHIDs($all_conpherence_phids)
+      ->needAllTransactions(true)
       ->execute();
     $unread_conpherences = array_select_keys(
       $all_conpherences,
