@@ -136,7 +136,6 @@ try {
     ));
 
   DarkConsoleXHProfPluginAPI::saveProfilerSample($access_log);
-
 } catch (Exception $ex) {
   PhabricatorStartup::didFatal("[Exception] ".$ex->getMessage());
 }
