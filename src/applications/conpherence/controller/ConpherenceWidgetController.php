@@ -69,6 +69,9 @@ final class ConpherenceWidgetController extends
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
+        'header' => 'conpherence-header-pane',
+        'messages' => 'conpherence-messages',
+        'people_widget' => 'widgets-people',
         'file_widget' => 'widgets-files',
         'settings_widget' => 'widgets-settings',
         'widgetRegistery' => array(
@@ -83,7 +86,8 @@ final class ConpherenceWidgetController extends
 
     $conpherence = $this->getConpherence();
 
-    $widgets = phutil_tag(
+    $widgets = array();
+    $widgets[] = phutil_tag(
       'div',
       array(
         'class' => 'widgets-header'
@@ -167,50 +171,50 @@ final class ConpherenceWidgetController extends
               'class' => 'sprite-conpherence conpherence_settings_off',
             ),
             '')
-        ))).
-    phutil_tag(
+          )));
+    $user = $this->getRequest()->getUser();
+    // now the widget bodies
+    $widgets[] = phutil_tag(
       'div',
       array(
         'class' => 'widgets-body',
         'id' => 'widgets-people',
         'style' => 'display: none;'
       ),
-      $this->renderPeopleWidgetPaneContent()).
-      javelin_tag(
-        'div',
-        array(
-          'class' => 'widgets-body',
-          'id' => 'widgets-files',
-          'sigil' => 'conpherence-widget-files',
-        ),
-        id(new ConpherenceFileWidgetView())
-        ->setUser($this->getRequest()->getUser())
-        ->setConpherence($conpherence)
-        ->setUpdateURI(
-          $this->getApplicationURI('update/'.$conpherence->getID().'/'))
-          ->render()).
-          phutil_tag(
-            'div',
-            array(
-              'class' => 'widgets-body',
-              'id' => 'widgets-calendar',
-              'style' => 'display: none;'
-            ),
-            $this->renderCalendarWidgetPaneContent()).
-            phutil_tag(
-              'div',
-              array(
-                'class' => 'widgets-body',
-                'id' => 'widgets-settings',
-                'style' => 'display: none'
-              ),
-              $this->renderSettingsWidgetPaneContent());
+      id(new ConpherencePeopleWidgetView())
+      ->setUser($user)
+      ->setConpherence($conpherence)
+      ->setUpdateURI($this->getWidgetURI()));
+    $widgets[] = phutil_tag(
+      'div',
+      array(
+        'class' => 'widgets-body',
+        'id' => 'widgets-files',
+      ),
+      id(new ConpherenceFileWidgetView())
+      ->setUser($user)
+      ->setConpherence($conpherence)
+      ->setUpdateURI($this->getWidgetURI()));
+    $widgets[] = phutil_tag(
+      'div',
+      array(
+        'class' => 'widgets-body',
+        'id' => 'widgets-calendar',
+        'style' => 'display: none;'
+      ),
+      $this->renderCalendarWidgetPaneContent());
+    $widgets[] = phutil_tag(
+      'div',
+      array(
+        'class' => 'widgets-body',
+        'id' => 'widgets-settings',
+        'style' => 'display: none'
+      ),
+      $this->renderSettingsWidgetPaneContent());
 
-    return array('widgets' => $widgets);
-  }
-
-  private function renderPeopleWidgetPaneContent() {
-    return 'TODO - people';
+    // without this implosion we get "," between each element in our widgets
+    // array
+    return array('widgets' => phutil_implode_html('', $widgets));
   }
 
   private function renderSettingsWidgetPaneContent() {
@@ -244,8 +248,6 @@ final class ConpherenceWidgetController extends
       ->setName('notifications')
       ->setValue($notifications);
 
-    $href = $this->getApplicationURI(
-      'update/'.$conpherence->getID().'/');
     $layout = array(
       $options,
       phutil_tag(
@@ -268,7 +270,7 @@ final class ConpherenceWidgetController extends
       $user,
       array(
         'method' => 'POST',
-        'action' => $href,
+        'action' => $this->getWidgetURI(),
       ),
       $layout);
   }
@@ -367,6 +369,11 @@ final class ConpherenceWidgetController extends
     }
 
     return $timestamps;
+  }
+
+  private function getWidgetURI() {
+    $conpherence = $this->getConpherence();
+    return $this->getApplicationURI('update/'.$conpherence->getID().'/');
   }
 
 }

@@ -159,23 +159,35 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         }
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-        $participants = array();
-        foreach ($xaction->getNewValue() as $participant) {
-          if ($participant == $this->getActor()->getPHID()) {
+
+        $participants = $object->getParticipants();
+
+        $old_map = array_fuse($xaction->getOldValue());
+        $new_map = array_fuse($xaction->getNewValue());
+
+        $remove = array_keys(array_diff_key($old_map, $new_map));
+        foreach ($remove as $phid) {
+          $remove_participant = $participants[$phid];
+          $remove_participant->delete();
+          unset($participants[$phid]);
+        }
+
+        $add = array_keys(array_diff_key($new_map, $old_map));
+        foreach ($add as $phid) {
+          if ($phid == $this->getActor()->getPHID()) {
             $status = ConpherenceParticipationStatus::UP_TO_DATE;
           } else {
             $status = ConpherenceParticipationStatus::BEHIND;
           }
-          $participants[] =
+          $participants[$phid] =
             id(new ConpherenceParticipant())
             ->setConpherencePHID($object->getPHID())
-            ->setParticipantPHID($participant)
+            ->setParticipantPHID($phid)
             ->setParticipationStatus($status)
             ->setDateTouched(time())
             ->setBehindTransactionPHID($xaction->getPHID())
             ->save();
         }
-        $participants = mpull($participants, null, 'getParticipantPHID');
         $object->attachParticipants($participants);
         break;
      }
@@ -224,11 +236,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $to_phids = array();
     $participants = $object->getParticipants();
+    if (empty($participants)) {
+      return $to_phids;
+    }
     $preferences = id(new PhabricatorUserPreferences())
       ->loadAllWhere('userPHID in (%Ls)', array_keys($participants));
     $preferences = mpull($preferences, null, 'getUserPHID');
-    $to_phids = array();
     foreach ($participants as $phid => $participant) {
       $default = ConpherenceSettings::EMAIL_ALWAYS;
       $preference = idx($preferences, $phid);

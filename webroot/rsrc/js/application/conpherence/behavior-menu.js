@@ -136,10 +136,16 @@ JX.behavior('conpherence-menu', function(config) {
           JX.$H(r.header)
         );
 
-        // update the menu entry as well
+        // update the menu entry
         JX.DOM.replace(
           JX.$(r.conpherence_phid + '-nav-item'),
           JX.$H(r.nav_item)
+        );
+
+        // update the people widget
+        JX.DOM.setContent(
+          JX.$(config.people_widget),
+          JX.$H(r.people_widget)
         );
       })
       .start();

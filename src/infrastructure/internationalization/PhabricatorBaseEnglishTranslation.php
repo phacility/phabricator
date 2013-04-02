@@ -217,6 +217,13 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%d people(s)' => array(
+        array(
+          '%d person',
+          '%d people',
+        ),
+      ),
+
       '%s Line(s)' => array(
         '%s Line',
         '%s Lines',

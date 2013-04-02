@@ -192,6 +192,91 @@
   padding-bottom: 1px;
 }
 
+/* people widget */
+.conpherence-widget-pane .people-widget-header {
+  float: left;
+  width: 280px;
+}
+
+.conpherence-widget-pane .people-widget-header .divider {
+  float: left;
+  clear: both;
+  width: 260px;
+  margin: 0px 0px 0px 10px;
+  border: 1px dashed #bfbfbf;
+}
+.conpherence-widget-pane .people-widget-header .add-people-widget {
+  float: left;
+  padding: 10px 0px 10px 0px;
+  width: 280px;
+}
+
+.conpherence-widget-pane .people-widget-header .add-people-widget
+.aphront-form-control-tokenizer {
+  float: left;
+  width: 180px;
+  padding: 0px 0px 0px 10px
+}
+
+.conpherence-widget-pane .people-widget-header .add-people-widget
+.jx-tokenizer-input {
+  padding: 1px 3px 1px 3px;
+}
+
+.conpherence-widget-pane .people-widget-header .add-people-widget
+.people-add-button {
+  float: right;
+  margin: 0px 10px 0px 0px;
+  padding: 3px 16px 4px 16px;
+}
+
+.conpherence-widget-pane .person-entry {
+  float: left;
+  width: 270px;
+  clear: both;
+  padding: 10px 0px 0px 8px;
+}
+
+.conpherence-widget-pane .person-entry a {
+  float: left;
+  clear: none;
+  font-size: 14px;
+  font-weight: bold;
+  width: 166px;
+}
+
+.conpherence-widget-pane .person-entry .pic {
+  float: left;
+  clear: left;
+  margin: 0px 10px 0px 0px;
+  width: 50px;
+  padding: 0;
+}
+
+.conpherence-widget-pane .person-entry .remove {
+  float: right;
+  clear: right;
+  margin: 0;
+  width: 34px;
+  height: 36px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  padding: 8px 0px 8px 0px;
+}
+
+.conpherence-widget-pane .person-entry .remove:hover {
+  text-decoration: none;
+}
+
+.conpherence-widget-pane .person-entry .remove .icon {
+  color: #bfbfbf;
+}
+
+.conpherence-widget-pane .person-entry .remove:hover .icon {
+  color: #18559d;
+}
+
 /* settings widget */
 .conpherence-widget-pane .notifications-update {
   margin: 2px 0px 0px 8px;
