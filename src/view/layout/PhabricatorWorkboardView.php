@@ -3,7 +3,7 @@
 final class PhabricatorWorkboardView extends AphrontView {
 
   private $panels = array();
-  private $flexLayout = false;
+  private $fluidLayout = false;
   private $actions = array();
 
   public function addPanel(PhabricatorWorkpanelView $panel) {
@@ -11,8 +11,8 @@ final class PhabricatorWorkboardView extends AphrontView {
     return $this;
   }
 
-  public function setFlexLayout($layout) {
-    $this->flexLayout = $layout;
+  public function setFluidLayout($layout) {
+    $this->fluidLayout = $layout;
     return $this;
   }
 
@@ -23,13 +23,6 @@ final class PhabricatorWorkboardView extends AphrontView {
 
   public function render() {
     require_celerity_resource('phabricator-workboard-view-css');
-
-    $classes = array();
-    $classes[] = 'phabricator-workboard-view-inner';
-
-    if (count($this->panels) > 6) {
-      throw new Exception("No more than 6 panels per workboard.");
-    }
 
     $action_list = null;
     if (!empty($this->actions)) {
@@ -50,29 +43,17 @@ final class PhabricatorWorkboardView extends AphrontView {
           $items);
     }
 
-    $classes[] = 'workboard-'.count($this->panels).'-up';
-
-    $view = phutil_tag(
-      'div',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      array(
-        $this->panels,
-      ));
-
-    $classes = array();
-    $classes[] = 'phabricator-workboard-view-outer';
-    if ($this->flexLayout) {
-      $classes[] = 'phabricator-workboard-flex';
-    } else {
-      $classes[] = 'phabricator-workboard-fixed';
+    $view = new AphrontMultiColumnView();
+    $view->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
+    $view->setFluidLayout($this->fluidLayout);
+    foreach ($this->panels as $panel) {
+      $view->addColumn($panel);
     }
 
     $board = phutil_tag(
       'div',
         array(
-          'class' => implode(' ', $classes)
+          'class' => 'phabricator-workboard-view-shadow'
         ),
         $view);
 

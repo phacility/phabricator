@@ -6,7 +6,7 @@
   width: 100%;
 }
 
-.phabricator-workboard-view-outer {
+.phabricator-workboard-view-shadow {
   padding: 8px;
   min-height: 120px;
   overflow-x: scroll;
@@ -25,7 +25,7 @@
   background: rgba(150,150,150,.2);
 }
 
-.device-phone .phabricator-workboard-view-outer {
+.device-phone .phabricator-workboard-view-shadow {
   background: none;
   box-shadow: none;
   padding: 0;
@@ -48,48 +48,14 @@
   margin: 0px;
 }
 
-.device-phone .phabricator-workboard-action-item-link {
-  margin-right: 0;
-}
-
-/* math here is based on panel width and margins */
-.phabricator-workboard-fixed
-  .phabricator-workboard-view-inner.workboard-1-up {
-  width: 310px;
-}
-
-.phabricator-workboard-fixed
-  .phabricator-workboard-view-inner.workboard-2-up {
-  width: 620px;
-}
-
-.phabricator-workboard-fixed
-  .phabricator-workboard-view-inner.workboard-3-up {
-  width: 930px;
-}
-
-.phabricator-workboard-fixed
-  .phabricator-workboard-view-inner.workboard-4-up {
-  width: 1008px;
-}
-
-.phabricator-workboard-fixed
-  .phabricator-workboard-view-inner.workboard-5-up {
-  width: 1250px;
-}
-
-.phabricator-workboard-fixed
-  .phabricator-workboard-view-inner.workboard-6-up {
-  width: 1500px;
-}
-
-.device-phone .phabricator-workboard-fixed .phabricator-workboard-view-inner {
-   width: 100%;
-}
-
 .phabricator-workboard-action-item-link {
   display: block;
   width: 50px;
   height: 50px;
   margin: 5px 4px 5px 5px;
 }
+
+.device-phone .phabricator-workboard-action-item-link {
+  margin-right: 0;
+}
+

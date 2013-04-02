@@ -2,41 +2,6 @@
  * @provides phabricator-workpanel-view-css
  */
 
-.phabricator-workpanel-view {
-  float: left;
-}
-
-.phabricator-workpanel-view-inner {
-  margin: 0 10px 0 0;
-}
-
-.device-phone .phabricator-workpanel-view-inner {
-  margin: 0;
-}
-
-.phabricator-workboard-flex .phabricator-workpanel-view:last-child
-  .phabricator-workpanel-view-inner {
-  margin: 0;
-}
-
-/* Panels require a fixed width to overflow well. */
-.phabricator-workboard-fixed .workboard-1-up .phabricator-workpanel-view,
-.phabricator-workboard-fixed .workboard-2-up .phabricator-workpanel-view,
-.phabricator-workboard-fixed .workboard-3-up .phabricator-workpanel-view {
-  width: 300px;
-}
-
-.phabricator-workboard-fixed .workboard-4-up .phabricator-workpanel-view,
-.phabricator-workboard-fixed .workboard-5-up .phabricator-workpanel-view,
-.phabricator-workboard-fixed .workboard-6-up .phabricator-workpanel-view {
-  width: 240px;
-}
-
-.device-phone .phabricator-workboard-view-outer div.phabricator-workpanel-view {
-  width: 100%;
-  margin-bottom: 20px;
-}
-
 .phabricator-workpanel-view .phabricator-workpanel-header {
   font-size: 14px;
   font-weight: bold;
@@ -82,29 +47,4 @@
 .phabricator-workpanel-view .phabricator-menu-item-name {
   padding-left: 5px;
   display: inline-block;
-}
-
-/* fluid/flex styles */
-.phabricator-workboard-flex .workboard-1-up .phabricator-workpanel-view {
-  width: 100%;
-}
-
-.phabricator-workboard-flex .workboard-2-up .phabricator-workpanel-view {
-  width: 50%;
-}
-
-.phabricator-workboard-flex .workboard-3-up .phabricator-workpanel-view {
-  width: 33.3333%;
-}
-
-.phabricator-workboard-flex .workboard-4-up .phabricator-workpanel-view {
-  width: 25%;
-}
-
-.phabricator-workboard-flex .workboard-5-up .phabricator-workpanel-view {
-  width: 20%;
-}
-
-.phabricator-workboard-flex .workboard-6-up .phabricator-workpanel-view {
-  width: 16.6666%;
 }
