@@ -2973,6 +2973,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/layout/phabricator-header-view.css',
   ),
+  'phabricator-hovercard-view-css' =>
+  array(
+    'uri' => '/res/061e66df/rsrc/css/layout/phabricator-hovercard-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/layout/phabricator-hovercard-view.css',
+  ),
   'phabricator-jump-nav' =>
   array(
     'uri' => '/res/745c0e89/rsrc/css/application/directory/phabricator-jump-nav.css',
