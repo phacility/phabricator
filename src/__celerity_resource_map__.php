@@ -1253,7 +1253,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/08fcd75a/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/35811cd4/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
