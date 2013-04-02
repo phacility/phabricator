@@ -9,6 +9,9 @@
 # NetBeans project files
 /nbproject/
 
+# PhpStorm project files
+.idea/
+
 # Arcanist scratch directory
 /.arc
 
