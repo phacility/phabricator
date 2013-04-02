@@ -68,11 +68,6 @@ class AphrontDefaultApplicationConfiguration
         ),
       ),
 
-      '/xhprof/' => array(
-        'list/(?P<view>[^/]+)/' => 'PhabricatorXHProfSampleListController',
-        'profile/(?P<phid>[^/]+)/' => 'PhabricatorXHProfProfileController',
-      ),
-
       '/~/' => array(
         '' => 'DarkConsoleController',
         'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
