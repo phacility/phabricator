@@ -21,7 +21,6 @@ final class PhabricatorAccessLog {
 
       // NOTE: Path may be null. We still create the log, it just won't write
       // anywhere.
-      $path = null;
 
       $log = new PhutilDeferredLog($path, $format);
       $log->setData(
