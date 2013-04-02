@@ -324,7 +324,7 @@ final class ConpherenceUpdateController
     $user = $this->getRequest()->getUser();
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
-      ->setBeforeMessageID($latest_transaction_id)
+      ->setAfterMessageID($latest_transaction_id)
       ->needHeaderPics(true)
       ->needWidgetData(true)
       ->needAllTransactions(true)
@@ -358,8 +358,10 @@ final class ConpherenceUpdateController
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => hsprintf('%s', $header),
-      'file_widget' => $file_widget->render(),
-      'people_widget' => $people_widget->render()
+
+      // TODO: Fix these.
+//      'file_widget' => $file_widget->render(),
+//      'people_widget' => $people_widget->render()
     );
     return $content;
   }
