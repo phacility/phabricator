@@ -88,6 +88,9 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'dragover',
         null,
         function(e) {
+          // NOTE: We must set this, or Chrome refuses to drop files from the
+          // download shelf.
+          e.getRawEvent().dataTransfer.dropEffect = 'copy';
           e.kill();
         });
 
