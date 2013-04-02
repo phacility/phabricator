@@ -12,6 +12,7 @@ final class ConpherenceThreadQuery
   private $needHeaderPics;
   private $needOrigPics;
   private $needAllTransactions;
+  private $beforeMessageID;
 
   public function needOrigPics($need_orig_pics) {
     $this->needOrigPics = $need_orig_pics;
@@ -40,6 +41,12 @@ final class ConpherenceThreadQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  // TODO: This is pretty hacky!
+  public function setBeforeMessageID($id) {
+    $this->beforeMessageID = $id;
     return $this;
   }
 
@@ -124,6 +131,7 @@ final class ConpherenceThreadQuery
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array_keys($conpherences))
       ->needHandles(true)
+      ->setBeforeID($this->beforeMessageID)
       ->execute();
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
