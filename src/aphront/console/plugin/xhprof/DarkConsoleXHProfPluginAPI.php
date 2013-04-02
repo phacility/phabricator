@@ -68,9 +68,7 @@ final class DarkConsoleXHProfPluginAPI {
   }
 
 
-  public static function saveProfilerSample(
-    AphrontRequest $request,
-    $access_log) {
+  public static function saveProfilerSample(PhutilDeferredLog $access_log) {
 
     if (!self::isProfilerStarted()) {
       return;
@@ -86,16 +84,13 @@ final class DarkConsoleXHProfPluginAPI {
       $sample_rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
     }
 
-    $profile_sample->setSampleRate($sample_rate);
-
-    if ($access_log) {
-      $profile_sample
-        ->setUsTotal($access_log->getData('T'))
-        ->setHostname($access_log->getData('h'))
-        ->setRequestPath($access_log->getData('U'))
-        ->setController($access_log->getData('C'))
-        ->setUserPHID($request->getUser()->getPHID());
-    }
+    $profile_sample
+      ->setSampleRate($sample_rate)
+      ->setUsTotal($access_log->getData('T'))
+      ->setHostname($access_log->getData('h'))
+      ->setRequestPath($access_log->getData('U'))
+      ->setController($access_log->getData('C'))
+      ->setUserPHID($access_log->getData('P'));
 
     $profile_sample->save();
   }
