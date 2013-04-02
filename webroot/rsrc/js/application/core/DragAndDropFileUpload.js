@@ -29,6 +29,11 @@ JX.install('PhabricatorDragAndDropFileUpload', {
       // Safari, Firefox and Chrome.
 
       return !!window.FileList;
+    },
+    isPasteSupported : function() {
+      // TODO: Needs to check if event.clipboardData is available.
+      // Works in Chrome, doesn't work in Firefox 10.
+      return !!window.FileList;
     }
   },
 
@@ -109,6 +114,27 @@ JX.install('PhabricatorDragAndDropFileUpload', {
           // Force depth to 0.
           this._updateDepth(-this._depth);
         }));
+
+      if (JX.PhabricatorDragAndDropFileUpload.isPasteSupported()) {
+        JX.DOM.listen(
+          this._node,
+          'paste',
+          null,
+          JX.bind(this, function(e) {
+            var clipboardData = e.getRawEvent().clipboardData;
+            if (!clipboardData) {
+              return;
+            }
+
+            for (var ii = 0; ii < clipboardData.items.length; ii++) {
+              var item = clipboardData.items[ii];
+              if (!/^image\//.test(item.type)) {
+                continue;
+              }
+              this._sendRequest(item.getAsFile());
+            }
+          }));
+      }
     },
     _sendRequest : function(spec) {
       var file = new JX.PhabricatorFileUpload()
