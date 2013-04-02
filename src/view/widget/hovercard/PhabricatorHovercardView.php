@@ -11,6 +11,8 @@ final class PhabricatorHovercardView extends AphrontView {
    */
   private $handle;
 
+  private $id;
+
   private $title = array();
   private $detail;
   private $tags = array();
@@ -23,6 +25,11 @@ final class PhabricatorHovercardView extends AphrontView {
   private $body;
 
   private $color = 'grey';
+
+  public function setId($id) {
+    $this->id = $id;
+    return $this;
+  }
 
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
@@ -67,6 +74,10 @@ final class PhabricatorHovercardView extends AphrontView {
   }
 
   public function render() {
+    if (!$this->handle) {
+      throw new Exception("Call setObjectHandle() before calling render()!");
+    }
+
     $handle = $this->handle;
     $user = $this->getUser();
 
@@ -85,7 +96,10 @@ final class PhabricatorHovercardView extends AphrontView {
         ),
         array_interleave(' ', $this->tags));
     }
-    $title[] = pht("%s: %s", $handle->getTypeName(), substr($type, 0, 1) . $id);
+
+    $title[] = pht("%s: %s",
+      $handle->getTypeName(),
+      $this->title ? $this->title : substr($type, 0, 1) . $id);
 
     $body = array();
     if ($this->detail) {
@@ -163,6 +177,7 @@ final class PhabricatorHovercardView extends AphrontView {
     return phutil_tag('div',
       array(
         'class' => 'phabricator-hovercard-wrapper',
+        'id'    => $this->id,
       ),
       $hovercard);
   }
