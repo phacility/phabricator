@@ -24,7 +24,7 @@ final class PhabricatorSetupCheckPygment extends PhabricatorSetupCheck {
           ->setSummary($summary)
           ->setMessage($message)
           ->addPhabricatorConfig('pygments.enabled')
-          ->addPhabricatorConfig('envinronment.append-paths');
+          ->addPhabricatorConfig('environment.append-paths');
       }
     }
   }
