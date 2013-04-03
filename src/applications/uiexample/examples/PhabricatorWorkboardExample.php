@@ -123,7 +123,7 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
           ->addPanel($panel3);
 
     $board2 = id(new PhabricatorWorkboardView())
-          ->setFlexLayout(true)
+          ->setFluidLayout(true)
           ->addPanel($panel)
           ->addPanel($panel2)
           ->addPanel($panel2)
@@ -151,7 +151,7 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
       celerity_get_resource_uri('/rsrc/image/people/taft.png'));
 
     $board3 = id(new PhabricatorWorkboardView())
-          ->setFlexLayout(true)
+          ->setFluidLayout(true)
           ->addPanel($panel)
           ->addPanel($panel)
           ->addPanel($panel2)

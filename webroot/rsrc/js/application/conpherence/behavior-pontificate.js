@@ -17,13 +17,6 @@ JX.behavior('conpherence-pontificate', function(config) {
     var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
     var header = JX.DOM.find(root, 'div', 'conpherence-header');
 
-    var files = null;
-    try {
-      files = JX.DOM.find(root, 'div', 'conpherence-widget-files');
-    } catch (ex) {
-      // Ignore, this view may not have a Files widget.
-    }
-
     JX.Workflow.newFromForm(form)
       .setHandler(JX.bind(this, function(r) {
         // add the new transactions, probably just our post but who knows
@@ -39,8 +32,13 @@ JX.behavior('conpherence-pontificate', function(config) {
           // Ignore; this view may not have a menu.
         }
 
-        if (files) {
-          JX.DOM.setContent(files, JX.$H(r.file_widget));
+        var inputs = JX.DOM.scry(form, 'input');
+        for (var ii = 0; ii < inputs.length; ii++) {
+          JX.log(inputs[ii]);
+          if (inputs[ii].name == 'latest_transaction_id') {
+            inputs[ii].value = r.latest_transaction_id;
+            break;
+          }
         }
 
         var textarea = JX.DOM.find(form, 'textarea');

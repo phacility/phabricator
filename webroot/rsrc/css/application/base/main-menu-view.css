@@ -329,7 +329,7 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
 
 .device-desktop .phabricator-search-menu {
   float: right;
-  margin-right: 110px;
+  margin-right: 116px;
 }
 
 .device .phabricator-search-menu-expanded .phabricator-search-menu {
@@ -355,15 +355,26 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   vertical-align: top;
 }
 
+.device-desktop .phabricator-application-menu a.phabricator-menu-item-view,
 .device-desktop .phabricator-application-menu .phabricator-menu-item-name {
   display: none;
+}
+
+.device-desktop .phabricator-application-menu
+  a.phabricator-menu-item-view.phabricator-core-menu-item {
+  display: block;
+}
+
+.device-desktop .phabricator-application-menu
+  a.phabricator-menu-item-view.phabricator-core-menu-item:hover {
+  background-color: #3a4247;
 }
 
 .device-desktop .phabricator-application-menu .phabricator-menu-item-view {
   display: block;
   float: left;
   position: relative;
-  min-width: 38px;
+  min-width: 40px;
   height: 44px;
 }
 

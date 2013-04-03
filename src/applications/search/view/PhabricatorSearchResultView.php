@@ -53,22 +53,7 @@ final class PhabricatorSearchResultView extends AphrontView {
         '');
     }
 
-    switch ($handle->getType()) {
-      case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
-        $object_name = $handle->getName();
-        if ($this->object) {
-          $data = $this->object->loadOneRelative(
-            new PhabricatorRepositoryCommitData(),
-            'commitID');
-          if ($data && strlen($data->getSummary())) {
-            $object_name = $handle->getName().': '.$data->getSummary();
-          }
-        }
-        break;
-      default:
-        $object_name = $handle->getFullName();
-        break;
-    }
+    $object_name = $handle->getFullName();
 
     return hsprintf(
       '<div class="phabricator-search-result">'.

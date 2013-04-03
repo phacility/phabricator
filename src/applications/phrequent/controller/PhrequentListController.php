@@ -8,8 +8,70 @@ final class PhrequentListController extends PhrequentController {
 
     $nav = $this->buildNav('usertime');
 
+    $form = id(new AphrontFormView())
+    ->setUser($user)
+    ->setNoShading(true);
+
+    $form->appendChild(
+      id(new AphrontFormToggleButtonsControl())
+      ->setName('o')
+      ->setLabel(pht('Sort Order'))
+      ->setBaseURI($request->getRequestURI(), 'o')
+      ->setValue($request->getStr('o', 's'))
+      ->setButtons(
+        array(
+             's'   => pht('Started'),
+             'e'   => pht('Ended'),
+             'd'   => pht('Duration'),
+        )));
+
+    $form->appendChild(
+      id(new AphrontFormToggleButtonsControl())
+      ->setName('e')
+      ->setLabel(pht('Ended'))
+      ->setBaseURI($request->getRequestURI(), 'e')
+      ->setValue($request->getStr('e', 'a'))
+      ->setButtons(
+        array(
+             'y'   => pht('Yes'),
+             'n'   => pht('No'),
+             'a'   => pht('All'),
+        )));
+
+    $filter = new AphrontListFilterView();
+    $filter->appendChild($form);
+
     $query = new PhrequentUserTimeQuery();
-    $query->setOrder(PhrequentUserTimeQuery::ORDER_ENDED);
+
+    switch ($request->getStr('o', 's')) {
+      case 's':
+        $order = PhrequentUserTimeQuery::ORDER_STARTED;
+        break;
+      case 'e':
+        $order = PhrequentUserTimeQuery::ORDER_ENDED;
+        break;
+      case 'd':
+        $order = PhrequentUserTimeQuery::ORDER_DURATION;
+        break;
+      default:
+        throw new Exception("Unknown order!");
+    }
+    $query->setOrder($order);
+
+    switch ($request->getStr('e', 'a')) {
+      case 'a':
+        $ended = PhrequentUserTimeQuery::ENDED_ALL;
+        break;
+      case 'y':
+        $ended = PhrequentUserTimeQuery::ENDED_YES;
+        break;
+      case 'n':
+        $ended = PhrequentUserTimeQuery::ENDED_NO;
+        break;
+      default:
+        throw new Exception("Unknown ended!");
+    }
+    $query->setEnded($ended);
 
     $pager = new AphrontPagerView();
     $pager->setPageSize(500);
@@ -20,15 +82,12 @@ final class PhrequentListController extends PhrequentController {
 
     $title = pht('Time Tracked');
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
     $table = $this->buildTableView($logs);
     $table->appendChild($pager);
 
     $nav->appendChild(
       array(
-        $header,
+        $filter,
         $table,
         $pager,
       ));

@@ -110,7 +110,15 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   private function renderHeader(DifferentialRevision $revision) {
     $view = id(new PhabricatorHeaderView())
-      ->setHeader($revision->getTitle());
+      ->setHeader($revision->getTitle($revision));
+
+    $view->addTag(self::renderTagForRevision($revision));
+
+    return $view;
+  }
+
+  public static function renderTagForRevision(
+    DifferentialRevision $revision) {
 
     $status = $revision->getStatus();
     $status_name =
@@ -118,12 +126,9 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $status_color =
       DifferentialRevisionStatus::getRevisionStatusTagColor($status);
 
-    $view->addTag(
-      id(new PhabricatorTagView())
+    return id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
       ->setName($status_name)
-      ->setBackgroundColor($status_color));
-
-    return $view;
+      ->setBackgroundColor($status_color);
   }
 }

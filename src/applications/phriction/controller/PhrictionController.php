@@ -49,6 +49,14 @@ abstract class PhrictionController extends PhabricatorController {
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
+    if (get_class($this) != 'PhrictionListController') {
+      $crumbs->addAction(
+        id(new PhabricatorMenuItemView())
+          ->setName(pht('Document Index'))
+          ->setHref('/phriction/')
+          ->setIcon('transcript'));
+    }
+
     $crumbs->addAction(
       id(new PhabricatorMenuItemView())
         ->setName(pht('Create Document'))

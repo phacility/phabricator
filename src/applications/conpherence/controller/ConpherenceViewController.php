@@ -41,6 +41,7 @@ final class ConpherenceViewController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needHeaderPics(true)
+      ->needAllTransactions(true)
       ->executeOne();
     $this->setConpherence($conpherence);
 

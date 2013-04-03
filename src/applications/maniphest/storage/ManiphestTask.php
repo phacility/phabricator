@@ -144,7 +144,6 @@ final class ManiphestTask extends ManiphestDAO
     return $this;
   }
 
-
   public function save() {
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);

@@ -32,12 +32,13 @@ final class ConpherenceUpdateController
       ->withIDs(array($conpherence_id))
       ->needOrigPics(true)
       ->needHeaderPics(true)
+      ->needAllTransactions(true)
       ->executeOne();
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
 
     $action = $request->getStr('action', 'metadata');
     $latest_transaction_id = null;
-    $fancy_ajax_style = true;
+    $response_mode = 'ajax';
     $error_view = null;
     $e_file = array();
     $errors = array();
@@ -55,10 +56,35 @@ final class ConpherenceUpdateController
       switch ($action) {
         case 'message':
           $message = $request->getStr('text');
-          $latest_transaction_id = $request->getInt('latest_transaction_id');
           $xactions = $editor->generateTransactionsFromText(
             $conpherence,
             $message);
+          break;
+        case 'add_person':
+          $xactions = array();
+          $person_tokenizer = $request->getArr('add_person');
+          $person_phid = reset($person_tokenizer);
+          if ($person_phid) {
+            $xactions[] = id(new ConpherenceTransaction())
+              ->setTransactionType(
+                ConpherenceTransactionType::TYPE_PARTICIPANTS)
+              ->setNewValue(array('+' => array($person_phid)));
+          }
+          break;
+        case 'remove_person':
+          $xactions = array();
+          if (!$request->isContinueRequest()) {
+            // do nothing; we'll display a confirmation dialogue instead
+            break;
+          }
+          $person_phid = $request->getStr('remove_person');
+          if ($person_phid && $person_phid == $user->getPHID()) {
+            $xactions[] = id(new ConpherenceTransaction())
+              ->setTransactionType(
+                ConpherenceTransactionType::TYPE_PARTICIPANTS)
+              ->setNewValue(array('-' => array($person_phid)));
+            $response_mode = 'go-home';
+          }
           break;
         case 'notifications':
           $notifications = $request->getStr('notifications');
@@ -115,7 +141,7 @@ final class ConpherenceUpdateController
             // use the existing title in this image upload case
             $title = $conpherence->getTitle();
             $updated = true;
-            $fancy_ajax_style = false;
+            $response_mode = 'redirect';
           }
 
           // all other metadata updates are continue requests
@@ -158,20 +184,29 @@ final class ConpherenceUpdateController
       if ($xactions) {
         try {
           $xactions = $editor->applyTransactions($conpherence, $xactions);
-          if ($fancy_ajax_style) {
+        } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+          return id(new PhabricatorApplicationTransactionNoEffectResponse())
+            ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
+            ->setException($ex);
+        }
+        switch ($response_mode) {
+          case 'ajax':
+            $latest_transaction_id = $request->getInt('latest_transaction_id');
             $content = $this->loadAndRenderUpdates(
               $conpherence_id,
               $latest_transaction_id);
             return id(new AphrontAjaxResponse())
               ->setContent($content);
-          } else {
+            break;
+          case 'go-home':
+            return id(new AphrontRedirectResponse())
+              ->setURI($this->getApplicationURI());
+            break;
+          case 'redirect':
+          default:
             return id(new AphrontRedirectResponse())
               ->setURI($this->getApplicationURI($conpherence->getID().'/'));
-          }
-        } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-          return id(new PhabricatorApplicationTransactionNoEffectResponse())
-            ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
-            ->setException($ex);
+            break;
         }
       }
     }
@@ -184,6 +219,9 @@ final class ConpherenceUpdateController
     }
 
     switch ($action) {
+      case 'remove_person':
+        $dialogue = $this->renderRemovePersonDialogue($conpherence);
+        break;
       case 'metadata':
       default:
         $dialogue = $this->renderMetadataDialogue($conpherence, $error_view);
@@ -198,6 +236,37 @@ final class ConpherenceUpdateController
         ->addSubmitButton()
         ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')));
 
+  }
+
+  private function renderRemovePersonDialogue(
+    ConpherenceThread $conpherence) {
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    $remove_person = $request->getStr('remove_person');
+    $participants = $conpherence->getParticipants();
+    $message = pht(
+      'Are you sure you want to remove yourself from this conpherence? ');
+    if (count($participants) == 1) {
+      $message .= pht(
+        'The conpherence will be inaccessible forever and ever.');
+    } else {
+      $message .= pht(
+        'Someone else in the conpherence can add you back later.');
+    }
+    $body = phutil_tag(
+      'p',
+      array(
+      ),
+      $message);
+
+    require_celerity_resource('conpherence-update-css');
+    return id(new AphrontDialogView())
+      ->setTitle(pht('Update Conpherence Participants'))
+      ->addHiddenInput('action', 'remove_person')
+      ->addHiddenInput('__continue__', true)
+      ->addHiddenInput('remove_person', $remove_person)
+      ->appendChild($body);
   }
 
   private function renderMetadataDialogue(
@@ -224,15 +293,15 @@ final class ConpherenceUpdateController
               'src' =>
               $conpherence->loadImageURI(ConpherenceImageData::SIZE_HEAD),
               ))))
-              ->appendChild(
-                id(new AphrontFormCropControl())
-                ->setLabel(pht('Crop Image'))
-                ->setValue($image)
-                ->setWidth(ConpherenceImageData::HEAD_WIDTH)
-                ->setHeight(ConpherenceImageData::HEAD_HEIGHT))
-                ->appendChild(
-                  id(new ConpherenceFormDragAndDropUploadControl())
-                  ->setLabel(pht('Change Image')));
+        ->appendChild(
+          id(new AphrontFormCropControl())
+          ->setLabel(pht('Crop Image'))
+          ->setValue($image)
+          ->setWidth(ConpherenceImageData::HEAD_WIDTH)
+          ->setHeight(ConpherenceImageData::HEAD_HEIGHT))
+          ->appendChild(
+            id(new ConpherenceFormDragAndDropUploadControl())
+            ->setLabel(pht('Change Image')));
     } else {
       $form
         ->appendChild(
@@ -255,9 +324,10 @@ final class ConpherenceUpdateController
     $user = $this->getRequest()->getUser();
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
-      ->setAfterID($latest_transaction_id)
+      ->setAfterMessageID($latest_transaction_id)
       ->needHeaderPics(true)
       ->needWidgetData(true)
+      ->needAllTransactions(true)
       ->withIDs(array($conpherence_id))
       ->executeOne();
 
@@ -272,11 +342,15 @@ final class ConpherenceUpdateController
 
     $header = $this->buildHeaderPaneContent($conpherence);
 
+    $widget_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
     $file_widget = id(new ConpherenceFileWidgetView())
       ->setUser($this->getRequest()->getUser())
       ->setConpherence($conpherence)
-      ->setUpdateURI(
-        $this->getApplicationURI('update/'.$conpherence->getID().'/'));
+      ->setUpdateURI($widget_uri);
+    $people_widget = id(new ConpherencePeopleWidgetView())
+      ->setUser($user)
+      ->setConpherence($conpherence)
+      ->setUpdateURI($widget_uri);
 
     $content = array(
       'transactions' => $rendered_transactions,
@@ -284,7 +358,10 @@ final class ConpherenceUpdateController
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => hsprintf('%s', $header),
-      'file_widget' => $file_widget->render()
+
+      // TODO: Fix these.
+//      'file_widget' => $file_widget->render(),
+//      'people_widget' => $people_widget->render()
     );
     return $content;
   }

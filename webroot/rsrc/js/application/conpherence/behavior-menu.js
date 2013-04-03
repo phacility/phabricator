@@ -136,10 +136,16 @@ JX.behavior('conpherence-menu', function(config) {
           JX.$H(r.header)
         );
 
-        // update the menu entry as well
+        // update the menu entry
         JX.DOM.replace(
           JX.$(r.conpherence_phid + '-nav-item'),
           JX.$H(r.nav_item)
+        );
+
+        // update the people widget
+        JX.DOM.setContent(
+          JX.$(config.people_widget),
+          JX.$H(r.people_widget)
         );
       })
       .start();
@@ -163,8 +169,15 @@ JX.behavior('conpherence-menu', function(config) {
   // select or load any threads. On Desktop, we automatically select the first
   // thread.
 
+  var old_device = null;
   function ondevicechange() {
-    if (JX.Device.getDevice() != 'desktop') {
+    var new_device = JX.Device.getDevice();
+    if (new_device === old_device) {
+      return;
+    }
+    old_device = new_device;
+
+    if (new_device != 'desktop') {
       return;
     }
 

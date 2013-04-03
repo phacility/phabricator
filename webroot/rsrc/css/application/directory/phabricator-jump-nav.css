@@ -25,11 +25,11 @@
   text-align: left;
 }
 
-.aphront-list-filter-view-controls {
+.phabricator-jump-nav-container .aphront-list-filter-view-controls {
   padding: 20px;
 }
 
-.aphront-list-filter-view-controls h1 {
+.phabricator-jump-nav-container .aphront-list-filter-view-controls h1 {
   color: #555;
   padding-top: 4px;
   margin-bottom: 0.67em;

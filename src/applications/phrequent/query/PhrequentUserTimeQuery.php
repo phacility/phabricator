@@ -7,9 +7,14 @@ final class PhrequentUserTimeQuery extends PhabricatorOffsetPagedQuery {
   const ORDER_ENDED    = 'order-ended';
   const ORDER_DURATION = 'order-duration';
 
+  const ENDED_YES = "ended-yes";
+  const ENDED_NO  = "ended-no";
+  const ENDED_ALL = "ended-all";
+
   private $userPHIDs;
   private $objectPHIDs;
   private $order = self::ORDER_ID;
+  private $ended = self::ENDED_ALL;
 
   public function setUsers($user_phids) {
     $this->userPHIDs = $user_phids;
@@ -23,6 +28,11 @@ final class PhrequentUserTimeQuery extends PhabricatorOffsetPagedQuery {
 
   public function setOrder($order) {
     $this->order = $order;
+    return $this;
+  }
+
+  public function setEnded($ended) {
+    $this->ended = $ended;
     return $this;
   }
 
@@ -58,6 +68,23 @@ final class PhrequentUserTimeQuery extends PhabricatorOffsetPagedQuery {
         $this->objectPHIDs);
     }
 
+    switch ($this->ended) {
+      case self::ENDED_ALL:
+        break;
+      case self::ENDED_YES:
+        $where[] = qsprintf(
+          $conn,
+          'dateEnded IS NOT NULL');
+        break;
+      case self::ENDED_NO:
+        $where[] = qsprintf(
+          $conn,
+          'dateEnded IS NULL');
+        break;
+      default:
+        throw new Exception("Unknown ended '{$this->ended}'!");
+    }
+
     return $this->formatWhereClause($where);
   }
 
@@ -70,7 +97,7 @@ final class PhrequentUserTimeQuery extends PhabricatorOffsetPagedQuery {
       case self::ORDER_ENDED:
         return 'ORDER BY dateEnded IS NULL, dateEnded DESC, dateStarted DESC';
       case self::ORDER_DURATION:
-        return 'ORDER BY (COALESCE(dateEnded, UNIX_TIMESTAMP() - dateStarted) '.
+        return 'ORDER BY COALESCE(dateEnded, UNIX_TIMESTAMP()) - dateStarted '.
                'DESC';
       default:
         throw new Exception("Unknown order '{$this->order}'!");

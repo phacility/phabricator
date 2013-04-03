@@ -113,7 +113,8 @@ return array(
   //  - %r The remote IP.
   //  - %T The request duration, in microseconds.
   //  - %U The request path.
-  //  - %u The logged-in user, if one is logged in.
+  //  - %u The logged-in username, if one is logged in.
+  //  - %P The logged-in user PHID, if one is logged in.
   //  - %M The HTTP method.
   //  - %m For conduit, the Conduit method which was invoked.
   //

@@ -21,6 +21,17 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     return pht('conpherence');
   }
 
+  public function getNoEffectDescription() {
+    switch ($this->getTransactionType()) {
+      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+        return pht(
+          'You can not add a participant who has already been added.');
+        break;
+    }
+
+    return parent::getNoEffectDescription();
+  }
+
   public function shouldHide() {
     $old = $this->getOldValue();
 

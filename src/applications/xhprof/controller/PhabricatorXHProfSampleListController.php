@@ -6,11 +6,12 @@ final class PhabricatorXHProfSampleListController
   private $view;
 
   public function willProcessRequest(array $data) {
-    $this->view = $data['view'];
+    $this->view = idx($data, 'view', 'all');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
@@ -39,7 +40,7 @@ final class PhabricatorXHProfSampleListController
     }
 
     $samples = id(new PhabricatorXHProfSample())->loadAllWhere(
-      '%Q ORDER BY dateCreated DESC LIMIT %d, %d',
+      '%Q ORDER BY id DESC LIMIT %d, %d',
       $clause,
       $pager->getOffset(),
       $pager->getPageSize() + 1);
@@ -47,19 +48,46 @@ final class PhabricatorXHProfSampleListController
     $samples = $pager->sliceResults($samples);
     $pager->setURI($request->getRequestURI(), 'page');
 
-    $table = new PhabricatorXHProfSampleListView();
-    $table->setUser($request->getUser());
-    $table->setSamples($samples);
-    $table->setShowType($show_type);
+    $list = new PhabricatorObjectItemListView();
+    foreach ($samples as $sample) {
+      $file_phid = $sample->getFilePHID();
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('XHProf Samples');
-    $panel->appendChild($table);
-    $panel->appendChild($pager);
+      $item = id(new PhabricatorObjectItemView())
+        ->setObjectName($sample->getID())
+        ->setHeader($sample->getRequestPath())
+        ->setHref($this->getApplicationURI('profile/'.$file_phid.'/'))
+        ->addAttribute(
+          number_format($sample->getUsTotal())." \xCE\xBCs");
+
+      if ($sample->getController()) {
+        $item->addAttribute($sample->getController());
+      }
+
+      $item->addAttribute($sample->getHostName());
+
+      $rate = $sample->getSampleRate();
+      if ($rate == 0) {
+        $item->addIcon('flag-6', pht('Manual Run'));
+      } else {
+        $item->addIcon('flag-7', pht('Sampled (1/%d)', $rate));
+      }
+
+      $item->addIcon(
+        'none',
+        phabricator_datetime($sample->getDateCreated(), $user));
+
+      $list->addItem($item);
+    }
+
+    $list->setPager($pager);
 
     return $this->buildStandardPageResponse(
-      $panel,
-      array('title' => 'XHProf Samples'));
+      $list,
+      array(
+        'title' => pht('XHProf Samples'),
+        'device' => true,
+        'dust' => true,
+      ));
 
   }
 }

@@ -31,6 +31,7 @@
   border-width: 1px 1px 1px 0;
   overflow: hidden;
   position: relative;
+  min-height: 29px;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-frame {
@@ -45,13 +46,12 @@
 .phabricator-object-item-name {
   display: inline-block;
   font-weight: bold;
-  font-size: 14px;
-  padding: 0 10px;
+  padding: 0 8px;
 }
 
 .phabricator-object-item-link {
   display: inline-block;
-  padding: 8px 0;
+  padding: 6px 0 4px;
 }
 
 .phabricator-object-item-objname {
@@ -109,13 +109,12 @@
 */
 
 .phabricator-object-item-attributes {
-  padding: 0px 10px 8px;
+  padding: 0 8px 6px;
 }
 
 .phabricator-object-item-attribute {
   display: inline;
   color: #777;
-  font-size: 13px;
 }
 
 .phabricator-object-item-attribute-spacer {
@@ -351,7 +350,6 @@
 
 
 .phabricator-object-list-cards .phabricator-object-item-name {
-  font-size: 13px;
   white-space: nowrap;
 }
 

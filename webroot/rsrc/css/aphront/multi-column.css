@@ -1,0 +1,113 @@
+/**
+ * @provides aphront-multi-column-view-css
+ */
+
+.aphront-multi-column-view {
+  width: 100%;
+}
+
+.device-phone .aphront-multi-column-outer {
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.aphront-multi-column-column-outer {
+  float: left;
+}
+
+.aphront-multi-column-inner .aphront-multi-column-column-last,
+.device-phone .aphront-multi-column-column {
+  margin: 0;
+}
+
+.device-phone .aphront-multi-column-outer
+  div.aphront-multi-column-column-outer {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* math here is based on panel width and margins */
+.aphront-multi-column-fixed
+  .aphront-multi-column-inner.aphront-multi-column-1-up {
+  width: 310px;
+}
+
+.aphront-multi-column-fixed
+  .aphront-multi-column-inner.aphront-multi-column-2-up {
+  width: 620px;
+}
+
+.aphront-multi-column-fixed
+  .aphront-multi-column-inner.aphront-multi-column-3-up {
+  width: 930px;
+}
+
+.aphront-multi-column-fixed
+  .aphront-multi-column-inner.aphront-multi-column-4-up {
+  width: 1008px;
+}
+
+.aphront-multi-column-fixed
+  .aphront-multi-column-inner.aphront-multi-column-5-up {
+  width: 1250px;
+}
+
+.aphront-multi-column-fixed
+  .aphront-multi-column-inner.aphront-multi-column-6-up {
+  width: 1500px;
+}
+
+.device-phone .aphront-multi-column-fixed .aphront-multi-column-inner {
+   width: 100%;
+}
+
+/* Panels require a fixed width to overflow well. */
+.aphront-multi-column-fixed .aphront-multi-column-1-up
+  .aphront-multi-column-column-outer,
+.aphront-multi-column-fixed .aphront-multi-column-2-up
+  .aphront-multi-column-column-outer,
+.aphront-multi-column-fixed .aphront-multi-column-3-up
+  .aphront-multi-column-column-outer {
+  width: 300px;
+}
+
+.aphront-multi-column-fixed .aphront-multi-column-4-up
+  .aphront-multi-column-column-outer,
+.aphront-multi-column-fixed .aphront-multi-column-5-up
+  .aphront-multi-column-column-outer,
+.aphront-multi-column-fixed .aphront-multi-column-6-up
+  .aphront-multi-column-column-outer {
+  width: 240px;
+}
+
+/* fluid/flex styles */
+.aphront-multi-column-fluid .aphront-multi-column-1-up
+  .aphront-multi-column-column-outer {
+  width: 100%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-2-up
+  .aphront-multi-column-column-outer {
+  width: 50%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-3-up
+  .aphront-multi-column-column-outer {
+  width: 33.3333%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-4-up
+  .aphront-multi-column-column-outer {
+  width: 25%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-5-up
+  .aphront-multi-column-column-outer {
+  width: 20%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-6-up
+  .aphront-multi-column-column-outer {
+  width: 16.6666%;
+}

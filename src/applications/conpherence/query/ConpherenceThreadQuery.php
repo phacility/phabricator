@@ -11,6 +11,8 @@ final class ConpherenceThreadQuery
   private $needWidgetData;
   private $needHeaderPics;
   private $needOrigPics;
+  private $needAllTransactions;
+  private $afterMessageID;
 
   public function needOrigPics($need_orig_pics) {
     $this->needOrigPics = $need_orig_pics;
@@ -27,6 +29,11 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
+  public function needAllTransactions($need_all_transactions) {
+    $this->needAllTransactions = $need_all_transactions;
+    return $this;
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -34,6 +41,12 @@ final class ConpherenceThreadQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  // TODO: This is pretty hacky!!!!~~
+  public function setAfterMessageID($id) {
+    $this->afterMessageID = $id;
     return $this;
   }
 
@@ -54,8 +67,13 @@ final class ConpherenceThreadQuery
     if ($conpherences) {
       $conpherences = mpull($conpherences, null, 'getPHID');
       $this->loadParticipants($conpherences);
-      $this->loadTransactionsAndHandles($conpherences);
+
+      if ($this->needAllTransactions) {
+        $this->loadTransactionsAndHandles($conpherences);
+      }
+
       $this->loadFilePHIDs($conpherences);
+
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
       }
@@ -113,7 +131,9 @@ final class ConpherenceThreadQuery
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array_keys($conpherences))
       ->needHandles(true)
+      ->setAfterID($this->afterMessageID)
       ->execute();
+
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
       $current_transactions = $transactions[$phid];

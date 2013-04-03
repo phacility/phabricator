@@ -132,13 +132,6 @@ final class PhrictionDocumentController
             $handles[$project_phid]->renderLink()));
       }
 
-      $index_link = phutil_tag(
-        'a',
-        array(
-          'href' => '/phriction/',
-        ),
-        pht('Document Index'));
-
       $subscriber_view = null;
       if ($subscribers) {
         $subcriber_list = array();
@@ -219,8 +212,7 @@ final class PhrictionDocumentController
       }
 
       $page_content = hsprintf(
-        '<div class="phriction-content">%s%s%s%s</div>',
-        $index_link,
+        '<div class="phriction-content">%s%s%s</div>',
         $byline,
         $move_notice,
         $core_content);

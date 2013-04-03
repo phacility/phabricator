@@ -414,7 +414,6 @@ final class CeleritySpriteGenerator {
         'light' => 'lb',
         'dark'  => 'dark',
         'blue'  => 'blue',
-        'glow'  => 'glow',
       );
     } else {
       $scales = array(
@@ -433,7 +432,6 @@ final class CeleritySpriteGenerator {
 
         'blue'  => 'blue',
         'light' => 'lb',
-        'glow'  => 'glow',
         */
       );
     }
@@ -451,10 +449,6 @@ final class CeleritySpriteGenerator {
         $css = '.app-'.$app.'-'.$color.$variant_short;
         if ($color == 'blue' && $variant_name == 'apps-large') {
           $css .= ', .phabricator-crumb-view:hover .app-'.$app.'-dark-large';
-        }
-        if ($color == 'glow' && $variant_name == 'apps-large') {
-          $css .= ', .device-desktop .phabricator-dark-menu a:hover '.
-                  '.app-'.$app.'-light-large';
         }
 
         $sprite = id(clone $template)

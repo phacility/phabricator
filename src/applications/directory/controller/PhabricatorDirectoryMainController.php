@@ -360,7 +360,11 @@ final class PhabricatorDirectoryMainController
     $list_filter->appendChild(phutil_tag('h1', array(), 'Jump Nav'));
     $list_filter->appendChild($form);
 
-    return $list_filter;
+    $container = phutil_tag('div',
+      array('class' => 'phabricator-jump-nav-container'),
+      $list_filter);
+
+    return $container;
   }
 
   private function renderMiniPanel($title, $body) {
