@@ -165,10 +165,10 @@ final class PhabricatorFlagQuery {
         return 'id DESC';
         break;
       case self::ORDER_COLOR:
-        return 'color DESC';
+        return 'color ASC';
         break;
       case self::ORDER_OBJECT:
-        return 'type ASC';
+        return 'type DESC';
         break;
       case self::ORDER_REASON:
         return 'reasonPHID DESC';
