@@ -81,6 +81,8 @@ class AphrontDefaultApplicationConfiguration
         'select/(?P<type>\w+)/'
           => 'PhabricatorSearchSelectController',
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
+        'hovercard/(?P<mode>retrieve|test)/' =>
+          'PhabricatorSearchHovercardController',
       ),
 
       '/status/' => 'PhabricatorStatusController',
