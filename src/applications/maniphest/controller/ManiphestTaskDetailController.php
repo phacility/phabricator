@@ -374,15 +374,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view = id(new PhabricatorHeaderView())
       ->setHeader($task->getTitle());
 
-    $status = $task->getStatus();
-    $status_name = ManiphestTaskStatus::getTaskStatusFullName($status);
-    $status_color = ManiphestTaskStatus::getTaskStatusTagColor($status);
-
-    $view->addTag(
-      id(new PhabricatorTagView())
-        ->setType(PhabricatorTagView::TYPE_STATE)
-        ->setName($status_name)
-        ->setBackgroundColor($status_color));
+    $view->addTag(ManiphestView::renderTagForTask($task));
 
     return $view;
   }
