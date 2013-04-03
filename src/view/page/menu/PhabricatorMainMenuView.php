@@ -186,6 +186,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       $view->addMenuItem(
         id(new PhabricatorMenuItemView())
           ->addClass('phabricator-menu-item-type-link')
+          ->addClass('phabricator-core-menu-item')
           ->setName(pht('Log Out'))
           ->setHref('/logout/')
           ->appendChild($this->renderMenuIcon('power-light-large')));

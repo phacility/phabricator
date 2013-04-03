@@ -42,6 +42,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
       $item = new PhabricatorMenuItemView();
       $item->setName(pht('Settings'));
       $item->setIcon('settings');
+      $item->addClass('phabricator-core-menu-item');
       $item->setSelected($selected);
       $item->setHref('/settings/');
       $items[] = $item;
