@@ -26,8 +26,8 @@
 }
 
 .aphront-list-filter-view-controls .aphront-form-view {
-  border-width: 0;
-  border-bottom: 1px solid #c0c5d1;
+  border-left: none;
+  border-right: none;
   padding: 12px 0 6px;
 }
 

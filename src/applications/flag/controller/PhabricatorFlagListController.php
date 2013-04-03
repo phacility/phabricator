@@ -20,6 +20,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
     $nav->setCrumbs($crumbs);
 
     $filter_form = new AphrontFormView();
+    $filter_form->setNoShading(true);
     $filter_form->setUser($user);
     $filter_form->appendChild(
       id(new AphrontFormToggleButtonsControl())
@@ -123,6 +124,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
       $nav,
       array(
         'title' => pht('Flags'),
+        'device' => true,
         'dust'  => true,
       ));
   }
