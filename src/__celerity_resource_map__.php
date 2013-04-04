@@ -912,7 +912,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-widget-pane-css' =>
   array(
-    'uri' => '/res/65c7c73f/rsrc/css/application/conpherence/widget-pane.css',
+    'uri' => '/res/fda7cf40/rsrc/css/application/conpherence/widget-pane.css',
     'type' => 'css',
     'requires' =>
     array(
