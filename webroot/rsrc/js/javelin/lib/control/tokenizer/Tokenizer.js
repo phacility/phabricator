@@ -43,8 +43,7 @@ JX.install('Tokenizer', {
     'change'],
 
   properties : {
-    limit : null,
-    nextInput : null
+    limit : null
   },
 
   members : {
@@ -326,16 +325,17 @@ JX.install('Tokenizer', {
     _onkeydown : function(e) {
       var focus = this._focus;
       var root = this._root;
+
+      var raw = e.getRawEvent();
+      if (raw.ctrlKey || raw.metaKey || raw.altKey) {
+        return;
+      }
+
       switch (e.getSpecialKey()) {
         case 'tab':
           var completed = this._typeahead.submit();
-          if (this.getNextInput()) {
-            if (!completed) {
-              this._focus.value = '';
-            }
-            setTimeout(JX.bind(this, function() {
-              this.getNextInput().focus();
-            }), 0);
+          if (!completed) {
+            this._focus.value = '';
           }
           break;
         case 'delete':

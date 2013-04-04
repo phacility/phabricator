@@ -114,7 +114,7 @@ JX.install('Event', {
      */
     getSpecialKey : function() {
       var r = this.getRawEvent();
-      if (!r || r.shiftKey) {
+      if (!r) {
         return null;
       }
 
