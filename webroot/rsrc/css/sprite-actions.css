@@ -1,0 +1,127 @@
+/**
+ * @provides sprite-action-icon-css
+ * @generated
+ */
+
+.sprite-action-icon {
+  background-image: url(/rsrc/image/sprite-action-icon.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-action-icon {
+    background-image: url(/rsrc/image/sprite-action-icon-X2.png);
+    background-size: 125px 150px;
+  }
+}
+
+
+.action-icon-flag-dark {
+  background-position: 0px 0px;
+}
+
+.action-icon-heart-dark {
+  background-position: -25px 0px;
+}
+
+.action-icon-move-dark {
+  background-position: -50px 0px;
+}
+
+.action-icon-new-dark {
+  background-position: -75px 0px;
+}
+
+.action-icon-search-dark {
+  background-position: -100px 0px;
+}
+
+.action-icon-settings-dark {
+  background-position: 0px -25px;
+}
+
+.action-icon-star-dark {
+  background-position: -25px -25px;
+}
+
+.action-icon-tag-dark {
+  background-position: -50px -25px;
+}
+
+.action-icon-wrench-dark {
+  background-position: -75px -25px;
+}
+
+.action-icon-flag-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-flag {
+  background-position: -100px -25px;
+}
+
+.action-icon-heart-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-heart {
+  background-position: 0px -50px;
+}
+
+.action-icon-move-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-move {
+  background-position: -25px -50px;
+}
+
+.action-icon-new-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-new {
+  background-position: -50px -50px;
+}
+
+.action-icon-search-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-search {
+  background-position: -75px -50px;
+}
+
+.action-icon-settings-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-settings {
+  background-position: -100px -50px;
+}
+
+.action-icon-star-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-star {
+  background-position: 0px -75px;
+}
+
+.action-icon-tag-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-tag {
+  background-position: -25px -75px;
+}
+
+.action-icon-wrench-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-wrench {
+  background-position: -50px -75px;
+}
+
+.action-icon-flag-white {
+  background-position: -75px -75px;
+}
+
+.action-icon-heart-white {
+  background-position: -100px -75px;
+}
+
+.action-icon-move-white {
+  background-position: 0px -100px;
+}
+
+.action-icon-new-white {
+  background-position: -25px -100px;
+}
+
+.action-icon-search-white {
+  background-position: -50px -100px;
+}
+
+.action-icon-settings-white {
+  background-position: -75px -100px;
+}
+
+.action-icon-star-white {
+  background-position: -100px -100px;
+}
+
+.action-icon-tag-white {
+  background-position: 0px -125px;
+}
+
+.action-icon-wrench-white {
+  background-position: -25px -125px;
+}

@@ -27,6 +27,10 @@
   background-position: 0px -132px;
 }
 
+.gradient-blue-header {
+  background-position: 0px -357px;
+}
+
 .gradient-breadcrumbs {
   background-position: 0px -325px;
 }
@@ -39,12 +43,20 @@
   background-position: 0px -159px;
 }
 
+.gradient-green-header {
+  background-position: 0px -428px;
+}
+
 .gradient-green-light, button.green:active, a.green:active {
   background-position: 0px -186px;
 }
 
 .gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled {
   background-position: 0px -213px;
+}
+
+.gradient-grey-header {
+  background-position: 0px -499px;
 }
 
 .gradient-grey-light, button.grey:active, a.grey:active, button.grey_active, a.dropdown-open {
@@ -61,4 +73,12 @@
 
 .gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus {
   background-position: 0px -296px;
+}
+
+.gradient-red-header {
+  background-position: 0px -570px;
+}
+
+.gradient-yellow-header {
+  background-position: 0px -641px;
 }

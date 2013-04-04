@@ -83,6 +83,116 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildActionsSheet() {
+    $icons = $this->getDirectoryList('actions_white_1x');
+
+    $colors = array(
+      'dark',
+      'grey',
+      'white',
+    );
+
+    $scales = array(
+      '1x'  => 1,
+      '2x'  => 2,
+    );
+
+    $template = id(new PhutilSprite())
+      ->setSourceSize(24, 24);
+
+    $sprites = array();
+    foreach ($colors as $color) {
+      foreach ($icons as $icon) {
+        $prefix = 'actions_';
+        if (strlen($color)) {
+          $prefix .= $color.'_';
+        }
+
+        $suffix = '';
+        if (strlen($color)) {
+          $suffix = '-'.$color;
+        }
+
+        $sprite = id(clone $template)
+          ->setName('action-icon-'.$icon.$suffix);
+
+        $tcss = array();
+        $tcss[] = '.action-icon-'.$icon.$suffix;
+        if ($color == 'grey') {
+          $tcss[] = '.device-desktop .phabricator-action-icon-view:hover '.
+            '.action-icon-'.$icon;
+        }
+
+        $sprite->setTargetCSS(implode(', ', $tcss));
+
+        foreach ($scales as $scale_key => $scale) {
+          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+          $sprite->setSourceFile($path, $scale);
+        }
+        $sprites[] = $sprite;
+      }
+    }
+
+    $sheet = $this->buildSheet('action-icon', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+    public function buildMiniconsSheet() {
+    $icons = $this->getDirectoryList('minicons_white_1x');
+
+    $colors = array(
+      'white',
+    );
+
+    $scales = array(
+      '1x'  => 1,
+      '2x'  => 2,
+    );
+
+    $template = id(new PhutilSprite())
+      ->setSourceSize(16, 16);
+
+    $sprites = array();
+    foreach ($colors as $color) {
+      foreach ($icons as $icon) {
+        $prefix = 'minicons_';
+        if (strlen($color)) {
+          $prefix .= $color.'_';
+        }
+
+        $suffix = '';
+        if (strlen($color)) {
+          $suffix = '-'.$color;
+        }
+
+        $sprite = id(clone $template)
+          ->setName('minicons-'.$icon.$suffix);
+
+        $sprite->setTargetCSS('.minicons-'.$icon.$suffix);
+
+        foreach ($scales as $scale_key => $scale) {
+          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+          $sprite->setSourceFile($path, $scale);
+        }
+        $sprites[] = $sprite;
+      }
+    }
+
+    $sheet = $this->buildSheet('minicons', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+
   public function buildMenuSheet() {
     $sprites = array();
 
@@ -300,6 +410,11 @@ final class CeleritySpriteGenerator {
       'menu-hover'      => 28,
       'menu-label'      => 24,
       'menu-selected'   => 28,
+      'red-header'      => 70,
+      'blue-header'     => 70,
+      'green-header'    => 70,
+      'yellow-header'   => 70,
+      'grey-header'     => 70
     );
 
     // Reorder the sprites so less-specific rules generate earlier in the sheet.

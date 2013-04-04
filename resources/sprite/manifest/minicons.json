@@ -1,0 +1,31 @@
+{
+  "version" : 1,
+  "sprites" : {
+    "minicons-company-white"    : {
+      "name" : "minicons-company-white",
+      "rule" : ".minicons-company-white",
+      "hash" : "181289eba2fcb851858ab5b99fd19818"
+    },
+    "minicons-move-white"       : {
+      "name" : "minicons-move-white",
+      "rule" : ".minicons-move-white",
+      "hash" : "620e464c0e50830b90eaed3b5a2b9f56"
+    },
+    "minicons-public-white"     : {
+      "name" : "minicons-public-white",
+      "rule" : ".minicons-public-white",
+      "hash" : "c075363aeba4c52dbcc328a24d8f4298"
+    },
+    "minicons-restricted-white" : {
+      "name" : "minicons-restricted-white",
+      "rule" : ".minicons-restricted-white",
+      "hash" : "af00df15815b83d410073859dacf7a75"
+    }
+  },
+  "scales"  : [
+    1,
+    2
+  ],
+  "header"  : "\/**\n * @provides sprite-minicons-css\n * @generated\n *\/\n\n.sprite-minicons {\n  background-image: url(\/rsrc\/image\/sprite-minicons.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-minicons {\n    background-image: url(\/rsrc\/image\/sprite-minicons-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type"    : "standard"
+}

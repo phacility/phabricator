@@ -16,6 +16,11 @@
       "rule" : ".gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit",
       "hash" : "f467612edcdbf984672287c6086492c4"
     },
+    "gradient-blue-header"     : {
+      "name" : "gradient-blue-header",
+      "rule" : ".gradient-blue-header",
+      "hash" : "dd82b6d737f9f683c0d6e70eff59e872"
+    },
     "gradient-blue-light"      : {
       "name" : "gradient-blue-light",
       "rule" : ".gradient-blue-light, button:active, a.button:active",
@@ -36,6 +41,11 @@
       "rule" : ".gradient-green-dark, button.green, a.green, a.green:visited",
       "hash" : "a6719fe55b2b0e527ed32985691eab34"
     },
+    "gradient-green-header"    : {
+      "name" : "gradient-green-header",
+      "rule" : ".gradient-green-header",
+      "hash" : "d61297d23aa31fa1de51e2b9b5974554"
+    },
     "gradient-green-light"     : {
       "name" : "gradient-green-light",
       "rule" : ".gradient-green-light, button.green:active, a.green:active",
@@ -45,6 +55,11 @@
       "name" : "gradient-grey-dark",
       "rule" : ".gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled",
       "hash" : "fac28a773098fc62bf571e12b843f71a"
+    },
+    "gradient-grey-header"     : {
+      "name" : "gradient-grey-header",
+      "rule" : ".gradient-grey-header",
+      "hash" : "f1453896068a8dd0d7885457c8e371bc"
     },
     "gradient-grey-light"      : {
       "name" : "gradient-grey-light",
@@ -65,6 +80,16 @@
       "name" : "gradient-menu-selected",
       "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus",
       "hash" : "9b4b039fba177b90bc26f0e6eece339d"
+    },
+    "gradient-red-header"      : {
+      "name" : "gradient-red-header",
+      "rule" : ".gradient-red-header",
+      "hash" : "27a76645065953a8440d0c3d2b192c82"
+    },
+    "gradient-yellow-header"   : {
+      "name" : "gradient-yellow-header",
+      "rule" : ".gradient-yellow-header",
+      "hash" : "181e68e61f29071c3ec3810694c2ef08"
     }
   },
   "scales"  : [
