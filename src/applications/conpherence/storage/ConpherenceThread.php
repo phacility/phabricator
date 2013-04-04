@@ -9,6 +9,8 @@ final class ConpherenceThread extends ConpherenceDAO
   protected $id;
   protected $phid;
   protected $title;
+  protected $messageCount;
+  protected $recentParticipantPHIDs = array();
   protected $imagePHIDs = array();
   protected $mailKey;
 
@@ -23,7 +25,8 @@ final class ConpherenceThread extends ConpherenceDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'imagePHIDs'  => self::SERIALIZATION_JSON,
+        'recentParticipantPHIDs' => self::SERIALIZATION_JSON,
+        'imagePHIDs' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }

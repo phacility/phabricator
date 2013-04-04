@@ -11,7 +11,8 @@ final class ConpherenceNewController extends ConpherenceController {
 
     $conpherence = id(new ConpherenceThread())
       ->attachParticipants(array())
-      ->attachFilePHIDs(array());
+      ->attachFilePHIDs(array())
+      ->setMessageCount(0);
     $title = pht('New Conversation');
     $participants = array();
     $message = '';
@@ -34,6 +35,8 @@ final class ConpherenceNewController extends ConpherenceController {
       } else {
         $participants[] = $user->getPHID();
         $participants = array_unique($participants);
+        $conpherence->setRecentParticipantPHIDs(
+          array_slice($participants, 0, 10));
       }
 
       $message = $request->getStr('message');

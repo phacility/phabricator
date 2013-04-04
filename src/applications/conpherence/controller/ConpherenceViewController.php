@@ -49,7 +49,7 @@ final class ConpherenceViewController extends
     $transactions = $conpherence->getTransactions();
     $latest_transaction = end($transactions);
     $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $participant->markUpToDate($latest_transaction);
+    $participant->markUpToDate($conpherence, $latest_transaction);
     unset($write_guard);
 
     $header = $this->renderHeaderPaneContent();
