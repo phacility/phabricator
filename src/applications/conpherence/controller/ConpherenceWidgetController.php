@@ -279,96 +279,199 @@ final class ConpherenceWidgetController extends
     $user = $this->getRequest()->getUser();
 
     $conpherence = $this->getConpherence();
+    $participants = $conpherence->getParticipants();
     $widget_data = $conpherence->getWidgetData();
     $statuses = $widget_data['statuses'];
     $handles = $conpherence->getHandles();
     $content = array();
+    $layout = id(new AphrontMultiColumnView())
+      ->setFluidLayout(true);
     $timestamps = $this->getCalendarWidgetWeekTimestamps();
+    $today = $timestamps['today'];
+    $weekstamps = $timestamps['weekstamps'];
     $one_day = 24 * 60 * 60;
-    foreach ($timestamps as $time => $day) {
+    foreach ($weekstamps as $time => $day) {
       // build a header for the new day
-      $content[] = id(new PhabricatorHeaderView())
-        ->setHeader($day->format('l'))
-        ->render();
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'day-header'
+        ),
+        array(
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'day-name'
+            ),
+            $day->format('l')),
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'day-date'
+            ),
+            $day->format('m/d/y'))
+          ));
+
+      $week_day_number = $day->format('w');
+
 
       $day->setTime(0, 0, 0);
       $epoch_start = $day->format('U');
-      $day->modify('+1 day');
-      $epoch_end = $day->format('U');
+      $next_day = clone $day;
+      $next_day->modify('+1 day');
+      $epoch_end = $next_day->format('U');
 
+      $first_status_of_the_day = true;
+      $statuses_of_the_day = array();
       // keep looking through statuses where we last left off
       foreach ($statuses as $status) {
         if ($status->getDateFrom() >= $epoch_end) {
           // This list is sorted, so we can stop looking.
           break;
         }
+        if (!$first_status_of_the_day) {
+          $content[] = phutil_tag(
+            'div',
+            array(
+              'class' => 'divider'
+            ),
+            '');
+        }
         if ($status->getDateFrom() < $epoch_end &&
-          $status->getDateTo() > $epoch_start) {
-            $timespan = $status->getDateTo() - $status->getDateFrom();
-            if ($timespan > $one_day) {
-              $time_str = 'm/d';
-            } else {
-              $time_str = 'h:i A';
-            }
-            $epoch_range = phabricator_format_local_time(
-              $status->getDateFrom(),
+            $status->getDateTo() > $epoch_start) {
+          $statuses_of_the_day[$status->getUserPHID()] = $status;
+          $timespan = $status->getDateTo() - $status->getDateFrom();
+          if ($timespan > $one_day) {
+            $time_str = 'm/d';
+          } else {
+            $time_str = 'h:i A';
+          }
+          $epoch_range = phabricator_format_local_time(
+            $status->getDateFrom(),
+            $user,
+            $time_str) . ' - ' . phabricator_format_local_time(
+              $status->getDateTo(),
               $user,
-              $time_str) . ' - ' . phabricator_format_local_time(
-                $status->getDateTo(),
-                $user,
-                $time_str);
+              $time_str);
 
-            $content[] = phutil_tag(
+          $content[] = phutil_tag(
+            'div',
+            array(
+              'class' => 'user-status '.$status->getTextStatus(),
+            ),
+            array(
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'epoch-range'
+                ),
+                $epoch_range),
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'icon',
+                ),
+                ''),
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'description'
+                ),
+                $status->getTerseSummary($user)),
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'participant'
+                ),
+                $handles[$status->getUserPHID()]->getName())
+              ));
+          $first_status_of_the_day = false;
+        }
+      }
+      // we didn't get a status on this day so add a spacer
+      if ($first_status_of_the_day) {
+        $content[] = phutil_tag(
+          'div',
+          array(
+            'class' => 'spacer'
+          ),
+          '');
+      }
+      if ($week_day_number > 0 && $week_day_number < 6) {
+        if ($week_day_number == $today->format('w')) {
+          $active_class = '-active';
+        } else {
+          $active_class = '';
+        }
+        $inner_layout = array();
+        foreach ($participants as $phid => $participant) {
+          $status = idx($statuses_of_the_day, $phid, false);
+          if ($status) {
+            $inner_layout[] = phutil_tag(
               'div',
               array(
-                'class' => 'user-status '.$status->getTextStatus(),
+                'class' => $status->getTextStatus()
               ),
+              '');
+          } else {
+            $inner_layout[] = phutil_tag(
+              'div',
               array(
-                phutil_tag(
-                  'div',
-                  array(
-                    'class' => 'epoch-range'
-                  ),
-                  $epoch_range),
-                phutil_tag(
-                  'div',
-                  array(
-                    'class' => 'icon',
-                  ),
-                  ''),
-                phutil_tag(
-                  'div',
-                  array(
-                    'class' => 'description'
-                  ),
-                  $status->getTerseSummary($user)),
-                phutil_tag(
-                  'div',
-                  array(
-                    'class' => 'participant'
-                  ),
-                  $handles[$status->getUserPHID()]->getName())
-                ));
+                'class' => 'present'
+              ),
+              '');
           }
+        }
+        $layout->addColumn(
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'day-column'.$active_class
+            ),
+            array(
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'day-name'
+                ),
+                $day->format('D')),
+              phutil_tag(
+                'div',
+                array(
+                  'class' => 'day-number',
+                ),
+                $day->format('j')),
+              $inner_layout
+              )));
       }
     }
 
-    return new PhutilSafeHTML(implode('', $content));
+    return
+      array(
+        $layout,
+        $content
+      );
   }
 
   private function getCalendarWidgetWeekTimestamps() {
     $user = $this->getRequest()->getUser();
     $timezone = new DateTimeZone($user->getTimezoneIdentifier());
 
+    $today = id(new DateTime('now', $timezone));
+    $monday = clone $today;
+    $monday
+      ->modify('+1 day')
+      ->modify('last monday');
     $timestamps = array();
     for ($day = 0; $day < 7; $day++) {
-      $timestamps[] = new DateTime(
-        sprintf('today +%d days', $day),
-        $timezone
-      );
+      $timestamp = clone $monday;
+      $timestamps[] = $timestamp->modify(sprintf('+%d days', $day));
     }
 
-    return $timestamps;
+    return array(
+      'today' => $today,
+      'weekstamps' => $timestamps
+    );
   }
 
   private function getWidgetURI() {

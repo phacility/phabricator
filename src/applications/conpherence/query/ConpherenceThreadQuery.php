@@ -173,11 +173,11 @@ final class ConpherenceThreadQuery
     // statuses of everyone currently in the conpherence
     // for a rolling one week window
     $start_of_week = phabricator_format_local_time(
-      strtotime('today'),
+      strtotime('last monday', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $end_of_week = phabricator_format_local_time(
-      strtotime('midnight +1 week'),
+      strtotime('last monday +1 week', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $statuses = id(new PhabricatorUserStatus())

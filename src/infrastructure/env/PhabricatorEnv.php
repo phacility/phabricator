@@ -96,13 +96,17 @@ final class PhabricatorEnv {
       date_default_timezone_set('UTC');
     }
 
-    // Append any paths to $PATH if we need to.
-    $paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
-    if (!empty($paths)) {
-      $current_env_path = getenv('PATH');
-      $new_env_paths = implode(PATH_SEPARATOR, $paths);
-      putenv('PATH='.$current_env_path.PATH_SEPARATOR.$new_env_paths);
+    // Prepend '/support/bin' and append any paths to $PATH if we need to.
+    $env_path = getenv('PATH');
+    $phabricator_path = dirname(phutil_get_library_root('phabricator'));
+    $support_path = $phabricator_path.'/support/bin';
+    $env_path = $support_path.PATH_SEPARATOR.$env_path;
+    $append_dirs = PhabricatorEnv::getEnvConfig('environment.append-paths');
+    if (!empty($append_dirs)) {
+      $append_path = implode(PATH_SEPARATOR, $append_dirs);
+      $env_path = $env_path.PATH_SEPARATOR.$append_path;
     }
+    putenv('PATH='.$env_path);
 
     PhabricatorEventEngine::initialize();
 

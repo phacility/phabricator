@@ -54,10 +54,12 @@ final class PhabricatorSearchHovercardController
         array(
           'dust' => true,
         ));
+    } else {
+      return id(new AphrontAjaxResponse())->setContent(
+        array(
+          'cards' => $cards,
+        ));
     }
-
-    // TODO: Write a reasonable way to provide client-side-ready hovercard
-    // put-into-the-browser markup (coming in the next diff)
   }
 
 }
