@@ -133,17 +133,112 @@
   margin: 8px 0px 0px 50px;
   border: 1px dashed #bfbfbf;
 }
+
 /* calendar widget */
 
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
+  margin: 2px 0px 0px 0px;
+  width: 280px;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column {
+  background: white;
+  border-right: 1px solid #bfbfbf;
+  text-align: center;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column-last {
+  border-right: 0;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .day-column,
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .day-column-active {
+  color: #bfbfbf;
+  background-color: white;
+  font-weight: bold;
+  padding: 0px 0px 10px 0px;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .day-column-active {
+  color: black;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .present ,
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .sporadic ,
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .away {
+  height: 10px;
+  margin: 5px 0px 5px 0px;
+  width: 100%;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .present {
+  background-color: white;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .sporadic {
+  background-color: rgb(222, 226, 232);
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .away {
+  background-color: rgb(102, 204, 255);
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .day-name {
+  padding: 5px 0px 0px 0px;
+  font-size: 12px;
+}
+.conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
+.aphront-multi-column-column .day-number {
+  font-size: 16px;
+  padding: 5px 0px 5px 0px;
+}
+.conpherence-widget-pane #widgets-calendar .day-header {
+  float: left;
+  clear: both;
+  background-color: #d8dce2;
+  border-top: 1px solid #bfbfbf;
+  border-bottom: 1px solid #bfbfbf;
+  padding: 5px 10px 5px 10px;
+  width: 260px;
+}
+.conpherence-widget-pane #widgets-calendar .day-header .day-name {
+  float: left;
+  clear: none;
+}
+.conpherence-widget-pane #widgets-calendar .day-header .day-date {
+  float: right;
+  clear: none;
+}
+
+.conpherence-widget-pane #widgets-calendar .divider {
+  float: left;
+  clear: both;
+  width: 260px;
+  margin: 0px 0px 0px 10px;
+  border: 1px dashed #bfbfbf;
+}
+.conpherence-widget-pane #widgets-calendar .spacer {
+  float: left;
+  clear: both;
+  height: 10px;
+  width: 100%;
+}
+
 .conpherence-widget-pane #widgets-calendar .user-status {
+  float: left;
+  clear: both;
   height: 60px;
+  width: 280px;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .icon {
   border-radius: 10px;
   position: relative;
   top: 24px;
-  left: 12px;
+  left: 10px;
   height: 16px;
   width: 16px;
   box-shadow: 0px 0px 1px #000;
@@ -162,7 +257,7 @@
   font-style: italic;
   position: relative;
   top: 24px;
-  right: 8px;
+  right: 10px;
   font-size: 11px;
 }
 
