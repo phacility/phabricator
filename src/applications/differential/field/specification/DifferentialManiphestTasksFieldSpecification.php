@@ -115,7 +115,7 @@ final class DifferentialManiphestTasksFieldSpecification
     $names = array();
     foreach ($this->maniphestTasks as $phid) {
       $handle = $this->getHandle($phid);
-      $names[] = 'T'.$handle->getAlternateID();
+      $names[] = $handle->getName();
     }
     return implode(', ', $names);
   }
