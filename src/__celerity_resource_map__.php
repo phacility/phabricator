@@ -1905,14 +1905,15 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-hovercards' =>
   array(
-    'uri' => '/res/8366e963/rsrc/js/application/core/behavior-hovercard.js',
+    'uri' => '/res/65824840/rsrc/js/application/core/behavior-hovercard.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-behavior-device',
       2 => 'javelin-stratcom',
-      3 => 'phabricator-hovercard',
+      3 => 'javelin-vector',
+      4 => 'phabricator-hovercard',
     ),
     'disk' => '/rsrc/js/application/core/behavior-hovercard.js',
   ),
@@ -3042,16 +3043,15 @@ celerity_register_resource_map(array(
   ),
   'phabricator-hovercard' =>
   array(
-    'uri' => '/res/1db6db48/rsrc/js/application/core/Hovercard.js',
+    'uri' => '/res/a6eafd28/rsrc/js/application/core/Hovercard.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-vector',
-      4 => 'javelin-request',
-      5 => 'phabricator-busy',
+      1 => 'javelin-dom',
+      2 => 'javelin-vector',
+      3 => 'javelin-request',
+      4 => 'javelin-uri',
     ),
     'disk' => '/rsrc/js/application/core/Hovercard.js',
   ),

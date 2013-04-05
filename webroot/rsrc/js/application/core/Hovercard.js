@@ -1,10 +1,9 @@
 /**
  * @requires javelin-install
- *           javelin-util
  *           javelin-dom
  *           javelin-vector
  *           javelin-request
- *           phabricator-busy
+ *           javelin-uri
  * @provides phabricator-hovercard
  * @javelin
  */
@@ -14,31 +13,54 @@ JX.install('Hovercard', {
   statics : {
     _node : null,
     _activeRoot : null,
-
-    _didScrape : false,
+    _visiblePHID : null,
 
     fetchUrl : '/search/hovercard/retrieve/',
 
     /**
      * Hovercard storage. {"PHID-XXXX-YYYY":"<...>", ...}
      */
-    cards : {},
+    _cards : {},
+
+    getAnchor : function() {
+      return this._activeRoot;
+    },
+
+    getCard : function() {
+      return this._node;
+    },
 
     show : function(root, phid) {
+      var self = JX.Hovercard;
+      self.hide();
+
+      self._visiblePHID = phid;
+      self._activeRoot = root;
 
       // Hovercards are all loaded by now, but when somebody previews a comment
       // for example it may not be loaded yet.
-      if (!JX.Hovercard.cards[phid]) {
-        JX.Hovercard.load([phid]);
+      if (!(phid in self._cards)) {
+        self._load([phid]);
+      } else {
+        self._drawCard(phid);
+      }
+    },
+
+    _drawCard : function(phid) {
+      var self = JX.Hovercard;
+      if (phid != self._visiblePHID) {
+        return;
+      }
+      if (!(phid in self._cards)) {
+        return;
       }
 
+      var root = self._activeRoot;
       var node = JX.$N('div',
         { className: 'jx-hovercard-container' },
-        JX.Hovercard.cards[phid]);
+        JX.$H(self._cards[phid]));
 
-      JX.Hovercard.hide();
-      this._node = node;
-      this._activeRoot = root;
+      self._node = node;
 
       // Append the card to the document, but offscreen, so we can measure it.
       node.style.left = '-10000px';
@@ -70,16 +92,15 @@ JX.install('Hovercard', {
 
       node.style.left = x + 'px';
       node.style.top  = y + 'px';
-
     },
 
     hide : function() {
-      if (this._node) {
-        JX.DOM.remove(this._node);
-        this._node = null;
-      }
-      if (this._activeRoot) {
-        this._activeRoot = null;
+      var self = JX.Hovercard;
+      self._visiblePHID = null;
+      self._activeRoot = null;
+      if (self._node) {
+        JX.DOM.remove(self._node);
+        self._node = null;
       }
     },
 
@@ -88,8 +109,9 @@ JX.install('Hovercard', {
      *
      * @param list phids
      */
-    load : function(phids) {
-      var uri = JX.$U(JX.Hovercard.fetchUrl);
+    _load : function(phids) {
+      var self = JX.Hovercard;
+      var uri = JX.$U(self.fetchUrl);
 
       for (var ii = 0; ii < phids.length; ii++) {
         uri.setQueryParam("phids["+ii+"]", phids[ii]);
@@ -97,28 +119,10 @@ JX.install('Hovercard', {
 
       new JX.Request(uri, function(r) {
         for (var phid in r.cards) {
-          JX.Hovercard.cards[phid] = JX.$H(r.cards[phid]);
+          self._cards[phid] = r.cards[phid];
+          self._drawCard(phid);
         }
       }).send();
-    },
-
-    // For later probably
-    // Currently unused
-    scrapeAndLoad: function() {
-      if (!JX.Hovercard._didScrape) {
-        // I assume links only for now
-        var cards = JX.DOM.scry(document, 'a', 'hovercard');
-        var phids = [];
-        var data;
-        for (var i = 0; i < cards.length; i++) {
-          data = JX.Stratcom.getData(cards[i]);
-          phids.push(data.hoverPHID);
-        }
-
-        JX.Hovercard.load(phids);
-
-        JX.Hovercard._didScrape = true;
-      }
     }
   }
 });

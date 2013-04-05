@@ -3,25 +3,17 @@
  * @requires javelin-behavior
  *           javelin-behavior-device
  *           javelin-stratcom
+ *           javelin-vector
  *           phabricator-hovercard
  * @javelin
  */
 
 JX.behavior('phabricator-hovercards', function(config) {
 
-  // First find all hovercard-able object on page and load them in a batch
-  JX.Hovercard.scrapeAndLoad();
-
-  // Event stuff
   JX.Stratcom.listen(
-    ['mouseover'],
+    'mouseover',
     'hovercard',
     function (e) {
-      if (e.getType() == 'mouseout') {
-        JX.Hovercard.hide();
-        return;
-      }
-
       if (JX.Device.getDevice() != 'desktop') {
         return;
       }
@@ -34,19 +26,15 @@ JX.behavior('phabricator-hovercards', function(config) {
     });
 
   JX.Stratcom.listen(
-    ['mousemove'],
+    'mousemove',
     null,
     function (e) {
-      if (JX.Device.getDevice() != 'desktop') {
+      if (!JX.Hovercard.getCard()) {
         return;
       }
 
-      if (!JX.Hovercard._node) {
-        return;
-      }
-
-      var root = JX.Hovercard._activeRoot;
-      var node = JX.Hovercard._node.firstChild;
+      var root = JX.Hovercard.getAnchor();
+      var node = JX.Hovercard.getCard();
 
       var mouse = JX.$V(e);
       var node_pos = JX.$V(node);
@@ -74,16 +62,15 @@ JX.behavior('phabricator-hovercards', function(config) {
        // Cursor is too far to the right.
       if (mouse.x >
         Math.max(root_pos.x + root_dim.x, node_pos.x + node_dim.x) + margin) {
-
         JX.Hovercard.hide();
       }
     });
 
   // When we leave the page, hide any visible hovercards. If we don't do this,
   // clicking a link with a hovercard and then hitting "back" will give you a
-  // phantom tooltip.
+  // phantom card. We also hide cards if the window resizes.
   JX.Stratcom.listen(
-    'unload',
+    ['unload', 'onresize'],
     null,
     function(e) {
       JX.Hovercard.hide();
