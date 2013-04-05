@@ -1733,7 +1733,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-maniphest-batch-editor' =>
   array(
-    'uri' => '/res/d22661be/rsrc/js/application/maniphest/behavior-batch-editor.js',
+    'uri' => '/res/00accaec/rsrc/js/application/maniphest/behavior-batch-editor.js',
     'type' => 'js',
     'requires' =>
     array(
