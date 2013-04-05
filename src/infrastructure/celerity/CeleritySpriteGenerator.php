@@ -114,13 +114,13 @@ final class CeleritySpriteGenerator {
         }
 
         $sprite = id(clone $template)
-          ->setName('action-icon-'.$icon.$suffix);
+          ->setName('actions-'.$icon.$suffix);
 
         $tcss = array();
-        $tcss[] = '.action-icon-'.$icon.$suffix;
-        if ($color == 'grey') {
-          $tcss[] = '.device-desktop .phabricator-action-icon-view:hover '.
-            '.action-icon-'.$icon;
+        $tcss[] = '.actions-'.$icon.$suffix;
+        if ($color == 'dark') {
+          $tcss[] = '.device-desktop '.
+            '.actions-'.$icon.'-grey.phabricator-action-icon-item-link:hover';
         }
 
         $sprite->setTargetCSS(implode(', ', $tcss));
@@ -133,7 +133,7 @@ final class CeleritySpriteGenerator {
       }
     }
 
-    $sheet = $this->buildSheet('action-icon', true);
+    $sheet = $this->buildSheet('actions', true);
     $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
@@ -147,6 +147,7 @@ final class CeleritySpriteGenerator {
 
     $colors = array(
       'white',
+      'dark',
     );
 
     $scales = array(

@@ -131,21 +131,21 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
           ->addPanel($panel2)
           ->addPanel($panel3);
 
-    $action = new PhabricatorWorkboardActionView();
+    $action = new PhabricatorActionIconView();
     $action->setHref('/maniphest/task/create');
     $action->setImage('/rsrc/image/actions/edit.png');
 
-    $person1 = new PhabricatorWorkboardActionView();
+    $person1 = new PhabricatorActionIconView();
     $person1->setHref('http://en.wikipedia.org/wiki/George_Washington');
     $person1->setImage(
       celerity_get_resource_uri('/rsrc/image/people/washington.png'));
 
-    $person2 = new PhabricatorWorkboardActionView();
+    $person2 = new PhabricatorActionIconView();
     $person2->setHref('http://en.wikipedia.org/wiki/Warren_G._Harding');
     $person2->setImage(
       celerity_get_resource_uri('/rsrc/image/people/harding.png'));
 
-    $person3 = new PhabricatorWorkboardActionView();
+    $person3 = new PhabricatorActionIconView();
     $person3->setHref('http://en.wikipedia.org/wiki/William_Howard_Taft');
     $person3->setImage(
       celerity_get_resource_uri('/rsrc/image/people/taft.png'));

@@ -625,15 +625,15 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/sprite-minicons-X2.png' =>
   array(
-    'hash' => '9b36608d0bfaa941816e42ceb6912aaf',
-    'uri' => '/res/9b36608d/rsrc/image/sprite-minicons-X2.png',
+    'hash' => 'c420c6462f7e50ca9941ccc5dd9e3dec',
+    'uri' => '/res/c420c646/rsrc/image/sprite-minicons-X2.png',
     'disk' => '/rsrc/image/sprite-minicons-X2.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-minicons.png' =>
   array(
-    'hash' => 'f4aa63b2bb2d7364c388a20fa35a08c5',
-    'uri' => '/res/f4aa63b2/rsrc/image/sprite-minicons.png',
+    'hash' => '168bb875933624b3080a1cc134e5b4ed',
+    'uri' => '/res/168bb875/rsrc/image/sprite-minicons.png',
     'disk' => '/rsrc/image/sprite-minicons.png',
     'type' => 'png',
   ),
@@ -2821,6 +2821,24 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/herald/PathTypeahead.js',
   ),
+  'phabricator-action-header-view-css' =>
+  array(
+    'uri' => '/res/1c0142de/rsrc/css/layout/phabricator-action-header-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/layout/phabricator-action-header-view.css',
+  ),
+  'phabricator-action-icon-view-css' =>
+  array(
+    'uri' => '/res/8b47cf61/rsrc/css/layout/phabricator-action-icon-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/layout/phabricator-action-icon-view.css',
+  ),
   'phabricator-action-list-view-css' =>
   array(
     'uri' => '/res/7a67c3b9/rsrc/css/layout/phabricator-action-list-view.css',
@@ -3475,7 +3493,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-workboard-view-css' =>
   array(
-    'uri' => '/res/c9bfe320/rsrc/css/layout/phabricator-workboard-view.css',
+    'uri' => '/res/14217087/rsrc/css/layout/phabricator-workboard-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3484,7 +3502,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-workpanel-view-css' =>
   array(
-    'uri' => '/res/4e25e23b/rsrc/css/layout/phabricator-workpanel-view.css',
+    'uri' => '/res/ff5d5b26/rsrc/css/layout/phabricator-workpanel-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3716,9 +3734,9 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/spacing.css',
   ),
-  'sprite-action-icon-css' =>
+  'sprite-actions-css' =>
   array(
-    'uri' => '/res/a992b71c/rsrc/css/sprite-actions.css',
+    'uri' => '/res/41ef6a23/rsrc/css/sprite-actions.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3799,7 +3817,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-minicons-css' =>
   array(
-    'uri' => '/res/8b66d53f/rsrc/css/sprite-minicons.css',
+    'uri' => '/res/2dba70cd/rsrc/css/sprite-minicons.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -1,127 +1,127 @@
 /**
- * @provides sprite-action-icon-css
+ * @provides sprite-actions-css
  * @generated
  */
 
-.sprite-action-icon {
-  background-image: url(/rsrc/image/sprite-action-icon.png);
+.sprite-actions {
+  background-image: url(/rsrc/image/sprite-actions.png);
   background-repeat: no-repeat;
 }
 
 @media
 only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-  .sprite-action-icon {
-    background-image: url(/rsrc/image/sprite-action-icon-X2.png);
+  .sprite-actions {
+    background-image: url(/rsrc/image/sprite-actions-X2.png);
     background-size: 125px 150px;
   }
 }
 
 
-.action-icon-flag-dark {
+.actions-flag-dark, .device-desktop .actions-flag-grey.phabricator-action-icon-item-link:hover {
   background-position: 0px 0px;
 }
 
-.action-icon-heart-dark {
+.actions-heart-dark, .device-desktop .actions-heart-grey.phabricator-action-icon-item-link:hover {
   background-position: -25px 0px;
 }
 
-.action-icon-move-dark {
+.actions-move-dark, .device-desktop .actions-move-grey.phabricator-action-icon-item-link:hover {
   background-position: -50px 0px;
 }
 
-.action-icon-new-dark {
+.actions-new-dark, .device-desktop .actions-new-grey.phabricator-action-icon-item-link:hover {
   background-position: -75px 0px;
 }
 
-.action-icon-search-dark {
+.actions-search-dark, .device-desktop .actions-search-grey.phabricator-action-icon-item-link:hover {
   background-position: -100px 0px;
 }
 
-.action-icon-settings-dark {
+.actions-settings-dark, .device-desktop .actions-settings-grey.phabricator-action-icon-item-link:hover {
   background-position: 0px -25px;
 }
 
-.action-icon-star-dark {
+.actions-star-dark, .device-desktop .actions-star-grey.phabricator-action-icon-item-link:hover {
   background-position: -25px -25px;
 }
 
-.action-icon-tag-dark {
+.actions-tag-dark, .device-desktop .actions-tag-grey.phabricator-action-icon-item-link:hover {
   background-position: -50px -25px;
 }
 
-.action-icon-wrench-dark {
+.actions-wrench-dark, .device-desktop .actions-wrench-grey.phabricator-action-icon-item-link:hover {
   background-position: -75px -25px;
 }
 
-.action-icon-flag-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-flag {
+.actions-flag-grey {
   background-position: -100px -25px;
 }
 
-.action-icon-heart-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-heart {
+.actions-heart-grey {
   background-position: 0px -50px;
 }
 
-.action-icon-move-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-move {
+.actions-move-grey {
   background-position: -25px -50px;
 }
 
-.action-icon-new-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-new {
+.actions-new-grey {
   background-position: -50px -50px;
 }
 
-.action-icon-search-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-search {
+.actions-search-grey {
   background-position: -75px -50px;
 }
 
-.action-icon-settings-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-settings {
+.actions-settings-grey {
   background-position: -100px -50px;
 }
 
-.action-icon-star-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-star {
+.actions-star-grey {
   background-position: 0px -75px;
 }
 
-.action-icon-tag-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-tag {
+.actions-tag-grey {
   background-position: -25px -75px;
 }
 
-.action-icon-wrench-grey, .device-desktop .phabricator-action-icon-view:hover .action-icon-wrench {
+.actions-wrench-grey {
   background-position: -50px -75px;
 }
 
-.action-icon-flag-white {
+.actions-flag-white {
   background-position: -75px -75px;
 }
 
-.action-icon-heart-white {
+.actions-heart-white {
   background-position: -100px -75px;
 }
 
-.action-icon-move-white {
+.actions-move-white {
   background-position: 0px -100px;
 }
 
-.action-icon-new-white {
+.actions-new-white {
   background-position: -25px -100px;
 }
 
-.action-icon-search-white {
+.actions-search-white {
   background-position: -50px -100px;
 }
 
-.action-icon-settings-white {
+.actions-settings-white {
   background-position: -75px -100px;
 }
 
-.action-icon-star-white {
+.actions-star-white {
   background-position: -100px -100px;
 }
 
-.action-icon-tag-white {
+.actions-tag-white {
   background-position: 0px -125px;
 }
 
-.action-icon-wrench-white {
+.actions-wrench-white {
   background-position: -25px -125px;
 }
