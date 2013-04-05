@@ -120,6 +120,11 @@ JX.install('Hovercard', {
       new JX.Request(uri, function(r) {
         for (var phid in r.cards) {
           self._cards[phid] = r.cards[phid];
+
+          if (self.getCard()) {
+            self.hide();
+          }
+
           self._drawCard(phid);
         }
       }).send();
