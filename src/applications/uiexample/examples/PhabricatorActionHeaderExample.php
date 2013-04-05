@@ -143,37 +143,37 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
 
     $header1 = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle('Company')
-      ->setHeaderHref('http://phacility.com/')
+      ->setHeaderHref('http://example.com/')
       ->addAction($action1);
 
     $header2 = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle('Public')
-      ->setHeaderHref('http://phacility.com/')
+      ->setHeaderHref('http://example.com/')
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
       ->addAction($action1);
 
     $header3 = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle('Restricted')
-      ->setHeaderHref('http://phacility.com/')
+      ->setHeaderHref('http://example.com/')
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_BLUE)
       ->addAction($action2);
 
     $header4 = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle('Company')
-      ->setHeaderHref('http://phacility.com/')
+      ->setHeaderHref('http://example.com/')
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREEN)
       ->addAction($action3);
 
     $header5 = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle('Public')
-      ->setHeaderHref('http://phacility.com/')
+      ->setHeaderHref('http://example.com/')
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
       ->addAction($action4)
       ->addAction($action5);
 
     $header6 = id(new PhabricatorActionHeaderView())
       ->setHeaderTitle('Restricted')
-      ->setHeaderHref('http://phacility.com/')
+      ->setHeaderHref('http://example.com/')
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_YELLOW)
       ->addAction($action6);
 
