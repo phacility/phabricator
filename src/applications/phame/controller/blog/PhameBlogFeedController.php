@@ -31,7 +31,6 @@ final class PhameBlogFeedController extends PhameController {
       ->setViewer($user)
       ->withBlogPHIDs(array($blog->getPHID()))
       ->withVisibility(PhamePost::VISIBILITY_PUBLISHED)
-      ->withPublishedAfter(strtotime('-1 month'))
       ->execute();
 
     $content = array();
