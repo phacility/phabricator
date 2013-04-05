@@ -19,19 +19,9 @@
   border: 1px solid #666666;
 }
 
-.phabricator-hovercard-head {
-  padding: 10px 15px;
-  font-weight: bold;
-  font-size: 15px;
-  white-space: nowrap;
-  color: white;
-  text-shadow: 0 1px 0 #333333;
-  font-weight: bold;
+.phabricator-hovercard-head .phabricator-action-header {
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
-  overflow: hidden;
-
-  background-color: #559911;
 }
 
 .phabricator-hovercard-tags {

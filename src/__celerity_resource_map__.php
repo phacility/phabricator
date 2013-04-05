@@ -3029,7 +3029,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-hovercard-view-css' =>
   array(
-    'uri' => '/res/061e66df/rsrc/css/layout/phabricator-hovercard-view.css',
+    'uri' => '/res/68d69a87/rsrc/css/layout/phabricator-hovercard-view.css',
     'type' => 'css',
     'requires' =>
     array(
