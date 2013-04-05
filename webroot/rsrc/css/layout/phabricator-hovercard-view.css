@@ -2,10 +2,13 @@
  * @provides phabricator-hovercard-view-css
  */
 
+.jx-hovercard-container {
+  position: absolute;
+}
+
 .phabricator-hovercard-wrapper {
   border-radius: 4px;
   width: 400px;
-  margin: auto;
   padding: 4px;
   background-color: #cccccc;
 }
