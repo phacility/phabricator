@@ -171,14 +171,14 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         foreach ($rows as $row) {
           $in[] = qsprintf(
             $conn_w,
-            '(%d, %s)',
+            '(id = %d AND leaseOwner = %s)',
             $row['id'],
             $row['leaseOwner']);
         }
         $where[] = qsprintf(
           $conn_w,
-          '(id, leaseOwner) IN (%Q)',
-          '('.implode(', ', $in).')');
+          '(%Q)',
+          implode(' OR ', $in));
         break;
       default:
         throw new Exception("Unknown phase '{$phase}'!");
