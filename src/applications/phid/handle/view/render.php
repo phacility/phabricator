@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Implodes a list of handles, rendering their links
+ * Implodes a list of handles, rendering their links.
  *
  * @group  handle
  * @return PhutilSafeHTML
@@ -17,9 +17,9 @@ function implode_handle_links($glue, array $handles) {
 }
 
 /**
- * Like @{function:implode_handle_links}Implodes selected handles from a pool of
- * handles. Useful if you load handles for various phids, but only render a few
- * of them at a time
+ * Like @{function:implode_handle_links}. Implodes selected handles from a pool
+ * of handles. Useful if you load handles for various phids, but only render
+ * a few of them at a time.
  *
  * @group  handle
  * @return PhutilSafeHTML
