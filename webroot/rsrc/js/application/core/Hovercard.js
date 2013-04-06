@@ -48,9 +48,15 @@ JX.install('Hovercard', {
 
     _drawCard : function(phid) {
       var self = JX.Hovercard;
+      // Already displaying
+      if (self.getCard() && phid == self._visiblePHID) {
+        return;
+      }
+      // Not the current requested card
       if (phid != self._visiblePHID) {
         return;
       }
+      // Not loaded
       if (!(phid in self._cards)) {
         return;
       }
@@ -121,8 +127,10 @@ JX.install('Hovercard', {
         for (var phid in r.cards) {
           self._cards[phid] = r.cards[phid];
 
-          if (self.getCard()) {
-            self.hide();
+          // Don't draw if the user is faster than the browser
+          // Only draw if the user is still requesting the original card
+          if (self.getCard() && phid != self._visiblePHID) {
+            continue;
           }
 
           self._drawCard(phid);
