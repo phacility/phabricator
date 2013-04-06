@@ -12,6 +12,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $effect;
   private $footIcons = array();
   private $handleIcons = array();
+  private $bylines = array();
   private $grippable;
 
   public function setObjectName($name) {
@@ -62,6 +63,11 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   public function getHeader() {
     return $this->header;
+  }
+
+  public function addByline($byline) {
+    $this->bylines[] = $byline;
+    return $this;
   }
 
   public function addIcon($icon, $label = null, $href = null) {
@@ -131,6 +137,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     if ($this->footIcons) {
       $item_classes[] = 'phabricator-object-item-with-foot-icons';
+    }
+
+    if ($this->bylines) {
+      $item_classes[] = 'phabricator-object-item-with-bylines';
     }
 
     switch ($this->effect) {
@@ -256,6 +266,24 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $handle_bar);
     }
 
+    $bylines = array();
+    if ($this->bylines) {
+      foreach ($this->bylines as $byline) {
+        $bylines[] = phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-object-item-byline',
+          ),
+          $byline);
+      }
+      $bylines = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-bylines',
+        ),
+        $bylines);
+    }
+
     if ($icons) {
       $icons = phutil_tag(
         'div',
@@ -325,7 +353,6 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         'class' => implode(' ', $content_classes),
       ),
       array(
-        $header,
         $attrs,
         $this->renderChildren(),
         $foot,
@@ -338,7 +365,9 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       ),
       array(
         $grippable,
+        $header,
         $icons,
+        $bylines,
         $content,
       ));
   }

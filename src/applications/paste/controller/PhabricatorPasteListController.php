@@ -101,7 +101,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         ->setHeader($title)
         ->setHref('/P'.$paste->getID())
         ->setObject($paste)
-        ->addAttribute(pht('Created %s by %s', $created, $author))
+        ->addByline(pht('Author: %s', $author))
         ->addIcon('none', $line_count)
         ->appendChild($source_code);
 

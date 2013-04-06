@@ -95,14 +95,21 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange')
         ->addIcon('comment', pht('Royal Flush!')));
+
+    $owner = phutil_tag('a', array('href' => '#'), pht('jackofclubs'));
     $list->addItem(
       id(new PhabricatorObjectItemView())
         ->setHeader(pht('House of Cards'))
-        ->setBarColor('yellow'));
+        ->setBarColor('yellow')
+        ->addByline(pht('Owner: %s', $owner)));
+
+    $author = phutil_tag('a', array('href' => '#'), pht('agoat'));
     $list->addItem(
       id(new PhabricatorObjectItemView())
         ->setHeader(pht('Cardigan'))
-        ->setBarColor('green'));
+        ->setBarColor('green')
+        ->addIcon('highlight', pht('Warm!'))
+        ->addByline(pht('Author: %s', $author)));
     $list->addItem(
       id(new PhabricatorObjectItemView())
         ->setHeader(pht('Cardamom'))
