@@ -166,8 +166,10 @@ final class PhabricatorObjectHandle {
   }
 
 
-  public function renderLink() {
-    $name = $this->getLinkName();
+  public function renderLink($name = null) {
+    if ($name === null) {
+      $name = $this->getLinkName();
+    }
     $class = null;
     $title = null;
 
