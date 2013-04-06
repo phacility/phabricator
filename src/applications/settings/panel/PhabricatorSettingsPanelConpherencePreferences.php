@@ -4,9 +4,8 @@ final class PhabricatorSettingsPanelConpherencePreferences
   extends PhabricatorSettingsPanel {
 
   public function isEnabled() {
-    $conpherence_app = PhabricatorApplication::getByClass(
+    return PhabricatorApplication::isClassInstalled(
       'PhabricatorApplicationConpherence');
-    return $conpherence_app->isInstalled();
   }
 
   public function getPanelKey() {

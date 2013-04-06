@@ -1083,6 +1083,7 @@ return array(
 
 // -- Maniphest ------------------------------------------------------------- //
 
+  // Deprecated, use 'phabricator.uninstalled-applications' instead.
   'maniphest.enabled' => true,
 
   // Array of custom fields for Maniphest tasks. For details on adding custom
@@ -1100,6 +1101,7 @@ return array(
 
 // -- Phriction ------------------------------------------------------------- //
 
+  // Deprecated, use 'phabricator.uninstalled-applications' instead.
   'phriction.enabled' => true,
 
 // -- Phame ----------------------------------------------------------------- //

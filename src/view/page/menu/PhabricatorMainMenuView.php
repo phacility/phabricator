@@ -260,11 +260,9 @@ final class PhabricatorMainMenuView extends AphrontView {
       'alert-notifications',
     );
 
-    $conpherence_application = PhabricatorApplication::getByClass(
-      'PhabricatorApplicationConpherence');
-
     $message_tag = '';
-    if ($conpherence_application->isInstalled()) {
+    $conpherence = 'PhabricatorApplicationConpherence';
+    if (PhabricatorApplication::isClassInstalled($conpherence)) {
       $message_id = celerity_generate_unique_node_id();
       $message_count_id = celerity_generate_unique_node_id();
 

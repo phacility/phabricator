@@ -19,7 +19,8 @@ final class PhabricatorPhrictionConfigOptions
             pht("Enable Phriction"),
             pht("Disable Phriction"),
           ))
-        ->setDescription(pht("Enable or disable Phriction.")),
+        ->setDescription(pht(
+          "Deprecated, use 'phabricator.uninstalled-applications' instead.")),
       $this->newOption(
         'metamta.phriction.subject-prefix', 'string', '[Phriction]')
         ->setDescription(pht("Subject prefix for Phriction email.")),

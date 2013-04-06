@@ -7,7 +7,8 @@ final class DifferentialManiphestTasksFieldSpecification
   private $maniphestTasks = array();
 
   public function shouldAppearOnRevisionView() {
-    return PhabricatorEnv::getEnvConfig('maniphest.enabled');
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorApplicationManiphest');
   }
 
   public function getRequiredHandlePHIDsForRevisionView() {
@@ -84,7 +85,7 @@ final class DifferentialManiphestTasksFieldSpecification
   }
 
   public function shouldAppearOnCommitMessage() {
-    return PhabricatorEnv::getEnvConfig('maniphest.enabled');
+    return $this->shouldAppearOnRevisionView();
   }
 
   public function getCommitMessageKey() {

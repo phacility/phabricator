@@ -529,7 +529,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
         'sigil' => 'workflow',
       );
 
-      if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $maniphest = 'PhabricatorApplicationManiphest';
+      if (PhabricatorApplication::isClassInstalled($maniphest)) {
         $links[] = array(
           'icon'  => 'attach',
           'name'  => pht('Edit Maniphest Tasks'),

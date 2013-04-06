@@ -58,10 +58,6 @@ abstract class PhabricatorApplication {
     return $this->getName().' Application';
   }
 
-  public function isEnabled() {
-    return true;
-  }
-
   public function isInstalled() {
     if (!$this->canUninstall()) {
       return true;
@@ -76,6 +72,10 @@ abstract class PhabricatorApplication {
       'phabricator.uninstalled-applications');
 
     return empty($uninstalled[get_class($this)]);
+  }
+
+  public static function isClassInstalled($class) {
+    return self::getByClass($class)->isInstalled();
   }
 
   public function isBeta() {
@@ -280,10 +280,6 @@ abstract class PhabricatorApplication {
       $apps = array();
       foreach ($all_applications as $app) {
         if (!$app->isInstalled()) {
-          continue;
-        }
-
-        if (!$app->isEnabled()) {
           continue;
         }
 
