@@ -63,12 +63,17 @@ abstract class PhabricatorApplication {
   }
 
   public function isInstalled() {
-    $uninstalled = PhabricatorEnv::getEnvConfig(
-      'phabricator.uninstalled-applications');
-
     if (!$this->canUninstall()) {
       return true;
     }
+
+    $beta = PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
+    if (!$beta && $this->isBeta()) {
+      return false;
+    }
+
+    $uninstalled = PhabricatorEnv::getEnvConfig(
+      'phabricator.uninstalled-applications');
 
     return empty($uninstalled[get_class($this)]);
   }
@@ -270,9 +275,6 @@ abstract class PhabricatorApplication {
   public static function getAllInstalledApplications() {
     static $applications;
 
-    $show_beta = PhabricatorEnv::getEnvConfig(
-      'phabricator.show-beta-applications');
-
     if (empty($applications)) {
       $all_applications = self::getAllApplications();
       $apps = array();
@@ -282,10 +284,6 @@ abstract class PhabricatorApplication {
         }
 
         if (!$app->isEnabled()) {
-          continue;
-        }
-
-        if (!$show_beta && $app->isBeta()) {
           continue;
         }
 

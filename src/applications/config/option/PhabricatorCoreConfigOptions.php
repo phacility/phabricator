@@ -54,9 +54,19 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('phabricator.show-beta-applications', 'bool', false)
         ->setBoolOptions(
           array(
-            pht('Visible'),
-            pht('Invisible')
-          ))->setDescription(pht('Show beta applications on the home page.')),
+            pht('Install Beta Applications'),
+            pht('Uninstall Beta Applications')
+          ))
+        ->setDescription(
+          pht(
+            "Phabricator includes 'Beta' applications which are in an early ".
+            "stage of development. They range from very rough prototypes to ".
+            "relatively complete (but unpolished) applications.\n\n".
+            "By default, Beta applications are not installed. You can enable ".
+            "this option to install them if you're interested in previewing ".
+            "upcoming features.\n\n".
+            "After enabling Beta applications, you can selectively uninstall ".
+            "them (like normal applications).")),
       $this->newOption('phabricator.serious-business', 'bool', false)
         ->setBoolOptions(
           array(
