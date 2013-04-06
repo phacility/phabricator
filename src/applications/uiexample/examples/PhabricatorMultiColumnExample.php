@@ -7,7 +7,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
   }
 
   public function getDescription() {
-    return 'A container good for 1-6 equally spaced columns. '.
+    return 'A container good for 1-7 equally spaced columns. '.
       'Fixed and Fluid layouts.';
   }
 
@@ -63,6 +63,18 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
+    $head5 = id(new PhabricatorHeaderView())
+      ->setHeader(pht('7 Column Fluid'));
+    $layout5 = id(new AphrontMultiColumnView())
+      ->addColumn('Sunday')
+      ->addColumn('Monday')
+      ->addColumn('Tuesday')
+      ->addColumn('Wednesday')
+      ->addColumn('Thursday')
+      ->addColumn('Friday')
+      ->addColumn('Saturday')
+      ->setFluidLayout(true);
+
     $wrap1 = phutil_tag(
       'div',
         array(
@@ -91,6 +103,13 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
         ),
         $layout4);
 
+    $wrap5 = phutil_tag(
+      'div',
+        array(
+          'class' => 'ml'
+        ),
+        $layout5);
+
     return phutil_tag(
       'div',
         array(),
@@ -102,7 +121,9 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
           $head3,
           $wrap3,
           $head4,
-          $wrap4
+          $wrap4,
+          $head5,
+          $wrap5
         ));
   }
 }

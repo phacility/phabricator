@@ -804,7 +804,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-multi-column-view-css' =>
   array(
-    'uri' => '/res/ee1159c3/rsrc/css/aphront/multi-column.css',
+    'uri' => '/res/4e5ae0f3/rsrc/css/aphront/multi-column.css',
     'type' => 'css',
     'requires' =>
     array(
