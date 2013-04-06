@@ -50,7 +50,7 @@ final class PhabricatorConfigResponse extends AphrontHTMLResponse {
       $resources[] = phutil_tag(
         'style',
         array('type' => 'text/css'),
-        Filesystem::readFile($webroot.'/rsrc/css/'.$path));
+        phutil_safe_html(Filesystem::readFile($webroot.'/rsrc/css/'.$path)));
     }
     return phutil_implode_html("\n", $resources);
   }
