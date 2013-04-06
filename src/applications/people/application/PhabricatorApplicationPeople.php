@@ -30,6 +30,12 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return false;
   }
 
+  public function getEventListeners() {
+    return array(
+      new PhabricatorPeopleHovercardEventListener(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/people/' => array(
