@@ -278,12 +278,9 @@ abstract class PhabricatorController extends AphrontController {
       throw new Exception("Unknown handle list style '{$style}'!");
     }
 
-    $items = array();
-    foreach ($phids as $phid) {
-      $items[] = $this->getHandle($phid)->renderLink();
-    }
-
-    return phutil_implode_html($style_map[$style], $items);
+    return implode_selected_handle_links($style_map[$style],
+      $this->getLoadedHandles(),
+      $phids);
   }
 
   protected function buildApplicationMenu() {

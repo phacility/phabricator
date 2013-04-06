@@ -3043,7 +3043,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-hovercard' =>
   array(
-    'uri' => '/res/a6eafd28/rsrc/js/application/core/Hovercard.js',
+    'uri' => '/res/345f3fca/rsrc/js/application/core/Hovercard.js',
     'type' => 'js',
     'requires' =>
     array(
