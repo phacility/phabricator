@@ -7,10 +7,10 @@
 }
 
 .phabricator-hovercard-wrapper {
-  border-radius: 4px;
+  border-radius: 5px;
   width: 400px;
-  padding: 4px;
-  background-color: #cccccc;
+  padding: 6px;
+  background-color: rgba(0,0,0,.2);
 }
 
 .device-phone .phabricator-hovercard-wrapper {
@@ -18,26 +18,24 @@
 }
 
 .phabricator-hovercard-container {
-  border-radius: 3px;
   border: 1px solid #666666;
 }
 
-.phabricator-hovercard-head .phabricator-action-header {
-  border-top-left-radius: 2px;
-  border-top-right-radius: 2px;
-}
-
 .phabricator-hovercard-tags {
-  font-size: 13px;
   float: right;
   white-space: normal;
 }
 
 .phabricator-hovercard-body {
-  padding: 15px;
+  padding: 8px;
   background-color: white;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+  color: #333;
+}
+
+.phabricator-hovercard-body-header {
+  font-size: 14px;
+  padding-bottom: 2px;
+  color: #000;
 }
 
 .phabricator-hovercard-body .profile-header-picture-frame {

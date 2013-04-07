@@ -3057,7 +3057,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-hovercard-view-css' =>
   array(
-    'uri' => '/res/6c7636cd/rsrc/css/layout/phabricator-hovercard-view.css',
+    'uri' => '/res/80683f88/rsrc/css/layout/phabricator-hovercard-view.css',
     'type' => 'css',
     'requires' =>
     array(

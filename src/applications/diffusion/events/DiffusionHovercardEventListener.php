@@ -64,7 +64,6 @@ final class DiffusionHovercardEventListener extends PhutilEventListener {
       $rev_handle = $handles[$revision];
       $hovercard->addField(pht('Revision'), $rev_handle->renderLink());
     }
-    $hovercard->setColor(PhabricatorActionHeaderView::HEADER_YELLOW);
 
     $event->setValue('hovercard', $hovercard);
   }

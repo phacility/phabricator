@@ -61,7 +61,6 @@ final class PhabricatorPeopleHovercardEventListener
       $hovercard->addField(pht('Blurb'),
         phutil_utf8_shorten($profile->getBlurb(), 120));
     }
-    $hovercard->setColor(PhabricatorActionHeaderView::HEADER_RED);
 
     $event->setValue('hovercard', $hovercard);
   }

@@ -92,7 +92,6 @@ final class ManiphestHovercardEventListener extends PhutilEventListener {
     }
 
     $hovercard->addTag(ManiphestView::renderTagForTask($task));
-    $hovercard->setColor(PhabricatorActionHeaderView::HEADER_BLUE);
 
     $event->setValue('hovercard', $hovercard);
   }

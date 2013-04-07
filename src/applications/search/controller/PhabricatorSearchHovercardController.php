@@ -44,7 +44,7 @@ final class PhabricatorSearchHovercardController
       foreach ($cards as $key => $hovercard) {
         $cards[$key] = phutil_tag('div',
           array(
-            'style' => 'margin: 20px;',
+            'class' => 'ml',
           ),
           $hovercard);
       }

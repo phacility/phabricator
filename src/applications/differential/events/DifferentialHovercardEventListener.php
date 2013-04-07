@@ -72,7 +72,6 @@ final class DifferentialHovercardEventListener extends PhutilEventListener {
 
     $hovercard->addTag(
       DifferentialRevisionDetailView::renderTagForRevision($rev));
-    $hovercard->setColor(PhabricatorActionHeaderView::HEADER_BLUE);
 
     $event->setValue('hovercard', $hovercard);
   }

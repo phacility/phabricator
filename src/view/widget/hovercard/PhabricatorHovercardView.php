@@ -17,7 +17,7 @@ final class PhabricatorHovercardView extends AphrontView {
   private $fields = array();
   private $actions = array();
 
-  private $color = 'green';
+  private $color = 'blue';
 
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
@@ -84,19 +84,31 @@ final class PhabricatorHovercardView extends AphrontView {
     }
 
     $body = array();
+
     if ($this->detail) {
-      $body[] = hsprintf('<strong>%s</strong>', $this->detail);
+      $body_title = $this->detail;
     } else {
       // Fallback for object handles
-      $body[] = hsprintf('<strong>%s</strong>', $handle->getFullName());
+      $body_title = $handle->getFullName();
     }
+
+    $body[] = phutil_tag(
+      'div',
+        array(
+          'class' => 'phabricator-hovercard-body-header'
+          ),
+        $body_title);
 
     foreach ($this->fields as $field) {
-      $body[] = hsprintf('<b>%s:</b> <span>%s</span>',
+      $item = hsprintf('<strong>%s:</strong> <span>%s</span>',
         $field['label'], $field['value']);
+      $body[] = phutil_tag(
+        'div',
+          array(
+            'class' => 'phabricator-hovercard-body-item'
+            ),
+          $item);
     }
-
-    $body = phutil_implode_html(phutil_tag('br'), $body);
 
     if ($handle->getImageURI()) {
       // Probably a user, we don't need to assume something else
