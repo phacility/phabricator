@@ -40,65 +40,76 @@ JX.behavior('conpherence-widget-pane', function(config) {
   );
 
   /* people widget */
-  var peopleRoot = JX.$(config.people_widget);
-  var peopleUpdateHandler = function (r) {
-    // update the transactions
-    var messages = JX.$(config.messages);
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
-    messages.scrollTop = messages.scrollHeight;
-
-    // update the menu entry as well
-    JX.DOM.replace(
-      JX.$(r.conpherence_phid + '-nav-item'),
-      JX.$H(r.nav_item)
-    );
-
-    // update the header
-    JX.DOM.setContent(
-      JX.$(config.header),
-      JX.$H(r.header)
-    );
-
-    // update the people widget
-    JX.DOM.setContent(
-      JX.$(config.people_widget),
-      JX.$H(r.people_widget)
-    );
-  };
-
-  JX.DOM.listen(
-    peopleRoot,
-    ['click'],
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
     'add-person',
     function (e) {
       e.kill();
-      var form = JX.DOM.find(peopleRoot, 'form');
+      var root = e.getNode('conpherence-layout');
+      var form = e.getNode('tag:form');
       var data = e.getNodeData('add-person');
+      var peopleRoot = e.getNode('widgets-people');
+      var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+      var header = JX.DOM.find(root, 'div', 'conpherence-header');
+      var latestTransactionData = JX.Stratcom.getData(
+        JX.DOM.find(
+          root,
+          'input',
+          'latest-transaction-id'
+      ));
+      data.latest_transaction_id = latestTransactionData.id;
       JX.Workflow.newFromForm(form, data)
-      .setHandler(peopleUpdateHandler)
+      .setHandler(JX.bind(this, function (r) {
+        // update the transactions
+        JX.DOM.appendContent(messages, JX.$H(r.transactions));
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+          JX.DOM.replace(
+            JX.$(r.conpherence_phid + '-nav-item'),
+            JX.$H(r.nav_item));
+          JX.Stratcom.invoke(
+            'conpherence-selectthread',
+            null,
+            { id : r.conpherence_phid + '-nav-item' }
+          );
+        } catch (ex) {
+          // Ignore; this view may not have a menu.
+        }
+
+        // update the header
+        JX.DOM.setContent(
+          header,
+          JX.$H(r.header)
+       );
+
+        // update the people widget
+        JX.DOM.setContent(
+          peopleRoot,
+          JX.$H(r.people_widget)
+        );
+      }))
       .start();
     }
   );
 
-  JX.DOM.listen(
-    peopleRoot,
+  JX.Stratcom.listen(
     ['click'],
     'remove-person',
     function (e) {
+      var peopleRoot = e.getNode('widgets-people');
       var form = JX.DOM.find(peopleRoot, 'form');
       var data = e.getNodeData('remove-person');
+      // we end up re-directing to conpherence home
       JX.Workflow.newFromForm(form, data)
-      .setHandler(peopleUpdateHandler)
       .start();
     }
   );
 
   /* settings widget */
-  var settingsRoot = JX.$(config.settings_widget);
-
   var onsubmitSettings = function (e) {
     e.kill();
-    var form = JX.DOM.find(settingsRoot, 'form');
+    var form = e.getNode('tag:form');
     var button = JX.DOM.find(form, 'button');
     JX.Workflow.newFromForm(form)
     .setHandler(JX.bind(this, function (r) {
@@ -112,9 +123,8 @@ JX.behavior('conpherence-widget-pane', function(config) {
     .start();
   };
 
-  JX.DOM.listen(
-    settingsRoot,
-    ['click'],
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
     'notifications-update',
     onsubmitSettings
   );

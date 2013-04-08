@@ -18,6 +18,10 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
       array(
         'method' => 'POST',
         'action' => $this->getUpdateURI(),
+        'sigil' => 'add-person',
+        'meta' => array(
+          'action' => 'add_person'
+        )
       ),
       array(
         id(new AphrontFormTokenizerControl())
@@ -26,15 +30,11 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
         ->setUser($user)
         ->setDatasource('/typeahead/common/users/')
         ->setLimit(1),
-        javelin_tag(
+        phutil_tag(
           'button',
           array(
-            'sigil' => 'add-person',
+            'type' => 'submit',
             'class' => 'people-add-button',
-            'meta' => array(
-              'action' => 'add_person',
-              'latest_transaction_id' => $this->getLatestTransactionID()
-            )
           ),
           pht('Add'))
       ));
@@ -73,7 +73,6 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
             'meta' => array(
               'remove_person' => $handle->getPHID(),
               'action' => 'remove_person',
-              'latest_transaction_id' => $this->getLatestTransactionID()
             )
           ),
           phutil_tag(
@@ -105,6 +104,5 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
     }
 
     return array($header, $body);
-
   }
 }

@@ -29,13 +29,12 @@ JX.behavior('conpherence-menu', function(config) {
   }
 
   function selectthread(node) {
-    if (node === thread.node) {
-      return;
-    }
 
     if (thread.node) {
       JX.DOM.alterClass(thread.node, 'conpherence-selected', false);
-      JX.DOM.alterClass(thread.node, 'hide-unread-count', false);
+      // keep the unread-count hidden still. big TODO once we ajax in updates
+      // to threads to make this work right and move threads between read /
+      // unread
     }
 
     JX.DOM.alterClass(node, 'conpherence-selected', true);
@@ -47,9 +46,17 @@ JX.behavior('conpherence-menu', function(config) {
     thread.selected = data.id;
 
     JX.History.replace(config.base_uri + data.id + '/');
-
     redrawthread();
   }
+
+  JX.Stratcom.listen(
+    'conpherence-selectthread',
+    null,
+    function (e) {
+      var node = JX.$(e.getData().id);
+      selectthread(node);
+    }
+  );
 
   function redrawthread() {
     if (!thread.node) {
@@ -67,6 +74,8 @@ JX.behavior('conpherence-menu', function(config) {
       new JX.Workflow(uri, {})
         .setHandler(onresponse)
         .start();
+    } else {
+      didredrawthread();
     }
 
     if (thread.visible !== null || !config.hasWidgets) {
@@ -183,7 +192,6 @@ JX.behavior('conpherence-menu', function(config) {
 
     if (!config.hasThreadList) {
       loadthreads();
-      didredrawthread();
     } else {
       didloadthreads();
     }
@@ -191,7 +199,6 @@ JX.behavior('conpherence-menu', function(config) {
 
   JX.Stratcom.listen('phabricator-device-change', null, ondevicechange);
   ondevicechange();
-
 
   function loadthreads() {
     var uri = config.base_uri + 'thread/' + config.selectedID + '/';
@@ -221,7 +228,6 @@ JX.behavior('conpherence-menu', function(config) {
         }
       }
     }
-
     redrawthread();
   }
 

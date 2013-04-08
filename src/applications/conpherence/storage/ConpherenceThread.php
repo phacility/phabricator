@@ -173,107 +173,51 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public function getDisplayData(PhabricatorUser $user, $size) {
-    $transactions = $this->getTransactions();
-
+    $recent_phids = $this->getRecentParticipantPHIDs();
     $handles = $this->getHandles();
-    // we don't want to show the user unless they are babbling to themselves
-    if (count($handles) > 1) {
-      unset($handles[$user->getPHID()]);
+
+    // luck has little to do with it really; most recent participant who isn't
+    // the user....
+    $lucky_phid = null;
+    $lucky_index = null;
+    foreach ($recent_phids as $index => $phid) {
+      if ($phid == $user->getPHID()) {
+        continue;
+      }
+      $lucky_phid = $phid;
+      break;
+    }
+    reset($recent_phids);
+
+    if ($lucky_phid) {
+      $lucky_handle = $handles[$lucky_phid];
+    // this will be just the user talking to themselves. weirdos.
+    } else {
+      $lucky_handle = reset($handles);
     }
 
-    $participants = $this->getParticipants();
-    $user_participation = $participants[$user->getPHID()];
-    $latest_transaction = null;
     $title = $this->getTitle();
-    $subtitle = '';
-    $img_src = null;
-    $img_class = null;
-    if ($this->getImagePHID($size)) {
+    if (!$title) {
+      $title = $lucky_handle->getName();
+    }
+
+    $image = $this->getImagePHID($size);
+    if ($image) {
       $img_src = $this->getImage($size)->getBestURI();
       $img_class = 'custom-';
-    }
-    $unread_count = 0;
-    $max_count = 10;
-    $snippet = null;
-    if (!$user_participation->isUpToDate()) {
-      $behind_transaction_phid =
-        $user_participation->getBehindTransactionPHID();
     } else {
-      $behind_transaction_phid = null;
-    }
-    foreach (array_reverse($transactions) as $transaction) {
-      switch ($transaction->getTransactionType()) {
-        case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-        case ConpherenceTransactionType::TYPE_TITLE:
-        case ConpherenceTransactionType::TYPE_PICTURE:
-          continue 2;
-        case PhabricatorTransactions::TYPE_COMMENT:
-          if ($snippet === null) {
-            $snippet = phutil_utf8_shorten(
-              $transaction->getComment()->getContent(),
-              48);
-            if ($transaction->getAuthorPHID() == $user->getPHID()) {
-              $snippet = "\xE2\x86\xB0  " . $snippet;
-            }
-          }
-          // fallthrough intentionally here
-        case ConpherenceTransactionType::TYPE_FILES:
-          if (!$latest_transaction) {
-            $latest_transaction = $transaction;
-          }
-          $latest_participant_phid = $transaction->getAuthorPHID();
-          if ((!$title || !$img_src) &&
-                $latest_participant_phid != $user->getPHID()) {
-            $latest_handle = $handles[$latest_participant_phid];
-            if (!$img_src) {
-              $img_src = $latest_handle->getImageURI();
-            }
-            if (!$title) {
-              $title = $latest_handle->getName();
-              // (maybs) used the pic, definitely used the name -- discard
-              unset($handles[$latest_participant_phid]);
-            }
-          }
-          if ($behind_transaction_phid) {
-            $unread_count++;
-            if ($transaction->getPHID() == $behind_transaction_phid) {
-              break 2;
-            }
-          }
-          if ($unread_count > $max_count) {
-            break 2;
-          }
-          break;
-        default:
-          continue 2;
-      }
-      if ($snippet && !$behind_transaction_phid) {
-        break;
-      }
-    }
-    if ($unread_count > $max_count) {
-      $unread_count = $max_count.'+';
-    }
-
-    // This happens if the user has been babbling, maybs just to themselves,
-    // but enough un-responded to transactions for our SQL limit would
-    // hit this too... Also happens on new threads since only the first
-    // author has participated.
-    // ...so just pick a different handle in these cases.
-    $some_handle = reset($handles);
-    if (!$img_src) {
-      $img_src = $some_handle->getImageURI();
-    }
-    if (!$title) {
-      $title = $some_handle->getName();
+      $img_src = $lucky_handle->getImageURI();
+      $img_class = null;
     }
 
     $count = 0;
     $final = false;
-    foreach ($handles as $handle) {
-      if ($handle->getType() != PhabricatorPHIDConstants::PHID_TYPE_USER) {
+    $subtitle = null;
+    foreach ($recent_phids as $phid) {
+      if ($phid == $user->getPHID()) {
         continue;
       }
+      $handle = $handles[$phid];
       if ($subtitle) {
         if ($final) {
           $subtitle .= '...';
@@ -287,14 +231,18 @@ final class ConpherenceThread extends ConpherenceDAO
       $final = $count == 3;
     }
 
+    $participants = $this->getParticipants();
+    $user_participation = $participants[$user->getPHID()];
+    $unread_count = $this->getMessageCount() -
+      $user_participation->getSeenMessageCount();
+
     return array(
       'title' => $title,
       'subtitle' => $subtitle,
       'unread_count' => $unread_count,
-      'epoch' => $latest_transaction->getDateCreated(),
+      'epoch' => $this->getDateModified(),
       'image' => $img_src,
       'image_class' => $img_class,
-      'snippet' => $snippet,
     );
   }
 

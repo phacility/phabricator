@@ -31,7 +31,6 @@ final class ConpherenceListController
     if ($conpherence_id) {
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
-        ->needAllTransactions(true)
         ->withIDs(array($conpherence_id))
         ->executeOne();
       if (!$conpherence) {

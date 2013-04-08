@@ -30,9 +30,9 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
+      ->needFilePHIDs(true)
       ->needOrigPics(true)
       ->needHeaderPics(true)
-      ->needAllTransactions(true)
       ->executeOne();
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
 
@@ -327,7 +327,7 @@ final class ConpherenceUpdateController
       ->setAfterMessageID($latest_transaction_id)
       ->needHeaderPics(true)
       ->needWidgetData(true)
-      ->needAllTransactions(true)
+      ->needTransactions(true)
       ->withIDs(array($conpherence_id))
       ->executeOne();
 
@@ -358,10 +358,8 @@ final class ConpherenceUpdateController
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => hsprintf('%s', $header),
-
-      // TODO: Fix these.
-//      'file_widget' => $file_widget->render(),
-//      'people_widget' => $people_widget->render()
+      'file_widget' => $file_widget->render(),
+      'people_widget' => $people_widget->render()
     );
     return $content;
   }

@@ -50,7 +50,6 @@ final class ConpherenceWidgetController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needWidgetData(true)
-      ->needAllTransactions(true)
       ->executeOne();
     $this->setConpherence($conpherence);
 
@@ -69,11 +68,6 @@ final class ConpherenceWidgetController extends
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
-        'header' => 'conpherence-header-pane',
-        'messages' => 'conpherence-messages',
-        'people_widget' => 'widgets-people',
-        'file_widget' => 'widgets-files',
-        'settings_widget' => 'widgets-settings',
         'widgetRegistery' => array(
           'widgets-conpherence-list' => $cant_toggle,
           'widgets-conversation' => $cant_toggle,
@@ -174,22 +168,24 @@ final class ConpherenceWidgetController extends
           )));
     $user = $this->getRequest()->getUser();
     // now the widget bodies
-    $widgets[] = phutil_tag(
+    $widgets[] = javelin_tag(
       'div',
       array(
         'class' => 'widgets-body',
         'id' => 'widgets-people',
+        'sigil' => 'widgets-people',
         'style' => 'display: none;'
       ),
       id(new ConpherencePeopleWidgetView())
       ->setUser($user)
       ->setConpherence($conpherence)
       ->setUpdateURI($this->getWidgetURI()));
-    $widgets[] = phutil_tag(
+    $widgets[] = javelin_tag(
       'div',
       array(
         'class' => 'widgets-body',
         'id' => 'widgets-files',
+        'sigil' => 'widgets-files',
       ),
       id(new ConpherenceFileWidgetView())
       ->setUser($user)
@@ -257,10 +253,10 @@ final class ConpherenceWidgetController extends
           'name' => 'action',
           'value' => 'notifications'
         )),
-      javelin_tag(
+      phutil_tag(
         'button',
         array(
-          'sigil' => 'notifications-update',
+          'type' => 'submit',
           'class' => 'notifications-update grey',
         ),
         pht('Update Notifications'))
@@ -271,6 +267,7 @@ final class ConpherenceWidgetController extends
       array(
         'method' => 'POST',
         'action' => $this->getWidgetURI(),
+        'sigil' => 'notifications-update',
       ),
       $layout);
   }

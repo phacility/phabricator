@@ -41,7 +41,7 @@ final class ConpherenceViewController extends
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needHeaderPics(true)
-      ->needAllTransactions(true)
+      ->needTransactions(true)
       ->executeOne();
     $this->setConpherence($conpherence);
 
@@ -105,7 +105,6 @@ final class ConpherenceViewController extends
       ->setWorkflow(true)
       ->setUser($user)
       ->addHiddenInput('action', 'message')
-      ->addHiddenInput('latest_transaction_id', $latest_transaction_id)
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setUser($user)
@@ -113,6 +112,19 @@ final class ConpherenceViewController extends
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Pontificate')))
+      ->appendChild(
+        javelin_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'latest_transaction_id',
+            'value' => $latest_transaction_id,
+            'sigil' => 'latest-transaction-id',
+            'meta' => array(
+              'id' => $latest_transaction_id
+            )
+          ),
+        ''))
       ->render();
 
     $scrollbutton = javelin_tag(
