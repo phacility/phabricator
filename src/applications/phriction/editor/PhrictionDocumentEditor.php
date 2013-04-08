@@ -294,12 +294,19 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     $author_phid = $this->getActor()->getPHID();
     $document = $this->document;
     $content = $document->getContent();
+    $slug_uri = PhrictionDocument::getSlugURI($document->getSlug());
+    $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
+    $prod_uri = PhabricatorEnv::getProductionURI('');
+
+    $vs_head = $diff_uri
+      ->alter('l', $old_content->getVersion())
+      ->alter('r', $content->getVersion());
 
     $old_title = $old_content->getTitle();
     $title = $content->getTitle();
 
     // TODO: Currently, this produces something like
-    // Phrictioh Document Xyz was Edit
+    // Phriction Document Xyz was Edit
     // I'm too lazy to build my own action string everywhere
     // Plus, it does not have pht() anyway
     $action = PhrictionChangeType::getChangeTypeLabel(
@@ -315,9 +322,17 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
           $old_title, $title);
       }
 
-      // The Remarkup text renderer comes in handy
-      // TODO: Consider sending a diff instead?
-      $body[] = pht("Content was changed to \n%s", $content->getContent());
+      $body[] = pht("Link to new version:\n%s",
+        $prod_uri.$slug_uri.'?v='.$content->getVersion());
+
+      $body[] = pht("Link to diff:\n%s", $prod_uri.$vs_head);
+    } else if ($content->getChangeType() ==
+      PhrictionChangeType::CHANGE_MOVE_AWAY) {
+
+      $target_document = id(new PhrictionDocument())
+        ->load($content->getChangeRef());
+      $slug_uri = PhrictionDocument::getSlugURI($target_document->getSlug());
+      $body[] = pht("Link to destination document:\n%s", $prod_uri.$slug_uri);
     }
 
     $body = implode("\n\n", $body);
