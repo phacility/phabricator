@@ -5,5 +5,8 @@
  */
 
 JX.behavior('aphront-basic-tokenizer', function(config) {
-  JX.Prefab.buildTokenizer(config).tokenizer.start();
+  var build = JX.Prefab.buildTokenizer(config);
+  if (build) {
+    build.tokenizer.start();
+  }
 });
