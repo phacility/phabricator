@@ -418,28 +418,7 @@ final class CeleritySpriteGenerator {
       'grey-header'     => 70
     );
 
-    // Reorder the sprites so less-specific rules generate earlier in the sheet.
-    // Otherwise we end up with blue "a.black" buttons because the blue rules
-    // have the same specificity but appear later.
-    $gradients = array_fuse($gradients);
-    $gradients = array_select_keys(
-      $gradients,
-      array(
-        'blue-dark',
-        'blue-light',
-      )) + $gradients;
-
     $extra_css = array(
-      'black-dark' => ', button.black, a.black, a.black:visited',
-      'black-light' => ', button.black:active, a.black:active',
-      'blue-dark' => ', button, a.button, a.button:visited, input.inputsubmit',
-      'blue-light' => ', button:active, a.button:active',
-      'grey-dark' => ', button.grey, input.inputaux, a.grey, a.grey:visited, '.
-                        'a.button.disabled, button[disabled], button.disabled',
-      'grey-light' => ', button.grey:active, a.grey:active, '.
-                        'button.grey_active, a.dropdown-open',
-      'green-dark' => ', button.green, a.green, a.green:visited',
-      'green-light' => ', button.green:active, a.green:active',
       'dark-menu-label' =>
         ', .phabricator-dark-menu .phabricator-menu-item-type-label',
       'menu-label' =>
@@ -472,8 +451,7 @@ final class CeleritySpriteGenerator {
       'gradient',
       false,
       PhutilSpriteSheet::TYPE_REPEAT_X,
-      ', button, a.button, a.button:visited, input.inputsubmit, '.
-      '.phabricator-dark-menu .phabricator-menu-item-type-label, '.
+      ', .phabricator-dark-menu .phabricator-menu-item-type-label, '.
       '.phabricator-side-menu .phabricator-menu-item-type-label, '.
       '.device-desktop .phabricator-side-menu '.
         'a.phabricator-menu-item-type-link:hover, '.
