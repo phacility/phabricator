@@ -8,7 +8,7 @@ final class ConduitAPI_releephwork_recordpickstatus_Method
   }
 
   public function getMethodDescription() {
-    return "Wrapper to ReleephRequestEditor->changePickStatus().";
+    return "Record whether a pick or revert was successful or not.";
   }
 
   public function defineParamTypes() {
@@ -55,9 +55,23 @@ final class ConduitAPI_releephwork_recordpickstatus_Method
     $releeph_request = id(new ReleephRequest())
       ->loadOneWhere('phid = %s', $request->getValue('requestPHID'));
 
-    id(new ReleephRequestEditor($releeph_request))
+    $editor = id(new ReleephRequestTransactionalEditor())
       ->setActor($request->getUser())
-      ->changePickStatus($pick_status, $dry_run, $details);
+      ->setContinueOnNoEffect(true)
+      ->setContentSource(
+        PhabricatorContentSource::newForSource(
+          PhabricatorContentSource::SOURCE_CONDUIT,
+          array()));
+
+    $xactions = array();
+
+    $xactions[] = id(new ReleephRequestTransaction())
+      ->setTransactionType(ReleephRequestTransaction::TYPE_PICK_STATUS)
+      ->setMetadataValue('dryRun', $dry_run)
+      ->setMetadataValue('details', $details)
+      ->setNewValue($pick_status);
+
+    $editor->applyTransactions($releeph_request, $xactions);
   }
 
 }
