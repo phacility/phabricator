@@ -36,6 +36,7 @@ JX.behavior('phabricator-hovercards', function(config) {
       var root = JX.Hovercard.getAnchor();
       var node = JX.Hovercard.getCard();
 
+      // TODO: Add southern cases here, too
       var mouse = JX.$V(e);
       var node_pos = JX.$V(node);
       var node_dim = JX.Vector.getDim(node);

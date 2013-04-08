@@ -80,21 +80,24 @@ JX.install('Hovercard', {
       var n = JX.Vector.getDim(child);
 
       // Move the tip so it's nicely aligned.
-      // I'm just doing north alignment for now
-      // TODO: Gracefully align to the side in edge cases
-      // I know, hardcoded paddings...
-      var x = parseInt(p.x - ((n.x - d.x) / 2)) + 20;
-      var y = parseInt(p.y - n.y) - 20;
+      // I'm just doing north/south alignment for now
+      // TODO: Fix southern graceful align
+      var margin = 20;
+      // We can't shift left by ~$margin or more here due to Pholio, Phriction
+      var x = parseInt(p.x) - margin / 2;
+      var y = parseInt(p.y - n.y) - margin;
 
-      // Why use 4? Shouldn't it be just 2?
-      if (x < (n.x / 4)) {
-        x += (n.x / 4);
+      // If more in the center, we can safely center
+      if (x > (n.x / 2) + margin) {
+        x = parseInt(p.x - (n.x / 2) + d.x);
       }
 
-      if (y < n.y) {
-        // Place it at the bottom
-        y += n.y + d.y + 50;
-      }
+      // Temporarily disabled, since it gives weird results (you can only see
+      // a hovercard once, as soon as it's hidden, it cannot be shown again)
+      // if (y < n.y) {
+      //   // Place it southern, since northern is not enough space
+      //   y = p.y + d.y + margin;
+      // }
 
       node.style.left = x + 'px';
       node.style.top  = y + 'px';
