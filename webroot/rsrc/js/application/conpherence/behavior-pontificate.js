@@ -22,6 +22,12 @@ JX.behavior('conpherence-pontificate', function(config) {
     } catch (ex) {
       // Ignore; maybe no files widget
     }
+    var peopleWidget = null;
+    try {
+      peopleWidget = JX.DOM.find(root, 'div', 'widgets-people');
+    } catch (ex) {
+      // Ignore; maybe no peoples widget
+    }
 
     JX.Workflow.newFromForm(form)
       .setHandler(JX.bind(this, function(r) {
@@ -48,6 +54,13 @@ JX.behavior('conpherence-pontificate', function(config) {
           JX.DOM.setContent(
             fileWidget,
             JX.$H(r.file_widget)
+          );
+        }
+
+        if (peopleWidget) {
+          JX.DOM.setContent(
+            peopleWidget,
+            JX.$H(r.people_widget)
           );
         }
 

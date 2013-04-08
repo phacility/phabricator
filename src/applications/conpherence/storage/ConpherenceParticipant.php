@@ -28,7 +28,7 @@ final class ConpherenceParticipant extends ConpherenceDAO {
   public function markUpToDate(
     ConpherenceThread $conpherence,
     ConpherenceTransaction $xaction) {
-    if (!$this->isUpToDate()) {
+    if (!$this->isUpToDate($conpherence)) {
       $this->setParticipationStatus(ConpherenceParticipationStatus::UP_TO_DATE);
       $this->setBehindTransactionPHID($xaction->getPHID());
       $this->setSeenMessageCount($conpherence->getMessageCount());
@@ -37,9 +37,12 @@ final class ConpherenceParticipant extends ConpherenceDAO {
     return $this;
   }
 
-  public function isUpToDate() {
-    return $this->getParticipationStatus() ==
-           ConpherenceParticipationStatus::UP_TO_DATE;
+  private function isUpToDate(ConpherenceThread $conpherence) {
+    return
+      ($this->getSeenMessageCount() == $conpherence->getMessageCount())
+        &&
+      ($this->getParticipationStatus() ==
+       ConpherenceParticipationStatus::UP_TO_DATE);
   }
 
 }

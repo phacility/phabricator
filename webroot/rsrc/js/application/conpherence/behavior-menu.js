@@ -2,6 +2,7 @@
  * @provides javelin-behavior-conpherence-menu
  * @requires javelin-behavior
  *           javelin-dom
+ *           javelin-util
  *           javelin-request
  *           javelin-stratcom
  *           javelin-workflow
@@ -134,29 +135,48 @@ JX.behavior('conpherence-menu', function(config) {
 
   JX.Stratcom.listen('click', 'conpherence-edit-metadata', function (e) {
     e.kill();
-    var root = JX.$(config.form_pane);
-    var form = JX.DOM.find(root, 'form');
+    var root = e.getNode('conpherence-layout');
+    var form = JX.DOM.find(root, 'form', 'conpherence-pontificate');
     var data = e.getNodeData('conpherence-edit-metadata');
+    var header = JX.DOM.find(root, 'div', 'conpherence-header');
+    var peopleWidget = null;
+    try {
+      peopleWidget = JX.DOM.find(root, 'div', 'widgets-people');
+    } catch (ex) {
+      // Ignore; maybe no people widget
+    }
+
     new JX.Workflow.newFromForm(form, data)
-      .setHandler(function (r) {
+      .setHandler(JX.bind(this, function(r) {
         // update the header
         JX.DOM.setContent(
-          JX.$(config.header),
+          header,
           JX.$H(r.header)
         );
 
-        // update the menu entry
-        JX.DOM.replace(
-          JX.$(r.conpherence_phid + '-nav-item'),
-          JX.$H(r.nav_item)
-        );
+        try {
+          // update the menu entry
+          JX.DOM.replace(
+            JX.$(r.conpherence_phid + '-nav-item'),
+            JX.$H(r.nav_item)
+          );
+          JX.Stratcom.invoke(
+            'conpherence-selectthread',
+            null,
+            { id : r.conpherence_phid + '-nav-item' }
+          );
+        } catch (ex) {
+          // Ignore; this view may not have a menu.
+        }
 
-        // update the people widget
-        JX.DOM.setContent(
-          JX.$(config.people_widget),
-          JX.$H(r.people_widget)
-        );
-      })
+        if (peopleWidget) {
+          // update the people widget
+          JX.DOM.setContent(
+            peopleWidget,
+            JX.$H(r.people_widget)
+          );
+        }
+      }))
       .start();
   });
 
