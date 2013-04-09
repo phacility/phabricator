@@ -191,14 +191,19 @@ final class PhabricatorStartup {
     self::endOutputCapture();
     $access_log = self::getGlobal('log.access');
 
-    try {
-      $access_log->setData(
-        array(
-          'c' => 500,
-        ));
-      $access_log->write();
-    } catch (Exception $ex) {
-      $message .= "\n(Moreover, unable to write to access log.)";
+    if ($access_log) {
+      // We may end up here before the access log is initialized, e.g. from
+      // verifyPHP().
+
+      try {
+        $access_log->setData(
+          array(
+            'c' => 500,
+          ));
+        $access_log->write();
+      } catch (Exception $ex) {
+        $message .= "\n(Moreover, unable to write to access log.)";
+      }
     }
 
     header(
