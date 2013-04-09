@@ -100,6 +100,10 @@ div.jx-typeahead-results {
   z-index: 14;
 }
 
+.jx-hovercard-container {
+  z-index: 16;
+}
+
 .jx-tooltip-container {
   z-index: 18;
 }
