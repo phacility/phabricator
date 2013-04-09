@@ -92,7 +92,8 @@ final class PonderFeedController extends PonderController {
     $view->setNoDataString(pht('No matching questions.'));
     foreach ($questions as $question) {
       $item = new PhabricatorObjectItemView();
-      $item->setHeader('Q'.$question->getID().' '.$question->getTitle());
+      $item->setObjectName('Q'.$question->getID());
+      $item->setHeader($question->getTitle());
       $item->setHref('/Q'.$question->getID());
       $item->setObject($question);
 

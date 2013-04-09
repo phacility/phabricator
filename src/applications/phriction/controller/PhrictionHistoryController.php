@@ -41,84 +41,87 @@ final class PhrictionHistoryController
     $author_phids = mpull($history, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($author_phids);
 
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
+
     foreach ($history as $content) {
 
+      $author = $handles[$content->getAuthorPHID()]->renderLink();
       $slug_uri = PhrictionDocument::getSlugURI($document->getSlug());
       $version = $content->getVersion();
 
       $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
 
-      $vs_previous = phutil_tag('em', array(), pht('Created'));
+      $vs_previous = null;
       if ($content->getVersion() != 1) {
-        $uri = $diff_uri
+        $vs_previous = $diff_uri
           ->alter('l', $content->getVersion() - 1)
           ->alter('r', $content->getVersion());
-        $vs_previous = phutil_tag(
-          'a',
-          array(
-            'href' => $uri,
-          ),
-          pht('Show Change'));
       }
 
-      $vs_head = phutil_tag('em', array(), pht('Current'));
+      $vs_head = null;
       if ($content->getID() != $document->getContentID()) {
-        $uri = $diff_uri
+        $vs_head = $diff_uri
           ->alter('l', $content->getVersion())
           ->alter('r', $current->getVersion());
-
-        $vs_head = phutil_tag(
-          'a',
-          array(
-            'href' => $uri,
-          ),
-          pht('Show Later Changes'));
       }
 
       $change_type = PhrictionChangeType::getChangeTypeLabel(
         $content->getChangeType());
+      switch ($content->getChangeType()) {
+        case PhrictionChangeType::CHANGE_DELETE:
+          $color = 'red';
+          break;
+        case PhrictionChangeType::CHANGE_EDIT:
+          $color = 'blue';
+          break;
+        case PhrictionChangeType::CHANGE_MOVE_HERE:
+            $color = 'yellow';
+          break;
+        case PhrictionChangeType::CHANGE_MOVE_AWAY:
+            $color = 'orange';
+          break;
+        case PhrictionChangeType::CHANGE_STUB:
+          $color = 'green';
+          break;
+        default:
+          throw new Exception("Unknown change type!");
+          break;
+      }
 
-      $rows[] = array(
-        phabricator_date($content->getDateCreated(), $user),
-        phabricator_time($content->getDateCreated(), $user),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $slug_uri.'?v='.$version,
-          ),
-          pht('Version %s', $version)),
-        $handles[$content->getAuthorPHID()]->renderLink(),
-        $change_type,
-        $content->getDescription(),
-        $vs_previous,
-        $vs_head,
-      );
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader(pht('%s by %s', $change_type, $author))
+        ->setBarColor($color)
+        ->addAttribute(
+          phutil_tag(
+            'a',
+            array(
+              'href' => $slug_uri.'?v='.$version,
+            ),
+            pht('Version %s', $version)))
+        ->addAttribute(pht('%s %s',
+          phabricator_date($content->getDateCreated(), $user),
+          phabricator_time($content->getDateCreated(), $user)));
+
+      if ($content->getDescription()) {
+        $item->addAttribute($content->getDescription());
+      }
+
+      if ($vs_previous) {
+        $item->addIcon('arrow_left', pht('Show Change'), $vs_previous);
+      } else {
+        $item->addIcon('arrow_left-grey',
+          phutil_tag('em', array(), pht('No previous change')));
+      }
+
+      if ($vs_head) {
+        $item->addIcon('merge', pht('Show Later Changes'), $vs_head);
+      } else {
+        $item->addIcon('merge-grey',
+          phutil_tag('em', array(), pht('No later changes')));
+      }
+
+      $list->addItem($item);
     }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Date'),
-        pht('Time'),
-        pht('Version'),
-        pht('Author'),
-        pht('Type'),
-        pht('Description'),
-        pht('Against Previous'),
-        pht('Against Current'),
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        'right',
-        'pri',
-        '',
-        '',
-        'wide',
-        '',
-        '',
-      ));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumb_views = $this->renderBreadcrumbs($document->getSlug());
@@ -131,20 +134,24 @@ final class PhrictionHistoryController
         ->setHref(
           PhrictionDocument::getSlugURI($document->getSlug(), 'history')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Document History'));
-    $panel->setNoBackground();
-    $panel->appendChild($table);
-    $panel->appendChild($pager);
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Document History for %s',
+      phutil_tag(
+        'a',
+        array('href' => PhrictionDocument::getSlugURI($document->getSlug())),
+        head($history)->getTitle())));
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $panel,
+        $header,
+        $list,
+        $pager,
       ),
       array(
         'title'     => pht('Document History'),
         'device'    => true,
+        'dust'      => true,
       ));
 
   }

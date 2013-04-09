@@ -4,64 +4,83 @@
  *           javelin-dom
  *           javelin-util
  *           javelin-workflow
+ *           javelin-stratcom
  */
 
 JX.behavior('conpherence-pontificate', function(config) {
-
-  var root = JX.$(config.form_pane);
-
   var onsubmit = function(e) {
     e.kill();
-    var form = JX.DOM.find(root, 'form');
+
+    var form = e.getNode('tag:form');
+
+    var root = e.getNode('conpherence-layout');
+    var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+    var header = JX.DOM.find(root, 'div', 'conpherence-header');
+    var fileWidget = null;
+    try {
+      fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
+    } catch (ex) {
+      // Ignore; maybe no files widget
+    }
+    var peopleWidget = null;
+    try {
+      peopleWidget = JX.DOM.find(root, 'div', 'widgets-people');
+    } catch (ex) {
+      // Ignore; maybe no peoples widget
+    }
+
     JX.Workflow.newFromForm(form)
       .setHandler(JX.bind(this, function(r) {
         // add the new transactions, probably just our post but who knows
-        var messages = JX.$(config.messages);
         JX.DOM.appendContent(messages, JX.$H(r.transactions));
         messages.scrollTop = messages.scrollHeight;
+        JX.DOM.setContent(header, JX.$H(r.header));
 
-        // update the menu entry as well
-        JX.DOM.replace(
-          JX.$(r.conpherence_phid + '-nav-item'),
-          JX.$H(r.nav_item)
-        );
-        JX.DOM.replace(
-          JX.$(r.conpherence_phid + '-menu-item'),
-          JX.$H(r.menu_item)
-        );
+        try {
+          var node = JX.$(r.conpherence_phid + '-nav-item');
+          JX.DOM.replace(
+            node,
+            JX.$H(r.nav_item));
+          JX.Stratcom.invoke(
+            'conpherence-selectthread',
+            null,
+            { id : r.conpherence_phid + '-nav-item' }
+          );
+        } catch (ex) {
+          // Ignore; this view may not have a menu.
+        }
 
-        // update the header
-        JX.DOM.setContent(
-          JX.$(config.header),
-          JX.$H(r.header)
-        );
+        if (fileWidget) {
+          JX.DOM.setContent(
+            fileWidget,
+            JX.$H(r.file_widget)
+          );
+        }
 
-        // update the file widget
-        JX.DOM.setContent(
-          JX.$(config.file_widget),
-          JX.$H(r.file_widget)
-        );
+        if (peopleWidget) {
+          JX.DOM.setContent(
+            peopleWidget,
+            JX.$H(r.people_widget)
+          );
+        }
 
-        // clear the textarea
+        var inputs = JX.DOM.scry(form, 'input');
+        for (var ii = 0; ii < inputs.length; ii++) {
+          if (inputs[ii].name == 'latest_transaction_id') {
+            inputs[ii].value = r.latest_transaction_id;
+            break;
+          }
+        }
+
         var textarea = JX.DOM.find(form, 'textarea');
         textarea.value = '';
-
       }))
     .start();
   };
 
-  JX.DOM.listen(
-    root,
+  JX.Stratcom.listen(
     ['submit', 'didSyntheticSubmit'],
-    null,
-    onsubmit
-  );
-
-  JX.DOM.listen(
-    root,
-    ['click'],
     'conpherence-pontificate',
-    onsubmit
-  );
+    onsubmit);
 
 });

@@ -7,7 +7,8 @@ final class ManiphestTask extends ManiphestDAO
   implements
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    PhrequentTrackableInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -142,7 +143,6 @@ final class ManiphestTask extends ManiphestDAO
 
     return $this;
   }
-
 
   public function save() {
     if (!$this->mailKey) {

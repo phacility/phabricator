@@ -114,6 +114,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phabricator-core-css');
     require_celerity_resource('phabricator-zindex-css');
     require_celerity_resource('phabricator-core-buttons-css');
+    require_celerity_resource('spacing-css');
     require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
 
@@ -210,24 +211,29 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   protected function getHead() {
     $monospaced = PhabricatorEnv::getEnvConfig('style.monospace');
+    $monospaced_win = PhabricatorEnv::getEnvConfig('style.monospace.windows');
 
     $request = $this->getRequest();
     if ($request) {
       $user = $request->getUser();
       if ($user) {
-        $monospaced = nonempty(
-          $user->loadPreferences()->getPreference(
-            PhabricatorUserPreferences::PREFERENCE_MONOSPACED),
-          $monospaced);
+        $pref = $user->loadPreferences()->getPreference(
+            PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
+        $monospaced = nonempty($pref, $monospaced);
+        $monospaced_win = nonempty($pref, $monospaced_win);
       }
     }
 
     $response = CelerityAPI::getStaticResourceResponse();
 
     return hsprintf(
-      '%s<style type="text/css">.PhabricatorMonospaced { font: %s; }</style>%s',
+      '%s<style type="text/css">'.
+      '.PhabricatorMonospaced { font: %s; } '.
+      '.platform-windows .PhabricatorMonospaced { font: %s; }'.
+      '</style>%s',
       parent::getHead(),
       phutil_safe_html($monospaced),
+      phutil_safe_html($monospaced_win),
       $response->renderSingleResource('javelin-magical-init'));
   }
 
@@ -394,6 +400,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     $classes[] = $device_guess;
+
+    if (preg_match('@Windows@', $agent)) {
+      $classes[] = 'platform-windows';
+    } else if (preg_match('@Macintosh@', $agent)) {
+      $classes[] = 'platform-mac';
+    } else if (preg_match('@X11@', $agent)) {
+      $classes[] = 'platform-linux';
+    }
 
     return implode(' ', $classes);
   }

@@ -124,3 +124,15 @@ img {
   border: 1px solid #444444;
   border-radius: 8px;
 }
+
+.grouped:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+hr {
+  height: 1px;
+  background: #bbbbbb;
+  border: none;
+}

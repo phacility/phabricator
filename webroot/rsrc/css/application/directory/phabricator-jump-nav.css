@@ -11,7 +11,10 @@
 .phabricator-jump-nav {
   font-size: 16px;
   width: 100%;
-  padding: 2px 0;
+  padding: 4px;
+  border-radius: 3px;
+  border: 1px solid #96A6C5;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
 .phabricator-jump-nav-caption {
@@ -20,4 +23,14 @@
   font-size: 11px;
   color: #666666;
   text-align: left;
+}
+
+.phabricator-jump-nav-container .aphront-list-filter-view-controls {
+  padding: 20px;
+}
+
+.phabricator-jump-nav-container .aphront-list-filter-view-controls h1 {
+  color: #555;
+  padding-top: 4px;
+  margin-bottom: 0.67em;
 }

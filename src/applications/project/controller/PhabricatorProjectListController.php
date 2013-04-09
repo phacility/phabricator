@@ -123,12 +123,8 @@ final class PhabricatorProjectListController
       $list->addItem($item);
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($table_header);
-
     $nav->appendChild(
       array(
-        $header,
         $list,
         $pager,
       ));

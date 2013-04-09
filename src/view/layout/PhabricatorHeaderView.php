@@ -39,12 +39,13 @@ final class PhabricatorHeaderView extends AphrontView {
     }
 
     if ($this->tags) {
+      $header[] = ' ';
       $header[] = phutil_tag(
         'span',
         array(
           'class' => 'phabricator-header-tags',
         ),
-        $this->tags);
+        array_interleave(' ', $this->tags));
     }
 
     return phutil_tag(

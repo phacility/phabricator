@@ -15,7 +15,9 @@ abstract class PhabricatorMacroController
     }
 
     $nav->addLabel(pht('Macros'));
-    $nav->addFilter('/', pht('All Macros'));
+    $nav->addFilter('active', pht('Active Macros'));
+    $nav->addFilter('all', pht('All Macros'));
+    $nav->addFilter('my', pht('My Macros'));
     if ($has_search) {
       $nav->addFilter('search',
         pht('Search'),

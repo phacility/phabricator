@@ -43,12 +43,8 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $list->setPager($pager);
     $list->setNoDataString($nodata);
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
     $nav->appendChild(
       array(
-        $header,
         $list,
       ));
 
@@ -66,6 +62,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -97,11 +94,14 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         '%s Line(s)',
         new PhutilNumber($line_count));
 
+      $title = nonempty($paste->getTitle(), pht('(An Untitled Masterwork)'));
+
       $item = id(new PhabricatorObjectItemView())
-        ->setHeader($paste->getFullName())
+        ->setObjectName('P'.$paste->getID())
+        ->setHeader($title)
         ->setHref('/P'.$paste->getID())
         ->setObject($paste)
-        ->addAttribute(pht('Created %s by %s', $created, $author))
+        ->addByline(pht('Author: %s', $author))
         ->addIcon('none', $line_count)
         ->appendChild($source_code);
 

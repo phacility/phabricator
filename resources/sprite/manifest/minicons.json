@@ -1,0 +1,51 @@
+{
+  "version" : 1,
+  "sprites" : {
+    "minicons-company-dark"     : {
+      "name" : "minicons-company-dark",
+      "rule" : ".minicons-company-dark",
+      "hash" : "7787a1c5ccdd0f94faa795db6b382901"
+    },
+    "minicons-company-white"    : {
+      "name" : "minicons-company-white",
+      "rule" : ".minicons-company-white",
+      "hash" : "181289eba2fcb851858ab5b99fd19818"
+    },
+    "minicons-move-dark"        : {
+      "name" : "minicons-move-dark",
+      "rule" : ".minicons-move-dark",
+      "hash" : "d87f5f972885ad2653d92675b4e3855c"
+    },
+    "minicons-move-white"       : {
+      "name" : "minicons-move-white",
+      "rule" : ".minicons-move-white",
+      "hash" : "620e464c0e50830b90eaed3b5a2b9f56"
+    },
+    "minicons-public-dark"      : {
+      "name" : "minicons-public-dark",
+      "rule" : ".minicons-public-dark",
+      "hash" : "12bdec3c0e273f820aaef70f61128f4b"
+    },
+    "minicons-public-white"     : {
+      "name" : "minicons-public-white",
+      "rule" : ".minicons-public-white",
+      "hash" : "c075363aeba4c52dbcc328a24d8f4298"
+    },
+    "minicons-restricted-dark"  : {
+      "name" : "minicons-restricted-dark",
+      "rule" : ".minicons-restricted-dark",
+      "hash" : "7a1d926f7af98bef3b17a913e1d0b5b3"
+    },
+    "minicons-restricted-white" : {
+      "name" : "minicons-restricted-white",
+      "rule" : ".minicons-restricted-white",
+      "hash" : "af00df15815b83d410073859dacf7a75"
+    }
+  },
+  "scales"  : [
+    1,
+    2
+  ],
+  "header"  : "\/**\n * @provides sprite-minicons-css\n * @generated\n *\/\n\n.sprite-minicons {\n  background-image: url(\/rsrc\/image\/sprite-minicons.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-minicons {\n    background-image: url(\/rsrc\/image\/sprite-minicons-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type"    : "standard"
+}

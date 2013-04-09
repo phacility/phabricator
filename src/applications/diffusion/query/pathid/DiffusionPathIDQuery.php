@@ -63,7 +63,11 @@ final class DiffusionPathIDQuery {
    */
   public static function getParentPath($path) {
     $path = self::normalizePath($path);
-    return dirname($path);
+    $path = dirname($path);
+    if (phutil_is_windows() && $path == '\\') {
+        $path = '/';
+    }
+    return $path;
   }
 
 

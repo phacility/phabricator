@@ -9,6 +9,10 @@ final class PhabricatorEmailVerificationController
     $this->code = $data['code'];
   }
 
+  public function shouldRequireAdmin() {
+    return false;
+  }
+
   public function shouldRequireEmailVerification() {
     // Since users need to be able to hit this endpoint in order to verify
     // email, we can't ever require email verification here.

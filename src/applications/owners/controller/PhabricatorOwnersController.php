@@ -61,6 +61,7 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     $nav->addLabel('Packages');
     $this->getExtraPackageViews($nav);
     $nav->addFilter('view/owned', 'Owned');
+    $nav->addFilter('view/projects', 'Projects');
     $nav->addFilter('view/all', 'All');
 
     $nav->selectFilter($this->getSideNavFilter(), 'view/owned');

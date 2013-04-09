@@ -50,6 +50,10 @@ abstract class PhabricatorRemarkupRuleObject
       }
     }
 
+    if ($this->getEngine()->isTextMode()) {
+      return PhabricatorEnv::getProductionURI($href);
+    }
+
     $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
 
     $attr = array(
@@ -63,6 +67,11 @@ abstract class PhabricatorRemarkupRuleObject
   protected function renderObjectEmbed($object, $handle, $options) {
     $name = $handle->getFullName();
     $href = $handle->getURI();
+
+    if ($this->getEngine()->isTextMode()) {
+      return $name.' <'.PhabricatorEnv::getProductionURI($href).'>';
+    }
+
     $attr = array(
       'phid' => $handle->getPHID(),
     );

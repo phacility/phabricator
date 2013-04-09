@@ -1,6 +1,7 @@
 <?php
 
-final class ReleephProject extends ReleephDAO {
+final class ReleephProject extends ReleephDAO
+  implements PhabricatorPolicyInterface {
 
   const DEFAULT_BRANCH_NAMESPACE = 'releeph-releases';
   const SYSTEM_AGENT_USERNAME_PREFIX = 'releeph-agent-';
@@ -173,4 +174,21 @@ final class ReleephProject extends ReleephDAO {
     }
     return false;
   }
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
 }

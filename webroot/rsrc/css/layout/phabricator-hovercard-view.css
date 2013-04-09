@@ -1,0 +1,62 @@
+/**
+ * @provides phabricator-hovercard-view-css
+ */
+
+.jx-hovercard-container {
+  position: absolute;
+}
+
+.phabricator-hovercard-wrapper {
+  border-radius: 5px;
+  width: 400px;
+  padding: 6px;
+  background-color: rgba(0,0,0,.2);
+}
+
+.device-phone .phabricator-hovercard-wrapper {
+  width: 300px;
+}
+
+.phabricator-hovercard-container {
+  border: 1px solid #666666;
+}
+
+.phabricator-hovercard-tags {
+  float: right;
+  white-space: normal;
+}
+
+.phabricator-hovercard-body {
+  padding: 8px;
+  background-color: white;
+  color: #333;
+}
+
+.phabricator-hovercard-body-header {
+  font-size: 14px;
+  padding-bottom: 2px;
+  color: #000;
+}
+
+.phabricator-hovercard-body .profile-header-picture-frame {
+  float: left;
+  margin: 0;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  width: 50px;
+  height: 50px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.phabricator-hovercard-tail {
+  padding: 3px 2px;
+  background-color: #eeeeee;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+.phabricator-hovercard-tail button,
+.phabricator-hovercard-tail a.button {
+  margin: 3px;
+}

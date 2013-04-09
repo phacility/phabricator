@@ -99,8 +99,8 @@ This daemon will daemonize and run normally.
 
 == General Tips ==
 
-  - You can set the number of taskmasters that `phd start` starts in the config.
-    If you have a task backlog, try increasing it.
+  - You can set the number of taskmasters that `phd start` starts by the config
+    key `phd.start-taskmasters`. If you have a task backlog, try increasing it.
   - When you `phd launch` or `phd debug` a daemon, you can type any unique
     substring of its name, so `phd launch pull` will work correctly.
   - `phd stop` and `phd restart` stop **all** of the daemons on the machine, not

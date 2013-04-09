@@ -18,6 +18,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
           array(
             'name'        => $request->getStr('name'),
             'authorPHID'  => $user->getPHID(),
+            'isExplicitUpload' => true,
           ));
       }
 
@@ -38,7 +39,6 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
           'desktop onto this page or the Phabricator home page.')));
 
     $form = id(new AphrontFormView())
-      ->setFlexible(true)
       ->setUser($user)
       ->setEncType('multipart/form-data')
       ->appendChild(
@@ -67,9 +67,6 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
 
     $title = pht('Upload File');
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
     if ($errors) {
       $errors = id(new AphrontErrorView())
         ->setTitle(pht('Form Errors'))
@@ -79,12 +76,17 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     $global_upload = id(new PhabricatorGlobalUploadTargetView())
       ->setShowIfSupportedID($support_id);
 
+    $panel = new AphrontPanelView();
+    $panel->setHeader(pht('New File Upload'));
+    $panel->setNoBackground();
+    $panel->appendChild($form);
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
         $errors,
-        $form,
+        $panel,
         $global_upload,
       ),
       array(

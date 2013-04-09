@@ -54,6 +54,7 @@ final class PhabricatorEnv {
   private static $repairSource;
   private static $overrideSource;
   private static $requestBaseURI;
+  private static $cache;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -95,13 +96,17 @@ final class PhabricatorEnv {
       date_default_timezone_set('UTC');
     }
 
-    // Append any paths to $PATH if we need to.
-    $paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
-    if (!empty($paths)) {
-      $current_env_path = getenv('PATH');
-      $new_env_paths = implode(PATH_SEPARATOR, $paths);
-      putenv('PATH='.$current_env_path.PATH_SEPARATOR.$new_env_paths);
+    // Prepend '/support/bin' and append any paths to $PATH if we need to.
+    $env_path = getenv('PATH');
+    $phabricator_path = dirname(phutil_get_library_root('phabricator'));
+    $support_path = $phabricator_path.'/support/bin';
+    $env_path = $support_path.PATH_SEPARATOR.$env_path;
+    $append_dirs = PhabricatorEnv::getEnvConfig('environment.append-paths');
+    if (!empty($append_dirs)) {
+      $append_path = implode(PATH_SEPARATOR, $append_dirs);
+      $env_path = $env_path.PATH_SEPARATOR.$append_path;
     }
+    putenv('PATH='.$env_path);
 
     PhabricatorEventEngine::initialize();
 
@@ -112,6 +117,8 @@ final class PhabricatorEnv {
   }
 
   private static function buildConfigurationSourceStack() {
+    self::dropConfigCache();
+
     $stack = new PhabricatorConfigStackSource();
     self::$sourceStack = $stack;
 
@@ -160,6 +167,7 @@ final class PhabricatorEnv {
       self::$sourceStack->pushSource(self::$repairSource);
     }
     self::$repairSource->setKeys(array($key => $value));
+    self::dropConfigCache();
   }
 
   public static function overrideConfig($key, $value) {
@@ -169,6 +177,7 @@ final class PhabricatorEnv {
       self::$sourceStack->pushSource(self::$overrideSource);
     }
     self::$overrideSource->setKeys(array($key => $value));
+    self::dropConfigCache();
   }
 
   public static function getUnrepairedEnvConfig($key, $default = null) {
@@ -220,8 +229,17 @@ final class PhabricatorEnv {
    * @task read
    */
   public static function getEnvConfig($key) {
+    if (isset(self::$cache[$key])) {
+      return self::$cache[$key];
+    }
+
+    if (array_key_exists($key, self::$cache)) {
+      return self::$cache[$key];
+    }
+
     $result = self::$sourceStack->getKeys(array($key));
     if (array_key_exists($key, $result)) {
+      self::$cache[$key] = $result[$key];
       return $result[$key];
     } else {
       throw new Exception("No config value specified for key '{$key}'.");
@@ -335,6 +353,7 @@ final class PhabricatorEnv {
    * @task test
    */
   private static function pushTestEnvironment() {
+    self::dropConfigCache();
     $source = new PhabricatorConfigDictionarySource(array());
     self::$sourceStack->pushSource($source);
     return spl_object_hash($source);
@@ -345,6 +364,7 @@ final class PhabricatorEnv {
    * @task test
    */
   public static function popTestEnvironment($key) {
+    self::dropConfigCache();
     $source = self::$sourceStack->popSource();
     $stack_key = spl_object_hash($source);
     if ($stack_key !== $key) {
@@ -476,6 +496,10 @@ final class PhabricatorEnv {
     foreach ($tmp as $source) {
       self::$sourceStack->pushSource($source);
     }
+  }
+
+  private static function dropConfigCache() {
+    self::$cache = array();
   }
 
 }

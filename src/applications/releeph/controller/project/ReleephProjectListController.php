@@ -2,15 +2,37 @@
 
 final class ReleephProjectListController extends PhabricatorController {
 
-  public function processRequest() {
-    $path = $this->getRequest()->getRequestURI()->getPath();
-    $is_active = strpos($path, 'inactive/') === false;
+  private $filter;
 
-    $releeph_projects = mfilter(
-      id(new ReleephProject())->loadAll(),
-      'getIsActive',
-      !$is_active);
-    $releeph_projects = msort($releeph_projects, 'getName');
+  public function willProcessRequest(array $data) {
+    $this->filter = idx($data, 'filter', 'active');
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $query = id(new ReleephProjectQuery())
+      ->setViewer($user)
+      ->setOrder(ReleephProjectQuery::ORDER_NAME);
+
+    switch ($this->filter) {
+      case 'inactive':
+        $query->withActive(0);
+        $is_active = false;
+        break;
+      case 'active':
+        $query->withActive(1);
+        $is_active = true;
+        break;
+      default:
+        throw new Exception("Unknown filter '{$this->filter}'!");
+    }
+
+    $pager = new AphrontCursorPagerView();
+    $pager->readFromRequest($request);
+
+    $releeph_projects = $query->executeWithCursorPager($pager);
 
     $releeph_projects_set = new LiskDAOSet();
     foreach ($releeph_projects as $releeph_project) {
@@ -60,10 +82,13 @@ final class ReleephProjectListController extends PhabricatorController {
       $panel->addButton($create_new_project_button);
     }
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    return $this->buildApplicationPage(
       array(
-        'title' => 'List Releeph Projects'
+        $panel,
+        $pager,
+      ),
+      array(
+        'title' => 'List Releeph Projects',
       ));
   }
 

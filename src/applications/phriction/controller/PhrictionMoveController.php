@@ -48,24 +48,19 @@ final class PhrictionMoveController
     $errors = array();
     $error_view = null;
     $e_url = null;
-    $e_block = false;
 
     $disallowed_statuses = array(
-      PhrictionDocumentStatus::STATUS_DELETED, // Stupid
-      PhrictionDocumentStatus::STATUS_MOVED, // Plain stupid
-      PhrictionDocumentStatus::STATUS_STUB, // Utterly stupid
+      PhrictionDocumentStatus::STATUS_DELETED => true, // Silly
+      PhrictionDocumentStatus::STATUS_MOVED => true, // Plain silly
+      PhrictionDocumentStatus::STATUS_STUB => true, // Utterly silly
     );
-    if (in_array($document->getStatus(), $disallowed_statuses)) {
-      $error_view = new AphrontErrorView();
-      $error_view->setSeverity(AphrontErrorView::SEVERITY_ERROR);
-      $error_view->appendChild(pht('An already moved or deleted document '.
-        'can not be moved again.'));
-
-      $error_dialog = new AphrontDialogView();
-      $error_dialog->setUser($user);
-      $error_dialog->setTitle("");
-      $error_dialog->appendChild($error_view);
-      $error_dialog->addCancelButton($cancel_uri, pht('I understand'));
+    if (isset($disallowed_statuses[$document->getStatus()])) {
+      $error_dialog = id(new AphrontDialogView())
+        ->setUser($user)
+        ->setTitle("Can not move page!")
+        ->appendChild(pht('An already moved or deleted document '.
+          'can not be moved again.'))
+        ->addCancelButton($cancel_uri);
 
       return id(new AphrontDialogResponse())->setDialog($error_dialog);
     }
@@ -102,7 +97,7 @@ final class PhrictionMoveController
           ->setDescription($content->getDescription());
 
         // Move it!
-        $target_editor->moveHere($document->getID());
+        $target_editor->moveHere($document->getID(), $document->getPHID());
 
         // Retrieve the target doc directly from the editor
         // No need to load it per Sql again

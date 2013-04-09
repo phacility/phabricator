@@ -34,6 +34,14 @@ final class PhabricatorStartup {
   /**
    * @task info
    */
+  public static function getMicrosecondsSinceStart() {
+    return (int)(1000000 * (microtime(true) - self::getStartTime()));
+  }
+
+
+  /**
+   * @task info
+   */
   public static function setGlobal($key, $value) {
     self::validateGlobal($key);
 
@@ -183,16 +191,14 @@ final class PhabricatorStartup {
     self::endOutputCapture();
     $access_log = self::getGlobal('log.access');
 
-    if ($access_log) {
-      try {
-        $access_log->setData(
-          array(
-            'c' => 500,
-          ));
-        $access_log->write();
-      } catch (Exception $ex) {
-        $message .= "\n(Moreover, unable to write to access log.)";
-      }
+    try {
+      $access_log->setData(
+        array(
+          'c' => 500,
+        ));
+      $access_log->write();
+    } catch (Exception $ex) {
+      $message .= "\n(Moreover, unable to write to access log.)";
     }
 
     header(

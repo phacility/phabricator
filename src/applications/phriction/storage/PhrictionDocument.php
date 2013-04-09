@@ -4,7 +4,7 @@
  * @group phriction
  */
 final class PhrictionDocument extends PhrictionDAO
-  implements PhabricatorPolicyInterface {
+  implements PhabricatorPolicyInterface, PhabricatorSubscribableInterface {
 
   protected $id;
   protected $phid;
@@ -123,6 +123,10 @@ final class PhrictionDocument extends PhrictionDAO
     if ($this->hasProject()) {
       return $this->getProject()->hasAutomaticCapability($capability, $user);
     }
+    return false;
+  }
+
+  public function isAutomaticallySubscribed($phid) {
     return false;
   }
 }

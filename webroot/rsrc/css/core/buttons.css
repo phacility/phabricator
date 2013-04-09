@@ -7,10 +7,9 @@ button,
 a.button,
 a.button:visited,
 input.inputsubmit {
-  background-color: #19558D;
-
+  background-color: #3477ad;
   color: white;
-  text-shadow: 0 -1px #19558D;
+  text-shadow: 0 -1px rgba(0,0,0,0.75);
   border: 1px solid #19558D;
   cursor: pointer;
   font-weight: bold;
@@ -19,10 +18,9 @@ input.inputsubmit {
   padding: 3px 10px 4px;
   text-align: center;
   white-space: nowrap;
-
   border-radius: 3px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
+  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
+  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
 }
 
 /* Buttons with images (full size only) */
@@ -34,37 +32,33 @@ a.icon:visited {
   text-indent: 29px;
 }
 
-button:active,
-a.button:active {
-  background-color: #19558D;
-}
-
 button.black,
 a.black,
 a.black:visited {
   background-color: #383838;
+  background-image: linear-gradient(to bottom, #505d65, #2d373c);
+  background-image: -webkit-linear-gradient(top, #505d65, #2d373c);
   border: 1px solid #333;
-  text-shadow: 0 -1px #000;
   border-bottom-color: #000;
 }
 
 button.green,
 a.green,
 a.green:visited {
-  background-color: #006600;
+  background-color: #348e20;
+  background-image: linear-gradient(to bottom, #4e9b33, #158009);
+  background-image: -webkit-linear-gradient(top, #4e9b33, #158009);
   border: 1px solid #3b6e22;
-  text-shadow: 0 -1px #006600;
   border-bottom-color: #2c5a15;
 }
 
 button.grey,
 input.inputaux,
 a.grey,
-a.grey:visited,
-a.button.disabled,
-button[disabled], /* Set by JX.Workflow. */
-button.disabled {
+a.grey:visited {
   background-color: #f7f7f7;
+  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+  background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
   border-color: #aaa;
   color: #333;
   border-bottom-color: #999;
@@ -72,11 +66,17 @@ button.disabled {
 }
 
 a.disabled,
-button.disabled {
+button.disabled,
+button[disabled] {
   filter:alpha(opacity=50);
-  -moz-opacity:0.5;
+  -moz-opacity: 0.5;
   -khtml-opacity: 0.5;
-  opacity: 0.5;
+  opacity: 0.5 !important;
+}
+
+body button:active,
+body a.button:active {
+  box-shadow: inset 0 0 8px rgba(0,0,0,.6);
 }
 
 button.grey:active,
@@ -84,11 +84,27 @@ a.grey:active,
 button.grey_active,
 a.dropdown-open {
   background-color: #7d7d7d;
+  box-shadow: inset 0 0 4px rgba(0,0,0,.2);
   color: #777;
 }
 
-a.button:hover {
+a.button:hover,
+button:hover {
   text-decoration: none;
+  box-shadow: inset 0 0 5px rgba(0,0,0,.4);
+}
+
+a.button.grey:hover,
+button.grey:hover {
+  text-decoration: none;
+  box-shadow: inset 0 0 4px rgba(0,0,0,.2);
+}
+
+body a.button.disabled:hover,
+body button.disabled:hover,
+body a.button.disabled:active,
+body button.disabled:active {
+  box-shadow: none;
 }
 
 button.small,

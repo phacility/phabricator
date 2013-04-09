@@ -8,6 +8,12 @@ final class PhabricatorObjectItemListView extends AphrontView {
   private $stackable;
   private $cards;
   private $noDataString;
+  private $flush;
+
+  public function setFlush($flush) {
+    $this->flush = $flush;
+    return $this;
+  }
 
   public function setHeader($header) {
     $this->header = $header;
@@ -73,6 +79,9 @@ final class PhabricatorObjectItemListView extends AphrontView {
     }
     if ($this->cards) {
       $classes[] = 'phabricator-object-list-cards';
+    }
+    if ($this->flush) {
+      $classes[] = 'phabricator-object-list-flush';
     }
 
     return phutil_tag(

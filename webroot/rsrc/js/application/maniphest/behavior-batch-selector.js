@@ -3,39 +3,42 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
+ *           javelin-util
  */
 
 JX.behavior('maniphest-batch-selector', function(config) {
 
-  // When a task row's selection state is changed, this issues updates to other
-  // parts of the application.
+  var selected = {};
 
-  var onchange = function(task) {
-    var input = JX.DOM.find(task, 'input', 'maniphest-batch');
-    var state = input.checked;
+  // Test if a task node is selected.
 
-    JX.DOM.alterClass(task, 'maniphest-batch-selected', state);
+  var get_id = function(task) {
+    return JX.Stratcom.getData(task).taskID;
+  }
 
-    JX.Stratcom.invoke(
-      (state ? 'maniphest-batch-task-add' : 'maniphest-batch-task-rem'),
-      null,
-      {id: input.value})
-  };
-
+  var is_selected = function(task) {
+    return (get_id(task) in selected);
+  }
 
   // Change the selected state of a task.
-  // If 'to' is undefined, toggle. Otherwise, set to true or false.
 
   var change = function(task, to) {
-
-    var input = JX.DOM.find(task, 'input', 'maniphest-batch');
-    var state = input.checked;
     if (to === undefined) {
-      input.checked = !input.checked;
-    } else {
-      input.checked = to;
+      to = !is_selected(task);
     }
-    onchange(task);
+
+    if (to) {
+      selected[get_id(task)] = true;
+    } else {
+      delete selected[get_id(task)];
+    }
+
+    JX.DOM.alterClass(
+      task,
+      'phabricator-object-item-selected',
+      is_selected(task));
+
+    update();
   };
 
 
@@ -43,62 +46,72 @@ JX.behavior('maniphest-batch-selector', function(config) {
   // buttons).
 
   var changeall = function(to) {
-    var inputs = JX.DOM.scry(document.body, 'table', 'maniphest-task');
+    var inputs = JX.DOM.scry(document.body, 'li', 'maniphest-task');
     for (var ii = 0; ii < inputs.length; ii++) {
       change(inputs[ii], to);
     }
   }
 
+  // Clear any document text selection after toggling a task via shift click,
+  // since errant clicks tend to start selecting various ranges otherwise.
+
+  var clear_selection = function() {
+    if (window.getSelection) {
+      if (window.getSelection().empty) {
+        window.getSelection().empty();
+      } else if (window.getSelection().removeAllRanges) {
+        window.getSelection().removeAllRanges();
+      }
+    } else if (document.selection) {
+      document.selection.empty();
+    }
+  }
 
   // Update the status text showing how many tasks are selected, and the button
   // state.
 
-  var selected = {};
-  var selected_count = 0;
-
   var update = function() {
-    var status = (selected_count == 1)
-      ? '1 Selected Task'
-      : selected_count + ' Selected Tasks';
+    var count = JX.keys(selected).length;
+    var status;
+    if (count == 0) {
+      status = 'Shift-Click to Select Tasks';
+    } else if (status == 1) {
+      status = '1 Selected Task';
+    } else {
+      status = count + ' Selected Tasks';
+    }
     JX.DOM.setContent(JX.$(config.status), status);
 
     var submit = JX.$(config.submit);
-    var disable = (selected_count == 0);
+    var disable = (count == 0);
     submit.disabled = disable;
     JX.DOM.alterClass(submit, 'disabled', disable);
   };
 
-
-  // When the user clicks the entire <td /> surrounding the checkbox, count it
-  // as a checkbox click.
+  // When he user shift-clicks the task, update the rest of the application
+  // state.
 
   JX.Stratcom.listen(
     'click',
     'maniphest-task',
     function(e) {
-      if (!JX.DOM.isNode(e.getTarget(), 'td')) {
-        // Only count clicks in the <td />, not (e.g.) the table border.
+      var raw = e.getRawEvent();
+      if (!raw.shiftKey) {
         return;
       }
 
-      // Check if the clicked <td /> contains a checkbox.
-      var inputs = JX.DOM.scry(e.getTarget(), 'input', 'maniphest-batch');
-      if (!inputs.length) {
+      if (raw.ctrlKey || raw.altKey || raw.metaKey || e.isRightButton()) {
         return;
       }
 
+      if (JX.Stratcom.pass(e)) {
+        return;
+      }
+
+      e.kill();
       change(e.getNode('maniphest-task'));
-  });
 
-
-  // When he user clicks the <input />, update the rest of the application
-  // state.
-
-  JX.Stratcom.listen(
-    ['click', 'onchange'],
-    'maniphest-batch',
-    function(e) {
-      onchange(e.getNode('maniphest-task'));
+      clear_selection();
     });
 
 
@@ -125,30 +138,21 @@ JX.behavior('maniphest-batch-selector', function(config) {
       e.kill();
     });
 
+  // When the user submits the form, dump selected state into it.
 
-  JX.Stratcom.listen(
-    'maniphest-batch-task-add',
+  JX.DOM.listen(
+    JX.$(config.formID),
+    'submit',
     null,
     function(e) {
-      var id = e.getData().id;
-      if (!(id in selected)) {
-        selected[id] = true;
-        selected_count++;
-        update();
+      var inputs = [];
+      for (var k in selected) {
+        inputs.push(
+          JX.$N('input', {type: 'hidden', name: 'batch[]', value: k}));
       }
+      JX.DOM.setContent(JX.$(config.idContainer), inputs);
     });
 
-
-  JX.Stratcom.listen(
-    'maniphest-batch-task-rem',
-    null,
-    function(e) {
-      var id = e.getData().id;
-      if (id in selected) {
-        delete selected[id];
-        selected_count--;
-        update();
-      }
-    });
+  update();
 
 });

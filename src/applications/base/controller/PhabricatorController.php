@@ -147,10 +147,14 @@ abstract class PhabricatorController extends AphrontController {
   public function buildApplicationPage($view, array $options) {
     $page = $this->buildStandardPageView();
 
+    $title = PhabricatorEnv::getEnvConfig('phabricator.serious-business') ?
+      'Phabricator' :
+      pht('Bacon Ice Cream for Breakfast');
+
     $application = $this->getCurrentApplication();
+    $page->setTitle(idx($options, 'title', $title));
     if ($application) {
       $page->setApplicationName($application->getName());
-      $page->setTitle(idx($options, 'title'));
       if ($application->getTitleGlyph()) {
         $page->setGlyph($application->getTitleGlyph());
       }
@@ -274,12 +278,9 @@ abstract class PhabricatorController extends AphrontController {
       throw new Exception("Unknown handle list style '{$style}'!");
     }
 
-    $items = array();
-    foreach ($phids as $phid) {
-      $items[] = $this->getHandle($phid)->renderLink();
-    }
-
-    return phutil_implode_html($style_map[$style], $items);
+    return implode_selected_handle_links($style_map[$style],
+      $this->getLoadedHandles(),
+      $phids);
   }
 
   protected function buildApplicationMenu() {

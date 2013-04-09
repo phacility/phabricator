@@ -1,0 +1,44 @@
+/**
+ * @provides phabricator-workpanel-view-css
+ */
+
+.phabricator-workpanel-view .phabricator-action-header {
+  border: 1px solid #b3b5b6;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.phabricator-workpanel-view .phabricator-workpanel-header-action {
+  float: right;
+  width: 24px;
+  border-left: 1px solid #b3b5b6;
+}
+
+.phabricator-workpanel-view .phabricator-workpanel-body {
+  background: #c4cde0;
+  padding: 5px 5px 1px 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  box-shadow: inset 0 0px 5px rgba(0,0,0,.4);
+}
+
+.phabricator-workpanel-view .phabricator-workpanel-footer-action a {
+  color: #333;
+  font-weight: bold;
+}
+
+.device-desktop .phabricator-workpanel-view .phabricator-workpanel-footer-action:hover {
+ background-color: rgba(100,100,100,.1);
+ border-radius: 3px;
+}
+
+.phabricator-workpanel-view .phabricator-menu-item-icon {
+  height: 12px;
+  width: 12px;
+  display: inline-block;
+}
+
+.phabricator-workpanel-view .phabricator-menu-item-name {
+  padding-left: 5px;
+  display: inline-block;
+}

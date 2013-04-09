@@ -3,6 +3,7 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-json
+ *           javelin-workflow
  *           stripe-core
  */
 
@@ -73,8 +74,11 @@ JX.behavior('stripe-payment-form', function(config) {
     }
     if (errors.length != 0) {
       cardErrors.value = JX.JSON.stringify(errors);
-      root.submit();
-      return true;
+
+      JX.Workflow.newFromForm(root)
+        .start();
+
+      return;
     }
 
     // no errors detected so contact Stripe asynchronously
@@ -110,14 +114,13 @@ JX.behavior('stripe-payment-form', function(config) {
       // success - we can use the token to create a customer object with
       // Stripe and let the billing commence!
       var token = response['id'];
+      cardErrors.value = '[]';
       stripeToken.value = token;
     }
-    root.submit();
+
+    JX.Workflow.newFromForm(root)
+      .start();
   }
 
-  JX.DOM.listen(
-      root,
-      'submit',
-      null,
-      onsubmit);
+  JX.DOM.listen(root, 'submit', null, onsubmit);
 });

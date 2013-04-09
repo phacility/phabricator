@@ -129,13 +129,29 @@ final class PhabricatorTagView extends AphrontView {
       $bar = null;
     }
 
-    return phutil_tag(
-      $this->href ? 'a' : 'span',
-      array(
-        'href'  => $this->href,
-        'class' => implode(' ', $classes),
-      ),
-      array($bar, $content));
+    if ($this->phid) {
+      Javelin::initBehavior('phabricator-hovercards');
+
+      return javelin_tag(
+        'a',
+        array(
+          'href'  => $this->href,
+          'class' => implode(' ', $classes),
+          'sigil' => 'hovercard',
+          'meta'  => array(
+            'hoverPHID' => $this->phid,
+          ),
+        ),
+        array($bar, $content));
+    } else {
+      return phutil_tag(
+        $this->href ? 'a' : 'span',
+        array(
+          'href'  => $this->href,
+          'class' => implode(' ', $classes),
+        ),
+        array($bar, $content));
+    }
   }
 
   public static function getTagTypes() {

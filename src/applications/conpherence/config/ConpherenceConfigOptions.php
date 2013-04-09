@@ -4,7 +4,7 @@ final class ConpherenceConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht('Copherence');
+    return pht('Conpherence');
   }
 
   public function getDescription() {

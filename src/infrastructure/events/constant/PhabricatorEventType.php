@@ -31,5 +31,7 @@ final class PhabricatorEventType extends PhutilEventType {
   const TYPE_UI_DIDRENDEROBJECTS            = 'ui.didRenderObjects';
   const TYPE_UI_WILLRENDERPROPERTIES        = 'ui.willRenderProperties';
 
+  const TYPE_UI_DIDRENDERHOVERCARD          = 'ui.didRenderHovercard';
+
   const TYPE_PEOPLE_DIDRENDERMENU           = 'people.didRenderMenu';
 }

@@ -25,6 +25,8 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_DIFF_FILETREE        = 'diff-filetree';
 
+  const PREFERENCE_CONPH_NOTIFICATIONS  = 'conph-notifications';
+
   protected $userPHID;
   protected $preferences = array();
 

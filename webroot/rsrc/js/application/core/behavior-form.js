@@ -31,6 +31,13 @@ JX.behavior('aphront-form-disable-on-submit', function(config) {
       return;
     }
 
+    // Don't double-submit forms.
+    if (form._disabled) {
+      return;
+    }
+
+    will_submit(form);
+
     // If nothing handled the synthetic submit, submit normally.
     form.submit();
   });

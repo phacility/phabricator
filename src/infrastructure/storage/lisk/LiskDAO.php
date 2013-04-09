@@ -178,7 +178,6 @@ abstract class LiskDAO {
 
   const IDS_AUTOINCREMENT           = 'ids-auto';
   const IDS_COUNTER                 = 'ids-counter';
-  const IDS_PHID                    = 'ids-phid';
   const IDS_MANUAL                  = 'ids-manual';
 
   const COUNTER_TABLE_NAME          = 'lisk_counter';
@@ -304,9 +303,8 @@ abstract class LiskDAO {
    * CONFIG_IDS
    * Lisk objects need to have a unique identifying ID. The three mechanisms
    * available for generating this ID are IDS_AUTOINCREMENT (default, assumes
-   * the ID column is an autoincrement primary key), IDS_PHID (to generate a
-   * unique PHID for each object), IDS_MANUAL (you are taking full
-   * responsibility for ID management), or IDS_COUNTER (see below).
+   * the ID column is an autoincrement primary key), IDS_MANUAL (you are taking
+   * full responsibility for ID management), or IDS_COUNTER (see below).
    *
    * InnoDB does not persist the value of `auto_increment` across restarts,
    * and instead initializes it to `MAX(id) + 1` during startup. This means it
@@ -860,10 +858,28 @@ abstract class LiskDAO {
 
 
   /**
-   * Retrieve the unique, numerical ID identifying this object. This value
-   * will be null if the object hasn't been persisted.
+   * Set unique ID identifying this object. You normally don't need to call this
+   * method unless with `IDS_MANUAL`.
    *
-   * @return int   Unique numerical ID.
+   * @param  mixed   Unique ID.
+   * @return this
+   * @task   save
+   */
+  public function setID($id) {
+    static $id_key = null;
+    if ($id_key === null) {
+      $id_key = $this->getIDKeyForUse();
+    }
+    $this->$id_key = $id;
+    return $this;
+  }
+
+
+  /**
+   * Retrieve the unique ID identifying this object. This value will be null if
+   * the object hasn't been persisted and you didn't set it manually.
+   *
+   * @return mixed   Unique ID.
    *
    * @task   info
    */
@@ -1212,13 +1228,6 @@ abstract class LiskDAO {
           $data[$id_key] = $id;
         }
         break;
-      case self::IDS_PHID:
-        if (empty($data[$this->getIDKeyForUse()])) {
-          $phid = $this->generatePHID();
-          $this->setID($phid);
-          $data[$this->getIDKeyForUse()] = $phid;
-        }
-        break;
       case self::IDS_MANUAL:
         break;
       default:
@@ -1291,15 +1300,6 @@ abstract class LiskDAO {
 
 
   /**
-   * Helper: Whether this class is configured to use PHIDs as the primary ID.
-   * @task internal
-   */
-  private function isPHIDPrimaryID() {
-    return ($this->getConfigOption(self::CONFIG_IDS) === self::IDS_PHID);
-  }
-
-
-  /**
    * Retrieve the primary key column, "id" by default. If you can not
    * reasonably name your ID column "id", override this method.
    *
@@ -1308,10 +1308,7 @@ abstract class LiskDAO {
    * @task   hook
    */
   public function getIDKey() {
-    return
-      $this->isPHIDPrimaryID() ?
-      'phid' :
-      'id';
+    return 'id';
   }
 
 
@@ -1327,7 +1324,7 @@ abstract class LiskDAO {
 
 
   /**
-   * Generate a new PHID, used by CONFIG_AUX_PHID and IDS_PHID.
+   * Generate a new PHID, used by CONFIG_AUX_PHID.
    *
    * @return phid    Unique, newly allocated PHID.
    *
@@ -1335,7 +1332,7 @@ abstract class LiskDAO {
    */
   protected function generatePHID() {
     throw new Exception(
-      "To use CONFIG_AUX_PHID or IDS_PHID, you need to overload ".
+      "To use CONFIG_AUX_PHID, you need to overload ".
       "generatePHID() to perform PHID generation.");
   }
 
@@ -1375,13 +1372,7 @@ abstract class LiskDAO {
       $this->setDateModified(time());
     }
 
-    if (($this->isPHIDPrimaryID() && !$this->getID())) {
-      // If PHIDs are the primary ID, the subclass could have overridden the
-      // name of the ID column.
-      $this->setID($this->generatePHID());
-    } else if ($this->getConfigOption(self::CONFIG_AUX_PHID) &&
-               !$this->getPHID()) {
-      // The subclass could still want PHIDs.
+    if ($this->getConfigOption(self::CONFIG_AUX_PHID) && !$this->getPHID()) {
       $this->setPHID($this->generatePHID());
     }
   }
@@ -1737,9 +1728,6 @@ abstract class LiskDAO {
         $property = $this->checkProperty($property);
         if (!$property) {
           throw new Exception("Bad setter call: {$method}");
-        }
-        if ($property == 'ID') {
-          $property = $this->getIDKeyForUse();
         }
         $dispatch_map[$method] = $property;
       }

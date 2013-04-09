@@ -32,6 +32,12 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_MCRO    = 'MCRO';
   const PHID_TYPE_CONF    = 'CONF';
   const PHID_TYPE_CONP    = 'CONP';
+  const PHID_TYPE_PVAR    = 'PVAR';
+  const PHID_TYPE_ACNT    = 'ACNT';
+  const PHID_TYPE_PDCT    = 'PDCT';
+  const PHID_TYPE_PRCH    = 'PRCH';
+  const PHID_TYPE_PAYM    = 'PAYM';
+  const PHID_TYPE_CHRG    = 'CHRG';
 
   const PHID_TYPE_XACT    = 'XACT';
   const PHID_TYPE_XCMT    = 'XCMT';

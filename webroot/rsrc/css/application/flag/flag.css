@@ -7,6 +7,13 @@
   background: transparent 0 0 no-repeat;
 }
 
+.phabricator-object-item .phabricator-flag-icon {
+  float: left;
+  margin: 2px;
+  margin-right: 8px;
+  margin-bottom: 0;
+}
+
 .phabricator-flag-radio {
   padding-left: 18px;
   margin: 1px;

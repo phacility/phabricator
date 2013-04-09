@@ -7,11 +7,10 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
     $user = $request->getUser();
 
     $pager = id(new AphrontCursorPagerView())
-      ->setURI(new PhutilURI($this->getApplicationURI('/given/')));
+      ->readFromRequest($request);
 
     $tokens_given = id(new PhabricatorTokenGivenQuery())
       ->setViewer($user)
-      ->setLimit(100)
       ->executeWithCursorPager($pager);
 
     $handles = array();
@@ -53,6 +52,7 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
 
       $list->addItem($item);
     }
+    $list->setPager($pager);
 
     $title = pht('Tokens Given');
 
@@ -65,13 +65,13 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
     $nav->selectFilter('given/');
 
     $nav->appendChild($list);
-    $nav->appendChild($pager);
 
     return $this->buildApplicationPage(
       $nav,
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 

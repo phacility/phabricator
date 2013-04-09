@@ -29,37 +29,41 @@ div.phabricator-application-launch-container {
   height: 66px;
   overflow: hidden;
   position: relative;
-
+  border: 1px solid #000;
   text-decoration: none;
-
-  border: 1px solid #080909;
-
 }
 
 a.application-tile-full {
-  width: 240px;
+  width: 100%;
   height: 52px;
+  border-bottom: 1px solid #404040;
+  border-left: none;
+  border-right: none;
+}
+
+.device-phone div.phabricator-application-launch-container {
+  display: none;
 }
 
 a.application-tile-full.application-tile-create {
-  width: 210px;
+  width: 88%;
   height: 52px;
   border-right: none;
 }
 
 .application-tile-full + .phabricator-application-launch-create {
-  display: block;
   float: right;
-  width: 28px;
-  border-top: 1px solid #080909;
-  border-bottom: 1px solid #080909;
-  border-left: 1px solid #080909;
+  width: 12%;
   height: 52px;
   position: relative;
+  border-top: 1px solid #000;
+  border-bottom: 1px solid #404040;
+  display: inline-block;
+  text-align: center;
 }
 
 a.phabricator-application-launch-create:hover {
-  background-image: url('/rsrc/image/texture/dark-menu-hover.png');
+  background-image: url(/res/a214a732/rsrc/image/texture/dark-menu-hover.png);
   color: #fff;
   text-decoration: none;
 }
@@ -70,7 +74,7 @@ a.phabricator-application-launch-container:hover {
 
 /* The hover effect looks awful on phones/tablets when scrolling. */
 .device-desktop a.phabricator-application-launch-container:hover {
-  background-image: url('/rsrc/image/texture/dark-menu-hover.png');
+  background-image: url(/res/a214a732/rsrc/image/texture/dark-menu-hover.png);
   color: #fff;
 }
 
@@ -84,10 +88,8 @@ a.phabricator-application-launch-container:hover {
 }
 
 .phabricator-application-create-icon {
-  display: block;
-  position: absolute;
-  right: 7px;
-  top: 20px;
+  display: inline-block;
+  margin: 20px auto;
   width: 14px;
   height: 14px;
 }

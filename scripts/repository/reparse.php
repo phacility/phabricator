@@ -10,8 +10,26 @@ $args->setSynopsis(<<<EOHELP
 
 Rerun the Diffusion parser on specific commits and repositories. Mostly
 useful for debugging changes to Diffusion.
+
+e.g. enqueue reparse owners in the TEST repo for all commits:
+./reparse.php --all TEST --owners
+
+e.g. do same but exclude before yesterday (local time):
+./reparse.php --all TEST --owners --min-date yesterday
+./reparse.php --all TEST --owners --min-date "today -1 day"
+
+e.g. do same but exclude before 03/31/2013 (local time):
+./reparse.php --all TEST --owners --min-date "03/31/2013"
 EOHELP
 );
+
+$min_date_usage_examples =
+  "Valid examples:\n".
+  "  'today', 'today 2pm', '-1 hour', '-2 hours', '-24 hours',\n".
+  "  'yesterday', 'today -1 day', 'yesterday 2pm', '2pm -1 day',\n".
+  "  'last Monday', 'last Monday 14:00', 'last Monday 2pm',\n".
+  "  '31 March 2013', '31 Mar', '03/31', '03/31/2013',\n".
+  "See __http://www.php.net/manual/en/datetime.formats.php__ for more.\n";
 
 $args->parseStandardArguments();
 $args->parse(
@@ -33,8 +51,9 @@ $args->parse(
     array(
       'name'     => 'min-date',
       'param'    => 'date',
-      'help'     => 'When used with __--all__, this will restrict to '.
-                    'reparsing only the commits that are newer than __date__.',
+      'help'     => 'Must be used with __--all__, this will exclude commits '.
+                    'which are earlier than __date__.'.
+                    "\n".$min_date_usage_examples,
     ),
     // which parts
     array(
@@ -87,11 +106,40 @@ if (!$all_from_repo && !$reparse_what) {
   usage("Specify a commit or repository to reparse.");
 }
 
+if ($all_from_repo && $reparse_what) {
+  $commits = implode(', ', $reparse_what);
+  usage(
+    "Specify a commit or repository to reparse, not both:\n".
+    "All from repo: ".$all_from_repo."\n".
+    "Commit(s) to reparse: ".$commits);
+}
+
 if (!$reparse_message && !$reparse_change && !$reparse_herald &&
     !$reparse_owners && !$reparse_harbormaster) {
   usage("Specify what information to reparse with --message, --change,  ".
         "--herald, --harbormaster, and/or --owners");
 }
+
+$min_timestamp = false;
+if ($min_date) {
+  $min_timestamp = strtotime($min_date);
+
+  if (!$all_from_repo) {
+    usage(
+      "You must use --all if you specify --min-date\n".
+      "e.g.\n".
+      "  ./reparse.php --all TEST --owners --min-date yesterday");
+  }
+
+  // previous to PHP 5.1.0 you would compare with -1, instead of false
+  if (false === $min_timestamp) {
+    usage(
+      "Supplied --min-date is not valid\n".
+      "Supplied value: '".$min_date."'\n".
+      $min_date_usage_examples);
+  }
+}
+
 if ($reparse_owners && !$force) {
   echo phutil_console_wrap(
     "You are about to recreate the relationship entries between the commits ".
@@ -114,13 +162,14 @@ if ($all_from_repo) {
     throw new Exception("Unknown repository {$all_from_repo}!");
   }
   $constraint = '';
-  if ($min_date) {
+  if ($min_timestamp) {
+    echo "Excluding entries before UNIX timestamp: ".$min_timestamp."\n";
     $table = new PhabricatorRepositoryCommit();
     $conn_r = $table->establishConnection('r');
     $constraint = qsprintf(
       $conn_r,
-      'AND epoch > unix_timestamp(%s)',
-      $min_date);
+      'AND epoch >= %d',
+      $min_timestamp);
   }
   $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
     'repositoryID = %d %Q',
@@ -236,6 +285,7 @@ echo "\nDone.\n";
 
 function usage($message) {
   echo phutil_console_format(
-    '**Usage Exception:** '.$message."\n");
+    '**Usage Exception:** '.$message."\n".
+    "Use __--help__ to display full help\n");
   exit(1);
 }

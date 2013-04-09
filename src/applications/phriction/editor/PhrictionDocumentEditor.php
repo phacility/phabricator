@@ -14,6 +14,9 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
   private $newContent;
   private $description;
 
+  // For the Feed Story when moving documents
+  private $fromDocumentPHID;
+
   private function __construct() {
     // <restricted>
   }
@@ -71,7 +74,8 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
       PhrictionChangeType::CHANGE_MOVE_AWAY, true, $new_doc_id);
   }
 
-  public function moveHere($old_doc_id) {
+  public function moveHere($old_doc_id, $old_doc_phid) {
+    $this->fromDocumentPHID = $old_doc_phid;
     return $this->execute(
       PhrictionChangeType::CHANGE_MOVE_HERE, false, $old_doc_id);
   }
@@ -181,11 +185,11 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
         break;
       case PhrictionChangeType::CHANGE_MOVE_AWAY:
         $doc_status = PhrictionDocumentStatus::STATUS_MOVED;
-        $feed_action = PhrictionActionConstants::ACTION_MOVE_AWAY;
+        $feed_action = null;
         break;
       case PhrictionChangeType::CHANGE_MOVE_HERE:
         $doc_status = PhrictionDocumentStatus::STATUS_EXISTS;
-        $feed_action = null;
+        $feed_action = PhrictionActionConstants::ACTION_MOVE_HERE;
         break;
       default:
         throw new Exception(
@@ -253,6 +257,10 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
       $related_phids[] = $project_phid;
     }
 
+    if ($this->fromDocumentPHID) {
+      $related_phids[] = $this->fromDocumentPHID;
+    }
+
     if ($feed_action) {
       id(new PhabricatorFeedStoryPublisher())
         ->setRelatedPHIDs($related_phids)
@@ -261,15 +269,94 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
         ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PHRICTION)
         ->setStoryData(
           array(
-            'phid'    => $document->getPHID(),
-            'action'  => $feed_action,
-            'content' => phutil_utf8_shorten($new_content->getContent(), 140),
-            'project' => $project_phid,
+            'phid'      => $document->getPHID(),
+            'action'    => $feed_action,
+            'content'   => phutil_utf8_shorten($new_content->getContent(), 140),
+            'project'   => $project_phid,
+            'movedFromPHID' => $this->fromDocumentPHID,
           ))
         ->publish();
     }
 
+    // TODO: Migrate to ApplicationTransactions fast, so we get rid of this code
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $document->getPHID());
+    $this->sendMailToSubscribers($subscribers, $content);
+
     return $this;
+  }
+
+  private function sendMailToSubscribers(array $subscribers, $old_content) {
+    if (!$subscribers) {
+      return;
+    }
+
+    $author_phid = $this->getActor()->getPHID();
+    $document = $this->document;
+    $content = $document->getContent();
+    $slug_uri = PhrictionDocument::getSlugURI($document->getSlug());
+    $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
+    $prod_uri = PhabricatorEnv::getProductionURI('');
+
+    $vs_head = $diff_uri
+      ->alter('l', $old_content->getVersion())
+      ->alter('r', $content->getVersion());
+
+    $old_title = $old_content->getTitle();
+    $title = $content->getTitle();
+
+    // TODO: Currently, this produces something like
+    // Phriction Document Xyz was Edit
+    // I'm too lazy to build my own action string everywhere
+    // Plus, it does not have pht() anyway
+    $action = PhrictionChangeType::getChangeTypeLabel(
+      $content->getChangeType());
+    $name = pht("Phriction Document %s was %s", $title, $action);
+
+    $body = array($name);
+    // Content may have changed, you never know
+    if ($content->getChangeType() == PhrictionChangeType::CHANGE_EDIT) {
+
+      if ($old_title != $title) {
+        $body[] = pht('Title was changed from "%s" to "%s"',
+          $old_title, $title);
+      }
+
+      $body[] = pht("Link to new version:\n%s",
+        $prod_uri.$slug_uri.'?v='.$content->getVersion());
+
+      $body[] = pht("Link to diff:\n%s", $prod_uri.$vs_head);
+    } else if ($content->getChangeType() ==
+      PhrictionChangeType::CHANGE_MOVE_AWAY) {
+
+      $target_document = id(new PhrictionDocument())
+        ->load($content->getChangeRef());
+      $slug_uri = PhrictionDocument::getSlugURI($target_document->getSlug());
+      $body[] = pht("Link to destination document:\n%s", $prod_uri.$slug_uri);
+    }
+
+    $body = implode("\n\n", $body);
+
+    $subject_prefix = $this->getMailSubjectPrefix();
+
+    $mail = new PhabricatorMetaMTAMail();
+    $mail->setSubject($name)
+      ->setSubjectPrefix($subject_prefix)
+      ->setVarySubjectPrefix('['.$action.']')
+      ->addHeader('Thread-Topic', $name)
+      ->setFrom($author_phid)
+      ->addTos($subscribers)
+      ->setBody($body)
+      ->setRelatedPHID($document->getPHID())
+      ->setIsBulk(true);
+
+    $mail->saveAndSend();
+  }
+
+  /* --( For less copy-pasting when switching to ApplicationTransactions )--- */
+
+  protected function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.phriction.subject-prefix');
   }
 
 }

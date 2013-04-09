@@ -30,7 +30,8 @@ final class PhabricatorDirectoryMainController
   private function buildMainResponse($nav, array $projects) {
     assert_instances_of($projects, 'PhabricatorProject');
 
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+    $maniphest = 'PhabricatorApplicationManiphest';
+    if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $unbreak_panel = $this->buildUnbreakNowPanel();
       $triage_panel = $this->buildNeedsTriagePanel($projects);
       $tasks_panel = $this->buildTasksPanel();
@@ -40,6 +41,11 @@ final class PhabricatorDirectoryMainController
       $tasks_panel = null;
     }
 
+    if (PhabricatorEnv::getEnvConfig('welcome.html') !== null) {
+      $welcome_panel = $this->buildWelcomePanel();
+    } else {
+      $welcome_panel = null;
+    }
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
     $audit_panel = $this->buildAuditPanel();
@@ -47,6 +53,7 @@ final class PhabricatorDirectoryMainController
 
     $content = array(
       $jump_panel,
+      $welcome_panel,
       $unbreak_panel,
       $triage_panel,
       $revision_panel,
@@ -59,10 +66,12 @@ final class PhabricatorDirectoryMainController
     $nav->appendChild($content);
     $nav->appendChild(new PhabricatorGlobalUploadTargetView());
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => 'Phabricator',
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -226,6 +235,16 @@ final class PhabricatorDirectoryMainController
     return $panel;
   }
 
+  private function buildWelcomePanel() {
+    $panel = new AphrontPanelView();
+    $panel->appendChild(
+      phutil_safe_html(
+        PhabricatorEnv::getEnvConfig('welcome.html')));
+    $panel->setNoBackground();
+
+    return $panel;
+  }
+
   private function buildTasksPanel() {
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
@@ -321,22 +340,32 @@ final class PhabricatorDirectoryMainController
           'it. See %s or type <tt>help</tt>.',
         $doc_link));
 
+    $form = phabricator_form(
+      $user,
+      array(
+        'action' => '/jump/',
+        'method' => 'POST',
+        'class'  => 'phabricator-jump-nav-form',
+      ),
+      array(
+        $jump_input,
+        $jump_caption,
+      ));
+
     $panel = new AphrontPanelView();
     $panel->setHeader('Jump Nav');
-    $panel->appendChild(
-      phabricator_form(
-        $user,
-        array(
-          'action' => '/jump/',
-          'method' => 'POST',
-          'class'  => 'phabricator-jump-nav-form',
-        ),
-        array(
-          $jump_input,
-          $jump_caption,
-        )));
+    $panel->setNoBackground();
+    // $panel->appendChild();
 
-    return $panel;
+    $list_filter = new AphrontListFilterView();
+    $list_filter->appendChild(phutil_tag('h1', array(), 'Jump Nav'));
+    $list_filter->appendChild($form);
+
+    $container = phutil_tag('div',
+      array('class' => 'phabricator-jump-nav-container'),
+      $list_filter);
+
+    return $container;
   }
 
   private function renderMiniPanel($title, $body) {

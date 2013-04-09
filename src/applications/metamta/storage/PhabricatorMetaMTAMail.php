@@ -23,6 +23,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   protected $relatedPHID;
 
   private $excludePHIDs = array();
+  private $overrideNoSelfMail = false;
 
   public function __construct() {
 
@@ -115,6 +116,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this->excludePHIDs;
   }
 
+  public function getOverrideNoSelfMailPreference() {
+    return $this->overrideNoSelfMail;
+  }
+
+  public function setOverrideNoSelfMailPreference($override) {
+    $this->overrideNoSelfMail = $override;
+    return $this;
+  }
+
   public function getTranslation(array $objects) {
     $default_translation = PhabricatorEnv::getEnvConfig('translation.provider');
     $return = null;
@@ -155,17 +165,23 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public function addAttachment(PhabricatorMetaMTAAttachment $attachment) {
-    $this->parameters['attachments'][] = $attachment;
+    $this->parameters['attachments'][] = $attachment->toDictionary();
     return $this;
   }
 
   public function getAttachments() {
-    return $this->getParam('attachments');
+    $dicts = $this->getParam('attachments');
+
+    $result = array();
+    foreach ($dicts as $dict) {
+      $result[] = PhabricatorMetaMTAAttachment::newFromDictionary($dict);
+    }
+    return $result;
   }
 
   public function setAttachments(array $attachments) {
     assert_instances_of($attachments, 'PhabricatorMetaMTAAttachment');
-    $this->setParam('attachments', $attachments);
+    $this->setParam('attachments', mpull($attachments, 'toDictionary'));
     return $this;
   }
 
@@ -420,6 +436,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             }
             break;
           case 'attachments':
+            $value = $this->getAttachments();
             foreach ($value as $attachment) {
               $mailer->addAttachment(
                 $attachment->getData(),
@@ -705,13 +722,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $is_mailable = false;
       switch ($value) {
         case PhabricatorPHIDConstants::PHID_TYPE_USER:
-          $user = $users[$phid];
+          $user = idx($users, $phid);
           if ($user) {
             $name = $this->getUserName($user);
             $is_mailable = !$user->getIsDisabled()
                         && !$user->getIsSystemAgent();
           }
-          $email = $user_emails[$phid] ?
+          $email = isset($user_emails[$phid]) ?
                    $user_emails[$phid]->getAddress() :
                    $default;
           break;
@@ -822,7 +839,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $from_user = id(new PhabricatorUser())->loadOneWhere(
         'phid = %s',
         $from);
-      if ($from_user) {
+      if ($from_user && !$this->getOverrideNoSelfMailPreference()) {
         $pref_key = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
         $exclude_self = $from_user
           ->loadPreferences()

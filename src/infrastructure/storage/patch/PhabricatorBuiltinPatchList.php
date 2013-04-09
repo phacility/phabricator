@@ -175,6 +175,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'releeph',
       ),
+      'db.phlux' => array(
+        'type' => 'db',
+        'name' => 'phlux',
+      ),
+      'db.phortune' => array(
+        'type' => 'db',
+        'name' => 'phortune',
+      ),
+      'db.phrequent' => array(
+        'type' => 'db',
+        'name' => 'phrequent',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1173,7 +1185,55 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('releeph.sql'),
       ),
+      '20130319.phabricatorfileexplicitupload.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath(
+          '20130319.phabricatorfileexplicitupload.sql')
+      ),
+      '20130319.conpherence.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130319.conpherence.sql'),
+      ),
+      '20130320.phlux.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130320.phlux.sql'),
+      ),
+      '20130317.phrictionedge.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130317.phrictionedge.sql'),
+      ),
+      '20130321.token.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130321.token.sql'),
+      ),
+      '20130310.xactionmeta.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130310.xactionmeta.sql'),
+      ),
+      '20130322.phortune.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130322.phortune.sql'),
+      ),
+      '20130323.phortunepayment.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130323.phortunepayment.sql'),
+      ),
+      '20130324.phortuneproduct.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130324.phortuneproduct.sql'),
+      ),
+      '20130330.phrequent.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130330.phrequent.sql'),
+      ),
+      '20130403.conpherencecache.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130403.conpherencecache.sql'),
+      ),
+      '20130403.conpherencecachemig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130403.conpherencecachemig.php'),
+      )
     );
   }
-
 }

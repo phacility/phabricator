@@ -20,6 +20,11 @@ final class PhabricatorRemarkupRuleYoutube
 
   public function markupYoutubeLink() {
     $v = idx($this->uri->getQueryParams(), 'v');
+
+    if ($this->getEngine()->isTextMode()) {
+      return $this->getEngine()->storeText('http://youtu.be/'.$v);
+    }
+
     $youtube_src = 'https://www.youtube.com/embed/'.$v;
     $iframe = hsprintf(
       '<div class="embedded-youtube-video">%s</div>',

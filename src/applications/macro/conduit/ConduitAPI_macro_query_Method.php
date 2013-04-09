@@ -11,6 +11,11 @@ final class ConduitAPI_macro_query_Method extends ConduitAPI_macro_Method {
 
   public function defineParamTypes() {
     return array(
+      'authorPHIDs' => 'optional list<phid>',
+      'phids'       => 'optional list<phid>',
+      'ids'         => 'optional list<id>',
+      'names'       => 'optional list<string>',
+      'nameLike'    => 'optional string',
     );
   }
 
@@ -24,24 +29,49 @@ final class ConduitAPI_macro_query_Method extends ConduitAPI_macro_Method {
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $query = new PhabricatorMacroQuery();
+    $query->setViewer($request->getUser());
 
-    $macros = id(new PhabricatorFileImageMacro())->loadAll();
+    $author_phids = $request->getValue('authorPHIDs');
+    $phids = $request->getValue('phids');
+    $ids = $request->getValue('ids');
+    $name_like = $request->getValue('nameLike');
+    $names = $request->getValue('names');
 
-    $files = array();
-    if ($macros) {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid IN (%Ls)',
-        mpull($macros, 'getFilePHID'));
-      $files = mpull($files, null, 'getPHID');
+    if ($author_phids) {
+      $query->withAuthorPHIDs($author_phids);
+    }
+
+    if ($phids) {
+      $query->withPHIDs($phids);
+    }
+
+    if ($ids) {
+      $query->withIDs($ids);
+    }
+
+    if ($name_like) {
+      $query->withNameLike($name_like);
+    }
+
+    if ($names) {
+      $query->withNames($names);
+    }
+
+    $macros = $query->execute();
+
+    if (!$macros) {
+      return array();
     }
 
     $results = array();
     foreach ($macros as $macro) {
-      if (empty($files[$macro->getFilePHID()])) {
-        continue;
-      }
+      $file = $macro->getFile();
       $results[$macro->getName()] = array(
-        'uri' => $files[$macro->getFilePHID()]->getBestURI(),
+        'uri' => $file->getBestURI(),
+        'phid' => $macro->getPHID(),
+        'authorPHID' => $file->getAuthorPHID(),
+        'dateCreated'   => $file->getDateCreated(),
       );
     }
 

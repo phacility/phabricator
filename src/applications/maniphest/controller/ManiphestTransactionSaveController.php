@@ -239,6 +239,17 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $draft->delete();
     }
 
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,
+      array(
+        'task'          => $task,
+        'new'           => false,
+        'transactions'  => $transactions,
+      ));
+    $event->setUser($user);
+    $event->setAphrontRequest($request);
+    PhutilEventEngine::dispatchEvent($event);
+
     return id(new AphrontRedirectResponse())
       ->setURI('/T'.$task->getID());
   }

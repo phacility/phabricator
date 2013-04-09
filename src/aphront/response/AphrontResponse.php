@@ -55,6 +55,12 @@ abstract class AphrontResponse {
   }
 
   public static function processValueForJSONEncoding(&$value, $key) {
+    if ($value instanceof PhutilSafeHTMLProducerInterface) {
+      // This renders the producer down to PhutilSafeHTML, which will then
+      // be simplified into a string below.
+      $value = hsprintf('%s', $value);
+    }
+
     if ($value instanceof PhutilSafeHTML) {
       // TODO: Javelin supports implicity conversion of '__html' objects to
       // JX.HTML, but only for Ajax responses, not behaviors. Just leave things

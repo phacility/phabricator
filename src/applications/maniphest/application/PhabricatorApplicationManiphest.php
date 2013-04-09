@@ -10,10 +10,6 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return '/maniphest/';
   }
 
-  public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('maniphest.enabled');
-  }
-
   public function getIconName() {
     return 'maniphest';
   }
@@ -39,6 +35,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
   public function getEventListeners() {
     return array(
       new ManiphestPeopleMenuEventListener(),
+      new ManiphestHovercardEventListener(),
     );
   }
 

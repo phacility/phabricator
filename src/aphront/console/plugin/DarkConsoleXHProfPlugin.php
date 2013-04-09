@@ -5,7 +5,7 @@
  */
 final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
-  protected $xhprofID;
+  protected $profileFilePHID;
 
   public function getName() {
     return 'XHProf';
@@ -13,7 +13,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
   public function getColor() {
     $data = $this->getData();
-    if ($data['xhprofID']) {
+    if ($data['profileFilePHID']) {
       return '#ff00ff';
     }
     return null;
@@ -25,7 +25,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
   public function generateData() {
     return array(
-      'xhprofID' => $this->xhprofID,
+      'profileFilePHID' => $this->profileFilePHID,
       'profileURI' => (string)$this
         ->getRequestURI()
         ->alter('__profile__', 'page'),
@@ -33,13 +33,13 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
   }
 
   public function getXHProfRunID() {
-    return $this->xhprofID;
+    return $this->profileFilePHID;
   }
 
   public function renderPanel() {
     $data = $this->getData();
 
-    $run = $data['xhprofID'];
+    $run = $data['profileFilePHID'];
     $profile_uri = $data['profileURI'];
 
     if (!DarkConsoleXHProfPluginAPI::isProfilerAvailable()) {
@@ -101,9 +101,7 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
 
   public function willShutdown() {
-    if (DarkConsoleXHProfPluginAPI::isProfilerStarted()) {
-      $this->xhprofID = DarkConsoleXHProfPluginAPI::stopProfiler();
-    }
+    $this->profileFilePHID = DarkConsoleXHProfPluginAPI::getProfileFilePHID();
   }
 
 }

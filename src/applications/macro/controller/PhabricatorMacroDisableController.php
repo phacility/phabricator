@@ -13,7 +13,15 @@ final class PhabricatorMacroDisableController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $macro = id(new PhabricatorFileImageMacro())->load($this->id);
+    $macro = id(new PhabricatorMacroQuery())
+      ->setViewer($user)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$macro) {
       return new Aphront404Response();
     }

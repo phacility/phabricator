@@ -107,6 +107,11 @@ final class PhrictionDiffController
       $crumbs->addCrumb($view);
     }
 
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('History'))
+        ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
+
 
     $title = "Version $l vs $r";
 
@@ -115,7 +120,8 @@ final class PhrictionDiffController
 
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
-        ->setName($title));
+        ->setName($title)
+        ->setHref($request->getRequestURI()));
 
 
     $comparison_table = $this->renderComparisonTable(
@@ -166,7 +172,6 @@ final class PhrictionDiffController
     }
 
 
-
     $output = hsprintf(
       '<br><div class="phriction-document-history-diff">'.
         '%s<br /><br />%s'.
@@ -202,9 +207,14 @@ final class PhrictionDiffController
     $document_id = $content->getDocumentID();
     $version = $content->getVersion();
 
-    if ($content->getChangeType() == PhrictionChangeType::CHANGE_DELETE) {
-      // Don't show an edit/revert button for changes which deleted the content
-      // since it's silly.
+    $hidden_statuses = array(
+      PhrictionChangeType::CHANGE_DELETE    => true, // Silly
+      PhrictionChangeType::CHANGE_MOVE_AWAY => true, // Plain silly
+      PhrictionChangeType::CHANGE_STUB      => true, // Utterly silly
+    );
+    if (isset($hidden_statuses[$content->getChangeType()])) {
+      // Don't show an edit/revert button for changes which deleted, moved or
+      // stubbed the content since it's silly.
       return null;
     }
 
@@ -236,37 +246,35 @@ final class PhrictionDiffController
     $phids = mpull($content, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($phids);
 
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
+
+    $first = true;
     foreach ($content as $c) {
-      $rows[] = array(
-        phabricator_date($c->getDateCreated(), $user),
-        phabricator_time($c->getDateCreated(), $user),
-        'Version '.$c->getVersion(),
-        $handles[$c->getAuthorPHID()]->renderLink(),
-        $c->getDescription(),
-      );
+      $author = $handles[$c->getAuthorPHID()]->renderLink();
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader(pht('%s by %s, %s',
+          PhrictionChangeType::getChangeTypeLabel($c->getChangeType()),
+          $author,
+          pht('Version %s', $c->getVersion())))
+        ->addAttribute(pht('%s %s',
+          phabricator_date($c->getDateCreated(), $user),
+          phabricator_time($c->getDateCreated(), $user)));
+
+      if ($c->getDescription()) {
+        $item->addAttribute($c->getDescription());
+      }
+
+      if ($first == true) {
+        $item->setBarColor('green');
+        $first = false;
+      } else {
+        $item->setBarColor('red');
+      }
+
+      $list->addItem($item);
     }
 
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Date'),
-        pht('Time'),
-        pht('Version'),
-        pht('Author'),
-        pht('Description'),
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        'right',
-        'pri',
-        '',
-        'wide',
-      ));
-
-    return $table;
+    return $list;
   }
 
 }
