@@ -10,13 +10,6 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return '/maniphest/';
   }
 
-  public function isInstalled() {
-    if (!PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      return false;
-    }
-    return parent::isInstalled();
-  }
-
   public function getIconName() {
     return 'maniphest';
   }

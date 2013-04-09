@@ -13,9 +13,6 @@ final class PhabricatorManiphestConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('maniphest.enabled', 'bool', true)
-        ->setDescription(pht(
-          "Deprecated, use 'phabricator.uninstalled-applications' instead.")),
       $this->newOption('maniphest.custom-fields', 'wild', array())
         ->setSummary(pht("Custom Maniphest fields."))
         ->setDescription(
