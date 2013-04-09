@@ -3271,6 +3271,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/search/search-results.css',
   ),
+  'phabricator-settings-css' =>
+  array(
+    'uri' => '/res/fb9d017f/rsrc/css/application/settings/settings.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/settings/settings.css',
+  ),
   'phabricator-shaped-request' =>
   array(
     'uri' => '/res/fbdb92db/rsrc/js/application/core/ShapedRequest.js',

@@ -19,6 +19,8 @@ final class PhabricatorSettingsPanelHomePreferences
     $user = $request->getUser();
     $preferences = $user->loadPreferences();
 
+    require_celerity_resource('phabricator-settings-css');
+
     $apps = PhabricatorApplication::getAllInstalledApplications();
     $pref_tiles = PhabricatorUserPreferences::PREFERENCE_APP_TILES;
     $tiles = $preferences->getPreference($pref_tiles, array());
@@ -53,40 +55,143 @@ final class PhabricatorSettingsPanelHomePreferences
       ->setFlexible(true)
       ->setUser($user);
 
-    $apps = msort($apps, 'getName');
-    foreach ($apps as $app) {
-      if (!$app->shouldAppearInLaunchView()) {
+    $group_map = PhabricatorApplication::getApplicationGroups();
+
+    $output = array();
+
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+
+    $applications = mgroup($applications, 'getApplicationGroup');
+
+    $applications = array_select_keys(
+    $applications,
+    array_keys($group_map));
+
+    foreach ($applications as $group => $apps) {
+      $group_name = $group_map[$group];
+      $rows = array();
+
+      foreach ($apps as $app) {
+        if (!$app->shouldAppearInLaunchView()) {
+        continue;
+        }
+
+        $default = $app->getDefaultTileDisplay($user);
+        if ($default == PhabricatorApplication::TILE_INVISIBLE) {
+          continue;
+        }
+
+
+
+        $default_name = PhabricatorApplication::getTileDisplayName($default);
+
+        $hide = PhabricatorApplication::TILE_HIDE;
+        $show = PhabricatorApplication::TILE_SHOW;
+        $full = PhabricatorApplication::TILE_FULL;
+
+        $key = get_class($app);
+
+        $default_radio_button_status =
+          (idx($tiles, $key, 'default') == 'default') ? 'checked' : null;
+
+        $hide_radio_button_status =
+          (idx($tiles, $key, 'default') == $hide) ? 'checked' : null;
+
+        $show_radio_button_status =
+          (idx($tiles, $key, 'default') == $show) ? 'checked' : null;
+
+        $full_radio_button_status =
+          (idx($tiles, $key, 'default') == $full) ? 'checked' : null;
+
+
+        $default_radio_button = phutil_tag(
+          'input',
+          array(
+            'type' => 'radio',
+            'name' => 'tile['.$key.']',
+            'value' => 'default',
+            'checked' => $default_radio_button_status,
+          ));
+
+        $hide_radio_button = phutil_tag(
+          'input',
+          array(
+            'type' => 'radio',
+            'name' => 'tile['.$key.']',
+            'value' => $hide,
+            'checked' => $hide_radio_button_status,
+          ));
+
+        $show_radio_button = phutil_tag(
+          'input',
+          array(
+            'type' => 'radio',
+            'name' => 'tile['.$key.']',
+            'value' => $show,
+            'checked' => $show_radio_button_status,
+          ));
+
+        $full_radio_button = phutil_tag(
+          'input',
+          array(
+            'type' => 'radio',
+            'name' => 'tile['.$key.']',
+            'value' => $full,
+            'checked' => $full_radio_button_status,
+          ));
+
+        $app_column = hsprintf(
+                        "<strong>%s</strong><br /><em> Default: %s</em>"
+                        , $app->getName(), $default_name);
+
+        $rows[] = array(
+          $app_column,
+          $default_radio_button,
+          $hide_radio_button,
+          $show_radio_button,
+          $full_radio_button,
+          );
+      }
+
+      if (empty($rows)) {
         continue;
       }
 
-      $default = $app->getDefaultTileDisplay($user);
-      if ($default == PhabricatorApplication::TILE_INVISIBLE) {
-        continue;
-      }
+      $table = new AphrontTableView($rows);
 
-      $default_name = PhabricatorApplication::getTileDisplayName($default);
-
-      $hide = PhabricatorApplication::TILE_HIDE;
-      $show = PhabricatorApplication::TILE_SHOW;
-      $full = PhabricatorApplication::TILE_FULL;
-
-      $key = get_class($app);
-      // Won't pht() for dynamic string (Applcation Name)
-      $form->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel($app->getName())
-          ->setName('tile['.$key.']')
-          ->setOptions(
-            array(
-              $hide     => PhabricatorApplication::getTileDisplayName($hide),
-              'default' => pht('Use Default (%s)', $default_name),
-              $show     => PhabricatorApplication::getTileDisplayName($show),
-              $full     => PhabricatorApplication::getTileDisplayName($full),
+      $table
+        ->setClassName('phabricator-settings-homepagetable')
+        ->setHeaders(
+          array(
+            pht('Applications'),
+            pht('Default'),
+            pht('Hidden'),
+            pht('Small'),
+            pht('Large'),
             ))
-          ->setValue(idx($tiles, $key, 'default')));
+        ->setColumnClasses(
+          array(
+            '',
+            'fixed',
+            'fixed',
+            'fixed',
+            'fixed',
+          ));
+
+
+      $panel = id(new AphrontPanelView())
+                 ->setHeader($group_name)
+                 ->addClass('phabricator-settings-panelview')
+                 ->appendChild($table)
+                 ->setNoBackground();
+
+
+      $output[] = $panel;
+
     }
 
     $form
+      ->appendChild($output)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));
