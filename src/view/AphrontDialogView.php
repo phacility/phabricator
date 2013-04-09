@@ -11,6 +11,7 @@ final class AphrontDialogView extends AphrontView {
   private $class;
   private $renderAsForm = true;
   private $formID;
+  private $headerColor = PhabricatorActionHeaderView::HEADER_DARK_GREY;
 
   private $width      = 'default';
   const WIDTH_DEFAULT = 'default';
@@ -79,6 +80,11 @@ final class AphrontDialogView extends AphrontView {
 
   public function setWidth($width) {
     $this->width = $width;
+    return $this;
+  }
+
+  public function setHeaderColor($color) {
+    $this->headerColor = $color;
     return $this;
   }
 
@@ -168,9 +174,13 @@ final class AphrontDialogView extends AphrontView {
     $buttons[] = phutil_tag('div', array('style' => 'clear: both;'), '');
     $children = $this->renderChildren();
 
+    $header = new PhabricatorActionHeaderView();
+    $header->setHeaderTitle($this->title);
+    $header->setHeaderColor($this->headerColor);
+
     $content = hsprintf(
       '%s%s%s',
-      phutil_tag('div', array('class' => 'aphront-dialog-head'), $this->title),
+      phutil_tag('div', array('class' => 'aphront-dialog-head'), $header),
       phutil_tag('div', array('class' => 'aphront-dialog-body'), $children),
       phutil_tag('div', array('class' => 'aphront-dialog-tail'), $buttons));
 

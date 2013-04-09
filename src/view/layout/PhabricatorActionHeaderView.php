@@ -6,6 +6,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
   const ICON_WHITE = 'white';
 
   const HEADER_GREY = 'grey';
+  const HEADER_DARK_GREY = 'dark-grey';
   const HEADER_BLUE = 'blue';
   const HEADER_GREEN = 'green';
   const HEADER_RED = 'red';

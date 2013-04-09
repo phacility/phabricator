@@ -49,7 +49,8 @@ final class PhrictionDeleteController extends PhrictionController {
     } else {
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
-        ->setTitle(pht('Delete document?'))
+        ->setTitle(pht('Delete Document?'))
+        ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
         ->appendChild(
           pht('Really delete this document? You can recover it later by '.
           'reverting to a previous version.'))
