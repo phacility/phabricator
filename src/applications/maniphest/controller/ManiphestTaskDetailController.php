@@ -335,12 +335,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $user, $task->getPHID());
 
     $object_name = 'T'.$task->getID();
+    $actions = $this->buildActionView($task);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($object_name)
         ->setHref('/'.$object_name))
+      ->setActionList($actions)
       ->addAction(
         id(new PhabricatorMenuItemView())
           ->setHref($this->getApplicationURI('/task/create/'))
@@ -348,7 +350,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setIcon('create'));
 
     $header = $this->buildHeaderView($task);
-    $actions = $this->buildActionView($task);
     $properties = $this->buildPropertyView($task, $aux_fields, $edges, $engine);
 
     return $this->buildApplicationPage(
