@@ -33,7 +33,6 @@ $package_spec = array(
     'javelin-behavior-refresh-csrf',
     'javelin-behavior-phabricator-watch-anchor',
     'javelin-behavior-phabricator-autofocus',
-    'phabricator-paste-file-upload',
     'phabricator-menu-item',
     'phabricator-dropdown-menu',
     'javelin-behavior-phabricator-oncopy',

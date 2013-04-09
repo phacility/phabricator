@@ -3,13 +3,14 @@
  */
 .conpherence-message-pane {
   position: fixed;
-  left: 320px;
-  top: 94px;
-  min-width: 320px;
+  left: 300px;
+  right: 281px;
+  top: 125px;
+  min-width: 300px;
   width: auto;
   height: 100%;
-  margin: 0px 320px 0px 0px;
 }
+
 .conpherence-show-older-messages {
   display: block;
   background: #e0e3ec;
@@ -21,12 +22,13 @@
 
 .conpherence-message-pane .conpherence-messages {
   position: fixed;
-  left: 320px;
-  right: 321px;
-  top: 124px;
+  left: 300px;
+  right: 281px;
+  top: 125px;
   bottom: 142px;
   overflow-y: auto;
-  box-shadow: inset 1px 5px 5px rgba(0,0,0,0.1);
+  box-shadow: inset 1px 4px 5px rgba(0,0,0,0.1);
+  -webkit-overflow-scrolling: touch;
 }
 
 .conpherence-message-pane .phabricator-form-view {
@@ -36,18 +38,10 @@
   padding: 0;
   position: fixed;
   bottom: 0;
-  left: 320px;
-  right: 321px;
+  left: 300px;
+  right: 281px;
 }
 
-.device-tablet
-.conpherence-message-pane .phabricator-form-view,
-.device-tablet
-.conpherence-message-pane .conpherence-messages,
-.device-tablet
-.conpherence-message-pane {
-  left: 0px;
-}
 
 .conpherence-message-pane .aphront-form-input {
   margin: 0;
@@ -60,18 +54,22 @@
 
 .conpherence-message-pane .phabricator-transaction-detail {
   border-width: 0;
+  margin-left: 45px;
 }
 
-.conpherence-message-pane .phabricator-transaction-header {
-  background: none;
+.conpherence-message-pane .phabricator-transaction-info,
+.conpherence-message-pane .phabricator-content-source-view {
+  color: #b7b7b7;
 }
 
-.conpherence-message-pane .phabricator-transaction-info {
+.conpherence-message-pane .phabricator-transaction-header,
+.conpherence-message-pane .phabricator-transaction-info,
+.conpherence-message-pane .phabricator-transaction-content {
   background: none;
 }
 
 .conpherence-message-pane .phabricator-transaction-content {
-  background: none;
+  padding-top: 0;
 }
 
 .conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
@@ -105,3 +103,4 @@
   padding: 6px;
   height: 6em;
 }
+

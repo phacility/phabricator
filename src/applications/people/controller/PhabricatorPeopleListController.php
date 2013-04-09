@@ -25,7 +25,8 @@ final class PhabricatorPeopleListController
       ->needPrimaryEmail(true)
       ->executeWithOffsetPager($pager);
 
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
+
     foreach ($users as $user) {
       $primary_email = $user->loadPrimaryEmail();
       if ($primary_email && $primary_email->getIsVerified()) {
@@ -34,91 +35,36 @@ final class PhabricatorPeopleListController
         $email = pht('Unverified');
       }
 
-      $status = array();
+      $user_handle = new PhabricatorObjectHandle();
+      $user_handle->setImageURI($user->loadProfileImageURI());
+
+      $item = new PhabricatorObjectItemView();
+      $item->setHeader($user->getFullName())
+        ->setHref('/people/edit/'.$user->getID().'/')
+        ->addAttribute(hsprintf('%s %s',
+            phabricator_date($user->getDateCreated(), $viewer),
+            phabricator_time($user->getDateCreated(), $viewer)))
+        ->addAttribute($email);
+
       if ($user->getIsDisabled()) {
-        $status[] = pht('Disabled');
+        $item->addIcon('disable', pht('Disabled'));
       }
+
       if ($user->getIsAdmin()) {
-        $status[] = pht('Admin');
+        $item->addIcon('highlight', pht('Admin'));
       }
+
       if ($user->getIsSystemAgent()) {
-        $status[] = pht('System Agent');
+        $item->addIcon('computer', pht('System Agent'));
       }
-      $status = implode(', ', $status);
 
-      $rows[] = array(
-        phabricator_date($user->getDateCreated(), $viewer),
-        phabricator_time($user->getDateCreated(), $viewer),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/p/'.$user->getUsername().'/',
-          ),
-          $user->getUserName()),
-        $user->getRealName(),
-        $status,
-        $email,
-        phutil_tag(
-          'a',
-          array(
-            'class' => 'button grey small',
-            'href'  => '/people/edit/'.$user->getID().'/',
-          ),
-          pht('Administrate User')),
-      );
+      $list->addItem($item);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Join Date'),
-        pht('Time'),
-        pht('Username'),
-        pht('Real Name'),
-        pht('Roles'),
-        pht('Email'),
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        null,
-        'right',
-        'pri',
-        'wide',
-        null,
-        null,
-        'action',
-      ));
-    $table->setColumnVisibility(
-      array(
-        true,
-        true,
-        true,
-        true,
-        $is_admin,
-        $is_admin,
-        $is_admin,
-      ));
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('People (%d)', number_format($count)));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('People (%d)', number_format($count)));
-    $panel->setNoBackground();
-    $panel->appendChild($table);
-    $panel->appendChild($pager);
-
-    if ($is_admin) {
-      if (PhabricatorEnv::getEnvConfig('ldap.auth-enabled')) {
-        $panel->addButton(
-          phutil_tag(
-            'a',
-            array(
-              'href' => '/people/ldap/',
-              'class' => 'button green'
-            ),
-            pht('Import from LDAP')));
-      }
-    }
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName(pht('User Directory'))
@@ -126,14 +72,17 @@ final class PhabricatorPeopleListController
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('people');
-    $nav->appendChild($panel);
+    $nav->appendChild($header);
+    $nav->appendChild($list);
+    $nav->appendChild($pager);
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => pht('People'),
+        'title'  => pht('People'),
         'device' => true,
+        'dust'   => true,
       ));
   }
 }

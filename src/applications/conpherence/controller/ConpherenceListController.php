@@ -3,8 +3,8 @@
 /**
  * @group conpherence
  */
-final class ConpherenceListController extends
-  ConpherenceController {
+final class ConpherenceListController
+  extends ConpherenceController {
 
   private $conpherenceID;
 
@@ -27,6 +27,7 @@ final class ConpherenceListController extends
 
     $conpherence_id = $this->getConpherenceID();
     $current_selection_epoch = null;
+    $conpherence = null;
     if ($conpherence_id) {
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
@@ -39,74 +40,39 @@ final class ConpherenceListController extends
       if ($conpherence->getTitle()) {
         $title = $conpherence->getTitle();
       }
-      $this->setSelectedConpherencePHID($conpherence->getPHID());
 
       $participant = $conpherence->getParticipant($user->getPHID());
       $current_selection_epoch = $participant->getDateTouched();
     }
 
-    $this->loadStartingConpherences($current_selection_epoch);
-    $nav = $this->buildSideNavView();
+    list($unread, $read) = $this->loadStartingConpherences(
+      $current_selection_epoch);
 
-    $main_pane = $this->renderEmptyMainPane();
-    $nav->appendChild(
-      array(
-        $main_pane,
-      ));
+    $thread_view = id(new ConpherenceThreadListView())
+      ->setUser($user)
+      ->setBaseURI($this->getApplicationURI())
+      ->setUnreadThreads($unread)
+      ->setReadThreads($read);
+
+    if ($request->isAjax()) {
+      return id(new AphrontAjaxResponse())->setContent($thread_view);
+    }
+
+    $layout = id(new ConpherenceLayoutView())
+      ->setBaseURI($this->getApplicationURI())
+      ->setThreadView($thread_view)
+      ->setRole('list');
+
+    if ($conpherence) {
+      $layout->setThread($conpherence);
+    }
 
     return $this->buildApplicationPage(
-      $nav,
+      $layout,
       array(
         'title' => $title,
         'device' => true,
       ));
   }
-
-  private function renderEmptyMainPane() {
-    $this->initJavelinBehaviors(true);
-    return phutil_tag(
-      'div',
-      array(
-        'id' => 'conpherence-main-pane'
-      ),
-      array(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'conpherence-header-pane',
-            'id' => 'conpherence-header-pane',
-          ),
-          ''),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'conpherence-widget-pane',
-            'id' => 'conpherence-widget-pane'
-          ),
-          ''),
-        javelin_tag(
-          'div',
-          array(
-            'class' => 'conpherence-message-pane',
-            'id' => 'conpherence-message-pane'
-          ),
-          array(
-            phutil_tag(
-              'div',
-              array(
-                'class' => 'conpherence-messages',
-                'id' => 'conpherence-messages'
-              ),
-              ''),
-            phutil_tag(
-              'div',
-              array(
-                'id' => 'conpherence-form'
-              ),
-              '')
-          ))
-      ));
-  }
-
 
 }

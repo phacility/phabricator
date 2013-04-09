@@ -1,0 +1,51 @@
+/**
+ * @provides sprite-minicons-css
+ * @generated
+ */
+
+.sprite-minicons {
+  background-image: url(/rsrc/image/sprite-minicons.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-minicons {
+    background-image: url(/rsrc/image/sprite-minicons-X2.png);
+    background-size: 51px 51px;
+  }
+}
+
+
+.minicons-company-white {
+  background-position: 0px 0px;
+}
+
+.minicons-move-white {
+  background-position: -17px 0px;
+}
+
+.minicons-public-white {
+  background-position: -34px 0px;
+}
+
+.minicons-restricted-white {
+  background-position: 0px -17px;
+}
+
+.minicons-company-dark {
+  background-position: -17px -17px;
+}
+
+.minicons-move-dark {
+  background-position: -34px -17px;
+}
+
+.minicons-public-dark {
+  background-position: 0px -34px;
+}
+
+.minicons-restricted-dark {
+  background-position: -17px -34px;
+}

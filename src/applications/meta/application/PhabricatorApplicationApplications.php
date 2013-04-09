@@ -15,7 +15,7 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
   }
 
   public function getIconName() {
-    return 'applications';
+    return 'application';
   }
 
   public function getTitleGlyph() {

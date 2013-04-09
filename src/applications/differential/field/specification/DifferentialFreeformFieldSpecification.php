@@ -4,7 +4,8 @@ abstract class DifferentialFreeformFieldSpecification
   extends DifferentialFieldSpecification {
 
   private function findMentionedTasks($message) {
-    if (!PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+    $maniphest = 'PhabricatorApplicationManiphest';
+    if (!PhabricatorApplication::isClassInstalled($maniphest)) {
       return array();
     }
 

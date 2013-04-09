@@ -16,7 +16,7 @@ To install Arcanist as a pre-commit hook, add this to your svn/hooks/pre-commit:
 
   #!/bin/sh
   set -e # Exit with an error code if this fails.
-  /usr/local/bin/php -f /path/to/arcanist/bin/arc svn-hook-pre-commit $@ 1>&2
+  /path/to/arcanist/bin/arc svn-hook-pre-commit $@ 1>&2
 
 Make sure you make this file executable, or you'll get an error for every commit
 with an unhelpful error message. You also need to specify the full path to PHP

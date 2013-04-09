@@ -18,6 +18,7 @@ abstract class PhabricatorApplicationTransaction
   protected $transactionType;
   protected $oldValue;
   protected $newValue;
+  protected $metadata = array();
 
   protected $contentSource;
 
@@ -36,6 +37,15 @@ abstract class PhabricatorApplicationTransaction
     return new PhabricatorApplicationTransactionView();
   }
 
+  public function getMetadataValue($key, $default = null) {
+    return idx($this->metadata, $key, $default);
+  }
+
+  public function setMetadataValue($key, $value) {
+    $this->metadata[$key] = $value;
+    return $this;
+  }
+
   public function generatePHID() {
     $type = PhabricatorPHIDConstants::PHID_TYPE_XACT;
     $subtype = $this->getApplicationTransactionType();
@@ -49,6 +59,7 @@ abstract class PhabricatorApplicationTransaction
       self::CONFIG_SERIALIZATION => array(
         'oldValue' => self::SERIALIZATION_JSON,
         'newValue' => self::SERIALIZATION_JSON,
+        'metadata' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }
@@ -108,6 +119,10 @@ abstract class PhabricatorApplicationTransaction
         $phids[] = $old;
         $phids[] = $new;
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        $phids[] = ipull($old, 'dst');
+        $phids[] = ipull($new, 'dst');
+        break;
     }
 
     return array_mergev($phids);
@@ -160,6 +175,8 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return 'lock';
+      case PhabricatorTransactions::TYPE_EDGE:
+        return 'link';
     }
 
     return null;
@@ -201,6 +218,8 @@ abstract class PhabricatorApplicationTransaction
         return pht(
           'All users are already subscribed to this %s.',
           $this->getApplicationObjectTypeName());
+      case PhabricatorTransactions::TYPE_EDGE:
+        return pht('Edges already exist; transaction has no effect.');
     }
 
     return pht('Transaction has no effect.');
@@ -259,6 +278,12 @@ abstract class PhabricatorApplicationTransaction
             $this->renderHandleList($rem));
         }
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        $type = $this->getMetadata('edge:type');
+        return pht(
+          '%s edited edges of type %s.',
+          $this->renderHandleLink($author_phid),
+          $type);
       default:
         return pht(
           '%s edited this %s.',
@@ -293,6 +318,11 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return pht(
           '%s updated subscribers of %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case PhabricatorTransactions::TYPE_EDGE:
+        return pht(
+          '%s updated edges of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
     }

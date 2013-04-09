@@ -36,6 +36,7 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
   public function getEventListeners() {
     return array(
       new ConpherencePeopleMenuEventListener(),
+      new ConpherenceHovercardEventListener(),
     );
   }
 
@@ -43,11 +44,11 @@ final class PhabricatorApplicationConpherence extends PhabricatorApplication {
     return array(
       '/conpherence/' => array(
         ''                         => 'ConpherenceListController',
+        'thread/(?P<id>[1-9]\d*)/' => 'ConpherenceListController',
+        '(?P<id>[1-9]\d*)/'        => 'ConpherenceViewController',
         'new/'                     => 'ConpherenceNewController',
-        'view/(?P<id>[1-9]\d*)/'   => 'ConpherenceViewController',
         'widget/(?P<id>[1-9]\d*)/' => 'ConpherenceWidgetController',
         'update/(?P<id>[1-9]\d*)/' => 'ConpherenceUpdateController',
-        '(?P<id>[1-9]\d*)/'        => 'ConpherenceListController',
       ),
     );
   }

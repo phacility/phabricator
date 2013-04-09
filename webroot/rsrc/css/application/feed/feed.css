@@ -3,8 +3,12 @@
  */
 
 .phabricator-feed-frame {
+  margin: 10px;
+}
+
+.device-desktop .phabricator-feed-frame {
   width: 640px;
-  padding: 20px;
+  margin: 20px;
 }
 
 .phabricator-chromeless-page .phabricator-feed-frame {

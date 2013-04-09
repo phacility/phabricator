@@ -3,10 +3,6 @@
 final class PhabricatorPeopleLogsController
   extends PhabricatorPeopleController {
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();

@@ -78,8 +78,9 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
       // NOTE: Since MySQL will disconnect us if we're idle for too long, we set
       // the wait_timeout to an enormous value, to allow us to hold the
-      // connection open indefinitely (or, at least, for a year).
-      queryfx($conn, 'SET wait_timeout = %d', 365 * 24 * 60 * 60);
+      // connection open indefinitely (or, at least, for 24 days).
+      $max_allowed_timeout = 2147483;
+      queryfx($conn, 'SET wait_timeout = %d', $max_allowed_timeout);
     }
 
     $result = queryfx_one(

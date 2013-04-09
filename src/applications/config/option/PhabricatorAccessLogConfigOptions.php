@@ -23,7 +23,8 @@ final class PhabricatorAccessLogConfigOptions
       'r' => pht("The remote IP."),
       'T' => pht("The request duration, in microseconds."),
       'U' => pht("The request path."),
-      'u' => pht("The logged-in user, if one is logged in."),
+      'u' => pht("The logged-in username, if one is logged in."),
+      'P' => pht("The logged-in user PHID, if one is logged in."),
       'M' => pht("The HTTP method."),
       'm' => pht("For conduit, the Conduit method which was invoked."),
     );

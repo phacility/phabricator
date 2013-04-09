@@ -15,6 +15,16 @@ function must_have_extension($ext) {
          "install it to run daemons on this machine.\n";
     exit(1);
   }
+
+  $extension = new ReflectionExtension($ext);
+  foreach ($extension->getFunctions() as $function) {
+    $function = $function->name;
+    if (!function_exists($function)) {
+      echo "ERROR: The PHP function {$function}() is disabled. You must ".
+           "enable it to run daemons on this machine.\n";
+      exit(1);
+    }
+  }
 }
 
 $command = isset($argv[1]) ? $argv[1] : 'help';

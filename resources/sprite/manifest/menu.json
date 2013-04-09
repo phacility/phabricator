@@ -4,12 +4,12 @@
     "app"              : {
       "name" : "app",
       "rule" : ".menu-icon-app",
-      "hash" : "fc525b5b3e3ecaeda3baccc18ace5a0a"
+      "hash" : "14cd042732abba487dc9c4135d65f2c5"
     },
     "app_blue"         : {
       "name" : "app_blue",
       "rule" : ".menu-icon-app-blue",
-      "hash" : "b92f3961cf38ba4d95fa26d7a54031c0"
+      "hash" : "5f9926e52a4e6fd43fc5fdd0cc5c8053"
     },
     "arrow-right"      : {
       "name" : "arrow-right",
@@ -31,20 +31,20 @@
       "rule" : ".alert-notifications.message-unread .phabricator-main-menu-message-icon",
       "hash" : "85d603ae4a9b8004944c6cf59da98b7d"
     },
-    "eye"              : {
-      "name" : "eye",
-      "rule" : ".menu-icon-eye",
-      "hash" : "553eb617c19b74b428558e606ff9b066"
-    },
-    "eye_blue"         : {
-      "name" : "eye_blue",
-      "rule" : ".menu-icon-eye-blue",
-      "hash" : "3ae3de9e694152bd6dbba58aebc46a45"
-    },
     "logo"             : {
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo-image",
       "hash" : "6eadea2c3dd2ada989eba22b6769b3eb"
+    },
+    "search"           : {
+      "name" : "search",
+      "rule" : ".menu-icon-search",
+      "hash" : "26fa1f6646d20e159bb5ed5bd125a3b9"
+    },
+    "search_blue"      : {
+      "name" : "search_blue",
+      "rule" : ".menu-icon-search-blue",
+      "hash" : "8ddecd3b988a3ec69c2116bfd65959cb"
     },
     "seen_have_unread" : {
       "name" : "seen_have_unread",

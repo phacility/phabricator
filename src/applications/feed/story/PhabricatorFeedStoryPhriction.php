@@ -6,6 +6,15 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     return $this->getValue('phid');
   }
 
+  public function getRequiredHandlePHIDs() {
+    $required_phids = parent::getRequiredHandlePHIDs();
+    $from_phid = $this->getStoryData()->getValue('movedFromPHID');
+    if ($from_phid) {
+      $required_phids[] = $from_phid;
+    }
+    return $required_phids;
+  }
+
   public function renderView() {
     $data = $this->getStoryData();
 
@@ -17,14 +26,45 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $action = $data->getValue('action');
     $verb = PhrictionActionConstants::getActionPastTenseVerb($action);
 
-    $view->setTitle(hsprintf(
-      '%s %s the document %s.',
-      $this->linkTo($author_phid),
-      $verb,
-      $this->linkTo($document_phid)));
+    switch ($action) {
+      case PhrictionActionConstants::ACTION_MOVE_HERE:
+        $from_phid = $data->getValue('movedFromPHID');
+
+        // Older feed stories may not have 'moved_from_phid', in that case
+        // we fall back to the default behaviour (hence the fallthrough)
+        if ($from_phid) {
+          $document_handle = $this->getHandle($document_phid);
+          $from_handle = $this->getHandle($from_phid);
+          $view->setTitle(pht(
+            '%s moved the document %s from %s to %s.',
+            $this->linkTo($author_phid),
+            $document_handle->renderLink(),
+            phutil_tag(
+              'a',
+              array(
+                'href'    => $from_handle->getURI(),
+              ),
+              $from_handle->getURI()),
+            phutil_tag(
+              'a',
+              array(
+                'href'    => $document_handle->getURI(),
+              ),
+              $document_handle->getURI())));
+          break;
+        }
+        /* Fallthrough */
+      default:
+        $view->setTitle(pht(
+          '%s %s the document %s.',
+          $this->linkTo($author_phid),
+          $verb,
+          $this->linkTo($document_phid)));
+        break;
+    }
+
     $view->setEpoch($data->getEpoch());
 
-    $action = $data->getValue('action');
     switch ($action) {
       case PhrictionActionConstants::ACTION_CREATE:
         $full_size = true;

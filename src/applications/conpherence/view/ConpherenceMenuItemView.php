@@ -9,7 +9,6 @@ final class ConpherenceMenuItemView extends AphrontTagView {
   private $subtitle;
   private $imageURI;
   private $href;
-  private $messageText;
   private $epoch;
   private $unreadCount;
 
@@ -19,14 +18,6 @@ final class ConpherenceMenuItemView extends AphrontTagView {
   }
   public function getUnreadCount() {
     return $this->unreadCount;
-  }
-
-  public function setMessageText($message_text) {
-    $this->messageText = $message_text;
-    return $this;
-  }
-  public function getMessageText() {
-    return $this->messageText;
   }
 
   public function setEpoch($epoch) {
@@ -111,15 +102,6 @@ final class ConpherenceMenuItemView extends AphrontTagView {
         ),
         $this->subtitle);
     }
-    $message = null;
-    if ($this->messageText) {
-      $message = phutil_tag(
-        'span',
-        array(
-          'class' => 'conpherence-menu-item-message-text'
-        ),
-        $this->messageText);
-    }
     $epoch = null;
     if ($this->epoch) {
       $epoch = phutil_tag(
@@ -143,7 +125,6 @@ final class ConpherenceMenuItemView extends AphrontTagView {
       $image,
       $title,
       $subtitle,
-      $message,
       $epoch,
       $unread_count,
     );

@@ -8,6 +8,9 @@ final class PhrictionListController
 
   private $view;
 
+  private $documents;
+  private $handles;
+
   public function willProcessRequest(array $data) {
     $this->view = idx($data, 'view');
   }
@@ -64,117 +67,154 @@ final class PhrictionListController
         throw new Exception("Unknown view '{$this->view}'!");
     }
 
-    $documents = $query->executeWithCursorPager($pager);
+    $this->documents = $query->executeWithCursorPager($pager);
+
+    $changeref_docs = array();
+    if ($this->view == 'updates') {
+      // Loading some documents here since they may not appear in the query
+      // results.
+      $changeref_ids = array_filter(mpull(
+        mpull($this->documents, 'getContent'), 'getChangeRef'));
+      if ($changeref_ids) {
+        $changeref_docs = id(new PhrictionDocumentQuery())
+          ->setViewer($user)
+          ->withIDs($changeref_ids)
+          ->execute();
+      }
+    }
 
     $phids = array();
-    foreach ($documents as $document) {
+    foreach ($this->documents as $document) {
       $phids[] = $document->getContent()->getAuthorPHID();
       if ($document->hasProject()) {
         $phids[] = $document->getProject()->getPHID();
       }
     }
 
-    $handles = $this->loadViewerHandles($phids);
+    $this->handles = $this->loadViewerHandles($phids);
 
-    $rows = array();
-    foreach ($documents as $document) {
-      $project_link = 'None';
-      if ($document->hasProject()) {
-        $project_phid = $document->getProject()->getPHID();
-        $project_link = $handles[$project_phid]->renderLink();
-      }
+    $list = new PhabricatorObjectItemListView();
 
-      $content = $document->getContent();
-
-      $change_type = null;
+    foreach ($this->documents as $document) {
       if ($this->view == 'updates') {
-        $change_type = $content->getChangeType();
-        switch ($content->getChangeType()) {
-          case PhrictionChangeType::CHANGE_DELETE:
-          case PhrictionChangeType::CHANGE_EDIT:
-            $change_type = PhrictionChangeType::getChangeTypeLabel(
-              $change_type);
-            break;
-          case PhrictionChangeType::CHANGE_MOVE_HERE:
-          case PhrictionChangeType::CHANGE_MOVE_AWAY:
-            $change_ref = $content->getChangeRef();
-            $ref_doc = $documents[$change_ref];
-            $ref_doc_slug = PhrictionDocument::getSlugURI(
-              $ref_doc->getSlug());
-            $ref_doc_link = hsprintf('<br /><a href="%s">%s</a>', $ref_doc_slug,
-              phutil_utf8_shorten($ref_doc_slug, 15));
-
-            if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
-              $change_type = pht('Moved from %s', $ref_doc_link);
-            } else {
-              $change_type = pht('Moved to %s', $ref_doc_link);
-            }
-            break;
-          default:
-            throw new Exception("Unknown change type!");
-            break;
-        }
+        $list->addItem(
+          $this->buildItemForUpdates($document, $changeref_docs));
+      } else {
+        $list->addItem(
+          $this->buildItemTheCasualWay($document));
       }
-
-      $rows[] = array(
-        $handles[$content->getAuthorPHID()]->renderLink(),
-        $change_type,
-        phutil_tag(
-          'a',
-          array(
-            'href' => PhrictionDocument::getSlugURI($document->getSlug()),
-          ),
-          $content->getTitle()),
-        $project_link,
-        phabricator_date($content->getDateCreated(), $user),
-        phabricator_time($content->getDateCreated(), $user),
-      );
     }
 
-    $document_table = new AphrontTableView($rows);
-    $document_table->setHeaders(
-      array(
-        pht('Last Editor'),
-        pht('Change Type'),
-        pht('Title'),
-        pht('Project'),
-        pht('Last Update'),
-        pht('Time'),
-      ));
-
-    $document_table->setColumnClasses(
-      array(
-        '',
-        '',
-        'wide pri',
-        '',
-        'right',
-        'right',
-      ));
-
-    $document_table->setColumnVisibility(
-      array(
-        true,
-        $this->view == 'updates',
-        true,
-        true,
-        true,
-        true,
-      ));
-
-    $panel = new AphrontPanelView();
-    $panel->setNoBackground();
-    $panel->appendChild($document_table);
-    $panel->appendChild($pager);
-
-    $nav->appendChild($panel);
+    $nav->appendChild($list);
+    $nav->appendChild($pager);
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => pht('Phriction Main'),
+        'title' => pht('Document Index'),
         'dust' => true,
       ));
+  }
+
+  private function buildItemTheCasualWay(PhrictionDocument $document) {
+    $user = $this->getRequest()->getUser();
+
+    $project_link = null;
+    if ($document->hasProject()) {
+      $project_phid = $document->getProject()->getPHID();
+      $project_link = $this->handles[$project_phid]->renderLink();
+    }
+
+    $content = $document->getContent();
+    $author = $this->handles[$content->getAuthorPHID()]->renderLink();
+    $title = $content->getTitle();
+
+    $slug = $document->getSlug();
+    $slug_uri = PhrictionDocument::getSlugURI($slug);
+    $edit_uri = '/phriction/edit/' . $document->getID() . '/';
+    $history_uri = PhrictionDocument::getSlugURI($slug, 'history');
+
+    $item = id(new PhabricatorObjectItemView())
+      ->setHeader($title)
+      ->setHref($slug_uri)
+      ->addAttribute(pht('By %s', $author))
+      ->addAttribute(pht('Updated: %s',
+        phabricator_datetime($content->getDateCreated(), $user)))
+      ->addAttribute($slug_uri);
+
+    if ($project_link) {
+      $item->addAttribute(pht('Project %s', $project_link));
+    }
+
+    return $item;
+  }
+
+  private function buildItemForUpdates(PhrictionDocument $document,
+    array $docs_from_refs) {
+
+    $user = $this->getRequest()->getUser();
+
+    $content = $document->getContent();
+    $version = $content->getVersion();
+    $author = $this->handles[$content->getAuthorPHID()]->renderLink();
+    $title = $content->getTitle();
+
+    $slug = $document->getSlug();
+    $slug_uri = PhrictionDocument::getSlugURI($slug);
+    $document_link = hsprintf('<a href="%s">%s</a>', $slug_uri, $title);
+
+    $change_type = $content->getChangeType();
+    switch ($content->getChangeType()) {
+      case PhrictionChangeType::CHANGE_DELETE:
+        $change_type = pht('%s deleted %s', $author, $document_link);
+        $color = 'red';
+        break;
+      case PhrictionChangeType::CHANGE_EDIT:
+        $change_type = pht('%s edited %s', $author, $document_link);
+        $color = 'blue';
+        break;
+      case PhrictionChangeType::CHANGE_MOVE_HERE:
+      case PhrictionChangeType::CHANGE_MOVE_AWAY:
+        $change_ref = $content->getChangeRef();
+        $ref_doc = $docs_from_refs[$change_ref];
+        $ref_doc_slug = PhrictionDocument::getSlugURI(
+          $ref_doc->getSlug());
+        $ref_doc_link = hsprintf('<a href="%s">%1$s</a>', $ref_doc_slug);
+
+        if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
+          $change_type = pht('%s moved %s from %s', $author, $document_link,
+            $ref_doc_link);
+          $color = 'yellow';
+        } else {
+          $change_type = pht('%s moved %s to %s', $author, $document_link,
+            $ref_doc_link);
+          $color = 'orange';
+        }
+        break;
+      default:
+        throw new Exception("Unknown change type!");
+        break;
+    }
+
+    $item = id(new PhabricatorObjectItemView())
+      ->setHeader($change_type)
+      ->setBarColor($color)
+      ->addAttribute(phabricator_datetime($content->getDateCreated(), $user))
+      ->addAttribute($slug_uri);
+
+    if ($content->getDescription()) {
+      $item->addAttribute($content->getDescription());
+    }
+
+    if ($version > 1) {
+      $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
+      $uri = $diff_uri->alter('l', $version - 1)->alter('r', $version);
+      $item->addIcon('history', pht('View Change'), $uri);
+    } else {
+      $item->addIcon('history', pht('No diff available'));
+    }
+
+    return $item;
   }
 
 }

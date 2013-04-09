@@ -54,7 +54,8 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
           'save/' => 'PholioInlineSaveController',
           'delete/(?P<id>\d+)/' => 'PholioInlineDeleteController',
           'view/(?P<id>\d+)/' => 'PholioInlineViewController',
-          'edit/(?P<id>\d+)/' => 'PholioInlineEditController'
+          'edit/(?P<id>\d+)/' => 'PholioInlineEditController',
+          'thumb/(?P<imageid>\d+)/' => 'PholioInlineThumbController'
         ),
       ),
     );

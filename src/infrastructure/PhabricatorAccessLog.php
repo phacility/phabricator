@@ -19,9 +19,8 @@ final class PhabricatorAccessLog {
         $format,
         "[%D]\t%p\t%h\t%r\t%u\t%C\t%m\t%U\t%R\t%c\t%T");
 
-      if (!$path) {
-        return null;
-      }
+      // NOTE: Path may be null. We still create the log, it just won't write
+      // anywhere.
 
       $log = new PhutilDeferredLog($path, $format);
       $log->setData(

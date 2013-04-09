@@ -285,9 +285,13 @@ EOBODY;
       return null;
     }
 
+    $user = head(id(new PhabricatorPeopleQuery())
+      ->withPhids(array($handle->getPHID()))
+      ->execute());
+
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();
-    $user_id = $handle->getAlternateID();
+    $user_id = $user->getID();
     $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
       $receiver->getMailKey(),
       $handle->getPHID());

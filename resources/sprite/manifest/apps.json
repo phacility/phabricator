@@ -1,6 +1,11 @@
 {
   "version" : 1,
   "sprites" : {
+    "app-adventure-dark"    : {
+      "name" : "app-adventure-dark",
+      "rule" : ".app-adventure-dark",
+      "hash" : "fb4a520656748f4512ce1bb0c05f8e91"
+    },
     "app-application-dark"  : {
       "name" : "app-application-dark",
       "rule" : ".app-application-dark",
@@ -15,6 +20,11 @@
       "name" : "app-calendar-dark",
       "rule" : ".app-calendar-dark",
       "hash" : "756d60566639ad1424444436a95c6a3f"
+    },
+    "app-chatlog-dark"      : {
+      "name" : "app-chatlog-dark",
+      "rule" : ".app-chatlog-dark",
+      "hash" : "339c4ddd72761c8cd3b9f9adbe1b0e09"
     },
     "app-conduit-dark"      : {
       "name" : "app-conduit-dark",
@@ -76,6 +86,11 @@
       "rule" : ".app-flags-dark",
       "hash" : "6382f373f7b0e70522d80ce06ef62813"
     },
+    "app-harbormaster-dark" : {
+      "name" : "app-harbormaster-dark",
+      "rule" : ".app-harbormaster-dark",
+      "hash" : "693886513474ea91f904d8adaa0e8e2b"
+    },
     "app-help-dark"         : {
       "name" : "app-help-dark",
       "rule" : ".app-help-dark",
@@ -131,6 +146,11 @@
       "rule" : ".app-people-dark",
       "hash" : "0b3995fcd043b506a408de6e25ad5292"
     },
+    "app-phage-dark"        : {
+      "name" : "app-phage-dark",
+      "rule" : ".app-phage-dark",
+      "hash" : "9d939bbe908a1bd96e1b22f8fa007aa5"
+    },
     "app-phame-dark"        : {
       "name" : "app-phame-dark",
       "rule" : ".app-phame-dark",
@@ -141,15 +161,30 @@
       "rule" : ".app-phid-dark",
       "hash" : "5a0ac05bbf36a7aeb36753d093c3c9f8"
     },
+    "app-phlux-dark"        : {
+      "name" : "app-phlux-dark",
+      "rule" : ".app-phlux-dark",
+      "hash" : "ee8d71e2a68b9a9704ccdc4276199d79"
+    },
     "app-pholio-dark"       : {
       "name" : "app-pholio-dark",
       "rule" : ".app-pholio-dark",
       "hash" : "7d3befd1c12dd464a5f5edbef4574a5c"
     },
+    "app-phortune-dark"     : {
+      "name" : "app-phortune-dark",
+      "rule" : ".app-phortune-dark",
+      "hash" : "cdc79c02273af8491c1d6b9fed029a55"
+    },
     "app-phpast-dark"       : {
       "name" : "app-phpast-dark",
       "rule" : ".app-phpast-dark",
       "hash" : "de1ad812c7a177c844fcff626b1abebf"
+    },
+    "app-phrequent-dark"    : {
+      "name" : "app-phrequent-dark",
+      "rule" : ".app-phrequent-dark",
+      "hash" : "60888f4879e557a0182a84785aabad16"
     },
     "app-phriction-dark"    : {
       "name" : "app-phriction-dark",
@@ -171,6 +206,11 @@
       "rule" : ".app-projects-dark",
       "hash" : "5e799f1e95ecfd33cb67b6e4ac992043"
     },
+    "app-releeph-dark"      : {
+      "name" : "app-releeph-dark",
+      "rule" : ".app-releeph-dark",
+      "hash" : "2ac942c35efb43646df853feb13c9b55"
+    },
     "app-repositories-dark" : {
       "name" : "app-repositories-dark",
       "rule" : ".app-repositories-dark",
@@ -191,10 +231,25 @@
       "rule" : ".app-slowvote-dark",
       "hash" : "e51cc1e6887f2deaff02d9c60aae36e0"
     },
+    "app-token-dark"        : {
+      "name" : "app-token-dark",
+      "rule" : ".app-token-dark",
+      "hash" : "960f497d9417746e2818b8fec0c1bf8b"
+    },
     "app-uiexamples-dark"   : {
       "name" : "app-uiexamples-dark",
       "rule" : ".app-uiexamples-dark",
       "hash" : "dd919fd2c10e7d1e0915f523ac3922ce"
+    },
+    "app-workphlow-dark"    : {
+      "name" : "app-workphlow-dark",
+      "rule" : ".app-workphlow-dark",
+      "hash" : "4b06ffd8686513187b70d0eac1a4d62d"
+    },
+    "app-xhprof-dark"       : {
+      "name" : "app-xhprof-dark",
+      "rule" : ".app-xhprof-dark",
+      "hash" : "8333803b5ac7760726ad72ad098b82e7"
     }
   },
   "scales"  : [

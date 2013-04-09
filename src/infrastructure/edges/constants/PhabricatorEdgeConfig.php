@@ -42,7 +42,11 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_FILE            = 25;
   const TYPE_FILE_HAS_OBJECT            = 26;
 
+  const TYPE_ACCOUNT_HAS_MEMBER         = 27;
+  const TYPE_MEMBER_HAS_ACCOUNT         = 28;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
+
 
   public static function getInverse($edge_type) {
     static $map = array(
@@ -84,6 +88,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_OBJECT_HAS_FILE => self::TYPE_FILE_HAS_OBJECT,
       self::TYPE_FILE_HAS_OBJECT => self::TYPE_OBJECT_HAS_FILE,
+
+      self::TYPE_ACCOUNT_HAS_MEMBER => self::TYPE_MEMBER_HAS_ACCOUNT,
+      self::TYPE_MEMBER_HAS_ACCOUNT => self::TYPE_ACCOUNT_HAS_MEMBER,
     );
 
     return idx($map, $edge_type);
@@ -116,7 +123,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_MOCK  => 'PholioMock',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO  => 'PhabricatorFileImageMacro',
       PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
-
+      PhabricatorPHIDConstants::PHID_TYPE_WIKI  => 'PhrictionDocument',
+      PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
     );
 
     $class = idx($class_map, $phid_type);

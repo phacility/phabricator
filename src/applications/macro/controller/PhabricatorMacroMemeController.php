@@ -9,14 +9,14 @@ final class PhabricatorMacroMemeController
     $upper_text = $request->getStr('uppertext');
     $lower_text = $request->getStr('lowertext');
     $user = $request->getUser();
-    $macro = id(new PhabricatorFileImageMacro())
-      ->loadOneWhere('name=%s', $macro_name);
+    $macro = id(new PhabricatorMacroQuery())
+      ->setViewer($user)
+      ->withNames(array($macro_name))
+      ->executeOne();
     if (!$macro) {
       return new Aphront404Response();
     }
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $macro->getFilePHID());
+    $file = $macro->getFile();
 
     $upper_text = strtoupper($upper_text);
     $lower_text = strtoupper($lower_text);

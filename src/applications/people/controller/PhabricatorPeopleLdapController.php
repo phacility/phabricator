@@ -3,12 +3,6 @@
 final class PhabricatorPeopleLdapController
   extends PhabricatorPeopleController {
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
-  private $view;
-
   public function processRequest() {
 
     $request = $this->getRequest();
@@ -37,30 +31,39 @@ final class PhabricatorPeopleLdapController
         id(new AphrontFormSubmitControl())
         ->setValue(pht('Search')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Import LDAP Users'));
-    $panel->appendChild($form);
+    $panel = id(new AphrontPanelView())
+      ->setHeader(pht('Import LDAP Users'))
+      ->setNoBackground()
+      ->setWidth(AphrontPanelView::WIDTH_FORM)
+      ->appendChild($form);
 
-
-    if ($request->getStr('import')) {
-      $content[] = $this->processImportRequest($request);
-    }
-
-    $content[] = $panel;
-
-    if ($request->getStr('search')) {
-      $content[] = $this->processSearchRequest($request);
-    }
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Import Ldap Users'))
+        ->setHref($this->getApplicationURI('/ldap/')));
 
     $nav = $this->buildSideNavView();
+    $nav->setCrumbs($crumbs);
     $nav->selectFilter('ldap');
     $nav->appendChild($content);
+
+    if ($request->getStr('import')) {
+      $nav->appendChild($this->processImportRequest($request));
+    }
+
+    $nav->appendChild($panel);
+
+    if ($request->getStr('search')) {
+      $nav->appendChild($this->processSearchRequest($request));
+    }
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => pht('Import Ldap Users'),
+        'title'  => pht('Import Ldap Users'),
         'device' => true,
+        'dust'   => true,
       ));
   }
 
@@ -70,11 +73,15 @@ final class PhabricatorPeopleLdapController
     $emails = $request->getArr('email');
     $names = $request->getArr('name');
 
-    $panel = new AphrontErrorView();
-    $panel->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-    $panel->setTitle(pht("Import Successful"));
-    $errors = array(pht("Successfully imported users from LDAP"));
+    $notice_view = new AphrontErrorView();
+    $notice_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+    $notice_view->setTitle(pht("Import Successful"));
+    $notice_view->setErrors(array(
+      pht("Successfully imported users from LDAP"),
+    ));
 
+    $list = new PhabricatorObjectItemListView();
+    $list->setNoDataString(pht("No users imported?"));
 
     foreach ($usernames as $username) {
       $user = new PhabricatorUser();
@@ -93,14 +100,28 @@ final class PhabricatorPeopleLdapController
         $ldap_info->setLDAPUsername($username);
         $ldap_info->setUserID($user->getID());
         $ldap_info->save();
-        $errors[] = pht('Successfully added %s', $username);
+
+        $header = pht('Successfully added %s', $username);
+        $attribute = null;
+        $color = 'green';
       } catch (Exception $ex) {
-        $errors[] = pht('Failed to add %s %s', $username, $ex->getMessage());
+        $header = pht('Failed to add %s', $username);
+        $attribute = $ex->getMessage();
+        $color = 'red';
       }
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($header)
+        ->addAttribute($attribute)
+        ->setBarColor($color);
+
+      $list->addItem($item);
     }
 
-    $panel->setErrors($errors);
-    return $panel;
+    return array(
+      $notice_view,
+      $list,
+    );
 
   }
 

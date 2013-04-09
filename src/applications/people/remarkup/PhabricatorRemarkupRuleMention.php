@@ -29,6 +29,11 @@ final class PhabricatorRemarkupRuleMention
 
   protected function markupMention($matches) {
     $engine = $this->getEngine();
+
+    if ($engine->isTextMode()) {
+      return $engine->storeText($matches[0]);
+    }
+
     $token = $engine->storeText('');
 
     // Store the original text exactly so we can preserve casing if it doesn't
@@ -64,46 +69,57 @@ final class PhabricatorRemarkupRuleMention
     $original = $engine->getTextMetadata($original_key, array());
 
     $usernames = array_keys($metadata);
-    $user_table = new PhabricatorUser();
-    $real_user_names = queryfx_all(
-      $user_table->establishConnection('r'),
-      'SELECT username, phid, realName, isDisabled
-        FROM %T
-        WHERE username IN (%Ls)',
-      $user_table->getTableName(),
-      $usernames);
+
+    $users = id(new PhabricatorPeopleQuery())
+      ->withUsernames($usernames)
+      ->execute();
+
+    if ($users) {
+      $user_statuses = id(new PhabricatorUserStatus())
+        ->loadCurrentStatuses(mpull($users, 'getPHID'));
+      $user_statuses = mpull($user_statuses, null, 'getUserPHID');
+    } else {
+      $user_statuses = array();
+    }
 
     $actual_users = array();
 
     $mentioned_key = self::KEY_MENTIONED;
     $mentioned = $engine->getTextMetadata($mentioned_key, array());
-    foreach ($real_user_names as $row) {
-      $actual_users[strtolower($row['username'])] = $row;
-      $mentioned[$row['phid']] = $row['phid'];
+    foreach ($users as $row) {
+      $actual_users[strtolower($row->getUserName())] = $row;
+      $mentioned[$row->getPHID()] = $row->getPHID();
     }
 
     $engine->setTextMetadata($mentioned_key, $mentioned);
 
     foreach ($metadata as $username => $tokens) {
       $exists = isset($actual_users[$username]);
-      if (!$exists) {
-        $class = 'phabricator-remarkup-mention-unknown';
-      } else if ($actual_users[$username]['isDisabled']) {
-        $class = 'phabricator-remarkup-mention-disabled';
-      } else {
-        $class = 'phabricator-remarkup-mention-exists';
-      }
 
       if ($exists) {
-        $tag = phutil_tag(
-          'a',
-          array(
-            'class'   => $class,
-            'href'    => '/p/'.$actual_users[$username]['username'].'/',
-            'target'  => '_blank',
-            'title'   => $actual_users[$username]['realName'],
-          ),
-          '@'.$actual_users[$username]['username']);
+        $user = $actual_users[$username];
+        Javelin::initBehavior('phabricator-hovercards');
+
+        $tag = id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_PERSON)
+          ->setPHID($user->getPHID())
+          ->setName('@'.$user->getUserName())
+          ->setHref('/p/'.$user->getUserName().'/');
+
+        if ($user->getIsDisabled()) {
+          $tag->setDotColor(PhabricatorTagView::COLOR_GREY);
+        } else {
+          $status = idx($user_statuses, $user->getPHID());
+          if ($status) {
+            $status = $status->getStatus();
+            if ($status == PhabricatorUserStatus::STATUS_AWAY) {
+              $tag->setDotColor(PhabricatorTagView::COLOR_RED);
+            } else if ($status == PhabricatorUserStatus::STATUS_AWAY) {
+              $tag->setDotColor(PhabricatorTagView::COLOR_ORANGE);
+            }
+          }
+        }
+
         foreach ($tokens as $token) {
           $engine->overwriteStoredText($token, $tag);
         }
@@ -115,7 +131,7 @@ final class PhabricatorRemarkupRuleMention
           $tag = phutil_tag(
             'span',
             array(
-              'class' => $class,
+              'class' => 'phabricator-remarkup-mention-unknown',
             ),
             '@'.idx($original, $token, $username));
           $engine->overwriteStoredText($token, $tag);

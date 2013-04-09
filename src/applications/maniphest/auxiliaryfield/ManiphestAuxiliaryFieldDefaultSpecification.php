@@ -23,6 +23,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   const TYPE_REMARKUP = 'remarkup';
   const TYPE_USER     = 'user';
   const TYPE_USERS    = 'users';
+  const TYPE_HEADER   = 'header';
 
   public function getFieldType() {
     return $this->fieldType;
@@ -112,6 +113,9 @@ class ManiphestAuxiliaryFieldDefaultSpecification
           $control->setLimit(1);
         }
         break;
+      case self::TYPE_HEADER:
+        $control = new AphrontFormMarkupControl();
+        break;
       default:
         $label = $this->getLabel();
         throw new ManiphestAuxiliaryFieldTypeException(
@@ -140,15 +144,30 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         }
         $control->setValue($value);
         break;
+      case self::TYPE_HEADER:
+        $control->setValue(
+          phutil_tag(
+            'h2',
+            array(
+              'class' => 'maniphest-auxiliary-header',
+            ),
+            $this->getLabel()));
+        break;
       default:
         $control->setValue($this->getValue());
         $control->setName('auxiliary['.$this->getAuxiliaryKey().']');
         break;
     }
 
-    $control->setLabel($this->getLabel());
-    $control->setCaption($this->getCaption());
-    $control->setError($this->getError());
+    switch ($type) {
+      case self::TYPE_HEADER:
+        break;
+      default:
+        $control->setLabel($this->getLabel());
+        $control->setCaption($this->getCaption());
+        $control->setError($this->getError());
+        break;
+    }
 
     return $control;
   }
@@ -294,6 +313,8 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_USER:
       case self::TYPE_USERS:
         return $this->renderHandleList($this->getValue());
+      case self::TYPE_HEADER:
+        return phutil_tag('hr');
     }
     return parent::renderForDetailView();
   }

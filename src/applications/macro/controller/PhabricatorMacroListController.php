@@ -3,64 +3,50 @@
 final class PhabricatorMacroListController
   extends PhabricatorMacroController {
 
+  private $filter;
+
+  public function willProcessRequest(array $data) {
+    $this->filter = idx($data, 'filter', 'active');
+  }
+
   public function processRequest() {
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $macro_table = new PhabricatorFileImageMacro();
-    $file_table = new PhabricatorFile();
-    $conn = $macro_table->establishConnection('r');
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
 
-    $where = array();
-
-    $join = array();
-    $join[] = qsprintf($conn, '%T m', $macro_table->getTableName());
+    $query = new PhabricatorMacroQuery();
+    $query->setViewer($viewer);
 
     $filter = $request->getStr('name');
     if (strlen($filter)) {
-      $where[] = qsprintf($conn, 'm.name LIKE %~', $filter);
+      $query->withNameLike($filter);
     }
 
     $authors = $request->getArr('authors');
+
     if ($authors) {
-      $join[] = qsprintf(
-        $conn,
-        '%T f ON m.filePHID = f.phid',
-        $file_table->getTableName());
-      $where[] = qsprintf($conn, 'f.authorPHID IN (%Ls)', $authors);
+      $query->withAuthorPHIDs($authors);
     }
 
-    $has_search = $where;
+    $has_search = $filter || $authors;
 
+    if ($this->filter == 'my') {
+      $query->withAuthorPHIDs(array($viewer->getPHID()));
+      // For pre-filling the tokenizer
+      $authors = array($viewer->getPHID());
+    }
+
+    if ($this->filter == 'active') {
+      $query->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE);
+    }
+
+    $macros = $query->executeWithCursorPager($pager);
     if ($has_search) {
-      $macros = queryfx_all(
-        $conn,
-        'SELECT m.* FROM  %Q WHERE %Q',
-        implode(' JOIN ', $join),
-        implode(' AND ', $where));
-      $macros = $macro_table->loadAllFromArray($macros);
       $nodata = pht('There are no macros matching the filter.');
     } else {
-      $pager = new AphrontPagerView();
-      $pager->setOffset($request->getInt('page'));
-
-      $macros = $macro_table->loadAllWhere(
-        '1 = 1 ORDER BY id DESC LIMIT %d, %d',
-        $pager->getOffset(),
-        $pager->getPageSize());
-
-      // Get an exact count since the size here is reasonably going to be a few
-      // thousand at most in any reasonable case.
-      $count = queryfx_one(
-        $conn,
-        'SELECT COUNT(*) N FROM %T',
-        $macro_table->getTableName());
-      $count = $count['N'];
-
-      $pager->setCount($count);
-      $pager->setURI($request->getRequestURI(), 'page');
-
       $nodata = pht('There are no image macros yet.');
     }
 
@@ -70,16 +56,10 @@ final class PhabricatorMacroListController
       $author_phids = array();
     }
 
-    $file_phids = mpull($macros, 'getFilePHID');
-
-    $files = array();
-    if ($file_phids) {
-      $files = $file_table->loadAllWhere(
-        "phid IN (%Ls)",
-        $file_phids);
+    $files = mpull($macros, 'getFile');
+    if ($files) {
       $author_phids += mpull($files, 'getAuthorPHID', 'getAuthorPHID');
     }
-    $files_map = mpull($files, null, 'getPHID');
 
     $this->loadHandles($author_phids);
     $author_handles = array_select_keys($this->getLoadedHandles(), $authors);
@@ -108,15 +88,14 @@ final class PhabricatorMacroListController
     $nav = $this->buildSideNavView(
       $for_app = false,
       $has_search);
-    $nav->selectFilter($has_search ? 'search' : '/');
+    $nav->selectFilter($has_search ? 'search' : $this->filter);
 
     $nav->appendChild($filter_view);
 
     $pinboard = new PhabricatorPinboardView();
     $pinboard->setNoDataString($nodata);
     foreach ($macros as $macro) {
-      $file_phid = $macro->getFilePHID();
-      $file = idx($files_map, $file_phid);
+      $file = $macro->getFile();
 
       $item = new PhabricatorPinboardItemView();
       if ($file) {
@@ -143,7 +122,20 @@ final class PhabricatorMacroListController
 
     if (!$has_search) {
       $nav->appendChild($pager);
-      $name = pht('All Macros');
+      switch ($this->filter) {
+        case 'all':
+          $name = pht('All Macros');
+          break;
+        case 'my':
+          $name = pht('My Macros');
+          break;
+        case 'active':
+          $name = pht('Active Macros');
+          break;
+        default:
+          throw new Exception("Unknown filter $this->filter");
+          break;
+      }
     } else {
       $name = pht('Search');
     }

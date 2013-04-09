@@ -86,11 +86,32 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     }
   }
 
-  protected function applyCustomInternalTransaction(
+  /**
+   * We really only need a read lock if we have a comment. In that case, we
+   * must update the messagesCount field on the conpherence and
+   * seenMessagesCount(s) for the participant(s).
+   */
+  protected function shouldReadLock(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $lock = false;
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $lock =  true;
+        break;
+    }
+
+    return $lock;
+  }
+
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $object->setMessageCount((int)$object->getMessageCount() + 1);
+        break;
       case ConpherenceTransactionType::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
         break;
@@ -105,6 +126,18 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           ConpherenceImageData::SIZE_HEAD);
         break;
     }
+    $this->updateRecentParticipantPHIDs($object, $xaction);
+  }
+
+  private function updateRecentParticipantPHIDs(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $participants = $object->getRecentParticipantPHIDs();
+    array_unshift($participants, $xaction->getAuthorPHID());
+    $participants = array_slice(array_unique($participants), 0, 10);
+
+    $object->setRecentParticipantPHIDs($participants);
   }
 
   /**
@@ -148,10 +181,13 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           if ($phid != $user->getPHID()) {
             if ($participant->getParticipationStatus() != $behind) {
               $participant->setBehindTransactionPHID($xaction_phid);
+              // decrement one as this is the message putting them behind!
+              $participant->setSeenMessageCount($object->getMessageCount() - 1);
             }
             $participant->setParticipationStatus($behind);
             $participant->setDateTouched($time);
           } else {
+            $participant->setSeenMessageCount($object->getMessageCount());
             $participant->setParticipationStatus($up_to_date);
             $participant->setDateTouched($time);
           }
@@ -159,20 +195,39 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         }
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-        foreach ($xaction->getNewValue() as $participant) {
-          if ($participant == $this->getActor()->getPHID()) {
+
+        $participants = $object->getParticipants();
+
+        $old_map = array_fuse($xaction->getOldValue());
+        $new_map = array_fuse($xaction->getNewValue());
+
+        $remove = array_keys(array_diff_key($old_map, $new_map));
+        foreach ($remove as $phid) {
+          $remove_participant = $participants[$phid];
+          $remove_participant->delete();
+          unset($participants[$phid]);
+        }
+
+        $add = array_keys(array_diff_key($new_map, $old_map));
+        foreach ($add as $phid) {
+          if ($phid == $this->getActor()->getPHID()) {
             $status = ConpherenceParticipationStatus::UP_TO_DATE;
+            $message_count = $object->getMessageCount();
           } else {
             $status = ConpherenceParticipationStatus::BEHIND;
+            $message_count = 0;
           }
-          id(new ConpherenceParticipant())
+          $participants[$phid] =
+            id(new ConpherenceParticipant())
             ->setConpherencePHID($object->getPHID())
-            ->setParticipantPHID($participant)
+            ->setParticipantPHID($phid)
             ->setParticipationStatus($status)
             ->setDateTouched(time())
             ->setBehindTransactionPHID($xaction->getPHID())
+            ->setSeenMessageCount($message_count)
             ->save();
         }
+        $object->attachParticipants($participants);
         break;
      }
   }
@@ -188,7 +243,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         return $v;
       case ConpherenceTransactionType::TYPE_FILES:
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-        return $this->mergePHIDTransactions($u, $v);
+        return $this->mergePHIDOrEdgeTransactions($u, $v);
     }
 
     return parent::mergeTransactions($u, $v);
@@ -220,8 +275,32 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
+    $to_phids = array();
     $participants = $object->getParticipants();
-    return array_keys($participants);
+    if (empty($participants)) {
+      return $to_phids;
+    }
+    $preferences = id(new PhabricatorUserPreferences())
+      ->loadAllWhere('userPHID in (%Ls)', array_keys($participants));
+    $preferences = mpull($preferences, null, 'getUserPHID');
+    foreach ($participants as $phid => $participant) {
+      $default = ConpherenceSettings::EMAIL_ALWAYS;
+      $preference = idx($preferences, $phid);
+      if ($preference) {
+        $default = $preference->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_CONPH_NOTIFICATIONS,
+          ConpherenceSettings::EMAIL_ALWAYS);
+      }
+      $settings = $participant->getSettings();
+      $notifications = idx(
+        $settings,
+        'notifications',
+        $default);
+      if ($notifications == ConpherenceSettings::EMAIL_ALWAYS) {
+        $to_phids[] = $phid;
+      }
+    }
+    return $to_phids;
   }
 
   protected function getMailCC(PhabricatorLiskDAO $object) {
@@ -251,5 +330,4 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   protected function supportsSearch() {
     return false;
   }
-
 }

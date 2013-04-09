@@ -18,8 +18,12 @@ final class PhabricatorRemarkupRuleImageMacro
   public function markupImageMacro($matches) {
     if ($this->images === null) {
       $this->images = array();
-      $rows = id(new PhabricatorFileImageMacro())->loadAllWhere(
-        'isDisabled = 0');
+
+      $viewer = $this->getEngine()->getConfig('viewer');
+      $rows = id(new PhabricatorMacroQuery())
+        ->setViewer($viewer)
+        ->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE)
+        ->execute();
       foreach ($rows as $row) {
         $this->images[$row->getName()] = $row->getFilePHID();
       }
@@ -31,6 +35,14 @@ final class PhabricatorRemarkupRuleImageMacro
       $phid = $this->images[$name];
 
       $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
+
+      if ($this->getEngine()->isTextMode()) {
+        if ($file) {
+          $name .= ' <'.$file->getBestURI().'>';
+        }
+        return $this->getEngine()->storeText($name);
+      }
+
       $style = null;
       $src_uri = null;
       if ($file) {

@@ -68,11 +68,6 @@ class AphrontDefaultApplicationConfiguration
         ),
       ),
 
-      '/xhprof/' => array(
-        'list/(?P<view>[^/]+)/' => 'PhabricatorXHProfSampleListController',
-        'profile/(?P<phid>[^/]+)/' => 'PhabricatorXHProfProfileController',
-      ),
-
       '/~/' => array(
         '' => 'DarkConsoleController',
         'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
@@ -86,6 +81,8 @@ class AphrontDefaultApplicationConfiguration
         'select/(?P<type>\w+)/'
           => 'PhabricatorSearchSelectController',
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
+        'hovercard/(?P<mode>retrieve|test)/' =>
+          'PhabricatorSearchHovercardController',
       ),
 
       '/status/' => 'PhabricatorStatusController',
@@ -102,12 +99,6 @@ class AphrontDefaultApplicationConfiguration
         'individual/' => 'PhabricatorNotificationIndividualController',
         'status/' => 'PhabricatorNotificationStatusController',
         'clear/' => 'PhabricatorNotificationClearController',
-      ),
-
-      '/phortune/' => array(
-        'stripe/' => array(
-          'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
-        ),
       ),
 
       '/debug/' => 'PhabricatorDebugController',
@@ -143,6 +134,7 @@ class AphrontDefaultApplicationConfiguration
       $response->setErrorInfo($ex->getMessage());
 
       return id(new AphrontJSONResponse())
+        ->setAddJSONShield(false)
         ->setContent($response->toDictionary());
     }
 

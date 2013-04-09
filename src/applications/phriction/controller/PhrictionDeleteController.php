@@ -23,11 +23,11 @@ final class PhrictionDeleteController extends PhrictionController {
 
     $e_text = null;
     $disallowed_states = array(
-      PhrictionDocumentStatus::STATUS_DELETED, // Stupid
-      PhrictionDocumentStatus::STATUS_MOVED, // Makes no sense
-      PhrictionDocumentStatus::STATUS_STUB, // How could they?
+      PhrictionDocumentStatus::STATUS_DELETED => true, // Silly
+      PhrictionDocumentStatus::STATUS_MOVED => true, // Makes no sense
+      PhrictionDocumentStatus::STATUS_STUB => true, // How could they?
     );
-    if (in_array($document->getStatus(), $disallowed_states)) {
+    if (isset($disallowed_states[$document->getStatus()])) {
       $e_text = pht('An already moved or deleted document can not be deleted');
     }
 

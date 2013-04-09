@@ -8,6 +8,8 @@
 final class DarkConsoleXHProfPluginAPI {
 
   private static $profilerStarted;
+  private static $profilerRunning;
+  private static $profileFilePHID;
 
   public static function isProfilerAvailable() {
     return extension_loaded('xhprof');
@@ -30,7 +32,7 @@ final class DarkConsoleXHProfPluginAPI {
     return false;
   }
 
-  public static function shouldStartProfiler() {
+  private static function shouldStartProfiler() {
     if (self::isProfilerRequested()) {
       return true;
     }
@@ -55,6 +57,10 @@ final class DarkConsoleXHProfPluginAPI {
     return self::$profilerStarted;
   }
 
+  private static function isProfilerRunning() {
+    return self::$profilerRunning;
+  }
+
   public static function includeXHProfLib() {
     // TODO: this is incredibly stupid, but we may not have Phutil metamodule
     // stuff loaded yet so we can't just phutil_get_library_root() our way
@@ -68,17 +74,11 @@ final class DarkConsoleXHProfPluginAPI {
   }
 
 
-  public static function saveProfilerSample(
-    AphrontRequest $request,
-    $access_log) {
-
-    if (!self::isProfilerStarted()) {
+  public static function saveProfilerSample(PhutilDeferredLog $access_log) {
+    $file_phid = self::getProfileFilePHID();
+    if (!$file_phid) {
       return;
     }
-
-    $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
-    $profile_sample = id(new PhabricatorXHProfSample())
-      ->setFilePHID($profile);
 
     if (self::isProfilerRequested()) {
       $sample_rate = 0;
@@ -86,18 +86,27 @@ final class DarkConsoleXHProfPluginAPI {
       $sample_rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
     }
 
-    $profile_sample->setSampleRate($sample_rate);
+    $profile_sample = id(new PhabricatorXHProfSample())
+      ->setFilePHID($file_phid)
+      ->setSampleRate($sample_rate)
+      ->setUsTotal($access_log->getData('T'))
+      ->setHostname($access_log->getData('h'))
+      ->setRequestPath($access_log->getData('U'))
+      ->setController($access_log->getData('C'))
+      ->setUserPHID($access_log->getData('P'));
 
-    if ($access_log) {
-      $profile_sample
-        ->setUsTotal($access_log->getData('T'))
-        ->setHostname($access_log->getData('h'))
-        ->setRequestPath($access_log->getData('U'))
-        ->setController($access_log->getData('C'))
-        ->setUserPHID($request->getUser()->getPHID());
+    AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+      $caught = null;
+      try {
+        $profile_sample->save();
+      } catch (Exception $ex) {
+        $caught = $ex;
+      }
+    AphrontWriteGuard::allowDangerousUnguardedWrites(false);
+
+    if ($caught) {
+      throw $caught;
     }
-
-    $profile_sample->save();
   }
 
   public static function hookProfiler() {
@@ -114,22 +123,29 @@ final class DarkConsoleXHProfPluginAPI {
     }
 
     self::startProfiler();
-    self::$profilerStarted = true;
   }
 
-  public static function startProfiler() {
+  private static function startProfiler() {
     self::includeXHProfLib();
     xhprof_enable();
+
+    self::$profilerStarted = true;
+    self::$profilerRunning = true;
   }
 
-  public static function stopProfiler() {
-    if (!self::isProfilerStarted()) {
-      return null;
+  public static function getProfileFilePHID() {
+    self::stopProfiler();
+    return self::$profileFilePHID;
+  }
+
+  private static function stopProfiler() {
+    if (!self::isProfilerRunning()) {
+      return;
     }
 
     $data = xhprof_disable();
     $data = serialize($data);
-    $file_class = 'PhabricatorFile';
+    self::$profilerRunning = false;
 
     // Since these happen on GET we can't do guarded writes. These also
     // sometimes happen after we've disposed of the write guard; in this
@@ -145,7 +161,7 @@ final class DarkConsoleXHProfPluginAPI {
     $caught = null;
     try {
       $file = call_user_func(
-        array($file_class, 'newFromFileData'),
+        array('PhabricatorFile', 'newFromFileData'),
         $data,
         array(
           'mime-type' => 'application/xhprof',
@@ -163,9 +179,9 @@ final class DarkConsoleXHProfPluginAPI {
 
     if ($caught) {
       throw $caught;
-    } else {
-      return $file->getPHID();
     }
+
+    self::$profileFilePHID = $file->getPHID();
   }
 
 }

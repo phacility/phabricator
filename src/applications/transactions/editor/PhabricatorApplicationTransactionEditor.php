@@ -101,6 +101,26 @@ abstract class PhabricatorApplicationTransactionEditor
         return $object->getViewPolicy();
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return $object->getEditPolicy();
+      case PhabricatorTransactions::TYPE_EDGE:
+        $edge_type = $xaction->getMetadataValue('edge:type');
+        if (!$edge_type) {
+          throw new Exception("Edge transaction has no 'edge:type'!");
+        }
+
+        $old_edges = array();
+        if ($object->getPHID()) {
+          $edge_src = $object->getPHID();
+
+          $old_edges = id(new PhabricatorEdgeQuery())
+            ->setViewer($this->getActor())
+            ->withSourcePHIDs(array($edge_src))
+            ->withEdgeTypes(array($edge_type))
+            ->needEdgeData(true)
+            ->execute();
+
+          $old_edges = $old_edges[$edge_src][$edge_type];
+        }
+        return $old_edges;
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -115,6 +135,8 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return $xaction->getNewValue();
+      case PhabricatorTransactions::TYPE_EDGE:
+        return $this->getEdgeTransactionNewValue($xaction);
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
     }
@@ -180,7 +202,46 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $subeditor->save();
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+        $src = $object->getPHID();
+        $type = $xaction->getMetadataValue('edge:type');
+
+        foreach ($new as $dst_phid => $edge) {
+          $new[$dst_phid]['src'] = $src;
+        }
+
+        $editor = id(new PhabricatorEdgeEditor())
+          ->setActor($this->getActor());
+
+        foreach ($old as $dst_phid => $edge) {
+          if (!empty($new[$dst_phid])) {
+            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
+              continue;
+            }
+          }
+          $editor->removeEdge($src, $type, $dst_phid);
+        }
+
+        foreach ($new as $dst_phid => $edge) {
+          if (!empty($old[$dst_phid])) {
+            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
+              continue;
+            }
+          }
+
+          $data = array(
+            'data' => $edge['data'],
+          );
+
+          $editor->addEdge($src, $type, $dst_phid, $data);
+        }
+
+        $editor->save();
+        break;
     }
+
     return $this->applyCustomExternalTransaction($object, $xaction);
   }
 
@@ -199,6 +260,15 @@ abstract class PhabricatorApplicationTransactionEditor
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
     return $this;
+  }
+
+  public function setContentSourceFromRequest(AphrontRequest $request) {
+    return $this->setContentSource(
+      PhabricatorContentSource::newForSource(
+        PhabricatorContentSource::SOURCE_WEB,
+        array(
+          'ip' => $request->getRemoteAddr(),
+        )));
   }
 
   public function getContentSource() {
@@ -244,6 +314,28 @@ abstract class PhabricatorApplicationTransactionEditor
       $xaction->setContentSource($this->getContentSource());
     }
 
+    $is_preview = $this->getIsPreview();
+    $read_locking = false;
+
+    if (!$is_preview && $object->getID()) {
+      foreach ($xactions as $xaction) {
+
+        // If any of the transactions require a read lock, hold one and reload
+        // the object. We need to do this fairly early so that the call to
+        // `adjustTransactionValues()` (which populates old values) is based
+        // on the synchronized state of the object, which may differ from the
+        // state when it was originally loaded.
+
+        if ($this->shouldReadLock($object, $xaction)) {
+          $object->openTransaction();
+          $object->beginReadLocking();
+          $read_locking = true;
+          $object->reload();
+          break;
+        }
+      }
+    }
+
     foreach ($xactions as $xaction) {
       $this->adjustTransactionValues($object, $xaction);
     }
@@ -251,12 +343,17 @@ abstract class PhabricatorApplicationTransactionEditor
     $xactions = $this->filterTransactions($object, $xactions);
 
     if (!$xactions) {
+      if ($read_locking) {
+        $object->endReadLocking();
+        $read_locking = false;
+        $object->killTransaction();
+      }
       return array();
     }
 
     $xactions = $this->sortTransactions($xactions);
 
-    if ($this->getIsPreview()) {
+    if ($is_preview) {
       $this->loadHandles($xactions);
       return $xactions;
     }
@@ -265,7 +362,10 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setActor($actor)
       ->setContentSource($this->getContentSource());
 
-    $object->openTransaction();
+    if (!$read_locking) {
+      $object->openTransaction();
+    }
+
       foreach ($xactions as $xaction) {
         $this->applyInternalEffects($object, $xaction);
       }
@@ -285,6 +385,12 @@ abstract class PhabricatorApplicationTransactionEditor
       foreach ($xactions as $xaction) {
         $this->applyExternalEffects($object, $xaction);
       }
+
+      if ($read_locking) {
+        $object->endReadLocking();
+        $read_locking = false;
+      }
+
     $object->saveTransaction();
 
     $this->loadHandles($xactions);
@@ -318,6 +424,46 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function didApplyTransactions(array $xactions) {
     // Hook for subclasses.
     return;
+  }
+
+
+  /**
+   * Determine if the editor should hold a read lock on the object while
+   * applying a transaction.
+   *
+   * If the editor does not hold a lock, two editors may read an object at the
+   * same time, then apply their changes without any synchronization. For most
+   * transactions, this does not matter much. However, it is important for some
+   * transactions. For example, if an object has a transaction count on it, both
+   * editors may read the object with `count = 23`, then independently update it
+   * and save the object with `count = 24` twice. This will produce the wrong
+   * state: the object really has 25 transactions, but the count is only 24.
+   *
+   * Generally, transactions fall into one of four buckets:
+   *
+   *   - Append operations: Actions like adding a comment to an object purely
+   *     add information to its state, and do not depend on the current object
+   *     state in any way. These transactions never need to hold locks.
+   *   - Overwrite operations: Actions like changing the title or description
+   *     of an object replace the current value with a new value, so the end
+   *     state is consistent without a lock. We currently do not lock these
+   *     transactions, although we may in the future.
+   *   - Edge operations: Edge and subscription operations have internal
+   *     synchronization which limits the damage race conditions can cause.
+   *     We do not currently lock these transactions, although we may in the
+   *     future.
+   *   - Update operations: Actions like incrementing a count on an object.
+   *     These operations generally should use locks, unless it is not
+   *     important that the state remain consistent in the presence of races.
+   *
+   * @param   PhabricatorLiskDAO  Object being updated.
+   * @param   PhabricatorApplicationTransaction Transaction being applied.
+   * @return  bool                True to synchronize the edit with a lock.
+   */
+  protected function shouldReadLock(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return false;
   }
 
   private function loadHandles(array $xactions) {
@@ -460,7 +606,14 @@ abstract class PhabricatorApplicationTransactionEditor
 
     switch ($type) {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-        return $this->mergePHIDTransactions($u, $v);
+        return $this->mergePHIDOrEdgeTransactions($u, $v);
+      case PhabricatorTransactions::TYPE_EDGE:
+        $u_type = $u->getMetadataValue('edge:type');
+        $v_type = $v->getMetadataValue('edge:type');
+        if ($u_type == $v_type) {
+          return $this->mergePHIDOrEdgeTransactions($u, $v);
+        }
+        return null;
     }
 
     // By default, do not merge the transactions.
@@ -516,7 +669,7 @@ abstract class PhabricatorApplicationTransactionEditor
     return array_values($result);
   }
 
-  protected function mergePHIDTransactions(
+  protected function mergePHIDOrEdgeTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
 
@@ -528,7 +681,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return $u;
   }
-
 
   protected function getPHIDTransactionNewValue(
     PhabricatorApplicationTransaction $xaction) {
@@ -576,6 +728,110 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return array_values($result);
+  }
+
+  protected function getEdgeTransactionNewValue(
+    PhabricatorApplicationTransaction $xaction) {
+
+    $new = $xaction->getNewValue();
+    $new_add = idx($new, '+', array());
+    unset($new['+']);
+    $new_rem = idx($new, '-', array());
+    unset($new['-']);
+    $new_set = idx($new, '=', null);
+    unset($new['=']);
+
+    if ($new) {
+      throw new Exception(
+        "Invalid 'new' value for Edge transaction. Value should contain only ".
+        "keys '+' (add edges), '-' (remove edges) and '=' (set edges).");
+    }
+
+    $old = $xaction->getOldValue();
+
+    $lists = array($new_set, $new_add, $new_rem);
+    foreach ($lists as $list) {
+      $this->checkEdgeList($list);
+    }
+
+    $result = array();
+    foreach ($old as $dst_phid => $edge) {
+      if ($new_set !== null && empty($new_set[$dst_phid])) {
+        continue;
+      }
+      $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
+        $xaction,
+        $edge);
+    }
+
+    if ($new_set !== null) {
+      foreach ($new_set as $dst_phid => $edge) {
+        $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
+          $xaction,
+          $edge);
+      }
+    }
+
+    foreach ($new_add as $dst_phid => $edge) {
+      $result[$dst_phid] = $this->normalizeEdgeTransactionValue(
+        $xaction,
+        $edge);
+    }
+
+    foreach ($new_rem as $dst_phid => $edge) {
+      unset($result[$dst_phid]);
+    }
+
+    return $result;
+  }
+
+  private function checkEdgeList($list) {
+    if (!$list) {
+      return;
+    }
+    foreach ($list as $key => $item) {
+      if (phid_get_type($key) === PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
+        throw new Exception(
+          "Edge transactions must have destination PHIDs as in edge ".
+          "lists (found key '{$key}').");
+      }
+      if (!is_array($item) && $item !== $key) {
+        throw new Exception(
+          "Edge transactions must have PHIDs or edge specs as values ".
+          "(found value '{$item}').");
+      }
+    }
+  }
+
+  protected function normalizeEdgeTransactionValue(
+    PhabricatorApplicationTransaction $xaction,
+    $edge) {
+
+    if (!is_array($edge)) {
+      $edge = array(
+        'dst' => $edge,
+      );
+    }
+
+    $edge_type = $xaction->getMetadataValue('edge:type');
+
+    if (empty($edge['type'])) {
+      $edge['type'] = $edge_type;
+    } else {
+      if ($edge['type'] != $edge_type) {
+        $this_type = $edge['type'];
+        throw new Exception(
+          "Edge transaction includes edge of type '{$this_type}', but ".
+          "transaction is of type '{$edge_type}'. Each edge transaction must ".
+          "alter edges of only one type.");
+      }
+    }
+
+    if (!isset($edge['data'])) {
+      $edge['data'] = null;
+    }
+
+    return $edge;
   }
 
   protected function sortTransactions(array $xactions) {

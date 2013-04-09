@@ -73,11 +73,35 @@ final class PholioTransactionView
         if (!$inline->getComment()) {
           continue;
         }
-        $out[] = parent::renderTransactionContent($inline);
+        $out[] = $this->renderInlineContent($inline);
       }
     }
 
     return $out;
+  }
+
+  private function renderInlineContent(PholioTransaction $inline) {
+    $comment = $inline->getComment();
+
+    $thumb = phutil_tag(
+      'img',
+      array(
+        'src' => '/pholio/inline/thumb/'.$comment->getImageID(),
+        ));
+
+    $link = phutil_tag(
+      'a',
+      array(
+        'href' => '#'
+      ),
+      $thumb);
+
+    $inline_comment = hsprintf('<p>%s</p>', $comment->getContent());
+
+    return phutil_tag(
+      'div',
+      array('class' => 'pholio-transaction-inline-comment'),
+      array($link, $inline_comment));
   }
 
 }

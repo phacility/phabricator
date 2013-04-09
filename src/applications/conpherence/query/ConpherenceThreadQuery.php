@@ -11,6 +11,20 @@ final class ConpherenceThreadQuery
   private $needWidgetData;
   private $needHeaderPics;
   private $needOrigPics;
+  private $needTransactions;
+  private $needParticipantCache;
+  private $needFilePHIDs;
+  private $afterMessageID;
+
+  public function needFilePHIDs($need_file_phids) {
+    $this->needFilePHIDs = $need_file_phids;
+    return $this;
+  }
+
+  public function needParticipantCache($participant_cache) {
+    $this->needParticipantCache = $participant_cache;
+    return $this;
+  }
 
   public function needOrigPics($need_orig_pics) {
     $this->needOrigPics = $need_orig_pics;
@@ -27,6 +41,11 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
+  public function needTransactions($need_transactions) {
+    $this->needTransactions = $need_transactions;
+    return $this;
+  }
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -34,6 +53,12 @@ final class ConpherenceThreadQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  // TODO: This is pretty hacky!!!!~~
+  public function setAfterMessageID($id) {
+    $this->afterMessageID = $id;
     return $this;
   }
 
@@ -53,9 +78,18 @@ final class ConpherenceThreadQuery
 
     if ($conpherences) {
       $conpherences = mpull($conpherences, null, 'getPHID');
-      $this->loadParticipants($conpherences);
-      $this->loadTransactionsAndHandles($conpherences);
-      $this->loadFilePHIDs($conpherences);
+      $this->loadParticipantsAndInitHandles($conpherences);
+      if ($this->needParticipantCache) {
+        $this->loadCoreHandles($conpherences, 'getRecentParticipantPHIDs');
+      } else if ($this->needWidgetData) {
+        $this->loadCoreHandles($conpherences, 'getParticipantPHIDs');
+      }
+      if ($this->needTransactions) {
+        $this->loadTransactionsAndHandles($conpherences);
+      }
+      if ($this->needFilePHIDs || $this->needWidgetData) {
+        $this->loadFilePHIDs($conpherences);
+      }
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
       }
@@ -92,7 +126,7 @@ final class ConpherenceThreadQuery
     return $this->formatWhereClause($where);
   }
 
-  private function loadParticipants(array $conpherences) {
+  private function loadParticipantsAndInitHandles(array $conpherences) {
     $participants = id(new ConpherenceParticipant())
       ->loadAllWhere('conpherencePHID IN (%Ls)', array_keys($conpherences));
     $map = mgroup($participants, 'getConpherencePHID');
@@ -103,8 +137,29 @@ final class ConpherenceThreadQuery
         null,
         'getParticipantPHID');
       $current_conpherence->attachParticipants($conpherence_participants);
+      $current_conpherence->attachHandles(array());
     }
 
+    return $this;
+  }
+
+  private function loadCoreHandles(
+    array $conpherences,
+    $method) {
+
+    $handle_phids = array();
+    foreach ($conpherences as $conpherence) {
+      $handle_phids[$conpherence->getPHID()] =
+        $conpherence->$method();
+    }
+    $flat_phids = array_mergev($handle_phids);
+    $handles = id(new PhabricatorObjectHandleData($flat_phids))
+      ->setViewer($this->getViewer())
+      ->loadHandles();
+    foreach ($handle_phids as $conpherence_phid => $phids) {
+      $conpherence = $conpherences[$conpherence_phid];
+      $conpherence->attachHandles(array_select_keys($handles, $phids));
+    }
     return $this;
   }
 
@@ -113,7 +168,9 @@ final class ConpherenceThreadQuery
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array_keys($conpherences))
       ->needHandles(true)
+      ->setAfterID($this->afterMessageID)
       ->execute();
+
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
       $current_transactions = $transactions[$phid];
@@ -121,7 +178,7 @@ final class ConpherenceThreadQuery
       foreach ($current_transactions as $transaction) {
         $handles += $transaction->getHandles();
       }
-      $conpherence->attachHandles($handles);
+      $conpherence->attachHandles($conpherence->getHandles() + $handles);
       $conpherence->attachTransactions($transactions[$phid]);
     }
     return $this;
@@ -153,11 +210,11 @@ final class ConpherenceThreadQuery
     // statuses of everyone currently in the conpherence
     // for a rolling one week window
     $start_of_week = phabricator_format_local_time(
-      strtotime('today'),
+      strtotime('last monday', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $end_of_week = phabricator_format_local_time(
-      strtotime('midnight +1 week'),
+      strtotime('last monday +1 week', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $statuses = id(new PhabricatorUserStatus())

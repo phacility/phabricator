@@ -61,7 +61,7 @@ abstract class PhabricatorApplicationTransactionComment
 
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
+    return PhabricatorMarkupEngine::getEngine();
   }
 
 

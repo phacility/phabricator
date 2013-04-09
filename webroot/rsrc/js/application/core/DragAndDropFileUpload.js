@@ -29,6 +29,11 @@ JX.install('PhabricatorDragAndDropFileUpload', {
       // Safari, Firefox and Chrome.
 
       return !!window.FileList;
+    },
+    isPasteSupported : function() {
+      // TODO: Needs to check if event.clipboardData is available.
+      // Works in Chrome, doesn't work in Firefox 10.
+      return !!window.FileList;
     }
   },
 
@@ -37,14 +42,12 @@ JX.install('PhabricatorDragAndDropFileUpload', {
     _depth : 0,
     _updateDepth : function(delta) {
       if (this._depth == 0 && delta > 0) {
-        JX.log('begin: ' + this._depth + ' @ ' + delta);
         this.invoke('didBeginDrag');
       }
 
       this._depth += delta;
 
       if (this._depth == 0 && delta < 0) {
-        JX.log('end: ' + this._depth + ' @ ' + delta);
         this.invoke('didEndDrag');
       }
     },
@@ -90,6 +93,9 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'dragover',
         null,
         function(e) {
+          // NOTE: We must set this, or Chrome refuses to drop files from the
+          // download shelf.
+          e.getRawEvent().dataTransfer.dropEffect = 'copy';
           e.kill();
         });
 
@@ -108,6 +114,27 @@ JX.install('PhabricatorDragAndDropFileUpload', {
           // Force depth to 0.
           this._updateDepth(-this._depth);
         }));
+
+      if (JX.PhabricatorDragAndDropFileUpload.isPasteSupported()) {
+        JX.DOM.listen(
+          this._node,
+          'paste',
+          null,
+          JX.bind(this, function(e) {
+            var clipboardData = e.getRawEvent().clipboardData;
+            if (!clipboardData) {
+              return;
+            }
+
+            for (var ii = 0; ii < clipboardData.items.length; ii++) {
+              var item = clipboardData.items[ii];
+              if (!/^image\//.test(item.type)) {
+                continue;
+              }
+              this._sendRequest(item.getAsFile());
+            }
+          }));
+      }
     },
     _sendRequest : function(spec) {
       var file = new JX.PhabricatorFileUpload()

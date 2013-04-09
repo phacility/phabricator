@@ -102,7 +102,9 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
 
     $sql = array();
     foreach ($index as $row) {
-      $sql[] = '('.(int)$row['pathID'].', '.(int)$row['maxCommit'].')';
+      $sql[] =
+        '(pathID = '.(int)$row['pathID'].' AND '.
+        'svnCommit = '.(int)$row['maxCommit'].')';
     }
 
     $browse = queryfx_all(
@@ -112,13 +114,13 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
         WHERE repositoryID = %d
           AND parentID = %d
           AND existed = 1
-        AND (pathID, svnCommit) in (%Q)
+        AND (%Q)
         ORDER BY pathName',
       PhabricatorRepository::TABLE_FILESYSTEM,
       PhabricatorRepository::TABLE_PATH,
       $repository->getID(),
       $path_id,
-      implode(', ', $sql));
+      implode(' OR ', $sql));
 
     $loadable_commits = array();
     foreach ($browse as $key => $file) {

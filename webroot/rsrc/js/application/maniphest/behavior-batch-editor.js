@@ -26,11 +26,14 @@ JX.behavior('maniphest-batch-editor', function(config) {
         'priority': 'Change Priority',
         'status': 'Open / Close',
         'add_comment': 'Comment',
-        'assign': 'Assign'
+        'assign': 'Assign',
+        'add_ccs' : 'Add CCs',
+        'remove_ccs' : 'Remove CCs'
       });
 
     var proj_tokenizer = build_tokenizer(config.sources.project);
     var owner_tokenizer = build_tokenizer(config.sources.owner);
+    var cc_tokenizer = build_tokenizer(config.sources.cc);
 
     var priority_select = JX.Prefab.renderSelect(config.priorityMap);
     var status_select = JX.Prefab.renderSelect(config.statusMap);
@@ -46,6 +49,13 @@ JX.behavior('maniphest-batch-editor', function(config) {
           JX.DOM.setContent(cell, proj_tokenizer.template);
           vfunc = function() {
             return JX.keys(proj_tokenizer.object.getTokens());
+          };
+          break;
+        case 'add_ccs':
+        case 'remove_ccs':
+          JX.DOM.setContent(cell, cc_tokenizer.template);
+          vfunc = function() {
+            return JX.keys(cc_tokenizer.object.getTokens());
           };
           break;
         case 'assign':

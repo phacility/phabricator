@@ -3,10 +3,6 @@
 final class PhabricatorPeopleEditController
   extends PhabricatorPeopleController {
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   private $id;
   private $view;
 
@@ -338,7 +334,7 @@ final class PhabricatorPeopleEditController
 
       $form->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Roles')
+          ->setLabel(pht('Roles'))
           ->setValue($roles));
     }
 
@@ -719,12 +715,8 @@ final class PhabricatorPeopleEditController
     $request = $this->getRequest();
     $admin = $request->getUser();
 
-    $profile = id(new PhabricatorUserProfile())->loadOneWhere(
-      'userPHID = %s',
-      $user->getPHID());
-    if (!$profile) {
-      $profile = new PhabricatorUserProfile();
-      $profile->setUserPHID($user->getPHID());
+    $profile = $user->loadUserProfile();
+    if (!$profile->getID()) {
       $profile->setTitle('');
       $profile->setBlurb('');
     }

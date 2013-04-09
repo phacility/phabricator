@@ -18,9 +18,10 @@ final class PhabricatorMacroMemeDialogController
         $e_macro = pht('Required');
         $errors[] = pht('Macro name is required.');
       } else {
-        $macro = id(new PhabricatorFileImageMacro())->loadOneWhere(
-          'name = %s',
-          $name);
+        $macro = id(new PhabricatorMacroQuery())
+          ->setViewer($user)
+          ->withNames(array($name))
+          ->executeOne();
         if (!$macro) {
           $e_macro = pht('Invalid');
           $errors[] = pht('No such macro.');

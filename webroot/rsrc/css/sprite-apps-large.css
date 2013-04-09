@@ -18,99 +18,99 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 
-.app-application-light-large {
+.app-adventure-light-large {
   background-position: 0px 0px;
 }
 
-.app-application-dark-large {
+.app-adventure-dark-large {
   background-position: -29px 0px;
 }
 
-.app-application-blue-large, .phabricator-crumb-view:hover .app-application-dark-large {
+.app-adventure-blue-large, .phabricator-crumb-view:hover .app-adventure-dark-large {
   background-position: -58px 0px;
 }
 
-.app-application-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-application-light-large {
+.app-application-light-large {
   background-position: -87px 0px;
 }
 
-.app-audit-light-large {
+.app-application-dark-large {
   background-position: -116px 0px;
 }
 
-.app-audit-dark-large {
+.app-application-blue-large, .phabricator-crumb-view:hover .app-application-dark-large {
   background-position: -145px 0px;
 }
 
-.app-audit-blue-large, .phabricator-crumb-view:hover .app-audit-dark-large {
+.app-audit-light-large {
   background-position: -174px 0px;
 }
 
-.app-audit-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-audit-light-large {
+.app-audit-dark-large {
   background-position: -203px 0px;
 }
 
-.app-calendar-light-large {
+.app-audit-blue-large, .phabricator-crumb-view:hover .app-audit-dark-large {
   background-position: -232px 0px;
 }
 
-.app-calendar-dark-large {
+.app-calendar-light-large {
   background-position: -261px 0px;
 }
 
-.app-calendar-blue-large, .phabricator-crumb-view:hover .app-calendar-dark-large {
+.app-calendar-dark-large {
   background-position: -290px 0px;
 }
 
-.app-calendar-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-calendar-light-large {
+.app-calendar-blue-large, .phabricator-crumb-view:hover .app-calendar-dark-large {
   background-position: -319px 0px;
 }
 
-.app-conduit-light-large {
+.app-chatlog-light-large {
   background-position: 0px -29px;
 }
 
-.app-conduit-dark-large {
+.app-chatlog-dark-large {
   background-position: -29px -29px;
 }
 
-.app-conduit-blue-large, .phabricator-crumb-view:hover .app-conduit-dark-large {
+.app-chatlog-blue-large, .phabricator-crumb-view:hover .app-chatlog-dark-large {
   background-position: -58px -29px;
 }
 
-.app-conduit-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-conduit-light-large {
+.app-conduit-light-large {
   background-position: -87px -29px;
 }
 
-.app-conpherence-light-large {
+.app-conduit-dark-large {
   background-position: -116px -29px;
 }
 
-.app-conpherence-dark-large {
+.app-conduit-blue-large, .phabricator-crumb-view:hover .app-conduit-dark-large {
   background-position: -145px -29px;
 }
 
-.app-conpherence-blue-large, .phabricator-crumb-view:hover .app-conpherence-dark-large {
+.app-conpherence-light-large {
   background-position: -174px -29px;
 }
 
-.app-conpherence-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-conpherence-light-large {
+.app-conpherence-dark-large {
   background-position: -203px -29px;
 }
 
-.app-countdown-light-large {
+.app-conpherence-blue-large, .phabricator-crumb-view:hover .app-conpherence-dark-large {
   background-position: -232px -29px;
 }
 
-.app-countdown-dark-large {
+.app-countdown-light-large {
   background-position: -261px -29px;
 }
 
-.app-countdown-blue-large, .phabricator-crumb-view:hover .app-countdown-dark-large {
+.app-countdown-dark-large {
   background-position: -290px -29px;
 }
 
-.app-countdown-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-countdown-light-large {
+.app-countdown-blue-large, .phabricator-crumb-view:hover .app-countdown-dark-large {
   background-position: -319px -29px;
 }
 
@@ -126,518 +126,494 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -58px -58px;
 }
 
-.app-daemon-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-daemon-light-large {
+.app-differential-light-large {
   background-position: -87px -58px;
 }
 
-.app-differential-light-large {
+.app-differential-dark-large {
   background-position: -116px -58px;
 }
 
-.app-differential-dark-large {
+.app-differential-blue-large, .phabricator-crumb-view:hover .app-differential-dark-large {
   background-position: -145px -58px;
 }
 
-.app-differential-blue-large, .phabricator-crumb-view:hover .app-differential-dark-large {
+.app-diffusion-light-large {
   background-position: -174px -58px;
 }
 
-.app-differential-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-differential-light-large {
+.app-diffusion-dark-large {
   background-position: -203px -58px;
 }
 
-.app-diffusion-light-large {
+.app-diffusion-blue-large, .phabricator-crumb-view:hover .app-diffusion-dark-large {
   background-position: -232px -58px;
 }
 
-.app-diffusion-dark-large {
+.app-diviner-light-large {
   background-position: -261px -58px;
 }
 
-.app-diffusion-blue-large, .phabricator-crumb-view:hover .app-diffusion-dark-large {
+.app-diviner-dark-large {
   background-position: -290px -58px;
 }
 
-.app-diffusion-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-diffusion-light-large {
+.app-diviner-blue-large, .phabricator-crumb-view:hover .app-diviner-dark-large {
   background-position: -319px -58px;
 }
 
-.app-diviner-light-large {
+.app-drydock-light-large {
   background-position: 0px -87px;
 }
 
-.app-diviner-dark-large {
+.app-drydock-dark-large {
   background-position: -29px -87px;
 }
 
-.app-diviner-blue-large, .phabricator-crumb-view:hover .app-diviner-dark-large {
+.app-drydock-blue-large, .phabricator-crumb-view:hover .app-drydock-dark-large {
   background-position: -58px -87px;
 }
 
-.app-diviner-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-diviner-light-large {
+.app-fact-light-large {
   background-position: -87px -87px;
 }
 
-.app-drydock-light-large {
+.app-fact-dark-large {
   background-position: -116px -87px;
 }
 
-.app-drydock-dark-large {
+.app-fact-blue-large, .phabricator-crumb-view:hover .app-fact-dark-large {
   background-position: -145px -87px;
 }
 
-.app-drydock-blue-large, .phabricator-crumb-view:hover .app-drydock-dark-large {
+.app-feed-light-large {
   background-position: -174px -87px;
 }
 
-.app-drydock-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-drydock-light-large {
+.app-feed-dark-large {
   background-position: -203px -87px;
 }
 
-.app-fact-light-large {
+.app-feed-blue-large, .phabricator-crumb-view:hover .app-feed-dark-large {
   background-position: -232px -87px;
 }
 
-.app-fact-dark-large {
+.app-files-light-large {
   background-position: -261px -87px;
 }
 
-.app-fact-blue-large, .phabricator-crumb-view:hover .app-fact-dark-large {
+.app-files-dark-large {
   background-position: -290px -87px;
 }
 
-.app-fact-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-fact-light-large {
+.app-files-blue-large, .phabricator-crumb-view:hover .app-files-dark-large {
   background-position: -319px -87px;
 }
 
-.app-feed-light-large {
+.app-flags-light-large {
   background-position: 0px -116px;
 }
 
-.app-feed-dark-large {
+.app-flags-dark-large {
   background-position: -29px -116px;
 }
 
-.app-feed-blue-large, .phabricator-crumb-view:hover .app-feed-dark-large {
+.app-flags-blue-large, .phabricator-crumb-view:hover .app-flags-dark-large {
   background-position: -58px -116px;
 }
 
-.app-feed-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-feed-light-large {
+.app-harbormaster-light-large {
   background-position: -87px -116px;
 }
 
-.app-files-light-large {
+.app-harbormaster-dark-large {
   background-position: -116px -116px;
 }
 
-.app-files-dark-large {
+.app-harbormaster-blue-large, .phabricator-crumb-view:hover .app-harbormaster-dark-large {
   background-position: -145px -116px;
 }
 
-.app-files-blue-large, .phabricator-crumb-view:hover .app-files-dark-large {
+.app-help-light-large {
   background-position: -174px -116px;
 }
 
-.app-files-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-files-light-large {
+.app-help-dark-large {
   background-position: -203px -116px;
 }
 
-.app-flags-light-large {
+.app-help-blue-large, .phabricator-crumb-view:hover .app-help-dark-large {
   background-position: -232px -116px;
 }
 
-.app-flags-dark-large {
+.app-herald-light-large {
   background-position: -261px -116px;
 }
 
-.app-flags-blue-large, .phabricator-crumb-view:hover .app-flags-dark-large {
+.app-herald-dark-large {
   background-position: -290px -116px;
 }
 
-.app-flags-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-flags-light-large {
+.app-herald-blue-large, .phabricator-crumb-view:hover .app-herald-dark-large {
   background-position: -319px -116px;
 }
 
-.app-help-light-large {
+.app-home-light-large {
   background-position: 0px -145px;
 }
 
-.app-help-dark-large {
+.app-home-dark-large {
   background-position: -29px -145px;
 }
 
-.app-help-blue-large, .phabricator-crumb-view:hover .app-help-dark-large {
+.app-home-blue-large, .phabricator-crumb-view:hover .app-home-dark-large {
   background-position: -58px -145px;
 }
 
-.app-help-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-help-light-large {
+.app-logo-light-large {
   background-position: -87px -145px;
 }
 
-.app-herald-light-large {
+.app-logo-dark-large {
   background-position: -116px -145px;
 }
 
-.app-herald-dark-large {
+.app-logo-blue-large, .phabricator-crumb-view:hover .app-logo-dark-large {
   background-position: -145px -145px;
 }
 
-.app-herald-blue-large, .phabricator-crumb-view:hover .app-herald-dark-large {
+.app-macro-light-large {
   background-position: -174px -145px;
 }
 
-.app-herald-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-herald-light-large {
+.app-macro-dark-large {
   background-position: -203px -145px;
 }
 
-.app-home-light-large {
+.app-macro-blue-large, .phabricator-crumb-view:hover .app-macro-dark-large {
   background-position: -232px -145px;
 }
 
-.app-home-dark-large {
+.app-mail-light-large {
   background-position: -261px -145px;
 }
 
-.app-home-blue-large, .phabricator-crumb-view:hover .app-home-dark-large {
+.app-mail-dark-large {
   background-position: -290px -145px;
 }
 
-.app-home-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-home-light-large {
+.app-mail-blue-large, .phabricator-crumb-view:hover .app-mail-dark-large {
   background-position: -319px -145px;
 }
 
-.app-logo-light-large {
+.app-maniphest-light-large {
   background-position: 0px -174px;
 }
 
-.app-logo-dark-large {
+.app-maniphest-dark-large {
   background-position: -29px -174px;
 }
 
-.app-logo-blue-large, .phabricator-crumb-view:hover .app-logo-dark-large {
+.app-maniphest-blue-large, .phabricator-crumb-view:hover .app-maniphest-dark-large {
   background-position: -58px -174px;
 }
 
-.app-logo-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-logo-light-large {
+.app-metamta-light-large {
   background-position: -87px -174px;
 }
 
-.app-macro-light-large {
+.app-metamta-dark-large {
   background-position: -116px -174px;
 }
 
-.app-macro-dark-large {
+.app-metamta-blue-large, .phabricator-crumb-view:hover .app-metamta-dark-large {
   background-position: -145px -174px;
 }
 
-.app-macro-blue-large, .phabricator-crumb-view:hover .app-macro-dark-large {
+.app-owners-light-large {
   background-position: -174px -174px;
 }
 
-.app-macro-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-macro-light-large {
+.app-owners-dark-large {
   background-position: -203px -174px;
 }
 
-.app-mail-light-large {
+.app-owners-blue-large, .phabricator-crumb-view:hover .app-owners-dark-large {
   background-position: -232px -174px;
 }
 
-.app-mail-dark-large {
+.app-paste-light-large {
   background-position: -261px -174px;
 }
 
-.app-mail-blue-large, .phabricator-crumb-view:hover .app-mail-dark-large {
+.app-paste-dark-large {
   background-position: -290px -174px;
 }
 
-.app-mail-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-mail-light-large {
+.app-paste-blue-large, .phabricator-crumb-view:hover .app-paste-dark-large {
   background-position: -319px -174px;
 }
 
-.app-maniphest-light-large {
+.app-people-light-large {
   background-position: 0px -203px;
 }
 
-.app-maniphest-dark-large {
+.app-people-dark-large {
   background-position: -29px -203px;
 }
 
-.app-maniphest-blue-large, .phabricator-crumb-view:hover .app-maniphest-dark-large {
+.app-people-blue-large, .phabricator-crumb-view:hover .app-people-dark-large {
   background-position: -58px -203px;
 }
 
-.app-maniphest-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-maniphest-light-large {
+.app-phage-light-large {
   background-position: -87px -203px;
 }
 
-.app-metamta-light-large {
+.app-phage-dark-large {
   background-position: -116px -203px;
 }
 
-.app-metamta-dark-large {
+.app-phage-blue-large, .phabricator-crumb-view:hover .app-phage-dark-large {
   background-position: -145px -203px;
 }
 
-.app-metamta-blue-large, .phabricator-crumb-view:hover .app-metamta-dark-large {
+.app-phame-light-large {
   background-position: -174px -203px;
 }
 
-.app-metamta-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-metamta-light-large {
+.app-phame-dark-large {
   background-position: -203px -203px;
 }
 
-.app-owners-light-large {
+.app-phame-blue-large, .phabricator-crumb-view:hover .app-phame-dark-large {
   background-position: -232px -203px;
 }
 
-.app-owners-dark-large {
+.app-phid-light-large {
   background-position: -261px -203px;
 }
 
-.app-owners-blue-large, .phabricator-crumb-view:hover .app-owners-dark-large {
+.app-phid-dark-large {
   background-position: -290px -203px;
 }
 
-.app-owners-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-owners-light-large {
+.app-phid-blue-large, .phabricator-crumb-view:hover .app-phid-dark-large {
   background-position: -319px -203px;
 }
 
-.app-paste-light-large {
+.app-phlux-light-large {
   background-position: 0px -232px;
 }
 
-.app-paste-dark-large {
+.app-phlux-dark-large {
   background-position: -29px -232px;
 }
 
-.app-paste-blue-large, .phabricator-crumb-view:hover .app-paste-dark-large {
+.app-phlux-blue-large, .phabricator-crumb-view:hover .app-phlux-dark-large {
   background-position: -58px -232px;
 }
 
-.app-paste-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-paste-light-large {
+.app-pholio-light-large {
   background-position: -87px -232px;
 }
 
-.app-people-light-large {
+.app-pholio-dark-large {
   background-position: -116px -232px;
 }
 
-.app-people-dark-large {
+.app-pholio-blue-large, .phabricator-crumb-view:hover .app-pholio-dark-large {
   background-position: -145px -232px;
 }
 
-.app-people-blue-large, .phabricator-crumb-view:hover .app-people-dark-large {
+.app-phortune-light-large {
   background-position: -174px -232px;
 }
 
-.app-people-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-people-light-large {
+.app-phortune-dark-large {
   background-position: -203px -232px;
 }
 
-.app-phame-light-large {
+.app-phortune-blue-large, .phabricator-crumb-view:hover .app-phortune-dark-large {
   background-position: -232px -232px;
 }
 
-.app-phame-dark-large {
+.app-phpast-light-large {
   background-position: -261px -232px;
 }
 
-.app-phame-blue-large, .phabricator-crumb-view:hover .app-phame-dark-large {
+.app-phpast-dark-large {
   background-position: -290px -232px;
 }
 
-.app-phame-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-phame-light-large {
+.app-phpast-blue-large, .phabricator-crumb-view:hover .app-phpast-dark-large {
   background-position: -319px -232px;
 }
 
-.app-phid-light-large {
+.app-phrequent-light-large {
   background-position: 0px -261px;
 }
 
-.app-phid-dark-large {
+.app-phrequent-dark-large {
   background-position: -29px -261px;
 }
 
-.app-phid-blue-large, .phabricator-crumb-view:hover .app-phid-dark-large {
+.app-phrequent-blue-large, .phabricator-crumb-view:hover .app-phrequent-dark-large {
   background-position: -58px -261px;
 }
 
-.app-phid-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-phid-light-large {
+.app-phriction-light-large {
   background-position: -87px -261px;
 }
 
-.app-pholio-light-large {
+.app-phriction-dark-large {
   background-position: -116px -261px;
 }
 
-.app-pholio-dark-large {
+.app-phriction-blue-large, .phabricator-crumb-view:hover .app-phriction-dark-large {
   background-position: -145px -261px;
 }
 
-.app-pholio-blue-large, .phabricator-crumb-view:hover .app-pholio-dark-large {
+.app-ponder-light-large {
   background-position: -174px -261px;
 }
 
-.app-pholio-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-pholio-light-large {
+.app-ponder-dark-large {
   background-position: -203px -261px;
 }
 
-.app-phpast-light-large {
+.app-ponder-blue-large, .phabricator-crumb-view:hover .app-ponder-dark-large {
   background-position: -232px -261px;
 }
 
-.app-phpast-dark-large {
+.app-power-light-large {
   background-position: -261px -261px;
 }
 
-.app-phpast-blue-large, .phabricator-crumb-view:hover .app-phpast-dark-large {
+.app-power-dark-large {
   background-position: -290px -261px;
 }
 
-.app-phpast-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-phpast-light-large {
+.app-power-blue-large, .phabricator-crumb-view:hover .app-power-dark-large {
   background-position: -319px -261px;
 }
 
-.app-phriction-light-large {
+.app-projects-light-large {
   background-position: 0px -290px;
 }
 
-.app-phriction-dark-large {
+.app-projects-dark-large {
   background-position: -29px -290px;
 }
 
-.app-phriction-blue-large, .phabricator-crumb-view:hover .app-phriction-dark-large {
+.app-projects-blue-large, .phabricator-crumb-view:hover .app-projects-dark-large {
   background-position: -58px -290px;
 }
 
-.app-phriction-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-phriction-light-large {
+.app-releeph-light-large {
   background-position: -87px -290px;
 }
 
-.app-ponder-light-large {
+.app-releeph-dark-large {
   background-position: -116px -290px;
 }
 
-.app-ponder-dark-large {
+.app-releeph-blue-large, .phabricator-crumb-view:hover .app-releeph-dark-large {
   background-position: -145px -290px;
 }
 
-.app-ponder-blue-large, .phabricator-crumb-view:hover .app-ponder-dark-large {
+.app-repositories-light-large {
   background-position: -174px -290px;
 }
 
-.app-ponder-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-ponder-light-large {
+.app-repositories-dark-large {
   background-position: -203px -290px;
 }
 
-.app-power-light-large {
+.app-repositories-blue-large, .phabricator-crumb-view:hover .app-repositories-dark-large {
   background-position: -232px -290px;
 }
 
-.app-power-dark-large {
+.app-settings-light-large {
   background-position: -261px -290px;
 }
 
-.app-power-blue-large, .phabricator-crumb-view:hover .app-power-dark-large {
+.app-settings-dark-large {
   background-position: -290px -290px;
 }
 
-.app-power-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-power-light-large {
+.app-settings-blue-large, .phabricator-crumb-view:hover .app-settings-dark-large {
   background-position: -319px -290px;
 }
 
-.app-projects-light-large {
+.app-setup-light-large {
   background-position: 0px -319px;
 }
 
-.app-projects-dark-large {
+.app-setup-dark-large {
   background-position: -29px -319px;
 }
 
-.app-projects-blue-large, .phabricator-crumb-view:hover .app-projects-dark-large {
+.app-setup-blue-large, .phabricator-crumb-view:hover .app-setup-dark-large {
   background-position: -58px -319px;
 }
 
-.app-projects-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-projects-light-large {
+.app-slowvote-light-large {
   background-position: -87px -319px;
 }
 
-.app-repositories-light-large {
+.app-slowvote-dark-large {
   background-position: -116px -319px;
 }
 
-.app-repositories-dark-large {
+.app-slowvote-blue-large, .phabricator-crumb-view:hover .app-slowvote-dark-large {
   background-position: -145px -319px;
 }
 
-.app-repositories-blue-large, .phabricator-crumb-view:hover .app-repositories-dark-large {
+.app-token-light-large {
   background-position: -174px -319px;
 }
 
-.app-repositories-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-repositories-light-large {
+.app-token-dark-large {
   background-position: -203px -319px;
 }
 
-.app-settings-light-large {
+.app-token-blue-large, .phabricator-crumb-view:hover .app-token-dark-large {
   background-position: -232px -319px;
 }
 
-.app-settings-dark-large {
+.app-uiexamples-light-large {
   background-position: -261px -319px;
 }
 
-.app-settings-blue-large, .phabricator-crumb-view:hover .app-settings-dark-large {
+.app-uiexamples-dark-large {
   background-position: -290px -319px;
 }
 
-.app-settings-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-settings-light-large {
+.app-uiexamples-blue-large, .phabricator-crumb-view:hover .app-uiexamples-dark-large {
   background-position: -319px -319px;
 }
 
-.app-setup-light-large {
+.app-workphlow-light-large {
   background-position: 0px -348px;
 }
 
-.app-setup-dark-large {
+.app-workphlow-dark-large {
   background-position: -29px -348px;
 }
 
-.app-setup-blue-large, .phabricator-crumb-view:hover .app-setup-dark-large {
+.app-workphlow-blue-large, .phabricator-crumb-view:hover .app-workphlow-dark-large {
   background-position: -58px -348px;
 }
 
-.app-setup-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-setup-light-large {
+.app-xhprof-light-large {
   background-position: -87px -348px;
 }
 
-.app-slowvote-light-large {
+.app-xhprof-dark-large {
   background-position: -116px -348px;
 }
 
-.app-slowvote-dark-large {
+.app-xhprof-blue-large, .phabricator-crumb-view:hover .app-xhprof-dark-large {
   background-position: -145px -348px;
-}
-
-.app-slowvote-blue-large, .phabricator-crumb-view:hover .app-slowvote-dark-large {
-  background-position: -174px -348px;
-}
-
-.app-slowvote-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-slowvote-light-large {
-  background-position: -203px -348px;
-}
-
-.app-uiexamples-light-large {
-  background-position: -232px -348px;
-}
-
-.app-uiexamples-dark-large {
-  background-position: -261px -348px;
-}
-
-.app-uiexamples-blue-large, .phabricator-crumb-view:hover .app-uiexamples-dark-large {
-  background-position: -290px -348px;
-}
-
-.app-uiexamples-glow-large, .device-desktop .phabricator-dark-menu a:hover .app-uiexamples-light-large {
-  background-position: -319px -348px;
 }

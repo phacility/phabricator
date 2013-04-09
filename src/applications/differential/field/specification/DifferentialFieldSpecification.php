@@ -277,13 +277,8 @@ abstract class DifferentialFieldSpecification {
       return phutil_tag('em', array(), pht('None'));
     }
 
-    $links = array();
-    foreach ($user_phids as $user_phid) {
-      $handle = $this->getHandle($user_phid);
-      $links[] = $handle->renderLink();
-    }
-
-    return phutil_implode_html(', ', $links);
+    return implode_selected_handle_links(', ',
+      $this->getLoadedHandles(), $user_phids);
   }
 
 
@@ -667,6 +662,10 @@ abstract class DifferentialFieldSpecification {
     return;
   }
 
+  public function getCommitMessageTips() {
+      return array();
+  }
+
 
 /* -(  Loading Additional Data  )-------------------------------------------- */
 
@@ -982,6 +981,14 @@ abstract class DifferentialFieldSpecification {
         "PHIDs you need from getRequiredHandlePHIDs().");
     }
     return $this->handles[$phid];
+  }
+
+  final protected function getLoadedHandles() {
+    if ($this->handles === null) {
+      throw new DifferentialFieldDataNotAvailableException($this);
+    }
+
+    return $this->handles;
   }
 
   /**

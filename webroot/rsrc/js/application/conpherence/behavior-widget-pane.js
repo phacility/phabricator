@@ -1,8 +1,11 @@
 /**
- * @provides javelin-behavior-conpherence-widget-pane
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
+ *           javelin-workflow
+ *           javelin-util
+ *           phabricator-notification
+ * @provides javelin-behavior-conpherence-widget-pane
  */
 
 JX.behavior('conpherence-widget-pane', function(config) {
@@ -34,6 +37,96 @@ JX.behavior('conpherence-widget-pane', function(config) {
         }
       }
     }
+  );
+
+  /* people widget */
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
+    'add-person',
+    function (e) {
+      e.kill();
+      var root = e.getNode('conpherence-layout');
+      var form = e.getNode('tag:form');
+      var data = e.getNodeData('add-person');
+      var peopleRoot = e.getNode('widgets-people');
+      var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+      var header = JX.DOM.find(root, 'div', 'conpherence-header');
+      var latestTransactionData = JX.Stratcom.getData(
+        JX.DOM.find(
+          root,
+          'input',
+          'latest-transaction-id'
+      ));
+      data.latest_transaction_id = latestTransactionData.id;
+      JX.Workflow.newFromForm(form, data)
+      .setHandler(JX.bind(this, function (r) {
+        // update the transactions
+        JX.DOM.appendContent(messages, JX.$H(r.transactions));
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+          JX.DOM.replace(
+            JX.$(r.conpherence_phid + '-nav-item'),
+            JX.$H(r.nav_item));
+          JX.Stratcom.invoke(
+            'conpherence-selectthread',
+            null,
+            { id : r.conpherence_phid + '-nav-item' }
+          );
+        } catch (ex) {
+          // Ignore; this view may not have a menu.
+        }
+
+        // update the header
+        JX.DOM.setContent(
+          header,
+          JX.$H(r.header)
+       );
+
+        // update the people widget
+        JX.DOM.setContent(
+          peopleRoot,
+          JX.$H(r.people_widget)
+        );
+      }))
+      .start();
+    }
+  );
+
+  JX.Stratcom.listen(
+    ['click'],
+    'remove-person',
+    function (e) {
+      var peopleRoot = e.getNode('widgets-people');
+      var form = JX.DOM.find(peopleRoot, 'form');
+      var data = e.getNodeData('remove-person');
+      // we end up re-directing to conpherence home
+      JX.Workflow.newFromForm(form, data)
+      .start();
+    }
+  );
+
+  /* settings widget */
+  var onsubmitSettings = function (e) {
+    e.kill();
+    var form = e.getNode('tag:form');
+    var button = JX.DOM.find(form, 'button');
+    JX.Workflow.newFromForm(form)
+    .setHandler(JX.bind(this, function (r) {
+      new JX.Notification()
+      .setDuration(6000)
+      .setContent(r)
+      .show();
+      button.disabled = '';
+      JX.DOM.alterClass(button, 'disabled', false);
+    }))
+    .start();
+  };
+
+  JX.Stratcom.listen(
+    ['submit', 'didSyntheticSubmit'],
+    'notifications-update',
+    onsubmitSettings
   );
 
 });

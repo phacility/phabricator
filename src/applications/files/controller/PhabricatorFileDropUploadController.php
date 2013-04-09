@@ -18,6 +18,7 @@ final class PhabricatorFileDropUploadController
       array(
         'name' => $request->getStr('name'),
         'authorPHID' => $user->getPHID(),
+        'isExplicitUpload' => true,
       ));
 
     $view = new AphrontAttachedFileView();

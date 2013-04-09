@@ -41,14 +41,18 @@ final class PhabricatorMainMenuView extends AphrontView {
     $header_id = celerity_generate_unique_node_id();
     $menus = array();
     $alerts = array();
+    $search_button = '';
+    $app_button = '';
 
     if ($user->isLoggedIn()) {
       list($menu, $dropdown) = $this->renderNotificationMenu();
       $alerts[] = $menu;
       $menus[] = $dropdown;
+      $app_button = $this->renderApplicationMenuButton($header_id);
+      $search_button = $this->renderSearchMenuButton($header_id);
     }
 
-    $phabricator_menu = $this->renderPhabricatorMenu();
+    $search_menu = $this->renderPhabricatorSearchMenu();
 
     if ($alerts) {
       $alerts = phutil_tag(
@@ -59,11 +63,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         $alerts);
     }
 
-    $application_menu = $this->getApplicationMenu();
-    if ($application_menu) {
-      $application_menu->addClass('phabricator-dark-menu');
-      $application_menu->addClass('phabricator-application-menu');
-    }
+    $application_menu = $this->renderApplicationMenu();
 
     return phutil_tag(
       'div',
@@ -72,14 +72,12 @@ final class PhabricatorMainMenuView extends AphrontView {
         'id'    => $header_id,
       ),
       array(
-        $this->renderPhabricatorMenuButton($header_id),
-        $application_menu
-          ? $this->renderApplicationMenuButton($header_id)
-          : null,
+        $app_button,
+        $search_button,
         $this->renderPhabricatorLogo(),
         $alerts,
-        $phabricator_menu,
         $application_menu,
+        $search_menu,
         $menus,
       ));
   }
@@ -116,37 +114,13 @@ final class PhabricatorMainMenuView extends AphrontView {
     return $result;
   }
 
-  private function renderPhabricatorMenuButton($header_id) {
-    $button_id = celerity_generate_unique_node_id();
-    return javelin_tag(
-      'a',
-      array(
-        'class' => 'phabricator-main-menu-expand-button '.
-                   'phabricator-expand-core-menu',
-        'sigil' => 'jx-toggle-class',
-        'meta'  => array(
-          'map' => array(
-            $header_id => 'phabricator-core-menu-expanded',
-            $button_id => 'menu-icon-eye-blue',
-          ),
-        ),
-      ),
-      phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-eye',
-          'id' => $button_id,
-        ),
-        ''));
-  }
-
   public function renderApplicationMenuButton($header_id) {
     $button_id = celerity_generate_unique_node_id();
     return javelin_tag(
       'a',
       array(
         'class' => 'phabricator-main-menu-expand-button '.
-                   'phabricator-expand-application-menu',
+                   'phabricator-expand-search-menu',
         'sigil' => 'jx-toggle-class',
         'meta'  => array(
           'map' => array(
@@ -164,81 +138,30 @@ final class PhabricatorMainMenuView extends AphrontView {
         ''));
   }
 
-  private function renderPhabricatorMenu() {
+  public function renderApplicationMenu() {
     $user = $this->getUser();
     $controller = $this->getController();
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
 
-    $core = array();
-    $more = array();
     $actions = array();
-
-    require_celerity_resource('sprite-apps-large-css');
-
-    $group_core = PhabricatorApplication::GROUP_CORE;
     foreach ($applications as $application) {
       if ($application->shouldAppearInLaunchView()) {
-        $icon = $application->getIconName().'-light-large';
-
-        $item = id(new PhabricatorMenuItemView())
-          ->setName($application->getName())
-          ->setHref($application->getBaseURI())
-          ->appendChild($this->renderMenuIcon($icon));
-        if ($application->getApplicationGroup() == $group_core) {
-          $core[] = $item;
-        } else {
-          $more[$application->getName()] = $item;
+        $app_actions = $application->buildMainMenuItems($user, $controller);
+        foreach ($app_actions as $action) {
+          $actions[] = $action;
         }
       }
-
-      $app_actions = $application->buildMainMenuItems($user, $controller);
-      foreach ($app_actions as $action) {
-        $actions[] = $action;
-      }
     }
 
+    $view = $this->getApplicationMenu();
 
-    $view = new PhabricatorMenuView();
+    if (!$view) {
+      $view = new PhabricatorMenuView();
+    }
+
     $view->addClass('phabricator-dark-menu');
-    $view->addClass('phabricator-core-menu');
-
-    $search = $this->renderSearch();
-    if ($search) {
-      $view->addMenuItem($search);
-    }
-
-    $view
-      ->newLabel(pht('Home'))
-      ->addClass('phabricator-core-item-device');
-    $view->addMenuItem(
-      id(new PhabricatorMenuItemView())
-        ->addClass('phabricator-core-item-device')
-        ->setName(pht('Phabricator Home'))
-        ->setHref('/')
-        ->appendChild($this->renderMenuIcon('logo-light-large')));
-    if ($controller && $controller->getCurrentApplication()) {
-      $application = $controller->getCurrentApplication();
-      $icon = $application->getIconName().'-light-large';
-      $view->addMenuItem(
-        id(new PhabricatorMenuItemView())
-          ->addClass('phabricator-core-item-device')
-          ->setName(pht('%s Home', $application->getName()))
-          ->appendChild($this->renderMenuIcon($icon))
-          ->setHref($controller->getApplicationURI()));
-    }
-
-    if ($core) {
-      $view->addMenuItem(
-        id(new PhabricatorMenuItemView())
-          ->addClass('phabricator-core-item-device')
-          ->setType(PhabricatorMenuItemView::TYPE_LABEL)
-          ->setName(pht('Core Applications')));
-      foreach ($core as $item) {
-        $item->addClass('phabricator-core-item-device');
-        $view->addMenuItem($item);
-      }
-    }
+    $view->addClass('phabricator-application-menu');
 
     if ($actions) {
       $view->addMenuItem(
@@ -259,19 +182,53 @@ final class PhabricatorMainMenuView extends AphrontView {
       }
     }
 
-    if ($more) {
+    if ($user->isLoggedIn()) {
       $view->addMenuItem(
         id(new PhabricatorMenuItemView())
-          ->addClass('phabricator-core-item-device')
-          ->setType(PhabricatorMenuItemView::TYPE_LABEL)
-          ->setName(pht('More Applications')));
-      ksort($more);
-      foreach ($more as $item) {
-        $item->addClass('phabricator-core-item-device');
-        $view->addMenuItem($item);
-      }
+          ->addClass('phabricator-menu-item-type-link')
+          ->addClass('phabricator-core-menu-item')
+          ->setName(pht('Log Out'))
+          ->setHref('/logout/')
+          ->appendChild($this->renderMenuIcon('power-light-large')));
     }
 
+    return $view;
+  }
+
+  public function renderSearchMenuButton($header_id) {
+    $button_id = celerity_generate_unique_node_id();
+    return javelin_tag(
+      'a',
+      array(
+        'class' => 'phabricator-main-menu-search-button '.
+                   'phabricator-expand-application-menu',
+        'sigil' => 'jx-toggle-class',
+        'meta'  => array(
+          'map' => array(
+            $header_id => 'phabricator-search-menu-expanded',
+            $button_id => 'menu-icon-search-blue',
+          ),
+        ),
+      ),
+      phutil_tag(
+      'span',
+      array(
+        'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-search',
+        'id' => $button_id,
+      ),
+      ''));
+  }
+
+  private function renderPhabricatorSearchMenu() {
+
+    $view = new PhabricatorMenuView();
+    $view->addClass('phabricator-dark-menu');
+    $view->addClass('phabricator-search-menu');
+
+    $search = $this->renderSearch();
+    if ($search) {
+      $view->addMenuItem($search);
+    }
 
     return $view;
   }
@@ -303,12 +260,9 @@ final class PhabricatorMainMenuView extends AphrontView {
       'alert-notifications',
     );
 
-    $conpherence = id(new PhabricatorApplicationConpherence())->isBeta();
-    $allow_beta =
-      PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
     $message_tag = '';
-
-    if (!$conpherence || $allow_beta) {
+    $conpherence = 'PhabricatorApplicationConpherence';
+    if (PhabricatorApplication::isClassInstalled($conpherence)) {
       $message_id = celerity_generate_unique_node_id();
       $message_count_id = celerity_generate_unique_node_id();
 

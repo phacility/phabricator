@@ -1,0 +1,15 @@
+/**
+ * @provides phabricator-action-icon-view-css
+ */
+
+.phabricator-action-icon-item-link.sprite-minicons {
+  display: block;
+  height: 16px;
+  width: 16px;
+}
+
+.phabricator-action-icon-item-link.sprite-actions {
+  display: block;
+  height: 24px;
+  width: 24px;
+}

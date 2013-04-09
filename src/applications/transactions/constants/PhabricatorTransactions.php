@@ -6,6 +6,7 @@ final class PhabricatorTransactions {
   const TYPE_SUBSCRIBERS  = 'core:subscribers';
   const TYPE_VIEW_POLICY  = 'core:view-policy';
   const TYPE_EDIT_POLICY  = 'core:edit-policy';
+  const TYPE_EDGE         = 'core:edge';
 
   const COLOR_RED         = 'red';
   const COLOR_ORANGE      = 'orange';

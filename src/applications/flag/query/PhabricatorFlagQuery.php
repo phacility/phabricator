@@ -13,6 +13,12 @@ final class PhabricatorFlagQuery {
   private $needObjects;
   private $viewer;
 
+  private $order     = 'order-id';
+  const ORDER_ID     = 'order-id';
+  const ORDER_COLOR  = 'order-color';
+  const ORDER_OBJECT = 'order-object';
+  const ORDER_REASON = 'order-reason';
+
   public function setViewer($viewer) {
     $this->viewer = $viewer;
     return $this;
@@ -30,6 +36,11 @@ final class PhabricatorFlagQuery {
 
   public function withObjectPHIDs(array $object_phids) {
     $this->objectPHIDs = $object_phids;
+    return $this;
+  }
+
+  public function withOrder($order) {
+    $this->order = $order;
     return $this;
   }
 
@@ -143,7 +154,29 @@ final class PhabricatorFlagQuery {
   }
 
   private function buildOrderClause($conn_r) {
-    return 'ORDER BY id DESC';
+    return qsprintf($conn_r,
+      'ORDER BY %Q',
+      $this->getOrderColumn($conn_r));
+  }
+
+  private function getOrderColumn($conn_r) {
+    switch ($this->order) {
+      case self::ORDER_ID:
+        return 'id DESC';
+        break;
+      case self::ORDER_COLOR:
+        return 'color ASC';
+        break;
+      case self::ORDER_OBJECT:
+        return 'type DESC';
+        break;
+      case self::ORDER_REASON:
+        return 'reasonPHID DESC';
+        break;
+      default:
+        throw new Exception("Unknown order {$this->order}!");
+        break;
+    }
   }
 
   private function buildLimitClause($conn_r) {

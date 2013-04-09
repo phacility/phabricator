@@ -2,10 +2,6 @@
  * @provides phabricator-crumbs-view-css
  */
 
-.device .phabricator-crumbs-view {
-  display: none;
-}
-
 .phabricator-crumbs-view {
   background-color: #d8dce2;
   height: 31px;
@@ -43,12 +39,25 @@
   line-height: 31px;
 }
 
+.device-phone .phabricator-crumb-view {
+  display: none;
+}
+
+.device-phone .phabricator-crumb-view.phabricator-last-crumb,
+.device-phone .phabricator-crumb-view.phabricator-crumb-has-icon {
+  display: inline-block;
+}
+
 .phabricator-crumb-icon {
   display: inline-block;
   width: 28px;
   height: 28px;
   margin: 2px 2px 0 13px;
   vertical-align: top;
+}
+
+.device-phone .phabricator-crumb-icon {
+  margin-left: 7px;
 }
 
 .phabricator-crumbs-actions {
@@ -60,6 +69,19 @@
   height: 17px;
   padding: 8px 14px 8px 24px;
   position: relative;
+}
+
+.device-phone a.phabricator-crumbs-action {
+  padding: 13px 20px 4px 10px;
+  border-left: 1px solid #ccc;
+}
+
+.device-phone .phabricator-crumbs-action-name {
+  display: none;
+}
+
+.device-phone a.phabricator-crumbs-action .sprite-icon {
+  margin-left: 5px;
 }
 
 .phabricator-crumbs-action .sprite-icon {

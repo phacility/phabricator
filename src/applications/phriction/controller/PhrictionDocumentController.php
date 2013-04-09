@@ -97,11 +97,19 @@ final class PhrictionDocumentController
         }
       }
 
+      $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $document->getPHID());
+
       $phids = array_filter(
         array(
           $content->getAuthorPHID(),
           $project_phid,
         ));
+
+      if ($subscribers) {
+        $phids = array_merge($phids, $subscribers);
+      }
+
       $handles = $this->loadViewerHandles($phids);
 
       $age = time() - $content->getDateCreated();
@@ -124,19 +132,29 @@ final class PhrictionDocumentController
             $handles[$project_phid]->renderLink()));
       }
 
-      $index_link = phutil_tag(
-        'a',
-        array(
-          'href' => '/phriction/',
-        ),
-        pht('Document Index'));
+      $subscriber_view = null;
+      if ($subscribers) {
+        $subcriber_list = array();
+        foreach ($subscribers as $subscriber) {
+          $subcriber_list[] = $handles[$subscriber];
+        }
+
+        $subcriber_list = phutil_implode_html(', ',
+          mpull($subcriber_list, 'renderLink'));
+
+        $subscriber_view = array(
+          hsprintf('<br />Subscribers: '),
+          $subcriber_list,
+        );
+      }
 
       $byline = hsprintf(
-        '<div class="phriction-byline">%s%s</div>',
+        '<div class="phriction-byline">%s%s%s</div>',
         pht('Last updated %s by %s.',
           $when,
           $handles[$content->getAuthorPHID()]->renderLink()),
-        $project_info);
+        $project_info,
+        $subscriber_view);
 
 
       $doc_status = $document->getStatus();
@@ -194,8 +212,7 @@ final class PhrictionDocumentController
       }
 
       $page_content = hsprintf(
-        '<div class="phriction-content">%s%s%s%s</div>',
-        $index_link,
+        '<div class="phriction-content">%s%s%s</div>',
         $byline,
         $move_notice,
         $core_content);

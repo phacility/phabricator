@@ -96,7 +96,7 @@ final class PhabricatorSettingsPanelOAuth
       $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue(pht('Link %s Account \xC2\xBB', $provider_name)));
+            ->setValue(pht("Link %s Account \xC2\xBB", $provider_name)));
     } else {
       $expires = $oauth_info->getTokenExpires();
 

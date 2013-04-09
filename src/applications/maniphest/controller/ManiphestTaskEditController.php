@@ -63,6 +63,9 @@ final class ManiphestTaskEditController extends ManiphestController {
       $parent_id = $request->getInt('parent');
       if ($parent_id) {
         $parent_task = id(new ManiphestTask())->load($parent_id);
+        if (!$template_id) {
+          $template_id = $parent_id;
+        }
       }
     }
 
@@ -532,8 +535,20 @@ final class ManiphestTaskEditController extends ManiphestController {
       $page_objects = array();
     }
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($header_name)
+        ->setHref($this->getApplicationURI('/task/create/')))
+      ->addAction(
+        id(new PhabricatorMenuItemView())
+          ->setHref($this->getApplicationURI('/task/create/'))
+          ->setName(pht('Create Task'))
+          ->setIcon('create'));
+
     return $this->buildApplicationPage(
       array(
+        $crumbs,
         $error_view,
         $panel,
         $description_preview_panel,

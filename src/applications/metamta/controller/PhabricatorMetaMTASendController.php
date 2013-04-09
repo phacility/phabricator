@@ -32,6 +32,7 @@ final class PhabricatorMetaMTASendController
       $mail->setIsHTML($request->getInt('html'));
       $mail->setIsBulk($request->getInt('bulk'));
       $mail->setMailTags($request->getStrList('mailtags'));
+      $mail->setOverrideNoSelfMailPreference(true);
       $mail->save();
       if ($request->getInt('immediately')) {
         $mail->sendNow();

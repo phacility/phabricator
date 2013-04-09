@@ -1,0 +1,20 @@
+/**
+ * @provides phrequent-css
+ */
+
+.phrequent-tracking-property {
+  padding: 6px 6px 6px 28px;
+  margin-bottom: 2px;
+  background: #e9e9e9;
+  background-repeat: no-repeat;
+  background-position: 6px center;
+}
+
+.phrequent-active {
+  background-image: url(/rsrc/image/phrequent_active.png);
+}
+
+.phrequent-on-stack {
+  color: #777777;
+  background-image: url(/rsrc/image/phrequent_inactive.png);
+}

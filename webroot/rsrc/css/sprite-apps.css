@@ -13,57 +13,65 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-apps {
     background-image: url(/rsrc/image/sprite-apps-X2.png);
-    background-size: 90px 105px;
+    background-size: 105px 120px;
   }
 }
 
 
-.app-application-dark {
+.app-adventure-dark {
   background-position: 0px 0px;
 }
 
-.app-audit-dark {
+.app-application-dark {
   background-position: -15px 0px;
 }
 
-.app-calendar-dark {
+.app-audit-dark {
   background-position: -30px 0px;
 }
 
-.app-conduit-dark {
+.app-calendar-dark {
   background-position: -45px 0px;
 }
 
-.app-conpherence-dark {
+.app-chatlog-dark {
   background-position: -60px 0px;
 }
 
-.app-countdown-dark {
+.app-conduit-dark {
   background-position: -75px 0px;
 }
 
-.app-daemon-dark {
+.app-conpherence-dark {
+  background-position: -90px 0px;
+}
+
+.app-countdown-dark {
   background-position: 0px -15px;
 }
 
-.app-differential-dark {
+.app-daemon-dark {
   background-position: -15px -15px;
 }
 
-.app-diffusion-dark {
+.app-differential-dark {
   background-position: -30px -15px;
 }
 
-.app-diviner-dark {
+.app-diffusion-dark {
   background-position: -45px -15px;
 }
 
-.app-drydock-dark {
+.app-diviner-dark {
   background-position: -60px -15px;
 }
 
-.app-fact-dark {
+.app-drydock-dark {
   background-position: -75px -15px;
+}
+
+.app-fact-dark {
+  background-position: -90px -15px;
 }
 
 .app-feed-dark {
@@ -78,16 +86,20 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -30px -30px;
 }
 
-.app-help-dark {
+.app-harbormaster-dark {
   background-position: -45px -30px;
 }
 
-.app-herald-dark {
+.app-help-dark {
   background-position: -60px -30px;
 }
 
-.app-home-dark {
+.app-herald-dark {
   background-position: -75px -30px;
+}
+
+.app-home-dark {
+  background-position: -90px -30px;
 }
 
 .app-logo-dark {
@@ -115,10 +127,14 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .app-paste-dark {
-  background-position: 0px -60px;
+  background-position: -90px -45px;
 }
 
 .app-people-dark {
+  background-position: 0px -60px;
+}
+
+.app-phage-dark {
   background-position: -15px -60px;
 }
 
@@ -130,46 +146,74 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -45px -60px;
 }
 
-.app-pholio-dark {
+.app-phlux-dark {
   background-position: -60px -60px;
 }
 
-.app-phpast-dark {
+.app-pholio-dark {
   background-position: -75px -60px;
 }
 
-.app-phriction-dark {
+.app-phortune-dark {
+  background-position: -90px -60px;
+}
+
+.app-phpast-dark {
   background-position: 0px -75px;
 }
 
-.app-ponder-dark {
+.app-phrequent-dark {
   background-position: -15px -75px;
 }
 
-.app-power-dark {
+.app-phriction-dark {
   background-position: -30px -75px;
 }
 
-.app-projects-dark {
+.app-ponder-dark {
   background-position: -45px -75px;
 }
 
-.app-repositories-dark {
+.app-power-dark {
   background-position: -60px -75px;
 }
 
-.app-settings-dark {
+.app-projects-dark {
   background-position: -75px -75px;
 }
 
-.app-setup-dark {
+.app-releeph-dark {
+  background-position: -90px -75px;
+}
+
+.app-repositories-dark {
   background-position: 0px -90px;
 }
 
-.app-slowvote-dark {
+.app-settings-dark {
   background-position: -15px -90px;
 }
 
-.app-uiexamples-dark {
+.app-setup-dark {
   background-position: -30px -90px;
+}
+
+.app-slowvote-dark {
+  background-position: -45px -90px;
+}
+
+.app-token-dark {
+  background-position: -60px -90px;
+}
+
+.app-uiexamples-dark {
+  background-position: -75px -90px;
+}
+
+.app-workphlow-dark {
+  background-position: -90px -90px;
+}
+
+.app-xhprof-dark {
+  background-position: 0px -105px;
 }

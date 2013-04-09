@@ -61,6 +61,8 @@ final class PhabricatorTokenGivenQuery
         $this->tokenPHIDs);
     }
 
+    $where[] = $this->buildPagingClause($conn_r);
+
     return $this->formatWhereClause($where);
   }
 
