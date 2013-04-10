@@ -12,6 +12,7 @@ final class PhabricatorSetupIssue {
   private $isIgnored = false;
   private $phpExtensions = array();
   private $phabricatorConfig = array();
+  private $relatedPhabricatorConfig = array();
   private $phpConfig = array();
   private $commands = array();
 
@@ -91,6 +92,15 @@ final class PhabricatorSetupIssue {
 
   public function getPhabricatorConfig() {
     return $this->phabricatorConfig;
+  }
+
+  public function addRelatedPhabricatorConfig($phabricator_config) {
+    $this->relatedPhabricatorConfig[] = $phabricator_config;
+    return $this;
+  }
+
+  public function getRelatedPhabricatorConfig() {
+    return $this->relatedPhabricatorConfig;
   }
 
   public function addPHPExtension($php_extension) {

@@ -17,7 +17,7 @@ final class PhabricatorSetupCheckFacebook extends PhabricatorSetupCheck {
       $this->newIssue('config.facebook.application-id')
         ->setName(pht("Facebook Application ID Not Set"))
         ->setMessage($message)
-        ->addPhabricatorConfig('facebook.auth-enabled')
+        ->addRelatedPhabricatorConfig('facebook.auth-enabled')
         ->addPhabricatorConfig('facebook.application-id');
     }
 
@@ -30,7 +30,7 @@ final class PhabricatorSetupCheckFacebook extends PhabricatorSetupCheck {
       $this->newIssue('config.facebook.application-secret')
         ->setName(pht("Facebook Application Secret Not Set"))
         ->setMessage($message)
-        ->addPhabricatorConfig('facebook.auth-enabled')
+        ->addRelatedPhabricatorConfig('facebook.auth-enabled')
         ->addPhabricatorConfig('facebook.application-secret');
     }
   }

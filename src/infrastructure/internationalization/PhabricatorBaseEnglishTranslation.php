@@ -9,6 +9,10 @@ abstract class PhabricatorBaseEnglishTranslation
 
   public function getTranslations() {
     return array(
+      'These %d configuration value(s) are related:' => array(
+        'This configuration value is related:',
+        'These configuration values are related:',
+      ),
       'Differential Revision(s)' => array(
         'Differential Revision',
         'Differential Revisions',
