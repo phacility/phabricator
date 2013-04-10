@@ -725,12 +725,12 @@ celerity_register_resource_map(array(
   ),
   'aphront-bars' =>
   array(
-    'uri' => '/res/d7bd9032/rsrc/css/core/aphront-bars.css',
+    'uri' => '/res/95a907d6/rsrc/css/aphront/aphront-bars.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/css/core/aphront-bars.css',
+    'disk' => '/rsrc/css/aphront/aphront-bars.css',
   ),
   'aphront-calendar-view-css' =>
   array(
@@ -806,12 +806,12 @@ celerity_register_resource_map(array(
   ),
   'aphront-notes' =>
   array(
-    'uri' => '/res/f8f3dcfa/rsrc/css/core/aphront-notes.css',
+    'uri' => '/res/5b8ebfa0/rsrc/css/aphront/aphront-notes.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/css/core/aphront-notes.css',
+    'disk' => '/rsrc/css/aphront/aphront-notes.css',
   ),
   'aphront-pager-view-css' =>
   array(
