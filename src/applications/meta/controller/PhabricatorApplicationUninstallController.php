@@ -23,31 +23,45 @@ final class PhabricatorApplicationUninstallController
 
     $view_uri = $this->getApplicationURI('view/'.$this->application);
 
-    if ($request->isDialogFormPost()) {
-      $this->manageApplication();
-      return id(new AphrontRedirectResponse())->setURI($view_uri);
-    }
+    $beta_enabled = PhabricatorEnv::getEnvConfig(
+      'phabricator.show-beta-applications');
 
     $dialog = id(new AphrontDialogView())
                ->setUser($user)
                ->addCancelButton($view_uri);
 
+    if ($selected->isBeta() && !$beta_enabled) {
+      $dialog
+        ->setTitle(pht('Beta Applications Not Enabled'))
+        ->appendChild(
+          pht(
+            'To manage beta applications, enable them by setting %s in your '.
+            'Phabricator configuration.',
+            phutil_tag('tt', array(), 'phabricator.show-beta-applications')));
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
+
+    if ($request->isDialogFormPost()) {
+      $this->manageApplication();
+      return id(new AphrontRedirectResponse())->setURI($view_uri);
+    }
+
     if ($this->action == 'install') {
       if ($selected->canUninstall()) {
         $dialog->setTitle('Confirmation')
                ->appendChild(
-                 'Install '. $selected->getName(). ' application ?')
+                 'Install '. $selected->getName(). ' application?')
                ->addSubmitButton('Install');
 
       } else {
         $dialog->setTitle('Information')
-               ->appendChild('You cannot install a installed application.');
+               ->appendChild('You cannot install an installed application.');
       }
     } else {
       if ($selected->canUninstall()) {
         $dialog->setTitle('Confirmation')
                ->appendChild(
-                 'Really Uninstall '. $selected->getName(). ' application ?')
+                 'Really Uninstall '. $selected->getName(). ' application?')
                ->addSubmitButton('Uninstall');
       } else {
         $dialog->setTitle('Information')
@@ -65,7 +79,7 @@ final class PhabricatorApplicationUninstallController
     $list = $config_entry->getValue();
     $uninstalled = PhabricatorEnv::getEnvConfig($key);
 
-    if ($uninstalled[$this->application]) {
+    if (isset($uninstalled[$this->application])) {
       unset($list[$this->application]);
     } else {
       $list[$this->application] = true;
