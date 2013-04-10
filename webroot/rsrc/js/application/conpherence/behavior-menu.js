@@ -47,6 +47,8 @@ JX.behavior('conpherence-menu', function(config) {
     thread.selected = data.id;
 
     JX.History.replace(config.base_uri + data.id + '/');
+    document.title = data.title;
+
     redrawthread();
   }
 
@@ -139,16 +141,13 @@ JX.behavior('conpherence-menu', function(config) {
     var form = JX.DOM.find(root, 'form', 'conpherence-pontificate');
     var data = e.getNodeData('conpherence-edit-metadata');
     var header = JX.DOM.find(root, 'div', 'conpherence-header');
-    var peopleWidget = null;
-    try {
-      peopleWidget = JX.DOM.find(root, 'div', 'widgets-people');
-    } catch (ex) {
-      // Ignore; maybe no people widget
-    }
+    var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
 
     new JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function(r) {
-        // update the header
+        JX.DOM.appendContent(messages, JX.$H(r.transactions));
+        messages.scrollTop = messages.scrollHeight;
+
         JX.DOM.setContent(
           header,
           JX.$H(r.header)
@@ -167,14 +166,6 @@ JX.behavior('conpherence-menu', function(config) {
           );
         } catch (ex) {
           // Ignore; this view may not have a menu.
-        }
-
-        if (peopleWidget) {
-          // update the people widget
-          JX.DOM.setContent(
-            peopleWidget,
-            JX.$H(r.people_widget)
-          );
         }
       }))
       .start();

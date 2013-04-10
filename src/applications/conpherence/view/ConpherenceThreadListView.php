@@ -79,6 +79,7 @@ final class ConpherenceThreadListView extends AphrontView {
       ->addSigil('conpherence-menu-click')
       ->setMetadata(
         array(
+          'title' => $title,
           'id' => $thread->getID(),
           ));
   }
