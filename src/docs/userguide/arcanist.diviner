@@ -47,7 +47,7 @@ Arcanist allows you to do things like:
   - download a patch from Differential with ##arc export##
   - update Git commit messages after review with ##arc amend##
   - commit SVN changes with ##arc commit##
-  - push Git changes with ##arc land##
+  - push Git and Mercurial changes with ##arc land##
   - view enhanced information about Git branches with ##arc branch##
 
 Once you've configured lint and unit test integration, you can also:
