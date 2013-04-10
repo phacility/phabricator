@@ -10,8 +10,13 @@
 
 JX.behavior('phabricator-hovercards', function(config) {
 
+  // We listen for mousemove instead of mouseover to handle the case when user
+  // scrolls with keyboard. We don't want to display hovercard if node gets
+  // under the mouse cursor randomly placed somewhere on the screen. This
+  // unfortunatelly doesn't work in Google Chrome which triggers both mousemove
+  // and mouseover in this case but works in other browsers.
   JX.Stratcom.listen(
-    'mouseover',
+    'mousemove',
     'hovercard',
     function (e) {
       if (JX.Device.getDevice() != 'desktop') {

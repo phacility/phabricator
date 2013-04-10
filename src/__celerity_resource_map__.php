@@ -1899,7 +1899,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-hovercards' =>
   array(
-    'uri' => '/res/7c16603a/rsrc/js/application/core/behavior-hovercard.js',
+    'uri' => '/res/b8b4bb47/rsrc/js/application/core/behavior-hovercard.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3639,33 +3639,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/ponder/vote.css',
   ),
-  'raphael-core' =>
-  array(
-    'uri' => '/res/3f48575a/rsrc/js/raphael/raphael.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/raphael/raphael.js',
-  ),
-  'raphael-g' =>
-  array(
-    'uri' => '/res/b07e5245/rsrc/js/raphael/g.raphael.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/raphael/g.raphael.js',
-  ),
-  'raphael-g-line' =>
-  array(
-    'uri' => '/res/a59c8556/rsrc/js/raphael/g.raphael.line.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/raphael/g.raphael.line.js',
-  ),
   'releeph-branch' =>
   array(
     'uri' => '/res/6ad6420d/rsrc/css/application/releeph/releeph-branch.css',
@@ -3863,15 +3836,6 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/sprite-tokens.css',
-  ),
-  'stripe-core' =>
-  array(
-    'uri' => '/res/3b0f0ad4/rsrc/js/stripe/stripe_core.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/stripe/stripe_core.js',
   ),
   'stripe-payment-form-css' =>
   array(
