@@ -1340,7 +1340,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-dark-console' =>
   array(
-    'uri' => '/res/89aeb6c0/rsrc/js/application/core/behavior-dark-console.js',
+    'uri' => '/res/3860fcf3/rsrc/js/application/core/behavior-dark-console.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3639,33 +3639,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/ponder/vote.css',
   ),
-  'raphael-core' =>
-  array(
-    'uri' => '/res/3f48575a/rsrc/js/raphael/raphael.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/raphael/raphael.js',
-  ),
-  'raphael-g' =>
-  array(
-    'uri' => '/res/b07e5245/rsrc/js/raphael/g.raphael.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/raphael/g.raphael.js',
-  ),
-  'raphael-g-line' =>
-  array(
-    'uri' => '/res/a59c8556/rsrc/js/raphael/g.raphael.line.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/raphael/g.raphael.line.js',
-  ),
   'releeph-branch' =>
   array(
     'uri' => '/res/6ad6420d/rsrc/css/application/releeph/releeph-branch.css',
@@ -3864,15 +3837,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/sprite-tokens.css',
   ),
-  'stripe-core' =>
-  array(
-    'uri' => '/res/3b0f0ad4/rsrc/js/stripe/stripe_core.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/stripe/stripe_core.js',
-  ),
   'stripe-payment-form-css' =>
   array(
     'uri' => '/res/634a6371/rsrc/css/application/phortune/stripe-payment-form.css',
@@ -3991,7 +3955,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/bf16b308/core.pkg.js',
       'type' => 'js',
     ),
-    'dca4a03d' =>
+    'e208b108' =>
     array(
       'name' => 'darkconsole.pkg.js',
       'symbols' =>
@@ -3999,7 +3963,7 @@ celerity_register_resource_map(array(
         0 => 'javelin-behavior-dark-console',
         1 => 'javelin-behavior-error-log',
       ),
-      'uri' => '/res/pkg/dca4a03d/darkconsole.pkg.js',
+      'uri' => '/res/pkg/e208b108/darkconsole.pkg.js',
       'type' => 'js',
     ),
     '8aaacd1b' =>
@@ -4169,7 +4133,7 @@ celerity_register_resource_map(array(
     'javelin-behavior-aphront-drag-and-drop-textarea' => 'e96b08f8',
     'javelin-behavior-aphront-form-disable-on-submit' => 'bf16b308',
     'javelin-behavior-audit-preview' => 'f96657b8',
-    'javelin-behavior-dark-console' => 'dca4a03d',
+    'javelin-behavior-dark-console' => 'e208b108',
     'javelin-behavior-device' => 'bf16b308',
     'javelin-behavior-differential-accept-with-errors' => 'e96b08f8',
     'javelin-behavior-differential-add-reviewers-and-ccs' => 'e96b08f8',
@@ -4185,7 +4149,7 @@ celerity_register_resource_map(array(
     'javelin-behavior-differential-user-select' => 'e96b08f8',
     'javelin-behavior-diffusion-commit-graph' => 'f96657b8',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f96657b8',
-    'javelin-behavior-error-log' => 'dca4a03d',
+    'javelin-behavior-error-log' => 'e208b108',
     'javelin-behavior-global-drag-and-drop' => 'bf16b308',
     'javelin-behavior-history-install' => 'bf16b308',
     'javelin-behavior-konami' => 'bf16b308',
