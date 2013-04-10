@@ -64,15 +64,22 @@ final class PonderQuestionViewController extends PonderController {
       ->setActionURI("/ponder/answer/add/");
 
     $header = id(new PhabricatorHeaderView())
-      ->setObjectName('Q'.$question->getID())
       ->setHeader($question->getTitle());
 
     $actions = $this->buildActionListView($question);
     $properties = $this->buildPropertyListView($question, $subscribers);
 
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->setActionList($actions);
+    $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName('Q'.$this->questionID)
+          ->setHref('/Q'.$this->questionID));
+
     $nav = $this->buildSideNavView($question);
     $nav->appendChild(
       array(
+        $crumbs,
         $header,
         $actions,
         $properties,

@@ -224,13 +224,14 @@ final class PhrictionDocumentController
 
     $children = $this->renderDocumentChildren($slug);
 
+    $actions = $this->buildActionView($user, $document);
+
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
     $crumb_views = $this->renderBreadcrumbs($slug);
     foreach ($crumb_views as $view) {
       $crumbs->addCrumb($view);
     }
-
-    $actions = $this->buildActionView($user, $document);
 
     $header = id(new PhabricatorHeaderView())
       ->setHeader($page_title);

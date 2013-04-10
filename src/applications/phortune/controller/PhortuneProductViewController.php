@@ -23,16 +23,6 @@ final class PhortuneProductViewController extends PhabricatorController {
 
     $title = pht('Product: %s', $product->getProductName());
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Products'))
-        ->setHref($this->getApplicationURI('product/')));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('#%d', $product->getID()))
-        ->setHref($request->getRequestURI()));
-
     $header = id(new PhabricatorHeaderView())
       ->setHeader($product->getProductName());
 
@@ -45,6 +35,17 @@ final class PhortuneProductViewController extends PhabricatorController {
           ->setName(pht('Edit Product'))
           ->setHref($edit_uri)
           ->setIcon('edit'));
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Products'))
+        ->setHref($this->getApplicationURI('product/')));
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('#%d', $product->getID()))
+        ->setHref($request->getRequestURI()));
 
     $properties = id(new PhabricatorPropertyListView())
       ->setUser($user)

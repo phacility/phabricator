@@ -51,6 +51,7 @@ final class DrydockResourceViewController extends DrydockController {
     $log_table->appendChild($pager);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Resource %d', $resource->getID())));
