@@ -1,6 +1,21 @@
 {
   "version" : 1,
   "sprites" : {
+    "actions-close-dark"     : {
+      "name" : "actions-close-dark",
+      "rule" : ".actions-close-dark, .device-desktop .actions-close-grey.phabricator-action-icon-item-link:hover",
+      "hash" : "f04c5692010a6d96b6fa83a26d73737e"
+    },
+    "actions-close-grey"     : {
+      "name" : "actions-close-grey",
+      "rule" : ".actions-close-grey",
+      "hash" : "22d7706066666cf0ba91f5ae4ef96f1f"
+    },
+    "actions-close-white"    : {
+      "name" : "actions-close-white",
+      "rule" : ".actions-close-white",
+      "hash" : "8d6ad8fc33b0e9471dc2c6d4de6e7341"
+    },
     "actions-flag-dark"      : {
       "name" : "actions-flag-dark",
       "rule" : ".actions-flag-dark, .device-desktop .actions-flag-grey.phabricator-action-icon-item-link:hover",

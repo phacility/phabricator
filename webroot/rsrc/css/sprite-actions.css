@@ -18,110 +18,122 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 
-.actions-flag-dark, .device-desktop .actions-flag-grey.phabricator-action-icon-item-link:hover {
+.actions-close-dark, .device-desktop .actions-close-grey.phabricator-action-icon-item-link:hover {
   background-position: 0px 0px;
 }
 
-.actions-heart-dark, .device-desktop .actions-heart-grey.phabricator-action-icon-item-link:hover {
+.actions-flag-dark, .device-desktop .actions-flag-grey.phabricator-action-icon-item-link:hover {
   background-position: -25px 0px;
 }
 
-.actions-move-dark, .device-desktop .actions-move-grey.phabricator-action-icon-item-link:hover {
+.actions-heart-dark, .device-desktop .actions-heart-grey.phabricator-action-icon-item-link:hover {
   background-position: -50px 0px;
 }
 
-.actions-new-dark, .device-desktop .actions-new-grey.phabricator-action-icon-item-link:hover {
+.actions-move-dark, .device-desktop .actions-move-grey.phabricator-action-icon-item-link:hover {
   background-position: -75px 0px;
 }
 
-.actions-search-dark, .device-desktop .actions-search-grey.phabricator-action-icon-item-link:hover {
+.actions-new-dark, .device-desktop .actions-new-grey.phabricator-action-icon-item-link:hover {
   background-position: -100px 0px;
 }
 
-.actions-settings-dark, .device-desktop .actions-settings-grey.phabricator-action-icon-item-link:hover {
+.actions-search-dark, .device-desktop .actions-search-grey.phabricator-action-icon-item-link:hover {
   background-position: 0px -25px;
 }
 
-.actions-star-dark, .device-desktop .actions-star-grey.phabricator-action-icon-item-link:hover {
+.actions-settings-dark, .device-desktop .actions-settings-grey.phabricator-action-icon-item-link:hover {
   background-position: -25px -25px;
 }
 
-.actions-tag-dark, .device-desktop .actions-tag-grey.phabricator-action-icon-item-link:hover {
+.actions-star-dark, .device-desktop .actions-star-grey.phabricator-action-icon-item-link:hover {
   background-position: -50px -25px;
 }
 
-.actions-wrench-dark, .device-desktop .actions-wrench-grey.phabricator-action-icon-item-link:hover {
+.actions-tag-dark, .device-desktop .actions-tag-grey.phabricator-action-icon-item-link:hover {
   background-position: -75px -25px;
 }
 
-.actions-flag-grey {
+.actions-wrench-dark, .device-desktop .actions-wrench-grey.phabricator-action-icon-item-link:hover {
   background-position: -100px -25px;
 }
 
-.actions-heart-grey {
+.actions-close-grey {
   background-position: 0px -50px;
 }
 
-.actions-move-grey {
+.actions-flag-grey {
   background-position: -25px -50px;
 }
 
-.actions-new-grey {
+.actions-heart-grey {
   background-position: -50px -50px;
 }
 
-.actions-search-grey {
+.actions-move-grey {
   background-position: -75px -50px;
 }
 
-.actions-settings-grey {
+.actions-new-grey {
   background-position: -100px -50px;
 }
 
-.actions-star-grey {
+.actions-search-grey {
   background-position: 0px -75px;
 }
 
-.actions-tag-grey {
+.actions-settings-grey {
   background-position: -25px -75px;
 }
 
-.actions-wrench-grey {
+.actions-star-grey {
   background-position: -50px -75px;
 }
 
-.actions-flag-white {
+.actions-tag-grey {
   background-position: -75px -75px;
 }
 
-.actions-heart-white {
+.actions-wrench-grey {
   background-position: -100px -75px;
 }
 
-.actions-move-white {
+.actions-close-white {
   background-position: 0px -100px;
 }
 
-.actions-new-white {
+.actions-flag-white {
   background-position: -25px -100px;
 }
 
-.actions-search-white {
+.actions-heart-white {
   background-position: -50px -100px;
 }
 
-.actions-settings-white {
+.actions-move-white {
   background-position: -75px -100px;
 }
 
-.actions-star-white {
+.actions-new-white {
   background-position: -100px -100px;
 }
 
-.actions-tag-white {
+.actions-search-white {
   background-position: 0px -125px;
 }
 
-.actions-wrench-white {
+.actions-settings-white {
   background-position: -25px -125px;
+}
+
+.actions-star-white {
+  background-position: -50px -125px;
+}
+
+.actions-tag-white {
+  background-position: -75px -125px;
+}
+
+.actions-wrench-white {
+  background-position: -100px -125px;
 }

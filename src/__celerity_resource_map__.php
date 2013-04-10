@@ -513,15 +513,15 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/sprite-actions-X2.png' =>
   array(
-    'hash' => 'dee876887537d0f941f89ea41adf6631',
-    'uri' => '/res/dee87688/rsrc/image/sprite-actions-X2.png',
+    'hash' => '92a9013097669d06db2e48724e7acdb3',
+    'uri' => '/res/92a90130/rsrc/image/sprite-actions-X2.png',
     'disk' => '/rsrc/image/sprite-actions-X2.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-actions.png' =>
   array(
-    'hash' => '6b58724a27c34412edb421dc25b4b091',
-    'uri' => '/res/6b58724a/rsrc/image/sprite-actions.png',
+    'hash' => '1c4119f9e4d940d6881842a710de3839',
+    'uri' => '/res/1c4119f9/rsrc/image/sprite-actions.png',
     'disk' => '/rsrc/image/sprite-actions.png',
     'type' => 'png',
   ),
@@ -3639,6 +3639,33 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/ponder/vote.css',
   ),
+  'raphael-core' =>
+  array(
+    'uri' => '/res/3f48575a/rsrc/js/raphael/raphael.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/raphael/raphael.js',
+  ),
+  'raphael-g' =>
+  array(
+    'uri' => '/res/b07e5245/rsrc/js/raphael/g.raphael.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/raphael/g.raphael.js',
+  ),
+  'raphael-g-line' =>
+  array(
+    'uri' => '/res/a59c8556/rsrc/js/raphael/g.raphael.line.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/raphael/g.raphael.line.js',
+  ),
   'releeph-branch' =>
   array(
     'uri' => '/res/6ad6420d/rsrc/css/application/releeph/releeph-branch.css',
@@ -3740,7 +3767,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-actions-css' =>
   array(
-    'uri' => '/res/41ef6a23/rsrc/css/sprite-actions.css',
+    'uri' => '/res/00b8f8bc/rsrc/css/sprite-actions.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3836,6 +3863,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/sprite-tokens.css',
+  ),
+  'stripe-core' =>
+  array(
+    'uri' => '/res/3b0f0ad4/rsrc/js/stripe/stripe_core.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/stripe/stripe_core.js',
   ),
   'stripe-payment-form-css' =>
   array(
