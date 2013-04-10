@@ -130,6 +130,7 @@ final class PhabricatorTagView extends AphrontView {
     }
 
     if ($this->phid) {
+      Javelin::initBehavior('phabricator-hovercards');
 
       return javelin_tag(
         'a',

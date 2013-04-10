@@ -15,6 +15,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
       'file(s)' => array('file', 'files'),
       'Maniphest Task(s)' => array('Maniphest Task', 'Maniphest Tasks'),
+      'Task(s)' => array('Task', 'Tasks'),
 
       'Please fix these errors and try again.' => array(
         'Please fix this error and try again.',

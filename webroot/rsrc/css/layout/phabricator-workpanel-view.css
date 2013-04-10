@@ -2,16 +2,10 @@
  * @provides phabricator-workpanel-view-css
  */
 
-.phabricator-workpanel-view .phabricator-workpanel-header {
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
+.phabricator-workpanel-view .phabricator-action-header {
   border: 1px solid #b3b5b6;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-  padding: 8px 10px;
-  background: #f0f0f0 url(/rsrc/image/texture/panel-header-gradient.png) repeat-x;
-  text-shadow: 0 1px 1px #fff;
 }
 
 .phabricator-workpanel-view .phabricator-workpanel-header-action {

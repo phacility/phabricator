@@ -67,6 +67,10 @@ final class ManiphestBatchEditController extends ManiphestController {
             'placeholder'   => pht('Type a user name...'),
             'limit'         => 1,
           ),
+          'cc'    => array(
+            'src'           => '/typeahead/common/mailable/',
+            'placeholder'   => pht('Type a user name...'),
+          )
         ),
         'input' => 'batch-form-actions',
         'priorityMap' => ManiphestTaskPriority::getTaskPriorityMap(),
@@ -142,11 +146,15 @@ final class ManiphestBatchEditController extends ManiphestController {
       'priority'        => ManiphestTransactionType::TYPE_PRIORITY,
       'add_project'     => ManiphestTransactionType::TYPE_PROJECTS,
       'remove_project'  => ManiphestTransactionType::TYPE_PROJECTS,
+      'add_ccs'         => ManiphestTransactionType::TYPE_CCS,
+      'remove_ccs'      => ManiphestTransactionType::TYPE_CCS,
     );
 
     $edge_edit_types = array(
       'add_project'    => true,
       'remove_project' => true,
+      'add_ccs'        => true,
+      'remove_ccs'     => true,
     );
 
     $xactions = array();
@@ -182,6 +190,9 @@ final class ManiphestBatchEditController extends ManiphestController {
           case ManiphestTransactionType::TYPE_PROJECTS:
             $current = $task->getProjectPHIDs();
             break;
+          case ManiphestTransactionType::TYPE_CCS:
+            $current = $task->getCCPHIDs();
+            break;
         }
       }
 
@@ -210,6 +221,11 @@ final class ManiphestBatchEditController extends ManiphestController {
             continue 2;
           }
           break;
+        case ManiphestTransactionType::TYPE_CCS:
+          if (empty($value)) {
+            continue 2;
+          }
+          break;
       }
 
       // If the edit doesn't change anything, go to the next action. This
@@ -233,7 +249,12 @@ final class ManiphestBatchEditController extends ManiphestController {
           }
           break;
         case ManiphestTransactionType::TYPE_PROJECTS:
-          $is_remove = ($action['action'] == 'remove_project');
+        case ManiphestTransactionType::TYPE_CCS:
+          $remove_actions = array(
+            'remove_project' => true,
+            'remove_ccs'    => true,
+          );
+          $is_remove = isset($remove_actions[$action['action']]);
 
           $current = array_fill_keys($current, true);
           $value   = array_fill_keys($value, true);

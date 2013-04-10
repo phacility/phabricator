@@ -83,6 +83,117 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildActionsSheet() {
+    $icons = $this->getDirectoryList('actions_white_1x');
+
+    $colors = array(
+      'dark',
+      'grey',
+      'white',
+    );
+
+    $scales = array(
+      '1x'  => 1,
+      '2x'  => 2,
+    );
+
+    $template = id(new PhutilSprite())
+      ->setSourceSize(24, 24);
+
+    $sprites = array();
+    foreach ($colors as $color) {
+      foreach ($icons as $icon) {
+        $prefix = 'actions_';
+        if (strlen($color)) {
+          $prefix .= $color.'_';
+        }
+
+        $suffix = '';
+        if (strlen($color)) {
+          $suffix = '-'.$color;
+        }
+
+        $sprite = id(clone $template)
+          ->setName('actions-'.$icon.$suffix);
+
+        $tcss = array();
+        $tcss[] = '.actions-'.$icon.$suffix;
+        if ($color == 'dark') {
+          $tcss[] = '.device-desktop '.
+            '.actions-'.$icon.'-grey.phabricator-action-icon-item-link:hover';
+        }
+
+        $sprite->setTargetCSS(implode(', ', $tcss));
+
+        foreach ($scales as $scale_key => $scale) {
+          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+          $sprite->setSourceFile($path, $scale);
+        }
+        $sprites[] = $sprite;
+      }
+    }
+
+    $sheet = $this->buildSheet('actions', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+    public function buildMiniconsSheet() {
+    $icons = $this->getDirectoryList('minicons_white_1x');
+
+    $colors = array(
+      'white',
+      'dark',
+    );
+
+    $scales = array(
+      '1x'  => 1,
+      '2x'  => 2,
+    );
+
+    $template = id(new PhutilSprite())
+      ->setSourceSize(16, 16);
+
+    $sprites = array();
+    foreach ($colors as $color) {
+      foreach ($icons as $icon) {
+        $prefix = 'minicons_';
+        if (strlen($color)) {
+          $prefix .= $color.'_';
+        }
+
+        $suffix = '';
+        if (strlen($color)) {
+          $suffix = '-'.$color;
+        }
+
+        $sprite = id(clone $template)
+          ->setName('minicons-'.$icon.$suffix);
+
+        $sprite->setTargetCSS('.minicons-'.$icon.$suffix);
+
+        foreach ($scales as $scale_key => $scale) {
+          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+          $sprite->setSourceFile($path, $scale);
+        }
+        $sprites[] = $sprite;
+      }
+    }
+
+    $sheet = $this->buildSheet('minicons', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+
   public function buildMenuSheet() {
     $sprites = array();
 
@@ -300,30 +411,15 @@ final class CeleritySpriteGenerator {
       'menu-hover'      => 28,
       'menu-label'      => 24,
       'menu-selected'   => 28,
+      'red-header'      => 70,
+      'blue-header'     => 70,
+      'green-header'    => 70,
+      'yellow-header'   => 70,
+      'grey-header'     => 70,
+      'dark-grey-header' => 70,
     );
 
-    // Reorder the sprites so less-specific rules generate earlier in the sheet.
-    // Otherwise we end up with blue "a.black" buttons because the blue rules
-    // have the same specificity but appear later.
-    $gradients = array_fuse($gradients);
-    $gradients = array_select_keys(
-      $gradients,
-      array(
-        'blue-dark',
-        'blue-light',
-      )) + $gradients;
-
     $extra_css = array(
-      'black-dark' => ', button.black, a.black, a.black:visited',
-      'black-light' => ', button.black:active, a.black:active',
-      'blue-dark' => ', button, a.button, a.button:visited, input.inputsubmit',
-      'blue-light' => ', button:active, a.button:active',
-      'grey-dark' => ', button.grey, input.inputaux, a.grey, a.grey:visited, '.
-                        'a.button.disabled, button[disabled], button.disabled',
-      'grey-light' => ', button.grey:active, a.grey:active, '.
-                        'button.grey_active, a.dropdown-open',
-      'green-dark' => ', button.green, a.green, a.green:visited',
-      'green-light' => ', button.green:active, a.green:active',
       'dark-menu-label' =>
         ', .phabricator-dark-menu .phabricator-menu-item-type-label',
       'menu-label' =>
@@ -356,8 +452,7 @@ final class CeleritySpriteGenerator {
       'gradient',
       false,
       PhutilSpriteSheet::TYPE_REPEAT_X,
-      ', button, a.button, a.button:visited, input.inputsubmit, '.
-      '.phabricator-dark-menu .phabricator-menu-item-type-label, '.
+      ', .phabricator-dark-menu .phabricator-menu-item-type-label, '.
       '.phabricator-side-menu .phabricator-menu-item-type-label, '.
       '.device-desktop .phabricator-side-menu '.
         'a.phabricator-menu-item-type-link:hover, '.

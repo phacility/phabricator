@@ -58,6 +58,11 @@
   width: 1500px;
 }
 
+.aphront-multi-column-fixed
+  .aphront-multi-column-inner.aphront-multi-column-7-up {
+  width: 1750px;
+}
+
 .device-phone .aphront-multi-column-fixed .aphront-multi-column-inner {
    width: 100%;
 }
@@ -77,6 +82,8 @@
 .aphront-multi-column-fixed .aphront-multi-column-5-up
   .aphront-multi-column-column-outer,
 .aphront-multi-column-fixed .aphront-multi-column-6-up
+  .aphront-multi-column-column-outer,
+.aphront-multi-column-fixed .aphront-multi-column-7-up
   .aphront-multi-column-column-outer {
   width: 240px;
 }
@@ -110,4 +117,9 @@
 .aphront-multi-column-fluid .aphront-multi-column-6-up
   .aphront-multi-column-column-outer {
   width: 16.6666%;
+}
+
+.aphront-multi-column-fluid .aphront-multi-column-7-up
+  .aphront-multi-column-column-outer {
+  width: 14.2857%;
 }

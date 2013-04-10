@@ -13,19 +13,17 @@
   width: 300px;
 }
 
-.aphront-dialog-head {
-  border: 1px solid #d4dadf;
-  font-size: 15px;
-  padding: 10px 15px;
-  font-weight: bold;
+.aphront-dialog-head .phabricator-action-header {
+  border-bottom: 1px solid #d4dadf;
+  padding: 5px 15px;
   white-space: nowrap;
-  color: #525252;
-  text-shadow: 0 1px 0 white;
-  font-weight: bold;
-  background-image: url(/rsrc/image/texture/table_header_tall.png);
-  background-repeat: repeat-x;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
+}
+
+.aphront-dialog-head .phabricator-action-header
+  .phabricator-action-header-title {
+  font-size: 15px;
 }
 
 .aphront-dialog-view-width-form {

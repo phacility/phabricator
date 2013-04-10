@@ -41,12 +41,9 @@ final class PhabricatorWorkpanelView extends AphrontView {
           $footer_tag);
     }
 
-    $header = phutil_tag(
-      'div',
-        array(
-          'class' => 'phabricator-workpanel-header'
-        ),
-      $this->header);
+    $header = id(new PhabricatorActionHeaderView())
+      ->setHeaderTitle($this->header)
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY);
 
     $body = phutil_tag(
       'div',

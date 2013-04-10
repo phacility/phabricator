@@ -306,7 +306,7 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       foreach ($edges as $edge) {
         $sql[] = qsprintf(
           $conn_w,
-          '(%s, %d, %s)',
+          '(src = %s AND type = %d AND dst = %s)',
           $edge['src'],
           $edge['type'],
           $edge['dst']);
@@ -323,9 +323,9 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       foreach (array_chunk($sql, 256) as $chunk) {
         queryfx(
           $conn_w,
-          'DELETE FROM %T WHERE (src, type, dst) IN (%Q)',
+          'DELETE FROM %T WHERE (%Q)',
           PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-          implode(', ', $chunk));
+          implode(' OR ', $chunk));
       }
     }
   }

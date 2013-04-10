@@ -18,8 +18,9 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
     $elements = array();
 
     $diff_handle = $this->createBasicDummyHandle(
-      "Introduce cooler Differential Revisions",
-      PhabricatorPHIDConstants::PHID_TYPE_DREV);
+      "D123",
+      PhabricatorPHIDConstants::PHID_TYPE_DREV,
+      "Introduce cooler Differential Revisions");
 
     $panel = $this->createPanel("Differential Hovercard");
     $panel->appendChild(id(new PhabricatorHovercardView())
@@ -31,8 +32,9 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
     $elements[] = $panel;
 
     $task_handle = $this->createBasicDummyHandle(
-      "Improve Mobile Experience for Phabricator",
-      PhabricatorPHIDConstants::PHID_TYPE_TASK);
+      "T123",
+      PhabricatorPHIDConstants::PHID_TYPE_TASK,
+      "Improve Mobile Experience for Phabricator");
 
     $tag = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)

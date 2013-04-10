@@ -11,25 +11,13 @@ final class PhabricatorHovercardView extends AphrontView {
    */
   private $handle;
 
-  private $id;
-
   private $title = array();
   private $detail;
   private $tags = array();
   private $fields = array();
   private $actions = array();
 
-  /**
-   * For overriding in case of Countdown, Paste, Pholio
-   */
-  private $body;
-
-  private $color = 'grey';
-
-  public function setId($id) {
-    $this->id = $id;
-    return $this;
-  }
+  private $color = 'blue';
 
   public function setObjectHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
@@ -79,42 +67,48 @@ final class PhabricatorHovercardView extends AphrontView {
     }
 
     $handle = $this->handle;
-    $user = $this->getUser();
-
-    $id = $handle->getAlternateID();
-    $type = $handle->getType();
 
     require_celerity_resource("phabricator-hovercard-view-css");
 
-    $title = array();
-    if ($this->tags) {
-      $title[] = ' ';
-      $title[] = phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-hovercard-tags',
-        ),
-        array_interleave(' ', $this->tags));
-    }
-
-    $title[] = pht("%s: %s",
+    $title = pht("%s: %s",
       $handle->getTypeName(),
-      $this->title ? $this->title : substr($type, 0, 1) . $id);
+      $this->title ? $this->title : $handle->getName());
+
+    $header = new PhabricatorActionHeaderView();
+    $header->setHeaderColor($this->color);
+    $header->setHeaderTitle($title);
+    if ($this->tags) {
+      foreach ($this->tags as $tag) {
+        $header->setTag($tag);
+      }
+    }
 
     $body = array();
+
     if ($this->detail) {
-      $body[] = hsprintf('<strong>%s</strong>', $this->detail);
+      $body_title = $this->detail;
     } else {
       // Fallback for object handles
-      $body[] = hsprintf('<strong>%s</strong>', $handle->getFullName());
+      $body_title = $handle->getFullName();
     }
+
+    $body[] = phutil_tag(
+      'div',
+        array(
+          'class' => 'phabricator-hovercard-body-header'
+          ),
+        $body_title);
 
     foreach ($this->fields as $field) {
-      $body[] = hsprintf('<b>%s:</b> <span>%s</span>',
+      $item = hsprintf('<strong>%s:</strong> <span>%s</span>',
         $field['label'], $field['value']);
+      $body[] = phutil_tag(
+        'div',
+          array(
+            'class' => 'phabricator-hovercard-body-item'
+            ),
+          $item);
     }
-
-    $body = phutil_implode_html(phutil_tag('br'), $body);
 
     if ($handle->getImageURI()) {
       // Probably a user, we don't need to assume something else
@@ -162,8 +156,16 @@ final class PhabricatorHovercardView extends AphrontView {
     // TODO: Add color support
     $content = hsprintf(
       '%s%s%s',
-      phutil_tag('div', array('class' => 'phabricator-hovercard-head'), $title),
-      phutil_tag('div', array('class' => 'phabricator-hovercard-body'), $body),
+      phutil_tag('div',
+        array(
+          'class' => 'phabricator-hovercard-head'
+        ),
+        $header),
+      phutil_tag('div',
+        array(
+          'class' => 'phabricator-hovercard-body'
+        ),
+        $body),
       $tail);
 
     $hovercard = phutil_tag("div",
@@ -177,7 +179,6 @@ final class PhabricatorHovercardView extends AphrontView {
     return phutil_tag('div',
       array(
         'class' => 'phabricator-hovercard-wrapper',
-        'id'    => $this->id,
       ),
       $hovercard);
   }

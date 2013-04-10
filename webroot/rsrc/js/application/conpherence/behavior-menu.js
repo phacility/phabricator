@@ -2,6 +2,7 @@
  * @provides javelin-behavior-conpherence-menu
  * @requires javelin-behavior
  *           javelin-dom
+ *           javelin-util
  *           javelin-request
  *           javelin-stratcom
  *           javelin-workflow
@@ -29,13 +30,12 @@ JX.behavior('conpherence-menu', function(config) {
   }
 
   function selectthread(node) {
-    if (node === thread.node) {
-      return;
-    }
 
     if (thread.node) {
       JX.DOM.alterClass(thread.node, 'conpherence-selected', false);
-      JX.DOM.alterClass(thread.node, 'hide-unread-count', false);
+      // keep the unread-count hidden still. big TODO once we ajax in updates
+      // to threads to make this work right and move threads between read /
+      // unread
     }
 
     JX.DOM.alterClass(node, 'conpherence-selected', true);
@@ -47,9 +47,17 @@ JX.behavior('conpherence-menu', function(config) {
     thread.selected = data.id;
 
     JX.History.replace(config.base_uri + data.id + '/');
-
     redrawthread();
   }
+
+  JX.Stratcom.listen(
+    'conpherence-selectthread',
+    null,
+    function (e) {
+      var node = JX.$(e.getData().id);
+      selectthread(node);
+    }
+  );
 
   function redrawthread() {
     if (!thread.node) {
@@ -67,6 +75,8 @@ JX.behavior('conpherence-menu', function(config) {
       new JX.Workflow(uri, {})
         .setHandler(onresponse)
         .start();
+    } else {
+      didredrawthread();
     }
 
     if (thread.visible !== null || !config.hasWidgets) {
@@ -125,29 +135,48 @@ JX.behavior('conpherence-menu', function(config) {
 
   JX.Stratcom.listen('click', 'conpherence-edit-metadata', function (e) {
     e.kill();
-    var root = JX.$(config.form_pane);
-    var form = JX.DOM.find(root, 'form');
+    var root = e.getNode('conpherence-layout');
+    var form = JX.DOM.find(root, 'form', 'conpherence-pontificate');
     var data = e.getNodeData('conpherence-edit-metadata');
+    var header = JX.DOM.find(root, 'div', 'conpherence-header');
+    var peopleWidget = null;
+    try {
+      peopleWidget = JX.DOM.find(root, 'div', 'widgets-people');
+    } catch (ex) {
+      // Ignore; maybe no people widget
+    }
+
     new JX.Workflow.newFromForm(form, data)
-      .setHandler(function (r) {
+      .setHandler(JX.bind(this, function(r) {
         // update the header
         JX.DOM.setContent(
-          JX.$(config.header),
+          header,
           JX.$H(r.header)
         );
 
-        // update the menu entry
-        JX.DOM.replace(
-          JX.$(r.conpherence_phid + '-nav-item'),
-          JX.$H(r.nav_item)
-        );
+        try {
+          // update the menu entry
+          JX.DOM.replace(
+            JX.$(r.conpherence_phid + '-nav-item'),
+            JX.$H(r.nav_item)
+          );
+          JX.Stratcom.invoke(
+            'conpherence-selectthread',
+            null,
+            { id : r.conpherence_phid + '-nav-item' }
+          );
+        } catch (ex) {
+          // Ignore; this view may not have a menu.
+        }
 
-        // update the people widget
-        JX.DOM.setContent(
-          JX.$(config.people_widget),
-          JX.$H(r.people_widget)
-        );
-      })
+        if (peopleWidget) {
+          // update the people widget
+          JX.DOM.setContent(
+            peopleWidget,
+            JX.$H(r.people_widget)
+          );
+        }
+      }))
       .start();
   });
 
@@ -183,7 +212,6 @@ JX.behavior('conpherence-menu', function(config) {
 
     if (!config.hasThreadList) {
       loadthreads();
-      didredrawthread();
     } else {
       didloadthreads();
     }
@@ -191,7 +219,6 @@ JX.behavior('conpherence-menu', function(config) {
 
   JX.Stratcom.listen('phabricator-device-change', null, ondevicechange);
   ondevicechange();
-
 
   function loadthreads() {
     var uri = config.base_uri + 'thread/' + config.selectedID + '/';
@@ -221,7 +248,6 @@ JX.behavior('conpherence-menu', function(config) {
         }
       }
     }
-
     redrawthread();
   }
 

@@ -46,7 +46,14 @@ JX.install('Prefab', {
      *
      */
     buildTokenizer : function(config) {
-      var root = config.root || JX.$(config.id);
+      try {
+        var root = config.root || JX.$(config.id);
+      } catch (ex) {
+        // If the root element does not exist, just return without building
+        // anything. This happens in some cases -- like Conpherence -- where we
+        // may load a tokenizer but not put it in the document.
+        return;
+      }
 
       var datasource;
       if (config.ondemand) {

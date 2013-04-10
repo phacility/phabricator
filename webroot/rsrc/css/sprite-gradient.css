@@ -3,7 +3,7 @@
  * @generated
  */
 
-.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-filetree a.phabricator-filetree-item:hover, .phabricator-filetree a.phabricator-active-nav-focus {
+.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-filetree a.phabricator-filetree-item:hover, .phabricator-filetree a.phabricator-active-nav-focus {
   background-image: url(/rsrc/image/sprite-gradient.png);
   background-repeat: repeat-x;
 }
@@ -11,48 +11,32 @@
 
 
 
-.gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit {
-  background-position: 0px -51px;
-}
-
-.gradient-blue-light, button:active, a.button:active {
-  background-position: 0px -78px;
-}
-
-.gradient-black-dark, button.black, a.black, a.black:visited {
-  background-position: 0px -105px;
-}
-
-.gradient-black-light, button.black:active, a.black:active {
-  background-position: 0px -132px;
+.gradient-blue-header {
+  background-position: 0px -141px;
 }
 
 .gradient-breadcrumbs {
-  background-position: 0px -325px;
+  background-position: 0px -109px;
+}
+
+.gradient-dark-grey-header {
+  background-position: 0px -212px;
 }
 
 .gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label {
   background-position: 0px -25px;
 }
 
-.gradient-green-dark, button.green, a.green, a.green:visited {
-  background-position: 0px -159px;
+.gradient-green-header {
+  background-position: 0px -283px;
 }
 
-.gradient-green-light, button.green:active, a.green:active {
-  background-position: 0px -186px;
-}
-
-.gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled {
-  background-position: 0px -213px;
-}
-
-.gradient-grey-light, button.grey:active, a.grey:active, button.grey_active, a.dropdown-open {
-  background-position: 0px -240px;
+.gradient-grey-header {
+  background-position: 0px -354px;
 }
 
 .gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover {
-  background-position: 0px -267px;
+  background-position: 0px -51px;
 }
 
 .gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label {
@@ -60,5 +44,13 @@
 }
 
 .gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus {
-  background-position: 0px -296px;
+  background-position: 0px -80px;
+}
+
+.gradient-red-header {
+  background-position: 0px -425px;
+}
+
+.gradient-yellow-header {
+  background-position: 0px -496px;
 }

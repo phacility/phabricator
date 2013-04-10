@@ -18,806 +18,818 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 
-.action-arrow_left {
+.action-action-menu {
   background-position: 0px 0px;
 }
 
-.action-arrow_right {
+.action-arrow_left {
   background-position: -15px 0px;
 }
 
-.action-attach {
+.action-arrow_right {
   background-position: -30px 0px;
 }
 
-.action-blame {
+.action-attach {
   background-position: -45px 0px;
 }
 
-.action-check {
+.action-blame {
   background-position: -60px 0px;
 }
 
-.action-comment {
+.action-check {
   background-position: -75px 0px;
 }
 
-.action-computer {
+.action-comment {
   background-position: -90px 0px;
 }
 
-.action-create {
+.action-computer {
   background-position: -105px 0px;
 }
 
-.action-delete {
+.action-create {
   background-position: -120px 0px;
 }
 
-.action-disable {
+.action-delete {
   background-position: -135px 0px;
 }
 
-.action-dislike {
+.action-disable {
   background-position: -150px 0px;
 }
 
-.action-download-alt {
+.action-dislike {
   background-position: -165px 0px;
 }
 
-.action-download {
+.action-download-alt {
   background-position: -180px 0px;
 }
 
-.action-edit {
+.action-download {
   background-position: -195px 0px;
 }
 
-.action-enable {
+.action-edit {
   background-position: 0px -15px;
 }
 
-.action-file {
+.action-enable {
   background-position: -15px -15px;
 }
 
-.action-flag-0 {
+.action-file {
   background-position: -30px -15px;
 }
 
-.action-flag-1 {
+.action-flag-0 {
   background-position: -45px -15px;
 }
 
-.action-flag-2 {
+.action-flag-1 {
   background-position: -60px -15px;
 }
 
-.action-flag-3 {
+.action-flag-2 {
   background-position: -75px -15px;
 }
 
-.action-flag-4 {
+.action-flag-3 {
   background-position: -90px -15px;
 }
 
-.action-flag-5 {
+.action-flag-4 {
   background-position: -105px -15px;
 }
 
-.action-flag-6 {
+.action-flag-5 {
   background-position: -120px -15px;
 }
 
-.action-flag-7 {
+.action-flag-6 {
   background-position: -135px -15px;
 }
 
-.action-flag-ghost {
+.action-flag-7 {
   background-position: -150px -15px;
 }
 
-.action-flag {
+.action-flag-ghost {
   background-position: -165px -15px;
 }
 
-.action-folder-open {
+.action-flag {
   background-position: -180px -15px;
 }
 
-.action-fork {
+.action-folder-open {
   background-position: -195px -15px;
 }
 
-.action-herald {
+.action-fork {
   background-position: 0px -30px;
 }
 
-.action-highlight {
+.action-herald {
   background-position: -15px -30px;
 }
 
-.action-history {
+.action-highlight {
   background-position: -30px -30px;
 }
 
-.action-image {
+.action-history {
   background-position: -45px -30px;
 }
 
-.action-like {
+.action-image {
   background-position: -60px -30px;
 }
 
-.action-link {
+.action-like {
   background-position: -75px -30px;
 }
 
-.action-lint-info {
+.action-link {
   background-position: -90px -30px;
 }
 
-.action-lint-ok {
+.action-lint-info {
   background-position: -105px -30px;
 }
 
-.action-lint-warning {
+.action-lint-ok {
   background-position: -120px -30px;
 }
 
-.action-lock {
+.action-lint-warning {
   background-position: -135px -30px;
 }
 
-.action-love {
+.action-lock {
   background-position: -150px -30px;
 }
 
-.action-merge {
+.action-love {
   background-position: -165px -30px;
 }
 
-.action-message {
+.action-merge {
   background-position: -180px -30px;
 }
 
-.action-meta-mta {
+.action-message {
   background-position: -195px -30px;
 }
 
-.action-move {
+.action-meta-mta {
   background-position: 0px -45px;
 }
 
-.action-new {
+.action-move {
   background-position: -15px -45px;
 }
 
-.action-none {
+.action-new {
   background-position: -30px -45px;
 }
 
-.action-perflab {
+.action-none {
   background-position: -45px -45px;
 }
 
-.action-preview {
+.action-perflab {
   background-position: -60px -45px;
 }
 
-.action-refresh {
+.action-preview {
   background-position: -75px -45px;
 }
 
-.action-remove {
+.action-refresh {
   background-position: -90px -45px;
 }
 
-.action-search {
+.action-remove {
   background-position: -105px -45px;
 }
 
-.action-start-sandcastle {
+.action-search {
   background-position: -120px -45px;
 }
 
-.action-subscribe-add {
+.action-start-sandcastle {
   background-position: -135px -45px;
 }
 
-.action-subscribe-auto {
+.action-subscribe-add {
   background-position: -150px -45px;
 }
 
-.action-subscribe-delete {
+.action-subscribe-auto {
   background-position: -165px -45px;
 }
 
-.action-tag {
+.action-subscribe-delete {
   background-position: -180px -45px;
 }
 
-.action-transcript {
+.action-tag {
   background-position: -195px -45px;
 }
 
-.action-undo {
+.action-transcript {
   background-position: 0px -60px;
 }
 
-.action-unlock {
+.action-undo {
   background-position: -15px -60px;
 }
 
-.action-unmerge {
+.action-unlock {
   background-position: -30px -60px;
 }
 
-.action-unpublish {
+.action-unmerge {
   background-position: -45px -60px;
 }
 
-.action-upload {
+.action-unpublish {
   background-position: -60px -60px;
 }
 
-.action-warning {
+.action-upload {
   background-position: -75px -60px;
 }
 
-.action-world {
+.action-warning {
   background-position: -90px -60px;
 }
 
-.action-arrow_left-grey {
+.action-world {
   background-position: -105px -60px;
 }
 
-.action-arrow_right-grey {
+.action-action-menu-grey {
   background-position: -120px -60px;
 }
 
-.action-attach-grey {
+.action-arrow_left-grey {
   background-position: -135px -60px;
 }
 
-.action-blame-grey {
+.action-arrow_right-grey {
   background-position: -150px -60px;
 }
 
-.action-check-grey {
+.action-attach-grey {
   background-position: -165px -60px;
 }
 
-.action-comment-grey {
+.action-blame-grey {
   background-position: -180px -60px;
 }
 
-.action-computer-grey {
+.action-check-grey {
   background-position: -195px -60px;
 }
 
-.action-create-grey {
+.action-comment-grey {
   background-position: 0px -75px;
 }
 
-.action-delete-grey {
+.action-computer-grey {
   background-position: -15px -75px;
 }
 
-.action-disable-grey {
+.action-create-grey {
   background-position: -30px -75px;
 }
 
-.action-dislike-grey {
+.action-delete-grey {
   background-position: -45px -75px;
 }
 
-.action-download-alt-grey {
+.action-disable-grey {
   background-position: -60px -75px;
 }
 
-.action-download-grey {
+.action-dislike-grey {
   background-position: -75px -75px;
 }
 
-.action-edit-grey {
+.action-download-alt-grey {
   background-position: -90px -75px;
 }
 
-.action-enable-grey {
+.action-download-grey {
   background-position: -105px -75px;
 }
 
-.action-file-grey {
+.action-edit-grey {
   background-position: -120px -75px;
 }
 
-.action-flag-0-grey {
+.action-enable-grey {
   background-position: -135px -75px;
 }
 
-.action-flag-1-grey {
+.action-file-grey {
   background-position: -150px -75px;
 }
 
-.action-flag-2-grey {
+.action-flag-0-grey {
   background-position: -165px -75px;
 }
 
-.action-flag-3-grey {
+.action-flag-1-grey {
   background-position: -180px -75px;
 }
 
-.action-flag-4-grey {
+.action-flag-2-grey {
   background-position: -195px -75px;
 }
 
-.action-flag-5-grey {
+.action-flag-3-grey {
   background-position: 0px -90px;
 }
 
-.action-flag-6-grey {
+.action-flag-4-grey {
   background-position: -15px -90px;
 }
 
-.action-flag-7-grey {
+.action-flag-5-grey {
   background-position: -30px -90px;
 }
 
-.action-flag-ghost-grey {
+.action-flag-6-grey {
   background-position: -45px -90px;
 }
 
-.action-flag-grey {
+.action-flag-7-grey {
   background-position: -60px -90px;
 }
 
-.action-folder-open-grey {
+.action-flag-ghost-grey {
   background-position: -75px -90px;
 }
 
-.action-fork-grey {
+.action-flag-grey {
   background-position: -90px -90px;
 }
 
-.action-herald-grey {
+.action-folder-open-grey {
   background-position: -105px -90px;
 }
 
-.action-highlight-grey {
+.action-fork-grey {
   background-position: -120px -90px;
 }
 
-.action-history-grey {
+.action-herald-grey {
   background-position: -135px -90px;
 }
 
-.action-image-grey {
+.action-highlight-grey {
   background-position: -150px -90px;
 }
 
-.action-like-grey {
+.action-history-grey {
   background-position: -165px -90px;
 }
 
-.action-link-grey {
+.action-image-grey {
   background-position: -180px -90px;
 }
 
-.action-lint-info-grey {
+.action-like-grey {
   background-position: -195px -90px;
 }
 
-.action-lint-ok-grey {
+.action-link-grey {
   background-position: 0px -105px;
 }
 
-.action-lint-warning-grey {
+.action-lint-info-grey {
   background-position: -15px -105px;
 }
 
-.action-lock-grey {
+.action-lint-ok-grey {
   background-position: -30px -105px;
 }
 
-.action-love-grey {
+.action-lint-warning-grey {
   background-position: -45px -105px;
 }
 
-.action-merge-grey {
+.action-lock-grey {
   background-position: -60px -105px;
 }
 
-.action-message-grey {
+.action-love-grey {
   background-position: -75px -105px;
 }
 
-.action-meta-mta-grey {
+.action-merge-grey {
   background-position: -90px -105px;
 }
 
-.action-move-grey {
+.action-message-grey {
   background-position: -105px -105px;
 }
 
-.action-new-grey {
+.action-meta-mta-grey {
   background-position: -120px -105px;
 }
 
-.action-none-grey {
+.action-move-grey {
   background-position: -135px -105px;
 }
 
-.action-perflab-grey {
+.action-new-grey {
   background-position: -150px -105px;
 }
 
-.action-preview-grey {
+.action-none-grey {
   background-position: -165px -105px;
 }
 
-.action-refresh-grey {
+.action-perflab-grey {
   background-position: -180px -105px;
 }
 
-.action-remove-grey {
+.action-preview-grey {
   background-position: -195px -105px;
 }
 
-.action-search-grey {
+.action-refresh-grey {
   background-position: 0px -120px;
 }
 
-.action-start-sandcastle-grey {
+.action-remove-grey {
   background-position: -15px -120px;
 }
 
-.action-subscribe-add-grey {
+.action-search-grey {
   background-position: -30px -120px;
 }
 
-.action-subscribe-auto-grey {
+.action-start-sandcastle-grey {
   background-position: -45px -120px;
 }
 
-.action-subscribe-delete-grey {
+.action-subscribe-add-grey {
   background-position: -60px -120px;
 }
 
-.action-tag-grey {
+.action-subscribe-auto-grey {
   background-position: -75px -120px;
 }
 
-.action-transcript-grey {
+.action-subscribe-delete-grey {
   background-position: -90px -120px;
 }
 
-.action-undo-grey {
+.action-tag-grey {
   background-position: -105px -120px;
 }
 
-.action-unlock-grey {
+.action-transcript-grey {
   background-position: -120px -120px;
 }
 
-.action-unmerge-grey {
+.action-undo-grey {
   background-position: -135px -120px;
 }
 
-.action-unpublish-grey {
+.action-unlock-grey {
   background-position: -150px -120px;
 }
 
-.action-upload-grey {
+.action-unmerge-grey {
   background-position: -165px -120px;
 }
 
-.action-warning-grey {
+.action-unpublish-grey {
   background-position: -180px -120px;
 }
 
-.action-world-grey {
+.action-upload-grey {
   background-position: -195px -120px;
 }
 
-.action-arrow_left-white, .device-desktop .phabricator-action-view:hover .action-arrow_left {
+.action-warning-grey {
   background-position: 0px -135px;
 }
 
-.action-arrow_right-white, .device-desktop .phabricator-action-view:hover .action-arrow_right {
+.action-world-grey {
   background-position: -15px -135px;
 }
 
-.action-attach-white, .device-desktop .phabricator-action-view:hover .action-attach {
+.action-action-menu-white, .device-desktop .phabricator-action-view:hover .action-action-menu {
   background-position: -30px -135px;
 }
 
-.action-blame-white, .device-desktop .phabricator-action-view:hover .action-blame {
+.action-arrow_left-white, .device-desktop .phabricator-action-view:hover .action-arrow_left {
   background-position: -45px -135px;
 }
 
-.action-check-white, .device-desktop .phabricator-action-view:hover .action-check {
+.action-arrow_right-white, .device-desktop .phabricator-action-view:hover .action-arrow_right {
   background-position: -60px -135px;
 }
 
-.action-comment-white, .device-desktop .phabricator-action-view:hover .action-comment {
+.action-attach-white, .device-desktop .phabricator-action-view:hover .action-attach {
   background-position: -75px -135px;
 }
 
-.action-computer-white, .device-desktop .phabricator-action-view:hover .action-computer {
+.action-blame-white, .device-desktop .phabricator-action-view:hover .action-blame {
   background-position: -90px -135px;
 }
 
-.action-create-white, .device-desktop .phabricator-action-view:hover .action-create {
+.action-check-white, .device-desktop .phabricator-action-view:hover .action-check {
   background-position: -105px -135px;
 }
 
-.action-delete-white, .device-desktop .phabricator-action-view:hover .action-delete {
+.action-comment-white, .device-desktop .phabricator-action-view:hover .action-comment {
   background-position: -120px -135px;
 }
 
-.action-disable-white, .device-desktop .phabricator-action-view:hover .action-disable {
+.action-computer-white, .device-desktop .phabricator-action-view:hover .action-computer {
   background-position: -135px -135px;
 }
 
-.action-dislike-white, .device-desktop .phabricator-action-view:hover .action-dislike {
+.action-create-white, .device-desktop .phabricator-action-view:hover .action-create {
   background-position: -150px -135px;
 }
 
-.action-download-alt-white, .device-desktop .phabricator-action-view:hover .action-download-alt {
+.action-delete-white, .device-desktop .phabricator-action-view:hover .action-delete {
   background-position: -165px -135px;
 }
 
-.action-download-white, .device-desktop .phabricator-action-view:hover .action-download {
+.action-disable-white, .device-desktop .phabricator-action-view:hover .action-disable {
   background-position: -180px -135px;
 }
 
-.action-edit-white, .device-desktop .phabricator-action-view:hover .action-edit {
+.action-dislike-white, .device-desktop .phabricator-action-view:hover .action-dislike {
   background-position: -195px -135px;
 }
 
-.action-enable-white, .device-desktop .phabricator-action-view:hover .action-enable {
+.action-download-alt-white, .device-desktop .phabricator-action-view:hover .action-download-alt {
   background-position: 0px -150px;
 }
 
-.action-file-white, .device-desktop .phabricator-action-view:hover .action-file {
+.action-download-white, .device-desktop .phabricator-action-view:hover .action-download {
   background-position: -15px -150px;
 }
 
-.action-flag-0-white, .device-desktop .phabricator-action-view:hover .action-flag-0 {
+.action-edit-white, .device-desktop .phabricator-action-view:hover .action-edit {
   background-position: -30px -150px;
 }
 
-.action-flag-1-white, .device-desktop .phabricator-action-view:hover .action-flag-1 {
+.action-enable-white, .device-desktop .phabricator-action-view:hover .action-enable {
   background-position: -45px -150px;
 }
 
-.action-flag-2-white, .device-desktop .phabricator-action-view:hover .action-flag-2 {
+.action-file-white, .device-desktop .phabricator-action-view:hover .action-file {
   background-position: -60px -150px;
 }
 
-.action-flag-3-white, .device-desktop .phabricator-action-view:hover .action-flag-3 {
+.action-flag-0-white, .device-desktop .phabricator-action-view:hover .action-flag-0 {
   background-position: -75px -150px;
 }
 
-.action-flag-4-white, .device-desktop .phabricator-action-view:hover .action-flag-4 {
+.action-flag-1-white, .device-desktop .phabricator-action-view:hover .action-flag-1 {
   background-position: -90px -150px;
 }
 
-.action-flag-5-white, .device-desktop .phabricator-action-view:hover .action-flag-5 {
+.action-flag-2-white, .device-desktop .phabricator-action-view:hover .action-flag-2 {
   background-position: -105px -150px;
 }
 
-.action-flag-6-white, .device-desktop .phabricator-action-view:hover .action-flag-6 {
+.action-flag-3-white, .device-desktop .phabricator-action-view:hover .action-flag-3 {
   background-position: -120px -150px;
 }
 
-.action-flag-7-white, .device-desktop .phabricator-action-view:hover .action-flag-7 {
+.action-flag-4-white, .device-desktop .phabricator-action-view:hover .action-flag-4 {
   background-position: -135px -150px;
 }
 
-.action-flag-ghost-white, .device-desktop .phabricator-action-view:hover .action-flag-ghost {
+.action-flag-5-white, .device-desktop .phabricator-action-view:hover .action-flag-5 {
   background-position: -150px -150px;
 }
 
-.action-flag-white, .device-desktop .phabricator-action-view:hover .action-flag {
+.action-flag-6-white, .device-desktop .phabricator-action-view:hover .action-flag-6 {
   background-position: -165px -150px;
 }
 
-.action-folder-open-white, .device-desktop .phabricator-action-view:hover .action-folder-open {
+.action-flag-7-white, .device-desktop .phabricator-action-view:hover .action-flag-7 {
   background-position: -180px -150px;
 }
 
-.action-fork-white, .device-desktop .phabricator-action-view:hover .action-fork {
+.action-flag-ghost-white, .device-desktop .phabricator-action-view:hover .action-flag-ghost {
   background-position: -195px -150px;
 }
 
-.action-herald-white, .device-desktop .phabricator-action-view:hover .action-herald {
+.action-flag-white, .device-desktop .phabricator-action-view:hover .action-flag {
   background-position: 0px -165px;
 }
 
-.action-highlight-white, .device-desktop .phabricator-action-view:hover .action-highlight {
+.action-folder-open-white, .device-desktop .phabricator-action-view:hover .action-folder-open {
   background-position: -15px -165px;
 }
 
-.action-history-white, .device-desktop .phabricator-action-view:hover .action-history {
+.action-fork-white, .device-desktop .phabricator-action-view:hover .action-fork {
   background-position: -30px -165px;
 }
 
-.action-image-white, .device-desktop .phabricator-action-view:hover .action-image {
+.action-herald-white, .device-desktop .phabricator-action-view:hover .action-herald {
   background-position: -45px -165px;
 }
 
-.action-like-white, .device-desktop .phabricator-action-view:hover .action-like {
+.action-highlight-white, .device-desktop .phabricator-action-view:hover .action-highlight {
   background-position: -60px -165px;
 }
 
-.action-link-white, .device-desktop .phabricator-action-view:hover .action-link {
+.action-history-white, .device-desktop .phabricator-action-view:hover .action-history {
   background-position: -75px -165px;
 }
 
-.action-lint-info-white, .device-desktop .phabricator-action-view:hover .action-lint-info {
+.action-image-white, .device-desktop .phabricator-action-view:hover .action-image {
   background-position: -90px -165px;
 }
 
-.action-lint-ok-white, .device-desktop .phabricator-action-view:hover .action-lint-ok {
+.action-like-white, .device-desktop .phabricator-action-view:hover .action-like {
   background-position: -105px -165px;
 }
 
-.action-lint-warning-white, .device-desktop .phabricator-action-view:hover .action-lint-warning {
+.action-link-white, .device-desktop .phabricator-action-view:hover .action-link {
   background-position: -120px -165px;
 }
 
-.action-lock-white, .device-desktop .phabricator-action-view:hover .action-lock {
+.action-lint-info-white, .device-desktop .phabricator-action-view:hover .action-lint-info {
   background-position: -135px -165px;
 }
 
-.action-love-white, .device-desktop .phabricator-action-view:hover .action-love {
+.action-lint-ok-white, .device-desktop .phabricator-action-view:hover .action-lint-ok {
   background-position: -150px -165px;
 }
 
-.action-merge-white, .device-desktop .phabricator-action-view:hover .action-merge {
+.action-lint-warning-white, .device-desktop .phabricator-action-view:hover .action-lint-warning {
   background-position: -165px -165px;
 }
 
-.action-message-white, .device-desktop .phabricator-action-view:hover .action-message {
+.action-lock-white, .device-desktop .phabricator-action-view:hover .action-lock {
   background-position: -180px -165px;
 }
 
-.action-meta-mta-white, .device-desktop .phabricator-action-view:hover .action-meta-mta {
+.action-love-white, .device-desktop .phabricator-action-view:hover .action-love {
   background-position: -195px -165px;
 }
 
-.action-move-white, .device-desktop .phabricator-action-view:hover .action-move {
+.action-merge-white, .device-desktop .phabricator-action-view:hover .action-merge {
   background-position: 0px -180px;
 }
 
-.action-new-white, .device-desktop .phabricator-action-view:hover .action-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.action-new-grey {
+.action-message-white, .device-desktop .phabricator-action-view:hover .action-message {
   background-position: -15px -180px;
 }
 
-.action-none-white, .device-desktop .phabricator-action-view:hover .action-none {
+.action-meta-mta-white, .device-desktop .phabricator-action-view:hover .action-meta-mta {
   background-position: -30px -180px;
 }
 
-.action-perflab-white, .device-desktop .phabricator-action-view:hover .action-perflab {
+.action-move-white, .device-desktop .phabricator-action-view:hover .action-move {
   background-position: -45px -180px;
 }
 
-.action-preview-white, .device-desktop .phabricator-action-view:hover .action-preview {
+.action-new-white, .device-desktop .phabricator-action-view:hover .action-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.action-new-grey {
   background-position: -60px -180px;
 }
 
-.action-refresh-white, .device-desktop .phabricator-action-view:hover .action-refresh {
+.action-none-white, .device-desktop .phabricator-action-view:hover .action-none {
   background-position: -75px -180px;
 }
 
-.action-remove-white, .device-desktop .phabricator-action-view:hover .action-remove {
+.action-perflab-white, .device-desktop .phabricator-action-view:hover .action-perflab {
   background-position: -90px -180px;
 }
 
-.action-search-white, .device-desktop .phabricator-action-view:hover .action-search {
+.action-preview-white, .device-desktop .phabricator-action-view:hover .action-preview {
   background-position: -105px -180px;
 }
 
-.action-start-sandcastle-white, .device-desktop .phabricator-action-view:hover .action-start-sandcastle {
+.action-refresh-white, .device-desktop .phabricator-action-view:hover .action-refresh {
   background-position: -120px -180px;
 }
 
-.action-subscribe-add-white, .device-desktop .phabricator-action-view:hover .action-subscribe-add {
+.action-remove-white, .device-desktop .phabricator-action-view:hover .action-remove {
   background-position: -135px -180px;
 }
 
-.action-subscribe-auto-white, .device-desktop .phabricator-action-view:hover .action-subscribe-auto {
+.action-search-white, .device-desktop .phabricator-action-view:hover .action-search {
   background-position: -150px -180px;
 }
 
-.action-subscribe-delete-white, .device-desktop .phabricator-action-view:hover .action-subscribe-delete {
+.action-start-sandcastle-white, .device-desktop .phabricator-action-view:hover .action-start-sandcastle {
   background-position: -165px -180px;
 }
 
-.action-tag-white, .device-desktop .phabricator-action-view:hover .action-tag {
+.action-subscribe-add-white, .device-desktop .phabricator-action-view:hover .action-subscribe-add {
   background-position: -180px -180px;
 }
 
-.action-transcript-white, .device-desktop .phabricator-action-view:hover .action-transcript {
+.action-subscribe-auto-white, .device-desktop .phabricator-action-view:hover .action-subscribe-auto {
   background-position: -195px -180px;
 }
 
-.action-undo-white, .device-desktop .phabricator-action-view:hover .action-undo {
+.action-subscribe-delete-white, .device-desktop .phabricator-action-view:hover .action-subscribe-delete {
   background-position: 0px -195px;
 }
 
-.action-unlock-white, .device-desktop .phabricator-action-view:hover .action-unlock {
+.action-tag-white, .device-desktop .phabricator-action-view:hover .action-tag {
   background-position: -15px -195px;
 }
 
-.action-unmerge-white, .device-desktop .phabricator-action-view:hover .action-unmerge {
+.action-transcript-white, .device-desktop .phabricator-action-view:hover .action-transcript {
   background-position: -30px -195px;
 }
 
-.action-unpublish-white, .device-desktop .phabricator-action-view:hover .action-unpublish {
+.action-undo-white, .device-desktop .phabricator-action-view:hover .action-undo {
   background-position: -45px -195px;
 }
 
-.action-upload-white, .device-desktop .phabricator-action-view:hover .action-upload {
+.action-unlock-white, .device-desktop .phabricator-action-view:hover .action-unlock {
   background-position: -60px -195px;
 }
 
-.action-warning-white, .device-desktop .phabricator-action-view:hover .action-warning {
+.action-unmerge-white, .device-desktop .phabricator-action-view:hover .action-unmerge {
   background-position: -75px -195px;
 }
 
-.action-world-white, .device-desktop .phabricator-action-view:hover .action-world {
+.action-unpublish-white, .device-desktop .phabricator-action-view:hover .action-unpublish {
   background-position: -90px -195px;
 }
 
-.remarkup-assist-b {
+.action-upload-white, .device-desktop .phabricator-action-view:hover .action-upload {
   background-position: -105px -195px;
 }
 
-.remarkup-assist-code {
+.action-warning-white, .device-desktop .phabricator-action-view:hover .action-warning {
   background-position: -120px -195px;
 }
 
-.remarkup-assist-help {
+.action-world-white, .device-desktop .phabricator-action-view:hover .action-world {
   background-position: -135px -195px;
 }
 
-.remarkup-assist-i {
+.remarkup-assist-b {
   background-position: -150px -195px;
 }
 
-.remarkup-assist-image {
+.remarkup-assist-code {
   background-position: -165px -195px;
 }
 
-.remarkup-assist-larger {
+.remarkup-assist-help {
   background-position: -180px -195px;
 }
 
-.remarkup-assist-meme {
+.remarkup-assist-i {
   background-position: -195px -195px;
 }
 
-.remarkup-assist-ol {
+.remarkup-assist-image {
   background-position: 0px -210px;
 }
 
-.remarkup-assist-table {
+.remarkup-assist-larger {
   background-position: -15px -210px;
 }
 
-.remarkup-assist-tag {
+.remarkup-assist-meme {
   background-position: -30px -210px;
 }
 
-.remarkup-assist-tt {
+.remarkup-assist-ol {
   background-position: -45px -210px;
 }
 
-.remarkup-assist-ul {
+.remarkup-assist-table {
   background-position: -60px -210px;
+}
+
+.remarkup-assist-tag {
+  background-position: -75px -210px;
+}
+
+.remarkup-assist-tt {
+  background-position: -90px -210px;
+}
+
+.remarkup-assist-ul {
+  background-position: -105px -210px;
 }

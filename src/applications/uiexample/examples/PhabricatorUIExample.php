@@ -22,7 +22,6 @@ abstract class PhabricatorUIExample {
 
     $id = mt_rand(15, 9999);
     $handle = new PhabricatorObjectHandle();
-    $handle->setAlternateID(mt_rand(15, 9999));
     $handle->setName($name);
     $handle->setType($type);
     $handle->setPHID(PhabricatorPHID::generateNewPHID($type));

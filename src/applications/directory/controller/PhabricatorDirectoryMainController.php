@@ -30,7 +30,8 @@ final class PhabricatorDirectoryMainController
   private function buildMainResponse($nav, array $projects) {
     assert_instances_of($projects, 'PhabricatorProject');
 
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+    $maniphest = 'PhabricatorApplicationManiphest';
+    if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $unbreak_panel = $this->buildUnbreakNowPanel();
       $triage_panel = $this->buildNeedsTriagePanel($projects);
       $tasks_panel = $this->buildTasksPanel();

@@ -86,11 +86,32 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     }
   }
 
-  protected function applyCustomInternalTransaction(
+  /**
+   * We really only need a read lock if we have a comment. In that case, we
+   * must update the messagesCount field on the conpherence and
+   * seenMessagesCount(s) for the participant(s).
+   */
+  protected function shouldReadLock(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $lock = false;
     switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $lock =  true;
+        break;
+    }
+
+    return $lock;
+  }
+
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $object->setMessageCount((int)$object->getMessageCount() + 1);
+        break;
       case ConpherenceTransactionType::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
         break;
@@ -105,6 +126,18 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           ConpherenceImageData::SIZE_HEAD);
         break;
     }
+    $this->updateRecentParticipantPHIDs($object, $xaction);
+  }
+
+  private function updateRecentParticipantPHIDs(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $participants = $object->getRecentParticipantPHIDs();
+    array_unshift($participants, $xaction->getAuthorPHID());
+    $participants = array_slice(array_unique($participants), 0, 10);
+
+    $object->setRecentParticipantPHIDs($participants);
   }
 
   /**
@@ -148,10 +181,13 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
           if ($phid != $user->getPHID()) {
             if ($participant->getParticipationStatus() != $behind) {
               $participant->setBehindTransactionPHID($xaction_phid);
+              // decrement one as this is the message putting them behind!
+              $participant->setSeenMessageCount($object->getMessageCount() - 1);
             }
             $participant->setParticipationStatus($behind);
             $participant->setDateTouched($time);
           } else {
+            $participant->setSeenMessageCount($object->getMessageCount());
             $participant->setParticipationStatus($up_to_date);
             $participant->setDateTouched($time);
           }
@@ -176,8 +212,10 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         foreach ($add as $phid) {
           if ($phid == $this->getActor()->getPHID()) {
             $status = ConpherenceParticipationStatus::UP_TO_DATE;
+            $message_count = $object->getMessageCount();
           } else {
             $status = ConpherenceParticipationStatus::BEHIND;
+            $message_count = 0;
           }
           $participants[$phid] =
             id(new ConpherenceParticipant())
@@ -186,6 +224,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             ->setParticipationStatus($status)
             ->setDateTouched(time())
             ->setBehindTransactionPHID($xaction->getPHID())
+            ->setSeenMessageCount($message_count)
             ->save();
         }
         $object->attachParticipants($participants);

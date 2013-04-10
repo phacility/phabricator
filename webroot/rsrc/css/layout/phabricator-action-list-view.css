@@ -29,9 +29,16 @@
 }
 
 .device .phabricator-action-list-view {
-  background: #f3f3f3;
   border-top: 1px solid #dcdcdc;
   padding: .5em 0;
+}
+
+.device .phabricator-action-list-view {
+  display: none;
+}
+
+.device .phabricator-action-list-view.phabricator-action-list-toggle {
+  display: block;
 }
 
 .phabricator-action-view {

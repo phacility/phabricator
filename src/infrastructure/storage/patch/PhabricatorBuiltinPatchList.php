@@ -1226,7 +1226,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('20130330.phrequent.sql'),
       ),
+      '20130403.conpherencecache.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130403.conpherencecache.sql'),
+      ),
+      '20130403.conpherencecachemig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130403.conpherencecachemig.php'),
+      )
     );
   }
-
 }

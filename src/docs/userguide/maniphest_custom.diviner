@@ -44,8 +44,17 @@ Each array key must be unique, and is used to organize the internal storage of
 the field. These options are available:
 
   - **label**: Display label for the field on the edit and detail interfaces.
-  - **type**: Field type: one of **int**, **string**, **bool**, **select**,
-    **remarkup**, **user**, **users**, or **date**.
+  - **type**: Field type. The supported field types are:
+    - **int**: An integer, rendered as a text field.
+    - **string**: A string, rendered as a text field.
+    - **bool**: A boolean value, rendered as a checkbox.
+    - **select**: Allows the user to select from several options, rendered
+      as a dropdown.
+    - **remarkup**: A text area which allows the user to enter markup.
+    - **user**: A single user typeahead.
+    - **users**: A typeahead which allows multiple users to be input.
+    - **date**: A date/time picker.
+    - **header**: Renders a visual divider which you can use to group fields.
   - **caption**: A caption to display underneath the field (optional).
   - **required**: True if the user should be required to provide a value.
   - **options**: If type is set to **select**, provide options for the dropdown

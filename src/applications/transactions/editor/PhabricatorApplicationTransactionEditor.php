@@ -314,6 +314,28 @@ abstract class PhabricatorApplicationTransactionEditor
       $xaction->setContentSource($this->getContentSource());
     }
 
+    $is_preview = $this->getIsPreview();
+    $read_locking = false;
+
+    if (!$is_preview && $object->getID()) {
+      foreach ($xactions as $xaction) {
+
+        // If any of the transactions require a read lock, hold one and reload
+        // the object. We need to do this fairly early so that the call to
+        // `adjustTransactionValues()` (which populates old values) is based
+        // on the synchronized state of the object, which may differ from the
+        // state when it was originally loaded.
+
+        if ($this->shouldReadLock($object, $xaction)) {
+          $object->openTransaction();
+          $object->beginReadLocking();
+          $read_locking = true;
+          $object->reload();
+          break;
+        }
+      }
+    }
+
     foreach ($xactions as $xaction) {
       $this->adjustTransactionValues($object, $xaction);
     }
@@ -321,12 +343,17 @@ abstract class PhabricatorApplicationTransactionEditor
     $xactions = $this->filterTransactions($object, $xactions);
 
     if (!$xactions) {
+      if ($read_locking) {
+        $object->endReadLocking();
+        $read_locking = false;
+        $object->killTransaction();
+      }
       return array();
     }
 
     $xactions = $this->sortTransactions($xactions);
 
-    if ($this->getIsPreview()) {
+    if ($is_preview) {
       $this->loadHandles($xactions);
       return $xactions;
     }
@@ -335,7 +362,10 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setActor($actor)
       ->setContentSource($this->getContentSource());
 
-    $object->openTransaction();
+    if (!$read_locking) {
+      $object->openTransaction();
+    }
+
       foreach ($xactions as $xaction) {
         $this->applyInternalEffects($object, $xaction);
       }
@@ -355,6 +385,12 @@ abstract class PhabricatorApplicationTransactionEditor
       foreach ($xactions as $xaction) {
         $this->applyExternalEffects($object, $xaction);
       }
+
+      if ($read_locking) {
+        $object->endReadLocking();
+        $read_locking = false;
+      }
+
     $object->saveTransaction();
 
     $this->loadHandles($xactions);
@@ -388,6 +424,46 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function didApplyTransactions(array $xactions) {
     // Hook for subclasses.
     return;
+  }
+
+
+  /**
+   * Determine if the editor should hold a read lock on the object while
+   * applying a transaction.
+   *
+   * If the editor does not hold a lock, two editors may read an object at the
+   * same time, then apply their changes without any synchronization. For most
+   * transactions, this does not matter much. However, it is important for some
+   * transactions. For example, if an object has a transaction count on it, both
+   * editors may read the object with `count = 23`, then independently update it
+   * and save the object with `count = 24` twice. This will produce the wrong
+   * state: the object really has 25 transactions, but the count is only 24.
+   *
+   * Generally, transactions fall into one of four buckets:
+   *
+   *   - Append operations: Actions like adding a comment to an object purely
+   *     add information to its state, and do not depend on the current object
+   *     state in any way. These transactions never need to hold locks.
+   *   - Overwrite operations: Actions like changing the title or description
+   *     of an object replace the current value with a new value, so the end
+   *     state is consistent without a lock. We currently do not lock these
+   *     transactions, although we may in the future.
+   *   - Edge operations: Edge and subscription operations have internal
+   *     synchronization which limits the damage race conditions can cause.
+   *     We do not currently lock these transactions, although we may in the
+   *     future.
+   *   - Update operations: Actions like incrementing a count on an object.
+   *     These operations generally should use locks, unless it is not
+   *     important that the state remain consistent in the presence of races.
+   *
+   * @param   PhabricatorLiskDAO  Object being updated.
+   * @param   PhabricatorApplicationTransaction Transaction being applied.
+   * @return  bool                True to synchronize the edit with a lock.
+   */
+  protected function shouldReadLock(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return false;
   }
 
   private function loadHandles(array $xactions) {

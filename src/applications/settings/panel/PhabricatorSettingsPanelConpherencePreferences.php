@@ -4,14 +4,8 @@ final class PhabricatorSettingsPanelConpherencePreferences
   extends PhabricatorSettingsPanel {
 
   public function isEnabled() {
-    // TODO - epriestley - resolve isBeta and isInstalled for
-    // PhabricatorApplication
-    $app = PhabricatorApplication::getByClass(
+    return PhabricatorApplication::isClassInstalled(
       'PhabricatorApplicationConpherence');
-    $is_prod = !$app->isBeta();
-    $allow_beta =
-      PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
-    return ($is_prod || $allow_beta) && $app->isInstalled();
   }
 
   public function getPanelKey() {

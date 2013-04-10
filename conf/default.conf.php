@@ -1083,8 +1083,6 @@ return array(
 
 // -- Maniphest ------------------------------------------------------------- //
 
-  'maniphest.enabled' => true,
-
   // Array of custom fields for Maniphest tasks. For details on adding custom
   // fields to Maniphest, see "Maniphest User Guide: Adding Custom Fields".
   'maniphest.custom-fields' => array(),
@@ -1097,10 +1095,6 @@ return array(
   // See the constants in @{class:ManiphestTaskPriority} for valid values.
   // Defaults to "needs triage".
   'maniphest.default-priority' => 90,
-
-// -- Phriction ------------------------------------------------------------- //
-
-  'phriction.enabled' => true,
 
 // -- Phame ----------------------------------------------------------------- //
 

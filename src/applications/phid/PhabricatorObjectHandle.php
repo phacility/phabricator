@@ -6,13 +6,10 @@ final class PhabricatorObjectHandle {
   private $phid;
   private $type;
   private $name;
-  private $email;
   private $fullName;
   private $imageURI;
   private $timestamp;
-  private $alternateID;
   private $status = PhabricatorObjectHandleStatus::STATUS_OPEN;
-  private $title;
   private $complete;
   private $disabled;
 
@@ -52,11 +49,6 @@ final class PhabricatorObjectHandle {
     return $this->status;
   }
 
-  public function setTitle($title) {
-    $this->title = $title;
-    return $this;
-  }
-
   public function setFullName($full_name) {
     $this->fullName = $full_name;
     return $this;
@@ -94,15 +86,6 @@ final class PhabricatorObjectHandle {
 
   public function getTimestamp() {
     return $this->timestamp;
-  }
-
-  public function setAlternateID($alternate_id) {
-    $this->alternateID = $alternate_id;
-    return $this;
-  }
-
-  public function getAlternateID() {
-    return $this->alternateID;
   }
 
   public function getTypeName() {
@@ -183,14 +166,15 @@ final class PhabricatorObjectHandle {
   }
 
 
-  public function renderLink() {
-    $name = $this->getLinkName();
+  public function renderLink($name = null) {
+    if ($name === null) {
+      $name = $this->getLinkName();
+    }
     $class = null;
     $title = null;
 
     if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
       $class .= ' handle-status-'.$this->status;
-      $title = (isset($this->title) ? $this->title : $this->status);
     }
 
     if ($this->disabled) {
@@ -203,7 +187,6 @@ final class PhabricatorObjectHandle {
       array(
         'href'  => $this->getURI(),
         'class' => $class,
-        'title' => $title,
       ),
       $name);
   }

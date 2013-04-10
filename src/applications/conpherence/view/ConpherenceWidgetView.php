@@ -23,11 +23,4 @@ abstract class ConpherenceWidgetView extends AphrontView {
   public function getConpherence() {
     return $this->conpherence;
   }
-
-  public function getLatestTransactionID() {
-    $transactions = $this->getConpherence()->getTransactions();
-    $latest = end($transactions);
-    return $latest->getID();
-  }
-
 }

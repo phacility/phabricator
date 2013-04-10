@@ -132,13 +132,25 @@ final class PhabricatorSetupIssueView extends AphrontView {
         "The current Phabricator configuration has these %d value(s):",
         count($configs)));
 
+    $options = PhabricatorApplicationConfigOptions::loadAllOptions();
+    $hidden = array();
+    foreach ($options as $key => $option) {
+      if ($option->getHidden()) {
+        $hidden[$key] = true;
+      }
+    }
+
+    $table = null;
     $dict = array();
     foreach ($configs as $key) {
-      $dict[$key] = PhabricatorEnv::getUnrepairedEnvConfig($key);
+      if (isset($hidden[$key])) {
+        $dict[$key] = null;
+      } else {
+        $dict[$key] = PhabricatorEnv::getUnrepairedEnvConfig($key);
+      }
     }
-    $table = $this->renderValueTable($dict);
 
-    $options = PhabricatorApplicationConfigOptions::loadAllOptions();
+    $table = $this->renderValueTable($dict, $hidden);
 
     if ($this->getIssue()->getIsFatal()) {
       $update_info = phutil_tag(
@@ -299,12 +311,18 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ));
   }
 
-  private function renderValueTable(array $dict) {
+  private function renderValueTable(array $dict, array $hidden = array()) {
     $rows = array();
     foreach ($dict as $key => $value) {
+      if (isset($hidden[$key])) {
+        $value = phutil_tag('em', array(), 'hidden');
+      } else {
+        $value = $this->renderValueForDisplay($value);
+      }
+
       $cols = array(
         phutil_tag('th', array(), $key),
-        phutil_tag('td', array(), $this->renderValueForDisplay($value)),
+        phutil_tag('td', array(), $value),
       );
       $rows[] = phutil_tag('tr', array(), $cols);
     }

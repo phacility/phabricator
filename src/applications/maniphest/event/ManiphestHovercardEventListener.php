@@ -60,7 +60,7 @@ final class ManiphestHovercardEventListener extends PhutilEventListener {
     $hovercard->addField(pht('Assigned to'), $owner);
     if ($project_phids) {
       $hovercard->addField(pht('Projects'),
-        $this->renderHandlesForPHIDs($project_phids, $viewer_handles));
+        implode_selected_handle_links(', ', $viewer_handles, $project_phids));
     }
 
     if ($edge_phids) {
@@ -84,9 +84,8 @@ final class ManiphestHovercardEventListener extends PhutilEventListener {
 
           $hovercard->addField(
             $edge_name,
-            $this->renderHandlesForPHIDs(
-              array_keys($edges[$edge_type]),
-              $viewer_handles)
+            implode_selected_handle_links(', ', $viewer_handles,
+              array_keys($edges[$edge_type]))
                 ->appendHTML($edge_overflow));
         }
       }
@@ -101,17 +100,6 @@ final class ManiphestHovercardEventListener extends PhutilEventListener {
     return id(new PhabricatorObjectHandleData($phids))
       ->setViewer($viewer)
       ->loadHandles();
-  }
-
-  protected function renderHandlesForPHIDs(array $phids,
-    array $handles, $glue = ', ') {
-
-    $items = array();
-    foreach ($phids as $phid) {
-      $items[] = $handles[$phid]->renderLink();
-    }
-
-    return phutil_implode_html($glue, $items);
   }
 
 }

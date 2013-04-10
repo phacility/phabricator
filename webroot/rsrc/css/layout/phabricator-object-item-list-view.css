@@ -46,12 +46,12 @@
 .phabricator-object-item-name {
   display: inline-block;
   font-weight: bold;
-  padding: 0 8px;
+  padding: 6px 8px 0;
+  white-space: nowrap;
 }
 
 .phabricator-object-item-link {
   display: inline-block;
-  padding: 6px 0 4px;
 }
 
 .phabricator-object-item-objname {
@@ -60,6 +60,7 @@
 }
 
 .phabricator-object-item-content {
+  margin-top: 2px;
   overflow: hidden;
 }
 
@@ -72,12 +73,12 @@
   top: 0;
   bottom: 0;
   left: 0;
-  width: 15px;
+  width: 17px;
   background: url(/rsrc/image/texture/grip.png) center center no-repeat;
 }
 
 .phabricator-object-item-grippable .phabricator-object-item-frame {
-  padding-left: 9px;
+  padding-left: 11px;
 }
 
 
@@ -131,6 +132,11 @@
 
 .phabricator-object-icon-pane {
   float: right;
+  margin-top: 4px;
+}
+
+.device .phabricator-object-item-no-icon-images .phabricator-object-icon-pane {
+  display: none;
 }
 
 .phabricator-object-item-with-handle-icons .phabricator-object-item-icons {
@@ -139,7 +145,7 @@
 
 .phabricator-object-item-icons {
   float: right;
-  padding: 6px 10px 0;
+  padding: 0 10px;
 }
 
 /* NOTE: The main content is an "overflow: hidden" div which we give a right
@@ -308,7 +314,7 @@
 
 /* - Handle Icons --------------------------------------------------------------
 
-  Shows owners, reviewers, etc.
+  Shows owners, reviewers, etc., using profile picture icons.
 
 */
 
@@ -331,6 +337,24 @@
 }
 
 
+/* - Bylines -------------------------------------------------------------------
+
+  Shows owners, authors, reviewers, etc., in text.
+
+*/
+
+.phabricator-object-item-bylines {
+  float: right;
+  clear: right;
+  padding: 0 10px;
+  margin: 3px 0;
+  font-size: 11px;
+  color: #333333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: right;
+}
+
 /* - Card List -----------------------------------------------------------------
 
   Rounded card list.
@@ -342,19 +366,11 @@
   border-radius: 3px;
   border-left-width: 6px;
   background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
+  margin-bottom: 4px;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-frame {
-  min-height: 47px;
-}
-
-
-.phabricator-object-list-cards .phabricator-object-item-name {
-  white-space: nowrap;
-}
-
-.phabricator-object-list-cards .phabricator-object-item-link {
-  padding: 6px 0;
+  min-height: 41px;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-selected {

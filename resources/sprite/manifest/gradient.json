@@ -1,75 +1,65 @@
 {
   "version" : 1,
   "sprites" : {
-    "gradient-black-dark"      : {
-      "name" : "gradient-black-dark",
-      "rule" : ".gradient-black-dark, button.black, a.black, a.black:visited",
-      "hash" : "17425d8c9c53672ab2edbd236e6efd7a"
+    "gradient-blue-header"      : {
+      "name" : "gradient-blue-header",
+      "rule" : ".gradient-blue-header",
+      "hash" : "dd82b6d737f9f683c0d6e70eff59e872"
     },
-    "gradient-black-light"     : {
-      "name" : "gradient-black-light",
-      "rule" : ".gradient-black-light, button.black:active, a.black:active",
-      "hash" : "c4fb2231553d2894fd2c97beaa8bfe39"
-    },
-    "gradient-blue-dark"       : {
-      "name" : "gradient-blue-dark",
-      "rule" : ".gradient-blue-dark, button, a.button, a.button:visited, input.inputsubmit",
-      "hash" : "f467612edcdbf984672287c6086492c4"
-    },
-    "gradient-blue-light"      : {
-      "name" : "gradient-blue-light",
-      "rule" : ".gradient-blue-light, button:active, a.button:active",
-      "hash" : "471d47c102def6db46b345310aac5a03"
-    },
-    "gradient-breadcrumbs"     : {
+    "gradient-breadcrumbs"      : {
       "name" : "gradient-breadcrumbs",
       "rule" : ".gradient-breadcrumbs",
       "hash" : "3d0f8634df5bc29eaf2a5a01bae79cf1"
     },
-    "gradient-dark-menu-label" : {
+    "gradient-dark-grey-header" : {
+      "name" : "gradient-dark-grey-header",
+      "rule" : ".gradient-dark-grey-header",
+      "hash" : "2bdb9bec730405a8fc0a1eca4f3538c2"
+    },
+    "gradient-dark-menu-label"  : {
       "name" : "gradient-dark-menu-label",
       "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label",
       "hash" : "e0d4a455142f9c4745d36ad8b7dd3f78"
     },
-    "gradient-green-dark"      : {
-      "name" : "gradient-green-dark",
-      "rule" : ".gradient-green-dark, button.green, a.green, a.green:visited",
-      "hash" : "a6719fe55b2b0e527ed32985691eab34"
+    "gradient-green-header"     : {
+      "name" : "gradient-green-header",
+      "rule" : ".gradient-green-header",
+      "hash" : "d61297d23aa31fa1de51e2b9b5974554"
     },
-    "gradient-green-light"     : {
-      "name" : "gradient-green-light",
-      "rule" : ".gradient-green-light, button.green:active, a.green:active",
-      "hash" : "124969cc7805bbd754005bc702e24c54"
+    "gradient-grey-header"      : {
+      "name" : "gradient-grey-header",
+      "rule" : ".gradient-grey-header",
+      "hash" : "f1453896068a8dd0d7885457c8e371bc"
     },
-    "gradient-grey-dark"       : {
-      "name" : "gradient-grey-dark",
-      "rule" : ".gradient-grey-dark, button.grey, input.inputaux, a.grey, a.grey:visited, a.button.disabled, button[disabled], button.disabled",
-      "hash" : "fac28a773098fc62bf571e12b843f71a"
-    },
-    "gradient-grey-light"      : {
-      "name" : "gradient-grey-light",
-      "rule" : ".gradient-grey-light, button.grey:active, a.grey:active, button.grey_active, a.dropdown-open",
-      "hash" : "83c6128f59fc2e426c912c2f73f5b92b"
-    },
-    "gradient-menu-hover"      : {
+    "gradient-menu-hover"       : {
       "name" : "gradient-menu-hover",
       "rule" : ".gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover",
       "hash" : "e6e064156d66952180e99b00996ffc38"
     },
-    "gradient-menu-label"      : {
+    "gradient-menu-label"       : {
       "name" : "gradient-menu-label",
       "rule" : ".gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label",
       "hash" : "04b9943f5b06c8cb21fe6b96714e6662"
     },
-    "gradient-menu-selected"   : {
+    "gradient-menu-selected"    : {
       "name" : "gradient-menu-selected",
       "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus",
       "hash" : "9b4b039fba177b90bc26f0e6eece339d"
+    },
+    "gradient-red-header"       : {
+      "name" : "gradient-red-header",
+      "rule" : ".gradient-red-header",
+      "hash" : "27a76645065953a8440d0c3d2b192c82"
+    },
+    "gradient-yellow-header"    : {
+      "name" : "gradient-yellow-header",
+      "rule" : ".gradient-yellow-header",
+      "hash" : "181e68e61f29071c3ec3810694c2ef08"
     }
   },
   "scales"  : [
     1
   ],
-  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, button, a.button, a.button:visited, input.inputsubmit, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-filetree a.phabricator-filetree-item:hover, .phabricator-filetree a.phabricator-active-nav-focus {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
+  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-filetree a.phabricator-filetree-item:hover, .phabricator-filetree a.phabricator-active-nav-focus {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
   "type"    : "repeat-x"
 }

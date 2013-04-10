@@ -4,6 +4,7 @@ final class PhabricatorActionListView extends AphrontView {
 
   private $actions = array();
   private $object;
+  private $id = null;
 
   public function setObject(PhabricatorLiskDAO $object) {
     $this->object = $object;
@@ -12,6 +13,11 @@ final class PhabricatorActionListView extends AphrontView {
 
   public function addAction(PhabricatorActionView $view) {
     $this->actions[] = $view;
+    return $this;
+  }
+
+  public function setID($id) {
+    $this->id = $id;
     return $this;
   }
 
@@ -41,6 +47,7 @@ final class PhabricatorActionListView extends AphrontView {
       'ul',
       array(
         'class' => 'phabricator-action-list-view',
+        'id' => $this->id
       ),
       $actions);
   }

@@ -66,7 +66,6 @@ final class ConpherenceThreadListView extends AphrontView {
     $unread_count = $data['unread_count'];
     $epoch = $data['epoch'];
     $image = $data['image'];
-    $snippet = $data['snippet'];
 
     return id(new ConpherenceMenuItemView())
       ->setUser($user)
@@ -75,7 +74,6 @@ final class ConpherenceThreadListView extends AphrontView {
       ->setHref($uri)
       ->setEpoch($epoch)
       ->setImageURI($image)
-      ->setMessageText($snippet)
       ->setUnreadCount($unread_count)
       ->setID($thread->getPHID().'-nav-item')
       ->addSigil('conpherence-menu-click')

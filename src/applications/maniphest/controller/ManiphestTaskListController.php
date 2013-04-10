@@ -37,16 +37,17 @@ final class ManiphestTaskListController extends ManiphestController {
       $max_priority = $request->getInt('set_hpriority');
 
       $uri = $request->getRequestURI()
-        ->alter('users',      $this->getArrToStrList('set_users'))
-        ->alter('projects',   $this->getArrToStrList('set_projects'))
-        ->alter('aprojects',  $this->getArrToStrList('set_aprojects'))
-        ->alter('xprojects',  $this->getArrToStrList('set_xprojects'))
-        ->alter('owners',     $this->getArrToStrList('set_owners'))
-        ->alter('authors',    $this->getArrToStrList('set_authors'))
-        ->alter('lpriority', $min_priority)
-        ->alter('hpriority', $max_priority)
-        ->alter('tasks', $task_ids)
-        ->alter('search', $search_text);
+        ->alter('users',         $this->getArrToStrList('set_users'))
+        ->alter('projects',      $this->getArrToStrList('set_projects'))
+        ->alter('aprojects',     $this->getArrToStrList('set_aprojects'))
+        ->alter('useraprojects', $this->getArrToStrList('set_useraprojects'))
+        ->alter('xprojects',     $this->getArrToStrList('set_xprojects'))
+        ->alter('owners',        $this->getArrToStrList('set_owners'))
+        ->alter('authors',       $this->getArrToStrList('set_authors'))
+        ->alter('lpriority',     $min_priority)
+        ->alter('hpriority',     $max_priority)
+        ->alter('tasks',         $task_ids)
+        ->alter('search',        $search_text);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
@@ -104,6 +105,9 @@ final class ManiphestTaskListController extends ManiphestController {
     $project_phids  = $query->getParameter('projectPHIDs', array());
     $any_project_phids = $query->getParameter(
       'anyProjectPHIDs',
+      array());
+    $any_user_project_phids = $query->getParameter(
+      'anyUserProjectPHIDs',
       array());
     $exclude_project_phids = $query->getParameter(
       'excludeProjectPHIDs',
@@ -214,6 +218,19 @@ final class ManiphestTaskListController extends ManiphestController {
           ->setLabel(pht('Any Projects'))
           ->setCaption(pht('Find tasks in ANY of these projects ("OR" query).'))
           ->setValue($atokens));
+
+      $tokens = array();
+      foreach ($any_user_project_phids as $phid) {
+        $tokens[$phid] = $handles[$phid]->getFullName();
+      }
+      $form->appendChild(
+        id(new AphrontFormTokenizerControl())
+        ->setDatasource('/typeahead/common/users/')
+        ->setName('set_useraprojects')
+        ->setLabel(pht('Any User Projects'))
+        ->setCaption(
+          pht('Find tasks in ANY of these users\' projects ("OR" query).'))
+        ->setValue($tokens));
 
       $tokens = array();
       foreach ($exclude_project_phids as $phid) {
@@ -427,6 +444,9 @@ final class ManiphestTaskListController extends ManiphestController {
     $any_project_phids = $search_query->getParameter(
       'anyProjectPHIDs',
       array());
+    $any_user_project_phids = $search_query->getParameter(
+      'anyUserProjectPHIDs',
+      array());
     $xproject_phids = $search_query->getParameter(
       'excludeProjectPHIDs',
       array());
@@ -461,6 +481,11 @@ final class ManiphestTaskListController extends ManiphestController {
 
     if ($author_phids) {
       $query->withAuthors($author_phids);
+    }
+
+    if ($any_user_project_phids) {
+      $query->setViewer($viewer);
+      $query->withAnyUserProjects($any_user_project_phids);
     }
 
     $status = $search_query->getParameter('status', 'all');
@@ -740,8 +765,10 @@ final class ManiphestTaskListController extends ManiphestController {
         ->withMemberPHIDs($user_phids)
         ->execute();
       $any_project_phids = mpull($projects, 'getPHID');
+      $any_user_project_phids = array();
     } else {
       $any_project_phids = $request->getStrList('aprojects');
+      $any_user_project_phids = $request->getStrList('useraprojects');
     }
 
     $project_phids = $request->getStrList('projects');
@@ -787,6 +814,7 @@ final class ManiphestTaskListController extends ManiphestController {
         'userPHIDs'           => $user_phids,
         'projectPHIDs'        => $project_phids,
         'anyProjectPHIDs'     => $any_project_phids,
+        'anyUserProjectPHIDs' => $any_user_project_phids,
         'excludeProjectPHIDs' => $exclude_project_phids,
         'ownerPHIDs'          => $owner_phids,
         'authorPHIDs'         => $author_phids,

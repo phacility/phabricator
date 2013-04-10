@@ -26,7 +26,8 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
 
   public function getEventListeners() {
     return array(
-      new DiffusionPeopleMenuEventListener()
+      new DiffusionPeopleMenuEventListener(),
+      new DiffusionHovercardEventListener(),
     );
   }
 

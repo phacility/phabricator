@@ -18,10 +18,6 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('article/Phriction_User_Guide.html');
   }
 
-  public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('phriction.enabled');
-  }
-
   public function getTitleGlyph() {
     return "\xE2\x9A\xA1";
   }

@@ -1,6 +1,21 @@
 {
   "version" : 1,
   "sprites" : {
+    "action-action-menu"            : {
+      "name" : "action-action-menu",
+      "rule" : ".action-action-menu",
+      "hash" : "533fe3e36cfbf890ad7348330a2328a9"
+    },
+    "action-action-menu-grey"       : {
+      "name" : "action-action-menu-grey",
+      "rule" : ".action-action-menu-grey",
+      "hash" : "9bc229a81b33bb62bcb4e025283ffbe5"
+    },
+    "action-action-menu-white"      : {
+      "name" : "action-action-menu-white",
+      "rule" : ".action-action-menu-white, .device-desktop .phabricator-action-view:hover .action-action-menu",
+      "hash" : "db0ff28b9ee23cdbf6125a7864b693b0"
+    },
     "action-arrow_left"             : {
       "name" : "action-arrow_left",
       "rule" : ".action-arrow_left",
