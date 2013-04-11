@@ -906,7 +906,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-menu-css' =>
   array(
-    'uri' => '/res/7413379f/rsrc/css/application/conpherence/menu.css',
+    'uri' => '/res/2ba4444e/rsrc/css/application/conpherence/menu.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -915,7 +915,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-message-pane-css' =>
   array(
-    'uri' => '/res/2876cc7f/rsrc/css/application/conpherence/message-pane.css',
+    'uri' => '/res/6a4811a7/rsrc/css/application/conpherence/message-pane.css',
     'type' => 'css',
     'requires' =>
     array(

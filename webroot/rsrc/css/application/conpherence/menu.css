@@ -19,6 +19,10 @@
   bottom: 0;
 }
 
+.device-phone .conpherence-menu-pane {
+  -webkit-overflow-scrolling: touch;
+}
+
 .conpherence-content-pane {
   margin-left: 300px;
   position: relative;
