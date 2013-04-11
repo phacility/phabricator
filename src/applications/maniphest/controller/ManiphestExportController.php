@@ -181,9 +181,8 @@ final class ManiphestExportController extends ManiphestController {
     foreach ($rows as $row => $cols) {
       foreach ($cols as $col => $spec) {
         $cell_name = $this->col($col).($row + 1);
-        $sheet
-          ->setCellValue($cell_name, $spec, $return_cell = true)
-          ->setDataType(PHPExcel_Cell_DataType::TYPE_STRING);
+        $cell = $sheet
+          ->setCellValue($cell_name, $spec, $return_cell = true);
 
         if ($row == 0) {
           $sheet->getStyle($cell_name)->applyFromArray($header_format);
@@ -195,6 +194,8 @@ final class ManiphestExportController extends ManiphestController {
             ->getStyle($cell_name)
             ->getNumberFormat()
             ->setFormatCode($code);
+        } else {
+          $cell->setDataType(PHPExcel_Cell_DataType::TYPE_STRING);
         }
       }
     }
