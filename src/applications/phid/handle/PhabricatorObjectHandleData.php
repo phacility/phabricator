@@ -271,6 +271,8 @@ final class PhabricatorObjectHandleData {
               $handle->setComplete(true);
               if (isset($statuses[$phid])) {
                 $handle->setStatus($statuses[$phid]->getTextStatus());
+                $handle->setTitle(
+                  $statuses[$phid]->getTerseSummary($this->viewer));
               }
               $handle->setDisabled($user->getIsDisabled());
 

@@ -7,6 +7,7 @@ final class PhabricatorObjectHandle {
   private $type;
   private $name;
   private $fullName;
+  private $title;
   private $imageURI;
   private $timestamp;
   private $status = PhabricatorObjectHandleStatus::STATUS_OPEN;
@@ -59,6 +60,15 @@ final class PhabricatorObjectHandle {
       return $this->fullName;
     }
     return $this->getName();
+  }
+  
+  public function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+  
+  public function getTitle() {
+    return $this->title;
   }
 
   public function setType($type) {
@@ -171,10 +181,11 @@ final class PhabricatorObjectHandle {
       $name = $this->getLinkName();
     }
     $class = null;
-    $title = null;
+    $title = $this->title;
 
     if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
       $class .= ' handle-status-'.$this->status;
+      $title = $title ? $title : $this->status;
     }
 
     if ($this->disabled) {
@@ -187,6 +198,7 @@ final class PhabricatorObjectHandle {
       array(
         'href'  => $this->getURI(),
         'class' => $class,
+        'title' => $title,
       ),
       $name);
   }
