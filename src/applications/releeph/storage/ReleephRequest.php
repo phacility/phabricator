@@ -11,13 +11,10 @@ final class ReleephRequest extends ReleephDAO {
   protected $pickStatus;
 
   // Information about the thing being requested
-  protected $requestCommitIdentifier;
   protected $requestCommitPHID;
-  protected $requestCommitOrdinal;
 
   // Information about the last commit to the releeph branch
   protected $commitIdentifier;
-  protected $committedByUserPHID;
   protected $commitPHID;
 
   // Pre-populated handles that we'll bulk load in ReleephBranch
@@ -267,10 +264,12 @@ final class ReleephRequest extends ReleephDAO {
   }
 
   public function loadPhabricatorRepositoryCommitData() {
-    return $this->loadOneRelative(
-      new PhabricatorRepositoryCommitData(),
-      'commitID',
-      'getRequestCommitOrdinal');
+    $commit = $this->loadPhabricatorRepositoryCommit();
+    if ($commit) {
+      return $commit->loadOneRelative(
+        new PhabricatorRepositoryCommitData(),
+        'commitID');
+    }
   }
 
   public function loadDifferentialRevision() {
