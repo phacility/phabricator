@@ -10,7 +10,7 @@ final class DiffusionMercurialLastModifiedQuery
     $path = $drequest->getPath();
 
     list($hash) = $repository->execxLocalCommand(
-      'log --template %s --limit 1 --rev %s -- %s',
+      'log --template %s --limit 1 --removed --rev %s -- %s',
       '{node}',
       hgsprintf('reverse(%s::%s)', '0', $drequest->getCommit()),
       nonempty(ltrim($path, '/'), '.'));
