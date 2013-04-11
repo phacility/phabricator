@@ -1140,13 +1140,13 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior' =>
   array(
-    'uri' => '/res/ef4eda09/rsrc/js/javelin/lib/behavior.js',
+    'uri' => '/res/adf7368b/rsrc/externals/javelin/lib/behavior.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-magical-init',
     ),
-    'disk' => '/rsrc/js/javelin/lib/behavior.js',
+    'disk' => '/rsrc/externals/javelin/lib/behavior.js',
   ),
   'javelin-behavior-aphlict-dropdown' =>
   array(
@@ -2272,7 +2272,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-view-placeholder' =>
   array(
-    'uri' => '/res/5b89bdf5/rsrc/js/javelin/ext/view/ViewPlaceholder.js',
+    'uri' => '/res/faaf0af7/rsrc/externals/javelin/ext/view/ViewPlaceholder.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2280,7 +2280,7 @@ celerity_register_resource_map(array(
       1 => 'javelin-dom',
       2 => 'javelin-view-renderer',
     ),
-    'disk' => '/rsrc/js/javelin/ext/view/ViewPlaceholder.js',
+    'disk' => '/rsrc/externals/javelin/ext/view/ViewPlaceholder.js',
   ),
   'javelin-behavior-workflow' =>
   array(
@@ -2297,28 +2297,28 @@ celerity_register_resource_map(array(
   ),
   'javelin-color' =>
   array(
-    'uri' => '/res/b0439fc9/rsrc/js/javelin/ext/fx/Color.js',
+    'uri' => '/res/f17034de/rsrc/externals/javelin/ext/fx/Color.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
     ),
-    'disk' => '/rsrc/js/javelin/ext/fx/Color.js',
+    'disk' => '/rsrc/externals/javelin/ext/fx/Color.js',
   ),
   'javelin-cookie' =>
   array(
-    'uri' => '/res/a9cddab0/rsrc/js/javelin/lib/Cookie.js',
+    'uri' => '/res/ee0d399f/rsrc/externals/javelin/lib/Cookie.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/lib/Cookie.js',
+    'disk' => '/rsrc/externals/javelin/lib/Cookie.js',
   ),
   'javelin-dom' =>
   array(
-    'uri' => '/res/459f3c08/rsrc/js/javelin/lib/DOM.js',
+    'uri' => '/res/64689b54/rsrc/externals/javelin/lib/DOM.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2328,11 +2328,11 @@ celerity_register_resource_map(array(
       3 => 'javelin-vector',
       4 => 'javelin-stratcom',
     ),
-    'disk' => '/rsrc/js/javelin/lib/DOM.js',
+    'disk' => '/rsrc/externals/javelin/lib/DOM.js',
   ),
   'javelin-dynval' =>
   array(
-    'uri' => '/res/d89c6f88/rsrc/js/javelin/ext/reactor/core/DynVal.js',
+    'uri' => '/res/ea6f2a9d/rsrc/externals/javelin/ext/reactor/core/DynVal.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2341,21 +2341,21 @@ celerity_register_resource_map(array(
       2 => 'javelin-util',
       3 => 'javelin-reactor',
     ),
-    'disk' => '/rsrc/js/javelin/ext/reactor/core/DynVal.js',
+    'disk' => '/rsrc/externals/javelin/ext/reactor/core/DynVal.js',
   ),
   'javelin-event' =>
   array(
-    'uri' => '/res/809d2d58/rsrc/js/javelin/core/Event.js',
+    'uri' => '/res/0a4efce8/rsrc/externals/javelin/core/Event.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
     ),
-    'disk' => '/rsrc/js/javelin/core/Event.js',
+    'disk' => '/rsrc/externals/javelin/core/Event.js',
   ),
   'javelin-fx' =>
   array(
-    'uri' => '/res/30ef0914/rsrc/js/javelin/ext/fx/FX.js',
+    'uri' => '/res/c7cefec3/rsrc/externals/javelin/ext/fx/FX.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2363,11 +2363,11 @@ celerity_register_resource_map(array(
       1 => 'javelin-install',
       2 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/ext/fx/FX.js',
+    'disk' => '/rsrc/externals/javelin/ext/fx/FX.js',
   ),
   'javelin-history' =>
   array(
-    'uri' => '/res/9bb36651/rsrc/js/javelin/lib/History.js',
+    'uri' => '/res/6c084b09/rsrc/externals/javelin/lib/History.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2376,63 +2376,63 @@ celerity_register_resource_map(array(
       2 => 'javelin-uri',
       3 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/lib/History.js',
+    'disk' => '/rsrc/externals/javelin/lib/History.js',
   ),
   'javelin-install' =>
   array(
-    'uri' => '/res/cab679ff/rsrc/js/javelin/core/install.js',
+    'uri' => '/res/904356c0/rsrc/externals/javelin/core/install.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-util',
       1 => 'javelin-magical-init',
     ),
-    'disk' => '/rsrc/js/javelin/core/install.js',
+    'disk' => '/rsrc/externals/javelin/core/install.js',
   ),
   'javelin-json' =>
   array(
-    'uri' => '/res/561b8056/rsrc/js/javelin/lib/JSON.js',
+    'uri' => '/res/cf83e72c/rsrc/externals/javelin/lib/JSON.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
     ),
-    'disk' => '/rsrc/js/javelin/lib/JSON.js',
+    'disk' => '/rsrc/externals/javelin/lib/JSON.js',
   ),
   'javelin-magical-init' =>
   array(
-    'uri' => '/res/2f1554da/rsrc/js/javelin/core/init.js',
+    'uri' => '/res/7af6987f/rsrc/externals/javelin/core/init.js',
     'type' => 'js',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/js/javelin/core/init.js',
+    'disk' => '/rsrc/externals/javelin/core/init.js',
   ),
   'javelin-mask' =>
   array(
-    'uri' => '/res/d2a35fff/rsrc/js/javelin/lib/Mask.js',
+    'uri' => '/res/5c40c29f/rsrc/externals/javelin/lib/Mask.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
     ),
-    'disk' => '/rsrc/js/javelin/lib/Mask.js',
+    'disk' => '/rsrc/externals/javelin/lib/Mask.js',
   ),
   'javelin-reactor' =>
   array(
-    'uri' => '/res/dfd87f3c/rsrc/js/javelin/ext/reactor/core/Reactor.js',
+    'uri' => '/res/c05f2658/rsrc/externals/javelin/ext/reactor/core/Reactor.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/ext/reactor/core/Reactor.js',
+    'disk' => '/rsrc/externals/javelin/ext/reactor/core/Reactor.js',
   ),
   'javelin-reactor-dom' =>
   array(
-    'uri' => '/res/701b6f39/rsrc/js/javelin/ext/reactor/dom/RDOM.js',
+    'uri' => '/res/477f5d3b/rsrc/externals/javelin/ext/reactor/dom/RDOM.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2442,11 +2442,11 @@ celerity_register_resource_map(array(
       3 => 'javelin-install',
       4 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/ext/reactor/dom/RDOM.js',
+    'disk' => '/rsrc/externals/javelin/ext/reactor/dom/RDOM.js',
   ),
   'javelin-reactor-node-calmer' =>
   array(
-    'uri' => '/res/5a35920a/rsrc/js/javelin/ext/reactor/core/ReactorNodeCalmer.js',
+    'uri' => '/res/a93dd6b6/rsrc/externals/javelin/ext/reactor/core/ReactorNodeCalmer.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2454,11 +2454,11 @@ celerity_register_resource_map(array(
       1 => 'javelin-reactor',
       2 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/ext/reactor/core/ReactorNodeCalmer.js',
+    'disk' => '/rsrc/externals/javelin/ext/reactor/core/ReactorNodeCalmer.js',
   ),
   'javelin-reactornode' =>
   array(
-    'uri' => '/res/f278cc27/rsrc/js/javelin/ext/reactor/core/ReactorNode.js',
+    'uri' => '/res/4eac475b/rsrc/externals/javelin/ext/reactor/core/ReactorNode.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2467,11 +2467,11 @@ celerity_register_resource_map(array(
       2 => 'javelin-util',
       3 => 'javelin-reactor-node-calmer',
     ),
-    'disk' => '/rsrc/js/javelin/ext/reactor/core/ReactorNode.js',
+    'disk' => '/rsrc/externals/javelin/ext/reactor/core/ReactorNode.js',
   ),
   'javelin-request' =>
   array(
-    'uri' => '/res/e25d75b3/rsrc/js/javelin/lib/Request.js',
+    'uri' => '/res/a9fbc4ae/rsrc/externals/javelin/lib/Request.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2483,11 +2483,11 @@ celerity_register_resource_map(array(
       5 => 'javelin-dom',
       6 => 'javelin-resource',
     ),
-    'disk' => '/rsrc/js/javelin/lib/Request.js',
+    'disk' => '/rsrc/externals/javelin/lib/Request.js',
   ),
   'javelin-resource' =>
   array(
-    'uri' => '/res/d5a3f835/rsrc/js/javelin/lib/Resource.js',
+    'uri' => '/res/1020e732/rsrc/externals/javelin/lib/Resource.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2496,11 +2496,11 @@ celerity_register_resource_map(array(
       2 => 'javelin-util',
       3 => 'javelin-uri',
     ),
-    'disk' => '/rsrc/js/javelin/lib/Resource.js',
+    'disk' => '/rsrc/externals/javelin/lib/Resource.js',
   ),
   'javelin-stratcom' =>
   array(
-    'uri' => '/res/c81f64eb/rsrc/js/javelin/core/Stratcom.js',
+    'uri' => '/res/714946e7/rsrc/externals/javelin/core/Stratcom.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2509,11 +2509,11 @@ celerity_register_resource_map(array(
       2 => 'javelin-util',
       3 => 'javelin-magical-init',
     ),
-    'disk' => '/rsrc/js/javelin/core/Stratcom.js',
+    'disk' => '/rsrc/externals/javelin/core/Stratcom.js',
   ),
   'javelin-tokenizer' =>
   array(
-    'uri' => '/res/f3e738e6/rsrc/js/javelin/lib/control/tokenizer/Tokenizer.js',
+    'uri' => '/res/731a958c/rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2522,11 +2522,11 @@ celerity_register_resource_map(array(
       2 => 'javelin-stratcom',
       3 => 'javelin-install',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/tokenizer/Tokenizer.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js',
   ),
   'javelin-typeahead' =>
   array(
-    'uri' => '/res/dccb789e/rsrc/js/javelin/lib/control/typeahead/Typeahead.js',
+    'uri' => '/res/fd79f758/rsrc/externals/javelin/lib/control/typeahead/Typeahead.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2535,11 +2535,11 @@ celerity_register_resource_map(array(
       2 => 'javelin-vector',
       3 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/typeahead/Typeahead.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/typeahead/Typeahead.js',
   ),
   'javelin-typeahead-composite-source' =>
   array(
-    'uri' => '/res/99705f64/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js',
+    'uri' => '/res/487b3da2/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2547,21 +2547,21 @@ celerity_register_resource_map(array(
       1 => 'javelin-typeahead-source',
       2 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js',
   ),
   'javelin-typeahead-normalizer' =>
   array(
-    'uri' => '/res/a9e97c0d/rsrc/js/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js',
+    'uri' => '/res/5a4bd979/rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js',
   ),
   'javelin-typeahead-ondemand-source' =>
   array(
-    'uri' => '/res/81e531aa/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js',
+    'uri' => '/res/9ab98c3d/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2571,11 +2571,11 @@ celerity_register_resource_map(array(
       3 => 'javelin-request',
       4 => 'javelin-typeahead-source',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js',
   ),
   'javelin-typeahead-preloaded-source' =>
   array(
-    'uri' => '/res/d464efd2/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js',
+    'uri' => '/res/ffc234d1/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2585,11 +2585,11 @@ celerity_register_resource_map(array(
       3 => 'javelin-request',
       4 => 'javelin-typeahead-source',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js',
   ),
   'javelin-typeahead-source' =>
   array(
-    'uri' => '/res/74b1f091/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadSource.js',
+    'uri' => '/res/df206a51/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2598,22 +2598,22 @@ celerity_register_resource_map(array(
       2 => 'javelin-dom',
       3 => 'javelin-typeahead-normalizer',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadSource.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadSource.js',
   ),
   'javelin-typeahead-static-source' =>
   array(
-    'uri' => '/res/c8e247fc/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js',
+    'uri' => '/res/bb0a5173/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-typeahead-source',
     ),
-    'disk' => '/rsrc/js/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js',
+    'disk' => '/rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadStaticSource.js',
   ),
   'javelin-uri' =>
   array(
-    'uri' => '/res/c107d858/rsrc/js/javelin/lib/URI.js',
+    'uri' => '/res/0f8f2aef/rsrc/externals/javelin/lib/URI.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2621,85 +2621,85 @@ celerity_register_resource_map(array(
       1 => 'javelin-util',
       2 => 'javelin-stratcom',
     ),
-    'disk' => '/rsrc/js/javelin/lib/URI.js',
+    'disk' => '/rsrc/externals/javelin/lib/URI.js',
   ),
   'javelin-util' =>
   array(
-    'uri' => '/res/25786b6c/rsrc/js/javelin/core/util.js',
+    'uri' => '/res/322fc289/rsrc/externals/javelin/core/util.js',
     'type' => 'js',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/js/javelin/core/util.js',
+    'disk' => '/rsrc/externals/javelin/core/util.js',
   ),
   'javelin-vector' =>
   array(
-    'uri' => '/res/f240bdb3/rsrc/js/javelin/lib/Vector.js',
+    'uri' => '/res/9f3e2ffc/rsrc/externals/javelin/lib/Vector.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-event',
     ),
-    'disk' => '/rsrc/js/javelin/lib/Vector.js',
+    'disk' => '/rsrc/externals/javelin/lib/Vector.js',
   ),
   'javelin-view' =>
   array(
-    'uri' => '/res/b98657a7/rsrc/js/javelin/ext/view/View.js',
+    'uri' => '/res/3022e596/rsrc/externals/javelin/ext/view/View.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/ext/view/View.js',
+    'disk' => '/rsrc/externals/javelin/ext/view/View.js',
   ),
   'javelin-view-html' =>
   array(
-    'uri' => '/res/7e5a2122/rsrc/js/javelin/ext/view/HTMLView.js',
+    'uri' => '/res/1b6e621c/rsrc/externals/javelin/ext/view/HTMLView.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-view',
     ),
-    'disk' => '/rsrc/js/javelin/ext/view/HTMLView.js',
+    'disk' => '/rsrc/externals/javelin/ext/view/HTMLView.js',
   ),
   'javelin-view-interpreter' =>
   array(
-    'uri' => '/res/17e911ca/rsrc/js/javelin/ext/view/ViewInterpreter.js',
+    'uri' => '/res/39fe3ad3/rsrc/externals/javelin/ext/view/ViewInterpreter.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-view',
       1 => 'javelin-install',
     ),
-    'disk' => '/rsrc/js/javelin/ext/view/ViewInterpreter.js',
+    'disk' => '/rsrc/externals/javelin/ext/view/ViewInterpreter.js',
   ),
   'javelin-view-renderer' =>
   array(
-    'uri' => '/res/db4ed5a2/rsrc/js/javelin/ext/view/ViewRenderer.js',
+    'uri' => '/res/d2119b79/rsrc/externals/javelin/ext/view/ViewRenderer.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
     ),
-    'disk' => '/rsrc/js/javelin/ext/view/ViewRenderer.js',
+    'disk' => '/rsrc/externals/javelin/ext/view/ViewRenderer.js',
   ),
   'javelin-view-visitor' =>
   array(
-    'uri' => '/res/0ef9dc43/rsrc/js/javelin/ext/view/ViewVisitor.js',
+    'uri' => '/res/b1606cec/rsrc/externals/javelin/ext/view/ViewVisitor.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-util',
     ),
-    'disk' => '/rsrc/js/javelin/ext/view/ViewVisitor.js',
+    'disk' => '/rsrc/externals/javelin/ext/view/ViewVisitor.js',
   ),
   'javelin-workflow' =>
   array(
-    'uri' => '/res/1535e366/rsrc/js/javelin/lib/Workflow.js',
+    'uri' => '/res/73e8d0e2/rsrc/externals/javelin/lib/Workflow.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2712,7 +2712,7 @@ celerity_register_resource_map(array(
       6 => 'javelin-mask',
       7 => 'javelin-uri',
     ),
-    'disk' => '/rsrc/js/javelin/lib/Workflow.js',
+    'disk' => '/rsrc/externals/javelin/lib/Workflow.js',
   ),
   'lightbox-attachment-css' =>
   array(
@@ -3641,30 +3641,30 @@ celerity_register_resource_map(array(
   ),
   'raphael-core' =>
   array(
-    'uri' => '/res/3f48575a/rsrc/js/raphael/raphael.js',
+    'uri' => '/res/0939b925/rsrc/externals/raphael/raphael.js',
     'type' => 'js',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/js/raphael/raphael.js',
+    'disk' => '/rsrc/externals/raphael/raphael.js',
   ),
   'raphael-g' =>
   array(
-    'uri' => '/res/b07e5245/rsrc/js/raphael/g.raphael.js',
+    'uri' => '/res/e14432ce/rsrc/externals/raphael/g.raphael.js',
     'type' => 'js',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/js/raphael/g.raphael.js',
+    'disk' => '/rsrc/externals/raphael/g.raphael.js',
   ),
   'raphael-g-line' =>
   array(
-    'uri' => '/res/a59c8556/rsrc/js/raphael/g.raphael.line.js',
+    'uri' => '/res/2c9e6746/rsrc/externals/raphael/g.raphael.line.js',
     'type' => 'js',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/js/raphael/g.raphael.line.js',
+    'disk' => '/rsrc/externals/raphael/g.raphael.line.js',
   ),
   'releeph-branch' =>
   array(
@@ -3866,12 +3866,12 @@ celerity_register_resource_map(array(
   ),
   'stripe-core' =>
   array(
-    'uri' => '/res/3b0f0ad4/rsrc/js/stripe/stripe_core.js',
+    'uri' => '/res/fc74303d/rsrc/externals/stripe-js/stripe_core.js',
     'type' => 'js',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/js/stripe/stripe_core.js',
+    'disk' => '/rsrc/externals/stripe-js/stripe_core.js',
   ),
   'stripe-payment-form-css' =>
   array(
@@ -4076,7 +4076,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/f96657b8/diffusion.pkg.js',
       'type' => 'js',
     ),
-    'a2f94024' =>
+    'bea3de16' =>
     array(
       'name' => 'javelin.pkg.js',
       'symbols' =>
@@ -4101,7 +4101,7 @@ celerity_register_resource_map(array(
         17 => 'javelin-typeahead-ondemand-source',
         18 => 'javelin-tokenizer',
       ),
-      'uri' => '/res/pkg/a2f94024/javelin.pkg.js',
+      'uri' => '/res/pkg/bea3de16/javelin.pkg.js',
       'type' => 'js',
     ),
     '6b1fccc6' =>
@@ -4161,7 +4161,7 @@ celerity_register_resource_map(array(
     'global-drag-and-drop-css' => 'b3deb720',
     'inline-comment-summary-css' => '8aaacd1b',
     'javelin-aphlict' => 'bf16b308',
-    'javelin-behavior' => 'a2f94024',
+    'javelin-behavior' => 'bea3de16',
     'javelin-behavior-aphlict-dropdown' => 'bf16b308',
     'javelin-behavior-aphlict-listen' => 'bf16b308',
     'javelin-behavior-aphront-basic-tokenizer' => 'bf16b308',
@@ -4212,24 +4212,24 @@ celerity_register_resource_map(array(
     'javelin-behavior-repository-crossreference' => 'e96b08f8',
     'javelin-behavior-toggle-class' => 'bf16b308',
     'javelin-behavior-workflow' => 'bf16b308',
-    'javelin-dom' => 'a2f94024',
-    'javelin-event' => 'a2f94024',
-    'javelin-install' => 'a2f94024',
-    'javelin-json' => 'a2f94024',
-    'javelin-mask' => 'a2f94024',
-    'javelin-request' => 'a2f94024',
-    'javelin-resource' => 'a2f94024',
-    'javelin-stratcom' => 'a2f94024',
-    'javelin-tokenizer' => 'a2f94024',
-    'javelin-typeahead' => 'a2f94024',
-    'javelin-typeahead-normalizer' => 'a2f94024',
-    'javelin-typeahead-ondemand-source' => 'a2f94024',
-    'javelin-typeahead-preloaded-source' => 'a2f94024',
-    'javelin-typeahead-source' => 'a2f94024',
-    'javelin-uri' => 'a2f94024',
-    'javelin-util' => 'a2f94024',
-    'javelin-vector' => 'a2f94024',
-    'javelin-workflow' => 'a2f94024',
+    'javelin-dom' => 'bea3de16',
+    'javelin-event' => 'bea3de16',
+    'javelin-install' => 'bea3de16',
+    'javelin-json' => 'bea3de16',
+    'javelin-mask' => 'bea3de16',
+    'javelin-request' => 'bea3de16',
+    'javelin-resource' => 'bea3de16',
+    'javelin-stratcom' => 'bea3de16',
+    'javelin-tokenizer' => 'bea3de16',
+    'javelin-typeahead' => 'bea3de16',
+    'javelin-typeahead-normalizer' => 'bea3de16',
+    'javelin-typeahead-ondemand-source' => 'bea3de16',
+    'javelin-typeahead-preloaded-source' => 'bea3de16',
+    'javelin-typeahead-source' => 'bea3de16',
+    'javelin-uri' => 'bea3de16',
+    'javelin-util' => 'bea3de16',
+    'javelin-vector' => 'bea3de16',
+    'javelin-workflow' => 'bea3de16',
     'lightbox-attachment-css' => 'b3deb720',
     'maniphest-task-summary-css' => '6b1fccc6',
     'maniphest-transaction-detail-css' => '6b1fccc6',
