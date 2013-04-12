@@ -232,10 +232,12 @@ final class PhrictionEditController
       ->appendChild($form);
 
     $preview_panel = hsprintf(
-      '<div class="aphront-panel-preview aphront-panel-preview-wide">
-        <div class="phriction-document-preview-header">%s</div>
+      '<div class="phriction-wrap">
+        <div class="phriction-content">
+        <div class="phriction-document-preview-header plt pll">%s</div>
         <div id="document-preview">
           <div class="aphront-panel-preview-loading-text">%s</div>
+        </div>
         </div>
       </div>',
       pht('Document Preview'),
@@ -257,8 +259,9 @@ final class PhrictionEditController
         $preview_panel,
       ),
       array(
-        'title' => pht('Edit Document'),
-        'device' => true,
+        'title'   => pht('Edit Document'),
+        'device'  => true,
+        'dust'    => true,
       ));
   }
 

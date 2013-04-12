@@ -30,7 +30,7 @@ final class PhabricatorCrumbsView extends AphrontView {
     require_celerity_resource('phabricator-crumbs-view-css');
 
     $action_view = null;
-    if ($this->actions) {
+    if (($this->actions) || ($this->actionListID)) {
       $actions = array();
       foreach ($this->actions as $action) {
         $icon = null;

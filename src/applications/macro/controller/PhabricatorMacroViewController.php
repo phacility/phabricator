@@ -30,14 +30,15 @@ final class PhabricatorMacroViewController
       $macro->getPHID());
 
     $this->loadHandles($subscribers);
+    $actions = $this->buildActionView($macro);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setHref($this->getApplicationURI('/view/'.$macro->getID().'/'))
         ->setName($title_short));
 
-    $actions = $this->buildActionView($macro);
     $properties = $this->buildPropertyView($macro, $file, $subscribers);
 
     $xactions = id(new PhabricatorMacroTransactionQuery())

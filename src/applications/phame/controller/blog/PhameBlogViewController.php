@@ -65,6 +65,9 @@ final class PhameBlogViewController extends PhameController {
   }
 
   private function renderProperties(PhameBlog $blog, PhabricatorUser $user) {
+    require_celerity_resource('aphront-tooltip-css');
+    Javelin::initBehavior('phabricator-tooltips');
+
     $properties = new PhabricatorPropertyListView();
 
     $properties->addProperty(
@@ -74,6 +77,21 @@ final class PhameBlogViewController extends PhameController {
     $properties->addProperty(
       pht('Domain'),
       $blog->getDomain());
+
+    $feed_uri = PhabricatorEnv::getProductionURI(
+      $this->getApplicationURI('blog/feed/'.$blog->getID().'/'));
+    $properties->addProperty(
+      pht('Atom URI'),
+      javelin_tag('a',
+        array(
+          'href' => $feed_uri,
+          'sigil' => 'has-tooltip',
+          'meta' => array(
+            'tip' => pht('Atom URI does not support custom domains.'),
+            'size' => 320,
+          )
+        ),
+        $feed_uri));
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $user,

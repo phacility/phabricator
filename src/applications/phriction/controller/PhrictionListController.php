@@ -32,9 +32,6 @@ final class PhrictionListController
 
     $nav = $this->buildSideNavView($this->view);
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($views[$this->view]);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(id(new PhabricatorCrumbView())
       ->setName($views[$this->view])
@@ -43,7 +40,6 @@ final class PhrictionListController
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
       ));
 
     $pager = id(new AphrontCursorPagerView())

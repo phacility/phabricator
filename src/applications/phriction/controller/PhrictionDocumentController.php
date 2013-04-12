@@ -30,6 +30,9 @@ final class PhrictionDocumentController
       $slug);
 
     $version_note = null;
+    $core_content = '';
+    $byline = '';
+    $move_notice = '';
 
     if (!$document) {
 
@@ -211,11 +214,6 @@ final class PhrictionDocumentController
           ->render();
       }
 
-      $page_content = hsprintf(
-        '<div class="phriction-content">%s%s%s</div>',
-        $byline,
-        $move_notice,
-        $core_content);
     }
 
     if ($version_note) {
@@ -224,29 +222,50 @@ final class PhrictionDocumentController
 
     $children = $this->renderDocumentChildren($slug);
 
+    $actions = $this->buildActionView($user, $document);
+
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
     $crumb_views = $this->renderBreadcrumbs($slug);
     foreach ($crumb_views as $view) {
       $crumbs->addCrumb($view);
     }
 
-    $actions = $this->buildActionView($user, $document);
-
     $header = id(new PhabricatorHeaderView())
       ->setHeader($page_title);
+
+      $page_content = hsprintf(
+        '<div class="phriction-wrap">
+          <div class="phriction-content">
+            %s%s%s%s%s
+          </div>
+          <div class="phriction-fake-space"></div>
+        </div>',
+        $header,
+        $actions,
+        $byline,
+        $move_notice,
+        $core_content);
+
+    $core_page = phutil_tag(
+      'div',
+        array(
+          'class' => 'phriction-offset'
+        ),
+        array(
+          $page_content,
+          $children,
+        ));
 
     return $this->buildApplicationPage(
       array(
         $crumbs->render(),
-        $header->render(),
-        $actions->render(),
-        $version_note,
-        $page_content,
-        $children,
+        $core_page,
       ),
       array(
         'title'   => $page_title,
         'device'  => true,
+        'dust'    => true,
       ));
 
   }
@@ -410,10 +429,12 @@ final class PhrictionDocumentController
     }
 
     return hsprintf(
-      '<div class="phriction-children">'.
-        '<div class="phriction-children-header">%s</div>'.
-        '%s'.
-      '</div>',
+      '<div class="phriction-wrap">
+        <div class="phriction-children">
+        <div class="phriction-children-header">%s</div>
+        %s
+        </div>
+      </div>',
       pht('Document Hierarchy'),
       phutil_tag('ul', array(), $list));
   }

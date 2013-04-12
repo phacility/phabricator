@@ -36,7 +36,7 @@ final class ConpherenceUpdateController
       ->executeOne();
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
 
-    $action = $request->getStr('action', 'metadata');
+    $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
     $latest_transaction_id = null;
     $response_mode = 'ajax';
     $error_view = null;
@@ -54,13 +54,13 @@ final class ConpherenceUpdateController
         ->setActor($user);
 
       switch ($action) {
-        case 'message':
+        case ConpherenceUpdateActions::MESSAGE:
           $message = $request->getStr('text');
           $xactions = $editor->generateTransactionsFromText(
             $conpherence,
             $message);
           break;
-        case 'add_person':
+        case ConpherenceUpdateActions::ADD_PERSON:
           $xactions = array();
           $person_tokenizer = $request->getArr('add_person');
           $person_phid = reset($person_tokenizer);
@@ -71,7 +71,7 @@ final class ConpherenceUpdateController
               ->setNewValue(array('+' => array($person_phid)));
           }
           break;
-        case 'remove_person':
+        case ConpherenceUpdateActions::REMOVE_PERSON:
           $xactions = array();
           if (!$request->isContinueRequest()) {
             // do nothing; we'll display a confirmation dialogue instead
@@ -86,7 +86,7 @@ final class ConpherenceUpdateController
             $response_mode = 'go-home';
           }
           break;
-        case 'notifications':
+        case ConpherenceUpdateActions::NOTIFICATIONS:
           $notifications = $request->getStr('notifications');
           $participant = $conpherence->getParticipant($user->getPHID());
           $participant->setSettings(array('notifications' => $notifications));
@@ -97,7 +97,7 @@ final class ConpherenceUpdateController
           return id(new AphrontAjaxResponse())
             ->setContent($result);
           break;
-        case 'metadata':
+        case ConpherenceUpdateActions::METADATA:
           $xactions = array();
           $top = $request->getInt('image_y');
           $left = $request->getInt('image_x');
@@ -193,6 +193,7 @@ final class ConpherenceUpdateController
           case 'ajax':
             $latest_transaction_id = $request->getInt('latest_transaction_id');
             $content = $this->loadAndRenderUpdates(
+              $action,
               $conpherence_id,
               $latest_transaction_id);
             return id(new AphrontAjaxResponse())
@@ -219,10 +220,10 @@ final class ConpherenceUpdateController
     }
 
     switch ($action) {
-      case 'remove_person':
+      case ConpherenceUpdateActions::REMOVE_PERSON:
         $dialogue = $this->renderRemovePersonDialogue($conpherence);
         break;
-      case 'metadata':
+      case ConpherenceUpdateActions::METADATA:
       default:
         $dialogue = $this->renderMetadataDialogue($conpherence, $error_view);
         break;
@@ -318,39 +319,77 @@ final class ConpherenceUpdateController
   }
 
   private function loadAndRenderUpdates(
+    $action,
     $conpherence_id,
     $latest_transaction_id) {
 
+    $need_header_pics = false;
+    $need_widget_data = false;
+    $need_transactions = false;
+    switch ($action) {
+      case ConpherenceUpdateActions::METADATA:
+        $need_header_pics = true;
+        $need_transactions = true;
+        break;
+      case ConpherenceUpdateActions::MESSAGE:
+      case ConpherenceUpdateActions::ADD_PERSON:
+        $need_transactions = true;
+        $need_widget_data = true;
+        break;
+      case ConpherenceUpdateActions::REMOVE_PERSON:
+      case ConpherenceUpdateActions::NOTIFICATIONS:
+      default:
+        break;
+
+    }
     $user = $this->getRequest()->getUser();
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->setAfterMessageID($latest_transaction_id)
-      ->needHeaderPics(true)
-      ->needWidgetData(true)
-      ->needTransactions(true)
+      ->needHeaderPics($need_header_pics)
+      ->needWidgetData($need_widget_data)
+      ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))
       ->executeOne();
 
-    $data = $this->renderConpherenceTransactions($conpherence);
-    $rendered_transactions = $data['transactions'];
-    $new_latest_transaction_id = $data['latest_transaction_id'];
-
-    $nav_item = id(new ConpherenceThreadListView())
-      ->setUser($user)
-      ->setBaseURI($this->getApplicationURI())
-      ->renderSingleThread($conpherence);
-
-    $header = $this->buildHeaderPaneContent($conpherence);
+    if ($need_transactions) {
+      $data = $this->renderConpherenceTransactions($conpherence);
+    } else {
+      $data = array();
+    }
+    $rendered_transactions = idx($data, 'transactions');
+    $new_latest_transaction_id = idx($data, 'latest_transaction_id');
 
     $widget_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-    $file_widget = id(new ConpherenceFileWidgetView())
-      ->setUser($this->getRequest()->getUser())
-      ->setConpherence($conpherence)
-      ->setUpdateURI($widget_uri);
-    $people_widget = id(new ConpherencePeopleWidgetView())
-      ->setUser($user)
-      ->setConpherence($conpherence)
-      ->setUpdateURI($widget_uri);
+    $nav_item = null;
+    $header = null;
+    $people_widget = null;
+    $file_widget = null;
+    switch ($action) {
+      case ConpherenceUpdateActions::METADATA:
+        $header = $this->buildHeaderPaneContent($conpherence);
+        $nav_item = id(new ConpherenceThreadListView())
+          ->setUser($user)
+          ->setBaseURI($this->getApplicationURI())
+          ->renderSingleThread($conpherence);
+        break;
+      case ConpherenceUpdateActions::MESSAGE:
+        $file_widget = id(new ConpherenceFileWidgetView())
+          ->setUser($this->getRequest()->getUser())
+          ->setConpherence($conpherence)
+          ->setUpdateURI($widget_uri);
+        break;
+      case ConpherenceUpdateActions::ADD_PERSON:
+        $people_widget = id(new ConpherencePeopleWidgetView())
+          ->setUser($user)
+          ->setConpherence($conpherence)
+          ->setUpdateURI($widget_uri);
+        break;
+      case ConpherenceUpdateActions::REMOVE_PERSON:
+      case ConpherenceUpdateActions::NOTIFICATIONS:
+      default:
+        break;
+    }
 
     $content = array(
       'transactions' => $rendered_transactions,
@@ -358,9 +397,10 @@ final class ConpherenceUpdateController
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => hsprintf('%s', $header),
-      'file_widget' => $file_widget->render(),
-      'people_widget' => $people_widget->render()
+      'file_widget' => $file_widget ? $file_widget->render() : null,
+      'people_widget' => $people_widget ? $people_widget->render() : null,
     );
+
     return $content;
   }
 

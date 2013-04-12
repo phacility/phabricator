@@ -495,7 +495,7 @@ final class SimpleEmailServiceRequest
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_USERAGENT, 'SimpleEmailService/php');
 
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, ($this->ses->verifyHost() ? 1 : 0));
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, ($this->ses->verifyHost() ? 2 : 0));
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, ($this->ses->verifyPeer() ? 1 : 0));
 
     // Request types

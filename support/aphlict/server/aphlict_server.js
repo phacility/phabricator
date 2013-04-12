@@ -182,6 +182,11 @@ var receive_server = http.createServer(function(request, response) {
       response.end();
     });
   } else if (request.url == '/status/') {
+    request.on('data', function(data) {
+      // We just ignore the request data, but newer versions of Node don't
+      // get to 'end' if we don't process the data. See T2953.
+    });
+
     request.on('end', function() {
       var status = {
         'uptime': (new Date().getTime() - start_time),

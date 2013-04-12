@@ -39,9 +39,9 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
         ->setName(pht('Can Not Connect to MySQL'))
         ->setMessage($message)
         ->setIsFatal(true)
-        ->addPhabricatorConfig('mysql.host')
-        ->addPhabricatorConfig('mysql.user')
-        ->addPhabricatorConfig('mysql.pass');
+        ->addRelatedPhabricatorConfig('mysql.host')
+        ->addRelatedPhabricatorConfig('mysql.user')
+        ->addRelatedPhabricatorConfig('mysql.pass');
       return;
     }
 

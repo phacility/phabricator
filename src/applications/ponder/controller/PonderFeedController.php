@@ -80,6 +80,7 @@ final class PonderFeedController extends PonderController {
       array(
         'device'  => true,
         'title'   => $title,
+        'dust'    => true,
       ));
   }
 

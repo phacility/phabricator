@@ -43,7 +43,7 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
 
         $this->newIssue('mysql.mode')
           ->setName(pht('MySQL STRICT_ALL_TABLES Mode Not Set'))
-          ->addPhabricatorConfig('phabricator.developer-mode')
+          ->addRelatedPhabricatorConfig('phabricator.developer-mode')
           ->setSummary($summary)
           ->setMessage($message);
       }

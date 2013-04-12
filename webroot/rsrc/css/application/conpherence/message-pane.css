@@ -42,8 +42,8 @@
   right: 281px;
 }
 
-
-.conpherence-message-pane .aphront-form-input {
+.conpherence-layout .conpherence-message-pane .phabricator-form-view
+  div.aphront-form-input {
   margin: 0;
   width: 100%;
 }

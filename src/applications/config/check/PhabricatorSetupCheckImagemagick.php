@@ -16,7 +16,7 @@ final class PhabricatorSetupCheckImagemagick extends PhabricatorSetupCheck {
         ->setName(pht(
           "'convert' binary not found or Imagemagick is not installed."))
         ->setMessage($message)
-        ->addPhabricatorConfig('files.enable-imagemagick')
+        ->addRelatedPhabricatorConfig('files.enable-imagemagick')
         ->addPhabricatorConfig('environment.append-paths');
       }
     }

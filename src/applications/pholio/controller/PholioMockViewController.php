@@ -85,6 +85,7 @@ final class PholioMockViewController extends PholioController {
     $add_comment = $this->buildAddCommentView($mock);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs->setActionList($actions);
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName('M'.$mock->getID())

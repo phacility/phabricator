@@ -5,7 +5,7 @@ abstract class PonderController extends PhabricatorController {
   public function buildStandardPageResponse($view, array $data) {
 
     $page = $this->buildStandardPageView();
-    $page->setApplicationName('Ponder!');
+    $page->setApplicationName(pht('Ponder!'));
     $page->setBaseURI('/ponder/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x97\xB3");
@@ -20,24 +20,24 @@ abstract class PonderController extends PhabricatorController {
     $side_nav = new AphrontSideNavFilterView();
     $side_nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    if ($question && $question->getID()) {
-      $side_nav->addFilter(
-        null,
-        'Q'.$question->getID(),
-        'Q'.$question->getID());
-    }
-
-    $side_nav->addLabel('Create');
-    $side_nav->addFilter('question/ask', 'Ask a Question');
-
-    $side_nav->addLabel('Questions');
-    $side_nav->addFilter('feed', 'All Questions');
-
-    $side_nav->addLabel('User');
-    $side_nav->addFilter('questions', 'Your Questions');
-    $side_nav->addFilter('answers', 'Your Answers');
+    $side_nav->addLabel(pht('Questions'));
+    $side_nav->addFilter('feed', pht('All Questions'));
+    $side_nav->addFilter('questions', pht('Your Questions'));
+    $side_nav->addFilter('answers', pht('Your Answers'));
 
     return $side_nav;
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $crumbs
+      ->addAction(
+        id(new PhabricatorMenuItemView())
+          ->setName(pht('New Question'))
+          ->setHref('question/ask')
+          ->setIcon('create'));
+
+    return $crumbs;
   }
 
 }

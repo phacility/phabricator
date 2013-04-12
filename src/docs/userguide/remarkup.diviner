@@ -362,6 +362,19 @@ dancing banana to create a macro named "peanutbutterjellytime", and then any
 time you type that string on a separate line it will be replaced with the image
 of a dancing banana.
 
+= Memes =
+
+You can also use image macros in the context of memes. For example, if you
+have an image macro named "grumpy", you can create a meme by doing the
+following:
+
+  {meme, src = grumpy, above = toptextgoeshere, below = bottomtextgoeshere}
+
+By default, the font used to create the text for the meme is `tuffy.ttf`. For
+the more authentic feel of `impact.ttf`, you simply have to place the Impact
+TrueType font in the Phabricator subfolder `/resources/font/`. If Remarkup
+detects the presence of `impact.ttf`, it will automatically use it.
+
 = Mentioning Users =
 
 In Differential and Maniphest, you can mention another user by writing:

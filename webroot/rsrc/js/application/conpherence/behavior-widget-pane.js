@@ -49,8 +49,11 @@ JX.behavior('conpherence-widget-pane', function(config) {
       var form = e.getNode('tag:form');
       var data = e.getNodeData('add-person');
       var peopleRoot = e.getNode('widgets-people');
-      var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
-      var header = JX.DOM.find(root, 'div', 'conpherence-header');
+      var messages = null;
+      try {
+        messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+      } catch (ex) {
+      }
       var latestTransactionData = JX.Stratcom.getData(
         JX.DOM.find(
           root,
@@ -60,28 +63,10 @@ JX.behavior('conpherence-widget-pane', function(config) {
       data.latest_transaction_id = latestTransactionData.id;
       JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function (r) {
-        // update the transactions
-        JX.DOM.appendContent(messages, JX.$H(r.transactions));
-        messages.scrollTop = messages.scrollHeight;
-
-        try {
-          JX.DOM.replace(
-            JX.$(r.conpherence_phid + '-nav-item'),
-            JX.$H(r.nav_item));
-          JX.Stratcom.invoke(
-            'conpherence-selectthread',
-            null,
-            { id : r.conpherence_phid + '-nav-item' }
-          );
-        } catch (ex) {
-          // Ignore; this view may not have a menu.
+        if (messages) {
+          JX.DOM.appendContent(messages, JX.$H(r.transactions));
+          messages.scrollTop = messages.scrollHeight;
         }
-
-        // update the header
-        JX.DOM.setContent(
-          header,
-          JX.$H(r.header)
-       );
 
         // update the people widget
         JX.DOM.setContent(

@@ -168,16 +168,17 @@
 
 .phabricator-remarkup-toc {
   float: right;
-  border: 1px solid #999999;
-  background: #f9f9f9;
+  border: 1px solid #d7d7d7;
+  background: #f7f7f7;
   padding: 4px 12px;
-  width: 220px;
+  width: 180px;
+  margin: 0 0 5px 10px;
 }
 
 .phabricator-remarkup-toc-header {
   font-size: 11px;
-  color: #444444;
-  border-bottom: 1px solid #bbbbbb;
+  color: #777;
+  border-bottom: 1px solid #d7d7d7;
   margin-bottom: 4px;
 }
 
@@ -186,16 +187,16 @@
   margin: 0;
   list-style: none;
   overflow: hidden;
-  padding-left: 0.25em;
 }
 
 .phabricator-remarkup-toc ul ul {
-  margin-left: 1.25em;
+  margin-left: 0;
 }
 
 .phabricator-remarkup-toc ul li {
   padding: 0;
   margin: 0;
+  font-size: 11px;
 }
 
 .phabricator-remarkup-embed-layout-right {
