@@ -118,9 +118,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
-        $data->setCommitDetail(
-          'differential.revisionPHID',
-          $revision->getPHID());
+        $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
+        id(new PhabricatorEdgeEditor())
+          ->setActor($user)
+          ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
+          ->save();
 
         $revision->loadRelationships();
         queryfx(

@@ -364,7 +364,8 @@ final class DiffusionCommitController extends DiffusionController {
       ->withSourcePHIDs(array($commit_phid))
       ->withEdgeTypes(array(
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT,
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV,
       ))
       ->execute();
 
@@ -372,8 +373,10 @@ final class DiffusionCommitController extends DiffusionController {
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK]);
     $proj_phids = array_keys(
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]);
+    $revision_phid = key(
+      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV]);
 
-    $phids = array_merge($task_phids, $proj_phids);
+    $phids = array_mergev($edges[$commit_phid]);
     if ($data->getCommitDetail('authorPHID')) {
       $phids[] = $data->getCommitDetail('authorPHID');
     }
@@ -382,9 +385,6 @@ final class DiffusionCommitController extends DiffusionController {
     }
     if ($data->getCommitDetail('committerPHID')) {
       $phids[] = $data->getCommitDetail('committerPHID');
-    }
-    if ($data->getCommitDetail('differential.revisionPHID')) {
-      $phids[] = $data->getCommitDetail('differential.revisionPHID');
     }
     if ($parents) {
       foreach ($parents as $parent) {
@@ -432,7 +432,6 @@ final class DiffusionCommitController extends DiffusionController {
       }
     }
 
-    $revision_phid = $data->getCommitDetail('differential.revisionPHID');
     if ($revision_phid) {
       $props['Differential Revision'] = $handles[$revision_phid]->renderLink();
     }
