@@ -30,6 +30,7 @@ final class PhabricatorCaches {
     static $cache;
     if (!$cache) {
       $caches = self::buildSetupCaches();
+      $caches = self::addNamespaceToCaches($caches);
       $caches = self::addProfilerToCaches($caches);
       $cache = id(new PhutilKeyValueCacheStack())
         ->setCaches($caches);
@@ -45,12 +46,6 @@ final class PhabricatorCaches {
     // In most cases, we should have APC. This is an ideal cache for our
     // purposes -- it's fast and empties on server restart.
     $apc = new PhutilKeyValueCacheAPC();
-
-    if (PhabricatorCaches::getNamespace()) {
-      $apc = id(new PhutilKeyValueCacheNamespace($apc))
-        ->setNamespace(PhabricatorCaches::getNamespace());
-    }
-
     if ($apc->isAvailable()) {
       return array($apc);
     }
@@ -60,13 +55,8 @@ final class PhabricatorCaches {
     $disk_path = self::getSetupCacheDiskCachePath();
     if ($disk_path) {
       $disk = new PhutilKeyValueCacheOnDisk();
-
-      if (PhabricatorCaches::getNamespace()) {
-        $disk = id(new PhutilKeyValueCacheNamespace($disk))
-          ->setNamespace(PhabricatorCaches::getNamespace());
-      }
-
       $disk->setCacheFile($disk_path);
+      $disk->setWait(0.1);
       if ($disk->isAvailable()) {
         return array($disk);
       }
@@ -180,6 +170,21 @@ final class PhabricatorCaches {
       $pcache->setProfiler(PhutilServiceProfiler::getInstance());
       $caches[$key] = $pcache;
     }
+    return $caches;
+  }
+
+  private static function addNamespaceToCaches(array $caches) {
+    $namespace = PhabricatorCaches::getNamespace();
+    if (!$namespace) {
+      return $caches;
+    }
+
+    foreach ($caches as $key => $cache) {
+      $ncache = new PhutilKeyValueCacheNamespace($cache);
+      $ncache->setNamespace($namespace);
+      $caches[$key] = $ncache;
+    }
+
     return $caches;
   }
 
