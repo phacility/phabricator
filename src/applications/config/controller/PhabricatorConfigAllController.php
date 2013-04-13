@@ -7,6 +7,10 @@ final class PhabricatorConfigAllController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $db_values = id(new PhabricatorConfigEntry())
+      ->loadAllWhere('namespace = %s', 'default');
+    $db_values = mpull($db_values, null, 'getConfigKey');
+
     $rows = array();
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     ksort($options);
@@ -22,6 +26,7 @@ final class PhabricatorConfigAllController
         $value = PhabricatorConfigJSON::prettyPrintJSON($value);
       }
 
+      $db_value = idx($db_values, $key);
       $rows[] = array(
         phutil_tag(
           'a',
@@ -30,6 +35,7 @@ final class PhabricatorConfigAllController
           ),
           $key),
         $value,
+        $db_value && !$db_value->getIsDeleted() ? pht('Customized') : '',
       );
     }
     $table = id(new AphrontTableView($rows))
@@ -43,6 +49,7 @@ final class PhabricatorConfigAllController
         array(
           pht('Key'),
           pht('Value'),
+          pht('Customized'),
         ));
 
     $title = pht('Current Settings');
