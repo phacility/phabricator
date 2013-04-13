@@ -6,45 +6,60 @@
   margin: 10px;
 }
 
-.device-desktop .phabricator-feed-frame {
-  width: 640px;
-  margin: 20px;
+.phabricator-feed-frame .phabricator-action-header-title {
+  font-size: 16px;
+  margin-bottom: 5px;
 }
 
-.phabricator-chromeless-page .phabricator-feed-frame {
-  width: auto;
+.device-desktop .phabricator-feed-frame {
+  width: 600px;
+  margin: 20px auto;
+}
+
+.phabricator-feed-wrap {
+  border-left: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  border-bottom: 1px solid #c0c5d1;
+  margin-bottom: 15px;
 }
 
 .phabricator-feed-story {
-  padding-left: 64px;
-  margin: .5em 0 1em;
   background: 5px 2px no-repeat;
-  min-height: 64px;
+  min-height: 50px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-.phabricator-feed-story-one-line {
-  min-height: 0;
-  color: #555;
+.phabricator-feed-story-head .phabricator-action-icon-item-link {
+  width: 35px;
+  height: 35px;
+  background-size: 35px;
+  float: left;
+  margin-right: 10px;
 }
 
 .phabricator-feed-story-head {
+ padding: 10px;
+ overflow: hidden;
+ color: #333;
 }
 
 .phabricator-feed-story-body {
-  padding: .5em 0;
+  padding: 0 10px 10px;
   color: #444444;
 }
 
 .phabricator-feed-story-foot {
-  color: #888888;
+  color: #777;
   font-size: 11px;
+  background: #f7f7f7;
+  padding: 10px;
 }
 
-.phabricator-feed-story-date {
-  color: #555;
-  font-weight: bold;
-  border-bottom: 1px solid #eeeeee;
-  padding: .5em 0;
+.phabricator-feed-story-foot .phabricator-action-icon-item-link {
+  float: left;
+  display: inline-block;
+  margin-right: 5px;
 }
 
 .phabricator-feed-story-date-separator {
@@ -60,4 +75,3 @@
   float: right;
   font-weight: bold;
 }
-

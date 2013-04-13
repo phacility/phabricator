@@ -55,6 +55,7 @@ final class PhabricatorFeedStoryDifferentialAggregate
     }
 
     $view = new PhabricatorFeedStoryView();
+    $view->setAppIcon('differential-dark');
     $view->setEpoch($this->getEpoch());
     $view->setViewed($this->getHasViewed());
     $view->setTitle($title);

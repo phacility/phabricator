@@ -11,6 +11,7 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $commit_phid = $this->getPrimaryObjectPHID();
 
     $view = new PhabricatorFeedStoryView();
+    $view->setAppIcon('audit-dark');
 
     $action = $this->getValue('action');
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
@@ -24,19 +25,10 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $view->setEpoch($this->getEpoch());
 
     $comments = $this->getValue('content');
-    if ($comments) {
-      $full_size = true;
-    } else {
-      $full_size = false;
-    }
 
-    if ($full_size) {
-      $view->setImage($this->getHandle($author_phid)->getImageURI());
-      $content = $this->renderSummary($this->getValue('content'));
-      $view->appendChild($content);
-    } else {
-      $view->setOneLineStory(true);
-    }
+    $view->setImage($this->getHandle($author_phid)->getImageURI());
+    $content = $this->renderSummary($this->getValue('content'));
+    $view->appendChild($content);
 
     return $view;
   }

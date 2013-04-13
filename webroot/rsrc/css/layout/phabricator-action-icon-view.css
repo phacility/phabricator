@@ -13,3 +13,9 @@
   height: 24px;
   width: 24px;
 }
+
+.phabricator-action-icon-item-link.sprite-apps {
+  display: block;
+  height: 14px;
+  width: 14px;
+}

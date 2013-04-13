@@ -55,6 +55,7 @@ final class PhabricatorFeedStoryManiphestAggregate
     }
 
     $view = new PhabricatorFeedStoryView();
+    $view->setAppIcon('maniphest-dark');
     $view->setEpoch($this->getEpoch());
     $view->setViewed($this->getHasViewed());
     $view->setTitle($title);

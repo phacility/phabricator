@@ -43,7 +43,6 @@ class PhabricatorApplicationTransactionFeedStory
 
     $xaction->setHandles($this->getHandles());
     $view->setTitle($xaction->getTitleForFeed());
-    $view->setOneLineStory(true);
 
     return $view;
   }

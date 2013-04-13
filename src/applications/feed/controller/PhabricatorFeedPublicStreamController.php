@@ -30,8 +30,9 @@ final class PhabricatorFeedPublicStreamController
     return $this->buildStandardPageResponse(
       $view,
       array(
-        'title'   => 'Public Feed',
-        'public'  => true,
+        'title' => pht('Public Feed'),
+        'public' => true,
+        'dust' => true,
       ));
   }
 }

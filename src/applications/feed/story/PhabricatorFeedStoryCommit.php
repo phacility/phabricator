@@ -50,6 +50,7 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
     }
 
     $view = new PhabricatorFeedStoryView();
+    $view->setAppIcon('differential-dark');
 
     $view->setTitle($title);
     $view->setEpoch($data->getEpoch());

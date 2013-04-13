@@ -18,602 +18,602 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 
-.app-adventure-light-large {
+.apps-adventure-light-large {
   background-position: 0px 0px;
 }
 
-.app-adventure-dark-large {
+.apps-adventure-dark-large {
   background-position: -29px 0px;
 }
 
-.app-adventure-blue-large, .phabricator-crumb-view:hover .app-adventure-dark-large {
+.apps-adventure-blue-large, .phabricator-crumb-view:hover .apps-adventure-dark-large {
   background-position: -58px 0px;
 }
 
-.app-application-light-large {
+.apps-application-light-large {
   background-position: -87px 0px;
 }
 
-.app-application-dark-large {
+.apps-application-dark-large {
   background-position: -116px 0px;
 }
 
-.app-application-blue-large, .phabricator-crumb-view:hover .app-application-dark-large {
+.apps-application-blue-large, .phabricator-crumb-view:hover .apps-application-dark-large {
   background-position: -145px 0px;
 }
 
-.app-audit-light-large {
+.apps-audit-light-large {
   background-position: -174px 0px;
 }
 
-.app-audit-dark-large {
+.apps-audit-dark-large {
   background-position: -203px 0px;
 }
 
-.app-audit-blue-large, .phabricator-crumb-view:hover .app-audit-dark-large {
+.apps-audit-blue-large, .phabricator-crumb-view:hover .apps-audit-dark-large {
   background-position: -232px 0px;
 }
 
-.app-calendar-light-large {
+.apps-calendar-light-large {
   background-position: -261px 0px;
 }
 
-.app-calendar-dark-large {
+.apps-calendar-dark-large {
   background-position: -290px 0px;
 }
 
-.app-calendar-blue-large, .phabricator-crumb-view:hover .app-calendar-dark-large {
+.apps-calendar-blue-large, .phabricator-crumb-view:hover .apps-calendar-dark-large {
   background-position: -319px 0px;
 }
 
-.app-chatlog-light-large {
+.apps-chatlog-light-large {
   background-position: 0px -29px;
 }
 
-.app-chatlog-dark-large {
+.apps-chatlog-dark-large {
   background-position: -29px -29px;
 }
 
-.app-chatlog-blue-large, .phabricator-crumb-view:hover .app-chatlog-dark-large {
+.apps-chatlog-blue-large, .phabricator-crumb-view:hover .apps-chatlog-dark-large {
   background-position: -58px -29px;
 }
 
-.app-conduit-light-large {
+.apps-conduit-light-large {
   background-position: -87px -29px;
 }
 
-.app-conduit-dark-large {
+.apps-conduit-dark-large {
   background-position: -116px -29px;
 }
 
-.app-conduit-blue-large, .phabricator-crumb-view:hover .app-conduit-dark-large {
+.apps-conduit-blue-large, .phabricator-crumb-view:hover .apps-conduit-dark-large {
   background-position: -145px -29px;
 }
 
-.app-conpherence-light-large {
+.apps-conpherence-light-large {
   background-position: -174px -29px;
 }
 
-.app-conpherence-dark-large {
+.apps-conpherence-dark-large {
   background-position: -203px -29px;
 }
 
-.app-conpherence-blue-large, .phabricator-crumb-view:hover .app-conpherence-dark-large {
+.apps-conpherence-blue-large, .phabricator-crumb-view:hover .apps-conpherence-dark-large {
   background-position: -232px -29px;
 }
 
-.app-countdown-light-large {
+.apps-countdown-light-large {
   background-position: -261px -29px;
 }
 
-.app-countdown-dark-large {
+.apps-countdown-dark-large {
   background-position: -290px -29px;
 }
 
-.app-countdown-blue-large, .phabricator-crumb-view:hover .app-countdown-dark-large {
+.apps-countdown-blue-large, .phabricator-crumb-view:hover .apps-countdown-dark-large {
   background-position: -319px -29px;
 }
 
-.app-daemon-light-large {
+.apps-daemon-light-large {
   background-position: 0px -58px;
 }
 
-.app-daemon-dark-large {
+.apps-daemon-dark-large {
   background-position: -29px -58px;
 }
 
-.app-daemon-blue-large, .phabricator-crumb-view:hover .app-daemon-dark-large {
+.apps-daemon-blue-large, .phabricator-crumb-view:hover .apps-daemon-dark-large {
   background-position: -58px -58px;
 }
 
-.app-differential-light-large {
+.apps-differential-light-large {
   background-position: -87px -58px;
 }
 
-.app-differential-dark-large {
+.apps-differential-dark-large {
   background-position: -116px -58px;
 }
 
-.app-differential-blue-large, .phabricator-crumb-view:hover .app-differential-dark-large {
+.apps-differential-blue-large, .phabricator-crumb-view:hover .apps-differential-dark-large {
   background-position: -145px -58px;
 }
 
-.app-diffusion-light-large {
+.apps-diffusion-light-large {
   background-position: -174px -58px;
 }
 
-.app-diffusion-dark-large {
+.apps-diffusion-dark-large {
   background-position: -203px -58px;
 }
 
-.app-diffusion-blue-large, .phabricator-crumb-view:hover .app-diffusion-dark-large {
+.apps-diffusion-blue-large, .phabricator-crumb-view:hover .apps-diffusion-dark-large {
   background-position: -232px -58px;
 }
 
-.app-diviner-light-large {
+.apps-diviner-light-large {
   background-position: -261px -58px;
 }
 
-.app-diviner-dark-large {
+.apps-diviner-dark-large {
   background-position: -290px -58px;
 }
 
-.app-diviner-blue-large, .phabricator-crumb-view:hover .app-diviner-dark-large {
+.apps-diviner-blue-large, .phabricator-crumb-view:hover .apps-diviner-dark-large {
   background-position: -319px -58px;
 }
 
-.app-drydock-light-large {
+.apps-drydock-light-large {
   background-position: 0px -87px;
 }
 
-.app-drydock-dark-large {
+.apps-drydock-dark-large {
   background-position: -29px -87px;
 }
 
-.app-drydock-blue-large, .phabricator-crumb-view:hover .app-drydock-dark-large {
+.apps-drydock-blue-large, .phabricator-crumb-view:hover .apps-drydock-dark-large {
   background-position: -58px -87px;
 }
 
-.app-fact-light-large {
+.apps-fact-light-large {
   background-position: -87px -87px;
 }
 
-.app-fact-dark-large {
+.apps-fact-dark-large {
   background-position: -116px -87px;
 }
 
-.app-fact-blue-large, .phabricator-crumb-view:hover .app-fact-dark-large {
+.apps-fact-blue-large, .phabricator-crumb-view:hover .apps-fact-dark-large {
   background-position: -145px -87px;
 }
 
-.app-feed-light-large {
+.apps-feed-light-large {
   background-position: -174px -87px;
 }
 
-.app-feed-dark-large {
+.apps-feed-dark-large {
   background-position: -203px -87px;
 }
 
-.app-feed-blue-large, .phabricator-crumb-view:hover .app-feed-dark-large {
+.apps-feed-blue-large, .phabricator-crumb-view:hover .apps-feed-dark-large {
   background-position: -232px -87px;
 }
 
-.app-files-light-large {
+.apps-files-light-large {
   background-position: -261px -87px;
 }
 
-.app-files-dark-large {
+.apps-files-dark-large {
   background-position: -290px -87px;
 }
 
-.app-files-blue-large, .phabricator-crumb-view:hover .app-files-dark-large {
+.apps-files-blue-large, .phabricator-crumb-view:hover .apps-files-dark-large {
   background-position: -319px -87px;
 }
 
-.app-flags-light-large {
+.apps-flags-light-large {
   background-position: 0px -116px;
 }
 
-.app-flags-dark-large {
+.apps-flags-dark-large {
   background-position: -29px -116px;
 }
 
-.app-flags-blue-large, .phabricator-crumb-view:hover .app-flags-dark-large {
+.apps-flags-blue-large, .phabricator-crumb-view:hover .apps-flags-dark-large {
   background-position: -58px -116px;
 }
 
-.app-harbormaster-light-large {
+.apps-harbormaster-light-large {
   background-position: -87px -116px;
 }
 
-.app-harbormaster-dark-large {
+.apps-harbormaster-dark-large {
   background-position: -116px -116px;
 }
 
-.app-harbormaster-blue-large, .phabricator-crumb-view:hover .app-harbormaster-dark-large {
+.apps-harbormaster-blue-large, .phabricator-crumb-view:hover .apps-harbormaster-dark-large {
   background-position: -145px -116px;
 }
 
-.app-help-light-large {
+.apps-help-light-large {
   background-position: -174px -116px;
 }
 
-.app-help-dark-large {
+.apps-help-dark-large {
   background-position: -203px -116px;
 }
 
-.app-help-blue-large, .phabricator-crumb-view:hover .app-help-dark-large {
+.apps-help-blue-large, .phabricator-crumb-view:hover .apps-help-dark-large {
   background-position: -232px -116px;
 }
 
-.app-herald-light-large {
+.apps-herald-light-large {
   background-position: -261px -116px;
 }
 
-.app-herald-dark-large {
+.apps-herald-dark-large {
   background-position: -290px -116px;
 }
 
-.app-herald-blue-large, .phabricator-crumb-view:hover .app-herald-dark-large {
+.apps-herald-blue-large, .phabricator-crumb-view:hover .apps-herald-dark-large {
   background-position: -319px -116px;
 }
 
-.app-home-light-large {
+.apps-home-light-large {
   background-position: 0px -145px;
 }
 
-.app-home-dark-large {
+.apps-home-dark-large {
   background-position: -29px -145px;
 }
 
-.app-home-blue-large, .phabricator-crumb-view:hover .app-home-dark-large {
+.apps-home-blue-large, .phabricator-crumb-view:hover .apps-home-dark-large {
   background-position: -58px -145px;
 }
 
-.app-logo-light-large {
+.apps-logo-light-large {
   background-position: -87px -145px;
 }
 
-.app-logo-dark-large {
+.apps-logo-dark-large {
   background-position: -116px -145px;
 }
 
-.app-logo-blue-large, .phabricator-crumb-view:hover .app-logo-dark-large {
+.apps-logo-blue-large, .phabricator-crumb-view:hover .apps-logo-dark-large {
   background-position: -145px -145px;
 }
 
-.app-macro-light-large {
+.apps-macro-light-large {
   background-position: -174px -145px;
 }
 
-.app-macro-dark-large {
+.apps-macro-dark-large {
   background-position: -203px -145px;
 }
 
-.app-macro-blue-large, .phabricator-crumb-view:hover .app-macro-dark-large {
+.apps-macro-blue-large, .phabricator-crumb-view:hover .apps-macro-dark-large {
   background-position: -232px -145px;
 }
 
-.app-mail-light-large {
+.apps-mail-light-large {
   background-position: -261px -145px;
 }
 
-.app-mail-dark-large {
+.apps-mail-dark-large {
   background-position: -290px -145px;
 }
 
-.app-mail-blue-large, .phabricator-crumb-view:hover .app-mail-dark-large {
+.apps-mail-blue-large, .phabricator-crumb-view:hover .apps-mail-dark-large {
   background-position: -319px -145px;
 }
 
-.app-maniphest-light-large {
+.apps-maniphest-light-large {
   background-position: 0px -174px;
 }
 
-.app-maniphest-dark-large {
+.apps-maniphest-dark-large {
   background-position: -29px -174px;
 }
 
-.app-maniphest-blue-large, .phabricator-crumb-view:hover .app-maniphest-dark-large {
+.apps-maniphest-blue-large, .phabricator-crumb-view:hover .apps-maniphest-dark-large {
   background-position: -58px -174px;
 }
 
-.app-metamta-light-large {
+.apps-metamta-light-large {
   background-position: -87px -174px;
 }
 
-.app-metamta-dark-large {
+.apps-metamta-dark-large {
   background-position: -116px -174px;
 }
 
-.app-metamta-blue-large, .phabricator-crumb-view:hover .app-metamta-dark-large {
+.apps-metamta-blue-large, .phabricator-crumb-view:hover .apps-metamta-dark-large {
   background-position: -145px -174px;
 }
 
-.app-owners-light-large {
+.apps-owners-light-large {
   background-position: -174px -174px;
 }
 
-.app-owners-dark-large {
+.apps-owners-dark-large {
   background-position: -203px -174px;
 }
 
-.app-owners-blue-large, .phabricator-crumb-view:hover .app-owners-dark-large {
+.apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large {
   background-position: -232px -174px;
 }
 
-.app-paste-light-large {
+.apps-paste-light-large {
   background-position: -261px -174px;
 }
 
-.app-paste-dark-large {
+.apps-paste-dark-large {
   background-position: -290px -174px;
 }
 
-.app-paste-blue-large, .phabricator-crumb-view:hover .app-paste-dark-large {
+.apps-paste-blue-large, .phabricator-crumb-view:hover .apps-paste-dark-large {
   background-position: -319px -174px;
 }
 
-.app-people-light-large {
+.apps-people-light-large {
   background-position: 0px -203px;
 }
 
-.app-people-dark-large {
+.apps-people-dark-large {
   background-position: -29px -203px;
 }
 
-.app-people-blue-large, .phabricator-crumb-view:hover .app-people-dark-large {
+.apps-people-blue-large, .phabricator-crumb-view:hover .apps-people-dark-large {
   background-position: -58px -203px;
 }
 
-.app-phage-light-large {
+.apps-phage-light-large {
   background-position: -87px -203px;
 }
 
-.app-phage-dark-large {
+.apps-phage-dark-large {
   background-position: -116px -203px;
 }
 
-.app-phage-blue-large, .phabricator-crumb-view:hover .app-phage-dark-large {
+.apps-phage-blue-large, .phabricator-crumb-view:hover .apps-phage-dark-large {
   background-position: -145px -203px;
 }
 
-.app-phame-light-large {
+.apps-phame-light-large {
   background-position: -174px -203px;
 }
 
-.app-phame-dark-large {
+.apps-phame-dark-large {
   background-position: -203px -203px;
 }
 
-.app-phame-blue-large, .phabricator-crumb-view:hover .app-phame-dark-large {
+.apps-phame-blue-large, .phabricator-crumb-view:hover .apps-phame-dark-large {
   background-position: -232px -203px;
 }
 
-.app-phid-light-large {
+.apps-phid-light-large {
   background-position: -261px -203px;
 }
 
-.app-phid-dark-large {
+.apps-phid-dark-large {
   background-position: -290px -203px;
 }
 
-.app-phid-blue-large, .phabricator-crumb-view:hover .app-phid-dark-large {
+.apps-phid-blue-large, .phabricator-crumb-view:hover .apps-phid-dark-large {
   background-position: -319px -203px;
 }
 
-.app-phlux-light-large {
+.apps-phlux-light-large {
   background-position: 0px -232px;
 }
 
-.app-phlux-dark-large {
+.apps-phlux-dark-large {
   background-position: -29px -232px;
 }
 
-.app-phlux-blue-large, .phabricator-crumb-view:hover .app-phlux-dark-large {
+.apps-phlux-blue-large, .phabricator-crumb-view:hover .apps-phlux-dark-large {
   background-position: -58px -232px;
 }
 
-.app-pholio-light-large {
+.apps-pholio-light-large {
   background-position: -87px -232px;
 }
 
-.app-pholio-dark-large {
+.apps-pholio-dark-large {
   background-position: -116px -232px;
 }
 
-.app-pholio-blue-large, .phabricator-crumb-view:hover .app-pholio-dark-large {
+.apps-pholio-blue-large, .phabricator-crumb-view:hover .apps-pholio-dark-large {
   background-position: -145px -232px;
 }
 
-.app-phortune-light-large {
+.apps-phortune-light-large {
   background-position: -174px -232px;
 }
 
-.app-phortune-dark-large {
+.apps-phortune-dark-large {
   background-position: -203px -232px;
 }
 
-.app-phortune-blue-large, .phabricator-crumb-view:hover .app-phortune-dark-large {
+.apps-phortune-blue-large, .phabricator-crumb-view:hover .apps-phortune-dark-large {
   background-position: -232px -232px;
 }
 
-.app-phpast-light-large {
+.apps-phpast-light-large {
   background-position: -261px -232px;
 }
 
-.app-phpast-dark-large {
+.apps-phpast-dark-large {
   background-position: -290px -232px;
 }
 
-.app-phpast-blue-large, .phabricator-crumb-view:hover .app-phpast-dark-large {
+.apps-phpast-blue-large, .phabricator-crumb-view:hover .apps-phpast-dark-large {
   background-position: -319px -232px;
 }
 
-.app-phrequent-light-large {
+.apps-phrequent-light-large {
   background-position: 0px -261px;
 }
 
-.app-phrequent-dark-large {
+.apps-phrequent-dark-large {
   background-position: -29px -261px;
 }
 
-.app-phrequent-blue-large, .phabricator-crumb-view:hover .app-phrequent-dark-large {
+.apps-phrequent-blue-large, .phabricator-crumb-view:hover .apps-phrequent-dark-large {
   background-position: -58px -261px;
 }
 
-.app-phriction-light-large {
+.apps-phriction-light-large {
   background-position: -87px -261px;
 }
 
-.app-phriction-dark-large {
+.apps-phriction-dark-large {
   background-position: -116px -261px;
 }
 
-.app-phriction-blue-large, .phabricator-crumb-view:hover .app-phriction-dark-large {
+.apps-phriction-blue-large, .phabricator-crumb-view:hover .apps-phriction-dark-large {
   background-position: -145px -261px;
 }
 
-.app-ponder-light-large {
+.apps-ponder-light-large {
   background-position: -174px -261px;
 }
 
-.app-ponder-dark-large {
+.apps-ponder-dark-large {
   background-position: -203px -261px;
 }
 
-.app-ponder-blue-large, .phabricator-crumb-view:hover .app-ponder-dark-large {
+.apps-ponder-blue-large, .phabricator-crumb-view:hover .apps-ponder-dark-large {
   background-position: -232px -261px;
 }
 
-.app-power-light-large {
+.apps-power-light-large {
   background-position: -261px -261px;
 }
 
-.app-power-dark-large {
+.apps-power-dark-large {
   background-position: -290px -261px;
 }
 
-.app-power-blue-large, .phabricator-crumb-view:hover .app-power-dark-large {
+.apps-power-blue-large, .phabricator-crumb-view:hover .apps-power-dark-large {
   background-position: -319px -261px;
 }
 
-.app-projects-light-large {
+.apps-projects-light-large {
   background-position: 0px -290px;
 }
 
-.app-projects-dark-large {
+.apps-projects-dark-large {
   background-position: -29px -290px;
 }
 
-.app-projects-blue-large, .phabricator-crumb-view:hover .app-projects-dark-large {
+.apps-projects-blue-large, .phabricator-crumb-view:hover .apps-projects-dark-large {
   background-position: -58px -290px;
 }
 
-.app-releeph-light-large {
+.apps-releeph-light-large {
   background-position: -87px -290px;
 }
 
-.app-releeph-dark-large {
+.apps-releeph-dark-large {
   background-position: -116px -290px;
 }
 
-.app-releeph-blue-large, .phabricator-crumb-view:hover .app-releeph-dark-large {
+.apps-releeph-blue-large, .phabricator-crumb-view:hover .apps-releeph-dark-large {
   background-position: -145px -290px;
 }
 
-.app-repositories-light-large {
+.apps-repositories-light-large {
   background-position: -174px -290px;
 }
 
-.app-repositories-dark-large {
+.apps-repositories-dark-large {
   background-position: -203px -290px;
 }
 
-.app-repositories-blue-large, .phabricator-crumb-view:hover .app-repositories-dark-large {
+.apps-repositories-blue-large, .phabricator-crumb-view:hover .apps-repositories-dark-large {
   background-position: -232px -290px;
 }
 
-.app-settings-light-large {
+.apps-settings-light-large {
   background-position: -261px -290px;
 }
 
-.app-settings-dark-large {
+.apps-settings-dark-large {
   background-position: -290px -290px;
 }
 
-.app-settings-blue-large, .phabricator-crumb-view:hover .app-settings-dark-large {
+.apps-settings-blue-large, .phabricator-crumb-view:hover .apps-settings-dark-large {
   background-position: -319px -290px;
 }
 
-.app-setup-light-large {
+.apps-setup-light-large {
   background-position: 0px -319px;
 }
 
-.app-setup-dark-large {
+.apps-setup-dark-large {
   background-position: -29px -319px;
 }
 
-.app-setup-blue-large, .phabricator-crumb-view:hover .app-setup-dark-large {
+.apps-setup-blue-large, .phabricator-crumb-view:hover .apps-setup-dark-large {
   background-position: -58px -319px;
 }
 
-.app-slowvote-light-large {
+.apps-slowvote-light-large {
   background-position: -87px -319px;
 }
 
-.app-slowvote-dark-large {
+.apps-slowvote-dark-large {
   background-position: -116px -319px;
 }
 
-.app-slowvote-blue-large, .phabricator-crumb-view:hover .app-slowvote-dark-large {
+.apps-slowvote-blue-large, .phabricator-crumb-view:hover .apps-slowvote-dark-large {
   background-position: -145px -319px;
 }
 
-.app-token-light-large {
+.apps-token-light-large {
   background-position: -174px -319px;
 }
 
-.app-token-dark-large {
+.apps-token-dark-large {
   background-position: -203px -319px;
 }
 
-.app-token-blue-large, .phabricator-crumb-view:hover .app-token-dark-large {
+.apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large {
   background-position: -232px -319px;
 }
 
-.app-uiexamples-light-large {
+.apps-uiexamples-light-large {
   background-position: -261px -319px;
 }
 
-.app-uiexamples-dark-large {
+.apps-uiexamples-dark-large {
   background-position: -290px -319px;
 }
 
-.app-uiexamples-blue-large, .phabricator-crumb-view:hover .app-uiexamples-dark-large {
+.apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large {
   background-position: -319px -319px;
 }
 
-.app-workphlow-light-large {
+.apps-workphlow-light-large {
   background-position: 0px -348px;
 }
 
-.app-workphlow-dark-large {
+.apps-workphlow-dark-large {
   background-position: -29px -348px;
 }
 
-.app-workphlow-blue-large, .phabricator-crumb-view:hover .app-workphlow-dark-large {
+.apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large {
   background-position: -58px -348px;
 }
 
-.app-xhprof-light-large {
+.apps-xhprof-light-large {
   background-position: -87px -348px;
 }
 
-.app-xhprof-dark-large {
+.apps-xhprof-dark-large {
   background-position: -116px -348px;
 }
 
-.app-xhprof-blue-large, .phabricator-crumb-view:hover .app-xhprof-dark-large {
+.apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large {
   background-position: -145px -348px;
 }
