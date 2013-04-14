@@ -70,14 +70,17 @@ final class PhamePostListController extends PhameController {
       mpull($posts, 'getBlogPHID'));
     $this->loadHandles($handle_phids);
 
-
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
     $post_list = $this->renderPostList($posts, $user, $nodata);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title)
+        ->setHref($this->getApplicationURI()));
 
     $nav->appendChild(
       array(
-        $header,
+        $crumbs,
         $post_list,
       ));
 
@@ -86,6 +89,7 @@ final class PhamePostListController extends PhameController {
       array(
         'title'   => $title,
         'device'  => true,
+        'dust'    => true,
       ));
   }
 

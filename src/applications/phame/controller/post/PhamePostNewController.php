@@ -54,6 +54,7 @@ final class PhamePostNewController extends PhameController {
       $title = pht('Move Post');
     } else {
       $title = pht('Create Post');
+      $view_uri = $this->getApplicationURI('/post/new');
     }
 
     $blogs = id(new PhameBlogQuery())
@@ -66,6 +67,14 @@ final class PhamePostNewController extends PhameController {
 
     $nav = $this->renderSideNavFilterView();
     $nav->selectFilter('post/new');
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title)
+        ->setHref($view_uri));
+    $nav->appendChild($crumbs);
+
     $nav->appendChild(
       id(new PhabricatorHeaderView())->setHeader($title));
 
@@ -91,7 +100,7 @@ final class PhamePostNewController extends PhameController {
         ->setFlexible(true)
         ->appendChild(
           id(new AphrontFormSelectControl())
-            ->setLabel('Blog')
+            ->setLabel(pht('Blog'))
             ->setName('blog')
             ->setOptions($options)
             ->setValue($selected_value));
@@ -119,6 +128,7 @@ final class PhamePostNewController extends PhameController {
       array(
         'title'   => $title,
         'device'  => true,
+        'dust' => true,
       ));
   }
 }
