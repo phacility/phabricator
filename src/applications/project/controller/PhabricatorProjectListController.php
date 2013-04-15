@@ -144,4 +144,8 @@ final class PhabricatorProjectListController
         'dust' => true,
       ));
   }
+
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView(null, true)->getMenu();
+  }
 }

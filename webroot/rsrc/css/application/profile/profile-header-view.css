@@ -8,7 +8,6 @@
   border-style: solid;
   border-color: #c0c5d1;
   width: 100%;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .phabricator-profile-header .profile-header-name {

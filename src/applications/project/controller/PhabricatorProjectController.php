@@ -30,16 +30,15 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $edit_uri = '/project/edit/'.$id.'/';
     $members_uri = '/project/members/'.$id.'/';
 
+    $nav_view->addLabel(pht('Project'));
     $nav_view->addFilter('dashboard', pht('Dashboard'));
-    $nav_view->addFilter('feed', pht('Feed'));
     $nav_view->addFilter(null, pht('Tasks').' '.$external_arrow, $tasks_uri);
     $nav_view->addFilter(null, pht('Wiki').' '.$external_arrow, $phriction_uri);
-    $nav_view->addFilter('people', pht('People'));
-    $nav_view->addFilter('about', pht('About'));
 
     $user = $this->getRequest()->getUser();
     $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
 
+    $nav_view->addLabel(pht('Manage'));
     if (PhabricatorPolicyFilter::hasCapability($user, $project, $can_edit)) {
       $nav_view->addFilter('edit', pht("Edit Project"), $edit_uri);
       $nav_view->addFilter('members', pht("Edit Members"), $members_uri);
@@ -59,10 +58,6 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     }
 
     return $nav_view;
-  }
-
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView(null, true)->getMenu();
   }
 
   public function buildSideNavView($filter = null, $for_app = false) {

@@ -100,13 +100,15 @@ final class PHUIFeedStoryView extends AphrontView {
     $body = null;
     $foot = null;
     $image_style = null;
-
-    $body = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-feed-story-body',
-      ),
-      $this->renderChildren());
+    $body_content = $this->renderChildren();
+    if ($body_content) {
+      $body = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-feed-story-body',
+        ),
+        $body_content);
+    }
 
     if ($this->epoch) {
       $foot = phabricator_datetime($this->epoch, $this->user);

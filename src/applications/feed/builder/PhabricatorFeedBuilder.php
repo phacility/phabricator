@@ -56,9 +56,8 @@ final class PhabricatorFeedBuilder {
       $null_view->appendChild($view);
     }
 
-    return id(new AphrontNullView())->appendChild(hsprintf(
-      '<div class="phabricator-feed-frame">%s</div>',
-      $null_view->render()));
+    return id(new AphrontNullView())
+      ->appendChild($null_view->render());
   }
 
 }

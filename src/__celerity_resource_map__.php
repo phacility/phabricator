@@ -2980,7 +2980,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-feed-css' =>
   array(
-    'uri' => '/res/e337f54b/rsrc/css/application/feed/feed.css',
+    'uri' => '/res/6db1087e/rsrc/css/application/feed/feed.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3212,7 +3212,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-css' =>
   array(
-    'uri' => '/res/a54f47a7/rsrc/css/application/profile/profile-view.css',
+    'uri' => '/res/76766eb6/rsrc/css/application/profile/profile-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3221,7 +3221,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-header-css' =>
   array(
-    'uri' => '/res/1ccc6f0b/rsrc/css/application/profile/profile-header-view.css',
+    'uri' => '/res/a03c1e20/rsrc/css/application/profile/profile-header-view.css',
     'type' => 'css',
     'requires' =>
     array(

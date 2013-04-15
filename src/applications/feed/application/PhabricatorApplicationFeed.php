@@ -7,7 +7,7 @@ final class PhabricatorApplicationFeed extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Review activity.';
+    return pht('Review activity.');
   }
 
   public function getIconName() {

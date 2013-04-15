@@ -3,7 +3,12 @@
  */
 
 .phabricator-feed-frame {
+  margin: 20px 10px;
+}
+
+.phabricator-public-feed-frame {
   margin: 10px;
+  max-width: 600px;
 }
 
 .phabricator-feed-frame .phabricator-action-header-title {
@@ -12,8 +17,8 @@
 }
 
 .device-desktop .phabricator-feed-frame {
-  width: 600px;
-  margin: 20px auto;
+  max-width: 600px;
+  margin: 20px;
 }
 
 .phabricator-feed-story-date-separator {
@@ -28,4 +33,16 @@
 .phabricator-feed-older-link {
   float: right;
   font-weight: bold;
+}
+
+.phabricator-public-feed-frame .phui-feed-story-foot {
+  background: none;
+}
+
+.phabricator-public-feed-frame .phui-feed-story {
+  box-shadow: none;
+}
+
+.phabricator-public-feed-frame .phui-feed-wrap {
+  border: none;
 }
