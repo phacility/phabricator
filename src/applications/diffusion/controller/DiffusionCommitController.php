@@ -360,14 +360,15 @@ final class DiffusionCommitController extends DiffusionController {
     $user = $this->getRequest()->getUser();
     $commit_phid = $commit->getPHID();
 
-    $edges = id(new PhabricatorEdgeQuery())
+    $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($commit_phid))
       ->withEdgeTypes(array(
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT,
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV,
-      ))
-      ->execute();
+      ));
+
+    $edges = $edge_query->execute();
 
     $task_phids = array_keys(
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK]);
@@ -376,7 +377,8 @@ final class DiffusionCommitController extends DiffusionController {
     $revision_phid = key(
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV]);
 
-    $phids = array_mergev($edges[$commit_phid]);
+    $phids = $edge_query->getDestinationPHIDs(array($commit_phid));
+
     if ($data->getCommitDetail('authorPHID')) {
       $phids[] = $data->getCommitDetail('authorPHID');
     }
