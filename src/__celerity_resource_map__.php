@@ -2878,7 +2878,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-chatlog-css' =>
   array(
-    'uri' => '/res/b5600765/rsrc/css/application/chatlog/chatlog.css',
+    'uri' => '/res/5542e247/rsrc/css/application/chatlog/chatlog.css',
     'type' => 'css',
     'requires' =>
     array(
