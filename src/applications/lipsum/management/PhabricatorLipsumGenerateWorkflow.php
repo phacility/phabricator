@@ -7,7 +7,7 @@ final class PhabricatorLipsumGenerateWorkflow
     $this
       ->setName('generate')
       ->setExamples('**generate**')
-      ->setSynopsis('Generate some Lipsum.')
+      ->setSynopsis('Generate some lipsum.')
       ->setArguments(
         array(
           array(
@@ -18,7 +18,13 @@ final class PhabricatorLipsumGenerateWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    echo "Lipsum Generator";
+    $admin = PhabricatorUser::getOmnipotentUser();
+    $peoplegen = new PhabricatorPeopleTestDataGenerator();
+    $object = $peoplegen->generate();
+    $handle = PhabricatorObjectHandleData::loadOneHandle($object->getPHID(),
+      $admin);
+    echo "Generated ".$handle->getFullName()."\n";
+    echo "\nRequested data has been generated.";
   }
 
 }
