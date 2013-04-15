@@ -9,7 +9,7 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('differential-dark');
     $view->setViewed($this->getHasViewed());
 

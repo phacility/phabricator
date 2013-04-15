@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorFeedStoryView extends PhabricatorFeedView {
+final class PHUIFeedStoryView extends AphrontView {
 
   private $title;
   private $image;
@@ -90,7 +90,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
     $head = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-feed-story-head',
+        'class' => 'phui-feed-story-head',
       ),
       array(
         $actor,
@@ -104,7 +104,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
     $body = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-feed-story-body',
+        'class' => 'phui-feed-story-body',
       ),
       $this->renderChildren());
 
@@ -124,18 +124,18 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
     $foot = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-feed-story-foot',
+        'class' => 'phui-feed-story-foot',
       ),
       array(
         $icon,
         $foot));
 
-    require_celerity_resource('phabricator-feed-css');
+    require_celerity_resource('phui-feed-story-css');
 
     $story = phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-feed-story',
+          'class' => 'phui-feed-story',
           'style' => $image_style,
         ),
         array(
@@ -146,7 +146,7 @@ final class PhabricatorFeedStoryView extends PhabricatorFeedView {
     return phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-feed-wrap'
+          'class' => 'phui-feed-wrap'
         ),
         $story);
   }

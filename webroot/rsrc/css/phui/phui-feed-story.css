@@ -1,0 +1,49 @@
+/**
+ * @provides phui-feed-story-css
+ */
+
+.phui-feed-wrap {
+  border-left: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  border-bottom: 1px solid #c0c5d1;
+  margin-bottom: 15px;
+}
+
+.phui-feed-story {
+  background: 5px 2px no-repeat;
+  min-height: 50px;
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.phui-feed-story-head .phabricator-action-icon-item-link {
+  width: 35px;
+  height: 35px;
+  background-size: 35px;
+  float: left;
+  margin-right: 10px;
+}
+
+.phui-feed-story-head {
+ padding: 10px;
+ overflow: hidden;
+ color: #333;
+}
+
+.phui-feed-story-body {
+  padding: 0 10px 10px;
+  color: #444444;
+}
+
+.phui-feed-story-foot {
+  color: #777;
+  font-size: 11px;
+  background: #f7f7f7;
+  padding: 10px;
+}
+
+.phui-feed-story-foot .phabricator-action-icon-item-link {
+  float: left;
+  display: inline-block;
+  margin-right: 5px;
+}

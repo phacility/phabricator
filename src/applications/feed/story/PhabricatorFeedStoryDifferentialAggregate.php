@@ -54,7 +54,7 @@ final class PhabricatorFeedStoryDifferentialAggregate
         break;
     }
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('differential-dark');
     $view->setEpoch($this->getEpoch());
     $view->setViewed($this->getHasViewed());

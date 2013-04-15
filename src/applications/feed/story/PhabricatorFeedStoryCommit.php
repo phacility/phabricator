@@ -49,7 +49,7 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
         $commit);
     }
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('differential-dark');
 
     $view->setTitle($title);

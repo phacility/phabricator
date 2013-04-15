@@ -32,7 +32,7 @@ class PhabricatorApplicationTransactionFeedStory
   }
 
   public function renderView() {
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setViewed($this->getHasViewed());
 
     $href = $this->getHandle($this->getPrimaryObjectPHID())->getURI();

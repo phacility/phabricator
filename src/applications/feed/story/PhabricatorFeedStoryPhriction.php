@@ -21,7 +21,7 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $author_phid = $data->getAuthorPHID();
     $document_phid = $data->getValue('phid');
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('phriction-dark');
 
     $action = $data->getValue('action');

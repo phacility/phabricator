@@ -16,7 +16,7 @@ final class PhabricatorFeedStoryManiphest
   public function renderView() {
     $data = $this->getStoryData();
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('maniphest-dark');
     $view->setViewed($this->getHasViewed());
 

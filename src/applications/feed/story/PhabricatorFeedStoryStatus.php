@@ -11,7 +11,7 @@ final class PhabricatorFeedStoryStatus extends PhabricatorFeedStory {
 
     $author_phid = $data->getAuthorPHID();
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('calendar-dark');
 
     $view->setTitle($this->linkTo($author_phid));

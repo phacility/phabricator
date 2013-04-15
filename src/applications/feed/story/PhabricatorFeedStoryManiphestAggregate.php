@@ -54,7 +54,7 @@ final class PhabricatorFeedStoryManiphestAggregate
         break;
     }
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('maniphest-dark');
     $view->setEpoch($this->getEpoch());
     $view->setViewed($this->getHasViewed());

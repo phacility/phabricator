@@ -10,7 +10,7 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $author_phid = $this->getAuthorPHID();
     $commit_phid = $this->getPrimaryObjectPHID();
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
     $view->setAppIcon('audit-dark');
 
     $action = $this->getValue('action');
