@@ -63,21 +63,6 @@ final class ConpherenceWidgetController extends
   private function renderWidgetPaneContent() {
     require_celerity_resource('conpherence-widget-pane-css');
     require_celerity_resource('sprite-conpherence-css');
-    $can_toggle = 1;
-    $cant_toggle = 0;
-    Javelin::initBehavior(
-      'conpherence-widget-pane',
-      array(
-        'widgetRegistery' => array(
-          'widgets-conpherence-list' => $cant_toggle,
-          'widgets-conversation' => $cant_toggle,
-          'widgets-people' => $can_toggle,
-          'widgets-files' => $can_toggle,
-          'widgets-calendar' => $can_toggle,
-          'widgets-settings' => $can_toggle,
-        )
-      ));
-
     $conpherence = $this->getConpherence();
 
     $widgets = array();
@@ -97,10 +82,9 @@ final class ConpherenceWidgetController extends
             array(
               'sigil' => 'conpherence-change-widget',
               'meta'  => array(
-                'widget' => 'widgets-conpherence-list',
-                'toggleClass' => 'conpherence_list_on'
+                'widget' => 'conpherence-menu-pane',
               ),
-              'id' => 'widgets-conpherence-list-toggle',
+              'id' => 'conpherence-menu-pane-toggle',
               'class' => 'sprite-conpherence conpherence_list_off',
             ),
             ''),
@@ -109,10 +93,9 @@ final class ConpherenceWidgetController extends
             array(
               'sigil' => 'conpherence-change-widget',
               'meta'  => array(
-                'widget' => 'widgets-conversation',
-                'toggleClass' => 'conpherence_conversation_on'
+                'widget' => 'conpherence-message-pane',
               ),
-              'id' => 'widgets-conpherence-conversation-toggle',
+              'id' => 'conpherence-message-pane-toggle',
               'class' => 'sprite-conpherence conpherence_conversation_off',
             ),
             ''),
@@ -122,7 +105,6 @@ final class ConpherenceWidgetController extends
               'sigil' => 'conpherence-change-widget',
               'meta'  => array(
                 'widget' => 'widgets-people',
-                'toggleClass' => 'conpherence_people_on'
               ),
               'id' => 'widgets-people-toggle',
               'class' => 'sprite-conpherence conpherence_people_off'
@@ -134,7 +116,6 @@ final class ConpherenceWidgetController extends
               'sigil' => 'conpherence-change-widget',
               'meta'  => array(
                 'widget' => 'widgets-files',
-                'toggleClass' => 'conpherence_files_on'
               ),
               'id' => 'widgets-files-toggle',
               'class' =>
@@ -147,7 +128,6 @@ final class ConpherenceWidgetController extends
               'sigil' => 'conpherence-change-widget',
               'meta'  => array(
                 'widget' => 'widgets-calendar',
-                'toggleClass' => 'conpherence_calendar_on'
               ),
               'id' => 'widgets-calendar-toggle',
               'class' => 'sprite-conpherence conpherence_calendar_off',
@@ -159,7 +139,6 @@ final class ConpherenceWidgetController extends
               'sigil' => 'conpherence-change-widget',
               'meta'  => array(
                 'widget' => 'widgets-settings',
-                'toggleClass' => 'conpherence_settings_on'
               ),
               'id' => 'widgets-settings-toggle',
               'class' => 'sprite-conpherence conpherence_settings_off',
@@ -326,16 +305,17 @@ final class ConpherenceWidgetController extends
           // This list is sorted, so we can stop looking.
           break;
         }
-        if (!$first_status_of_the_day) {
-          $content[] = phutil_tag(
-            'div',
-            array(
-              'class' => 'divider'
-            ),
-            '');
-        }
+
         if ($status->getDateFrom() < $epoch_end &&
             $status->getDateTo() > $epoch_start) {
+          if (!$first_status_of_the_day) {
+            $content[] = phutil_tag(
+              'div',
+              array(
+                'class' => 'divider'
+              ),
+              '');
+          }
           $statuses_of_the_day[$status->getUserPHID()] = $status;
           $timespan = $status->getDateTo() - $status->getDateFrom();
           if ($timespan > $one_day) {

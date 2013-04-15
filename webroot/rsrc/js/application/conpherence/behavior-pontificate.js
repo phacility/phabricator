@@ -45,15 +45,11 @@ JX.behavior('conpherence-pontificate', function(config) {
         var textarea = JX.DOM.find(form, 'textarea');
         textarea.value = '';
 
-        try {
-          JX.Stratcom.invoke(
-            'conpherence-selectthread',
-            null,
-            { id : r.conpherence_phid + '-nav-item' }
-          );
-        } catch (ex) {
-          // Ignore; this view may not have a menu.
-        }
+        JX.Stratcom.invoke(
+          'conpherence-selectthread',
+          null,
+          { id : r.conpherence_phid + '-nav-item' }
+        );
       }))
     .start();
   };

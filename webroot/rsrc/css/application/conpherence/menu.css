@@ -10,6 +10,17 @@
   top: 44px;
 }
 
+.conpherence-layout .conpherence-no-threads {
+  height 80%;
+  width: 80%;
+  padding: 10%;
+  text-align: center;
+}
+
+.conpherence-layout .conpherence-no-threads .text {
+  margin: 0px 0px 16px 0px;
+}
+
 .conpherence-menu-pane {
   width: 300px;
   position: absolute;
@@ -28,38 +39,28 @@
   position: relative;
 }
 
-div.conpherence-layout .phabricator-nav-column-background {
+.conpherence-layout .phabricator-nav-column-background {
   display: block;
   width: 300px;
 }
 
-.device .conpherence-role-list .conpherence-menu-pane,
-.device .conpherence-role-list .phabricator-nav-column-background {
+.device .conpherence-menu-pane {
+  top: 41px;
+}
+
+.device .phabricator-nav-column-background {
+  top: 86px;
+}
+
+.device .conpherence-menu-pane,
+.device .phabricator-nav-column-background {
+  display: none;
   width: 100%;
 }
 
-.device .conpherence-role-list .conpherence-content-pane {
-  display: none;
-}
-
-.device .conpherence-role-thread .conpherence-menu-pane,
-.device .conpherence-role-thread .phabricator-nav-column-background,
-.device .conpherence-role-thread .conpherence-widget-pane {
-  display: none;
-}
-
-.device .conpherence-role-thread .conpherence-content-pane {
+.device .conpherence-content-pane {
   margin-left: 0;
 }
-
-.device .conpherence-role-thread .conpherence-message-pane,
-.device .conpherence-role-thread .conpherence-messages,
-.device .conpherence-role-thread .phabricator-form-view {
-  left: 0;
-  right: 0;
-  width: 100%;
-}
-
 
 .conpherence-menu .conpherence-menu-item-view {
   display: block;

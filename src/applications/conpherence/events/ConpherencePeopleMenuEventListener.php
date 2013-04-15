@@ -21,7 +21,7 @@ final class ConpherencePeopleMenuEventListener extends PhutilEventListener {
 
     $conpherence_uri =
       new PhutilURI('/conpherence/new/?participant='.$person->getPHID());
-    $name = pht('Conpherence');
+    $name = pht('Message');
 
     $menu->addMenuItemBefore('activity',
       id(new PhabricatorMenuItemView())
