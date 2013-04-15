@@ -26,6 +26,22 @@ final class PhamePostViewController extends PhameController {
 
     $nav = $this->renderSideNavFilterView();
 
+    $this->loadHandles(
+      array(
+        $post->getBlogPHID(),
+        $post->getBloggerPHID(),
+      ));
+    $actions = $this->renderActions($post, $user);
+    $properties = $this->renderProperties($post, $user);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($post->getTitle())
+        ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/')));
+
+    $nav->appendChild($crumbs);
     $nav->appendChild(
       id(new PhabricatorHeaderView())
         ->setHeader($post->getTitle()));
@@ -50,15 +66,6 @@ final class PhamePostViewController extends PhameController {
                 'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
-    $this->loadHandles(
-      array(
-        $post->getBlogPHID(),
-        $post->getBloggerPHID(),
-      ));
-
-    $actions = $this->renderActions($post, $user);
-    $properties = $this->renderProperties($post, $user);
-
     $nav->appendChild(
       array(
         $actions,
@@ -68,8 +75,9 @@ final class PhamePostViewController extends PhameController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title'   => $post->getTitle(),
-        'device'  => true,
+        'title' => $post->getTitle(),
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -92,7 +100,7 @@ final class PhamePostViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setIcon('edit')
         ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
-        ->setName('Edit Post')
+        ->setName(pht('Edit Post'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -100,7 +108,7 @@ final class PhamePostViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setIcon('move')
         ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
-        ->setName('Move Post')
+        ->setName(pht('Move Post'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -123,7 +131,7 @@ final class PhamePostViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setIcon('delete')
         ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
-        ->setName('Delete Post')
+        ->setName(pht('Delete Post'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 

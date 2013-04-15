@@ -11,42 +11,15 @@ final class PhabricatorChatLogChannelListController
                 ->setViewer($user)
                 ->execute();
 
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
     foreach ($channels as $channel) {
-      $rows[] = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' =>
-                 '/chatlog/channel/'.$channel->getID().'/',
-          ),
-          $channel->getChannelName()),
-          $channel->getServiceName(),
-          $channel->getServiceType());
+        $item = id(new PhabricatorObjectItemView())
+          ->setHeader($channel->getChannelName())
+          ->setHref('/chatlog/channel/'.$channel->getID().'/')
+          ->addAttribute($channel->getServiceName())
+          ->addAttribute($channel->getServiceType());
+        $list->addItem($item);
     }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Channel'),
-        pht('Service Name'),
-        pht('Service Type'),
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        '',
-        '',
-      ));
-
-    $title = pht('Channel List');
-
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
-    $panel = id(new AphrontPanelView())
-            ->appendChild($table)
-            ->setNoBackground(true);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
@@ -55,14 +28,15 @@ final class PhabricatorChatLogChannelListController
           ->setName(pht('Channel List'))
           ->setHref($this->getApplicationURI()));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $panel,
+        $list,
       ),
       array(
         'title' => pht('Channel List'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 }

@@ -38,7 +38,7 @@ final class PhamePostPublishController extends PhameController {
     }
 
     $header = id(new PhabricatorHeaderView())
-      ->setHeader('Preview Post');
+      ->setHeader(pht('Preview Post'));
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -50,9 +50,16 @@ final class PhamePostPublishController extends PhameController {
 
     $frame = $this->renderPreviewFrame($post);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Preview'))
+        ->setHref($view_uri));
+
     $nav = $this->renderSideNavFilterView(null);
     $nav->appendChild(
       array(
+        $crumbs,
         $header,
         $form,
         $frame,
@@ -79,7 +86,7 @@ final class PhamePostPublishController extends PhameController {
         'iframe',
         array(
           'style' => 'width: 100%; height: 600px; '.
-                     'border: 1px solid #303030; background: #303030;',
+                     'border: 1px solid #303030;',
           'src' => $this->getApplicationURI('/post/framed/'.$post->getID().'/'),
         ),
         ''));

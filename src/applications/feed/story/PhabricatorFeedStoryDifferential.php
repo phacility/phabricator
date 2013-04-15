@@ -9,7 +9,8 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
+    $view->setAppIcon('differential-dark');
     $view->setViewed($this->getHasViewed());
 
     $line = $this->getLineForData($data);
@@ -20,23 +21,10 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $view->setHref($href);
 
     $action = $data->getValue('action');
-    switch ($action) {
-      case DifferentialAction::ACTION_CREATE:
-      case DifferentialAction::ACTION_CLOSE:
-        $full_size = true;
-        break;
-      default:
-        $full_size = false;
-        break;
-    }
 
-    if ($full_size) {
-      $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
-      $content = $this->renderSummary($data->getValue('feedback_content'));
-      $view->appendChild($content);
-    } else {
-      $view->setOneLineStory(true);
-    }
+    $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
+    $content = $this->renderSummary($data->getValue('feedback_content'));
+    $view->appendChild($content);
 
     return $view;
   }

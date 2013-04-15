@@ -38,6 +38,7 @@ final class PhameBlogDeleteController extends PhameController {
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle(pht('Delete Blog?'))
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
       ->appendChild(
         pht(
           'Really delete the blog "%s"? It will be gone forever.',

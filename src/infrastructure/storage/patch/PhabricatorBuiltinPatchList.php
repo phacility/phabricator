@@ -1233,7 +1233,11 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130403.conpherencecachemig.php' => array(
         'type' => 'php',
         'name' => $this->getPatchPath('20130403.conpherencecachemig.php'),
-      )
+      ),
+      '20130409.commitdrev.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130409.commitdrev.php'),
+      ),
     );
   }
 }

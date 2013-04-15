@@ -115,7 +115,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       } else {
         $icon = $application->getIconName();
         $classes[] = 'sprite-apps-large';
-        $classes[] = 'app-'.$icon.'-light-large';
+        $classes[] = 'apps-'.$icon.'-light-large';
       }
 
       $icon = phutil_tag(

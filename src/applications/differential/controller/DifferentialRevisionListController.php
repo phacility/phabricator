@@ -17,7 +17,6 @@ final class DifferentialRevisionListController extends DifferentialController {
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
-    $viewer_is_anonymous = !$user->isLoggedIn();
 
     $params = array_filter(
       array(
@@ -26,12 +25,9 @@ final class DifferentialRevisionListController extends DifferentialController {
       ));
     $params['participants'] = $request->getArr('participants');
 
-    $default_filter = ($viewer_is_anonymous ? 'all' : 'active');
     $filters = $this->getFilters();
-    $this->filter = $this->selectFilter(
-      $filters,
-      $this->filter,
-      $default_filter);
+    $this->filter = $this->selectFilter($filters,
+      $this->filter, !$user->isLoggedIn());
 
     // Redirect from search to canonical URL.
     $phid_arr = $request->getArr('view_users');
@@ -80,16 +76,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       'order' => 'modified',
     );
 
-    $side_nav = new AphrontSideNavFilterView();
-    $side_nav->setBaseURI(id(clone $uri)->setPath('/differential/filter/'));
-    foreach ($filters as $filter) {
-      list($filter_name, $display_name) = $filter;
-      if ($filter_name) {
-        $side_nav->addFilter($filter_name.'/'.$username, $display_name);
-      } else {
-        $side_nav->addLabel($display_name);
-      }
-    }
+    $side_nav = $this->buildSideNav($this->filter, false, $username);
     $side_nav->selectFilter($this->filter.'/'.$username, null);
 
     $panels = array();
@@ -200,37 +187,6 @@ final class DifferentialRevisionListController extends DifferentialController {
         'title' => pht('Differential Home'),
         'dust' => true,
       ));
-  }
-
-  private function getFilters() {
-    return array(
-      array(null, pht('User Revisions')),
-      array('active', pht('Active')),
-      array('revisions', pht('Revisions')),
-      array('reviews', pht('Reviews')),
-      array('subscribed', pht('Subscribed')),
-      array('drafts', pht('Draft Reviews')),
-      array(null, pht('All Revisions')),
-      array('all', pht('All')),
-    );
-  }
-
-  private function selectFilter(
-    array $filters,
-    $requested_filter,
-    $default_filter) {
-
-    // If the user requested a filter, make sure it actually exists.
-    if ($requested_filter) {
-      foreach ($filters as $filter) {
-        if ($filter[0] === $requested_filter) {
-          return $requested_filter;
-        }
-      }
-    }
-
-    // If not, return the default filter.
-    return $default_filter;
   }
 
   private function getFilterRequiresUser($filter) {

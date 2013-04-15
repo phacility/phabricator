@@ -73,18 +73,6 @@ class AphrontDefaultApplicationConfiguration
         'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
       ),
 
-      '/search/' => array(
-        '' => 'PhabricatorSearchController',
-        '(?P<key>[^/]+)/' => 'PhabricatorSearchController',
-        'attach/(?P<phid>[^/]+)/(?P<type>\w+)/(?:(?P<action>\w+)/)?'
-          => 'PhabricatorSearchAttachController',
-        'select/(?P<type>\w+)/'
-          => 'PhabricatorSearchSelectController',
-        'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
-        'hovercard/(?P<mode>retrieve|test)/' =>
-          'PhabricatorSearchHovercardController',
-      ),
-
       '/status/' => 'PhabricatorStatusController',
 
 

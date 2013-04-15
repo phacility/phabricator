@@ -377,7 +377,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       'span',
       array(
         'class' => 'phabricator-core-menu-icon '.
-                   'sprite-apps-large app-'.$name,
+                   'sprite-apps-large apps-'.$name,
       ),
       '');
   }

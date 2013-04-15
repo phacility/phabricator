@@ -4,6 +4,7 @@ final class PhabricatorActionIconView extends AphrontView {
 
   const SPRITE_MINICONS = 'minicons';
   const SPRITE_ACTIONS = 'actions';
+  const SPRITE_APPS = 'apps';
 
   private $href;
   private $workflow;
@@ -39,27 +40,32 @@ final class PhabricatorActionIconView extends AphrontView {
   public function render() {
     require_celerity_resource('phabricator-action-icon-view-css');
 
+    $tag = 'span';
+    if ($this->href) {
+      $tag = 'a';
+    }
+
     if ($this->spriteIcon) {
-      require_celerity_resource('sprite-actions-css');
-      require_celerity_resource('sprite-minicons-css');
+      require_celerity_resource('sprite-'.$this->spriteSheet.'-css');
+
       $classes = array();
       $classes[] = 'phabricator-action-icon-item-link';
       $classes[] = 'sprite-'.$this->spriteSheet;
       $classes[] = $this->spriteSheet.'-'.$this->spriteIcon;
 
       $action_icon = phutil_tag(
-        'a',
+        $tag,
           array(
-            'href'  => $this->href,
+            'href'  => $this->href ? $this->href : null,
             'class' => implode(' ', $classes),
             'sigil' => $this->workflow ? 'workflow' : null,
           ),
           '');
     } else {
       $action_icon = phutil_tag(
-        'a',
+        $tag,
           array(
-            'href'  => $this->href,
+            'href'  => $this->href ? $this->href : null,
             'class' => 'phabricator-action-icon-item-link',
             'sigil' => $this->workflow ? 'workflow' : null,
             'style' => 'background-image: url('.$this->image.');'

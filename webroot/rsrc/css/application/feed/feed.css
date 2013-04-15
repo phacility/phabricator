@@ -6,45 +6,14 @@
   margin: 10px;
 }
 
+.phabricator-feed-frame .phabricator-action-header-title {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
 .device-desktop .phabricator-feed-frame {
-  width: 640px;
-  margin: 20px;
-}
-
-.phabricator-chromeless-page .phabricator-feed-frame {
-  width: auto;
-}
-
-.phabricator-feed-story {
-  padding-left: 64px;
-  margin: .5em 0 1em;
-  background: 5px 2px no-repeat;
-  min-height: 64px;
-}
-
-.phabricator-feed-story-one-line {
-  min-height: 0;
-  color: #555;
-}
-
-.phabricator-feed-story-head {
-}
-
-.phabricator-feed-story-body {
-  padding: .5em 0;
-  color: #444444;
-}
-
-.phabricator-feed-story-foot {
-  color: #888888;
-  font-size: 11px;
-}
-
-.phabricator-feed-story-date {
-  color: #555;
-  font-weight: bold;
-  border-bottom: 1px solid #eeeeee;
-  padding: .5em 0;
+  width: 600px;
+  margin: 20px auto;
 }
 
 .phabricator-feed-story-date-separator {
@@ -60,4 +29,3 @@
   float: right;
   font-weight: bold;
 }
-

@@ -48,8 +48,15 @@ final class PhameBlogViewController extends PhameController {
       $user,
       pht('This blog has no visible posts.'));
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($blog->getName())
+        ->setHref($this->getApplicationURI()));
+
     $nav->appendChild(
       array(
+        $crumbs,
         $header,
         $actions,
         $properties,
@@ -59,8 +66,9 @@ final class PhameBlogViewController extends PhameController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'device'  => true,
-        'title'   => $blog->getName(),
+        'device' => true,
+        'title' => $blog->getName(),
+        'dust' => true,
       ));
   }
 

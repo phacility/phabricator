@@ -57,12 +57,18 @@ final class PhabricatorFeedMainController extends PhabricatorFeedController {
       $feed_view = $builder->buildView();
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
+    $crumbs = $this
+      ->buildApplicationCrumbs($nav)
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($title)
+          ->setHref($this->getApplicationURI('filter/'.$filter.'/')));
+
+    $nav->setCrumbs($crumbs);
+
 
     $nav->appendChild(
       array(
-        $header,
         $feed_view,
         $pager,
       ));
@@ -72,6 +78,7 @@ final class PhabricatorFeedMainController extends PhabricatorFeedController {
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 

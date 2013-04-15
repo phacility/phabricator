@@ -2840,7 +2840,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-action-icon-view-css' =>
   array(
-    'uri' => '/res/8b47cf61/rsrc/css/layout/phabricator-action-icon-view.css',
+    'uri' => '/res/dbceab3e/rsrc/css/layout/phabricator-action-icon-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2878,7 +2878,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-chatlog-css' =>
   array(
-    'uri' => '/res/f6631adc/rsrc/css/application/chatlog/chatlog.css',
+    'uri' => '/res/b5600765/rsrc/css/application/chatlog/chatlog.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2980,7 +2980,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-feed-css' =>
   array(
-    'uri' => '/res/fa2d5d8d/rsrc/css/application/feed/feed.css',
+    'uri' => '/res/e337f54b/rsrc/css/application/feed/feed.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3212,7 +3212,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-css' =>
   array(
-    'uri' => '/res/9869d10b/rsrc/css/application/profile/profile-view.css',
+    'uri' => '/res/a54f47a7/rsrc/css/application/profile/profile-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3221,7 +3221,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-header-css' =>
   array(
-    'uri' => '/res/4b1cb23b/rsrc/css/application/profile/profile-header-view.css',
+    'uri' => '/res/1ccc6f0b/rsrc/css/application/profile/profile-header-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3594,6 +3594,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/phriction/phriction-document-css.css',
   ),
+  'phui-feed-story-css' =>
+  array(
+    'uri' => '/res/9b5bb654/rsrc/css/phui/phui-feed-story.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-feed-story.css',
+  ),
   'ponder-comment-table-css' =>
   array(
     'uri' => '/res/a1bb9056/rsrc/css/application/ponder/comments.css',
@@ -3776,7 +3785,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-apps-css' =>
   array(
-    'uri' => '/res/d0b8b697/rsrc/css/sprite-apps.css',
+    'uri' => '/res/edc99ce1/rsrc/css/sprite-apps.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3785,7 +3794,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-apps-large-css' =>
   array(
-    'uri' => '/res/0c77875d/rsrc/css/sprite-apps-large.css',
+    'uri' => '/res/40397d93/rsrc/css/sprite-apps-large.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3903,7 +3912,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '9cece986' =>
+    '1b484e7b' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -3945,7 +3954,7 @@ celerity_register_resource_map(array(
         34 => 'phabricator-object-item-list-view-css',
         35 => 'global-drag-and-drop-css',
       ),
-      'uri' => '/res/pkg/9cece986/core.pkg.css',
+      'uri' => '/res/pkg/1b484e7b/core.pkg.css',
       'type' => 'css',
     ),
     'bf16b308' =>
@@ -4135,16 +4144,16 @@ celerity_register_resource_map(array(
   'reverse' =>
   array(
     'aphront-attached-file-view-css' => '6b1fccc6',
-    'aphront-dialog-view-css' => '9cece986',
-    'aphront-error-view-css' => '9cece986',
-    'aphront-form-view-css' => '9cece986',
-    'aphront-list-filter-view-css' => '9cece986',
-    'aphront-pager-view-css' => '9cece986',
-    'aphront-panel-view-css' => '9cece986',
-    'aphront-table-view-css' => '9cece986',
-    'aphront-tokenizer-control-css' => '9cece986',
-    'aphront-tooltip-css' => '9cece986',
-    'aphront-typeahead-control-css' => '9cece986',
+    'aphront-dialog-view-css' => '1b484e7b',
+    'aphront-error-view-css' => '1b484e7b',
+    'aphront-form-view-css' => '1b484e7b',
+    'aphront-list-filter-view-css' => '1b484e7b',
+    'aphront-pager-view-css' => '1b484e7b',
+    'aphront-panel-view-css' => '1b484e7b',
+    'aphront-table-view-css' => '1b484e7b',
+    'aphront-tokenizer-control-css' => '1b484e7b',
+    'aphront-tooltip-css' => '1b484e7b',
+    'aphront-typeahead-control-css' => '1b484e7b',
     'differential-changeset-view-css' => '8aaacd1b',
     'differential-core-view-css' => '8aaacd1b',
     'differential-inline-comment-editor' => 'e96b08f8',
@@ -4158,7 +4167,7 @@ celerity_register_resource_map(array(
     'differential-table-of-contents-css' => '8aaacd1b',
     'diffusion-commit-view-css' => 'c8ce2d88',
     'diffusion-icons-css' => 'c8ce2d88',
-    'global-drag-and-drop-css' => '9cece986',
+    'global-drag-and-drop-css' => '1b484e7b',
     'inline-comment-summary-css' => '8aaacd1b',
     'javelin-aphlict' => 'bf16b308',
     'javelin-behavior' => 'bea3de16',
@@ -4230,47 +4239,47 @@ celerity_register_resource_map(array(
     'javelin-util' => 'bea3de16',
     'javelin-vector' => 'bea3de16',
     'javelin-workflow' => 'bea3de16',
-    'lightbox-attachment-css' => '9cece986',
+    'lightbox-attachment-css' => '1b484e7b',
     'maniphest-task-summary-css' => '6b1fccc6',
     'maniphest-transaction-detail-css' => '6b1fccc6',
     'phabricator-busy' => 'bf16b308',
     'phabricator-content-source-view-css' => '8aaacd1b',
-    'phabricator-core-buttons-css' => '9cece986',
-    'phabricator-core-css' => '9cece986',
-    'phabricator-crumbs-view-css' => '9cece986',
-    'phabricator-directory-css' => '9cece986',
+    'phabricator-core-buttons-css' => '1b484e7b',
+    'phabricator-core-css' => '1b484e7b',
+    'phabricator-crumbs-view-css' => '1b484e7b',
+    'phabricator-directory-css' => '1b484e7b',
     'phabricator-drag-and-drop-file-upload' => 'e96b08f8',
     'phabricator-dropdown-menu' => 'bf16b308',
     'phabricator-file-upload' => 'bf16b308',
-    'phabricator-filetree-view-css' => '9cece986',
-    'phabricator-flag-css' => '9cece986',
-    'phabricator-form-view-css' => '9cece986',
-    'phabricator-header-view-css' => '9cece986',
-    'phabricator-jump-nav' => '9cece986',
+    'phabricator-filetree-view-css' => '1b484e7b',
+    'phabricator-flag-css' => '1b484e7b',
+    'phabricator-form-view-css' => '1b484e7b',
+    'phabricator-header-view-css' => '1b484e7b',
+    'phabricator-jump-nav' => '1b484e7b',
     'phabricator-keyboard-shortcut' => 'bf16b308',
     'phabricator-keyboard-shortcut-manager' => 'bf16b308',
-    'phabricator-main-menu-view' => '9cece986',
+    'phabricator-main-menu-view' => '1b484e7b',
     'phabricator-menu-item' => 'bf16b308',
-    'phabricator-nav-view-css' => '9cece986',
+    'phabricator-nav-view-css' => '1b484e7b',
     'phabricator-notification' => 'bf16b308',
-    'phabricator-notification-css' => '9cece986',
-    'phabricator-notification-menu-css' => '9cece986',
-    'phabricator-object-item-list-view-css' => '9cece986',
+    'phabricator-notification-css' => '1b484e7b',
+    'phabricator-notification-menu-css' => '1b484e7b',
+    'phabricator-object-item-list-view-css' => '1b484e7b',
     'phabricator-object-selector-css' => '8aaacd1b',
     'phabricator-prefab' => 'bf16b308',
     'phabricator-project-tag-css' => '6b1fccc6',
-    'phabricator-remarkup-css' => '9cece986',
+    'phabricator-remarkup-css' => '1b484e7b',
     'phabricator-shaped-request' => 'e96b08f8',
-    'phabricator-side-menu-view-css' => '9cece986',
-    'phabricator-standard-page-view' => '9cece986',
+    'phabricator-side-menu-view-css' => '1b484e7b',
+    'phabricator-standard-page-view' => '1b484e7b',
     'phabricator-textareautils' => 'bf16b308',
     'phabricator-tooltip' => 'bf16b308',
-    'phabricator-transaction-view-css' => '9cece986',
-    'phabricator-zindex-css' => '9cece986',
-    'sprite-apps-large-css' => '9cece986',
-    'sprite-gradient-css' => '9cece986',
-    'sprite-icon-css' => '9cece986',
-    'sprite-menu-css' => '9cece986',
-    'syntax-highlighting-css' => '9cece986',
+    'phabricator-transaction-view-css' => '1b484e7b',
+    'phabricator-zindex-css' => '1b484e7b',
+    'sprite-apps-large-css' => '1b484e7b',
+    'sprite-gradient-css' => '1b484e7b',
+    'sprite-icon-css' => '1b484e7b',
+    'sprite-menu-css' => '1b484e7b',
+    'syntax-highlighting-css' => '1b484e7b',
   ),
 ));

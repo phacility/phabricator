@@ -502,26 +502,19 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $commit_phids = array_keys(
       $edges[PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT]);
     if ($commit_phids) {
-      $commits = id(new PhabricatorRepositoryCommit())
-        ->putInSet(new LiskDAOSet())
-        ->loadAllWhere('phid IN (%Ls)', $commit_phids);
+      $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
+      $drev_edges = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($commit_phids)
+        ->withEdgeTypes(array($commit_drev))
+        ->execute();
 
-      foreach ($commits as $commit) {
-        $phid = $commit->getPHID();
+      foreach ($commit_phids as $phid) {
         $revisions_commits[$phid] = $handles[$phid]->renderLink();
-
-        $data = $commit->loadOneRelative(
-          new PhabricatorRepositoryCommitData(),
-          'commitID');
-
-        $revision_phid = ($data
-          ? $data->getCommitDetail('differential.revisionPHID')
-          : null);
-
+        $revision_phid = key($drev_edges[$phid][$commit_drev]);
         $revision_handle = idx($handles, $revision_phid);
         if ($revision_handle) {
-          $has_drev = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
-          unset($edges[$has_drev][$revision_phid]);
+          $task_drev = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
+          unset($edges[$task_drev][$revision_phid]);
           $revisions_commits[$phid] = hsprintf(
             '%s / %s',
             $revision_handle->renderLink($revision_handle->getName()),

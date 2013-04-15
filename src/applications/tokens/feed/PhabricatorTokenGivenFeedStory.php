@@ -15,8 +15,10 @@ final class PhabricatorTokenGivenFeedStory
   }
 
   public function renderView() {
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
+    $view->setAppIcon('token-dark');
     $view->setViewed($this->getHasViewed());
+    $author_phid = $this->getValue('authorPHID');
 
     $href = $this->getHandle($this->getPrimaryObjectPHID())->getURI();
     $view->setHref($href);
@@ -27,7 +29,7 @@ final class PhabricatorTokenGivenFeedStory
       $this->linkTo($this->getValue('objectPHID')));
 
     $view->setTitle($title);
-    $view->setOneLineStory(true);
+    $view->setImage($this->getHandle($author_phid)->getImageURI());
 
     return $view;
   }

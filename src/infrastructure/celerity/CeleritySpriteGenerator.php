@@ -541,13 +541,13 @@ final class CeleritySpriteGenerator {
     foreach ($apps as $app) {
       foreach ($colors as $color => $color_path) {
 
-        $css = '.app-'.$app.'-'.$color.$variant_short;
+        $css = '.apps-'.$app.'-'.$color.$variant_short;
         if ($color == 'blue' && $variant_name == 'apps-large') {
-          $css .= ', .phabricator-crumb-view:hover .app-'.$app.'-dark-large';
+          $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
         }
 
         $sprite = id(clone $template)
-          ->setName('app-'.$app.'-'.$color.$variant_short)
+          ->setName('apps-'.$app.'-'.$color.$variant_short)
           ->setTargetCSS($css);
 
         foreach ($scales as $scale_name => $scale) {

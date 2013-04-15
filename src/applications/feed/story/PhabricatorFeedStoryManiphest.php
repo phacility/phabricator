@@ -16,7 +16,8 @@ final class PhabricatorFeedStoryManiphest
   public function renderView() {
     $data = $this->getStoryData();
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
+    $view->setAppIcon('maniphest-dark');
     $view->setViewed($this->getHasViewed());
 
     $line = $this->getLineForData($data);
@@ -24,36 +25,23 @@ final class PhabricatorFeedStoryManiphest
     $view->setEpoch($data->getEpoch());
 
     $action = $data->getValue('action');
+
+    $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
+
     switch ($action) {
-      case ManiphestAction::ACTION_CREATE:
       case ManiphestAction::ACTION_COMMENT:
-        $full_size = true;
+        // I'm just fetching the comments here
+        // Don't repeat this at home!
+        $comments = $data->getValue('comments');
+        $content = $this->renderSummary($comments);
         break;
       default:
-        $full_size = false;
+        // I think this is just for create
+        $content = $this->renderSummary($data->getValue('description'));
         break;
     }
 
-    if ($full_size) {
-      $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
-
-      switch ($action) {
-        case ManiphestAction::ACTION_COMMENT:
-          // I'm just fetching the comments here
-          // Don't repeat this at home!
-          $comments = $data->getValue('comments');
-          $content = $this->renderSummary($comments);
-          break;
-        default:
-          // I think this is just for create
-          $content = $this->renderSummary($data->getValue('description'));
-          break;
-      }
-
-      $view->appendChild($content);
-    } else {
-      $view->setOneLineStory(true);
-    }
+    $view->appendChild($content);
 
     $href = $this->getHandle($data->getValue('taskPHID'))->getURI();
     $view->setHref($href);

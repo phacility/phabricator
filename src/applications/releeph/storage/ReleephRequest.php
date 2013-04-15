@@ -228,11 +228,10 @@ final class ReleephRequest extends ReleephDAO {
   }
 
   public function loadRequestCommitDiffPHID() {
-    $commit_data = $this->loadPhabricatorRepositoryCommitData();
-    if (!$commit_data) {
-      return null;
-    }
-    return $commit_data->getCommitDetail('differential.revisionPHID');
+    $revision_phid = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getRequestCommitPHID(),
+      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+    return reset($revision_phid);
   }
 
 
