@@ -964,7 +964,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryReference' => 'applications/feed/storage/PhabricatorFeedStoryReference.php',
     'PhabricatorFeedStoryStatus' => 'applications/feed/story/PhabricatorFeedStoryStatus.php',
     'PhabricatorFeedStoryTypeConstants' => 'applications/feed/constants/PhabricatorFeedStoryTypeConstants.php',
-    'PhabricatorFeedView' => 'applications/feed/view/PhabricatorFeedView.php',
     'PhabricatorFile' => 'applications/files/storage/PhabricatorFile.php',
     'PhabricatorFileController' => 'applications/files/controller/PhabricatorFileController.php',
     'PhabricatorFileDAO' => 'applications/files/storage/PhabricatorFileDAO.php',
@@ -2663,7 +2662,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryReference' => 'PhabricatorFeedDAO',
     'PhabricatorFeedStoryStatus' => 'PhabricatorFeedStory',
     'PhabricatorFeedStoryTypeConstants' => 'PhabricatorFeedConstants',
-    'PhabricatorFeedView' => 'AphrontView',
     'PhabricatorFile' =>
     array(
       0 => 'PhabricatorFileDAO',
