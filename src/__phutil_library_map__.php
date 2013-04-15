@@ -725,6 +725,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationReleeph' => 'applications/releeph/application/PhabricatorApplicationReleeph.php',
     'PhabricatorApplicationReleephConfigOptions' => 'applications/releeph/config/PhabricatorApplicationReleephConfigOptions.php',
     'PhabricatorApplicationRepositories' => 'applications/repository/application/PhabricatorApplicationRepositories.php',
+    'PhabricatorApplicationSearch' => 'applications/search/application/PhabricatorApplicationSearch.php',
     'PhabricatorApplicationSearchEngine' => 'applications/search/engine/PhabricatorApplicationSearchEngine.php',
     'PhabricatorApplicationSettings' => 'applications/settings/application/PhabricatorApplicationSettings.php',
     'PhabricatorApplicationSlowvote' => 'applications/slowvote/application/PhabricatorApplicationSlowvote.php',
@@ -963,7 +964,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryReference' => 'applications/feed/storage/PhabricatorFeedStoryReference.php',
     'PhabricatorFeedStoryStatus' => 'applications/feed/story/PhabricatorFeedStoryStatus.php',
     'PhabricatorFeedStoryTypeConstants' => 'applications/feed/constants/PhabricatorFeedStoryTypeConstants.php',
-    'PhabricatorFeedStoryView' => 'applications/feed/view/PhabricatorFeedStoryView.php',
     'PhabricatorFeedView' => 'applications/feed/view/PhabricatorFeedView.php',
     'PhabricatorFile' => 'applications/files/storage/PhabricatorFile.php',
     'PhabricatorFileController' => 'applications/files/controller/PhabricatorFileController.php',
@@ -2422,6 +2422,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationReleeph' => 'PhabricatorApplication',
     'PhabricatorApplicationReleephConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorApplicationRepositories' => 'PhabricatorApplication',
+    'PhabricatorApplicationSearch' => 'PhabricatorApplication',
     'PhabricatorApplicationSettings' => 'PhabricatorApplication',
     'PhabricatorApplicationSlowvote' => 'PhabricatorApplication',
     'PhabricatorApplicationStatusView' => 'AphrontView',
@@ -2662,7 +2663,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryReference' => 'PhabricatorFeedDAO',
     'PhabricatorFeedStoryStatus' => 'PhabricatorFeedStory',
     'PhabricatorFeedStoryTypeConstants' => 'PhabricatorFeedConstants',
-    'PhabricatorFeedStoryView' => 'PhabricatorFeedView',
     'PhabricatorFeedView' => 'AphrontView',
     'PhabricatorFile' =>
     array(
