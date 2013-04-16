@@ -104,7 +104,7 @@ final class PhabricatorImageTransformer {
       $x,
       $scaled_y);
 
-    return $this->saveImageDataInAnyFormat($img, $file->getMimeType());
+    return self::saveImageDataInAnyFormat($img, $file->getMimeType());
   }
 
   private function crasslyCropTo(PhabricatorFile $file, $top, $left, $w, $h) {
@@ -126,7 +126,7 @@ final class PhabricatorImageTransformer {
       $w, $h,
       $orig_w, $orig_h);
 
-    return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
+    return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
 
@@ -141,7 +141,7 @@ final class PhabricatorImageTransformer {
     }
 
     $dst = $this->applyScaleTo($file, $dx, $dy);
-    return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
+    return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
   private function getBlankDestinationFile($dx, $dy) {
@@ -254,7 +254,7 @@ final class PhabricatorImageTransformer {
       $sdx, $sdy,
       $x, $y);
 
-    return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
+    return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
   private function applyMemeTo(
@@ -314,7 +314,7 @@ final class PhabricatorImageTransformer {
         break;
       }
     }
-    return $this->saveImageDataInAnyFormat($img, $file->getMimeType());
+    return self::saveImageDataInAnyFormat($img, $file->getMimeType());
   }
 
   private function makeImageWithTextBorder($img, $font_size, $x, $y,
@@ -352,7 +352,7 @@ final class PhabricatorImageTransformer {
     );
   }
 
-  private function saveImageDataInAnyFormat($data, $preferred_mime = '') {
+  public static function saveImageDataInAnyFormat($data, $preferred_mime = '') {
     switch ($preferred_mime) {
       case 'image/gif': // Gif doesn't support true color
       case 'image/png':
