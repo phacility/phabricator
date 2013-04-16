@@ -9,21 +9,34 @@ final class PhabricatorMetaMTAReceiveController
     $user = $request->getUser();
 
     if ($request->isFormPost()) {
-      $receiver = PhabricatorMetaMTAReceivedMail::loadReceiverObject(
-        $request->getStr('obj'));
-      if (!$receiver) {
-        throw new Exception(pht("No such task or revision!"));
+      $received = new PhabricatorMetaMTAReceivedMail();
+      $header_content = array();
+      $from = $request->getStr('sender');
+      $to = $request->getStr('receiver');
+      $uri = '/mail/received/';
+
+      if (!empty($from)) {
+        $header_content['from'] = $from;
       }
 
-      $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
+      if (preg_match('/.+@.+/', $to)) {
+        $header_content['to'] = $to;
+      } else {
+        $receiver = PhabricatorMetaMTAReceivedMail::loadReceiverObject($to);
+
+        if (!$receiver) {
+          throw new Exception(pht("No such task or revision!"));
+        }
+
+        $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
         $receiver->getMailKey(),
         $user->getPHID());
 
-      $received = new PhabricatorMetaMTAReceivedMail();
-      $received->setHeaders(
-        array(
-          'to' => $request->getStr('obj').'+'.$user->getID().'+'.$hash.'@',
-        ));
+        $header_content['to'] =
+          $to.'+'.$user->getID().'+'.$hash.'@';
+      }
+
+      $received->setHeaders($header_content);
       $received->setBodies(
         array(
           'text' => $request->getStr('body'),
@@ -38,10 +51,6 @@ final class PhabricatorMetaMTAReceiveController
 
       $received->processReceivedMail();
 
-      $phid = $receiver->getPHID();
-      $handles = $this->loadViewerHandles(array($phid));
-      $uri = $handles[$phid]->getURI();
-
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
@@ -51,15 +60,21 @@ final class PhabricatorMetaMTAReceiveController
     $form
       ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">%s</p>',
-        pht('This form will simulate sending mail to an object.')))
+        pht(
+          'This form will simulate sending mail to an object '.
+          'or an email address.')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('From'))
+          ->setName('sender'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('To'))
-          ->setName('obj')
+          ->setName('receiver')
           ->setCaption(pht(
             'e.g. %s or %s',
             phutil_tag('tt', array(), 'D1234'),
-            phutil_tag('tt', array(), 'T1234'))))
+            phutil_tag('tt', array(), 'bugs@example.com'))))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Body'))
@@ -86,3 +101,4 @@ final class PhabricatorMetaMTAReceiveController
   }
 
 }
+
