@@ -3297,7 +3297,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-slowvote-css' =>
   array(
-    'uri' => '/res/94d20443/rsrc/css/application/slowvote/slowvote.css',
+    'uri' => '/res/dd7e273e/rsrc/css/application/slowvote/slowvote.css',
     'type' => 'css',
     'requires' =>
     array(

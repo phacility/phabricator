@@ -1728,6 +1728,8 @@ phutil_register_library_map(array(
     'ReleephStatusFieldSpecification' => 'applications/releeph/field/specification/ReleephStatusFieldSpecification.php',
     'ReleephSummaryFieldSpecification' => 'applications/releeph/field/specification/ReleephSummaryFieldSpecification.php',
     'ReleephUserView' => 'applications/releeph/view/user/ReleephUserView.php',
+    'SlowvoteEmbedView' => 'applications/slowvote/view/SlowvoteEmbedView.php',
+    'SlowvoteRemarkupRule' => 'applications/slowvote/remarkup/SlowvoteRemarkupRule.php',
   ),
   'function' =>
   array(
@@ -3455,5 +3457,7 @@ phutil_register_library_map(array(
     'ReleephStatusFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephSummaryFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephUserView' => 'AphrontView',
+    'SlowvoteEmbedView' => 'AphrontView',
+    'SlowvoteRemarkupRule' => 'PhabricatorRemarkupRuleObject',
   ),
 ));

@@ -67,3 +67,25 @@
   float: left;
   margin: 0px 4px 6px 0px;
 }
+
+.phabricator-slowvote-embed {
+  width: 400px;
+  background: #f7f7f7;
+  border: 1px solid #dbdbdb;
+  padding: 5px;
+}
+
+.phabricator-slowvote-embed-option {
+  margin: 1px;
+  background: #F0FFFF;
+}
+
+.phabricator-slowvote-embed-option-selected {
+  padding-left: 0px !important;
+}
+
+.phabricator-slowvote-embed-option-text {
+  border: 1px solid #dbdbdb;
+  border-left: 0px;
+  padding-left: 1em;
+}

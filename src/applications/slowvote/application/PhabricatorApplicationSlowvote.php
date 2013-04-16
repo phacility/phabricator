@@ -30,6 +30,12 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new SlowvoteRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/V(?P<id>[1-9]\d*)' => 'PhabricatorSlowvotePollController',
