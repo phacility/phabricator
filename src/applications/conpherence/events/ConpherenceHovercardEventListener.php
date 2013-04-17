@@ -32,7 +32,7 @@ final class ConpherenceHovercardEventListener extends PhutilEventListener {
 
     $conpherence_uri = new PhutilURI(
       '/conpherence/new/?participant='.$user->getPHID());
-    $name = pht('Start a Conpherence');
+    $name = pht('Send a Message');
     $hovercard->addAction($name, $conpherence_uri, true);
 
     $event->setValue('hovercard', $hovercard);

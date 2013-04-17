@@ -179,7 +179,7 @@ final class PhabricatorPeopleProfileController
     $blurb = $engine->markupText($blurb);
 
     $content = hsprintf(
-      '<div class="phabricator-profile-info-group ml">
+      '<div class="phabricator-profile-info-group profile-wrap-responsive">
         <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
@@ -194,7 +194,7 @@ final class PhabricatorPeopleProfileController
           </table>
         </div>
       </div>'.
-      '<div class="phabricator-profile-info-group ml">
+      '<div class="phabricator-profile-info-group profile-wrap-responsive">
         <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
@@ -234,7 +234,7 @@ final class PhabricatorPeopleProfileController
     $view = $builder->buildView();
 
     return hsprintf(
-      '<div class="phabricator-profile-info-group">
+      '<div class="profile-feed profile-wrap-responsive">
         %s
       </div>',
       $view->render());

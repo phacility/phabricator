@@ -964,7 +964,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryReference' => 'applications/feed/storage/PhabricatorFeedStoryReference.php',
     'PhabricatorFeedStoryStatus' => 'applications/feed/story/PhabricatorFeedStoryStatus.php',
     'PhabricatorFeedStoryTypeConstants' => 'applications/feed/constants/PhabricatorFeedStoryTypeConstants.php',
-    'PhabricatorFeedView' => 'applications/feed/view/PhabricatorFeedView.php',
     'PhabricatorFile' => 'applications/files/storage/PhabricatorFile.php',
     'PhabricatorFileController' => 'applications/files/controller/PhabricatorFileController.php',
     'PhabricatorFileDAO' => 'applications/files/storage/PhabricatorFileDAO.php',
@@ -1038,8 +1037,10 @@ phutil_register_library_map(array(
     'PhabricatorLDAPUnknownUserException' => 'applications/auth/ldap/PhabricatorLDAPUnknownUserException.php',
     'PhabricatorLDAPUnlinkController' => 'applications/auth/controller/PhabricatorLDAPUnlinkController.php',
     'PhabricatorLintEngine' => 'infrastructure/lint/PhabricatorLintEngine.php',
+    'PhabricatorLipsumArtist' => 'applications/lipsum/image/PhabricatorLipsumArtist.php',
     'PhabricatorLipsumGenerateWorkflow' => 'applications/lipsum/management/PhabricatorLipsumGenerateWorkflow.php',
     'PhabricatorLipsumManagementWorkflow' => 'applications/lipsum/management/PhabricatorLipsumManagementWorkflow.php',
+    'PhabricatorLipsumMondrianArtist' => 'applications/lipsum/image/PhabricatorLipsumMondrianArtist.php',
     'PhabricatorLiskDAO' => 'infrastructure/storage/lisk/PhabricatorLiskDAO.php',
     'PhabricatorLocalDiskFileStorageEngine' => 'applications/files/engine/PhabricatorLocalDiskFileStorageEngine.php',
     'PhabricatorLocalTimeTestCase' => 'view/__tests__/PhabricatorLocalTimeTestCase.php',
@@ -1729,6 +1730,8 @@ phutil_register_library_map(array(
     'ReleephStatusFieldSpecification' => 'applications/releeph/field/specification/ReleephStatusFieldSpecification.php',
     'ReleephSummaryFieldSpecification' => 'applications/releeph/field/specification/ReleephSummaryFieldSpecification.php',
     'ReleephUserView' => 'applications/releeph/view/user/ReleephUserView.php',
+    'SlowvoteEmbedView' => 'applications/slowvote/view/SlowvoteEmbedView.php',
+    'SlowvoteRemarkupRule' => 'applications/slowvote/remarkup/SlowvoteRemarkupRule.php',
   ),
   'function' =>
   array(
@@ -2663,7 +2666,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryReference' => 'PhabricatorFeedDAO',
     'PhabricatorFeedStoryStatus' => 'PhabricatorFeedStory',
     'PhabricatorFeedStoryTypeConstants' => 'PhabricatorFeedConstants',
-    'PhabricatorFeedView' => 'AphrontView',
     'PhabricatorFile' =>
     array(
       0 => 'PhabricatorFileDAO',
@@ -2739,6 +2741,7 @@ phutil_register_library_map(array(
     'PhabricatorLintEngine' => 'PhutilLintEngine',
     'PhabricatorLipsumGenerateWorkflow' => 'PhabricatorLipsumManagementWorkflow',
     'PhabricatorLipsumManagementWorkflow' => 'PhutilArgumentWorkflow',
+    'PhabricatorLipsumMondrianArtist' => 'PhabricatorLipsumArtist',
     'PhabricatorLiskDAO' => 'LiskDAO',
     'PhabricatorLocalDiskFileStorageEngine' => 'PhabricatorFileStorageEngine',
     'PhabricatorLocalTimeTestCase' => 'PhabricatorTestCase',
@@ -3457,5 +3460,7 @@ phutil_register_library_map(array(
     'ReleephStatusFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephSummaryFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephUserView' => 'AphrontView',
+    'SlowvoteEmbedView' => 'AphrontView',
+    'SlowvoteRemarkupRule' => 'PhabricatorRemarkupRuleObject',
   ),
 ));

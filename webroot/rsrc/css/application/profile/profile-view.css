@@ -102,3 +102,27 @@ img.phabricator-profile-image {
   font-weight: bold;
   margin: .5em 1em 0;
 }
+
+.profile-wrap-responsive {
+  margin: 20px;
+}
+
+.device .profile-wrap-responsive {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.device-desktop .profile-feed {
+  max-width: 640px;
+}
+
+.profile-feed .phabricator-action-header-title {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.device-desktop .phabricator-project-layout
+  .aphront-multi-column-column-outer:first-child
+  .phabricator-profile-info-group {
+  margin-right: 0;
+}

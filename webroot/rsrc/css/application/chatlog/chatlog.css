@@ -63,6 +63,7 @@
   color: #a1a5a9;
   font-size: 11px;
   float: right;
+  margin-left: 5px;
 }
 
 .phabricator-chat-log td.author {
@@ -79,4 +80,5 @@
 
 .phabricator-chat-log td.message {
   white-space: pre-wrap;
+  word-break: break-word;
 }

@@ -32,7 +32,8 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $menu->addMenuItem(
       id(new PhabricatorMenuItemView())
-        ->setName(pht('New Conversation'))
+        ->addSigil('conpherence-new-conversation')
+        ->setName(pht('New Message'))
         ->setWorkflow(true)
         ->setKey('new')
         ->setHref($this->baseURI.'new/')

@@ -13,7 +13,7 @@ final class ConpherenceNewController extends ConpherenceController {
       ->attachParticipants(array())
       ->attachFilePHIDs(array())
       ->setMessageCount(0);
-    $title = pht('New Conversation');
+    $title = pht('New Message');
     $participants = array();
     $message = '';
     $files = array();
@@ -137,7 +137,7 @@ final class ConpherenceNewController extends ConpherenceController {
       ->setUser($user)
       ->setTitle($title)
       ->addCancelButton($cancel_uri)
-      ->addSubmitButton(pht('Create Conversation'));
+      ->addSubmitButton(pht('Send Message'));
 
     $form = id(new AphrontFormLayoutView())
       ->setUser($user)

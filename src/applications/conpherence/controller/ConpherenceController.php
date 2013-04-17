@@ -43,11 +43,14 @@ abstract class ConpherenceController extends PhabricatorController {
 
     $all_participation = $unread + $read;
     $all_conpherence_phids = array_keys($all_participation);
-    $all_conpherences = id(new ConpherenceThreadQuery())
-      ->setViewer($user)
-      ->withPHIDs($all_conpherence_phids)
-      ->needParticipantCache(true)
-      ->execute();
+    $all_conpherences = array();
+    if ($all_conpherence_phids) {
+      $all_conpherences = id(new ConpherenceThreadQuery())
+        ->setViewer($user)
+        ->withPHIDs($all_conpherence_phids)
+        ->needParticipantCache(true)
+        ->execute();
+    }
     $unread_conpherences = array_select_keys(
       $all_conpherences,
       array_keys($unread));
@@ -63,7 +66,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $nav = new PhabricatorMenuView();
 
     $nav->newLink(
-      pht('New Conversation'),
+      pht('New Message'),
       $this->getApplicationURI('new/'));
 
     return $nav;
@@ -75,7 +78,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $crumbs
       ->addAction(
         id(new PhabricatorMenuItemView())
-          ->setName(pht('New Conversation'))
+          ->setName(pht('New Message'))
           ->setHref($this->getApplicationURI('new/'))
           ->setIcon('create'))
       ->addCrumb(

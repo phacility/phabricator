@@ -57,6 +57,10 @@ final class PhabricatorFeedMainController extends PhabricatorFeedController {
       $feed_view = $builder->buildView();
     }
 
+    $feed_view = hsprintf(
+      '<div class="phabricator-feed-frame">%s</div>',
+      $feed_view);
+
     $crumbs = $this
       ->buildApplicationCrumbs($nav)
       ->addCrumb(

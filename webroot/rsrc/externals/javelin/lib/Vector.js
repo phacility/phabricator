@@ -238,9 +238,16 @@ JX.install('Vector', {
       var x = 0;
       var y = 0;
       do {
-        x += node.offsetLeft;
-        y += node.offsetTop;
-        node = node.offsetParent;
+        var offsetParent = node.offsetParent;
+        var scrollLeft = 0;
+        var scrollTop = 0;
+        if (offsetParent && offsetParent != document.body) {
+          scrollLeft = offsetParent.scrollLeft;
+          scrollTop = offsetParent.scrollTop;
+        }
+        x += (node.offsetLeft - scrollLeft);
+        y += (node.offsetTop - scrollTop);
+        node = offsetParent;
       } while (node && node != document.body);
 
       return new JX.Vector(x, y);
