@@ -65,7 +65,7 @@ final class ReleephRequest extends ReleephDAO {
 
     $found_pusher_want = false;
     foreach ($this->userIntents as $phid => $intent) {
-      if ($project->isPusherPHID($phid)) {
+      if ($project->isAuthoritativePHID($phid)) {
         if ($intent == self::INTENT_PASS) {
           return self::INTENT_PASS;
         }
