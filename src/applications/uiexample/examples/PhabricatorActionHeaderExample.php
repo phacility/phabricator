@@ -49,12 +49,9 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap1 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout1);
+    $wrap1 = id(new PHUIBoxView())
+      ->appendChild($layout1)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
 /* Policy Icons */
     $title2 = id(new PhabricatorHeaderView())
@@ -99,12 +96,9 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap2 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout2);
+    $wrap2 = id(new PHUIBoxView())
+      ->appendChild($layout2)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
 
 /* Action Icons */
@@ -187,12 +181,9 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap3 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout3);
+    $wrap3 = id(new PHUIBoxView())
+      ->appendChild($layout3)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
 /* Action Icons */
     $title4 = id(new PhabricatorHeaderView())
@@ -243,7 +234,7 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_YELLOW)
       ->setTag($tag1);
 
-    $layout3 = id(new AphrontMultiColumnView())
+    $layout4 = id(new AphrontMultiColumnView())
       ->addColumn($header1)
       ->addColumn($header2)
       ->addColumn($header3)
@@ -253,12 +244,9 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap4 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout3);
+    $wrap4 = id(new PHUIBoxView())
+      ->appendChild($layout4)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
     return phutil_tag(
       'div',

@@ -170,26 +170,17 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
     $head3 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Action Panel'));
 
-    $wrap1 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $board);
+    $wrap1 = id(new PHUIBoxView())
+      ->appendChild($board)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
-    $wrap2 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $board2);
+    $wrap2 = id(new PHUIBoxView())
+      ->appendChild($board2)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
-    $wrap3 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $board3);
+    $wrap3 = id(new PHUIBoxView())
+      ->appendChild($board3)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
     return phutil_tag(
       'div',
