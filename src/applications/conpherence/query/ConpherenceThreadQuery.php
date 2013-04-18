@@ -6,7 +6,7 @@
 final class ConpherenceThreadQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  const TRANSACTION_LIMIT = 2;
+  const TRANSACTION_LIMIT = 100;
 
   private $phids;
   private $ids;
