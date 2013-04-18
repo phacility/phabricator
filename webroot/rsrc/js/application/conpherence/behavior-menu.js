@@ -235,16 +235,18 @@ JX.behavior('conpherence-menu', function(config) {
 
   JX.Stratcom.listen('click', 'show-older-messages', function(e) {
     e.kill();
-    var last_offset = e.getNodeData('show-older-messages').offset;
-    var conf_id = e.getNodeData('show-older-messages').ID;
+    var data = e.getNodeData('show-older-messages');
+    var oldest_transaction_id = data.oldest_transaction_id;
+    var conf_id = thread.selected;
     JX.DOM.remove(e.getNode('show-older-messages'));
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
     new JX.Request(config.base_uri + conf_id + '/', function(r) {
       var messages = JX.$H(r.messages);
-      JX.DOM.prependContent(messages_root,
-      JX.$H(messages));
-    }).setData({ offset: last_offset+1 }).send();
+      JX.DOM.prependContent(
+        messages_root,
+        JX.$H(messages));
+    }).setData({ oldest_transaction_id : oldest_transaction_id }).send();
   });
 
 

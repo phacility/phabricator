@@ -37,12 +37,19 @@ final class ConpherenceViewController extends
     if (!$conpherence_id) {
       return new Aphront404Response();
     }
-    $conpherence = id(new ConpherenceThreadQuery())
+    $query = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needHeaderPics(true)
+      ->needParticipantCache(true)
       ->needTransactions(true)
-      ->executeOne();
+      ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT);
+    $before_transaction_id = $request->getInt('oldest_transaction_id');
+    if ($before_transaction_id) {
+      $query
+        ->setBeforeTransactionID($before_transaction_id);
+    }
+    $conpherence = $query->executeOne();
     $this->setConpherence($conpherence);
 
     $participant = $conpherence->getParticipant($user->getPHID());
@@ -52,9 +59,23 @@ final class ConpherenceViewController extends
     $participant->markUpToDate($conpherence, $latest_transaction);
     unset($write_guard);
 
-    $header = $this->renderHeaderPaneContent();
-    $messages = $this->renderMessagePaneContent();
-    $content = $header + $messages;
+    $data = $this->renderConpherenceTransactions($conpherence);
+    $messages = $this->renderMessagePaneContent(
+      $data['transactions'],
+      $data['oldest_transaction_id']);
+    if ($before_transaction_id) {
+      $header = null;
+      $form = null;
+      $content = array('messages' => $messages);
+    } else {
+      $header = $this->renderHeaderPaneContent();
+      $form = $this->renderFormContent($data['latest_transaction_id']);
+      $content = array(
+        'header' => $header,
+        'messages' => $messages,
+        'form' => $form
+      );
+    }
 
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())->setContent($content);
@@ -64,8 +85,8 @@ final class ConpherenceViewController extends
       ->setBaseURI($this->getApplicationURI())
       ->setThread($conpherence)
       ->setHeader($header)
-      ->setMessages($messages['messages'])
-      ->setReplyForm($messages['form'])
+      ->setMessages($messages)
+      ->setReplyForm($form)
       ->setRole('thread');
 
     return $this->buildApplicationPage(
@@ -80,19 +101,39 @@ final class ConpherenceViewController extends
     require_celerity_resource('conpherence-header-pane-css');
     $conpherence = $this->getConpherence();
     $header = $this->buildHeaderPaneContent($conpherence);
-    return array('header' => hsprintf('%s', $header));
+    return hsprintf('%s', $header);
   }
 
 
-  private function renderMessagePaneContent() {
+  private function renderMessagePaneContent(
+    array $transactions,
+    $oldest_transaction_id) {
+
     require_celerity_resource('conpherence-message-pane-css');
-    $user = $this->getRequest()->getUser();
+
+    $scrollbutton = '';
+    if ($oldest_transaction_id) {
+      $scrollbutton = javelin_tag(
+        'a',
+        array(
+          'href' => '#',
+          'mustcapture' => true,
+          'sigil' => 'show-older-messages',
+          'class' => 'conpherence-show-older-messages',
+          'meta' => array(
+            'oldest_transaction_id' => $oldest_transaction_id
+          )
+        ),
+        pht('Show Older Messages'));
+    }
+
+    return hsprintf('%s%s', $scrollbutton, $transactions);
+  }
+
+  private function renderFormContent($latest_transaction_id) {
+
     $conpherence = $this->getConpherence();
-
-    $data = $this->renderConpherenceTransactions($conpherence);
-    $latest_transaction_id = $data['latest_transaction_id'];
-    $transactions = $data['transactions'];
-
+    $user = $this->getRequest()->getUser();
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
     Javelin::initBehavior('conpherence-pontificate');
@@ -127,21 +168,7 @@ final class ConpherenceViewController extends
         ''))
       ->render();
 
-    $scrollbutton = javelin_tag(
-      'a',
-      array(
-        'href' => '#',
-        'mustcapture' => true,
-        'sigil' => 'show-older-messages',
-        'class' => 'conpherence-show-older-messages',
-      ),
-      pht('Show Older Messages'));
-
-    return array(
-      'messages' => hsprintf('%s%s', $scrollbutton, $transactions),
-      'form' => $form
-    );
-
+    return $form;
   }
 
 }

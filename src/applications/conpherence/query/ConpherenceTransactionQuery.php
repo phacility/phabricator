@@ -10,4 +10,9 @@ final class ConpherenceTransactionQuery
     return new ConpherenceTransaction();
   }
 
+  protected function getReversePaging() {
+    return false;
+  }
+
+
 }
