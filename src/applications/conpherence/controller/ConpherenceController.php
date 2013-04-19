@@ -146,10 +146,10 @@ abstract class ConpherenceController extends PhabricatorController {
     if (count($transactions) == $too_many) {
       $last_transaction = end($transactions);
       unset($transactions[$last_transaction->getID()]);
+      $oldest_transaction = end($transactions);
+      $oldest_transaction_id = $oldest_transaction->getID();
     }
     $transactions = array_reverse($transactions);
-    $oldest_transaction = reset($transactions);
-    $oldest_transaction_id = $oldest_transaction->getID();
     $handles = $conpherence->getHandles();
     $rendered_transactions = array();
     $engine = id(new PhabricatorMarkupEngine())
