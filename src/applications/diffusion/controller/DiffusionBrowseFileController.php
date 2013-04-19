@@ -432,7 +432,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $epoch_min   = min($epoch_list);
       $epoch_max   = max($epoch_list);
       $epoch_range = ($epoch_max - $epoch_min) + 1;
-      $handles     = $this->loadViewerHandles(ipull($blame_dict, 'authorPHID'));
+
+      $author_phids = ipull(ifilter($blame_dict, 'authorPHID'), 'authorPHID');
+      $handles = $this->loadViewerHandles($author_phids);
     }
 
     $line_arr = array();
