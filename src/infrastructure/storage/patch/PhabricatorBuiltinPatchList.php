@@ -1238,6 +1238,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130409.commitdrev.php'),
       ),
+      '20130417.externalaccount.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130417.externalaccount.sql'),
+      ),
     );
   }
 }
