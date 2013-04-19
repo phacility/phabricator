@@ -8,6 +8,8 @@
 final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  protected $filter;
+
   /**
    * Create a saved query object from the request.
    *
@@ -15,9 +17,15 @@ final class PhabricatorPasteSearchEngine
    * @return The saved query that is built.
    */
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $query = new PhabricatorSavedQuery();
 
-    return $query;
+    $saved = new PhabricatorSavedQuery();
+
+    if ($this->filter == "my") {
+      $user = $request->getUser();
+      $saved->setParameter('authorPHIDs', array($user->getPHID()));
+    }
+
+    return $saved;
   }
 
   /**
@@ -43,6 +51,15 @@ final class PhabricatorPasteSearchEngine
    * @return void
    */
   public function buildSearchForm(PhabricatorSavedQuery $saved_query) {
+  }
+
+  public function setPasteSearchFilter($filter) {
+    $this->filter = $filter;
+    return $this;
+  }
+
+  public function getPasteSearchFilter() {
+    return $this->filter;
   }
 
 }
