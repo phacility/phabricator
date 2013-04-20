@@ -326,7 +326,6 @@
 }
 
 .remarkup-control-order-mode {
-  z-index: 90;
   position: fixed;
   top: -1px;
   bottom: -1px;
@@ -335,11 +334,12 @@
 }
 
 .remarkup-control-order-mode textarea.remarkup-assist-textarea {
-  position: fixed;
-  top: 25px;
-  bottom: -2px;
+  position: absolute;
+  top: 26px;
   left: 0;
   right: 0;
+  bottom: 0;
+  /* NOTE: This doesn't work in Firefox, there's a JS behavior to correct it. */
   height: auto;
   border-width: 1px 0 0 0;
   outline: none;

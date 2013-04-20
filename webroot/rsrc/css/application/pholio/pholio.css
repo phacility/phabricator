@@ -134,7 +134,6 @@
 .pholio-device-lightbox {
   position: absolute;
   overflow: auto;
-  z-index: 99;
 }
 
 .pholio-device-lightbox img {

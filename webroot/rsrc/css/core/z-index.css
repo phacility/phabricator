@@ -18,6 +18,10 @@
   z-index: 2;
 }
 
+.pholio-new-inline-comment {
+  z-index: 2;
+}
+
 .phabricator-timeline-icon-fill {
   z-index: 3;
 }
@@ -108,10 +112,18 @@ div.jx-typeahead-results {
   z-index: 18;
 }
 
+.pholio-device-lightbox {
+  z-index: 20;
+}
+
 .dropdown-menu-frame {
   z-index: 32;
 }
 
 .busy {
   z-index: 40;
+}
+
+.remarkup-control-order-mode {
+  z-index: 50;
 }

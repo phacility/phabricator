@@ -6,6 +6,7 @@
  *           phabricator-textareautils
  *           javelin-workflow
  *           phabricator-notification
+ *           javelin-vector
  */
 
 JX.behavior('phabricator-remarkup-assist', function(config) {
@@ -19,11 +20,14 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     }
 
     // First, disable any active mode.
-    if (edit_mode == 'order') {
-      JX.DOM.alterClass(edit_root, 'remarkup-control-order-mode', false);
-    }
-    if (edit_mode == 'chaos') {
-      JX.DOM.alterClass(edit_root, 'remarkup-control-chaos-mode', false);
+    if (edit_root) {
+      if (edit_mode == 'order') {
+        JX.DOM.alterClass(edit_root, 'remarkup-control-order-mode', false);
+      }
+      if (edit_mode == 'chaos') {
+        JX.DOM.alterClass(edit_root, 'remarkup-control-chaos-mode', false);
+      }
+      JX.DOM.find(edit_root, 'textarea').style.height = '';
     }
 
     edit_root = root;
@@ -32,6 +36,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     // Now, apply the new mode.
     if (mode == 'order') {
       JX.DOM.alterClass(edit_root, 'remarkup-control-order-mode', true);
+      resizearea();
     }
 
     if (mode == 'chaos') {
@@ -40,6 +45,30 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
     JX.DOM.focus(JX.DOM.find(edit_root, 'textarea'));
   }
+
+  function resizearea() {
+    if (!edit_root) {
+      return;
+    }
+    if (edit_mode != 'order') {
+      return;
+    }
+
+    // In Firefox, a textarea with position "absolute" or "fixed", anchored
+    // "top" and "bottom", and height "auto" renders as two lines high. Force
+    // it to the correct height with Javascript.
+
+    var area = JX.DOM.find(edit_root, 'textarea');
+
+    var v = JX.Vector.getViewport();
+    v.x = null;
+    v.y -= 26;
+
+    v.setDim(area);
+  }
+
+  JX.Stratcom.listen('resize', null, resizearea);
+
 
   JX.Stratcom.listen('keydown', null, function(e) {
     if (edit_mode == 'chaos') {
