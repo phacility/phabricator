@@ -961,6 +961,26 @@
       "rule" : ".action-world-white, .device-desktop .phabricator-action-view:hover .action-world",
       "hash" : "106ab6c8bc5a685cd0837baaa6c617e4"
     },
+    "remarkup-assist-chaos"         : {
+      "name" : "remarkup-assist-chaos",
+      "rule" : ".remarkup-assist-",
+      "hash" : "2e4be455bf874e498af3d381a948e201"
+    },
+    "remarkup-assist-make_big"      : {
+      "name" : "remarkup-assist-make_big",
+      "rule" : ".remarkup-assist-big",
+      "hash" : "0cf6aec7e40d563c9ad0259fbc3460fa"
+    },
+    "remarkup-assist-make_small"    : {
+      "name" : "remarkup-assist-make_small",
+      "rule" : ".remarkup-assist-small",
+      "hash" : "c3c668b341bd61b7d89d4b249ab137d7"
+    },
+    "remarkup-assist-order"         : {
+      "name" : "remarkup-assist-order",
+      "rule" : ".remarkup-assist-",
+      "hash" : "9b9f813e1635c68ef62f17e834830cd3"
+    },
     "remarkup-assist-text_b"        : {
       "name" : "remarkup-assist-text_b",
       "rule" : ".remarkup-assist-b",
