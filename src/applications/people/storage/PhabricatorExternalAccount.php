@@ -2,16 +2,15 @@
 
 final class PhabricatorExternalAccount extends PhabricatorUserDAO {
 
-    private $phid;
-    private $userPHID;
-    private $accountType;
-    private $accountDomain;
-    private $accountSecret;
-    private $accountID;
-    private $displayName;
+  private $userPHID;
+  private $accountType;
+  private $accountDomain;
+  private $accountSecret;
+  private $accountID;
+  private $displayName;
 
-    public function generatePHID() {
+  public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_XUSR);
-    }
+  }
 }

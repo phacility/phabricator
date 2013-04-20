@@ -4,9 +4,82 @@
  *           javelin-stratcom
  *           javelin-dom
  *           phabricator-textareautils
+ *           javelin-workflow
+ *           phabricator-notification
  */
 
 JX.behavior('phabricator-remarkup-assist', function(config) {
+
+  var edit_mode = 'normal';
+  var edit_root = null;
+
+  function set_edit_mode(root, mode) {
+    if (mode == edit_mode) {
+      return;
+    }
+
+    // First, disable any active mode.
+    if (edit_mode == 'order') {
+      JX.DOM.alterClass(edit_root, 'remarkup-control-order-mode', false);
+    }
+    if (edit_mode == 'chaos') {
+      JX.DOM.alterClass(edit_root, 'remarkup-control-chaos-mode', false);
+    }
+
+    edit_root = root;
+    edit_mode = mode;
+
+    // Now, apply the new mode.
+    if (mode == 'order') {
+      JX.DOM.alterClass(edit_root, 'remarkup-control-order-mode', true);
+    }
+
+    if (mode == 'chaos') {
+      JX.DOM.alterClass(edit_root, 'remarkup-control-chaos-mode', true);
+    }
+
+    JX.DOM.focus(JX.DOM.find(edit_root, 'textarea'));
+  }
+
+  JX.Stratcom.listen('keydown', null, function(e) {
+    cause_chaos();
+
+    if (e.getSpecialKey() != 'esc') {
+      return;
+    }
+
+    if (edit_mode != 'order') {
+      return;
+    }
+
+    e.kill();
+    set_edit_mode(edit_root, 'normal');
+  });
+
+  var chaos_states = [];
+  function cause_chaos() {
+    for (var ii = 0; ii <= 13; ii++) {
+      if (Math.random() > 0.98) {
+        chaos_states[ii] = !chaos_states[ii];
+      }
+      JX.DOM.alterClass(
+        edit_root,
+        'remarkup-control-chaos-mode-' + ii,
+        !!chaos_states[ii]);
+    }
+
+    if (Math.random() > 0.99) {
+      var n = new JX.Notification()
+        .setContent("Hey, listen!")
+        .setDuration(1000 + Math.random() * 6000);
+
+      if (Math.random() > 0.75) {
+        n.alterClassName('jx-notification-alert', true);
+      }
+
+      n.show();
+    }
+  }
 
   function update(area, l, m, r) {
     // Replace the selection with the entire assisted text.
@@ -22,7 +95,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       r.start + l.length + m.length);
   }
 
-  function assist(area, action) {
+  function assist(area, action, root) {
     // If the user has some text selected, we'll try to use that (for example,
     // if they have a word selected and want to bold it). Otherwise we'll insert
     // generic text.
@@ -70,6 +143,20 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           })
           .start();
         break;
+      case 'chaos':
+        if (edit_mode == 'chaos') {
+          set_edit_mode(root, 'normal');
+        } else {
+          set_edit_mode(root, 'chaos');
+        }
+        break;
+      case 'order':
+        if (edit_mode == 'order') {
+          set_edit_mode(root, 'normal');
+        } else {
+          set_edit_mode(root, 'order');
+        }
+        break;
     }
   }
 
@@ -87,7 +174,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       var root = e.getNode('remarkup-assist-control');
       var area = JX.DOM.find(root, 'textarea');
 
-      assist(area, data.action);
+      assist(area, data.action, root);
     });
 
 });

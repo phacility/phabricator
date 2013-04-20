@@ -320,6 +320,106 @@
   float: right;
 }
 
+.jx-order-mask {
+  background: #ffffff;
+  opacity: 1.0;
+}
+
+.remarkup-control-order-mode {
+  z-index: 90;
+  position: fixed;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  right: -1px;
+}
+
+.remarkup-control-order-mode textarea.remarkup-assist-textarea {
+  position: fixed;
+  top: 25px;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: auto;
+  border-width: 1px 0 0 0;
+  outline: none;
+}
+
+.remarkup-control-chaos-mode textarea.remarkup-assist-textarea {
+  position: relative;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-0
+  textarea.remarkup-assist-textarea {
+  background-image: url(/rsrc/image/checker_light.png);
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-1
+  textarea.remarkup-assist-textarea {
+  font-family: "Comic Sans", "Comic Sans MS";
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-2
+  textarea.remarkup-assist-textarea {
+  left: -6px;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-3
+  textarea.remarkup-assist-textarea {
+  top: -4px;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-4
+  textarea.remarkup-assist-textarea {
+  direction: rtl;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-5
+  textarea.remarkup-assist-textarea {
+  border: 8px ridge #666666;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-6
+  textarea.remarkup-assist-textarea {
+  opacity: 0.5;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-7
+  textarea.remarkup-assist-textarea {
+  border-radius: 24px;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-8
+  textarea.remarkup-assist-textarea {
+  font-weight: bold;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-9
+  textarea.remarkup-assist-textarea {
+  font-variant: small-caps;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-10
+  textarea.remarkup-assist-textarea {
+  text-transform: uppercase;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-11
+  textarea.remarkup-assist-textarea {
+  letter-spacing: 6px;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-12
+  textarea.remarkup-assist-textarea {
+  font-size: 16px;
+}
+
+.remarkup-control-chaos-mode.remarkup-control-chaos-mode-13
+  textarea.remarkup-assist-textarea {
+  transform: rotate(3deg);
+  -webkit-transform: rotate(3deg);
+}
+
 .phabricator-image-macro-hero {
   margin: auto;
   max-width: 95%;

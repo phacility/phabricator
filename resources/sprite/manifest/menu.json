@@ -4,62 +4,62 @@
     "app"              : {
       "name" : "app",
       "rule" : ".menu-icon-app",
-      "hash" : "14cd042732abba487dc9c4135d65f2c5"
+      "hash" : "82d277c1d6da6786cd03db3adcb843cd"
     },
     "app_blue"         : {
       "name" : "app_blue",
       "rule" : ".menu-icon-app-blue",
-      "hash" : "5f9926e52a4e6fd43fc5fdd0cc5c8053"
+      "hash" : "ee9922d71c4cf12635254872c861379d"
     },
     "arrow-right"      : {
       "name" : "arrow-right",
       "rule" : ".phabricator-crumb-divider",
-      "hash" : "50180da0aed206c9db2bc1547c1a158c"
+      "hash" : "a994209450dc73a80841cdd66bb59925"
     },
     "conf-hover"       : {
       "name" : "conf-hover",
       "rule" : ".alert-notifications:hover .phabricator-main-menu-message-icon",
-      "hash" : "bcb2938e45f5e908173b47d761f165c6"
+      "hash" : "110e09706f34bb967f925c1bc831a723"
     },
     "conf-off"         : {
       "name" : "conf-off",
       "rule" : ".alert-notifications .phabricator-main-menu-message-icon",
-      "hash" : "04cb75c44b245567a60e2de98aa1bff4"
+      "hash" : "2af87b0a5d0d3b3991e5358c36a611d9"
     },
     "conf-unseen"      : {
       "name" : "conf-unseen",
       "rule" : ".alert-notifications.message-unread .phabricator-main-menu-message-icon",
-      "hash" : "85d603ae4a9b8004944c6cf59da98b7d"
+      "hash" : "9eda01b1f1789934f307c72b9c14f413"
     },
     "logo"             : {
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo-image",
-      "hash" : "6eadea2c3dd2ada989eba22b6769b3eb"
+      "hash" : "c6c7ab165dce13a51ef329928c7c4aba"
     },
     "search"           : {
       "name" : "search",
       "rule" : ".menu-icon-search",
-      "hash" : "26fa1f6646d20e159bb5ed5bd125a3b9"
+      "hash" : "71b7bf0fb6a8ea0a50fe39b4499bf456"
     },
     "search_blue"      : {
       "name" : "search_blue",
       "rule" : ".menu-icon-search-blue",
-      "hash" : "8ddecd3b988a3ec69c2116bfd65959cb"
+      "hash" : "248d24bc446c7d51dfd07d0f4a421409"
     },
     "seen_have_unread" : {
       "name" : "seen_have_unread",
       "rule" : ".alert-notifications:hover .phabricator-main-menu-alert-icon",
-      "hash" : "5ff174bbf7ea9721b6e6fe8bbd11a3b2"
+      "hash" : "4d95837845ddbef86405610effce7213"
     },
     "seen_read_all"    : {
       "name" : "seen_read_all",
       "rule" : ".alert-notifications .phabricator-main-menu-alert-icon",
-      "hash" : "3685584b5ccac8f39acbd912b111d081"
+      "hash" : "ff3bfbbb0a3fa0d7a5bcfa897ae19e90"
     },
     "unseen_any"       : {
       "name" : "unseen_any",
       "rule" : ".alert-notifications.alert-unread .phabricator-main-menu-alert-icon",
-      "hash" : "5a3f8047aa4d813b9b1f4877c68f1626"
+      "hash" : "d708d816883fdfc849df8eecf92650c0"
     }
   },
   "scales"  : [

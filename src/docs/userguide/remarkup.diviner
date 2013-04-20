@@ -475,3 +475,17 @@ Some general notes about this syntax:
     not);
   - you can use other Remarkup rules (like **bold**, //italics//, etc.) inside
     table cells.
+
+= Order and Chaos =
+
+Remarkup editors provide two special composition modes.
+
+In **Order** mode, the editor expands to the full size of the screen. This can
+make it easier to edit large blocks of text, or improve focus by removing
+distractions. You can exit **Order** mode by clicking the button again or by
+pressing escape.
+
+In **Chaos** mode, the opposite happens.
+
+For serious business installs, **Chaos** mode is unavailable and **Order** mode
+is called **Fullscreen Mode**.

@@ -786,51 +786,51 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -135px -195px;
 }
 
-.remarkup-assist- {
+.remarkup-assist-b {
   background-position: -150px -195px;
 }
 
-.remarkup-assist-big {
+.remarkup-assist-chaos {
   background-position: -165px -195px;
 }
 
-.remarkup-assist-small {
+.remarkup-control-chaos-mode .remarkup-assist-chaos {
   background-position: -180px -195px;
 }
 
-.remarkup-assist- {
+.remarkup-assist-code {
   background-position: -195px -195px;
 }
 
-.remarkup-assist-b {
+.remarkup-assist-help {
   background-position: 0px -210px;
 }
 
-.remarkup-assist-code {
+.remarkup-assist-i {
   background-position: -15px -210px;
 }
 
-.remarkup-assist-help {
+.remarkup-assist-image {
   background-position: -30px -210px;
 }
 
-.remarkup-assist-i {
+.remarkup-assist-larger {
   background-position: -45px -210px;
 }
 
-.remarkup-assist-image {
+.remarkup-assist-meme {
   background-position: -60px -210px;
 }
 
-.remarkup-assist-larger {
+.remarkup-assist-ol {
   background-position: -75px -210px;
 }
 
-.remarkup-assist-meme {
+.remarkup-assist-order {
   background-position: -90px -210px;
 }
 
-.remarkup-assist-ol {
+.remarkup-control-order-mode .remarkup-assist-order {
   background-position: -105px -210px;
 }
 
