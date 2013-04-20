@@ -105,33 +105,33 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
     $title3 = id(new PhabricatorHeaderView())
       ->setHeader(pht('With Action Icons'));
 
-    $action1 = new PhabricatorActionIconView();
-    $action1->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action1 = new PHUIIconView();
+    $action1->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action1->setSpriteIcon('settings-grey');
     $action1->setHref('#');
 
-    $action2 = new PhabricatorActionIconView();
-    $action2->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action2 = new PHUIIconView();
+    $action2->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action2->setSpriteIcon('heart-white');
     $action2->setHref('#');
 
-    $action3 = new PhabricatorActionIconView();
-    $action3->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action3 = new PHUIIconView();
+    $action3->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action3->setSpriteIcon('tag-white');
     $action3->setHref('#');
 
-    $action4 = new PhabricatorActionIconView();
-    $action4->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action4 = new PHUIIconView();
+    $action4->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action4->setSpriteIcon('new-white');
     $action4->setHref('#');
 
-    $action5 = new PhabricatorActionIconView();
-    $action5->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action5 = new PHUIIconView();
+    $action5->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action5->setSpriteIcon('search-white');
     $action5->setHref('#');
 
-    $action6 = new PhabricatorActionIconView();
-    $action6->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action6 = new PHUIIconView();
+    $action6->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action6->setSpriteIcon('move-white');
     $action6->setHref('#');
 
@@ -199,8 +199,8 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
       ->setName('Closed');
 
-    $action1 = new PhabricatorActionIconView();
-    $action1->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action1 = new PHUIIconView();
+    $action1->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action1->setSpriteIcon('flag-grey');
     $action1->setHref('#');
 

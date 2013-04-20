@@ -2,13 +2,6 @@
  * @provides tokens-css
  */
 
-.token-icon {
-  position: relative;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-}
-
 button.token-button {
   background: #f6f6f6;
   border: 1px solid #333333;

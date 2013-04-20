@@ -120,7 +120,7 @@ final class CeleritySpriteGenerator {
         $tcss[] = '.actions-'.$icon.$suffix;
         if ($color == 'dark') {
           $tcss[] = '.device-desktop '.
-            '.actions-'.$icon.'-grey.phabricator-action-icon-item-link:hover';
+            '.actions-'.$icon.'-grey.phui-icon-item-link:hover';
         }
 
         $sprite->setTargetCSS(implode(', ', $tcss));
@@ -308,8 +308,8 @@ final class CeleritySpriteGenerator {
       $path = $this->getPath('tokens_1x/'.$token.'.png');
 
       $sprite = id(clone $template)
-        ->setName('token-'.$token)
-        ->setTargetCSS('.token-'.$token)
+        ->setName('tokens-'.$token)
+        ->setTargetCSS('.tokens-'.$token)
         ->setSourceFile($path, 1);
 
       $sprites[] = $sprite;

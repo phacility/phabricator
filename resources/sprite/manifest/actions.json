@@ -3,7 +3,7 @@
   "sprites" : {
     "actions-close-dark"     : {
       "name" : "actions-close-dark",
-      "rule" : ".actions-close-dark, .device-desktop .actions-close-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-close-dark, .device-desktop .actions-close-grey.phui-icon-item-link:hover",
       "hash" : "f04c5692010a6d96b6fa83a26d73737e"
     },
     "actions-close-grey"     : {
@@ -18,7 +18,7 @@
     },
     "actions-flag-dark"      : {
       "name" : "actions-flag-dark",
-      "rule" : ".actions-flag-dark, .device-desktop .actions-flag-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-flag-dark, .device-desktop .actions-flag-grey.phui-icon-item-link:hover",
       "hash" : "4ae54fc28dd2d6cfa6e57dde7bd640cf"
     },
     "actions-flag-grey"      : {
@@ -33,7 +33,7 @@
     },
     "actions-heart-dark"     : {
       "name" : "actions-heart-dark",
-      "rule" : ".actions-heart-dark, .device-desktop .actions-heart-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-heart-dark, .device-desktop .actions-heart-grey.phui-icon-item-link:hover",
       "hash" : "90b437a281724a4961e33272eafd616b"
     },
     "actions-heart-grey"     : {
@@ -48,7 +48,7 @@
     },
     "actions-move-dark"      : {
       "name" : "actions-move-dark",
-      "rule" : ".actions-move-dark, .device-desktop .actions-move-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-move-dark, .device-desktop .actions-move-grey.phui-icon-item-link:hover",
       "hash" : "38f5b9168bf04d1a904b09805e589cd7"
     },
     "actions-move-grey"      : {
@@ -63,7 +63,7 @@
     },
     "actions-new-dark"       : {
       "name" : "actions-new-dark",
-      "rule" : ".actions-new-dark, .device-desktop .actions-new-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-new-dark, .device-desktop .actions-new-grey.phui-icon-item-link:hover",
       "hash" : "52c45b76d0dbd51e6eb65f0597d5098a"
     },
     "actions-new-grey"       : {
@@ -78,7 +78,7 @@
     },
     "actions-search-dark"    : {
       "name" : "actions-search-dark",
-      "rule" : ".actions-search-dark, .device-desktop .actions-search-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-search-dark, .device-desktop .actions-search-grey.phui-icon-item-link:hover",
       "hash" : "6ff124bc9423bf98be5a53e22508cd26"
     },
     "actions-search-grey"    : {
@@ -93,7 +93,7 @@
     },
     "actions-settings-dark"  : {
       "name" : "actions-settings-dark",
-      "rule" : ".actions-settings-dark, .device-desktop .actions-settings-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-settings-dark, .device-desktop .actions-settings-grey.phui-icon-item-link:hover",
       "hash" : "5ecb08643250a052e5d090ef4660faf5"
     },
     "actions-settings-grey"  : {
@@ -108,7 +108,7 @@
     },
     "actions-star-dark"      : {
       "name" : "actions-star-dark",
-      "rule" : ".actions-star-dark, .device-desktop .actions-star-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-star-dark, .device-desktop .actions-star-grey.phui-icon-item-link:hover",
       "hash" : "45567d03f8e34811eca0621e93b5e050"
     },
     "actions-star-grey"      : {
@@ -123,7 +123,7 @@
     },
     "actions-tag-dark"       : {
       "name" : "actions-tag-dark",
-      "rule" : ".actions-tag-dark, .device-desktop .actions-tag-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-tag-dark, .device-desktop .actions-tag-grey.phui-icon-item-link:hover",
       "hash" : "24d97fa7524d0bf1bac17d9e07a63f48"
     },
     "actions-tag-grey"       : {
@@ -138,7 +138,7 @@
     },
     "actions-wrench-dark"    : {
       "name" : "actions-wrench-dark",
-      "rule" : ".actions-wrench-dark, .device-desktop .actions-wrench-grey.phabricator-action-icon-item-link:hover",
+      "rule" : ".actions-wrench-dark, .device-desktop .actions-wrench-grey.phui-icon-item-link:hover",
       "hash" : "3a5cfa463c3c89194d3bbce3952a6e80"
     },
     "actions-wrench-grey"    : {

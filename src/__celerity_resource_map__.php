@@ -2839,15 +2839,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/layout/phabricator-action-header-view.css',
   ),
-  'phabricator-action-icon-view-css' =>
-  array(
-    'uri' => '/res/dbceab3e/rsrc/css/layout/phabricator-action-icon-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/layout/phabricator-action-icon-view.css',
-  ),
   'phabricator-action-list-view-css' =>
   array(
     'uri' => '/res/3d02ca59/rsrc/css/layout/phabricator-action-list-view.css',
@@ -3525,7 +3516,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-workboard-view-css' =>
   array(
-    'uri' => '/res/14217087/rsrc/css/layout/phabricator-workboard-view.css',
+    'uri' => '/res/e48df9e8/rsrc/css/layout/phabricator-workboard-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3606,12 +3597,21 @@ celerity_register_resource_map(array(
   ),
   'phui-feed-story-css' =>
   array(
-    'uri' => '/res/9b5bb654/rsrc/css/phui/phui-feed-story.css',
+    'uri' => '/res/a2db2369/rsrc/css/phui/phui-feed-story.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
     'disk' => '/rsrc/css/phui/phui-feed-story.css',
+  ),
+  'phui-icon-view-css' =>
+  array(
+    'uri' => '/res/4d0588b4/rsrc/css/phui/phui-icon.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-icon.css',
   ),
   'ponder-comment-table-css' =>
   array(
@@ -3786,7 +3786,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-actions-css' =>
   array(
-    'uri' => '/res/00b8f8bc/rsrc/css/sprite-actions.css',
+    'uri' => '/res/89d67d5a/rsrc/css/sprite-actions.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3876,7 +3876,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-tokens-css' =>
   array(
-    'uri' => '/res/9ae0de5b/rsrc/css/sprite-tokens.css',
+    'uri' => '/res/edb4e341/rsrc/css/sprite-tokens.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3912,7 +3912,7 @@ celerity_register_resource_map(array(
   ),
   'tokens-css' =>
   array(
-    'uri' => '/res/6b3c65c7/rsrc/css/application/tokens/tokens.css',
+    'uri' => '/res/1699df7d/rsrc/css/application/tokens/tokens.css',
     'type' => 'css',
     'requires' =>
     array(

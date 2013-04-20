@@ -1,14 +1,19 @@
 <?php
 
-final class PhabricatorActionIconView extends AphrontView {
+final class PHUIIconView extends AphrontView {
 
   const SPRITE_MINICONS = 'minicons';
   const SPRITE_ACTIONS = 'actions';
   const SPRITE_APPS = 'apps';
+  const SPRITE_TOKENS = 'tokens';
+
+  const HEAD_SMALL = 'phuihead-small';
+  const HEAD_MEDIUM = 'phuihead-medium';
 
   private $href;
   private $workflow;
   private $image;
+  private $headSize = null;
   private $spriteIcon;
   private $spriteSheet;
 
@@ -27,6 +32,11 @@ final class PhabricatorActionIconView extends AphrontView {
     return $this;
   }
 
+  public function setHeadSize($size) {
+    $this->headSize = $size;
+    return $this;
+  }
+
   public function setSpriteIcon($sprite) {
     $this->spriteIcon = $sprite;
     return $this;
@@ -38,18 +48,18 @@ final class PhabricatorActionIconView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('phabricator-action-icon-view-css');
+    require_celerity_resource('phui-icon-view-css');
 
     $tag = 'span';
     if ($this->href) {
       $tag = 'a';
     }
 
+    $classes = array();
+    $classes[] = 'phui-icon-item-link';
+
     if ($this->spriteIcon) {
       require_celerity_resource('sprite-'.$this->spriteSheet.'-css');
-
-      $classes = array();
-      $classes[] = 'phabricator-action-icon-item-link';
       $classes[] = 'sprite-'.$this->spriteSheet;
       $classes[] = $this->spriteSheet.'-'.$this->spriteIcon;
 
@@ -62,11 +72,15 @@ final class PhabricatorActionIconView extends AphrontView {
           ),
           '');
     } else {
+      if ($this->headSize) {
+        $classes[] = $this->headSize;
+      }
+
       $action_icon = phutil_tag(
         $tag,
           array(
             'href'  => $this->href ? $this->href : null,
-            'class' => 'phabricator-action-icon-item-link',
+            'class' => implode(' ', $classes),
             'sigil' => $this->workflow ? 'workflow' : null,
             'style' => 'background-image: url('.$this->image.');'
           ),

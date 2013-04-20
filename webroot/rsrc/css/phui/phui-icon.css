@@ -1,0 +1,41 @@
+/**
+ * @provides phui-icon-view-css
+ */
+
+.phui-icon-item-link {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.phui-icon-item-link.sprite-minicons {
+  height: 16px;
+  width: 16px;
+}
+
+.phui-icon-item-link.sprite-actions {
+  height: 24px;
+  width: 24px;
+}
+
+.phui-icon-item-link.sprite-apps {
+  height: 14px;
+  width: 14px;
+}
+
+.phui-icon-item-link.sprite-tokens {
+  height: 16px;
+  width: 16px;
+}
+
+.phui-icon-item-link.phuihead-medium {
+  height: 50px;
+  width: 50px;
+}
+
+.phui-icon-item-link.phuihead-small {
+  height: 35px;
+  width: 35px;
+  background-size: 35px;
+}
+
+
