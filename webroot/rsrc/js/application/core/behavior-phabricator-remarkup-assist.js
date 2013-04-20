@@ -42,7 +42,9 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
   }
 
   JX.Stratcom.listen('keydown', null, function(e) {
-    cause_chaos();
+    if (edit_mode == 'chaos') {
+      cause_chaos();
+    }
 
     if (e.getSpecialKey() != 'esc') {
       return;
@@ -68,7 +70,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         !!chaos_states[ii]);
     }
 
-    if (Math.random() > 0.99) {
+    if (Math.random() > 0.98) {
       var n = new JX.Notification()
         .setContent("Hey, listen!")
         .setDuration(1000 + Math.random() * 6000);
