@@ -162,8 +162,7 @@ final class PhamePostView extends AphrontView {
       '');
 
     $c_uri = '//connect.facebook.net/en_US/all.js#xfbml=1&appId='.$fb_id;
-    $fb_js = hsprintf(
-      '<script>%s</script>',
+    $fb_js = CelerityStaticResourceResponse::renderInlineScript(
       jsprintf(
         '(function(d, s, id) {'.
         ' var js, fjs = d.getElementsByTagName(s)[0];'.
@@ -211,8 +210,7 @@ final class PhamePostView extends AphrontView {
       ));
 
     // protip - try some  var disqus_developer = 1; action to test locally
-    $disqus_js = hsprintf(
-      '<script>%s</script>',
+    $disqus_js = CelerityStaticResourceResponse::renderInlineScript(
       jsprintf(
         ' var disqus_shortname = "phabricator";'.
         ' var disqus_identifier = %s;'.

@@ -182,12 +182,22 @@ final class CelerityStaticResourceResponse {
 
     if ($data) {
       $data = implode("\n", $data);
-      return hsprintf(
-        '<script type="text/javascript">//<![CDATA['."\n".'%s//]]></script>',
-        phutil_safe_html($data));
+      return self::renderInlineScript($data);
     } else {
       return '';
     }
+  }
+
+  public static function renderInlineScript($data) {
+    if (stripos($data, '</script>') !== false) {
+      throw new Exception(
+        'Literal </script> is not allowed inside inline script.');
+    }
+    return hsprintf(
+      // We don't use <![CDATA[ ]]> because it is ignored by HTML parsers. We
+      // would need to send the document with XHTML content type.
+      '<script type="text/javascript">%s</script>',
+      phutil_safe_html($data));
   }
 
   public function buildAjaxResponse($payload, $error = null) {
