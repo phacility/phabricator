@@ -27,6 +27,11 @@
   width: 16px;
 }
 
+.phui-icon-item-link.sprite-payments {
+  height: 32px;
+  width: 60px;
+}
+
 .phui-icon-item-link.phuihead-medium {
   height: 50px;
   width: 50px;

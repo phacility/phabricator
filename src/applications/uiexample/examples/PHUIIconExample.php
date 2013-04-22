@@ -48,6 +48,30 @@ final class PHUIIconExample extends PhabricatorUIExample {
     $person6->setImage(
       celerity_get_resource_uri('/rsrc/image/people/taft.png'));
 
+    $card1 = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
+      ->setSpriteIcon('visa')
+      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+
+    $card2 = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
+      ->setSpriteIcon('mastercard')
+      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+
+    $card3 = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
+      ->setSpriteIcon('paypal')
+      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+
+    $card4 = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
+      ->setSpriteIcon('americanexpress')
+      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
+
+    $card5 = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
+      ->setSpriteIcon('googlecheckout');
+
     $actions = array(
       'settings-grey',
       'heart-grey',
@@ -108,6 +132,14 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->addPadding(PHUI::PADDING_SMALL)
           ->setShadow(true));
 
+    $layout4 =
+      array(
+        id(new PHUIBoxView())
+          ->appendChild(array($card1, $card2, $card3, $card4, $card5))
+          ->addMargin(PHUI::MARGIN_MEDIUM)
+          ->addPadding(PHUI::PADDING_MEDIUM)
+          ->setShadow(true));
+
     $head1 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Action Icons!'));
 
@@ -116,6 +148,9 @@ final class PHUIIconExample extends PhabricatorUIExample {
 
     $head3 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Tokens'));
+
+    $head4 = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Payments'));
 
     $wrap1 = id(new PHUIBoxView())
       ->appendChild($layout1)
@@ -129,6 +164,10 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->appendChild($layout3)
       ->addMargin(PHUI::MARGIN_LARGE);
 
+    $wrap4 = id(new PHUIBoxView())
+      ->appendChild($layout4)
+      ->addMargin(PHUI::MARGIN_LARGE);
+
     return phutil_tag(
       'div',
         array(),
@@ -138,7 +177,9 @@ final class PHUIIconExample extends PhabricatorUIExample {
           $head2,
           $wrap2,
           $head3,
-          $wrap3
+          $wrap3,
+          $head4,
+          $wrap4
         ));
         }
 }

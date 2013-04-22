@@ -637,6 +637,20 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-minicons.png',
     'type' => 'png',
   ),
+  '/rsrc/image/sprite-payments-X2.png' =>
+  array(
+    'hash' => 'a896e11842db04bde8c3dc18d6efacd3',
+    'uri' => '/res/a896e118/rsrc/image/sprite-payments-X2.png',
+    'disk' => '/rsrc/image/sprite-payments-X2.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/sprite-payments.png' =>
+  array(
+    'hash' => '5ac5b872d19a862eabc508c8bf97a53b',
+    'uri' => '/res/5ac5b872/rsrc/image/sprite-payments.png',
+    'disk' => '/rsrc/image/sprite-payments.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/sprite-tokens.png' =>
   array(
     'hash' => '67c46fd75c885b76ecbfe46e71a476cc',
@@ -3609,7 +3623,7 @@ celerity_register_resource_map(array(
   ),
   'phui-icon-view-css' =>
   array(
-    'uri' => '/res/4d0588b4/rsrc/css/phui/phui-icon.css',
+    'uri' => '/res/9d05b3f3/rsrc/css/phui/phui-icon.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3885,6 +3899,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/sprite-minicons.css',
+  ),
+  'sprite-payments-css' =>
+  array(
+    'uri' => '/res/dcb6e856/rsrc/css/sprite-payments.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/sprite-payments.css',
   ),
   'sprite-tokens-css' =>
   array(
