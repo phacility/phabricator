@@ -141,6 +141,15 @@ abstract class ConpherenceController extends PhabricatorController {
 
     $user = $this->getRequest()->getUser();
     $transactions = $conpherence->getTransactions();
+    $oldest_transaction_id = 0;
+    $too_many = ConpherenceThreadQuery::TRANSACTION_LIMIT + 1;
+    if (count($transactions) == $too_many) {
+      $last_transaction = end($transactions);
+      unset($transactions[$last_transaction->getID()]);
+      $oldest_transaction = end($transactions);
+      $oldest_transaction_id = $oldest_transaction->getID();
+    }
+    $transactions = array_reverse($transactions);
     $handles = $conpherence->getHandles();
     $rendered_transactions = array();
     $engine = id(new PhabricatorMarkupEngine())
@@ -166,11 +175,11 @@ abstract class ConpherenceController extends PhabricatorController {
         ->render();
     }
     $latest_transaction_id = $transaction->getID();
-    $rendered_transactions = phutil_implode_html(' ', $rendered_transactions);
 
     return array(
       'transactions' => $rendered_transactions,
-      'latest_transaction_id' => $latest_transaction_id
+      'latest_transaction_id' => $latest_transaction_id,
+      'oldest_transaction_id' => $oldest_transaction_id
     );
 
   }

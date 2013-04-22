@@ -80,7 +80,7 @@ final class PHUIFeedStoryView extends AphrontView {
 
     $actor = '';
     if ($this->image) {
-      $actor = new PhabricatorActionIconView();
+      $actor = new PHUIIconView();
       $actor->setImage($this->image);
       if ($this->imageHref) {
         $actor->setHref($this->imageHref);
@@ -118,9 +118,9 @@ final class PHUIFeedStoryView extends AphrontView {
 
     $icon = null;
     if ($this->appIcon) {
-      $icon = new PhabricatorActionIconView();
+      $icon = new PHUIIconView();
       $icon->setSpriteIcon($this->appIcon);
-      $icon->setSpriteSheet(PhabricatorActionIconView::SPRITE_APPS);
+      $icon->setSpriteSheet(PHUIIconView::SPRITE_APPS);
     }
 
     $foot = phutil_tag(

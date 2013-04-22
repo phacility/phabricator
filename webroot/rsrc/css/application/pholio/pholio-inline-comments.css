@@ -56,7 +56,6 @@
   position: absolute;
   border: 1px solid #000;
   background: rgb(60, 60, 60);
-  z-index: 100;
   padding: 8px 10px 8px 12px;
   width: 260px;
   box-shadow: 0 2px 10px 1px #999;

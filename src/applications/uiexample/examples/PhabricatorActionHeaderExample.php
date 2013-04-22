@@ -49,12 +49,9 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap1 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout1);
+    $wrap1 = id(new PHUIBoxView())
+      ->appendChild($layout1)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
 /* Policy Icons */
     $title2 = id(new PhabricatorHeaderView())
@@ -99,45 +96,42 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap2 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout2);
+    $wrap2 = id(new PHUIBoxView())
+      ->appendChild($layout2)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
 
 /* Action Icons */
     $title3 = id(new PhabricatorHeaderView())
       ->setHeader(pht('With Action Icons'));
 
-    $action1 = new PhabricatorActionIconView();
-    $action1->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action1 = new PHUIIconView();
+    $action1->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action1->setSpriteIcon('settings-grey');
     $action1->setHref('#');
 
-    $action2 = new PhabricatorActionIconView();
-    $action2->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action2 = new PHUIIconView();
+    $action2->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action2->setSpriteIcon('heart-white');
     $action2->setHref('#');
 
-    $action3 = new PhabricatorActionIconView();
-    $action3->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action3 = new PHUIIconView();
+    $action3->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action3->setSpriteIcon('tag-white');
     $action3->setHref('#');
 
-    $action4 = new PhabricatorActionIconView();
-    $action4->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action4 = new PHUIIconView();
+    $action4->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action4->setSpriteIcon('new-white');
     $action4->setHref('#');
 
-    $action5 = new PhabricatorActionIconView();
-    $action5->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action5 = new PHUIIconView();
+    $action5->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action5->setSpriteIcon('search-white');
     $action5->setHref('#');
 
-    $action6 = new PhabricatorActionIconView();
-    $action6->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action6 = new PHUIIconView();
+    $action6->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action6->setSpriteIcon('move-white');
     $action6->setHref('#');
 
@@ -187,12 +181,9 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap3 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout3);
+    $wrap3 = id(new PHUIBoxView())
+      ->appendChild($layout3)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
 /* Action Icons */
     $title4 = id(new PhabricatorHeaderView())
@@ -208,8 +199,8 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
       ->setName('Closed');
 
-    $action1 = new PhabricatorActionIconView();
-    $action1->setSpriteSheet(PhabricatorActionIconView::SPRITE_ACTIONS);
+    $action1 = new PHUIIconView();
+    $action1->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS);
     $action1->setSpriteIcon('flag-grey');
     $action1->setHref('#');
 
@@ -243,7 +234,7 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_YELLOW)
       ->setTag($tag1);
 
-    $layout3 = id(new AphrontMultiColumnView())
+    $layout4 = id(new AphrontMultiColumnView())
       ->addColumn($header1)
       ->addColumn($header2)
       ->addColumn($header3)
@@ -253,12 +244,9 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_SMALL);
 
-    $wrap4 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $layout3);
+    $wrap4 = id(new PHUIBoxView())
+      ->appendChild($layout4)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
     return phutil_tag(
       'div',

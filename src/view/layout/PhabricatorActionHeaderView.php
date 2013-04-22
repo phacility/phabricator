@@ -19,7 +19,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
   private $iconColor = PhabricatorActionHeaderView::ICON_GREY;
   private $headerColor;
 
-  public function addAction(PhabricatorActionIconView $action) {
+  public function addAction(PHUIIconView $action) {
     $this->actions[] = $action;
     return $this;
   }

@@ -131,21 +131,21 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
           ->addPanel($panel2)
           ->addPanel($panel3);
 
-    $action = new PhabricatorActionIconView();
+    $action = new PHUIIconView();
     $action->setHref('/maniphest/task/create');
     $action->setImage('/rsrc/image/actions/edit.png');
 
-    $person1 = new PhabricatorActionIconView();
+    $person1 = new PHUIIconView();
     $person1->setHref('http://en.wikipedia.org/wiki/George_Washington');
     $person1->setImage(
       celerity_get_resource_uri('/rsrc/image/people/washington.png'));
 
-    $person2 = new PhabricatorActionIconView();
+    $person2 = new PHUIIconView();
     $person2->setHref('http://en.wikipedia.org/wiki/Warren_G._Harding');
     $person2->setImage(
       celerity_get_resource_uri('/rsrc/image/people/harding.png'));
 
-    $person3 = new PhabricatorActionIconView();
+    $person3 = new PHUIIconView();
     $person3->setHref('http://en.wikipedia.org/wiki/William_Howard_Taft');
     $person3->setImage(
       celerity_get_resource_uri('/rsrc/image/people/taft.png'));
@@ -170,26 +170,17 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
     $head3 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Action Panel'));
 
-    $wrap1 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $board);
+    $wrap1 = id(new PHUIBoxView())
+      ->appendChild($board)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
-    $wrap2 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $board2);
+    $wrap2 = id(new PHUIBoxView())
+      ->appendChild($board2)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
-    $wrap3 = phutil_tag(
-      'div',
-        array(
-          'class' => 'ml'
-        ),
-        $board3);
+    $wrap3 = id(new PHUIBoxView())
+      ->appendChild($board3)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
     return phutil_tag(
       'div',

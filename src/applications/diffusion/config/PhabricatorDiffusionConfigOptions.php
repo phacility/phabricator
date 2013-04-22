@@ -65,6 +65,21 @@ final class PhabricatorDiffusionConfigOptions
             pht("Disable Closing Audits"),
           ))
         ->setDescription(pht('Controls whether Author can Close Audits.')),
+
+      $this->newOption('bugtraq.url', 'string', '')
+        ->addExample('https://bugs.php.net/%BUGID%', pht('PHP bugs'))
+        ->addExample('/%BUGID%', pht('Local Maniphest URL'))
+        ->setDescription(pht(
+          'URL of external bug tracker used by Diffusion. %s will be '.
+            'substituted by the bug ID.',
+          '%BUGID%')),
+      $this->newOption('bugtraq.logregex', 'list<string>', array())
+        ->addExample(array('\B#([1-9]\d*)\b'), pht('Issue #123'))
+        ->addExample(array('(?<!#)\b(T[1-9]\d*)\b'), pht('Task T123'))
+        ->setDescription(pht(
+          'Regular expression to link external bug tracker. See '.
+            'http://tortoisesvn.net/docs/release/TortoiseSVN_en/'.
+            'tsvn-dug-bugtracker.html for further explanation.')),
     );
   }
 

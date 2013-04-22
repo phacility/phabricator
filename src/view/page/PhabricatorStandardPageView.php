@@ -228,8 +228,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     return hsprintf(
       '%s<style type="text/css">'.
-      '.PhabricatorMonospaced { font: %s; } '.
-      '.platform-windows .PhabricatorMonospaced { font: %s; }'.
+      '.PhabricatorMonospaced, '.
+      '.phabricator-remarkup .remarkup-code-block { font: %s; } '.
+      '.platform-windows .PhabricatorMonospaced, '.
+      '.platform-windows .phabricator-remarkup '.
+        '.remarkup-code-block { font: %s; }'.
       '</style>%s',
       parent::getHead(),
       phutil_safe_html($monospaced),

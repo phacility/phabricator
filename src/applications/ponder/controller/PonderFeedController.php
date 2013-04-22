@@ -16,16 +16,21 @@ final class PonderFeedController extends PonderController {
     $this->answerOffset = $request->getInt('aoff');
 
     $pages = array(
-      'feed'      => 'All Questions',
-      'questions' => 'Your Questions',
-      'answers'   => 'Your Answers',
+      'feed'      => pht('All Questions'),
+      'questions' => pht('Your Questions'),
+      'answers'   => pht('Your Answers'),
     );
 
     $side_nav = $this->buildSideNavView();
-
     $this->page = $side_nav->selectFilter($this->page, 'feed');
-
     $title = $pages[$this->page];
+
+    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title)
+        ->setHref($this->getApplicationURI()));
+    $side_nav->setCrumbs($crumbs);
 
     switch ($this->page) {
       case 'feed':
@@ -53,8 +58,6 @@ final class PonderFeedController extends PonderController {
         $view = $this->buildQuestionListView($questions);
         $view->setPager($pager);
 
-        $side_nav->appendChild(
-          id(new PhabricatorHeaderView())->setHeader($title));
         $side_nav->appendChild($view);
         break;
       case 'answers':

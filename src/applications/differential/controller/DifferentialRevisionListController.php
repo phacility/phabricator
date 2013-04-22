@@ -184,8 +184,9 @@ final class DifferentialRevisionListController extends DifferentialController {
     return $this->buildApplicationPage(
       $side_nav,
       array(
-        'title' => pht('Differential Home'),
-        'dust' => true,
+        'title'  => pht('Differential Home'),
+        'device' => true,
+        'dust'   => true,
       ));
   }
 

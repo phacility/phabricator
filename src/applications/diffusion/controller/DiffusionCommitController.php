@@ -90,13 +90,20 @@ final class DiffusionCommitController extends DiffusionController {
         $property_list->addProperty($key, $value);
       }
 
+      $message = $commit_data->getCommitMessage();
+
+      $revision = $commit->getCommitIdentifier();
+      $message = $repository->linkBugtraq($message, $revision);
+
+      $message = $engine->markupText($message);
+
       $property_list->addTextContent(
         phutil_tag(
           'div',
           array(
             'class' => 'diffusion-commit-message phabricator-remarkup',
           ),
-          $engine->markupText($commit_data->getCommitMessage())));
+          $message));
 
       $content[] = $top_anchor;
       $content[] = $headsup_view;

@@ -6,6 +6,8 @@
 final class ConpherenceThreadQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  const TRANSACTION_LIMIT = 100;
+
   private $phids;
   private $ids;
   private $needWidgetData;
@@ -14,7 +16,9 @@ final class ConpherenceThreadQuery
   private $needTransactions;
   private $needParticipantCache;
   private $needFilePHIDs;
-  private $afterMessageID;
+  private $afterTransactionID;
+  private $beforeTransactionID;
+  private $transactionLimit;
 
   public function needFilePHIDs($need_file_phids) {
     $this->needFilePHIDs = $need_file_phids;
@@ -56,10 +60,23 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
-  // TODO: This is pretty hacky!!!!~~
-  public function setAfterMessageID($id) {
-    $this->afterMessageID = $id;
+  public function setAfterTransactionID($id) {
+    $this->afterTransactionID = $id;
     return $this;
+  }
+
+  public function setBeforeTransactionID($id) {
+    $this->beforeTransactionID = $id;
+    return $this;
+  }
+
+  public function setTransactionLimit($transaction_limit) {
+    $this->transactionLimit = $transaction_limit;
+    return $this;
+  }
+
+  public function getTransactionLimit() {
+    return $this->transactionLimit;
   }
 
   protected function loadPage() {
@@ -164,13 +181,23 @@ final class ConpherenceThreadQuery
   }
 
   private function loadTransactionsAndHandles(array $conpherences) {
-    $transactions = id(new ConpherenceTransactionQuery())
+    $query = id(new ConpherenceTransactionQuery())
       ->setViewer($this->getViewer())
       ->withObjectPHIDs(array_keys($conpherences))
-      ->needHandles(true)
-      ->setAfterID($this->afterMessageID)
-      ->execute();
+      ->needHandles(true);
 
+    // We have to flip these for the underyling query class. The semantics of
+    // paging are tricky business.
+    if ($this->afterTransactionID) {
+      $query->setBeforeID($this->afterTransactionID);
+    } else if ($this->beforeTransactionID) {
+      $query->setAfterID($this->beforeTransactionID);
+    }
+    if ($this->getTransactionLimit()) {
+      // fetch an extra for "show older" scenarios
+      $query->setLimit($this->getTransactionLimit() + 1);
+    }
+    $transactions = $query->execute();
     $transactions = mgroup($transactions, 'getObjectPHID');
     foreach ($conpherences as $phid => $conpherence) {
       $current_transactions = $transactions[$phid];

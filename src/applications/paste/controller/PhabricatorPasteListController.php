@@ -21,29 +21,20 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $nav = $this->buildSideNavView($this->filter);
     $filter = $nav->getSelectedFilter();
 
-    switch ($filter) {
-      case 'my':
-        $saved_query->setParameter('authorPHIDs', array($user->getPHID()));
-        $title = pht('My Pastes');
-        $nodata = pht("You haven't created any Pastes yet.");
-        break;
-      case 'all':
-        $title = pht('All Pastes');
-        $nodata = pht("There are no Pastes yet.");
-        break;
-    }
+    $engine = id(new PhabricatorPasteSearchEngine())
+      ->setPasteSearchFilter($filter);
+    $saved_query = $engine->buildSavedQueryFromRequest($request);
+    $query = $engine->buildQueryFromSavedQuery($saved_query);
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
-    $engine = new PhabricatorPasteSearchEngine();
-    $query = $engine->buildQueryFromSavedQuery($saved_query);
     $pastes = $query->setViewer($request->getUser())
       ->needContent(true)
       ->executeWithCursorPager($pager);
 
     $list = $this->buildPasteList($pastes);
     $list->setPager($pager);
-    $list->setNoDataString($nodata);
+    $list->setNoDataString(pht("No results found for this query."));
 
     $nav->appendChild(
       array(
@@ -54,7 +45,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       ->buildApplicationCrumbs($nav)
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName($title)
+          ->setName(pht("Pastes"))
           ->setHref($this->getApplicationURI('filter/'.$filter.'/')));
 
     $nav->setCrumbs($crumbs);
@@ -62,7 +53,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => $title,
+        'title' => pht("Pastes"),
         'device' => true,
         'dust' => true,
       ));

@@ -64,9 +64,18 @@ final class CeleritySpriteGenerator {
       // Strip 'text_' from these file names.
       $class_name = substr($icon, 5);
 
+      if ($class_name == 'order_off') {
+        $tcss = '.remarkup-control-order-mode .remarkup-assist-order';
+      } else if ($class_name == 'chaos_off') {
+        $tcss = '.remarkup-control-chaos-mode .remarkup-assist-chaos';
+      } else {
+        $tcss = '.remarkup-assist-'.$class_name;
+      }
+
       $sprite = id(clone $template)
         ->setName('remarkup-assist-'.$icon)
-        ->setTargetCSS('.remarkup-assist-'.$class_name);
+        ->setTargetCSS($tcss);
+
       foreach ($scales as $scale_key => $scale) {
         $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
         $sprite->setSourceFile($path, $scale);
@@ -120,7 +129,7 @@ final class CeleritySpriteGenerator {
         $tcss[] = '.actions-'.$icon.$suffix;
         if ($color == 'dark') {
           $tcss[] = '.device-desktop '.
-            '.actions-'.$icon.'-grey.phabricator-action-icon-item-link:hover';
+            '.actions-'.$icon.'-grey.phui-icon-item-link:hover';
         }
 
         $sprite->setTargetCSS(implode(', ', $tcss));
@@ -308,8 +317,8 @@ final class CeleritySpriteGenerator {
       $path = $this->getPath('tokens_1x/'.$token.'.png');
 
       $sprite = id(clone $template)
-        ->setName('token-'.$token)
-        ->setTargetCSS('.token-'.$token)
+        ->setName('tokens-'.$token)
+        ->setTargetCSS('.tokens-'.$token)
         ->setSourceFile($path, 1);
 
       $sprites[] = $sprite;

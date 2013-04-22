@@ -16,7 +16,7 @@ final class PhabricatorWorkboardView extends AphrontView {
     return $this;
   }
 
-  public function addAction(PhabricatorActionIconView $action) {
+  public function addAction(PHUIIconView $action) {
     $this->actions[] = $action;
     return $this;
   }

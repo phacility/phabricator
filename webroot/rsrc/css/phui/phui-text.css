@@ -1,0 +1,55 @@
+/**
+ * @provides phui-text-css
+ */
+
+
+/* Styles */
+.phui-text-bold {
+  font-weight: bold;
+}
+
+.phui-text-uppercase {
+  text-transform: uppercase;
+}
+
+.phui-text-strike {
+  text-decoration: line-through;
+}
+
+
+/* Colors */
+.phui-text-red {
+  color: #E41C2B;
+}
+
+.phui-text-orange {
+  color: #EA921D;
+}
+
+.phui-text-yellow {
+  color: #EABB1D;
+}
+
+.phui-text-green {
+  color: #2FC118
+}
+
+.phui-text-blue {
+  color: #1D5998;
+}
+
+.phui-text-indigo {
+  color: #BD1772;
+}
+
+.phui-text-violet {
+  color: #701A9C;
+}
+
+.phui-text-white {
+  color: #fff;
+}
+
+.phui-text-black {
+  color: #333;
+}

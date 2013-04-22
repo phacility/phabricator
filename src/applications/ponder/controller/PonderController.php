@@ -34,7 +34,7 @@ abstract class PonderController extends PhabricatorController {
       ->addAction(
         id(new PhabricatorMenuItemView())
           ->setName(pht('New Question'))
-          ->setHref('question/ask')
+          ->setHref('/ponder/question/ask')
           ->setIcon('create'));
 
     return $crumbs;

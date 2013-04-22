@@ -91,13 +91,14 @@ class PhabricatorBarePageView extends AphrontPageView {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
+    $developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
     return hsprintf(
-      '%s%s%s<script type="text/javascript">%s window.__DEV__=%s;</script>%s',
+      '%s%s%s%s%s',
       $viewport_tag,
       $icon_tag,
       $apple_tag,
-      $framebust,
-      (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') ? '1' : '0'),
+      CelerityStaticResourceResponse::renderInlineScript(
+        $framebust.jsprintf('window.__DEV__=%d;', ($developer ? 1 : 0))),
       $response->renderResourcesOfType('css'));
   }
 

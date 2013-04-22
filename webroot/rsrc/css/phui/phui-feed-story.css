@@ -16,7 +16,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-.phui-feed-story-head .phabricator-action-icon-item-link {
+.phui-feed-story-head .phui-icon-item-link {
   width: 35px;
   height: 35px;
   background-size: 35px;
@@ -42,7 +42,7 @@
   padding: 10px;
 }
 
-.phui-feed-story-foot .phabricator-action-icon-item-link {
+.phui-feed-story-foot .phui-icon-item-link {
   float: left;
   display: inline-block;
   margin-right: 5px;

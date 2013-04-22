@@ -345,7 +345,7 @@ final class ConpherenceUpdateController
     $user = $this->getRequest()->getUser();
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
-      ->setAfterMessageID($latest_transaction_id)
+      ->setAfterTransactionID($latest_transaction_id)
       ->needHeaderPics($need_header_pics)
       ->needWidgetData($need_widget_data)
       ->needTransactions($need_transactions)
