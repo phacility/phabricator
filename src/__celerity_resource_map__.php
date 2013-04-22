@@ -3616,6 +3616,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/phui/phui-icon.css',
   ),
+  'phui-text-css' =>
+  array(
+    'uri' => '/res/ca884ca6/rsrc/css/phui/phui-text.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-text.css',
+  ),
   'ponder-comment-table-css' =>
   array(
     'uri' => '/res/a1bb9056/rsrc/css/application/ponder/comments.css',
