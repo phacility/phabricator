@@ -4,1042 +4,1042 @@
     "action-action-menu"             : {
       "name" : "action-action-menu",
       "rule" : ".action-action-menu",
-      "hash" : "d5d890fa35a9d970add84f8a84d9c427"
+      "hash" : "533fe3e36cfbf890ad7348330a2328a9"
     },
     "action-action-menu-grey"        : {
       "name" : "action-action-menu-grey",
       "rule" : ".action-action-menu-grey",
-      "hash" : "1e74d6e6d5dd767f45dbd9b60c267871"
+      "hash" : "9bc229a81b33bb62bcb4e025283ffbe5"
     },
     "action-action-menu-white"       : {
       "name" : "action-action-menu-white",
       "rule" : ".action-action-menu-white, .device-desktop .phabricator-action-view:hover .action-action-menu",
-      "hash" : "451f233efeff33ccea200a2328d30803"
+      "hash" : "db0ff28b9ee23cdbf6125a7864b693b0"
     },
     "action-arrow_left"              : {
       "name" : "action-arrow_left",
       "rule" : ".action-arrow_left",
-      "hash" : "439cd6051e6aab63b62d1e47f00ad4a0"
+      "hash" : "18a72fcb866d409a6273883cc56b4862"
     },
     "action-arrow_left-grey"         : {
       "name" : "action-arrow_left-grey",
       "rule" : ".action-arrow_left-grey",
-      "hash" : "a3d0d34ef06a95685bf7a3e05eb97045"
+      "hash" : "200067f0f3af28260f95632eb17c373a"
     },
     "action-arrow_left-white"        : {
       "name" : "action-arrow_left-white",
       "rule" : ".action-arrow_left-white, .device-desktop .phabricator-action-view:hover .action-arrow_left",
-      "hash" : "e113bc929cedac55146edcf6e22f2fe0"
+      "hash" : "f21ee5fc3b0ad93d1ca18c71e6a62623"
     },
     "action-arrow_right"             : {
       "name" : "action-arrow_right",
       "rule" : ".action-arrow_right",
-      "hash" : "06b693491c0594d4e7ff537dbd725a98"
+      "hash" : "64fb031691e8711ec2922644831a4b05"
     },
     "action-arrow_right-grey"        : {
       "name" : "action-arrow_right-grey",
       "rule" : ".action-arrow_right-grey",
-      "hash" : "894f051068f9e206d96576ca6d14fd4f"
+      "hash" : "7d3a0c9e65b9917ccc5acf3ec1ccad2e"
     },
     "action-arrow_right-white"       : {
       "name" : "action-arrow_right-white",
       "rule" : ".action-arrow_right-white, .device-desktop .phabricator-action-view:hover .action-arrow_right",
-      "hash" : "aebf657073a1a85eeb0887cf32db8f08"
+      "hash" : "b16e8688f68d9f225aae11fa2de98f41"
     },
     "action-attach"                  : {
       "name" : "action-attach",
       "rule" : ".action-attach",
-      "hash" : "a062d26bbe37abd305998545885fb1c0"
+      "hash" : "4aeca7c85a2c384c25c0a5d27aa2a41f"
     },
     "action-attach-grey"             : {
       "name" : "action-attach-grey",
       "rule" : ".action-attach-grey",
-      "hash" : "09eae1092a9f48ec48b8970be67351b7"
+      "hash" : "6d528ecda66e9919452cbca77f94d034"
     },
     "action-attach-white"            : {
       "name" : "action-attach-white",
       "rule" : ".action-attach-white, .device-desktop .phabricator-action-view:hover .action-attach",
-      "hash" : "1f69f442d87f6e27980229dbedfbf728"
+      "hash" : "75b0dcbb6f6f297b647266165bd0ac77"
     },
     "action-blame"                   : {
       "name" : "action-blame",
       "rule" : ".action-blame",
-      "hash" : "81fbaa234aed3a379c403aa0c7f3c7eb"
+      "hash" : "467a17a711c501b51318b2661d38458c"
     },
     "action-blame-grey"              : {
       "name" : "action-blame-grey",
       "rule" : ".action-blame-grey",
-      "hash" : "4b383ffb76ee537ce9b6fadb8d2ee160"
+      "hash" : "b5def77f42ef0fc2eb8141f54a6c730b"
     },
     "action-blame-white"             : {
       "name" : "action-blame-white",
       "rule" : ".action-blame-white, .device-desktop .phabricator-action-view:hover .action-blame",
-      "hash" : "e975ef46298c46530659e12fbd012292"
+      "hash" : "ef8bcbb695d0af2ef18c7be1fe308641"
     },
     "action-check"                   : {
       "name" : "action-check",
       "rule" : ".action-check",
-      "hash" : "c8b9c56214fd39a4ba99e07e1fa72e22"
+      "hash" : "0db35013c33b71355dc33912073d0c28"
     },
     "action-check-grey"              : {
       "name" : "action-check-grey",
       "rule" : ".action-check-grey",
-      "hash" : "2375808574c858425660eac59d80e29a"
+      "hash" : "381b82f1a08592cf1c3f23b3d12c0456"
     },
     "action-check-white"             : {
       "name" : "action-check-white",
       "rule" : ".action-check-white, .device-desktop .phabricator-action-view:hover .action-check",
-      "hash" : "803fbc2117621cf946af270cf5bed06b"
+      "hash" : "be412e3b2d3574bb04721b2f8646b67e"
     },
     "action-comment"                 : {
       "name" : "action-comment",
       "rule" : ".action-comment",
-      "hash" : "bb9067094e0cb805dc597eb0ebdd94f9"
+      "hash" : "5cbd81c2469dc95048abf073d977f7e2"
     },
     "action-comment-grey"            : {
       "name" : "action-comment-grey",
       "rule" : ".action-comment-grey",
-      "hash" : "8d71bd6c89116ca02aef8ce830514022"
+      "hash" : "be352ed442c144230f65c0a4c4d56a64"
     },
     "action-comment-white"           : {
       "name" : "action-comment-white",
       "rule" : ".action-comment-white, .device-desktop .phabricator-action-view:hover .action-comment",
-      "hash" : "48bfa57a5b06edcf08329b47fc546071"
+      "hash" : "5f428fb791a23e4a8e2c15f66ff23485"
     },
     "action-computer"                : {
       "name" : "action-computer",
       "rule" : ".action-computer",
-      "hash" : "4e25c6822b815a2c29478082012d1237"
+      "hash" : "ab8e3d101f3f1a8b434d449ef1b9abd3"
     },
     "action-computer-grey"           : {
       "name" : "action-computer-grey",
       "rule" : ".action-computer-grey",
-      "hash" : "d2972bca3937fc49e859019c0fd6647f"
+      "hash" : "6ad695eb4df2f2db3268513307439280"
     },
     "action-computer-white"          : {
       "name" : "action-computer-white",
       "rule" : ".action-computer-white, .device-desktop .phabricator-action-view:hover .action-computer",
-      "hash" : "154afcf0ee1539c0d5a273c971a8c6e1"
+      "hash" : "773aaa54b567fb9de636e3d4be417b3a"
     },
     "action-create"                  : {
       "name" : "action-create",
       "rule" : ".action-create",
-      "hash" : "5901de6f71af459888d1b277d0726916"
+      "hash" : "b6f1daca7830bd72f390e7d64630c366"
     },
     "action-create-grey"             : {
       "name" : "action-create-grey",
       "rule" : ".action-create-grey",
-      "hash" : "3efad05cb3ac57da962e2bc1c5ff2308"
+      "hash" : "fa830394fbf05528cd3c655ab0481d0a"
     },
     "action-create-white"            : {
       "name" : "action-create-white",
       "rule" : ".action-create-white, .device-desktop .phabricator-action-view:hover .action-create",
-      "hash" : "8e06e0eb1031b008ca4a32eba9934289"
+      "hash" : "addfa0ab79944ca318ffc57e568bae9c"
     },
     "action-delete"                  : {
       "name" : "action-delete",
       "rule" : ".action-delete",
-      "hash" : "41bbd0d0d4cb69b2b5423367603187e3"
+      "hash" : "174c6a08a8a7131cef810e006b5a71e0"
     },
     "action-delete-grey"             : {
       "name" : "action-delete-grey",
       "rule" : ".action-delete-grey",
-      "hash" : "244047621dbeefd392c4c7f3059a9e6a"
+      "hash" : "e541601ce768fb2fa1a941a95ac3a7cf"
     },
     "action-delete-white"            : {
       "name" : "action-delete-white",
       "rule" : ".action-delete-white, .device-desktop .phabricator-action-view:hover .action-delete",
-      "hash" : "deb1e03b1aa95a07fa16ee82f9605914"
+      "hash" : "496e780e0470bce85116baaa3aebdab2"
     },
     "action-disable"                 : {
       "name" : "action-disable",
       "rule" : ".action-disable",
-      "hash" : "e0db051423597acbf4611467227989f3"
+      "hash" : "0a0b314012bdaaa307ac70d2581c20b5"
     },
     "action-disable-grey"            : {
       "name" : "action-disable-grey",
       "rule" : ".action-disable-grey",
-      "hash" : "301c0440f503fba4c3e1d0adc9f8dad6"
+      "hash" : "c7741a4579c4e7a1c94dfd029b3e3bb0"
     },
     "action-disable-white"           : {
       "name" : "action-disable-white",
       "rule" : ".action-disable-white, .device-desktop .phabricator-action-view:hover .action-disable",
-      "hash" : "cb5ee0cda04760e0568e8245a807754f"
+      "hash" : "3f456c6f15d4aaccfe85ae73e856ca1c"
     },
     "action-dislike"                 : {
       "name" : "action-dislike",
       "rule" : ".action-dislike",
-      "hash" : "fbacfb7af00bdbd738039643cdf5bc51"
+      "hash" : "846820ffc823a4899dde8f8c14203df1"
     },
     "action-dislike-grey"            : {
       "name" : "action-dislike-grey",
       "rule" : ".action-dislike-grey",
-      "hash" : "73fcb492401b2b18785857f843e577f0"
+      "hash" : "1e994ac16acba86dae2f9e94ff0df2c2"
     },
     "action-dislike-white"           : {
       "name" : "action-dislike-white",
       "rule" : ".action-dislike-white, .device-desktop .phabricator-action-view:hover .action-dislike",
-      "hash" : "6ea8a6df9208f9a790702d801589be7e"
+      "hash" : "55d374c8466370c8c5805b8135c3f416"
     },
     "action-download"                : {
       "name" : "action-download",
       "rule" : ".action-download",
-      "hash" : "a3edf236a8d30a71b46f5126ac32bd6e"
+      "hash" : "b4517953cb610ad5af5537ac5526a168"
     },
     "action-download-alt"            : {
       "name" : "action-download-alt",
       "rule" : ".action-download-alt",
-      "hash" : "eb4d4a8d850b7404332bd4d36067b00a"
+      "hash" : "7ea7b578f8da62d7aaf82b1e80f0fa96"
     },
     "action-download-alt-grey"       : {
       "name" : "action-download-alt-grey",
       "rule" : ".action-download-alt-grey",
-      "hash" : "e19cba41b19ed423ba72d5ec1447cdca"
+      "hash" : "6b06b8e24433f7b4690a0bda53441399"
     },
     "action-download-alt-white"      : {
       "name" : "action-download-alt-white",
       "rule" : ".action-download-alt-white, .device-desktop .phabricator-action-view:hover .action-download-alt",
-      "hash" : "40bd588c9478a92ba592eadb0cd2255d"
+      "hash" : "f458b2b153b9fd655bdea9c2c73ed569"
     },
     "action-download-grey"           : {
       "name" : "action-download-grey",
       "rule" : ".action-download-grey",
-      "hash" : "35df8e7bea8392edfad0e41ffba56204"
+      "hash" : "d2502bf6e4c56e8c24f564285a3d0f4e"
     },
     "action-download-white"          : {
       "name" : "action-download-white",
       "rule" : ".action-download-white, .device-desktop .phabricator-action-view:hover .action-download",
-      "hash" : "88650982d63c7fe1b0df57f19b73764e"
+      "hash" : "90ca79835936319d143ea5c3b745744e"
     },
     "action-edit"                    : {
       "name" : "action-edit",
       "rule" : ".action-edit",
-      "hash" : "37b7c707bb18feb66fbad36cd99f82be"
+      "hash" : "539f11d58239683c73b275335e1cd5ee"
     },
     "action-edit-grey"               : {
       "name" : "action-edit-grey",
       "rule" : ".action-edit-grey",
-      "hash" : "a41905d50572da65d4c7e31c6bd5b9cb"
+      "hash" : "9ac07dfbc52997775aeaa4fafbf43d12"
     },
     "action-edit-white"              : {
       "name" : "action-edit-white",
       "rule" : ".action-edit-white, .device-desktop .phabricator-action-view:hover .action-edit",
-      "hash" : "31a23bb50808f363fb8f92ac1774348a"
+      "hash" : "cb83ff8b6f93bf367233960142abf744"
     },
     "action-enable"                  : {
       "name" : "action-enable",
       "rule" : ".action-enable",
-      "hash" : "ac321d05767830df55141e143a412c59"
+      "hash" : "a0d81348f61019149090e89d2d126a8f"
     },
     "action-enable-grey"             : {
       "name" : "action-enable-grey",
       "rule" : ".action-enable-grey",
-      "hash" : "637dcb6c96460ffd8e7dc9bcce105665"
+      "hash" : "8d6bf1d0333b81cde5cbeb8646316863"
     },
     "action-enable-white"            : {
       "name" : "action-enable-white",
       "rule" : ".action-enable-white, .device-desktop .phabricator-action-view:hover .action-enable",
-      "hash" : "3856031f36cf1126c6b375419b872158"
+      "hash" : "6cbadeb75ede97f58a62b0bafbc7aef5"
     },
     "action-file"                    : {
       "name" : "action-file",
       "rule" : ".action-file",
-      "hash" : "7ddd35db36264115fb7c0a219f561753"
+      "hash" : "95de3ed156d8e8008a464fee994a8b7a"
     },
     "action-file-grey"               : {
       "name" : "action-file-grey",
       "rule" : ".action-file-grey",
-      "hash" : "d1147f0cd62b48c8fca06cbe923c0330"
+      "hash" : "bd1b94b5ef4ea93570b5dd11f9b6fc2f"
     },
     "action-file-white"              : {
       "name" : "action-file-white",
       "rule" : ".action-file-white, .device-desktop .phabricator-action-view:hover .action-file",
-      "hash" : "bb5434e03f07ba3ab4db4a08c91a5a95"
+      "hash" : "330b3ff7217edaa7b348c1209eeb5301"
     },
     "action-flag"                    : {
       "name" : "action-flag",
       "rule" : ".action-flag",
-      "hash" : "da0e4bc0ee0b7ca4f307e347a9fe6f85"
+      "hash" : "017bbfc781bfa2613ade68fd791d7b66"
     },
     "action-flag-0"                  : {
       "name" : "action-flag-0",
       "rule" : ".action-flag-0",
-      "hash" : "e3c9d406418889ac7f219dc2e4e3695d"
+      "hash" : "63ae0ab21e802d2cf11c40cb239718a6"
     },
     "action-flag-0-grey"             : {
       "name" : "action-flag-0-grey",
       "rule" : ".action-flag-0-grey",
-      "hash" : "d48a88e9782cfc132799f8df5c828fee"
+      "hash" : "6a9bb10f146c2adbd5ffc8111ce959c8"
     },
     "action-flag-0-white"            : {
       "name" : "action-flag-0-white",
       "rule" : ".action-flag-0-white, .device-desktop .phabricator-action-view:hover .action-flag-0",
-      "hash" : "745431f4973ca195c418544375f56163"
+      "hash" : "f40d6750653f54ce6099c76294ab5b80"
     },
     "action-flag-1"                  : {
       "name" : "action-flag-1",
       "rule" : ".action-flag-1",
-      "hash" : "76ec571366cba7f3440fdb1c4b9118be"
+      "hash" : "7f50971290dff274a11930faeeac076b"
     },
     "action-flag-1-grey"             : {
       "name" : "action-flag-1-grey",
       "rule" : ".action-flag-1-grey",
-      "hash" : "d5807977961d63b8c52754077a68b2e0"
+      "hash" : "eb6af245f22f94b81368ac24a5021cb0"
     },
     "action-flag-1-white"            : {
       "name" : "action-flag-1-white",
       "rule" : ".action-flag-1-white, .device-desktop .phabricator-action-view:hover .action-flag-1",
-      "hash" : "b8d0afbab58acf0a573dd28d3ad51de3"
+      "hash" : "c47bfa96d98672bfe5afa85a0cfbec89"
     },
     "action-flag-2"                  : {
       "name" : "action-flag-2",
       "rule" : ".action-flag-2",
-      "hash" : "e6d3a4ecf63079d053adae81d45c4f0a"
+      "hash" : "63a979a0d2de57efdcf5fee2192957e1"
     },
     "action-flag-2-grey"             : {
       "name" : "action-flag-2-grey",
       "rule" : ".action-flag-2-grey",
-      "hash" : "516c5a8e041b65aea5ddbdb7542b3d12"
+      "hash" : "46d028b2ddbc26251b5fcc02ec87ca43"
     },
     "action-flag-2-white"            : {
       "name" : "action-flag-2-white",
       "rule" : ".action-flag-2-white, .device-desktop .phabricator-action-view:hover .action-flag-2",
-      "hash" : "7c013e587c0e7522952413749e62bd62"
+      "hash" : "45b1dda7b8c85546d40789ca83ed481c"
     },
     "action-flag-3"                  : {
       "name" : "action-flag-3",
       "rule" : ".action-flag-3",
-      "hash" : "4bd5ac1c2c0ed4765000fb49811d2c68"
+      "hash" : "d95b847797e6ad0ae4e5719085530709"
     },
     "action-flag-3-grey"             : {
       "name" : "action-flag-3-grey",
       "rule" : ".action-flag-3-grey",
-      "hash" : "f471dcb2c59b7ce1ac83057e71cd3560"
+      "hash" : "fab7eca7e7a1e75a68a2f86a9ecb4dfd"
     },
     "action-flag-3-white"            : {
       "name" : "action-flag-3-white",
       "rule" : ".action-flag-3-white, .device-desktop .phabricator-action-view:hover .action-flag-3",
-      "hash" : "a8eaacbb09c261565ca05a2672b1fdd8"
+      "hash" : "42f994d618726c1294ac7206accdac0d"
     },
     "action-flag-4"                  : {
       "name" : "action-flag-4",
       "rule" : ".action-flag-4",
-      "hash" : "f5e87f3bcd0617174961f25c51c7dcc7"
+      "hash" : "61d60e39d879436ffaa4bf3489c4be62"
     },
     "action-flag-4-grey"             : {
       "name" : "action-flag-4-grey",
       "rule" : ".action-flag-4-grey",
-      "hash" : "a2893da9d76f4765782064035313fb2f"
+      "hash" : "8dc44ff4d36f6e1e4522fc865923a4df"
     },
     "action-flag-4-white"            : {
       "name" : "action-flag-4-white",
       "rule" : ".action-flag-4-white, .device-desktop .phabricator-action-view:hover .action-flag-4",
-      "hash" : "5a1c34e6ccaf9f60e51867e593fe86fe"
+      "hash" : "e948ac8da0548c252ce32f4ff2503790"
     },
     "action-flag-5"                  : {
       "name" : "action-flag-5",
       "rule" : ".action-flag-5",
-      "hash" : "1100ba1c1351fe594c66a7d68b4f55ce"
+      "hash" : "597c19fdaa99572b5d65d30d3cb81c13"
     },
     "action-flag-5-grey"             : {
       "name" : "action-flag-5-grey",
       "rule" : ".action-flag-5-grey",
-      "hash" : "ef2bb6c72aadb0945f9f56bf24c14174"
+      "hash" : "24bf02b161815f07e9bcd9e75ba141f6"
     },
     "action-flag-5-white"            : {
       "name" : "action-flag-5-white",
       "rule" : ".action-flag-5-white, .device-desktop .phabricator-action-view:hover .action-flag-5",
-      "hash" : "ab3f27db5a080c3aa094d6d50bece2a4"
+      "hash" : "55bcef156bbd099ada0c39aa796be663"
     },
     "action-flag-6"                  : {
       "name" : "action-flag-6",
       "rule" : ".action-flag-6",
-      "hash" : "a37b3211517264f5a51c17c50d77a0df"
+      "hash" : "490fea784ff63de9edffb1d142db49e0"
     },
     "action-flag-6-grey"             : {
       "name" : "action-flag-6-grey",
       "rule" : ".action-flag-6-grey",
-      "hash" : "4dd3537f6f61a4f857149a5dea413652"
+      "hash" : "5b3c14db2a182eb31f1925829adac556"
     },
     "action-flag-6-white"            : {
       "name" : "action-flag-6-white",
       "rule" : ".action-flag-6-white, .device-desktop .phabricator-action-view:hover .action-flag-6",
-      "hash" : "49a663b600316d73c521687c69ef8bdd"
+      "hash" : "f251c82a144e354d241b977992aca356"
     },
     "action-flag-7"                  : {
       "name" : "action-flag-7",
       "rule" : ".action-flag-7",
-      "hash" : "5f4d6d3df81afe0745b75f810fb4be33"
+      "hash" : "02c8e4bcca7b2dfd746e6414f3419130"
     },
     "action-flag-7-grey"             : {
       "name" : "action-flag-7-grey",
       "rule" : ".action-flag-7-grey",
-      "hash" : "dc17400b19fe344a664568e51bd4c2c1"
+      "hash" : "cf0b4c737ab286110e2e1e2f1619e7d1"
     },
     "action-flag-7-white"            : {
       "name" : "action-flag-7-white",
       "rule" : ".action-flag-7-white, .device-desktop .phabricator-action-view:hover .action-flag-7",
-      "hash" : "063e08f676e39c26b33c6cac8ae14e15"
+      "hash" : "bc1a5ec732b7d24e78c4dfd686347a6e"
     },
     "action-flag-ghost"              : {
       "name" : "action-flag-ghost",
       "rule" : ".action-flag-ghost",
-      "hash" : "3152fe67fc364d460d607e338237acf4"
+      "hash" : "45e3a9c7a6436fff77a26ac14fe8a2ff"
     },
     "action-flag-ghost-grey"         : {
       "name" : "action-flag-ghost-grey",
       "rule" : ".action-flag-ghost-grey",
-      "hash" : "56c962d3557fee90bcb6216ff9df2b84"
+      "hash" : "effe2cb0f7bf9d8498de00cb9d2219d5"
     },
     "action-flag-ghost-white"        : {
       "name" : "action-flag-ghost-white",
       "rule" : ".action-flag-ghost-white, .device-desktop .phabricator-action-view:hover .action-flag-ghost",
-      "hash" : "583261ed96dbe3452e3e6a0001aea6d8"
+      "hash" : "330a6db5d35105eb2a40926ac10bf050"
     },
     "action-flag-grey"               : {
       "name" : "action-flag-grey",
       "rule" : ".action-flag-grey",
-      "hash" : "2abe4ae06cc54bf6069bac446e5fa439"
+      "hash" : "19ff6ca97d5a9417711c125342bfd181"
     },
     "action-flag-white"              : {
       "name" : "action-flag-white",
       "rule" : ".action-flag-white, .device-desktop .phabricator-action-view:hover .action-flag",
-      "hash" : "3442002f986cb8f7e1f06183927945a3"
+      "hash" : "c75814a0ab1d5efd93eb04bc91ea1d70"
     },
     "action-folder-open"             : {
       "name" : "action-folder-open",
       "rule" : ".action-folder-open",
-      "hash" : "fa3478ecd57fd41a6a16107db86a15e9"
+      "hash" : "041a997bd0fe3dc0eab6974cab2f4909"
     },
     "action-folder-open-grey"        : {
       "name" : "action-folder-open-grey",
       "rule" : ".action-folder-open-grey",
-      "hash" : "dada2fb1cbcb8256f607eae1914219c1"
+      "hash" : "78861d4d04e344db11e235dfadfaa0b2"
     },
     "action-folder-open-white"       : {
       "name" : "action-folder-open-white",
       "rule" : ".action-folder-open-white, .device-desktop .phabricator-action-view:hover .action-folder-open",
-      "hash" : "af7843feb777d7eafc3904fe0a268ed3"
+      "hash" : "b6c96d025fbd7d9d2f6184ab2b5255c1"
     },
     "action-fork"                    : {
       "name" : "action-fork",
       "rule" : ".action-fork",
-      "hash" : "15285571cef4f6251aad47c42e5f0f1c"
+      "hash" : "73872362aa5fa8a715bb2b282e8873a7"
     },
     "action-fork-grey"               : {
       "name" : "action-fork-grey",
       "rule" : ".action-fork-grey",
-      "hash" : "aa875e4018c152bed7b37c776d18660e"
+      "hash" : "80b616de5d415c74e2561cf85cd5563a"
     },
     "action-fork-white"              : {
       "name" : "action-fork-white",
       "rule" : ".action-fork-white, .device-desktop .phabricator-action-view:hover .action-fork",
-      "hash" : "a3a53c919c04ae550970ccb5477671d2"
+      "hash" : "ed9479c691af95386f88076a65d73b19"
     },
     "action-herald"                  : {
       "name" : "action-herald",
       "rule" : ".action-herald",
-      "hash" : "4084564ec8592cb6c9bf840f8c7eea6a"
+      "hash" : "75eb507020fcb7dc6890022513648e85"
     },
     "action-herald-grey"             : {
       "name" : "action-herald-grey",
       "rule" : ".action-herald-grey",
-      "hash" : "bc9f0fef0b1f75ed4f20cc4359f706f5"
+      "hash" : "30b633461f095ac3f032eb02398ae67e"
     },
     "action-herald-white"            : {
       "name" : "action-herald-white",
       "rule" : ".action-herald-white, .device-desktop .phabricator-action-view:hover .action-herald",
-      "hash" : "7d773778fa6126ac05a4c6f9d85dd20d"
+      "hash" : "149fd50929e68d6bcf6310d9e4c316b6"
     },
     "action-highlight"               : {
       "name" : "action-highlight",
       "rule" : ".action-highlight",
-      "hash" : "25f8142b1c665f623f9eab935bf256ab"
+      "hash" : "4430cca9eab0cbd85d3ee1b5e1f29ae3"
     },
     "action-highlight-grey"          : {
       "name" : "action-highlight-grey",
       "rule" : ".action-highlight-grey",
-      "hash" : "0d4347b151224476548a0dc43f6d1ceb"
+      "hash" : "47fe828e1b61553326752209a8fba6cb"
     },
     "action-highlight-white"         : {
       "name" : "action-highlight-white",
       "rule" : ".action-highlight-white, .device-desktop .phabricator-action-view:hover .action-highlight",
-      "hash" : "d32f9b42dc24f41aa02c18ba5db5d65f"
+      "hash" : "09a52dfdf893ee63be162f0c180d31fe"
     },
     "action-history"                 : {
       "name" : "action-history",
       "rule" : ".action-history",
-      "hash" : "69fbd6f3875ceef440a5fdd727162024"
+      "hash" : "6669ec72a77a09e3e8c8c5fe941810a9"
     },
     "action-history-grey"            : {
       "name" : "action-history-grey",
       "rule" : ".action-history-grey",
-      "hash" : "97ed21324d25b236212e33c9bfd4dc0a"
+      "hash" : "3146a0c0c8698ef95ad74515cc9971ad"
     },
     "action-history-white"           : {
       "name" : "action-history-white",
       "rule" : ".action-history-white, .device-desktop .phabricator-action-view:hover .action-history",
-      "hash" : "4ffae3b425eaf5a7aec9757bd9fb97c3"
+      "hash" : "07490563c7cf4e8194918c3700ca1b57"
     },
     "action-image"                   : {
       "name" : "action-image",
       "rule" : ".action-image",
-      "hash" : "bfe9f9b16bf54a258c76cf314bb87152"
+      "hash" : "5f03cd1fa806db2861d93a0fba7deff7"
     },
     "action-image-grey"              : {
       "name" : "action-image-grey",
       "rule" : ".action-image-grey",
-      "hash" : "e11788cab503c91d3a39847165181cb8"
+      "hash" : "32e1008c29447da5fc4a263c1b56ce41"
     },
     "action-image-white"             : {
       "name" : "action-image-white",
       "rule" : ".action-image-white, .device-desktop .phabricator-action-view:hover .action-image",
-      "hash" : "de395492a2088e998f48cba698744b0f"
+      "hash" : "d48be030bf83013fcd3549460f197712"
     },
     "action-like"                    : {
       "name" : "action-like",
       "rule" : ".action-like",
-      "hash" : "2afed6b1e26578bcbc23f8d1c72221ab"
+      "hash" : "89d7ac4a8642389bded3af9aa464b06b"
     },
     "action-like-grey"               : {
       "name" : "action-like-grey",
       "rule" : ".action-like-grey",
-      "hash" : "8b2baee6c58e57d61c71d48b7e52522b"
+      "hash" : "262bdae8449eae9ecfb58246a8457f64"
     },
     "action-like-white"              : {
       "name" : "action-like-white",
       "rule" : ".action-like-white, .device-desktop .phabricator-action-view:hover .action-like",
-      "hash" : "0b6dd7cb5820d65faefdc2e7a8d75acf"
+      "hash" : "773b180de4276644cad9688a1f0935ce"
     },
     "action-link"                    : {
       "name" : "action-link",
       "rule" : ".action-link",
-      "hash" : "0bb7d22b7db2915c787f132bee42a71d"
+      "hash" : "bbaed885947840548f9b466fd97aef83"
     },
     "action-link-grey"               : {
       "name" : "action-link-grey",
       "rule" : ".action-link-grey",
-      "hash" : "0bfe4298307d9bd2e66a43b5d1ee6c00"
+      "hash" : "c3bd4b5b14e7ed7c522fd148022a9e7b"
     },
     "action-link-white"              : {
       "name" : "action-link-white",
       "rule" : ".action-link-white, .device-desktop .phabricator-action-view:hover .action-link",
-      "hash" : "4cc1d11240276baf1864b9209e28d794"
+      "hash" : "e846157dd9d0119d82b2777052acdb3d"
     },
     "action-lint-info"               : {
       "name" : "action-lint-info",
       "rule" : ".action-lint-info",
-      "hash" : "f3588606b991614019f2aba3e5d75867"
+      "hash" : "324e1d2d947862a69df78e68e4a36b1f"
     },
     "action-lint-info-grey"          : {
       "name" : "action-lint-info-grey",
       "rule" : ".action-lint-info-grey",
-      "hash" : "738e607d12f91a7a9bc8f9b2c13052b6"
+      "hash" : "76eadf42825e50f995b5d8d088ee591f"
     },
     "action-lint-info-white"         : {
       "name" : "action-lint-info-white",
       "rule" : ".action-lint-info-white, .device-desktop .phabricator-action-view:hover .action-lint-info",
-      "hash" : "04d9cd9ec75225136ce19ef447ebbd5a"
+      "hash" : "ef6d4bb883446171a1a1df66b13b2c66"
     },
     "action-lint-ok"                 : {
       "name" : "action-lint-ok",
       "rule" : ".action-lint-ok",
-      "hash" : "d2dd1f379b71c38233c33c106867593d"
+      "hash" : "97b66fc1a5474f00bc1fdda6525820d5"
     },
     "action-lint-ok-grey"            : {
       "name" : "action-lint-ok-grey",
       "rule" : ".action-lint-ok-grey",
-      "hash" : "e7b4b0ff5593c77ecf8af929960656c1"
+      "hash" : "eefd06511a24992aef9e486b560c4062"
     },
     "action-lint-ok-white"           : {
       "name" : "action-lint-ok-white",
       "rule" : ".action-lint-ok-white, .device-desktop .phabricator-action-view:hover .action-lint-ok",
-      "hash" : "26661c20c9d68c0568e7f8e7b9a79370"
+      "hash" : "f2720295139147930fb78e962450075d"
     },
     "action-lint-warning"            : {
       "name" : "action-lint-warning",
       "rule" : ".action-lint-warning",
-      "hash" : "30f226154af0794c0e05f53129a7a8fc"
+      "hash" : "d0b1c5f84db953de088056db7fbe1eae"
     },
     "action-lint-warning-grey"       : {
       "name" : "action-lint-warning-grey",
       "rule" : ".action-lint-warning-grey",
-      "hash" : "fef17b967a78fba8c6a4f772fc8c7ab2"
+      "hash" : "f4f73032f5f2310d7731affba2318d5d"
     },
     "action-lint-warning-white"      : {
       "name" : "action-lint-warning-white",
       "rule" : ".action-lint-warning-white, .device-desktop .phabricator-action-view:hover .action-lint-warning",
-      "hash" : "acc7c971f83efb5298390bb0ebdbbdb1"
+      "hash" : "d540c0afe65862f5c32c934f1956ca36"
     },
     "action-lock"                    : {
       "name" : "action-lock",
       "rule" : ".action-lock",
-      "hash" : "d79fe308c2bca2a15eb4f2b0784eaef6"
+      "hash" : "7ca88645707cf9cd69ace1e416c0f964"
     },
     "action-lock-grey"               : {
       "name" : "action-lock-grey",
       "rule" : ".action-lock-grey",
-      "hash" : "ffa7de98cd41e3db7f9ea284662de41e"
+      "hash" : "c95e9a3071dc3bc389c235c49a5c5388"
     },
     "action-lock-white"              : {
       "name" : "action-lock-white",
       "rule" : ".action-lock-white, .device-desktop .phabricator-action-view:hover .action-lock",
-      "hash" : "323f4e1dc1d38b173bbe290c27ec9bea"
+      "hash" : "e6f5edd8fdfadab84dd95e5582ac1db1"
     },
     "action-love"                    : {
       "name" : "action-love",
       "rule" : ".action-love",
-      "hash" : "4b5271c2f7cbf2ae1d904a3cc5f79b09"
+      "hash" : "9f101bddc6deba2b128bdc7bb45d583a"
     },
     "action-love-grey"               : {
       "name" : "action-love-grey",
       "rule" : ".action-love-grey",
-      "hash" : "3b629d11a145bc0eb300d9ee8daaacc6"
+      "hash" : "615fa9c17fa8a9e0b27846f3c99fdd87"
     },
     "action-love-white"              : {
       "name" : "action-love-white",
       "rule" : ".action-love-white, .device-desktop .phabricator-action-view:hover .action-love",
-      "hash" : "25a8f8c240d2fcd12e8ce192c749c9cb"
+      "hash" : "5f92d9a4565e79b96c956f054ede993a"
     },
     "action-merge"                   : {
       "name" : "action-merge",
       "rule" : ".action-merge",
-      "hash" : "d1465a199273ca5a7d1914b7827388aa"
+      "hash" : "0c7cb3934262b3374f5c94e36c826672"
     },
     "action-merge-grey"              : {
       "name" : "action-merge-grey",
       "rule" : ".action-merge-grey",
-      "hash" : "b04fa26d964413d9b2efe0354aa22f95"
+      "hash" : "e8c11bd0a92a273ba5f90fee8bd31fb6"
     },
     "action-merge-white"             : {
       "name" : "action-merge-white",
       "rule" : ".action-merge-white, .device-desktop .phabricator-action-view:hover .action-merge",
-      "hash" : "c89d5163d7e237cde54b833356311a1c"
+      "hash" : "433a26913a0db78eb707edf0dbbf0fdc"
     },
     "action-message"                 : {
       "name" : "action-message",
       "rule" : ".action-message",
-      "hash" : "b965efb0e7bc88a5f944bfa0476eb652"
+      "hash" : "c14b8eb1f70855eb801c42c5f04ea5d0"
     },
     "action-message-grey"            : {
       "name" : "action-message-grey",
       "rule" : ".action-message-grey",
-      "hash" : "ac4c4a9265d0d4810164907222ff401c"
+      "hash" : "93574f7b8adadc01b036b2376e7b1eb1"
     },
     "action-message-white"           : {
       "name" : "action-message-white",
       "rule" : ".action-message-white, .device-desktop .phabricator-action-view:hover .action-message",
-      "hash" : "7ec19102800f71d08b3d08f31cbbaf02"
+      "hash" : "3fe1df81d1af648ac1e483e2a081ed62"
     },
     "action-meta-mta"                : {
       "name" : "action-meta-mta",
       "rule" : ".action-meta-mta",
-      "hash" : "afbb4a97071268b542634aea2eed9fdb"
+      "hash" : "3895ce9ea717cc0a1bcc2f93015a5c86"
     },
     "action-meta-mta-grey"           : {
       "name" : "action-meta-mta-grey",
       "rule" : ".action-meta-mta-grey",
-      "hash" : "bc939fa46edc09f3e8b31a06cfb18895"
+      "hash" : "873f04635a614bce012cfc82837b6be1"
     },
     "action-meta-mta-white"          : {
       "name" : "action-meta-mta-white",
       "rule" : ".action-meta-mta-white, .device-desktop .phabricator-action-view:hover .action-meta-mta",
-      "hash" : "e1f6ed22db628d691172d7589004ff8f"
+      "hash" : "8d1edd5f73363a7057474364850abc39"
     },
     "action-move"                    : {
       "name" : "action-move",
       "rule" : ".action-move",
-      "hash" : "5ee19a8116be04fca2cdb2ca18848aaa"
+      "hash" : "fa5d4f6c263a4cad009990a3f00c1819"
     },
     "action-move-grey"               : {
       "name" : "action-move-grey",
       "rule" : ".action-move-grey",
-      "hash" : "9f856630044d1d87d689b8d381426391"
+      "hash" : "201db3f4614022b6e57c2168aa9f7298"
     },
     "action-move-white"              : {
       "name" : "action-move-white",
       "rule" : ".action-move-white, .device-desktop .phabricator-action-view:hover .action-move",
-      "hash" : "3f81eb8b52850b4910ecf4a8c7667ad5"
+      "hash" : "d7f6217f85f2cfa45d7e44bd06d3f438"
     },
     "action-new"                     : {
       "name" : "action-new",
       "rule" : ".action-new",
-      "hash" : "dfbcbf59a5440d9a99b0c18e2010f58e"
+      "hash" : "62ce1bb9b7c8252f58a37c655b7ed377"
     },
     "action-new-grey"                : {
       "name" : "action-new-grey",
       "rule" : ".action-new-grey",
-      "hash" : "fc6c948a0019a8a63e1a36a0c21f60ef"
+      "hash" : "5d96082b216b783d6256ee3cc755dc87"
     },
     "action-new-white"               : {
       "name" : "action-new-white",
       "rule" : ".action-new-white, .device-desktop .phabricator-action-view:hover .action-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.action-new-grey",
-      "hash" : "99a86e78d0f9bd775e283484b2bba989"
+      "hash" : "782f8bc8dc883c0637910e5fbc3c6f9f"
     },
     "action-none"                    : {
       "name" : "action-none",
       "rule" : ".action-none",
-      "hash" : "29ab47e45ff4d1f23786bf0c1fc20414"
+      "hash" : "5595f8625292cd95d1240ed429dc880c"
     },
     "action-none-grey"               : {
       "name" : "action-none-grey",
       "rule" : ".action-none-grey",
-      "hash" : "8d0dec138cc8bbd2da813c24a55ef8f5"
+      "hash" : "76d2d2e3fff56f21759d03dd5c17331c"
     },
     "action-none-white"              : {
       "name" : "action-none-white",
       "rule" : ".action-none-white, .device-desktop .phabricator-action-view:hover .action-none",
-      "hash" : "ee7b57ca9dcc4e87e09fbe2949ec1242"
+      "hash" : "69ce41011458cfbdabb1a9fb7537d087"
     },
     "action-perflab"                 : {
       "name" : "action-perflab",
       "rule" : ".action-perflab",
-      "hash" : "233b376e3b9d43082a60ea54afa6bc18"
+      "hash" : "ec1acf5413f771b1f2782aa759074764"
     },
     "action-perflab-grey"            : {
       "name" : "action-perflab-grey",
       "rule" : ".action-perflab-grey",
-      "hash" : "fbd064b66bed85a725cbb4741d0e85b0"
+      "hash" : "2f7fa40824ccf254322e60e216f1d50e"
     },
     "action-perflab-white"           : {
       "name" : "action-perflab-white",
       "rule" : ".action-perflab-white, .device-desktop .phabricator-action-view:hover .action-perflab",
-      "hash" : "9add2d46ea13b938c631ac2a4f376e3d"
+      "hash" : "aac6b8b9fa044430375ba370243292cb"
     },
     "action-preview"                 : {
       "name" : "action-preview",
       "rule" : ".action-preview",
-      "hash" : "2eb136352c63e4f0f7632f81d12d635c"
+      "hash" : "a33cb74fc6e1b9665ac4ff20635babe8"
     },
     "action-preview-grey"            : {
       "name" : "action-preview-grey",
       "rule" : ".action-preview-grey",
-      "hash" : "f7c4e6ea75fb0a9f2fe00183112db8ad"
+      "hash" : "4cfe3a27e5e818ea9f7805a7c1b05fa7"
     },
     "action-preview-white"           : {
       "name" : "action-preview-white",
       "rule" : ".action-preview-white, .device-desktop .phabricator-action-view:hover .action-preview",
-      "hash" : "71cac08ba19ee678499a9cbd5c24c6cf"
+      "hash" : "61523a3b9edc3d0ddfea9f399bae0fe1"
     },
     "action-refresh"                 : {
       "name" : "action-refresh",
       "rule" : ".action-refresh",
-      "hash" : "171e46e974912cfa0b347d1e96a579c7"
+      "hash" : "d5d7cf16bfe862d0a101ccf216b76df1"
     },
     "action-refresh-grey"            : {
       "name" : "action-refresh-grey",
       "rule" : ".action-refresh-grey",
-      "hash" : "6e102669eb7b6389d7c08c838886841d"
+      "hash" : "b4838ee697b2a9b70dc6920da7ab3e89"
     },
     "action-refresh-white"           : {
       "name" : "action-refresh-white",
       "rule" : ".action-refresh-white, .device-desktop .phabricator-action-view:hover .action-refresh",
-      "hash" : "5a7dad6d45f6b47bc1175a7efa4089a1"
+      "hash" : "44fa7fc18a847416b9db3858e0b47737"
     },
     "action-remove"                  : {
       "name" : "action-remove",
       "rule" : ".action-remove",
-      "hash" : "364176fcff78057741963dbf48eecbbd"
+      "hash" : "4c9dcad5540a611a5e05380d7982a601"
     },
     "action-remove-grey"             : {
       "name" : "action-remove-grey",
       "rule" : ".action-remove-grey",
-      "hash" : "b0d190ec2837c0cbdc99428178a8eddf"
+      "hash" : "dc0b179b0a96dd5c9f387ee41daf77a7"
     },
     "action-remove-white"            : {
       "name" : "action-remove-white",
       "rule" : ".action-remove-white, .device-desktop .phabricator-action-view:hover .action-remove",
-      "hash" : "e3646206c14813fca81a35de43722aae"
+      "hash" : "8c750027adb708e8507a51986081d309"
     },
     "action-search"                  : {
       "name" : "action-search",
       "rule" : ".action-search",
-      "hash" : "8307439f020b262ab8443edb745ed171"
+      "hash" : "1340e68f4f2b55c5feee4a0241672c82"
     },
     "action-search-grey"             : {
       "name" : "action-search-grey",
       "rule" : ".action-search-grey",
-      "hash" : "c1ce13aab1083b20fb094b56b3deab8a"
+      "hash" : "a7e598337c9a8a6feb3de62247abb611"
     },
     "action-search-white"            : {
       "name" : "action-search-white",
       "rule" : ".action-search-white, .device-desktop .phabricator-action-view:hover .action-search",
-      "hash" : "72098d2091e6297c4253c3e45a365ec4"
+      "hash" : "91e764bd3ed921153ac66fc56e04b884"
     },
     "action-start-sandcastle"        : {
       "name" : "action-start-sandcastle",
       "rule" : ".action-start-sandcastle",
-      "hash" : "afa09dd71e0747c56e64d95e975122c8"
+      "hash" : "52f245ddeff53c5cf084c27b6e45b152"
     },
     "action-start-sandcastle-grey"   : {
       "name" : "action-start-sandcastle-grey",
       "rule" : ".action-start-sandcastle-grey",
-      "hash" : "b0912a9f2a1bcff19ab90f539107864f"
+      "hash" : "d41cff7a3c898616f75634c8d796cd6c"
     },
     "action-start-sandcastle-white"  : {
       "name" : "action-start-sandcastle-white",
       "rule" : ".action-start-sandcastle-white, .device-desktop .phabricator-action-view:hover .action-start-sandcastle",
-      "hash" : "53692026662afaafdcbaa9ab7de7aa0d"
+      "hash" : "04959e4bcf29b57213e5b49ab6f25aeb"
     },
     "action-subscribe-add"           : {
       "name" : "action-subscribe-add",
       "rule" : ".action-subscribe-add",
-      "hash" : "d2100e88f2ffc71c2df1d40049f2bf68"
+      "hash" : "1b166c23ed6a971d2f93d37147caf622"
     },
     "action-subscribe-add-grey"      : {
       "name" : "action-subscribe-add-grey",
       "rule" : ".action-subscribe-add-grey",
-      "hash" : "637094fbed70285b62cbfe9ead4bd480"
+      "hash" : "2b2fd9749636140f78233bef8e604d56"
     },
     "action-subscribe-add-white"     : {
       "name" : "action-subscribe-add-white",
       "rule" : ".action-subscribe-add-white, .device-desktop .phabricator-action-view:hover .action-subscribe-add",
-      "hash" : "75be8cd5e9622834bd6faf0c6d1db271"
+      "hash" : "2ca899f12f05b03c5c54cbac08d2b74d"
     },
     "action-subscribe-auto"          : {
       "name" : "action-subscribe-auto",
       "rule" : ".action-subscribe-auto",
-      "hash" : "95145b14f35005a0ff3224e3076a9388"
+      "hash" : "a6cd0083b657b924882d830cd4f91bbc"
     },
     "action-subscribe-auto-grey"     : {
       "name" : "action-subscribe-auto-grey",
       "rule" : ".action-subscribe-auto-grey",
-      "hash" : "12edd25560b91838642baa3529743733"
+      "hash" : "77ccbf046a3a39ebf20ba6e58e865438"
     },
     "action-subscribe-auto-white"    : {
       "name" : "action-subscribe-auto-white",
       "rule" : ".action-subscribe-auto-white, .device-desktop .phabricator-action-view:hover .action-subscribe-auto",
-      "hash" : "eda2baeaf056a2d5f46184393ec6dbca"
+      "hash" : "f22920740beb517bb7d33ae91462907d"
     },
     "action-subscribe-delete"        : {
       "name" : "action-subscribe-delete",
       "rule" : ".action-subscribe-delete",
-      "hash" : "55a16e4abd9fe661f350b5327aafed88"
+      "hash" : "e78959e3ed89af610da59e8ef77c799d"
     },
     "action-subscribe-delete-grey"   : {
       "name" : "action-subscribe-delete-grey",
       "rule" : ".action-subscribe-delete-grey",
-      "hash" : "c1c033955177120cd6adcb0d68f37e18"
+      "hash" : "e3e8d142bdd4d1acfebcd03c790ac5b5"
     },
     "action-subscribe-delete-white"  : {
       "name" : "action-subscribe-delete-white",
       "rule" : ".action-subscribe-delete-white, .device-desktop .phabricator-action-view:hover .action-subscribe-delete",
-      "hash" : "bc0d60756e5b4c141b801fb384933eab"
+      "hash" : "1368667fb8b115c95512eda55d7065a5"
     },
     "action-tag"                     : {
       "name" : "action-tag",
       "rule" : ".action-tag",
-      "hash" : "069a8593574d6f847a3611b23677e667"
+      "hash" : "2574ffef0cafe758774e358bd6e5cd6a"
     },
     "action-tag-grey"                : {
       "name" : "action-tag-grey",
       "rule" : ".action-tag-grey",
-      "hash" : "544d96d3bed359a545f2eaa16687cead"
+      "hash" : "e8194bcfb48d63a5a8c5ce69a0a3dcc5"
     },
     "action-tag-white"               : {
       "name" : "action-tag-white",
       "rule" : ".action-tag-white, .device-desktop .phabricator-action-view:hover .action-tag",
-      "hash" : "e3e509127ef1a452faaa03465dd6f9c1"
+      "hash" : "2d54a42a650a987ce706c2d935ff33cd"
     },
     "action-transcript"              : {
       "name" : "action-transcript",
       "rule" : ".action-transcript",
-      "hash" : "4e76a6b1c51fcfc1b1b1ad0e7f247c3a"
+      "hash" : "6be4d47abddeb109216f346787face70"
     },
     "action-transcript-grey"         : {
       "name" : "action-transcript-grey",
       "rule" : ".action-transcript-grey",
-      "hash" : "313af234ca64b2ecc53dd1c91ce0b1c1"
+      "hash" : "9ed35e5d39536a4b8dd934039c742447"
     },
     "action-transcript-white"        : {
       "name" : "action-transcript-white",
       "rule" : ".action-transcript-white, .device-desktop .phabricator-action-view:hover .action-transcript",
-      "hash" : "39743a3d055fcd5b344eb59092006f16"
+      "hash" : "7c3df910499b8ddb85c2f53e0d58c0db"
     },
     "action-undo"                    : {
       "name" : "action-undo",
       "rule" : ".action-undo",
-      "hash" : "7e860a8ec5bb760b0767ecc3114173c7"
+      "hash" : "f81151e242bb8ae29714bec10cb7c5f1"
     },
     "action-undo-grey"               : {
       "name" : "action-undo-grey",
       "rule" : ".action-undo-grey",
-      "hash" : "6c9fdd95e53b4ec05da46cf129e3c6fb"
+      "hash" : "8d4b0bc147b463011ec00321ba75b17f"
     },
     "action-undo-white"              : {
       "name" : "action-undo-white",
       "rule" : ".action-undo-white, .device-desktop .phabricator-action-view:hover .action-undo",
-      "hash" : "8b3fefbad3b5179a6b35b41617e2cef2"
+      "hash" : "39b777060ce1d1b0c68c550bb63d7146"
     },
     "action-unlock"                  : {
       "name" : "action-unlock",
       "rule" : ".action-unlock",
-      "hash" : "e2ff544b4c60dcf7545755d96d23b993"
+      "hash" : "d7cc6ffcda62a90e455d37ca0f07d0dd"
     },
     "action-unlock-grey"             : {
       "name" : "action-unlock-grey",
       "rule" : ".action-unlock-grey",
-      "hash" : "d9656d004d5c516a38d75462eadf82f5"
+      "hash" : "efdc3048fa3a4051a43f43a915e53b0e"
     },
     "action-unlock-white"            : {
       "name" : "action-unlock-white",
       "rule" : ".action-unlock-white, .device-desktop .phabricator-action-view:hover .action-unlock",
-      "hash" : "a970eb7a33d2c5c71d2125b0b8e79375"
+      "hash" : "d0e7aff47724d94167e9bcb11eb5e6aa"
     },
     "action-unmerge"                 : {
       "name" : "action-unmerge",
       "rule" : ".action-unmerge",
-      "hash" : "48a0128075a15f5145c343f9fe4fba2e"
+      "hash" : "00d417a336f6e076bb587cd4cef5eb49"
     },
     "action-unmerge-grey"            : {
       "name" : "action-unmerge-grey",
       "rule" : ".action-unmerge-grey",
-      "hash" : "9be17dad18c74a10122def1dabbbf1c4"
+      "hash" : "904a51920678c838b72c934085f339a7"
     },
     "action-unmerge-white"           : {
       "name" : "action-unmerge-white",
       "rule" : ".action-unmerge-white, .device-desktop .phabricator-action-view:hover .action-unmerge",
-      "hash" : "5139f358574dcd0ac5cecf412c8115fd"
+      "hash" : "2e5761de881642c94e641879bbde318f"
     },
     "action-unpublish"               : {
       "name" : "action-unpublish",
       "rule" : ".action-unpublish",
-      "hash" : "3e6211c213fec14fe152b5fabcb0f306"
+      "hash" : "88d21b9ce49b7ac886250df307f756ce"
     },
     "action-unpublish-grey"          : {
       "name" : "action-unpublish-grey",
       "rule" : ".action-unpublish-grey",
-      "hash" : "602cdfcfa89b575456aee6eb808accc4"
+      "hash" : "5c4fe69253100e9ca292348af13b9f3f"
     },
     "action-unpublish-white"         : {
       "name" : "action-unpublish-white",
       "rule" : ".action-unpublish-white, .device-desktop .phabricator-action-view:hover .action-unpublish",
-      "hash" : "b8cde193bf30d834fc90ddfd17fe56ea"
+      "hash" : "f663861c0776cea790d8392e4aa2fc5d"
     },
     "action-upload"                  : {
       "name" : "action-upload",
       "rule" : ".action-upload",
-      "hash" : "e1ab661b790989b38b07eae365343c36"
+      "hash" : "bdd10302988fe6d2130f0dfc3b67d281"
     },
     "action-upload-grey"             : {
       "name" : "action-upload-grey",
       "rule" : ".action-upload-grey",
-      "hash" : "f03d83d2e4d3ae10661d430aa4f02523"
+      "hash" : "f376bbbbadefea220ec02ca3ae53d41a"
     },
     "action-upload-white"            : {
       "name" : "action-upload-white",
       "rule" : ".action-upload-white, .device-desktop .phabricator-action-view:hover .action-upload",
-      "hash" : "75a3ea84188c4b4b21aa5a656464a8d0"
+      "hash" : "4b31d9dc6f17bd0cd54c3dcea7a95313"
     },
     "action-warning"                 : {
       "name" : "action-warning",
       "rule" : ".action-warning",
-      "hash" : "c1544d80d0bb28d7f9925e5ecda1165f"
+      "hash" : "950ac4ea5e65de41aca0788e6769650f"
     },
     "action-warning-grey"            : {
       "name" : "action-warning-grey",
       "rule" : ".action-warning-grey",
-      "hash" : "dccb1f52678bf74fc1eaa6a6e8dcae7a"
+      "hash" : "180e305268970291f6a38760deea0d4c"
     },
     "action-warning-white"           : {
       "name" : "action-warning-white",
       "rule" : ".action-warning-white, .device-desktop .phabricator-action-view:hover .action-warning",
-      "hash" : "57aadd4cf33bf6cb6464d243cd3e5f4d"
+      "hash" : "4ec3034629bc144886cd7aae5412dce2"
     },
     "action-world"                   : {
       "name" : "action-world",
       "rule" : ".action-world",
-      "hash" : "374749ade70638672595b8a985341a34"
+      "hash" : "95ebc5ab6e70ab9d794f0960f2a43559"
     },
     "action-world-grey"              : {
       "name" : "action-world-grey",
       "rule" : ".action-world-grey",
-      "hash" : "f5fa565f8dbc81d5ac8d8f128179929b"
+      "hash" : "969b164f2f5580f9226f293dbcfe50bc"
     },
     "action-world-white"             : {
       "name" : "action-world-white",
       "rule" : ".action-world-white, .device-desktop .phabricator-action-view:hover .action-world",
-      "hash" : "b50f9d742377edf4edda3e1e78f1e558"
+      "hash" : "106ab6c8bc5a685cd0837baaa6c617e4"
     },
     "remarkup-assist-text_b"         : {
       "name" : "remarkup-assist-text_b",
       "rule" : ".remarkup-assist-b",
-      "hash" : "12c565d4934f6a777c9524baf75cebb6"
+      "hash" : "b2e7ba9cba2946a78ac8045d83852ade"
     },
     "remarkup-assist-text_chaos"     : {
       "name" : "remarkup-assist-text_chaos",
       "rule" : ".remarkup-assist-chaos",
-      "hash" : "970014bac5ad05a98e5d89eaa2775bc0"
+      "hash" : "c5c1e04004a7f24e9e222eee034a975a"
     },
     "remarkup-assist-text_chaos_off" : {
       "name" : "remarkup-assist-text_chaos_off",
       "rule" : ".remarkup-control-chaos-mode .remarkup-assist-chaos",
-      "hash" : "6aba69818e88ff220e774271e2d710b4"
+      "hash" : "40c8cc1f8f52cdb70c70fd00ce436f3b"
     },
     "remarkup-assist-text_code"      : {
       "name" : "remarkup-assist-text_code",
       "rule" : ".remarkup-assist-code",
-      "hash" : "f06f106cb8edb67e8b99d159d704a61a"
+      "hash" : "c0527e968c770450d4aa7cefe38271b8"
     },
     "remarkup-assist-text_help"      : {
       "name" : "remarkup-assist-text_help",
       "rule" : ".remarkup-assist-help",
-      "hash" : "9d54d8224b81de8e3ed7beac0e486257"
+      "hash" : "e8312c555e5f3935d8e2dcf44147b7f8"
     },
     "remarkup-assist-text_i"         : {
       "name" : "remarkup-assist-text_i",
       "rule" : ".remarkup-assist-i",
-      "hash" : "50f83a53f5b094d3d92b619d06fada3c"
+      "hash" : "19d4c474555d75d0e4739ec7097dbfa4"
     },
     "remarkup-assist-text_image"     : {
       "name" : "remarkup-assist-text_image",
       "rule" : ".remarkup-assist-image",
-      "hash" : "c2869e71cc7cb6178598cd41a19ababb"
+      "hash" : "5a560800fa31b24d18807b430797ac95"
     },
     "remarkup-assist-text_larger"    : {
       "name" : "remarkup-assist-text_larger",
       "rule" : ".remarkup-assist-larger",
-      "hash" : "d3165f15a1b3734e4b7088f7b74330ba"
+      "hash" : "5cd9c8223c99ef3409c82dfaefeebc50"
     },
     "remarkup-assist-text_meme"      : {
       "name" : "remarkup-assist-text_meme",
       "rule" : ".remarkup-assist-meme",
-      "hash" : "ed9c4166858ca1caedf5f8e4b8ad587e"
+      "hash" : "ff98a508db2348b3d46aaf8225b26862"
     },
     "remarkup-assist-text_ol"        : {
       "name" : "remarkup-assist-text_ol",
       "rule" : ".remarkup-assist-ol",
-      "hash" : "266b858f5ffc42760fb2e12913a5198a"
+      "hash" : "a2805d44ca0eac518f99109c4969f450"
     },
     "remarkup-assist-text_order"     : {
       "name" : "remarkup-assist-text_order",
       "rule" : ".remarkup-assist-order",
-      "hash" : "aed1511443ff24dcbca27ac4624dee66"
+      "hash" : "9eb7710b469dfbdf7093ab84b9a28a37"
     },
     "remarkup-assist-text_order_off" : {
       "name" : "remarkup-assist-text_order_off",
       "rule" : ".remarkup-control-order-mode .remarkup-assist-order",
-      "hash" : "bf78a7f49efcc295db550dd665d55a00"
+      "hash" : "c32fbbdde8bd18f7bdc287935d73024a"
     },
     "remarkup-assist-text_table"     : {
       "name" : "remarkup-assist-text_table",
       "rule" : ".remarkup-assist-table",
-      "hash" : "5c2961b35460b3b5b7efdd5bc4e318ca"
+      "hash" : "2ae3fb49af42f07038d77aa5b62862c0"
     },
     "remarkup-assist-text_tag"       : {
       "name" : "remarkup-assist-text_tag",
       "rule" : ".remarkup-assist-tag",
-      "hash" : "165bd3a4de8d54cf720db9bc64116d25"
+      "hash" : "446c23bff9fc7da885ea574f073eaf0f"
     },
     "remarkup-assist-text_tt"        : {
       "name" : "remarkup-assist-text_tt",
       "rule" : ".remarkup-assist-tt",
-      "hash" : "c07e6816500c9cd66fa27758cc902195"
+      "hash" : "77ae74c8a9a02fde5565399409dc5ab3"
     },
     "remarkup-assist-text_ul"        : {
       "name" : "remarkup-assist-text_ul",
       "rule" : ".remarkup-assist-ul",
-      "hash" : "26f55c0fcf9148879e3fb058ac319100"
+      "hash" : "cf3c6b4f809377b7eff9fcef42fc47df"
     }
   },
   "scales"  : [

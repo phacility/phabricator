@@ -4,57 +4,57 @@
     "gradient-blue-header"      : {
       "name" : "gradient-blue-header",
       "rule" : ".gradient-blue-header",
-      "hash" : "140afa213190597e9b55b2eafdd73595"
+      "hash" : "dd82b6d737f9f683c0d6e70eff59e872"
     },
     "gradient-breadcrumbs"      : {
       "name" : "gradient-breadcrumbs",
       "rule" : ".gradient-breadcrumbs",
-      "hash" : "688ab77f50cfbc17ec30d798efb1b39e"
+      "hash" : "3d0f8634df5bc29eaf2a5a01bae79cf1"
     },
     "gradient-dark-grey-header" : {
       "name" : "gradient-dark-grey-header",
       "rule" : ".gradient-dark-grey-header",
-      "hash" : "8367f2aa63fc9e87113f1399236646b3"
+      "hash" : "2bdb9bec730405a8fc0a1eca4f3538c2"
     },
     "gradient-dark-menu-label"  : {
       "name" : "gradient-dark-menu-label",
       "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label",
-      "hash" : "89a908596142d38fbe61a706694cd321"
+      "hash" : "e0d4a455142f9c4745d36ad8b7dd3f78"
     },
     "gradient-green-header"     : {
       "name" : "gradient-green-header",
       "rule" : ".gradient-green-header",
-      "hash" : "e98f182fcb60ef2f069b50c1cc86bfcd"
+      "hash" : "d61297d23aa31fa1de51e2b9b5974554"
     },
     "gradient-grey-header"      : {
       "name" : "gradient-grey-header",
       "rule" : ".gradient-grey-header",
-      "hash" : "35fb239cd341b3eb2eea7a73b69782f9"
+      "hash" : "f1453896068a8dd0d7885457c8e371bc"
     },
     "gradient-menu-hover"       : {
       "name" : "gradient-menu-hover",
       "rule" : ".gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover",
-      "hash" : "856380207ac8c5cb6770d44dceb245a8"
+      "hash" : "e6e064156d66952180e99b00996ffc38"
     },
     "gradient-menu-label"       : {
       "name" : "gradient-menu-label",
       "rule" : ".gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label",
-      "hash" : "8ad8352b077ae02820ebbbae26dc669b"
+      "hash" : "04b9943f5b06c8cb21fe6b96714e6662"
     },
     "gradient-menu-selected"    : {
       "name" : "gradient-menu-selected",
       "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus",
-      "hash" : "815bafb94e11c23e1a419ea85dcae113"
+      "hash" : "9b4b039fba177b90bc26f0e6eece339d"
     },
     "gradient-red-header"       : {
       "name" : "gradient-red-header",
       "rule" : ".gradient-red-header",
-      "hash" : "74d5dacd92eb2aaf4b0b79ccf814849b"
+      "hash" : "27a76645065953a8440d0c3d2b192c82"
     },
     "gradient-yellow-header"    : {
       "name" : "gradient-yellow-header",
       "rule" : ".gradient-yellow-header",
-      "hash" : "6ee02b257d2c9b0e0fbc5bdaa2d0ef75"
+      "hash" : "181e68e61f29071c3ec3810694c2ef08"
     }
   },
   "scales"  : [

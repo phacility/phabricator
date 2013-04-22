@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-actions {
     background-image: url(/rsrc/image/sprite-actions-X2.png);
-    background-size: 125px 150px;
+    background-size: 150px 175px;
   }
 }
 
@@ -22,20 +22,24 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px 0px;
 }
 
-.actions-flag-dark, .device-desktop .actions-flag-grey.phui-icon-item-link:hover {
+.actions-down-dark, .device-desktop .actions-down-grey.phui-icon-item-link:hover {
   background-position: -25px 0px;
 }
 
-.actions-heart-dark, .device-desktop .actions-heart-grey.phui-icon-item-link:hover {
+.actions-flag-dark, .device-desktop .actions-flag-grey.phui-icon-item-link:hover {
   background-position: -50px 0px;
 }
 
-.actions-move-dark, .device-desktop .actions-move-grey.phui-icon-item-link:hover {
+.actions-heart-dark, .device-desktop .actions-heart-grey.phui-icon-item-link:hover {
   background-position: -75px 0px;
 }
 
-.actions-new-dark, .device-desktop .actions-new-grey.phui-icon-item-link:hover {
+.actions-move-dark, .device-desktop .actions-move-grey.phui-icon-item-link:hover {
   background-position: -100px 0px;
+}
+
+.actions-new-dark, .device-desktop .actions-new-grey.phui-icon-item-link:hover {
+  background-position: -125px 0px;
 }
 
 .actions-search-dark, .device-desktop .actions-search-grey.phui-icon-item-link:hover {
@@ -54,86 +58,118 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -75px -25px;
 }
 
-.actions-wrench-dark, .device-desktop .actions-wrench-grey.phui-icon-item-link:hover {
+.actions-token-dark, .device-desktop .actions-token-grey.phui-icon-item-link:hover {
   background-position: -100px -25px;
 }
 
-.actions-close-grey {
+.actions-up-dark, .device-desktop .actions-up-grey.phui-icon-item-link:hover {
+  background-position: -125px -25px;
+}
+
+.actions-wrench-dark, .device-desktop .actions-wrench-grey.phui-icon-item-link:hover {
   background-position: 0px -50px;
 }
 
-.actions-flag-grey {
+.actions-close-grey {
   background-position: -25px -50px;
 }
 
-.actions-heart-grey {
+.actions-down-grey {
   background-position: -50px -50px;
 }
 
-.actions-move-grey {
+.actions-flag-grey {
   background-position: -75px -50px;
 }
 
-.actions-new-grey {
+.actions-heart-grey {
   background-position: -100px -50px;
 }
 
-.actions-search-grey {
+.actions-move-grey {
+  background-position: -125px -50px;
+}
+
+.actions-new-grey {
   background-position: 0px -75px;
 }
 
-.actions-settings-grey {
+.actions-search-grey {
   background-position: -25px -75px;
 }
 
-.actions-star-grey {
+.actions-settings-grey {
   background-position: -50px -75px;
 }
 
-.actions-tag-grey {
+.actions-star-grey {
   background-position: -75px -75px;
 }
 
-.actions-wrench-grey {
+.actions-tag-grey {
   background-position: -100px -75px;
 }
 
-.actions-close-white {
+.actions-token-grey {
+  background-position: -125px -75px;
+}
+
+.actions-up-grey {
   background-position: 0px -100px;
 }
 
-.actions-flag-white {
+.actions-wrench-grey {
   background-position: -25px -100px;
 }
 
-.actions-heart-white {
+.actions-close-white {
   background-position: -50px -100px;
 }
 
-.actions-move-white {
+.actions-down-white {
   background-position: -75px -100px;
 }
 
-.actions-new-white {
+.actions-flag-white {
   background-position: -100px -100px;
 }
 
-.actions-search-white {
+.actions-heart-white {
+  background-position: -125px -100px;
+}
+
+.actions-move-white {
   background-position: 0px -125px;
 }
 
-.actions-settings-white {
+.actions-new-white {
   background-position: -25px -125px;
 }
 
-.actions-star-white {
+.actions-search-white {
   background-position: -50px -125px;
 }
 
-.actions-tag-white {
+.actions-settings-white {
   background-position: -75px -125px;
 }
 
-.actions-wrench-white {
+.actions-star-white {
   background-position: -100px -125px;
+}
+
+.actions-tag-white {
+  background-position: -125px -125px;
+}
+
+.actions-token-white {
+  background-position: 0px -150px;
+}
+
+.actions-up-white {
+  background-position: -25px -150px;
+}
+
+.actions-wrench-white {
+  background-position: -50px -150px;
 }
