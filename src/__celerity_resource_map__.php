@@ -637,17 +637,10 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-minicons.png',
     'type' => 'png',
   ),
-  '/rsrc/image/sprite-payments-X2.png' =>
-  array(
-    'hash' => 'a896e11842db04bde8c3dc18d6efacd3',
-    'uri' => '/res/a896e118/rsrc/image/sprite-payments-X2.png',
-    'disk' => '/rsrc/image/sprite-payments-X2.png',
-    'type' => 'png',
-  ),
   '/rsrc/image/sprite-payments.png' =>
   array(
-    'hash' => '5ac5b872d19a862eabc508c8bf97a53b',
-    'uri' => '/res/5ac5b872/rsrc/image/sprite-payments.png',
+    'hash' => '5ce73fb580609e7cda16832e3577b147',
+    'uri' => '/res/5ce73fb5/rsrc/image/sprite-payments.png',
     'disk' => '/rsrc/image/sprite-payments.png',
     'type' => 'png',
   ),
@@ -911,7 +904,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-header-pane-css' =>
   array(
-    'uri' => '/res/0c8d4664/rsrc/css/application/conpherence/header-pane.css',
+    'uri' => '/res/dc654fce/rsrc/css/application/conpherence/header-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1296,7 +1289,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/00da05a6/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/ce7bfa44/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1327,7 +1320,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-widget-pane' =>
   array(
-    'uri' => '/res/0876b8d6/rsrc/js/application/conpherence/behavior-widget-pane.js',
+    'uri' => '/res/a9bcb950/rsrc/js/application/conpherence/behavior-widget-pane.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3623,7 +3616,7 @@ celerity_register_resource_map(array(
   ),
   'phui-icon-view-css' =>
   array(
-    'uri' => '/res/9d05b3f3/rsrc/css/phui/phui-icon.css',
+    'uri' => '/res/2aa71cc6/rsrc/css/phui/phui-icon.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3902,7 +3895,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-payments-css' =>
   array(
-    'uri' => '/res/dcb6e856/rsrc/css/sprite-payments.css',
+    'uri' => '/res/876697b6/rsrc/css/sprite-payments.css',
     'type' => 'css',
     'requires' =>
     array(
