@@ -2374,7 +2374,7 @@ phutil_register_library_map(array(
     'PHUIBoxView' => 'AphrontTagView',
     'PHUIFeedStoryView' => 'AphrontView',
     'PHUIIconExample' => 'PhabricatorUIExample',
-    'PHUIIconView' => 'AphrontView',
+    'PHUIIconView' => 'AphrontTagView',
     'PackageCreateMail' => 'PackageMail',
     'PackageDeleteMail' => 'PackageMail',
     'PackageMail' => 'PhabricatorMail',

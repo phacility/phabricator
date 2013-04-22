@@ -1,6 +1,6 @@
 <?php
 
-final class PHUIIconView extends AphrontView {
+final class PHUIIconView extends AphrontTagView {
 
   const SPRITE_MINICONS = 'minicons';
   const SPRITE_ACTIONS = 'actions';
@@ -10,8 +10,7 @@ final class PHUIIconView extends AphrontView {
   const HEAD_SMALL = 'phuihead-small';
   const HEAD_MEDIUM = 'phuihead-medium';
 
-  private $href;
-  private $workflow;
+  private $href = null;
   private $image;
   private $headSize = null;
   private $spriteIcon;
@@ -19,11 +18,6 @@ final class PHUIIconView extends AphrontView {
 
   public function setHref($href) {
     $this->href = $href;
-    return $this;
-  }
-
-  public function setWorkflow($workflow) {
-    $this->workflow = $workflow;
     return $this;
   }
 
@@ -47,46 +41,31 @@ final class PHUIIconView extends AphrontView {
     return $this;
   }
 
-  public function render() {
-    require_celerity_resource('phui-icon-view-css');
-
+  public function getTagName() {
     $tag = 'span';
     if ($this->href) {
       $tag = 'a';
     }
+    return $tag;
+  }
 
-    $classes = array();
-    $classes[] = 'phui-icon-item-link';
+  public function getTagAttributes() {
+    require_celerity_resource('phui-icon-view-css');
+
+    $this->addClass('phui-icon-item-link');
 
     if ($this->spriteIcon) {
       require_celerity_resource('sprite-'.$this->spriteSheet.'-css');
-      $classes[] = 'sprite-'.$this->spriteSheet;
-      $classes[] = $this->spriteSheet.'-'.$this->spriteIcon;
-
-      $action_icon = phutil_tag(
-        $tag,
-          array(
-            'href'  => $this->href ? $this->href : null,
-            'class' => implode(' ', $classes),
-            'sigil' => $this->workflow ? 'workflow' : null,
-          ),
-          '');
+      $this->addClass('sprite-'.$this->spriteSheet);
+      $this->addClass($this->spriteSheet.'-'.$this->spriteIcon);
     } else {
       if ($this->headSize) {
-        $classes[] = $this->headSize;
+        $this->addClass($this->headSize);
       }
-
-      $action_icon = phutil_tag(
-        $tag,
-          array(
-            'href'  => $this->href ? $this->href : null,
-            'class' => implode(' ', $classes),
-            'sigil' => $this->workflow ? 'workflow' : null,
-            'style' => 'background-image: url('.$this->image.');'
-          ),
-          '');
+      $this->setStyle('background-image: url('.$this->image.');');
     }
 
-    return $action_icon;
+    $attribs = array('href' => $this->href);
+    return $attribs;
   }
 }
