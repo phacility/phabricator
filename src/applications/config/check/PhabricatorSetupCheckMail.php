@@ -18,7 +18,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
             ->setShortName(pht('Missing Sendmail'))
             ->setName(pht('No Sendmail Binary Found'))
             ->setMessage($message)
-            ->addPhabricatorConfig('metamta.mail-adapter');
+            ->addRelatedPhabricatorConfig('metamta.mail-adapter');
         }
         break;
       case 'PhabricatorMailImplementationAmazonSESAdapter':
@@ -30,7 +30,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
           $this->newIssue('config.can-send-as-user')
             ->setName(pht("SES Can't Send As User"))
             ->setMessage($message)
-            ->addPhabricatorConfig('metamta.mail-adapter')
+            ->addRelatedPhabricatorConfig('metamta.mail-adapter')
             ->addPhabricatorConfig('metamta.can-send-as-user');
         }
 
@@ -43,7 +43,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
           $this->newIssue('config.amazon-ses.access-key')
             ->setName(pht("Amazon SES Access Key Not Set"))
             ->setMessage($message)
-            ->addPhabricatorConfig('metamta.mail-adapter')
+            ->addRelatedPhabricatorConfig('metamta.mail-adapter')
             ->addPhabricatorConfig('amazon-ses.access-key');
         }
 
@@ -56,7 +56,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
           $this->newIssue('config.amazon-ses.secret-key')
             ->setName(pht("Amazon SES Secret Key Not Set"))
             ->setMessage($message)
-            ->addPhabricatorConfig('metamta.mail-adapter')
+            ->addRelatedPhabricatorConfig('metamta.mail-adapter')
             ->addPhabricatorConfig('amazon-ses.secret-key');
         }
 
@@ -73,7 +73,7 @@ final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
           $this->newIssue('config.metamta.default-address')
             ->setName(pht("No SES From Address Configured"))
             ->setMessage($message)
-            ->addPhabricatorConfig('metamta.mail-adapter')
+            ->addRelatedPhabricatorConfig('metamta.mail-adapter')
             ->addPhabricatorConfig('metamta.default-address');
         }
         break;

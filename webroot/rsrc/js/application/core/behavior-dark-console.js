@@ -193,6 +193,7 @@ JX.behavior('dark-console', function(config, statics) {
       new JX.Request('/~/', JX.bag)
         .setData({ tab : tclass })
         .send();
+      statics.selected = tclass;
     }
 
     draw_panel();

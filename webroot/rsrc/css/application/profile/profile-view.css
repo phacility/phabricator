@@ -69,17 +69,18 @@ td.phabricator-profile-content {
 }
 
 .phabricator-profile-info-group {
-  margin-bottom: 2em;
+  box-shadow: 0 1px 1px rgba(0,0,0,.4);
 }
 
 .phabricator-profile-info-header {
   padding: 8px;
-  background: #f0f0f0;
-  border-top: 1px solid #d9d9d9;
+  background: #e7e7e7;
+  border-bottom: 1px solid #d9d9d9;
 }
 
 .phabricator-profile-info-pane {
   padding: 8px .5em;
+  background: #fff;
 }
 
 .phabricator-profile-info-table {
@@ -100,4 +101,28 @@ img.phabricator-profile-image {
   padding: .25em;
   font-weight: bold;
   margin: .5em 1em 0;
+}
+
+.profile-wrap-responsive {
+  margin: 20px;
+}
+
+.device .profile-wrap-responsive {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.device-desktop .profile-feed {
+  max-width: 640px;
+}
+
+.profile-feed .phabricator-action-header-title {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.device-desktop .phabricator-project-layout
+  .aphront-multi-column-column-outer:first-child
+  .phabricator-profile-info-group {
+  margin-right: 0;
 }

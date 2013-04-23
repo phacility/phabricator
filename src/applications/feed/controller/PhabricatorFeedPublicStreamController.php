@@ -25,13 +25,14 @@ final class PhabricatorFeedPublicStreamController
       ->setFramed(true)
       ->setUser($viewer);
 
-    $view = $builder->buildView();
+    $view = hsprintf('<div class="phabricator-public-feed-frame">%s</div>',
+      $builder->buildView());
 
     return $this->buildStandardPageResponse(
       $view,
       array(
-        'title'   => 'Public Feed',
-        'public'  => true,
+        'title' => pht('Public Feed'),
+        'public' => true,
       ));
   }
 }

@@ -94,7 +94,6 @@ final class ConduitAPI_feed_query_Method
             $data = $view->render();
           break;
           case 'html-summary':
-            $view->setOneLineStory(true);
             $data = $view->render();
           break;
           case 'data':

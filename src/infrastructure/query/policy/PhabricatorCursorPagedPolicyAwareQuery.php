@@ -35,9 +35,17 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $this;
   }
 
+  final protected function getAfterID() {
+    return $this->afterID;
+  }
+
   final public function setBeforeID($object_id) {
     $this->beforeID = $object_id;
     return $this;
+  }
+
+  final protected function getBeforeID() {
+    return $this->beforeID;
   }
 
   final protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {

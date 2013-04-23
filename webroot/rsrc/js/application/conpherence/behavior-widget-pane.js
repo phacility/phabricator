@@ -5,39 +5,104 @@
  *           javelin-workflow
  *           javelin-util
  *           phabricator-notification
+ *           javelin-behavior-device
  * @provides javelin-behavior-conpherence-widget-pane
  */
 
 JX.behavior('conpherence-widget-pane', function(config) {
 
+  var toggle_widget = function (data) {
+    var device = JX.Device.getDevice();
+    var is_desktop = device == 'desktop';
+    if (config.widgetRegistery[data.widget] == config.devicesOnly &&
+        is_desktop) {
+      return;
+    }
+
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var widgetPane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+    for (var widget in config.widgetRegistery) {
+      // device-only widgets are *always shown* on the desktop
+      if (config.widgetRegistery[widget] == config.devicesOnly) {
+        if (is_desktop) {
+          JX.$(widget).style.display = 'block';
+          if (config.widgetExtraNodes[widget]) {
+            for (var i in config.widgetExtraNodes[widget]) {
+              var tag_data = config.widgetExtraNodes[widget][i];
+              var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
+              node.style.display = tag_data.desktopstyle;
+            }
+          }
+          continue;
+        }
+      }
+
+      var cur_toggle = JX.$(widget + '-toggle');
+      var toggle_class = config.widgetToggleMap[widget];
+      if (widget == data.widget) {
+        JX.DOM.alterClass(cur_toggle, toggle_class, true);
+        JX.$(widget).style.display = 'block';
+        if (config.widgetRegistery[widget] == config.devicesOnly) {
+          widgetPane.style.height = '42px';
+        } else {
+          widgetPane.style.height = '100%';
+        }
+        if (config.widgetExtraNodes[widget]) {
+          for (var i in config.widgetExtraNodes[widget]) {
+            var tag_data = config.widgetExtraNodes[widget][i];
+            var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
+            node.style.display = tag_data.showstyle;
+          }
+        }
+        // some one off code for conpherence messages
+        if (widget == 'conpherence-message-pane') {
+          JX.Stratcom.invoke('conpherence-redraw-thread', null, {});
+          JX.Stratcom.invoke('conpherence-update-page-data', null, {});
+        }
+        // some one off code for conpherence list
+        if (widget == 'conpherence-menu-pane') {
+          JX.Stratcom.invoke(
+            'conpherence-update-page-data',
+            null,
+            { use_base_uri : true, title: 'Conpherence' }
+          );
+        }
+      } else {
+        JX.DOM.alterClass(
+          cur_toggle,
+          toggle_class,
+          false
+        );
+        JX.$(widget).style.display = 'none';
+        if (config.widgetExtraNodes[widget]) {
+          for (var i in config.widgetExtraNodes[widget]) {
+            var tag_data = config.widgetExtraNodes[widget][i];
+            var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
+            node.style.display = tag_data.hidestyle;
+          }
+        }
+      }
+    }
+  };
+
   JX.Stratcom.listen(
-    'click',
+    ['touchstart', 'mousedown'],
     'conpherence-change-widget',
     function(e) {
       e.kill();
       var data = e.getNodeData('conpherence-change-widget');
-      // abort if this widget isn't exactly involved in this toggle business
-      if (!config.widgetRegistery[data.widget]) {
-        return;
-      }
-      for (var widget in config.widgetRegistery) {
-        if (!config.widgetRegistery[widget]) {
-          continue;
-        } else if (widget == data.widget) {
-          JX.$(widget).style.display = 'block';
-          JX.DOM.alterClass(e.getTarget(), data.toggleClass, true);
-        } else {
-          JX.$(widget).style.display = 'none';
-          var cur_toggle = JX.$(widget + '-toggle');
-          JX.DOM.alterClass(
-            cur_toggle,
-            JX.Stratcom.getData(cur_toggle).toggleClass,
-            false
-          );
-        }
-      }
+      toggle_widget(data);
     }
   );
+
+  JX.Stratcom.listen(
+    'conpherence-toggle-widget',
+    null,
+    function (e) {
+      toggle_widget(e.getData());
+    }
+  );
+
 
   /* people widget */
   JX.Stratcom.listen(
@@ -49,8 +114,11 @@ JX.behavior('conpherence-widget-pane', function(config) {
       var form = e.getNode('tag:form');
       var data = e.getNodeData('add-person');
       var peopleRoot = e.getNode('widgets-people');
-      var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
-      var header = JX.DOM.find(root, 'div', 'conpherence-header');
+      var messages = null;
+      try {
+        messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+      } catch (ex) {
+      }
       var latestTransactionData = JX.Stratcom.getData(
         JX.DOM.find(
           root,
@@ -60,28 +128,10 @@ JX.behavior('conpherence-widget-pane', function(config) {
       data.latest_transaction_id = latestTransactionData.id;
       JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function (r) {
-        // update the transactions
-        JX.DOM.appendContent(messages, JX.$H(r.transactions));
-        messages.scrollTop = messages.scrollHeight;
-
-        try {
-          JX.DOM.replace(
-            JX.$(r.conpherence_phid + '-nav-item'),
-            JX.$H(r.nav_item));
-          JX.Stratcom.invoke(
-            'conpherence-selectthread',
-            null,
-            { id : r.conpherence_phid + '-nav-item' }
-          );
-        } catch (ex) {
-          // Ignore; this view may not have a menu.
+        if (messages) {
+          JX.DOM.appendContent(messages, JX.$H(r.transactions));
+          messages.scrollTop = messages.scrollHeight;
         }
-
-        // update the header
-        JX.DOM.setContent(
-          header,
-          JX.$H(r.header)
-       );
 
         // update the people widget
         JX.DOM.setContent(
@@ -94,7 +144,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
   );
 
   JX.Stratcom.listen(
-    ['click'],
+    ['touchstart', 'mousedown'],
     'remove-person',
     function (e) {
       var peopleRoot = e.getNode('widgets-people');

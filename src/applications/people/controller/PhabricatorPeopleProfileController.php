@@ -141,8 +141,6 @@ final class PhabricatorPeopleProfileController
     }
 
     $nav->appendChild($header);
-
-    $content = hsprintf('<div style="padding: 1em;">%s</div>', $content);
     $header->appendChild($content);
 
     if ($user->getPHID() == $viewer->getPHID()) {
@@ -163,6 +161,8 @@ final class PhabricatorPeopleProfileController
       $nav,
       array(
         'title' => $user->getUsername(),
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -179,7 +179,7 @@ final class PhabricatorPeopleProfileController
     $blurb = $engine->markupText($blurb);
 
     $content = hsprintf(
-      '<div class="phabricator-profile-info-group">
+      '<div class="phabricator-profile-info-group profile-wrap-responsive">
         <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
@@ -194,7 +194,7 @@ final class PhabricatorPeopleProfileController
           </table>
         </div>
       </div>'.
-      '<div class="phabricator-profile-info-group">
+      '<div class="phabricator-profile-info-group profile-wrap-responsive">
         <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
@@ -234,11 +234,9 @@ final class PhabricatorPeopleProfileController
     $view = $builder->buildView();
 
     return hsprintf(
-      '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">%s</h1>
-        <div class="phabricator-profile-info-pane">%s</div>
+      '<div class="profile-feed profile-wrap-responsive">
+        %s
       </div>',
-      pht('Activity Feed'),
       $view->render());
   }
 }

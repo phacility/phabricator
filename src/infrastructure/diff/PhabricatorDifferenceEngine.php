@@ -94,7 +94,7 @@ final class PhabricatorDifferenceEngine {
     Filesystem::writeFile($old_tmp, $old);
     Filesystem::writeFile($new_tmp, $new);
     list($err, $diff) = exec_manual(
-      '/usr/bin/diff %Ls %s %s',
+      'diff %Ls %s %s',
       $options,
       $old_tmp,
       $new_tmp);

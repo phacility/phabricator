@@ -39,6 +39,7 @@ final class DrydockLeaseViewController extends DrydockController {
     $log_table->appendChild($pager);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($title)

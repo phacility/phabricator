@@ -43,11 +43,14 @@ abstract class ConpherenceController extends PhabricatorController {
 
     $all_participation = $unread + $read;
     $all_conpherence_phids = array_keys($all_participation);
-    $all_conpherences = id(new ConpherenceThreadQuery())
-      ->setViewer($user)
-      ->withPHIDs($all_conpherence_phids)
-      ->needParticipantCache(true)
-      ->execute();
+    $all_conpherences = array();
+    if ($all_conpherence_phids) {
+      $all_conpherences = id(new ConpherenceThreadQuery())
+        ->setViewer($user)
+        ->withPHIDs($all_conpherence_phids)
+        ->needParticipantCache(true)
+        ->execute();
+    }
     $unread_conpherences = array_select_keys(
       $all_conpherences,
       array_keys($unread));
@@ -63,7 +66,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $nav = new PhabricatorMenuView();
 
     $nav->newLink(
-      pht('New Conversation'),
+      pht('New Message'),
       $this->getApplicationURI('new/'));
 
     return $nav;
@@ -75,7 +78,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $crumbs
       ->addAction(
         id(new PhabricatorMenuItemView())
-          ->setName(pht('New Conversation'))
+          ->setName(pht('New Message'))
           ->setHref($this->getApplicationURI('new/'))
           ->setIcon('create'))
       ->addCrumb(
@@ -138,6 +141,15 @@ abstract class ConpherenceController extends PhabricatorController {
 
     $user = $this->getRequest()->getUser();
     $transactions = $conpherence->getTransactions();
+    $oldest_transaction_id = 0;
+    $too_many = ConpherenceThreadQuery::TRANSACTION_LIMIT + 1;
+    if (count($transactions) == $too_many) {
+      $last_transaction = end($transactions);
+      unset($transactions[$last_transaction->getID()]);
+      $oldest_transaction = end($transactions);
+      $oldest_transaction_id = $oldest_transaction->getID();
+    }
+    $transactions = array_reverse($transactions);
     $handles = $conpherence->getHandles();
     $rendered_transactions = array();
     $engine = id(new PhabricatorMarkupEngine())
@@ -163,11 +175,11 @@ abstract class ConpherenceController extends PhabricatorController {
         ->render();
     }
     $latest_transaction_id = $transaction->getID();
-    $rendered_transactions = phutil_implode_html(' ', $rendered_transactions);
 
     return array(
       'transactions' => $rendered_transactions,
-      'latest_transaction_id' => $latest_transaction_id
+      'latest_transaction_id' => $latest_transaction_id,
+      'oldest_transaction_id' => $oldest_transaction_id
     );
 
   }

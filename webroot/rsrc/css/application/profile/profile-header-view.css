@@ -3,13 +3,16 @@
  */
 
 .phabricator-profile-header {
-  background: #efefef;
+  background: #e0e3ec;
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #c0c5d1;
   width: 100%;
-  border-bottom: 1px solid #cccccc;
 }
 
 .phabricator-profile-header .profile-header-name {
-  font-size: 22px;
+  font-size: 24px;
+  color: #333;
   font-weight: bold;
   padding: 12px 12px 6px;
   width: 100%;
@@ -31,6 +34,6 @@
 
 .phabricator-profile-header .profile-header-description {
   padding: 0 12px 12px;
-  color: #444444;
-  font-size: 11px;
+  color: #555;
+  font-size: 13px;
 }

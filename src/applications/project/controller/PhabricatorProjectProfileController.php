@@ -18,11 +18,8 @@ final class PhabricatorProjectProfileController
 
     $query = id(new PhabricatorProjectQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id));
-
-    if ($this->page == 'people') {
-      $query->needMembers(true);
-    }
+      ->withIDs(array($this->id))
+      ->needMembers(true);
 
     $project = $query->executeOne();
     $this->project = $project;
@@ -42,34 +39,31 @@ final class PhabricatorProjectProfileController
     $this->page = $nav_view->selectFilter($this->page, 'dashboard');
 
     require_celerity_resource('phabricator-profile-css');
-    switch ($this->page) {
-      case 'dashboard':
-        $content = $this->renderTasksPage($project, $profile);
 
-        $query = new PhabricatorFeedQuery();
-        $query->setFilterPHIDs(
-          array(
-            $project->getPHID(),
-          ));
-        $query->setLimit(50);
-        $query->setViewer($this->getRequest()->getUser());
-        $stories = $query->execute();
+    $tasks = $this->renderTasksPage($project, $profile);
 
-        $content = hsprintf('%s%s', $content, $this->renderStories($stories));
-        break;
-      case 'about':
-        $content = $this->renderAboutPage($project, $profile);
-        break;
-      case 'people':
-        $content = $this->renderPeoplePage($project, $profile);
-        break;
-      case 'feed':
-        $content = $this->renderFeedPage($project, $profile);
-        break;
-      default:
-        throw new Exception("Unimplemented filter '{$this->page}'.");
-    }
+    $query = new PhabricatorFeedQuery();
+    $query->setFilterPHIDs(
+      array(
+        $project->getPHID(),
+      ));
+    $query->setLimit(50);
+    $query->setViewer($this->getRequest()->getUser());
+    $stories = $query->execute();
+    $feed = $this->renderStories($stories);
+    $about = $this->renderAboutPage($project, $profile);
+    $people = $this->renderPeoplePage($project, $profile);
+    $col1 = hsprintf('%s%s', $about, $people);
 
+    $content = id(new AphrontMultiColumnView())
+      ->addColumn($col1)
+      ->addColumn($feed)
+      ->setFluidLayout(true);
+
+    $content = hsprintf(
+      '<div class="phabricator-project-layout">%s%s</div>',
+        $tasks,
+        $content);
 
     $header = new PhabricatorProfileHeaderView();
     $header->setName($project->getName());
@@ -111,16 +105,15 @@ final class PhabricatorProjectProfileController
     }
 
     $header->addAction($action);
-
     $nav_view->appendChild($header);
-
-    $content = hsprintf('<div style="padding: 1em;">%s</div>', $content);
     $header->appendChild($content);
 
     return $this->buildApplicationPage(
       $nav_view,
       array(
         'title' => pht('%s Project', $project->getName()),
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -140,8 +133,8 @@ final class PhabricatorProjectProfileController
     $timestamp = phabricator_datetime($project->getDateCreated(), $viewer);
 
     $about = hsprintf(
-      '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">About</h1>
+      '<div class="phabricator-profile-info-group profile-wrap-responsive">
+        <h1 class="phabricator-profile-info-header">%s</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
@@ -163,6 +156,7 @@ final class PhabricatorProjectProfileController
           </table>
         </div>
       </div>',
+      pht('About This Project'),
       pht('Creator'),
       $handles[$project->getAuthorPHID()]->renderLink(),
       pht('Created'),
@@ -194,7 +188,7 @@ final class PhabricatorProjectProfileController
     }
 
     return hsprintf(
-      '<div class="phabricator-profile-info-group">'.
+      '<div class="phabricator-profile-info-group profile-wrap-responsive">'.
         '<h1 class="phabricator-profile-info-header">%s</h1>'.
         '<div class="phabricator-profile-info-pane">%s</div>'.
       '</div>',
@@ -227,11 +221,9 @@ final class PhabricatorProjectProfileController
     $view = $builder->buildView();
 
     return hsprintf(
-      '<div class="phabricator-profile-info-group">'.
-        '<h1 class="phabricator-profile-info-header">%s</h1>'.
-        '<div class="phabricator-profile-info-pane">%s</div>'.
+      '<div class="profile-feed profile-wrap-responsive">'.
+        '%s'.
       '</div>',
-      pht('Activity Feed'),
       $view->render());
   }
 
@@ -273,7 +265,7 @@ final class PhabricatorProjectProfileController
       pht("View All Open Tasks \xC2\xBB"));
 
     $content = hsprintf(
-      '<div class="phabricator-profile-info-group">
+      '<div class="phabricator-profile-info-group profile-wrap-responsive">
         <h1 class="phabricator-profile-info-header">%s</h1>'.
         '<div class="phabricator-profile-info-pane">'.
           '%s'.
@@ -285,6 +277,10 @@ final class PhabricatorProjectProfileController
       $more_link);
 
     return $content;
+  }
+
+  public function buildApplicationMenu() {
+    return $this->buildLocalNavigation($this->project)->getMenu();
   }
 
 }

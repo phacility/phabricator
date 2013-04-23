@@ -1,0 +1,14 @@
+/**
+ * @provides phui-box-css
+ */
+
+.phui-box-shadow {
+  border-left: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  border-bottom: 1px solid #c0c5d1;
+}
+
+.phui-box-shadow .phui-box-inner {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}

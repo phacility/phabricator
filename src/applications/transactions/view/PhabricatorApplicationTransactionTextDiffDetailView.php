@@ -33,20 +33,24 @@ final class PhabricatorApplicationTransactionTextDiffDetailView
       $new = implode("\n", $new)."\n";
     }
 
-    $engine = new PhabricatorDifferenceEngine();
-    $changeset = $engine->generateChangesetFromFileContent($old, $new);
+    try {
+      $engine = new PhabricatorDifferenceEngine();
+      $changeset = $engine->generateChangesetFromFileContent($old, $new);
 
-    $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
+      $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
 
-    $markup_engine = new PhabricatorMarkupEngine();
-    $markup_engine->setViewer($this->getUser());
+      $markup_engine = new PhabricatorMarkupEngine();
+      $markup_engine->setViewer($this->getUser());
 
-    $parser = new DifferentialChangesetParser();
-    $parser->setChangeset($changeset);
-    $parser->setMarkupEngine($markup_engine);
-    $parser->setWhitespaceMode($whitespace_mode);
+      $parser = new DifferentialChangesetParser();
+      $parser->setChangeset($changeset);
+      $parser->setMarkupEngine($markup_engine);
+      $parser->setWhitespaceMode($whitespace_mode);
 
-    return $parser->render(0, PHP_INT_MAX, array());
+      return $parser->render(0, PHP_INT_MAX, array());
+    } catch (Exception $ex) {
+      return $ex->getMessage();
+    }
   }
 
 }

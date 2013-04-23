@@ -2,19 +2,30 @@
  * @provides phabricator-chatlog-css
  */
 
+.phabricator-chat-log-wrap {
+  padding: 0 20px;
+}
+
+.device-phone .phabricator-chat-log-wrap {
+  padding: 0;
+}
+
 .phabricator-chat-log-panel {
-  margin: 1em auto;
-  width: 80em;
+  margin: 20px auto;
+  border-left: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  border-bottom: 1px solid #c0c5d1;
 }
 
 .phabricator-chat-log {
-  font-size: 12px;
   width: 100%;
-  border: 1px solid #bbbbbb;
+  border: 1px solid #e7e7e7;
+  box-shadow: 0 1px 1px rgba(0,0,0,.2);
 }
 
 .phabricator-chat-log td {
-  padding: 4px 8px;
+  padding: 8px;
+  line-height: 18px;
 }
 
 .phabricator-chat-log tr {
@@ -22,15 +33,16 @@
 }
 
 .phabricator-chat-log tr td.author {
-  background: #dfdfdf;
+  background: #e7e7ee;
 }
 
 .phabricator-chat-log tr.alternate {
-  background: #e9e9e9;
+  border-top: 1px solid #e7e7e7;
+  border-bottom: 1px solid #e7e7e7;
 }
 
 .phabricator-chat-log tr.alternate td.author {
-  background: #d9d9d9;
+  background: #dfdfe6;
 }
 
 .phabricator-chat-log tr.highlight td {
@@ -47,19 +59,26 @@
   width: 12em;
 }
 
-.phabricator-chat-log td.timestamp a {
-  color: #555555;
+.phabricator-chat-log td.message .timestamp {
+  color: #a1a5a9;
   font-size: 11px;
+  float: right;
+  margin-left: 5px;
 }
 
 .phabricator-chat-log td.author {
   white-space: nowrap;
   text-align: right;
   font-weight: bold;
-  width: 12em;
+  width: 140px;
   color: #555555;
+}
+
+.device-phone .phabricator-chat-log td.author {
+  width: 80px;
 }
 
 .phabricator-chat-log td.message {
   white-space: pre-wrap;
+  word-break: break-word;
 }

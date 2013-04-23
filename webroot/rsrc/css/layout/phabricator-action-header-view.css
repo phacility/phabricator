@@ -45,7 +45,7 @@
 .gradient-blue-header .phabricator-action-header-link,
 .gradient-yellow-header .phabricator-action-header-link {
   color: #fff;
-  text-shadow: 0 -1px 1px rgba(0,0,0,.5);
+  text-shadow: 0 -1px 1px rgba(0,0,0,.7);
 }
 
 .phabricator-action-header-title span {

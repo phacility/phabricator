@@ -19,16 +19,20 @@
   background-position: 0px -109px;
 }
 
+.gradient-dark-grey-header {
+  background-position: 0px -212px;
+}
+
 .gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label {
   background-position: 0px -25px;
 }
 
 .gradient-green-header {
-  background-position: 0px -212px;
+  background-position: 0px -283px;
 }
 
 .gradient-grey-header {
-  background-position: 0px -283px;
+  background-position: 0px -354px;
 }
 
 .gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover {
@@ -44,9 +48,9 @@
 }
 
 .gradient-red-header {
-  background-position: 0px -354px;
+  background-position: 0px -425px;
 }
 
 .gradient-yellow-header {
-  background-position: 0px -425px;
+  background-position: 0px -496px;
 }

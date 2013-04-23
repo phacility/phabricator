@@ -11,12 +11,12 @@
   border-width: 0 0 0 1px;
   border-color: #CCC;
   border-style: solid;
-  background: url('/rsrc/image/texture/dust_background.jpg');
+  background: url('/rsrc/image/texture/dust_background.jpeg');
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.device-phone .conpherence-widget-pane {
+.device .conpherence-widget-pane {
   top: 44px;
   width: 100%;
 }
@@ -28,7 +28,7 @@
 
 .conpherence-widget-pane .aphront-form-inset {
   border: 0;
-  background: url('/rsrc/image/texture/dust_background.jpg');
+  background: url('/rsrc/image/texture/dust_background.jpeg');
 }
 
 .conpherence-widget-pane .widgets-header {
@@ -39,13 +39,12 @@
 .conpherence-widget-pane .widgets-header .widgets-header-icon-holder {
   height: 40px;
   width: 280px;
-  margin: 0 auto;
+  margin: 0px auto;
 }
 
 .device-desktop .conpherence-widget-pane .widgets-header
 .widgets-header-icon-holder {
   width: 175px;
-  margin: 0px auto 0px auto;
 }
 
 .conpherence-widget-pane .widgets-header .sprite-conpherence {
@@ -67,9 +66,9 @@
 }
 
 .device-desktop .conpherence-widget-pane .widgets-header
-#widgets-conpherence-list-toggle,
+#conpherence-menu-pane-toggle,
 .device-desktop .conpherence-widget-pane .widgets-header
-#widgets-conpherence-conversation-toggle {
+#conpherence-message-pane-toggle {
   display: none;
 }
 
@@ -81,7 +80,7 @@
   width: 100%;
 }
 
-.device-phone .conpherence-widget-pane .widgets-body {
+.device .conpherence-widget-pane .widgets-body {
   top: 85px;
 }
 
@@ -134,17 +133,34 @@
   border: 1px dashed #bfbfbf;
 }
 
+.device .conpherence-widget-pane #widgets-files .file-title,
+.device .conpherence-widget-pane #widgets-files .file-uploaded-by {
+  width: 82%;
+}
+.device .conpherence-widget-pane #widgets-files .divider {
+  width: 80%;
+  margin: 8px 0px 0px 10%;
+}
+
 /* calendar widget */
 
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
   margin: 2px 0px 0px 0px;
   width: 280px;
 }
+.device .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
+  width: 100%;
+}
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
 .aphront-multi-column-column {
   background: white;
   border-right: 1px solid #bfbfbf;
   text-align: center;
+}
+.device-phone .conpherence-widget-pane #widgets-calendar
+.aphront-multi-column-fluid .aphront-multi-column-5-up
+.aphront-multi-column-column-outer {
+  width: 20%;
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
 .aphront-multi-column-column-last {
@@ -204,6 +220,10 @@
   padding: 5px 10px 5px 10px;
   width: 260px;
 }
+.device .conpherence-widget-pane #widgets-calendar .day-header {
+  width: 98%;
+  padding: 5px 1% 5px 1%;
+}
 .conpherence-widget-pane #widgets-calendar .day-header .day-name {
   float: left;
   clear: none;
@@ -220,6 +240,10 @@
   margin: 0px 0px 0px 10px;
   border: 1px dashed #bfbfbf;
 }
+.conpherence-widget-pane #widgets-calendar .divider {
+  width: 96%;
+  margin: 0px 0px 0px 2%;
+}
 .conpherence-widget-pane #widgets-calendar .spacer {
   float: left;
   clear: both;
@@ -232,6 +256,9 @@
   clear: both;
   height: 60px;
   width: 280px;
+}
+.device .conpherence-widget-pane #widgets-calendar .user-status {
+  width: 100%;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .icon {
@@ -277,6 +304,11 @@
   width: 260px;
 }
 
+.device .conpherence-widget-pane #widgets-calendar .user-status .description,
+.device .conpherence-widget-pane #widgets-calendar .user-status .participant {
+  /* we keep these short so no need to change the width */
+}
+
 .conpherence-widget-pane .widget-icon {
   display: block;
   height: 14px;
@@ -292,7 +324,6 @@
   float: left;
   width: 280px;
 }
-
 .conpherence-widget-pane .people-widget-header .divider {
   float: left;
   clear: both;
@@ -300,10 +331,19 @@
   margin: 0px 0px 0px 10px;
   border: 1px dashed #bfbfbf;
 }
+.device .conpherence-widget-pane .people-widget-header .divider {
+  width: 96%;
+  margin: 0px 0px 0px 2%;
+}
 .conpherence-widget-pane .people-widget-header .add-people-widget {
   float: left;
   padding: 10px 0px 10px 0px;
   width: 280px;
+}
+
+.device .conpherence-widget-pane .people-widget-header,
+.device .conpherence-widget-pane .people-widget-header .add-people-widget {
+  width: 100%;
 }
 
 .conpherence-widget-pane .people-widget-header .add-people-widget
@@ -312,24 +352,32 @@
   width: 180px;
   padding: 0px 0px 0px 10px
 }
-
-.conpherence-widget-pane .people-widget-header .add-people-widget
-.jx-tokenizer-input {
-  padding: 1px 3px 1px 3px;
+.device .conpherence-widget-pane .people-widget-header .add-people-widget
+.aphront-form-control-tokenizer {
+  width: 70%;
 }
-
 .conpherence-widget-pane .people-widget-header .add-people-widget
 .people-add-button {
   float: right;
-  margin: 0px 10px 0px 0px;
+  margin: 2px 10px 0px 0px;
   padding: 3px 16px 4px 16px;
 }
-
+@-moz-document url-prefix() {
+  .conpherence-widget-pane .people-widget-header .add-people-widget
+  .people-add-button {
+    margin: -1px 10px 0px 0px;
+  }
+}
 .conpherence-widget-pane .person-entry {
   float: left;
   width: 270px;
   clear: both;
   padding: 10px 0px 0px 8px;
+}
+
+.device .conpherence-widget-pane .person-entry {
+  width: 98%;
+  padding: 10px 0px 0px 2%;
 }
 
 .conpherence-widget-pane .person-entry a {

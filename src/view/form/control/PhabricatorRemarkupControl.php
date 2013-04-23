@@ -64,6 +64,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         'tip' => pht('Meme'),
       );
     }
+
     $actions['help'] = array(
         'tip' => pht('Help'),
         'align' => 'right',
@@ -71,21 +72,48 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
           'article/Remarkup_Reference.html'),
       );
 
+    $actions[] = array(
+      'spacer' => true,
+      'align' => 'right',
+    );
+
+    $is_serious = PhabricatorEnv::getEnvConfig(
+      'phabricator.serious-business');
+
+    $actions['order'] = array(
+      'tip' => $is_serious
+        ? pht('Fullscreen Mode')
+        : pht('Order Mode'),
+      'align' => 'right',
+    );
+
+    if (!$is_serious) {
+      $actions['chaos'] = array(
+        'tip' => pht('Chaos Mode'),
+        'align' => 'right',
+      );
+    }
+
     $buttons = array();
     foreach ($actions as $action => $spec) {
+
+      $classes = array();
+
+      if (idx($spec, 'align') == 'right') {
+        $classes[] = 'remarkup-assist-right';
+      }
+
       if (idx($spec, 'spacer')) {
+        $classes[] = 'remarkup-assist-separator';
         $buttons[] = phutil_tag(
           'span',
           array(
-            'class' => 'remarkup-assist-separator',
+            'class' => implode(' ', $classes),
           ),
           '');
         continue;
-      }
-      $classes = array();
-      $classes[] = 'remarkup-assist-button';
-      if (idx($spec, 'align') == 'right') {
-        $classes[] = 'remarkup-assist-right';
+      } else {
+        $classes[] = 'remarkup-assist-button';
       }
 
       $href = idx($spec, 'href', '#');

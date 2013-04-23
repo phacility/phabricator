@@ -18,7 +18,6 @@ final class DiffusionHovercardEventListener extends PhutilEventListener {
     $viewer = $event->getUser();
     $hovercard = $event->getValue('hovercard');
     $object_handle = $event->getValue('handle');
-    $phid = $object_handle->getPHID();
     $commit = $event->getValue('object');
 
     if (!($commit instanceof PhabricatorRepositoryCommit)) {
@@ -26,7 +25,11 @@ final class DiffusionHovercardEventListener extends PhutilEventListener {
     }
 
     $commit_data = $commit->loadCommitData();
-    $revision = $commit_data->getCommitDetail('differential.revisionPHID');
+
+    $revision = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $commit->getPHID(),
+      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+    $revision = reset($revision);
 
     $author = $commit->getAuthorPHID();
 

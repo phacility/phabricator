@@ -32,9 +32,6 @@ final class PhrictionListController
 
     $nav = $this->buildSideNavView($this->view);
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($views[$this->view]);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(id(new PhabricatorCrumbView())
       ->setName($views[$this->view])
@@ -43,7 +40,6 @@ final class PhrictionListController
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
       ));
 
     $pager = id(new AphrontCursorPagerView())
@@ -167,11 +163,9 @@ final class PhrictionListController
     switch ($content->getChangeType()) {
       case PhrictionChangeType::CHANGE_DELETE:
         $change_type = pht('%s deleted %s', $author, $document_link);
-        $color = 'red';
         break;
       case PhrictionChangeType::CHANGE_EDIT:
         $change_type = pht('%s edited %s', $author, $document_link);
-        $color = 'blue';
         break;
       case PhrictionChangeType::CHANGE_MOVE_HERE:
       case PhrictionChangeType::CHANGE_MOVE_AWAY:
@@ -184,11 +178,9 @@ final class PhrictionListController
         if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
           $change_type = pht('%s moved %s from %s', $author, $document_link,
             $ref_doc_link);
-          $color = 'yellow';
         } else {
           $change_type = pht('%s moved %s to %s', $author, $document_link,
             $ref_doc_link);
-          $color = 'orange';
         }
         break;
       default:
@@ -198,7 +190,6 @@ final class PhrictionListController
 
     $item = id(new PhabricatorObjectItemView())
       ->setHeader($change_type)
-      ->setBarColor($color)
       ->addAttribute(phabricator_datetime($content->getDateCreated(), $user))
       ->addAttribute($slug_uri);
 
@@ -211,7 +202,7 @@ final class PhrictionListController
       $uri = $diff_uri->alter('l', $version - 1)->alter('r', $version);
       $item->addIcon('history', pht('View Change'), $uri);
     } else {
-      $item->addIcon('history', pht('No diff available'));
+      $item->addIcon('history-grey', pht('No diff available'));
     }
 
     return $item;

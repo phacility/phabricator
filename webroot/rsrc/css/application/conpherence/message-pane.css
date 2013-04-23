@@ -1,6 +1,7 @@
 /**
  * @provides conpherence-message-pane-css
  */
+
 .conpherence-message-pane {
   position: fixed;
   left: 300px;
@@ -10,6 +11,14 @@
   width: auto;
   height: 100%;
 }
+
+.device .conpherence-message-pane {
+  left: 0;
+  right: 0;
+  top: 85px;
+  width: 100%;
+}
+
 
 .conpherence-show-older-messages {
   display: block;
@@ -31,6 +40,15 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.device .conpherence-message-pane .conpherence-messages {
+  left: 0;
+  right: 0;
+  top: 85px;
+  bottom: 3em;
+  width: 100%;
+  box-shadow: none;
+}
+
 .conpherence-message-pane .phabricator-form-view {
   border-width: 0;
   background: none;
@@ -42,8 +60,20 @@
   right: 281px;
 }
 
+.device .conpherence-message-pane .remarkup-assist-bar {
+  height: 0px;
+}
 
-.conpherence-message-pane .aphront-form-input {
+.device .conpherence-message-pane .phabricator-form-view {
+  left: 0;
+  right: 0;
+  background-color: #d8dce2;
+  height: 3em;
+  width: 100%;
+}
+
+.conpherence-layout .conpherence-message-pane .phabricator-form-view
+  div.aphront-form-input {
   margin: 0;
   width: 100%;
 }
@@ -91,16 +121,38 @@
 }
 
 .conpherence-message-pane .remarkup-assist-textarea {
+  height: 6em;
+  padding: 6px;
   border-width: 0 0 1px 0;
   border-color: #e7e7e7;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+.device .conpherence-message-pane .remarkup-assist-textarea {
+  margin: 0.5em 0em 0em 2%;
+  padding: 6px 1%;
+  width: 98%;
+  height: 2em;
+  resize: none;
 }
 
 .conpherence-message-pane .remarkup-assist-textarea:focus {
   outline: none;
 }
 
-.conpherence-message-pane .aphront-form-input textarea {
-  padding: 6px;
-  height: 6em;
+.device .conpherence-message-pane .aphront-form-control-textarea {
+  float: left;
+  height: 2em;
+}
+.device-tablet .conpherence-message-pane .aphront-form-control-textarea {
+  width: 76%;
+}
+.device-phone .conpherence-message-pane .aphront-form-control-textarea {
+  width: 63%;
 }
 
+.device .conpherence-message-pane .aphront-form-control-submit button {
+  margin: 0.6em 0 0 2%;
+}

@@ -8,14 +8,9 @@ final class ReleephRevisionFieldSpecification
   }
 
   public function renderValueForHeaderView() {
-    $data = $this
+    $phid = $this
       ->getReleephRequest()
-      ->loadPhabricatorRepositoryCommitData();
-    if (!$data) {
-      return null;
-    }
-
-    $phid = $data->getCommitDetail('differential.revisionPHID');
+      ->loadRequestCommitDiffPHID();
     if (!$phid) {
       return null;
     }

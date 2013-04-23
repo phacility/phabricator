@@ -21,7 +21,8 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $author_phid = $data->getAuthorPHID();
     $document_phid = $data->getValue('phid');
 
-    $view = new PhabricatorFeedStoryView();
+    $view = new PHUIFeedStoryView();
+    $view->setAppIcon('phriction-dark');
 
     $action = $data->getValue('action');
     $verb = PhrictionActionConstants::getActionPastTenseVerb($action);
@@ -64,23 +65,9 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     }
 
     $view->setEpoch($data->getEpoch());
-
-    switch ($action) {
-      case PhrictionActionConstants::ACTION_CREATE:
-        $full_size = true;
-        break;
-      default:
-        $full_size = false;
-        break;
-    }
-
-    if ($full_size) {
-      $view->setImage($this->getHandle($author_phid)->getImageURI());
-      $content = $this->renderSummary($data->getValue('content'));
-      $view->appendChild($content);
-    } else {
-      $view->setOneLineStory(true);
-    }
+    $view->setImage($this->getHandle($author_phid)->getImageURI());
+    $content = $this->renderSummary($data->getValue('content'));
+    $view->appendChild($content);
 
     return $view;
   }

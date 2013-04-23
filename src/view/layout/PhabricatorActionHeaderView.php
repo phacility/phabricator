@@ -6,6 +6,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
   const ICON_WHITE = 'white';
 
   const HEADER_GREY = 'grey';
+  const HEADER_DARK_GREY = 'dark-grey';
   const HEADER_BLUE = 'blue';
   const HEADER_GREEN = 'green';
   const HEADER_RED = 'red';
@@ -18,7 +19,7 @@ final class PhabricatorActionHeaderView extends AphrontView {
   private $iconColor = PhabricatorActionHeaderView::ICON_GREY;
   private $headerColor;
 
-  public function addAction(PhabricatorActionIconView $action) {
+  public function addAction(PHUIIconView $action) {
     $this->actions[] = $action;
     return $this;
   }

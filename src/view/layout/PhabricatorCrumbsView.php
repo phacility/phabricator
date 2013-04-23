@@ -4,6 +4,7 @@ final class PhabricatorCrumbsView extends AphrontView {
 
   private $crumbs = array();
   private $actions = array();
+  private $actionListID = null;
 
   protected function canAppendChild() {
     return false;
@@ -14,10 +15,14 @@ final class PhabricatorCrumbsView extends AphrontView {
     return $this;
   }
 
-
   public function addAction(PhabricatorMenuItemView $action) {
     $this->actions[] = $action;
+    return $this;
+  }
 
+  public function setActionList(PhabricatorActionListView $list) {
+    $this->actionListID = celerity_generate_unique_node_id();
+    $list->setId($this->actionListID);
     return $this;
   }
 
@@ -25,7 +30,7 @@ final class PhabricatorCrumbsView extends AphrontView {
     require_celerity_resource('phabricator-crumbs-view-css');
 
     $action_view = null;
-    if ($this->actions) {
+    if (($this->actions) || ($this->actionListID)) {
       $actions = array();
       foreach ($this->actions as $action) {
         $icon = null;
@@ -44,6 +49,7 @@ final class PhabricatorCrumbsView extends AphrontView {
             ),
           $action->getName()
         );
+
         $actions[] = javelin_tag(
           'a',
           array(
@@ -55,6 +61,42 @@ final class PhabricatorCrumbsView extends AphrontView {
             $icon,
             $name,
           ));
+      }
+
+      if ($this->actionListID) {
+        $icon_id = celerity_generate_unique_node_id();
+        $icon = phutil_tag(
+          'span',
+            array(
+              'class' => 'sprite-icon action-action-menu'
+            ),
+            '');
+        $name = phutil_tag(
+          'span',
+            array(
+              'class' => 'phabricator-crumbs-action-name'
+            ),
+          pht('Actions'));
+
+        $actions[] = javelin_tag(
+          'a',
+            array(
+              'href'  => '#',
+              'class' =>
+                'phabricator-crumbs-action phabricator-crumbs-action-menu',
+              'sigil' => 'jx-toggle-class',
+              'id'    => $icon_id,
+              'meta'  => array(
+                'map' => array(
+                  $this->actionListID => 'phabricator-action-list-toggle',
+                  $icon_id => 'phabricator-crumbs-action-menu-open'
+                ),
+              ),
+            ),
+            array(
+              $icon,
+              $name,
+            ));
       }
 
       $action_view = phutil_tag(

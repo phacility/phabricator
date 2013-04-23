@@ -45,6 +45,12 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_ACCOUNT_HAS_MEMBER         = 27;
   const TYPE_MEMBER_HAS_ACCOUNT         = 28;
 
+  const TYPE_PURCAHSE_HAS_CHARGE        = 29;
+  const TYPE_CHARGE_HAS_PURCHASE        = 30;
+
+  const TYPE_DREV_HAS_COMMIT            = 31;
+  const TYPE_COMMIT_HAS_DREV            = 32;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
 
@@ -91,6 +97,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_ACCOUNT_HAS_MEMBER => self::TYPE_MEMBER_HAS_ACCOUNT,
       self::TYPE_MEMBER_HAS_ACCOUNT => self::TYPE_ACCOUNT_HAS_MEMBER,
+
+      self::TYPE_DREV_HAS_COMMIT => self::TYPE_COMMIT_HAS_DREV,
+      self::TYPE_COMMIT_HAS_DREV => self::TYPE_DREV_HAS_COMMIT,
     );
 
     return idx($map, $edge_type);
@@ -125,6 +134,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
       PhabricatorPHIDConstants::PHID_TYPE_WIKI  => 'PhrictionDocument',
       PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
+      PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
+      PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
     );
 
     $class = idx($class_map, $phid_type);

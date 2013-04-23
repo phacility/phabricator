@@ -90,13 +90,20 @@ final class DiffusionCommitController extends DiffusionController {
         $property_list->addProperty($key, $value);
       }
 
+      $message = $commit_data->getCommitMessage();
+
+      $revision = $commit->getCommitIdentifier();
+      $message = $repository->linkBugtraq($message, $revision);
+
+      $message = $engine->markupText($message);
+
       $property_list->addTextContent(
         phutil_tag(
           'div',
           array(
             'class' => 'diffusion-commit-message phabricator-remarkup',
           ),
-          $engine->markupText($commit_data->getCommitMessage())));
+          $message));
 
       $content[] = $top_anchor;
       $content[] = $headsup_view;
@@ -360,20 +367,25 @@ final class DiffusionCommitController extends DiffusionController {
     $user = $this->getRequest()->getUser();
     $commit_phid = $commit->getPHID();
 
-    $edges = id(new PhabricatorEdgeQuery())
+    $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($commit_phid))
       ->withEdgeTypes(array(
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT
-      ))
-      ->execute();
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT,
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV,
+      ));
+
+    $edges = $edge_query->execute();
 
     $task_phids = array_keys(
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK]);
     $proj_phids = array_keys(
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]);
+    $revision_phid = key(
+      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV]);
 
-    $phids = array_merge($task_phids, $proj_phids);
+    $phids = $edge_query->getDestinationPHIDs(array($commit_phid));
+
     if ($data->getCommitDetail('authorPHID')) {
       $phids[] = $data->getCommitDetail('authorPHID');
     }
@@ -382,9 +394,6 @@ final class DiffusionCommitController extends DiffusionController {
     }
     if ($data->getCommitDetail('committerPHID')) {
       $phids[] = $data->getCommitDetail('committerPHID');
-    }
-    if ($data->getCommitDetail('differential.revisionPHID')) {
-      $phids[] = $data->getCommitDetail('differential.revisionPHID');
     }
     if ($parents) {
       foreach ($parents as $parent) {
@@ -432,7 +441,6 @@ final class DiffusionCommitController extends DiffusionController {
       }
     }
 
-    $revision_phid = $data->getCommitDetail('differential.revisionPHID');
     if ($revision_phid) {
       $props['Differential Revision'] = $handles[$revision_phid]->renderLink();
     }

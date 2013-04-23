@@ -47,6 +47,8 @@ final class PhortuneAccountViewController extends PhortuneController {
           ->setHref('#')
           ->setDisabled(true));
 
+    $crumbs->setActionList($actions);
+
     $properties = id(new PhabricatorPropertyListView())
       ->setObject($account)
       ->setUser($user);

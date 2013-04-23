@@ -22,15 +22,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     }
 
     $this->loadHandles(array($file->getAuthorPHID()));
-
     $phid = $file->getPHID();
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName('F'.$file->getID())
-        ->setHref($this->getApplicationURI("/info/{$phid}/")));
-
     $header = id(new PhabricatorHeaderView())
       ->setHeader($file->getName());
 
@@ -44,6 +36,13 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $actions = $this->buildActionView($file);
     $properties = $this->buildPropertyView($file);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setActionList($actions);
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName('F'.$file->getID())
+        ->setHref($this->getApplicationURI("/info/{$phid}/")));
 
     return $this->buildApplicationPage(
       array(

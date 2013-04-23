@@ -15,16 +15,16 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
 
     ini_set('mysql.connect_timeout', 2);
 
+    $config = array(
+      'user'      => $conn_user,
+      'pass'      => $conn_pass,
+      'host'      => $conn_host,
+      'database'  => null,
+    );
+
     $conn_raw = PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
-      array(
-        array(
-          'user'      => $conn_user,
-          'pass'      => $conn_pass,
-          'host'      => $conn_host,
-          'database'  => null,
-        ),
-      ));
+      array($config));
 
     try {
       queryfx($conn_raw, 'SELECT 1');
@@ -39,9 +39,9 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
         ->setName(pht('Can Not Connect to MySQL'))
         ->setMessage($message)
         ->setIsFatal(true)
-        ->addPhabricatorConfig('mysql.host')
-        ->addPhabricatorConfig('mysql.user')
-        ->addPhabricatorConfig('mysql.pass');
+        ->addRelatedPhabricatorConfig('mysql.host')
+        ->addRelatedPhabricatorConfig('mysql.user')
+        ->addRelatedPhabricatorConfig('mysql.pass');
       return;
     }
 
@@ -80,6 +80,29 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
         ->setMessage($message)
         ->setIsFatal(true)
         ->addCommand(hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
+    } else {
+
+      $config['database'] = $namespace.'_meta_data';
+      $conn_meta = PhabricatorEnv::newObjectFromConfig(
+        'mysql.implementation',
+        array($config));
+
+      $applied = queryfx_all($conn_meta, 'SELECT patch FROM patch_status');
+      $applied = ipull($applied, 'patch', 'patch');
+
+      $all = PhabricatorSQLPatchList::buildAllPatches();
+      $diff = array_diff_key($all, $applied);
+
+      if ($diff) {
+        $this->newIssue('storage.patch')
+          ->setName(pht('Upgrade MySQL Schema'))
+          ->setMessage(pht(
+            "Run the storage upgrade script to upgrade Phabricator's database ".
+              "schema. Missing patches: %s.",
+            implode(', ', array_keys($diff))))
+          ->addCommand(
+            hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
+      }
     }
   }
 }

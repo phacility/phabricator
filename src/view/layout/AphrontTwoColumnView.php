@@ -4,6 +4,7 @@ final class AphrontTwoColumnView extends AphrontView {
 
   private $mainColumn;
   private $sideColumn;
+  private $centered = false;
   private $padding = true;
 
   public function setMainColumn($main) {
@@ -13,6 +14,11 @@ final class AphrontTwoColumnView extends AphrontView {
 
   public function setSideColumn($side) {
     $this->sideColumn = $side;
+    return $this;
+  }
+
+  public function setCentered($centered) {
+    $this->centered = $centered;
     return $this;
   }
 
@@ -39,6 +45,10 @@ final class AphrontTwoColumnView extends AphrontView {
       $this->sideColumn);
 
     $classes = array('aphront-two-column');
+    if ($this->centered) {
+      $classes = array('aphront-two-column-centered');
+    }
+
     if ($this->padding) {
       $classes[] = 'aphront-two-column-padded';
     }

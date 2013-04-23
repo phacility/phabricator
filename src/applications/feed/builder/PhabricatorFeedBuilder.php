@@ -44,13 +44,10 @@ final class PhabricatorFeedBuilder {
             '<div class="phabricator-feed-story-date-separator"></div>'));
         }
         $last_date = $date;
-        $null_view->appendChild(
-          phutil_tag(
-            'div',
-            array(
-              'class' => 'phabricator-feed-story-date',
-            ),
-            $date));
+        $header = new PhabricatorActionHeaderView();
+        $header->setHeaderTitle($date);
+
+        $null_view->appendChild($header);
       }
 
       $view = $story->renderView();
@@ -59,9 +56,8 @@ final class PhabricatorFeedBuilder {
       $null_view->appendChild($view);
     }
 
-    return id(new AphrontNullView())->appendChild(hsprintf(
-      '<div class="phabricator-feed-frame">%s</div>',
-      $null_view->render()));
+    return id(new AphrontNullView())
+      ->appendChild($null_view->render());
   }
 
 }

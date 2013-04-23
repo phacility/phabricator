@@ -64,9 +64,18 @@ final class CeleritySpriteGenerator {
       // Strip 'text_' from these file names.
       $class_name = substr($icon, 5);
 
+      if ($class_name == 'order_off') {
+        $tcss = '.remarkup-control-order-mode .remarkup-assist-order';
+      } else if ($class_name == 'chaos_off') {
+        $tcss = '.remarkup-control-chaos-mode .remarkup-assist-chaos';
+      } else {
+        $tcss = '.remarkup-assist-'.$class_name;
+      }
+
       $sprite = id(clone $template)
         ->setName('remarkup-assist-'.$icon)
-        ->setTargetCSS('.remarkup-assist-'.$class_name);
+        ->setTargetCSS($tcss);
+
       foreach ($scales as $scale_key => $scale) {
         $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
         $sprite->setSourceFile($path, $scale);
@@ -120,7 +129,7 @@ final class CeleritySpriteGenerator {
         $tcss[] = '.actions-'.$icon.$suffix;
         if ($color == 'dark') {
           $tcss[] = '.device-desktop '.
-            '.actions-'.$icon.'-grey.phabricator-action-icon-item-link:hover';
+            '.actions-'.$icon.'-grey.phui-icon-item-link:hover';
         }
 
         $sprite->setTargetCSS(implode(', ', $tcss));
@@ -308,14 +317,45 @@ final class CeleritySpriteGenerator {
       $path = $this->getPath('tokens_1x/'.$token.'.png');
 
       $sprite = id(clone $template)
-        ->setName('token-'.$token)
-        ->setTargetCSS('.token-'.$token)
+        ->setName('tokens-'.$token)
+        ->setTargetCSS('.tokens-'.$token)
         ->setSourceFile($path, 1);
 
       $sprites[] = $sprite;
     }
 
     $sheet = $this->buildSheet('tokens', false);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
+  public function buildPaymentsSheet() {
+    $icons = $this->getDirectoryList('payments_2x');
+    $scales = array(
+      '2x' => 1,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(60, 32);
+
+    $sprites = array();
+    $prefix = 'payments_';
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName('payments-'.$icon)
+        ->setTargetCSS('.payments-'.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('payments', true);
+    $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }
@@ -415,7 +455,8 @@ final class CeleritySpriteGenerator {
       'blue-header'     => 70,
       'green-header'    => 70,
       'yellow-header'   => 70,
-      'grey-header'     => 70
+      'grey-header'     => 70,
+      'dark-grey-header' => 70,
     );
 
     $extra_css = array(
@@ -540,13 +581,13 @@ final class CeleritySpriteGenerator {
     foreach ($apps as $app) {
       foreach ($colors as $color => $color_path) {
 
-        $css = '.app-'.$app.'-'.$color.$variant_short;
+        $css = '.apps-'.$app.'-'.$color.$variant_short;
         if ($color == 'blue' && $variant_name == 'apps-large') {
-          $css .= ', .phabricator-crumb-view:hover .app-'.$app.'-dark-large';
+          $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
         }
 
         $sprite = id(clone $template)
-          ->setName('app-'.$app.'-'.$color.$variant_short)
+          ->setName('apps-'.$app.'-'.$color.$variant_short)
           ->setTargetCSS($css);
 
         foreach ($scales as $scale_name => $scale) {

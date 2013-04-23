@@ -138,6 +138,11 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($mocks, null, 'getPHID');
 
+      case PhabricatorPHIDConstants::PHID_TYPE_POLL:
+        $polls = id(new PhabricatorSlowvotePoll())
+          ->loadAllWhere('phid IN (%Ls)', $phids);
+        return mpull($polls, null, 'getPHID');
+
       case PhabricatorPHIDConstants::PHID_TYPE_XACT:
         $subtypes = array();
         foreach ($phids as $phid) {
@@ -271,6 +276,8 @@ final class PhabricatorObjectHandleData {
               $handle->setComplete(true);
               if (isset($statuses[$phid])) {
                 $handle->setStatus($statuses[$phid]->getTextStatus());
+                $handle->setTitle(
+                  $statuses[$phid]->getTerseSummary($this->viewer));
               }
               $handle->setDisabled($user->getIsDisabled());
 
@@ -612,6 +619,25 @@ final class PhabricatorObjectHandleData {
               $handle->setName('M'.$mock->getID());
               $handle->setFullName('M'.$mock->getID().': '.$mock->getName());
               $handle->setURI('/M'.$mock->getID());
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_POLL:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName('Unknown Slowvote');
+            } else {
+              $poll = $objects[$phid];
+              $handle->setName('V'.$poll->getID());
+              $handle->setFullName(
+                'V'.$poll->getID().': '.$poll->getQuestion());
+              $handle->setURI('/V'.$poll->getID());
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

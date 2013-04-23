@@ -62,7 +62,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
       ->setObjectHandle($user_handle)
       ->addField(pht('Status'), 'Available')
       ->addField(pht('Member since'), '30. February 1750')
-      ->addAction(pht('Start a Conpherence'), '/dev/null')
+      ->addAction(pht('Send a Message'), '/dev/null')
       ->setUser($user));
     $elements[] = $panel;
 

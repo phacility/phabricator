@@ -27,18 +27,21 @@ JX.install('Hovercard', {
     },
 
     getCard : function() {
-      return this._node;
+      var self = JX.Hovercard;
+      return self._node;
     },
 
     show : function(root, phid) {
       var self = JX.Hovercard;
+      // Already displaying
+      if (self.getCard() && phid == self._visiblePHID) {
+        return;
+      }
       self.hide();
 
       self._visiblePHID = phid;
       self._activeRoot = root;
 
-      // Hovercards are all loaded by now, but when somebody previews a comment
-      // for example it may not be loaded yet.
       if (!(phid in self._cards)) {
         self._load([phid]);
       } else {
@@ -48,8 +51,8 @@ JX.install('Hovercard', {
 
     _drawCard : function(phid) {
       var self = JX.Hovercard;
-      // Already displaying
-      if (self.getCard() && phid == self._visiblePHID) {
+      // card is loading...
+      if (self._cards[phid] === true) {
         return;
       }
       // Not the current requested card
@@ -74,7 +77,6 @@ JX.install('Hovercard', {
 
       // Retrieve size from child (wrapper), since node gives wrong dimensions?
       var child = node.firstChild;
-
       var p = JX.$V(root);
       var d = JX.Vector.getDim(root);
       var n = JX.Vector.getDim(child);
@@ -122,8 +124,20 @@ JX.install('Hovercard', {
       var self = JX.Hovercard;
       var uri = JX.$U(self.fetchUrl);
 
+      var send = false;
       for (var ii = 0; ii < phids.length; ii++) {
+        var phid = phids[ii];
+        if (phid in self._cards) {
+          continue;
+        }
+        self._cards[phid] = true; // means "loading"
         uri.setQueryParam("phids["+ii+"]", phids[ii]);
+        send = true;
+      }
+
+      if (!send) {
+        // already loaded / loading everything!
+        return;
       }
 
       new JX.Request(uri, function(r) {

@@ -1,0 +1,20 @@
+/**
+ * @provides phabricator-settings-css
+ */
+
+.phabricator-settings-homepagetable {
+  width: 60% !important;
+  margin: auto;
+}
+
+.phabricator-settings-homepagetable td.fixed {
+  width: 24px;
+  text-align: center;
+
+}
+
+.phabricator-settings-panelview h1 {
+  text-align: center;
+}
+
+

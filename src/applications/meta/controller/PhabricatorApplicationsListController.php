@@ -13,17 +13,8 @@ final class PhabricatorApplicationsListController
     $applications = PhabricatorApplication::getAllApplications();
 
     $list = $this->buildInstalledApplicationsList($applications);
-
     $title = pht('Installed Applications');
-
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
-
-    $nav->appendChild(
-      array(
-        $header,
-        $list
-      ));
+    $nav->appendChild($list);
 
     $crumbs = $this
       ->buildApplicationCrumbs()
@@ -39,6 +30,7 @@ final class PhabricatorApplicationsListController
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 

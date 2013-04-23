@@ -23,7 +23,7 @@ final class PhabricatorSetupCheckPygment extends PhabricatorSetupCheck {
           ->setName(pht('pygmentize Not Found'))
           ->setSummary($summary)
           ->setMessage($message)
-          ->addPhabricatorConfig('pygments.enabled')
+          ->addRelatedPhabricatorConfig('pygments.enabled')
           ->addPhabricatorConfig('environment.append-paths');
       }
     }

@@ -335,12 +335,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $user, $task->getPHID());
 
     $object_name = 'T'.$task->getID();
+    $actions = $this->buildActionView($task);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($object_name)
         ->setHref('/'.$object_name))
+      ->setActionList($actions)
       ->addAction(
         id(new PhabricatorMenuItemView())
           ->setHref($this->getApplicationURI('/task/create/'))
@@ -348,7 +350,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setIcon('create'));
 
     $header = $this->buildHeaderView($task);
-    $actions = $this->buildActionView($task);
     $properties = $this->buildPropertyView($task, $aux_fields, $edges, $engine);
 
     return $this->buildApplicationPage(
@@ -501,26 +502,19 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $commit_phids = array_keys(
       $edges[PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT]);
     if ($commit_phids) {
-      $commits = id(new PhabricatorRepositoryCommit())
-        ->putInSet(new LiskDAOSet())
-        ->loadAllWhere('phid IN (%Ls)', $commit_phids);
+      $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
+      $drev_edges = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($commit_phids)
+        ->withEdgeTypes(array($commit_drev))
+        ->execute();
 
-      foreach ($commits as $commit) {
-        $phid = $commit->getPHID();
+      foreach ($commit_phids as $phid) {
         $revisions_commits[$phid] = $handles[$phid]->renderLink();
-
-        $data = $commit->loadOneRelative(
-          new PhabricatorRepositoryCommitData(),
-          'commitID');
-
-        $revision_phid = ($data
-          ? $data->getCommitDetail('differential.revisionPHID')
-          : null);
-
+        $revision_phid = key($drev_edges[$phid][$commit_drev]);
         $revision_handle = idx($handles, $revision_phid);
         if ($revision_handle) {
-          $has_drev = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
-          unset($edges[$has_drev][$revision_phid]);
+          $task_drev = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
+          unset($edges[$task_drev][$revision_phid]);
           $revisions_commits[$phid] = hsprintf(
             '%s / %s',
             $revision_handle->renderLink($revision_handle->getName()),

@@ -48,8 +48,15 @@ final class PhameBlogViewController extends PhameController {
       $user,
       pht('This blog has no visible posts.'));
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($blog->getName())
+        ->setHref($this->getApplicationURI()));
+
     $nav->appendChild(
       array(
+        $crumbs,
         $header,
         $actions,
         $properties,
@@ -59,12 +66,16 @@ final class PhameBlogViewController extends PhameController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'device'  => true,
-        'title'   => $blog->getName(),
+        'device' => true,
+        'title' => $blog->getName(),
+        'dust' => true,
       ));
   }
 
   private function renderProperties(PhameBlog $blog, PhabricatorUser $user) {
+    require_celerity_resource('aphront-tooltip-css');
+    Javelin::initBehavior('phabricator-tooltips');
+
     $properties = new PhabricatorPropertyListView();
 
     $properties->addProperty(
@@ -74,6 +85,21 @@ final class PhameBlogViewController extends PhameController {
     $properties->addProperty(
       pht('Domain'),
       $blog->getDomain());
+
+    $feed_uri = PhabricatorEnv::getProductionURI(
+      $this->getApplicationURI('blog/feed/'.$blog->getID().'/'));
+    $properties->addProperty(
+      pht('Atom URI'),
+      javelin_tag('a',
+        array(
+          'href' => $feed_uri,
+          'sigil' => 'has-tooltip',
+          'meta' => array(
+            'tip' => pht('Atom URI does not support custom domains.'),
+            'size' => 320,
+          )
+        ),
+        $feed_uri));
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $user,
