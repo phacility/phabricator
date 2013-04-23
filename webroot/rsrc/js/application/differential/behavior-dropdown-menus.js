@@ -6,9 +6,12 @@
  *           javelin-stratcom
  *           phabricator-dropdown-menu
  *           phabricator-menu-item
+ *           phabricator-phtize
  */
 
 JX.behavior('differential-dropdown-menus', function(config) {
+
+  var pht = JX.phtize(config.pht);
 
   function show_more(container) {
     var nodes = JX.DOM.scry(container, 'tr', 'context-target');
@@ -46,7 +49,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
     if (data.diffusionURI) {
       // Show this only if we have a link, since when this appears in Diffusion
       // it is otherwise potentially confusing.
-      diffusion_item = link_to('Browse in Diffusion', data.diffusionURI);
+      diffusion_item = link_to(pht('Browse in Diffusion'), data.diffusionURI);
     }
 
     var menu = new JX.PhabricatorDropdownMenu(buttons[ii])
@@ -63,25 +66,25 @@ JX.behavior('differential-dropdown-menus', function(config) {
       menu.addItem(diffusion_item);
     }
 
-    menu.addItem(link_to('View Standalone', data.standaloneURI));
+    menu.addItem(link_to(pht('View Standalone'), data.standaloneURI));
 
     if (data.leftURI) {
-      menu.addItem(link_to('Show Raw File (Left)', data.leftURI));
+      menu.addItem(link_to(pht('Show Raw File (Left)'), data.leftURI));
     }
 
     if (data.rightURI) {
-      menu.addItem(link_to('Show Raw File (Right)', data.rightURI));
+      menu.addItem(link_to(pht('Show Raw File (Right)'), data.rightURI));
     }
 
     if (data.editor) {
       menu.addItem(new JX.PhabricatorMenuItem(
-        'Open in Editor',
+        pht('Open in Editor'),
         JX.bind(null, location.assign, data.editor), // Open in the same window.
         data.editor));
     }
 
     if (data.editorConfigure) {
-      menu.addItem(link_to('Configure Editor', data.editorConfigure));
+      menu.addItem(link_to(pht('Configure Editor'), data.editorConfigure));
     }
 
     menu.listen(
@@ -95,14 +98,14 @@ JX.behavior('differential-dropdown-menus', function(config) {
         var nodes = JX.DOM.scry(JX.$(data.containerID), 'a', 'show-more');
         if (nodes.length) {
           reveal_item.setDisabled(false);
-          reveal_item.setName('Show Entire File');
+          reveal_item.setName(pht('Show Entire File'));
         } else {
           reveal_item.setDisabled(true);
-          reveal_item.setName('Entire File Shown');
+          reveal_item.setName(pht('Entire File Shown'));
         }
 
         visible_item.setDisabled(true);
-        visible_item.setName("Can't Toggle Unloaded File");
+        visible_item.setName(pht("Can't Toggle Unloaded File"));
         var diffs = JX.DOM.scry(JX.$(data.containerID),
                                'table', 'differential-diff');
         if (diffs.length > 1) {
@@ -113,9 +116,9 @@ JX.behavior('differential-dropdown-menus', function(config) {
           diff = diffs[0];
           visible_item.setDisabled(false);
           if (JX.Stratcom.getData(diff).hidden) {
-            visible_item.setName('Expand File');
+            visible_item.setName(pht('Expand File'));
           } else {
-            visible_item.setName('Collapse File');
+            visible_item.setName(pht('Collapse File'));
           }
         } else {
           // Do nothing when there is no diff shown in the table. For example,
