@@ -95,7 +95,10 @@ final class DiffusionHistoryController extends DiffusionController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'history',
+        'title' => array(
+          pht('History'),
+          pht('%s Repository', $drequest->getRepository()->getCallsign()),
+        ),
       ));
   }
 
