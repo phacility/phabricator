@@ -2,21 +2,13 @@
  * @provides phui-feed-story-css
  */
 
-.phui-feed-wrap {
-  border-left: 1px solid #e7e7e7;
-  border-right: 1px solid #e7e7e7;
-  border-bottom: 1px solid #c0c5d1;
-  margin-bottom: 15px;
-}
-
 .phui-feed-story {
   background: 5px 2px no-repeat;
   min-height: 50px;
   background-color: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-.phui-feed-story-head .phui-icon-item-link {
+.phui-feed-story-head .phui-feed-story-actor-image {
   width: 35px;
   height: 35px;
   background-size: 35px;
@@ -46,4 +38,39 @@
   float: left;
   display: inline-block;
   margin-right: 5px;
+}
+
+.phui-feed-story-bigtext-post {
+  font-size: 15px;
+  font-weight: 200;
+  line-height: 18px;
+  color: #444;
+}
+
+.phui-feed-story-bigtext-post h3 {
+  font-size: 24px;
+  font-weight: 100;
+  line-height: 18px;
+  color: #444;
+  margin: 10px 0;
+}
+
+.phui-feed-token-bar {
+  margin-top: 10px;
+  border-top: 1px solid #e7e7e7;
+  padding-top: 10px;
+}
+
+.phui-feed-token-bar .phui-icon-item-link {
+  margin-right: 2px;
+}
+
+.phui-feed-story-action-list {
+  float: right;
+  padding-top: 4px;
+}
+
+.phui-feed-story-action-item {
+  float: right;
+  padding-left: 2px;
 }

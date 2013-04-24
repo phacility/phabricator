@@ -3618,7 +3618,7 @@ celerity_register_resource_map(array(
   ),
   'phui-feed-story-css' =>
   array(
-    'uri' => '/res/a2db2369/rsrc/css/phui/phui-feed-story.css',
+    'uri' => '/res/d6ccc638/rsrc/css/phui/phui-feed-story.css',
     'type' => 'css',
     'requires' =>
     array(

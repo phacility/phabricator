@@ -118,7 +118,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
 
     return phutil_tag(
       'div',
-      array('style' => 'padding: 1em 2em;'),
+      array('class' => 'ml'),
       $tags);
   }
 }
