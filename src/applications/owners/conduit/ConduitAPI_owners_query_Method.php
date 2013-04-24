@@ -74,9 +74,12 @@ final class ConduitAPI_owners_query_Method
         ->setErrorDescription(
           'Repository callsign '.$repo_callsign.' not recognized');
     }
-
-    return PhabricatorOwnersPackage::loadOwningPackages(
-      $repository, $path);
+    if ($path == null) {
+      return PhabricatorOwnersPackage::loadPackagesForRepository($repository);
+    } else {
+      return PhabricatorOwnersPackage::loadOwningPackages(
+        $repository, $path);
+    }
   }
 
   public static function buildPackageInformationDictionaries($packages) {
@@ -116,7 +119,7 @@ final class ConduitAPI_owners_query_Method
 
     $repo = $request->getValue('repositoryCallsign');
     $path = $request->getValue('path');
-    $is_path_query = ($repo && $path) ? 1 : 0;
+    $is_path_query = $repo ? 1 : 0;
 
     if ($is_owner_query + $is_path_query + $is_affiliated_query === 0) {
       // if no search terms are provided, return everything
