@@ -20,6 +20,7 @@ final class PhabricatorFeedStoryPublisher {
     $this->subscribedPHIDs = $phids;
     return $this;
   }
+
   public function setPrimaryObjectPHID($phid) {
     $this->primaryObjectPHID = $phid;
     return $this;

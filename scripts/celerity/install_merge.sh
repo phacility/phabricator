@@ -6,4 +6,4 @@ echo "src/__celerity_resource_map__.php merge=celerity" \
 git config merge.celerity.name "Celerity Mapper"
 
 git config merge.celerity.driver \
-  '$GIT_DIR/../scripts/celerity_mapper.php $GIT_DIR/../webroot'
+  'php $GIT_DIR/../scripts/celerity_mapper.php $GIT_DIR/../webroot'

@@ -14,8 +14,8 @@ extends PhabricatorOAuthProvider {
     return array(
       'grant_type' => 'authorization_code',
     );
-
   }
+
   public function decodeTokenResponse($response) {
     $decoded = json_decode($response, true);
     if (!is_array($decoded)) {
