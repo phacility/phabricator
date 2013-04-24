@@ -130,8 +130,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return newv('ExecFuture', $args);
-
   }
+
   public function passthruLocalCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);

@@ -182,6 +182,19 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return $packages;
   }
 
+  public static function loadPackagesForRepository($repository) {
+    $package = new PhabricatorOwnersPackage();
+    $ids = ipull(
+      queryfx_all(
+        $package->establishConnection('r'),
+        'SELECT DISTINCT packageID FROM %T WHERE repositoryPHID = %s',
+        id(new PhabricatorOwnersPath())->getTableName(),
+        $repository->getPHID()),
+      'packageID');
+
+    return $package->loadAllWhere('id in (%Ld)', $ids);
+  }
+
   public static function findLongestPathsPerPackage(array $rows, array $paths) {
     $ids = array();
 

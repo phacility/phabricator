@@ -61,6 +61,9 @@ JX.behavior('conpherence-menu', function(config) {
     JX.History.replace(config.base_uri + uri_suffix);
     if (data.title) {
       document.title = data.title;
+    } else if (thread.node) {
+      var threadData = JX.Stratcom.getData(thread.node);
+      document.title = threadData.title;
     }
   }
 
@@ -173,8 +176,8 @@ JX.behavior('conpherence-menu', function(config) {
   }
 
   JX.Stratcom.listen(
-    null,
     'conpherence-redraw-thread',
+    null,
     function (e) {
       didredrawthread();
     }

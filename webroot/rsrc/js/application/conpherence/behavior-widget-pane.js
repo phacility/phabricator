@@ -64,7 +64,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
           JX.Stratcom.invoke(
             'conpherence-update-page-data',
             null,
-            { use_base_uri : true }
+            { use_base_uri : true, title: 'Conpherence' }
           );
         }
       } else {

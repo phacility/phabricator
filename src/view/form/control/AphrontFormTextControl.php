@@ -12,6 +12,7 @@ final class AphrontFormTextControl extends AphrontFormControl {
   private function getDisableAutocomplete() {
     return $this->disableAutocomplete;
   }
+
   public function getSigil() {
     return $this->sigil;
   }

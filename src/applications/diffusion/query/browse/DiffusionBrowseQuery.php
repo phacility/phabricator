@@ -72,6 +72,7 @@ abstract class DiffusionBrowseQuery {
   }
 
   final public function loadPaths() {
+    $this->reason = null;
     return $this->executeQuery();
   }
 

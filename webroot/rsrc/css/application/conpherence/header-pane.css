@@ -37,39 +37,39 @@
 }
 
 .conpherence-header-pane .title {
-  position: relative;
+  position: absolute;
   font-size: 16px;
   font-weight: bold;
   left: 77px;
   top: 21px;
-  max-width: 80%;
+  right: 66px;
   overflow-x: auto;
 }
 
 .conpherence-header-pane .custom-title {
-  position: relative;
+  position: absolute;
   font-size: 16px;
   font-weight: bold;
   left: 132px;
   top: 21px;
-  max-width: 80%;
+  right: 66px;
   overflow-x: auto;
 }
 
 .conpherence-header-pane .subtitle {
-  position: relative;
+  position: absolute;
   left: 77px;
-  top: 21px;
+  top: 40px;
+  right: 66px;
   color: #bfbfbf;
-  max-width: 80%;
 }
 
 .conpherence-header-pane .custom-subtitle {
-  position: relative;
+  position: absolute;
   left: 132px;
-  top: 21px;
+  top: 40px;
+  right: 66px;
   color: #bfbfbf;
-  max-width: 80%;
 }
 
 .conpherence-header-pane .upload-photo {

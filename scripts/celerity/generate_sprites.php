@@ -34,6 +34,7 @@ $sheets = array(
   'minicons' => $generator->buildMiniconsSheet(),
   'conpherence' => $generator->buildConpherenceSheet(),
   'apps-large' => $generator->buildAppsLargeSheet(),
+  'payments' => $generator->buildPaymentsSheet(),
   'tokens' => $generator->buildTokenSheet(),
   'docs' => $generator->buildDocsSheet(),
   'gradient' => $generator->buildGradientSheet(),
