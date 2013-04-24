@@ -14,6 +14,7 @@ final class DifferentialLintFieldSpecification
   public function renderValueForDiffView() {
     return $this->renderValueForRevisionView();
   }
+
   public function shouldAppearOnRevisionView() {
     return true;
   }

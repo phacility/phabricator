@@ -30,7 +30,7 @@ p, blockquote, th, td, button {
 }
 
 body.make-me-sneeze {
-  background: url('/rsrc/image/texture/dust_background.jpeg');
+  background: #e9eaed url('/rsrc/image/texture/dust_background.jpeg');
 }
 
 .make-me-sneeze .phabricator-standard-page {

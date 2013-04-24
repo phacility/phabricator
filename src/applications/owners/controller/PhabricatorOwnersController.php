@@ -11,6 +11,7 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     $this->filter = $filter;
     return $this;
   }
+
   public function buildStandardPageResponse($view, array $data) {
 
     $page = $this->buildStandardPageView();

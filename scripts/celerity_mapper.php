@@ -35,6 +35,7 @@ $package_spec = array(
     'javelin-behavior-phabricator-autofocus',
     'phabricator-menu-item',
     'phabricator-dropdown-menu',
+    'phabricator-phtize',
     'javelin-behavior-phabricator-oncopy',
     'phabricator-tooltip',
     'javelin-behavior-phabricator-tooltips',
