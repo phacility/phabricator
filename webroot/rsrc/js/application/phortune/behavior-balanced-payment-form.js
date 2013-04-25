@@ -1,5 +1,5 @@
 /**
- * @provides javelin-behavior-stripe-payment-form
+ * @provides javelin-behavior-balanced-payment-form
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-json
@@ -7,8 +7,8 @@
  *           phortune-credit-card-form
  */
 
-JX.behavior('stripe-payment-form', function(config) {
-  Stripe.setPublishableKey(config.stripePublishableKey);
+JX.behavior('balanced-payment-form', function(config) {
+  balanced.init(config.balancedMarketplaceURI);
 
   var root = JX.$(config.formID);
   var ccform = new JX.PhortuneCreditCardForm(root);
@@ -16,20 +16,18 @@ JX.behavior('stripe-payment-form', function(config) {
   var onsubmit = function(e) {
     e.kill();
 
-    // validate the card data with Stripe client API and submit the form
-    // with any detected errors
     var cardData = ccform.getCardData();
     var errors = [];
 
-    if (!Stripe.validateCardNumber(cardData.number)) {
+    if (!balanced.card.isCardNumberValid(cardData.number)) {
       errors.push('number');
     }
 
-    if (!Stripe.validateCVC(cardData.cvc)) {
+    if (!balanced.card.isSecurityCodeValid(cardData.number, cardData.cvc)) {
       errors.push('cvc');
     }
 
-    if (!Stripe.validateExpiry(cardData.month, cardData.year)) {
+    if (!balanced.card.isExpiryValid(cardData.month, cardData.year)) {
       errors.push('expiry');
     }
 
@@ -41,27 +39,27 @@ JX.behavior('stripe-payment-form', function(config) {
     }
 
     var data = {
-      number: cardData.number,
-      cvc: cardData.cvc,
-      exp_month: cardData.month,
-      exp_year: cardData.year
+      card_number: cardData.number,
+      security_code: cardData.cvc,
+      expiration_month: cardData.month,
+      expiration_year: cardData.year
     };
 
-    Stripe.createToken(data, onresponse);
+    balanced.card.create(data, onresponse);
   }
 
-  var onresponse = function(status, response) {
+  var onresponse = function(response) {
+
     var errors = [];
-    var token = null;
     if (response.error) {
       errors = [response.error.type];
-    } else {
-      token = response.id;
+    } else if (response.status != 201) {
+      errors = ['balanced:' + response.status];
     }
 
     var params = {
       cardErrors: JX.JSON.stringify(errors),
-      stripeToken: token
+      balancedCardData: JX.JSON.stringify(response.data)
     };
 
     JX.Workflow

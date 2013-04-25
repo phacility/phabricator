@@ -59,11 +59,11 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   }
 
   private function getPublishableKey() {
-    return PhabricatorEnv::getEnvConfig('stripe.publishable-key');
+    return PhabricatorEnv::getEnvConfig('phortune.stripe.publishable-key');
   }
 
   private function getSecretKey() {
-    return PhabricatorEnv::getEnvConfig('stripe.secret-key');
+    return PhabricatorEnv::getEnvConfig('phortune.stripe.secret-key');
   }
 
 
@@ -90,11 +90,13 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     if ($card_errors) {
       $raw_errors = json_decode($card_errors);
       $errors = $this->parseRawCreatePaymentMethodErrors($raw_errors);
-    } else if (!$stripe_token) {
-      $errors[] = pht('There was an unknown error processing your card.');
     }
 
-    $secret_key = $this->getSecretKey();
+    if (!$errors) {
+      if (!$stripe_token) {
+        $errors[] = pht('There was an unknown error processing your card.');
+      }
+    }
 
     if (!$errors) {
       $root = dirname(phutil_get_library_root('phabricator'));
@@ -102,6 +104,8 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
       try {
         // First, make sure the token is valid.
+        $secret_key = $this->getSecretKey();
+
         $info = id(new Stripe_Token())->retrieve($stripe_token, $secret_key);
 
         $account_phid = $method->getAccountPHID();

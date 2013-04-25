@@ -1274,6 +1274,20 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/diffusion/behavior-audit-preview.js',
   ),
+  'javelin-behavior-balanced-payment-form' =>
+  array(
+    'uri' => '/res/2a850a31/rsrc/js/application/phortune/behavior-balanced-payment-form.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-json',
+      3 => 'javelin-workflow',
+      4 => 'phortune-credit-card-form',
+    ),
+    'disk' => '/rsrc/js/application/phortune/behavior-balanced-payment-form.js',
+  ),
   'javelin-behavior-conpherence-drag-and-drop-photo' =>
   array(
     'uri' => '/res/9e3eb1cd/rsrc/js/application/conpherence/behavior-drag-and-drop-photo.js',
@@ -2258,7 +2272,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-stripe-payment-form' =>
   array(
-    'uri' => '/res/62dc91b4/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
+    'uri' => '/res/2ae12d96/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
     'type' => 'js',
     'requires' =>
     array(
