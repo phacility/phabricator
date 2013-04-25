@@ -60,16 +60,12 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function buildPaymentProvider() {
-    $providers = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhortunePaymentProvider')
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
+    $providers = PhortunePaymentProvider::getAllProviders();
 
     $accept = array();
     foreach ($providers as $provider) {
-      $obj = newv($provider['name'], array());
-      if ($obj->canHandlePaymentMethod($this)) {
-        $accept[] = $obj;
+      if ($provider->canHandlePaymentMethod($this)) {
+        $accept[] = $provider;
       }
     }
 

@@ -9,6 +9,15 @@ final class DarkConsoleErrorLogPluginAPI {
 
   private static $discardMode = false;
 
+  public static function registerErrorHandler() {
+    // NOTE: This forces PhutilReadableSerializer to load, so that we are
+    // able to handle errors which fire from inside autoloaders (PHP will not
+    // reenter autoloaders).
+    PhutilReadableSerializer::printableValue(null);
+    PhutilErrorHandler::setErrorListener(
+      array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
+  }
+
   public static function enableDiscardMode() {
     self::$discardMode = true;
   }

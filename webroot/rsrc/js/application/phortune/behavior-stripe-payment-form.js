@@ -4,7 +4,6 @@
  *           javelin-dom
  *           javelin-json
  *           javelin-workflow
- *           stripe-core
  */
 
 JX.behavior('stripe-payment-form', function(config) {
@@ -23,38 +22,6 @@ JX.behavior('stripe-payment-form', function(config) {
     };
   }
 
-  var stripeErrorObject = function(type) {
-    var errorPre  = 'Stripe (our payments provider) has detected your card ';
-    var errorPost = ' is invalid.';
-    var msg       = '';
-    var result    = {};
-
-    switch (type) {
-      case 'number':
-        msg = errorPre + 'number' + errorPost;
-        break;
-      case 'cvc':
-        msg = errorPre + 'CVC' + errorPost;
-        break;
-      case 'expiry':
-        msg = errorPre + 'expiration date' + errorPost;
-        break;
-      case 'stripe':
-        msg = 'Stripe (our payments provider) is experiencing issues. ' +
-              'Please try again.';
-        break;
-      case 'invalid_request':
-      default:
-        msg = 'Unknown error.';
-              // TODO - how best report bugs? would be good to get
-              // user feedback since this shouldn't happen!
-        break;
-    }
-
-    result[type] = msg;
-    return result;
-  }
-
   var onsubmit = function(e) {
     e.kill();
 
@@ -63,21 +30,19 @@ JX.behavior('stripe-payment-form', function(config) {
     var cardData = getCardData();
     var errors   = [];
     if (!Stripe.validateCardNumber(cardData.number)) {
-      errors.push(stripeErrorObject('number'));
+      errors.push('number');
     }
     if (!Stripe.validateCVC(cardData.cvc)) {
-      errors.push(stripeErrorObject('cvc'));
+      errors.push('cvc');
     }
-    if (!Stripe.validateExpiry(cardData.month,
-                               cardData.year)) {
-      errors.push(stripeErrorObject('expiry'));
+    if (!Stripe.validateExpiry(cardData.month, cardData.year)) {
+      errors.push('expiry');
     }
-    if (errors.length != 0) {
-      cardErrors.value = JX.JSON.stringify(errors);
 
+    if (errors.length) {
+      cardErrors.value = JX.JSON.stringify(errors);
       JX.Workflow.newFromForm(root)
         .start();
-
       return;
     }
 
@@ -97,16 +62,14 @@ JX.behavior('stripe-payment-form', function(config) {
       var errors = [];
       switch (response.error.type) {
         case 'card_error':
-          var error = {};
-          error[response.error.code] = response.error.message;
-          errors.push(error);
+          errors.push(response.error.code);
           break;
         case 'invalid_request_error':
-          errors.push(stripeErrorObject('invalid_request'));
+          errors.push('invalid_request');
           break;
         case 'api_error':
         default:
-          errors.push(stripeErrorObject('stripe'));
+          errors.push('stripe');
           break;
       }
       cardErrors.value = JX.JSON.stringify(errors);

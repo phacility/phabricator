@@ -2258,7 +2258,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-stripe-payment-form' =>
   array(
-    'uri' => '/res/30bcbbb1/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
+    'uri' => '/res/e4149d37/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2266,7 +2266,6 @@ celerity_register_resource_map(array(
       1 => 'javelin-dom',
       2 => 'javelin-json',
       3 => 'javelin-workflow',
-      4 => 'stripe-core',
     ),
     'disk' => '/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
   ),
