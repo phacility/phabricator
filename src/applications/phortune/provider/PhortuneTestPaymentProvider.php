@@ -3,7 +3,7 @@
 final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
 
   public function isEnabled() {
-    return true;
+    return PhabricatorEnv::getEnvConfig('phortune.test.enabled');
   }
 
   public function getProviderType() {
@@ -37,4 +37,60 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     return;
   }
 
+
+/* -(  Adding Payment Methods  )--------------------------------------------- */
+
+
+  public function canCreatePaymentMethods() {
+    return true;
+  }
+
+
+  public function translateCreatePaymentMethodErrorCode($error_code) {
+    return $error_code;
+  }
+
+
+  public function getCreatePaymentMethodErrorMessage($error_code) {
+    return null;
+  }
+
+
+  public function validateCreatePaymentMethodToken(array $token) {
+    return true;
+  }
+
+
+  public function createPaymentMethodFromRequest(
+    AphrontRequest $request,
+    PhortunePaymentMethod $method,
+    array $token) {
+
+    $method
+      ->setExpires('2050', '01')
+      ->setBrand('FreeMoney')
+      ->setLastFourDigits('9999');
+
+  }
+
+
+  /**
+   * @task addmethod
+   */
+  public function renderCreatePaymentMethodForm(
+    AphrontRequest $request,
+    array $errors) {
+
+    $ccform = id(new PhortuneCreditCardForm())
+      ->setUser($request->getUser())
+      ->setErrors($errors);
+
+    Javelin::initBehavior(
+      'test-payment-form',
+      array(
+        'formID' => $ccform->getFormID(),
+      ));
+
+    return $ccform->buildForm();
+  }
 }

@@ -2280,6 +2280,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
   ),
+  'javelin-behavior-test-payment-form' =>
+  array(
+    'uri' => '/res/a8fe8616/rsrc/js/application/phortune/behavior-test-payment-form.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'phortune-credit-card-form',
+    ),
+    'disk' => '/rsrc/js/application/phortune/behavior-test-payment-form.js',
+  ),
   'javelin-behavior-toggle-class' =>
   array(
     'uri' => '/res/79921b7f/rsrc/js/core/behavior-toggle-class.js',

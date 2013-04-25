@@ -25,6 +25,21 @@ final class PhabricatorPhortuneConfigOptions
       $this->newOption('phortune.balanced.secret-key', 'string', null)
         ->setHidden(true)
         ->setDescription(pht('Balanced secret key.')),
+      $this->newOption('phortune.test.enabled', 'bool', false)
+        ->setBoolOptions(
+          array(
+            pht('Enable Test Provider'),
+            pht('Disable Test Provider'),
+          ))
+        ->setSummary(pht('Enable test payment provider.'))
+        ->setDescription(
+          pht(
+            "Enable the test payment provider.\n\n".
+            "NOTE: Enabling this provider gives all users infinite free ".
+            "money! You should enable it **ONLY** for testing and ".
+            "development."))
+        ->setLocked(true)
+
     );
   }
 

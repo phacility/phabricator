@@ -9,6 +9,9 @@ final class PhortunePaymentProviderTestCase extends PhabricatorTestCase {
   }
 
   public function testNoPaymentProvider() {
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('phortune.test.enabled', true);
+
     $method = id(new PhortunePaymentMethod())
       ->setMetadataValue('type', 'hugs');
 
@@ -26,6 +29,9 @@ final class PhortunePaymentProviderTestCase extends PhabricatorTestCase {
   }
 
   public function testMultiplePaymentProviders() {
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('phortune.test.enabled', true);
+
    $method = id(new PhortunePaymentMethod())
     ->setMetadataValue('type', 'test.multiple');
 
