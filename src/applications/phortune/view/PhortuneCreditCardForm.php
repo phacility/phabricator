@@ -5,6 +5,7 @@ final class PhortuneCreditCardForm {
   private $formID;
   private $scripts = array();
   private $user;
+  private $errors = array();
 
   private $cardNumberError;
   private $cardCVCError;
@@ -15,18 +16,8 @@ final class PhortuneCreditCardForm {
     return $this;
   }
 
-  public function setCardExpirationError($card_expiration_error) {
-    $this->cardExpirationError = $card_expiration_error;
-    return $this;
-  }
-
-  public function setCardCVCError($card_cvc_error) {
-    $this->cardCVCError = $card_cvc_error;
-    return $this;
-  }
-
-  public function setCardNumberError($card_number_error) {
-    $this->cardNumberError = $card_number_error;
+  public function setErrors(array $errors) {
+    $this->errors = $errors;
     return $this;
   }
 
@@ -63,6 +54,19 @@ final class PhortuneCreditCardForm {
           )));
     }
 
+    $errors = $this->errors;
+    $e_number = isset($errors[PhortuneErrCode::ERR_CC_INVALID_NUMBER])
+      ? pht('Invalid')
+      : true;
+
+    $e_cvc = isset($errors[PhortuneErrCode::ERR_CC_INVALID_CVC])
+      ? pht('Invalid')
+      : true;
+
+    $e_expiry = isset($errors[PhortuneErrCode::ERR_CC_INVALID_EXPIRY])
+      ? pht('Invalid')
+      : null;
+
     $form
       ->setID($form_id)
       ->appendChild(
@@ -85,18 +89,18 @@ final class PhortuneCreditCardForm {
         ->setLabel('Card Number')
         ->setDisableAutocomplete(true)
         ->setSigil('number-input')
-        ->setError($this->cardNumberError))
+        ->setError($e_number))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('CVC')
         ->setDisableAutocomplete(true)
         ->setSigil('cvc-input')
-        ->setError($this->cardCVCError))
+        ->setError($e_cvc))
       ->appendChild(
         id(new PhortuneMonthYearExpiryControl())
         ->setLabel('Expiration')
         ->setUser($this->user)
-        ->setError($this->cardExpirationError));
+        ->setError($e_expiry));
 
     return $form;
   }

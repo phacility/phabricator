@@ -11,12 +11,16 @@ final class PhortunePaymentMethod extends PhortuneDAO
   const STATUS_FAILED     = 'payment:failed';
   const STATUS_REMOVED    = 'payment:removed';
 
-  protected $name;
+  protected $name = '';
   protected $status;
   protected $accountPHID;
   protected $authorPHID;
-  protected $expiresEpoch;
+  protected $expires;
   protected $metadata = array();
+  protected $brand;
+  protected $lastFourDigits;
+  protected $providerType;
+  protected $providerDomain;
 
   private $account;
 
@@ -47,7 +51,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function getDescription() {
-    return pht('Expires %s', date('m/y'), $this->getExpiresEpoch());
+    return '...';
   }
 
   public function getMetadataValue($key, $default = null) {
@@ -78,6 +82,11 @@ final class PhortunePaymentMethod extends PhortuneDAO
     }
 
     return head($accept);
+  }
+
+  public function setExpires($year, $month) {
+    $this->expires = $year.'-'.$month;
+    return $this;
   }
 
 

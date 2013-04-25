@@ -1276,15 +1276,13 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-balanced-payment-form' =>
   array(
-    'uri' => '/res/2a850a31/rsrc/js/application/phortune/behavior-balanced-payment-form.js',
+    'uri' => '/res/6876492d/rsrc/js/application/phortune/behavior-balanced-payment-form.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-      2 => 'javelin-json',
-      3 => 'javelin-workflow',
-      4 => 'phortune-credit-card-form',
+      2 => 'phortune-credit-card-form',
     ),
     'disk' => '/rsrc/js/application/phortune/behavior-balanced-payment-form.js',
   ),
@@ -2272,15 +2270,13 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-stripe-payment-form' =>
   array(
-    'uri' => '/res/2ae12d96/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
+    'uri' => '/res/c1a12d77/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-      2 => 'javelin-json',
-      3 => 'javelin-workflow',
-      4 => 'phortune-credit-card-form',
+      2 => 'phortune-credit-card-form',
     ),
     'disk' => '/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
   ),
@@ -3605,12 +3601,15 @@ celerity_register_resource_map(array(
   ),
   'phortune-credit-card-form' =>
   array(
-    'uri' => '/res/7be5799a/rsrc/js/application/phortune/phortune-credit-card-form.js',
+    'uri' => '/res/bc948778/rsrc/js/application/phortune/phortune-credit-card-form.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
+      2 => 'javelin-json',
+      3 => 'javelin-workflow',
+      4 => 'javelin-util',
     ),
     'disk' => '/rsrc/js/application/phortune/phortune-credit-card-form.js',
   ),

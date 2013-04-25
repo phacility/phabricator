@@ -81,63 +81,45 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
    */
   public function createPaymentMethodFromRequest(
     AphrontRequest $request,
-    PhortunePaymentMethod $method) {
-
-    $card_errors = $request->getStr('cardErrors');
-    $stripe_token = $request->getStr('stripeToken');
+    PhortunePaymentMethod $method,
+    array $token) {
 
     $errors = array();
-    if ($card_errors) {
-      $raw_errors = json_decode($card_errors);
-      $errors = $this->parseRawCreatePaymentMethodErrors($raw_errors);
-    }
 
-    if (!$errors) {
-      if (!$stripe_token) {
-        $errors[] = pht('There was an unknown error processing your card.');
-      }
-    }
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/stripe-php/lib/Stripe.php';
 
-    if (!$errors) {
-      $root = dirname(phutil_get_library_root('phabricator'));
-      require_once $root.'/externals/stripe-php/lib/Stripe.php';
+    $secret_key = $this->getSecretKey();
+    $stripe_token = $token['stripeCardToken'];
 
-      try {
-        // First, make sure the token is valid.
-        $secret_key = $this->getSecretKey();
+    // First, make sure the token is valid.
+    $info = id(new Stripe_Token())->retrieve($stripe_token, $secret_key);
 
-        $info = id(new Stripe_Token())->retrieve($stripe_token, $secret_key);
+    $account_phid = $method->getAccountPHID();
+    $author_phid = $method->getAuthorPHID();
 
-        $account_phid = $method->getAccountPHID();
-        $author_phid = $method->getAuthorPHID();
+    $params = array(
+      'card' => $stripe_token,
+      'description' => $account_phid.':'.$author_phid,
+    );
 
-        $params = array(
-          'card' => $stripe_token,
-          'description' => $account_phid.':'.$author_phid,
-        );
+    // Then, we need to create a Customer in order to be able to charge
+    // the card more than once. We create one Customer for each card;
+    // they do not map to PhortuneAccounts because we allow an account to
+    // have more than one active card.
+    $customer = Stripe_Customer::create($params, $secret_key);
 
-        // Then, we need to create a Customer in order to be able to charge
-        // the card more than once. We create one Customer for each card;
-        // they do not map to PhortuneAccounts because we allow an account to
-        // have more than one active card.
-        $customer = Stripe_Customer::create($params, $secret_key);
-
-        $card = $info->card;
-        $method
-          ->setName($card->type.' / '.$card->last4)
-          ->setExpiresEpoch(strtotime($card->exp_year.'-'.$card->exp_month))
-          ->setMetadata(
-            array(
-              'type'              => 'stripe.customer',
-              'stripe.customerID' => $customer->id,
-              'stripe.tokenID'    => $stripe_token,
-            ));
-      } catch (Exception $ex) {
-        phlog($ex);
-        $errors[] = pht(
-          'There was an error communicating with the payments backend.');
-      }
-    }
+    $card = $info->card;
+    $method
+      ->setBrand($card->type)
+      ->setLastFourDigits($card->last4)
+      ->setExpires($card->exp_year, $card->exp_month)
+      ->setMetadata(
+        array(
+          'type' => 'stripe.customer',
+          'stripe.customerID' => $customer->id,
+          'stripe.cardToken' => $stripe_token,
+        ));
 
     return $errors;
   }
@@ -148,9 +130,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
     $ccform = id(new PhortuneCreditCardForm())
       ->setUser($request->getUser())
-      ->setCardNumberError(isset($errors['number']) ? pht('Invalid') : true)
-      ->setCardCVCError(isset($errors['cvc']) ? pht('Invalid') : true)
-      ->setCardExpirationError(isset($errors['exp']) ? pht('Invalid') : null)
+      ->setErrors($errors)
       ->addScript('https://js.stripe.com/v2/');
 
     Javelin::initBehavior(
@@ -163,64 +143,84 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     return $ccform->buildForm();
   }
 
+  private function getStripeShortErrorCode($error_code) {
+    $prefix = 'cc:stripe:';
+    if (strncmp($error_code, $prefix, strlen($prefix))) {
+      return null;
+    }
+    return substr($error_code, strlen($prefix));
+  }
 
-  /**
-   * Stripe JS and calls to Stripe handle all errors with processing this
-   * form. This function takes the raw errors - in the form of an array
-   * where each elementt is $type => $message - and figures out what if
-   * any fields were invalid and pulls the messages into a flat object.
-   *
-   * See https://stripe.com/docs/api#errors for more information on possible
-   * errors.
-   */
-  private function parseRawCreatePaymentMethodErrors(array $raw_errors) {
-    $errors = array();
+  public function validateCreatePaymentMethodToken(array $token) {
+    return isset($token['stripeCardToken']);
+  }
 
-    foreach ($raw_errors as $type) {
-      $error_key = null;
-      $message = pht('A card processing error has occurred.');
-      switch ($type) {
-        case 'number':
-        case 'invalid_number':
-        case 'incorrect_number':
-          $error_key = 'number';
-          $message = pht('Invalid or incorrect credit card number.');
-          break;
-        case 'cvc':
-        case 'invalid_cvc':
-        case 'incorrect_cvc':
-          $error_key = 'cvc';
-          $message = pht('Card CVC is invalid or incorrect.');
-          break;
-        case 'expiry':
-        case 'invalid_expiry_month':
-        case 'invalid_expiry_year':
-          $error_key = 'exp';
-          $message = pht('Card expiration date is invalid or incorrect.');
-          break;
-        case 'card_declined':
-        case 'expired_card':
-        case 'duplicate_transaction':
-        case 'processing_error':
-          // these errors don't map well to field(s) being bad
-          break;
-        case 'invalid_amount':
-        case 'missing':
-        default:
-          // these errors only happen if we (not the user) messed up so log it
-          $error = sprintf('[Stripe Error] %s', $type);
-          phlog($error);
-          break;
-      }
+  public function translateCreatePaymentMethodErrorCode($error_code) {
+    $short_code = $this->getStripeShortErrorCode($error_code);
 
-      if ($error_key === null || isset($errors[$error_key])) {
-        $errors[] = $message;
-      } else {
-        $errors[$error_key] = $message;
+    if ($short_code) {
+      static $map = array(
+        'error:invalid_number'        => PhortuneErrCode::ERR_CC_INVALID_NUMBER,
+        'error:invalid_cvc'           => PhortuneErrCode::ERR_CC_INVALID_CVC,
+        'error:invalid_expiry_month'  => PhortuneErrCode::ERR_CC_INVALID_EXPIRY,
+        'error:invalid_expiry_year'   => PhortuneErrCode::ERR_CC_INVALID_EXPIRY,
+      );
+
+      if (isset($map[$short_code])) {
+        return $map[$short_code];
       }
     }
 
-    return $errors;
+    return $error_code;
+  }
+
+  /**
+   * See https://stripe.com/docs/api#errors for more information on possible
+   * errors.
+   */
+  public function getCreatePaymentMethodErrorMessage($error_code) {
+    $short_code = $this->getStripeShortErrorCode($error_code);
+    if (!$short_code) {
+      return null;
+    }
+
+    switch ($short_code) {
+      case 'error:incorrect_number':
+        $error_key = 'number';
+        $message = pht('Invalid or incorrect credit card number.');
+        break;
+      case 'error:incorrect_cvc':
+        $error_key = 'cvc';
+        $message = pht('Card CVC is invalid or incorrect.');
+        break;
+        $error_key = 'exp';
+        $message = pht('Card expiration date is invalid or incorrect.');
+        break;
+      case 'error:invalid_expiry_month':
+      case 'error:invalid_expiry_year':
+      case 'error:invalid_cvc':
+      case 'error:invalid_number':
+        // NOTE: These should be translated into Phortune error codes earlier,
+        // so we don't expect to receive them here. They are listed for clarity
+        // and completeness. If we encounter one, we treat it as an unknown
+        // error.
+        break;
+      case 'error:invalid_amount':
+      case 'error:missing':
+      case 'error:card_declined':
+      case 'error:expired_card':
+      case 'error:duplicate_transaction':
+      case 'error:processing_error':
+      default:
+        // NOTE: These errors currently don't recevive a detailed message.
+        // NOTE: We can also end up here with "http:nnn" messages.
+
+        // TODO: At least some of these should have a better message, or be
+        // translated into common errors above.
+        break;
+    }
+
+    return null;
   }
 
 }

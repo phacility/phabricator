@@ -2,72 +2,56 @@
  * @provides javelin-behavior-stripe-payment-form
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-json
- *           javelin-workflow
  *           phortune-credit-card-form
  */
 
 JX.behavior('stripe-payment-form', function(config) {
   Stripe.setPublishableKey(config.stripePublishableKey);
 
-  var root = JX.$(config.formID);
-  var ccform = new JX.PhortuneCreditCardForm(root);
+  var ccform = new JX.PhortuneCreditCardForm(JX.$(config.formID), onsubmit);
 
-  var onsubmit = function(e) {
-    e.kill();
-
-    // validate the card data with Stripe client API and submit the form
-    // with any detected errors
-    var cardData = ccform.getCardData();
+  function onsubmit(card_data) {
     var errors = [];
 
-    if (!Stripe.validateCardNumber(cardData.number)) {
-      errors.push('number');
+    if (!Stripe.validateCardNumber(card_data.number)) {
+      errors.push('cc:invalid:number');
     }
 
-    if (!Stripe.validateCVC(cardData.cvc)) {
-      errors.push('cvc');
+    if (!Stripe.validateCVC(card_data.cvc)) {
+      errors.push('cc:invalid:cvc');
     }
 
-    if (!Stripe.validateExpiry(cardData.month, cardData.year)) {
-      errors.push('expiry');
+    if (!Stripe.validateExpiry(card_data.month, card_data.year)) {
+      errors.push('cc:invalid:expiry');
     }
 
     if (errors.length) {
-      JX.Workflow
-        .newFromForm(root, {cardErrors: JX.JSON.stringify(errors)})
-        .start();
+      ccform.submitForm(errors);
       return;
     }
 
     var data = {
-      number: cardData.number,
-      cvc: cardData.cvc,
-      exp_month: cardData.month,
-      exp_year: cardData.year
+      number: card_data.number,
+      cvc: card_data.cvc,
+      exp_month: card_data.month,
+      exp_year: card_data.year
     };
 
     Stripe.createToken(data, onresponse);
   }
 
-  var onresponse = function(status, response) {
+  function onresponse(status, response) {
     var errors = [];
     var token = null;
-    if (response.error) {
-      errors = [response.error.type];
+    if (status != 200) {
+      errors.push('cc:stripe:http:' + status);
+    } else if (response.error) {
+      errors.push('cc:stripe:error:' + response.error.type);
     } else {
       token = response.id;
     }
 
-    var params = {
-      cardErrors: JX.JSON.stringify(errors),
-      stripeToken: token
-    };
-
-    JX.Workflow
-      .newFromForm(root, params)
-      .start();
+    ccform.submitForm(errors, {stripeCardToken: token});
   }
 
-  JX.DOM.listen(root, 'submit', null, onsubmit);
 });

@@ -48,9 +48,38 @@ final class PhortunePaymentMethodEditController
         ->setAccountPHID($account->getPHID())
         ->setAuthorPHID($user->getPHID())
         ->setStatus(PhortunePaymentMethod::STATUS_ACTIVE)
-        ->setMetadataValue('providerKey', $provider->getProviderKey());
+        ->setProviderType($provider->getProviderType())
+        ->setProviderDomain($provider->getProviderDomain());
 
-      $errors = $provider->createPaymentMethodFromRequest($request, $method);
+      if (!$errors) {
+        $errors = $this->processClientErrors(
+          $provider,
+          $request->getStr('errors'));
+      }
+
+      if (!$errors) {
+        $client_token_raw = $request->getStr('token');
+        $client_token = json_decode($client_token_raw, true);
+        if (!is_array($client_token)) {
+          $errors[] = pht(
+            'There was an error decoding token information submitted by the '.
+            'client. Expected a JSON-encoded token dictionary, received: %s.',
+            nonempty($client_token_raw, pht('nothing')));
+        } else {
+          if (!$provider->validateCreatePaymentMethodToken($client_token)) {
+            $errors[] = pht(
+              'There was an error with the payment token submitted by the '.
+              'client. Expected a valid dictionary, received: %s.',
+              $client_token_raw);
+          }
+        }
+        if (!$errors) {
+          $errors = $provider->createPaymentMethodFromRequest(
+            $request,
+            $method,
+            $client_token);
+        }
+      }
 
       if (!$errors) {
         $method->save();
@@ -150,6 +179,63 @@ final class PhortunePaymentMethodEditController
         'device' => true,
         'dust' => true,
       ));
+  }
+
+  private function processClientErrors(
+    PhortunePaymentProvider $provider,
+    $client_errors_raw) {
+
+    $errors = array();
+
+    $client_errors = json_decode($client_errors_raw, true);
+    if (!is_array($client_errors)) {
+      $errors[] = pht(
+        'There was an error decoding error information submitted by the '.
+        'client. Expected a JSON-encoded list of error codes, received: %s.',
+        nonempty($client_errors_raw, pht('nothing')));
+    }
+
+    foreach (array_unique($client_errors) as $key => $client_error) {
+      $client_errors[$key] = $provider->translateCreatePaymentMethodErrorCode(
+        $client_error);
+    }
+
+    foreach (array_unique($client_errors) as $client_error) {
+      switch ($client_error) {
+        case PhortuneErrCode::ERR_CC_INVALID_NUMBER:
+          $message = pht(
+            'The card number you entered is not a valid card number. Check '.
+            'that you entered it correctly.');
+          break;
+        case PhortuneErrCode::ERR_CC_INVALID_CVC:
+          $message = pht(
+            'The CVC code you entered is not a valid CVC code. Check that '.
+            'you entered it correctly. The CVC code is a 3-digit or 4-digit '.
+            'numeric code which usually appears on the back of the card.');
+          break;
+        case PhortuneErrCode::ERR_CC_INVALID_EXPIRY:
+          $message = pht(
+            'The card expiration date is not a valid expiration date. Check '.
+            'that you entered it correctly. You can not add an expired card '.
+            'as a payment method.');
+          break;
+        default:
+          $message = $provider->getCreatePaymentErrorMessage($client_error);
+          if (!$message) {
+            $message = pht(
+              "There was an unexpected error ('%s') processing payment ".
+              "information.",
+              $client_error);
+
+            phlog($message);
+          }
+          break;
+      }
+
+      $errors[$client_error] = $message;
+    }
+
+    return $errors;
   }
 
 }

@@ -2,70 +2,56 @@
  * @provides javelin-behavior-balanced-payment-form
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-json
- *           javelin-workflow
  *           phortune-credit-card-form
  */
 
 JX.behavior('balanced-payment-form', function(config) {
   balanced.init(config.balancedMarketplaceURI);
 
-  var root = JX.$(config.formID);
-  var ccform = new JX.PhortuneCreditCardForm(root);
+  var ccform = new JX.PhortuneCreditCardForm(JX.$(config.formID), onsubmit);
 
-  var onsubmit = function(e) {
-    e.kill();
-
-    var cardData = ccform.getCardData();
+  function onsubmit(card_data) {
     var errors = [];
 
-    if (!balanced.card.isCardNumberValid(cardData.number)) {
-      errors.push('number');
+    if (!balanced.card.isCardNumberValid(card_data.number)) {
+      errors.push('cc:invalid:number');
     }
 
-    if (!balanced.card.isSecurityCodeValid(cardData.number, cardData.cvc)) {
-      errors.push('cvc');
+    if (!balanced.card.isSecurityCodeValid(card_data.number, card_data.cvc)) {
+      errors.push('cc:invalid:cvc');
     }
 
-    if (!balanced.card.isExpiryValid(cardData.month, cardData.year)) {
-      errors.push('expiry');
+    if (!balanced.card.isExpiryValid(card_data.month, card_data.year)) {
+      errors.push('cc:invalid:expiry');
     }
 
     if (errors.length) {
-      JX.Workflow
-        .newFromForm(root, {cardErrors: JX.JSON.stringify(errors)})
-        .start();
+      ccform.submitForm(errors);
       return;
     }
 
     var data = {
-      card_number: cardData.number,
-      security_code: cardData.cvc,
-      expiration_month: cardData.month,
-      expiration_year: cardData.year
+      card_number: card_data.number,
+      security_code: card_data.cvc,
+      expiration_month: card_data.month,
+      expiration_year: card_data.year
     };
 
     balanced.card.create(data, onresponse);
   }
 
-  var onresponse = function(response) {
-
+  function onresponse(response) {
+    var token = null;
     var errors = [];
+
     if (response.error) {
-      errors = [response.error.type];
+      errors = ['cc:balanced:error:' + response.error.type];
     } else if (response.status != 201) {
-      errors = ['balanced:' + response.status];
+      errors = ['cc:balanced:http:' + response.status];
+    } else {
+      token = response.data.uri;
     }
 
-    var params = {
-      cardErrors: JX.JSON.stringify(errors),
-      balancedCardData: JX.JSON.stringify(response.data)
-    };
-
-    JX.Workflow
-      .newFromForm(root, params)
-      .start();
+    ccform.submitForm(errors, {balancedMarketplaceURI: token});
   }
-
-  JX.DOM.listen(root, 'submit', null, onsubmit);
 });

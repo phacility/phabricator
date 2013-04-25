@@ -95,9 +95,34 @@ abstract class PhortunePaymentProvider {
   /**
    * @task addmethod
    */
+  public function translateCreatePaymentMethodErrorCode($error_code) {
+    throw new PhortuneNotImplementedException($this);
+  }
+
+
+  /**
+   * @task addmethod
+   */
+  public function getCreatePaymentMethodErrorMessage($error_code) {
+    throw new PhortuneNotImplementedException($this);
+  }
+
+
+  /**
+   * @task addmethod
+   */
+  public function validateCreatePaymentMethodToken(array $token) {
+    throw new PhortuneNotImplementedException($this);
+  }
+
+
+  /**
+   * @task addmethod
+   */
   public function createPaymentMethodFromRequest(
     AphrontRequest $request,
-    PhortunePaymentMethod $method) {
+    PhortunePaymentMethod $method,
+    array $token) {
     throw new PhortuneNotImplementedException($this);
   }
 

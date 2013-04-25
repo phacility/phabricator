@@ -2,6 +2,10 @@
  * @provides phortune-credit-card-form
  * @requires javelin-install
  *           javelin-dom
+ *           javelin-json
+ *           javelin-workflow
+ *           javelin-util
+ * @javelin
  */
 
 /**
@@ -9,21 +13,21 @@
  *
  * To construct an object for a form:
  *
- *   new JX.PhortuneCreditCardForm(form_root_node);
+ *   new JX.PhortuneCreditCardForm(form_root_node, submit_callback);
  *
- * To read card data from a form:
- *
- *   var data = ccform.getCardData();
  */
 JX.install('PhortuneCreditCardForm', {
-  construct : function(root) {
+  construct : function(root, onsubmit) {
     this._root = root;
+    this._submitCallback = onsubmit;
+    JX.DOM.listen(root, 'submit', null, JX.bind(this, this._onsubmit));
   },
 
   members : {
     _root : null,
+    _submitCallback : null,
 
-    getCardData : function() {
+    _getCardData : function() {
       var root = this._root;
 
       return {
@@ -32,7 +36,24 @@ JX.install('PhortuneCreditCardForm', {
         month  : JX.DOM.find(root, 'select', 'month-input' ).value,
         year   : JX.DOM.find(root, 'select', 'year-input'  ).value
       };
+    },
+
+    submitForm : function(errors, token) {
+      var params = {
+        errors: JX.JSON.stringify(errors),
+        token: JX.JSON.stringify(token || {})
+      };
+
+      JX.Workflow
+        .newFromForm(this._root, params)
+        .start();
+    },
+
+    _onsubmit : function(e) {
+      e.kill();
+      this._submitCallback(this._getCardData());
     }
+
   }
 
 });
