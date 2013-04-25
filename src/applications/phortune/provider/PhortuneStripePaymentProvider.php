@@ -85,6 +85,8 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
     $card_errors = $request->getStr('cardErrors');
     $stripe_token = $request->getStr('stripeToken');
+
+    $errors = array();
     if ($card_errors) {
       $raw_errors = json_decode($card_errors);
       $errors = $this->parseRawCreatePaymentMethodErrors($raw_errors);
@@ -140,77 +142,21 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     AphrontRequest $request,
     array $errors) {
 
-    $e_card_number = isset($errors['number']) ? pht('Invalid') : true;
-    $e_card_cvc = isset($errors['cvc']) ? pht('Invalid') : true;
-    $e_card_exp = isset($errors['exp']) ? pht('Invalid') : null;
+    $ccform = id(new PhortuneCreditCardForm())
+      ->setUser($request->getUser())
+      ->setCardNumberError(isset($errors['number']) ? pht('Invalid') : true)
+      ->setCardCVCError(isset($errors['cvc']) ? pht('Invalid') : true)
+      ->setCardExpirationError(isset($errors['exp']) ? pht('Invalid') : null)
+      ->addScript('https://js.stripe.com/v2/');
 
-    $user = $request->getUser();
-
-    $form_id = celerity_generate_unique_node_id();
-    require_celerity_resource('stripe-payment-form-css');
-    require_celerity_resource('aphront-tooltip-css');
-    Javelin::initBehavior('phabricator-tooltips');
-
-    $form = id(new AphrontFormView())
-      ->setID($form_id)
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-        ->setLabel('')
-        ->setValue(
-          javelin_tag(
-            'div',
-            array(
-              'class' => 'credit-card-logos',
-              'sigil' => 'has-tooltip',
-              'meta' => array(
-                'tip'  => 'We support Visa, Mastercard, American Express, '.
-                          'Discover, JCB, and Diners Club.',
-                'size' => 440,
-              )
-            ))))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel('Card Number')
-        ->setDisableAutocomplete(true)
-        ->setSigil('number-input')
-        ->setError($e_card_number))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel('CVC')
-        ->setDisableAutocomplete(true)
-        ->setSigil('cvc-input')
-        ->setError($e_card_cvc))
-      ->appendChild(
-        id(new PhortuneMonthYearExpiryControl())
-        ->setLabel('Expiration')
-        ->setUser($user)
-        ->setError($e_card_exp))
-      ->appendChild(
-        javelin_tag(
-          'input',
-          array(
-            'hidden' => true,
-            'name'   => 'stripeToken',
-            'sigil'  => 'stripe-token-input',
-          )))
-      ->appendChild(
-        javelin_tag(
-          'input',
-          array(
-            'hidden' => true,
-            'name'   => 'cardErrors',
-            'sigil'  => 'card-errors-input'
-          )));
-
-    require_celerity_resource('stripe-core');
     Javelin::initBehavior(
       'stripe-payment-form',
       array(
-        'stripePublishKey' => $this->getPublishableKey(),
-        'root'             => $form_id,
+        'stripePublishableKey' => $this->getPublishableKey(),
+        'formID'               => $ccform->getFormID(),
       ));
 
-    return $form;
+    return $ccform->buildForm();
   }
 
 

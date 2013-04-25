@@ -2258,7 +2258,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-stripe-payment-form' =>
   array(
-    'uri' => '/res/e4149d37/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
+    'uri' => '/res/62dc91b4/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2266,6 +2266,7 @@ celerity_register_resource_map(array(
       1 => 'javelin-dom',
       2 => 'javelin-json',
       3 => 'javelin-workflow',
+      4 => 'phortune-credit-card-form',
     ),
     'disk' => '/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
   ),
@@ -3588,6 +3589,26 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/pholio/pholio-inline-comments.css',
   ),
+  'phortune-credit-card-form' =>
+  array(
+    'uri' => '/res/7be5799a/rsrc/js/application/phortune/phortune-credit-card-form.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/phortune/phortune-credit-card-form.js',
+  ),
+  'phortune-credit-card-form-css' =>
+  array(
+    'uri' => '/res/563c8c6d/rsrc/css/application/phortune/phortune-credit-card-form.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/phortune/phortune-credit-card-form.css',
+  ),
   'phrequent-css' =>
   array(
     'uri' => '/res/9d6f3eb7/rsrc/css/application/phrequent/phrequent.css',
@@ -3920,24 +3941,6 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/sprite-tokens.css',
-  ),
-  'stripe-core' =>
-  array(
-    'uri' => '/res/fc74303d/rsrc/externals/stripe-js/stripe_core.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/externals/stripe-js/stripe_core.js',
-  ),
-  'stripe-payment-form-css' =>
-  array(
-    'uri' => '/res/634a6371/rsrc/css/application/phortune/stripe-payment-form.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/phortune/stripe-payment-form.css',
   ),
   'syntax-highlighting-css' =>
   array(

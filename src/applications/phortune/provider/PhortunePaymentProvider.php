@@ -81,7 +81,6 @@ abstract class PhortunePaymentProvider {
     PhortuneCharge $charge);
 
 
-
 /* -(  Adding Payment Methods  )--------------------------------------------- */
 
 
@@ -111,5 +110,6 @@ abstract class PhortunePaymentProvider {
     array $errors) {
     throw new PhortuneNotImplementedException($this);
   }
+
 
 }
