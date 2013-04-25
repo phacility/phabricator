@@ -39,6 +39,7 @@ final class PhabricatorPeopleTestDataGenerator
   protected function generateUsername($random_real_name) {
     $name = strtolower($random_real_name);
     $name = preg_replace('/[^a-z]/s'  , ' ', $name);
+    $name = preg_replace('/\s+/', ' ', $name);
     $words = explode(" ", $name);
     $random = rand(0, 4);
     $reduced = "";
