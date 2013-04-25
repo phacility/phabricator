@@ -1,0 +1,8 @@
+<phpunit>
+    <testsuite name="RESTful">
+        <directory>.</directory>
+    </testsuite>
+    <logging>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
+    </logging>
+</phpunit>
