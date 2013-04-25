@@ -11,6 +11,7 @@ final class PhortuneCharge extends PhortuneDAO {
 
   const STATUS_PENDING    = 'charge:pending';
   const STATUS_AUTHORIZED = 'charge:authorized';
+  const STATUS_CHARGING   = 'charge:charging';
   const STATUS_CHARGED    = 'charge:charged';
   const STATUS_FAILED     = 'charge:failed';
 
@@ -19,7 +20,7 @@ final class PhortuneCharge extends PhortuneDAO {
   protected $paymentMethodPHID;
   protected $amountInCents;
   protected $status;
-  protected $metadata;
+  protected $metadata = array();
 
   public function getConfiguration() {
     return array(

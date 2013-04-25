@@ -96,8 +96,8 @@ final class PhortunePaymentMethodEditController
             ->setMetadata(
               array(
                 'type'              => 'stripe.customer',
-                'stripeCustomerID'  => $customer->id,
-                'stripeTokenID'     => $stripe_token,
+                'stripe.customerID' => $customer->id,
+                'stripe.tokenID'    => $stripe_token,
               ))
             ->save();
 

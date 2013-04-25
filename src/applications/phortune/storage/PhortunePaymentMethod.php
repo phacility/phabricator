@@ -16,7 +16,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
   protected $accountPHID;
   protected $authorPHID;
   protected $expiresEpoch;
-  protected $metadata;
+  protected $metadata = array();
 
   private $account;
 
@@ -48,6 +48,40 @@ final class PhortunePaymentMethod extends PhortuneDAO
 
   public function getDescription() {
     return pht('Expires %s', date('m/y'), $this->getExpiresEpoch());
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return idx($this->getMetadata(), $key, $default);
+  }
+
+  public function setMetadataValue($key, $value) {
+    $this->metadata[$key] = $value;
+    return $this;
+  }
+
+  public function buildPaymentProvider() {
+    $providers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhortunePaymentProvider')
+      ->setConcreteOnly(true)
+      ->selectAndLoadSymbols();
+
+    $accept = array();
+    foreach ($providers as $provider) {
+      $obj = newv($provider['name'], array());
+      if ($obj->canHandlePaymentMethod($this)) {
+        $accept[] = $obj;
+      }
+    }
+
+    if (!$accept) {
+      throw new PhortuneNoPaymentProviderException($this);
+    }
+
+    if (count($accept) > 1) {
+      throw new PhortuneMultiplePaymentProvidersException($this, $accept);
+    }
+
+    return head($accept);
   }
 
 
