@@ -46,6 +46,10 @@ final class PhortunePaymentMethod extends PhortuneDAO
     return $this->account;
   }
 
+  public function getDescription() {
+    return pht('Expires %s', date('m/y'), $this->getExpiresEpoch());
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

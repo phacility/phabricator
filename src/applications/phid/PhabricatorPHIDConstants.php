@@ -38,6 +38,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_PRCH    = 'PRCH';
   const PHID_TYPE_PAYM    = 'PAYM';
   const PHID_TYPE_CHRG    = 'CHRG';
+  const PHID_TYPE_CART    = 'CART';
 
   const PHID_TYPE_XACT    = 'XACT';
   const PHID_TYPE_XCMT    = 'XCMT';
