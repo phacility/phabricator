@@ -252,7 +252,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         array_unshift($args, $this->getLocalPath());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $pattern = "(cd %s && HGPLAIN=1 hg {$pattern})";
+        $hgplain = (phutil_is_windows() ? "set HGPLAIN=1 &&" : "HGPLAIN=1");
+        $pattern = "(cd %s && {$hgplain} hg {$pattern})";
         array_unshift($args, $this->getLocalPath());
         break;
       default:
