@@ -28,6 +28,9 @@
  * If you do this correctly, the input should suggest items and enter them as
  * tokens as the user types.
  *
+ * When the tokenizer is focused, the CSS class `jx-tokenizer-container-focused`
+ * is added to the container node.
+ *
  * @group control
  */
 JX.install('Tokenizer', {
@@ -205,8 +208,7 @@ JX.install('Tokenizer', {
       } else if (e.getType() == 'keydown') {
         this._onkeydown(e);
       } else if (e.getType() == 'blur') {
-        this._focus.value = '';
-        this._redraw();
+        this._didblur();
 
         // Explicitly update the placeholder since we just wiped the field
         // value.
@@ -378,7 +380,23 @@ JX.install('Tokenizer', {
     focus : function() {
       var focus = this._focus;
       JX.DOM.show(focus);
+
+      JX.DOM.alterClass(
+        this._containerNode,
+        'jx-tokenizer-container-focused',
+        true);
+
       setTimeout(function() { JX.DOM.focus(focus); }, 0);
+    },
+
+    _didblur: function() {
+      JX.DOM.alterClass(
+        this._containerNode,
+        'jx-tokenizer-container-focused',
+        false);
+      this._focus.value = '';
+      this._redraw();
     }
+
   }
 });
