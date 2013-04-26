@@ -47,12 +47,13 @@ final class PhabricatorOAuthLoginController
     $userinfo_uri = (string)$userinfo_uri;
 
     try {
-      $user_data = HTTPSFuture::loadContent($userinfo_uri);
-      if ($user_data === false) {
-        throw new PhabricatorOAuthProviderException(
-          "Request to '{$userinfo_uri}' failed!");
-      }
-      $provider->setUserData($user_data);
+      $user_data_request = new HTTPSFuture($userinfo_uri);
+
+      // NOTE: GitHub requires a User-Agent header.
+      $user_data_request->addHeader('User-Agent', 'Phabricator');
+
+      list($body) = $user_data_request->resolvex();
+      $provider->setUserData($body);
     } catch (PhabricatorOAuthProviderException $e) {
       return $this->buildErrorResponse(new PhabricatorOAuthFailureView(), $e);
     }
