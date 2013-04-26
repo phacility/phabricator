@@ -1348,7 +1348,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-dark-console' =>
   array(
-    'uri' => '/res/635a9422/rsrc/js/core/behavior-dark-console.js',
+    'uri' => '/res/1e2c7a5e/rsrc/js/core/behavior-dark-console.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -4050,7 +4050,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/26980a1c/core.pkg.js',
       'type' => 'js',
     ),
-    '6d1d1e99' =>
+    '4ccfeb47' =>
     array(
       'name' => 'darkconsole.pkg.js',
       'symbols' =>
@@ -4058,7 +4058,7 @@ celerity_register_resource_map(array(
         0 => 'javelin-behavior-dark-console',
         1 => 'javelin-behavior-error-log',
       ),
-      'uri' => '/res/pkg/6d1d1e99/darkconsole.pkg.js',
+      'uri' => '/res/pkg/4ccfeb47/darkconsole.pkg.js',
       'type' => 'js',
     ),
     '8aaacd1b' =>
@@ -4228,7 +4228,7 @@ celerity_register_resource_map(array(
     'javelin-behavior-aphront-drag-and-drop-textarea' => '27c55b30',
     'javelin-behavior-aphront-form-disable-on-submit' => '26980a1c',
     'javelin-behavior-audit-preview' => 'f96657b8',
-    'javelin-behavior-dark-console' => '6d1d1e99',
+    'javelin-behavior-dark-console' => '4ccfeb47',
     'javelin-behavior-device' => '26980a1c',
     'javelin-behavior-differential-accept-with-errors' => '27c55b30',
     'javelin-behavior-differential-add-reviewers-and-ccs' => '27c55b30',
@@ -4244,7 +4244,7 @@ celerity_register_resource_map(array(
     'javelin-behavior-differential-user-select' => '27c55b30',
     'javelin-behavior-diffusion-commit-graph' => 'f96657b8',
     'javelin-behavior-diffusion-pull-lastmodified' => 'f96657b8',
-    'javelin-behavior-error-log' => '6d1d1e99',
+    'javelin-behavior-error-log' => '4ccfeb47',
     'javelin-behavior-global-drag-and-drop' => '26980a1c',
     'javelin-behavior-history-install' => '26980a1c',
     'javelin-behavior-konami' => '26980a1c',

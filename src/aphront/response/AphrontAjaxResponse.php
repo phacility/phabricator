@@ -42,6 +42,7 @@ final class AphrontAjaxResponse extends AphrontResponse {
         array(
           'uri'     => (string)$this->getRequest()->getRequestURI(),
           'key'     => $console->getKey($this->getRequest()),
+          'color'   => $console->getColor(),
         ));
     }
 
