@@ -6,62 +6,6 @@
 abstract class ConpherenceController extends PhabricatorController {
   private $conpherences;
 
-  /**
-   * Try for a full set of unread conpherences, and if we fail
-   * load read conpherences. Additional conpherences in either category
-   * are loaded asynchronously.
-   */
-  public function loadStartingConpherences($current_selection_epoch = null) {
-    $user = $this->getRequest()->getUser();
-
-    $read_participant_query = id(new ConpherenceParticipantQuery())
-      ->withParticipantPHIDs(array($user->getPHID()));
-    $read_status =  ConpherenceParticipationStatus::UP_TO_DATE;
-    if ($current_selection_epoch) {
-      $read_one = $read_participant_query
-        ->withParticipationStatus($read_status)
-        ->withDateTouched($current_selection_epoch, '>')
-        ->execute();
-
-      $read_two = $read_participant_query
-        ->withDateTouched($current_selection_epoch, '<=')
-        ->execute();
-
-      $read = array_merge($read_one, $read_two);
-
-    } else {
-      $read = $read_participant_query
-        ->withParticipationStatus($read_status)
-        ->execute();
-    }
-
-    $unread_status = ConpherenceParticipationStatus::BEHIND;
-    $unread = id(new ConpherenceParticipantQuery())
-      ->withParticipantPHIDs(array($user->getPHID()))
-      ->withParticipationStatus($unread_status)
-      ->execute();
-
-    $all_participation = $unread + $read;
-    $all_conpherence_phids = array_keys($all_participation);
-    $all_conpherences = array();
-    if ($all_conpherence_phids) {
-      $all_conpherences = id(new ConpherenceThreadQuery())
-        ->setViewer($user)
-        ->withPHIDs($all_conpherence_phids)
-        ->needParticipantCache(true)
-        ->execute();
-    }
-    $unread_conpherences = array_select_keys(
-      $all_conpherences,
-      array_keys($unread));
-
-    $read_conpherences = array_select_keys(
-      $all_conpherences,
-      array_keys($read));
-
-    return array($unread_conpherences, $read_conpherences);
-  }
-
   public function buildApplicationMenu() {
     $nav = new PhabricatorMenuView();
 

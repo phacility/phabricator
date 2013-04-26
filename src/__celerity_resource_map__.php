@@ -1289,7 +1289,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/ce7bfa44/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/06bfc1a3/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1301,6 +1301,7 @@ celerity_register_resource_map(array(
       5 => 'javelin-workflow',
       6 => 'javelin-behavior-device',
       7 => 'javelin-history',
+      8 => 'javelin-vector',
     ),
     'disk' => '/rsrc/js/application/conpherence/behavior-menu.js',
   ),

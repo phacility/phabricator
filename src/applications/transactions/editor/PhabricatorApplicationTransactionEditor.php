@@ -257,6 +257,11 @@ abstract class PhabricatorApplicationTransactionEditor
     throw new Exception("Capability not supported!");
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+  }
+
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
     return $this;
@@ -385,6 +390,8 @@ abstract class PhabricatorApplicationTransactionEditor
       foreach ($xactions as $xaction) {
         $this->applyExternalEffects($object, $xaction);
       }
+
+      $this->applyFinalEffects($object, $xactions);
 
       if ($read_locking) {
         $object->endReadLocking();

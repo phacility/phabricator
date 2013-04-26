@@ -8,6 +8,7 @@
  *           javelin-workflow
  *           javelin-behavior-device
  *           javelin-history
+ *           javelin-vector
  */
 
 JX.behavior('conpherence-menu', function(config) {
@@ -53,6 +54,15 @@ JX.behavior('conpherence-menu', function(config) {
     redrawthread();
   }
 
+  JX.Stratcom.listen(
+    'conpherence-selectthread',
+    null,
+    function (e) {
+      var node = JX.$(e.getData().id);
+      selectthread(node);
+    }
+  );
+
   function updatepagedata(data) {
     var uri_suffix = thread.selected + '/';
     if (data.use_base_uri) {
@@ -75,15 +85,6 @@ JX.behavior('conpherence-menu', function(config) {
     }
   );
 
-  JX.Stratcom.listen(
-    'conpherence-selectthread',
-    null,
-    function (e) {
-      var node = JX.$(e.getData().id);
-      selectthread(node);
-    }
-  );
-
   function redrawthread() {
     if (!thread.node) {
       return;
@@ -96,9 +97,9 @@ JX.behavior('conpherence-menu', function(config) {
     var data = JX.Stratcom.getData(thread.node);
 
     if (thread.visible !== null || !config.hasThread) {
-      var uri = config.base_uri + data.id + '/';
+    var uri = config.base_uri + data.id + '/';
       new JX.Workflow(uri, {})
-        .setHandler(onresponse)
+        .setHandler(onloadthreadresponse)
         .start();
     } else {
       didredrawthread();
@@ -154,7 +155,7 @@ JX.behavior('conpherence-menu', function(config) {
     }
   }
 
-  function onresponse(response) {
+  function onloadthreadresponse(response) {
     var header = JX.$H(response.header);
     var messages = JX.$H(response.messages);
     var form = JX.$H(response.form);
@@ -252,11 +253,9 @@ JX.behavior('conpherence-menu', function(config) {
     }).setData({ oldest_transaction_id : oldest_transaction_id }).send();
   });
 
-
   // On mobile, we just show a thread list, so we don't want to automatically
   // select or load any threads. On Desktop, we automatically select the first
   // thread.
-
   var old_device = null;
   function ondevicechange() {
     var new_device = JX.Device.getDevice();
@@ -284,16 +283,18 @@ JX.behavior('conpherence-menu', function(config) {
   function loadthreads() {
     var uri = config.base_uri + 'thread/' + config.selectedID + '/';
     new JX.Workflow(uri)
-      .setHandler(onthreadresponse)
+      .setHandler(onloadthreadsresponse)
       .start();
   }
 
-  function onthreadresponse(r) {
+  function onloadthreadsresponse(r) {
     var layout = JX.$(config.layoutID);
     var menu = JX.DOM.find(layout, 'div', 'conpherence-menu-pane');
     JX.DOM.setContent(menu, JX.$H(r));
 
     config.selectedID && selectthreadid(config.selectedID);
+
+    thread.node.scrollIntoView();
   }
 
   function didloadthreads() {
@@ -315,5 +316,72 @@ JX.behavior('conpherence-menu', function(config) {
     }
     redrawthread();
   }
+
+  var handlethreadscrollers = function (e) {
+    e.kill();
+
+    var data = e.getNodeData('conpherence-menu-scroller');
+    var scroller = e.getNode('conpherence-menu-scroller');
+    new JX.Workflow(scroller.href, data)
+      .setHandler(
+        JX.bind(null, threadscrollerresponse, scroller, data.direction))
+      .start();
+  };
+
+  var threadscrollerresponse = function (scroller, direction, r) {
+    var html = JX.$H(r.html);
+
+    var threadPhids = r.phids;
+    var reselectId = null;
+    // remove any threads that are in the list that we just got back
+    // in the result set; things have changed and they'll be in the
+    // right place soon
+    for (var ii = 0; ii < threadPhids.length; ii++) {
+      try {
+        var nodeId = threadPhids[ii] + '-nav-item';
+        var node = JX.$(nodeId);
+        var nodeData = JX.Stratcom.getData(node);
+        if (nodeData.id == thread.selected) {
+          reselectId = nodeId;
+        }
+        JX.DOM.remove(node);
+      } catch (ex) {
+        // ignore , just haven't seen this thread yet
+      }
+    }
+
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var menuRoot = JX.DOM.find(root, 'div', 'conpherence-menu-pane');
+    var scrollY = 0;
+    // we have to do some hyjinx in the up case to make the menu scroll to
+    // where it should
+    if (direction == 'up') {
+      var style = {
+        position: 'absolute',
+        left:     '-10000px'
+      };
+      var test_size = JX.$N('div', {style: style}, html);
+      document.body.appendChild(test_size);
+      var html_size = JX.Vector.getDim(test_size);
+      JX.DOM.remove(test_size);
+      scrollY = html_size.y;
+    }
+    JX.DOM.replace(scroller, html);
+    menuRoot.scrollTop += scrollY;
+
+    if (reselectId) {
+      JX.Stratcom.invoke(
+        'conpherence-selectthread',
+        null,
+        { id : reselectId }
+      );
+    }
+  };
+
+  JX.Stratcom.listen(
+    ['click'],
+    'conpherence-menu-scroller',
+    handlethreadscrollers
+  );
 
 });

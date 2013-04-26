@@ -140,9 +140,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $object->setRecentParticipantPHIDs($participants);
   }
 
-  /**
-   * For now this only supports adding more files and participants.
-   */
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -169,33 +166,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             $file_phid);
         }
         $editor->save();
-        // fallthrough
-      case PhabricatorTransactions::TYPE_COMMENT:
-        $xaction_phid = $xaction->getPHID();
-        $behind = ConpherenceParticipationStatus::BEHIND;
-        $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
-        $participants = $object->getParticipants();
-        $user = $this->getActor();
-        $time = time();
-        foreach ($participants as $phid => $participant) {
-          if ($phid != $user->getPHID()) {
-            if ($participant->getParticipationStatus() != $behind) {
-              $participant->setBehindTransactionPHID($xaction_phid);
-              // decrement one as this is the message putting them behind!
-              $participant->setSeenMessageCount($object->getMessageCount() - 1);
-            }
-            $participant->setParticipationStatus($behind);
-            $participant->setDateTouched($time);
-          } else {
-            $participant->setSeenMessageCount($object->getMessageCount());
-            $participant->setParticipationStatus($up_to_date);
-            $participant->setDateTouched($time);
-          }
-          $participant->save();
-        }
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-
         $participants = $object->getParticipants();
 
         $old_map = array_fuse($xaction->getOldValue());
@@ -229,7 +201,37 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         }
         $object->attachParticipants($participants);
         break;
-     }
+    }
+  }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // update everyone's participation status on the last xaction -only-
+    $xaction = end($xactions);
+    $xaction_phid = $xaction->getPHID();
+    $behind = ConpherenceParticipationStatus::BEHIND;
+    $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
+    $participants = $object->getParticipants();
+    $user = $this->getActor();
+    $time = time();
+    foreach ($participants as $phid => $participant) {
+      if ($phid != $user->getPHID()) {
+        if ($participant->getParticipationStatus() != $behind) {
+          $participant->setBehindTransactionPHID($xaction_phid);
+          // decrement one as this is the message putting them behind!
+          $participant->setSeenMessageCount($object->getMessageCount() - 1);
+        }
+        $participant->setParticipationStatus($behind);
+        $participant->setDateTouched($time);
+      } else {
+        $participant->setSeenMessageCount($object->getMessageCount());
+        $participant->setParticipationStatus($up_to_date);
+        $participant->setDateTouched($time);
+      }
+      $participant->save();
+    }
   }
 
   protected function mergeTransactions(

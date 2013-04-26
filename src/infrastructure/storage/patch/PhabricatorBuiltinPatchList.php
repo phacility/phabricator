@@ -1250,6 +1250,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130423.phortunepaymentrevised.sql'),
       ),
+      '20130423.conpherenceindices.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130423.conpherenceindices.sql'),
+      ),
     );
   }
 }

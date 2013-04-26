@@ -50,6 +50,9 @@ final class ConpherenceViewController extends
         ->setBeforeTransactionID($before_transaction_id);
     }
     $conpherence = $query->executeOne();
+    if (!$conpherence) {
+      return new Aphront404Response();
+    }
     $this->setConpherence($conpherence);
 
     $participant = $conpherence->getParticipant($user->getPHID());
