@@ -1,6 +1,7 @@
 <?php
 
-final class ReleephRequest extends ReleephDAO {
+final class ReleephRequest extends ReleephDAO
+  implements PhabricatorPolicyInterface {
 
   protected $phid;
   protected $branchID;
@@ -283,6 +284,28 @@ final class ReleephRequest extends ReleephDAO {
 
   public function setStatus($value) {
     throw new Exception('`status` is now deprecated!');
+  }
+
+/* -(  Make magic Lisk methods private  )------------------------------------ */
+
+  private function setUserIntents(array $ar) {
+    return parent::setUserIntents($ar);
+  }
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }
