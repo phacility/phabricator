@@ -252,8 +252,8 @@ final class PhabricatorDifferentialConfigOptions
         false)
         ->setBoolOptions(
           array(
-            pht("Do not show context"),
             pht("Show context"),
+            pht("Do not show context"),
           ))
         ->setSummary(pht("Show diff context around inline comments in email."))
         ->setDescription(
