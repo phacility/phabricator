@@ -271,7 +271,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         ->withParticipantPHIDs(array($user->getPHID()))
         ->withParticipationStatus($unread_status)
         ->execute();
-      $message_count_number = $unread[$user->getPHID()];
+      $message_count_number = idx($unread, $user->getPHID(), 0);
       if ($message_count_number > 999) {
         $message_count_number = "\xE2\x88\x9E";
       }
