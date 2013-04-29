@@ -19,7 +19,6 @@ final class PhabricatorConfigManagementSetWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
-
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
       throw new PhutilArgumentUsageException(
