@@ -267,11 +267,11 @@ final class PhabricatorMainMenuView extends AphrontView {
       $message_count_id = celerity_generate_unique_node_id();
 
       $unread_status = ConpherenceParticipationStatus::BEHIND;
-      $unread = id(new ConpherenceParticipantQuery())
+      $unread = id(new ConpherenceParticipantCountQuery())
         ->withParticipantPHIDs(array($user->getPHID()))
         ->withParticipationStatus($unread_status)
         ->execute();
-      $message_count_number = count($unread);
+      $message_count_number = idx($unread, $user->getPHID(), 0);
       if ($message_count_number > 999) {
         $message_count_number = "\xE2\x88\x9E";
       }

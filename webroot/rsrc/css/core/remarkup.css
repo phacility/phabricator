@@ -139,6 +139,10 @@
   padding:     .25em 1em;
 }
 
+.phabricator-remarkup blockquote em {
+  font-style: normal;
+}
+
 .phabricator-remarkup img.remarkup-proxy-image {
   max-width: 640px;
   max-height: 640px;

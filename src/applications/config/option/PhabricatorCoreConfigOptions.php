@@ -153,6 +153,14 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('phabricator.cache-namespace', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Cache namespace.')),
+      $this->newOption('phabricator.allow-email-users', 'bool', false)
+        ->setBoolOptions(
+            array(
+              pht('Allow'),
+              pht('Disallow'),
+              ))->setDescription(
+                 pht(
+                   'Allow non-members to interact with tasks over email.')),
       );
 
   }

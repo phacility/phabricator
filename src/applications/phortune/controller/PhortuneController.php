@@ -2,6 +2,21 @@
 
 abstract class PhortuneController extends PhabricatorController {
 
+  protected function loadActiveAccount(PhabricatorUser $user) {
+    $accounts = id(new PhortuneAccountQuery())
+      ->setViewer($user)
+      ->withMemberPHIDs(array($user->getPHID()))
+      ->execute();
+
+    if (!$accounts) {
+      return $this->createUserAccount($user);
+    } else if (count($accounts) == 1) {
+      return head($accounts);
+    } else {
+      throw new Exception("TODO: No account selection yet.");
+    }
+  }
+
   protected function createUserAccount(PhabricatorUser $user) {
     $request = $this->getRequest();
 

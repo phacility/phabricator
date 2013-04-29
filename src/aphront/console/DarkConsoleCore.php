@@ -83,6 +83,14 @@ final class DarkConsoleCore {
     return $key;
   }
 
+  public function getColor() {
+    foreach ($this->getPlugins() as $plugin) {
+      if ($plugin->getColor()) {
+        return $plugin->getColor();
+      }
+    }
+  }
+
   public function render(AphrontRequest $request) {
     $user = $request->getUser();
     $visible = $user ? $user->getConsoleVisible() : true;
@@ -94,6 +102,7 @@ final class DarkConsoleCore {
         'class' => 'dark-console',
         'style' => $visible ? '' : 'display: none;',
         'data-console-key' => $this->getKey($request),
+        'data-console-color' => $this->getColor(),
       ),
       '');
   }

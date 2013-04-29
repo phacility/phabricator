@@ -3,23 +3,30 @@
 final class ConpherenceThreadListView extends AphrontView {
 
   private $baseURI;
-  private $unreadThreads;
-  private $readThreads;
+  private $threads;
+  private $scrollUpParticipant;
+  private $scrollDownParticipant;
+
+  public function setThreads(array $threads) {
+    assert_instances_of($threads, 'ConpherenceThread');
+    $this->threads = $threads;
+    return $this;
+  }
+
+  public function setScrollUpParticipant(
+    ConpherenceParticipant $participant) {
+    $this->scrollUpParticipant = $participant;
+    return $this;
+  }
+
+  public function setScrollDownParticipant(
+    ConpherenceParticipant $participant) {
+    $this->scrollDownParticipant = $participant;
+    return $this;
+  }
 
   public function setBaseURI($base_uri) {
     $this->baseURI = $base_uri;
-    return $this;
-  }
-
-  public function setUnreadThreads(array $unread_threads) {
-    assert_instances_of($unread_threads, 'ConpherenceThread');
-    $this->unreadThreads = $unread_threads;
-    return $this;
-  }
-
-  public function setReadThreads(array $read_threads) {
-    assert_instances_of($read_threads, 'ConpherenceThread');
-    $this->readThreads = $read_threads;
     return $this;
   }
 
@@ -39,16 +46,36 @@ final class ConpherenceThreadListView extends AphrontView {
         ->setHref($this->baseURI.'new/')
         ->setType(PhabricatorMenuItemView::TYPE_BUTTON));
 
-    $menu->newLabel(pht('Unread'));
-    $this->addThreadsToMenu($menu, $this->unreadThreads, $read = false);
-    $menu->newLabel(pht('Read'));
-    $this->addThreadsToMenu($menu, $this->readThreads, $read = true);
+    $menu->newLabel('');
+    $this->addThreadsToMenu($menu, $this->threads);
 
     return $menu;
   }
 
   public function renderSingleThread(ConpherenceThread $thread) {
     return $this->renderThread($thread);
+  }
+
+  public function renderThreadsHTML() {
+    $thread_html = array();
+
+    if ($this->scrollUpParticipant->getID()) {
+      $thread_html[] = $this->getScrollMenuItem(
+        $this->scrollUpParticipant,
+        'up');
+    }
+
+    foreach ($this->threads as $thread) {
+      $thread_html[] = $this->renderSingleThread($thread);
+    }
+
+    if ($this->scrollDownParticipant->getID()) {
+      $thread_html[] = $this->getScrollMenuItem(
+        $this->scrollDownParticipant,
+        'down');
+    }
+
+    return phutil_implode_html('', $thread_html);
   }
 
   private function renderThreadItem(ConpherenceThread $thread) {
@@ -87,28 +114,59 @@ final class ConpherenceThreadListView extends AphrontView {
 
   private function addThreadsToMenu(
     PhabricatorMenuView $menu,
-    array $conpherences,
-    $read = false) {
+    array $conpherences) {
+
+    if ($this->scrollUpParticipant->getID()) {
+      $item = $this->getScrollMenuItem($this->scrollUpParticipant, 'up');
+      $menu->addMenuItem($item);
+    }
 
     foreach ($conpherences as $conpherence) {
       $item = $this->renderThreadItem($conpherence);
       $menu->addMenuItem($item);
     }
 
-    if (empty($conpherences) || $read) {
-      $menu->addMenuItem($this->getNoConpherencesBlock());
+    if (empty($conpherences)) {
+      $menu->addMenuItem($this->getNoConpherencesMenuItem());
+    }
+
+    if ($this->scrollDownParticipant->getID()) {
+      $item = $this->getScrollMenuItem($this->scrollDownParticipant, 'down');
+      $menu->addMenuItem($item);
     }
 
     return $menu;
   }
 
-  private function getNoConpherencesBlock() {
+  public function getScrollMenuItem(
+    ConpherenceParticipant $participant,
+    $direction) {
+
+    if ($direction == 'up') {
+      $name = pht('Load Newer Threads');
+    } else {
+      $name = pht('Load Older Threads');
+    }
+    $item = id(new PhabricatorMenuItemView())
+      ->addSigil('conpherence-menu-scroller')
+      ->setName($name)
+      ->setHref($this->baseURI)
+      ->setType(PhabricatorMenuItemView::TYPE_BUTTON)
+      ->setMetadata(array(
+        'participant_id' => $participant->getID(),
+        'conpherence_phid' => $participant->getConpherencePHID(),
+        'date_touched' => $participant->getDateTouched(),
+        'direction' => $direction));
+    return $item;
+  }
+
+  private function getNoConpherencesMenuItem() {
     $message = phutil_tag(
       'div',
       array(
         'class' => 'no-conpherences-menu-item'
       ),
-      pht('No more conpherences.'));
+      pht('No conpherences.'));
 
     return id(new PhabricatorMenuItemView())
       ->setType(PhabricatorMenuItemView::TYPE_CUSTOM)

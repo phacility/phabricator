@@ -33,7 +33,87 @@ final class PhortuneAccountBuyController
       return new Aphront404Response();
     }
 
-    $title = pht('Buy %s', $product->getProductName());
+    $purchase = new PhortunePurchase();
+    $purchase->setProductPHID($product->getPHID());
+    $purchase->setAccountPHID($account->getPHID());
+    $purchase->setPurchaseName($product->getProductName());
+    $purchase->setBasePriceInCents($product->getPriceInCents());
+    $purchase->setQuantity(1);
+    $purchase->setTotalPriceInCents(
+      $purchase->getBasePriceInCents() * $purchase->getQuantity());
+    $purchase->setStatus(PhortunePurchase::STATUS_PENDING);
+
+    $cart = new PhortuneCart();
+    $cart->setAccountPHID($account->getPHID());
+    $cart->setOwnerPHID($user->getPHID());
+    $cart->attachPurchases(
+      array(
+        $purchase,
+      ));
+
+    $rows = array();
+    $total = 0;
+    foreach ($cart->getPurchases() as $purchase) {
+      $rows[] = array(
+        $purchase->getPurchaseName(),
+        PhortuneUtil::formatCurrency($purchase->getBasePriceInCents()),
+        $purchase->getQuantity(),
+        PhortuneUtil::formatCurrency($purchase->getTotalPriceInCents()),
+      );
+
+      $total += $purchase->getTotalPriceInCents();
+    }
+
+    $rows[] = array(
+      phutil_tag('strong', array(), pht('Total')),
+      '',
+      '',
+      phutil_tag('strong', array(), PhortuneUtil::formatCurrency($total)),
+    );
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        pht('Item'),
+        pht('Price'),
+        pht('Qty.'),
+        pht('Total'),
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->setNoBackground(true);
+    $panel->appendChild($table);
+
+
+    $title = pht('Buy Stuff');
+
+
+    $methods = id(new PhortunePaymentMethodQuery())
+      ->setViewer($user)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->withStatus(PhortunePaymentMethodQuery::STATUS_OPEN)
+      ->execute();
+
+    $method_control = id(new AphrontFormRadioButtonControl())
+      ->setLabel(pht('Payment Method'));
+
+    if (!$methods) {
+      $method_control = id(new AphrontFormStaticControl())
+        ->setLabel(pht('Payment Method'))
+        ->setValue(
+          phutil_tag('em', array(), pht('No payment methods configured.')));
+    } else {
+      $method_control = id(new AphrontFormRadioButtonControl())
+        ->setLabel(pht('Payment Method'))
+        ->setName('paymentMethodID')
+        ->setValue($request->getInt('paymentMethodID'));
+      foreach ($methods as $method) {
+        $method_control->addButton(
+          $method->getID(),
+          $method->getName(),
+          $method->getDescription());
+      }
+    }
 
     $payment_method_uri = $this->getApplicationURI(
       $account->getID().'/paymentmethod/edit/');
@@ -46,16 +126,9 @@ final class PhortuneAccountBuyController
       ),
       pht('Add New Payment Method'));
 
-
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Stuff'))
-          ->setValue($product->getProductName()))
-      ->appendChild(
-        id(new AphrontFormRadioButtonControl())
-          ->setLabel(pht('Payment Method')))
+      ->appendChild($method_control)
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setValue($new_method))
@@ -64,7 +137,10 @@ final class PhortuneAccountBuyController
           ->setValue(pht("Dolla Dolla Bill Y'all")));
 
     return $this->buildApplicationPage(
-      $form,
+      array(
+        $panel,
+        $form,
+      ),
       array(
         'title'   => $title,
         'device'  => true,

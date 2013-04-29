@@ -209,9 +209,12 @@ final class DiffusionBrowseController extends DiffusionController {
       }
 
     } catch (CommandException $ex) {
-      return id(new AphrontErrorView())
-        ->setTitle(pht('Search Error'))
-        ->appendChild($ex->getStderr());
+      $stderr = $ex->getStderr();
+      if ($stderr != '') {
+        return id(new AphrontErrorView())
+          ->setTitle(pht('Search Error'))
+          ->appendChild($stderr);
+      }
     }
 
     $results = array_slice($results, $page);

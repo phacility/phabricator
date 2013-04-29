@@ -211,29 +211,52 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       if ($user) {
         $this->setAuthorPHID($user->getPHID());
       } else {
-        $default_author = PhabricatorEnv::getEnvConfig(
-          'metamta.maniphest.default-public-author');
+        $allow_email_users = PhabricatorEnv::getEnvConfig(
+          'phabricator.allow-email-users');
 
-        if ($default_author) {
-          $user = id(new PhabricatorUser())->loadOneWhere(
-            'username = %s',
-            $default_author);
-          if ($user) {
-            $receiver->setOriginalEmailSource($from);
-          } else {
-            throw new Exception(
-              "Phabricator is misconfigured, the configuration key ".
-              "'metamta.maniphest.default-public-author' is set to user ".
-              "'{$default_author}' but that user does not exist.");
+        if ($allow_email_users) {
+          $email = new PhutilEmailAddress($from);
+
+          $user = id(new PhabricatorExternalAccount())->loadOneWhere(
+            'accountType = %s AND accountDomain IS NULL and accountID = %s',
+            'email', $email->getAddress());
+
+          if (!$user) {
+            $user = new PhabricatorExternalAccount();
+            $user->setAccountID($email->getAddress());
+            $user->setAccountType('email');
+            $user->setDisplayName($email->getDisplayName());
+            $user->save();
+
           }
+
         } else {
-          // TODO: We should probably bounce these since from the user's
-          // perspective their email vanishes into a black hole.
-          return $this->setMessage("Invalid public user '{$from}'.")->save();
+          $default_author = PhabricatorEnv::getEnvConfig(
+            'metamta.maniphest.default-public-author');
+
+          if ($default_author) {
+            $user = id(new PhabricatorUser())->loadOneWhere(
+              'username = %s',
+              $default_author);
+
+            if (!$user) {
+              throw new Exception(
+                "Phabricator is misconfigured, the configuration key ".
+                "'metamta.maniphest.default-public-author' is set to user ".
+                "'{$default_author}' but that user does not exist.");
+            }
+
+          } else {
+            // TODO: We should probably bounce these since from the user's
+            // perspective their email vanishes into a black hole.
+            return $this->setMessage("Invalid public user '{$from}'.")->save();
+          }
         }
+
       }
 
       $receiver->setAuthorPHID($user->getPHID());
+      $receiver->setOriginalEmailSource($from);
       $receiver->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
 
       $editor = new ManiphestTransactionEditor();
@@ -242,7 +265,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
       $handler->setActor($user);
       $handler->setExcludeMailRecipientPHIDs(
-        $this->loadExcludeMailRecipientPHIDs());
+      $this->loadExcludeMailRecipientPHIDs());
       $handler->processEmail($this);
 
       $this->setRelatedPHID($receiver->getPHID());
