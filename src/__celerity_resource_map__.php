@@ -741,7 +741,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-calendar-view-css' =>
   array(
-    'uri' => '/res/73061a31/rsrc/css/aphront/calendar-view.css',
+    'uri' => '/res/ae6f5b54/rsrc/css/aphront/calendar-view.css',
     'type' => 'css',
     'requires' =>
     array(
