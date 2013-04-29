@@ -18,26 +18,21 @@ final class PhabricatorLipsumGenerateWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $type = "Paste";
+    $classname = "Phabricator".$type."TestDataGenerator";
     $admin = PhabricatorUser::getOmnipotentUser();
-    // $peoplegen = new PhabricatorPeopleTestDataGenerator();
-    // $object = $peoplegen->generate();
-    // $handle = PhabricatorObjectHandleData::loadOneHandle($object->getPHID(),
-    //   $admin);
-    // echo "Generated ".$handle->getFullName()."\n";
+    try {
+      $taskgen = newv($classname, array());
+      $object = $taskgen->generate();
 
-    $taskgen = new PhabricatorManiphestTaskTestDataGenerator();
-    $object = $taskgen->generate();
-    $handle = PhabricatorObjectHandleData::loadOneHandle($object->getPHID(),
-      $admin);
-    echo "Generated ".$handle->getFullName()."\n";
-    echo "\nRequested data has been generated.";
+      $handle = PhabricatorObjectHandleData::loadOneHandle($object->getPHID(),
+        $admin);
+      echo "Generated ".$handle->getFullName()."\n";
+      echo "\nRequested data has been generated.";
+    } catch (PhutilMissingSymbolException $ex) {
+    }
 
-    // $taskgen = new PhabricatorRevisionTestDataGenerator();
-    // $object = $taskgen->generate();
-    // $handle = PhabricatorObjectHandleData::loadOneHandle($object->getPHID(),
-    //   $admin);
-    // echo "Generated ".$handle->getFullName()."\n";
-    // echo "\nRequested data has been generated.";
+
   }
 
 }
