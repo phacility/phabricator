@@ -4,9 +4,14 @@ abstract class PhrequentController extends PhabricatorController {
 
   protected function buildNav($view) {
     $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/phrequent/'));
+    $nav->setBaseURI(new PhutilURI('/phrequent/view/'));
 
-    $nav->addFilter('usertime', 'Time Tracked');
+    $nav->addLabel(pht('User Times'));
+    $nav->addFilter('current', pht('Currently Tracking'));
+    $nav->addFilter('recent', pht('Recent Activity'));
+    $nav->addLabel('All Times');
+    $nav->addFilter('allcurrent', pht('Currently Tracking'));
+    $nav->addFilter('allrecent', pht('Recent Activity'));
 
     $nav->selectFilter($view);
 
