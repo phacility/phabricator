@@ -75,6 +75,10 @@ table.aphront-calendar-view td div.aphront-calendar-day {
   background-color: #fdfae7;
 }
 
+.aphront-calendar-today {
+  background-color: #A6FAAD;
+}
+
 .aphront-calendar-empty {
   background-color: #ededed;
 }

@@ -6,6 +6,8 @@
 final class PhabricatorSavedQuery extends PhabricatorSearchDAO {
 
   protected $parameters = array();
+  protected $queryKey = "";
+  protected $engineClassName = "PhabricatorPasteSearchEngine";
 
   public function getConfiguration() {
     return array(
@@ -21,5 +23,16 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO {
 
   public function getParameter($key, $default = null) {
     return idx($this->parameters, $key, $default);
+  }
+
+  public function save() {
+    if ($this->getEngineClass() === null) {
+      throw new Exception(pht("Engine class is null."));
+    }
+
+    $serial = $this->getEngineClass().serialize($this->parameters);
+    $this->queryKey = PhabricatorHash::digestForIndex($serial);
+
+    return parent::save();
   }
 }

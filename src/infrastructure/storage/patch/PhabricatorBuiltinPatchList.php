@@ -1254,6 +1254,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130423.conpherenceindices.sql'),
       ),
+      '20130426.search_savedquery.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130426.search_savedquery.sql'),
+      ),
     );
   }
 }
