@@ -2224,6 +2224,7 @@ phutil_register_library_map(array(
     'DiffusionPathQueryTestCase' => 'PhabricatorTestCase',
     'DiffusionPathValidateController' => 'DiffusionController',
     'DiffusionPeopleMenuEventListener' => 'PhutilEventListener',
+    'DiffusionQuery' => 'PhabricatorQuery',
     'DiffusionRawDiffQuery' => 'DiffusionQuery',
     'DiffusionRemarkupRule' => 'PhabricatorRemarkupRuleObject',
     'DiffusionRepositoryController' => 'DiffusionController',

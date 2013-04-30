@@ -1,6 +1,6 @@
 <?php
 
-abstract class DiffusionQuery {
+abstract class DiffusionQuery extends PhabricatorQuery {
 
   private $request;
 
@@ -34,6 +34,10 @@ abstract class DiffusionQuery {
 
   final protected function getRequest() {
     return $this->request;
+  }
+
+  public function execute() {
+    return $this->executeQuery();
   }
 
   abstract protected function executeQuery();
