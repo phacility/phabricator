@@ -4,15 +4,77 @@ final class PhabricatorManiphestTaskTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
   public function generate() {
-    return id(new ManiphestTask())
-      ->setStatus($this->generateTaskStatus())
-      ->setPriority($this->generateTaskPriority())
+    $authorPHID = $this->loadAuthorPHID();
+    $author = id(new PhabricatorUser())
+          ->loadOneWhere('phid = %s', $authorPHID);
+    $task = id(new ManiphestTask())
       ->setSubPriority($this->generateTaskSubPriority())
-      ->setAuthorPHID($this->loadAuthorPHID())
-      ->setTitle($this->generateTitle())
-      ->setDescription($this->generateDescription())
-      ->setOwnerPHID($this->loadOwnerPHID())
-      ->save();
+      ->setAuthorPHID($authorPHID)
+      ->setTitle($this->generateTitle());
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_UNKNOWN,
+      array());
+    $template = id(new ManiphestTransaction())
+      ->setAuthorPHID($authorPHID)
+      ->setContentSource($content_source);
+    // Accumulate Transactions
+    $changes = array();
+    $changes[ManiphestTransactionType::TYPE_TITLE] =
+      $this->generateTitle();
+    $changes[ManiphestTransactionType::TYPE_DESCRIPTION] =
+      $this->generateDescription();
+    $changes[ManiphestTransactionType::TYPE_OWNER] =
+      $this->loadOwnerPHID();
+    $changes[ManiphestTransactionType::TYPE_STATUS] =
+      $this->generateTaskStatus();
+    $changes[ManiphestTransactionType::TYPE_PRIORITY] =
+      $this->generateTaskPriority();
+    $changes[ManiphestTransactionType::TYPE_CCS] =
+      $this->getCCPHIDs();
+    $changes[ManiphestTransactionType::TYPE_PROJECTS] =
+      $this->getProjectPHIDs();
+    $transactions = array();
+    foreach ($changes as $type => $value) {
+      $transaction = clone $template;
+      $transaction->setTransactionType($type);
+      $transaction->setNewValue($value);
+      $transactions[] = $transaction;
+    }
+    // Accumulate Auxiliary Transactions
+    $aux_fields = id(ManiphestTaskExtensions::newExtensions())
+      ->loadFields($task, $author);
+    if ($aux_fields) {
+      foreach ($aux_fields as $aux_field) {
+        $transaction = clone $template;
+        $transaction->setTransactionType(
+          ManiphestTransactionType::TYPE_AUXILIARY);
+        $aux_key = $aux_field->getAuxiliaryKey();
+        $transaction->setMetadataValue('aux:key', $aux_key);
+        $transaction->setNewValue($aux_field->getValueForStorage());
+        $transactions[] = $transaction;
+      }
+    }
+    // Apply Transactions
+    $editor = id(new ManiphestTransactionEditor())
+      ->setActor($author)
+      ->applyTransactions($task, $transactions);
+    return $task->save();
+  }
+
+  public function getCCPHIDs() {
+    $ccs = array();
+    for ($i = 0; $i < rand(1, 4);$i++) {
+      $ccs[] = $this->loadPhabrictorUserPHID();
+    }
+    return $ccs;
+  }
+
+  public function getProjectPHIDs() {
+    $projects = array();
+    for ($i = 0; $i < rand(1, 4);$i++) {
+      $projects[] = $this->loadOneRandom("PhabricatorProject")->getPHID();
+    }
+    return $projects;
   }
 
   private function loadPhabrictorUserPHID() {
