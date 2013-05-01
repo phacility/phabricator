@@ -28,6 +28,7 @@ final class ConpherencePeopleMenuEventListener extends PhutilEventListener {
       ->setIsExternal(true)
       ->setName($name)
       ->setHref($conpherence_uri)
+      ->setWorkflow(true)
       ->setKey($name));
 
     $event->setValue('menu', $menu);
