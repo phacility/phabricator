@@ -606,7 +606,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     list($stdout) = $repository->execxLocalCommand(
       'branch -r --verbose --no-abbrev');
 
-    $branches = DiffusionGitBranchQuery::parseGitRemoteBranchOutput(
+    $branches = DiffusionGitBranch::parseRemoteBranchOutput(
       $stdout,
       $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
 

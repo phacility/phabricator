@@ -154,12 +154,14 @@ final class DiffusionRepositoryController extends DiffusionController {
     if ($drequest->getBranch() !== null) {
       $limit = 15;
 
-      $branch_query = DiffusionBranchQuery::newFromDiffusionRequest($drequest);
-      $branch_query->setLimit($limit + 1);
-      $branches = $branch_query->loadBranches();
-
+      $branches = DiffusionBranchInformation::newFromConduit(
+        $this->callConduitWithDiffusionRequest(
+          'diffusion.branchquery',
+          array(
+            'limit' => $limit
+          )));
       if (!$branches) {
-          return null;
+        return null;
       }
 
       $more_branches = (count($branches) > $limit);

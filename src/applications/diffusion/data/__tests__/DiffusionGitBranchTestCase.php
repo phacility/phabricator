@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionGitBranchQueryTestCase
+final class DiffusionGitBranchTestCase
   extends PhabricatorTestCase {
 
   public function testRemoteBranchParser() {
@@ -26,7 +26,7 @@ EOTXT;
         'origin/weekend-refactoring' => '6e947ab0498b82075ca6195ac168385a11326c4b',
         'alternate/release-1.0.0'    => '9ddd5d67962dd89fa167f9989954468b6c517b87',
       ),
-      DiffusionGitBranchQuery::parseGitRemoteBranchOutput($output));
+      DiffusionGitBranch::parseRemoteBranchOutput($output));
 
     $this->assertEqual(
       array(
@@ -35,7 +35,7 @@ EOTXT;
         'master'              => '713f1fc54f9cfc830acbf6bbdb46a2883f772896',
         'weekend-refactoring' => '6e947ab0498b82075ca6195ac168385a11326c4b',
       ),
-      DiffusionGitBranchQuery::parseGitRemoteBranchOutput($output, 'origin'));
+      DiffusionGitBranch::parseRemoteBranchOutput($output, 'origin'));
   }
 
 }
