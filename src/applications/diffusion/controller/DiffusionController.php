@@ -321,4 +321,17 @@ abstract class DiffusionController extends PhabricatorController {
     return $crumb_list;
   }
 
+  protected function callConduitWithDiffusionRequest(
+    $method,
+    array $params = array()) {
+
+    $user = $this->getRequest()->getUser();
+    $drequest = $this->getDiffusionRequest();
+
+    return DiffusionQuery::callConduitWithDiffusionRequest(
+      $user,
+      $drequest,
+      $method,
+      $params);
+  }
 }
