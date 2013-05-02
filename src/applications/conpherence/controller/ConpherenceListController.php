@@ -228,16 +228,17 @@ final class ConpherenceListController
   private function loadConpherenceThreadData($participation) {
     $user = $this->getRequest()->getUser();
     $conpherence_phids = array_keys($participation);
+    $conpherences = array();
     if ($conpherence_phids) {
       $conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
         ->needParticipantCache(true)
         ->execute();
-    }
 
-    // this will re-sort by participation data
-    $conpherences = array_select_keys($conpherences, $conpherence_phids);
+      // this will re-sort by participation data
+      $conpherences = array_select_keys($conpherences, $conpherence_phids);
+    }
 
     return $conpherences;
   }
