@@ -16,4 +16,13 @@ abstract class PhabricatorTestDataGenerator {
     }
   }
 
+
+  public function loadPhabrictorUserPHID() {
+    return $this->loadOneRandom("PhabricatorUser")->getPHID();
+  }
+
+  public function loadPhabrictorUser() {
+    return $this->loadOneRandom("PhabricatorUser");
+  }
+
 }

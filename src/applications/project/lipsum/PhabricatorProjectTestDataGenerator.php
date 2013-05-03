@@ -7,17 +7,18 @@ final class PhabricatorProjectTestDataGenerator
 
   public function generate() {
     $title = $this->generateTitle();
-    $author = $this->loadAuthorPHID();
+    $author = $this->loadPhabrictorUser();
+    $authorPHID = $author->getPHID();
     $project = id(new PhabricatorProject())
       ->setName($title)
-      ->setAuthorPHID($author);
+      ->setAuthorPHID($authorPHID);
 
     $this->addTransaction(
       PhabricatorProjectTransactionType::TYPE_NAME,
       $title);
     $this->addTransaction(
       PhabricatorProjectTransactionType::TYPE_MEMBERS,
-      $this->loadMembersWithAuthor($author));
+      $this->loadMembersWithAuthor($authorPHID));
     $this->addTransaction(
       PhabricatorProjectTransactionType::TYPE_STATUS,
       $this->generateProjectStatus());
@@ -32,8 +33,7 @@ final class PhabricatorProjectTestDataGenerator
       PhabricatorPolicies::POLICY_PUBLIC);
 
     $editor = id(new PhabricatorProjectEditor($project))
-      ->setActor(id(new PhabricatorUser())
-          ->loadOneWhere('phid = %s', $author))
+      ->setActor($author)
       ->applyTransactions($this->xactions);
 
     $profile = id(new PhabricatorProjectProfile())
@@ -50,13 +50,6 @@ final class PhabricatorProjectTestDataGenerator
       ->setNewValue($value);
   }
 
-  private function loadPhabrictorUserPHID() {
-    return $this->loadOneRandom("PhabricatorUser")->getPHID();
-  }
-
-  public function loadAuthorPHID() {
-    return $this->loadPhabrictorUserPHID();
-  }
 
   public function loadMembersWithAuthor($author) {
     $members = array($author);

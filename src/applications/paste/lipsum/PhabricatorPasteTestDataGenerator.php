@@ -9,7 +9,7 @@ final class PhabricatorPasteTestDataGenerator
     "PHP" => "php");
 
   public function generate() {
-    $authorphid = $this->loadAuthorPHID();
+    $authorphid = $this->loadPhabrictorUserPHID();
     $language = $this->generateLanguage();
     $content = $this->generateContent($language);
     $title = $this->generateTitle($language);
@@ -43,14 +43,6 @@ final class PhabricatorPasteTestDataGenerator
       }
     }
     return null;
-  }
-
-  private function loadPhabrictorUserPHID() {
-    return id($this->loadOneRandom("PhabricatorUser"))->getPHID();
-  }
-
-  public function loadAuthorPHID() {
-    return $this->loadPhabrictorUserPHID();
   }
 
   public function generateTitle($language = null) {
