@@ -2269,6 +2269,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/repository/repository-crossreference.js',
   ),
+  'javelin-behavior-slowvote-embed' =>
+  array(
+    'uri' => '/res/1315b118/rsrc/js/application/slowvote/behavior-slowvote-embed.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-util',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/slowvote/behavior-slowvote-embed.js',
+  ),
   'javelin-behavior-stripe-payment-form' =>
   array(
     'uri' => '/res/c1a12d77/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
@@ -3332,7 +3345,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-slowvote-css' =>
   array(
-    'uri' => '/res/357ccc42/rsrc/css/application/slowvote/slowvote.css',
+    'uri' => '/res/d1c2e05a/rsrc/css/application/slowvote/slowvote.css',
     'type' => 'css',
     'requires' =>
     array(

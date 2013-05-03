@@ -80,12 +80,12 @@
   background: #F0FFFF;
 }
 
-.phabricator-slowvote-embed-option-selected {
-  padding-left: 0px !important;
+.phabricator-slowvote-embed-option-vote {
+  display: inline-block;
+  width: 1em;
 }
 
 .phabricator-slowvote-embed-option-text {
   border: 1px solid #dbdbdb;
   border-left: 0px;
-  padding-left: 1em;
 }
