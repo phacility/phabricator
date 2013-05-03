@@ -2271,7 +2271,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-slowvote-embed' =>
   array(
-    'uri' => '/res/1315b118/rsrc/js/application/slowvote/behavior-slowvote-embed.js',
+    'uri' => '/res/eef0818f/rsrc/js/application/slowvote/behavior-slowvote-embed.js',
     'type' => 'js',
     'requires' =>
     array(

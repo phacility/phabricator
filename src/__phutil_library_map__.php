@@ -867,6 +867,7 @@ phutil_register_library_map(array(
     'PhabricatorContentSourceView' => 'applications/metamta/contentsource/PhabricatorContentSourceView.php',
     'PhabricatorController' => 'applications/base/controller/PhabricatorController.php',
     'PhabricatorCoreConfigOptions' => 'applications/config/option/PhabricatorCoreConfigOptions.php',
+    'PhabricatorCountdown' => 'applications/countdown/storage/PhabricatorCountdown.php',
     'PhabricatorCountdownController' => 'applications/countdown/controller/PhabricatorCountdownController.php',
     'PhabricatorCountdownDAO' => 'applications/countdown/storage/PhabricatorCountdownDAO.php',
     'PhabricatorCountdownDeleteController' => 'applications/countdown/controller/PhabricatorCountdownDeleteController.php',
@@ -1427,7 +1428,6 @@ phutil_register_library_map(array(
     'PhabricatorTimelineExample' => 'applications/uiexample/examples/PhabricatorTimelineExample.php',
     'PhabricatorTimelineIterator' => 'infrastructure/daemon/timeline/cursor/PhabricatorTimelineIterator.php',
     'PhabricatorTimelineView' => 'view/layout/PhabricatorTimelineView.php',
-    'PhabricatorTimer' => 'applications/countdown/storage/PhabricatorTimer.php',
     'PhabricatorToken' => 'applications/tokens/storage/PhabricatorToken.php',
     'PhabricatorTokenController' => 'applications/tokens/controller/PhabricatorTokenController.php',
     'PhabricatorTokenCount' => 'applications/tokens/storage/PhabricatorTokenCount.php',
@@ -2352,6 +2352,7 @@ phutil_register_library_map(array(
     'ManiphestSavedQueryListController' => 'ManiphestController',
     'ManiphestSearchIndexer' => 'PhabricatorSearchDocumentIndexer',
     'ManiphestSubpriorityController' => 'ManiphestController',
+    'ManiphestSubscribeController' => 'ManiphestController',
     'ManiphestTask' =>
     array(
       0 => 'ManiphestDAO',
@@ -2603,6 +2604,7 @@ phutil_register_library_map(array(
     'PhabricatorContentSourceView' => 'AphrontView',
     'PhabricatorController' => 'AphrontController',
     'PhabricatorCoreConfigOptions' => 'PhabricatorApplicationConfigOptions',
+    'PhabricatorCountdown' => 'PhabricatorCountdownDAO',
     'PhabricatorCountdownController' => 'PhabricatorController',
     'PhabricatorCountdownDAO' => 'PhabricatorLiskDAO',
     'PhabricatorCountdownDeleteController' => 'PhabricatorCountdownController',
@@ -3121,7 +3123,6 @@ phutil_register_library_map(array(
     'PhabricatorTimelineExample' => 'PhabricatorUIExample',
     'PhabricatorTimelineIterator' => 'Iterator',
     'PhabricatorTimelineView' => 'AphrontView',
-    'PhabricatorTimer' => 'PhabricatorCountdownDAO',
     'PhabricatorToken' =>
     array(
       0 => 'PhabricatorTokenDAO',

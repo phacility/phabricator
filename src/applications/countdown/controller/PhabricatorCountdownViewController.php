@@ -14,7 +14,7 @@ final class PhabricatorCountdownViewController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $timer = id(new PhabricatorTimer())->load($this->id);
+    $timer = id(new PhabricatorCountdown())->load($this->id);
     if (!$timer) {
       return new Aphront404Response();
     }
@@ -50,7 +50,7 @@ final class PhabricatorCountdownViewController
       </div>',
       $container,
       $timer->getTitle(),
-      phabricator_datetime($timer->getDatePoint(), $user),
+      phabricator_datetime($timer->getEpoch(), $user),
       pht('Days'),
       pht('Hours'),
       pht('Minutes'),
@@ -62,7 +62,7 @@ final class PhabricatorCountdownViewController
       $chrome_link);
 
     Javelin::initBehavior('countdown-timer', array(
-      'timestamp' => $timer->getDatepoint(),
+      'timestamp' => $timer->getEpoch(),
       'container' => $container,
     ));
 

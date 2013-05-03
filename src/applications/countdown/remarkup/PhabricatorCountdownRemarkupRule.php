@@ -15,7 +15,7 @@ final class PhabricatorCountdownRemarkupRule extends PhutilRemarkupRule {
   }
 
   protected function markupCountdown($matches) {
-    $countdown = id(new PhabricatorTimer())->load($matches[1]);
+    $countdown = id(new PhabricatorCountdown())->load($matches[1]);
     if (!$countdown) {
       return $matches[0];
     }
@@ -23,7 +23,7 @@ final class PhabricatorCountdownRemarkupRule extends PhutilRemarkupRule {
     $engine = $this->getEngine();
 
     if ($engine->isTextMode()) {
-      $date = $countdown->getDatepoint();
+      $date = $countdown->getEpoch();
       $viewer = $engine->getConfig('viewer');
       if ($viewer) {
         $date = phabricator_datetime($date, $viewer);
@@ -36,7 +36,7 @@ final class PhabricatorCountdownRemarkupRule extends PhutilRemarkupRule {
 
     $metadata_key = self::KEY_RULE_COUNTDOWN;
     $metadata = $engine->getTextMetadata($metadata_key, array());
-    $metadata[$id] = array($countdown->getDatepoint(), $token);
+    $metadata[$id] = array($countdown->getEpoch(), $token);
     $engine->setTextMetadata($metadata_key, $metadata);
 
     return $token;

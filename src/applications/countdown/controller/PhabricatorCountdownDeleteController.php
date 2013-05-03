@@ -14,7 +14,7 @@ final class PhabricatorCountdownDeleteController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $timer = id(new PhabricatorTimer())->load($this->id);
+    $timer = id(new PhabricatorCountdown())->load($this->id);
     if (!$timer) {
       return new Aphront404Response();
     }
