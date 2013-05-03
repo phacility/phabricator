@@ -1,6 +1,7 @@
 <?php
 
-abstract class ReleephFieldSpecification {
+abstract class ReleephFieldSpecification
+  implements PhabricatorMarkupInterface {
 
   abstract public function getName();
 
@@ -236,6 +237,64 @@ abstract class ReleephFieldSpecification {
 
   public function renderValueForRevertMessage() {
     return $this->renderValueForCommitMessage();
+  }
+
+
+/* -(  Markup Interface  )--------------------------------------------------- */
+
+  const MARKUP_FIELD_GENERIC = 'releeph:generic-markup-field';
+
+  private $engine;
+
+  /**
+   * ReleephFieldSpecification implements much of PhabricatorMarkupInterface
+   * for you.  If you return true from `shouldMarkup()`, and implement
+   * `getMarkupText()` then your text will be rendered through the Phabricator
+   * markup pipeline.
+   *
+   * Output is retrievable with `getMarkupEngineOutput()`.
+   */
+  public function shouldMarkup() {
+    return false;
+  }
+
+  public function getMarkupText($field) {
+    throw new ReleephFieldSpecificationIncompleteException($this);
+  }
+
+  final public function getMarkupEngineOutput() {
+    return $this->engine->getOutput($this, self::MARKUP_FIELD_GENERIC);
+  }
+
+  final public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
+    $this->engine = $engine;
+    $engine->addObject($this, self::MARKUP_FIELD_GENERIC);
+    return $this;
+  }
+
+  final public function getMarkupFieldKey($field) {
+    return sprintf(
+      '%s:%s:%s:%s',
+      $this->getReleephRequest()->getPHID(),
+      $this->getStorageKey(),
+      $field,
+      PhabricatorHash::digest($this->getMarkupText($field)));
+  }
+
+  final public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+  }
+
+  final public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+
+    return $output;
+  }
+
+  final public function shouldUseMarkupCache($field) {
+    return true;
   }
 
 
