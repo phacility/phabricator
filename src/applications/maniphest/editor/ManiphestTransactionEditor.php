@@ -438,5 +438,39 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     return (double)(2 << 32);
   }
 
+  public static function addCC(
+    ManiphestTask $task,
+    PhabricatorUser $user) {
+    $current_ccs = $task->getCCPHIDs();
+    $new_ccs = array_merge($current_ccs, array($user->getPHID()));
 
+    $transaction = new ManiphestTransaction();
+    $transaction->setTaskID($task->getID());
+    $transaction->setAuthorPHID($user->getPHID());
+    $transaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
+    $transaction->setNewValue(array_unique($new_ccs));
+    $transaction->setOldValue($current_ccs);
+
+    id(new ManiphestTransactionEditor())
+      ->setActor($user)
+      ->applyTransactions($task, array($transaction));
+  }
+
+  public static function removeCC(
+    ManiphestTask $task,
+    PhabricatorUser $user) {
+    $current_ccs = $task->getCCPHIDs();
+    $new_ccs = array_diff($current_ccs, array($user->getPHID()));
+
+    $transaction = new ManiphestTransaction();
+    $transaction->setTaskID($task->getID());
+    $transaction->setAuthorPHID($user->getPHID());
+    $transaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
+    $transaction->setNewValue(array_unique($new_ccs));
+    $transaction->setOldValue($current_ccs);
+
+    id(new ManiphestTransactionEditor())
+      ->setActor($user)
+      ->applyTransactions($task, array($transaction));
+  }
 }

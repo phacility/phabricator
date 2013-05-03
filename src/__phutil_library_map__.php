@@ -633,6 +633,7 @@ phutil_register_library_map(array(
     'ManiphestSavedQueryListController' => 'applications/maniphest/controller/ManiphestSavedQueryListController.php',
     'ManiphestSearchIndexer' => 'applications/maniphest/search/ManiphestSearchIndexer.php',
     'ManiphestSubpriorityController' => 'applications/maniphest/controller/ManiphestSubpriorityController.php',
+    'ManiphestSubscribeController' => 'applications/maniphest/controller/ManiphestSubscribeController.php',
     'ManiphestTask' => 'applications/maniphest/storage/ManiphestTask.php',
     'ManiphestTaskAuxiliaryStorage' => 'applications/maniphest/storage/ManiphestTaskAuxiliaryStorage.php',
     'ManiphestTaskDescriptionChangeController' => 'applications/maniphest/controller/ManiphestTaskDescriptionChangeController.php',
