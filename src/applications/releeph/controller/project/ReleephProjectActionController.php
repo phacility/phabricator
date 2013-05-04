@@ -24,14 +24,18 @@ final class ReleephProjectActionController extends ReleephController {
 
         $dialog = id(new AphrontDialogView())
           ->setUser($request->getUser())
-          ->setTitle('Really deactivate Releeph Project?')
-          ->appendChild(hsprintf(
-            '<p>Really deactivate the Releeph project <i>%s</i>?',
-            $rph_project->getName()))
-          ->appendChild(hsprintf(
-            '<p style="margin-top:1em">It will still exist, but '.
-            'will be hidden from the list of active projects.</p>'))
-          ->addSubmitButton('Deactivate Releeph Project')
+          ->setTitle(pht('Really deactivate Releeph Project?'))
+          ->appendChild(phutil_tag(
+            'p',
+            array(),
+            pht('Really deactivate the Releeph project: %s?',
+            $rph_project->getName())))
+          ->appendChild(phutil_tag(
+            'p',
+            array(),
+            pht('It will still exist, but '.
+            'will be hidden from the list of active projects.')))
+          ->addSubmitButton(pht('Deactivate Releeph Project'))
           ->addCancelButton($request->getRequestURI());
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -49,12 +53,15 @@ final class ReleephProjectActionController extends ReleephController {
 
         $dialog = id(new AphrontDialogView())
           ->setUser($request->getUser())
-          ->setTitle('Really delete Releeph Project?')
-          ->appendChild(hsprintf(
-            '<p>Really delete the "%s" Releeph project? '.
-              'This cannot be undone!</p>',
-            $rph_project->getName()))
-          ->addSubmitButton('Delete Releeph Project')
+          ->setTitle(pht('Really delete Releeph Project?'))
+          ->appendChild(phutil_tag(
+            'p',
+            array(),
+            pht('Really delete the Releeph project: %s? '.
+              'This cannot be undone!'),
+              $rph_project->getName()))
+          ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
+          ->addSubmitButton(pht('Delete'))
           ->addCancelButton($request->getRequestURI());
         return id(new AphrontDialogResponse())->setDialog($dialog);
 

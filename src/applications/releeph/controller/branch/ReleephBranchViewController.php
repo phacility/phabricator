@@ -43,7 +43,7 @@ final class ReleephBranchViewController extends ReleephController {
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue('Filter'));
+        ->setValue(pht('Filter')));
 
     $list = id(new ReleephRequestHeaderListView())
       ->setOriginType('branch')
@@ -72,7 +72,7 @@ final class ReleephBranchViewController extends ReleephController {
       $crumbs->addAction(
         id(new PhabricatorMenuItemView())
           ->setHref($create_uri)
-          ->setName('Request Pick')
+          ->setName(pht('Request Pick'))
           ->setIcon('create'));
     }
 

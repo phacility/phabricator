@@ -3,11 +3,11 @@
 final class PhabricatorApplicationReleeph extends PhabricatorApplication {
 
   public function getName() {
-    return 'Releeph';
+    return pht('Releeph');
   }
 
   public function getShortDescription() {
-    return 'Release Branches';
+    return pht('Release Branches');
   }
 
   public function getBaseURI() {
