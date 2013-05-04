@@ -65,7 +65,7 @@ final class PhabricatorPholioMockTestDataGenerator
     return $mock->save();
   }
 
-  private function loadPhabrictorUserPHID() {
+  public function loadPhabrictorUserPHID() {
     return $this->loadOneRandom("PhabricatorUser")->getPHID();
   }
 
