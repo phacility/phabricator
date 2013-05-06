@@ -7,24 +7,51 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
   }
 
   private $filter;
+  private $queryKey;
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
+    $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $saved_query = new PhabricatorSavedQuery();
+    if ($request->isFormPost()) {
+      $saved = id(new PhabricatorPasteSearchEngine())
+        ->buildSavedQueryFromRequest($request);
+      if (count($saved->getParameter('authorPHIDs')) == 0) {
+        return id(new AphrontRedirectResponse())
+          ->setURI('/paste/filter/advanced/');
+      }
+      return id(new AphrontRedirectResponse())
+        ->setURI('/paste/query/'.$saved->getQueryKey().'/');
+    }
 
     $nav = $this->buildSideNavView($this->filter);
     $filter = $nav->getSelectedFilter();
 
+    $saved_query = new PhabricatorSavedQuery();
     $engine = id(new PhabricatorPasteSearchEngine())
-      ->setPasteSearchFilter($filter);
-    $saved_query = $engine->buildSavedQueryFromRequest($request);
-    $query = $engine->buildQueryFromSavedQuery($saved_query);
+      ->setPasteSearchFilter($filter)
+      ->setPasteSearchUser($request->getUser());
+
+    if ($this->queryKey !== null) {
+      $saved_query = id(new PhabricatorSavedQuery())->loadOneWhere(
+        'queryKey = %s',
+        $this->queryKey);
+
+      if (!$saved_query) {
+        return new Aphront404Response();
+      }
+
+      $query = id(new PhabricatorPasteSearchEngine())
+        ->buildQueryFromSavedQuery($saved_query);
+    } else {
+      $saved_query = $engine->buildSavedQueryFromRequest($request);
+      $query = $engine->buildQueryFromSavedQuery($saved_query);
+    }
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
@@ -35,6 +62,14 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $list = $this->buildPasteList($pastes);
     $list->setPager($pager);
     $list->setNoDataString(pht("No results found for this query."));
+
+    if ($this->queryKey !== null || $filter == "advanced") {
+      $form = $engine->buildSearchForm($saved_query);
+      $nav->appendChild(
+        array(
+          $form
+        ));
+    }
 
     $nav->appendChild(
       array(

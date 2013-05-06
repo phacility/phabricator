@@ -9,6 +9,7 @@ final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   protected $filter;
+  protected $user;
 
   /**
    * Create a saved query object from the request.
@@ -23,6 +24,19 @@ final class PhabricatorPasteSearchEngine
     if ($this->filter == "my") {
       $user = $request->getUser();
       $saved->setParameter('authorPHIDs', array($user->getPHID()));
+    } else {
+      $data = $request->getRequestData();
+      if (array_key_exists('set_users', $data)) {
+        $saved->setParameter('authorPHIDs', $data['set_users']);
+      }
+    }
+
+    try {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $saved->save();
+      unset($unguarded);
+    } catch (AphrontQueryDuplicateKeyException $ex) {
+      // Ignore, this is just a repeated search.
     }
 
     return $saved;
@@ -48,9 +62,30 @@ final class PhabricatorPasteSearchEngine
    * Builds the search form using the request.
    *
    * @param PhabricatorSavedQuery The query to populate the form with.
-   * @return void
+   * @return AphrontFormView The built form.
    */
   public function buildSearchForm(PhabricatorSavedQuery $saved_query) {
+    $phids = $saved_query->getParameter('authorPHIDs', array());
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->user)
+      ->loadHandles();
+    $users_searched = mpull($handles, 'getFullName', 'getPHID');
+
+    $form = id(new AphrontFormView())
+      ->setUser($this->user);
+
+    $form->appendChild(
+      id(new AphrontFormTokenizerControl())
+        ->setDatasource('/typeahead/common/searchowner/')
+        ->setName('set_users')
+        ->setLabel(pht('Users'))
+        ->setValue($users_searched));
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue(pht('Filter Pastes')));
+
+    return $form;
   }
 
   public function setPasteSearchFilter($filter) {
@@ -60,6 +95,11 @@ final class PhabricatorPasteSearchEngine
 
   public function getPasteSearchFilter() {
     return $this->filter;
+  }
+
+  public function setPasteSearchUser($user) {
+    $this->user = $user;
+    return $this;
   }
 
 }
