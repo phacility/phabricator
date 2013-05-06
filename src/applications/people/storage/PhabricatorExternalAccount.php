@@ -20,4 +20,11 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO {
     ) + parent::getConfiguration();
   }
 
+  public function getPhabricatorUser() {
+    $tmp_usr = id(new PhabricatorUser())
+      ->makeEphemeral()
+      ->setPHID($this->getPHID());
+    return $tmp_usr;
+  }
+
 }
