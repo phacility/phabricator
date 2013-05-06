@@ -289,5 +289,15 @@ describe('Javelin URI', function() {
     expect(uri2.getQueryParams()).not.toEqual({'key' : 'value'});
   });
 
+  it('should not loop indefinitely when parsing empty params', function() {
+    expect(JX.$U('/?&key=value').getQueryParams()).toEqual({'key' : 'value'});
+    expect(JX.$U('/?&&&key=value').getQueryParams()).toEqual({'key' : 'value'});
+    expect(JX.$U('/?&&').getQueryParams()).toEqual({});
+  });
+
+  it('should parse values with =', function() {
+    expect(JX.$U('/?x=1=1').getQueryParams()).toEqual({'x' : '1=1'});
+  });
+
 });
 
