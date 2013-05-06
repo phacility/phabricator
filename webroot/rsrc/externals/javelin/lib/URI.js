@@ -44,7 +44,6 @@ JX.$U = function(uri) {
 JX.install('URI', {
   statics : {
     _uriPattern : /(?:([^:\/?#]+):)?(?:\/\/([^:\/?#]*)(?::(\d*))?)?([^?#]*)(?:\?([^#]*))?(?:#(.*))?/,
-    _queryPattern : /(?:^|&)([^&=]*)=?([^&]*)/g,
 
     /**
      *  Convert a Javascript object into an HTTP query string.
@@ -62,6 +61,10 @@ JX.install('URI', {
       }
 
       return kv_pairs.join('&');
+    },
+
+    _decode : function(str) {
+      return decodeURIComponent(str.replace(/\+/g, ' '));
     }
   },
 
@@ -94,14 +97,23 @@ JX.install('URI', {
       this.setPath(path.charAt(0) == '/' ? path : '/' + path);
 
       // parse the query data
-      if (query) {
-        var queryData = {};
-        var data;
-        while ((data = JX.URI._queryPattern.exec(query)) != null) {
-          queryData[decodeURIComponent(data[1].replace(/\+/g, ' '))] =
-            decodeURIComponent(data[2].replace(/\+/g, ' '));
+      if (query && query.length) {
+        var dict = {};
+        var parts = query.split('&');
+        for (var ii = 0; ii < parts.length; ii++) {
+          var part = parts[ii];
+          if (!part.length) {
+            continue;
+          }
+          var pieces = part.split('=');
+          var name = pieces[0];
+          if (!name.length) {
+            continue;
+          }
+          var value = pieces.slice(1).join('=') || '';
+          dict[JX.URI._decode(name)] = JX.URI._decode(value);
         }
-        this.setQueryParams(queryData);
+        this.setQueryParams(dict);
       }
     }
   },

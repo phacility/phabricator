@@ -30,8 +30,9 @@ final class DiffusionCommitController extends DiffusionController {
     $commit = $drequest->loadCommit();
 
     if (!$commit) {
-      $query = DiffusionExistsQuery::newFromDiffusionRequest($drequest);
-      $exists = $query->loadExistentialData();
+      $exists = $this->callConduitWithDiffusionRequest(
+        'diffusion.existsquery',
+        array('commit' => $drequest->getCommit()));
       if (!$exists) {
         return new Aphront404Response();
       }

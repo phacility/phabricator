@@ -2269,6 +2269,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/repository/repository-crossreference.js',
   ),
+  'javelin-behavior-slowvote-embed' =>
+  array(
+    'uri' => '/res/eef0818f/rsrc/js/application/slowvote/behavior-slowvote-embed.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-util',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/slowvote/behavior-slowvote-embed.js',
+  ),
   'javelin-behavior-stripe-payment-form' =>
   array(
     'uri' => '/res/c1a12d77/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
@@ -2648,7 +2661,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-uri' =>
   array(
-    'uri' => '/res/0f8f2aef/rsrc/externals/javelin/lib/URI.js',
+    'uri' => '/res/a1e5cbb3/rsrc/externals/javelin/lib/URI.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2875,7 +2888,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-action-list-view-css' =>
   array(
-    'uri' => '/res/3d02ca59/rsrc/css/layout/phabricator-action-list-view.css',
+    'uri' => '/res/f63afae7/rsrc/css/layout/phabricator-action-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3332,7 +3345,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-slowvote-css' =>
   array(
-    'uri' => '/res/357ccc42/rsrc/css/application/slowvote/slowvote.css',
+    'uri' => '/res/d1c2e05a/rsrc/css/application/slowvote/slowvote.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4163,7 +4176,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/f96657b8/diffusion.pkg.js',
       'type' => 'js',
     ),
-    'c9168ae3' =>
+    '7d174323' =>
     array(
       'name' => 'javelin.pkg.js',
       'symbols' =>
@@ -4188,7 +4201,7 @@ celerity_register_resource_map(array(
         17 => 'javelin-typeahead-ondemand-source',
         18 => 'javelin-tokenizer',
       ),
-      'uri' => '/res/pkg/c9168ae3/javelin.pkg.js',
+      'uri' => '/res/pkg/7d174323/javelin.pkg.js',
       'type' => 'js',
     ),
     '6b1fccc6' =>
@@ -4248,7 +4261,7 @@ celerity_register_resource_map(array(
     'global-drag-and-drop-css' => '55644450',
     'inline-comment-summary-css' => '8aaacd1b',
     'javelin-aphlict' => '26980a1c',
-    'javelin-behavior' => 'c9168ae3',
+    'javelin-behavior' => '7d174323',
     'javelin-behavior-aphlict-dropdown' => '26980a1c',
     'javelin-behavior-aphlict-listen' => '26980a1c',
     'javelin-behavior-aphront-basic-tokenizer' => '26980a1c',
@@ -4299,24 +4312,24 @@ celerity_register_resource_map(array(
     'javelin-behavior-repository-crossreference' => '27c55b30',
     'javelin-behavior-toggle-class' => '26980a1c',
     'javelin-behavior-workflow' => '26980a1c',
-    'javelin-dom' => 'c9168ae3',
-    'javelin-event' => 'c9168ae3',
-    'javelin-install' => 'c9168ae3',
-    'javelin-json' => 'c9168ae3',
-    'javelin-mask' => 'c9168ae3',
-    'javelin-request' => 'c9168ae3',
-    'javelin-resource' => 'c9168ae3',
-    'javelin-stratcom' => 'c9168ae3',
-    'javelin-tokenizer' => 'c9168ae3',
-    'javelin-typeahead' => 'c9168ae3',
-    'javelin-typeahead-normalizer' => 'c9168ae3',
-    'javelin-typeahead-ondemand-source' => 'c9168ae3',
-    'javelin-typeahead-preloaded-source' => 'c9168ae3',
-    'javelin-typeahead-source' => 'c9168ae3',
-    'javelin-uri' => 'c9168ae3',
-    'javelin-util' => 'c9168ae3',
-    'javelin-vector' => 'c9168ae3',
-    'javelin-workflow' => 'c9168ae3',
+    'javelin-dom' => '7d174323',
+    'javelin-event' => '7d174323',
+    'javelin-install' => '7d174323',
+    'javelin-json' => '7d174323',
+    'javelin-mask' => '7d174323',
+    'javelin-request' => '7d174323',
+    'javelin-resource' => '7d174323',
+    'javelin-stratcom' => '7d174323',
+    'javelin-tokenizer' => '7d174323',
+    'javelin-typeahead' => '7d174323',
+    'javelin-typeahead-normalizer' => '7d174323',
+    'javelin-typeahead-ondemand-source' => '7d174323',
+    'javelin-typeahead-preloaded-source' => '7d174323',
+    'javelin-typeahead-source' => '7d174323',
+    'javelin-uri' => '7d174323',
+    'javelin-util' => '7d174323',
+    'javelin-vector' => '7d174323',
+    'javelin-workflow' => '7d174323',
     'lightbox-attachment-css' => '55644450',
     'maniphest-task-summary-css' => '6b1fccc6',
     'maniphest-transaction-detail-css' => '6b1fccc6',

@@ -25,10 +25,10 @@ final class ReleephBranchEditController extends ReleephController {
               $branch_name);
 
       if ($existing_with_same_branch_name) {
-        $errors[] = sprintf(
+        $errors[] = pht(
           "The branch name %s is currently taken. Please use another name. ",
           $branch_name);
-        $e_existing_with_same_branch_name = 'Error';
+        $e_existing_with_same_branch_name = pht('Error');
       }
 
       if (!$errors) {
@@ -73,52 +73,53 @@ final class ReleephBranchEditController extends ReleephController {
       ->setUser($request->getUser())
       ->appendChild(
         id(new AphrontFormStaticControl())
-        ->setLabel('Branch name')
+        ->setLabel(pht('Branch Name'))
         ->setValue($branch_name))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel('Cut point')
+          ->setLabel(pht('Cut Point'))
           ->setValue($handles[$cut_commit_phid]->renderLink()))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel('Created by')
+          ->setLabel(pht('Created By'))
           ->setValue($handles[$creator_phid]->renderLink()))
       ->appendChild(
         id(new AphrontFormTextControl)
-          ->setLabel('Symbolic Name')
+          ->setLabel(pht('Symbolic Name'))
           ->setName('symbolicName')
           ->setValue($symbolic_name)
-          ->setCaption('Mutable alternate name, for easy reference, '.
-              '(e.g. "LATEST")'))
-      ->appendChild(hsprintf(
-        '<br>' .
-        'In dire situations where the branch name is wrong, ' .
-        'you can edit it in the database by changing the field below. ' .
-        'If you do this, it is very important that you change your ' .
-        'branch\'s name in the VCS to reflect the new name in Releeph, ' .
-        'otherwise a catastrophe of previously unheard-of magnitude ' .
-        'will befall your project.'))
+          ->setCaption(pht('Mutable alternate name, for easy reference, '.
+              '(e.g. "LATEST")')))
+      ->appendChild(phutil_tag(
+          'p',
+          array(),
+          pht('In dire situations where the branch name is wrong, ' .
+            'you can edit it in the database by changing the field below. ' .
+            'If you do this, it is very important that you change your ' .
+            'branch\'s name in the VCS to reflect the new name in Releeph, ' .
+            'otherwise a catastrophe of previously unheard-of magnitude ' .
+            'will befall your project.')))
       ->appendChild(
         id(new AphrontFormTextControl)
-          ->setLabel('New branch name')
+          ->setLabel(pht('New Branch Name'))
           ->setName('branchName')
           ->setValue($branch_name)
           ->setError($e_existing_with_same_branch_name))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($releeph_branch->getURI())
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
         ->setErrors($errors)
-        ->setTitle('Errors');
+        ->setTitle(pht('Errors'));
     }
 
-    $title = hsprintf(
-      'Edit branch %s',
+    $title = pht(
+      'Edit Branch %s',
       $releeph_branch->getDisplayNameWithDetail());
 
     $panel = id(new AphrontPanelView())

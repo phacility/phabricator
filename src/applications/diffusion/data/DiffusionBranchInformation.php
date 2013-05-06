@@ -25,4 +25,21 @@ final class DiffusionBranchInformation {
     return $this->headCommitIdentifier;
   }
 
+  public static function newFromConduit(array $dicts) {
+    $branches = array();
+    foreach ($dicts as $dict) {
+      $branches[] = id(new DiffusionBranchInformation())
+        ->setName($dict['name'])
+        ->setHeadCommitIdentifier($dict['head_commit_identifier']);
+    }
+    return $branches;
+  }
+
+  public function toDictionary() {
+    return array(
+      'name' => $this->getName(),
+      'head_commit_identifier' => $this->getHeadCommitIdentifier()
+    );
+  }
+
 }

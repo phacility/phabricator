@@ -26,11 +26,11 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO {
   }
 
   public function save() {
-    if ($this->getEngineClass() === null) {
+    if ($this->getEngineClassName() === null) {
       throw new Exception(pht("Engine class is null."));
     }
 
-    $serial = $this->getEngineClass().serialize($this->parameters);
+    $serial = $this->getEngineClassName().serialize($this->parameters);
     $this->queryKey = PhabricatorHash::digestForIndex($serial);
 
     return parent::save();

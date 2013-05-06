@@ -4,7 +4,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
   public function generate() {
-    $authorPHID = $this->loadAuthorPHID();
+    $authorPHID = $this->loadPhabrictorUserPHID();
     $author = id(new PhabricatorUser())
           ->loadOneWhere('phid = %s', $authorPHID);
     $task = id(new ManiphestTask())
@@ -75,14 +75,6 @@ final class PhabricatorManiphestTaskTestDataGenerator
       $projects[] = $this->loadOneRandom("PhabricatorProject")->getPHID();
     }
     return $projects;
-  }
-
-  private function loadPhabrictorUserPHID() {
-    return $this->loadOneRandom("PhabricatorUser")->getPHID();
-  }
-
-  public function loadAuthorPHID() {
-    return $this->loadPhabrictorUserPHID();
   }
 
   public function loadOwnerPHID() {

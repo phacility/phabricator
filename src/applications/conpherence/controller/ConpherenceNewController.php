@@ -86,24 +86,9 @@ final class ConpherenceNewController extends ConpherenceController {
 
         $conpherence->saveTransaction();
 
-        if ($request->isAjax()) {
-          $dialog = id(new AphrontDialogView())
-            ->setUser($user)
-            ->setTitle('Success')
-            ->addCancelButton('#', 'Okay')
-            ->appendChild(
-              phutil_tag(
-                'p',
-                array(),
-                pht('Message sent successfully.')));
-          $response = id(new AphrontDialogResponse())
-            ->setDialog($dialog);
-        } else {
-          $uri = $this->getApplicationURI($conpherence->getID());
-          $response = id(new AphrontRedirectResponse())
-            ->setURI($uri);
-        }
-        return $response;
+        $uri = $this->getApplicationURI($conpherence->getID());
+        return id(new AphrontRedirectResponse())
+          ->setURI($uri);
       }
     }
 

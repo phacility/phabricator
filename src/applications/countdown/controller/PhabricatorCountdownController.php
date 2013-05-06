@@ -8,9 +8,9 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav->addFilter('', pht('All Timers'),
+    $nav->addFilter('', pht('All Countdowns'),
       $this->getApplicationURI(''));
-    $nav->addFilter('', pht('Create Timer'),
+    $nav->addFilter('', pht('Create Countdown'),
       $this->getApplicationURI('edit/'));
 
     return $nav;
@@ -25,7 +25,7 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
 
     $crumbs->addAction(
       id(new PhabricatorMenuItemView())
-        ->setName(pht('Create Timer'))
+        ->setName(pht('Create Countdown'))
         ->setHref($this->getApplicationURI('edit/'))
         ->setIcon('create'));
 

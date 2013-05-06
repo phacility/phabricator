@@ -47,7 +47,7 @@ final class ReleephProjectListController extends PhabricatorController {
         array(
           'href'  => '/releeph/project/inactive/',
         ),
-        'View inactive projects');
+        pht('View inactive projects'));
       $panel
         ->setHeader(hsprintf(
           'Active Releeph Projects &middot; %s', $view_inactive_link))
@@ -61,7 +61,7 @@ final class ReleephProjectListController extends PhabricatorController {
         array(
           'href' => '/releeph/project/'
         ),
-        'View active projects');
+        pht('View active projects'));
       $panel
         ->setHeader(hsprintf(
           'Inactive Releeph Projects &middot; %s', $view_active_link))
@@ -78,7 +78,7 @@ final class ReleephProjectListController extends PhabricatorController {
           'href'  => '/releeph/project/create/',
           'class' => 'green button',
         ),
-        'Create New Project');
+        pht('Create New Project'));
       $panel->addButton($create_new_project_button);
     }
 
@@ -88,7 +88,7 @@ final class ReleephProjectListController extends PhabricatorController {
         $pager,
       ),
       array(
-        'title' => 'List Releeph Projects',
+        'title' => pht('All Releeph Projects'),
       ));
   }
 

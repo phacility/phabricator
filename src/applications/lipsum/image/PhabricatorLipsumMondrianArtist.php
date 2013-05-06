@@ -30,8 +30,8 @@ final class PhabricatorLipsumMondrianArtist extends PhabricatorLipsumArtist {
 
     $fills = mt_rand(3, 8);
     for ($ii = 0; $ii < $fills; $ii++) {
-      $xp = mt_rand(0, $x);
-      $yp = mt_rand(0, $y);
+      $xp = mt_rand(0, $x - 1);
+      $yp = mt_rand(0, $y - 1);
       if (imagecolorat($image, $xp, $yp) != $c_white) {
         continue;
       }

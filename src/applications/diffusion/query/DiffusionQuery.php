@@ -1,6 +1,6 @@
 <?php
 
-abstract class DiffusionQuery {
+abstract class DiffusionQuery extends PhabricatorQuery {
 
   private $request;
 
@@ -34,6 +34,31 @@ abstract class DiffusionQuery {
 
   final protected function getRequest() {
     return $this->request;
+  }
+
+  final public static function callConduitWithDiffusionRequest(
+    PhabricatorUser $user,
+    DiffusionRequest $drequest,
+    $method,
+    array $params = array()) {
+
+    $repository = $drequest->getRepository();
+
+    $core_params = array(
+      'callsign' => $repository->getCallsign()
+    );
+    $params = $params + $core_params;
+
+    return id(new ConduitCall(
+      $method,
+      $params
+    ))
+    ->setUser($user)
+    ->execute();
+  }
+
+  public function execute() {
+    return $this->executeQuery();
   }
 
   abstract protected function executeQuery();

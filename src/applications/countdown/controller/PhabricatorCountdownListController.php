@@ -12,7 +12,7 @@ final class PhabricatorCountdownListController
     $pager->setOffset($request->getInt('page'));
     $pager->setURI($request->getRequestURI(), 'page');
 
-    $timers = id(new PhabricatorTimer())->loadAllWhere(
+    $timers = id(new PhabricatorCountdown())->loadAllWhere(
       '1 = 1 ORDER BY id DESC LIMIT %d, %d',
       $pager->getOffset(),
       $pager->getPageSize() + 1);
@@ -54,7 +54,7 @@ final class PhabricatorCountdownListController
             'href' => '/countdown/'.$timer->getID().'/',
           ),
           $timer->getTitle()),
-        phabricator_datetime($timer->getDatepoint(), $user),
+        phabricator_datetime($timer->getEpoch(), $user),
         $edit_button,
         $delete_button,
       );
@@ -83,7 +83,7 @@ final class PhabricatorCountdownListController
 
     $panel = id(new AphrontPanelView())
       ->appendChild($table)
-      ->setHeader(pht('Timers'))
+      ->setHeader(pht('Countdowns'))
       ->setNoBackground()
       ->appendChild($pager);
 
@@ -91,7 +91,7 @@ final class PhabricatorCountdownListController
       ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName(pht('All Timers'))
+          ->setName(pht('All Countdowns'))
           ->setHref($this->getApplicationURI()));
 
     return $this->buildApplicationPage(

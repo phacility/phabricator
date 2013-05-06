@@ -12,10 +12,10 @@ final class PhabricatorCountdownEditController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $action_label = pht('Create Timer');
+    $action_label = pht('Create Countdown');
 
     if ($this->id) {
-      $timer = id(new PhabricatorTimer())->load($this->id);
+      $timer = id(new PhabricatorCountdown())->load($this->id);
       // If no timer is found
       if (!$timer) {
         return new Aphront404Response();
@@ -26,10 +26,10 @@ final class PhabricatorCountdownEditController
         return new Aphront403Response();
       }
 
-      $action_label = pht('Update Timer');
+      $action_label = pht('Update Countdown');
     } else {
-      $timer = new PhabricatorTimer();
-      $timer->setDatePoint(time());
+      $timer = new PhabricatorCountdown();
+      $timer->setEpoch(time());
     }
 
     $error_view = null;
@@ -38,7 +38,7 @@ final class PhabricatorCountdownEditController
     if ($request->isFormPost()) {
       $errors = array();
       $title = $request->getStr('title');
-      $datepoint = $request->getStr('datepoint');
+      $epoch = $request->getStr('epoch');
 
       $e_text = null;
       if (!strlen($title)) {
@@ -51,7 +51,7 @@ final class PhabricatorCountdownEditController
       $timezone = new DateTimeZone($user->getTimezoneIdentifier());
 
       try {
-        $date = new DateTime($datepoint, $timezone);
+        $date = new DateTime($epoch, $timezone);
         $timestamp = $date->format('U');
       } catch (Exception $e) {
         $errors[] = pht('You entered an incorrect date. You can enter date'.
@@ -61,7 +61,7 @@ final class PhabricatorCountdownEditController
       }
 
       $timer->setTitle($title);
-      $timer->setDatePoint($timestamp);
+      $timer->setEpoch($timestamp);
 
       if (!count($errors)) {
         $timer->setAuthorPHID($user->getPHID());
@@ -76,12 +76,12 @@ final class PhabricatorCountdownEditController
       }
     }
 
-    if ($timer->getDatePoint()) {
-      $display_datepoint = phabricator_datetime(
-        $timer->getDatePoint(),
+    if ($timer->getEpoch()) {
+      $display_epoch = phabricator_datetime(
+        $timer->getEpoch(),
         $user);
     } else {
-      $display_datepoint = $request->getStr('datepoint');
+      $display_epoch = $request->getStr('epoch');
     }
 
     $form = id(new AphrontFormView())
@@ -95,8 +95,8 @@ final class PhabricatorCountdownEditController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('End date'))
-          ->setValue($display_datepoint)
-          ->setName('datepoint')
+          ->setValue($display_epoch)
+          ->setName('epoch')
           ->setCaption(pht('Examples: '.
             '2011-12-25 or 3 hours or '.
             'June 8 2011, 5 PM.')))

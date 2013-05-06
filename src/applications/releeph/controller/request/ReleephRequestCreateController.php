@@ -54,9 +54,9 @@ final class ReleephRequestCreateController extends ReleephController {
       try {
         $pr_commit = $finder->fromPartial($request_identifier);
       } catch (Exception $e) {
-        $e_request_identifier = 'Invalid';
+        $e_request_identifier = pht('Invalid');
         $errors[] =
-          "Request {$request_identifier} is probably not a valid commit";
+          pht('Request %s is probably not a valid commit', $request_identifier);
         $errors[] = $e->getMessage();
       }
 
@@ -64,8 +64,8 @@ final class ReleephRequestCreateController extends ReleephController {
       if (!$errors) {
         $pr_commit_data = $pr_commit->loadCommitData();
         if (!$pr_commit_data) {
-          $e_request_identifier = 'Not parsed yet';
-          $errors[] = "The requested commit hasn't been parsed yet.";
+          $e_request_identifier = pht('Not parsed yet');
+          $errors[] = pht('The requested commit hasn\'t been parsed yet.');
         }
       }
 
@@ -93,7 +93,7 @@ final class ReleephRequestCreateController extends ReleephController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
     }
 
     // For the typeahead
@@ -119,7 +119,7 @@ final class ReleephRequestCreateController extends ReleephController {
         ->addHiddenInput('requestIdentifierRaw', 'D'.$diff_rev_id)
         ->appendChild(
           id(new AphrontFormStaticControl())
-            ->setLabel('Diff')
+            ->setLabel(pht('Diff'))
             ->setValue($title));
     } else {
       $origin = $releeph_branch->getURI();
@@ -132,8 +132,8 @@ final class ReleephRequestCreateController extends ReleephController {
           ->setError($e_request_identifier)
           ->setStartTime($branch_cut_point->getEpoch())
           ->setCaption(
-            'Start typing to autocomplete on commit title, '.
-            'or give a Phabricator commit identifier like rFOO1234'));
+            pht('Start typing to autocomplete on commit title, '.
+            'or give a Phabricator commit identifier like rFOO1234')));
     }
 
     // Fields
@@ -148,18 +148,18 @@ final class ReleephRequestCreateController extends ReleephController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($origin)
-          ->setValue('Request'));
+          ->setValue(pht('Request')));
 
     $panel = id(new AphrontPanelView())
       ->setHeader(
-        'Request for '.
-        $releeph_branch->getDisplayNameWithDetail())
+        pht('Request for %s',
+        $releeph_branch->getDisplayNameWithDetail()))
       ->setWidth(AphrontPanelView::WIDTH_FORM)
       ->appendChild($form);
 
     return $this->buildStandardPageResponse(
       array($error_view, $panel),
-      array('title' => 'Request pick'));
+      array('title' => pht('Request Pick')));
   }
 
 }

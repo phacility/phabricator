@@ -1,51 +1,6 @@
 <?php
 
-final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
-
-  protected function executeQuery() {
-    $drequest = $this->getRequest();
-    $repository = $drequest->getRepository();
-
-    // We need to add 1 in case we pick up HEAD.
-
-    $count = $this->getOffset() + $this->getLimit() + 1;
-
-    list($stdout) = $repository->execxLocalCommand(
-      'for-each-ref %C --sort=-creatordate --format=%s refs/remotes',
-      $count ? '--count='.(int)$count : null,
-      '%(refname:short) %(objectname)');
-
-    $branch_list = self::parseGitRemoteBranchOutput(
-      $stdout,
-      $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
-
-    $branches = array();
-    foreach ($branch_list as $name => $head) {
-      if (!$repository->shouldTrackBranch($name)) {
-        continue;
-      }
-
-      $branch = new DiffusionBranchInformation();
-      $branch->setName($name);
-      $branch->setHeadCommitIdentifier($head);
-      $branches[] = $branch;
-    }
-
-    $offset = $this->getOffset();
-    if ($offset) {
-      $branches = array_slice($branches, $offset);
-    }
-
-    // We might have too many even after offset slicing, if there was no HEAD
-    // for some reason.
-    $limit = $this->getLimit();
-    if ($limit) {
-      $branches = array_slice($branches, 0, $limit);
-    }
-
-    return $branches;
-  }
-
+final class DiffusionGitBranch {
 
   /**
    * Parse the output of 'git branch -r --verbose --no-abbrev' or similar into
@@ -66,7 +21,7 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
    * @param string Filter branches to those on a specific remote.
    * @return map Map of 'branch' or 'remote/branch' to hash at HEAD.
    */
-  public static function parseGitRemoteBranchOutput(
+  public static function parseRemoteBranchOutput(
     $stdout,
     $only_this_remote = null) {
     $map = array();
@@ -115,5 +70,4 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
 
     return $map;
   }
-
 }

@@ -57,14 +57,14 @@ final class ReleephRequestDifferentialCreateController
     require_celerity_resource('releeph-request-differential-create-dialog');
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Choose Releeph Branch')
+      ->setTitle(pht('Choose Releeph Branch'))
       ->setClass('releeph-request-differential-create-dialog')
       ->addCancelButton('/D'.$request->getStr('D'));
 
     $dialog->appendChild(
-      "This differential revision changes code that is associated ".
+      pht("This differential revision changes code that is associated ".
       "with multiple Releeph branches.  ".
-      "Please select the branch where you would like this code to be picked.");
+      "Please select the branch where you would like this code to be picked."));
 
     foreach ($branch_groups as $project_id => $branches) {
       $project = idx($projects, $project_id);

@@ -10,7 +10,7 @@ final class DiffusionGitContainsQuery extends DiffusionContainsQuery {
       'branch -r --verbose --no-abbrev --contains %s',
       $request->getCommit());
 
-    return DiffusionGitBranchQuery::parseGitRemoteBranchOutput(
+    return DiffusionGitBranch::parseRemoteBranchOutput(
       $contains,
       DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
   }
