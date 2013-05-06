@@ -41,6 +41,12 @@
   display: block;
 }
 
+.device .phabricator-action-view button.phabricator-action-view-item,
+.device .phabricator-action-view-item {
+  font-size: 14px;
+  line-height: 22px;
+}
+
 .phabricator-action-view {
   padding: 1px 0;
   position: relative;

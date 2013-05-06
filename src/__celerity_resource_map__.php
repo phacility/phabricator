@@ -2888,7 +2888,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-action-list-view-css' =>
   array(
-    'uri' => '/res/3d02ca59/rsrc/css/layout/phabricator-action-list-view.css',
+    'uri' => '/res/f63afae7/rsrc/css/layout/phabricator-action-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
