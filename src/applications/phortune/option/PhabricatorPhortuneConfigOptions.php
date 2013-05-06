@@ -38,8 +38,19 @@ final class PhabricatorPhortuneConfigOptions
             "NOTE: Enabling this provider gives all users infinite free ".
             "money! You should enable it **ONLY** for testing and ".
             "development."))
+        ->setLocked(true),
+      $this->newOption('phortune.paypal.api-username', 'string', null)
         ->setLocked(true)
-
+        ->setDescription(
+          pht('PayPal API username.')),
+      $this->newOption('phortune.paypal.api-password', 'string', null)
+        ->setHidden(true)
+        ->setDescription(
+          pht('PayPal API password.')),
+      $this->newOption('phortune.paypal.api-signature', 'string', null)
+        ->setHidden(true)
+        ->setDescription(
+          pht('PayPal API signature.')),
     );
   }
 

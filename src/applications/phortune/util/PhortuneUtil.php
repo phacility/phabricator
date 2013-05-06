@@ -31,4 +31,8 @@ final class PhortuneUtil {
     return $display_value;
   }
 
+  public static function formatBareCurrency($price_in_cents) {
+    return str_replace('$', '', self::formatCurrency($price_in_cents));
+  }
+
 }

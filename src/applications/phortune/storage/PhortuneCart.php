@@ -28,6 +28,10 @@ final class PhortuneCart extends PhortuneDAO {
     return $this;
   }
 
+  public function getTotalInCents() {
+    return 123;
+  }
+
   public function getPurchases() {
     if ($this->purchases === null) {
       throw new Exception("Purchases not attached to cart!");

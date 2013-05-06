@@ -1604,6 +1604,7 @@ phutil_register_library_map(array(
     'PhortunePaymentMethodViewController' => 'applications/phortune/controller/PhortunePaymentMethodViewController.php',
     'PhortunePaymentProvider' => 'applications/phortune/provider/PhortunePaymentProvider.php',
     'PhortunePaymentProviderTestCase' => 'applications/phortune/provider/__tests__/PhortunePaymentProviderTestCase.php',
+    'PhortunePaypalPaymentProvider' => 'applications/phortune/provider/PhortunePaypalPaymentProvider.php',
     'PhortuneProduct' => 'applications/phortune/storage/PhortuneProduct.php',
     'PhortuneProductEditController' => 'applications/phortune/controller/PhortuneProductEditController.php',
     'PhortuneProductEditor' => 'applications/phortune/editor/PhortuneProductEditor.php',
@@ -1612,6 +1613,7 @@ phutil_register_library_map(array(
     'PhortuneProductTransaction' => 'applications/phortune/storage/PhortuneProductTransaction.php',
     'PhortuneProductTransactionQuery' => 'applications/phortune/query/PhortuneProductTransactionQuery.php',
     'PhortuneProductViewController' => 'applications/phortune/controller/PhortuneProductViewController.php',
+    'PhortuneProviderController' => 'applications/phortune/controller/PhortuneProviderController.php',
     'PhortunePurchase' => 'applications/phortune/storage/PhortunePurchase.php',
     'PhortuneStripePaymentProvider' => 'applications/phortune/provider/PhortuneStripePaymentProvider.php',
     'PhortuneTestExtraPaymentProvider' => 'applications/phortune/provider/__tests__/PhortuneTestExtraPaymentProvider.php',
@@ -3335,6 +3337,7 @@ phutil_register_library_map(array(
     'PhortunePaymentMethodQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhortunePaymentMethodViewController' => 'PhabricatorController',
     'PhortunePaymentProviderTestCase' => 'PhabricatorTestCase',
+    'PhortunePaypalPaymentProvider' => 'PhortunePaymentProvider',
     'PhortuneProduct' =>
     array(
       0 => 'PhortuneDAO',
@@ -3347,6 +3350,7 @@ phutil_register_library_map(array(
     'PhortuneProductTransaction' => 'PhabricatorApplicationTransaction',
     'PhortuneProductTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhortuneProductViewController' => 'PhortuneController',
+    'PhortuneProviderController' => 'PhortuneController',
     'PhortunePurchase' => 'PhortuneDAO',
     'PhortuneStripePaymentProvider' => 'PhortunePaymentProvider',
     'PhortuneTestExtraPaymentProvider' => 'PhortunePaymentProvider',
