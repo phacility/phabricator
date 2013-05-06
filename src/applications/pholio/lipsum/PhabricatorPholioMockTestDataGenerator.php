@@ -87,7 +87,7 @@ final class PhabricatorPholioMockTestDataGenerator
     $images = newv("PhabricatorFile", array())
       ->loadAllWhere("mimeType = %s", "image/jpeg");
     $rand_images = array();
-    $quantity = rand(1, 10);
+    $quantity = rand(2, 10);
     foreach (array_rand($images, $quantity) as $random) {
       $rand_images[] = $images[$random]->getPHID();
     }

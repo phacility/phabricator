@@ -4,7 +4,7 @@ final class PhabricatorPasteTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
   // Better Support for this in the future
-  private $supportedLanguages = array(
+  public $supportedLanguages = array(
     "Java" => "java",
     "PHP" => "php");
 

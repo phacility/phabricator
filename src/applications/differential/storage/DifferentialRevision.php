@@ -238,7 +238,6 @@ final class DifferentialRevision extends DifferentialDAO
       'SELECT * FROM %T WHERE revisionID = %d ORDER BY sequence',
       self::RELATIONSHIP_TABLE,
       $this->getID());
-
     return $this->attachRelationships($data);
   }
 
