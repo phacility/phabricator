@@ -590,7 +590,6 @@ EOBODY;
       ->addTos(array($this->getPHID()))
       ->setSubject('[Phabricator] Welcome to Phabricator')
       ->setBody($body)
-      ->setFrom($admin->getPHID())
       ->saveAndSend();
   }
 
@@ -630,7 +629,6 @@ EOBODY;
       ->addTos(array($this->getPHID()))
       ->setSubject('[Phabricator] Username Changed')
       ->setBody($body)
-      ->setFrom($admin->getPHID())
       ->saveAndSend();
   }
 
