@@ -102,6 +102,17 @@
   background: #e9ecf5;
 }
 
+/* - Subhead -------------------------------------------------------------------
+
+  Descriptive Text or Links under the main header, before attributes.
+
+*/
+
+.phabricator-object-item-subhead {
+  color: #777;
+  padding: 0 8px 6px;
+}
+
 
 /* - Attribute List ------------------------------------------------------------
 
