@@ -65,10 +65,6 @@ final class PhabricatorPholioMockTestDataGenerator
     return $mock->save();
   }
 
-  public function loadPhabrictorUserPHID() {
-    return $this->loadOneRandom("PhabricatorUser")->getPHID();
-  }
-
   public function generateTitle() {
     return id(new PhutilLipsumContextFreeGrammar())
       ->generate();

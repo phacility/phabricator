@@ -4,7 +4,7 @@ final class PhabricatorFileTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
   public function generate() {
-    $authorPHID = $this->loadAuthorPHID();
+    $authorPHID = $this->loadPhabrictorUserPHID();
     $dimension = 1 << rand(5, 12);
     $image = id(new PhabricatorLipsumMondrianArtist())
       ->generate($dimension, $dimension);
@@ -16,13 +16,5 @@ final class PhabricatorFileTestDataGenerator
     $file->setAuthorPHID($authorPHID);
     $file->setMimeType('image/jpeg');
     return $file->save();
-  }
-
-  private function loadPhabrictorUserPHID() {
-    return $this->loadOneRandom("PhabricatorUser")->getPHID();
-  }
-
-  public function loadAuthorPHID() {
-    return $this->loadPhabrictorUserPHID();
   }
 }
