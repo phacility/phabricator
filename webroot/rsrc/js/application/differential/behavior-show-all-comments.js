@@ -27,14 +27,18 @@ JX.behavior('differential-show-all-comments', function(config) {
   // there's an anchor in the URL, since we don't want to link to "#comment-3"
   // and have it collapsed.
 
-  if (window.location.hash) {
+  function at_comment_hash() {
+    return window.location.hash && window.location.hash.match(/comment/);
+  }
+
+  if (at_comment_hash()) {
     reveal();
   } else {
     JX.Stratcom.listen(
       'hashchange',
       null,
       function(e) {
-        if (window.location.hash.match(/comment/) && reveal()) {
+        if (at_comment_hash() && reveal()) {
           try {
             var target = JX.$(window.location.hash.replace(/^#/, ''));
             window.scrollTo(0, target.offsetTop);

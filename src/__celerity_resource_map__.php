@@ -1513,7 +1513,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-show-all-comments' =>
   array(
-    'uri' => '/res/eaa12efc/rsrc/js/application/differential/behavior-show-all-comments.js',
+    'uri' => '/res/5a26be1a/rsrc/js/application/differential/behavior-show-all-comments.js',
     'type' => 'js',
     'requires' =>
     array(
