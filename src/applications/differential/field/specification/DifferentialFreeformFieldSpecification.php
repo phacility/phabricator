@@ -200,13 +200,25 @@ abstract class DifferentialFreeformFieldSpecification
 
     $message = $this->renderValueForCommitMessage($is_edit = false);
 
-    $commits = self::findRevertedCommits($message);
-
     $user = id(new PhabricatorUser())->loadOneWhere(
       'phid = %s',
       $data->getCommitDetail('authorPHID'));
     if (!$user) {
+      // TODO: Maybe after grey users, we should find a way to proceed even
+      // if we don't know who the author is.
       return;
+    }
+
+    $commit_names = self::findRevertedCommits($message);
+    if ($commit_names) {
+      $reverts = id(new DiffusionCommitQuery())
+        ->setViewer($user)
+        ->withIdentifiers($commit_names)
+        ->withDefaultRepository($repository)
+        ->execute();
+      foreach ($reverts as $revert) {
+        // TODO: Do interesting things here.
+      }
     }
 
     $tasks_statuses = $this->findMentionedTasks($message);
