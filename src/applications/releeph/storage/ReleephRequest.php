@@ -274,6 +274,10 @@ final class ReleephRequest extends ReleephDAO {
   }
 
   public function loadDifferentialRevision() {
+    $diff_phid = $this->loadRequestCommitDiffPHID();
+    if (!$diff_phid) {
+      return null;
+    }
     return $this->loadOneRelative(
         new DifferentialRevision(),
         'phid',
