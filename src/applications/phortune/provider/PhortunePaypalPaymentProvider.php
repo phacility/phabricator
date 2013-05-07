@@ -122,15 +122,15 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
           ));
 
         $total_in_cents = $cart->getTotalInCents();
-        $price = PhortuneUtil::formatBareCurrency($total_in_cents);
+        $price = PhortuneCurrency::newFromUSDCents($total_in_cents);
 
         $result = $this
           ->newPaypalAPICall()
           ->setRawPayPalQuery(
             'SetExpressCheckout',
             array(
-              'PAYMENTREQUEST_0_AMT'            => $price,
-              'PAYMENTREQUEST_0_CURRENCYCODE'   => 'USD',
+              'PAYMENTREQUEST_0_AMT'            => $price->formatBareValue(),
+              'PAYMENTREQUEST_0_CURRENCYCODE'   => $price->getCurrency(),
               'RETURNURL'                       => $return_uri,
               'CANCELURL'                       => $cancel_uri,
               'PAYMENTREQUEST_0_PAYMENTACTION'  => 'Sale',

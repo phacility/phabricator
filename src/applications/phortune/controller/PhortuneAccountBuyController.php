@@ -56,9 +56,11 @@ final class PhortuneAccountBuyController
     foreach ($cart->getPurchases() as $purchase) {
       $rows[] = array(
         $purchase->getPurchaseName(),
-        PhortuneUtil::formatCurrency($purchase->getBasePriceInCents()),
+        PhortuneCurrency::newFromUSDCents($purchase->getBasePriceInCents())
+          ->formatForDisplay(),
         $purchase->getQuantity(),
-        PhortuneUtil::formatCurrency($purchase->getTotalPriceInCents()),
+        PhortuneCurrency::newFromUSDCents($purchase->getTotalPriceInCents())
+          ->formatForDisplay(),
       );
 
       $total += $purchase->getTotalPriceInCents();
@@ -68,7 +70,8 @@ final class PhortuneAccountBuyController
       phutil_tag('strong', array(), pht('Total')),
       '',
       '',
-      phutil_tag('strong', array(), PhortuneUtil::formatCurrency($total)),
+      phutil_tag('strong', array(),
+        PhortuneCurrency::newFromUSDCents($total)->formatForDisplay()),
     );
 
     $table = new AphrontTableView($rows);
