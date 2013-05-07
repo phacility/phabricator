@@ -256,12 +256,19 @@
 
 
 .remarkup-assist-textarea {
-  border-width: 1px;
-  border-color: #e5e5e5 #999999 #999999;
+  border-left-color: #96A6C5;
+  border-right-color: #96A6C5;
+  border-bottom-color: #96A6C5;
+  border-top-color: #c9d4e9;
+  border-radius: 0;
 
   /* Prevent Safari and Chrome users from dragging the textarea any wider,
      because the top bar won't resize along with it. */
   resize: vertical;
+}
+
+.remarkup-assist-textarea:focus {
+  border: 1px solid rgba(82, 168, 236, 0.8);
 }
 
 .remarkup-assist-bar {
@@ -270,7 +277,9 @@
 
   border-width: 1px 1px 0;
   border-style: solid;
-  border-color: #737373 #999999;
+  border-top-color: #96A6C5;
+  border-left-color: #96A6C5;
+  border-right-color: #96A6C5;
 
   background: #f5f5f5;
   overflow: hidden;

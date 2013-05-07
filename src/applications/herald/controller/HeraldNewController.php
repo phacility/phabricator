@@ -57,6 +57,7 @@ final class HeraldNewController extends HeraldController {
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/herald/rule/')
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('New rule for'))
@@ -69,20 +70,20 @@ final class HeraldNewController extends HeraldController {
           ->setValue(pht('Create Rule'))
           ->addCancelButton('/herald/view/'.$this->contentType.'/'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Create New Herald Rule'));
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Create New Herald Rule'));
 
     $nav = $this->renderNav();
     $nav->selectFilter('new');
-    $nav->appendChild($panel);
+    $nav->appendChild($header);
+    $nav->appendChild($form);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Create Herald Rule',
+        'title' => pht('Create Herald Rule'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

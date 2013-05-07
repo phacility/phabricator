@@ -111,18 +111,12 @@ final class HeraldTestConsoleController extends HeraldController {
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Test Rules')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Test Herald Rules'));
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->appendChild($form);
-    $panel->setNoBackground();
-
     $nav = $this->renderNav();
     $nav->selectFilter('test');
     $nav->appendChild(
       array(
         $error_view,
-        $panel,
+        $form,
       ));
 
     $crumbs = id($this->buildApplicationCrumbs())
@@ -135,10 +129,12 @@ final class HeraldTestConsoleController extends HeraldController {
           ->setName(pht('Test Console')));
     $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Test Console',
+        'title' => pht('Test Console'),
+        'dust' => true,
+        'device' => true,
       ));
   }
 

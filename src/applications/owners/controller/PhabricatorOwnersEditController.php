@@ -134,10 +134,10 @@ final class PhabricatorOwnersEditController
     $token_all_owners = mpull($token_all_owners, 'getFullName');
 
     if ($package->getID()) {
-      $title = 'Edit Package';
+      $title = pht('Edit Package');
       $side_nav_filter = 'edit/'.$this->id;
     } else {
-      $title = 'New Package';
+      $title = pht('New Package');
       $side_nav_filter = 'new';
     }
     $this->setSideNavFilter($side_nav_filter);
@@ -181,6 +181,7 @@ final class PhabricatorOwnersEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Name')
@@ -249,16 +250,18 @@ final class PhabricatorOwnersEditController
           ->addCancelButton($cancel_uri)
           ->setValue('Save Package'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader($title);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->appendChild($error_view);
-    $panel->appendChild($form);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    return $this->buildApplicationPage(
+      array(
+        $error_view,
+        $header,
+        $form,
+      ),
       array(
         'title' => $title,
+        'dust' => true,
       ));
   }
 

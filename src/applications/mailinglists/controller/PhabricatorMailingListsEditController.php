@@ -114,34 +114,28 @@ final class PhabricatorMailingListsEditController
           ->setValue(pht('Save'))
           ->addCancelButton($this->getApplicationURI()));
 
-    $panel = new AphrontPanelView();
     if ($list->getID()) {
-      $panel->setHeader(pht('Edit Mailing List'));
       $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName(pht('Edit Mailing List'))
           ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
     } else {
-      $panel->setHeader(pht('Create Mailing List'));
       $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
           ->setName(pht('Create Mailing List'))
           ->setHref($this->getApplicationURI('/edit/')));
     }
 
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $error_view,
-        $panel,
+        $form,
       ),
       array(
         'title' => pht('Edit Mailing List'),
         'device' => true,
+        'dust' => true,
       ));
   }
 

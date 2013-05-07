@@ -82,6 +82,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
+    $form->setFlexible(true);
     if ($diff) {
       $form->addHiddenInput('diffID', $diff->getID());
     }
@@ -131,25 +132,39 @@ final class DifferentialRevisionEditController extends DifferentialController {
 
     $form->appendChild($submit);
 
-    $panel = new AphrontPanelView();
+    $crumbs = $this->buildApplicationCrumbs();
     if ($revision->getID()) {
       if ($diff) {
-        $panel->setHeader(pht('Update Differential Revision'));
+        $title = pht('Update Differential Revision');
+        $crumbs->addCrumb(
+          id(new PhabricatorCrumbView())
+            ->setName('D'.$revision->getID())
+            ->setHref('/differential/diff/'.$diff->getID().'/'));
       } else {
-        $panel->setHeader(pht('Edit Differential Revision'));
+        $title = pht('Edit Differential Revision');
+        $crumbs->addCrumb(
+          id(new PhabricatorCrumbView())
+            ->setName('D'.$revision->getID())
+            ->setHref('/D'.$revision->getID()));
       }
     } else {
-      $panel->setHeader(pht('Create New Differential Revision'));
+      $title = pht('Create New Differential Revision');
     }
 
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title)
+        ->setHref(''));
 
-    return $this->buildStandardPageResponse(
-      array($error_view, $panel),
+    return $this->buildApplicationPage(
       array(
-        'title' => pht('Edit Differential Revision'),
+        $crumbs,
+        $error_view,
+        $form),
+      array(
+        'title' => $title,
+        'device' => true,
+        'dust' => true,
       ));
   }
 

@@ -71,6 +71,7 @@ final class PhabricatorRepositoryCreateController
     $form
       ->setUser($user)
       ->setAction('/repository/create/')
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Name')
@@ -102,19 +103,19 @@ final class PhabricatorRepositoryCreateController
           ->setValue('Create Repository')
           ->addCancelButton('/repository/'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Create Repository');
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Create Repository'));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $error_view,
-        $panel,
+        $header,
+        $form,
       ),
       array(
-        'title' => 'Create Repository',
+        'title' => pht('Create Repository'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

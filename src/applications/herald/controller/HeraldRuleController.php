@@ -171,13 +171,11 @@ final class HeraldRuleController extends HeraldController {
 
     $this->setupEditorBehavior($rule, $handles);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(
       $rule->getID()
         ? pht('Edit Herald Rule')
         : pht('Create Herald Rule'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
 
     $nav = $this->renderNav();
     $nav->selectFilter(
@@ -185,13 +183,14 @@ final class HeraldRuleController extends HeraldController {
     $nav->appendChild(
       array(
         $error_view,
-        $panel,
+        $header,
+        $form,
       ));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Edit Rule',
+        'title' => pht('Edit Rule'),
       ));
   }
 

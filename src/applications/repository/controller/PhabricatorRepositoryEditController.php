@@ -153,21 +153,21 @@ final class PhabricatorRepositoryEditController
         id(new AphrontFormSubmitControl())
           ->setValue('Save'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Edit Repository');
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
-
     $nav = $this->sideNav;
 
-    $nav->appendChild($error_view);
-    $nav->appendChild($panel);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Edit Repository'));
 
-    return $this->buildStandardPageResponse(
+    $nav->appendChild($error_view);
+    $nav->appendChild($header);
+    $nav->appendChild($form);
+
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Edit Repository',
+        'title' => pht('Edit Repository'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -359,6 +359,7 @@ final class PhabricatorRepositoryEditController
     $form
       ->setUser($user)
       ->setAction('/repository/edit/'.$repository->getID().'/tracking/')
+      ->setFlexible(true)
       ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Phabricator can track '.
         'repositories, importing commits as they happen and notifying '.
@@ -675,20 +676,18 @@ final class PhabricatorRepositoryEditController
         id(new AphrontFormSubmitControl())
           ->setValue('Save Configuration'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Repository Tracking');
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->setNoBackground();
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Edit Repository Tracking'));
 
     $nav = $this->sideNav;
     $nav->appendChild($error_view);
-    $nav->appendChild($panel);
+    $nav->appendChild($header);
+    $nav->appendChild($form);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Edit Repository Tracking',
+        'title' => pht('Edit Repository Tracking'),
       ));
   }
 

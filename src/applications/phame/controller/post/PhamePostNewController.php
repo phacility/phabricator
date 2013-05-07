@@ -75,9 +75,6 @@ final class PhamePostNewController extends PhameController {
         ->setHref($view_uri));
     $nav->appendChild($crumbs);
 
-    $nav->appendChild(
-      id(new PhabricatorHeaderView())->setHeader($title));
-
     if (!$blogs) {
       $notification = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NODATA)

@@ -355,6 +355,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $project_tokenizer_id = celerity_generate_unique_node_id();
 
     $form = new AphrontFormView();
+    $form->setFlexible(true);
     $form
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
@@ -499,11 +500,6 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->addCancelButton($cancel_uri)
           ->setValue($button_name));
 
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->setHeader($header_name);
-    $panel->appendChild($form);
-    $panel->setNoBackground();
     $inst1 = pht('Description Preview');
     $inst2 = pht('Loading preview...');
 
@@ -550,7 +546,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       array(
         $crumbs,
         $error_view,
-        $panel,
+        $form,
         $description_preview_panel,
       ),
       array(

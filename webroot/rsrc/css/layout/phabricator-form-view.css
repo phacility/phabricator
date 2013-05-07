@@ -3,11 +3,15 @@
  */
 
 .phabricator-form-view {
-  padding: .75em;
-  background: #f9f9f9;
+  padding: 20px;
+  background: #f4f5f8;
   border-width: 1px 0;
   border-style: solid;
-  border-color: #dbdbdb;
+  border-color: rgb(199, 201, 214);
+}
+
+.device-phone .phabricator-form-view {
+  padding: 10px 5px 10px 10px;
 }
 
 .device .phabricator-form-view .aphront-form-control .aphront-form-label {
