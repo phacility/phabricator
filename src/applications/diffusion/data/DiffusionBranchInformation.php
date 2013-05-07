@@ -30,7 +30,7 @@ final class DiffusionBranchInformation {
     foreach ($dicts as $dict) {
       $branches[] = id(new DiffusionBranchInformation())
         ->setName($dict['name'])
-        ->setHeadCommitIdentifier($dict['head_commit_identifier']);
+        ->setHeadCommitIdentifier($dict['headCommitIdentifier']);
     }
     return $branches;
   }
@@ -38,7 +38,7 @@ final class DiffusionBranchInformation {
   public function toDictionary() {
     return array(
       'name' => $this->getName(),
-      'head_commit_identifier' => $this->getHeadCommitIdentifier()
+      'headCommitIdentifier' => $this->getHeadCommitIdentifier()
     );
   }
 

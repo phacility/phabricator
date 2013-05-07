@@ -40,12 +40,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $needs_blame = true;
     }
 
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $this->diffusionRequest);
-    $file_query->setViewer($request->getUser());
-    $file_query->setNeedsBlame($needs_blame);
-    $file_query->loadFileContent();
-    $data = $file_query->getRawData();
+    $file_content = DiffusionFileContent::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.filecontentquery',
+        array(
+          'commit' => $drequest->getCommit(),
+          'path' => $drequest->getPath(),
+          'needsBlame' => $needs_blame,
+        )));
+    $data = $file_content->getCorpus();
 
     if ($selected === 'raw') {
       return $this->buildRawResponse($path, $data);
@@ -56,7 +59,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
     // Build the content of the file.
     $corpus = $this->buildCorpus(
       $selected,
-      $file_query,
+      $file_content,
       $needs_blame,
       $drequest,
       $path,
@@ -160,12 +163,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
       '/'.$drequest->getPath());
   }
 
-  private function buildCorpus($selected,
-                               DiffusionFileContentQuery $file_query,
-                               $needs_blame,
-                               DiffusionRequest $drequest,
-                               $path,
-                               $data) {
+  private function buildCorpus(
+    $selected,
+    DiffusionFileContent $file_content,
+    $needs_blame,
+    DiffusionRequest $drequest,
+    $path,
+    $data) {
 
     if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
       $file = $this->loadFileForData($path, $data);
@@ -189,15 +193,16 @@ final class DiffusionBrowseFileController extends DiffusionController {
           array(
             'style' => $style,
           ),
-          $file_query->getRawData());
+          $file_content->getCorpus());
 
           break;
 
       case 'plainblame':
         $style =
           "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
-        list($text_list, $rev_list, $blame_dict) =
-          $file_query->getBlameData();
+        $text_list = $file_content->getTextList();
+        $rev_list = $file_content->getRevList();
+        $blame_dict = $file_content->getBlameDict();
 
         $rows = array();
         foreach ($text_list as $k => $line) {
@@ -213,15 +218,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
             'style' => $style,
           ),
           implode("\n", $rows));
-
         break;
 
       case 'highlighted':
       case 'blame':
       default:
         require_celerity_resource('syntax-highlighting-css');
-
-        list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
+        $text_list = $file_content->getTextList();
+        $rev_list = $file_content->getRevList();
+        $blame_dict = $file_content->getBlameDict();
 
         $text_list = implode("\n", $text_list);
         $text_list = PhabricatorSyntaxHighlighter::highlightWithFilename(
@@ -230,7 +235,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $text_list = explode("\n", $text_list);
 
         $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
-          $needs_blame, $drequest, $file_query, $selected);
+          $needs_blame, $drequest, $selected);
 
         $corpus_table = javelin_tag(
           'table',
@@ -423,7 +428,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
     array $blame_dict,
     $needs_blame,
     DiffusionRequest $drequest,
-    DiffusionFileContentQuery $file_query,
     $selected) {
 
     $handles = array();
