@@ -365,7 +365,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'div',
         array(
           'id' => $aphlict_container_id,
-          'style' => 'position: absolute; width: 0; height: 0;',
+          'style' =>
+            'position: absolute; width: 0; height: 0; overflow: hidden;',
         ),
         '');
     }
