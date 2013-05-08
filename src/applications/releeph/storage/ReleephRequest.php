@@ -9,6 +9,7 @@ final class ReleephRequest extends ReleephDAO {
   protected $userIntents = array();
   protected $inBranch;
   protected $pickStatus;
+  protected $mailKey;
 
   // Information about the thing being requested
   protected $requestCommitPHID;
@@ -151,6 +152,13 @@ final class ReleephRequest extends ReleephDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       ReleephPHIDConstants::PHID_TYPE_RERQ);
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
 
