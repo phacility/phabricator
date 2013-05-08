@@ -58,10 +58,8 @@ final class PhabricatorSettingsPanelDiffPreferences
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Diff Preferences'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Diff Preferences'));
 
     $error_view = null;
     if ($request->getBool('saved')) {
@@ -73,7 +71,8 @@ final class PhabricatorSettingsPanelDiffPreferences
 
     return array(
       $error_view,
-      $panel,
+      $header,
+      $form,
     );
   }
 }

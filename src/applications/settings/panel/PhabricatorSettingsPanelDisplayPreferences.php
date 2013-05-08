@@ -157,10 +157,8 @@ EXAMPLE;
       id(new AphrontFormSubmitControl())
         ->setValue(pht('Save Preferences')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Display Preferences'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Display Preferences'));
 
     $error_view = null;
     if ($request->getStr('saved') === 'true') {
@@ -172,7 +170,8 @@ EXAMPLE;
 
     return array(
       $error_view,
-      $panel,
+      $header,
+      $form,
     );
   }
 }

@@ -56,10 +56,8 @@ final class PhabricatorSettingsPanelConpherencePreferences
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Conpherence Preferences'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Conpherence Preferences'));
 
     $error_view = null;
     if ($request->getBool('saved')) {
@@ -71,7 +69,8 @@ final class PhabricatorSettingsPanelConpherencePreferences
 
     return array(
       $error_view,
-      $panel,
+      $header,
+      $form,
     );
   }
 }

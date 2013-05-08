@@ -69,19 +69,22 @@ final class PhabricatorSettingsPanelLDAP
       $forms['Unlink Account'] = $unlink_form;
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('LDAP Account Settings'));
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('LDAP Account Settings'));
 
+    $formbox = new PHUIBoxView();
     foreach ($forms as $name => $form) {
       if ($name) {
-        $panel->appendChild(hsprintf('<br /><h1>%s</h1><br />', $name));
+        $head = new PhabricatorHeaderView();
+        $head->setHeader($name);
+        $formbox->appendChild($head);
       }
-      $panel->appendChild($form);
+      $formbox->appendChild($form);
     }
 
     return array(
-      $panel,
+      $header,
+      $formbox,
     );
   }
 }

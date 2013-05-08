@@ -217,14 +217,13 @@ final class PhabricatorSettingsPanelProfile
         ->setValue(pht('Save'))
         ->addCancelButton('/p/'.$user->getUsername().'/'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Edit Profile Details'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Edit Profile Details'));
 
     return array(
       $error_view,
-      $panel,
+      $header,
+      $form,
     );
   }
 

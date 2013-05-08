@@ -159,14 +159,13 @@ final class PhabricatorSettingsPanelPassword
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Change Password'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Change Password'));
 
     return array(
       $notice,
-      $panel,
+      $header,
+      $form,
     );
   }
 }

@@ -30,6 +30,8 @@ final class PhabricatorSettingsMainController
       $nav,
       array(
         'title' => $panel->getPanelName(),
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -83,6 +85,11 @@ final class PhabricatorSettingsMainController
     }
 
     return $nav;
+  }
+
+  public function buildApplicationMenu() {
+    $panels = $this->buildPanels();
+    return $this->renderSideNav($panels)->getMenu();
   }
 
 }

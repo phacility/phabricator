@@ -89,14 +89,13 @@ final class PhabricatorSettingsPanelAccount
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Account Settings'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Account Settings'));
 
     return array(
       $notice,
-      $panel,
+      $header,
+      $form,
     );
   }
 }

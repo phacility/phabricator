@@ -922,7 +922,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-message-pane-css' =>
   array(
-    'uri' => '/res/6b49a2d9/rsrc/css/application/conpherence/message-pane.css',
+    'uri' => '/res/52cf7ca3/rsrc/css/application/conpherence/message-pane.css',
     'type' => 'css',
     'requires' =>
     array(
