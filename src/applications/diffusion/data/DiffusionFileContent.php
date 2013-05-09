@@ -12,6 +12,9 @@ final class DiffusionFileContent {
     return $this;
   }
   public function getTextList() {
+    if (!$this->textList) {
+      return phutil_split_lines($this->getCorpus(), $retain_ends = false);
+    }
     return $this->textList;
   }
 
