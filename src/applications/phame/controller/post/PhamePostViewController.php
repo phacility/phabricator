@@ -162,7 +162,9 @@ final class PhamePostViewController extends PhameController {
     PhamePost $post,
     PhabricatorUser $user) {
 
-    $properties = new PhabricatorPropertyListView();
+    $properties = id(new PhabricatorPropertyListView())
+      ->setUser($user)
+      ->setObject($post);
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $user,
@@ -192,6 +194,8 @@ final class PhamePostViewController extends PhameController {
       ->setViewer($user)
       ->addObject($post, PhamePost::MARKUP_FIELD_BODY)
       ->process();
+
+    $properties->invokeWillRenderEvent();
 
     $properties->addTextContent(
       phutil_tag(

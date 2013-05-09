@@ -113,8 +113,9 @@ final class PonderQuestionViewController extends PonderController {
     array $subscribers) {
 
     $viewer = $this->getRequest()->getUser();
-    $view = new PhabricatorPropertyListView();
-
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($question);
     $view->addProperty(
       pht('Author'),
       $this->getHandle($question->getAuthorPHID())->renderLink());

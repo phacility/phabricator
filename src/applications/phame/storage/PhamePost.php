@@ -4,7 +4,10 @@
  * @group phame
  */
 final class PhamePost extends PhameDAO
-  implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface,
+    PhabricatorTokenReceiverInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
   const MARKUP_FIELD_SUMMARY = 'markup:summary';
@@ -180,6 +183,14 @@ final class PhamePost extends PhameDAO
 
   public function shouldUseMarkupCache($field) {
     return (bool)$this->getPHID();
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getBloggerPHID(),
+    );
   }
 
 }
