@@ -129,7 +129,11 @@ final class PholioMockQuery
     }
 
     foreach ($all_images as $image) {
-      $image->attachFile($all_files[$image->getFilePHID()]);
+      $file = idx($all_files, $image->getFilePHID());
+      if (!$file) {
+        $file = PhabricatorFile::loadBuiltin($this->getViewer(), 'missing.png');
+      }
+      $image->attachFile($file);
       if ($this->needInlineComments) {
         $inlines = idx($all_images, $image->getID(), array());
         $image->attachInlineComments($inlines);
@@ -151,7 +155,11 @@ final class PholioMockQuery
       $cover_file_phids), null, 'getPHID');
 
     foreach ($mocks as $mock) {
-      $mock->attachCoverFile($cover_files[$mock->getCoverPHID()]);
+      $file = idx($cover_files, $mock->getCoverPHID());
+      if (!$file) {
+        $file = PhabricatorFile::loadBuiltin($this->getViewer(), 'missing.png');
+      }
+      $mock->attachCoverFile($file);
     }
   }
 

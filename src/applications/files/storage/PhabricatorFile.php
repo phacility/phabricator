@@ -682,6 +682,89 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
 
+  /**
+   * Load (or build) the {@class:PhabricatorFile} objects for builtin file
+   * resources. The builtin mechanism allows files shipped with Phabricator
+   * to be treated like normal files so that APIs do not need to special case
+   * things like default images or deleted files.
+   *
+   * Builtins are located in `resources/builtin/` and identified by their
+   * name.
+   *
+   * @param  PhabricatorUser                Viewing user.
+   * @param  list<string>                   List of builtin file names.
+   * @return dict<string, PhabricatorFile>  Dictionary of named builtins.
+   */
+  public static function loadBuiltins(PhabricatorUser $user, array $names) {
+    $specs = array();
+    foreach ($names as $name) {
+      $specs[] = array(
+        'originalPHID' => PhabricatorPHIDConstants::PHID_VOID,
+        'transform'    => 'builtin:'.$name,
+      );
+    }
+
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($user)
+      ->withTransforms($specs)
+      ->execute();
+
+    $files = mpull($files, null, 'getName');
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $root = $root.'/resources/builtin/';
+
+    $build = array();
+    foreach ($names as $name) {
+      if (isset($files[$name])) {
+        continue;
+      }
+
+      // This is just a sanity check to prevent loading arbitrary files.
+      if (basename($name) != $name) {
+        throw new Exception("Invalid builtin name '{$name}'!");
+      }
+
+      $path = $root.$name;
+
+      if (!Filesystem::pathExists($path)) {
+        throw new Exception("Builtin '{$path}' does not exist!");
+      }
+
+      $data = Filesystem::readFile($path);
+      $params = array(
+        'name' => $name,
+        'ttl'  => time() + (60 * 60 * 24 * 7),
+      );
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $file = PhabricatorFile::newFromFileData($data, $params);
+        $xform = id(new PhabricatorTransformedFile())
+          ->setOriginalPHID(PhabricatorPHIDConstants::PHID_VOID)
+          ->setTransform('builtin:'.$name)
+          ->setTransformedPHID($file->getPHID())
+          ->save();
+      unset($unguarded);
+
+      $files[$name] = $file;
+    }
+
+    return $files;
+  }
+
+
+  /**
+   * Convenience wrapper for @{method:loadBuiltins}.
+   *
+   * @param PhabricatorUser   Viewing user.
+   * @param string            Single builtin name to load.
+   * @return PhabricatorFile  Corresponding builtin file.
+   */
+  public static function loadBuiltin(PhabricatorUser $user, $name) {
+    return idx(self::loadBuiltins($user, array($name)), $name);
+  }
+
+
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
 
