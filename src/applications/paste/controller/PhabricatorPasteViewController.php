@@ -120,7 +120,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     array $child_phids) {
 
     $user = $this->getRequest()->getUser();
-    $properties = new PhabricatorPropertyListView();
+    $properties = id(new PhabricatorPropertyListView())
+      ->setUser($user)
+      ->setObject($paste);
 
     $properties->addProperty(
       pht('Author'),

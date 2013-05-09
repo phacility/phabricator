@@ -2,7 +2,8 @@
 
 final class PhabricatorRepositoryCommit
   extends PhabricatorRepositoryDAO
-  implements PhabricatorPolicyInterface {
+  implements PhabricatorPolicyInterface,
+    PhabricatorTokenReceiverInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -169,6 +170,14 @@ final class PhabricatorRepositoryCommit
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return $this->getRepository()->hasAutomaticCapability($capability, $viewer);
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
   }
 
 }

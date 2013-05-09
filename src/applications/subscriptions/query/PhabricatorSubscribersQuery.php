@@ -49,6 +49,4 @@ final class PhabricatorSubscribersQuery extends PhabricatorQuery {
 
     return $results;
   }
-
-
 }
