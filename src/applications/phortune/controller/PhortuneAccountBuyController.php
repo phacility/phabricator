@@ -56,9 +56,11 @@ final class PhortuneAccountBuyController
     foreach ($cart->getPurchases() as $purchase) {
       $rows[] = array(
         $purchase->getPurchaseName(),
-        PhortuneUtil::formatCurrency($purchase->getBasePriceInCents()),
+        PhortuneCurrency::newFromUSDCents($purchase->getBasePriceInCents())
+          ->formatForDisplay(),
         $purchase->getQuantity(),
-        PhortuneUtil::formatCurrency($purchase->getTotalPriceInCents()),
+        PhortuneCurrency::newFromUSDCents($purchase->getTotalPriceInCents())
+          ->formatForDisplay(),
       );
 
       $total += $purchase->getTotalPriceInCents();
@@ -68,7 +70,8 @@ final class PhortuneAccountBuyController
       phutil_tag('strong', array(), pht('Total')),
       '',
       '',
-      phutil_tag('strong', array(), PhortuneUtil::formatCurrency($total)),
+      phutil_tag('strong', array(),
+        PhortuneCurrency::newFromUSDCents($total)->formatForDisplay()),
     );
 
     $table = new AphrontTableView($rows);
@@ -110,7 +113,7 @@ final class PhortuneAccountBuyController
       foreach ($methods as $method) {
         $method_control->addButton(
           $method->getID(),
-          $method->getName(),
+          $method->getBrand().' / '.$method->getLastFourDigits(),
           $method->getDescription());
       }
     }
@@ -118,28 +121,60 @@ final class PhortuneAccountBuyController
     $payment_method_uri = $this->getApplicationURI(
       $account->getID().'/paymentmethod/edit/');
 
-    $new_method = phutil_tag(
-      'a',
-      array(
-        'href'  => $payment_method_uri,
-        'sigil' => 'workflow',
-      ),
-      pht('Add New Payment Method'));
-
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild($method_control)
-      ->appendChild(
+      ->appendChild($method_control);
+
+    $add_providers = PhortunePaymentProvider::getProvidersForAddPaymentMethod();
+    if ($add_providers) {
+      $new_method = phutil_tag(
+        'a',
+        array(
+          'class' => 'button grey',
+          'href'  => $payment_method_uri,
+          'sigil' => 'workflow',
+        ),
+        pht('Add New Payment Method'));
+      $form->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setValue($new_method))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht("Dolla Dolla Bill Y'all")));
+          ->setValue($new_method));
+    }
+
+    if ($methods || $add_providers) {
+      $form
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue(pht("Submit Payment"))
+            ->setDisabled(!$methods));
+    }
+
+    $provider_form = null;
+
+    $pay_providers = PhortunePaymentProvider::getProvidersForOneTimePayment();
+    if ($pay_providers) {
+      $one_time_options = array();
+      foreach ($pay_providers as $provider) {
+        $one_time_options[] = $provider->renderOneTimePaymentButton(
+          $account,
+          $cart,
+          $user);
+      }
+
+      $provider_form = id(new AphrontFormLayoutView())
+        ->setPadded(true)
+        ->setBackgroundShading(true);
+      $provider_form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Pay With')
+          ->setValue($one_time_options));
+    }
 
     return $this->buildApplicationPage(
       array(
         $panel,
         $form,
+        phutil_tag('br', array()),
+        $provider_form,
       ),
       array(
         'title'   => $title,

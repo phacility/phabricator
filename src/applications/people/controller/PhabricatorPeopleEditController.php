@@ -115,6 +115,7 @@ final class PhabricatorPeopleEditController
       array(
         'title' => pht('Edit User'),
         'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -343,18 +344,14 @@ final class PhabricatorPeopleEditController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save')));
 
-    $panel = new AphrontPanelView();
+    $header = new PhabricatorHeaderView();
     if ($user->getID()) {
-      $panel->setHeader(pht('Edit User'));
+      $header->setHeader(pht('Edit User'));
     } else {
-      $panel->setHeader(pht('Create New User'));
+      $header->setHeader(pht('Create New User'));
     }
 
-    $panel->appendChild($form);
-    $panel->setNoBackground();
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-
-    return array($error_view, $panel);
+    return array($error_view, $form);
   }
 
   private function processRoleRequest(PhabricatorUser $user) {
@@ -452,13 +449,10 @@ final class PhabricatorPeopleEditController
             ->setValue(pht('Edit Role')));
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Edit Role'));
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
-    $panel->appendChild($form);
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Edit Role'));
 
-    return array($error_view, $panel);
+    return array($error_view, $header, $form);
   }
 
   private function processCertificateRequest($user) {
@@ -493,13 +487,10 @@ final class PhabricatorPeopleEditController
             pht('You may only view the certificates of System Agents.')));
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Conduit Certificate'));
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
-    $panel->appendChild($form);
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Conduit Certificate'));
 
-    return array($panel);
+    return array($header, $form);
   }
 
   private function processRenameRequest(PhabricatorUser $user) {
@@ -591,13 +582,10 @@ final class PhabricatorPeopleEditController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Change Username')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Change Username'));
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
-    $panel->appendChild($form);
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Change Username'));
 
-    return array($errors, $panel);
+    return array($errors, $header, $form);
   }
 
   private function processDeleteRequest(PhabricatorUser $user) {
@@ -685,13 +673,10 @@ final class PhabricatorPeopleEditController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Delete User')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Delete User'));
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
-    $panel->appendChild($form);
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Delete User'));
 
-    return array($errors, $panel);
+    return array($errors, $header, $form);
   }
 
   private function getRoleInstructions() {

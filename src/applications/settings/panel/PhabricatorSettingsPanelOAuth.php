@@ -128,7 +128,7 @@ final class PhabricatorSettingsPanelOAuth
       }
 
       if (!$provider->isProviderLinkPermanent()) {
-        $unlink = pht('Unlink %s Account');
+        $unlink = pht('Unlink %s Account', $provider_name);
         $unlink_form = new AphrontFormView();
         $unlink_form
           ->setUser($user)
@@ -208,22 +208,25 @@ final class PhabricatorSettingsPanelOAuth
       $forms['Account Token Information'] = $token_form;
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('%s Account Settings', $provider_name));
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('%s Account Settings', $provider_name));
 
+    $formbox = new PHUIBoxView();
     foreach ($forms as $name => $form) {
       if ($name) {
-        $panel->appendChild(hsprintf('<br /><h1>%s</h1><br />', $name));
+        $head = new PhabricatorHeaderView();
+        $head->setHeader($name);
+        $formbox->appendChild($head);
       }
-      $panel->appendChild($form);
+      $formbox->appendChild($form);
     }
 
     return id(new AphrontNullView())
       ->appendChild(
         array(
           $notice,
-          $panel,
+          $header,
+          $formbox,
         ));
   }
 

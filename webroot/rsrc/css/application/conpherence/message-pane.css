@@ -128,6 +128,7 @@
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  resize: none;
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {

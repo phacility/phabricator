@@ -6,6 +6,16 @@
 abstract class ConduitAPI_diffusion_abstractquery_Method
   extends ConduitAPI_diffusion_Method {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_UNSTABLE;
+  }
+  public function getMethodStatusDescription() {
+    return pht(
+      'See T2784 - migrating diffusion working copy calls to conduit methods. '.
+      'Until that task is completed (and possibly after) these methods are '.
+      'unstable.');
+  }
+
   private $diffusionRequest;
   protected function setDiffusionRequest(DiffusionRequest $request) {
     $this->diffusionRequest = $request;
@@ -71,7 +81,9 @@ abstract class ConduitAPI_diffusion_abstractquery_Method
   final protected function execute(ConduitAPIRequest $request) {
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'callsign'  => $request->getValue('callsign'),
+        'callsign' => $request->getValue('callsign'),
+        'path' => $request->getValue('path'),
+        'commit' => $request->getValue('commit'),
       ));
     $this->setDiffusionRequest($drequest);
 

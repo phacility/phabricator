@@ -28,12 +28,7 @@ final class ConduitAPI_releephwork_canpush_Method
   protected function execute(ConduitAPIRequest $request) {
     $releeph_project = id(new ReleephProject())
       ->loadOneWhere('phid = %s', $request->getValue('projectPHID'));
-
-    if (!$releeph_project->getPushers()) {
-      return true;
-    } else {
-      $user = $request->getUser();
-      return $releeph_project->isPusher($user);
-    }
+    $user = $request->getUser();
+    return $releeph_project->isAuthoritative($user);
   }
 }

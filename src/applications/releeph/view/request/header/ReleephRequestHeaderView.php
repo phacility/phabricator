@@ -225,7 +225,7 @@ final class ReleephRequestHeaderView extends AphrontView {
     $right_buttons = array();
 
     $user_phid = $this->user->getPHID();
-    $is_pusher = $this->releephProject->isPusherPHID($user_phid);
+    $is_pusher = $this->releephProject->isAuthoritativePHID($user_phid);
     $is_requestor = $this->releephRequest->getRequestUserPHID() === $user_phid;
 
     $current_intent = idx(

@@ -165,6 +165,8 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
     $list->addItem(
       id(new PhabricatorObjectItemView())
         ->setHeader(pht('Ace of Hearts'))
+        ->setSubHead(
+          pht('This is the most powerful card in the game "Hearts".'))
         ->setHref('#')
         ->addAttribute(pht('Suit: Hearts'))
         ->addAttribute(pht('Rank: Ace'))

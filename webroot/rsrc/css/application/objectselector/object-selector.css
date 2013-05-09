@@ -18,6 +18,7 @@
 
 .phabricator-object-selector-search td {
   padding: 4px 8px;
+  vertical-align: middle;
 }
 
 td.phabricator-object-selector-search-text {

@@ -166,8 +166,6 @@ final class PhamePostEditController
         'uri'         => '/phame/post/preview/',
       ));
 
-    $header = id(new PhabricatorHeaderView())->setHeader($page_title);
-
     if ($errors) {
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Errors saving post.'))
@@ -186,7 +184,6 @@ final class PhamePostEditController
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
         $error_view,
         $form,
         $preview_panel,

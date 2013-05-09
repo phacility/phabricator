@@ -4,6 +4,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   private $objectName;
   private $header;
+  private $subhead;
   private $href;
   private $attributes = array();
   private $icons = array();
@@ -58,6 +59,11 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   public function setHeader($header) {
     $this->header = $header;
+    return $this;
+  }
+
+  public function setSubHead($subhead) {
+    $this->subhead = $subhead;
     return $this;
   }
 
@@ -284,6 +290,16 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $bylines);
     }
 
+    $subhead = null;
+    if ($this->subhead) {
+      $subhead = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-subhead',
+        ),
+        $this->subhead);
+    }
+
     if ($icons) {
       $icons = phutil_tag(
         'div',
@@ -315,6 +331,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           ));
         $first = false;
       }
+
       $attrs = phutil_tag(
         'ul',
         array(
@@ -353,6 +370,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         'class' => implode(' ', $content_classes),
       ),
       array(
+        $subhead,
         $attrs,
         $this->renderChildren(),
         $foot,

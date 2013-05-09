@@ -33,7 +33,8 @@ final class PhortuneProductEditController extends PhabricatorController {
     $v_name = $product->getProductName();
     $v_type = $product->getProductType();
     $v_price = (int)$product->getPriceInCents();
-    $display_price = PhortuneUtil::formatCurrency($v_price);
+    $display_price = PhortuneCurrency::newFromUSDCents($v_price)
+      ->formatForDisplay();
 
     $e_name = true;
     $e_type = null;
@@ -62,7 +63,8 @@ final class PhortuneProductEditController extends PhabricatorController {
 
       $display_price = $request->getStr('price');
       try {
-        $v_price = PhortuneUtil::parseCurrency($display_price);
+        $v_price = PhortuneCurrency::newFromUserInput($user, $display_price)
+          ->getValue();
         $e_price = null;
       } catch (Exception $ex) {
         $errors[] = pht('Price should be formatted as: $1.23');

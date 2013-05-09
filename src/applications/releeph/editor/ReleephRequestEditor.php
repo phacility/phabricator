@@ -44,9 +44,7 @@ final class ReleephRequestEditor extends PhabricatorEditor {
 
     $rq
       ->setBranchID($branch->getID())
-      ->setRequestCommitIdentifier($commit->getCommitIdentifier())
       ->setRequestCommitPHID($commit->getPHID())
-      ->setRequestCommitOrdinal($commit->getID())
       ->setInBranch(0)
       ->setRequestUserPHID($requestor->getPHID())
       ->setUserIntent($requestor, ReleephRequest::INTENT_WANT)
@@ -177,7 +175,6 @@ final class ReleephRequestEditor extends PhabricatorEditor {
           ->setPickStatus(ReleephRequest::PICK_OK)
           ->setCommitIdentifier($new_commit_id)
           ->setCommitPHID(null)
-          ->setCommittedByUserPHID($actor->getPHID())
           ->save();
         break;
 
@@ -187,7 +184,6 @@ final class ReleephRequestEditor extends PhabricatorEditor {
           ->setPickStatus(ReleephRequest::REVERT_OK)
           ->setCommitIdentifier(null)
           ->setCommitPHID(null)
-          ->setCommittedByUserPHID(null)
           ->save();
         break;
 
@@ -254,7 +250,6 @@ final class ReleephRequestEditor extends PhabricatorEditor {
           ->setPickStatus(ReleephRequest::PICK_OK)
           ->setCommitIdentifier($commit->getCommitIdentifier())
           ->setCommitPHID($commit->getPHID())
-          ->setCommittedByUserPHID($actor->getPHID())
           ->save();
         break;
 
@@ -264,7 +259,6 @@ final class ReleephRequestEditor extends PhabricatorEditor {
           ->setPickStatus(ReleephRequest::REVERT_OK)
           ->setCommitIdentifier(null)
           ->setCommitPHID(null)
-          ->setCommittedByUserPHID(null)
           ->save();
         break;
 

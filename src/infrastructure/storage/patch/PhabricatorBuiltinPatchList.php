@@ -1270,6 +1270,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130502.countdownrevamp3.sql'),
       ),
+      '20130507.releephrqsimplifycols.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130507.releephrqsimplifycols.sql'),
+      ),
+      '20130507.releephrqmailkey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130507.releephrqmailkey.sql'),
+      ),
+      '20130507.releephrqmailkeypop.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130507.releephrqmailkeypop.php'),
+      ),
     );
   }
 }

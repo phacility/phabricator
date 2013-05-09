@@ -90,10 +90,26 @@ final class ReleephRequestHeaderListView
       }
     }
 
-    $field_groups = $selector->arrangeFieldsForHeaderView($fields);
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($this->getUser());
 
     $views = array();
     foreach ($this->releephRequests as $releeph_request) {
+      $our_fields = array();
+      foreach ($fields as $key => $field) {
+        $our_fields[$key] = clone $field;
+      }
+
+      foreach ($our_fields as $field) {
+        if ($field->shouldMarkup()) {
+          $field
+            ->setReleephRequest($releeph_request)
+            ->setMarkupEngine($engine);
+        }
+      }
+
+      $our_field_groups = $selector->arrangeFieldsForHeaderView($our_fields);
+
       $views[] = id(new ReleephRequestHeaderView())
         ->setUser($this->user)
         ->setAphrontRequest($this->aphrontRequest)
@@ -101,9 +117,10 @@ final class ReleephRequestHeaderListView
         ->setReleephProject($this->releephProject)
         ->setReleephBranch($this->releephBranch)
         ->setReleephRequest($releeph_request)
-        ->setReleephFieldGroups($field_groups)
-        ->render();
+        ->setReleephFieldGroups($our_field_groups);
     }
+
+    $engine->process();
 
     return $views;
   }

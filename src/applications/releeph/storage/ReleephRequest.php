@@ -9,15 +9,13 @@ final class ReleephRequest extends ReleephDAO {
   protected $userIntents = array();
   protected $inBranch;
   protected $pickStatus;
+  protected $mailKey;
 
   // Information about the thing being requested
-  protected $requestCommitIdentifier;
   protected $requestCommitPHID;
-  protected $requestCommitOrdinal;
 
   // Information about the last commit to the releeph branch
   protected $commitIdentifier;
-  protected $committedByUserPHID;
   protected $commitPHID;
 
   // Pre-populated handles that we'll bulk load in ReleephBranch
@@ -67,7 +65,7 @@ final class ReleephRequest extends ReleephDAO {
 
     $found_pusher_want = false;
     foreach ($this->userIntents as $phid => $intent) {
-      if ($project->isPusherPHID($phid)) {
+      if ($project->isAuthoritativePHID($phid)) {
         if ($intent == self::INTENT_PASS) {
           return self::INTENT_PASS;
         }
@@ -156,6 +154,13 @@ final class ReleephRequest extends ReleephDAO {
       ReleephPHIDConstants::PHID_TYPE_RERQ);
   }
 
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
+  }
+
 
 /* -(  Helpful accessors )--------------------------------------------------- */
 
@@ -228,10 +233,13 @@ final class ReleephRequest extends ReleephDAO {
   }
 
   public function loadRequestCommitDiffPHID() {
-    $revision_phid = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getRequestCommitPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
-    return reset($revision_phid);
+    $commit = $this->loadPhabricatorRepositoryCommit();
+    if ($commit) {
+      $edges = $this
+        ->loadPhabricatorRepositoryCommit()
+        ->loadRelativeEdges(PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+      return head(array_keys($edges));
+    }
   }
 
 
@@ -264,13 +272,19 @@ final class ReleephRequest extends ReleephDAO {
   }
 
   public function loadPhabricatorRepositoryCommitData() {
-    return $this->loadOneRelative(
-      new PhabricatorRepositoryCommitData(),
-      'commitID',
-      'getRequestCommitOrdinal');
+    $commit = $this->loadPhabricatorRepositoryCommit();
+    if ($commit) {
+      return $commit->loadOneRelative(
+        new PhabricatorRepositoryCommitData(),
+        'commitID');
+    }
   }
 
   public function loadDifferentialRevision() {
+    $diff_phid = $this->loadRequestCommitDiffPHID();
+    if (!$diff_phid) {
+      return null;
+    }
     return $this->loadOneRelative(
         new DifferentialRevision(),
         'phid',

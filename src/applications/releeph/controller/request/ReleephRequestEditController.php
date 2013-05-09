@@ -14,7 +14,6 @@ final class ReleephRequestEditController extends ReleephController {
     $phids = array();
     $phids[] = $releeph_request->getRequestCommitPHID();
     $phids[] = $releeph_request->getRequestUserPHID();
-    $phids[] = $releeph_request->getCommittedByUserPHID();
 
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->setViewer($request->getUser())

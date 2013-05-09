@@ -260,10 +260,10 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $receiver->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
 
       $editor = new ManiphestTransactionEditor();
-      $editor->setActor($user);
+      $editor->setActor($user->getPhabricatorUser());
       $handler = $editor->buildReplyHandler($receiver);
 
-      $handler->setActor($user);
+      $handler->setActor($user->getPhabricatorUser());
       $handler->setExcludeMailRecipientPHIDs(
       $this->loadExcludeMailRecipientPHIDs());
       $handler->processEmail($this);

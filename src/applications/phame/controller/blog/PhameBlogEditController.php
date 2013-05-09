@@ -171,9 +171,6 @@ final class PhameBlogEditController
       $error_view = null;
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($page_title);
-
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -185,7 +182,6 @@ final class PhameBlogEditController
     $nav->appendChild(
       array(
         $crumbs,
-        $header,
         $error_view,
         $form,
       ));

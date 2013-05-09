@@ -226,10 +226,8 @@ final class PhrictionEditController
           ->addCancelButton($cancel_uri)
           ->setValue($submit_button));
 
-    $panel = id(new AphrontPanelView())
-      ->setNoBackground()
-      ->setHeader($panel_header)
-      ->appendChild($form);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($panel_header);
 
     $preview_panel = hsprintf(
       '<div class="phriction-wrap">
@@ -255,7 +253,8 @@ final class PhrictionEditController
       array(
         $draft_note,
         $error_view,
-        $panel,
+        $header,
+        $form,
         $preview_panel,
       ),
       array(

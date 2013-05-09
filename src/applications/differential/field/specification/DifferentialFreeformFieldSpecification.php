@@ -98,6 +98,53 @@ abstract class DifferentialFreeformFieldSpecification
     return $dependents;
   }
 
+  public static function findRevertedCommits($message) {
+    $reverts = array();
+    $matches = null;
+
+    // NOTE: Git language is "This reverts commit X."
+    // NOTE: Mercurial language is "Backed out changeset Y".
+
+    $prefixes = array(
+      'revert'        => true,
+      'reverts'       => true,
+      'back\s*out'    => true,
+      'backs\s*out'   => true,
+      'backed\s*out'  => true,
+      'undo'          => true,
+      'undoes'        => true,
+    );
+
+    $optional = array(
+      'commit'        => true,
+      'changeset'     => true,
+      'rev'           => true,
+      'revision'      => true,
+      'change'        => true,
+      'diff'          => true,
+    );
+
+    $pre_re = implode('|', array_keys($prefixes));
+    $opt_re = implode('|', array_keys($optional));
+
+    $matches = null;
+    preg_match_all(
+      '/\b(?i:'.$pre_re.')(?:\s+(?i:'.$opt_re.'))?([rA-Z0-9a-f,\s]+)\b/',
+      $message,
+      $matches);
+
+    $result = array();
+    foreach ($matches[1] as $commits) {
+      $commits = preg_split('/[,\s]+/', $commits);
+      $commits = array_filter($commits);
+      foreach ($commits as $commit) {
+        $result[$commit] = $commit;
+      }
+    }
+
+    return $result;
+  }
+
   public function didWriteRevision(DifferentialRevisionEditor $editor) {
     $message = $this->renderValueForCommitMessage(false);
 
@@ -151,14 +198,29 @@ abstract class DifferentialFreeformFieldSpecification
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $data) {
 
+    $message = $this->renderValueForCommitMessage($is_edit = false);
+
     $user = id(new PhabricatorUser())->loadOneWhere(
       'phid = %s',
       $data->getCommitDetail('authorPHID'));
     if (!$user) {
+      // TODO: Maybe after grey users, we should find a way to proceed even
+      // if we don't know who the author is.
       return;
     }
 
-    $message = $this->renderValueForCommitMessage($is_edit = false);
+    $commit_names = self::findRevertedCommits($message);
+    if ($commit_names) {
+      $reverts = id(new DiffusionCommitQuery())
+        ->setViewer($user)
+        ->withIdentifiers($commit_names)
+        ->withDefaultRepository($repository)
+        ->execute();
+      foreach ($reverts as $revert) {
+        // TODO: Do interesting things here.
+      }
+    }
+
     $tasks_statuses = $this->findMentionedTasks($message);
     if (!$tasks_statuses) {
       return;

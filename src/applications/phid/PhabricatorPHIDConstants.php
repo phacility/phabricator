@@ -44,4 +44,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_XCMT    = 'XCMT';
   const PHID_TYPE_XUSR    = 'XUSR';
 
+  const PHID_TYPE_VOID    = 'VOID';
+  const PHID_VOID         = 'PHID-VOID-00000000000000000000';
+
 }

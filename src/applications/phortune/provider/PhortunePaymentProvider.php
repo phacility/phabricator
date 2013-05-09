@@ -37,6 +37,27 @@ abstract class PhortunePaymentProvider {
     return $providers;
   }
 
+  public static function getProvidersForOneTimePayment() {
+    $providers = self::getEnabledProviders();
+    foreach ($providers as $key => $provider) {
+      if (!$provider->canProcessOneTimePayments()) {
+        unset($providers[$key]);
+      }
+    }
+    return $providers;
+  }
+
+  public static function getProviderByDigest($digest) {
+    $providers = self::getEnabledProviders();
+    foreach ($providers as $key => $provider) {
+      $provider_digest = PhabricatorHash::digestForIndex($key);
+      if ($provider_digest == $digest) {
+        return $provider;
+      }
+    }
+    return null;
+  }
+
   abstract public function isEnabled();
 
   final public function getProviderKey() {
@@ -136,5 +157,48 @@ abstract class PhortunePaymentProvider {
     throw new PhortuneNotImplementedException($this);
   }
 
+
+/* -(  One-Time Payments  )-------------------------------------------------- */
+
+
+  public function canProcessOneTimePayments() {
+    return false;
+  }
+
+  public function renderOneTimePaymentButton(
+    PhortuneAccount $account,
+    PhortuneCart $cart,
+    PhabricatorUser $user) {
+    throw new PhortuneNotImplementedException($this);
+  }
+
+
+/* -(  Controllers  )-------------------------------------------------------- */
+
+
+  final public function getControllerURI(
+    $action,
+    array $params = array()) {
+
+    $digest = PhabricatorHash::digestForIndex($this->getProviderKey());
+
+    $app = PhabricatorApplication::getByClass('PhabricatorApplicationPhortune');
+    $path = $app->getBaseURI().'provider/'.$digest.'/'.$action.'/';
+
+    $uri = new PhutilURI($path);
+    $uri->setQueryParams($params);
+
+    return PhabricatorEnv::getURI((string)$uri);
+  }
+
+  public function canRespondToControllerAction($action) {
+    return false;
+  }
+
+  public function processControllerRequest(
+    PhortuneProviderController $controller,
+    AphrontRequest $request) {
+    throw new PhortuneNotImplementedException($this);
+  }
 
 }

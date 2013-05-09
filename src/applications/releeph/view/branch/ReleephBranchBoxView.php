@@ -187,7 +187,7 @@ final class ReleephBranchBoxView extends AphrontView {
 
     $releeph_project = $br->loadReleephProject();
     if (!$releeph_project->getPushers() ||
-        $releeph_project->isPusher($this->user)) {
+        $releeph_project->isAuthoritative($this->user)) {
 
       $buttons[] = phutil_tag(
         'a',

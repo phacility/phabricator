@@ -232,7 +232,7 @@ JX.install('HeraldRuleEditor', {
           set_fn(this._config.template.defaultColor);
           break;
         default:
-          input = JX.$N('input');
+          input = JX.$N('input', {type: 'text'});
           get_fn = function() { return input.value; };
           set_fn = function(v) { input.value = v; };
           break;

@@ -116,11 +116,17 @@ abstract class DiffusionBrowseQuery {
         'path'        => $readme->getFullPath(),
       ));
 
-    $content_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $readme_request);
-    $content_query->setViewer($this->getViewer());
-    $content_query->loadFileContent();
-    $readme_content = $content_query->getRawData();
+    $file_content = DiffusionFileContent::newFromConduit(
+      DiffusionQuery::callConduitWithDiffusionRequest(
+        $this->getViewer(),
+        $readme_request,
+        'diffusion.filecontentquery',
+        array(
+          'commit' => $drequest->getStableCommitName(),
+          'path' => $readme->getFullPath(),
+          'needsBlame' => false,
+        )));
+    $readme_content = $file_content->getCorpus();
 
     if (preg_match('/\\.txt$/', $readme->getPath())) {
       $readme_content = phutil_escape_html_newlines($readme_content);

@@ -152,16 +152,15 @@ final class PhabricatorSettingsPanelSSHKeys
           ->addCancelButton($this->getPanelURI())
           ->setValue($save));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader($header);
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header_title = new PhabricatorHeaderView();
+    $header_title->setHeader($header);
 
     return id(new AphrontNullView())
       ->appendChild(
         array(
           $error_view,
-          $panel,
+          $header_title,
+          $form,
         ));
   }
 
