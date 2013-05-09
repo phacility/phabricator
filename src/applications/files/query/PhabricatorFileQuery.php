@@ -24,6 +24,38 @@ final class PhabricatorFileQuery
     return $this;
   }
 
+  /**
+   * Select files which are transformations of some other file. For example,
+   * you can use this query to find previously generated thumbnails of an image
+   * file.
+   *
+   * As a parameter, provide a list of transformation specifications. Each
+   * specification is a dictionary with the keys `originalPHID` and `transform`.
+   * The `originalPHID` is the PHID of the original file (the file which was
+   * transformed) and the `transform` is the name of the transform to query
+   * for. If you pass `true` as the `transform`, all transformations of the
+   * file will be selected.
+   *
+   * For example:
+   *
+   *   array(
+   *     array(
+   *       'originalPHID' => 'PHID-FILE-aaaa',
+   *       'transform'    => 'sepia',
+   *     ),
+   *     array(
+   *       'originalPHID' => 'PHID-FILE-bbbb',
+   *       'transform'    => true,
+   *     ),
+   *   )
+   *
+   * This selects the `"sepia"` transformation of the file with PHID
+   * `PHID-FILE-aaaa` and all transformations of the file with PHID
+   * `PHID-FILE-bbbb`.
+   *
+   * @param list<dict>  List of transform specifications, described above.
+   * @return this
+   */
   public function withTransforms(array $specs) {
     foreach ($specs as $spec) {
       if (!is_array($spec) ||
@@ -50,7 +82,7 @@ final class PhabricatorFileQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T f %Q %Q %Q %Q',
+      'SELECT f.* FROM %T f %Q %Q %Q %Q',
       $table->getTableName(),
       $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
@@ -108,11 +140,18 @@ final class PhabricatorFileQuery
     if ($this->transforms) {
       $clauses = array();
       foreach ($this->transforms as $transform) {
-        $clauses[] = qsprintf(
-          $conn_r,
-          '(t.originalPHID = %s AND t.transform = %s)',
-          $transform['originalPHID'],
-          $transform['transform']);
+        if ($transform['transform'] === true) {
+          $clauses[] = qsprintf(
+            $conn_r,
+            '(t.originalPHID = %s)',
+            $transform['originalPHID']);
+        } else {
+          $clauses[] = qsprintf(
+            $conn_r,
+            '(t.originalPHID = %s AND t.transform = %s)',
+            $transform['originalPHID'],
+            $transform['transform']);
+        }
       }
       $where[] = qsprintf($conn_r, '(%Q)', implode(') OR (', $clauses));
     }

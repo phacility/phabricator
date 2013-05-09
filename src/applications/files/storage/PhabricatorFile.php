@@ -384,29 +384,54 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function delete() {
-    // delete all records of this file in transformedfile
-    $trans_files = id(new PhabricatorTransformedFile())->loadAllWhere(
-      'TransformedPHID = %s', $this->getPHID());
+
+    // We want to delete all the rows which mark this file as the transformation
+    // of some other file (since we're getting rid of it). We also delete all
+    // the transformations of this file, so that a user who deletes an image
+    // doesn't need to separately hunt down and delete a bunch of thumbnails and
+    // resizes of it.
+
+    $outbound_xforms = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withTransforms(
+        array(
+          array(
+            'originalPHID' => $this->getPHID(),
+            'transform'    => true,
+          ),
+        ))
+      ->execute();
+
+    foreach ($outbound_xforms as $outbound_xform) {
+      $outbound_xform->delete();
+    }
+
+    $inbound_xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
+      'transformedPHID = %s',
+      $this->getPHID());
 
     $this->openTransaction();
-    foreach ($trans_files as $trans_file) {
-      $trans_file->delete();
-    }
-    $ret = parent::delete();
+      foreach ($inbound_xforms as $inbound_xform) {
+        $inbound_xform->delete();
+      }
+      $ret = parent::delete();
     $this->saveTransaction();
 
     // Check to see if other files are using storage
     $other_file = id(new PhabricatorFile())->loadAllWhere(
       'storageEngine = %s AND storageHandle = %s AND
-      storageFormat = %s AND id != %d LIMIT 1', $this->getStorageEngine(),
-      $this->getStorageHandle(), $this->getStorageFormat(),
+      storageFormat = %s AND id != %d LIMIT 1',
+      $this->getStorageEngine(),
+      $this->getStorageHandle(),
+      $this->getStorageFormat(),
       $this->getID());
 
     // If this is the only file using the storage, delete storage
-    if (count($other_file) == 0) {
+    if (!$other_file) {
       $engine = $this->instantiateStorageEngine();
       $engine->deleteFile($this->getStorageHandle());
     }
+
     return $ret;
   }
 
