@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorPaste extends PhabricatorPasteDAO
-  implements PhabricatorPolicyInterface {
+  implements PhabricatorTokenReceiverInterface, PhabricatorPolicyInterface {
 
   protected $phid;
   protected $title;
@@ -77,6 +77,14 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function attachRawContent($raw_content) {
     $this->rawContent = $raw_content;
     return $this;
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
   }
 
 }
