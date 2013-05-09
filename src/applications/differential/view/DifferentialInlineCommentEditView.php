@@ -125,7 +125,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       $this->renderChildren());
 
     $edit = phutil_tag(
-      'edit',
+      'div',
       array(
         'class' => 'differential-inline-comment-edit-buttons',
       ),
