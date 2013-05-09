@@ -3306,7 +3306,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-search-results-css' =>
   array(
-    'uri' => '/res/f8a86e27/rsrc/css/application/search/search-results.css',
+    'uri' => '/res/9b749d7d/rsrc/css/application/search/search-results.css',
     'type' => 'css',
     'requires' =>
     array(
