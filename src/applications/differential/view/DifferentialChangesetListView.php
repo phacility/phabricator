@@ -108,6 +108,9 @@ final class DifferentialChangesetListView extends AphrontView {
     $changesets = $this->changesets;
 
     Javelin::initBehavior('differential-toggle-files', array());
+    Javelin::initBehavior(
+      'differential-dropdown-menus',
+      array());
 
     $output = array();
     $mapping = array();
@@ -303,10 +306,6 @@ final class DifferentialChangesetListView extends AphrontView {
     }
 
     $meta['containerID'] = $detail->getID();
-
-    Javelin::initBehavior(
-      'differential-dropdown-menus',
-      array());
 
     return javelin_tag(
       'a',
