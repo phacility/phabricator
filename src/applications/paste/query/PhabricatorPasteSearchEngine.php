@@ -83,7 +83,10 @@ final class PhabricatorPasteSearchEngine
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue(pht('Filter Pastes')));
+      ->setValue(pht('Filter Pastes'))
+      ->addCancelButton(
+        '/search/name/'.$saved_query->getQueryKey().'/',
+        pht('Save Custom Query...')));
 
     return $form;
   }

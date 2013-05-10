@@ -18,7 +18,11 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     if ($user->isLoggedIn()) {
       $nav->addFilter('my', pht('My Pastes'));
     }
+
+    $nav->addLabel(pht('Search'));
     $nav->addFilter('advanced', pht('Advanced Search'));
+    $nav->addFilter('', pht('Saved Queries'),
+      $this->getApplicationURI('/savedqueries/'));
 
     $nav->selectFilter($filter, 'all');
 

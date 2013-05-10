@@ -1282,6 +1282,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130507.releephrqmailkeypop.php'),
       ),
+      '20130508.search_namedquery.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130508.search_namedquery.sql'),
+      ),
     );
   }
 }
