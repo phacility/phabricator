@@ -191,7 +191,7 @@ final class ReleephProjectEditController extends ReleephController {
           ->setValue($release_counter)
           ->setName('releaseCounter')
           ->setCaption(
-            pht("Used by the command line branch cutter's %N field")))
+            pht("Used by the command line branch cutter's %%N field")))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Pick Instructions'))
