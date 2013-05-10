@@ -86,7 +86,9 @@ final class DiffusionCommitController extends DiffusionController {
         $commit_data,
         $parent_query->loadParents());
       $property_list = id(new PhabricatorPropertyListView())
-        ->setHasKeyboardShortcuts(true);
+        ->setHasKeyboardShortcuts(true)
+        ->setUser($user)
+        ->setObject($commit);
       foreach ($commit_properties as $key => $value) {
         $property_list->addProperty($key, $value);
       }
@@ -98,6 +100,7 @@ final class DiffusionCommitController extends DiffusionController {
 
       $message = $engine->markupText($message);
 
+      $property_list->invokeWillRenderEvent();
       $property_list->addTextContent(
         phutil_tag(
           'div',
@@ -105,7 +108,6 @@ final class DiffusionCommitController extends DiffusionController {
             'class' => 'diffusion-commit-message phabricator-remarkup',
           ),
           $message));
-
       $content[] = $top_anchor;
       $content[] = $headsup_view;
       $content[] = $headsup_actions;

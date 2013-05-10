@@ -2,12 +2,12 @@
  * @provides phabricator-search-results-css
  */
 
-.phabricator-search-result-list {
-  padding: 1em 3em 2em;
-}
-
 .phabricator-search-result {
   margin: 4px 0 16px;
+}
+
+.device-phone .phabricator-search-result-box .phui-box {
+  margin: 20px 0;
 }
 
 .phabricator-search-result .result-image {
@@ -15,16 +15,12 @@
   float: left;
   width: 50px;
   height: 50px;
-}
-
-.phabricator-search-result .result-desc {
-  margin-left: 58px;
+  margin-right: 10px;
 }
 
 .phabricator-search-result .result-type {
-  color: #888888;
-  font-size: 11px;
   margin-top: 4px;
+  word-break: break-word;
 }
 
 .phabricator-search-result .result-name {

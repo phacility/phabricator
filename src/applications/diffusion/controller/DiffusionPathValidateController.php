@@ -25,18 +25,24 @@ final class DiffusionPathValidateController extends DiffusionController {
         'repository'  => $repository,
         'path'        => $path,
       ));
+    $this->setDiffusionRequest($drequest);
 
-    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-    $browse_query->setViewer($request->getUser());
-    $browse_query->needValidityOnly(true);
-    $valid = $browse_query->loadPaths();
+    $browse_results = DiffusionBrowseResultSet::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.browsequery',
+        array(
+          'path' => $drequest->getPath(),
+          'commit' => $drequest->getCommit(),
+          'needValidityOnly' => true,
+        )));
+    $valid = $browse_results->isValidResults();
 
     if (!$valid) {
-      switch ($browse_query->getReasonForEmptyResultSet()) {
-        case DiffusionBrowseQuery::REASON_IS_FILE:
+      switch ($browse_results->getReasonForEmptyResultSet()) {
+        case DiffusionBrowseResultSet::REASON_IS_FILE:
           $valid = true;
           break;
-        case DiffusionBrowseQuery::REASON_IS_EMPTY:
+        case DiffusionBrowseResultSet::REASON_IS_EMPTY:
           $valid = true;
           break;
       }

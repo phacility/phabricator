@@ -2,11 +2,11 @@
 
 final class DiffusionEmptyResultView extends DiffusionView {
 
-  private $browseQuery;
+  private $browseResultSet;
   private $view;
 
-  public function setBrowseQuery($browse_query) {
-    $this->browseQuery = $browse_query;
+  public function setDiffusionBrowseResultSet(DiffusionBrowseResultSet $set) {
+    $this->browseResultSet = $set;
     return $this;
   }
 
@@ -26,22 +26,23 @@ final class DiffusionEmptyResultView extends DiffusionView {
       $commit = 'HEAD';
     }
 
-    switch ($this->browseQuery->getReasonForEmptyResultSet()) {
-      case DiffusionBrowseQuery::REASON_IS_NONEXISTENT:
+    $reason = $this->browseResultSet->getReasonForEmptyResultSet();
+    switch ($reason) {
+      case DiffusionBrowseResultSet::REASON_IS_NONEXISTENT:
         $title = 'Path Does Not Exist';
         // TODO: Under git, this error message should be more specific. It
         // may exist on some other branch.
         $body  = "This path does not exist anywhere.";
         $severity = AphrontErrorView::SEVERITY_ERROR;
         break;
-      case DiffusionBrowseQuery::REASON_IS_EMPTY:
+      case DiffusionBrowseResultSet::REASON_IS_EMPTY:
         $title = 'Empty Directory';
         $body = "This path was an empty directory at {$commit}.\n";
         $severity = AphrontErrorView::SEVERITY_NOTICE;
         break;
-      case DiffusionBrowseQuery::REASON_IS_DELETED:
-        $deleted = $this->browseQuery->getDeletedAtCommit();
-        $existed = $this->browseQuery->getExistedAtCommit();
+      case DiffusionBrowseResultSet::REASON_IS_DELETED:
+        $deleted = $this->browseResultSet->getDeletedAtCommit();
+        $existed = $this->browseResultSet->getExistedAtCommit();
 
         $browse = $this->linkBrowse(
           $drequest->getPath(),
@@ -61,7 +62,7 @@ final class DiffusionEmptyResultView extends DiffusionView {
           "r{$callsign}{$existed}");
         $severity = AphrontErrorView::SEVERITY_WARNING;
         break;
-      case DiffusionBrowseQuery::REASON_IS_UNTRACKED_PARENT:
+      case DiffusionBrowseResultSet::REASON_IS_UNTRACKED_PARENT:
         $subdir = $drequest->getRepository()->getDetail('svn-subpath');
         $title = 'Directory Not Tracked';
         $body =
@@ -72,7 +73,7 @@ final class DiffusionEmptyResultView extends DiffusionView {
         $severity = AphrontErrorView::SEVERITY_WARNING;
         break;
       default:
-        throw new Exception("Unknown failure reason!");
+        throw new Exception("Unknown failure reason: $reason");
     }
 
     $error_view = new AphrontErrorView();

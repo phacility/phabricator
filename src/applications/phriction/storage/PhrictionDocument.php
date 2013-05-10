@@ -4,7 +4,10 @@
  * @group phriction
  */
 final class PhrictionDocument extends PhrictionDAO
-  implements PhabricatorPolicyInterface, PhabricatorSubscribableInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface {
 
   protected $id;
   protected $phid;
@@ -128,5 +131,11 @@ final class PhrictionDocument extends PhrictionDAO
 
   public function isAutomaticallySubscribed($phid) {
     return false;
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return PhabricatorSubscribersQuery::loadSubscribersForPHID($this->phid);
   }
 }

@@ -22,14 +22,15 @@ final class PhabricatorAccessLog {
       // NOTE: Path may be null. We still create the log, it just won't write
       // anywhere.
 
-      $log = new PhutilDeferredLog($path, $format);
-      $log->setData(
-        array(
-          'D' => date('r'),
-          'h' => php_uname('n'),
-          'p' => getmypid(),
-          'e' => time(),
-        ));
+      $log = id(new PhutilDeferredLog($path, $format))
+        ->setFailQuietly(true)
+        ->setData(
+          array(
+            'D' => date('r'),
+            'h' => php_uname('n'),
+            'p' => getmypid(),
+            'e' => time(),
+          ));
 
       self::$log = $log;
     }

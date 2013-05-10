@@ -213,6 +213,8 @@ JX.install('Tokenizer', {
         // Explicitly update the placeholder since we just wiped the field
         // value.
         this._typeahead.updatePlaceholder();
+      } else if (e.getType() == 'focus') {
+        this._didfocus();
       }
     },
 
@@ -380,16 +382,17 @@ JX.install('Tokenizer', {
     focus : function() {
       var focus = this._focus;
       JX.DOM.show(focus);
+      setTimeout(function() { JX.DOM.focus(focus); }, 0);
+    },
 
+    _didfocus : function() {
       JX.DOM.alterClass(
         this._containerNode,
         'jx-tokenizer-container-focused',
         true);
-
-      setTimeout(function() { JX.DOM.focus(focus); }, 0);
     },
 
-    _didblur: function() {
+    _didblur : function() {
       JX.DOM.alterClass(
         this._containerNode,
         'jx-tokenizer-container-focused',
