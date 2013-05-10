@@ -216,10 +216,17 @@ final class DiffusionRepositoryController extends DiffusionController {
 
   private function buildTagListTable(DiffusionRequest $drequest) {
     $tag_limit = 15;
-
-    $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
-    $query->setLimit($tag_limit + 1);
-    $tags = $query->loadTags();
+    $tags = array();
+    try {
+      $tags = DiffusionRepositoryTag::newFromConduit(
+        $this->callConduitWithDiffusionRequest(
+          'diffusion.tagsquery',
+          array('limit' => $tag_limit + 1)));
+    } catch (ConduitException $e) {
+      if ($e->getMessage() != 'ERR-UNSUPPORTED-VCS') {
+        throw $e;
+      }
+    }
 
     if (!$tags) {
       return null;

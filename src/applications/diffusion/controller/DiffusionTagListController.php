@@ -13,22 +13,27 @@ final class DiffusionTagListController extends DiffusionController {
     $pager->setURI($request->getRequestURI(), 'offset');
     $pager->setOffset($request->getInt('offset'));
 
+    $params = array(
+      'limit' => $pager->getPageSize() + 1,
+      'offset' => $pager->getOffset());
     if ($drequest->getRawCommit()) {
       $is_commit = true;
-
-      $query = DiffusionCommitTagsQuery::newFromDiffusionRequest($drequest);
-      $query->setOffset($pager->getOffset());
-      $query->setLimit($pager->getPageSize() + 1);
-      $tags = $query->loadTags();
+      $params['commit'] = $request->getCommit();
     } else {
       $is_commit = false;
-
-      $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
-      $query->setOffset($pager->getOffset());
-      $query->setLimit($pager->getPageSize() + 1);
-      $tags = $query->loadTags();
     }
 
+    $tags = array();
+    try {
+      $conduit_result = $this->callConduitWithDiffusionRequest(
+        'diffusion.tagsquery',
+        $params);
+      $tags = DiffusionRepositoryTag::newFromConduit($conduit_result);
+    } catch (ConduitException $ex) {
+      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
+        throw $ex;
+      }
+    }
     $tags = $pager->sliceResults($tags);
 
     $content = null;
