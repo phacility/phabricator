@@ -27,7 +27,7 @@ $webroot = Filesystem::readablePath($webroot);
 $generator = new CeleritySpriteGenerator();
 
 $sheets = array(
-  'icon' => $generator->buildIconSheet(),
+  'icons' => $generator->buildIconSheet(),
   'menu' => $generator->buildMenuSheet(),
   'apps' => $generator->buildAppsSheet(),
   'actions' => $generator->buildActionsSheet(),

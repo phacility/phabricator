@@ -33,17 +33,17 @@ final class CeleritySpriteGenerator {
         }
 
         $sprite = id(clone $template)
-          ->setName('action-'.$icon.$suffix);
+          ->setName('icons-'.$icon.$suffix);
 
         $tcss = array();
-        $tcss[] = '.action-'.$icon.$suffix;
+        $tcss[] = '.icons-'.$icon.$suffix;
         if ($color == 'white') {
           $tcss[] = '.device-desktop .phabricator-action-view:hover '.
-            '.action-'.$icon;
+            '.icons-'.$icon;
           if ($icon == 'new') {
             // Hover state for the "+" icons on homepage tiles.
             $tcss[] = '.phabricator-application-launch-create:hover '.
-                      '.phabricator-application-create-icon.action-new-grey';
+                      '.phabricator-application-create-icon.icons-new-grey';
           }
         }
 
@@ -83,7 +83,7 @@ final class CeleritySpriteGenerator {
       $sprites[] = $sprite;
     }
 
-    $sheet = $this->buildSheet('icon', true);
+    $sheet = $this->buildSheet('icons', true);
     $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
@@ -129,7 +129,7 @@ final class CeleritySpriteGenerator {
         $tcss[] = '.actions-'.$icon.$suffix;
         if ($color == 'dark') {
           $tcss[] = '.device-desktop '.
-            '.actions-'.$icon.'-grey.phui-icon-item-link:hover';
+            '.actions-'.$icon.'-grey.phui-icon-view:hover';
         }
 
         $sprite->setTargetCSS(implode(', ', $tcss));

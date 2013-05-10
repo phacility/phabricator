@@ -7,6 +7,7 @@ final class PHUIIconView extends AphrontTagView {
   const SPRITE_APPS = 'apps';
   const SPRITE_TOKENS = 'tokens';
   const SPRITE_PAYMENTS = 'payments';
+  const SPRITE_ICONS = 'icons';
 
   const HEAD_SMALL = 'phuihead-small';
   const HEAD_MEDIUM = 'phuihead-medium';
@@ -53,20 +54,25 @@ final class PHUIIconView extends AphrontTagView {
   public function getTagAttributes() {
     require_celerity_resource('phui-icon-view-css');
 
-    $this->addClass('phui-icon-item-link');
+    $style = null;
+    $classes = array();
+    $classes[] = 'phui-icon-view';
 
     if ($this->spriteIcon) {
       require_celerity_resource('sprite-'.$this->spriteSheet.'-css');
-      $this->addClass('sprite-'.$this->spriteSheet);
-      $this->addClass($this->spriteSheet.'-'.$this->spriteIcon);
+      $classes[] = 'sprite-'.$this->spriteSheet;
+      $classes[] = $this->spriteSheet.'-'.$this->spriteIcon;
     } else {
       if ($this->headSize) {
-        $this->addClass($this->headSize);
+        $classes[] = $this->headSize;
       }
-      $this->setStyle('background-image: url('.$this->image.');');
+      $style = 'background-image: url('.$this->image.');';
     }
 
-    $attribs = array('href' => $this->href);
-    return $attribs;
+    return array(
+      'href' => $this->href,
+      'style' => $style,
+      'class' => $classes,
+    );
   }
 }

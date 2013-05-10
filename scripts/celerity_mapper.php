@@ -85,7 +85,7 @@ $package_spec = array(
     'phabricator-flag-css',
     'aphront-error-view-css',
 
-    'sprite-icon-css',
+    'sprite-icons-css',
     'sprite-gradient-css',
     'sprite-menu-css',
     'sprite-apps-large-css',

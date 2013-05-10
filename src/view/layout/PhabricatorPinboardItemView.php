@@ -69,7 +69,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
           'span',
           array(
             'class' =>
-              'phabricator-pinboard-icon sprite-icon action-'.$block[0].'-grey',
+              'phabricator-pinboard-icon sprite-icons icons-'.$block[0].'-grey',
           ),
           '');
         $count = phutil_tag('span', array(), $block[1]);

@@ -15,6 +15,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $handleIcons = array();
   private $bylines = array();
   private $grippable;
+  private $actions = array();
 
   public function setObjectName($name) {
     $this->objectName = $name;
@@ -73,6 +74,14 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   public function addByline($byline) {
     $this->bylines[] = $byline;
+    return $this;
+  }
+
+  public function addAction(PhabricatorMenuItemView $action) {
+    if (count($this->actions) >= 3) {
+      throw new Exception("Limit 3 actions per item.");
+    }
+    $this->actions[] = $action;
     return $this;
   }
 
@@ -149,6 +158,12 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $item_classes[] = 'phabricator-object-item-with-bylines';
     }
 
+    if ($this->actions) {
+      $n = count($this->actions);
+      $item_classes[] = 'phabricator-object-item-with-actions';
+      $item_classes[] = 'phabricator-object-item-with-'.$n.'-actions';
+    }
+
     switch ($this->effect) {
       case 'highlighted':
         $item_classes[] = 'phabricator-object-item-highlighted';
@@ -217,7 +232,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           'span',
           array(
             'class' => 'phabricator-object-item-icon-image '.
-                       'sprite-icon action-'.$icon,
+                       'sprite-icons icons-'.$icon,
           ),
           '');
 
@@ -376,10 +391,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $foot,
       ));
 
-    return phutil_tag(
+    $box = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-object-item-frame',
+        'class' => 'phabricator-object-item-content-box',
       ),
       array(
         $grippable,
@@ -388,15 +403,38 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $bylines,
         $content,
       ));
+
+    $actions = array();
+    if ($this->actions) {
+      foreach (array_reverse($this->actions) as $action) {
+        $actions[] = $action;
+      }
+      $actions = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-actions',
+        ),
+        $actions);
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-object-item-frame',
+      ),
+      array(
+        $actions,
+        $box,
+      ));
   }
 
   private function renderFootIcon($icon, $label) {
-    require_celerity_resource('sprite-icon-css');
+    require_celerity_resource('sprite-icons-css');
 
     $icon = phutil_tag(
       'span',
       array(
-        'class' => 'sprite-icon action-'.$icon,
+        'class' => 'sprite-icons icons-'.$icon,
       ),
       '');
 

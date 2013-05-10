@@ -59,12 +59,12 @@ final class PhabricatorActionView extends AphrontView {
         $suffix = '-grey';
       }
 
-      require_celerity_resource('sprite-icon-css');
+      require_celerity_resource('sprite-icons-css');
       $icon = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-action-view-icon sprite-icon '.
-                       'action-'.$this->icon.$suffix,
+          'class' => 'phabricator-action-view-icon sprite-icons '.
+                       'icons-'.$this->icon.$suffix,
         ),
         '');
     }
