@@ -16,15 +16,15 @@ final class ReleephRequestStatusView extends AphrontView {
     $status = $request->getStatus();
     $pick_status = $request->getPickStatus();
 
-    $description = ReleephRequest::getStatusDescriptionFor($status);
+    $description = ReleephRequestStatus::getStatusDescriptionFor($status);
 
     $warning = null;
 
-    if ($status == ReleephRequest::STATUS_NEEDS_PICK) {
+    if ($status == ReleephRequestStatus::STATUS_NEEDS_PICK) {
       if ($pick_status == ReleephRequest::PICK_FAILED) {
         $warning = 'Last pick failed!';
       }
-    } elseif ($status == ReleephRequest::STATUS_NEEDS_REVERT) {
+    } elseif ($status == ReleephRequestStatus::STATUS_NEEDS_REVERT) {
       if ($pick_status == ReleephRequest::REVERT_FAILED) {
         $warning = 'Last revert failed!';
       }

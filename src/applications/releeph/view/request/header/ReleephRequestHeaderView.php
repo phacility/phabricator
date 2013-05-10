@@ -55,7 +55,8 @@ final class ReleephRequestHeaderView extends AphrontView {
     $rr_div_class =
       'releeph-request-header '.
       'releeph-request-header-border '.
-      'releeph-border-color-'.ReleephRequest::getStatusClassSuffixFor($status);
+      'releeph-border-color-'.
+      ReleephRequestStatus::getStatusClassSuffixFor($status);
 
     $hidden_link = phutil_tag(
       'a',

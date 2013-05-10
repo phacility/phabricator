@@ -115,7 +115,7 @@ final class ReleephBranchBoxView extends AphrontView {
 
     $cells = array();
     foreach ($statistics as $status => $count) {
-      $description = ReleephRequest::getStatusDescriptionFor($status);
+      $description = ReleephRequestStatus::getStatusDescriptionFor($status);
       $cells[] = phutil_tag('th', array(), $count);
       $cells[] = phutil_tag('td', array(), $description);
     }

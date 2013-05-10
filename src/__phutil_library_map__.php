@@ -1742,6 +1742,7 @@ phutil_register_library_map(array(
     'ReleephRequestHeaderView' => 'applications/releeph/view/request/header/ReleephRequestHeaderView.php',
     'ReleephRequestIntentsView' => 'applications/releeph/view/request/ReleephRequestIntentsView.php',
     'ReleephRequestReplyHandler' => 'applications/releeph/mail/ReleephRequestReplyHandler.php',
+    'ReleephRequestStatus' => 'applications/releeph/constants/ReleephRequestStatus.php',
     'ReleephRequestStatusView' => 'applications/releeph/view/request/ReleephRequestStatusView.php',
     'ReleephRequestTransaction' => 'applications/releeph/storage/ReleephRequestTransaction.php',
     'ReleephRequestTransactionComment' => 'applications/releeph/storage/ReleephRequestTransactionComment.php',
