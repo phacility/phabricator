@@ -18,9 +18,15 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_query->needParents(true);
     $history = $history_query->loadHistory();
 
-    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-    $browse_query->setViewer($this->getRequest()->getUser());
-    $browse_results = $browse_query->loadPaths();
+    $browse_results = DiffusionBrowseResultSet::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.browsequery',
+        array(
+          'path' => $drequest->getPath(),
+          'commit' => $drequest->getCommit(),
+          'renderReadme' => true,
+        )));
+    $browse_paths = $browse_results->getPaths();
 
     $phids = array();
 
@@ -36,7 +42,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       }
     }
 
-    foreach ($browse_results as $item) {
+    foreach ($browse_paths as $item) {
       $data = $item->getLastCommitData();
       if ($data) {
         if ($data->getCommitDetail('authorPHID')) {
@@ -82,7 +88,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_table = new DiffusionBrowseTableView();
     $browse_table->setDiffusionRequest($drequest);
     $browse_table->setHandles($handles);
-    $browse_table->setPaths($browse_results);
+    $browse_table->setPaths($browse_paths);
     $browse_table->setUser($this->getRequest()->getUser());
 
     $browse_panel = new AphrontPanelView();
@@ -99,7 +105,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $this->buildBranchListTable($drequest);
 
-    $readme = $browse_query->renderReadme($browse_results);
+    $readme = $browse_results->getReadmeContent();
     if ($readme) {
       $panel = new AphrontPanelView();
       $panel->setHeader('README');

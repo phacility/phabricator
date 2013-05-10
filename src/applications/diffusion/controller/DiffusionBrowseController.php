@@ -9,11 +9,16 @@ final class DiffusionBrowseController extends DiffusionController {
     if ($this->getRequest()->getStr('before')) {
       $is_file = true;
     } else if ($this->getRequest()->getStr('grep') == '') {
-      $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-      $browse_query->setViewer($this->getRequest()->getUser());
-      $results = $browse_query->loadPaths();
-      $reason = $browse_query->getReasonForEmptyResultSet();
-      $is_file = ($reason == DiffusionBrowseQuery::REASON_IS_FILE);
+      $results = DiffusionBrowseResultSet::newFromConduit(
+        $this->callConduitWithDiffusionRequest(
+          'diffusion.browsequery',
+          array(
+            'path' => $drequest->getPath(),
+            'commit' => $drequest->getCommit(),
+            'renderReadme' => true,
+          )));
+      $reason = $results->getReasonForEmptyResultSet();
+      $is_file = ($reason == DiffusionBrowseResultSet::REASON_IS_FILE);
     }
 
     if ($is_file) {
@@ -42,17 +47,17 @@ final class DiffusionBrowseController extends DiffusionController {
       $content[] = $this->renderSearchResults();
 
     } else {
-      if (!$results) {
+      if (!$results->isValidResults()) {
         $empty_result = new DiffusionEmptyResultView();
         $empty_result->setDiffusionRequest($drequest);
-        $empty_result->setBrowseQuery($browse_query);
+        $empty_result->setDiffusionBrowseResultSet($results);
         $empty_result->setView($this->getRequest()->getStr('view'));
         $content[] = $empty_result;
 
       } else {
 
         $phids = array();
-        foreach ($results as $result) {
+        foreach ($results->getPaths() as $result) {
           $data = $result->getLastCommitData();
           if ($data) {
             if ($data->getCommitDetail('authorPHID')) {
@@ -67,7 +72,7 @@ final class DiffusionBrowseController extends DiffusionController {
         $browse_table = new DiffusionBrowseTableView();
         $browse_table->setDiffusionRequest($drequest);
         $browse_table->setHandles($handles);
-        $browse_table->setPaths($results);
+        $browse_table->setPaths($results->getPaths());
         $browse_table->setUser($this->getRequest()->getUser());
 
         $browse_panel = new AphrontPanelView();
@@ -79,7 +84,7 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $content[] = $this->buildOpenRevisions();
 
-      $readme_content = $browse_query->renderReadme($results);
+      $readme_content = $results->getReadmeContent();
       if ($readme_content) {
         $readme_panel = new AphrontPanelView();
         $readme_panel->setHeader('README');
@@ -99,7 +104,6 @@ final class DiffusionBrowseController extends DiffusionController {
         'view'   => 'browse',
       ));
     $nav->setCrumbs($crumbs);
-
     return $this->buildApplicationPage(
       $nav,
       array(

@@ -41,4 +41,18 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     return $this;
   }
 
+  public function toDictionary() {
+    return array(
+      'commitID' => $this->commitID,
+      'authorName' => $this->authorName,
+      'commitMessage' => $this->commitMessage,
+      'commitDetails' => json_encode($this->commitDetails),
+    );
+  }
+
+  public static function newFromDictionary(array $dict) {
+    return id(new PhabricatorRepositoryCommitData())
+      ->loadFromArray($dict);
+  }
+
 }

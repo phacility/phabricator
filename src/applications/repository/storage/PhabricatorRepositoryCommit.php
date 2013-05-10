@@ -180,4 +180,27 @@ final class PhabricatorRepositoryCommit
     );
   }
 
+/* -( Stuff for serialization )---------------------------------------------- */
+
+  /**
+   * NOTE: this is not a complete serialization; only the 'protected' fields are
+   * involved. This is due to ease of (ab)using the Lisk abstraction to get this
+   * done, as well as complexity of the other fields.
+   */
+  public function toDictionary() {
+    return array(
+      'repositoryID' => $this->getRepositoryID(),
+      'phid' =>  $this->getPHID(),
+      'commitIdentifier' =>  $this->getCommitIdentifier(),
+      'epoch' => $this->getEpoch(),
+      'mailKey' => $this->getMailKey(),
+      'authorPHID' => $this->getAuthorPHID(),
+      'auditStatus' => $this->getAuditStatus(),
+      'summary' => $this->getSummary());
+  }
+
+  public static function newFromDictionary(array $dict) {
+    return id(new PhabricatorRepositoryCommit())
+      ->loadFromArray($dict);
+  }
 }
