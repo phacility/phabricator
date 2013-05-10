@@ -2919,7 +2919,8 @@ phutil_register_library_map(array(
     'PhabricatorPaste' =>
     array(
       0 => 'PhabricatorPasteDAO',
-      1 => 'PhabricatorPolicyInterface',
+      1 => 'PhabricatorTokenReceiverInterface',
+      2 => 'PhabricatorPolicyInterface',
     ),
     'PhabricatorPasteController' => 'PhabricatorController',
     'PhabricatorPasteDAO' => 'PhabricatorLiskDAO',
@@ -3006,6 +3007,7 @@ phutil_register_library_map(array(
     array(
       0 => 'PhabricatorRepositoryDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorTokenReceiverInterface',
     ),
     'PhabricatorRepositoryCommitChangeParserWorker' => 'PhabricatorRepositoryCommitParserWorker',
     'PhabricatorRepositoryCommitData' => 'PhabricatorRepositoryDAO',
@@ -3243,6 +3245,7 @@ phutil_register_library_map(array(
       0 => 'PhameDAO',
       1 => 'PhabricatorPolicyInterface',
       2 => 'PhabricatorMarkupInterface',
+      3 => 'PhabricatorTokenReceiverInterface',
     ),
     'PhamePostDeleteController' => 'PhameController',
     'PhamePostEditController' => 'PhameController',
@@ -3386,6 +3389,7 @@ phutil_register_library_map(array(
       0 => 'PhrictionDAO',
       1 => 'PhabricatorPolicyInterface',
       2 => 'PhabricatorSubscribableInterface',
+      3 => 'PhabricatorTokenReceiverInterface',
     ),
     'PhrictionDocumentController' => 'PhrictionController',
     'PhrictionDocumentEditor' => 'PhabricatorEditor',
@@ -3438,6 +3442,7 @@ phutil_register_library_map(array(
       2 => 'PonderVotableInterface',
       3 => 'PhabricatorSubscribableInterface',
       4 => 'PhabricatorPolicyInterface',
+      5 => 'PhabricatorTokenReceiverInterface',
     ),
     'PonderQuestionAskController' => 'PonderController',
     'PonderQuestionDetailView' => 'AphrontView',
