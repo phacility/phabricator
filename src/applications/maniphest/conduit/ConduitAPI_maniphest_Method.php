@@ -207,15 +207,26 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       return array();
     }
 
+    $task_phids = mpull($tasks, 'getPHID');
+
     $all_aux = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
       'taskPHID in (%Ls)',
-      mpull($tasks, 'getPHID'));
+      $task_phids);
     $all_aux = mgroup($all_aux, 'getTaskPHID');
+
+    $all_deps = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs($task_phids)
+      ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK));
+    $all_deps->execute();
 
     $result = array();
     foreach ($tasks as $task) {
       $auxiliary = idx($all_aux, $task->getPHID(), array());
       $auxiliary = mpull($auxiliary, 'getValue', 'getName');
+
+      $task_deps = $all_deps->getDestinationPHIDs(
+        array($task->getPHID()),
+        array(PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK));
 
       $result[$task->getPHID()] = array(
         'id'           => $task->getID(),
@@ -235,6 +246,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
         'objectName'   => 'T'.$task->getID(),
         'dateCreated'  => $task->getDateCreated(),
         'dateModified' => $task->getDateModified(),
+        'dependsOnTaskPHIDs' => $task_deps,
       );
     }
 
