@@ -73,7 +73,7 @@ final class DiffusionRepositoryTag {
       'type' => $this->getType());
   }
 
-  public function newFromConduit(array $dicts) {
+  public static function newFromConduit(array $dicts) {
     $tags = array();
     foreach ($dicts as $dict) {
       $tags[] = id(new DiffusionRepositoryTag())
