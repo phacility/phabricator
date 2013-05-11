@@ -134,12 +134,12 @@ final class PhabricatorActionView extends AphrontView {
 
   public static function getAvailableIcons() {
     $root = dirname(phutil_get_library_root('phabricator'));
-    $path = $root.'/resources/sprite/manifest/icon.json';
+    $path = $root.'/resources/sprite/manifest/icons.json';
     $data = Filesystem::readFile($path);
     $manifest = json_decode($data, true);
 
     $results = array();
-    $prefix = 'action-';
+    $prefix = 'icons-';
     foreach ($manifest['sprites'] as $sprite) {
       $name = $sprite['name'];
       if (preg_match('/-(white|grey)$/', $name)) {
