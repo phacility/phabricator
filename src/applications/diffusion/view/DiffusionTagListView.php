@@ -92,11 +92,11 @@ final class DiffusionTagListView extends DiffusionView {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Tag',
-        'Commit',
-        'Description',
-        'Author',
-        'Created',
+        pht('Tag'),
+        pht('Commit'),
+        pht('Description'),
+        pht('Author'),
+        pht('Created'),
       ));
     $table->setColumnClasses(
       array(

@@ -31,7 +31,7 @@ final class DiffusionBrowseController extends DiffusionController {
     $content = array();
 
     if ($drequest->getTagContent()) {
-      $title = 'Tag: '.$drequest->getSymbolicCommit();
+      $title = pht('Tag: %s', $drequest->getSymbolicCommit());
 
       $tag_view = new AphrontPanelView();
       $tag_view->setHeader($title);
@@ -84,14 +84,21 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $content[] = $this->buildOpenRevisions();
 
-      $readme_content = $results->getReadmeContent();
-      if ($readme_content) {
-        $readme_panel = new AphrontPanelView();
-        $readme_panel->setHeader('README');
-        $readme_panel->appendChild($readme_content);
+      $readme = $results->getReadmeContent();
+      if ($readme) {
+        $box = new PHUIBoxView();
+        $box->setShadow(true);
+        $box->appendChild($readme);
+        $box->addPadding(PHUI::PADDING_LARGE);
 
-        $content[] = $readme_panel;
+        $panel = new AphrontPanelView();
+        $panel->setHeader(pht('README'));
+        $panel->setNoBackground();
+        $panel->appendChild($box);
+
+        $content[] = $panel;
       }
+
     }
 
     $nav = $this->buildSideNav('browse', false);
@@ -107,6 +114,8 @@ final class DiffusionBrowseController extends DiffusionController {
     return $this->buildApplicationPage(
       $nav,
       array(
+        'device' => true,
+        'dust' => true,
         'title' => array(
           nonempty(basename($drequest->getPath()), '/'),
           $drequest->getRepository()->getCallsign().' Repository',
@@ -119,7 +128,8 @@ final class DiffusionBrowseController extends DiffusionController {
     $drequest = $this->getDiffusionRequest();
     $form = id(new AphrontFormView())
       ->setUser($this->getRequest()->getUser())
-      ->setMethod('GET');
+      ->setMethod('GET')
+      ->setNoShading(true);
 
     switch ($drequest->getRepository()->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
@@ -140,7 +150,10 @@ final class DiffusionBrowseController extends DiffusionController {
         break;
     }
 
-    return $form;
+    $filter = new AphrontListFilterView();
+    $filter->appendChild($form);
+
+    return $filter;
   }
 
   private function renderSearchResults() {

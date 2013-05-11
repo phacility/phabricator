@@ -38,10 +38,10 @@ final class DiffusionCommitController extends DiffusionController {
       }
       return $this->buildStandardPageResponse(
         id(new AphrontErrorView())
-        ->setTitle('Error displaying commit.')
-        ->appendChild('Failed to load the commit because the commit has not '.
-                      'been parsed yet.'),
-          array('title' => 'Commit Still Parsing'));
+        ->setTitle(pht('Error displaying commit.'))
+        ->appendChild(pht('Failed to load the commit because the commit has '.
+                      'not been parsed yet.')),
+          array('title' => pht('Commit Still Parsing')));
     }
 
     $commit_data = $drequest->loadCommitData();
@@ -57,13 +57,13 @@ final class DiffusionCommitController extends DiffusionController {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
 
       $error_panel = new AphrontErrorView();
-      $error_panel->setTitle('Commit Not Tracked');
+      $error_panel->setTitle(pht('Commit Not Tracked'));
       $error_panel->setSeverity(AphrontErrorView::SEVERITY_WARNING);
       $error_panel->appendChild(
-        "This Diffusion repository is configured to track only one ".
+        pht("This Diffusion repository is configured to track only one ".
         "subdirectory of the entire Subversion repository, and this commit ".
-        "didn't affect the tracked subdirectory ('".$subpath."'), so no ".
-        "information is available.");
+        "didn't affect the tracked subdirectory ('%s'), so no ".
+        "information is available.", $subpath));
       $content[] = $error_panel;
       $content[] = $top_anchor;
     } else {
@@ -169,7 +169,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     if ($bad_commit) {
       $error_panel = new AphrontErrorView();
-      $error_panel->setTitle('Bad Commit');
+      $error_panel->setTitle(pht('Bad Commit'));
       $error_panel->appendChild($bad_commit['description']);
 
       $content[] = $error_panel;
@@ -178,7 +178,7 @@ final class DiffusionCommitController extends DiffusionController {
     } else if (!count($changes)) {
       $no_changes = new AphrontErrorView();
       $no_changes->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $no_changes->setTitle('Not Yet Parsed');
+      $no_changes->setTitle(pht('Not Yet Parsed'));
       // TODO: This can also happen with weird SVN changes that don't do
       // anything (or only alter properties?), although the real no-changes case
       // is extremely rare and might be impossible to produce organically. We
@@ -186,8 +186,8 @@ final class DiffusionCommitController extends DiffusionController {
       // DB once we parse these changes so we can distinguish between
       // "not parsed yet" and "no changes".
       $no_changes->appendChild(
-        "This commit hasn't been fully parsed yet (or doesn't affect any ".
-        "paths).");
+        pht("This commit hasn't been fully parsed yet (or doesn't affect any ".
+        "paths)."));
       $content[] = $no_changes;
     } else if ($was_limited) {
       $huge_commit = new AphrontErrorView();
@@ -210,14 +210,14 @@ final class DiffusionCommitController extends DiffusionController {
             'class'   => 'button green',
             'href'    => '?show_all=true',
           ),
-          'Show All Changes');
+          pht('Show All Changes'));
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
           ->appendChild(phutil_tag(
             'p',
             array(),
-            "This commit is very large. Load each file individually."));
+            pht("This commit is very large. Load each file individually.")));
 
         $change_panel->appendChild($warning_view);
         $change_panel->addButton($show_all_button);
@@ -357,7 +357,7 @@ final class DiffusionCommitController extends DiffusionController {
     return $this->buildApplicationPage(
       $content,
       array(
-        'title' => $commit_id
+        'title' => $commit_id,
       ));
   }
 
@@ -463,13 +463,13 @@ final class DiffusionCommitController extends DiffusionController {
       array(
         'id' => 'commit-branches',
       ),
-      'Unknown');
+      pht('Unknown'));
     $props['Tags'] = phutil_tag(
       'span',
       array(
         'id' => 'commit-tags',
       ),
-      'Unknown');
+      pht('Unknown'));
 
     $callsign = $request->getRepository()->getCallsign();
     $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
@@ -525,8 +525,8 @@ final class DiffusionCommitController extends DiffusionController {
     $this->highlightedAudits = $view->getHighlightedAudits();
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Audits');
-    $panel->setCaption('Audits you are responsible for are highlighted.');
+    $panel->setHeader(pht('Audits'));
+    $panel->setCaption(pht('Audits you are responsible for are highlighted.'));
     $panel->appendChild($view);
     $panel->setNoBackground();
 
@@ -617,13 +617,13 @@ final class DiffusionCommitController extends DiffusionController {
       ->addHiddenInput('commit', $commit->getPHID())
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Action')
+          ->setLabel(pht('Action'))
           ->setName('action')
           ->setID('audit-action')
           ->setOptions($actions))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Add Auditors')
+          ->setLabel(pht('Add Auditors'))
           ->setName('auditors')
           ->setControlID('add-auditors')
           ->setControlStyle('display: none')
@@ -631,7 +631,7 @@ final class DiffusionCommitController extends DiffusionController {
           ->setDisableBehavior(true))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Add CCs')
+          ->setLabel(pht('Add CCs'))
           ->setName('ccs')
           ->setControlID('add-ccs')
           ->setControlStyle('display: none')
@@ -639,17 +639,18 @@ final class DiffusionCommitController extends DiffusionController {
           ->setDisableBehavior(true))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-          ->setLabel('Comments')
+          ->setLabel(pht('Comments'))
           ->setName('content')
           ->setValue($draft)
           ->setID('audit-content')
           ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? 'Submit' : 'Cook the Books'));
+          ->setValue($is_serious ? pht('Submit') : pht('Cook the Books')));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader($is_serious ? 'Audit Commit' : 'Creative Accounting');
+    $panel->setHeader(
+      $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
     $panel->appendChild($form);
     $panel->addClass('aphront-panel-accent');
     $panel->addClass('aphront-panel-flush');
@@ -665,14 +666,14 @@ final class DiffusionCommitController extends DiffusionController {
             'src' => '/typeahead/common/users/',
             'row' => 'add-auditors',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-            'placeholder' => 'Type a user name...',
+            'placeholder' => pht('Type a user name...'),
           ),
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),
             'src' => '/typeahead/common/mailable/',
             'row' => 'add-ccs',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-            'placeholder' => 'Type a user or mailing list...',
+            'placeholder' => pht('Type a user or mailing list...'),
           ),
         ),
         'select' => 'audit-action',
@@ -833,7 +834,7 @@ final class DiffusionCommitController extends DiffusionController {
     $history_table->setHandles($handles);
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Merged Changes');
+    $panel->setHeader(pht('Merged Changes'));
     $panel->setCaption($caption);
     $panel->appendChild($history_table);
     $panel->setNoBackground();
@@ -857,7 +858,7 @@ final class DiffusionCommitController extends DiffusionController {
            $commit->getCommitIdentifier().'/edit/';
 
     $action = id(new PhabricatorActionView())
-      ->setName('Edit Commit')
+      ->setName(pht('Edit Commit'))
       ->setHref($uri)
       ->setIcon('edit');
     $actions->addAction($action);
@@ -868,7 +869,7 @@ final class DiffusionCommitController extends DiffusionController {
     $maniphest = 'PhabricatorApplicationManiphest';
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $action = id(new PhabricatorActionView())
-        ->setName('Edit Maniphest Tasks')
+        ->setName(pht('Edit Maniphest Tasks'))
         ->setIcon('attach')
         ->setHref('/search/attach/'.$commit->getPHID().'/TASK/edge/')
         ->setWorkflow(true);
@@ -877,21 +878,21 @@ final class DiffusionCommitController extends DiffusionController {
 
     if ($user->getIsAdmin()) {
       $action = id(new PhabricatorActionView())
-        ->setName('MetaMTA Transcripts')
+        ->setName(pht('MetaMTA Transcripts'))
         ->setIcon('file')
         ->setHref('/mail/?phid='.$commit->getPHID());
       $actions->addAction($action);
     }
 
     $action = id(new PhabricatorActionView())
-      ->setName('Herald Transcripts')
+      ->setName(pht('Herald Transcripts'))
       ->setIcon('file')
       ->setHref('/herald/transcript/?phid='.$commit->getPHID())
       ->setWorkflow(true);
     $actions->addAction($action);
 
     $action = id(new PhabricatorActionView())
-      ->setName('Download Raw Diff')
+      ->setName(pht('Download Raw Diff'))
       ->setHref($request->getRequestURI()->alter('diff', true))
       ->setIcon('download');
     $actions->addAction($action);

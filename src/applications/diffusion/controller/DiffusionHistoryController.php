@@ -40,10 +40,10 @@ final class DiffusionHistoryController extends DiffusionController {
     $content = array();
 
     if ($request->getBool('copies')) {
-      $button_title = 'Hide Copies/Branches';
+      $button_title = pht('Hide Copies/Branches');
       $copies_new = null;
     } else {
-      $button_title = 'Show Copies/Branches';
+      $button_title = pht('Show Copies/Branches');
       $copies_new = true;
     }
 
@@ -71,7 +71,7 @@ final class DiffusionHistoryController extends DiffusionController {
     }
 
     $history_panel = new AphrontPanelView();
-    $history_panel->setHeader('History');
+    $history_panel->setHeader(pht('History'));
     $history_panel->addButton($button);
     $history_panel->appendChild($history_table);
     $history_panel->appendChild($pager);
@@ -95,6 +95,8 @@ final class DiffusionHistoryController extends DiffusionController {
     return $this->buildApplicationPage(
       $nav,
       array(
+        'device' => true,
+        'dust' => true,
         'title' => array(
           pht('History'),
           pht('%s Repository', $drequest->getRepository()->getCallsign()),

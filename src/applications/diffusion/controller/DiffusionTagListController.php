@@ -39,11 +39,11 @@ final class DiffusionTagListController extends DiffusionController {
     $content = null;
     if (!$tags) {
       $content = new AphrontErrorView();
-      $content->setTitle('No Tags');
+      $content->setTitle(pht('No Tags'));
       if ($is_commit) {
-        $content->appendChild('This commit has no tags.');
+        $content->appendChild(pht('This commit has no tags.'));
       } else {
-        $content->appendChild('This repository has no tags.');
+        $content->appendChild(pht('This repository has no tags.'));
       }
       $content->setSeverity(AphrontErrorView::SEVERITY_NODATA);
     } else {
@@ -65,7 +65,7 @@ final class DiffusionTagListController extends DiffusionController {
       $view->setHandles($handles);
 
       $panel = id(new AphrontPanelView())
-        ->setHeader('Tags')
+        ->setHeader(pht('Tags'))
         ->appendChild($view)
         ->appendChild($pager);
 

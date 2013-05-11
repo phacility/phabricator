@@ -80,13 +80,13 @@ final class DiffusionLintController extends DiffusionController {
 
     $table = id(new AphrontTableView($rows))
       ->setHeaders(array(
-        'Problems',
-        'Files',
-        'Repository',
-        'Severity',
-        'Code',
-        'Name',
-        'Example',
+        pht('Problems'),
+        pht('Files'),
+        pht('Repository'),
+        pht('Severity'),
+        pht('Code'),
+        pht('Name'),
+        pht('Example'),
       ))
       ->setColumnVisibility(array(true, true, !$this->diffusionRequest))
       ->setColumnClasses(array('n', 'n', '', '', 'pri', '', ''));
@@ -112,7 +112,7 @@ final class DiffusionLintController extends DiffusionController {
             ->setDatasource('/typeahead/common/users/')
             ->setLimit(1)
             ->setName('owner')
-            ->setLabel('Owner')
+            ->setLabel(pht('Owner'))
             ->setValue($owners))
         ->appendChild(
           id(new AphrontFormSubmitControl())
@@ -143,7 +143,11 @@ final class DiffusionLintController extends DiffusionController {
 
     return $this->buildApplicationPage(
       $content,
-      array('title' => $title));
+      array(
+        'title' => $title,
+        'device' => true,
+        'dust' => true,
+        ));
   }
 
   private function loadLintCodes(array $owner_phids) {

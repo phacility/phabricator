@@ -82,10 +82,10 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        'History',
-        'Browse',
-        'Change',
-        'Path',
+        pht('History'),
+        pht('Browse'),
+        pht('Change'),
+        pht('Path'),
       ));
     $view->setColumnClasses(
       array(
@@ -95,7 +95,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
         'wide',
       ));
     $view->setRowClasses($rowc);
-    $view->setNoDataString('This change has not been fully parsed yet.');
+    $view->setNoDataString(pht('This change has not been fully parsed yet.'));
 
     return $view->render();
   }

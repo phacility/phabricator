@@ -3,7 +3,7 @@
 final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return 'Repository Browser';
+    return pht('Repository Browser');
   }
 
   public function getBaseURI() {
@@ -90,4 +90,3 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
   }
 
 }
-

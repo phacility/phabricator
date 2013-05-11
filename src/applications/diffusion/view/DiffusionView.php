@@ -52,7 +52,7 @@ abstract class DiffusionView extends AphrontView {
       array(
         'href' => $href,
       ),
-      'History');
+      pht('History'));
   }
 
   final public function linkBrowse($path, array $details = array()) {
@@ -66,7 +66,7 @@ abstract class DiffusionView extends AphrontView {
     if (isset($details['text'])) {
       $text = $details['text'];
     } else {
-      $text = 'Browse';
+      $text = pht('Browse');
     }
 
     return phutil_tag(

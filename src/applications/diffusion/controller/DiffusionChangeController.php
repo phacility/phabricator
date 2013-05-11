@@ -66,7 +66,9 @@ final class DiffusionChangeController extends DiffusionController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Change',
+        'title' => pht('Change'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

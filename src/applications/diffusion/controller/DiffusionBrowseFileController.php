@@ -84,17 +84,17 @@ final class DiffusionBrowseFileController extends DiffusionController {
     if ($follow) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $notice->setTitle('Unable to Continue');
+      $notice->setTitle(pht('Unable to Continue'));
       switch ($follow) {
         case 'first':
           $notice->appendChild(
-            "Unable to continue tracing the history of this file because ".
-            "this commit is the first commit in the repository.");
+            pht("Unable to continue tracing the history of this file because ".
+            "this commit is the first commit in the repository."));
           break;
         case 'created':
           $notice->appendChild(
-            "Unable to continue tracing the history of this file because ".
-            "this commit created the file.");
+            pht("Unable to continue tracing the history of this file because ".
+            "this commit created the file."));
           break;
       }
       $content[] = $notice;
@@ -104,10 +104,10 @@ final class DiffusionBrowseFileController extends DiffusionController {
     if ($renamed) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $notice->setTitle('File Renamed');
+      $notice->setTitle(pht('File Renamed'));
       $notice->appendChild(
-        "File history passes through a rename from '".$drequest->getPath().
-        "' to '".$renamed."'.");
+        pht("File history passes through a rename from '%s' to '%s'.",
+          $drequest->getPath(), $renamed));
       $content[] = $notice;
     }
 
@@ -647,7 +647,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           if ($revision_id) {
             $revision = idx($revisions, $revision_id);
             if (!$revision) {
-              $tooltip = '(Invalid revision)';
+              $tooltip = pht('(Invalid revision)');
             } else {
               $tooltip =
                 phabricator_date($revision->getDateModified(), $user).
@@ -675,7 +675,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
               'href'  => $uri->setQueryParam('view', 'blame'),
               'sigil' => 'has-tooltip',
               'meta'  => array(
-                'tip'     => 'Skip Past This Commit',
+                'tip'     => pht('Skip Past This Commit'),
                 'align'   => 'E',
                 'size'    => 300,
               ),

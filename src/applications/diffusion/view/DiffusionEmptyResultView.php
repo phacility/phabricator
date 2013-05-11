@@ -29,15 +29,15 @@ final class DiffusionEmptyResultView extends DiffusionView {
     $reason = $this->browseResultSet->getReasonForEmptyResultSet();
     switch ($reason) {
       case DiffusionBrowseResultSet::REASON_IS_NONEXISTENT:
-        $title = 'Path Does Not Exist';
+        $title = pht('Path Does Not Exist');
         // TODO: Under git, this error message should be more specific. It
         // may exist on some other branch.
-        $body  = "This path does not exist anywhere.";
+        $body  = pht("This path does not exist anywhere.");
         $severity = AphrontErrorView::SEVERITY_ERROR;
         break;
       case DiffusionBrowseResultSet::REASON_IS_EMPTY:
-        $title = 'Empty Directory';
-        $body = "This path was an empty directory at {$commit}.\n";
+        $title = pht('Empty Directory');
+        $body = pht("This path was an empty directory at %s.\n", $commit);
         $severity = AphrontErrorView::SEVERITY_NOTICE;
         break;
       case DiffusionBrowseResultSet::REASON_IS_DELETED:
@@ -52,8 +52,8 @@ final class DiffusionEmptyResultView extends DiffusionView {
             'params' => array('view' => $this->view),
           ));
 
-        $title = 'Path Was Deleted';
-        $body = hsprintf(
+        $title = pht('Path Was Deleted');
+        $body = pht(
           "This path does not exist at %s. It was deleted in %s and last %s ".
             "at %s.",
           $commit,
@@ -64,12 +64,12 @@ final class DiffusionEmptyResultView extends DiffusionView {
         break;
       case DiffusionBrowseResultSet::REASON_IS_UNTRACKED_PARENT:
         $subdir = $drequest->getRepository()->getDetail('svn-subpath');
-        $title = 'Directory Not Tracked';
+        $title = pht('Directory Not Tracked');
         $body =
-          "This repository is configured to track only one subdirectory ".
-          "of the entire repository ('{$subdir}'), ".
+          pht("This repository is configured to track only one subdirectory ".
+          "of the entire repository ('%s'), ".
           "but you aren't looking at something in that subdirectory, so no ".
-          "information is available.";
+          "information is available.", $subdir);
         $severity = AphrontErrorView::SEVERITY_WARNING;
         break;
       default:

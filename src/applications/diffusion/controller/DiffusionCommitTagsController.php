@@ -50,10 +50,10 @@ final class DiffusionCommitTagsController extends DiffusionController {
               'action'  => 'tags',
             )),
         ),
-        "More tags\xE2\x80\xA6");
+        pht("More Tags\xE2\x80\xA6"));
     }
 
     return id(new AphrontAjaxResponse())
-      ->setContent($tag_links ? implode(', ', $tag_links) : 'None');
+      ->setContent($tag_links ? implode(', ', $tag_links) : pht('None'));
   }
 }

@@ -26,13 +26,14 @@
 }
 
 .aphront-panel-view .aphront-panel-header {
-  margin: 0 0 1em 0;
+  margin: 0 0 8px 0;
 }
 
 .aphront-panel-view h1 {
   font-size: 16px;
   font-weight: bold;
   color: #555;
+  text-shadow: 0 1px 1px #fff;
   padding: 4px 0 0 0;
 }
 
