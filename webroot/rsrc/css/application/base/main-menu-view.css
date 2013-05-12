@@ -131,7 +131,7 @@
 
 .device .phabricator-main-menu-search-container {
   padding: 0;
-  margin: 0 8px 0 52px;
+  margin: 0 8px ;
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input {
@@ -154,7 +154,7 @@
 }
 
 .device .phabricator-main-menu-search input {
-  height: 16px;
+  height: 30px;
   font-size: 15px;
   border-radius: 15px;
 }
