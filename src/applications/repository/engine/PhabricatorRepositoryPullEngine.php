@@ -10,37 +10,28 @@
  * @task hg       Pulling Mercurial Working Copies
  * @task internal Internals
  */
-final class PhabricatorRepositoryPullEngine {
-
-  private $repository;
+final class PhabricatorRepositoryPullEngine
+  extends PhabricatorRepositoryEngine {
 
 
 /* -(  Pulling Working Copies  )--------------------------------------------- */
 
 
-  public function setRepository(PhabricatorRepository $repository) {
-    $this->repository = $repository;
-    return $this;
-  }
-
-  private function getRepository() {
-    return $this->repository;
-  }
-
   public function pullRepository() {
     $repository = $this->getRepository();
-
-    if (!$repository) {
-      throw new Exception("Call setRepository() before pullRepository()!");
-    }
 
     $is_hg = false;
     $is_git = false;
 
     $vcs = $repository->getVersionControlSystem();
+    $callsign = $repository->getCallsign();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // We never pull a local copy of Subversion repositories.
+        $this->log(
+          "Repository '%s' is a Subversion repository, which does not require ".
+          "a local working copy to be pulled.",
+          $callsign);
         return;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $is_git = true;
@@ -65,12 +56,18 @@ final class PhabricatorRepositoryPullEngine {
     }
 
     if (!Filesystem::pathExists($local_path)) {
+      $this->log(
+        "Creating a new working copy for repository '%s'.",
+        $callsign);
       if ($is_git) {
         $this->executeGitCreate();
       } else {
         $this->executeMercurialCreate();
       }
     } else {
+      $this->log(
+        "Updating the working copy for repository '%s'.",
+        $callsign);
       if ($is_git) {
         $this->executeGitUpdate();
       } else {

@@ -11,6 +11,10 @@ final class PhabricatorRepositoryManagementPullWorkflow
       ->setArguments(
         array(
           array(
+            'name'        => 'verbose',
+            'help'        => 'Show additional debugging information.',
+          ),
+          array(
             'name'        => 'repos',
             'wildcard'    => true,
           ),
@@ -32,6 +36,7 @@ final class PhabricatorRepositoryManagementPullWorkflow
 
       id(new PhabricatorRepositoryPullEngine())
         ->setRepository($repo)
+        ->setVerbose($args->getArg('verbose'))
         ->pullRepository();
     }
 

@@ -3,8 +3,6 @@
 abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
 
   private $dirs = array();
-  private $repos = array();
-  private $pulled = array();
 
   protected function getPhabricatorTestCaseConfiguration() {
     return array(
@@ -13,10 +11,6 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
   }
 
   protected function buildBareRepository($callsign) {
-    if (isset($this->repos[$callsign])) {
-      return $this->repos[$callsign];
-    }
-
     $data_dir = dirname(__FILE__).'/data/';
 
     $types = array(
@@ -67,8 +61,6 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
     $this->dirs[] = $dir;
     $this->dirs[] = $local;
 
-    $this->repos[$callsign] = $repo;
-
     return $repo;
   }
 
@@ -78,10 +70,6 @@ abstract class PhabricatorWorkingCopyTestCase extends PhabricatorTestCase {
 
   protected function buildPulledRepository($callsign) {
     $repository = $this->buildBareRepository($callsign);
-
-    if (isset($this->pulled[$callsign])) {
-      return $repository;
-    }
 
     id(new PhabricatorRepositoryPullEngine())
       ->setRepository($repository)

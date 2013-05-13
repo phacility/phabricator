@@ -31,6 +31,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
   private $commitCache = array();
   private $repair;
+  private $discoveryEngines = array();
 
   public function setRepair($repair) {
     $this->repair = $repair;
@@ -183,14 +184,38 @@ final class PhabricatorRepositoryPullLocalDaemon
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         return $this->executeGitDiscover($repository);
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        return $this->executeSvnDiscover($repository);
+        $refs = $this->getDiscoveryEngine($repository)
+          ->discoverCommits();
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         return $this->executeHgDiscover($repository);
       default:
         throw new Exception("Unknown VCS '{$vcs}'!");
     }
+
+    foreach ($refs as $ref) {
+      $this->recordCommit(
+        $repository,
+        $ref->getIdentifier(),
+        $ref->getEpoch(),
+        $ref->getBranch());
+    }
+
+    return (bool)count($refs);
   }
 
+  private function getDiscoveryEngine(PhabricatorRepository $repository) {
+    $id = $repository->getID();
+    if (empty($this->discoveryEngines[$id])) {
+      $engine = id(new PhabricatorRepositoryDiscoveryEngine())
+          ->setRepository($repository)
+          ->setVerbose($this->getVerbose())
+          ->setRepairMode($this->repair);
+
+      $this->discoveryEngines[$id] = $engine;
+    }
+    return $this->discoveryEngines[$id];
+  }
 
   private function isKnownCommit(
     PhabricatorRepository $repository,
@@ -679,111 +704,6 @@ final class PhabricatorRepositoryPullLocalDaemon
       $epoch = $stream->getCommitDate($target);
       $this->recordCommit($repository, $target, $epoch);
     }
-  }
-
-
-/* -(  Subversion Implementation  )------------------------------------------ */
-
-
-  private function executeSvnDiscover(
-    PhabricatorRepository $repository) {
-
-    $uri = $this->executeSvnGetBaseSVNLogURI($repository);
-
-    list($xml) = $repository->execxRemoteCommand(
-      'log --xml --quiet --limit 1 %s@HEAD',
-      $uri);
-
-    $results = $this->executeSvnParseLogXML($xml);
-    $commit = head_key($results);
-    $epoch  = head($results);
-
-    if ($this->isKnownCommit($repository, $commit)) {
-      return false;
-    }
-
-    $this->executeSvnDiscoverCommit($repository, $commit, $epoch);
-    return true;
-  }
-
-  private function executeSvnDiscoverCommit(
-    PhabricatorRepository $repository,
-    $commit,
-    $epoch) {
-
-    $uri = $this->executeSvnGetBaseSVNLogURI($repository);
-
-    $discover = array(
-      $commit => $epoch,
-    );
-    $upper_bound = $commit;
-
-    $limit = 1;
-    while ($upper_bound > 1 &&
-           !$this->isKnownCommit($repository, $upper_bound)) {
-      // Find all the unknown commits on this path. Note that we permit
-      // importing an SVN subdirectory rather than the entire repository, so
-      // commits may be nonsequential.
-      list($err, $xml, $stderr) = $repository->execRemoteCommand(
-        ' log --xml --quiet --limit %d %s@%d',
-        $limit,
-        $uri,
-        $upper_bound - 1);
-      if ($err) {
-        if (preg_match('/(path|File) not found/', $stderr)) {
-          // We've gone all the way back through history and this path was not
-          // affected by earlier commits.
-          break;
-        } else {
-          throw new Exception("svn log error #{$err}: {$stderr}");
-        }
-      }
-      $discover += $this->executeSvnParseLogXML($xml);
-
-      $upper_bound = min(array_keys($discover));
-
-      // Discover 2, 4, 8, ... 256 logs at a time. This allows us to initially
-      // import large repositories fairly quickly, while pulling only as much
-      // data as we need in the common case (when we've already imported the
-      // repository and are just grabbing one commit at a time).
-      $limit = min($limit * 2, 256);
-    }
-
-    // NOTE: We do writes only after discovering all the commits so that we're
-    // never left in a state where we've missed commits -- if the discovery
-    // script terminates it can always resume and restore the import to a good
-    // state. This is also why we sort the discovered commits so we can do
-    // writes forward from the smallest one.
-
-    ksort($discover);
-    foreach ($discover as $commit => $epoch) {
-      $this->recordCommit($repository, $commit, $epoch);
-    }
-  }
-
-  private function executeSvnParseLogXML($xml) {
-    $xml = phutil_utf8ize($xml);
-
-    $result = array();
-
-    $log = new SimpleXMLElement($xml);
-    foreach ($log->logentry as $entry) {
-      $commit = (int)$entry['revision'];
-      $epoch  = (int)strtotime((string)$entry->date[0]);
-      $result[$commit] = $epoch;
-    }
-
-    return $result;
-  }
-
-
-  private function executeSvnGetBaseSVNLogURI(
-    PhabricatorRepository $repository) {
-
-    $uri = $repository->getDetail('remote-uri');
-    $subpath = $repository->getDetail('svn-subpath');
-
-    return $uri.$subpath;
   }
 
 }
