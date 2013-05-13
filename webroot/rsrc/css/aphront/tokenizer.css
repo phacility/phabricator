@@ -44,8 +44,9 @@ body input.jx-tokenizer-input:focus {
   border-color: transparent;
 }
 
-.jx-typeahead-placeholder {
+body input.jx-typeahead-placeholder {
   margin-left: 4px;
+  color: #777
 }
 
 a.jx-tokenizer-x {
