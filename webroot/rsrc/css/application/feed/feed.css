@@ -9,6 +9,7 @@
 .phabricator-public-feed-frame {
   margin: 10px;
   max-width: 600px;
+  overflow-x: auto;
 }
 
 .phabricator-feed-frame .phabricator-action-header-title {

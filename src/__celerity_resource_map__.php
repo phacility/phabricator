@@ -3019,7 +3019,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-feed-css' =>
   array(
-    'uri' => '/res/f3e6e80b/rsrc/css/application/feed/feed.css',
+    'uri' => '/res/e19633ed/rsrc/css/application/feed/feed.css',
     'type' => 'css',
     'requires' =>
     array(
