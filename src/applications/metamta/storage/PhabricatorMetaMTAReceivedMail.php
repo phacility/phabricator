@@ -5,11 +5,12 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   protected $headers = array();
   protected $bodies = array();
   protected $attachments = array();
+  protected $status = '';
 
   protected $relatedPHID;
   protected $authorPHID;
   protected $message;
-  protected $messageIDHash;
+  protected $messageIDHash = '';
 
   public function getConfiguration() {
     return array(
@@ -25,18 +26,31 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     // Normalize headers to lowercase.
     $normalized = array();
     foreach ($headers as $name => $value) {
-      $normalized[strtolower($name)] = $value;
+      $name = $this->normalizeMailHeaderName($name);
+      if ($name == 'message-id') {
+        $this->setMessageIDHash(PhabricatorHash::digestForIndex($value));
+      }
+      $normalized[$name] = $value;
     }
     $this->headers = $normalized;
     return $this;
   }
 
+  public function getHeader($key, $default = null) {
+    $key = $this->normalizeMailHeaderName($key);
+    return idx($this->headers, $key, $default);
+  }
+
+  private function normalizeMailHeaderName($name) {
+    return strtolower($name);
+  }
+
   public function getMessageID() {
-    return idx($this->headers, 'message-id');
+    return $this->getHeader('Message-ID');
   }
 
   public function getSubject() {
-    return idx($this->headers, 'subject');
+    return $this->getHeader('Subject');
   }
 
   public function getCCAddresses() {
@@ -156,35 +170,15 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
   public function processReceivedMail() {
 
-    // If Phabricator sent the mail, always drop it immediately. This prevents
-    // loops where, e.g., the public bug address is also a user email address
-    // and creating a bug sends them an email, which loops.
-    $is_phabricator_mail = idx(
-      $this->headers,
-      'x-phabricator-sent-this-message');
-    if ($is_phabricator_mail) {
-      $message = "Ignoring email with 'X-Phabricator-Sent-This-Message' ".
-                 "header to avoid loops.";
-      return $this->setMessage($message)->save();
-    }
-
-    $message_id_hash = $this->getMessageIDHash();
-    if ($message_id_hash) {
-      $messages = $this->loadAllWhere(
-        'messageIDHash = %s',
-        $message_id_hash);
-      $messages_count = count($messages);
-      if ($messages_count > 1) {
-        $first_message = reset($messages);
-        if ($first_message->getID() != $this->getID()) {
-          $message = sprintf(
-            'Ignoring email with message id hash "%s" that has been seen %d '.
-            'times, including this message.',
-            $message_id_hash,
-            $messages_count);
-          return $this->setMessage($message)->save();
-        }
-      }
+    try {
+      $this->dropMailFromPhabricator();
+      $this->dropMailAlreadyReceived();
+    } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
+      $this
+        ->setStatus($ex->getStatusCode())
+        ->setMessage($ex->getMessage())
+        ->save();
+      return $this;
     }
 
     list($to,
@@ -458,6 +452,63 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     }
 
     return $user;
+  }
+
+  /**
+   * If Phabricator sent the mail, always drop it immediately. This prevents
+   * loops where, e.g., the public bug address is also a user email address
+   * and creating a bug sends them an email, which loops.
+   */
+  private function dropMailFromPhabricator() {
+    if (!$this->getHeader('x-phabricator-sent-this-message')) {
+      return;
+    }
+
+    throw new PhabricatorMetaMTAReceivedMailProcessingException(
+      MetaMTAReceivedMailStatus::STATUS_FROM_PHABRICATOR,
+      "Ignoring email with 'X-Phabricator-Sent-This-Message' header to avoid ".
+      "loops.");
+  }
+
+  /**
+   * If this mail has the same message ID as some other mail, and isn't the
+   * first mail we we received with that message ID, we drop it as a duplicate.
+   */
+  private function dropMailAlreadyReceived() {
+    $message_id_hash = $this->getMessageIDHash();
+    if (!$message_id_hash) {
+      // No message ID hash, so we can't detect duplicates. This should only
+      // happen with very old messages.
+      return;
+    }
+
+    $messages = $this->loadAllWhere(
+      'messageIDHash = %s ORDER BY id ASC LIMIT 2',
+      $message_id_hash);
+    $messages_count = count($messages);
+    if ($messages_count <= 1) {
+      // If we only have one copy of this message, we're good to process it.
+      return;
+    }
+
+    $first_message = reset($messages);
+    if ($first_message->getID() == $this->getID()) {
+      // If this is the first copy of the message, it is okay to process it.
+      // We may not have been able to to process it immediately when we received
+      // it, and could may have received several copies without processing any
+      // yet.
+      return;
+    }
+
+    $message = sprintf(
+      'Ignoring email with message id hash "%s" that has been seen %d '.
+      'times, including this message.',
+      $message_id_hash,
+      $messages_count);
+
+    throw new PhabricatorMetaMTAReceivedMailProcessingException(
+      MetaMTAReceivedMailStatus::STATUS_DUPLICATE,
+      $message);
   }
 
 }

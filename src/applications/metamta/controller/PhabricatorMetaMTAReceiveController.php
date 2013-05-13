@@ -10,7 +10,9 @@ final class PhabricatorMetaMTAReceiveController
 
     if ($request->isFormPost()) {
       $received = new PhabricatorMetaMTAReceivedMail();
-      $header_content = array();
+      $header_content = array(
+        'Message-ID' => Filesystem::readRandomBytes(12),
+      );
       $from = $request->getStr('sender');
       $to = $request->getStr('receiver');
       $uri = '/mail/received/';
@@ -41,11 +43,6 @@ final class PhabricatorMetaMTAReceiveController
         array(
           'text' => $request->getStr('body'),
         ));
-
-      // Make up some unique value, since this column isn't nullable.
-      $received->setMessageIDHash(
-        PhabricatorHash::digestForIndex(
-          Filesystem::readRandomBytes(12)));
 
       $received->save();
 

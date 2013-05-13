@@ -1294,6 +1294,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130508.releephtransactionsmig.php'),
       ),
+      '20130513.receviedmailstatus.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130513.receviedmailstatus.sql'),
+      ),
     );
   }
 }
