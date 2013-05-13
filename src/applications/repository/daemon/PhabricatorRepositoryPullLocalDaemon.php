@@ -120,7 +120,9 @@ final class PhabricatorRepositoryPullLocalDaemon
           $callsign = $repository->getCallsign();
           $this->log("Updating repository '{$callsign}'.");
 
-          $this->pullRepository($repository);
+          id(new PhabricatorRepositoryPullEngine())
+            ->setRepository($repository)
+            ->pullRepository();
 
           if (!$no_discovery) {
             // TODO: It would be nice to discover only if we pulled something,
@@ -172,54 +174,6 @@ final class PhabricatorRepositoryPullLocalDaemon
       return id(new PhabricatorRepository())->loadAll();
     } else {
       return PhabricatorRepository::loadAllByPHIDOrCallsign($names);
-    }
-  }
-
-
-  /**
-   * @task pull
-   */
-  public function pullRepository(PhabricatorRepository $repository) {
-    $vcs = $repository->getVersionControlSystem();
-
-    $is_svn = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_SVN);
-    $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
-    $is_hg = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL);
-
-    if ($is_svn) {
-      return;
-    }
-
-    $callsign = $repository->getCallsign();
-
-    if (!$is_git && !$is_hg) {
-      throw new Exception(
-        "Unknown VCS '{$vcs}' for repository '{$callsign}'!");
-    }
-
-    $local_path = $repository->getDetail('local-path');
-    if (!$local_path) {
-      throw new Exception(
-        "No local path is available for repository '{$callsign}'.");
-    }
-
-    if (!Filesystem::pathExists($local_path)) {
-      $dirname = dirname($local_path);
-      if (!Filesystem::pathExists($dirname)) {
-        Filesystem::createDirectory($dirname, 0755, $recursive = true);
-      }
-
-      if ($is_git) {
-        return $this->executeGitCreate($repository, $local_path);
-      } else if ($is_hg) {
-        return $this->executeHgCreate($repository, $local_path);
-      }
-    } else {
-      if ($is_git) {
-        return $this->executeGitUpdate($repository, $local_path);
-      } else if ($is_hg) {
-        return $this->executeHgUpdate($repository, $local_path);
-      }
     }
   }
 
@@ -468,121 +422,6 @@ final class PhabricatorRepositoryPullLocalDaemon
 /* -(  Git Implementation  )------------------------------------------------- */
 
 
-  private function canWrite($path) {
-    $default_path =
-      PhabricatorEnv::getEnvConfig('repository.default-local-path');
-    return Filesystem::isDescendant($path, $default_path);
-  }
-
-  /**
-   * @task git
-   */
-  private function executeGitCreate(
-    PhabricatorRepository $repository,
-    $path) {
-
-    $repository->execxRemoteCommand(
-      'clone --origin origin %s %s',
-      $repository->getRemoteURI(),
-      rtrim($path, '/'));
-  }
-
-
-  /**
-   * @task git
-   */
-  private function executeGitUpdate(
-    PhabricatorRepository $repository,
-    $path) {
-
-    // Run a bunch of sanity checks to detect people checking out repositories
-    // inside other repositories, making empty directories, pointing the local
-    // path at some random file or path, etc.
-
-    list($err, $stdout) = $repository->execLocalCommand(
-      'rev-parse --show-toplevel');
-    $msg = '';
-
-    if ($err) {
-
-      // Try to raise a more tailored error message in the more common case
-      // of the user creating an empty directory. (We could try to remove it,
-      // but might not be able to, and it's much simpler to raise a good
-      // message than try to navigate those waters.)
-      if (is_dir($path)) {
-        $files = Filesystem::listDirectory($path, $include_hidden = true);
-        if (!$files) {
-          $msg =
-            "Expected to find a git repository at '{$path}', but there ".
-            "is an empty directory there. Remove the directory: the daemon ".
-            "will run 'git clone' for you.";
-        }
-      } else {
-        $msg =
-        "Expected to find a git repository at '{$path}', but there is ".
-        "a non-repository directory (with other stuff in it) there. Move or ".
-        "remove this directory (or reconfigure the repository to use a ".
-        "different directory), and then either clone a repository yourself ".
-        "or let the daemon do it.";
-      }
-    } else {
-      $repo_path = rtrim($stdout, "\n");
-
-      if (empty($repo_path)) {
-        $err = true;
-        $msg =
-          "Expected to find a git repository at '{$path}', but ".
-          "there was no result from `git rev-parse --show-toplevel`. ".
-          "Something is misconfigured or broken. The git repository ".
-          "may be inside a '.git/' directory.";
-      } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
-        $err = true;
-        $msg =
-          "Expected to find repo at '{$path}', but the actual ".
-          "git repository root for this directory is '{$repo_path}'. ".
-          "Something is misconfigured. The repository's 'Local Path' should ".
-          "be set to some place where the daemon can check out a working ".
-          "copy, and should not be inside another git repository.";
-      }
-    }
-
-    if ($err && $this->canWrite($path)) {
-      phlog("{$path} failed sanity check; recloning. ({$msg})");
-      Filesystem::remove($path);
-      $this->executeGitCreate($repository, $path);
-    } else if ($err) {
-      throw new Exception($msg);
-    }
-
-    $retry = false;
-    do {
-      // This is a local command, but needs credentials.
-      $future = $repository->getRemoteCommandFuture('fetch --all --prune');
-      $future->setCWD($path);
-      list($err, $stdout, $stderr) = $future->resolve();
-
-      if ($err && !$retry && $this->canWrite($path)) {
-        $retry = true;
-        // Fix remote origin url if it doesn't match our configuration
-        $origin_url =
-          $repository->execLocalCommand('config --get remote.origin.url');
-        $remote_uri = $repository->getDetail('remote-uri');
-        if ($origin_url != $remote_uri) {
-          $repository->execLocalCommand('remote set-url origin %s',
-                                        $remote_uri);
-        }
-      } else if ($err) {
-        throw new Exception(
-          "git fetch failed with error #{$err}:\n".
-          "stdout:{$stdout}\n\n".
-          "stderr:{$stderr}\n");
-      } else {
-        $retry = false;
-      }
-    } while ($retry);
-  }
-
-
   /**
    * @task git
    */
@@ -786,60 +625,6 @@ final class PhabricatorRepositoryPullLocalDaemon
 
 /* -(  Mercurial Implementation  )------------------------------------------- */
 
-
-  /**
-   * @task hg
-   */
-  private function executeHgCreate(
-    PhabricatorRepository $repository,
-    $path) {
-
-    $repository->execxRemoteCommand(
-      'clone %s %s',
-      $repository->getRemoteURI(),
-      rtrim($path, '/'));
-  }
-
-
-  /**
-   * @task hg
-   */
-  private function executeHgUpdate(
-    PhabricatorRepository $repository,
-    $path) {
-
-    // This is a local command, but needs credentials.
-    $future = $repository->getRemoteCommandFuture('pull -u');
-    $future->setCWD($path);
-
-    try {
-      $future->resolvex();
-    } catch (CommandException $ex) {
-      $err = $ex->getError();
-      $stdout = $ex->getStdOut();
-
-      // NOTE: Between versions 2.1 and 2.1.1, Mercurial changed the behavior
-      // of "hg pull" to return 1 in case of a successful pull with no changes.
-      // This behavior has been reverted, but users who updated between Feb 1,
-      // 2012 and Mar 1, 2012 will have the erroring version. Do a dumb test
-      // against stdout to check for this possibility.
-      // See: https://github.com/facebook/phabricator/issues/101/
-
-      // NOTE: Mercurial has translated versions, which translate this error
-      // string. In a translated version, the string will be something else,
-      // like "aucun changement trouve". There didn't seem to be an easy way
-      // to handle this (there are hard ways but this is not a common problem
-      // and only creates log spam, not application failures). Assume English.
-
-      // TODO: Remove this once we're far enough in the future that deployment
-      // of 2.1 is exceedingly rare?
-      if ($err == 1 && preg_match('/no changes found/', $stdout)) {
-        return;
-      } else {
-        throw $ex;
-      }
-    }
-  }
 
   private function executeHgDiscover(PhabricatorRepository $repository) {
     // NOTE: "--debug" gives us 40-character hashes.

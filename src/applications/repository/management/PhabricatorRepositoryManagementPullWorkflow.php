@@ -11,10 +11,6 @@ final class PhabricatorRepositoryManagementPullWorkflow
       ->setArguments(
         array(
           array(
-            'name'        => 'verbose',
-            'help'        => 'Show additional debugging information.',
-          ),
-          array(
             'name'        => 'repos',
             'wildcard'    => true,
           ),
@@ -34,9 +30,9 @@ final class PhabricatorRepositoryManagementPullWorkflow
     foreach ($repos as $repo) {
       $console->writeOut("Pulling '%s'...\n", $repo->getCallsign());
 
-      $daemon = new PhabricatorRepositoryPullLocalDaemon(array());
-      $daemon->setVerbose($args->getArg('verbose'));
-      $daemon->pullRepository($repo);
+      id(new PhabricatorRepositoryPullEngine())
+        ->setRepository($repo)
+        ->pullRepository();
     }
 
     $console->writeOut("Done.\n");
