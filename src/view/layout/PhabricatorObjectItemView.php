@@ -122,7 +122,9 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   }
 
   public function addAttribute($attribute) {
-    $this->attributes[] = $attribute;
+    if (!empty($attribute)) {
+      $this->attributes[] = $attribute;
+    }
     return $this;
   }
 
