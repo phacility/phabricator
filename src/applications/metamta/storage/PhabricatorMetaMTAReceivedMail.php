@@ -217,19 +217,20 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         if ($allow_email_users) {
           $email = new PhutilEmailAddress($from);
 
-          $user = id(new PhabricatorExternalAccount())->loadOneWhere(
+          $xuser = id(new PhabricatorExternalAccount())->loadOneWhere(
             'accountType = %s AND accountDomain IS NULL and accountID = %s',
-            'email', $email->getAddress());
+            'email',
+            $email->getAddress());
 
-          if (!$user) {
-            $user = new PhabricatorExternalAccount();
-            $user->setAccountID($email->getAddress());
-            $user->setAccountType('email');
-            $user->setDisplayName($email->getDisplayName());
-            $user->save();
-
+          if (!$xuser) {
+            $xuser = new PhabricatorExternalAccount();
+            $xuser->setAccountID($email->getAddress());
+            $xuser->setAccountType('email');
+            $xuser->setDisplayName($email->getDisplayName());
+            $xuser->save();
           }
 
+          $user = $xuser->getPhabricatorUser();
         } else {
           $default_author = PhabricatorEnv::getEnvConfig(
             'metamta.maniphest.default-public-author');
@@ -260,12 +261,12 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $receiver->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
 
       $editor = new ManiphestTransactionEditor();
-      $editor->setActor($user->getPhabricatorUser());
+      $editor->setActor($user);
       $handler = $editor->buildReplyHandler($receiver);
 
-      $handler->setActor($user->getPhabricatorUser());
+      $handler->setActor($user);
       $handler->setExcludeMailRecipientPHIDs(
-      $this->loadExcludeMailRecipientPHIDs());
+        $this->loadExcludeMailRecipientPHIDs());
       $handler->processEmail($this);
 
       $this->setRelatedPHID($receiver->getPHID());
