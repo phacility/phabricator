@@ -94,7 +94,7 @@ final class DiffusionHomeController extends DiffusionController {
             'callsign' => $repository->getCallsign(),
             'action' => 'history',
           )),
-          pht('%d Commits', number_format($size)));
+          pht('%s Commits', new PhutilNumber($size)));
       }
 
       $lint_count = '';
@@ -110,7 +110,7 @@ final class DiffusionHomeController extends DiffusionController {
               'action' => 'lint',
             )),
           ),
-          pht('%d Lint Messages', number_format($lint_branches[$branch])));
+          pht('%s Lint Messages', new PhutilNumber($lint_branches[$branch])));
       }
 
       $datetime = '';
