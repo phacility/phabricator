@@ -9,6 +9,7 @@ final class AphrontFormLayoutView extends AphrontView {
 
   private $backgroundShading;
   private $padded;
+  private $fullWidth;
 
   public function setBackgroundShading($shading) {
     $this->backgroundShading = $shading;
@@ -17,6 +18,11 @@ final class AphrontFormLayoutView extends AphrontView {
 
   public function setPadded($padded) {
     $this->padded = $padded;
+    return $this;
+  }
+
+  public function setFullWidth($width) {
+    $this->fullWidth = $width;
     return $this;
   }
 
@@ -29,6 +35,10 @@ final class AphrontFormLayoutView extends AphrontView {
 
     if ($this->padded) {
       $classes[] = 'aphront-form-view-padded';
+    }
+
+    if ($this->fullWidth) {
+      $classes[] = 'aphront-form-full-width';
     }
 
     $classes = implode(' ', $classes);
