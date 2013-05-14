@@ -927,7 +927,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-menu-css' =>
   array(
-    'uri' => '/res/3a60b96c/rsrc/css/application/conpherence/menu.css',
+    'uri' => '/res/9991071e/rsrc/css/application/conpherence/menu.css',
     'type' => 'css',
     'requires' =>
     array(
