@@ -454,6 +454,17 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       }
     }
 
+    $allow_email_users = PhabricatorEnv::getEnvConfig(
+          'phabricator.allow-email-users');
+
+    if (!$user && $allow_email_users) {
+      $xusr = id(new PhabricatorExternalAccount())->loadOneWhere(
+            'accountType = %s AND accountDomain IS NULL and accountID = %s',
+            'email', $from);
+
+      $user = $xusr->getPhabricatorUser();
+    }
+
     return $user;
   }
 
