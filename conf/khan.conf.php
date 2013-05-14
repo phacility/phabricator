@@ -13,6 +13,7 @@ return array(
 
   // Allow, but don't require, a user to say how they did testing.
   'differential.require-test-plan-field' => false,
+  'differential.allow-reopen' => true,
 
   // Allow logins via google.
   'google.auth-enabled' => true,
