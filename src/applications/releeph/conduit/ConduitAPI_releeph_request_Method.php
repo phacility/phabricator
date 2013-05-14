@@ -43,6 +43,7 @@ final class ConduitAPI_releeph_request_Method
     $requested_commits = array();
     $things = $request->getValue('things');
     $finder = id(new ReleephCommitFinder())
+      ->setUser($user)
       ->setReleephProject($releeph_project);
     foreach ($things as $thing) {
       try {

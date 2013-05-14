@@ -10,6 +10,7 @@ final class DiffusionCommitController extends DiffusionController {
   public function willProcessRequest(array $data) {
     // This controller doesn't use blob/path stuff, just pass the dictionary
     // in directly instead of using the AphrontRequest parsing mechanism.
+    $data['user'] = $this->getRequest()->getUser();
     $drequest = DiffusionRequest::newFromDictionary($data);
     $this->diffusionRequest = $drequest;
   }

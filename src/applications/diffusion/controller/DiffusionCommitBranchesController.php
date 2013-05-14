@@ -3,6 +3,7 @@
 final class DiffusionCommitBranchesController extends DiffusionController {
 
   public function willProcessRequest(array $data) {
+    $data['user'] = $this->getRequest()->getUser();
     $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
   }
 

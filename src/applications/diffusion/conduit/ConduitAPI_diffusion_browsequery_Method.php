@@ -61,9 +61,10 @@ final class ConduitAPI_diffusion_browsequery_Method
 
     $readme_request = DiffusionRequest::newFromDictionary(
       array(
-        'repository'  => $drequest->getRepository(),
-        'commit'      => $drequest->getStableCommitName(),
-        'path'        => $readme->getFullPath(),
+        'user' => $request->getUser(),
+        'repository' => $drequest->getRepository(),
+        'commit' => $drequest->getStableCommitName(),
+        'path' => $readme->getFullPath(),
       ));
 
     $file_content = DiffusionFileContent::newFromConduit(

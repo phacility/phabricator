@@ -40,6 +40,7 @@ final class DiffusionLintController extends DiffusionController {
       $drequests = array();
       foreach ($branches as $id => $branch) {
         $drequests[$id] = DiffusionRequest::newFromDictionary(array(
+          'user' => $user,
           'repository' => $repositories[$branch->getRepositoryID()],
           'branch' => $branch->getName(),
         ));

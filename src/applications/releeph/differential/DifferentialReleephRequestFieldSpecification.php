@@ -327,8 +327,9 @@ final class DifferentialReleephRequestFieldSpecification
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
           DiffusionRequest::newFromDictionary(array(
-            'repository'  => $repo,
-            'commit'      => $commit->getCommitIdentifier(),
+            'user' => $this->getUser(),
+            'repository' => $repo,
+            'commit' => $commit->getCommitIdentifier(),
           )));
         $path_changes = $change_query->loadChanges();
         $commit_paths = mpull($path_changes, 'getPath');

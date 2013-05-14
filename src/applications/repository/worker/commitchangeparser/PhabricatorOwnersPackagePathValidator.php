@@ -85,8 +85,10 @@ final class PhabricatorOwnersPackagePathValidator {
     $repository =
       id(new PhabricatorRepository())->load($commit->getRepositoryID());
     $data = array(
-      'repository'=>$repository,
-      'commit'=>$commit->getCommitIdentifier()
+      'user' => PhabricatorUser::getOmnipotentUser(),
+      'initFromConduit' => false,
+      'repository' => $repository,
+      'commit' => $commit->getCommitIdentifier()
     );
     $drequest = DiffusionRequest::newFromDictionary($data);
     $change_query =

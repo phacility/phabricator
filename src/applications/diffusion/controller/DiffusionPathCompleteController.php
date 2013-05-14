@@ -27,8 +27,9 @@ final class DiffusionPathCompleteController extends DiffusionController {
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'repository'  => $repository,
-        'path'        => $query_dir,
+        'user' => $request->getUser(),
+        'repository' => $repository,
+        'path' => $query_dir,
       ));
     $this->setDiffusionRequest($drequest);
 

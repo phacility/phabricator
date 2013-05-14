@@ -230,6 +230,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $actor_phid) {
 
     $drequest = DiffusionRequest::newFromDictionary(array(
+      'user' => PhabricatorUser::getOmnipotentUser(),
+      'initFromConduit' => false,
       'repository' => $this->repository,
       'commit' => $this->commit->getCommitIdentifier(),
     ));
@@ -333,6 +335,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           return $vs_diff;
         }
         $drequest = DiffusionRequest::newFromDictionary(array(
+          'user' => PhabricatorUser::getOmnipotentUser(),
+          'initFromConduit' => false,
           'repository' => $this->repository,
           'commit' => $this->commit->getCommitIdentifier(),
           'path' => $path,

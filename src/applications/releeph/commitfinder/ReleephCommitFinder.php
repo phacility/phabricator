@@ -3,6 +3,15 @@
 final class ReleephCommitFinder {
 
   private $releephProject;
+  private $user;
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+  public function getUser() {
+    return $this->user;
+  }
 
   public function setReleephProject(ReleephProject $rp) {
     $this->releephProject = $rp;
@@ -55,6 +64,7 @@ final class ReleephCommitFinder {
     }
 
     try {
+      $dr_data['user'] = $this->getUser();
       $dr = DiffusionRequest::newFromDictionary($dr_data);
     } catch (Exception $ex) {
       $message = "No commit matches {$partial_string}: ".$ex->getMessage();

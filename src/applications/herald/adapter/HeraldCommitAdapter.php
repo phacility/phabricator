@@ -106,6 +106,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
   private function loadCommitDiff() {
     $drequest = DiffusionRequest::newFromDictionary(
       array(
+        'user' => PhabricatorUser::getOmnipotentUser(),
         'repository' => $this->repository,
         'commit' => $this->commit->getCommitIdentifier(),
       ));

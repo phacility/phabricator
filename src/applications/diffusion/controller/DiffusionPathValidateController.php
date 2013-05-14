@@ -22,8 +22,9 @@ final class DiffusionPathValidateController extends DiffusionController {
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'repository'  => $repository,
-        'path'        => $path,
+        'user' => $request->getUser(),
+        'repository' => $repository,
+        'path' => $path,
       ));
     $this->setDiffusionRequest($drequest);
 

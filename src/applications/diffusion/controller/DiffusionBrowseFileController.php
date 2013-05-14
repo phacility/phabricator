@@ -957,6 +957,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $before_req = DiffusionRequest::newFromDictionary(
       array(
+        'user' => $this->getRequest()->getUser(),
         'repository' => $drequest->getRepository(),
         'commit'     => $commit,
       ));

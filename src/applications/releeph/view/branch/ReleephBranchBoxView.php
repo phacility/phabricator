@@ -167,6 +167,7 @@ final class ReleephBranchBoxView extends AphrontView {
         "Diffusion \xE2\x86\x97");
     } else {
       $diffusion_request = DiffusionRequest::newFromDictionary(array(
+        'user' => $this->getUser(),
         'repository' => $repo,
       ));
       $diffusion_branch_uri = $diffusion_request->generateURI(array(
