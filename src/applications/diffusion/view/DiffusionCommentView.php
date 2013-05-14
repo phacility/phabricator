@@ -114,10 +114,10 @@ final class DiffusionCommentView extends AphrontView {
     $actions = array();
     if ($action == PhabricatorAuditActionConstants::ADD_CCS) {
       $rendered_ccs = $this->renderHandleList($added_ccs);
-      $actions[] = hsprintf("%s added CCs: %s.", $author_link, $rendered_ccs);
+      $actions[] = pht("%s added CCs: %s.", $author_link, $rendered_ccs);
     } else if ($action == PhabricatorAuditActionConstants::ADD_AUDITORS) {
       $rendered_auditors = $this->renderHandleList($added_auditors);
-      $actions[] = hsprintf(
+      $actions[] = pht(
         "%s added auditors: %s.",
         $author_link,
         $rendered_auditors);

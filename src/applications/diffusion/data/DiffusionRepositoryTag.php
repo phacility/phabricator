@@ -63,4 +63,28 @@ final class DiffusionRepositoryTag {
     return $this->author;
   }
 
+  public function toDictionary() {
+    return array(
+      'author' => $this->getAuthor(),
+      'epoch' => $this->getEpoch(),
+      'commitIdentifier' => $this->getCommitIdentifier(),
+      'name' => $this->getName(),
+      'description' => $this->getDescription(),
+      'type' => $this->getType());
+  }
+
+  public static function newFromConduit(array $dicts) {
+    $tags = array();
+    foreach ($dicts as $dict) {
+      $tags[] = id(new DiffusionRepositoryTag())
+        ->setAuthor($dict['author'])
+        ->setEpoch($dict['epoch'])
+        ->setCommitIdentifier($dict['commitIdentifier'])
+        ->setName($dict['name'])
+        ->setDescription($dict['description'])
+        ->setType($dict['type']);
+    }
+    return $tags;
+  }
+
 }

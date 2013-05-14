@@ -90,6 +90,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->getDetail('local-path');
   }
 
+  public function getSubversionBaseURI() {
+    $vcs = $this->getVersionControlSystem();
+    if ($vcs != PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
+      throw new Exception("Not a subversion repository!");
+    }
+
+    $uri = $this->getDetail('remote-uri');
+    $subpath = $this->getDetail('svn-subpath');
+
+    return $uri.$subpath;
+  }
+
   public function execRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatRemoteCommand($args);

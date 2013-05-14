@@ -268,9 +268,26 @@ final class DifferentialReleephRequestFieldSpecification
       $actor = id(new PhabricatorUser())
         ->loadOneWhere('phid = %s', $actor_phid);
 
-      id(new ReleephRequestEditor($releeph_request))
+      $xactions = array();
+
+      $xactions[] = id(new ReleephRequestTransaction())
+        ->setTransactionType(ReleephRequestTransaction::TYPE_DISCOVERY)
+        ->setMetadataValue('action', $action)
+        ->setMetadataValue('authorPHID',
+          $data->getCommitDetail('authorPHID'))
+        ->setMetadataValue('committerPHID',
+          $data->getCommitDetail('committerPHID'))
+        ->setNewValue($commit->getPHID());
+
+      $editor = id(new ReleephRequestTransactionalEditor())
         ->setActor($actor)
-        ->discoverCommit($action, $commit, $data);
+        ->setContinueOnNoEffect(true)
+        ->setContentSource(
+          PhabricatorContentSource::newForSource(
+            PhabricatorContentSource::SOURCE_UNKNOWN,
+            array()));
+
+      $editor->applyTransactions($releeph_request, $xactions);
     }
   }
 

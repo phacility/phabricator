@@ -58,7 +58,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
         ),
         'request/' => array(
           '(?P<requestID>[1-9]\d*)/' => 'ReleephRequestViewController',
-          'create/' => 'ReleephRequestCreateController',
+          'create/' => 'ReleephRequestEditController',
           'differentialcreate/' => array(
             'D(?P<diffRevID>[1-9]\d*)' =>
               'ReleephRequestDifferentialCreateController',
@@ -69,13 +69,15 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
             'ReleephRequestActionController',
           'typeahead/' =>
             'ReleephRequestTypeaheadController',
+          'comment/(?P<requestID>[1-9]\d*)/' =>
+            'ReleephRequestCommentController',
         ),
 
         // Branch navigation made pretty, as it's the most common:
         '(?P<projectName>[^/]+)/(?P<branchName>[^/]+)/' => array(
           ''              => 'ReleephBranchViewController',
           'edit/'         => 'ReleephBranchEditController',
-          'request/'      => 'ReleephRequestCreateController',
+          'request/'      => 'ReleephRequestEditController',
           '(?P<action>close|re-open)/' => 'ReleephBranchAccessController',
         ),
       )

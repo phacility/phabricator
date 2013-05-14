@@ -115,13 +115,17 @@ final class PhabricatorOwnersListController
           ->withStatus(PhabricatorProjectQuery::STATUS_ANY)
           ->execute();
         $owner_phids = mpull($projects, 'getPHID');
-        $data = queryfx_all(
-          $package->establishConnection('r'),
-          'SELECT p.* FROM %T p JOIN %T o ON p.id = o.packageID
-            WHERE o.userPHID IN (%Ls) GROUP BY p.id',
-          $package->getTableName(),
-          $owner->getTableName(),
-          $owner_phids);
+        if ($owner_phids) {
+          $data = queryfx_all(
+            $package->establishConnection('r'),
+            'SELECT p.* FROM %T p JOIN %T o ON p.id = o.packageID
+              WHERE o.userPHID IN (%Ls) GROUP BY p.id',
+            $package->getTableName(),
+            $owner->getTableName(),
+            $owner_phids);
+        } else {
+          $data = array();
+        }
         $packages = $package->loadAllFromArray($data);
 
         $header = 'Owned Packages';

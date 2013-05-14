@@ -83,7 +83,7 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $verb = PhrictionActionConstants::getActionPastTenseVerb($action);
 
     $text = "{$author_name} {$verb} the document".
-            "{$document_title} {$document_uri}";
+            " {$document_title} {$document_uri}";
 
     return $text;
   }

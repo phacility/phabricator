@@ -13,7 +13,8 @@ body div.jx-tokenizer-container {
   position: relative;
   display: block;
   padding: 0;
-  height: 30px;
+  min-height: 30px;
+  height: auto;
 }
 
 var.jx-tokenizer-metrics {
@@ -33,7 +34,7 @@ body input.jx-tokenizer-input {
   box-shadow: none;
   -webkit-box-shadow: none;
   font-size: 13px;
-  color: #777;
+  color: #333;
   height: 26px;
 }
 
@@ -43,8 +44,9 @@ body input.jx-tokenizer-input:focus {
   border-color: transparent;
 }
 
-.jx-typeahead-placeholder {
+body input.jx-typeahead-placeholder {
   margin-left: 4px;
+  color: #777
 }
 
 a.jx-tokenizer-x {

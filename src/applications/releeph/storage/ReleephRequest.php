@@ -34,14 +34,6 @@ final class ReleephRequest extends ReleephDAO {
   const REVERT_OK     = 5;
   const REVERT_FAILED = 6;
 
-  const STATUS_REQUESTED       = 1;
-  const STATUS_NEEDS_PICK      = 2;  // aka approved
-  const STATUS_REJECTED        = 3;
-  const STATUS_ABANDONED       = 4;
-  const STATUS_PICKED          = 5;
-  const STATUS_REVERTED        = 6;
-  const STATUS_NEEDS_REVERT    = 7;  // aka revert requested
-
   public function shouldBeInBranch() {
     return
       $this->getPusherIntent() == self::INTENT_WANT &&
@@ -92,48 +84,29 @@ final class ReleephRequest extends ReleephDAO {
   private function calculateStatus() {
     if ($this->shouldBeInBranch()) {
       if ($this->getInBranch()) {
-        return self::STATUS_PICKED;
+        return ReleephRequestStatus::STATUS_PICKED;
       } else {
-        return self::STATUS_NEEDS_PICK;
+        return ReleephRequestStatus::STATUS_NEEDS_PICK;
       }
     } else {
       if ($this->getInBranch()) {
-        return self::STATUS_NEEDS_REVERT;
+        return ReleephRequestStatus::STATUS_NEEDS_REVERT;
       } else {
         $has_been_in_branch = $this->getCommitIdentifier();
         // Regardless of why we reverted something, always say reverted if it
         // was once in the branch.
         if ($has_been_in_branch) {
-          return self::STATUS_REVERTED;
+          return ReleephRequestStatus::STATUS_REVERTED;
         } elseif ($this->getPusherIntent() === ReleephRequest::INTENT_PASS) {
           // Otherwise, if it has never been in the branch, explicitly say why:
-          return self::STATUS_REJECTED;
+          return ReleephRequestStatus::STATUS_REJECTED;
         } elseif ($this->getRequestorIntent() === ReleephRequest::INTENT_WANT) {
-          return self::STATUS_REQUESTED;
+          return ReleephRequestStatus::STATUS_REQUESTED;
         } else {
-          return self::STATUS_ABANDONED;
+          return ReleephRequestStatus::STATUS_ABANDONED;
         }
       }
     }
-  }
-
-  public static function getStatusDescriptionFor($status) {
-    static $descriptions = array(
-      self::STATUS_REQUESTED       => 'Requested',
-      self::STATUS_REJECTED        => 'Rejected',
-      self::STATUS_ABANDONED       => 'Abandoned',
-      self::STATUS_PICKED          => 'Picked',
-      self::STATUS_REVERTED        => 'Reverted',
-      self::STATUS_NEEDS_PICK      => 'Needs Pick',
-      self::STATUS_NEEDS_REVERT    => 'Needs Revert',
-    );
-    return idx($descriptions, $status, '??');
-  }
-
-  public static function getStatusClassSuffixFor($status) {
-    $description = self::getStatusDescriptionFor($status);
-    $class = str_replace(' ', '-', strtolower($description));
-    return $class;
   }
 
 
@@ -310,13 +283,6 @@ final class ReleephRequest extends ReleephDAO {
 
   public function setStatus($value) {
     throw new Exception('`status` is now deprecated!');
-  }
-
-
-/* -(  Make magic Lisk methods private  )------------------------------------ */
-
-  private function setUserIntents(array $ar) {
-    return parent::setUserIntents($ar);
   }
 
 }

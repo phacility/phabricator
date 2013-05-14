@@ -34,9 +34,10 @@ final class PhabricatorRepositoryManagementPullWorkflow
     foreach ($repos as $repo) {
       $console->writeOut("Pulling '%s'...\n", $repo->getCallsign());
 
-      $daemon = new PhabricatorRepositoryPullLocalDaemon(array());
-      $daemon->setVerbose($args->getArg('verbose'));
-      $daemon->pullRepository($repo);
+      id(new PhabricatorRepositoryPullEngine())
+        ->setRepository($repo)
+        ->setVerbose($args->getArg('verbose'))
+        ->pullRepository();
     }
 
     $console->writeOut("Done.\n");

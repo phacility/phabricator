@@ -92,11 +92,11 @@
   display: none;
 }
 
-.device-phone a.phabricator-crumbs-action .sprite-icon {
+.device-phone a.phabricator-crumbs-action .sprite-icons {
   margin-left: 5px;
 }
 
-.phabricator-crumbs-action .sprite-icon {
+.phabricator-crumbs-action .sprite-icons {
   width: 14px;
   height: 14px;
   left: 4px;

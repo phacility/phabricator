@@ -170,7 +170,9 @@ final class PHUIIconExample extends PhabricatorUIExample {
 
     return phutil_tag(
       'div',
-        array(),
+        array(
+          'class' => 'phui-icon-example',
+        ),
         array(
           $head1,
           $wrap1,

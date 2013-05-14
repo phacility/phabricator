@@ -13,31 +13,28 @@ final class DiffusionHomeController extends DiffusionController {
       $rows = array();
       foreach ($shortcuts as $shortcut) {
         $rows[] = array(
-          phutil_tag(
-            'a',
-            array(
-              'href' => $shortcut->getHref(),
-            ),
-            $shortcut->getName()),
+          $shortcut->getName(),
+          $shortcut->getHref(),
           $shortcut->getDescription(),
         );
       }
 
-      $shortcut_table = new AphrontTableView($rows);
-      $shortcut_table->setHeaders(
-        array(
-          'Link',
-          '',
-        ));
-      $shortcut_table->setColumnClasses(
-        array(
-          'pri',
-          'wide',
-        ));
+      $list = new PhabricatorObjectItemListView();
+      $list->setCards(true);
+      $list->setFlush(true);
+      foreach ($rows as $row) {
+        $item = id(new PhabricatorObjectItemView())
+            ->setHeader($row[0])
+            ->setHref($row[1])
+            ->setSubhead(($row[2] ? $row[2] : pht('No Description')));
+        $list->addItem($item);
+      }
 
-      $shortcut_panel = new AphrontPanelView();
-      $shortcut_panel->setHeader('Shortcuts');
-      $shortcut_panel->appendChild($shortcut_table);
+      $shortcut_panel = id(new AphrontPanelView())
+        ->setNoBackground(true)
+        ->setHeader(pht('Shortcuts'))
+        ->appendChild($list);
+
     } else {
       $shortcut_panel = null;
     }
@@ -97,7 +94,7 @@ final class DiffusionHomeController extends DiffusionController {
             'callsign' => $repository->getCallsign(),
             'action' => 'history',
           )),
-          number_format($size));
+          pht('%s Commits', new PhutilNumber($size)));
       }
 
       $lint_count = '';
@@ -113,23 +110,19 @@ final class DiffusionHomeController extends DiffusionController {
               'action' => 'lint',
             )),
           ),
-          number_format($lint_branches[$branch]));
+          pht('%s Lint Messages', new PhutilNumber($lint_branches[$branch])));
       }
 
-      $date = '-';
-      $time = '-';
+      $datetime = '';
       if ($commit) {
         $date = phabricator_date($commit->getEpoch(), $user);
         $time = phabricator_time($commit->getEpoch(), $user);
+        $datetime = $date.' '.$time;
       }
 
       $rows[] = array(
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/diffusion/'.$repository->getCallsign().'/',
-          ),
-          $repository->getName()),
+        $repository->getName(),
+        ('/diffusion/'.$repository->getCallsign().'/'),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
         $size,
@@ -139,9 +132,8 @@ final class DiffusionHomeController extends DiffusionController {
               $repository,
               $commit->getCommitIdentifier(),
               $commit->getSummary())
-          : '-',
-        $date,
-        $time,
+          : pht('No Commits'),
+        $datetime
       );
     }
 
@@ -170,43 +162,28 @@ final class DiffusionHomeController extends DiffusionController {
           $repository_tool));
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setNoDataString($no_repositories_txt);
-    $table->setHeaders(
-      array(
-        'Repository',
-        'VCS',
-        'Commits',
-        'Lint',
-        'Last',
-        'Date',
-        'Time',
-      ));
-    $table->setColumnClasses(
-      array(
-        'pri',
-        '',
-        'n',
-        'n',
-        'wide',
-        '',
-        'right',
-      ));
-    $table->setColumnVisibility(
-      array(
-        true,
-        true,
-        true,
-        $show_lint,
-        true,
-        true,
-        true,
-      ));
+    $list = new PhabricatorObjectItemListView();
+    $list->setCards(true);
+    $list->setFlush(true);
+    foreach ($rows as $row) {
+      $item = id(new PhabricatorObjectItemView())
+          ->setHeader($row[0])
+          ->setSubHead($row[5])
+          ->setHref($row[1])
+          ->addAttribute(($row[2] ? $row[2] : pht('No Information')))
+          ->addAttribute(($row[3] ? $row[3] : pht('0 Commits')))
+          ->addIcon('none', $row[6]);
+      if ($show_lint) {
+        $item->addAttribute($row[4]);
+      }
+      $list->addItem($item);
+    }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Browse Repositories');
-    $panel->appendChild($table);
-    $panel->setNoBackground();
+    $list = id(new AphrontPanelView())
+      ->setNoBackground(true)
+      ->setHeader(pht('Repositories'))
+      ->appendChild($list);
+
 
     $crumbs = $this->buildCrumbs();
     $crumbs->addCrumb(
@@ -214,14 +191,16 @@ final class DiffusionHomeController extends DiffusionController {
         ->setName(pht('All Repositories'))
         ->setHref($this->getApplicationURI()));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $shortcut_panel,
-        $panel,
+        $list,
       ),
       array(
-        'title' => 'Diffusion',
+        'title' => pht('Diffusion'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

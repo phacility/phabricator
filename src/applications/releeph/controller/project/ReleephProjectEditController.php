@@ -191,7 +191,7 @@ final class ReleephProjectEditController extends ReleephController {
           ->setValue($release_counter)
           ->setName('releaseCounter')
           ->setCaption(
-            pht("Used by the command line branch cutter's %N field")))
+            pht("Used by the command line branch cutter's %%N field")))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Pick Instructions'))
@@ -252,18 +252,15 @@ final class ReleephProjectEditController extends ReleephController {
     $commit_author_inset = $this->buildCommitAuthorInset($commit_author);
 
     // Build the Template inset
-    $markup_engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
-
-    // From DifferentialUnitFieldSpecification...
-    $markup_engine->setConfig('viewer', $request->getUser());
-
     $help_markup = phutil_tag(
       'div',
       array(
         'class' => 'phabricator-remarkup',
       ),
-      phutil_safe_html(
-        $markup_engine->markupText(ReleephBranchTemplate::getHelpRemarkup())));
+      PhabricatorMarkupEngine::renderOneObject(
+        new ReleephBranchTemplate(),
+        'field',
+        $request->getUser()));
 
     $branch_template_input = id(new AphrontFormTextControl())
       ->setName('branchTemplate')

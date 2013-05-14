@@ -1,0 +1,52 @@
+<?php
+
+final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
+
+  protected function getPhabricatorTestCaseConfiguration() {
+    return array(
+      self::PHABRICATOR_TESTCONFIG_BUILD_STORAGE_FIXTURES => true,
+    );
+  }
+
+  public function testDropSelfMail() {
+    $mail = new PhabricatorMetaMTAReceivedMail();
+    $mail->setHeaders(
+      array(
+        'X-Phabricator-Sent-This-Message' => 'yes',
+      ));
+    $mail->save();
+
+    $mail->processReceivedMail();
+
+    $this->assertEqual(
+      MetaMTAReceivedMailStatus::STATUS_FROM_PHABRICATOR,
+      $mail->getStatus());
+  }
+
+
+  public function testDropDuplicateMail() {
+    $mail_a = new PhabricatorMetaMTAReceivedMail();
+    $mail_a->setHeaders(
+      array(
+        'Message-ID' => 'test@example.com',
+      ));
+    $mail_a->save();
+
+    $mail_b = new PhabricatorMetaMTAReceivedMail();
+    $mail_b->setHeaders(
+      array(
+        'Message-ID' => 'test@example.com',
+      ));
+    $mail_b->save();
+
+    $mail_a->processReceivedMail();
+    $mail_b->processReceivedMail();
+
+    $this->assertEqual(
+      MetaMTAReceivedMailStatus::STATUS_DUPLICATE,
+      $mail_b->getStatus());
+  }
+
+
+
+}

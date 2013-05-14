@@ -1282,6 +1282,22 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130507.releephrqmailkeypop.php'),
       ),
+      '20130508.search_namedquery.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130508.search_namedquery.sql'),
+      ),
+      '20130508.releephtransactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130508.releephtransactions.sql'),
+      ),
+      '20130508.releephtransactionsmig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130508.releephtransactionsmig.php'),
+      ),
+      '20130513.receviedmailstatus.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130513.receviedmailstatus.sql'),
+      ),
     );
   }
 }

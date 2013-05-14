@@ -18,3 +18,7 @@ button.token-button {
 .token-grid {
   text-align: center;
 }
+
+.phui-icon-view.sprite-tokens {
+  display: inline-block;
+}

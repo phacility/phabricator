@@ -11,6 +11,22 @@ abstract class ReleephFieldSpecification
     return null;
   }
 
+  public function getRequiredStorageKey() {
+    $key = $this->getStorageKey();
+    if ($key === null) {
+      throw new ReleephFieldSpecificationIncompleteException($this);
+    }
+    if (strpos($key, '.') !== false) {
+      /**
+       * Storage keys are reused for form controls, and periods in form control
+       * names break HTML forms.
+       */
+      throw new Exception(
+        "You can't use '.' in storage keys!");
+    }
+    return $key;
+  }
+
   final public function isEditable() {
     return $this->getStorageKey() !== null;
   }
@@ -37,6 +53,17 @@ abstract class ReleephFieldSpecification
     return;
   }
 
+  /**
+   * Turn values as they are stored in a ReleephRequest into a text that can be
+   * rendered as a transactions old/new values.
+   */
+  public function normalizeForTransactionView(
+    PhabricatorApplicationTransaction $xaction,
+    $value) {
+
+    return $value;
+  }
+
 
 /* -(  Header View  )-------------------------------------------------------- */
 
@@ -58,13 +85,6 @@ abstract class ReleephFieldSpecification
 
   public function renderEditControl(AphrontRequest $request) {
     throw new ReleephFieldSpecificationIncompleteException($this);
-  }
-
-  public function setValueFromAphrontRequest(AphrontRequest $request) {
-    $data = $request->getRequestData();
-    $value = idx($data, $this->getRequiredStorageKey());
-    $this->validate($value);
-    $this->setValue($value);
   }
 
 
@@ -299,22 +319,6 @@ abstract class ReleephFieldSpecification
 
 
 /* -(  Implementation  )----------------------------------------------------- */
-
-  protected function getRequiredStorageKey() {
-    $key = $this->getStorageKey();
-    if ($key === null) {
-      throw new ReleephFieldSpecificationIncompleteException($this);
-    }
-    if (strpos($key, '.') !== false) {
-      /**
-       * Storage keys are reused for form controls, and periods in form control
-       * names break HTML forms.
-       */
-      throw new Exception(
-        "You can't use '.' in storage keys!");
-    }
-    return $key;
-  }
 
   /**
    * The "hook" functions ##appendSelectControlsHook()## and

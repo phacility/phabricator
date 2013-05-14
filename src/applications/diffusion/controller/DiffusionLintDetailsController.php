@@ -50,12 +50,12 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     $table = id(new AphrontTableView($rows))
       ->setHeaders(array(
-        'Path',
-        'Line',
-        'Author',
-        'Severity',
-        'Name',
-        'Description',
+        pht('Path'),
+        pht('Line'),
+        pht('Author'),
+        pht('Severity'),
+        pht('Name'),
+        pht('Description'),
       ))
       ->setColumnClasses(array('', 'n'))
       ->setColumnVisibility(array($is_dir));
@@ -97,9 +97,13 @@ final class DiffusionLintDetailsController extends DiffusionController {
 
     return $this->buildApplicationPage(
       $nav,
-      array('title' => array(
-        'Lint',
-        $drequest->getRepository()->getCallsign(),
+      array(
+        'device' => true,
+        'dust' => true,
+        'title' =>
+          array(
+            pht('Lint'),
+            $drequest->getRepository()->getCallsign(),
       )));
   }
 

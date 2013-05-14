@@ -60,7 +60,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     $template->setContentSource($content_source);
     $template->setAuthorPHID($user->getPHID());
 
-
+    $is_unsub = false;
     if ($is_new_task) {
       // If this is a new task, create a "User created this task." transaction
       // and then set the title and description.
@@ -100,6 +100,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
           $new_value = $user->getPHID();
           break;
         case 'unsubscribe':
+          $is_unsub = true;
           $ttype = ManiphestTransactionType::TYPE_CCS;
           $ccs = $task->getCCPHIDs();
           foreach ($ccs as $k => $phid) {
@@ -119,11 +120,15 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       $xactions[] = $xaction;
     }
 
-    $task->setCCPHIDs(array($user->getPHID()));
     $ccs = $mail->loadCCPHIDs();
-    if ($ccs) {
-      $old_ccs = $task->getCCPHIDs();
-      $new_ccs = array_unique(array_merge($old_ccs, $ccs));
+    $old_ccs = $task->getCCPHIDs();
+    $new_ccs = array_merge($old_ccs, $ccs);
+    if (!$is_unsub) {
+      $new_ccs[] = $user->getPHID();
+    }
+    $new_ccs = array_unique($new_ccs);
+
+    if (array_diff($new_ccs, $old_ccs)) {
       $cc_xaction = clone $template;
       $cc_xaction->setTransactionType(ManiphestTransactionType::TYPE_CCS);
       $cc_xaction->setNewValue($new_ccs);

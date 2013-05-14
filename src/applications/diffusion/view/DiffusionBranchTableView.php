@@ -45,7 +45,7 @@ final class DiffusionBranchTableView extends DiffusionView {
                 'branch' => $branch->getName(),
               ))
           ),
-          'History'),
+          pht('History')),
         phutil_tag(
           'a',
           array(
@@ -73,11 +73,11 @@ final class DiffusionBranchTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        'History',
-        'Branch',
-        'Head',
-        'Modified',
-        'Details',
+        pht('History'),
+        pht('Branch'),
+        pht('Head'),
+        pht('Modified'),
+        pht('Details'),
       ));
     $view->setColumnClasses(
       array(

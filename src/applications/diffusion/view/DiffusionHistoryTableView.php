@@ -146,15 +146,15 @@ final class DiffusionHistoryTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        'Browse',
+        pht('Browse'),
         '',
-        'Commit',
-        'Revision',
-        'Change',
-        'Date',
-        'Time',
-        'Author/Committer',
-        'Details',
+        pht('Commit'),
+        pht('Revision'),
+        pht('Change'),
+        pht('Date'),
+        pht('Time'),
+        pht('Author/Committer'),
+        pht('Details'),
       ));
     $view->setColumnClasses(
       array(

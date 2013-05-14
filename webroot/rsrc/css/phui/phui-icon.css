@@ -2,42 +2,42 @@
  * @provides phui-icon-view-css
  */
 
-.phui-icon-item-link {
+.phui-icon-example .phui-icon-view {
   display: inline-block;
   vertical-align: top;
 }
 
-.phui-icon-item-link.sprite-minicons {
+.phui-icon-view.sprite-minicons {
   height: 16px;
   width: 16px;
 }
 
-.phui-icon-item-link.sprite-actions {
+.phui-icon-view.sprite-actions {
   height: 24px;
   width: 24px;
 }
 
-.phui-icon-item-link.sprite-apps {
+.phui-icon-view.sprite-apps {
   height: 14px;
   width: 14px;
 }
 
-.phui-icon-item-link.sprite-tokens {
+.phui-icon-view.sprite-tokens {
   height: 16px;
   width: 16px;
 }
 
-.phui-icon-item-link.sprite-payments {
+.phui-icon-view.sprite-payments {
   height: 32px;
   width: 60px;
 }
 
-.phui-icon-item-link.phuihead-medium {
+.phui-icon-view.phuihead-medium {
   height: 50px;
   width: 50px;
 }
 
-.phui-icon-item-link.phuihead-small {
+.phui-icon-view.phuihead-small {
   height: 35px;
   width: 35px;
   background-size: 35px;

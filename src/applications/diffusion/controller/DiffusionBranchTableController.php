@@ -26,8 +26,8 @@ final class DiffusionBranchTableController extends DiffusionController {
     $content = null;
     if (!$branches) {
       $content = new AphrontErrorView();
-      $content->setTitle('No Branches');
-      $content->appendChild('This repository has no branches.');
+      $content->setTitle(pht('No Branches'));
+      $content->appendChild(pht('This repository has no branches.'));
       $content->setSeverity(AphrontErrorView::SEVERITY_NODATA);
     } else {
       $commits = id(new PhabricatorAuditCommitQuery())
@@ -44,7 +44,7 @@ final class DiffusionBranchTableController extends DiffusionController {
         ->setDiffusionRequest($drequest);
 
       $panel = id(new AphrontPanelView())
-        ->setHeader('Branches')
+        ->setHeader(pht('Branches'))
         ->appendChild($view)
         ->appendChild($pager);
 

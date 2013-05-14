@@ -38,7 +38,7 @@ final class PhabricatorCrumbsView extends AphrontView {
           $icon = phutil_tag(
             'span',
             array(
-              'class' => 'sprite-icon action-'.$action->getIcon(),
+              'class' => 'sprite-icons icons-'.$action->getIcon(),
             ),
             '');
         }
@@ -68,7 +68,7 @@ final class PhabricatorCrumbsView extends AphrontView {
         $icon = phutil_tag(
           'span',
             array(
-              'class' => 'sprite-icon action-action-menu'
+              'class' => 'sprite-icons action-action-menu'
             ),
             '');
         $name = phutil_tag(

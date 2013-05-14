@@ -49,7 +49,7 @@ final class ConduitAPI_diffusion_browsequery_Method
 
       $path = $result_path->getPath();
 
-      if (preg_match('/^readme(|\.txt|\.remarkup|\.rainbow)$/i', $path)) {
+      if (preg_match('/^readme(|\.txt|\.remarkup|\.rainbow|\.md)$/i', $path)) {
         $readme = $result_path;
         break;
       }

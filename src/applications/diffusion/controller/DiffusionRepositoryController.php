@@ -75,10 +75,10 @@ final class DiffusionRepositoryController extends DiffusionController {
             'action' => 'history',
           )),
       ),
-      'View Full Commit History');
+      pht('View Full Commit History'));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader(hsprintf("Recent Commits &middot; %s", $all));
+    $panel->setHeader(pht("Recent Commits &middot; %s", $all));
     $panel->appendChild($history_table);
     $panel->setNoBackground();
 
@@ -95,7 +95,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_panel->setHeader(phutil_tag(
       'a',
       array('href' => $drequest->generateURI(array('action' => 'browse'))),
-      'Browse Repository'));
+      pht('Browse Repository')));
     $browse_panel->appendChild($browse_table);
     $browse_panel->setNoBackground();
 
@@ -107,16 +107,24 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $readme = $browse_results->getReadmeContent();
     if ($readme) {
+      $box = new PHUIBoxView();
+      $box->setShadow(true);
+      $box->appendChild($readme);
+      $box->addPadding(PHUI::PADDING_LARGE);
+
       $panel = new AphrontPanelView();
-      $panel->setHeader('README');
-      $panel->appendChild($readme);
+      $panel->setHeader(pht('README'));
+      $panel->setNoBackground();
+      $panel->appendChild($box);
       $content[] = $panel;
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $content,
       array(
         'title' => $drequest->getRepository()->getName(),
+        'dust' => true,
+        'device' => true,
       ));
   }
 
@@ -149,7 +157,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Repository Properties');
+    $panel->setHeader(pht('Repository Properties'));
     $panel->appendChild($table);
     $panel->setNoBackground();
 
@@ -187,11 +195,11 @@ final class DiffusionRepositoryController extends DiffusionController {
       $table->setUser($this->getRequest()->getUser());
 
       $panel = new AphrontPanelView();
-      $panel->setHeader('Branches');
+      $panel->setHeader(pht('Branches'));
       $panel->setNoBackground();
 
       if ($more_branches) {
-        $panel->setCaption('Showing ' . $limit . ' branches.');
+        $panel->setCaption(pht('Showing %d branches.', $limit));
       }
 
       $panel->addButton(
@@ -204,7 +212,7 @@ final class DiffusionRepositoryController extends DiffusionController {
               )),
             'class' => 'grey button',
           ),
-          "Show All Branches \xC2\xBB"));
+          pht("Show All Branches \xC2\xBB")));
 
       $panel->appendChild($table);
 
@@ -216,10 +224,17 @@ final class DiffusionRepositoryController extends DiffusionController {
 
   private function buildTagListTable(DiffusionRequest $drequest) {
     $tag_limit = 15;
-
-    $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
-    $query->setLimit($tag_limit + 1);
-    $tags = $query->loadTags();
+    $tags = array();
+    try {
+      $tags = DiffusionRepositoryTag::newFromConduit(
+        $this->callConduitWithDiffusionRequest(
+          'diffusion.tagsquery',
+          array('limit' => $tag_limit + 1)));
+    } catch (ConduitException $e) {
+      if ($e->getMessage() != 'ERR-UNSUPPORTED-VCS') {
+        throw $e;
+      }
+    }
 
     if (!$tags) {
       return null;
@@ -246,10 +261,10 @@ final class DiffusionRepositoryController extends DiffusionController {
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Tags');
+    $panel->setHeader(pht('Tags'));
 
     if ($more_tags) {
-      $panel->setCaption('Showing the '.$tag_limit.' most recent tags.');
+      $panel->setCaption(pht('Showing the %d most recent tags.', $tag_limit));
     }
 
     $panel->addButton(
@@ -262,7 +277,7 @@ final class DiffusionRepositoryController extends DiffusionController {
             )),
           'class' => 'grey button',
         ),
-        "Show All Tags \xC2\xBB"));
+        pht("Show All Tags \xC2\xBB")));
     $panel->appendChild($view);
 
     return $panel;

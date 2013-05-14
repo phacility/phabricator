@@ -14,13 +14,13 @@ final class ReleephStatusFieldSpecification
   }
 
   private static $filters = array(
-    'req' => ReleephRequest::STATUS_REQUESTED,
-    'app' => ReleephRequest::STATUS_NEEDS_PICK,
-    'rej' => ReleephRequest::STATUS_REJECTED,
-    'abn' => ReleephRequest::STATUS_ABANDONED,
-    'mer' => ReleephRequest::STATUS_PICKED,
-    'rrq' => ReleephRequest::STATUS_NEEDS_REVERT,
-    'rev' => ReleephRequest::STATUS_REVERTED,
+    'req' => ReleephRequestStatus::STATUS_REQUESTED,
+    'app' => ReleephRequestStatus::STATUS_NEEDS_PICK,
+    'rej' => ReleephRequestStatus::STATUS_REJECTED,
+    'abn' => ReleephRequestStatus::STATUS_ABANDONED,
+    'mer' => ReleephRequestStatus::STATUS_PICKED,
+    'rrq' => ReleephRequestStatus::STATUS_NEEDS_REVERT,
+    'rev' => ReleephRequestStatus::STATUS_REVERTED,
   );
 
   protected function appendSelectControls(
@@ -34,7 +34,7 @@ final class ReleephStatusFieldSpecification
     );
 
     foreach (self::$filters as $code => $status) {
-      $name = ReleephRequest::getStatusDescriptionFor($status);
+      $name = ReleephRequestStatus::getStatusDescriptionFor($status);
       $filter_names[$code] = $name;
     }
 

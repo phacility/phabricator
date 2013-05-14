@@ -39,8 +39,6 @@ final class PhabricatorMetaMTASendGridReceiveController
       'text' => $request->getStr('text'),
       'html' => $request->getStr('from'),
     ));
-    $received->setMessageIDHash(
-      PhabricatorHash::digestForIndex($received->getMessageID()));
 
     $file_phids = array();
     foreach ($_FILES as $file_raw) {
