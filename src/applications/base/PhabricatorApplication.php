@@ -246,6 +246,11 @@ abstract class PhabricatorApplication {
         break;
       }
     }
+
+    if (!$selected) {
+      throw new Exception("No application '{$class_name}'!");
+    }
+
     return $selected;
   }
 

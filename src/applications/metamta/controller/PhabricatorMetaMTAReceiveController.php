@@ -11,7 +11,7 @@ final class PhabricatorMetaMTAReceiveController
     if ($request->isFormPost()) {
       $received = new PhabricatorMetaMTAReceivedMail();
       $header_content = array(
-        'Message-ID' => Filesystem::readRandomBytes(12),
+        'Message-ID' => Filesystem::readRandomCharacters(12),
       );
       $from = $request->getStr('sender');
       $to = $request->getStr('receiver');

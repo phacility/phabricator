@@ -47,6 +47,21 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
       $mail_b->getStatus());
   }
 
+  public function testDropUnreceivableMail() {
+    $mail = new PhabricatorMetaMTAReceivedMail();
+    $mail->setHeaders(
+      array(
+        'Message-ID' => 'test@example.com',
+        'To'         => 'does+not+exist@example.com',
+      ));
+    $mail->save();
+
+    $mail->processReceivedMail();
+
+    $this->assertEqual(
+      MetaMTAReceivedMailStatus::STATUS_NO_RECEIVERS,
+      $mail->getStatus());
+  }
 
 
 }

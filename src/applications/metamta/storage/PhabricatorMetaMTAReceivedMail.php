@@ -173,6 +173,9 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     try {
       $this->dropMailFromPhabricator();
       $this->dropMailAlreadyReceived();
+
+      $receiver = $this->loadReceiver();
+
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
       $this
         ->setStatus($ex->getStatusCode())
@@ -509,6 +512,43 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     throw new PhabricatorMetaMTAReceivedMailProcessingException(
       MetaMTAReceivedMailStatus::STATUS_DUPLICATE,
       $message);
+  }
+
+
+  /**
+   * Load a concrete instance of the @{class:PhabricatorMailReceiver} which
+   * accepts this mail, if one exists.
+   */
+  private function loadReceiver() {
+    $receivers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorMailReceiver')
+      ->loadObjects();
+
+    $accept = array();
+    foreach ($receivers as $key => $receiver) {
+      if (!$receiver->isEnabled()) {
+        continue;
+      }
+      if ($receiver->canAcceptMail($this)) {
+        $accept[$key] = $receiver;
+      }
+    }
+
+    if (!$accept) {
+      throw new PhabricatorMetaMTAReceivedMailProcessingException(
+        MetaMTAReceivedMailStatus::STATUS_NO_RECEIVERS,
+        "No concrete, enabled subclasses of `PhabricatorMailReceiver` can ".
+        "accept this mail.");
+    }
+
+    if (count($accept) > 1) {
+      $names = implode(', ', array_keys($accept));
+      throw new PhabricatorMetaMTAReceivedMailProcessingException(
+        MetaMTAReceivedMailStatus::STATUS_ABUNDANT_RECEIVERS,
+        "More than one `PhabricatorMailReceiver` claims to accept this mail.");
+    }
+
+    return head($accept);
   }
 
 }
