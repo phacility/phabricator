@@ -434,6 +434,20 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/loading.gif',
     'type' => 'gif',
   ),
+  '/rsrc/image/loading/loading_24.gif' =>
+  array(
+    'hash' => 'd6dcc5e6111a44fb9a160fc27b19d85c',
+    'uri' => '/res/d6dcc5e6/rsrc/image/loading/loading_24.gif',
+    'disk' => '/rsrc/image/loading/loading_24.gif',
+    'type' => 'gif',
+  ),
+  '/rsrc/image/loading/loading_48.gif' =>
+  array(
+    'hash' => 'cb6fc6eb9c0a0efaf589978029080c58',
+    'uri' => '/res/cb6fc6eb/rsrc/image/loading/loading_48.gif',
+    'disk' => '/rsrc/image/loading/loading_48.gif',
+    'type' => 'gif',
+  ),
   '/rsrc/image/main_texture.png' =>
   array(
     'hash' => 'e34d8143384721be73ec9b7532a977ab',
@@ -4001,7 +4015,7 @@ celerity_register_resource_map(array(
   ),
   'tokens-css' =>
   array(
-    'uri' => '/res/8def7753/rsrc/css/application/tokens/tokens.css',
+    'uri' => '/res/dae13a94/rsrc/css/application/tokens/tokens.css',
     'type' => 'css',
     'requires' =>
     array(
