@@ -117,6 +117,9 @@ final class ConduitAPI_diffusion_browsequery_Method
     $path = $request->getValue('path');
     $commit = $request->getValue('commit');
     $result = $this->getEmptyResultSet();
+    if ($commit === null) {
+      $commit = 'HEAD';
+    }
 
     if ($path == '') {
       // Fast path to improve the performance of the repository view; we know
