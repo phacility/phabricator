@@ -943,8 +943,11 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
-    $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
-    $raw_diff  = $raw_query->loadRawDiff();
+    $raw_diff = $this->callConduitWithDiffusionRequest(
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath()));
 
     $file = PhabricatorFile::buildFromFileDataOrHash(
       $raw_diff,

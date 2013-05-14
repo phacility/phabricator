@@ -110,10 +110,14 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
         'commit' => $this->commit->getCommitIdentifier(),
       ));
 
-    $raw = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
-      ->setTimeout(60 * 60 * 15)
-      ->setLinesOfContext(0)
-      ->loadRawDiff();
+    $raw = DiffusionQuery::callConduitWithDiffusionRequest(
+      $drequest,
+      PhabricatorUser::getOmnipotentUser(),
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $this->commit->getCommitIdentifier(),
+        'timeout' => 60 * 60 * 15,
+        'linesOfContext' => 0));
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw);
