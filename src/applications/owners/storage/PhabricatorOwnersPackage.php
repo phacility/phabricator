@@ -319,6 +319,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
               $drequest,
               'diffusion.browsequery',
               array(
+                'commit' => $drequest->getCommit(),
                 'path' => $path,
                 'needValidityOnly' => true)));
           $valid = $results->isValidResults();
