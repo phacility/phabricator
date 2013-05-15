@@ -20,4 +20,40 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
     return false;
   }
 
+  public function loadSender(PhabricatorMetaMTAReceivedMail $mail) {
+    try {
+      // Try to load the sender normally.
+      return parent::loadSender($mail);
+    } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
+
+      // If we failed to load the sender normally, use this special legacy
+      // black magic.
+
+      // TODO: Deprecate and remove this.
+
+      $default_author_key = 'metamta.maniphest.default-public-author';
+      $default_author = PhabricatorEnv::getEnvConfig($default_author_key);
+
+      if (!strlen($default_author)) {
+        throw $ex;
+      }
+
+      $user = id(new PhabricatorUser())->loadOneWhere(
+        'username = %s',
+        $default_author);
+
+      if ($user) {
+        return $user;
+      }
+
+      throw new PhabricatorMetaMTAReceivedMailProcessingException(
+        MetaMTAReceivedMailStatus::STATUS_UNKNOWN_SENDER,
+        pht(
+          "Phabricator is misconfigured, the configuration key ".
+          "'metamta.maniphest.default-public-author' is set to user ".
+          "'%s' but that user does not exist.",
+          $default_author));
+    }
+  }
+
 }

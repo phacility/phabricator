@@ -175,6 +175,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $this->dropMailAlreadyReceived();
 
       $receiver = $this->loadReceiver();
+      $sender = $receiver->loadSender($this);
 
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
       $this

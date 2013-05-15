@@ -63,5 +63,28 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
       $mail->getStatus());
   }
 
+  public function testDropUnknownSenderMail() {
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig(
+      'metamta.maniphest.public-create-email',
+      'bugs@example.com');
+    $env->overrideEnvConfig('phabricator.allow-email-users', false);
+    $env->overrideEnvConfig('metamta.maniphest.default-public-author', null);
+
+    $mail = new PhabricatorMetaMTAReceivedMail();
+    $mail->setHeaders(
+      array(
+        'Message-ID' => 'test@example.com',
+        'To'         => 'bugs@example.com',
+        'From'       => 'does+not+exist@example.com',
+      ));
+    $mail->save();
+
+    $mail->processReceivedMail();
+
+    $this->assertEqual(
+      MetaMTAReceivedMailStatus::STATUS_UNKNOWN_SENDER,
+      $mail->getStatus());
+  }
 
 }
