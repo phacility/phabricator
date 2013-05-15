@@ -41,6 +41,7 @@ final class ReleephBranchCreateController extends ReleephController {
       } else {
         try {
           $finder = id(new ReleephCommitFinder())
+            ->setUser($request->getUser())
             ->setReleephProject($releeph_project);
           $cut_commit = $finder->fromPartial($cut_point);
         } catch (Exception $e) {

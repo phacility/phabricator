@@ -309,6 +309,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
           // build query to validate path
           $drequest = DiffusionRequest::newFromDictionary(
             array(
+              'user' => $this->getActor(),
               'repository'  => $repository,
               'path'        => $path,
             ));
@@ -318,6 +319,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
               $drequest,
               'diffusion.browsequery',
               array(
+                'commit' => $drequest->getCommit(),
                 'path' => $path,
                 'needValidityOnly' => true)));
           $valid = $results->isValidResults();

@@ -85,6 +85,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   public function getTitle() {
     $use_glyph = true;
+
     $request = $this->getRequest();
     if ($request) {
       $user = $request->getUser();
@@ -94,9 +95,23 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    return ($use_glyph ?
-            $this->getGlyph() : '['.$this->getApplicationName().']').
-      ' '.parent::getTitle();
+    $title = parent::getTitle();
+
+    $prefix = null;
+    if ($use_glyph) {
+      $prefix = $this->getGlyph();
+    } else {
+      $application_name = $this->getApplicationName();
+      if (strlen($application_name)) {
+        $prefix = '['.$application_name.']';
+      }
+    }
+
+    if (strlen($prefix)) {
+      $title = $prefix.' '.$title;
+    }
+
+    return $title;
   }
 
 

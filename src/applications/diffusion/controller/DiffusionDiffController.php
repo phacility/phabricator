@@ -42,19 +42,27 @@ final class DiffusionDiffController extends DiffusionController {
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-
-    $diff_query = DiffusionDiffQuery::newFromDiffusionRequest($drequest);
-    $changeset = $diff_query->loadChangeset();
+    $data = $this->callConduitWithDiffusionRequest(
+      'diffusion.diffquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath()));
+    $drequest->setCommit($data['effectiveCommit']);
+    $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
+    $diff = DifferentialDiff::newFromRawChanges($raw_changes);
+    $changesets = $diff->getChangesets();
+    $changeset = reset($changesets);
 
     if (!$changeset) {
       return new Aphront404Response();
     }
 
-
     $parser = new DifferentialChangesetParser();
     $parser->setUser($user);
     $parser->setChangeset($changeset);
-    $parser->setRenderingReference($diff_query->getRenderingReference());
+    $parser->setRenderingReference($drequest->generateURI(
+      array(
+        'action' => 'rendering-ref')));
 
     $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
     $ids = $pquery->loadPathIDs();

@@ -14,6 +14,16 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 
     $repository = $request->getRepository();
 
+    $obj = self::initQueryObject($base_class, $repository);
+    $obj->request = $request;
+
+    return $obj;
+  }
+
+  final protected static function initQueryObject(
+    $base_class,
+    PhabricatorRepository $repository) {
+
     $map = array(
       PhabricatorRepositoryType::REPOSITORY_TYPE_GIT        => 'Git',
       PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL  => 'Mercurial',
@@ -27,8 +37,6 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 
     $class = str_replace('Diffusion', 'Diffusion'.$name, $base_class);
     $obj = new $class();
-    $obj->request = $request;
-
     return $obj;
   }
 

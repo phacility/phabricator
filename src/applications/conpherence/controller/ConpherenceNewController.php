@@ -126,6 +126,7 @@ final class ConpherenceNewController extends ConpherenceController {
 
     $form = id(new AphrontFormLayoutView())
       ->setUser($user)
+      ->setFullWidth(true)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
         ->setName('participants')

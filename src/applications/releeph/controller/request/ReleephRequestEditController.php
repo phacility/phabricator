@@ -71,6 +71,7 @@ final class ReleephRequestEditController extends ReleephController {
         } else {
           $pr_commit = null;
           $finder = id(new ReleephCommitFinder())
+            ->setUser($user)
             ->setReleephProject($releeph_project);
           try {
             $pr_commit = $finder->fromPartial($request_identifier);
@@ -186,7 +187,7 @@ final class ReleephRequestEditController extends ReleephController {
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($request->getUser());
+      ->setUser($user);
 
     if ($is_edit) {
       $form

@@ -10,6 +10,7 @@ final class DiffusionCommitController extends DiffusionController {
   public function willProcessRequest(array $data) {
     // This controller doesn't use blob/path stuff, just pass the dictionary
     // in directly instead of using the AphrontRequest parsing mechanism.
+    $data['user'] = $this->getRequest()->getUser();
     $drequest = DiffusionRequest::newFromDictionary($data);
     $this->diffusionRequest = $drequest;
   }
@@ -943,8 +944,11 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
-    $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
-    $raw_diff  = $raw_query->loadRawDiff();
+    $raw_diff = $this->callConduitWithDiffusionRequest(
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath()));
 
     $file = PhabricatorFile::buildFromFileDataOrHash(
       $raw_diff,

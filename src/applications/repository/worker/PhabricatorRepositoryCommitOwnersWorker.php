@@ -8,7 +8,9 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepositoryCommit $commit) {
 
     $affected_paths = PhabricatorOwnerPathQuery::loadAffectedPaths(
-      $repository, $commit);
+      $repository,
+      $commit,
+      PhabricatorUser::getOmnipotentUser());
     $affected_packages = PhabricatorOwnersPackage::loadAffectedPackages(
       $repository,
       $affected_paths);

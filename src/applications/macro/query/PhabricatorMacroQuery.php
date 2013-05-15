@@ -52,7 +52,7 @@ final class PhabricatorMacroQuery
 
     $rows = queryfx_all(
       $conn,
-      'SELECT * FROM %T m %Q %Q %Q %Q',
+      'SELECT m.* FROM %T m %Q %Q %Q %Q',
       $macro_table->getTableName(),
       $this->buildJoinClause($conn),
       $this->buildWhereClause($conn),

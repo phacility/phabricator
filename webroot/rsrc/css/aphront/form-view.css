@@ -25,7 +25,8 @@
   text-shadow: 0 1px rgba(255,255,255,1);
 }
 
-.device-phone .aphront-form-view label.aphront-form-label {
+.device-phone .aphront-form-view label.aphront-form-label,
+.aphront-form-full-width.aphront-form-view label.aphront-form-label {
   display: block;
   float: none;
   text-align: left;
@@ -39,7 +40,8 @@
   width: 60%;
 }
 
-.device-phone .aphront-form-input {
+.device-phone .aphront-form-input,
+.aphront-form-full-width .aphront-form-input {
   margin-left: 0%;
   margin-right: 0%;
   width: 100%;
@@ -53,7 +55,12 @@
   padding-top: 4px;
 }
 
-.device-phone .aphront-form-error {
+.aphront-dialog-body .aphront-form-full-width {
+  margin-top: -10px;
+}
+
+.device-phone .aphront-form-error,
+.aphront-form-full-width .aphront-form-error {
   float: none;
   width: 100%;
 }
@@ -110,7 +117,8 @@
   margin-left: 20%;
 }
 
-.device-phone .aphront-form-view .aphront-form-caption {
+.device-phone .aphront-form-view .aphront-form-caption,
+.aphront-form-full-width .aphront-form-view .aphront-form-caption {
   margin-right: 0%;
 }
 
@@ -125,7 +133,8 @@
   padding: 10px 4px;
 }
 
-.device .aphront-form-instructions {
+.device .aphront-form-instructions,
+.aphront-form-full-width .aphront-form-instructions {
   width: 100%;
   margin: 0;
 }

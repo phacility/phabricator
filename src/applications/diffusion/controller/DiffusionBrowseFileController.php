@@ -927,31 +927,29 @@ final class DiffusionBrowseFileController extends DiffusionController {
       return null;
     }
 
-    $diff_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
-    $diff_query->setAgainstCommit($target_commit);
-    try {
-      $raw_diff = $diff_query->loadRawDiff();
-      $old_line = 0;
-      $new_line = 0;
+    $raw_diff = $this->callConduitWithDiffusionRequest(
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath(),
+        'againstCommit' => $target_commit));
+    $old_line = 0;
+    $new_line = 0;
 
-      foreach (explode("\n", $raw_diff) as $text) {
-        if ($text[0] == '-' || $text[0] == ' ') {
-          $old_line++;
-        }
-        if ($text[0] == '+' || $text[0] == ' ') {
-          $new_line++;
-        }
-        if ($new_line == $line) {
-          return $old_line;
-        }
+    foreach (explode("\n", $raw_diff) as $text) {
+      if ($text[0] == '-' || $text[0] == ' ') {
+        $old_line++;
       }
-
-      // We didn't find the target line.
-      return $line;
-
-    } catch (Exception $ex) {
-      return $line;
+      if ($text[0] == '+' || $text[0] == ' ') {
+        $new_line++;
+      }
+      if ($new_line == $line) {
+        return $old_line;
+      }
     }
+
+    // We didn't find the target line.
+    return $line;
   }
 
   private function loadParentRevisionOf($commit) {
@@ -959,6 +957,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $before_req = DiffusionRequest::newFromDictionary(
       array(
+        'user' => $this->getRequest()->getUser(),
         'repository' => $drequest->getRepository(),
         'commit'     => $commit,
       ));

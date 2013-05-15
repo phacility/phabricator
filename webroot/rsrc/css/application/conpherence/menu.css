@@ -105,6 +105,9 @@
   font-size: 13px;
   color: #ffffff;
   text-shadow: 0px 1px 1px #000000;
+  overflow: hidden;
+  width: 160px;
+  text-overflow: ellipsis;
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-subtitle {
