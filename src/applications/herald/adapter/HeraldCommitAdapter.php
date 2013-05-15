@@ -53,7 +53,9 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
   public function loadAffectedPaths() {
     if ($this->affectedPaths === null) {
       $result = PhabricatorOwnerPathQuery::loadAffectedPaths(
-        $this->repository, $this->commit);
+        $this->repository,
+        $this->commit,
+        PhabricatorUser::getOmnipotentUser());
       $this->affectedPaths = $result;
     }
     return $this->affectedPaths;
