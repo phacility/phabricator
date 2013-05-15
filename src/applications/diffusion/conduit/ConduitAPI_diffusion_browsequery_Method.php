@@ -118,7 +118,7 @@ final class ConduitAPI_diffusion_browsequery_Method
     $commit = $request->getValue('commit');
     $result = $this->getEmptyResultSet();
     if ($commit === null) {
-      $commit = 'HEAD';
+      $commit = 'origin/master';
     }
 
     if ($path == '') {
