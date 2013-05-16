@@ -4,32 +4,35 @@
 
 div.jx-typeahead-hardpoint {
   position: relative;
-  _zoom: 1; /* Some kind of IE6 fix? */
+  _zoom: 1; /* Some kind of IE6 fix? */ /* yes */
 }
 
 div.jx-typeahead-results {
   position: absolute;
-  border-bottom: 1px solid #203b75;
+  border: 1px solid #96a6c7;
+  border-top: 0px;
   padding: 0;
-  background: #ffffff;
-  width: 100%;
+  background: #fefefe;
+  width: 98%;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+  margin: -1px 1% 0;
 }
 
 div.jx-typeahead-results a.jx-result {
-  color: #222;
+  color: #333;
   display: block;
-  padding: .4em .5em .45em;
-  font-size: 11px;
-  border-width: 0px 1px 1px;
-  border-style: solid;
-  border-color: #dddddd #203b75;
+  padding: 5px 8px;
+  font-size: 13px;
+  border-bottom: 1px solid #e7e7e7;
+  border-top: 1px solid #fff;
 }
 
 div.jx-typeahead-results a.jx-result:hover,
 div.jx-typeahead-results a.focused {
   display: block;
-  background: #3b5998;
-  color: #ffffff;
+  background: #dde6f9;
+  border-top: 1px solid #dde6f9;
+  border-bottom: 1px solid #d0dbf3;
   text-decoration: none;
 }
 
