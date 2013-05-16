@@ -87,6 +87,15 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     }
 
     $this->env = PhabricatorEnv::beginScopedEnv();
+
+    // NOTE: While running unit tests, we act as though all applications are
+    // installed, regardless of the install's configuration. Tests which need
+    // to uninstall applications are responsible for adjusting state themselves
+    // (such tests are exceedingly rare).
+
+    $this->env->overrideEnvConfig(
+      'phabricator.uninstalled-applications',
+      array());
   }
 
   protected function didRunTests() {
