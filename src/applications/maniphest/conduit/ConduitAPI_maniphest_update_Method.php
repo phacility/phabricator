@@ -13,7 +13,8 @@ final class ConduitAPI_maniphest_update_Method
   public function defineErrorTypes() {
     return array(
       'ERR-BAD-TASK'          => 'No such maniphest task exists.',
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.'
+      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
+      'ERR-NO-EFFECT'         => 'Update has no effect.',
     );
   }
 
@@ -39,6 +40,15 @@ final class ConduitAPI_maniphest_update_Method
       $task = id(new ManiphestTask())->loadOneWhere(
         'phid = %s',
         $phid);
+    }
+
+    $params = $request->getAllParameters();
+    unset($params['id']);
+    unset($params['phid']);
+    $params = call_user_func_array('coalesce', $params);
+
+    if (!$params) {
+      throw new ConduitException('ERR-NO-EFFECT');
     }
 
     if (!$task) {
