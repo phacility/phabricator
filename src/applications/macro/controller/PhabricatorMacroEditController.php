@@ -156,6 +156,7 @@ final class PhabricatorMacroEditController
 
     $form
       ->setEncType('multipart/form-data')
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -219,7 +220,7 @@ final class PhabricatorMacroEditController
 
     if ($macro->getID()) {
       $title = pht('Edit Image Macro');
-      $crumb = pht('Edit');
+      $crumb = pht('Edit Macro');
 
       $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
@@ -227,7 +228,7 @@ final class PhabricatorMacroEditController
           ->setName(pht('Macro "%s"', $macro->getName())));
     } else {
       $title = pht('Create Image Macro');
-      $crumb = pht('Create');
+      $crumb = pht('Create Macro');
     }
 
     $crumbs->addCrumb(
@@ -266,17 +267,11 @@ final class PhabricatorMacroEditController
       $upload = array($upload_header, $upload_form);
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Create New Macro'));
-    $panel->setNoBackground();
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $error_view,
-        $panel,
+        $form,
         $upload,
       ),
       array(
