@@ -12,4 +12,16 @@ final class DifferentialRevisionMailReceiver
     return 'D[1-9]\d*';
   }
 
+  protected function loadObject($pattern, PhabricatorUser $viewer) {
+    $id = (int)trim($pattern, 'D');
+
+    $results = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->execute();
+
+    return head($results);
+  }
+
+
 }

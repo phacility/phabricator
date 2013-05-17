@@ -11,4 +11,14 @@ final class PonderQuestionMailReceiver extends PhabricatorObjectMailReceiver {
     return 'Q[1-9]\d*';
   }
 
+  protected function loadObject($pattern, PhabricatorUser $viewer) {
+    $id = (int)trim($pattern, 'Q');
+
+    return id(new PonderQuestionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->executeOne();
+  }
+
+
 }

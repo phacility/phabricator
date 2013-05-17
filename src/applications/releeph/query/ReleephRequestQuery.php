@@ -5,6 +5,12 @@ final class ReleephRequestQuery
 
   private $requestedCommitPHIDs;
   private $commitToRevMap;
+  private $ids;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function getRevisionPHID($commit_phid) {
     if ($this->commitToRevMap) {
@@ -55,6 +61,13 @@ final class ReleephRequestQuery
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->requestedCommitPHIDs) {
       $where[] = qsprintf(

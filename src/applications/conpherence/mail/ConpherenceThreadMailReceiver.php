@@ -12,4 +12,14 @@ final class ConpherenceThreadMailReceiver
     return 'E[1-9]\d*';
   }
 
+  protected function loadObject($pattern, PhabricatorUser $viewer) {
+    $id = (int)trim($pattern, 'E');
+
+    return id(new ConpherenceThreadQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->executeOne();
+  }
+
+
 }
