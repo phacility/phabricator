@@ -337,7 +337,9 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $check_phid = $receiver->getPHID();
     }
 
-    $expect_hash = self::computeMailHash($receiver->getMailKey(), $check_phid);
+    $expect_hash = PhabricatorObjectMailReceiver::computeMailHash(
+      $receiver->getMailKey(),
+      $check_phid);
 
     if ($expect_hash != $hash) {
       return $this->setMessage("Invalid mail hash!")->save();
@@ -405,13 +407,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     }
 
     return $class_obj->load($receiver_id);
-  }
-
-  public static function computeMailHash($mail_key, $phid) {
-    $global_mail_key = PhabricatorEnv::getEnvConfig('phabricator.mail-key');
-
-    $hash = PhabricatorHash::digest($mail_key.$global_mail_key.$phid);
-    return substr($hash, 0, 16);
   }
 
   /**

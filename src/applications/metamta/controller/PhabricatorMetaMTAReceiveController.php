@@ -30,9 +30,9 @@ final class PhabricatorMetaMTAReceiveController
           throw new Exception(pht("No such task or revision!"));
         }
 
-        $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
-        $receiver->getMailKey(),
-        $user->getPHID());
+        $hash = PhabricatorObjectMailReceiver::computeMailHash(
+          $receiver->getMailKey(),
+          $user->getPHID());
 
         $header_content['to'] =
           $to.'+'.$user->getID().'+'.$hash.'@';

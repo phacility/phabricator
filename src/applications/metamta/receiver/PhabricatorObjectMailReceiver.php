@@ -33,5 +33,11 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
     return $regexp;
   }
 
+  public static function computeMailHash($mail_key, $phid) {
+    $global_mail_key = PhabricatorEnv::getEnvConfig('phabricator.mail-key');
+
+    $hash = PhabricatorHash::digest($mail_key.$global_mail_key.$phid);
+    return substr($hash, 0, 16);
+  }
 
 }
