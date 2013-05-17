@@ -49,8 +49,8 @@
   padding-left: 6px;
 }
 
-.phabricator-main-menu-logo:hover {
-  background-color: #3a4247;
+.device-desktop .phabricator-main-menu-logo:hover {
+  background-color: #1e2225;
 }
 
 .phabricator-main-menu-logo-image {
@@ -358,7 +358,7 @@
 
 .device-desktop .phabricator-application-menu
   a.phabricator-menu-item-view.phabricator-core-menu-item:hover {
-  background-color: #3a4247;
+  background-color: #1e2225;
 }
 
 .device-desktop .phabricator-application-menu .phabricator-menu-item-view {

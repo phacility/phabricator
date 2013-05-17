@@ -4,42 +4,42 @@
     "docs_audio" : {
       "name" : "docs_audio",
       "rule" : ".docs_audio",
-      "hash" : "c21807a617c7185927a1469414d94162"
+      "hash" : "d3fccd15fc53b04b6caf22a3bb5f4634"
     },
     "docs_doc"   : {
       "name" : "docs_doc",
       "rule" : ".docs_doc",
-      "hash" : "a8101edeb05359642272ae3f5cff3459"
+      "hash" : "31496e2953350c276a6b8619b071f299"
     },
     "docs_file"  : {
       "name" : "docs_file",
       "rule" : ".docs_file",
-      "hash" : "67eaa901da768ad2e6e4e56f6d85b1eb"
+      "hash" : "3d88ce46362e723cf76bf552550c82a6"
     },
     "docs_image" : {
       "name" : "docs_image",
       "rule" : ".docs_image",
-      "hash" : "c13a007374062851f39affa852b0017f"
+      "hash" : "8eaa89c50f3be46c87706d649bd304af"
     },
     "docs_movie" : {
       "name" : "docs_movie",
       "rule" : ".docs_movie",
-      "hash" : "85161a854bcd425bfb51c083ddd3015a"
+      "hash" : "859f7df4027e145290607d78d9500b45"
     },
     "docs_pdf"   : {
       "name" : "docs_pdf",
       "rule" : ".docs_pdf",
-      "hash" : "9ab4fa1f86b0b5f512e6c3bba05f392a"
+      "hash" : "c423839d6b35baf59e79c0cd8d3e580f"
     },
     "docs_place" : {
       "name" : "docs_place",
       "rule" : ".docs_place",
-      "hash" : "da49737d9320594908833850e6e35269"
+      "hash" : "8ee9e4dad7df830c487227083e0091f5"
     },
     "docs_zip"   : {
       "name" : "docs_zip",
       "rule" : ".docs_zip",
-      "hash" : "c7e5ede0d02b78119761804aadc4590f"
+      "hash" : "91d6be2027be6a7791477ac12cd94b6d"
     }
   },
   "scales"  : [

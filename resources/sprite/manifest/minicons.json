@@ -4,42 +4,42 @@
     "minicons-company-dark"     : {
       "name" : "minicons-company-dark",
       "rule" : ".minicons-company-dark",
-      "hash" : "efc3dd9db2f9aa3c4b2c90b2930d0523"
+      "hash" : "7787a1c5ccdd0f94faa795db6b382901"
     },
     "minicons-company-white"    : {
       "name" : "minicons-company-white",
       "rule" : ".minicons-company-white",
-      "hash" : "5f5f9a7f23c088171234c4fc815eb94c"
+      "hash" : "181289eba2fcb851858ab5b99fd19818"
     },
     "minicons-move-dark"        : {
       "name" : "minicons-move-dark",
       "rule" : ".minicons-move-dark",
-      "hash" : "181a840106735e48dcb475498caed9be"
+      "hash" : "d87f5f972885ad2653d92675b4e3855c"
     },
     "minicons-move-white"       : {
       "name" : "minicons-move-white",
       "rule" : ".minicons-move-white",
-      "hash" : "f76fb8f509d9d3ff4892a49c8346642b"
+      "hash" : "620e464c0e50830b90eaed3b5a2b9f56"
     },
     "minicons-public-dark"      : {
       "name" : "minicons-public-dark",
       "rule" : ".minicons-public-dark",
-      "hash" : "122c5e3b2d6d528f9bb2397f80dac3d2"
+      "hash" : "12bdec3c0e273f820aaef70f61128f4b"
     },
     "minicons-public-white"     : {
       "name" : "minicons-public-white",
       "rule" : ".minicons-public-white",
-      "hash" : "8eb9e659a2d1c2b3551e1deaeb7b2525"
+      "hash" : "c075363aeba4c52dbcc328a24d8f4298"
     },
     "minicons-restricted-dark"  : {
       "name" : "minicons-restricted-dark",
       "rule" : ".minicons-restricted-dark",
-      "hash" : "45f1ef1316a184dfaaacdbdfb6097246"
+      "hash" : "7a1d926f7af98bef3b17a913e1d0b5b3"
     },
     "minicons-restricted-white" : {
       "name" : "minicons-restricted-white",
       "rule" : ".minicons-restricted-white",
-      "hash" : "bf739af8043b30551fc5812e8352e366"
+      "hash" : "af00df15815b83d410073859dacf7a75"
     }
   },
   "scales"  : [

@@ -4,37 +4,37 @@
     "payments-americanexpress" : {
       "name" : "payments-americanexpress",
       "rule" : ".payments-americanexpress",
-      "hash" : "3d3e8cedd420ac5dd6adfbb046676efc"
+      "hash" : "ace986273a0bae308c4018e02cdd60f2"
     },
     "payments-discover"        : {
       "name" : "payments-discover",
       "rule" : ".payments-discover",
-      "hash" : "f38b962de12444ae90236d34630bfe7d"
+      "hash" : "0b60e5e4c25e0d3bf2c3cb780d7eaf00"
     },
     "payments-googlecheckout"  : {
       "name" : "payments-googlecheckout",
       "rule" : ".payments-googlecheckout",
-      "hash" : "e183de08a0b7d8ce7577ea936e2137fd"
+      "hash" : "1f00e015545898e059ca09fa49b239e7"
     },
     "payments-mastercard"      : {
       "name" : "payments-mastercard",
       "rule" : ".payments-mastercard",
-      "hash" : "b428e5a6b08c4490d2cc0443fbe8596a"
+      "hash" : "49a742b837610f7b37b565ba4899c95c"
     },
     "payments-paypal"          : {
       "name" : "payments-paypal",
       "rule" : ".payments-paypal",
-      "hash" : "bb4be31630d12980e0b3156789ed2849"
+      "hash" : "5664cf7acd9fe65d60e1449a33f56ce2"
     },
     "payments-visa"            : {
       "name" : "payments-visa",
       "rule" : ".payments-visa",
-      "hash" : "cbbcf0054d92e125deaa3048a190ddeb"
+      "hash" : "ff2ffac55927dbe7a1bf02fdfac561ea"
     },
     "payments-worldpay"        : {
       "name" : "payments-worldpay",
       "rule" : ".payments-worldpay",
-      "hash" : "db2d09a263e8f7260443aaada48c6f80"
+      "hash" : "acc037ffa26f6caccf290006e39ba1fc"
     }
   },
   "scales"  : [
