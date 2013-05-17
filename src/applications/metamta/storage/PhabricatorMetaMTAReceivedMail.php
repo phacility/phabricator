@@ -176,6 +176,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
       $receiver = $this->loadReceiver();
       $sender = $receiver->loadSender($this);
+      $receiver->validateSender($this, $sender);
 
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
       $this
@@ -197,62 +198,11 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
     $from = idx($this->headers, 'from');
 
-    // TODO -- make this a switch statement / better if / when we add more
-    // public create email addresses!
-    $create_task = PhabricatorEnv::getEnvConfig(
-      'metamta.maniphest.public-create-email');
-
-    if ($create_task && $to == $create_task) {
+    // TODO: Move this into `ManiphestCreateMailReceiver`.
+    if ($receiver instanceof ManiphestCreateMailReceiver) {
       $receiver = new ManiphestTask();
 
-      $user = $this->lookupSender();
-      if ($user) {
-        $this->setAuthorPHID($user->getPHID());
-      } else {
-        $allow_email_users = PhabricatorEnv::getEnvConfig(
-          'phabricator.allow-email-users');
-
-        if ($allow_email_users) {
-          $email = new PhutilEmailAddress($from);
-
-          $xuser = id(new PhabricatorExternalAccount())->loadOneWhere(
-            'accountType = %s AND accountDomain IS NULL and accountID = %s',
-            'email',
-            $email->getAddress());
-
-          if (!$xuser) {
-            $xuser = new PhabricatorExternalAccount();
-            $xuser->setAccountID($email->getAddress());
-            $xuser->setAccountType('email');
-            $xuser->setDisplayName($email->getDisplayName());
-            $xuser->save();
-          }
-
-          $user = $xuser->getPhabricatorUser();
-        } else {
-          $default_author = PhabricatorEnv::getEnvConfig(
-            'metamta.maniphest.default-public-author');
-
-          if ($default_author) {
-            $user = id(new PhabricatorUser())->loadOneWhere(
-              'username = %s',
-              $default_author);
-
-            if (!$user) {
-              throw new Exception(
-                "Phabricator is misconfigured, the configuration key ".
-                "'metamta.maniphest.default-public-author' is set to user ".
-                "'{$default_author}' but that user does not exist.");
-            }
-
-          } else {
-            // TODO: We should probably bounce these since from the user's
-            // perspective their email vanishes into a black hole.
-            return $this->setMessage("Invalid public user '{$from}'.")->save();
-          }
-        }
-
-      }
+      $user = $sender;
 
       $receiver->setAuthorPHID($user->getPHID());
       $receiver->setOriginalEmailSource($from);
@@ -275,11 +225,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
     // means we're creating a conpherence...!
     if ($user_phids) {
-      // we must have a valid user who created this conpherence
-      $user = $this->lookupSender();
-      if (!$user) {
-        return $this->setMessage("Invalid public user '{$from}'.")->save();
-      }
+      $user = $sender;
 
       $conpherence = id(new ConpherenceReplyHandler())
         ->setMailReceiver(new ConpherenceThread())
@@ -293,31 +239,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       return $this->save();
     }
 
-    if ($user_id == 'public') {
-      if (!PhabricatorEnv::getEnvConfig('metamta.public-replies')) {
-        return $this->setMessage("Public replies not enabled.")->save();
-      }
-
-      $user = $this->lookupSender();
-
-      if (!$user) {
-        return $this->setMessage("Invalid public user '{$from}'.")->save();
-      }
-
-      $use_user_hash = false;
-    } else {
-      $user = id(new PhabricatorUser())->load($user_id);
-      if (!$user) {
-        return $this->setMessage("Invalid private user '{$user_id}'.")->save();
-      }
-
-      $use_user_hash = true;
-    }
-
-    if ($user->getIsDisabled()) {
-      return $this->setMessage("User '{$user_id}' is disabled")->save();
-    }
-
+    $user = $sender;
     $this->setAuthorPHID($user->getPHID());
 
     $receiver = self::loadReceiverObject($receiver_name);
@@ -326,24 +248,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     }
 
     $this->setRelatedPHID($receiver->getPHID());
-
-    if ($use_user_hash) {
-      // This is a private reply-to address, check that the user hash is
-      // correct.
-      $check_phid = $user->getPHID();
-    } else {
-      // This is a public reply-to address, check that the object hash is
-      // correct.
-      $check_phid = $receiver->getPHID();
-    }
-
-    $expect_hash = PhabricatorObjectMailReceiver::computeMailHash(
-      $receiver->getMailKey(),
-      $check_phid);
-
-    if ($expect_hash != $hash) {
-      return $this->setMessage("Invalid mail hash!")->save();
-    }
 
     if ($receiver instanceof ManiphestTask) {
       $editor = new ManiphestTransactionEditor();
@@ -429,39 +333,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $raw_addresses[] = $this->getRawEmailAddress($address);
     }
     return array_filter($raw_addresses);
-  }
-
-  private function lookupSender() {
-    $from = idx($this->headers, 'from');
-    $from = $this->getRawEmailAddress($from);
-
-    $user = PhabricatorUser::loadOneWithEmailAddress($from);
-
-    // If Phabricator is configured to allow "Reply-To" authentication, try
-    // the "Reply-To" address if we failed to match the "From" address.
-    $config_key = 'metamta.insecure-auth-with-reply-to';
-    $allow_reply_to = PhabricatorEnv::getEnvConfig($config_key);
-
-    if (!$user && $allow_reply_to) {
-      $reply_to = idx($this->headers, 'reply-to');
-      $reply_to = $this->getRawEmailAddress($reply_to);
-      if ($reply_to) {
-        $user = PhabricatorUser::loadOneWithEmailAddress($reply_to);
-      }
-    }
-
-    $allow_email_users = PhabricatorEnv::getEnvConfig(
-          'phabricator.allow-email-users');
-
-    if (!$user && $allow_email_users) {
-      $xusr = id(new PhabricatorExternalAccount())->loadOneWhere(
-            'accountType = %s AND accountDomain IS NULL and accountID = %s',
-            'email', $from);
-
-      $user = $xusr->getPhabricatorUser();
-    }
-
-    return $user;
   }
 
   /**
