@@ -107,6 +107,7 @@
   padding: 10px 0;
   position: relative;
   height: 24px;
+  margin: 0 8px;
 }
 
 .phabricator-main-menu-search-target {
@@ -122,16 +123,10 @@
 .device .phabricator-main-menu-search-target {
   width: 100%;
   margin-left: -25px;
-
-}
-
-.device-desktop .phabricator-main-menu-search-container {
-  margin: 0 8px 0 50px;
 }
 
 .device .phabricator-main-menu-search-container {
   padding: 0;
-  margin: 0 8px ;
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input {
@@ -140,6 +135,7 @@
   box-shadow: none;
   transition: none;
 
+  color: #999;
   width: 100%;
   right: 0;
   position: absolute;
@@ -160,12 +156,16 @@
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
-  background: #c9c9c9;
-  border: none;
+  background: #fff;
+  color: #333;
+  border-color: #e7e7e7;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
-  color: #999999;
+  color: #999;
 }
 
 .phabricator-main-menu-search button {
@@ -189,23 +189,18 @@
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
-  border-radius: 4px;
-  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.35);
-  border: 1px solid #33393d;
-}
-
-.phabricator-main-menu-search-target div.jx-typeahead-results a.jx-result {
-  border: 0;
-}
-
-.phabricator-main-menu-search-target div.jx-typeahead-results a.focused,
-.phabricator-main-menu-search-target div.jx-typeahead-results a:hover {
-  background: #3875d7;
+  background: #ffffff;
+  word-wrap: break-word;
+  overflow-y: auto;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
+  border: 2px solid #33393d;
+  border-radius: 3px;
+  margin-left: 40px;
 }
 
 .phabricator-main-search-typeahead-result {
   display: block;
-  padding: 4px 4px 4px 38px;
+  padding: 1px 4px 1px 38px;
   background-position: 4px 4px;
   background-size: 25px 25px;
   background-repeat: no-repeat;
@@ -213,22 +208,15 @@
 
 .phabricator-main-search-typeahead-result .result-name {
   display: block;
+  font-size: 12px;
   font-weight: bold;
-  color: #444444;
-}
-
-.focused .phabricator-main-search-typeahead-result .result-name,
-a:hover .phabricator-main-search-typeahead-result .result-name {
-  color: #eeeeee;
+  color: #333;
 }
 
 .phabricator-main-search-typeahead-result .result-type {
-  color: #888888;
-}
-
-.focused .phabricator-main-search-typeahead-result .result-type,
-a:hover .phabricator-main-search-typeahead-result .result-type {
-  color: #dddddd;
+  color: #888;
+  font-size: 11px;
+  font-weight: normal;
 }
 
 
