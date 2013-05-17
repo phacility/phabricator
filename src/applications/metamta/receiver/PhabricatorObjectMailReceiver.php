@@ -26,6 +26,10 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
    */
   abstract protected function loadObject($pattern, PhabricatorUser $viewer);
 
+  public function loadMailReceiverObject($pattern, PhabricatorUser $viewer) {
+    return $this->loadObject($pattern, $viewer);
+  }
+
 
   public function validateSender(
     PhabricatorMetaMTAReceivedMail $mail,
