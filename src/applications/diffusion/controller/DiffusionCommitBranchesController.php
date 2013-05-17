@@ -10,8 +10,9 @@ final class DiffusionCommitBranchesController extends DiffusionController {
   public function processRequest() {
     $request = $this->getDiffusionRequest();
 
-    $branch_query = DiffusionContainsQuery::newFromDiffusionRequest($request);
-    $branches = $branch_query->loadContainingBranches();
+    $branches = $this->callConduitWithDiffusionRequest(
+      'diffusion.commitbranchesquery',
+      array('commit' => $request->getCommit()));
 
     $branch_links = array();
     foreach ($branches as $branch => $commit) {
