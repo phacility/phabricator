@@ -61,7 +61,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this->getRawEmailAddresses(idx($this->headers, 'to'));
   }
 
-  private function loadExcludeMailRecipientPHIDs() {
+  public function loadExcludeMailRecipientPHIDs() {
     $addresses = array_merge(
       $this->getToAddresses(),
       $this->getCCAddresses());
@@ -115,7 +115,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $receiver_name       = null;
     $user_id             = null;
     $hash                = null;
-    $user_phids          = array();
     $user_names          = array();
     foreach ($this->getToAddresses() as $address) {
       if ($address == $create_task) {
@@ -150,20 +149,11 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       }
     }
 
-    // since we haven't found a phabricator address, maybe this is
-    // someone trying to create a conpherence?
-    if (!$phabricator_address && $user_names) {
-      $users = id(new PhabricatorUser())
-        ->loadAllWhere('userName IN (%Ls)', $user_names);
-      $user_phids = mpull($users, 'getPHID');
-    }
-
     return array(
       $phabricator_address,
       $receiver_name,
       $user_id,
       $hash,
-      $user_phids
     );
   }
 
@@ -178,6 +168,22 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $sender = $receiver->loadSender($this);
       $receiver->validateSender($this, $sender);
 
+      $this->setAuthorPHID($sender->getPHID());
+
+      // TODO: Once everything can receive mail, nuke this.
+      $can_receive = false;
+      if ($receiver instanceof ManiphestCreateMailReceiver) {
+        $can_receive = true;
+      }
+      if ($receiver instanceof ConpherenceCreateThreadMailReceiver) {
+        $can_receive = true;
+      }
+
+      if ($can_receive) {
+        $receiver->receiveMail($this, $sender);
+        return $this->setMessage('OK')->save();
+      }
+
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
       $this
         ->setStatus($ex->getStatusCode())
@@ -189,58 +195,15 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     list($to,
          $receiver_name,
          $user_id,
-         $hash,
-         $user_phids) = $this->getPhabricatorToInformation();
-    if (!$to && !$user_phids) {
+         $hash) = $this->getPhabricatorToInformation();
+    if (!$to) {
       $raw_to = idx($this->headers, 'to');
       return $this->setMessage("Unrecognized 'to' format: {$raw_to}")->save();
     }
 
     $from = idx($this->headers, 'from');
 
-    // TODO: Move this into `ManiphestCreateMailReceiver`.
-    if ($receiver instanceof ManiphestCreateMailReceiver) {
-      $receiver = new ManiphestTask();
-
-      $user = $sender;
-
-      $receiver->setAuthorPHID($user->getPHID());
-      $receiver->setOriginalEmailSource($from);
-      $receiver->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
-
-      $editor = new ManiphestTransactionEditor();
-      $editor->setActor($user);
-      $handler = $editor->buildReplyHandler($receiver);
-
-      $handler->setActor($user);
-      $handler->setExcludeMailRecipientPHIDs(
-        $this->loadExcludeMailRecipientPHIDs());
-      $handler->processEmail($this);
-
-      $this->setRelatedPHID($receiver->getPHID());
-      $this->setMessage('OK');
-
-      return $this->save();
-    }
-
-    // means we're creating a conpherence...!
-    if ($user_phids) {
-      $user = $sender;
-
-      $conpherence = id(new ConpherenceReplyHandler())
-        ->setMailReceiver(new ConpherenceThread())
-        ->setMailAddedParticipantPHIDs($user_phids)
-        ->setActor($user)
-        ->setExcludeMailRecipientPHIDs($this->loadExcludeMailRecipientPHIDs())
-        ->processEmail($this);
-
-      $this->setRelatedPHID($conpherence->getPHID());
-      $this->setMessage('OK');
-      return $this->save();
-    }
-
     $user = $sender;
-    $this->setAuthorPHID($user->getPHID());
 
     $receiver = self::loadReceiverObject($receiver_name);
     if (!$receiver) {
