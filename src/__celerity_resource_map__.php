@@ -3700,7 +3700,7 @@ celerity_register_resource_map(array(
   ),
   'phui-form-css' =>
   array(
-    'uri' => '/res/86916b69/rsrc/css/phui/phui-form.css',
+    'uri' => '/res/ba4d7995/rsrc/css/phui/phui-form.css',
     'type' => 'css',
     'requires' =>
     array(
