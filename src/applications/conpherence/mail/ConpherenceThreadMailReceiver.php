@@ -21,5 +21,18 @@ final class ConpherenceThreadMailReceiver
       ->executeOne();
   }
 
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
+
+    $handler = id(new ConpherenceReplyHandler())
+      ->setMailReceiver($object);
+
+    $handler->setActor($sender);
+    $handler->setExcludeMailRecipientPHIDs(
+      $mail->loadExcludeMailRecipientPHIDs());
+    $handler->processEmail($mail);
+  }
 
 }

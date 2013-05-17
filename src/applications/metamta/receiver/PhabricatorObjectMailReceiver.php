@@ -26,25 +26,38 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
    */
   abstract protected function loadObject($pattern, PhabricatorUser $viewer);
 
+
+  final protected function processReceivedMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorUser $sender) {
+
+    $object = $this->loadObjectFromMail($mail, $sender);
+    $mail->setRelatedPHID($object->getPHID());
+
+    $this->processReceivedObjectMail($mail, $object, $sender);
+
+    return $this;
+  }
+
+  abstract protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender);
+
   public function loadMailReceiverObject($pattern, PhabricatorUser $viewer) {
     return $this->loadObject($pattern, $viewer);
   }
 
-
   public function validateSender(
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
+
     parent::validateSender($mail, $sender);
 
-    foreach ($mail->getToAddresses() as $address) {
-      $parts = $this->matchObjectAddress($address);
-      if ($parts) {
-        break;
-      }
-    }
+    $parts = $this->matchObjectAddressInMail($mail);
 
     try {
-      $object = $this->loadObject($parts['pattern'], $sender);
+      $object = $this->loadObjectFromMail($mail, $sender);
     } catch (PhabricatorPolicyException $policy_exception) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_POLICY_PROBLEM,
@@ -99,13 +112,24 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
 
 
   final public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    foreach ($mail->getToAddresses() as $address) {
-      if ($this->matchObjectAddress($address)) {
-        return true;
-      }
+    if ($this->matchObjectAddressInMail($mail)) {
+      return true;
     }
 
     return false;
+  }
+
+  private function matchObjectAddressInMail(
+    PhabricatorMetaMTAReceivedmail $mail) {
+
+    foreach ($mail->getToAddresses() as $address) {
+      $parts = $this->matchObjectAddress($address);
+      if ($parts) {
+        return $parts;
+      }
+    }
+
+    return null;
   }
 
   private function matchObjectAddress($address) {
@@ -135,6 +159,14 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
       '$)U';
 
     return $regexp;
+  }
+
+  private function loadObjectFromMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorUser $sender) {
+    $parts = $this->matchObjectAddressInMail($mail);
+
+    return $this->loadObject($parts['pattern'], $sender);
   }
 
   public static function computeMailHash($mail_key, $phid) {

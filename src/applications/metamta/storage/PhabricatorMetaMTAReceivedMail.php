@@ -88,76 +88,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return array_merge($user_phids,  $mailing_list_phids);
   }
 
-  /**
-   * Parses "to" addresses, looking for a public create email address
-   * first and if not found parsing the "to" address for reply handler
-   * information: receiver name, user id, and hash. If nothing can be
-   * found, it then loads user phids for as many to: email addresses as
-   * it can, theoretically falling back to create a conpherence amongst
-   * those users.
-   */
-  private function getPhabricatorToInformation() {
-    // Only one "public" create address so far
-    $create_task = PhabricatorEnv::getEnvConfig(
-      'metamta.maniphest.public-create-email');
-
-    // For replies, look for an object address with a format like:
-    // D291+291+b0a41ca848d66dcc@example.com
-    $single_handle_prefix = PhabricatorEnv::getEnvConfig(
-      'metamta.single-reply-handler-prefix');
-
-    $prefixPattern = ($single_handle_prefix)
-      ? preg_quote($single_handle_prefix, '/') . '\+'
-      : '';
-    $pattern = "/^{$prefixPattern}((?:D|T|C|E)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
-
-    $phabricator_address = null;
-    $receiver_name       = null;
-    $user_id             = null;
-    $hash                = null;
-    $user_names          = array();
-    foreach ($this->getToAddresses() as $address) {
-      if ($address == $create_task) {
-        $phabricator_address = $address;
-        // it's okay to stop here because we just need to map a create
-        // address to an application and don't need / won't have more
-        // information in these cases.
-        break;
-      }
-
-      $matches = null;
-      $ok = preg_match(
-        $pattern,
-        $address,
-        $matches);
-
-      if ($ok) {
-        $phabricator_address = $address;
-        $receiver_name       = $matches[1];
-        $user_id             = $matches[2];
-        $hash                = $matches[3];
-        break;
-      }
-
-      $parts = explode('@', $address);
-      $maybe_name = trim($parts[0]);
-      $maybe_domain = trim($parts[1]);
-      $mail_domain = PhabricatorEnv::getEnvConfig('metamta.domain');
-      if ($mail_domain == $maybe_domain &&
-          PhabricatorUser::validateUsername($maybe_name)) {
-        $user_names[] = $maybe_name;
-      }
-    }
-
-    return array(
-      $phabricator_address,
-      $receiver_name,
-      $user_id,
-      $hash,
-    );
-  }
-
-
   public function processReceivedMail() {
 
     try {
@@ -170,70 +100,23 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
       $this->setAuthorPHID($sender->getPHID());
 
-      // TODO: Once everything can receive mail, nuke this.
-      $can_receive = false;
-      if ($receiver instanceof ManiphestCreateMailReceiver) {
-        $can_receive = true;
-      }
-      if ($receiver instanceof ConpherenceCreateThreadMailReceiver) {
-        $can_receive = true;
-      }
-
-      if ($can_receive) {
-        $receiver->receiveMail($this, $sender);
-        return $this->setMessage('OK')->save();
-      }
-
+      $receiver->receiveMail($this, $sender);
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
       $this
         ->setStatus($ex->getStatusCode())
         ->setMessage($ex->getMessage())
         ->save();
       return $this;
+    } catch (Exception $ex) {
+      $this
+        ->setStatus(MetaMTAReceivedMailStatus::STATUS_UNHANDLED_EXCEPTION)
+        ->setMessage(pht('Unhandled Exception: %s', $ex->getMessage()))
+        ->save();
+
+      throw $ex;
     }
 
-    list($to,
-         $receiver_name,
-         $user_id,
-         $hash) = $this->getPhabricatorToInformation();
-    if (!$to) {
-      $raw_to = idx($this->headers, 'to');
-      return $this->setMessage("Unrecognized 'to' format: {$raw_to}")->save();
-    }
-
-    $from = idx($this->headers, 'from');
-
-    $user = $sender;
-
-    $receiver = self::loadReceiverObject($receiver_name);
-    if (!$receiver) {
-      return $this->setMessage("Invalid object '{$receiver_name}'")->save();
-    }
-
-    $this->setRelatedPHID($receiver->getPHID());
-
-    if ($receiver instanceof ManiphestTask) {
-      $editor = new ManiphestTransactionEditor();
-      $editor->setActor($user);
-      $handler = $editor->buildReplyHandler($receiver);
-    } else if ($receiver instanceof DifferentialRevision) {
-      $handler = DifferentialMail::newReplyHandlerForRevision($receiver);
-    } else if ($receiver instanceof PhabricatorRepositoryCommit) {
-      $handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
-        $receiver);
-    } else if ($receiver instanceof ConpherenceThread) {
-      $handler = id(new ConpherenceReplyHandler())
-        ->setMailReceiver($receiver);
-    }
-
-    $handler->setActor($user);
-    $handler->setExcludeMailRecipientPHIDs(
-      $this->loadExcludeMailRecipientPHIDs());
-    $handler->processEmail($this);
-
-    $this->setMessage('OK');
-
-    return $this->save();
+    return $this->setMessage('OK')->save();
   }
 
   public function getCleanTextBody() {
@@ -245,35 +128,6 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
   public function getRawTextBody() {
     return idx($this->bodies, 'text');
-  }
-
-  public static function loadReceiverObject($receiver_name) {
-    if (!$receiver_name) {
-      return null;
-    }
-
-    $receiver_type = $receiver_name[0];
-    $receiver_id   = substr($receiver_name, 1);
-
-    $class_obj = null;
-    switch ($receiver_type) {
-      case 'T':
-        $class_obj = new ManiphestTask();
-        break;
-      case 'D':
-        $class_obj = new DifferentialRevision();
-        break;
-      case 'C':
-        $class_obj = new PhabricatorRepositoryCommit();
-        break;
-      case 'E':
-        $class_obj = new ConpherenceThread();
-        break;
-      default:
-        return null;
-    }
-
-    return $class_obj->load($receiver_id);
   }
 
   /**

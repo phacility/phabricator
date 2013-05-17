@@ -45,7 +45,7 @@ final class ConpherenceCreateThreadMailReceiver
       $usernames);
   }
 
-  public function processReceivedMail(
+  protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
 

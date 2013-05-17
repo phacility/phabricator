@@ -21,4 +21,14 @@ final class PhabricatorMacroMailReceiver extends PhabricatorObjectMailReceiver {
       ->executeOne();
   }
 
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
+
+    // TODO: For now, we just drop this mail on the floor.
+
+  }
+
+
 }

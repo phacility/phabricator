@@ -23,5 +23,17 @@ final class DifferentialRevisionMailReceiver
     return head($results);
   }
 
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
+
+    $handler = DifferentialMail::newReplyHandlerForRevision($object);
+
+    $handler->setActor($sender);
+    $handler->setExcludeMailRecipientPHIDs(
+      $mail->loadExcludeMailRecipientPHIDs());
+    $handler->processEmail($mail);
+  }
 
 }

@@ -20,4 +20,17 @@ final class PhabricatorAuditMailReceiver extends PhabricatorObjectMailReceiver {
       ->executeOne();
   }
 
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
+
+    $handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit($object);
+
+    $handler->setActor($sender);
+    $handler->setExcludeMailRecipientPHIDs(
+      $mail->loadExcludeMailRecipientPHIDs());
+    $handler->processEmail($mail);
+  }
+
 }

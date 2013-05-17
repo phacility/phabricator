@@ -56,7 +56,7 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
     }
   }
 
-  public function processReceivedMail(
+  protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
 

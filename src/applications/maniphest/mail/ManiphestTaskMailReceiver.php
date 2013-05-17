@@ -22,4 +22,19 @@ final class ManiphestTaskMailReceiver extends PhabricatorObjectMailReceiver {
     return head($results);
   }
 
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
+
+    $editor = new ManiphestTransactionEditor();
+    $editor->setActor($sender);
+    $handler = $editor->buildReplyHandler($object);
+
+    $handler->setActor($sender);
+    $handler->setExcludeMailRecipientPHIDs(
+      $mail->loadExcludeMailRecipientPHIDs());
+    $handler->processEmail($mail);
+  }
+
 }

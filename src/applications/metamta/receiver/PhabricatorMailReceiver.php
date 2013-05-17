@@ -5,11 +5,9 @@ abstract class PhabricatorMailReceiver {
   abstract public function isEnabled();
   abstract public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail);
 
-  public function processReceivedMail(
+  abstract protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorUser $sender) {
-    return;
-  }
+    PhabricatorUser $sender);
 
   final public function receiveMail(
     PhabricatorMetaMTAReceivedMail $mail,

@@ -14,5 +14,6 @@ final class MetaMTAReceivedMailStatus
   const STATUS_POLICY_PROBLEM       = 'err:policy';
   const STATUS_NO_SUCH_OBJECT       = 'err:not-found';
   const STATUS_HASH_MISMATCH        = 'err:bad-hash';
+  const STATUS_UNHANDLED_EXCEPTION  = 'err:exception';
 
 }
