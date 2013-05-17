@@ -902,44 +902,23 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildRefs(DiffusionRequest $request) {
-    // Not turning this into a proper Query class since it's pretty simple,
-    // one-off, and Git-specific.
-
+    // this is git-only, so save a conduit round trip and just get out of
+    // here if the repository isn't git
     $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
-
     $repository = $request->getRepository();
     if ($repository->getVersionControlSystem() != $type_git) {
       return null;
     }
 
-    list($stdout) = $repository->execxLocalCommand(
-      'log --format=%s -n 1 %s --',
-      '%d',
-      $request->getCommit());
-
-    // %d, gives a weird output format
-    // similar to (remote/one, remote/two, remote/three)
-    $refs = trim($stdout, "() \n");
-    if (!$refs) {
-        return null;
-    }
-    $refs = explode(',', $refs);
-    $refs = array_map('trim', $refs);
-
+    $results = $this->callConduitWithDiffusionRequest(
+      'diffusion.refsquery',
+      array('commit' => $request->getCommit()));
     $ref_links = array();
-    foreach ($refs as $ref) {
-      $ref_links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $request->generateURI(
-            array(
-              'action'  => 'browse',
-              'branch'  => $ref,
-            )),
-        ),
-        $ref);
+    foreach ($results as $ref_data) {
+      $ref_links[] = phutil_tag('a',
+        array('href' => $ref_data['href']),
+        $ref_data['ref']);
     }
-
     return phutil_implode_html(', ', $ref_links);
   }
 
