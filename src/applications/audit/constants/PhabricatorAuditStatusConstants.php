@@ -13,23 +13,38 @@ final class PhabricatorAuditStatusConstants {
   const CC                      = 'cc';
 
   public static function getStatusNameMap() {
-    static $map = array(
-      self::NONE                => 'Not Applicable',
-      self::AUDIT_NOT_REQUIRED  => 'Audit Not Required',
-      self::AUDIT_REQUIRED      => 'Audit Required',
-      self::CONCERNED           => 'Concern Raised',
-      self::ACCEPTED            => 'Accepted',
-      self::AUDIT_REQUESTED     => 'Audit Requested',
-      self::RESIGNED            => 'Resigned',
-      self::CLOSED              => 'Closed',
-      self::CC                  => "Was CC'd",
+    $map = array(
+      self::NONE                => pht('Not Applicable'),
+      self::AUDIT_NOT_REQUIRED  => pht('Audit Not Required'),
+      self::AUDIT_REQUIRED      => pht('Audit Required'),
+      self::CONCERNED           => pht('Concern Raised'),
+      self::ACCEPTED            => pht('Accepted'),
+      self::AUDIT_REQUESTED     => pht('Audit Requested'),
+      self::RESIGNED            => pht('Resigned'),
+      self::CLOSED              => pht('Closed'),
+      self::CC                  => pht("Was CC'd"),
     );
 
     return $map;
   }
 
   public static function getStatusName($code) {
-    return idx(self::getStatusNameMap(), $code, 'Unknown');
+    return idx(self::getStatusNameMap(), $code, pht('Unknown'));
+  }
+
+  public static function getStatusColor($code) {
+    switch ($code) {
+      case self::CONCERNED:
+        $color = 'orange';
+        break;
+      case self::AUDIT_REQUIRED:
+        $color = 'red';
+        break;
+      default:
+        $color = null;
+        break;
+    }
+    return $color;
   }
 
   public static function getOpenStatusConstants() {

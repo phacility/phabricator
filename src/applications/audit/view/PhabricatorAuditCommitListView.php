@@ -13,7 +13,7 @@ final class PhabricatorAuditCommitListView extends AphrontView {
 
   public function setCommits(array $commits) {
     assert_instances_of($commits, 'PhabricatorRepositoryCommit');
-    $this->commits = $commits;
+    $this->commits = mpull($commits, null, 'getPHID');
     return $this;
   }
 
@@ -52,10 +52,29 @@ final class PhabricatorAuditCommitListView extends AphrontView {
     return $handle;
   }
 
+  private function getCommitDescription($phid) {
+    if ($this->commits === null) {
+      return null;
+    }
+
+    $commit = idx($this->commits, $phid);
+    if (!$commit) {
+      return null;
+    }
+
+    return $commit->getCommitData()->getSummary();
+  }
+
   public function render() {
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
+    $list->setCards(true);
+    $list->setFlush(true);
     foreach ($this->commits as $commit) {
-      $commit_name = $this->getHandle($commit->getPHID())->renderLink();
+      $commit_phid = $commit->getPHID();
+      $commit_name = $this->getHandle($commit_phid)->getName();
+      $commit_link = $this->getHandle($commit_phid)->getURI();
+      $commit_desc = $this->getCommitDescription($commit_phid);
+
       $author_name = null;
       if ($commit->getAuthorPHID()) {
         $author_name = $this->getHandle($commit->getAuthorPHID())->renderLink();
@@ -66,51 +85,35 @@ final class PhabricatorAuditCommitListView extends AphrontView {
           $actor_phid = $audit->getActorPHID();
           $auditors[$actor_phid] = $this->getHandle($actor_phid)->renderLink();
         }
+        $auditors = phutil_implode_html(', ', $auditors);
       }
-      $rows[] = array(
-        $commit_name,
-        $author_name,
-        PhabricatorAuditCommitStatusConstants::getStatusName(
-          $commit->getAuditStatus()),
-        phutil_implode_html(', ', $auditors),
-        phabricator_datetime($commit->getEpoch(), $this->user),
-      );
-    }
+      $committed = phabricator_datetime($commit->getEpoch(), $this->user);
+      $commit_status = PhabricatorAuditCommitStatusConstants::getStatusName(
+          $commit->getAuditStatus());
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'Commit',
-        'Author',
-        'Audit Status',
-        'Auditors',
-        'Date',
-      ));
-    $table->setColumnClasses(
-      array(
-        'wide',
-        '',
-        '',
-        '',
-        '',
-      ));
+      $item = id(new PhabricatorObjectItemView())
+          ->setObjectName($commit_name)
+          ->setHeader($commit_desc)
+          ->setHref($commit_link)
+          ->addAttribute($commit_status)
+          ->addIcon('none', $committed);
 
-    if ($this->commits && reset($this->commits)->getAudits() === null) {
-      $table->setColumnVisibility(
-        array(
-          true,
-          true,
-          true,
-          false,
-          true,
-        ));
+      if (!empty($auditors)) {
+        $item->addAttribute(pht('Auditors: %s', $auditors));
+      }
+
+      if ($author_name) {
+        $item->addByline(pht('Author: %s', $author_name));
+      }
+
+      $list->addItem($item);
     }
 
     if ($this->noDataString) {
-      $table->setNoDataString($this->noDataString);
+      $list->setNoDataString($this->noDataString);
     }
 
-    return $table->render();
+    return $list->render();
   }
 
 }

@@ -11,14 +11,14 @@ final class PhabricatorAuditActionConstants {
   const ADD_AUDITORS = 'add_auditors';
 
   public static function getActionNameMap() {
-    static $map = array(
-      self::COMMENT => 'Comment',
-      self::CONCERN => "Raise Concern \xE2\x9C\x98",
-      self::ACCEPT  => "Accept Commit \xE2\x9C\x94",
-      self::RESIGN  => 'Resign from Audit',
-      self::CLOSE   => 'Close Audit',
-      self::ADD_CCS => 'Add CCs',
-      self::ADD_AUDITORS => 'Add Auditors',
+    $map = array(
+      self::COMMENT => pht('Comment'),
+      self::CONCERN => pht("Raise Concern \xE2\x9C\x98"),
+      self::ACCEPT  => pht("Accept Commit \xE2\x9C\x94"),
+      self::RESIGN  => pht('Resign from Audit'),
+      self::CLOSE   => pht('Close Audit'),
+      self::ADD_CCS => pht('Add CCs'),
+      self::ADD_AUDITORS => pht('Add Auditors'),
     );
 
     return $map;

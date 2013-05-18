@@ -110,12 +110,15 @@ final class PhabricatorAuditListView extends AphrontView {
   public function render() {
     $rowc = array();
 
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
+    $list->setCards(true);
+    $list->setFlush(true);
     foreach ($this->audits as $audit) {
       $commit_phid = $audit->getCommitPHID();
       $committed = null;
 
-      $commit_name = $this->getHandle($commit_phid)->renderLink();
+      $commit_name = $this->getHandle($commit_phid)->getName();
+      $commit_link = $this->getHandle($commit_phid)->getURI();
       $commit_desc = $this->getCommitDescription($commit_phid);
       $commit = idx($this->commits, $commit_phid);
       if ($commit && $this->user) {
@@ -123,59 +126,37 @@ final class PhabricatorAuditListView extends AphrontView {
       }
 
       $reasons = $audit->getAuditReasons();
-      $reasons = phutil_implode_html(phutil_tag('br'), $reasons);
+      $reasons = phutil_implode_html(', ', $reasons);
 
       $status_code = $audit->getAuditStatus();
-      $status = PhabricatorAuditStatusConstants::getStatusName($status_code);
+      $status_text =
+        PhabricatorAuditStatusConstants::getStatusName($status_code);
+      $status_color =
+        PhabricatorAuditStatusConstants::getStatusColor($status_code);
 
       $auditor_handle = $this->getHandle($audit->getAuditorPHID());
-      $rows[] = array(
-        $commit_name,
-        $committed,
-        $auditor_handle->renderLink(),
-        $status,
-        $reasons,
-      );
+      $item = id(new PhabricatorObjectItemView())
+          ->setObjectName($commit_name)
+          ->setHeader($commit_desc)
+          ->setHref($commit_link)
+          ->setBarColor($status_color)
+          ->addAttribute($status_text)
+          ->addAttribute($reasons)
+          ->addIcon('none', $committed)
+          ->addByline(pht('Auditor: %s', $auditor_handle->renderLink()));
 
-      $row_class = null;
       if (array_key_exists($audit->getID(), $this->getHighlightedAudits())) {
-        $row_class = 'highlighted';
+        $item->setBarColor('yellow');
       }
-      $rowc[] = $row_class;
-    }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'Commit',
-        'Committed',
-        'Auditor',
-        'Status',
-        'Details',
-      ));
-    $table->setColumnClasses(
-      array(
-        'pri',
-        '',
-        '',
-        '',
-        ($this->showCommits ? '' : 'wide'),
-      ));
-    $table->setRowClasses($rowc);
-    $table->setColumnVisibility(
-      array(
-        $this->showCommits,
-        $this->showCommits,
-        true,
-        true,
-        true,
-      ));
+      $list->addItem($item);
+    }
 
     if ($this->noDataString) {
-      $table->setNoDataString($this->noDataString);
+      $list->setNoDataString($this->noDataString);
     }
 
-    return $table->render();
+    return $list->render();
   }
 
 }

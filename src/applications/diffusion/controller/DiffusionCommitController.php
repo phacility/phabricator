@@ -359,6 +359,7 @@ final class DiffusionCommitController extends DiffusionController {
       $content,
       array(
         'title' => $commit_id,
+        'dust' => true,
       ));
   }
 
@@ -649,12 +650,9 @@ final class DiffusionCommitController extends DiffusionController {
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? pht('Submit') : pht('Cook the Books')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(
       $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
-    $panel->appendChild($form);
-    $panel->addClass('aphront-panel-accent');
-    $panel->addClass('aphront-panel-flush');
 
     require_celerity_resource('phabricator-transaction-view-css');
 
@@ -714,12 +712,13 @@ final class DiffusionCommitController extends DiffusionController {
         'id' => $pane_id,
       ),
       hsprintf(
-        '<div class="differential-add-comment-panel">%s%s%s</div>',
+        '<div class="differential-add-comment-panel">%s%s%s%s</div>',
         id(new PhabricatorAnchorView())
           ->setAnchorName('comment')
           ->setNavigationMarker(true)
           ->render(),
-        $panel->render(),
+        $header,
+        $form,
         $preview_panel));
   }
 

@@ -2,7 +2,6 @@
 
 final class PhabricatorAuditListController extends PhabricatorAuditController {
 
-  private $filter;
   private $name;
   private $filterStatus;
 
@@ -13,8 +12,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
   public function processRequest() {
     $request = $this->getRequest();
-
-    $nav = $this->buildNavAndSelectFilter();
+    $nav = $this->buildSideNavView();
 
     if ($request->isFormPost()) {
       // If the list filter is POST'ed, redirect to GET so the page can be
@@ -75,34 +73,13 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       $nav->appendChild($panel);
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => pht('Audits'),
+        'device' => true,
+        'dust' => true,
       ));
-  }
-
-  private function buildNavAndSelectFilter() {
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/audit/view/'));
-    $nav->addLabel(pht('Active'));
-    $nav->addFilter('active', pht('Need Attention'));
-
-    $nav->addLabel(pht('Audits'));
-    $nav->addFilter('audits', pht('All'));
-    $nav->addFilter('user', pht('By User'));
-    $nav->addFilter('project', pht('By Project'));
-    $nav->addFilter('package', pht('By Package'));
-    $nav->addFilter('repository', pht('By Repository'));
-
-    $nav->addLabel(pht('Commits'));
-    $nav->addFilter('commits', pht('All'));
-    $nav->addFilter('author', pht('By Author'));
-    $nav->addFilter('packagecommits', pht('By Package'));
-
-    $this->filter = $nav->selectFilter($this->filter, 'active');
-
-    return $nav;
   }
 
   private function buildListFilters(PhabricatorObjectHandle $handle = null) {
@@ -111,6 +88,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     $form = new AphrontFormView();
     $form->setUser($user);
+    $form->setNoShading(true);
 
     $show_status  = false;
     $show_user    = false;
