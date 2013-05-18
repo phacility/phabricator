@@ -99,11 +99,23 @@ abstract class PhabricatorRemarkupRuleObject
       array($this, 'markupObjectEmbed'),
       $text);
 
+    // If the prefix starts with a word character (like "D"), we want to
+    // require a word boundary so that we don't match "XD1" as "D1". If the
+    // prefix does not start with a word character, we want to require no word
+    // boundary for the same reasons. Test if the prefix starts with a word
+    // character.
+    if (preg_match('/^\w/', $prefix)) {
+      $boundary = '\\b';
+    } else {
+      $boundary = '\\B';
+    }
+
     // NOTE: The "(?<!#)" prevents us from linking "#abcdef" or similar. The
     // "\b" allows us to link "(abcdef)" or similar without linking things
     // in the middle of words.
+
     $text = preg_replace_callback(
-      '@(?<!#)\b'.$prefix.'('.$id.')(?:#([-\w\d]+))?\b@',
+      '((?<!#)'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?\b)',
       array($this, 'markupObjectReference'),
       $text);
 
