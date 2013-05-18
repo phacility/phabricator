@@ -16,6 +16,7 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
     return array(
       'callsign' => 'required string',
       'path' => 'required string',
+      'branch' => 'optional string',
       'limit' => 'optional int',
     );
   }
@@ -35,6 +36,7 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
         'user' => $request->getUser(),
         'callsign' => $request->getValue('callsign'),
         'path' => $request->getValue('path'),
+        'branch' => $request->getValue('branch'),
       ));
 
     $limit = nonempty(
