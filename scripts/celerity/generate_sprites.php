@@ -51,6 +51,9 @@ if ($err) {
 }
 
 foreach ($sheets as $name => $sheet) {
+
+  $sheet->setBasePath($root);
+
   $manifest_path = $root.'/resources/sprite/manifest/'.$name.'.json';
   if (!$args->getArg('force')) {
     if (Filesystem::pathExists($manifest_path)) {
