@@ -78,7 +78,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
   }
 
   private function shouldIgnorePath($path) {
-    return preg_match('@/__tests__/|externals/javelinjs/src/docs/@', $path);
+    return preg_match('@/__tests__/|externals/javelin/docs/@', $path);
   }
 
   public function lintPath($path) {
@@ -167,12 +167,17 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
         continue;
       }
 
-      $symbol_path = 'webroot'.$symbol_info['disk'];
-      list($ignored, $req_install) = $this->getUsedAndInstalledSymbolsForPath(
-        $symbol_path);
-      if (array_intersect_key($req_install, $external_classes)) {
-        $need = array_diff_key($need, $req_install);
+      if (preg_match('/\\.css$/', $symbol_info['disk'])) {
+        // If JS requires CSS, just assume everything is fine.
         unset($requires[$key]);
+      } else {
+        $symbol_path = 'webroot'.$symbol_info['disk'];
+        list($ignored, $req_install) = $this->getUsedAndInstalledSymbolsForPath(
+          $symbol_path);
+        if (array_intersect_key($req_install, $external_classes)) {
+          $need = array_diff_key($need, $req_install);
+          unset($requires[$key]);
+        }
       }
     }
 

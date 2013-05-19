@@ -1,7 +1,6 @@
 /**
  * @provides javelin-behavior-diffusion-jump-to
  * @requires javelin-behavior
- *           javelin-util
  *           javelin-vector
  *           javelin-dom
  */

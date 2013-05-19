@@ -35,7 +35,7 @@ function parse_command_line_arguments(argv) {
   return config;
 }
 
-if (process.getuid() != 0) {
+if (process.getuid() !== 0) {
   console.log(
     "ERROR: "+
     "This server must be run as root because it needs to bind to privileged "+
@@ -118,8 +118,8 @@ var MAX_ID = 9007199254740991;//2^53 -1
 // you want to write something pretty be my guest
 
 function generate_id() {
-  if (typeof generate_id.current_id == 'undefined'
-      || generate_id.current_id > MAX_ID) {
+  if (typeof generate_id.current_id == 'undefined' ||
+      generate_id.current_id > MAX_ID) {
     generate_id.current_id = 0;
   }
   return generate_id.current_id++;
@@ -132,15 +132,15 @@ var send_server = net.createServer(function(socket) {
   socket.on('connect', function() {
     clients[client_id] = socket;
     current_connections++;
-    log(client_name + 'connected\t\t('
-        + current_connections + ' current connections)');
+    log(client_name + 'connected\t\t(' +
+      current_connections + ' current connections)');
   });
 
   socket.on('close', function() {
     delete clients[client_id];
     current_connections--;
-    log(client_name + 'closed\t\t('
-        + current_connections + ' current connections)');
+    log(client_name + 'closed\t\t(' +
+      current_connections + ' current connections)');
   });
 
   socket.on('timeout', function() {

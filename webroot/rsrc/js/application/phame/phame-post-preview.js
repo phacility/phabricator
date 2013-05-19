@@ -18,9 +18,9 @@ JX.behavior('phame-post-preview', function(config) {
     if (!sync_titles) {
       return;
     }
-    var title_string  = new String(title.value);
+    var title_string  = title.value;
     phame_title.value = normalizeSlug(title_string);
-  }
+  };
 
   var phameTitleKeyupCallback = function (e) {
     // stop sync'ing once user edits phame_title directly
@@ -38,11 +38,11 @@ JX.behavior('phame-post-preview', function(config) {
       phame_title.focus();
       phame_title.setSelectionRange(position, position);
     }
-  }
+  };
 
   var phameTitleBlurCallback = function (e) {
     phame_title.value = normalizeSlug(phame_title.value);
-  }
+  };
 
   // This is a sort of implementation of PhabricatorSlug::normalize
   var normalizeSlug = function (slug, spare_trailing_underscore) {
@@ -53,7 +53,7 @@ JX.behavior('phame-post-preview', function(config) {
       s = s.replace(/_$/g, '');
     }
     return s;
-  }
+  };
 
   var callback = function(r) {
     JX.DOM.setContent(JX.$(config.preview), JX.$H(r));
@@ -65,7 +65,7 @@ JX.behavior('phame-post-preview', function(config) {
       title       : title.value,
       phame_title : phame_title.value
     };
-  }
+  };
 
   var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
   var trigger = JX.bind(request, request.trigger);

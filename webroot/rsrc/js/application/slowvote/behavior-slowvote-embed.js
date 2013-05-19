@@ -1,7 +1,7 @@
 /**
  * @provides javelin-behavior-slowvote-embed
  * @requires javelin-behavior
- *           javelin-util
+ *           javelin-request
  *           javelin-stratcom
  *           javelin-dom
  */

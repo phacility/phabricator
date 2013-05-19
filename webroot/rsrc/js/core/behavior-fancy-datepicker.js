@@ -76,7 +76,7 @@ JX.behavior('fancy-datepicker', function(config) {
       m: JX.DOM.find(root, 'select', 'month-input'),
       d: JX.DOM.find(root, 'select', 'day-input')
     };
-  }
+  };
 
   var read_date = function() {
     var i = get_inputs();
@@ -97,7 +97,7 @@ JX.behavior('fancy-datepicker', function(config) {
       picker.firstChild,
       [
         render_month(),
-        render_day(),
+        render_day()
       ]);
   };
 
@@ -114,7 +114,7 @@ JX.behavior('fancy-datepicker', function(config) {
     }
 
     return JX.$N('td', {meta: {value: value}, className: class_name}, label);
-  }
+  };
 
 
   // Render the top bar which allows you to pick a month and year.
@@ -152,7 +152,8 @@ JX.behavior('fancy-datepicker', function(config) {
     // First, render the weekday names.
     var weekdays = 'SMTWTFS';
     var weekday_names = [];
-    for (var ii = 0; ii < weekdays.length; ii++) {
+    var ii;
+    for (ii = 0; ii < weekdays.length; ii++) {
       weekday_names.push(cell(weekdays.charAt(ii), null, false, 'day-name'));
     }
     weeks.push(JX.$N('tr', {}, weekday_names));
@@ -168,7 +169,7 @@ JX.behavior('fancy-datepicker', function(config) {
 
     var today = new Date();
 
-    for (var ii = 1; ii <= 31; ii++) {
+    for (ii = 1; ii <= 31; ii++) {
       var date = new Date(value_y, value_m - 1, ii);
       if (date.getMonth() != (value_m - 1)) {
         // We've spilled over into the next month, so stop rendering.
@@ -183,7 +184,7 @@ JX.behavior('fancy-datepicker', function(config) {
       if (is_today) {
         classes.push('today');
       }
-      if (date.getDay() == 0 || date.getDay() == 6) {
+      if (date.getDay() === 0 || date.getDay() == 6) {
         classes.push('weekend');
       }
 
@@ -191,7 +192,7 @@ JX.behavior('fancy-datepicker', function(config) {
     }
 
     // Slice the days into weeks.
-    for (var ii = 0; ii < days.length; ii += 7) {
+    for (ii = 0; ii < days.length; ii += 7) {
       weeks.push(JX.$N('tr', {}, days.slice(ii, ii + 7)));
     }
 
@@ -216,7 +217,7 @@ JX.behavior('fancy-datepicker', function(config) {
       switch (p[0]) {
         case 'm':
           // User clicked left or right month selection buttons.
-          value_m = value_m + parseInt(p[1]);
+          value_m = value_m + parseInt(p[1], 10);
           if (value_m > 12) {
             value_m -= 12;
             value_y++;
@@ -227,7 +228,7 @@ JX.behavior('fancy-datepicker', function(config) {
           break;
         case 'd':
           // User clicked a day.
-          value_d = parseInt(p[1]);
+          value_d = parseInt(p[1], 10);
           write_date();
 
           // Wait a moment to close the selector so they can see the effect

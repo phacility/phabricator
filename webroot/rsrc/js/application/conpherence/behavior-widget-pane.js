@@ -21,15 +21,19 @@ JX.behavior('conpherence-widget-pane', function(config) {
 
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var widgetPane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+    var i;
+    var tag_data;
+    var node;
+
     for (var widget in config.widgetRegistery) {
       // device-only widgets are *always shown* on the desktop
       if (config.widgetRegistery[widget] == config.devicesOnly) {
         if (is_desktop) {
           JX.$(widget).style.display = 'block';
           if (config.widgetExtraNodes[widget]) {
-            for (var i in config.widgetExtraNodes[widget]) {
-              var tag_data = config.widgetExtraNodes[widget][i];
-              var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
+            for (i in config.widgetExtraNodes[widget]) {
+              tag_data = config.widgetExtraNodes[widget][i];
+              node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
               node.style.display = tag_data.desktopstyle;
             }
           }
@@ -48,9 +52,9 @@ JX.behavior('conpherence-widget-pane', function(config) {
           widgetPane.style.height = '100%';
         }
         if (config.widgetExtraNodes[widget]) {
-          for (var i in config.widgetExtraNodes[widget]) {
-            var tag_data = config.widgetExtraNodes[widget][i];
-            var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
+          for (i in config.widgetExtraNodes[widget]) {
+            tag_data = config.widgetExtraNodes[widget][i];
+            node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
             node.style.display = tag_data.showstyle;
           }
         }
@@ -75,9 +79,9 @@ JX.behavior('conpherence-widget-pane', function(config) {
         );
         JX.$(widget).style.display = 'none';
         if (config.widgetExtraNodes[widget]) {
-          for (var i in config.widgetExtraNodes[widget]) {
-            var tag_data = config.widgetExtraNodes[widget][i];
-            var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
+          for (i in config.widgetExtraNodes[widget]) {
+            tag_data = config.widgetExtraNodes[widget][i];
+            node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
             node.style.display = tag_data.hidestyle;
           }
         }

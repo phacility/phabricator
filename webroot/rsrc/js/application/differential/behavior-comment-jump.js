@@ -1,7 +1,7 @@
 /**
  * @provides javelin-behavior-differential-comment-jump
  * @requires javelin-behavior
- *           javelin-util
+ *           javelin-stratcom
  *           javelin-dom
  */
 
@@ -20,7 +20,7 @@ JX.behavior('differential-comment-jump', function(config) {
         }
       }
       JX.Stratcom.invoke('differential-toggle-file-request', null, {
-        element: jumpto,
+        element: jumpto
       });
       JX.DOM.scrollTo(jumpto);
       e.kill();

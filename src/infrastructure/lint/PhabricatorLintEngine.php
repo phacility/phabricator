@@ -37,16 +37,35 @@ class PhabricatorLintEngine extends PhutilLintEngine {
     $javelin_linter = new PhabricatorJavelinLinter();
     $linters[] = $javelin_linter;
 
+    $jshint_linter = new ArcanistJSHintLinter();
+    $linters[] = $jshint_linter;
+
     foreach ($paths as $path) {
+      if (!preg_match('/\.js$/', $path)) {
+        continue;
+      }
+
+      if (strpos($path, 'externals/JsShrink') !== false) {
+        // Ignore warnings in JsShrink tests.
+        continue;
+      }
+
+      if (strpos($path, 'externals/raphael') !== false) {
+        // Ignore Raphael.
+        continue;
+      }
+
+      $jshint_linter->addPath($path);
+      $jshint_linter->addData($path, $this->loadData($path));
+
       if (strpos($path, 'support/aphlict/') !== false) {
         // This stuff is Node.js, not Javelin, so don't apply the Javelin
         // linter.
         continue;
       }
-      if (preg_match('/\.js$/', $path)) {
-        $javelin_linter->addPath($path);
-        $javelin_linter->addData($path, $this->loadData($path));
-      }
+
+      $javelin_linter->addPath($path);
+      $javelin_linter->addData($path, $this->loadData($path));
     }
 
     return $linters;

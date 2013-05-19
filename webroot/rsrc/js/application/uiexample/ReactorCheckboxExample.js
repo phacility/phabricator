@@ -1,8 +1,6 @@
 /**
  * @provides phabricator-uiexample-reactor-checkbox
  * @requires javelin-install
- *           javelin-view
- *           javelin-util
  *           javelin-dom
  *           javelin-reactor-dom
  */

@@ -197,7 +197,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
     var node = e.getNode('differential-inline-comment');
     handle_inline_action(node, op);
-  }
+  };
 
   var handle_inline_action = function(node, op) {
     var data = JX.Stratcom.getData(node);
@@ -243,7 +243,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       .start();
 
     set_link_state(true);
-  }
+  };
 
   for (var op in {'edit' : 1, 'delete' : 1, 'reply' : 1}) {
     JX.Stratcom.listen(

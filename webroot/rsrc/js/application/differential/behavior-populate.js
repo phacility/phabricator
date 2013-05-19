@@ -97,7 +97,7 @@ JX.behavior('differential-populate', function(config) {
       var diff;
       try {
         diff = JX.$(meta.id);
-      } catch (e) {
+      } catch (ex) {
         // Already loaded.
       }
       if (diff) {

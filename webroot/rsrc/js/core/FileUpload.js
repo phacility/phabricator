@@ -36,11 +36,12 @@ JX.install('PhabricatorFileUpload', {
         .setDuration(0)
         .show();
 
+      var content;
       switch (this.getStatus()) {
         case 'done':
           var link = JX.$N('a', {href: this.getURI()}, 'F' + this.getID());
 
-          var content = [
+          content = [
             JX.$N('strong', {}, ['Upload Complete (', link, ')']),
             JX.$N('br'),
             this.getName()
@@ -53,7 +54,7 @@ JX.install('PhabricatorFileUpload', {
           this._notification = null;
           break;
         case 'error':
-          var content = [
+          content = [
             JX.$N('strong', {}, 'Upload Failure'),
             JX.$N('br'),
             this.getName(),
@@ -89,7 +90,7 @@ JX.install('PhabricatorFileUpload', {
         return null;
       }
       var ratio = this.getUploadedBytes() / this.getTotalBytes();
-      return parseInt(100 * ratio) + '%';
+      return parseInt(100 * ratio, 10) + '%';
     },
     _renderFileSize : function() {
       if (!this.getTotalBytes()) {

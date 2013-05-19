@@ -13,11 +13,11 @@ describe('JX.ViewRenderer', function() {
     parent.addChild(child);
     child.render = function(_) {
       child_rendered = true;
-    }
+    };
 
     parent.render = function(rendered_children) {
       child_rendered_first = child_rendered;
-    }
+    };
 
     JX.ViewRenderer.render(parent);
     expect(child_rendered_first).toBe(true);

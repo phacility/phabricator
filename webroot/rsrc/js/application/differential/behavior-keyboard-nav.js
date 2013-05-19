@@ -130,9 +130,12 @@ JX.behavior('differential-keyboard-navigation', function(config) {
           selection_end = blocks[focus][1];
 
           manager.scrollTo(selection_begin);
-          (refreshFocus = function() {
+
+          refreshFocus = function() {
             manager.focusOn(selection_begin, selection_end);
-          })();
+          };
+
+          refreshFocus();
 
           return;
         } else {

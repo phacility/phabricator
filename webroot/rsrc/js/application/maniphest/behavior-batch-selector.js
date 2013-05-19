@@ -14,11 +14,11 @@ JX.behavior('maniphest-batch-selector', function(config) {
 
   var get_id = function(task) {
     return JX.Stratcom.getData(task).taskID;
-  }
+  };
 
   var is_selected = function(task) {
     return (get_id(task) in selected);
-  }
+  };
 
   // Change the selected state of a task.
 
@@ -50,7 +50,7 @@ JX.behavior('maniphest-batch-selector', function(config) {
     for (var ii = 0; ii < inputs.length; ii++) {
       change(inputs[ii], to);
     }
-  }
+  };
 
   // Clear any document text selection after toggling a task via shift click,
   // since errant clicks tend to start selecting various ranges otherwise.
@@ -65,7 +65,7 @@ JX.behavior('maniphest-batch-selector', function(config) {
     } else if (document.selection) {
       document.selection.empty();
     }
-  }
+  };
 
   // Update the status text showing how many tasks are selected, and the button
   // state.
@@ -73,7 +73,7 @@ JX.behavior('maniphest-batch-selector', function(config) {
   var update = function() {
     var count = JX.keys(selected).length;
     var status;
-    if (count == 0) {
+    if (count === 0) {
       status = 'Shift-Click to Select Tasks';
     } else if (status == 1) {
       status = '1 Selected Task';
@@ -83,7 +83,7 @@ JX.behavior('maniphest-batch-selector', function(config) {
     JX.DOM.setContent(JX.$(config.status), status);
 
     var submit = JX.$(config.submit);
-    var disable = (count == 0);
+    var disable = (count === 0);
     submit.disabled = disable;
     JX.DOM.alterClass(submit, 'disabled', disable);
   };

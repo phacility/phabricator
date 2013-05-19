@@ -36,7 +36,7 @@ JX.behavior('phabricator-transaction-comment-form', function(config) {
         [
           JX.$H(response.spacer),
           JX.$H(response.xactions.join(response.spacer)),
-          JX.$H(response.spacer),
+          JX.$H(response.spacer)
         ]);
       JX.DOM.show(panel);
     }

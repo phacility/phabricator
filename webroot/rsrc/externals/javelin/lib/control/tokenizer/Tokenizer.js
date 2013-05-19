@@ -345,7 +345,7 @@ JX.install('Tokenizer', {
         case 'delete':
           if (!this._focus.value.length) {
             var tok;
-            while (tok = this._tokens.pop()) {
+            while ((tok = this._tokens.pop())) {
               if (this._remove(tok, true)) {
                 break;
               }
