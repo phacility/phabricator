@@ -22,6 +22,7 @@ $package_spec = array(
     'javelin-typeahead-preloaded-source',
     'javelin-typeahead-ondemand-source',
     'javelin-tokenizer',
+    'javelin-history',
   ),
   'core.pkg.js' => array(
     'javelin-behavior-aphront-basic-tokenizer',
@@ -60,6 +61,8 @@ $package_spec = array(
     'phabricator-file-upload',
     'javelin-behavior-global-drag-and-drop',
     'javelin-behavior-phabricator-reveal-content',
+    'phabricator-hovercard',
+    'javelin-behavior-phabricator-hovercards',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -102,7 +105,14 @@ $package_spec = array(
     'phabricator-crumbs-view-css',
     'phabricator-object-item-list-view-css',
     'global-drag-and-drop-css',
+    'spacing-css',
+    'phui-form-css',
+    'phui-icon-view-css',
 
+    'phabricator-application-launch-view-css',
+    'phabricator-action-list-view-css',
+    'phabricator-property-list-view-css',
+    'phabricator-tag-view-css',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
