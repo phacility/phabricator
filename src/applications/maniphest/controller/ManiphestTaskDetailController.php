@@ -331,9 +331,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $transaction_view->setAuxiliaryFields($aux_fields);
     $transaction_view->setMarkupEngine($engine);
 
-    PhabricatorFeedStoryNotification::updateObjectNotificationViews(
-      $user, $task->getPHID());
-
     $object_name = 'T'.$task->getID();
     $actions = $this->buildActionView($task);
 

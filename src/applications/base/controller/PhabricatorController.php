@@ -166,9 +166,20 @@ abstract class PhabricatorController extends AphrontController {
       $view = $nav;
     }
 
-    $view->setUser($this->getRequest()->getUser());
+    $user = $this->getRequest()->getUser();
+    $view->setUser($user);
 
     $page->appendChild($view);
+
+    $object_phids = idx($options, 'pageObjects', array());
+    if ($object_phids) {
+      $page->appendPageObjects($object_phids);
+      foreach ($object_phids as $object_phid) {
+        PhabricatorFeedStoryNotification::updateObjectNotificationViews(
+          $user,
+          $object_phid);
+      }
+    }
 
     if (idx($options, 'device')) {
       $page->setDeviceReady(true);
