@@ -35,7 +35,8 @@ final class PhabricatorConduitAPIController
       $metadata = idx($params, '__conduit__', array());
       unset($params['__conduit__']);
 
-      $call = new ConduitCall($method, $params);
+      $call = new ConduitCall(
+        $method, $params, idx($metadata, 'isProxied', false));
 
       $result = null;
 
