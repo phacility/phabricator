@@ -18,6 +18,7 @@ final class DifferentialCommentSaveController extends DifferentialController {
     $action     = $request->getStr('action');
     $reviewers  = $request->getArr('reviewers');
     $ccs        = $request->getArr('ccs');
+    $pci_compliance        = $request->getArr('pci_compliance');
 
     $editor = new DifferentialCommentEditor(
       $revision,
@@ -37,6 +38,7 @@ final class DifferentialCommentSaveController extends DifferentialController {
         ->setAttachInlineComments(true)
         ->setAddedReviewers($reviewers)
         ->setAddedCCs($ccs)
+        ->setPCICheckbox($pci_compliance)
         ->save();
     } catch (DifferentialActionHasNoEffectException $no_effect) {
       $has_inlines = id(new DifferentialInlineComment())->loadAllWhere(

@@ -59,6 +59,8 @@ final class DifferentialAddCommentView extends AphrontView {
       $action = idx($this->draft->getMetadata(), 'action');
     }
 
+    $pci_compliance = 1;
+
     $enable_reviewers = DifferentialAction::allowReviewers($action);
     $enable_ccs = ($action == DifferentialAction::ACTION_ADDCCS);
 
@@ -76,6 +78,13 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setValue($action)
           ->setID('comment-action')
           ->setOptions($this->actions))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+        ->addCheckbox(
+          'pci_compliance',
+          $pci_compliance,
+          pht('Some PCI Compliance Message'),
+          true))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Add Reviewers'))

@@ -36,6 +36,11 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     return $this;
   }
 
+  public function setPCICheckbox($checkbox_val) {
+    $this->pci_checkbox_val = $checkbox_val;
+    return $this;
+  }
+
   public function setAttachInlineComments($attach) {
     $this->attachInlineComments = $attach;
     return $this;
@@ -96,6 +101,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $actor              = $this->requireActor();
     $revision           = $this->revision;
     $action             = $this->action;
+    $pci_compliant      = $this->pci_checkbox_val;
     $actor_phid         = $actor->getPHID();
     $actor_is_author    = ($actor_phid == $revision->getAuthorPHID());
     $allow_self_accept  = PhabricatorEnv::getEnvConfig(
@@ -171,6 +177,9 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       case DifferentialAction::ACTION_ACCEPT:
         if ($actor_is_author && !$allow_self_accept) {
           throw new Exception('You can not accept your own revision.');
+        }
+        if (!$pci_compliant) {
+          throw new Exception('You must accept pci compliance checkbox.');
         }
         if (($revision_status !=
              ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
