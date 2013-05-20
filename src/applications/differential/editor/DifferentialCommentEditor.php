@@ -181,6 +181,8 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         }
         if (!$pci_compliant) {
           throw new Exception('You must check the box saying you validated this review against OWASP Top 10');
+        } else {
+          $this->message = $this->message."\nI have evaluated this review against OWASP top 10";
         }
         if (($revision_status !=
              ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
