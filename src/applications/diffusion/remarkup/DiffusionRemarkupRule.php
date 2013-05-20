@@ -7,6 +7,10 @@ final class DiffusionRemarkupRule
     return '';
   }
 
+  protected function getObjectNamePrefixBeginsWithWordCharacter() {
+    return true;
+  }
+
   protected function getObjectIDPattern() {
     $min_unqualified = PhabricatorRepository::MINIMUM_UNQUALIFIED_HASH;
     $min_qualified   = PhabricatorRepository::MINIMUM_QUALIFIED_HASH;

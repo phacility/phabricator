@@ -11,6 +11,11 @@ abstract class PhabricatorRemarkupRuleObject
   abstract protected function getObjectNamePrefix();
   abstract protected function loadObjects(array $ids);
 
+  protected function getObjectNamePrefixBeginsWithWordCharacter() {
+    $prefix = $this->getObjectNamePrefix();
+    return preg_match('/^\w/', $prefix);
+  }
+
   protected function getObjectIDPattern() {
     return '[1-9]\d*';
   }
@@ -104,7 +109,7 @@ abstract class PhabricatorRemarkupRuleObject
     // prefix does not start with a word character, we want to require no word
     // boundary for the same reasons. Test if the prefix starts with a word
     // character.
-    if (preg_match('/^\w/', $prefix)) {
+    if ($this->getObjectNamePrefixBeginsWithWordCharacter()) {
       $boundary = '\\b';
     } else {
       $boundary = '\\B';
