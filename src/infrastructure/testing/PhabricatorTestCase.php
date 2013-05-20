@@ -96,6 +96,9 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $this->env->overrideEnvConfig(
       'phabricator.uninstalled-applications',
       array());
+
+    // TODO: Remove this when we remove "releeph.installed".
+    $this->env->overrideEnvConfig('releeph.installed', true);
   }
 
   protected function didRunTests() {
