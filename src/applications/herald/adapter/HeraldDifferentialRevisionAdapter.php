@@ -217,12 +217,12 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
       $effect->setAction(HeraldActionConfig::ACTION_ADD_CC);
       $effect->setTarget(array_keys($this->explicitCCs));
       $effect->setReason(
-        'CCs provided explicitly by revision author or carried over from a '.
-        'previous version of the revision.');
+        pht('CCs provided explicitly by revision author or carried over '.
+        'from a previous version of the revision.'));
       $result[] = new HeraldApplyTranscript(
         $effect,
         true,
-        'Added addresses to CC list.');
+        pht('Added addresses to CC list.'));
     }
 
     $forbidden_ccs = array_fill_keys(
@@ -236,7 +236,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'OK, did nothing.');
+            pht('OK, did nothing.'));
           break;
         case HeraldActionConfig::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
@@ -269,18 +269,18 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
               $result[] = new HeraldApplyTranscript(
                 $effect,
                 true,
-                'Added these addresses to '.$op.' list. '.
-                'Others could not be added.');
+                pht('Added these addresses to %s list. '.
+                'Others could not be added.', $op));
             }
             $result[] = new HeraldApplyTranscript(
               $failed,
               false,
-              $op.' forbidden, these addresses have unsubscribed.');
+              pht('%s forbidden, these addresses have unsubscribed.', $op));
           } else {
             $result[] = new HeraldApplyTranscript(
               $effect,
               true,
-              'Added addresses to '.$op.' list.');
+              pht('Added addresses to %s list.', $op));
           }
           break;
         case HeraldActionConfig::ACTION_REMOVE_CC:
@@ -290,7 +290,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'Removed addresses from CC list.');
+            pht('Removed addresses from CC list.'));
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");

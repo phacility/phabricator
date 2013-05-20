@@ -11,7 +11,7 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Create Notification Rules';
+    return pht('Create Notification Rules');
   }
 
   public function getTitleGlyph() {

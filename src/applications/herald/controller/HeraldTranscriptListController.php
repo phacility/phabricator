@@ -64,19 +64,19 @@ final class HeraldTranscriptListController extends HeraldController {
             'href' => '/herald/transcript/'.$xscript['id'].'/',
             'class' => 'button small grey',
           ),
-          'View Transcript'),
+          pht('View Transcript')),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Date',
-        'Time',
-        'Object',
-        'Dry Run',
-        'Duration',
-        'View',
+        pht('Date'),
+        pht('Time'),
+        pht('Object'),
+        pht('Dry Run'),
+        pht('Duration'),
+        pht('View'),
       ));
     $table->setColumnClasses(
       array(
@@ -105,10 +105,12 @@ final class HeraldTranscriptListController extends HeraldController {
           ->setName(pht('Transcripts')));
     $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Herald Transcripts',
+        'title' => pht('Herald Transcripts'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

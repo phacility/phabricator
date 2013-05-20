@@ -21,24 +21,24 @@ final class HeraldConditionConfig {
   const CONDITION_REGEXP_PAIR     = 'regexp-pair';
 
   public static function getConditionMap() {
-    static $map = array(
-      self::CONDITION_CONTAINS        => 'contains',
-      self::CONDITION_NOT_CONTAINS    => 'does not contain',
-      self::CONDITION_IS              => 'is',
-      self::CONDITION_IS_NOT          => 'is not',
-      self::CONDITION_IS_ANY          => 'is any of',
-      self::CONDITION_IS_NOT_ANY      => 'is not any of',
-      self::CONDITION_INCLUDE_ALL     => 'include all of',
-      self::CONDITION_INCLUDE_ANY     => 'include any of',
-      self::CONDITION_INCLUDE_NONE    => 'include none of',
-      self::CONDITION_IS_ME           => 'is myself',
-      self::CONDITION_IS_NOT_ME       => 'is not myself',
-      self::CONDITION_REGEXP          => 'matches regexp',
-      self::CONDITION_RULE            => 'matches:',
-      self::CONDITION_NOT_RULE        => 'does not match:',
-      self::CONDITION_EXISTS          => 'exists',
-      self::CONDITION_NOT_EXISTS      => 'does not exist',
-      self::CONDITION_REGEXP_PAIR     => 'matches regexp pair',
+    $map = array(
+      self::CONDITION_CONTAINS        => pht('contains'),
+      self::CONDITION_NOT_CONTAINS    => pht('does not contain'),
+      self::CONDITION_IS              => pht('is'),
+      self::CONDITION_IS_NOT          => pht('is not'),
+      self::CONDITION_IS_ANY          => pht('is any of'),
+      self::CONDITION_IS_NOT_ANY      => pht('is not any of'),
+      self::CONDITION_INCLUDE_ALL     => pht('include all of'),
+      self::CONDITION_INCLUDE_ANY     => pht('include any of'),
+      self::CONDITION_INCLUDE_NONE    => pht('include none of'),
+      self::CONDITION_IS_ME           => pht('is myself'),
+      self::CONDITION_IS_NOT_ME       => pht('is not myself'),
+      self::CONDITION_REGEXP          => pht('matches regexp'),
+      self::CONDITION_RULE            => pht('matches:'),
+      self::CONDITION_NOT_RULE        => pht('does not match:'),
+      self::CONDITION_EXISTS          => pht('exists'),
+      self::CONDITION_NOT_EXISTS      => pht('does not exist'),
+      self::CONDITION_REGEXP_PAIR     => pht('matches regexp pair'),
     );
 
     return $map;

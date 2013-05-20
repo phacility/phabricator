@@ -22,7 +22,7 @@ abstract class HeraldObjectAdapter {
       return new HeraldApplyTranscript(
         $effect,
         false,
-        'Object already flagged.');
+        pht('Object already flagged.'));
     }
 
     $handle = PhabricatorObjectHandleData::loadOneHandle(
@@ -38,13 +38,14 @@ abstract class HeraldObjectAdapter {
     $flag->setReasonPHID($user->getPHID());
 
     $flag->setColor($color);
-    $flag->setNote('Flagged by Herald Rule "'.$rule->getName().'".');
+    $flag->setNote(
+      pht('Flagged by Herald Rule "%s".', $rule->getName()));
     $flag->save();
 
     return new HeraldApplyTranscript(
       $effect,
       true,
-      'Added flag.');
+      pht('Added flag.'));
   }
 
 }

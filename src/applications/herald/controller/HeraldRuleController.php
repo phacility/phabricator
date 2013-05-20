@@ -75,7 +75,7 @@ final class HeraldRuleController extends HeraldController {
 
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
       $error_view->setErrors($errors);
     } else {
       $error_view = null;
@@ -109,7 +109,7 @@ final class HeraldRuleController extends HeraldController {
           )))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Rule Name')
+          ->setLabel(pht('Rule Name'))
           ->setName('name')
           ->setError($e_name)
           ->setValue($rule->getName()));
@@ -117,13 +117,13 @@ final class HeraldRuleController extends HeraldController {
     $form
       ->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setValue(hsprintf(
-            "This <strong>%s</strong> rule triggers for <strong>%s</strong>.",
-            $rule_type_name,
-            $content_type_name)))
+          ->setValue(pht(
+            "This %s rule triggers for %s.",
+            phutil_tag('strong', array(), $rule_type_name),
+            phutil_tag('strong', array(), $content_type_name))))
       ->appendChild(
         id(new AphrontFormInsetView())
-          ->setTitle('Conditions')
+          ->setTitle(pht('Conditions'))
           ->setRightButton(javelin_tag(
             'a',
             array(
@@ -132,9 +132,9 @@ final class HeraldRuleController extends HeraldController {
               'sigil' => 'create-condition',
               'mustcapture' => true
             ),
-            'Create New Condition'))
+            pht('New Condition')))
           ->setDescription(
-            hsprintf('When %s these conditions are met:', $must_match_selector))
+            pht('When %s these conditions are met:', $must_match_selector))
           ->setContent(javelin_tag(
             'table',
             array(
@@ -144,7 +144,7 @@ final class HeraldRuleController extends HeraldController {
             '')))
       ->appendChild(
         id(new AphrontFormInsetView())
-          ->setTitle('Action')
+          ->setTitle(pht('Action'))
           ->setRightButton(javelin_tag(
             'a',
             array(
@@ -153,8 +153,8 @@ final class HeraldRuleController extends HeraldController {
               'sigil' => 'create-action',
               'mustcapture' => true,
             ),
-            'Create New Action'))
-          ->setDescription(hsprintf(
+            pht('New Action')))
+          ->setDescription(pht(
             'Take these actions %s this rule matches:',
             $repetition_selector))
           ->setContent(javelin_tag(
@@ -166,24 +166,29 @@ final class HeraldRuleController extends HeraldController {
               '')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save Rule')
+          ->setValue(pht('Save Rule'))
           ->addCancelButton('/herald/view/'.$rule->getContentType().'/'));
 
     $this->setupEditorBehavior($rule, $handles);
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(
-      $rule->getID()
+    $title = $rule->getID()
         ? pht('Edit Herald Rule')
-        : pht('Create Herald Rule'));
+        : pht('Create Herald Rule');
+
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($title)
+          ->setHref('#'));
 
     $nav = $this->renderNav();
+    $nav->setCrumbs($crumbs);
     $nav->selectFilter(
       'view/'.$rule->getContentType().'/'.$rule->getRuleType());
     $nav->appendChild(
       array(
         $error_view,
-        $header,
         $form,
       ));
 
@@ -191,6 +196,8 @@ final class HeraldRuleController extends HeraldController {
       $nav,
       array(
         'title' => pht('Edit Rule'),
+        'dust' => true,
+        'device' => true,
       ));
   }
 
@@ -213,8 +220,8 @@ final class HeraldRuleController extends HeraldController {
     $errors = array();
 
     if (!strlen($rule->getName())) {
-      $e_name = "Required";
-      $errors[] = "Rule must have a name.";
+      $e_name = pht("Required");
+      $errors[] = pht("Rule must have a name.");
     }
 
     $data = json_decode($request->getStr('rule'), true);
@@ -247,10 +254,10 @@ final class HeraldRuleController extends HeraldController {
       if ($cond_type == HeraldConditionConfig::CONDITION_REGEXP) {
         if (@preg_match($obj->getValue(), '') === false) {
           $errors[] =
-            'The regular expression "'.$obj->getValue().'" is not valid. '.
+            pht('The regular expression "%s" is not valid. '.
             'Regular expressions must have enclosing characters (e.g. '.
             '"@/path/to/file@", not "/path/to/file") and be syntactically '.
-            'correct.';
+            'correct.', $obj->getValue());
         }
       }
 
@@ -258,26 +265,27 @@ final class HeraldRuleController extends HeraldController {
         $json = json_decode($obj->getValue(), true);
         if (!is_array($json)) {
           $errors[] =
-            'The regular expression pair "'.$obj->getValue().'" is not '.
-            'valid JSON. Enter a valid JSON array with two elements.';
+            pht('The regular expression pair "%s" is not '.
+            'valid JSON. Enter a valid JSON array with two elements.',
+            $obj->getValue());
         } else {
           if (count($json) != 2) {
             $errors[] =
-              'The regular expression pair "'.$obj->getValue().'" must have '.
-              'exactly two elements.';
+              pht('The regular expression pair "%s" must have '.
+              'exactly two elements.', $obj->getValue());
           } else {
             $key_regexp = array_shift($json);
             $val_regexp = array_shift($json);
 
             if (@preg_match($key_regexp, '') === false) {
               $errors[] =
-                'The first regexp, "'.$key_regexp.'" in the regexp pair '.
-                'is not a valid regexp.';
+                pht('The first regexp, "%s" in the regexp pair '.
+                'is not a valid regexp.', $key_regexp);
             }
             if (@preg_match($val_regexp, '') === false) {
               $errors[] =
-                'The second regexp, "'.$val_regexp.'" in the regexp pair '.
-                'is not a valid regexp.';
+                pht('The second regexp, "%s" in the regexp pair '.
+                'is not a valid regexp.', $val_regexp);
             }
           }
         }
@@ -320,8 +328,8 @@ final class HeraldRuleController extends HeraldController {
         $rule->saveTransaction();
 
       } catch (AphrontQueryDuplicateKeyException $ex) {
-        $e_name = "Not Unique";
-        $errors[] = "Rule name is not unique. Choose a unique name.";
+        $e_name = pht("Not Unique");
+        $errors[] = pht("Rule name is not unique. Choose a unique name.");
       }
     }
 
@@ -469,8 +477,8 @@ final class HeraldRuleController extends HeraldController {
     return AphrontFormSelectControl::renderSelectTag(
       $rule->getMustMatchAll() ? 'all' : 'any',
       array(
-        'all' => 'all of',
-        'any' => 'any of',
+        'all' => pht('all of'),
+        'any' => pht('any of'),
       ),
       array(
         'name' => 'must_match',
