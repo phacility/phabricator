@@ -24,6 +24,12 @@ final class PhabricatorMetaMTAEmailBodyParser {
       '',
       $body);
 
+    // See example in T3217.
+    $body = preg_replace(
+      '/^________________________________________\s+From:.*?/imsU',
+      '',
+      $body);
+
     return rtrim($body);
   }
 

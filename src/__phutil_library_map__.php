@@ -1118,8 +1118,8 @@ phutil_register_library_map(array(
     'PhabricatorMetaMTAConfigOptions' => 'applications/config/option/PhabricatorMetaMTAConfigOptions.php',
     'PhabricatorMetaMTAController' => 'applications/metamta/controller/PhabricatorMetaMTAController.php',
     'PhabricatorMetaMTADAO' => 'applications/metamta/storage/PhabricatorMetaMTADAO.php',
-    'PhabricatorMetaMTAEmailBodyParser' => 'applications/metamta/PhabricatorMetaMTAEmailBodyParser.php',
-    'PhabricatorMetaMTAEmailBodyParserTestCase' => 'applications/metamta/__tests__/PhabricatorMetaMTAEmailBodyParserTestCase.php',
+    'PhabricatorMetaMTAEmailBodyParser' => 'applications/metamta/parser/PhabricatorMetaMTAEmailBodyParser.php',
+    'PhabricatorMetaMTAEmailBodyParserTestCase' => 'applications/metamta/parser/__tests__/PhabricatorMetaMTAEmailBodyParserTestCase.php',
     'PhabricatorMetaMTAListController' => 'applications/metamta/controller/PhabricatorMetaMTAListController.php',
     'PhabricatorMetaMTAMail' => 'applications/metamta/storage/PhabricatorMetaMTAMail.php',
     'PhabricatorMetaMTAMailBody' => 'applications/metamta/view/PhabricatorMetaMTAMailBody.php',
@@ -2293,11 +2293,7 @@ phutil_register_library_map(array(
     'DivinerFileAtomizer' => 'DivinerAtomizer',
     'DivinerGenerateWorkflow' => 'DivinerWorkflow',
     'DivinerListController' => 'PhabricatorController',
-    'DivinerLiveAtom' =>
-    array(
-      0 => 'DivinerDAO',
-      1 => 'PhabricatorPolicyInterface',
-    ),
+    'DivinerLiveAtom' => 'DivinerDAO',
     'DivinerLiveBook' =>
     array(
       0 => 'DivinerDAO',

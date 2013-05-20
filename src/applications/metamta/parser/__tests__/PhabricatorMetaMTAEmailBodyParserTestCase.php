@@ -103,6 +103,14 @@ OKAY
 Sent from my iPhone
 EOEMAIL
 ,
+<<<EOMAIL
+OKAY
+
+________________________________________
+From: Abraham Lincoln <alincoln@logcab.in>
+Subject: Core World Tariffs
+EOMAIL
+,
     );
   }
 
