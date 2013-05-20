@@ -187,6 +187,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'phrequent',
       ),
+      'db.diviner' => array(
+        'type' => 'db',
+        'name' => 'diviner',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1297,6 +1301,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130513.receviedmailstatus.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20130513.receviedmailstatus.sql'),
+      ),
+      '20130519.diviner.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130519.diviner.sql'),
       ),
     );
   }

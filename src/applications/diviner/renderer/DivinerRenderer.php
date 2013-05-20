@@ -3,7 +3,7 @@
 abstract class DivinerRenderer {
 
   private $publisher;
-  private $atomStack;
+  private $atomStack = array();
 
   public function setPublisher($publisher) {
     $this->publisher = $publisher;

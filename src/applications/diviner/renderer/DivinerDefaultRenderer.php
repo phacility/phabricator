@@ -155,7 +155,7 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
             'class' => 'atom-index-item',
           ),
           array(
-            $ref->getName(),
+            $this->renderAtomRefLink($ref),
             ' - ',
             $ref->getSummary(),
           ));
@@ -227,8 +227,13 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
   }
 
   public function getHrefForAtomRef(DivinerAtomRef $ref) {
+    $depth = 1;
+
     $atom = $this->peekAtomStack();
-    $depth = $this->getAtomHrefDepth($atom);
+    if ($atom) {
+      $depth = $this->getAtomHrefDepth($atom);
+    }
+
     $href = str_repeat('../', $depth);
 
     $book = $ref->getBook();
@@ -240,9 +245,19 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
     if ($context !== null) {
       $href .= $context.'/';
     }
-    $href .= $name.'/';
+    $href .= $name.'/index.html';
 
     return $href;
   }
+
+  protected function renderAtomRefLink(DivinerAtomRef $ref) {
+    return phutil_tag(
+      'a',
+      array(
+        'href' => $this->getHrefForAtomRef($ref),
+      ),
+      $ref->getTitle());
+  }
+
 
 }
