@@ -35,7 +35,9 @@ final class DiffusionMercurialMergedCommitsQuery
     // Remove the merge commit.
     $hashes = array_diff($hashes, array($request->getCommit()));
 
-    return $this->loadHistoryForCommitIdentifiers($hashes);
+    return DiffusionQuery::loadHistoryForCommitIdentifiers(
+      $hashes,
+      $request);
   }
 
 }

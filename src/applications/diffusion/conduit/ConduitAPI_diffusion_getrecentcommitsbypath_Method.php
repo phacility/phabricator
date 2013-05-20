@@ -43,11 +43,19 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
       $request->getValue('limit'),
       self::DEFAULT_LIMIT);
 
-    $history = DiffusionHistoryQuery::newFromDiffusionRequest($drequest)
-    ->setLimit($limit)
-    ->needDirectChanges(true)
-    ->needChildChanges(true)
-    ->loadHistory();
+    $history_result = DiffusionQuery::callConduitWithDiffusionRequest(
+      $request->getUser(),
+      $drequest,
+      'diffusion.historyquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath(),
+        'offset' => 0,
+        'limit' => $limit,
+        'needDirectChanges' => true,
+        'needChildChanges' => true));
+    $history = DiffusionPathChange::newFromConduit(
+      $history_result['pathChanges']);
 
     $raw_commit_identifiers = mpull($history, 'getCommitIdentifier');
     $result = array();

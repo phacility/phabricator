@@ -33,7 +33,9 @@ final class DiffusionGitMergedCommitsQuery extends DiffusionMergedCommitsQuery {
     // Remove the merge commit.
     $hashes = array_diff($hashes, array($request->getCommit()));
 
-    return $this->loadHistoryForCommitIdentifiers($hashes);
+    return DiffusionQuery::loadHistoryForCommitIdentifiers(
+      $hashes,
+      $request);
   }
 
 }

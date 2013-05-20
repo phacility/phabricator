@@ -12,11 +12,15 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $this->buildPropertiesTable($drequest->getRepository());
 
-    $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
-      $drequest);
-    $history_query->setLimit(15);
-    $history_query->needParents(true);
-    $history = $history_query->loadHistory();
+    $history_results = $this->callConduitWithDiffusionRequest(
+      'diffusion.historyquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath(),
+        'offset' => 0,
+        'limit' => 15));
+    $history = DiffusionPathChange::newFromConduit(
+      $history_results['pathChanges']);
 
     $browse_results = DiffusionBrowseResultSet::newFromConduit(
       $this->callConduitWithDiffusionRequest(
@@ -63,7 +67,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table->setHandles($handles);
     $history_table->setHistory($history);
     $history_table->loadRevisions();
-    $history_table->setParents($history_query->getParents());
+    $history_table->setParents($history_results['parents']);
     $history_table->setIsHead(true);
 
     $callsign = $drequest->getRepository()->getCallsign();
