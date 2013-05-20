@@ -83,7 +83,7 @@ final class DifferentialAddCommentView extends AphrontView {
         ->addCheckbox(
           'pci_compliance',
           $pci_compliance,
-          pht('Some PCI Compliance Message'),
+          pht('I Have evaluated this review against OWASP Top 10'),
           true))
       ->appendChild(
         id(new AphrontFormTokenizerControl())

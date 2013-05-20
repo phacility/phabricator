@@ -17,6 +17,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
   private $noEmail;
 
   private $isDaemonWorkflow;
+  private $pci_checkbox_val;
 
   public function __construct(
     DifferentialRevision $revision,
@@ -179,7 +180,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           throw new Exception('You can not accept your own revision.');
         }
         if (!$pci_compliant) {
-          throw new Exception('You must accept pci compliance checkbox.');
+          throw new Exception('You must check the box saying you validated this review against OWASP Top 10');
         }
         if (($revision_status !=
              ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&

@@ -18,7 +18,7 @@ final class DifferentialCommentSaveController extends DifferentialController {
     $action     = $request->getStr('action');
     $reviewers  = $request->getArr('reviewers');
     $ccs        = $request->getArr('ccs');
-    $pci_compliance        = $request->getArr('pci_compliance');
+    $pci_compliance        = $request->getInt('pci_compliance');
 
     $editor = new DifferentialCommentEditor(
       $revision,
