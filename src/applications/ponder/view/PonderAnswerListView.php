@@ -47,8 +47,8 @@ final class PonderAnswerListView extends AphrontView {
     $handles = $this->handles;
 
     $panel = id(new AphrontPanelView())
-      ->addClass("ponder-panel")
-      ->setHeader("Responses:");
+      ->setNoBackground()
+      ->setHeader(pht("Responses"));
 
     foreach ($this->answers as $cur_answer) {
       $view = new PonderPostBodyView();
@@ -71,7 +71,7 @@ final class PonderAnswerListView extends AphrontView {
       $panel->appendChild($view);
       $panel->appendChild($commentview);
       $panel->appendChild(
-        hsprintf('<div style="height: 40px; clear : both"></div>'));
+        hsprintf('<div style="height: 20px; clear: both"></div>'));
 
     }
 

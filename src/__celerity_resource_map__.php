@@ -3705,25 +3705,16 @@ celerity_register_resource_map(array(
   ),
   'ponder-comment-table-css' =>
   array(
-    'uri' => '/res/a1bb9056/rsrc/css/application/ponder/comments.css',
+    'uri' => '/res/cf9c686f/rsrc/css/application/ponder/comments.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
     'disk' => '/rsrc/css/application/ponder/comments.css',
   ),
-  'ponder-core-view-css' =>
-  array(
-    'uri' => '/res/3a2d5e18/rsrc/css/application/ponder/core.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/ponder/core.css',
-  ),
   'ponder-feed-view-css' =>
   array(
-    'uri' => '/res/df22bd20/rsrc/css/application/ponder/feed.css',
+    'uri' => '/res/cab09075/rsrc/css/application/ponder/feed.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3741,7 +3732,7 @@ celerity_register_resource_map(array(
   ),
   'ponder-vote-css' =>
   array(
-    'uri' => '/res/ea8316c2/rsrc/css/application/ponder/vote.css',
+    'uri' => '/res/104d54ba/rsrc/css/application/ponder/vote.css',
     'type' => 'css',
     'requires' =>
     array(

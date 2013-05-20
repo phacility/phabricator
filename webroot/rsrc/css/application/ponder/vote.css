@@ -12,11 +12,8 @@
   display: block;
 
   text-decoration: none;
-  color: #999999;
+  color: #a1a5a9;
   font-weight: normal;
-
-  /* Our default fonts have weirdly different up/down arrow sizes. */
-  font-family: Arial;
 }
 
 .ponder-votebox a:hover {
@@ -38,20 +35,25 @@
   font-weight: bold;
 }
 
-
-
-
 .ponder-votebox {
-  float  : left;
-  width  : 32px;
-  height : 60px;
-  margin-top : 56px;
-  margin-left : 10px;
+  float: left;
+  width: 32px;
+  height: 60px;
+  margin-top: 56px;
+  margin-left: 10px;
+}
+
+.device-phone .ponder-votebox {
+  margin: 0;
+}
+
+.device-phone .ponder-votebox-content {
+  margin-left: 35px;
 }
 
 .ponder-votable .phabricator-transaction-view {
-  margin : 0;
-  padding : 0;
+  margin: 0;
+  padding: 0;
 }
 
 .ponder-votable .phabricator-transaction-detail {
