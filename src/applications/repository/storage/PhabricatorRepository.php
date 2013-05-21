@@ -159,6 +159,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $pattern = $args[0];
     $args = array_slice($args, 1);
 
+    $empty = $this->getEmptyReadableDirectoryPath();
+
     if ($this->shouldUseSSH()) {
       switch ($this->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
@@ -175,8 +177,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
             'csprintf',
             array_merge(
               array(
-                "(ssh-add %s && git {$pattern})",
+                "(ssh-add %s && HOME=%s git {$pattern})",
                 $this->getSSHKeyfile(),
+                $empty,
               ),
               $args));
           $pattern = "ssh-agent sh -c %s";
@@ -239,7 +242,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           $pattern = "svn --non-interactive {$pattern}";
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $pattern = "git {$pattern}";
+          $pattern = "HOME=%s git {$pattern}";
+          array_unshift($args, $empty);
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $pattern = "hg {$pattern}";
@@ -258,14 +262,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $pattern = $args[0];
     $args = array_slice($args, 1);
 
+    $empty = $this->getEmptyReadableDirectoryPath();
+
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $pattern = "(cd %s && svn --non-interactive {$pattern})";
         array_unshift($args, $this->getLocalPath());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $pattern = "(cd %s && git {$pattern})";
-        array_unshift($args, $this->getLocalPath());
+        $pattern = "(cd %s && HOME=%s git {$pattern})";
+        array_unshift($args, $this->getLocalPath(), $empty);
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $hgplain = (phutil_is_windows() ? "set HGPLAIN=1 &&" : "HGPLAIN=1");
@@ -279,6 +285,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     array_unshift($args, $pattern);
 
     return $args;
+  }
+
+  private function getEmptyReadableDirectoryPath() {
+    // See T2965. Some time after Git 1.7.5.4, Git started fataling if it can
+    // not read $HOME. For many users, $HOME points at /root (this seems to be
+    // a default result of Apache setup). Instead, explicitly point $HOME at a
+    // readable, empty directory so that Git looks for the config file it's
+    // after, fails to locate it, and moves on. This is really silly, but seems
+    // like the least damaging approach to mitigating the issue.
+    $root = dirname(phutil_get_library_root('phabricator'));
+    return $root.'/support/empty/';
   }
 
   private function getSSHLogin() {
