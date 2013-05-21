@@ -90,6 +90,10 @@
   padding: 4px;
 }
 
+.aphront-form-full-width .aphront-form-control {
+  padding: 4px 0;
+}
+
 .aphront-form-control-submit button,
 .aphront-form-control-submit a.button {
   float: right;
