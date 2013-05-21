@@ -43,7 +43,7 @@ final class PhabricatorNotificationPanelController
 
     $json = array(
       'content' => $content,
-      'number'  => $unread_count,
+      'number'  => (int)$unread_count,
     );
 
     return id(new AphrontAjaxResponse())->setContent($json);
