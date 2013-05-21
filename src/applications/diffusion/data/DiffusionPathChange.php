@@ -150,11 +150,23 @@ final class DiffusionPathChange {
   }
 
   public function toDictionary() {
+    $commit = $this->getCommit();
+    if ($commit) {
+      $commit_dict = $commit->toDictionary();
+    } else {
+      $commit_dict = array();
+    }
+    $commit_data = $this->getCommitData();
+    if ($commit_data) {
+      $commit_data_dict = $commit_data->toDictionary();
+    } else {
+      $commit_data_dict = array();
+    }
     return array(
       'path' => $this->getPath(),
       'commitIdentifier' => $this->getCommitIdentifier(),
-      'commit' => $this->getCommit()->toDictionary(),
-      'commitData' => $this->getCommitData()->toDictionary(),
+      'commit' => $commit_dict,
+      'commitData' => $commit_data_dict,
       'fileType' => $this->getFileType(),
       'targetPath' =>  $this->getTargetPath(),
       'targetCommitIdentifier' => $this->getTargetCommitIdentifier(),
