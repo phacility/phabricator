@@ -818,7 +818,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-multi-column-view-css' =>
   array(
-    'uri' => '/res/972551b3/rsrc/css/aphront/multi-column.css',
+    'uri' => '/res/e01f5f0e/rsrc/css/aphront/multi-column.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3592,7 +3592,7 @@ celerity_register_resource_map(array(
   ),
   'phame-css' =>
   array(
-    'uri' => '/res/8e3edb71/rsrc/css/application/phame/phame.css',
+    'uri' => '/res/ba5a8cd8/rsrc/css/application/phame/phame.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3669,7 +3669,7 @@ celerity_register_resource_map(array(
   ),
   'phui-feed-story-css' =>
   array(
-    'uri' => '/res/2fb3c729/rsrc/css/phui/phui-feed-story.css',
+    'uri' => '/res/4dbcec0e/rsrc/css/phui/phui-feed-story.css',
     'type' => 'css',
     'requires' =>
     array(

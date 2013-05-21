@@ -48,6 +48,13 @@ final class PhameBlogViewController extends PhameController {
       $user,
       pht('This blog has no visible posts.'));
 
+    require_celerity_resource('phame-css');
+    $post_list = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addClass('phame-post-list')
+      ->appendChild($post_list);
+
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())

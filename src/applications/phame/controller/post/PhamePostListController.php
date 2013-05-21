@@ -70,7 +70,12 @@ final class PhamePostListController extends PhameController {
       mpull($posts, 'getBlogPHID'));
     $this->loadHandles($handle_phids);
 
+    require_celerity_resource('phame-css');
     $post_list = $this->renderPostList($posts, $user, $nodata);
+    $post_list = id(new PHUIBoxView())
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addClass('phame-post-list')
+      ->appendChild($post_list);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
