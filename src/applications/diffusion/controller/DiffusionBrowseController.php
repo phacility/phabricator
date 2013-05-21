@@ -15,7 +15,6 @@ final class DiffusionBrowseController extends DiffusionController {
           array(
             'path' => $drequest->getPath(),
             'commit' => $drequest->getCommit(),
-            'renderReadme' => true,
           )));
       $reason = $results->getReasonForEmptyResultSet();
       $is_file = ($reason == DiffusionBrowseResultSet::REASON_IS_FILE);
@@ -84,7 +83,11 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $content[] = $this->buildOpenRevisions();
 
-      $readme = $results->getReadmeContent();
+      $readme = $this->callConduitWithDiffusionRequest(
+        'diffusion.readmequery',
+        array(
+          'paths' => $results->getPathDicts()
+        ));
       if ($readme) {
         $box = new PHUIBoxView();
         $box->setShadow(true);

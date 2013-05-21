@@ -21,95 +21,12 @@ final class ConduitAPI_diffusion_browsequery_Method
       'path' => 'optional string',
       'commit' => 'optional string',
       'needValidityOnly' => 'optional bool',
-      'renderReadme' => 'optional bool',
     );
   }
 
   protected function getResult(ConduitAPIRequest $request) {
     $result = parent::getResult($request);
-    if ($request->getValue('renderReadme', false)) {
-      $readme = $this->renderReadme($request, $result);
-    }
     return $result->toDictionary();
-  }
-
-  final private function renderReadme(
-    ConduitAPIRequest $request,
-    DiffusionBrowseResultSet $result) {
-    $drequest = $this->getDiffusionRequest();
-
-    $readme = null;
-    foreach ($result->getPaths() as $result_path) {
-      $file_type = $result_path->getFileType();
-      if (($file_type != ArcanistDiffChangeType::FILE_NORMAL) &&
-          ($file_type != ArcanistDiffChangeType::FILE_TEXT)) {
-        // Skip directories, etc.
-        continue;
-      }
-
-      $path = $result_path->getPath();
-
-      if (preg_match('/^readme(|\.txt|\.remarkup|\.rainbow|\.md)$/i', $path)) {
-        $readme = $result_path;
-        break;
-      }
-    }
-
-    if (!$readme) {
-      return null;
-    }
-
-    $readme_request = DiffusionRequest::newFromDictionary(
-      array(
-        'user' => $request->getUser(),
-        'repository' => $drequest->getRepository(),
-        'commit' => $drequest->getStableCommitName(),
-        'path' => $readme->getFullPath(),
-      ));
-
-    $file_content = DiffusionFileContent::newFromConduit(
-      DiffusionQuery::callConduitWithDiffusionRequest(
-        $request->getUser(),
-        $readme_request,
-        'diffusion.filecontentquery',
-        array(
-          'commit' => $drequest->getStableCommitName(),
-          'path' => $readme->getFullPath(),
-          'needsBlame' => false,
-        )));
-    $readme_content = $file_content->getCorpus();
-
-    if (preg_match('/\\.txt$/', $readme->getPath())) {
-      $readme_content = phutil_escape_html_newlines($readme_content);
-
-      $class = null;
-    } else if (preg_match('/\\.rainbow$/', $readme->getPath())) {
-      $highlighter = new PhutilRainbowSyntaxHighlighter();
-      $readme_content = $highlighter
-        ->getHighlightFuture($readme_content)
-        ->resolve();
-      $readme_content = phutil_escape_html_newlines($readme_content);
-
-      require_celerity_resource('syntax-highlighting-css');
-      $class = 'remarkup-code';
-    } else {
-      // Markup extensionless files as remarkup so we get links and such.
-      $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-      $engine->setConfig('viewer', $request->getUser());
-      $readme_content = $engine->markupText($readme_content);
-
-      $class = 'phabricator-remarkup';
-    }
-
-    $readme_content = phutil_tag(
-      'div',
-      array(
-        'class' => $class,
-      ),
-      $readme_content);
-
-    $result->setReadmeContent($readme_content);
-    return $result;
   }
 
   protected function getGitResult(ConduitAPIRequest $request) {

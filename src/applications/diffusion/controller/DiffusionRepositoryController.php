@@ -28,12 +28,10 @@ final class DiffusionRepositoryController extends DiffusionController {
         array(
           'path' => $drequest->getPath(),
           'commit' => $drequest->getCommit(),
-          'renderReadme' => true,
         )));
     $browse_paths = $browse_results->getPaths();
 
     $phids = array();
-
     foreach ($history as $item) {
       $data = $item->getCommitData();
       if ($data) {
@@ -57,9 +55,14 @@ final class DiffusionRepositoryController extends DiffusionController {
         }
       }
     }
-
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
+
+    $readme = $this->callConduitWithDiffusionRequest(
+      'diffusion.readmequery',
+      array(
+       'paths' => $browse_results->getPathDicts()
+        ));
 
     $history_table = new DiffusionHistoryTableView();
     $history_table->setUser($this->getRequest()->getUser());
@@ -109,7 +112,6 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $this->buildBranchListTable($drequest);
 
-    $readme = $browse_results->getReadmeContent();
     if ($readme) {
       $box = new PHUIBoxView();
       $box->setShadow(true);
