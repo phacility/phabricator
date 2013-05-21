@@ -803,13 +803,20 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
     $drequest = $this->getDiffusionRequest();
-
     $limit = 50;
 
-    $merge_query = DiffusionMergedCommitsQuery::newFromDiffusionRequest(
-      $drequest);
-    $merge_query->setLimit($limit + 1);
-    $merges = $merge_query->loadMergedCommits();
+    $merges = array();
+    try {
+      $merges = $this->callConduitWithDiffusionRequest(
+        'diffusion.mergedcommitsquery',
+        array(
+          'commit' => $drequest->getCommit(),
+          'limit' => $limit + 1));
+    } catch (ConduitException $ex) {
+      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
+        throw $ex;
+      }
+    }
 
     if (!$merges) {
       return null;
