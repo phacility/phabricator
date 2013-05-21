@@ -17,7 +17,7 @@ extends DiffusionExpandShortNameQuery {
     // TODO: Show "multiple matching commits" if count is larger than 1. For
     // now, pick the first one.
 
-    $this->commit = head($full_hash);
+    $this->setCommit(head($full_hash));
   }
 
 }

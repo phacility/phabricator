@@ -74,8 +74,9 @@ final class DiffusionCommitController extends DiffusionController {
       require_celerity_resource('diffusion-commit-view-css');
       require_celerity_resource('phabricator-remarkup-css');
 
-      $parent_query = DiffusionCommitParentsQuery::newFromDiffusionRequest(
-        $drequest);
+      $parents = $this->callConduitWithDiffusionRequest(
+        'diffusion.commitparentsquery',
+        array('commit' => $drequest->getCommit()));
 
       $headsup_view = id(new PhabricatorHeaderView())
         ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')));
@@ -85,7 +86,7 @@ final class DiffusionCommitController extends DiffusionController {
       $commit_properties = $this->loadCommitProperties(
         $commit,
         $commit_data,
-        $parent_query->loadParents());
+        $parents);
       $property_list = id(new PhabricatorPropertyListView())
         ->setHasKeyboardShortcuts(true)
         ->setUser($user)
