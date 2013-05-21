@@ -24,14 +24,16 @@ final class PhabricatorOwnersDeleteController
       return id(new AphrontRedirectResponse())->setURI('/owners/');
     }
 
+    $text = pht('Are you sure you want to delete the "%s" package? This '.
+          'operation can not be undone.', $package->getName());
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle('Really delete this package?')
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
       ->appendChild(hsprintf(
-        '<p>Are you sure you want to delete the "%s" package? This operation '.
-          'can not be undone.</p>',
-        $package->getName()))
-      ->addSubmitButton('Delete')
+        '<p>%s</p>',
+        $text))
+      ->addSubmitButton(pht('Delete'))
       ->addCancelButton('/owners/package/'.$package->getID().'/')
       ->setSubmitURI($request->getRequestURI());
 

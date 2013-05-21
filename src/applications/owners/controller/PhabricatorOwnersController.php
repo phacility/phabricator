@@ -12,62 +12,56 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     return $this;
   }
 
-  public function buildStandardPageResponse($view, array $data) {
-
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName('Owners');
-    $page->setBaseURI('/owners/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x98\x81");
-    $nav = $this->renderSideNav();
-    $nav->appendChild($view);
-    $page->appendChild($nav);
-
-    $filter = $nav->getSelectedFilter();
-    switch ($filter) {
-      case 'view/owned':
-      case 'view/all':
-        $crumbs = $this->buildApplicationCrumbs();
-
-        if ($filter == 'view/owned') {
-          $title = pht('Owned Packages');
-        } else {
-          $title = pht('All Packages');
-        }
-
-        $crumbs->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName($title));
-
-        $crumbs->addAction(
-          id(new PhabricatorMenuItemView())
-            ->setName(pht('Create Package'))
-            ->setHref('/owners/new/')
-            ->setIcon('create'));
-
-        $nav->setCrumbs($crumbs);
-        break;
-    }
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
-
-  public function renderSideNav() {
+  public function buildSideNavView() {
     $nav = new AphrontSideNavFilterView();
     $base_uri = new PhutilURI('/owners/');
     $nav->setBaseURI($base_uri);
 
-    $nav->addLabel('Packages');
+    $nav->addLabel(pht('Packages'));
     $this->getExtraPackageViews($nav);
-    $nav->addFilter('view/owned', 'Owned');
-    $nav->addFilter('view/projects', 'Projects');
-    $nav->addFilter('view/all', 'All');
+    $nav->addFilter('view/owned', pht('Owned'));
+    $nav->addFilter('view/projects', pht('Projects'));
+    $nav->addFilter('view/all', pht('All'));
 
     $nav->selectFilter($this->getSideNavFilter(), 'view/owned');
 
+    $filter = $nav->getSelectedFilter();
+    switch ($filter) {
+      case 'view/owned':
+        $title = pht('Owned Packages');
+        break;
+      case 'view/all':
+        $title = pht('All Packages');
+        break;
+      case 'view/projects':
+        $title = pht('Projects');
+        break;
+      case 'new':
+        $title = pht('New Package');
+        break;
+      default:
+        $title = pht('Package');
+        break;
+    }
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title));
+
+    $crumbs->addAction(
+      id(new PhabricatorMenuItemView())
+        ->setName(pht('Create Package'))
+        ->setHref('/owners/new/')
+        ->setIcon('create'));
+
+    $nav->setCrumbs($crumbs);
+
     return $nav;
+  }
+
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView()->getMenu();
   }
 
   protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
