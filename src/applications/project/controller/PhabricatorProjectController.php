@@ -2,19 +2,6 @@
 
 abstract class PhabricatorProjectController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName(pht('Project'));
-    $page->setBaseURI('/project/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x98\xA3");
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
-
   protected function buildLocalNavigation(PhabricatorProject $project) {
     $id = $project->getID();
 
