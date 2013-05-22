@@ -150,3 +150,8 @@
 .device-phone .phriction-content .phabricator-remarkup-toc {
   width: 120px;
 }
+
+.phriction-content .phabricator-remarkup .remarkup-code-block {
+  clear: both;
+  margin: 20px 0;
+}
