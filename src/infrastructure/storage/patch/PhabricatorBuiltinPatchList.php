@@ -1306,6 +1306,11 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130519.diviner.sql'),
       ),
+      '20130521.dropconphimages.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130521.dropconphimages.sql'),
+      ),
+
     );
   }
 }

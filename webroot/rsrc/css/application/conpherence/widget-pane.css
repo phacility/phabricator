@@ -5,7 +5,7 @@
 .conpherence-widget-pane {
   position: fixed;
   right: 0px;
-  top: 125px;
+  top: 76px;
   width: 280px;
   height: 100%;
   border-width: 0 0 0 1px;
@@ -75,7 +75,7 @@
 .conpherence-widget-pane .widgets-body {
   position: fixed;
   overflow-y: auto;
-  top: 165px;
+  top: 116px;
   bottom: 0px;
   width: 100%;
 }
@@ -161,6 +161,7 @@
 .aphront-multi-column-fluid .aphront-multi-column-5-up
 .aphront-multi-column-column-outer {
   width: 20%;
+  margin-bottom: 0px;
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
 .aphront-multi-column-column-last {

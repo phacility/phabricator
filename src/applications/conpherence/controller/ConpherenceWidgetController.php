@@ -107,7 +107,8 @@ final class ConpherenceWidgetController extends
                 'widget' => 'widgets-people',
               ),
               'id' => 'widgets-people-toggle',
-              'class' => 'sprite-conpherence conpherence_people_off'
+              'class' =>
+              'sprite-conpherence conpherence_people_on conpherence_people_off'
             ),
             ''),
           javelin_tag(
@@ -119,7 +120,7 @@ final class ConpherenceWidgetController extends
               ),
               'id' => 'widgets-files-toggle',
               'class' =>
-              'sprite-conpherence conpherence_files_on conpherence_files_off'
+              'sprite-conpherence conpherence_files_off'
             ),
             ''),
           javelin_tag(
@@ -153,7 +154,6 @@ final class ConpherenceWidgetController extends
         'class' => 'widgets-body',
         'id' => 'widgets-people',
         'sigil' => 'widgets-people',
-        'style' => 'display: none;'
       ),
       id(new ConpherencePeopleWidgetView())
       ->setUser($user)
@@ -165,6 +165,7 @@ final class ConpherenceWidgetController extends
         'class' => 'widgets-body',
         'id' => 'widgets-files',
         'sigil' => 'widgets-files',
+        'style' => 'display: none;'
       ),
       id(new ConpherenceFileWidgetView())
       ->setUser($user)

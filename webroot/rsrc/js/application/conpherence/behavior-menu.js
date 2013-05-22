@@ -149,7 +149,7 @@ JX.behavior('conpherence-menu', function(config) {
         'conpherence-toggle-widget',
         null,
         {
-          widget : 'widgets-files'
+          widget : 'widgets-people'
         }
       );
     }

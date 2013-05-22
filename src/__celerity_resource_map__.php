@@ -918,7 +918,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-header-pane-css' =>
   array(
-    'uri' => '/res/dc654fce/rsrc/css/application/conpherence/header-pane.css',
+    'uri' => '/res/762c199d/rsrc/css/application/conpherence/header-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -936,7 +936,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-message-pane-css' =>
   array(
-    'uri' => '/res/52cf7ca3/rsrc/css/application/conpherence/message-pane.css',
+    'uri' => '/res/ff25351b/rsrc/css/application/conpherence/message-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -954,7 +954,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-widget-pane-css' =>
   array(
-    'uri' => '/res/197df36c/rsrc/css/application/conpherence/widget-pane.css',
+    'uri' => '/res/c0131a8b/rsrc/css/application/conpherence/widget-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1316,7 +1316,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/06bfc1a3/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/2bffa665/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(

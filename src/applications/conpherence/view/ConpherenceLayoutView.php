@@ -65,14 +65,6 @@ final class ConpherenceLayoutView extends AphrontView {
         'hasWidgets' => false,
       ));
 
-    Javelin::initBehavior('conpherence-drag-and-drop-photo',
-      array(
-        'target' => 'conpherence-header-pane',
-        'form_pane' => 'conpherence-form',
-        'upload_uri' => '/file/dropupload/',
-        'activated_class' => 'conpherence-header-upload-photo',
-      ));
-
     $all_views = 1;
     $devices_only = 0;
     Javelin::initBehavior(
@@ -94,12 +86,6 @@ final class ConpherenceLayoutView extends AphrontView {
               'tagname' => 'div',
               'sigil' => 'phabricator-nav-column-background',
               'showstyle' => 'block',
-              'hidestyle' => 'none',
-              'desktopstyle' => 'block'),
-            array(
-              'tagname' => 'a',
-              'sigil' =>  'conpherence-new-conversation',
-              'showstyle' => 'none',
               'hidestyle' => 'none',
               'desktopstyle' => 'block'),
           )

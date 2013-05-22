@@ -6,7 +6,7 @@
   position: fixed;
   left: 300px;
   right: 281px;
-  top: 125px;
+  top: 76px;
   min-width: 300px;
   width: auto;
   height: 100%;
@@ -33,8 +33,8 @@
   position: fixed;
   left: 300px;
   right: 281px;
-  top: 125px;
-  bottom: 142px;
+  top: 76px;
+  bottom: 190px;
   overflow-y: auto;
   box-shadow: inset 1px 4px 5px rgba(0,0,0,0.1);
   -webkit-overflow-scrolling: touch;
@@ -52,7 +52,7 @@
 .conpherence-message-pane .phabricator-form-view {
   border-width: 0;
   background: none;
-  height: 143px;
+  height: 190px;
   padding: 0;
   position: fixed;
   bottom: 0;
@@ -121,7 +121,7 @@
 }
 
 .conpherence-message-pane .remarkup-assist-textarea {
-  height: 6em;
+  height: 124px;
   padding: 6px;
   border-width: 0 0 1px 0;
   border-color: #e7e7e7;

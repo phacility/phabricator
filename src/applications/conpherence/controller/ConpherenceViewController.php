@@ -40,7 +40,6 @@ final class ConpherenceViewController extends
     $query = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
-      ->needHeaderPics(true)
       ->needParticipantCache(true)
       ->needTransactions(true)
       ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT);
