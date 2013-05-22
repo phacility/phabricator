@@ -265,7 +265,7 @@ final class ReleephRequestTransactionalEditor
     $body->addTextSection(
       pht('RELEEPH BRANCH'),
       $project_and_branch."\n".
-      $releeph_branch->getURI());
+      PhabricatorEnv::getProductionURI($releeph_branch->getURI()));
 
     return $body;
   }

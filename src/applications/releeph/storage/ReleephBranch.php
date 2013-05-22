@@ -98,7 +98,7 @@ final class ReleephBranch extends ReleephDAO {
       rawurlencode($this->getBasename()),
       $path
     );
-    return PhabricatorEnv::getProductionURI(implode('/', $components));
+    return implode('/', $components);
   }
 
   public function loadReleephProject() {
