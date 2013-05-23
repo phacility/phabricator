@@ -6,7 +6,7 @@
 button,
 a.button,
 a.button:visited,
-input.inputsubmit {
+input[type="submit"] {
   background-color: #3477ad;
   color: white;
   text-shadow: 0 -1px rgba(0,0,0,0.75);
@@ -53,7 +53,7 @@ a.green:visited {
 }
 
 button.grey,
-input.inputaux,
+input[type="submit"].grey,
 a.grey,
 a.grey:visited {
   background-color: #f7f7f7;

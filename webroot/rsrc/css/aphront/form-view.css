@@ -100,6 +100,12 @@
   margin: 0.5em 0 0em 2%;
 }
 
+.phui-form-control-multi-submit input {
+  float: right;
+  margin: 0.5em 0 0em 2%;
+  width: auto;
+}
+
 .aphront-form-control-textarea textarea.aphront-textarea-very-short {
   height: 44px;
 }
