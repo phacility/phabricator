@@ -1310,6 +1310,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130521.dropconphimages.sql'),
       ),
+      '20130523.maniphest_owners.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130523.maniphest_owners.sql'),
+      ),
 
     );
   }

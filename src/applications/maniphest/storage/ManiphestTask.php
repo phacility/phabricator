@@ -90,7 +90,7 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function setOwnerPHID($phid) {
-    $this->ownerPHID = $phid;
+    $this->ownerPHID = nonempty($phid, null);
     $this->subscribersNeedUpdate = true;
     return $this;
   }
