@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 final class PhabricatorCountdownListController
   extends PhabricatorCountdownController {
 
@@ -8,22 +11,19 @@ final class PhabricatorCountdownListController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('page'));
-    $pager->setURI($request->getRequestURI(), 'page');
+    $pager = new AphrontCursorPagerView();
+    $pager->readFromRequest($request);
 
-    $timers = id(new PhabricatorCountdown())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
+    $query = id(new CountdownQuery())
+      ->setViewer($user);
 
-    $timers = $pager->sliceResults($timers);
+    $countdowns = $query->executeWithCursorPager($pager);
 
-    $phids = mpull($timers, 'getAuthorPHID');
+    $phids = mpull($countdowns, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
-    foreach ($timers as $timer) {
+    foreach ($countdowns as $timer) {
       $edit_button = null;
       $delete_button = null;
       if ($user->getIsAdmin() ||
