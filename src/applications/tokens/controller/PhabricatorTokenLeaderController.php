@@ -16,6 +16,7 @@ final class PhabricatorTokenLeaderController
     $counts = $query->getTokenCounts();
 
     $handles = array();
+    $phids = array();
     if ($counts) {
       $phids = mpull($objects, 'getPHID');
       $handles = id(new PhabricatorObjectHandleData($phids))
