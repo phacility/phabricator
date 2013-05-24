@@ -92,7 +92,7 @@ final class ConpherenceUpdateController
         case ConpherenceUpdateActions::METADATA:
           $xactions = array();
           $updated = false;
-          // all other metadata updates are continue requests
+          // all metadata updates are continue requests
           if (!$request->isContinueRequest()) {
             break;
           }
@@ -103,6 +103,7 @@ final class ConpherenceUpdateController
               ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
               ->setNewValue($title);
             $updated = true;
+            $response_mode = 'redirect';
           }
           if (!$updated) {
             $errors[] = pht(

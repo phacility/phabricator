@@ -25,7 +25,15 @@ abstract class ConpherenceController extends PhabricatorController {
         ->setName(pht('New Message'))
         ->setHref($this->getApplicationURI('new/'))
         ->setIcon('create')
-        ->setWorkflow(true));
+        ->setWorkflow(true))
+      ->addAction(
+        id(new PhabricatorMenuItemView())
+        ->setName(pht('Thread'))
+        ->setHref('#')
+        ->setIcon('action-menu')
+        ->setStyle('display: none;')
+        ->addClass('device-widgets-selector')
+        ->addSigil('device-widgets-selector'));
     return $crumbs;
   }
 
@@ -38,7 +46,9 @@ abstract class ConpherenceController extends PhabricatorController {
     }
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
-      ->setName($title));
+      ->setName($title)
+      ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
+      ->setWorkflow(true));
 
     return $crumbs;
   }

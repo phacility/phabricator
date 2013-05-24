@@ -91,10 +91,14 @@ final class ConpherenceViewController extends
       ->setReplyForm($form)
       ->setRole('thread');
 
+    $title = $conpherence->getTitle();
+    if (!$title) {
+      $title = pht('Conpherence');
+    }
     return $this->buildApplicationPage(
       $layout,
       array(
-        'title' => $conpherence->getTitle(),
+        'title' => $title,
         'device' => true,
       ));
   }

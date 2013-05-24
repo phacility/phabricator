@@ -65,8 +65,8 @@ abstract class AphrontTagView extends AphrontView {
     return $this;
   }
 
-  public function getClass() {
-    return $this->class;
+  public function getClasses() {
+    return $this->classes;
   }
 
   public function setID($id) {

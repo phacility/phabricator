@@ -6,6 +6,12 @@ final class PhabricatorCrumbView extends AphrontView {
   private $href;
   private $icon;
   private $isLastCrumb;
+  private $workflow;
+
+  public function setWorkflow($workflow) {
+    $this->workflow = $workflow;
+    return $this;
+  }
 
   public function setName($name) {
     $this->name = $name;
@@ -71,14 +77,13 @@ final class PhabricatorCrumbView extends AphrontView {
       $classes[] = 'phabricator-last-crumb';
     }
 
-    return phutil_tag(
+    return javelin_tag(
       $this->href ? 'a' : 'span',
-      array(
-        'href'  => $this->href,
-        'class' => implode(' ', $classes),
-      ),
-      array($icon, $name, $divider));
+        array(
+          'sigil' => $this->workflow ? 'workflow' : null,
+          'href'  => $this->href,
+          'class' => implode(' ', $classes),
+        ),
+        array($icon, $name, $divider));
   }
-
-
 }

@@ -918,7 +918,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-header-pane-css' =>
   array(
-    'uri' => '/res/762c199d/rsrc/css/application/conpherence/header-pane.css',
+    'uri' => '/res/6d7bfc7e/rsrc/css/application/conpherence/header-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -927,7 +927,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-menu-css' =>
   array(
-    'uri' => '/res/9991071e/rsrc/css/application/conpherence/menu.css',
+    'uri' => '/res/c955650e/rsrc/css/application/conpherence/menu.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -936,7 +936,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-message-pane-css' =>
   array(
-    'uri' => '/res/9b319b64/rsrc/css/application/conpherence/message-pane.css',
+    'uri' => '/res/383af93e/rsrc/css/application/conpherence/message-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -954,7 +954,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-widget-pane-css' =>
   array(
-    'uri' => '/res/c0131a8b/rsrc/css/application/conpherence/widget-pane.css',
+    'uri' => '/res/7aaa78c5/rsrc/css/application/conpherence/widget-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1303,7 +1303,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/2bffa665/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/a7f3be10/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1335,7 +1335,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-widget-pane' =>
   array(
-    'uri' => '/res/d2063fd4/rsrc/js/application/conpherence/behavior-widget-pane.js',
+    'uri' => '/res/bc139f8e/rsrc/js/application/conpherence/behavior-widget-pane.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1346,6 +1346,8 @@ celerity_register_resource_map(array(
       4 => 'javelin-util',
       5 => 'phabricator-notification',
       6 => 'javelin-behavior-device',
+      7 => 'phabricator-dropdown-menu',
+      8 => 'phabricator-menu-item',
     ),
     'disk' => '/rsrc/js/application/conpherence/behavior-widget-pane.js',
   ),

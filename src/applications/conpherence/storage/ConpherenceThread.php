@@ -157,9 +157,10 @@ final class ConpherenceThread extends ConpherenceDAO
       $lucky_handle = reset($handles);
     }
 
-    $title = $this->getTitle();
+    $title = $js_title = $this->getTitle();
     if (!$title) {
       $title = $lucky_handle->getName();
+      $js_title = pht('Conpherence');
     }
     $img_src = $lucky_handle->getImageURI();
 
@@ -191,6 +192,7 @@ final class ConpherenceThread extends ConpherenceDAO
 
     return array(
       'title' => $title,
+      'js_title' => $js_title,
       'subtitle' => $subtitle,
       'unread_count' => $unread_count,
       'epoch' => $this->getDateModified(),

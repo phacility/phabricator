@@ -50,12 +50,19 @@ final class PhabricatorCrumbsView extends AphrontView {
           $action->getName()
         );
 
+        $action_sigils = $action->getSigils();
+        if ($action->getWorkflow()) {
+          $action_sigils[] = 'workflow';
+        }
+        $action_classes = $action->getClasses();
+        $action_classes[] = 'phabricator-crumbs-action';
         $actions[] = javelin_tag(
           'a',
           array(
             'href' => $action->getHref(),
-            'class' => 'phabricator-crumbs-action',
-            'sigil' => $action->getWorkflow() ? 'workflow' : null,
+            'class' => implode(' ', $action_classes),
+            'sigil' => implode(' ', $action_sigils),
+            'style' => $action->getStyle()
           ),
           array(
             $icon,

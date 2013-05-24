@@ -4,8 +4,8 @@
 
 .conpherence-message-pane {
   position: fixed;
-  left: 300px;
-  right: 281px;
+  left: 280px;
+  right: 241px;
   top: 76px;
   min-width: 300px;
   width: auto;
@@ -15,7 +15,6 @@
 .device .conpherence-message-pane {
   left: 0;
   right: 0;
-  top: 85px;
   width: 100%;
 }
 
@@ -31,8 +30,8 @@
 
 .conpherence-message-pane .conpherence-messages {
   position: fixed;
-  left: 300px;
-  right: 281px;
+  left: 280px;
+  right: 241px;
   top: 76px;
   bottom: 190px;
   overflow-y: auto;
@@ -43,7 +42,6 @@
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;
-  top: 85px;
   bottom: 3em;
   width: 100%;
   box-shadow: none;
@@ -56,8 +54,8 @@
   padding: 0;
   position: fixed;
   bottom: 0;
-  left: 300px;
-  right: 281px;
+  left: 280px;
+  right: 241px;
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {

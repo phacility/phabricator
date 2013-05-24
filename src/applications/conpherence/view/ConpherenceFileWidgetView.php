@@ -85,6 +85,15 @@ final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
         ));
     }
 
+    if (empty($files)) {
+      $files_html[] = javelin_tag(
+        'div',
+        array(
+          'class' => 'no-files',
+          'sigil' => 'no-files'),
+        pht('No files.'));
+    }
+
     return phutil_tag(
       'div',
       array('class' => 'file-list'),

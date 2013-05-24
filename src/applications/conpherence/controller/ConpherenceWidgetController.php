@@ -69,83 +69,14 @@ final class ConpherenceWidgetController extends
     $widgets[] = phutil_tag(
       'div',
       array(
-        'class' => 'widgets-header'
+        'class' => 'widgets-header',
       ),
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'widgets-header-icon-holder'
-        ),
-        array(
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'conpherence-menu-pane',
-              ),
-              'id' => 'conpherence-menu-pane-toggle',
-              'class' => 'sprite-conpherence conpherence_list_off',
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'conpherence-message-pane',
-              ),
-              'id' => 'conpherence-message-pane-toggle',
-              'class' => 'sprite-conpherence conpherence_conversation_off',
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-people',
-              ),
-              'id' => 'widgets-people-toggle',
-              'class' =>
-              'sprite-conpherence conpherence_people_on conpherence_people_off'
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-files',
-              ),
-              'id' => 'widgets-files-toggle',
-              'class' =>
-              'sprite-conpherence conpherence_files_off'
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-calendar',
-              ),
-              'id' => 'widgets-calendar-toggle',
-              'class' => 'sprite-conpherence conpherence_calendar_off',
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-settings',
-              ),
-              'id' => 'widgets-settings-toggle',
-              'class' => 'sprite-conpherence conpherence_settings_off',
-            ),
-            '')
-          )));
+      id(new PhabricatorActionHeaderView())
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      ->setHeaderTitle('')
+      ->setHeaderHref('#')
+      ->setDropdown(true)
+      ->addHeaderSigil('widgets-selector'));
     $user = $this->getRequest()->getUser();
     // now the widget bodies
     $widgets[] = javelin_tag(
