@@ -252,15 +252,10 @@ final class ReleephProjectEditController extends ReleephController {
     $commit_author_inset = $this->buildCommitAuthorInset($commit_author);
 
     // Build the Template inset
-    $help_markup = phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-remarkup',
-      ),
-      PhabricatorMarkupEngine::renderOneObject(
-        new ReleephBranchTemplate(),
-        'field',
-        $request->getUser()));
+    $help_markup = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($this->getBranchHelpText()),
+      'default',
+      $request->getUser());
 
     $branch_template_input = id(new AphrontFormTextControl())
       ->setName('branchTemplate')
@@ -382,6 +377,57 @@ EOTEXT
       ->setTitle(pht('Authors'))
       ->appendChild($help_markup)
       ->appendChild($control);
+  }
+
+  private function getBranchHelpText() {
+    return <<<EOTEXT
+
+==== Interpolations ====
+
+| Code  | Meaning
+| ----- | -------
+| `%P`  | The name of your project, with spaces changed to "-".
+| `%p`  | Like %P, but all lowercase.
+| `%Y`  | The four digit year associated with the branch date.
+| `%m`  | The two digit month.
+| `%d`  | The two digit day.
+| `%v`  | The handle of the commit where the branch was cut ("rXYZa4b3c2d1").
+| `%V`  | The abbreviated commit id where the branch was cut ("a4b3c2d1").
+| `%..` | Any other sequence interpreted by `strftime()`.
+| `%%`  | A literal percent sign.
+
+
+==== Tips for Branch Templates ====
+
+Use a directory to separate your release branches from other branches:
+
+  lang=none
+  releases/%Y-%M-%d-%v
+  => releases/2012-30-16-rHERGE32cd512a52b7
+
+Include a second hierarchy if you share your repository with other projects:
+
+  lang=none
+  releases/%P/%p-release-%Y%m%d-%V
+  => releases/Tintin/tintin-release-20121116-32cd512a52b7
+
+Keep your branch names simple, avoiding strange punctuation, most of which is
+forbidden or escaped anyway:
+
+  lang=none, counterexample
+  releases//..clown-releases..//`date --iso=seconds`-$(sudo halt)
+
+Include the date early in your template, in an order which sorts properly:
+
+  lang=none
+  releases/%Y%m%d-%v
+  => releases/20121116-rHERGE32cd512a52b7 (good!)
+
+  releases/%V-%m.%d.%Y
+  => releases/32cd512a52b7-11.16.2012 (awful!)
+
+
+EOTEXT;
   }
 
 }
