@@ -136,38 +136,32 @@ final class DiffusionRepositoryController extends DiffusionController {
 
   private function buildPropertiesTable(PhabricatorRepository $repository) {
 
-    $properties = array();
-    $properties['Name'] = $repository->getName();
-    $properties['Callsign'] = $repository->getCallsign();
-    $properties['Description'] = $repository->getDetail('description');
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($repository->getName());
+
+    $view = new PhabricatorPropertyListView();
+    $view->addProperty(pht('Callsign'), $repository->getCallsign());
+
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $properties['Clone URI'] = $repository->getPublicRemoteURI();
+        $view->addProperty(
+          pht('Clone URI'),
+          $repository->getPublicRemoteURI());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $properties['Repository Root'] = $repository->getPublicRemoteURI();
+        $view->addProperty(
+          pht('Repository Root'),
+          $repository->getPublicRemoteURI());
         break;
     }
 
-    $rows = array();
-    foreach ($properties as $key => $value) {
-      $rows[] = array($key, $value);
+    $description = $repository->getDetail('description');
+    if (strlen($description)) {
+      $view->addTextContent($description);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setColumnClasses(
-      array(
-        'header',
-        'wide',
-      ));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Repository Properties'));
-    $panel->appendChild($table);
-    $panel->setNoBackground();
-
-    return $panel;
+    return array($header, $view);
   }
 
   private function buildBranchListTable(DiffusionRequest $drequest) {
