@@ -191,7 +191,7 @@
   padding-bottom: 2px;
 }
 
-.pholio-transaction-inline-comment p {
+.pholio-transaction-inline-comment div {
   display: table-cell;
   vertical-align: middle;
   padding-bottom: 2px;
