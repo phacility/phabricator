@@ -91,7 +91,7 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
           ->setValue($v_name)
           ->setError($e_name))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))

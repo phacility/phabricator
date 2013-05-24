@@ -4,7 +4,9 @@
  * @task uri Repository URI Management
  */
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -740,6 +742,40 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
     return false;
+  }
+
+
+/* -(  PhabricatorMarkupInterface  )----------------------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    $hash = PhabricatorHash::digestForIndex($this->getMarkupText($field));
+    return "repo:{$hash}";
+  }
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newMarkupEngine(array());
+  }
+
+  public function getMarkupText($field) {
+    return $this->getDetail('description');
+  }
+
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    require_celerity_resource('phabricator-remarkup-css');
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $output);
+  }
+
+  public function shouldUseMarkupCache($field) {
+    return true;
   }
 
 }

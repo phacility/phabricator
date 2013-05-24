@@ -135,11 +135,13 @@ final class DiffusionRepositoryController extends DiffusionController {
   }
 
   private function buildPropertiesTable(PhabricatorRepository $repository) {
+    $user = $this->getRequest()->getUser();
 
     $header = id(new PhabricatorHeaderView())
       ->setHeader($repository->getName());
 
-    $view = new PhabricatorPropertyListView();
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($user);
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
     switch ($repository->getVersionControlSystem()) {
@@ -158,6 +160,10 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $description = $repository->getDetail('description');
     if (strlen($description)) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        $repository,
+        'description',
+        $user);
       $view->addTextContent($description);
     }
 

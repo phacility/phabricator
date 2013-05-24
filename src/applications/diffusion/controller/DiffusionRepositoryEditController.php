@@ -83,8 +83,10 @@ final class DiffusionRepositoryEditController extends DiffusionController {
   }
 
   private function buildBasicProperties(PhabricatorRepository $repository) {
+    $user = $this->getRequest()->getUser();
+
     $view = id(new PhabricatorPropertyListView())
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($user)
       ->setObject($repository);
 
     $view->addProperty(pht('Name'), $repository->getName());
@@ -98,11 +100,16 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $view->addProperty(pht('Callsign'), $repository->getCallsign());
 
     $description = $repository->getDetail('description');
+    $view->addSectionHeader(pht('Description'));
     if (!strlen($description)) {
-      $description = phutil_tag('em', array(), pht('None'));
+      $description = phutil_tag('em', array(), pht('No description provided.'));
+    } else {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        $repository,
+        'description',
+        $user);
     }
-    $view->addProperty(pht('Description'), $description);
-
+    $view->addTextContent($description);
 
     return $view;
   }
