@@ -194,3 +194,23 @@ a.toggle-selected {
 a.toggle-fixed {
   cursor: default;
 }
+
+.caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: top;
+  border-top: 5px solid #fff;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  content: "";
+}
+
+.dropdown .caret {
+  margin-top: 7px;
+  margin-left: 4px;
+}
+
+.grey.dropdown .caret {
+  border-top-color: #000;
+}
