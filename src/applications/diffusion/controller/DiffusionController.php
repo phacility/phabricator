@@ -334,4 +334,11 @@ abstract class DiffusionController extends PhabricatorController {
       $method,
       $params);
   }
+
+  protected function getRepositoryControllerURI(
+    PhabricatorRepository $repository,
+    $path) {
+    return $this->getApplicationURI($repository->getCallsign().'/'.$path);
+  }
+
 }

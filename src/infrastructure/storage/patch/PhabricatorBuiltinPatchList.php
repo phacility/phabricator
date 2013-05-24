@@ -1314,7 +1314,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130523.maniphest_owners.sql'),
       ),
-
+      '20130524.repoxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130524.repoxactions.sql'),
+      ),
     );
   }
 }
