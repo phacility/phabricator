@@ -25,6 +25,7 @@
 .phui-feed-story-body {
   padding: 0 10px 10px;
   color: #444444;
+  word-break: break-word;
 }
 
 .phui-feed-story-foot {
