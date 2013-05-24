@@ -58,6 +58,24 @@ final class AphrontFormView extends AphrontView {
     return $this;
   }
 
+  public function appendInstructions($text) {
+    return $this->appendChild(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-form-instructions',
+        ),
+        $text));
+  }
+
+  public function appendRemarkupInstructions($remarkup) {
+    return $this->appendInstructions(
+      PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($remarkup),
+        'default',
+        $this->getUser()));
+  }
+
   public function render() {
     if ($this->flexible) {
       require_celerity_resource('phabricator-form-view-css');

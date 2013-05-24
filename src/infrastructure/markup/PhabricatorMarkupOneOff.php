@@ -30,7 +30,10 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newMarkupEngine(array());
+    return PhabricatorMarkupEngine::newMarkupEngine(
+      array(
+        'preserve-linebreaks' => false,
+      ));
   }
 
   public function getMarkupText($field) {

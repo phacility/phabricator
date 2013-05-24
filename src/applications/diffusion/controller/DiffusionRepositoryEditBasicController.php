@@ -98,7 +98,9 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save'))
-          ->addCancelButton($edit_uri));
+          ->addCancelButton($edit_uri))
+      ->appendChild(id(new PHUIFormDividerControl()))
+      ->appendRemarkupInstructions($this->getReadmeInstructions());
 
     $content[] = $form;
 
@@ -111,5 +113,21 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
       ));
   }
 
+  private function getReadmeInstructions() {
+    return pht(<<<EOTEXT
+You can also create a `README` file at the repository root (or in any
+subdirectory) to provide information about the repository. These formats are
+supported:
+
+| File Name       | Rendered As... |
+|-----------------|----------------|
+| `README`          | Plain Text |
+| `README.txt`      | Plain Text |
+| `README.remarkup` | Remarkup |
+| `README.md`       | Remarkup |
+| `README.rainbow`  | \xC2\xA1Fiesta! |
+EOTEXT
+);
+  }
 
 }
