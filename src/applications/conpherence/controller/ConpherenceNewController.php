@@ -73,13 +73,9 @@ final class ConpherenceNewController extends ConpherenceController {
             id(new ConpherenceTransactionComment())
             ->setContent($message)
             ->setConpherencePHID($conpherence->getPHID()));
-        $content_source = PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr()
-          ));
+
         id(new ConpherenceEditor())
-          ->setContentSource($content_source)
+          ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true)
           ->setActor($user)
           ->applyTransactions($conpherence, $xactions);

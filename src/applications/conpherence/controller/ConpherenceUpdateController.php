@@ -40,14 +40,9 @@ final class ConpherenceUpdateController
     $e_file = array();
     $errors = array();
     if ($request->isFormPost()) {
-      $content_source = PhabricatorContentSource::newForSource(
-        PhabricatorContentSource::SOURCE_WEB,
-        array(
-          'ip' => $request->getRemoteAddr()
-        ));
       $editor = id(new ConpherenceEditor())
         ->setContinueOnNoEffect($request->isContinueRequest())
-        ->setContentSource($content_source)
+        ->setContentSourceFromRequest($request)
         ->setActor($user);
 
       switch ($action) {

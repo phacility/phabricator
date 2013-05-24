@@ -76,12 +76,7 @@ final class PhabricatorSubscriptionsEditController
       $editor = id($object->getApplicationTransactionEditor())
         ->setActor($user)
         ->setContinueOnNoEffect(true)
-        ->setContentSource(
-          PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_WEB,
-            array(
-              'ip' => $request->getRemoteAddr(),
-            )));
+        ->setContentSourceFromRequest($request);
 
       $editor->applyTransactions($object, array($xaction));
     } else {

@@ -47,6 +47,11 @@ abstract class PhabricatorApplicationTransactionComment
     return $this;
   }
 
+  public function setContentSourceFromRequest(AphrontRequest $request) {
+    return $this->setContentSource(
+      PhabricatorContentSource::newFromRequest($request));
+  }
+
   public function getContentSource() {
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }

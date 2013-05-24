@@ -110,12 +110,6 @@ final class PholioMockEditController extends PholioController {
       }
 
       if (!$errors) {
-        $content_source = PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          ));
-
         foreach ($xactions as $type => $value) {
           $xactions[$type] = id(new PholioTransaction())
             ->setTransactionType($type)
@@ -124,7 +118,7 @@ final class PholioMockEditController extends PholioController {
 
         $mock->openTransaction();
           $editor = id(new PholioMockEditor())
-            ->setContentSource($content_source)
+            ->setContentSourceFromRequest($request)
             ->setContinueOnNoEffect(true)
             ->setActor($user);
 

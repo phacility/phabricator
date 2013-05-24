@@ -28,12 +28,7 @@ final class ReleephRequestActionController extends ReleephController {
     $editor = id(new ReleephRequestTransactionalEditor())
       ->setActor($user)
       ->setContinueOnNoEffect(true)
-      ->setContentSource(
-        PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          )));
+      ->setContentSourceFromRequest($request);
 
     $xactions = array();
 

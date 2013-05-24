@@ -40,12 +40,7 @@ final class PhabricatorMacroCommentController
     $editor = id(new PhabricatorMacroEditor())
       ->setActor($user)
       ->setContinueOnNoEffect($request->isContinueRequest())
-      ->setContentSource(
-        PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          )))
+      ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
 
     try {

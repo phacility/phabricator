@@ -118,12 +118,7 @@ final class PhabricatorMacroEditController
           $editor = id(new PhabricatorMacroEditor())
             ->setActor($user)
             ->setContinueOnNoEffect(true)
-            ->setContentSource(
-              PhabricatorContentSource::newForSource(
-                PhabricatorContentSource::SOURCE_WEB,
-                array(
-                  'ip' => $request->getRemoteAddr(),
-                )));
+            ->setContentSourceFromRequest($request);
 
           $xactions = $editor->applyTransactions($original, $xactions);
 
