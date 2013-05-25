@@ -11,12 +11,21 @@ this means that you should write your source code in UTF-8. In most cases this
 does not require you to change anything, because ASCII text is a subset of
 UTF-8.
 
+If you have a repository with source files that do not have UTF-8, you have two
+options:
+
+  - Convert all files in the repository to ASCII or UTF-8 (see "Detecting and
+    Repairing Files" below). This is recommended, especially if the encoding
+    problems are accidental.
+  - Configure Phabricator to convert files into UTF-8 from whatever encoding
+    your repository is in when it needs to (see "Support for Alternate
+    Encodings" below). This is not completely supported, and repositories with
+    files that have multiple encodings are not supported.
+
 = Detecting and Repairing Files =
 
 It is recommended that you write source files only in ASCII text, but
-Phabricator fully supports UTF-8 source files. However, it won't currently do
-encoding transformation, so if you have source files which are not valid UTF-8
-you may run into issues.
+Phabricator fully supports UTF-8 source files.
 
 If you have a project which isn't valid UTF-8 because a few files have random
 binary nonsense in them, there is a script in libphutil which can help you
@@ -55,8 +64,17 @@ Phabricator doesn't include any default tools to help you process them in a
 systematic way. You could hack up ##utf8.php## as a starting point, or use other
 tools to batch-process your source files.
 
-NOTE: If you have a project which uses a //different encoding// for source
-files, there is no easy way to get it working with Phabricator or Arcanist right
-now. If it's not reasonable to switch to UTF-8, tell us more about your use case
-and we can evaluate supporting it. Since tools like Git don't work well with
-other encodings, the prevailing assumption is that this is a rare situation.
+= Support for Alternate Encodings =
+
+Phabricator has some support for encodings other than UTF-8.
+
+NOTE: Alternate encodings are not completely supported, and a few features will
+not work correctly. Codebases with files that have multiple different encodings
+(for example, some files in ISO-8859-1 and some files in Shift-JIS) are not
+supported at all.
+
+To use an alternate encoding, edit the repository in Diffusion and specify the
+encoding to use.
+
+Optionally, you can use the `--encoding` flag when running `arc`, or set
+`encoding` in your `.arcconfig`.

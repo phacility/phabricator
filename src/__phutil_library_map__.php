@@ -480,6 +480,7 @@ phutil_register_library_map(array(
     'DiffusionRepositoryController' => 'applications/diffusion/controller/DiffusionRepositoryController.php',
     'DiffusionRepositoryEditBasicController' => 'applications/diffusion/controller/DiffusionRepositoryEditBasicController.php',
     'DiffusionRepositoryEditController' => 'applications/diffusion/controller/DiffusionRepositoryEditController.php',
+    'DiffusionRepositoryEditEncodingController' => 'applications/diffusion/controller/DiffusionRepositoryEditEncodingController.php',
     'DiffusionRepositoryPath' => 'applications/diffusion/data/DiffusionRepositoryPath.php',
     'DiffusionRepositoryTag' => 'applications/diffusion/data/DiffusionRepositoryTag.php',
     'DiffusionRequest' => 'applications/diffusion/request/DiffusionRequest.php',
@@ -2283,6 +2284,7 @@ phutil_register_library_map(array(
     'DiffusionRepositoryController' => 'DiffusionController',
     'DiffusionRepositoryEditBasicController' => 'DiffusionController',
     'DiffusionRepositoryEditController' => 'DiffusionController',
+    'DiffusionRepositoryEditEncodingController' => 'DiffusionController',
     'DiffusionSetupException' => 'AphrontUsageException',
     'DiffusionStableCommitNameQuery' => 'DiffusionQuery',
     'DiffusionSvnCommitParentsQuery' => 'DiffusionCommitParentsQuery',
@@ -3075,6 +3077,7 @@ phutil_register_library_map(array(
     array(
       0 => 'PhabricatorRepositoryDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorMarkupInterface',
     ),
     'PhabricatorRepositoryArcanistProject' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositoryArcanistProjectDeleteController' => 'PhabricatorRepositoryController',

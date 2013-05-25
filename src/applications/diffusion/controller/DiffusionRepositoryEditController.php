@@ -24,6 +24,11 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $content[] = $this->buildBasicActions($repository);
     $content[] = $this->buildBasicProperties($repository);
 
+    $content[] = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Text Encoding'));
+
+    $content[] = $this->buildEncodingActions($repository);
+    $content[] = $this->buildEncodingProperties($repository);
 
     $content[] = id(new PhabricatorHeaderView())
       ->setHeader(pht('Edit History'));
@@ -86,8 +91,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $user = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorPropertyListView())
-      ->setUser($user)
-      ->setObject($repository);
+      ->setUser($user);
 
     $view->addProperty(pht('Name'), $repository->getName());
     $view->addProperty(pht('ID'), $repository->getID());
@@ -110,6 +114,44 @@ final class DiffusionRepositoryEditController extends DiffusionController {
         $user);
     }
     $view->addTextContent($description);
+
+    return $view;
+  }
+
+  private function buildEncodingActions(PhabricatorRepository $repository) {
+    $user = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($user);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('edit')
+      ->setName(pht('Edit Text Encoding'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/encoding/'))
+      ->setDisabled(!$can_edit);
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildEncodingProperties(PhabricatorRepository $repository) {
+    $user = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($user);
+
+    $encoding = $repository->getDetail('encoding');
+    if (!$encoding) {
+      $encoding = phutil_tag('em', array(), pht('Use Default (UTF-8)'));
+    }
+
+    $view->addProperty(pht('Encoding'), $encoding);
 
     return $view;
   }
