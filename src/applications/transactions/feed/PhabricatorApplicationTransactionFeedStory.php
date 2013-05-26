@@ -35,14 +35,21 @@ class PhabricatorApplicationTransactionFeedStory
     $view = new PHUIFeedStoryView();
     $view->setViewed($this->getHasViewed());
 
-    $href = $this->getHandle($this->getPrimaryObjectPHID())->getURI();
-    $view->setHref($view);
+    $handle = $this->getHandle($this->getPrimaryObjectPHID());
+    $view->setHref($handle->getURI());
+    $view->setEpoch($this->getPrimaryTransaction()->getDateCreated());
+
+    $view->setAppIconFromPHID($handle->getPHID());
 
     $xaction_phids = $this->getValue('transactionPHIDs');
     $xaction = $this->getObject(head($xaction_phids));
 
     $xaction->setHandles($this->getHandles());
     $view->setTitle($xaction->getTitleForFeed());
+
+    $view->setImage(
+      $this->getHandle(
+        $this->getPrimaryTransaction()->getAuthorPHID())->getImageURI());
 
     return $view;
   }
