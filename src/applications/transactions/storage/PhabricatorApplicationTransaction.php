@@ -150,6 +150,10 @@ abstract class PhabricatorApplicationTransaction
     return $this->handles[$phid];
   }
 
+  public function getHandleIfExists($phid) {
+    return idx($this->handles, $phid);
+  }
+
   public function getHandles() {
     if ($this->handles === null) {
       throw new Exception(
@@ -246,25 +250,27 @@ abstract class PhabricatorApplicationTransaction
           '%s added a comment.',
           $this->renderHandleLink($author_phid));
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        // TODO: Render human-readable.
         return pht(
           '%s changed the visibility of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          PhabricatorPolicyQuery::isGlobalPolicy($old) ?
-            $old : $this->renderHandleLink($old),
-          PhabricatorPolicyQuery::isGlobalPolicy($new) ?
-            $new : $this->renderHandleLink($new));
+          PhabricatorPolicy::newFromPolicyAndHandle(
+            $old,
+            $this->getHandleIfExists($old))->renderDescription(),
+          PhabricatorPolicy::newFromPolicyAndHandle(
+            $new,
+            $this->getHandleIfExists($new))->renderDescription());
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        // TODO: Render human-readable.
         return pht(
           '%s changed the edit policy of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          PhabricatorPolicyQuery::isGlobalPolicy($old) ?
-            $old : $this->renderHandleLink($old),
-          PhabricatorPolicyQuery::isGlobalPolicy($new) ?
-            $new : $this->renderHandleLink($new));
+          PhabricatorPolicy::newFromPolicyAndHandle(
+            $old,
+            $this->getHandleIfExists($old))->renderDescription(),
+          PhabricatorPolicy::newFromPolicyAndHandle(
+            $new,
+            $this->getHandleIfExists($new))->renderDescription());
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);

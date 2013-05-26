@@ -104,12 +104,9 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
         ->setViewer($this->viewer)
         ->loadHandles();
       foreach ($other_policies as $phid) {
-        $handle = $handles[$phid];
-        $results[$phid] = id(new PhabricatorPolicy())
-          ->setType(PhabricatorPolicyType::TYPE_MASKED)
-          ->setPHID($handle->getPHID())
-          ->setHref($handle->getLink())
-          ->setName($handle->getFullName());
+        $results[$phid] = PhabricatorPolicy::newFromPolicyAndHandle(
+          $phid,
+          $handles[$phid]);
       }
     }
 
@@ -126,6 +123,13 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     }
 
     return false;
+  }
+
+  public static function getGlobalPolicy($policy) {
+    if (!self::isGlobalPolicy($policy)) {
+      throw new Exception("Policy '{$policy}' is not a global policy!");
+    }
+    return idx(self::getGlobalPolicies(), $policy);
   }
 
   private static function getGlobalPolicies() {

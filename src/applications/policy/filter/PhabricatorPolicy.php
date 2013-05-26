@@ -7,6 +7,48 @@ final class PhabricatorPolicy {
   private $type;
   private $href;
 
+  public static function newFromPolicyAndHandle(
+    $policy_identifier,
+    PhabricatorObjectHandle $handle = null) {
+
+    $is_global = PhabricatorPolicyQuery::isGlobalPolicy($policy_identifier);
+    if ($is_global) {
+      return PhabricatorPolicyQuery::getGlobalPolicy($policy_identifier);
+    }
+
+    if (!$handle) {
+      throw new Exception(
+        "Policy identifier is an object PHID ('{$phid_identifier}'), but no ".
+        "object handle was provided. A handle must be provided for object ".
+        "policies.");
+    }
+
+    $handle_phid = $handle->getPHID();
+    if ($policy_identifier != $handle_phid) {
+      throw new Exception(
+        "Policy identifier is an object PHID ('{$phid_identifier}'), but ".
+        "the provided handle has a different PHID ('{$handle_phid}'). The ".
+        "handle must correspond to the policy identifier.");
+    }
+
+    $policy = id(new PhabricatorPolicy())
+      ->setPHID($policy_identifier)
+      ->setHref($handle->getURI());
+
+    $phid_type = phid_get_type($policy_identifier);
+    switch ($phid_type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
+        $policy->setType(PhabricatorPolicyType::TYPE_PROJECT);
+        $policy->setName($handle->getName());
+        break;
+      default:
+        $policy->setType(PhabricatorPolicyType::TYPE_MASKED);
+        $policy->setName($handle->getFullName());
+        break;
+    }
+
+    return $policy;
+  }
 
   public function setType($type) {
     $this->type = $type;
