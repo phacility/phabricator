@@ -120,6 +120,7 @@ abstract class AphrontApplicationConfiguration {
     $file_uri     = PhabricatorEnv::getEnvConfig(
       'security.alternate-file-domain');
     $conduit_uris = PhabricatorEnv::getEnvConfig('conduit.servers');
+    $allowed_uris = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
 
     $uris = array_merge(
       array(
@@ -127,7 +128,8 @@ abstract class AphrontApplicationConfiguration {
         $prod_uri,
         $file_uri,
       ),
-      $conduit_uris);
+      $conduit_uris,
+      $allowed_uris);
 
     $host_match = false;
     foreach ($uris as $uri) {

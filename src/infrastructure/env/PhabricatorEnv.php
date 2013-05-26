@@ -278,6 +278,21 @@ final class PhabricatorEnv {
     return rtrim($production_domain, '/').$path;
   }
 
+  public static function getAllowedURIs($path) {
+    $uri = new PhutilURI($path);
+    if ($uri->getDomain()) {
+      return $path;
+    }
+
+    $allowed_uris = self::getEnvConfig('phabricator.allowed-uris');
+    $return = array();
+    foreach ($allowed_uris as $allowed_uri) {
+      $return[] = rtrim($allowed_uri, '/').$path;
+    }
+
+    return $return;
+  }
+
 
   /**
    * Get the fully-qualified production URI for a static resource path.

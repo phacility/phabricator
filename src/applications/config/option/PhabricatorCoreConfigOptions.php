@@ -37,6 +37,19 @@ final class PhabricatorCoreConfigOptions
             "{{phabricator.base-uri}}. Most installs do not need to set ".
             "this option."))
         ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
+      $this->newOption('phabricator.allowed-uris', 'list<string>', array())
+        ->setLocked(true)
+        ->setSummary(pht("Alternative URIs that can access Phabricator."))
+        ->setDescription(
+          pht(
+            "These alternative URIs will be able to access 'normal' pages ".
+              "on your Phabricator install. Other features such as OAuth ".
+              "won't work. The major use case for this is moving installs ".
+              "across domains."))
+        ->addExample(
+          '["http://phabricator2.example.com/", '.
+            '"http://phabricator3.example.com/]"',
+          pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
           pht("The timezone Phabricator should use."))
