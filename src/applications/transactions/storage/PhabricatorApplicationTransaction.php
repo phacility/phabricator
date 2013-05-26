@@ -123,6 +123,15 @@ abstract class PhabricatorApplicationTransaction
         $phids[] = ipull($old, 'dst');
         $phids[] = ipull($new, 'dst');
         break;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        if (!PhabricatorPolicyQuery::isGlobalPolicy($old)) {
+          $phids[] = array($old);
+        }
+        if (!PhabricatorPolicyQuery::isGlobalPolicy($new)) {
+          $phids[] = array($new);
+        }
+        break;
     }
 
     return array_mergev($phids);
@@ -242,16 +251,20 @@ abstract class PhabricatorApplicationTransaction
           '%s changed the visibility of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          $old,
-          $new);
+          PhabricatorPolicyQuery::isGlobalPolicy($old) ?
+            $old : $this->renderHandleLink($old),
+          PhabricatorPolicyQuery::isGlobalPolicy($new) ?
+            $new : $this->renderHandleLink($new));
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         // TODO: Render human-readable.
         return pht(
           '%s changed the edit policy of this %s from "%s" to "%s".',
           $this->renderHandleLink($author_phid),
           $this->getApplicationObjectTypeName(),
-          $old,
-          $new);
+          PhabricatorPolicyQuery::isGlobalPolicy($old) ?
+            $old : $this->renderHandleLink($old),
+          PhabricatorPolicyQuery::isGlobalPolicy($new) ?
+            $new : $this->renderHandleLink($new));
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);

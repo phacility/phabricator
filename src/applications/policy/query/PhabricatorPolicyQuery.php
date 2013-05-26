@@ -118,6 +118,16 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     return $results;
   }
 
+  public static function isGlobalPolicy($policy) {
+    $globalPolicies = self::getGlobalPolicies();
+
+    if (isset($globalPolicies[$policy])) {
+      return true;
+    }
+
+    return false;
+  }
+
   private static function getGlobalPolicies() {
     static $constants = array(
       PhabricatorPolicies::POLICY_PUBLIC,
