@@ -485,15 +485,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     $form
       ->appendChild($description_control);
 
-    if (!$task->getID()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormDragAndDropUploadControl())
-            ->setLabel(pht('Attached Files'))
-            ->setName('files')
-            ->setActivatedClass('aphront-panel-view-drag-and-drop'));
-    }
-
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())

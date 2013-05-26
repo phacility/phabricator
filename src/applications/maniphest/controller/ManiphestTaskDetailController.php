@@ -258,11 +258,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setID('transaction-comments')
           ->setUser($user))
       ->appendChild(
-        id(new AphrontFormDragAndDropUploadControl())
-          ->setLabel(pht('Attached Files'))
-          ->setName('files')
-          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? pht('Submit') : pht('Avast!')));
 

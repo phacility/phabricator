@@ -54,8 +54,12 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       'table' => array(
         'tip' => pht('Table'),
-      )
+      ),
+      'image' => array(
+        'tip' => pht('Upload File'),
+      ),
     );
+
     if (!$this->disableMacro and function_exists('imagettftext')) {
       $actions[] = array(
         'spacer' => true,

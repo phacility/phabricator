@@ -174,6 +174,9 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           })
           .start();
         break;
+      case 'image':
+        new JX.Workflow('/file/uploaddialog/').start();
+        break;
       case 'chaos':
         if (edit_mode == 'chaos') {
           set_edit_mode(root, 'normal');
