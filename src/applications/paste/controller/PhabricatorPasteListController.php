@@ -29,12 +29,8 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         ->setURI('/paste/query/'.$saved->getQueryKey().'/');
     }
 
-    $nav = $this->buildSideNavView($this->filter);
-    $filter = $nav->getSelectedFilter();
-
-    $saved_query = new PhabricatorSavedQuery();
+    $nav = $this->buildSideNavView();
     $engine = id(new PhabricatorPasteSearchEngine())
-      ->setPasteSearchFilter($filter)
       ->setPasteSearchUser($request->getUser());
 
     if ($this->queryKey !== null) {
@@ -48,7 +44,13 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
       $query = id(new PhabricatorPasteSearchEngine())
         ->buildQueryFromSavedQuery($saved_query);
+
+      $nav->selectFilter('query/'.$this->queryKey);
+      $filter = null;
     } else {
+      $filter = $nav->selectFilter('filter/'.$this->filter);
+      $engine->setPasteSearchFilter($filter);
+
       $saved_query = $engine->buildSavedQueryFromRequest($request);
       $query = $engine->buildQueryFromSavedQuery($saved_query);
     }
@@ -63,7 +65,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $list->setPager($pager);
     $list->setNoDataString(pht("No results found for this query."));
 
-    if ($this->queryKey !== null || $filter == "advanced") {
+    if ($this->queryKey !== null || $filter == "filter/advanced") {
       $form = $engine->buildSearchForm($saved_query);
       $nav->appendChild(
         array(

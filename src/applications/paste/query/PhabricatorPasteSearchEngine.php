@@ -21,7 +21,7 @@ final class PhabricatorPasteSearchEngine
 
     $saved = new PhabricatorSavedQuery();
 
-    if ($this->filter == "my") {
+    if ($this->filter == "filter/my") {
       $user = $request->getUser();
       $saved->setParameter('authorPHIDs', array($user->getPHID()));
     } else {

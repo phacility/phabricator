@@ -2,35 +2,44 @@
 
 abstract class PhabricatorPasteController extends PhabricatorController {
 
-  public function buildSideNavView($filter = null, $for_app = false) {
+  public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI('filter/')));
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('', pht('Create Paste'),
-        $this->getApplicationURI('/create/'));
+      $nav->addFilter('create', pht('Create Paste'));
     }
 
-    $nav->addLabel(pht('Filters'));
-    $nav->addFilter('all', pht('All Pastes'));
-    if ($user->isLoggedIn()) {
-      $nav->addFilter('my', pht('My Pastes'));
+    $nav->addLabel(pht('Queries'));
+
+    $named_queries = id(new PhabricatorNamedQueryQuery())
+      ->setViewer($user)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->withEngineClassNames(array('PhabricatorPasteSearchEngine'))
+      ->execute();
+
+    foreach ($named_queries as $query) {
+      $nav->addFilter('query/'.$query->getQueryKey(), $query->getQueryName());
     }
+
+    $nav->addFilter('filter/all', pht('All Pastes'));
+    if ($user->isLoggedIn()) {
+      $nav->addFilter('filter/my', pht('My Pastes'));
+    }
+    $nav->addFilter('savedqueries', pht('Edit Queries...'));
 
     $nav->addLabel(pht('Search'));
-    $nav->addFilter('advanced', pht('Advanced Search'));
-    $nav->addFilter('', pht('Saved Queries'),
-      $this->getApplicationURI('/savedqueries/'));
+    $nav->addFilter('filter/advanced', pht('Advanced Search'));
 
-    $nav->selectFilter($filter, 'all');
+    $nav->selectFilter(null);
 
     return $nav;
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(null, true)->getMenu();
+    return $this->buildSideNavView(true)->getMenu();
   }
 
   public function buildApplicationCrumbs() {

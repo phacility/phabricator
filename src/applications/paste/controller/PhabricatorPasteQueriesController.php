@@ -7,8 +7,8 @@ final class PhabricatorPasteQueriesController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildSideNavView("");
-    $filter = $nav->getSelectedFilter();
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('savedqueries');
 
     $named_queries = id(new PhabricatorNamedQueryQuery())
       ->setViewer($user)
