@@ -34,6 +34,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_applications = true;
         $need_rich_data = true;
         $need_symbols = true;
+        $need_projs = true;
         break;
       case 'searchowner':
         $need_users = true;
@@ -207,7 +208,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
       foreach ($projs as $proj) {
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($proj->getName())
+          ->setDisplayType("Project")
           ->setURI('/project/view/'.$proj->getID().'/')
+          ->setImageURI($proj->loadProfile()->loadProfileImageURI())
           ->setPHID($proj->getPHID());
       }
     }
