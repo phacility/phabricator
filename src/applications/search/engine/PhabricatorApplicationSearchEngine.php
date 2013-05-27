@@ -56,11 +56,11 @@ abstract class PhabricatorApplicationSearchEngine {
    * Return an application URI corresponding to the results page of a query.
    * Normally, this is something like `/application/query/QUERYKEY/`.
    *
-   * @param   PhabricatorSavedQuery   The query to build a URI for.
-   * @return  string                  URI where the query can be executed.
+   * @param   string  The query key to build a URI for.
+   * @return  string  URI where the query can be executed.
    * @task uri
    */
-  abstract public function getQueryResultsPageURI(PhabricatorSavedQuery $query);
+  abstract public function getQueryResultsPageURI($query_key);
 
 
   /**

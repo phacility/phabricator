@@ -22,7 +22,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     if ($request->isFormPost()) {
       return id(new AphrontRedirectResponse())->setURI(
         $engine->getQueryResultsPageURI(
-          $engine->buildSavedQueryFromRequest($request)));
+          $engine->buildSavedQueryFromRequest($request)->getQueryKey()));
     }
 
     $nav = $this->buildSideNavView();

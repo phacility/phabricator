@@ -31,7 +31,7 @@ final class PhabricatorPasteQueriesController
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($named_query->getQueryName())
-        ->setHref('/paste/query/'.$named_query->getQueryKey().'/');
+        ->setHref($engine->getQueryResultsPageURI($named_query->getQueryKey()));
 
       if ($named_query->getIsBuiltin()) {
         $item->addIcon('lock-grey', pht('Builtin'));

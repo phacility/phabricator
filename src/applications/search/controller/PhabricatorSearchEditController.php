@@ -44,7 +44,8 @@ final class PhabricatorSearchEditController
       // If we haven't saved the query yet, this is a "Save..." operation, so
       // take the user back to the query if they cancel instead of back to the
       // management interface.
-      $cancel_uri = $engine->getQueryResultsPageURI($saved_query);
+      $cancel_uri = $engine->getQueryResultsPageURI(
+        $saved_query->getQueryKey());
     }
 
     $e_name = true;

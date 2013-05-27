@@ -80,8 +80,8 @@ final class PhabricatorPasteSearchEngine
     return $form;
   }
 
-  public function getQueryResultsPageURI(PhabricatorSavedQuery $query) {
-    return '/paste/query/'.$query->getQueryKey().'/';
+  public function getQueryResultsPageURI($query_key) {
+    return '/paste/query/'.$query_key.'/';
   }
 
   public function getQueryManagementURI() {
