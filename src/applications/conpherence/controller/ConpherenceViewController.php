@@ -104,7 +104,6 @@ final class ConpherenceViewController extends
   }
 
   private function renderHeaderPaneContent() {
-    require_celerity_resource('conpherence-header-pane-css');
     $conpherence = $this->getConpherence();
     $header = $this->buildHeaderPaneContent($conpherence);
     return hsprintf('%s', $header);

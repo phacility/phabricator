@@ -168,9 +168,9 @@ final class ConpherenceWidgetController extends
         'button',
         array(
           'type' => 'submit',
-          'class' => 'notifications-update grey',
+          'class' => 'notifications-update',
         ),
-        pht('Update Notifications'))
+        pht('Save'))
     );
 
     return phabricator_form(
@@ -263,18 +263,15 @@ final class ConpherenceWidgetController extends
               $user,
               $time_str);
 
+          $secondary_info = pht('%s, %s',
+            $handles[$status->getUserPHID()]->getName(), $epoch_range);
+
           $content[] = phutil_tag(
             'div',
             array(
-              'class' => 'user-status '.$status->getTextStatus(),
+              'class' => 'pm user-status '.$status->getTextStatus(),
             ),
             array(
-              phutil_tag(
-                'div',
-                array(
-                  'class' => 'epoch-range'
-                ),
-                $epoch_range),
               phutil_tag(
                 'div',
                 array(
@@ -286,17 +283,24 @@ final class ConpherenceWidgetController extends
                 array(
                   'class' => 'description'
                 ),
-                $status->getTerseSummary($user)),
-              phutil_tag(
-                'div',
                 array(
-                  'class' => 'participant'
-                ),
-                $handles[$status->getUserPHID()]->getName())
+                  $status->getTerseSummary($user),
+                  phutil_tag(
+                    'div',
+                    array(
+                      'class' => 'participant'
+                    ),
+                    $secondary_info)))
               ));
           $first_status_of_the_day = false;
+        } else {
+          $content[] = phutil_tag(
+            'div',
+            array('class' => 'no-events pmt pml'),
+            pht('No Events Scheduled.'));
         }
       }
+
       // we didn't get a status on this day so add a spacer
       if ($first_status_of_the_day) {
         $content[] = phutil_tag(

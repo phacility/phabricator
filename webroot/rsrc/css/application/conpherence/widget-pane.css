@@ -22,7 +22,7 @@
 
 .conpherence-widget-pane .aphront-form-input {
   margin: 0;
-  width: 85%;
+  width: 100%;
 }
 
 .conpherence-widget-pane .aphront-form-inset {
@@ -45,15 +45,14 @@
   margin-right: 0px;
   border-top-color: #000;
 }
-.conpherence-widget-pane .widgets-header  a:hover {
-  text-decoration: none;
-}
+
 .device-desktop .conpherence-layout .device-widgets-selector {
   display: none;
 }
 
 .dropdown-menu-frame {
-  width: 229px !important;
+  width: 200px !important;
+  margin-top: 4px;
 }
 
 .conpherence-widget-pane .widgets-body {
@@ -64,9 +63,13 @@
   top: 74px;
 }
 
+#widgets-settings {
+ padding: 3px 6px;
+}
+
 .device-desktop .conpherence-widget-pane .widgets-body {
-  top: 104px;
-  width: 280px;
+  top: 106px;
+  width: 240px;
 }
 
 /* files widget */
@@ -78,12 +81,11 @@
   color: #555;
 }
 .conpherence-widget-pane #widgets-files .file-entry {
-  padding: 12px 0px 14px 0px;
+  padding: 10px 0;
+  margin: 0 5px 0 10px;
+  border-bottom: 1px solid #e7e7e7;
 }
 .conpherence-widget-pane #widgets-files .file-icon {
-  position: relative;
-  top: 0px;
-  left: 8px;
   width: 32px;
   height: 32px;
   float: left;
@@ -92,36 +94,19 @@
   display: block;
   position: relative;
   top: -4px;
-  left: 20px;
+  left: 10px;
   overflow-x: hidden;
-  width: 170px;
+  width: 165px;
   font-weight: bold;
+  text-overflow: ellipsis;
 }
 .conpherence-widget-pane #widgets-files .file-uploaded-by {
   color: #a1a5a9;
   position: relative;
   top: 0px;
-  left: 20px;
+  left: 10px;
   width: 170px;
   font-size: 11px;
-}
-
-.conpherence-widget-pane #widgets-files .file-extra {
-  display: block;
-  height: 120px;
-  width: 120px;
-  margin: 8px 0px 8px 52px;
-  border: 1px solid #7289b7;
-  box-shadow: 0 0px 5px rgba(0,0,0,.25);
-  background: #fff;
-}
-
-.conpherence-widget-pane #widgets-files .divider {
-  float: left;
-  clear: both;
-  width: 170px;
-  margin: 8px 0px 0px 50px;
-  border: 1px dashed #bfbfbf;
 }
 
 .device .conpherence-widget-pane #widgets-files .file-title,
@@ -156,6 +141,11 @@
   float: left;
   clear: none;
 }
+
+.conpherence-widget-pane .no-events {
+  color: #999;
+}
+
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
 .aphront-multi-column-column-last {
   border-right: 0;
@@ -206,8 +196,7 @@
   padding: 5px 0px 5px 0px;
 }
 .conpherence-widget-pane #widgets-calendar .day-header {
-  float: left;
-  clear: both;
+  overflow: hidden;
   background-color: #d8dce2;
   border-top: 1px solid #bfbfbf;
   border-bottom: 1px solid #bfbfbf;
@@ -220,11 +209,15 @@
 }
 .conpherence-widget-pane #widgets-calendar .day-header .day-name {
   float: left;
-  clear: none;
+  color: #555759;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 11px;
 }
 .conpherence-widget-pane #widgets-calendar .day-header .day-date {
   float: right;
-  clear: none;
+  color: #555759;
+  font-size: 11px;
 }
 
 .conpherence-widget-pane #widgets-calendar .divider {
@@ -245,24 +238,12 @@
   width: 100%;
 }
 
-.conpherence-widget-pane #widgets-calendar .user-status {
-  float: left;
-  clear: both;
-  height: 60px;
-  width: 240px;
-}
-.device .conpherence-widget-pane #widgets-calendar .user-status {
-  width: 100%;
-}
-
 .conpherence-widget-pane #widgets-calendar .user-status .icon {
-  border-radius: 10px;
-  position: relative;
-  top: 24px;
-  left: 10px;
-  height: 16px;
-  width: 16px;
-  box-shadow: 0px 0px 1px #000;
+  border-radius: 8px;
+  height: 14px;
+  width: 14px;
+  margin-top: 7px;
+  float: left;
 }
 
 .conpherence-widget-pane #widgets-calendar .sporadic .icon {
@@ -273,29 +254,17 @@
   background-color: rgb(102, 204, 255);
 }
 
-.conpherence-widget-pane #widgets-calendar .user-status .epoch-range {
-  float: right;
-  font-style: italic;
-  position: relative;
-  top: 24px;
-  right: 10px;
-  font-size: 11px;
-}
-
 .conpherence-widget-pane #widgets-calendar .user-status .description {
-  position: relative;
-  left: 40px;
-  top: 0px;
-  width: 220px;
+  width: 195px;
+  float: left;
+  text-overflow: ellipsis;
+  margin: 0 0 10px 10px;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .participant {
-  position: relative;
-  left: 40px;
-  top: 0px;
-  font-style: italic;
   font-size: 11px;
-  width: 220px;
+  color: #888;
+  padding-top: 2px;
 }
 
 .device .conpherence-widget-pane #widgets-calendar .user-status .description,
@@ -314,80 +283,51 @@
 }
 
 /* people widget */
-.conpherence-widget-pane .people-widget-header {
-  float: left;
-  width: 240px;
-}
-.conpherence-widget-pane .people-widget-header .divider {
-  float: left;
-  clear: both;
-  width: 220px;
-  margin: 0px 0px 0px 10px;
-  border: 1px dashed #bfbfbf;
-}
-.device .conpherence-widget-pane .people-widget-header .divider {
-  width: 96%;
-  margin: 0px 0px 0px 2%;
-}
 .conpherence-widget-pane .people-widget-header .add-people-widget {
-  float: left;
-  padding: 10px 0px 10px 0px;
-  width: 240px;
+  padding: 10px 0 5px 0;
+  overflow: hidden;
 }
-.device .conpherence-widget-pane .people-widget-header,
-.device .conpherence-widget-pane .people-widget-header .add-people-widget {
-  width: 100%;
-}
-.conpherence-widget-pane .add-people-widget .aphront-form-input {
-  width: 100%;
-}
+
 .conpherence-widget-pane .people-widget-header .add-people-widget
 .aphront-form-control-tokenizer {
   float: left;
-  width: 142px;
+  width: 150px;
   padding: 0px 0px 0px 10px
 }
+
 .device .conpherence-widget-pane .people-widget-header .add-people-widget
 .aphront-form-control-tokenizer {
   width: 70%;
 }
+
 .conpherence-widget-pane .people-widget-header .add-people-widget
 .people-add-button {
   float: right;
   margin: 2px 8px 0px 0px;
   padding: 3px 16px 4px 16px;
 }
-@-moz-document url-prefix() {
-  .conpherence-widget-pane .people-widget-header .add-people-widget
-  .people-add-button {
-    margin: -1px 10px 0px 0px;
-  }
-}
-.conpherence-widget-pane .person-entry {
-  float: left;
-  width: 230px;
-  clear: both;
-  padding: 10px 0px 0px 8px;
-}
 
-.device .conpherence-widget-pane .person-entry {
-  width: 98%;
-  padding: 10px 0px 0px 2%;
+.conpherence-widget-pane .person-entry {
+  clear: both;
+  padding: 5px 0 0 10px;
 }
 
 .conpherence-widget-pane .person-entry a {
   float: left;
-  clear: none;
-  font-size: 14px;
   font-weight: bold;
-  width: 124px;
+  line-height: 20px;
+}
+
+.conpherence-widget-pane .person-entry a img {
+  height: 35px;
+  width: 35px;
 }
 
 .conpherence-widget-pane .person-entry .pic {
   float: left;
   clear: left;
-  margin: 0px 10px 0px 0px;
-  width: 50px;
+  margin: 0 8px 0 0;
+  width: 35px;
   padding: 0;
 }
 
@@ -395,12 +335,12 @@
   float: right;
   clear: right;
   margin: 0;
-  width: 34px;
-  height: 36px;
+  width: 20px;
+  height: 20px;
   text-align: center;
   font-size: 22px;
   font-weight: bold;
-  padding: 8px 0px 8px 0px;
+  padding: 8px 0 8px 0p
 }
 
 .conpherence-widget-pane .person-entry .remove:hover {
@@ -418,5 +358,5 @@
 /* settings widget */
 .conpherence-widget-pane .title-update,
 .conpherence-widget-pane .notifications-update {
-  margin: 2px 0px 0px 8px;
+  margin: 3px 0px 0px 4px;
 }
