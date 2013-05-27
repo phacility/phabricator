@@ -105,4 +105,8 @@ final class PhabricatorPasteSearchEngine
     return $this;
   }
 
+  public function getQueryResultsPageURI(PhabricatorSavedQuery $query) {
+    return '/paste/query/'.$query->getQueryKey().'/';
+  }
+
 }

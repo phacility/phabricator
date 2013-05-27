@@ -16,17 +16,16 @@ final class PhabricatorSearchNameController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    if ($this->queryKey) {
-      $saved_query = id(new PhabricatorSavedQueryQuery())
-        ->setViewer($user)
-        ->withQueryKeys(array($this->queryKey))
-        ->executeOne();
-      if (!$saved_query) {
-        return new Aphront404Response();
-      }
-    } else {
+    $saved_query = id(new PhabricatorSavedQueryQuery())
+      ->setViewer($user)
+      ->withQueryKeys(array($this->queryKey))
+      ->executeOne();
+
+    if (!$saved_query) {
       return new Aphront404Response();
     }
+
+    $engine = $saved_query->newEngine();
 
     if ($request->isFormPost()) {
       $named_query = id(new PhabricatorNamedQuery())
@@ -42,7 +41,7 @@ final class PhabricatorSearchNameController
       }
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/search/');
+        ->setURI($engine->getQueryResultsPageURI($saved_query));
     }
 
     $form = id(new AphrontFormView())

@@ -34,4 +34,13 @@ abstract class PhabricatorApplicationSearchEngine {
    */
   abstract public function buildSearchForm(PhabricatorSavedQuery $query);
 
+
+  /**
+   * Return an application URI corresponding to the results page of a query.
+   * Normally, this is something like `/application/query/QUERYKEY/`.
+   *
+   * @param   PhabricatorSavedQuery   The query to build a URI for.
+   * @return  string                  URI where the query can be executed.
+   */
+  abstract public function getQueryResultsPageURI(PhabricatorSavedQuery $query);
 }
