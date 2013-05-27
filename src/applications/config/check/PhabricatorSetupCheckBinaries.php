@@ -60,6 +60,40 @@ final class PhabricatorSetupCheckBinaries extends PhabricatorSetupCheck {
               "differing files, but did not."));
       }
     }
+
+    $table = new PhabricatorRepository();
+    $vcses = queryfx_all(
+      $table->establishConnection('r'),
+      'SELECT DISTINCT versionControlSystem FROM %T',
+      $table->getTableName());
+
+    foreach ($vcses as $vcs) {
+      switch ($vcs['versionControlSystem']) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $binary = 'git';
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $binary = 'svn';
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          $binary = 'hg';
+          break;
+        default:
+          $binary = null;
+          break;
+      }
+      if (!$binary) {
+        continue;
+      }
+
+      if (!Filesystem::binaryExists($binary)) {
+        $message = pht(
+          'You have at least one repository configured which uses this '.
+          'version control system. It will not work without the VCS binary.');
+        $this->raiseWarning($binary, $message);
+      }
+    }
+
   }
 
   private function raiseWarning($bin, $message) {
