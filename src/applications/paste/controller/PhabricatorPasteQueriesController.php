@@ -10,31 +10,27 @@ final class PhabricatorPasteQueriesController
     $nav = $this->buildSideNavView("");
     $filter = $nav->getSelectedFilter();
 
-    $table = new PhabricatorNamedQuery();
-    $conn = $table->establishConnection('r');
-    $data = queryfx_all(
-      $conn,
-      'SELECT * FROM %T WHERE userPHID=%s AND engineClassName=%s',
-      $table->getTableName(),
-      $user->getPHID(),
-      'PhabricatorPasteSearchEngine');
+    $named_queries = id(new PhabricatorNamedQueryQuery())
+      ->setViewer($user)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->withEngineClassNames(array('PhabricatorPasteSearchEngine'))
+      ->execute();
 
     $list = new PhabricatorObjectItemListView();
     $list->setUser($user);
 
-    foreach ($data as $key => $saved_query) {
-      $date_created = phabricator_datetime($saved_query["dateCreated"], $user);
+    foreach ($named_queries as $named_query) {
+      $date_created = phabricator_datetime(
+        $named_query->getDateCreated(),
+        $user);
+
       $item = id(new PhabricatorObjectItemView())
-        ->setHeader($saved_query["queryName"])
-        ->setHref('/paste/query/'.$saved_query["queryKey"].'/')
-        ->addByline(pht('Date Created: ').$date_created);
+        ->setHeader($named_query->getQueryName())
+        ->setHref('/paste/query/'.$named_query->getQueryKey().'/')
+        ->addIcon('none', $date_created);
+
       $list->addItem($item);
     }
-
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-
-    $list->setPager($pager);
 
     $list->setNoDataString(pht("No results found for this query."));
 

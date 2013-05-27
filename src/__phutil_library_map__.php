@@ -1147,6 +1147,7 @@ phutil_register_library_map(array(
     'PhabricatorMySQLConfigOptions' => 'applications/config/option/PhabricatorMySQLConfigOptions.php',
     'PhabricatorMySQLFileStorageEngine' => 'applications/files/engine/PhabricatorMySQLFileStorageEngine.php',
     'PhabricatorNamedQuery' => 'applications/search/storage/PhabricatorNamedQuery.php',
+    'PhabricatorNamedQueryQuery' => 'applications/search/query/PhabricatorNamedQueryQuery.php',
     'PhabricatorNoteExample' => 'applications/uiexample/examples/PhabricatorNoteExample.php',
     'PhabricatorNotificationBuilder' => 'applications/notification/builder/PhabricatorNotificationBuilder.php',
     'PhabricatorNotificationClearController' => 'applications/notification/controller/PhabricatorNotificationClearController.php',
@@ -2923,7 +2924,12 @@ phutil_register_library_map(array(
     'PhabricatorMustVerifyEmailController' => 'PhabricatorAuthController',
     'PhabricatorMySQLConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorMySQLFileStorageEngine' => 'PhabricatorFileStorageEngine',
-    'PhabricatorNamedQuery' => 'PhabricatorSearchDAO',
+    'PhabricatorNamedQuery' =>
+    array(
+      0 => 'PhabricatorSearchDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorNamedQueryQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorNoteExample' => 'PhabricatorUIExample',
     'PhabricatorNotificationClearController' => 'PhabricatorNotificationController',
     'PhabricatorNotificationConfigOptions' => 'PhabricatorApplicationConfigOptions',
