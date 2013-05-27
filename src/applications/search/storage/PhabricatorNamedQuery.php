@@ -11,6 +11,16 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   protected $userPHID = "";
   protected $engineClassName = "";
 
+  private $isBuiltin;
+
+  public function setIsBuiltin($is_builtin) {
+    $this->isBuiltin = $is_builtin;
+    return $this;
+  }
+
+  public function getIsBuiltin() {
+    return $this->isBuiltin;
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

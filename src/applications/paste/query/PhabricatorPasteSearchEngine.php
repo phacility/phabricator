@@ -8,9 +8,6 @@
 final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
-  protected $filter;
-  protected $user;
-
   /**
    * Create a saved query object from the request.
    *
@@ -18,18 +15,10 @@ final class PhabricatorPasteSearchEngine
    * @return The saved query that is built.
    */
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
-
     $saved = new PhabricatorSavedQuery();
-
-    if ($this->filter == "filter/my") {
-      $user = $request->getUser();
-      $saved->setParameter('authorPHIDs', array($user->getPHID()));
-    } else {
-      $data = $request->getRequestData();
-      if (array_key_exists('set_users', $data)) {
-        $saved->setParameter('authorPHIDs', $data['set_users']);
-      }
-    }
+    $saved->setParameter(
+      'authorPHIDs',
+      array_values($request->getArr('set_users')));
 
     try {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -67,12 +56,12 @@ final class PhabricatorPasteSearchEngine
   public function buildSearchForm(PhabricatorSavedQuery $saved_query) {
     $phids = $saved_query->getParameter('authorPHIDs', array());
     $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($this->user)
+      ->setViewer($this->requireViewer())
       ->loadHandles();
     $users_searched = mpull($handles, 'getFullName', 'getPHID');
 
     $form = id(new AphrontFormView())
-      ->setUser($this->user);
+      ->setUser($this->requireViewer());
 
     $form->appendChild(
       id(new AphrontFormTokenizerControl())
@@ -83,7 +72,7 @@ final class PhabricatorPasteSearchEngine
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-      ->setValue(pht('Filter Pastes'))
+      ->setValue(pht('Query'))
       ->addCancelButton(
         '/search/edit/'.$saved_query->getQueryKey().'/',
         pht('Save Custom Query...')));
@@ -91,22 +80,36 @@ final class PhabricatorPasteSearchEngine
     return $form;
   }
 
-  public function setPasteSearchFilter($filter) {
-    $this->filter = $filter;
-    return $this;
-  }
-
-  public function getPasteSearchFilter() {
-    return $this->filter;
-  }
-
-  public function setPasteSearchUser($user) {
-    $this->user = $user;
-    return $this;
-  }
-
   public function getQueryResultsPageURI(PhabricatorSavedQuery $query) {
     return '/paste/query/'.$query->getQueryKey().'/';
+  }
+
+  public function getBuiltinQueryNames() {
+    $names = array(
+      'all'       => pht('All Pastes'),
+    );
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['authored'] = pht('Authored');
+    }
+
+    return $names;
+  }
+
+  public function buildSavedQueryFromBuiltin($query_key) {
+
+    $query = $this->newSavedQuery();
+
+    switch ($query_key) {
+      case 'all':
+        return $query;
+      case 'authored':
+        return $query->setParameter(
+          'authorPHIDs',
+          array($this->requireViewer()->getPHID()));
+    }
+
+    return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
 }

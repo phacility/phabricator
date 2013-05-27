@@ -7,14 +7,19 @@ final class PhabricatorPasteQueriesController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $engine = id(new PhabricatorPasteSearchEngine())
+      ->setViewer($user);
+
     $nav = $this->buildSideNavView();
     $nav->selectFilter('savedqueries');
 
     $named_queries = id(new PhabricatorNamedQueryQuery())
       ->setViewer($user)
       ->withUserPHIDs(array($user->getPHID()))
-      ->withEngineClassNames(array('PhabricatorPasteSearchEngine'))
+      ->withEngineClassNames(array(get_class($engine)))
       ->execute();
+
+    $named_queries += $engine->getBuiltinQueries();
 
     $list = new PhabricatorObjectItemListView();
     $list->setUser($user);
@@ -26,12 +31,18 @@ final class PhabricatorPasteQueriesController
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($named_query->getQueryName())
-        ->setHref('/paste/query/'.$named_query->getQueryKey().'/')
-        ->addIcon('none', $date_created)
-        ->addAction(
+        ->setHref('/paste/query/'.$named_query->getQueryKey().'/');
+
+      if ($named_query->getIsBuiltin()) {
+        $item->addIcon('lock-grey', pht('Builtin'));
+        $item->setBarColor('grey');
+      } else {
+        $item->addIcon('none', $date_created);
+        $item->addAction(
           id(new PhabricatorMenuItemView())
             ->setIcon('edit')
             ->setHref('/search/edit/'.$named_query->getQueryKey().'/'));
+      }
 
       $list->addItem($item);
     }

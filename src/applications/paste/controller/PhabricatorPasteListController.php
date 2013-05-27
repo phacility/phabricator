@@ -2,38 +2,34 @@
 
 final class PhabricatorPasteListController extends PhabricatorPasteController {
 
-  public function shouldRequireLogin() {
-    return false;
-  }
-
-  private $filter;
   private $queryKey;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter');
-    $this->queryKey = idx($data, 'queryKey');
+    $this->queryKey = idx($data, 'queryKey', 'all');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $engine = id(new PhabricatorPasteSearchEngine())
+      ->setViewer($user);
+
     if ($request->isFormPost()) {
-      $saved = id(new PhabricatorPasteSearchEngine())
-        ->buildSavedQueryFromRequest($request);
-      if (count($saved->getParameter('authorPHIDs')) == 0) {
-        return id(new AphrontRedirectResponse())
-          ->setURI('/paste/filter/advanced/');
-      }
-      return id(new AphrontRedirectResponse())
-        ->setURI('/paste/query/'.$saved->getQueryKey().'/');
+      return id(new AphrontRedirectResponse())->setURI(
+        $engine->getQueryResultsPageURI(
+          $engine->buildSavedQueryFromRequest($request)));
     }
 
     $nav = $this->buildSideNavView();
-    $engine = id(new PhabricatorPasteSearchEngine())
-      ->setPasteSearchUser($request->getUser());
 
-    if ($this->queryKey !== null) {
+    if ($engine->isBuiltinQuery($this->queryKey)) {
+      $saved_query = $engine->buildSavedQueryFromBuiltin($this->queryKey);
+    } else {
       $saved_query = id(new PhabricatorSavedQueryQuery())
         ->setViewer($user)
         ->withQueryKeys(array($this->queryKey))
@@ -42,19 +38,14 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       if (!$saved_query) {
         return new Aphront404Response();
       }
-
-      $query = id(new PhabricatorPasteSearchEngine())
-        ->buildQueryFromSavedQuery($saved_query);
-
-      $nav->selectFilter('query/'.$this->queryKey);
-      $filter = null;
-    } else {
-      $filter = $nav->selectFilter('filter/'.$this->filter);
-      $engine->setPasteSearchFilter($filter);
-
-      $saved_query = $engine->buildSavedQueryFromRequest($request);
-      $query = $engine->buildQueryFromSavedQuery($saved_query);
     }
+
+    $query = id(new PhabricatorPasteSearchEngine())
+      ->buildQueryFromSavedQuery($saved_query);
+
+    $filter = $nav->selectFilter(
+      'query/'.$saved_query->getQueryKey(),
+      'filter/advanced');
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
@@ -68,10 +59,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
     if ($this->queryKey !== null || $filter == "filter/advanced") {
       $form = $engine->buildSearchForm($saved_query);
-      $nav->appendChild(
-        array(
-          $form
-        ));
+      $nav->appendChild($form);
     }
 
     $nav->appendChild(
