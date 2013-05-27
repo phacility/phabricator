@@ -34,9 +34,10 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       ->setPasteSearchUser($request->getUser());
 
     if ($this->queryKey !== null) {
-      $saved_query = id(new PhabricatorSavedQuery())->loadOneWhere(
-        'queryKey = %s',
-        $this->queryKey);
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($user)
+        ->withQueryKeys(array($this->queryKey))
+        ->executeOne();
 
       if (!$saved_query) {
         return new Aphront404Response();

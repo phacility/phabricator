@@ -3,7 +3,8 @@
 /**
  * @group search
  */
-final class PhabricatorSavedQuery extends PhabricatorSearchDAO {
+final class PhabricatorSavedQuery extends PhabricatorSearchDAO
+  implements PhabricatorPolicyInterface {
 
   protected $parameters = array();
   protected $queryKey = "";
@@ -35,4 +36,23 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO {
 
     return parent::save();
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_PUBLIC;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
 }

@@ -17,9 +17,10 @@ final class PhabricatorSearchNameController
     $user = $request->getUser();
 
     if ($this->queryKey) {
-      $saved_query = id(new PhabricatorSavedQuery())->loadOneWhere(
-        'queryKey = %s',
-        $this->queryKey);
+      $saved_query = id(new PhabricatorSavedQueryQuery())
+        ->setViewer($user)
+        ->withQueryKeys(array($this->queryKey))
+        ->executeOne();
       if (!$saved_query) {
         return new Aphront404Response();
       }
@@ -28,12 +29,10 @@ final class PhabricatorSearchNameController
     }
 
     if ($request->isFormPost()) {
-      $request_data = $request->getRequestData();
-
       $named_query = id(new PhabricatorNamedQuery())
         ->setUserPHID($user->getPHID())
         ->setQueryKey($saved_query->getQueryKey())
-        ->setQueryName($request_data["set_name"])
+        ->setQueryName($request->getStr('name'))
         ->setEngineClassName($saved_query->getEngineClassName());
 
       try {
@@ -51,7 +50,7 @@ final class PhabricatorSearchNameController
 
     $form->appendChild(
       id(new AphrontFormTextControl())
-        ->setName('set_name')
+        ->setName('name')
         ->setLabel(pht('Query Name')));
 
     $form->appendChild(

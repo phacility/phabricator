@@ -1354,6 +1354,7 @@ phutil_register_library_map(array(
     'PhabricatorSQLPatchList' => 'infrastructure/storage/patch/PhabricatorSQLPatchList.php',
     'PhabricatorSSHWorkflow' => 'infrastructure/ssh/PhabricatorSSHWorkflow.php',
     'PhabricatorSavedQuery' => 'applications/search/storage/PhabricatorSavedQuery.php',
+    'PhabricatorSavedQueryQuery' => 'applications/search/query/PhabricatorSavedQueryQuery.php',
     'PhabricatorScopedEnv' => 'infrastructure/env/PhabricatorScopedEnv.php',
     'PhabricatorSearchAbstractDocument' => 'applications/search/index/PhabricatorSearchAbstractDocument.php',
     'PhabricatorSearchAttachController' => 'applications/search/controller/PhabricatorSearchAttachController.php',
@@ -3135,7 +3136,12 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorS3FileStorageEngine' => 'PhabricatorFileStorageEngine',
     'PhabricatorSSHWorkflow' => 'PhutilArgumentWorkflow',
-    'PhabricatorSavedQuery' => 'PhabricatorSearchDAO',
+    'PhabricatorSavedQuery' =>
+    array(
+      0 => 'PhabricatorSearchDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorSavedQueryQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorSearchAttachController' => 'PhabricatorSearchBaseController',
     'PhabricatorSearchBaseController' => 'PhabricatorController',
     'PhabricatorSearchConfigOptions' => 'PhabricatorApplicationConfigOptions',
