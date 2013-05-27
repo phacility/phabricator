@@ -84,6 +84,10 @@ final class PhabricatorPasteSearchEngine
     return '/paste/query/'.$query->getQueryKey().'/';
   }
 
+  public function getQueryManagementURI() {
+    return '/paste/savedqueries/';
+  }
+
   public function getBuiltinQueryNames() {
     $names = array(
       'all'       => pht('All Pastes'),
@@ -99,6 +103,7 @@ final class PhabricatorPasteSearchEngine
   public function buildSavedQueryFromBuiltin($query_key) {
 
     $query = $this->newSavedQuery();
+    $query->setQueryKey($query_key);
 
     switch ($query_key) {
       case 'all':

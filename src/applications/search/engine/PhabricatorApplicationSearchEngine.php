@@ -5,6 +5,7 @@
  * creating and storing saved queries.
  *
  * @task builtin  Builtin Queries
+ * @task uri      Query URIs
  *
  * @group search
  */
@@ -57,8 +58,19 @@ abstract class PhabricatorApplicationSearchEngine {
    *
    * @param   PhabricatorSavedQuery   The query to build a URI for.
    * @return  string                  URI where the query can be executed.
+   * @task uri
    */
   abstract public function getQueryResultsPageURI(PhabricatorSavedQuery $query);
+
+
+  /**
+   * Return an application URI for query management. This is used when, e.g.,
+   * a query deletion operation is cancelled.
+   *
+   * @return  string  URI where queries can be managed.
+   * @task uri
+   */
+  abstract public function getQueryManagementURI();
 
 
   public function newSavedQuery() {

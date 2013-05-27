@@ -40,6 +40,11 @@ final class PhabricatorPasteQueriesController
         $item->addIcon('none', $date_created);
         $item->addAction(
           id(new PhabricatorMenuItemView())
+            ->setIcon('delete')
+            ->setHref('/search/delete/'.$named_query->getQueryKey().'/')
+            ->setWorkflow(true));
+        $item->addAction(
+          id(new PhabricatorMenuItemView())
             ->setIcon('edit')
             ->setHref('/search/edit/'.$named_query->getQueryKey().'/'));
       }

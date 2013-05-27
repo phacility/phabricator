@@ -25,7 +25,10 @@ final class PhabricatorSearchEditController
       return new Aphront404Response();
     }
 
-    $engine = $saved_query->newEngine();
+    $engine = $saved_query->newEngine()->setViewer($user);
+
+    $complete_uri = $engine->getQueryManagementURI();
+    $cancel_uri = $complete_uri;
 
     $named_query = id(new PhabricatorNamedQueryQuery())
       ->setViewer($user)
@@ -37,6 +40,11 @@ final class PhabricatorSearchEditController
         ->setUserPHID($user->getPHID())
         ->setQueryKey($saved_query->getQueryKey())
         ->setEngineClassName($saved_query->getEngineClassName());
+
+      // If we haven't saved the query yet, this is a "Save..." operation, so
+      // take the user back to the query if they cancel instead of back to the
+      // management interface.
+      $cancel_uri = $engine->getQueryResultsPageURI($saved_query);
     }
 
     $e_name = true;
@@ -53,9 +61,7 @@ final class PhabricatorSearchEditController
 
       if (!$errors) {
         $named_query->save();
-
-        $results_uri = $engine->getQueryResultsPageURI($saved_query);
-        return id(new AphrontRedirectResponse())->setURI($results_uri);
+        return id(new AphrontRedirectResponse())->setURI($complete_uri);
       }
     }
 
@@ -76,7 +82,8 @@ final class PhabricatorSearchEditController
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save Query')));
+        ->setValue(pht('Save Query'))
+        ->addCancelButton($cancel_uri));
 
     if ($named_query->getID()) {
       $title = pht('Edit Saved Query');
