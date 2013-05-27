@@ -88,7 +88,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
   public function withOwners(array $owners) {
     $this->includeUnowned = false;
     foreach ($owners as $k => $phid) {
-      if ($phid == ManiphestTaskOwner::OWNER_UP_FOR_GRABS) {
+      if ($phid == ManiphestTaskOwner::OWNER_UP_FOR_GRABS || $phid === null) {
         $this->includeUnowned = true;
         unset($owners[$k]);
         break;
