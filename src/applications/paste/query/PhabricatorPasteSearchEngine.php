@@ -18,7 +18,7 @@ final class PhabricatorPasteSearchEngine
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
       'authorPHIDs',
-      array_values($request->getArr('set_users')));
+      array_values($request->getArr('authors')));
 
     try {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -53,31 +53,21 @@ final class PhabricatorPasteSearchEngine
    * @param PhabricatorSavedQuery The query to populate the form with.
    * @return AphrontFormView The built form.
    */
-  public function buildSearchForm(PhabricatorSavedQuery $saved_query) {
+  public function buildSearchForm(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $saved_query) {
     $phids = $saved_query->getParameter('authorPHIDs', array());
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->setViewer($this->requireViewer())
       ->loadHandles();
-    $users_searched = mpull($handles, 'getFullName', 'getPHID');
-
-    $form = id(new AphrontFormView())
-      ->setUser($this->requireViewer());
+    $author_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form->appendChild(
       id(new AphrontFormTokenizerControl())
-        ->setDatasource('/typeahead/common/searchowner/')
-        ->setName('set_users')
-        ->setLabel(pht('Users'))
-        ->setValue($users_searched));
-
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-      ->setValue(pht('Query'))
-      ->addCancelButton(
-        '/search/edit/'.$saved_query->getQueryKey().'/',
-        pht('Save Custom Query...')));
-
-    return $form;
+        ->setDatasource('/typeahead/common/users/')
+        ->setName('authors')
+        ->setLabel(pht('Authors'))
+        ->setValue($author_tokens));
   }
 
   public function getQueryResultsPageURI($query_key) {

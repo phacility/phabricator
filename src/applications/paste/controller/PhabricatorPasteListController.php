@@ -58,14 +58,28 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $list->setNoDataString(pht("No results found for this query."));
 
     if ($this->queryKey !== null || $filter == "filter/advanced") {
-      $form = $engine->buildSearchForm($saved_query);
-      $nav->appendChild($form);
+      $form = id(new AphrontFormView())
+        ->setNoShading(true)
+        ->setUser($user);
+
+      $engine->buildSearchForm($form, $saved_query);
+
+      $submit = id(new AphrontFormSubmitControl())
+        ->setValue(pht('Execute Query'));
+
+      if ($filter == 'filter/advanced') {
+        $submit->addCancelButton(
+          '/search/edit/'.$saved_query->getQueryKey().'/',
+          pht('Save Custom Query...'));
+      }
+
+      $form->appendChild($submit);
+
+      $filter_view = id(new AphrontListFilterView())->appendChild($form);
+      $nav->appendChild($filter_view);
     }
 
-    $nav->appendChild(
-      array(
-        $list,
-      ));
+    $nav->appendChild($list);
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)

@@ -46,10 +46,13 @@ abstract class PhabricatorApplicationSearchEngine {
   /**
    * Builds the search form using the request.
    *
+   * @param AphrontFormView       Form to populate.
    * @param PhabricatorSavedQuery The query from which to build the form.
    * @return void
    */
-  abstract public function buildSearchForm(PhabricatorSavedQuery $query);
+  abstract public function buildSearchForm(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $query);
 
 
   /**
