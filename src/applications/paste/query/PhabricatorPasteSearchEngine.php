@@ -85,7 +85,7 @@ final class PhabricatorPasteSearchEngine
       id(new AphrontFormSubmitControl())
       ->setValue(pht('Filter Pastes'))
       ->addCancelButton(
-        '/search/name/'.$saved_query->getQueryKey().'/',
+        '/search/edit/'.$saved_query->getQueryKey().'/',
         pht('Save Custom Query...')));
 
     return $form;

@@ -27,7 +27,11 @@ final class PhabricatorPasteQueriesController
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($named_query->getQueryName())
         ->setHref('/paste/query/'.$named_query->getQueryKey().'/')
-        ->addIcon('none', $date_created);
+        ->addIcon('none', $date_created)
+        ->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setIcon('edit')
+            ->setHref('/search/edit/'.$named_query->getQueryKey().'/'));
 
       $list->addItem($item);
     }
