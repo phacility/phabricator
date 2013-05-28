@@ -255,7 +255,7 @@ final class PhrictionDocumentController
     $view->addProperty(pht('Last Updated'), $when);
 
     if ($subscribers) {
-      $subscribers = $this->renderHandlesForPHIDs($subscribers);
+      $subscribers = $this->renderHandlesForPHIDs($subscribers, ',');
       $view->addProperty(pht('Subscribers'), $subscribers);
     }
 
