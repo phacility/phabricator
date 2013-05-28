@@ -15,7 +15,6 @@ final class DiffusionBrowseController extends DiffusionController {
           array(
             'path' => $drequest->getPath(),
             'commit' => $drequest->getCommit(),
-            'renderReadme' => true,
           )));
       $reason = $results->getReasonForEmptyResultSet();
       $is_file = ($reason == DiffusionBrowseResultSet::REASON_IS_FILE);
@@ -84,7 +83,11 @@ final class DiffusionBrowseController extends DiffusionController {
 
       $content[] = $this->buildOpenRevisions();
 
-      $readme = $results->getReadmeContent();
+      $readme = $this->callConduitWithDiffusionRequest(
+        'diffusion.readmequery',
+        array(
+          'paths' => $results->getPathDicts()
+        ));
       if ($readme) {
         $box = new PHUIBoxView();
         $box->setShadow(true);
@@ -171,70 +174,24 @@ final class DiffusionBrowseController extends DiffusionController {
 
     try {
 
-      switch ($repository->getVersionControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $future = $repository->getLocalCommandFuture(
-            // NOTE: --perl-regexp is available only with libpcre compiled in.
-            'grep --extended-regexp --null -n --no-color -e %s %s -- %s',
-            $this->getRequest()->getStr('grep'),
-            $drequest->getStableCommitName(),
-            $drequest->getPath());
+      $results = $this->callConduitWithDiffusionRequest(
+        'diffusion.searchquery',
+        array(
+          'grep' => $this->getRequest()->getStr('grep'),
+          'stableCommitName' => $drequest->getStableCommitName(),
+          'path' => $drequest->getPath(),
+          'limit' => $limit + 1,
+          'offset' => $page));
 
-          $binary_pattern = '/Binary file [^:]*:(.+) matches/';
-          $lines = new LinesOfALargeExecFuture($future);
-          foreach ($lines as $line) {
-            $result = null;
-            if (preg_match('/[^:]*:(.+)\0(.+)\0(.*)/', $line, $result)) {
-              $results[] = array_slice($result, 1);
-            } else if (preg_match($binary_pattern, $line, $result)) {
-              list(, $path) = $result;
-              $results[] = array($path, null, pht('Binary file'));
-            } else {
-              $results[] = array(null, null, $line);
-            }
-            if (count($results) > $page + $limit) {
-              break;
-            }
-          }
-          unset($lines);
-
-          break;
-
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $future = $repository->getLocalCommandFuture(
-            'grep --rev %s --print0 --line-number %s %s',
-            hgsprintf('ancestors(%s)', $drequest->getStableCommitName()),
-            $this->getRequest()->getStr('grep'),
-            $drequest->getPath());
-
-          $lines = id(new LinesOfALargeExecFuture($future))->setDelimiter("\0");
-          $parts = array();
-          foreach ($lines as $line) {
-            $parts[] = $line;
-            if (count($parts) == 4) {
-              list($path, $offset, $line, $string) = $parts;
-              $results[] = array($path, $line, $string);
-              if (count($results) > $page + $limit) {
-                break;
-              }
-              $parts = array();
-            }
-          }
-          unset($lines);
-
-          break;
-      }
-
-    } catch (CommandException $ex) {
-      $stderr = $ex->getStderr();
-      if ($stderr != '') {
+    } catch (ConduitException $ex) {
+      $err = $ex->getErrorDescription();
+      if ($err != '') {
         return id(new AphrontErrorView())
           ->setTitle(pht('Search Error'))
-          ->appendChild($stderr);
+          ->appendChild($err);
       }
     }
 
-    $results = array_slice($results, $page);
     $results = $pager->sliceResults($results);
 
     require_celerity_resource('syntax-highlighting-css');

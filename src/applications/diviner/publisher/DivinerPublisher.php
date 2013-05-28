@@ -86,7 +86,7 @@ abstract class DivinerPublisher {
   protected function getAtomSimilarIndex(DivinerAtom $atom) {
     $atoms = $this->getSimilarAtoms($atom);
     if (count($atoms) == 1) {
-      return null;
+      return 0;
     }
 
     $index = 1;

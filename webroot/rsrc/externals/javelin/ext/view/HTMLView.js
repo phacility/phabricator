@@ -5,7 +5,9 @@
  *
  * @provides javelin-view-html
  * @requires javelin-install
- *           javelin-view
+ *           javelin-dom
+ *           javelin-view-visitor
+ *           javelin-util
  */
 
 JX.install('HTMLView', {
@@ -26,7 +28,7 @@ JX.install('HTMLView', {
 
     validate: function(view, children) {
       var spec = this._getHTMLSpec();
-      if (!view.getName() in spec) {
+      if (!(view.getName() in spec)) {
         throw new Error("invalid tag");
       }
 

@@ -74,8 +74,9 @@ final class DiffusionCommitController extends DiffusionController {
       require_celerity_resource('diffusion-commit-view-css');
       require_celerity_resource('phabricator-remarkup-css');
 
-      $parent_query = DiffusionCommitParentsQuery::newFromDiffusionRequest(
-        $drequest);
+      $parents = $this->callConduitWithDiffusionRequest(
+        'diffusion.commitparentsquery',
+        array('commit' => $drequest->getCommit()));
 
       $headsup_view = id(new PhabricatorHeaderView())
         ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')));
@@ -85,7 +86,7 @@ final class DiffusionCommitController extends DiffusionController {
       $commit_properties = $this->loadCommitProperties(
         $commit,
         $commit_data,
-        $parent_query->loadParents());
+        $parents);
       $property_list = id(new PhabricatorPropertyListView())
         ->setHasKeyboardShortcuts(true)
         ->setUser($user)
@@ -359,6 +360,8 @@ final class DiffusionCommitController extends DiffusionController {
       $content,
       array(
         'title' => $commit_id,
+        'pageObjects' => array($commit->getPHID()),
+        'dust' => true,
       ));
   }
 
@@ -649,12 +652,9 @@ final class DiffusionCommitController extends DiffusionController {
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? pht('Submit') : pht('Cook the Books')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(
       $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
-    $panel->appendChild($form);
-    $panel->addClass('aphront-panel-accent');
-    $panel->addClass('aphront-panel-flush');
 
     require_celerity_resource('phabricator-transaction-view-css');
 
@@ -714,12 +714,13 @@ final class DiffusionCommitController extends DiffusionController {
         'id' => $pane_id,
       ),
       hsprintf(
-        '<div class="differential-add-comment-panel">%s%s%s</div>',
+        '<div class="differential-add-comment-panel">%s%s%s%s</div>',
         id(new PhabricatorAnchorView())
           ->setAnchorName('comment')
           ->setNavigationMarker(true)
           ->render(),
-        $panel->render(),
+        $header,
+        $form,
         $preview_panel));
   }
 
@@ -804,13 +805,20 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
     $drequest = $this->getDiffusionRequest();
-
     $limit = 50;
 
-    $merge_query = DiffusionMergedCommitsQuery::newFromDiffusionRequest(
-      $drequest);
-    $merge_query->setLimit($limit + 1);
-    $merges = $merge_query->loadMergedCommits();
+    $merges = array();
+    try {
+      $merges = $this->callConduitWithDiffusionRequest(
+        'diffusion.mergedcommitsquery',
+        array(
+          'commit' => $drequest->getCommit(),
+          'limit' => $limit + 1));
+    } catch (ConduitException $ex) {
+      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
+        throw $ex;
+      }
+    }
 
     if (!$merges) {
       return null;
@@ -902,44 +910,23 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildRefs(DiffusionRequest $request) {
-    // Not turning this into a proper Query class since it's pretty simple,
-    // one-off, and Git-specific.
-
+    // this is git-only, so save a conduit round trip and just get out of
+    // here if the repository isn't git
     $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
-
     $repository = $request->getRepository();
     if ($repository->getVersionControlSystem() != $type_git) {
       return null;
     }
 
-    list($stdout) = $repository->execxLocalCommand(
-      'log --format=%s -n 1 %s --',
-      '%d',
-      $request->getCommit());
-
-    // %d, gives a weird output format
-    // similar to (remote/one, remote/two, remote/three)
-    $refs = trim($stdout, "() \n");
-    if (!$refs) {
-        return null;
-    }
-    $refs = explode(',', $refs);
-    $refs = array_map('trim', $refs);
-
+    $results = $this->callConduitWithDiffusionRequest(
+      'diffusion.refsquery',
+      array('commit' => $request->getCommit()));
     $ref_links = array();
-    foreach ($refs as $ref) {
-      $ref_links[] = phutil_tag(
-        'a',
-        array(
-          'href' => $request->generateURI(
-            array(
-              'action'  => 'browse',
-              'branch'  => $ref,
-            )),
-        ),
-        $ref);
+    foreach ($results as $ref_data) {
+      $ref_links[] = phutil_tag('a',
+        array('href' => $ref_data['href']),
+        $ref_data['ref']);
     }
-
     return phutil_implode_html(', ', $ref_links);
   }
 

@@ -94,7 +94,8 @@ final class PonderQuestionViewController extends PonderController {
       $nav,
       array(
         'device' => true,
-        'title' => 'Q'.$question->getID().' '.$question->getTitle()
+        'title' => 'Q'.$question->getID().' '.$question->getTitle(),
+        'dust' => true,
       ));
   }
 

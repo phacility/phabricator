@@ -262,7 +262,7 @@ describe('Javelin URI', function() {
     expect(uri.toString()).toEqual('/?clown=town');
   });
 
-  it('can remove non existant query data', function() {
+  it('can remove non existent query data', function() {
     var uri = JX.$U('/?key=value');
     uri.addQueryParams({'magic' : null});
     expect(uri.getQueryParams()).toEqual({

@@ -282,7 +282,8 @@ JX.install('TypeaheadSource', {
 
     sortHits : function(value, hits) {
       var objs = [];
-      for (var ii = 0; ii < hits.length; ii++) {
+      var ii;
+      for (ii = 0; ii < hits.length; ii++) {
         objs.push(this._raw[hits[ii]]);
       }
 
@@ -299,7 +300,7 @@ JX.install('TypeaheadSource', {
       handler(value, objs, default_comparator);
 
       hits.splice(0, hits.length);
-      for (var ii = 0; ii < objs.length; ii++) {
+      for (ii = 0; ii < objs.length; ii++) {
         hits.push(objs[ii].id);
       }
     },

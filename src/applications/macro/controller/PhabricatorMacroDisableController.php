@@ -35,12 +35,7 @@ final class PhabricatorMacroDisableController
 
       $editor = id(new PhabricatorMacroEditor())
         ->setActor($user)
-        ->setContentSource(
-          PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_WEB,
-            array(
-              'ip' => $request->getRemoteAddr(),
-            )));
+        ->setContentSourceFromRequest($request);
 
       $xactions = $editor->applyTransactions($macro, array($xaction));
 

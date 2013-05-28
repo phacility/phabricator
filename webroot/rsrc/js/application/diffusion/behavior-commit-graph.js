@@ -20,7 +20,7 @@ JX.behavior('diffusion-commit-graph', function(config) {
       '#00cccc',
       '#00cc33',
       '#66cc00',
-      '#cc9900',
+      '#cc9900'
     ];
     return colors[c % colors.length];
   }
@@ -48,9 +48,9 @@ JX.behavior('diffusion-commit-graph', function(config) {
     var data = JX.Stratcom.getData(nodes[ii]);
 
     var cell = 12; // Width of each thread.
-    function xpos(col) {
+    var xpos = function(col) {
       return (col * cell) + (cell / 2);
-    }
+    };
 
     var h = 26;
     var w = cell * config.count;
@@ -71,8 +71,11 @@ JX.behavior('diffusion-commit-graph', function(config) {
     // a parent). We use this to figure out where to draw the join/split lines.
 
     var origin = null;
-    for (var jj = 0; jj < data.line.length; jj++) {
-      var c = data.line.charAt(jj);
+    var jj;
+    var x;
+    var c;
+    for (jj = 0; jj < data.line.length; jj++) {
+      c = data.line.charAt(jj);
       switch (c) {
         case 'o':
         case '^':
@@ -84,9 +87,9 @@ JX.behavior('diffusion-commit-graph', function(config) {
     // Draw all the join lines. These start at some column at the top of the
     // canvas and join the commit's column. They indicate branching.
 
-    for (var jj = 0; jj < data.join.length; jj++) {
+    for (jj = 0; jj < data.join.length; jj++) {
       var join = data.join[jj];
-      var x = xpos(join);
+      x = xpos(join);
       cxt.beginPath();
         cxt.moveTo(x, 0);
         cxt.bezierCurveTo(x, h/4, origin, h/4, origin, h/2);
@@ -96,9 +99,9 @@ JX.behavior('diffusion-commit-graph', function(config) {
     // Draw all the split lines. These start at the commit and end at some
     // column on the bottom of the canvas. They indicate merging.
 
-    for (var jj = 0; jj < data.split.length; jj++) {
+    for (jj = 0; jj < data.split.length; jj++) {
       var split = data.split[jj];
-      var x = xpos(split);
+      x = xpos(split);
       cxt.beginPath();
         cxt.moveTo(origin, h/2);
         cxt.bezierCurveTo(origin, 3*h/4, x, 3*h/4, x, h);
@@ -108,13 +111,16 @@ JX.behavior('diffusion-commit-graph', function(config) {
     // Draw the vertical lines (a branch with no activity at this commit) and
     // the commit circles.
 
-    for (var jj = 0; jj < data.line.length; jj++) {
-      var c = data.line.charAt(jj);
+    for (jj = 0; jj < data.line.length; jj++) {
+      c = data.line.charAt(jj);
       switch (c) {
         case 'o':
         case '^':
-          origin = xpos(jj);
         case '|':
+          if (c == 'o' || c == '^') {
+            origin = xpos(jj);
+          }
+
           cxt.beginPath();
           cxt.moveTo(xpos(jj), (c == '^' ? h/2 : 0));
           cxt.lineTo(xpos(jj), h);

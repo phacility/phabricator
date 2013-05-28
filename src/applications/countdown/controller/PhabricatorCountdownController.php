@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 abstract class PhabricatorCountdownController extends PhabricatorController {
 
   public function buildSideNavView() {

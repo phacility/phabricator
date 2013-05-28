@@ -2,15 +2,14 @@
  * @provides javelin-behavior-releeph-preview-branch
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-stratcom
  *           javelin-uri
- *           javelin-util
+ *           javelin-request
  */
 
 JX.behavior('releeph-preview-branch', function(config) {
 
   var uri = JX.$U(config.uri);
-  for (param_name in config.params.static) {
+  for (var param_name in config.params.static) {
     var value = config.params.static[param_name];
     uri.setQueryParam(param_name, value);
   }
@@ -20,7 +19,7 @@ JX.behavior('releeph-preview-branch', function(config) {
   var dynamics = config.params.dynamic;
 
   function renderPreview() {
-    for (param_name in dynamics) {
+    for (var param_name in dynamics) {
       var node_id = dynamics[param_name];
       var input = JX.$(node_id);
       uri.setQueryParam(param_name, input.value);
@@ -33,7 +32,7 @@ JX.behavior('releeph-preview-branch', function(config) {
 
   renderPreview();
 
-  for (ii in dynamics) {
+  for (var ii in dynamics) {
     var node_id = dynamics[ii];
     var input = JX.$(node_id);
     JX.DOM.listen(

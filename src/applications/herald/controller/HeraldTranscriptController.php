@@ -34,11 +34,11 @@ final class HeraldTranscriptController extends HeraldController {
     if (!$object_xscript) {
       $notice = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle('Old Transcript')
+        ->setTitle(pht('Old Transcript'))
         ->appendChild(phutil_tag(
           'p',
           array(),
-          'Details of this transcript have been garbage collected.'));
+          pht('Details of this transcript have been garbage collected.')));
       $nav->appendChild($notice);
     } else {
       $filter = $this->getFilterPHIDs();
@@ -53,9 +53,9 @@ final class HeraldTranscriptController extends HeraldController {
       if ($xscript->getDryRun()) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Dry Run');
-        $notice->appendChild(
-          'This was a dry run to test Herald rules, no actions were executed.');
+        $notice->setTitle(pht('Dry Run'));
+        $notice->appendChild(pht('This was a dry run to test Herald '.
+          'rules, no actions were executed.'));
         $nav->appendChild($notice);
       }
 
@@ -82,10 +82,12 @@ final class HeraldTranscriptController extends HeraldController {
           ->setName($xscript->getID()));
     $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Transcript',
+        'title' => pht('Transcript'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -127,9 +129,9 @@ final class HeraldTranscriptController extends HeraldController {
 
   protected function getFilterMap() {
     return array(
-      self::FILTER_AFFECTED => 'Rules that Affected Me',
-      self::FILTER_OWNED    => 'Rules I Own',
-      self::FILTER_ALL      => 'All Rules',
+      self::FILTER_AFFECTED => pht('Rules that Affected Me'),
+      self::FILTER_OWNED    => pht('Rules I Own'),
+      self::FILTER_ALL      => pht('All Rules'),
     );
   }
 
@@ -295,9 +297,13 @@ final class HeraldTranscriptController extends HeraldController {
       }
 
       if ($apply_xscript->getApplied()) {
-        $outcome = hsprintf('<span class="outcome-success">SUCCESS</span>');
+        $success = pht('SUCCESS');
+        $outcome =
+          hsprintf('<span class="outcome-success">%s</span>', $success);
       } else {
-        $outcome = hsprintf('<span class="outcome-failure">FAILURE</span>');
+        $failure = pht('FAILURE');
+        $outcome =
+          hsprintf('<span class="outcome-failure">%s</span>', $failure);
       }
 
       $rows[] = array(
@@ -313,12 +319,12 @@ final class HeraldTranscriptController extends HeraldController {
     }
 
     $table = new AphrontTableView($rows);
-    $table->setNoDataString('No actions were taken.');
+    $table->setNoDataString(pht('No actions were taken.'));
     $table->setHeaders(
       array(
-        'Action',
-        'Target',
-        'Details',
+        pht('Action'),
+        pht('Target'),
+        pht('Details'),
       ));
     $table->setColumnClasses(
       array(
@@ -370,7 +376,7 @@ final class HeraldTranscriptController extends HeraldController {
         $cond_markup[] = phutil_tag(
           'li',
           array(),
-          hsprintf(
+          pht(
             '%s Condition: %s %s %s%s',
             $result,
             $field_names[$cond->getFieldName()],
@@ -380,12 +386,14 @@ final class HeraldTranscriptController extends HeraldController {
       }
 
       if ($rule->getResult()) {
+        $pass = pht('PASS');
         $result = hsprintf(
-          '<span class="herald-outcome rule-pass">PASS</span>');
+          '<span class="herald-outcome rule-pass">%s</span>', $pass);
         $class = 'herald-rule-pass';
       } else {
+        $fail = pht('FAIL');
         $result = hsprintf(
-          '<span class="herald-outcome rule-fail">FAIL</span>');
+          '<span class="herald-outcome rule-fail">%s</span>', $fail);
         $class = 'herald-rule-fail';
       }
 
@@ -435,13 +443,16 @@ final class HeraldTranscriptController extends HeraldController {
             phutil_tag('ul', array(), $cond_markup)));
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Rule Details');
-    $panel->appendChild(phutil_tag(
-      'ul',
-      array('class' => 'herald-explain-list'),
-      $rule_markup));
-
+    $panel = '';
+    if ($rule_markup) {
+      $panel = new AphrontPanelView();
+      $panel->setHeader(pht('Rule Details'));
+      $panel->setNoBackground();
+      $panel->appendChild(phutil_tag(
+        'ul',
+        array('class' => 'herald-explain-list'),
+        $rule_markup));
+    }
     return $panel;
   }
 
@@ -457,10 +468,10 @@ final class HeraldTranscriptController extends HeraldController {
       $handles = $this->loadViewerHandles(array($phid));
 
       $data += array(
-        'Object Name' => $object_xscript->getName(),
-        'Object Type' => $object_xscript->getType(),
-        'Object PHID' => $phid,
-        'Object Link' => $handles[$phid]->renderLink(),
+        pht('Object Name') => $object_xscript->getName(),
+        pht('Object Type') => $object_xscript->getType(),
+        pht('Object PHID') => $phid,
+        pht('Object Link') => $handles[$phid]->renderLink(),
       );
     }
 
@@ -501,7 +512,8 @@ final class HeraldTranscriptController extends HeraldController {
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Object Transcript');
+    $panel->setHeader(pht('Object Transcript'));
+    $panel->setNoBackground();
     $panel->appendChild($table);
 
     return $panel;

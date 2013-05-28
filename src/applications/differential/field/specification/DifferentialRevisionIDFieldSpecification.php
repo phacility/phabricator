@@ -71,6 +71,14 @@ final class DifferentialRevisionIDFieldSpecification
       if ($uri == PhabricatorEnv::getProductionURI('/D'.$id)) {
         return $id;
       }
+
+      $allowed_uris = PhabricatorEnv::getAllowedURIs('/D'.$id);
+
+      foreach ($allowed_uris as $allowed_uri) {
+        if ($uri == $allowed_uri) {
+          return $id;
+        }
+      }
     }
 
     return null;

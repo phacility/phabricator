@@ -11,26 +11,26 @@ final class HeraldActionConfig {
 
   public static function getActionMessageMapForRuleType($rule_type) {
     $generic_mappings = array(
-      self::ACTION_NOTHING      => 'Do nothing',
-      self::ACTION_ADD_CC       => 'Add emails to CC',
-      self::ACTION_REMOVE_CC    => 'Remove emails from CC',
-      self::ACTION_EMAIL        => 'Send an email to',
-      self::ACTION_AUDIT        => 'Trigger an Audit',
-      self::ACTION_FLAG         => 'Mark with flag',
+      self::ACTION_NOTHING      => pht('Do nothing'),
+      self::ACTION_ADD_CC       => pht('Add emails to CC'),
+      self::ACTION_REMOVE_CC    => pht('Remove emails from CC'),
+      self::ACTION_EMAIL        => pht('Send an email to'),
+      self::ACTION_AUDIT        => pht('Trigger an Audit'),
+      self::ACTION_FLAG         => pht('Mark with flag'),
     );
 
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         $specific_mappings = array(
-          self::ACTION_AUDIT        => 'Trigger an Audit for project',
+          self::ACTION_AUDIT        => pht('Trigger an Audit for project'),
         );
         break;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         $specific_mappings = array(
-          self::ACTION_ADD_CC       => 'CC me',
-          self::ACTION_REMOVE_CC    => 'Remove me from CC',
-          self::ACTION_EMAIL        => 'Email me',
-          self::ACTION_AUDIT        => 'Trigger an Audit by me',
+          self::ACTION_ADD_CC       => pht('CC me'),
+          self::ACTION_REMOVE_CC    => pht('Remove me from CC'),
+          self::ACTION_EMAIL        => pht('Email me'),
+          self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
         );
         break;
       case null:

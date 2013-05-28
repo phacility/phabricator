@@ -31,10 +31,7 @@ final class ConpherenceUpdateController
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needFilePHIDs(true)
-      ->needOrigPics(true)
-      ->needHeaderPics(true)
       ->executeOne();
-    $supported_formats = PhabricatorFile::getTransformableImageFormats();
 
     $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
     $latest_transaction_id = null;
@@ -43,14 +40,9 @@ final class ConpherenceUpdateController
     $e_file = array();
     $errors = array();
     if ($request->isFormPost()) {
-      $content_source = PhabricatorContentSource::newForSource(
-        PhabricatorContentSource::SOURCE_WEB,
-        array(
-          'ip' => $request->getRemoteAddr()
-        ));
       $editor = id(new ConpherenceEditor())
         ->setContinueOnNoEffect($request->isContinueRequest())
-        ->setContentSource($content_source)
+        ->setContentSourceFromRequest($request)
         ->setActor($user);
 
       switch ($action) {
@@ -99,78 +91,19 @@ final class ConpherenceUpdateController
           break;
         case ConpherenceUpdateActions::METADATA:
           $xactions = array();
-          $top = $request->getInt('image_y');
-          $left = $request->getInt('image_x');
-          $file_id = $request->getInt('file_id');
-          $title = $request->getStr('title');
           $updated = false;
-          if ($file_id) {
-            $orig_file = id(new PhabricatorFileQuery())
-              ->setViewer($user)
-              ->withIDs(array($file_id))
-              ->executeOne();
-            $okay = $orig_file->isTransformableImage();
-            if ($okay) {
-              $xactions[] = id(new ConpherenceTransaction())
-                ->setTransactionType(ConpherenceTransactionType::TYPE_PICTURE)
-                ->setNewValue($orig_file->getPHID());
-              // do a transformation "crudely"
-              $xformer = new PhabricatorImageTransformer();
-              $header_file = $xformer->executeConpherenceTransform(
-                $orig_file,
-                0,
-                0,
-                ConpherenceImageData::HEAD_WIDTH,
-                ConpherenceImageData::HEAD_HEIGHT);
-              // this is handled outside the editor for now. no particularly
-              // good reason to move it inside
-              $conpherence->setImagePHIDs(
-                array(
-                  ConpherenceImageData::SIZE_HEAD => $header_file->getPHID(),
-                ));
-              $conpherence->setImages(
-                array(
-                  ConpherenceImageData::SIZE_HEAD => $header_file,
-                ));
-            } else {
-              $e_file[] = $orig_file;
-              $errors[] =
-                pht('This server only supports these image formats: %s.',
-                  implode(', ', $supported_formats));
-            }
-            // use the existing title in this image upload case
-            $title = $conpherence->getTitle();
-            $updated = true;
-            $response_mode = 'redirect';
-          }
-
-          // all other metadata updates are continue requests
+          // all metadata updates are continue requests
           if (!$request->isContinueRequest()) {
             break;
           }
 
-          if ($top !== null || $left !== null) {
-            $file = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
-            $xformer = new PhabricatorImageTransformer();
-            $xformed = $xformer->executeConpherenceTransform(
-              $file,
-              $top,
-              $left,
-              ConpherenceImageData::HEAD_WIDTH,
-              ConpherenceImageData::HEAD_HEIGHT);
-            $image_phid = $xformed->getPHID();
-
-            $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(
-                ConpherenceTransactionType::TYPE_PICTURE_CROP)
-                ->setNewValue($image_phid);
-            $updated = true;
-          }
+          $title = $request->getStr('title');
           if ($title != $conpherence->getTitle()) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
               ->setNewValue($title);
             $updated = true;
+            $response_mode = 'redirect';
           }
           if (!$updated) {
             $errors[] = pht(
@@ -282,34 +215,6 @@ final class ConpherenceUpdateController
         ->setName('title')
         ->setValue($conpherence->getTitle()));
 
-    $image = $conpherence->getImage(ConpherenceImageData::SIZE_ORIG);
-    if ($image) {
-      $form
-        ->appendChild(
-          id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Image'))
-          ->setValue(phutil_tag(
-            'img',
-            array(
-              'src' =>
-              $conpherence->loadImageURI(ConpherenceImageData::SIZE_HEAD),
-              ))))
-        ->appendChild(
-          id(new AphrontFormCropControl())
-          ->setLabel(pht('Crop Image'))
-          ->setValue($image)
-          ->setWidth(ConpherenceImageData::HEAD_WIDTH)
-          ->setHeight(ConpherenceImageData::HEAD_HEIGHT))
-          ->appendChild(
-            id(new ConpherenceFormDragAndDropUploadControl())
-            ->setLabel(pht('Change Image')));
-    } else {
-      $form
-        ->appendChild(
-          id(new ConpherenceFormDragAndDropUploadControl())
-          ->setLabel(pht('Image')));
-    }
-
     require_celerity_resource('conpherence-update-css');
     return id(new AphrontDialogView())
       ->setTitle(pht('Update Conpherence'))
@@ -323,12 +228,10 @@ final class ConpherenceUpdateController
     $conpherence_id,
     $latest_transaction_id) {
 
-    $need_header_pics = false;
     $need_widget_data = false;
     $need_transactions = false;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $need_header_pics = true;
         $need_transactions = true;
         break;
       case ConpherenceUpdateActions::MESSAGE:
@@ -346,7 +249,6 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->setAfterTransactionID($latest_transaction_id)
-      ->needHeaderPics($need_header_pics)
       ->needWidgetData($need_widget_data)
       ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))

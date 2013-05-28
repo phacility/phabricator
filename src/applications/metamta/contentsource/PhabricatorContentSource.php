@@ -38,6 +38,14 @@ final class PhabricatorContentSource {
     return $obj;
   }
 
+  public static function newFromRequest(AphrontRequest $request) {
+    return self::newForSource(
+      PhabricatorContentSource::SOURCE_WEB,
+      array(
+        'ip' => $request->getRemoteAddr(),
+      ));
+  }
+
   public function serialize() {
     return json_encode(array(
       'source' => $this->getSource(),

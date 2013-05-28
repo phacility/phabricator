@@ -2,9 +2,34 @@
 
 abstract class PhabricatorMailReceiver {
 
-
   abstract public function isEnabled();
   abstract public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail);
+
+  abstract protected function processReceivedMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorUser $sender);
+
+  final public function receiveMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorUser $sender) {
+    $this->processReceivedMail($mail, $sender);
+  }
+
+  public function validateSender(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorUser $sender) {
+
+    if ($sender->getIsDisabled()) {
+      throw new PhabricatorMetaMTAReceivedMailProcessingException(
+        MetaMTAReceivedMailStatus::STATUS_DISABLED_SENDER,
+        pht(
+          "Sender '%s' has a disabled user account.",
+          $sender->getUsername()));
+    }
+
+
+    return;
+  }
 
   /**
    * Identifies the sender's user account for a piece of received mail. Note

@@ -9,6 +9,7 @@ final class AphrontMultiColumnView extends AphrontView {
   private $column = array();
   private $fluidLayout = false;
   private $gutter;
+  private $shadow;
 
   public function addColumn($column) {
     $this->columns[] = $column;
@@ -22,6 +23,11 @@ final class AphrontMultiColumnView extends AphrontView {
 
   public function setGutter($gutter) {
     $this->gutter = $gutter;
+    return $this;
+  }
+
+  public function setShadow($shadow) {
+    $this->shadow = $shadow;
     return $this;
   }
 
@@ -41,6 +47,8 @@ final class AphrontMultiColumnView extends AphrontView {
     $columns = array();
     $column_class = array();
     $column_class[] = 'aphront-multi-column-column';
+    $outer_class = array();
+    $outer_class[] = 'aphront-multi-column-column-outer';
     if ($this->gutter) {
       $column_class[] = $this->gutter;
     }
@@ -48,6 +56,7 @@ final class AphrontMultiColumnView extends AphrontView {
     foreach ($this->columns as $column) {
       if (++$i === count($this->columns)) {
         $column_class[] = 'aphront-multi-column-column-last';
+        $outer_class[] = 'aphront-multi-colum-column-outer-last';
       }
       $column_inner = phutil_tag(
         'div',
@@ -58,7 +67,7 @@ final class AphrontMultiColumnView extends AphrontView {
       $columns[] = phutil_tag(
         'div',
           array(
-          'class' => 'aphront-multi-column-column-outer'
+          'class' => implode(' ', $outer_class)
           ),
         $column_inner);
     }
@@ -86,6 +95,14 @@ final class AphrontMultiColumnView extends AphrontView {
           'class' => implode(' ', $classes)
         ),
         $view);
+
+    if ($this->shadow) {
+      $board = id(new PHUIBoxView())
+        ->setShadow(true)
+        ->appendChild($board)
+        ->addPadding(PHUI::PADDING_MEDIUM_TOP)
+        ->addPadding(PHUI::PADDING_MEDIUM_BOTTOM);
+    }
 
     return phutil_tag(
       'div',

@@ -97,7 +97,7 @@ JX.behavior('conpherence-menu', function(config) {
     var data = JX.Stratcom.getData(thread.node);
 
     if (thread.visible !== null || !config.hasThread) {
-    var uri = config.base_uri + data.id + '/';
+      var uri = config.base_uri + data.id + '/';
       new JX.Workflow(uri, {})
         .setHandler(onloadthreadresponse)
         .start();
@@ -124,35 +124,23 @@ JX.behavior('conpherence-menu', function(config) {
     updatetoggledwidget();
   }
 
-  function updatetoggledwidget() {
+  function updatetoggledwidget(no_toggle) {
+    JX.Stratcom.invoke(
+      'conpherence-toggle-widget',
+      null,
+      {
+        widget : getdefaultwidget(),
+        no_toggle : no_toggle
+      });
+  }
+
+  function getdefaultwidget() {
     var device = JX.Device.getDevice();
-    if (device != 'desktop') {
-      if (config.role == 'list') {
-        JX.Stratcom.invoke(
-          'conpherence-toggle-widget',
-          null,
-          {
-            widget : 'conpherence-menu-pane'
-          }
-        );
-      } else {
-        JX.Stratcom.invoke(
-          'conpherence-toggle-widget',
-          null,
-          {
-            widget : 'conpherence-message-pane'
-          }
-        );
-      }
-    } else {
-      JX.Stratcom.invoke(
-        'conpherence-toggle-widget',
-        null,
-        {
-          widget : 'widgets-files'
-        }
-      );
+    var widget = 'conpherence-message-pane';
+    if (device == 'desktop') {
+      widget = 'widgets-people';
     }
+    return widget;
   }
 
   function onloadthreadresponse(response) {
@@ -174,6 +162,22 @@ JX.behavior('conpherence-menu', function(config) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var messagesRoot = JX.DOM.find(root, 'div', 'conpherence-messages');
     messagesRoot.scrollTop = messagesRoot.scrollHeight;
+
+    try {
+      var device = JX.Device.getDevice();
+      var deviceWidgetSelector = JX.DOM.find(
+        root,
+        'a',
+        'device-widgets-selector');
+      if (device != 'desktop') {
+        JX.DOM.show(deviceWidgetSelector);
+        updatetoggledwidget(true);
+      } else {
+        JX.DOM.hide(deviceWidgetSelector);
+      }
+    } catch (ex) {
+      // not here yet
+    }
   }
 
   JX.Stratcom.listen(
@@ -262,6 +266,18 @@ JX.behavior('conpherence-menu', function(config) {
     if (new_device === old_device) {
       return;
     }
+
+    if (old_device === null) {
+      old_device = new_device;
+      if (config.role == 'list') {
+        if (new_device != 'desktop') {
+          return;
+        }
+      } else {
+        loadthreads();
+        return;
+      }
+    }
     var update_toggled_widget =
       new_device == 'desktop' || old_device == 'desktop';
     old_device = new_device;
@@ -270,10 +286,12 @@ JX.behavior('conpherence-menu', function(config) {
       updatetoggledwidget();
     }
 
-    if (!config.hasThreadList) {
-      loadthreads();
-    } else {
+    if (config.role == 'list') {
       didloadthreads();
+      config.role = 'thread';
+      var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+      JX.DOM.alterClass(root, 'conpherence-role-list', false);
+      JX.DOM.alterClass(root, 'conpherence-role-thread', true);
     }
   }
 

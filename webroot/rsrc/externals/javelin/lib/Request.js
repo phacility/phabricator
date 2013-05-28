@@ -201,7 +201,7 @@ JX.install('Request', {
               'JX.Request("'+this.getURI()+'", ...): '+
               'server returned an empty response.');
           }
-          if (expect_guard && xport.responseText.indexOf('for (;;);') != 0) {
+          if (expect_guard && xport.responseText.indexOf('for (;;);') !== 0) {
             JX.$E(
               'JX.Request("'+this.getURI()+'", ...): '+
               'server returned an invalid response.');
@@ -405,7 +405,7 @@ JX.install('Request', {
           recurse(obj, ii);
         }
       } else if (obj && typeof obj == 'object') {
-        if (obj.__html != null) {
+        if (('__html' in obj) && (obj.__html !== null)) {
           parent[index] = JX.$H(obj.__html);
         } else {
           for (var key in obj) {

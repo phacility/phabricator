@@ -149,4 +149,48 @@ final class DiffusionPathChange {
     return $diff->getChangesets();
   }
 
+  public function toDictionary() {
+    $commit = $this->getCommit();
+    if ($commit) {
+      $commit_dict = $commit->toDictionary();
+    } else {
+      $commit_dict = array();
+    }
+    $commit_data = $this->getCommitData();
+    if ($commit_data) {
+      $commit_data_dict = $commit_data->toDictionary();
+    } else {
+      $commit_data_dict = array();
+    }
+    return array(
+      'path' => $this->getPath(),
+      'commitIdentifier' => $this->getCommitIdentifier(),
+      'commit' => $commit_dict,
+      'commitData' => $commit_data_dict,
+      'fileType' => $this->getFileType(),
+      'targetPath' =>  $this->getTargetPath(),
+      'targetCommitIdentifier' => $this->getTargetCommitIdentifier(),
+      'awayPaths' => $this->getAwayPaths());
+  }
+
+  public static function newFromConduit(array $dicts) {
+    $results = array();
+    foreach ($dicts as $dict) {
+      $commit = PhabricatorRepositoryCommit::newFromDictionary($dict['commit']);
+      $commit_data =
+        PhabricatorRepositoryCommitData::newFromDictionary(
+          $dict['commitData']);
+      $results[] = id(new DiffusionPathChange())
+        ->setPath($dict['path'])
+        ->setCommitIdentifier($dict['commitIdentifier'])
+        ->setCommit($commit)
+        ->setCommitData($commit_data)
+        ->setFileType($dict['fileType'])
+        ->setTargetPath($dict['targetPath'])
+        ->setTargetCommitIdentifier($dict['targetCommitIdentifier'])
+        ->setAwayPaths($dict['awayPaths']);
+    }
+    return $results;
+  }
+
 }

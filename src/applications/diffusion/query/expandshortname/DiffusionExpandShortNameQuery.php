@@ -22,6 +22,15 @@ abstract class DiffusionExpandShortNameQuery extends DiffusionQuery {
     return $this->repository;
   }
 
+  protected function setCommitType($type) {
+    $this->commitType = $type;
+    return $this;
+  }
+  protected function setTagContent($content) {
+    $this->tagContent = $content;
+    return $this;
+  }
+
   final public static function newFromRepository(
     PhabricatorRepository $repository) {
 

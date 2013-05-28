@@ -260,7 +260,7 @@ EOBODY;
     // We compute a hash using the object's own PHID to prevent an attacker
     // from blindly interacting with objects that they haven't ever received
     // mail about by just sending to D1@, D2@, etc...
-    $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
+    $hash = PhabricatorObjectMailReceiver::computeMailHash(
       $receiver->getMailKey(),
       $receiver->getPHID());
 
@@ -292,7 +292,7 @@ EOBODY;
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();
     $user_id = $user->getID();
-    $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
+    $hash = PhabricatorObjectMailReceiver::computeMailHash(
       $receiver->getMailKey(),
       $handle->getPHID());
     $domain = $this->getReplyHandlerDomain();

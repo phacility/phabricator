@@ -39,12 +39,7 @@ abstract class PhortuneController extends PhabricatorController {
 
     $editor = id(new PhortuneAccountEditor())
       ->setActor($user)
-      ->setContentSource(
-        PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          )));
+      ->setContentSourceFromRequest($request);
 
     // We create an account for you the first time you visit Phortune.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();

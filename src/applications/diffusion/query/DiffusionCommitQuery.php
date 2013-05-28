@@ -3,6 +3,7 @@
 final class DiffusionCommitQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $identifiers;
   private $phids;
   private $defaultRepository;
@@ -29,6 +30,11 @@ final class DiffusionCommitQuery
    */
   public function withDefaultRepository(PhabricatorRepository $repository) {
     $this->defaultRepository = $repository;
+    return $this;
+  }
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
@@ -162,6 +168,13 @@ final class DiffusionCommitQuery
       }
 
       $where[] = '('.implode(' OR ', $sql).')';
+    }
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
     }
 
     if ($this->phids) {

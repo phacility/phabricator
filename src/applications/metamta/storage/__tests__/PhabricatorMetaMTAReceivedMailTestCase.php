@@ -87,4 +87,31 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
       $mail->getStatus());
   }
 
+
+  public function testDropDisabledSenderMail() {
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig(
+      'metamta.maniphest.public-create-email',
+      'bugs@example.com');
+
+    $user = $this->generateNewTestUser()
+      ->setIsDisabled(true)
+      ->save();
+
+    $mail = new PhabricatorMetaMTAReceivedMail();
+    $mail->setHeaders(
+      array(
+        'Message-ID'  => 'test@example.com',
+        'From'        => $user->loadPrimaryEmail()->getAddress(),
+        'To'          => 'bugs@example.com',
+      ));
+    $mail->save();
+
+    $mail->processReceivedMail();
+
+    $this->assertEqual(
+      MetaMTAReceivedMailStatus::STATUS_DISABLED_SENDER,
+      $mail->getStatus());
+  }
+
 }

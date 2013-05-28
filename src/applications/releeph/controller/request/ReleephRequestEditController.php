@@ -140,12 +140,7 @@ final class ReleephRequestEditController extends ReleephController {
         $editor = id(new ReleephRequestTransactionalEditor())
           ->setActor($user)
           ->setContinueOnNoEffect(true)
-          ->setContentSource(
-            PhabricatorContentSource::newForSource(
-              PhabricatorContentSource::SOURCE_WEB,
-              array(
-                'ip' => $request->getRemoteAddr(),
-              )));
+          ->setContentSourceFromRequest($request);
         $editor->applyTransactions($rq, $xactions);
         return id(new AphrontRedirectResponse())->setURI($origin_uri);
       }

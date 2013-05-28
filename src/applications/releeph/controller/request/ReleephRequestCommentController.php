@@ -28,12 +28,7 @@ final class ReleephRequestCommentController
     $editor = id(new ReleephRequestTransactionalEditor())
       ->setActor($user)
       ->setContinueOnNoEffect($request->isContinueRequest())
-      ->setContentSource(
-        PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          )))
+      ->setContentSourceFromRequest($request)
       ->setIsPreview($is_preview);
 
     try {

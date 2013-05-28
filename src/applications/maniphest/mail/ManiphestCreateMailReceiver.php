@@ -56,4 +56,26 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
     }
   }
 
+  protected function processReceivedMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorUser $sender) {
+
+    $task = new ManiphestTask();
+
+    $task->setAuthorPHID($sender->getPHID());
+    $task->setOriginalEmailSource($mail->getHeader('From'));
+    $task->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+
+    $editor = new ManiphestTransactionEditor();
+    $editor->setActor($sender);
+    $handler = $editor->buildReplyHandler($task);
+
+    $handler->setActor($sender);
+    $handler->setExcludeMailRecipientPHIDs(
+      $mail->loadExcludeMailRecipientPHIDs());
+    $handler->processEmail($mail);
+
+    $mail->setRelatedPHID($task->getPHID());
+  }
+
 }

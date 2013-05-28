@@ -22,26 +22,27 @@ final class HeraldFieldConfig {
   const FIELD_MERGE_REQUESTER        = 'merge-requester';
 
   public static function getFieldMap() {
-    static $map = array(
-      self::FIELD_TITLE                  => 'Title',
-      self::FIELD_BODY                   => 'Body',
-      self::FIELD_AUTHOR                 => 'Author',
-      self::FIELD_REVIEWER               => 'Reviewer',
-      self::FIELD_REVIEWERS              => 'Reviewers',
-      self::FIELD_CC                     => 'CCs',
-      self::FIELD_TAGS                   => 'Tags',
-      self::FIELD_DIFF_FILE              => 'Any changed filename',
-      self::FIELD_DIFF_CONTENT           => 'Any changed file content',
-      self::FIELD_REPOSITORY             => 'Repository',
-      self::FIELD_RULE                   => 'Another Herald rule',
-      self::FIELD_AFFECTED_PACKAGE       => 'Any affected package',
-      self::FIELD_AFFECTED_PACKAGE_OWNER => "Any affected package's owner",
+    $map = array(
+      self::FIELD_TITLE                  => pht('Title'),
+      self::FIELD_BODY                   => pht('Body'),
+      self::FIELD_AUTHOR                 => pht('Author'),
+      self::FIELD_REVIEWER               => pht('Reviewer'),
+      self::FIELD_REVIEWERS              => pht('Reviewers'),
+      self::FIELD_CC                     => pht('CCs'),
+      self::FIELD_TAGS                   => pht('Tags'),
+      self::FIELD_DIFF_FILE              => pht('Any changed filename'),
+      self::FIELD_DIFF_CONTENT           => pht('Any changed file content'),
+      self::FIELD_REPOSITORY             => pht('Repository'),
+      self::FIELD_RULE                   => pht('Another Herald rule'),
+      self::FIELD_AFFECTED_PACKAGE       => pht('Any affected package'),
+      self::FIELD_AFFECTED_PACKAGE_OWNER =>
+                                      pht("Any affected package's owner"),
       self::FIELD_NEED_AUDIT_FOR_PACKAGE =>
-                                          'Affected packages that need audit',
-      self::FIELD_DIFFERENTIAL_REVISION  => 'Differential revision',
-      self::FIELD_DIFFERENTIAL_REVIEWERS => 'Differential reviewers',
-      self::FIELD_DIFFERENTIAL_CCS       => 'Differential CCs',
-      self::FIELD_MERGE_REQUESTER        => 'Merge requester'
+                                      pht('Affected packages that need audit'),
+      self::FIELD_DIFFERENTIAL_REVISION  => pht('Differential revision'),
+      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
+      self::FIELD_DIFFERENTIAL_CCS       => pht('Differential CCs'),
+      self::FIELD_MERGE_REQUESTER        => pht('Merge requester')
     );
 
     return $map;

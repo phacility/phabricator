@@ -204,7 +204,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'Great success at doing nothing.');
+            pht('Great success at doing nothing.'));
           break;
         case HeraldActionConfig::ACTION_EMAIL:
           foreach ($effect->getTarget() as $phid) {
@@ -213,7 +213,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'Added address to email targets.');
+            pht('Added address to email targets.'));
           break;
         case HeraldActionConfig::ACTION_AUDIT:
           foreach ($effect->getTarget() as $phid) {
@@ -225,7 +225,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'Triggered an audit.');
+            pht('Triggered an audit.'));
           break;
         case HeraldActionConfig::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(

@@ -255,7 +255,7 @@ final class PhrictionDocumentController
     $view->addProperty(pht('Last Updated'), $when);
 
     if ($subscribers) {
-      $subscribers = $this->renderHandlesForPHIDs($subscribers);
+      $subscribers = $this->renderHandlesForPHIDs($subscribers, ',');
       $view->addProperty(pht('Subscribers'), $subscribers);
     }
 
@@ -319,7 +319,7 @@ final class PhrictionDocumentController
     $content_dao = new PhrictionContent();
     $conn = $document_dao->establishConnection('r');
 
-    $limit = 50;
+    $limit = 250;
     $d_child = PhabricatorSlug::getDepth($slug) + 1;
     $d_grandchild = PhabricatorSlug::getDepth($slug) + 2;
 

@@ -22,62 +22,35 @@ abstract class ConpherenceController extends PhabricatorController {
     $crumbs
       ->addAction(
         id(new PhabricatorMenuItemView())
-          ->setName(pht('New Message'))
-          ->setHref($this->getApplicationURI('new/'))
-          ->setIcon('create'))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Conpherence')));
-
+        ->setName(pht('New Message'))
+        ->setHref($this->getApplicationURI('new/'))
+        ->setIcon('create')
+        ->setWorkflow(true))
+      ->addAction(
+        id(new PhabricatorMenuItemView())
+        ->setName(pht('Thread'))
+        ->setHref('#')
+        ->setIcon('action-menu')
+        ->setStyle('display: none;')
+        ->addClass('device-widgets-selector')
+        ->addSigil('device-widgets-selector'));
     return $crumbs;
   }
 
   protected function buildHeaderPaneContent(ConpherenceThread $conpherence) {
-    $user = $this->getRequest()->getUser();
-    $display_data = $conpherence->getDisplayData(
-      $user,
-      ConpherenceImageData::SIZE_HEAD);
-    $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-    $class_mod = $display_data['image_class'];
+    $crumbs = $this->buildApplicationCrumbs();
+    if ($conpherence->getTitle()) {
+      $title = $conpherence->getTitle();
+    } else {
+      $title = pht('Conpherence');
+    }
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+      ->setName($title)
+      ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
+      ->setWorkflow(true));
 
-    return array(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'upload-photo'
-        ),
-        pht('Drop photo here to change this Conpherence photo.')),
-      javelin_tag(
-        'a',
-        array(
-          'class' => 'edit',
-          'href' => $edit_href,
-          'sigil' => 'conpherence-edit-metadata',
-          'meta' => array(
-            'action' => 'metadata'
-          )
-        ),
-        ''),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'header-image',
-          'style' => 'background-image: url('.$display_data['image'].');'
-        ),
-        ''),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'title',
-        ),
-        $display_data['title']),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'subtitle',
-        ),
-        $display_data['subtitle']),
-    );
+    return $crumbs;
   }
 
   protected function renderConpherenceTransactions(

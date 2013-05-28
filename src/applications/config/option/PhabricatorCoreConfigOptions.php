@@ -12,6 +12,18 @@ final class PhabricatorCoreConfigOptions
   }
 
   public function getOptions() {
+    if (phutil_is_windows()) {
+      $paths = array();
+    } else {
+      $paths = array(
+        '/bin',
+        '/usr/bin',
+        '/usr/local/bin',
+      );
+    }
+
+    $path = getenv('PATH');
+
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
         ->setLocked(true)
@@ -37,6 +49,19 @@ final class PhabricatorCoreConfigOptions
             "{{phabricator.base-uri}}. Most installs do not need to set ".
             "this option."))
         ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
+      $this->newOption('phabricator.allowed-uris', 'list<string>', array())
+        ->setLocked(true)
+        ->setSummary(pht("Alternative URIs that can access Phabricator."))
+        ->setDescription(
+          pht(
+            "These alternative URIs will be able to access 'normal' pages ".
+              "on your Phabricator install. Other features such as OAuth ".
+              "won't work. The major use case for this is moving installs ".
+              "across domains."))
+        ->addExample(
+          '["http://phabricator2.example.com/", '.
+            '"http://phabricator3.example.com/]"',
+          pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
           pht("The timezone Phabricator should use."))
@@ -82,20 +107,24 @@ final class PhabricatorCoreConfigOptions
             "and a call to 'Leap Into Action'. If you'd prefer more ".
             "traditional UI strings like 'Submit', you can set this flag to ".
             "disable most of the jokes and easter eggs.")),
-       $this->newOption('environment.append-paths', 'list<string>', array())
+       $this->newOption('environment.append-paths', 'list<string>', $paths)
         ->setSummary(
           pht("These paths get appended to your \$PATH envrionment variable."))
         ->setDescription(
           pht(
             "Phabricator occasionally shells out to other binaries on the ".
-            "server. An example of this is the \"pygmentize\" command, used ".
+            "server. An example of this is the `pygmentize` command, used ".
             "to syntax-highlight code written in languages other than PHP. ".
             "By default, it is assumed that these binaries are in the \$PATH ".
             "of the user running Phabricator (normally 'apache', 'httpd', or ".
             "'nobody'). Here you can add extra directories to the \$PATH ".
             "environment variable, for when these binaries are in ".
-            "non-standard locations. Note that you can also put binaries in ".
-            "`phabricator/support/bin`."))
+            "non-standard locations.\n\n".
+            "Note that you can also put binaries in ".
+            "`phabricator/support/bin/` (for example, by symlinking them).\n\n".
+            "The current value of PATH after configuration is applied is:\n\n".
+            "  lang=text\n".
+            "  %s", $path))
         ->addExample('/usr/local/bin', pht('Add One Path'))
         ->addExample("/usr/bin\n/usr/local/bin", pht('Add Multiple Paths')),
        $this->newOption('tokenizer.ondemand', 'bool', false)

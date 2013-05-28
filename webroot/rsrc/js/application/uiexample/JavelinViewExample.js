@@ -1,8 +1,6 @@
 /**
  * @provides phabricator-uiexample-javelin-view
  * @requires javelin-install
- *           javelin-view
- *           javelin-util
  *           javelin-dom
  */
 

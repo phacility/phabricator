@@ -21,7 +21,9 @@ final class HeraldRuleEditHistoryView extends AphrontView {
   }
 
   public function render() {
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
+    $list->setFlush(true);
+    $list->setCards(true);
 
     foreach ($this->edits as $edit) {
       $name = nonempty($edit->getRuleName(), 'Unknown Rule');
@@ -43,31 +45,20 @@ final class HeraldRuleEditHistoryView extends AphrontView {
           break;
       }
 
-      $rows[] = array(
-        $edit->getRuleID(),
-        $this->handles[$edit->getEditorPHID()]->renderLink(),
-        $details,
-        phabricator_datetime($edit->getDateCreated(), $this->user),
-      );
+      $editor = $this->handles[$edit->getEditorPHID()]->renderLink();
+      $date = phabricator_datetime($edit->getDateCreated(), $this->user);
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setObjectName(pht('Rule %d', $edit->getRuleID()))
+        ->setSubHead($details)
+        ->addIcon('none', $date)
+        ->addByLine(pht('Editor: %s', $editor));
+
+      $list->addItem($item);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setNoDataString("No edits for rule.");
-    $table->setHeaders(
-      array(
-        'Rule ID',
-        'Editor',
-        'Details',
-        'Edit Date',
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        '',
-        'wide',
-        '',
-      ));
+    $list->setNoDataString(pht('No edits for rule.'));
 
-    return $table->render();
+    return $list;
   }
 }

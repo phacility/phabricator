@@ -75,7 +75,9 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 /* -(  Query Utilities  )---------------------------------------------------- */
 
 
-  final protected function loadCommitsByIdentifiers(array $identifiers) {
+  final public static function loadCommitsByIdentifiers(
+    array $identifiers,
+    DiffusionRequest $drequest) {
     if (!$identifiers) {
       return array();
     }
@@ -83,7 +85,6 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $commits = array();
     $commit_data = array();
 
-    $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
     $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
@@ -131,14 +132,16 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     return $commits;
   }
 
-  final protected function loadHistoryForCommitIdentifiers(array $identifiers) {
+  final public static function loadHistoryForCommitIdentifiers(
+    array $identifiers,
+    DiffusionRequest $drequest) {
+
     if (!$identifiers) {
       return array();
     }
 
-    $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
-    $commits = self::loadCommitsByIdentifiers($identifiers);
+    $commits = self::loadCommitsByIdentifiers($identifiers, $drequest);
 
     if (!$commits) {
       return array();

@@ -35,20 +35,4 @@ final class DiffusionGitRequest extends DiffusionRequest {
     return $remote.'/'.$this->getBranch();
   }
 
-  public function getStableCommitName() {
-    if (!$this->stableCommitName) {
-      if ($this->commit) {
-        $this->stableCommitName = $this->commit;
-      } else {
-        $branch = $this->getBranch();
-        list($stdout) = $this->getRepository()->execxLocalCommand(
-          'rev-parse --verify %s/%s',
-          DiffusionBranchInformation::DEFAULT_GIT_REMOTE,
-          $branch);
-        $this->stableCommitName = trim($stdout);
-      }
-    }
-    return substr($this->stableCommitName, 0, 16);
-  }
-
 }

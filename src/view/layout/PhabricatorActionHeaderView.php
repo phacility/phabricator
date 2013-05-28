@@ -15,9 +15,16 @@ final class PhabricatorActionHeaderView extends AphrontView {
   private $headerTitle;
   private $headerHref;
   private $headerIcon;
+  private $headerSigils = array();
   private $actions = array();
   private $iconColor = PhabricatorActionHeaderView::ICON_GREY;
   private $headerColor;
+  private $dropdown;
+
+  public function setDropdown($dropdown) {
+    $this->dropdown = $dropdown;
+    return $this;
+  }
 
   public function addAction(PHUIIconView $action) {
     $this->actions[] = $action;
@@ -36,6 +43,11 @@ final class PhabricatorActionHeaderView extends AphrontView {
 
   public function setHeaderHref($href) {
     $this->headerHref = $href;
+    return $this;
+  }
+
+  public function addHeaderSigil($sigil) {
+    $this->headerSigils[] = $sigil;
     return $this;
   }
 
@@ -66,6 +78,10 @@ final class PhabricatorActionHeaderView extends AphrontView {
       $classes[] = 'gradient-'.$this->headerColor.'-header';
     }
 
+    if ($this->dropdown) {
+      $classes[] = 'dropdown';
+    }
+
     $action_list = array();
     foreach ($this->actions as $action) {
       $action_list[] = phutil_tag(
@@ -89,11 +105,12 @@ final class PhabricatorActionHeaderView extends AphrontView {
 
     $header_title = $this->headerTitle;
     if ($this->headerHref) {
-      $header_title = phutil_tag(
+      $header_title = javelin_tag(
         'a',
           array(
             'class' => 'phabricator-action-header-link',
-            'href' => $this->headerHref
+            'href' => $this->headerHref,
+            'sigil' => implode(' ', $this->headerSigils)
           ),
           $this->headerTitle);
     }

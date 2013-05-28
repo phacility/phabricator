@@ -866,6 +866,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $rename_query = new DiffusionRenameHistoryQuery();
         $rename_query->setRequest($drequest);
         $rename_query->setOldCommit($grandparent->getCommitIdentifier());
+        $rename_query->setViewer($request->getUser());
         $old_filename = $rename_query->loadOldFilename();
         $was_created = $rename_query->getWasCreated();
       }
@@ -954,16 +955,21 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
   private function loadParentRevisionOf($commit) {
     $drequest = $this->getDiffusionRequest();
+    $user = $this->getRequest()->getUser();
 
     $before_req = DiffusionRequest::newFromDictionary(
       array(
-        'user' => $this->getRequest()->getUser(),
+        'user' => $user,
         'repository' => $drequest->getRepository(),
         'commit'     => $commit,
       ));
 
-    $query = DiffusionCommitParentsQuery::newFromDiffusionRequest($before_req);
-    $parents = $query->loadParents();
+    $parents = DiffusionQuery::callConduitWithDiffusionRequest(
+      $user,
+      $before_req,
+      'diffusion.commitparentsquery',
+      array(
+        'commit' => $commit));
 
     return head($parents);
   }

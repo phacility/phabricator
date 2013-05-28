@@ -1,8 +1,6 @@
 /**
  * @provides phabricator-uiexample-reactor-radio
  * @requires javelin-install
- *           javelin-view
- *           javelin-util
  *           javelin-dom
  *           javelin-reactor-dom
  */

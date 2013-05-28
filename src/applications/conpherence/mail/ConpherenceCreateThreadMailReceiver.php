@@ -9,22 +9,12 @@ final class ConpherenceCreateThreadMailReceiver
   }
 
   public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $usernames = array();
-    foreach ($mail->getToAddresses() as $to_address) {
-      $address = self::stripMailboxPrefix($to_address);
-      $usernames[] = id(new PhutilEmailAddress($address))->getLocalPart();
-    }
-
-    $usernames = array_unique($usernames);
-
+    $usernames = $this->getMailUsernames($mail);
     if (!$usernames) {
       return false;
     }
 
-    $users = id(new PhabricatorUser())->loadAllWhere(
-      'username in (%Ls)',
-      $usernames);
-
+    $users = $this->loadMailUsers($mail);
     if (count($users) != count($usernames)) {
       // At least some of the addresses are not users, so don't accept this as
       // a new Conpherence thread.
@@ -32,6 +22,44 @@ final class ConpherenceCreateThreadMailReceiver
     }
 
     return true;
+  }
+
+  private function getMailUsernames(PhabricatorMetaMTAReceivedMail $mail) {
+    $usernames = array();
+    foreach ($mail->getToAddresses() as $to_address) {
+      $address = self::stripMailboxPrefix($to_address);
+      $usernames[] = id(new PhutilEmailAddress($address))->getLocalPart();
+    }
+
+    return array_unique($usernames);
+  }
+
+  private function loadMailUsers(PhabricatorMetaMTAReceivedMail $mail) {
+    $usernames = $this->getMailUsernames($mail);
+    if (!$usernames) {
+      return array();
+    }
+
+    return id(new PhabricatorUser())->loadAllWhere(
+      'username in (%Ls)',
+      $usernames);
+  }
+
+  protected function processReceivedMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorUser $sender) {
+
+    $users = $this->loadMailUsers($mail);
+    $phids = mpull($users, 'getPHID');
+
+    $conpherence = id(new ConpherenceReplyHandler())
+      ->setMailReceiver(new ConpherenceThread())
+      ->setMailAddedParticipantPHIDs($phids)
+      ->setActor($sender)
+      ->setExcludeMailRecipientPHIDs($mail->loadExcludeMailRecipientPHIDs())
+      ->processEmail($mail);
+
+    $mail->setRelatedPHID($conpherence->getPHID());
   }
 
 }

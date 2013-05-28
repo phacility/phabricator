@@ -11,8 +11,6 @@ final class ConpherenceThreadQuery
   private $phids;
   private $ids;
   private $needWidgetData;
-  private $needHeaderPics;
-  private $needOrigPics;
   private $needTransactions;
   private $needParticipantCache;
   private $needFilePHIDs;
@@ -27,16 +25,6 @@ final class ConpherenceThreadQuery
 
   public function needParticipantCache($participant_cache) {
     $this->needParticipantCache = $participant_cache;
-    return $this;
-  }
-
-  public function needOrigPics($need_orig_pics) {
-    $this->needOrigPics = $need_orig_pics;
-    return $this;
-  }
-
-  public function needHeaderPics($need_header_pics) {
-    $this->needHeaderPics = $need_header_pics;
     return $this;
   }
 
@@ -109,12 +97,6 @@ final class ConpherenceThreadQuery
       }
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
-      }
-      if ($this->needOrigPics) {
-        $this->loadOrigPics($conpherences);
-      }
-      if ($this->needHeaderPics) {
-        $this->loadHeaderPics($conpherences);
       }
     }
 
@@ -299,44 +281,6 @@ final class ConpherenceThreadQuery
         'files_authors' => $files_authors
       );
       $conpherence->attachWidgetData($widget_data);
-    }
-
-    return $this;
-  }
-
-  private function loadOrigPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_ORIG);
-  }
-
-  private function loadHeaderPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_HEAD);
-  }
-
-  private function loadPics(array $conpherences, $size) {
-    $conpherence_pic_phids = array();
-    foreach ($conpherences as $conpherence) {
-      $phid = $conpherence->getImagePHID($size);
-      if ($phid) {
-        $conpherence_pic_phids[$conpherence->getPHID()] = $phid;
-      }
-    }
-
-    if (!$conpherence_pic_phids) {
-      return $this;
-    }
-
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($conpherence_pic_phids)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
-
-    foreach ($conpherence_pic_phids as $conpherence_phid => $pic_phid) {
-      $conpherences[$conpherence_phid]->setImage($files[$pic_phid], $size);
     }
 
     return $this;

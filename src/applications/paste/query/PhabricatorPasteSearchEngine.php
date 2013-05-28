@@ -8,9 +8,6 @@
 final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
-  protected $filter;
-  protected $user;
-
   /**
    * Create a saved query object from the request.
    *
@@ -18,18 +15,10 @@ final class PhabricatorPasteSearchEngine
    * @return The saved query that is built.
    */
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
-
     $saved = new PhabricatorSavedQuery();
-
-    if ($this->filter == "my") {
-      $user = $request->getUser();
-      $saved->setParameter('authorPHIDs', array($user->getPHID()));
-    } else {
-      $data = $request->getRequestData();
-      if (array_key_exists('set_users', $data)) {
-        $saved->setParameter('authorPHIDs', $data['set_users']);
-      }
-    }
+    $saved->setParameter(
+      'authorPHIDs',
+      array_values($request->getArr('authors')));
 
     try {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -64,45 +53,58 @@ final class PhabricatorPasteSearchEngine
    * @param PhabricatorSavedQuery The query to populate the form with.
    * @return AphrontFormView The built form.
    */
-  public function buildSearchForm(PhabricatorSavedQuery $saved_query) {
+  public function buildSearchForm(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $saved_query) {
     $phids = $saved_query->getParameter('authorPHIDs', array());
     $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($this->user)
+      ->setViewer($this->requireViewer())
       ->loadHandles();
-    $users_searched = mpull($handles, 'getFullName', 'getPHID');
-
-    $form = id(new AphrontFormView())
-      ->setUser($this->user);
+    $author_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form->appendChild(
       id(new AphrontFormTokenizerControl())
-        ->setDatasource('/typeahead/common/searchowner/')
-        ->setName('set_users')
-        ->setLabel(pht('Users'))
-        ->setValue($users_searched));
-
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-      ->setValue(pht('Filter Pastes'))
-      ->addCancelButton(
-        '/search/name/'.$saved_query->getQueryKey().'/',
-        pht('Save Custom Query...')));
-
-    return $form;
+        ->setDatasource('/typeahead/common/users/')
+        ->setName('authors')
+        ->setLabel(pht('Authors'))
+        ->setValue($author_tokens));
   }
 
-  public function setPasteSearchFilter($filter) {
-    $this->filter = $filter;
-    return $this;
+  public function getQueryResultsPageURI($query_key) {
+    return '/paste/query/'.$query_key.'/';
   }
 
-  public function getPasteSearchFilter() {
-    return $this->filter;
+  public function getQueryManagementURI() {
+    return '/paste/savedqueries/';
   }
 
-  public function setPasteSearchUser($user) {
-    $this->user = $user;
-    return $this;
+  public function getBuiltinQueryNames() {
+    $names = array(
+      'all'       => pht('All Pastes'),
+    );
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['authored'] = pht('Authored');
+    }
+
+    return $names;
+  }
+
+  public function buildSavedQueryFromBuiltin($query_key) {
+
+    $query = $this->newSavedQuery();
+    $query->setQueryKey($query_key);
+
+    switch ($query_key) {
+      case 'all':
+        return $query;
+      case 'authored':
+        return $query->setParameter(
+          'authorPHIDs',
+          array($this->requireViewer()->getPHID()));
+    }
+
+    return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
 }

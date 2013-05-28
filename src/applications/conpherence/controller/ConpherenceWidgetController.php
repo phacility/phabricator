@@ -69,82 +69,14 @@ final class ConpherenceWidgetController extends
     $widgets[] = phutil_tag(
       'div',
       array(
-        'class' => 'widgets-header'
+        'class' => 'widgets-header',
       ),
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'widgets-header-icon-holder'
-        ),
-        array(
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'conpherence-menu-pane',
-              ),
-              'id' => 'conpherence-menu-pane-toggle',
-              'class' => 'sprite-conpherence conpherence_list_off',
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'conpherence-message-pane',
-              ),
-              'id' => 'conpherence-message-pane-toggle',
-              'class' => 'sprite-conpherence conpherence_conversation_off',
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-people',
-              ),
-              'id' => 'widgets-people-toggle',
-              'class' => 'sprite-conpherence conpherence_people_off'
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-files',
-              ),
-              'id' => 'widgets-files-toggle',
-              'class' =>
-              'sprite-conpherence conpherence_files_on conpherence_files_off'
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-calendar',
-              ),
-              'id' => 'widgets-calendar-toggle',
-              'class' => 'sprite-conpherence conpherence_calendar_off',
-            ),
-            ''),
-          javelin_tag(
-            'a',
-            array(
-              'sigil' => 'conpherence-change-widget',
-              'meta'  => array(
-                'widget' => 'widgets-settings',
-              ),
-              'id' => 'widgets-settings-toggle',
-              'class' => 'sprite-conpherence conpherence_settings_off',
-            ),
-            '')
-          )));
+      id(new PhabricatorActionHeaderView())
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
+      ->setHeaderTitle('')
+      ->setHeaderHref('#')
+      ->setDropdown(true)
+      ->addHeaderSigil('widgets-selector'));
     $user = $this->getRequest()->getUser();
     // now the widget bodies
     $widgets[] = javelin_tag(
@@ -153,7 +85,6 @@ final class ConpherenceWidgetController extends
         'class' => 'widgets-body',
         'id' => 'widgets-people',
         'sigil' => 'widgets-people',
-        'style' => 'display: none;'
       ),
       id(new ConpherencePeopleWidgetView())
       ->setUser($user)
@@ -165,6 +96,7 @@ final class ConpherenceWidgetController extends
         'class' => 'widgets-body',
         'id' => 'widgets-files',
         'sigil' => 'widgets-files',
+        'style' => 'display: none;'
       ),
       id(new ConpherenceFileWidgetView())
       ->setUser($user)
@@ -236,9 +168,9 @@ final class ConpherenceWidgetController extends
         'button',
         array(
           'type' => 'submit',
-          'class' => 'notifications-update grey',
+          'class' => 'notifications-update',
         ),
-        pht('Update Notifications'))
+        pht('Save'))
     );
 
     return phabricator_form(
@@ -331,18 +263,15 @@ final class ConpherenceWidgetController extends
               $user,
               $time_str);
 
+          $secondary_info = pht('%s, %s',
+            $handles[$status->getUserPHID()]->getName(), $epoch_range);
+
           $content[] = phutil_tag(
             'div',
             array(
-              'class' => 'user-status '.$status->getTextStatus(),
+              'class' => 'pm user-status '.$status->getTextStatus(),
             ),
             array(
-              phutil_tag(
-                'div',
-                array(
-                  'class' => 'epoch-range'
-                ),
-                $epoch_range),
               phutil_tag(
                 'div',
                 array(
@@ -354,17 +283,24 @@ final class ConpherenceWidgetController extends
                 array(
                   'class' => 'description'
                 ),
-                $status->getTerseSummary($user)),
-              phutil_tag(
-                'div',
                 array(
-                  'class' => 'participant'
-                ),
-                $handles[$status->getUserPHID()]->getName())
+                  $status->getTerseSummary($user),
+                  phutil_tag(
+                    'div',
+                    array(
+                      'class' => 'participant'
+                    ),
+                    $secondary_info)))
               ));
           $first_status_of_the_day = false;
+        } else {
+          $content[] = phutil_tag(
+            'div',
+            array('class' => 'no-events pmt pml'),
+            pht('No Events Scheduled.'));
         }
       }
+
       // we didn't get a status on this day so add a spacer
       if ($first_status_of_the_day) {
         $content[] = phutil_tag(

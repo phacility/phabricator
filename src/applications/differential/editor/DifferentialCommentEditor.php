@@ -492,6 +492,18 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         $actor_phid);
     }
 
+    $is_new = !$revision->getID();
+
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_DIFFERENTIAL_WILLEDITREVISION,
+        array(
+          'revision'      => $revision,
+          'new'           => $is_new,
+        ));
+
+    $event->setUser($actor);
+    PhutilEventEngine::dispatchEvent($event);
+
     $comment = id(new DifferentialComment())
       ->setAuthorPHID($actor_phid)
       ->setRevisionID($revision->getID())
@@ -546,6 +558,15 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
         $comment->setMetadata($metadata);
         $comment->save();
+
+        $event = new PhabricatorEvent(
+          PhabricatorEventType::TYPE_DIFFERENTIAL_DIDEDITREVISION,
+            array(
+              'revision'      => $revision,
+              'new'           => $is_new,
+            ));
+        $event->setUser($actor);
+        PhutilEventEngine::dispatchEvent($event);
       }
     }
 

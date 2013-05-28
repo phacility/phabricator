@@ -16,10 +16,6 @@ final class PhabricatorEmailTokenController
   public function processRequest() {
     $request = $this->getRequest();
 
-    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
-      return new Aphront400Response();
-    }
-
     $token = $this->token;
     $email = $request->getStr('email');
 
@@ -81,15 +77,22 @@ final class PhabricatorEmailTokenController
     $request->setCookie('phusr', $target_user->getUsername());
     $request->setCookie('phsid', $session_key);
 
-    if (PhabricatorEnv::getEnvConfig('account.editable')) {
+    $next = '/';
+    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+      $panels = id(new PhabricatorSettingsPanelOAuth())->buildPanels();
+      foreach ($panels as $panel) {
+        if ($panel->isEnabled()) {
+          $next = $panel->getPanelURI();
+          break;
+        }
+      }
+    } else if (PhabricatorEnv::getEnvConfig('account.editable')) {
       $next = (string)id(new PhutilURI('/settings/panel/password/'))
         ->setQueryParams(
           array(
             'token' => $token,
             'email' => $email,
           ));
-    } else {
-      $next = '/';
     }
 
     $uri = new PhutilURI('/login/validate/');

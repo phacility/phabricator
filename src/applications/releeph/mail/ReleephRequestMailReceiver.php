@@ -11,4 +11,22 @@ final class ReleephRequestMailReceiver extends PhabricatorObjectMailReceiver {
     return 'RQ[1-9]\d*';
   }
 
+  protected function loadObject($pattern, PhabricatorUser $viewer) {
+    $id = (int)substr($pattern, 2);
+
+    return id(new ReleephRequestQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->executeOne();
+  }
+
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
+
+    // TODO: For now, we just drop this mail on the floor.
+
+  }
+
 }

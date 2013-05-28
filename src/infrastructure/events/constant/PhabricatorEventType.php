@@ -15,6 +15,8 @@ final class PhabricatorEventType extends PhutilEventType {
 
   const TYPE_DIFFERENTIAL_WILLSENDMAIL      = 'differential.willSendMail';
   const TYPE_DIFFERENTIAL_WILLMARKGENERATED = 'differential.willMarkGenerated';
+  const TYPE_DIFFERENTIAL_WILLEDITREVISION  = 'differential.willEditRevision';
+  const TYPE_DIFFERENTIAL_DIDEDITREVISION   = 'differential.didEditRevision';
 
   const TYPE_DIFFUSION_DIDDISCOVERCOMMIT    = 'diffusion.didDiscoverCommit';
   const TYPE_DIFFUSION_LOOKUPUSER           = 'diffusion.lookupUser';

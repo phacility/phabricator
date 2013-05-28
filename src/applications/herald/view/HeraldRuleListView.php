@@ -34,76 +34,50 @@ final class HeraldRuleListView extends AphrontView {
 
     $type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
-    $rows = array();
-
+    $list = new PhabricatorObjectItemListView();
+    $list->setFlush(true);
+    $list->setCards(true);
     foreach ($this->rules as $rule) {
 
       if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
-        $author = null;
+        $author = pht('Global Rule');
       } else {
         $author = $this->handles[$rule->getAuthorPHID()]->renderLink();
+        $author = pht('Editor: %s', $author);
       }
-
-      $name = phutil_tag(
-        'a',
-        array(
-          'href' => '/herald/rule/'.$rule->getID().'/',
-        ),
-        $rule->getName());
 
       $edit_log = phutil_tag(
         'a',
         array(
           'href' => '/herald/history/'.$rule->getID().'/',
         ),
-        'View Edit Log');
+        pht('View Edit Log'));
 
       $delete = javelin_tag(
         'a',
         array(
           'href' => '/herald/delete/'.$rule->getID().'/',
           'sigil' => 'workflow',
-          'class' => 'button small grey',
         ),
-        'Delete');
+        pht('Delete'));
 
-      $rows[] = array(
-        $type_map[$rule->getRuleType()],
-        $author,
-        $name,
-        $edit_log,
-        $delete,
-      );
+      $item = id(new PhabricatorObjectItemView())
+        ->setObjectName($type_map[$rule->getRuleType()])
+        ->setHeader($rule->getName())
+        ->setHref('/herald/rule/'.$rule->getID().'/')
+        ->addAttribute($edit_log)
+        ->addIcon('none', $author)
+        ->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setHref('/herald/delete/'.$rule->getID().'/')
+            ->setIcon('delete')
+            ->setWorkflow(true));
+
+      $list->addItem($item);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setNoDataString("No matching rules.");
+    $list->setNoDataString(pht("No matching rules."));
 
-    $table->setHeaders(
-      array(
-        'Rule Type',
-        'Author',
-        'Rule Name',
-        'Edit Log',
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        '',
-        'wide pri',
-        '',
-        'action'
-      ));
-    $table->setColumnVisibility(
-      array(
-        $this->showRuleType,
-        $this->showAuthor,
-        true,
-        true,
-        true,
-      ));
-
-    return $table->render();
+    return $list;
   }
 }

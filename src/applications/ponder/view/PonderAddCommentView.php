@@ -33,6 +33,7 @@ final class PonderAddCommentView extends AphrontView {
     $form
       ->setUser($this->user)
       ->setAction($this->actionURI)
+      ->setNoShading(true)
       ->setWorkflow(true)
       ->addHiddenInput('target', $target)
       ->addHiddenInput('question_id', $questionID)
@@ -41,12 +42,14 @@ final class PonderAddCommentView extends AphrontView {
           ->setName('content'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue($is_serious ? 'Submit' : 'Editorialize'));
+          ->setValue($is_serious ?
+            pht('Submit') :
+            pht('Editorialize')));
 
     $view = id(new AphrontMoreView())
       ->setSome('')
       ->setMore($form->render())
-      ->setExpandText('Add Comment');
+      ->setExpandText(pht('Add Comment'));
 
     return $view->render();
   }

@@ -7,34 +7,50 @@ final class PhabricatorPasteQueriesController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildSideNavView("");
-    $filter = $nav->getSelectedFilter();
+    $engine = id(new PhabricatorPasteSearchEngine())
+      ->setViewer($user);
 
-    $table = new PhabricatorNamedQuery();
-    $conn = $table->establishConnection('r');
-    $data = queryfx_all(
-      $conn,
-      'SELECT * FROM %T WHERE userPHID=%s AND engineClassName=%s',
-      $table->getTableName(),
-      $user->getPHID(),
-      'PhabricatorPasteSearchEngine');
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('savedqueries');
+
+    $named_queries = id(new PhabricatorNamedQueryQuery())
+      ->setViewer($user)
+      ->withUserPHIDs(array($user->getPHID()))
+      ->withEngineClassNames(array(get_class($engine)))
+      ->execute();
+
+    $named_queries += $engine->getBuiltinQueries();
 
     $list = new PhabricatorObjectItemListView();
     $list->setUser($user);
 
-    foreach ($data as $key => $saved_query) {
-      $date_created = phabricator_datetime($saved_query["dateCreated"], $user);
+    foreach ($named_queries as $named_query) {
+      $date_created = phabricator_datetime(
+        $named_query->getDateCreated(),
+        $user);
+
       $item = id(new PhabricatorObjectItemView())
-        ->setHeader($saved_query["queryName"])
-        ->setHref('/paste/query/'.$saved_query["queryKey"].'/')
-        ->addByline(pht('Date Created: ').$date_created);
+        ->setHeader($named_query->getQueryName())
+        ->setHref($engine->getQueryResultsPageURI($named_query->getQueryKey()));
+
+      if ($named_query->getIsBuiltin()) {
+        $item->addIcon('lock-grey', pht('Builtin'));
+        $item->setBarColor('grey');
+      } else {
+        $item->addIcon('none', $date_created);
+        $item->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setIcon('delete')
+            ->setHref('/search/delete/'.$named_query->getQueryKey().'/')
+            ->setWorkflow(true));
+        $item->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setIcon('edit')
+            ->setHref('/search/edit/'.$named_query->getQueryKey().'/'));
+      }
+
       $list->addItem($item);
     }
-
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-
-    $list->setPager($pager);
 
     $list->setNoDataString(pht("No results found for this query."));
 

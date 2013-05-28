@@ -51,7 +51,7 @@ final class ReleephProject extends ReleephDAO
       $this->getID(),
       $path
     );
-    return PhabricatorEnv::getProductionURI(implode('/', $components));
+    return implode('/', $components);
   }
 
   public function setDetail($key, $value) {

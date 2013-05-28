@@ -3,12 +3,12 @@
  */
 
 .ponder-question-summary {
-  width : 100%;
-  background : #DFDFE3;
-  float : left;
-  clear : both;
-  margin-top : 1px;
-  padding : 1px;
+  width: 100%;
+  background: #DFDFE3;
+  float: left;
+  clear: both;
+  margin-top: 1px;
+  padding: 1px;
 }
 
 .ponder-answer-summary {

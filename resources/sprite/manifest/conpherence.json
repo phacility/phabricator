@@ -4,72 +4,72 @@
     "conpherence_calendar_off"     : {
       "name" : "conpherence_calendar_off",
       "rule" : ".conpherence_calendar_off",
-      "hash" : "4d03aee7c611b72870ae39118b2ffb21"
+      "hash" : "e796dcc485ac1c7538077602dec9d19d"
     },
     "conpherence_calendar_on"      : {
       "name" : "conpherence_calendar_on",
       "rule" : ".conpherence_calendar_on, .device-desktop .conpherence_calendar_off:hover ",
-      "hash" : "efa498604c106f19b825c8a1ed63edad"
+      "hash" : "da4b7152589b0eb36834bfeda6b55c69"
     },
     "conpherence_conversation_off" : {
       "name" : "conpherence_conversation_off",
       "rule" : ".conpherence_conversation_off",
-      "hash" : "fd4039f04f57452ee2bf8e0ac1fcacab"
+      "hash" : "74cf53c92e7ad9ad3a852adfb0e655f4"
     },
     "conpherence_conversation_on"  : {
       "name" : "conpherence_conversation_on",
       "rule" : ".conpherence_conversation_on, .device-desktop .conpherence_conversation_off:hover ",
-      "hash" : "f3f526793bfb7bfe2db39a7fdfc9605b"
+      "hash" : "e8c73f0fcf11cf7fe1b252ede2211b34"
     },
     "conpherence_files_off"        : {
       "name" : "conpherence_files_off",
       "rule" : ".conpherence_files_off",
-      "hash" : "39241fd1b72cfe6d60836c6a4975f45d"
+      "hash" : "44643c3e1ac4eb2d46fbb256220e5957"
     },
     "conpherence_files_on"         : {
       "name" : "conpherence_files_on",
       "rule" : ".conpherence_files_on, .device-desktop .conpherence_files_off:hover ",
-      "hash" : "9bb8747b1b754d9bd9cef6eac4115847"
+      "hash" : "9f7bab94f1afcacce64762023ad53974"
     },
     "conpherence_list_off"         : {
       "name" : "conpherence_list_off",
       "rule" : ".conpherence_list_off",
-      "hash" : "f56a971f145fe96f70fa930cdd734085"
+      "hash" : "28326e81ee1fb2c7b615f42a95d7429b"
     },
     "conpherence_list_on"          : {
       "name" : "conpherence_list_on",
       "rule" : ".conpherence_list_on, .device-desktop .conpherence_list_off:hover ",
-      "hash" : "1be2136af5b5f4b158184332e7498837"
+      "hash" : "ee13901236f1f5a7db2d682ddc6884ce"
     },
     "conpherence_more_off"         : {
       "name" : "conpherence_more_off",
       "rule" : ".conpherence_more_off",
-      "hash" : "633469f84525082326ea72d2809cccaf"
+      "hash" : "2c0e47c834fa96248b70d7b8c9a4a931"
     },
     "conpherence_more_on"          : {
       "name" : "conpherence_more_on",
       "rule" : ".conpherence_more_on, .device-desktop .conpherence_more_off:hover ",
-      "hash" : "a2812e313a5c5f0aba1ccee25d40113d"
+      "hash" : "6eefff663beef44f01d438ddda54a8b7"
     },
     "conpherence_people_off"       : {
       "name" : "conpherence_people_off",
       "rule" : ".conpherence_people_off",
-      "hash" : "85e20d9b6111b61fe960d023bd6b00ec"
+      "hash" : "fccd3f5b8fe2e0af32dcb58b912153c9"
     },
     "conpherence_people_on"        : {
       "name" : "conpherence_people_on",
       "rule" : ".conpherence_people_on, .device-desktop .conpherence_people_off:hover ",
-      "hash" : "fca0c890b0594fdbe5ad19b2183bd275"
+      "hash" : "f959cea0c9d0f22aeefabc398e5d4ea7"
     },
     "conpherence_settings_off"     : {
       "name" : "conpherence_settings_off",
       "rule" : ".conpherence_settings_off",
-      "hash" : "645a36b516cb95c2ec26dbabde9fc117"
+      "hash" : "b28d654205d852c92606cd18e229a390"
     },
     "conpherence_settings_on"      : {
       "name" : "conpherence_settings_on",
       "rule" : ".conpherence_settings_on, .device-desktop .conpherence_settings_off:hover ",
-      "hash" : "6d923258ea79e9b29e9fa5b8c971311a"
+      "hash" : "50b5f0920d22874ba3416bf6d796cfbd"
     }
   },
   "scales"  : [

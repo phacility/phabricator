@@ -258,11 +258,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setID('transaction-comments')
           ->setUser($user))
       ->appendChild(
-        id(new AphrontFormDragAndDropUploadControl())
-          ->setLabel(pht('Attached Files'))
-          ->setName('files')
-          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? pht('Submit') : pht('Avast!')));
 
@@ -330,9 +325,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $transaction_view->setUser($user);
     $transaction_view->setAuxiliaryFields($aux_fields);
     $transaction_view->setMarkupEngine($engine);
-
-    PhabricatorFeedStoryNotification::updateObjectNotificationViews(
-      $user, $task->getPHID());
 
     $object_name = 'T'.$task->getID();
     $actions = $this->buildActionView($task);

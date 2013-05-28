@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 final class PhabricatorApplicationCountdown extends PhabricatorApplication {
 
   public function getBaseURI() {

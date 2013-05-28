@@ -306,6 +306,9 @@ abstract class DiffusionRequest {
    *                a symbolic commit reference.
    */
   public function getStableCommitName() {
+    if (!$this->stableCommitName) {
+      $this->queryStableCommitName();
+    }
     return $this->stableCommitName;
   }
 
@@ -628,4 +631,23 @@ abstract class DiffusionRequest {
     $this->tagContent = $commit_data['tagContent'];
   }
 
+  private function queryStableCommitName() {
+    if ($this->commit) {
+      $this->stableCommitName = $this->commit;
+    } else if ($this->shouldInitFromConduit()) {
+      $this->stableCommitName = DiffusionQuery::callConduitWithDiffusionRequest(
+        $this->getUser(),
+        $this,
+        'diffusion.stablecommitnamequery',
+        array(
+          'branch' => $this->getBranch()
+        ));
+    } else {
+      $query = DiffusionStableCommitNameQuery::newFromRepository(
+        $this->getRepository());
+      $query->setBranch($this->getBranch());
+      $this->stableCommitName = $query->load();
+    }
+    return $this->stableCommitName;
+  }
 }

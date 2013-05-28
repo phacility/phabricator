@@ -2,7 +2,6 @@
  * @provides javelin-behavior-countdown-timer
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-util
  */
 
 JX.behavior('countdown-timer', function(config) {

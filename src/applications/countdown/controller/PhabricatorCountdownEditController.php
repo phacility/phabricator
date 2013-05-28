@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 final class PhabricatorCountdownEditController
   extends PhabricatorCountdownController {
 
@@ -15,21 +18,25 @@ final class PhabricatorCountdownEditController
     $action_label = pht('Create Countdown');
 
     if ($this->id) {
-      $timer = id(new PhabricatorCountdown())->load($this->id);
-      // If no timer is found
-      if (!$timer) {
+      $countdown = id(new CountdownQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->executeOne();
+
+      // If no countdown is found
+      if (!$countdown) {
         return new Aphront404Response();
       }
 
-      if (($timer->getAuthorPHID() != $user->getPHID())
+      if (($countdown->getAuthorPHID() != $user->getPHID())
           && $user->getIsAdmin() == false) {
         return new Aphront403Response();
       }
 
       $action_label = pht('Update Countdown');
     } else {
-      $timer = new PhabricatorCountdown();
-      $timer->setEpoch(time());
+      $countdown = new PhabricatorCountdown();
+      $countdown->setEpoch(time());
     }
 
     $error_view = null;
@@ -60,14 +67,14 @@ final class PhabricatorCountdownEditController
         $timestamp = null;
       }
 
-      $timer->setTitle($title);
-      $timer->setEpoch($timestamp);
+      $countdown->setTitle($title);
+      $countdown->setEpoch($timestamp);
 
       if (!count($errors)) {
-        $timer->setAuthorPHID($user->getPHID());
-        $timer->save();
+        $countdown->setAuthorPHID($user->getPHID());
+        $countdown->save();
         return id(new AphrontRedirectResponse())
-          ->setURI('/countdown/'.$timer->getID().'/');
+          ->setURI('/countdown/'.$countdown->getID().'/');
       } else {
         $error_view = id(new AphrontErrorView())
           ->setErrors($errors)
@@ -76,9 +83,9 @@ final class PhabricatorCountdownEditController
       }
     }
 
-    if ($timer->getEpoch()) {
+    if ($countdown->getEpoch()) {
       $display_epoch = phabricator_datetime(
-        $timer->getEpoch(),
+        $countdown->getEpoch(),
         $user);
     } else {
       $display_epoch = $request->getStr('epoch');
@@ -90,7 +97,7 @@ final class PhabricatorCountdownEditController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
-          ->setValue($timer->getTitle())
+          ->setValue($countdown->getTitle())
           ->setName('title'))
       ->appendChild(
         id(new AphrontFormTextControl())

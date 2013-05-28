@@ -337,7 +337,7 @@ JX.install('Event', {
       JX.Event.prototype.toString = function() {
         var path = '['+this.getPath().join(', ')+']';
         return 'Event<'+this.getType()+', '+path+', '+this.getTarget()+'>';
-      }
+      };
     }
   }
 });

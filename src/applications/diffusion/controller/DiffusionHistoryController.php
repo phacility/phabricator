@@ -9,22 +9,21 @@ final class DiffusionHistoryController extends DiffusionController {
     $page_size = $request->getInt('pagesize', 100);
     $offset = $request->getInt('page', 0);
 
-    $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
-      $drequest);
-    $history_query->setOffset($offset);
-    $history_query->setLimit($page_size + 1);
-
+    $params = array(
+      'commit' => $drequest->getCommit(),
+      'path' => $drequest->getPath(),
+      'offset' => $offset,
+      'limit' => $page_size + 1);
     if (!$request->getBool('copies')) {
-      $history_query->needDirectChanges(true);
-      $history_query->needChildChanges(true);
+      $params['needDirectChanges'] = true;
+      $params['needChildChanges'] = true;
     }
 
-    $show_graph = !strlen($drequest->getPath());
-    if ($show_graph) {
-      $history_query->needParents(true);
-    }
-
-    $history = $history_query->loadHistory();
+    $history_results = $this->callConduitWithDiffusionRequest(
+      'diffusion.historyquery',
+      $params);
+    $history = DiffusionPathChange::newFromConduit(
+      $history_results['pathChanges']);
 
     $pager = new AphrontPagerView();
     $pager->setPageSize($page_size);
@@ -37,6 +36,7 @@ final class DiffusionHistoryController extends DiffusionController {
     }
     $pager->setURI($request->getRequestURI(), 'page');
 
+    $show_graph = !strlen($drequest->getPath());
     $content = array();
 
     if ($request->getBool('copies')) {
@@ -66,7 +66,7 @@ final class DiffusionHistoryController extends DiffusionController {
     $history_table->setHandles($handles);
 
     if ($show_graph) {
-      $history_table->setParents($history_query->getParents());
+      $history_table->setParents($history_results['parents']);
       $history_table->setIsHead($offset == 0);
     }
 

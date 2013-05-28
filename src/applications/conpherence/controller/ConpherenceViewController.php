@@ -40,7 +40,6 @@ final class ConpherenceViewController extends
     $query = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
-      ->needHeaderPics(true)
       ->needParticipantCache(true)
       ->needTransactions(true)
       ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT);
@@ -92,16 +91,19 @@ final class ConpherenceViewController extends
       ->setReplyForm($form)
       ->setRole('thread');
 
+    $title = $conpherence->getTitle();
+    if (!$title) {
+      $title = pht('Conpherence');
+    }
     return $this->buildApplicationPage(
       $layout,
       array(
-        'title' => $conpherence->getTitle(),
+        'title' => $title,
         'device' => true,
       ));
   }
 
   private function renderHeaderPaneContent() {
-    require_celerity_resource('conpherence-header-pane-css');
     $conpherence = $this->getConpherence();
     $header = $this->buildHeaderPaneContent($conpherence);
     return hsprintf('%s', $header);

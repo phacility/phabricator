@@ -90,10 +90,20 @@
   padding: 4px;
 }
 
+.aphront-form-full-width .aphront-form-control {
+  padding: 4px 0;
+}
+
 .aphront-form-control-submit button,
 .aphront-form-control-submit a.button {
   float: right;
+  margin: 0.5em 0 0 2%;
+}
+
+.phui-form-control-multi-submit input {
+  float: right;
   margin: 0.5em 0 0em 2%;
+  width: auto;
 }
 
 .aphront-form-control-textarea textarea.aphront-textarea-very-short {
@@ -132,6 +142,8 @@
   margin-left: 20%;
   padding: 10px 4px;
 }
+
+
 
 .device .aphront-form-instructions,
 .aphront-form-full-width .aphront-form-instructions {
@@ -410,4 +422,12 @@ table.aphront-form-control-checkbox-layout th {
 
 .aphront-form-control-counted-togglebuttons .toggle.disabled:hover {
   background-color: #a7a7a7;
+}
+
+.phui-form-divider hr {
+  height: 1px;
+  border: 0;
+  background: #c0c0c0;
+  width: 85%;
+  margin: 15px auto;
 }

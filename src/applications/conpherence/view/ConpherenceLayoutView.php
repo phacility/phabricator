@@ -65,54 +65,32 @@ final class ConpherenceLayoutView extends AphrontView {
         'hasWidgets' => false,
       ));
 
-    Javelin::initBehavior('conpherence-drag-and-drop-photo',
-      array(
-        'target' => 'conpherence-header-pane',
-        'form_pane' => 'conpherence-form',
-        'upload_uri' => '/file/dropupload/',
-        'activated_class' => 'conpherence-header-upload-photo',
-      ));
-
-    $all_views = 1;
-    $devices_only = 0;
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
-        'allViews' => $all_views,
-        'devicesOnly' => $devices_only,
-        'widgetRegistery' => array(
-          'conpherence-menu-pane' => $devices_only,
-          'conpherence-message-pane' => $devices_only,
-          'widgets-people' => $all_views,
-          'widgets-files' => $all_views,
-          'widgets-calendar' => $all_views,
-          'widgets-settings' => $all_views,
-        ),
-        'widgetExtraNodes' => array(
-          'conpherence-menu-pane' => array(
-            array(
-              'tagname' => 'div',
-              'sigil' => 'phabricator-nav-column-background',
-              'showstyle' => 'block',
-              'hidestyle' => 'none',
-              'desktopstyle' => 'block'),
-            array(
-              'tagname' => 'a',
-              'sigil' =>  'conpherence-new-conversation',
-              'showstyle' => 'none',
-              'hidestyle' => 'none',
-              'desktopstyle' => 'block'),
-          )
-        ),
-        'widgetToggleMap' => array(
-          'conpherence-menu-pane' => 'conpherence_list_on',
-          'conpherence-message-pane' => 'conpherence_conversation_on',
-          'widgets-people' => 'conpherence_people_on',
-          'widgets-files' => 'conpherence_files_on',
-          'widgets-calendar' => 'conpherence_calendar_on',
-          'widgets-settings' => 'conpherence_settings_on',
-        )
-      ));
+        'selectChar' => "\xE2\x96\xBC",
+        'widgetRegistry' => array(
+          'conpherence-message-pane' => array(
+            'name' => pht('Thread'),
+            'deviceOnly' => true,
+          ),
+          'widgets-people' => array(
+            'name' => pht('Participants'),
+            'deviceOnly' => false,
+          ),
+          'widgets-files' => array(
+            'name' => pht('Files'),
+            'deviceOnly' => false,
+          ),
+          'widgets-calendar' => array(
+            'name' => pht('Calendar'),
+            'deviceOnly' => false,
+          ),
+          'widgets-settings' => array(
+            'name' => pht('Settings'),
+            'deviceOnly' => false,
+          ),
+        )));
 
     return javelin_tag(
       'div',

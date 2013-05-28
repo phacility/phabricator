@@ -282,7 +282,7 @@ JX.install('Workflow', {
 
       JX.Workflow._pop();
       e.prevent();
-    };
+    }
 
     JX.Stratcom.listen('keydown', null, close_dialog_when_user_presses_escape);
   }

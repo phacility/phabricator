@@ -11,4 +11,24 @@ final class PhabricatorMacroMailReceiver extends PhabricatorObjectMailReceiver {
     return 'MCRO[1-9]\d*';
   }
 
+
+  protected function loadObject($pattern, PhabricatorUser $viewer) {
+    $id = (int)substr($pattern, 4);
+
+    return id(new PhabricatorMacroQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($id))
+      ->executeOne();
+  }
+
+  protected function processReceivedObjectMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    PhabricatorLiskDAO $object,
+    PhabricatorUser $sender) {
+
+    // TODO: For now, we just drop this mail on the floor.
+
+  }
+
+
 }

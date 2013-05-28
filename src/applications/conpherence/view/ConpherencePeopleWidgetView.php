@@ -49,13 +49,7 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
           array(
             'class' => 'add-people-widget',
           ),
-          $add_widget),
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'divider'
-          ),
-          '')
+          $add_widget)
       ));
 
     $body = array();

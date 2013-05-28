@@ -67,6 +67,7 @@ final class PhabricatorMacroListController
     $filter_form = id(new AphrontFormView())
       ->setMethod('GET')
       ->setUser($request->getUser())
+      ->setNoShading(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')

@@ -16,12 +16,12 @@ extends DiffusionExpandShortNameQuery {
     if ($type == 'missing') {
       throw new DiffusionExpandCommitQueryException(
         DiffusionExpandCommitQueryException::CODE_MISSING,
-        "Bad commit '{$this->commit}'.");
+        "Bad commit '{$commit}'.");
     }
 
     switch ($type) {
       case 'tag':
-        $this->commitType = 'tag';
+        $this->setCommitType('tag');
 
         $matches = null;
         $ok = preg_match(
@@ -35,18 +35,18 @@ extends DiffusionExpandShortNameQuery {
         }
 
         $hash = $matches[1];
-        $this->tagContent = trim($matches[2]);
+        $this->setTagContent(trim($matches[2]));
         break;
       case 'commit':
         break;
       default:
         throw new DiffusionExpandCommitQueryException(
           DiffusionExpandCommitQueryException::CODE_INVALID,
-          "The reference '{$this->commit}' does not name a valid ".
+          "The reference '{$commit}' does not name a valid ".
           'commit or a tag in this repository.');
         break;
     }
 
-    $this->commit = $hash;
+    $this->setCommit($hash);
   }
 }

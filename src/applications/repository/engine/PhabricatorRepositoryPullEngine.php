@@ -140,14 +140,14 @@ final class PhabricatorRepositoryPullEngine
 
       if (empty($repo_path)) {
         $err = true;
-        $msg =
+        $message =
           "Expected to find a git repository at '{$path}', but ".
           "there was no result from `git rev-parse --show-toplevel`. ".
           "Something is misconfigured or broken. The git repository ".
           "may be inside a '.git/' directory.";
       } else if (!Filesystem::pathsAreEquivalent($repo_path, $path)) {
         $err = true;
-        $msg =
+        $message =
           "Expected to find repo at '{$path}', but the actual ".
           "git repository root for this directory is '{$repo_path}'. ".
           "Something is misconfigured. The repository's 'Local Path' should ".

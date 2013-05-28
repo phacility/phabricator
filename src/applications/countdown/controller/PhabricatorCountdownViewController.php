@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 final class PhabricatorCountdownViewController
   extends PhabricatorCountdownController {
 
@@ -14,8 +17,13 @@ final class PhabricatorCountdownViewController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $timer = id(new PhabricatorCountdown())->load($this->id);
-    if (!$timer) {
+
+    $countdown = id(new CountdownQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
+
+    if (!$countdown) {
       return new Aphront404Response();
     }
 
@@ -49,8 +57,8 @@ final class PhabricatorCountdownViewController
         %s
       </div>',
       $container,
-      $timer->getTitle(),
-      phabricator_datetime($timer->getEpoch(), $user),
+      $countdown->getTitle(),
+      phabricator_datetime($countdown->getEpoch(), $user),
       pht('Days'),
       pht('Hours'),
       pht('Minutes'),
@@ -62,7 +70,7 @@ final class PhabricatorCountdownViewController
       $chrome_link);
 
     Javelin::initBehavior('countdown-timer', array(
-      'timestamp' => $timer->getEpoch(),
+      'timestamp' => $countdown->getEpoch(),
       'container' => $container,
     ));
 
@@ -72,7 +80,7 @@ final class PhabricatorCountdownViewController
       ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName($timer->getTitle())
+          ->setName($countdown->getTitle())
           ->setHref($this->getApplicationURI($this->id.'/')));
 
     return $this->buildApplicationPage(
@@ -81,7 +89,7 @@ final class PhabricatorCountdownViewController
         $panel,
       ),
       array(
-        'title' => pht('Countdown: %s', $timer->getTitle()),
+        'title' => pht('Countdown: %s', $countdown->getTitle()),
         'chrome' => $chrome_visible,
         'device' => true,
       ));

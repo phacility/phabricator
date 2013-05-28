@@ -11,6 +11,8 @@ abstract class AphrontFormControl extends AphrontView {
   private $id;
   private $controlID;
   private $controlStyle;
+  private $formPage;
+  private $required;
 
   public function setID($id) {
     $this->id = $id;
@@ -82,6 +84,55 @@ abstract class AphrontFormControl extends AphrontView {
 
   public function getValue() {
     return $this->value;
+  }
+
+  public function isValid() {
+    if ($this->error && $this->error !== true) {
+      return false;
+    }
+
+    if ($this->isRequired() && $this->isEmpty()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function isRequired() {
+    return $this->required;
+  }
+
+  public function isEmpty() {
+    return !strlen($this->getValue());
+  }
+
+  public function getSerializedValue() {
+    return $this->getValue();
+  }
+
+  public function readSerializedValue($value) {
+    $this->setValue($value);
+    return $this;
+  }
+
+  public function readValueFromRequest(AphrontRequest $request) {
+    $this->setValue($request->getStr($this->getName()));
+    return $this;
+  }
+
+  public function setFormPage(PHUIFormPageView $page) {
+    if ($this->formPage) {
+      throw new Exception("This control is already a member of a page!");
+    }
+    $this->formPage = $page;
+    return $this;
+  }
+
+  public function getFormPage() {
+    if ($this->formPage === null) {
+      throw new Exception("This control does not have a page!");
+    }
+    return $this->formPage;
   }
 
   public function setDisabled($disabled) {

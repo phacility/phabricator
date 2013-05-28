@@ -14,6 +14,6 @@ final class DiffusionGitCommitParentsQuery
 
     $hashes = preg_split('/\s+/', trim($stdout));
 
-    return self::loadCommitsByIdentifiers($hashes);
+    return self::loadCommitsByIdentifiers($hashes, $drequest);
   }
 }

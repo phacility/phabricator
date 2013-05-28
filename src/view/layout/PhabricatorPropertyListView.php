@@ -121,19 +121,23 @@ final class PhabricatorPropertyListView extends AphrontView {
       $key = $spec['key'];
       $value = $spec['value'];
 
+      // NOTE: We append a space to each value to improve the behavior when the
+      // user double-clicks a property value (like a URI) to select it. Without
+      // the space, the label is also selected.
+
       $items[] = phutil_tag(
         'dt',
         array(
           'class' => 'phabricator-property-list-key',
         ),
-        $key);
+        array($key, ' '));
 
       $items[] = phutil_tag(
         'dd',
         array(
           'class' => 'phabricator-property-list-value',
         ),
-        $value);
+        array($value, ' '));
     }
 
     $list = phutil_tag(

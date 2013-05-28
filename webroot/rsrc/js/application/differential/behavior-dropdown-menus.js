@@ -57,7 +57,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
 
     var visible_item = new JX.PhabricatorMenuItem('', function () {
       JX.Stratcom.invoke('differential-toggle-file', null, {
-        diff: JX.DOM.scry(JX.$(data.containerID), 'table', 'differential-diff'),
+        diff: JX.DOM.scry(JX.$(data.containerID), 'table', 'differential-diff')
       });
     });
     menu.addItem(visible_item);

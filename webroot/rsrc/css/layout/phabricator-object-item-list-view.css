@@ -346,6 +346,11 @@
   background: #bfdcff;
 }
 
+.phabricator-object-list-flush .aphront-error-view {
+  margin: 0;
+  background: #fff;
+}
+
 
 /* - Foot Icons ----------------------------------------------------------------
 

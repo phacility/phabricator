@@ -79,7 +79,7 @@ final class PhabricatorProjectProfileEditController
         $editor->setActor($user);
         $editor->applyTransactions($xactions);
       } catch (PhabricatorProjectNameCollisionException $ex) {
-        $e_name = 'Not Unique';
+        $e_name = pht('Not Unique');
         $errors[] = $ex->getMessage();
       }
 
@@ -244,6 +244,7 @@ final class PhabricatorProjectProfileEditController
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 }

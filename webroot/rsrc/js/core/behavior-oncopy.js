@@ -37,7 +37,7 @@ JX.behavior('phabricator-oncopy', function() {
     var pos;
     for (var ii = 0; ii < lines.length; ii++) {
       pos = lines[ii].indexOf(zws);
-      if (pos == -1 && ii != 0) {
+      if (pos == -1 && ii !== 0) {
         continue;
       }
       result.push(lines[ii].substring(pos + 1));
@@ -76,5 +76,5 @@ JX.behavior('phabricator-oncopy', function() {
       // to work or give me any errors. So you lose your selection when you
       // copy. Oh well?
     }
-  }
+  };
 });

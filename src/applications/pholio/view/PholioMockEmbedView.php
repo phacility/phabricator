@@ -22,7 +22,6 @@ final class PholioMockEmbedView extends AphrontView {
 
     require_celerity_resource('pholio-css');
 
-
     $mock_link = phutil_tag(
       'a',
       array(

@@ -41,7 +41,7 @@ JX.behavior('global-drag-and-drop', function(config) {
     files.push(f);
 
     pending--;
-    if (pending == 0 && !errors) {
+    if (pending === 0 && !errors) {
       // If whatever the user dropped in has finished uploading, send them to
       // their uploads.
       var uri;

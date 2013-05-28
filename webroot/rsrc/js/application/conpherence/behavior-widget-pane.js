@@ -6,100 +6,113 @@
  *           javelin-util
  *           phabricator-notification
  *           javelin-behavior-device
+ *           phabricator-dropdown-menu
+ *           phabricator-menu-item
  * @provides javelin-behavior-conpherence-widget-pane
  */
 
 JX.behavior('conpherence-widget-pane', function(config) {
 
+  var build_widget_selector = function (data) {
+    var widgets = config.widgetRegistry;
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var widgetPane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+    var widgetHeader = JX.DOM.find(widgetPane, 'a', 'widgets-selector');
+    var mobileWidgetHeader = null;
+    try {
+      mobileWidgetHeader = JX.DOM.find(
+        root,
+        'a',
+        'device-widgets-selector');
+    } catch (ex) {
+      // is okay - no mobileWidgetHeader yet...
+    }
+    var widgetData = widgets[data.widget];
+    JX.DOM.setContent(
+      widgetHeader,
+      widgetData.name);
+    JX.DOM.appendContent(
+      widgetHeader,
+      JX.$N('span', { className : 'caret' }));
+    if (mobileWidgetHeader) {
+      // this is fragile but adding a sigil to this element is awkward
+      var mobileWidgetHeaderSpans = JX.DOM.scry(mobileWidgetHeader, 'span');
+      var mobileWidgetHeaderSpan = mobileWidgetHeaderSpans[1];
+      JX.DOM.setContent(
+        mobileWidgetHeaderSpan,
+        widgetData.name);
+    }
+
+    var menu = new JX.PhabricatorDropdownMenu(widgetHeader);
+    menu.toggleAlignDropdownRight(false);
+    var deviceMenu = null;
+    if (mobileWidgetHeader) {
+      deviceMenu = new JX.PhabricatorDropdownMenu(mobileWidgetHeader);
+    }
+
+    for (var widget in widgets) {
+      widgetData = widgets[widget];
+      if (mobileWidgetHeader) {
+        deviceMenu.addItem(new JX.PhabricatorMenuItem(
+          widgetData.name,
+          JX.bind(null, build_widget_selector, { widget : widget }),
+          '#'
+          ).setDisabled(widget == data.widget));
+      }
+      if (widgetData.deviceOnly) {
+        continue;
+      }
+      menu.addItem(new JX.PhabricatorMenuItem(
+        widgetData.name,
+        JX.bind(null, build_widget_selector, { widget : widget }),
+        '#'
+      ).setDisabled(widget == data.widget));
+    }
+    if (data.no_toggle) {
+      return;
+    }
+    toggle_widget(data);
+  };
+
   var toggle_widget = function (data) {
+    var widgets = config.widgetRegistry;
+    var widgetData = widgets[data.widget];
     var device = JX.Device.getDevice();
     var is_desktop = device == 'desktop';
-    if (config.widgetRegistery[data.widget] == config.devicesOnly &&
-        is_desktop) {
+
+    if (widgetData.deviceOnly && is_desktop) {
       return;
     }
 
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var widgetPane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
-    for (var widget in config.widgetRegistery) {
-      // device-only widgets are *always shown* on the desktop
-      if (config.widgetRegistery[widget] == config.devicesOnly) {
-        if (is_desktop) {
+    for (var widget in config.widgetRegistry) {
+      widgetData = widgets[widget];
+      if (widgetData.deviceOnly && is_desktop) {
+        // some one off code for conpherence messages which are device-only
+        // as a widget, but shown always on the desktop
+        if (widget == 'conpherence-message-pane') {
           JX.$(widget).style.display = 'block';
-          if (config.widgetExtraNodes[widget]) {
-            for (var i in config.widgetExtraNodes[widget]) {
-              var tag_data = config.widgetExtraNodes[widget][i];
-              var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
-              node.style.display = tag_data.desktopstyle;
-            }
-          }
-          continue;
+          JX.Stratcom.invoke('conpherence-redraw-thread', null, {});
         }
+        continue;
       }
-
-      var cur_toggle = JX.$(widget + '-toggle');
-      var toggle_class = config.widgetToggleMap[widget];
       if (widget == data.widget) {
-        JX.DOM.alterClass(cur_toggle, toggle_class, true);
         JX.$(widget).style.display = 'block';
-        if (config.widgetRegistery[widget] == config.devicesOnly) {
-          widgetPane.style.height = '42px';
-        } else {
-          widgetPane.style.height = '100%';
-        }
-        if (config.widgetExtraNodes[widget]) {
-          for (var i in config.widgetExtraNodes[widget]) {
-            var tag_data = config.widgetExtraNodes[widget][i];
-            var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
-            node.style.display = tag_data.showstyle;
-          }
-        }
-        // some one off code for conpherence messages
+        // some one off code for conpherence messages - fancier refresh tech
         if (widget == 'conpherence-message-pane') {
           JX.Stratcom.invoke('conpherence-redraw-thread', null, {});
           JX.Stratcom.invoke('conpherence-update-page-data', null, {});
         }
-        // some one off code for conpherence list
-        if (widget == 'conpherence-menu-pane') {
-          JX.Stratcom.invoke(
-            'conpherence-update-page-data',
-            null,
-            { use_base_uri : true, title: 'Conpherence' }
-          );
-        }
       } else {
-        JX.DOM.alterClass(
-          cur_toggle,
-          toggle_class,
-          false
-        );
         JX.$(widget).style.display = 'none';
-        if (config.widgetExtraNodes[widget]) {
-          for (var i in config.widgetExtraNodes[widget]) {
-            var tag_data = config.widgetExtraNodes[widget][i];
-            var node = JX.DOM.find(root, tag_data.tagname, tag_data.sigil);
-            node.style.display = tag_data.hidestyle;
-          }
-        }
       }
     }
   };
 
   JX.Stratcom.listen(
-    ['touchstart', 'mousedown'],
-    'conpherence-change-widget',
-    function(e) {
-      e.kill();
-      var data = e.getNodeData('conpherence-change-widget');
-      toggle_widget(data);
-    }
-  );
-
-  JX.Stratcom.listen(
     'conpherence-toggle-widget',
     null,
     function (e) {
-      toggle_widget(e.getData());
+      build_widget_selector(e.getData());
     }
   );
 

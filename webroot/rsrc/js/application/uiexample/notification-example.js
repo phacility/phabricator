@@ -2,7 +2,6 @@
  * @requires phabricator-notification
  *           javelin-stratcom
  *           javelin-behavior
- *           javelin-uri
  * @provides javelin-behavior-phabricator-notification-example
  */
 

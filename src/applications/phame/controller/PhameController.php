@@ -36,44 +36,57 @@ abstract class PhameController extends PhabricatorController {
     $nodata) {
     assert_instances_of($posts, 'PhamePost');
 
-    $list = id(new PhabricatorObjectItemListView())
-      ->setUser($user)
-      ->setNoDataString($nodata);
+    $stories = array();
 
     foreach ($posts as $post) {
       $blogger = $this->getHandle($post->getBloggerPHID())->renderLink();
+      $bloggerURI = $this->getHandle($post->getBloggerPHID())->getURI();
+      $bloggerImage = $this->getHandle($post->getBloggerPHID())->getImageURI();
 
       $blog = null;
       if ($post->getBlog()) {
         $blog = $this->getHandle($post->getBlog()->getPHID())->renderLink();
       }
 
-      $published = null;
-      if ($post->getDatePublished()) {
-        $published = phabricator_date($post->getDatePublished(), $user);
+      $phame_post = '';
+      if ($post->getBody()) {
+        $phame_post = PhabricatorMarkupEngine::summarize($post->getBody());
       }
 
-      $draft = $post->isDraft();
+      $blog_view = $post->getViewURI();
+      $phame_title = phutil_tag('a', array('href' => $blog_view),
+        $post->getTitle());
+
+      $blogger = phutil_tag('strong', array(), $blogger);
+      if ($post->isDraft()) {
+        $title = pht('%s drafted a blog post on %s.',
+          $blogger, $blog);
+        $title = phutil_tag('em', array(), $title);
+      } else {
+        $title = pht('%s wrote a blog post on %s.',
+          $blogger, $blog);
+      }
 
       $item = id(new PhabricatorObjectItemView())
         ->setObject($post)
         ->setHeader($post->getTitle())
         ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/'));
 
-      if ($blog) {
-        $item->addAttribute($blog);
-      }
+      $story = id(new PHUIFeedStoryView())
+        ->setTitle($title)
+        ->setImage($bloggerImage)
+        ->setImageHref($bloggerURI)
+        ->setAppIcon('phame-dark')
+        ->setUser($user)
+        ->setPontification($phame_post, $phame_title);
 
-      if ($draft) {
-        $desc = pht('Draft by %s', $blogger);
-      } else {
-        $desc = pht('Published on %s by %s', $published, $blogger);
+      if ($post->getDatePublished()) {
+        $story->setEpoch($post->getDatePublished());
       }
-      $item->addAttribute($desc);
-      $list->addItem($item);
+      $stories[] = $story;
     }
 
-    return $list;
+    return $stories;
   }
 
   public function buildApplicationMenu() {

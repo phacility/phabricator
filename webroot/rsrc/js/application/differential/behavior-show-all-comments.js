@@ -42,7 +42,7 @@ JX.behavior('differential-show-all-comments', function(config) {
           try {
             var target = JX.$(window.location.hash.replace(/^#/, ''));
             window.scrollTo(0, target.offsetTop);
-          } catch (e) {
+          } catch (ex) {
           }
         }
       });

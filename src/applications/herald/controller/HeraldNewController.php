@@ -34,16 +34,16 @@ final class HeraldNewController extends HeraldController {
 
     $captions = array(
       HeraldRuleTypeConfig::RULE_TYPE_PERSONAL =>
-        'Personal rules notify you about events. You own them, but they can '.
-        'only affect you.',
+        pht('Personal rules notify you about events. You own them, but '.
+        'they can only affect you.'),
       HeraldRuleTypeConfig::RULE_TYPE_GLOBAL =>
-        'Global rules notify anyone about events. No one owns them, and '.
+        pht('Global rules notify anyone about events. No one owns them, and '.
         'anyone can edit them. Usually, Global rules are used to notify '.
-        'mailing lists.',
+        'mailing lists.'),
     );
 
     $radio = id(new AphrontFormRadioButtonControl())
-      ->setLabel('Type')
+      ->setLabel(pht('Type'))
       ->setName('rule_type')
       ->setValue($this->ruleType);
 
@@ -70,13 +70,18 @@ final class HeraldNewController extends HeraldController {
           ->setValue(pht('Create Rule'))
           ->addCancelButton('/herald/view/'.$this->contentType.'/'));
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Create New Herald Rule'));
+    $crumbs = $this
+      ->buildApplicationCrumbs()
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Create Herald Rule'))
+          ->setHref($this->getApplicationURI(
+            'view/'.$this->contentType.'/'.$this->ruleType)));
 
     $nav = $this->renderNav();
     $nav->selectFilter('new');
-    $nav->appendChild($header);
     $nav->appendChild($form);
+    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
       $nav,

@@ -180,9 +180,9 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
       $other_name = $collision->getName();
       $other_id = $collision->getID();
       throw new PhabricatorProjectNameCollisionException(
-        "Project names must be unique. The name '{$name}' is too similar to ".
-        "the name of another project, '{$other_name}' (Project ID: ".
-        "{$other_id}). Choose a unique name.");
+        pht("Project names must be unique. The name '%s' is too similar to ".
+        "the name of another project, '%s' (Project ID: ".
+        "%d). Choose a unique name.", $name, $other_name, $other_id));
     }
   }
 

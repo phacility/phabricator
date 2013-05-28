@@ -12,10 +12,6 @@
   width: 100%;
 }
 
-.aphront-multi-column-column-outer {
-  float: left;
-}
-
 .aphront-multi-column-inner .aphront-multi-column-column-last,
 .device-phone .aphront-multi-column-column {
   margin: 0;
@@ -23,7 +19,7 @@
 
 .device-phone .aphront-multi-column-outer
   div.aphront-multi-column-column-outer {
-  width: 100%;
+  width: auto;
   margin-bottom: 20px;
 }
 
@@ -122,4 +118,46 @@
 .aphront-multi-column-fluid .aphront-multi-column-7-up
   .aphront-multi-column-column-outer {
   width: 14.2857%;
+}
+
+/* Shadow Panels */
+
+.aphront-multi-column-inner {
+  display: table;
+  width: 100%;
+}
+
+.device-phone .aphront-multi-column-inner {
+  display: block;
+  width: auto;
+}
+
+.aphront-multi-column-column-outer {
+  display: table-cell;
+  height: 100%;
+}
+
+.phui-box-shadow .aphront-multi-column-column-outer {
+  border-right: 1px solid #e7e7e7;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.phui-box-shadow .aphront-multi-colum-column-outer-last {
+  border: none;
+}
+
+.device-phone .aphront-multi-column-column-outer {
+  display: block;
+  border: none;
+}
+
+.device-phone .phui-box-shadow .aphront-multi-column-column-outer {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.device-phone .phui-box-shadow .aphront-multi-colum-column-outer-last {
+  border: none;
+  padding-bottom: 0;
 }

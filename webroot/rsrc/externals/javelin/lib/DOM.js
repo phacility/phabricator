@@ -102,8 +102,8 @@ JX.install('HTML', {
       var tags = ['legend', 'thead', 'tbody', 'tfoot', 'column', 'colgroup',
                   'caption', 'tr', 'th', 'td', 'option'];
       var evil_stuff = new RegExp('^\\s*<(' + tags.join('|') + ')\\b', 'i');
-      var match = null;
-      if (match = str.match(evil_stuff)) {
+      var match = str.match(evil_stuff);
+      if (match) {
         JX.$E(
           'new JX.HTML("<' + match[1] + '>..."): ' +
           'call initializes an HTML object with an invalid partial fragment ' +
@@ -725,8 +725,10 @@ JX.install('DOM', {
      * @return void
      */
     show : function() {
+      var ii;
+
       if (__DEV__) {
-        for (var ii = 0; ii < arguments.length; ++ii) {
+        for (ii = 0; ii < arguments.length; ++ii) {
           if (!arguments[ii]) {
             JX.$E(
               'JX.DOM.show(...): ' +
@@ -735,7 +737,7 @@ JX.install('DOM', {
         }
       }
 
-      for (var ii = 0; ii < arguments.length; ++ii) {
+      for (ii = 0; ii < arguments.length; ++ii) {
         arguments[ii].style.display = '';
       }
     },
@@ -750,8 +752,10 @@ JX.install('DOM', {
      * @return void
      */
     hide : function() {
+      var ii;
+
       if (__DEV__) {
-        for (var ii = 0; ii < arguments.length; ++ii) {
+        for (ii = 0; ii < arguments.length; ++ii) {
           if (!arguments[ii]) {
             JX.$E(
               'JX.DOM.hide(...): ' +
@@ -760,7 +764,7 @@ JX.install('DOM', {
         }
       }
 
-      for (var ii = 0; ii < arguments.length; ++ii) {
+      for (ii = 0; ii < arguments.length; ++ii) {
         arguments[ii].style.display = 'none';
       }
     },

@@ -247,7 +247,7 @@ JX.bind = function(context, func, more) {
 
   return function() {
     return func.apply(context || window, bound.concat(JX.$A(arguments)));
-  }
+  };
 };
 
 
@@ -320,7 +320,7 @@ if (__DEV__) {
    */
   JX.log = function(message) {
     window.console.log(message);
-  }
+  };
 
   window.alert = (function(native_alert) {
     var recent_alerts = [];
@@ -349,7 +349,7 @@ if (__DEV__) {
         native_alert(msg);
       }
       in_alert = false;
-    }
+    };
   })(window.alert);
 }
 

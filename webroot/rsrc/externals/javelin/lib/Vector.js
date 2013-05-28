@@ -164,13 +164,9 @@ JX.install('Vector', {
      */
     setDim : function(node) {
       node.style.width =
-        (this.x === null)
-          ? ''
-          : (parseInt(this.x, 10) + 'px');
+        (this.x === null) ? '' : (parseInt(this.x, 10) + 'px');
       node.style.height =
-        (this.y === null)
-          ? ''
-          : (parseInt(this.y, 10) + 'px');
+        (this.y === null) ? '' : (parseInt(this.y, 10) + 'px');
       return this;
     },
 

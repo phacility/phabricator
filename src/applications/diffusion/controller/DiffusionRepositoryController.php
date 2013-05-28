@@ -12,11 +12,15 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $this->buildPropertiesTable($drequest->getRepository());
 
-    $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
-      $drequest);
-    $history_query->setLimit(15);
-    $history_query->needParents(true);
-    $history = $history_query->loadHistory();
+    $history_results = $this->callConduitWithDiffusionRequest(
+      'diffusion.historyquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath(),
+        'offset' => 0,
+        'limit' => 15));
+    $history = DiffusionPathChange::newFromConduit(
+      $history_results['pathChanges']);
 
     $browse_results = DiffusionBrowseResultSet::newFromConduit(
       $this->callConduitWithDiffusionRequest(
@@ -24,12 +28,10 @@ final class DiffusionRepositoryController extends DiffusionController {
         array(
           'path' => $drequest->getPath(),
           'commit' => $drequest->getCommit(),
-          'renderReadme' => true,
         )));
     $browse_paths = $browse_results->getPaths();
 
     $phids = array();
-
     foreach ($history as $item) {
       $data = $item->getCommitData();
       if ($data) {
@@ -53,9 +55,14 @@ final class DiffusionRepositoryController extends DiffusionController {
         }
       }
     }
-
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
+
+    $readme = $this->callConduitWithDiffusionRequest(
+      'diffusion.readmequery',
+      array(
+       'paths' => $browse_results->getPathDicts()
+        ));
 
     $history_table = new DiffusionHistoryTableView();
     $history_table->setUser($this->getRequest()->getUser());
@@ -63,7 +70,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table->setHandles($handles);
     $history_table->setHistory($history);
     $history_table->loadRevisions();
-    $history_table->setParents($history_query->getParents());
+    $history_table->setParents($history_results['parents']);
     $history_table->setIsHead(true);
 
     $callsign = $drequest->getRepository()->getCallsign();
@@ -105,7 +112,6 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $this->buildBranchListTable($drequest);
 
-    $readme = $browse_results->getReadmeContent();
     if ($readme) {
       $box = new PHUIBoxView();
       $box->setShadow(true);
@@ -129,39 +135,39 @@ final class DiffusionRepositoryController extends DiffusionController {
   }
 
   private function buildPropertiesTable(PhabricatorRepository $repository) {
+    $user = $this->getRequest()->getUser();
 
-    $properties = array();
-    $properties['Name'] = $repository->getName();
-    $properties['Callsign'] = $repository->getCallsign();
-    $properties['Description'] = $repository->getDetail('description');
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($repository->getName());
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($user);
+    $view->addProperty(pht('Callsign'), $repository->getCallsign());
+
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $properties['Clone URI'] = $repository->getPublicRemoteURI();
+        $view->addProperty(
+          pht('Clone URI'),
+          $repository->getPublicRemoteURI());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $properties['Repository Root'] = $repository->getPublicRemoteURI();
+        $view->addProperty(
+          pht('Repository Root'),
+          $repository->getPublicRemoteURI());
         break;
     }
 
-    $rows = array();
-    foreach ($properties as $key => $value) {
-      $rows[] = array($key, $value);
+    $description = $repository->getDetail('description');
+    if (strlen($description)) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        $repository,
+        'description',
+        $user);
+      $view->addTextContent($description);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setColumnClasses(
-      array(
-        'header',
-        'wide',
-      ));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Repository Properties'));
-    $panel->appendChild($table);
-    $panel->setNoBackground();
-
-    return $panel;
+    return array($header, $view);
   }
 
   private function buildBranchListTable(DiffusionRequest $drequest) {

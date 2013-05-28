@@ -445,7 +445,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
     $this->log(pht('PUBLISHING DOCUMENTATION'));
 
-    $publisher = new DivinerStaticPublisher();
+    $publisher = new DivinerLivePublisher();
     $publisher->setConfig($this->getAllConfig());
     $publisher->setAtomCache($atom_cache);
     $publisher->setRenderer(new DivinerDefaultRenderer());

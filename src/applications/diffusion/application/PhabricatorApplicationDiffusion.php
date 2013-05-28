@@ -62,6 +62,11 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
             => 'DiffusionCommitTagsController',
           'commit/(?P<commit>[a-z0-9]+)/edit/'
             => 'DiffusionCommitEditController',
+          'edit/' => array(
+            '' => 'DiffusionRepositoryEditController',
+            'basic/' => 'DiffusionRepositoryEditBasicController',
+            'encoding/' => 'DiffusionRepositoryEditEncodingController',
+          ),
         ),
         'inline/' => array(
           'edit/(?P<phid>[^/]+)/'    => 'DiffusionInlineCommentController',

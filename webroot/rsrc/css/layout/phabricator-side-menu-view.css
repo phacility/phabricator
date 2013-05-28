@@ -11,13 +11,20 @@
 
 .phabricator-side-menu .phabricator-menu-item-type-link {
   padding: 6px 8px 6px 24px;
+  color: #e1e2e5;
+  text-shadow: rgba(0, 0, 0, 1) 0px 1px 1px;
+}
+
+.phabricator-side-menu .phabricator-menu-item-selected,
+.device-desktop .phabricator-side-menu
+ .phabricator-menu-item-selected.phabricator-menu-item-type-link:hover {
+  background-color: #305c85;
   color: #fff;
-  text-shadow: rgba(0, 0, 0, 1) 0px -1px 1px;
 }
 
 .phabricator-side-menu .phabricator-menu-item-type-label {
   padding: 6px 8px 4px 12px;
-  color: #fff;
+  color: #f7f7f7;
   text-transform: uppercase;
   font-size: 12px;
   font-weight: bold;
@@ -41,9 +48,10 @@
 }
 
 .phabricator-side-menu .phabricator-menu-item-type-button:hover {
-  background-image: url(/rsrc/image/texture/dark-menu-hover.png);
+  background-color: #1e2225;
 }
 
 .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover {
   text-decoration: none;
+  background-color: #1e2225;
 }

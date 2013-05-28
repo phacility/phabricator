@@ -76,10 +76,11 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     function clear_stage() {
-      for (var ii = 0; ii < reticles.length; ii++) {
+      var ii;
+      for (ii = 0; ii < reticles.length; ii++) {
         JX.DOM.remove(reticles[ii]);
       }
-      for (var ii = 0; ii < cards.length; ii++) {
+      for (ii = 0; ii < cards.length; ii++) {
         JX.DOM.remove(cards[ii]);
       }
       reticles = [];
@@ -160,7 +161,7 @@ JX.behavior('pholio-mock-view', function(config) {
     if (!active_image) {
       return;
     }
-    var idx = get_image_index(active_image.id)
+    var idx = get_image_index(active_image.id);
     idx = (idx + delta + config.images.length) % config.images.length;
     select_image(config.images[idx].id);
   }
@@ -324,7 +325,7 @@ JX.behavior('pholio-mock-view', function(config) {
         ).setPos(dialog);
 
         JX.DOM.focus(JX.DOM.find(dialog, 'textarea'));
-      }
+      };
 
       new JX.Workflow('/pholio/inline/save/', data)
         .setHandler(handler)
@@ -343,14 +344,15 @@ JX.behavior('pholio-mock-view', function(config) {
 
     var width = end.x - start.x;
     var height = end.y - start.y;
+    var addon;
 
     if (width < min_size) {
-      var addon = (min_size-width)/2;
+      addon = (min_size-width)/2;
 
       start.x = Math.max(0, start.x - addon);
       end.x = Math.min(active_image.tag.naturalWidth, end.x + addon);
 
-      if (start.x == 0) {
+      if (start.x === 0) {
         end.x = Math.min(min_size, active_image.tag.naturalWidth);
       } else if (end.x == active_image.tag.naturalWidth) {
         start.x = Math.max(0, active_image.tag.naturalWidth - min_size);
@@ -358,12 +360,12 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     if (height < min_size) {
-      var addon = (min_size-height)/2;
+      addon = (min_size-height)/2;
 
       start.y = Math.max(0, start.y - addon);
       end.y = Math.min(active_image.tag.naturalHeight, end.y + addon);
 
-      if (start.y == 0) {
+      if (start.y === 0) {
         end.y = Math.min(min_size, active_image.tag.naturalHeight);
       } else if (end.y == active_image.tag.naturalHeight) {
         start.y = Math.max(0, active_image.tag.naturalHeight - min_size);

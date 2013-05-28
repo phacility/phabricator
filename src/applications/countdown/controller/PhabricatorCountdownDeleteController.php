@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group countdown
+ */
 final class PhabricatorCountdownDeleteController
   extends PhabricatorCountdownController {
 
@@ -14,24 +17,28 @@ final class PhabricatorCountdownDeleteController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $timer = id(new PhabricatorCountdown())->load($this->id);
-    if (!$timer) {
+    $countdown = id(new CountdownQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
+
+    if (!$countdown) {
       return new Aphront404Response();
     }
 
-    if (($timer->getAuthorPHID() !== $user->getPHID())
+    if (($countdown->getAuthorPHID() !== $user->getPHID())
         && $user->getIsAdmin() === false) {
       return new Aphront403Response();
     }
 
     if ($request->isFormPost()) {
-      $timer->delete();
+      $countdown->delete();
       return id(new AphrontRedirectResponse())
         ->setURI('/countdown/');
     }
 
     $inst = pht('Are you sure you want to delete the countdown %s?',
-            $timer->getTitle());
+            $countdown->getTitle());
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($request->getUser());

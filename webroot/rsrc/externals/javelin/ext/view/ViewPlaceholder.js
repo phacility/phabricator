@@ -48,6 +48,7 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-view-renderer
+ *           javelin-install
  */
 
 
@@ -72,11 +73,12 @@ JX.install('ViewPlaceholder', {
   statics: {
     register: function(wait_on_token, token, cb) {
       var ready_q = [];
+      var waiting;
 
       if (!wait_on_token || wait_on_token in JX.ViewPlaceholder.ready) {
         ready_q.push({token: token, cb: cb});
       } else {
-        var waiting = JX.ViewPlaceholder.waiting;
+        waiting = JX.ViewPlaceholder.waiting;
         waiting[wait_on_token] = waiting[wait_on_token] || [];
         waiting[wait_on_token].push({token: token, cb: cb});
       }
@@ -84,7 +86,7 @@ JX.install('ViewPlaceholder', {
       while(ready_q.length) {
         var ready = ready_q.shift();
 
-        var waiting = JX.ViewPlaceholder.waiting[ready.token];
+        waiting = JX.ViewPlaceholder.waiting[ready.token];
         if (waiting) {
           for (var ii = 0; ii < waiting.length; ii++) {
             ready_q.push(waiting[ii]);

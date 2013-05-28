@@ -25,7 +25,7 @@ final class HeraldDryRunAdapter extends HeraldObjectAdapter {
       $results[] = new HeraldApplyTranscript(
         $effect,
         false,
-        'This was a dry run, so no actions were actually taken.');
+        pht('This was a dry run, so no actions were actually taken.'));
     }
     return $results;
   }

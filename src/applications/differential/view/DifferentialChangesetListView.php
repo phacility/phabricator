@@ -317,7 +317,7 @@ final class DifferentialChangesetListView extends AphrontView {
         'target'  => '_blank',
         'sigil'   => 'differential-view-options',
       ),
-      pht("View Options \xE2\x96\xBC"));
+      pht('View Options') . " \xE2\x96\xBC");
   }
 
 }

@@ -26,6 +26,12 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
     return self::GROUP_ORGANIZATION;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new ProjectRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/project/' => array(

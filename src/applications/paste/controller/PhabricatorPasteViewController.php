@@ -2,12 +2,11 @@
 
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
+  private $id;
+
   public function shouldAllowPublic() {
     return true;
   }
-
-  private $id;
-  private $handles;
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
@@ -70,6 +69,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       array(
         'title' => $paste->getFullName(),
         'device' => true,
+        'pageObjects' => array($paste->getPHID()),
       ));
   }
 

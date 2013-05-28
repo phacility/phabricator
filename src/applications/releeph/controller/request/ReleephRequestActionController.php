@@ -28,12 +28,7 @@ final class ReleephRequestActionController extends ReleephController {
     $editor = id(new ReleephRequestTransactionalEditor())
       ->setActor($user)
       ->setContinueOnNoEffect(true)
-      ->setContentSource(
-        PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          )));
+      ->setContentSourceFromRequest($request);
 
     $xactions = array();
 
@@ -54,11 +49,15 @@ final class ReleephRequestActionController extends ReleephController {
 
       case 'mark-manually-picked':
       case 'mark-manually-reverted':
-        if (!$releeph_project->isAuthoritative($user)) {
+        if (
+          $releeph_request->getRequestUserPHID() === $user->getPHID() ||
+          $releeph_project->isAuthoritative($user)) {
+
+          // We're all good!
+        } else {
           throw new Exception(
-            "Bug!  Only authoritative users (pushers, or users in pusherless ".
-            "Releeph projects) can manually change a request's in-branch ".
-            "status!");
+            "Bug!  Only pushers or the requestor can manually change a ".
+            "request's in-branch status!");
         }
 
         if ($action === 'mark-manually-picked') {

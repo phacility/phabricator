@@ -119,11 +119,11 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     // Now, select just the middle part. For instance, if the user clicked
     // "B" to create bold text, we insert '**bold**' but just select the word
     // "bold" so if they type stuff they'll be editing the bold text.
-    var r = JX.TextAreaUtils.getSelectionRange(area);
+    var range = JX.TextAreaUtils.getSelectionRange(area);
     JX.TextAreaUtils.setSelectionRange(
       area,
-      r.start + l.length,
-      r.start + l.length + m.length);
+      range.start + l.length,
+      range.start + l.length + m.length);
   }
 
   function assist(area, action, root) {
@@ -152,16 +152,16 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           sel = ["List Item"];
         }
         sel = sel.join("\n" + ch);
-        update(area, ((r.start == 0) ? "" : "\n\n") + ch, sel, "\n\n");
+        update(area, ((r.start === 0) ? "" : "\n\n") + ch, sel, "\n\n");
         break;
       case 'code':
         sel = sel || "foreach ($list as $item) {\n  work_miracles($item);\n}";
         sel = sel.split("\n");
         sel = "  " + sel.join("\n  ");
-        update(area, ((r.start == 0) ? "" : "\n\n"), sel, "\n\n");
+        update(area, ((r.start === 0) ? "" : "\n\n"), sel, "\n\n");
         break;
       case 'table':
-        update(area, (r.start == 0 ? '' : '\n\n') + '| ', sel || 'data', ' |');
+        update(area, (r.start === 0 ? '' : '\n\n') + '| ', sel || 'data', ' |');
         break;
       case 'meme':
         new JX.Workflow('/macro/meme/create/')
@@ -170,9 +170,12 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
               area,
               '',
               sel,
-              (r.start == 0 ? '' : '\n\n') + response.text + '\n\n');
+              (r.start === 0 ? '' : '\n\n') + response.text + '\n\n');
           })
           .start();
+        break;
+      case 'image':
+        new JX.Workflow('/file/uploaddialog/').start();
         break;
       case 'chaos':
         if (edit_mode == 'chaos') {

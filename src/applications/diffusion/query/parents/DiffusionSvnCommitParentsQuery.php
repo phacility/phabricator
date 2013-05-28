@@ -17,6 +17,6 @@ final class DiffusionSvnCommitParentsQuery
       $ids = array();
     }
 
-    return self::loadCommitsByIdentifiers($ids);
+    return self::loadCommitsByIdentifiers($ids, $drequest);
   }
 }

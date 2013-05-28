@@ -35,7 +35,6 @@ final class PonderUserProfileView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('ponder-core-view-css');
     require_celerity_resource('ponder-feed-view-css');
 
     $user     = $this->user;

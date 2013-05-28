@@ -96,7 +96,7 @@ final class PholioTransactionView
       ),
       $thumb);
 
-    $inline_comment = hsprintf('<p>%s</p>', $comment->getContent());
+    $inline_comment = parent::renderTransactionContent($inline);
 
     return phutil_tag(
       'div',
