@@ -945,7 +945,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-widget-pane-css' =>
   array(
-    'uri' => '/res/d3829b07/rsrc/css/application/conpherence/widget-pane.css',
+    'uri' => '/res/6f836b19/rsrc/css/application/conpherence/widget-pane.css',
     'type' => 'css',
     'requires' =>
     array(

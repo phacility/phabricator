@@ -200,10 +200,16 @@ final class ConpherenceWidgetController extends
     $one_day = 24 * 60 * 60;
     foreach ($weekstamps as $time => $day) {
       // build a header for the new day
+      if ($day->format('w') == $today->format('w')) {
+          $active_class = 'today';
+      } else {
+          $active_class = '';
+      }
+
       $content[] = phutil_tag(
         'div',
         array(
-          'class' => 'day-header'
+          'class' => 'day-header '.$active_class
         ),
         array(
           phutil_tag(

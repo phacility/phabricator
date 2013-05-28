@@ -186,27 +186,37 @@
   background-color: rgb(102, 204, 255);
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
-.aphront-multi-column-column .day-name {
+ .day-name {
   padding: 5px 0px 0px 0px;
   font-size: 12px;
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
-.aphront-multi-column-column .day-number {
+ .day-number {
   font-size: 16px;
-  padding: 5px 0px 5px 0px;
+  padding: 0 0 5px 0;
 }
+
 .conpherence-widget-pane #widgets-calendar .day-header {
   overflow: hidden;
-  background-color: #d8dce2;
-  border-top: 1px solid #bfbfbf;
-  border-bottom: 1px solid #bfbfbf;
+  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+  background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
+  border-top: 1px solid #e7e7e7;
+  border-bottom: 1px solid #d7d7d7;
   padding: 5px 10px 5px 10px;
-  width: 220px;
 }
-.device .conpherence-widget-pane #widgets-calendar .day-header {
-  width: 98%;
-  padding: 5px 1% 5px 1%;
+
+.conpherence-widget-pane #widgets-calendar .day-header.today {
+  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
+  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
+  border-top: none;
+  border-bottom: none;
 }
+
+.conpherence-widget-pane #widgets-calendar .day-header.today .day-name,
+.conpherence-widget-pane #widgets-calendar .day-header.today .day-date {
+  color: #fff;
+}
+
 .conpherence-widget-pane #widgets-calendar .day-header .day-name {
   float: left;
   color: #555759;
@@ -214,6 +224,7 @@
   text-transform: uppercase;
   font-size: 11px;
 }
+
 .conpherence-widget-pane #widgets-calendar .day-header .day-date {
   float: right;
   color: #555759;
