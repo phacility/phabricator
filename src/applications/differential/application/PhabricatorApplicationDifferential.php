@@ -40,7 +40,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
       '/D(?P<id>[1-9]\d*)' => 'DifferentialRevisionViewController',
       '/differential/' => array(
         '' => 'DifferentialRevisionListController',
-        'filter/(?P<filter>\w+)/(?:(?P<username>[\w\.-_]+)/)?' =>
+        'filter/(?P<filter>\w+)/(?:(?P<username>[\w._-]+)/)?' =>
           'DifferentialRevisionListController',
         'stats/(?P<filter>\w+)/' => 'DifferentialRevisionStatsController',
         'diff/' => array(
