@@ -145,10 +145,10 @@
 /* calendar widget */
 
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
-  margin: 2px 0px 0px 0px;
   width: 240px;
 }
 .device .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
+  margin: 2px 0px 0px 0px;
   width: 100%;
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view

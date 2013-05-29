@@ -169,12 +169,18 @@ JX.behavior('conpherence-widget-pane', function(config) {
       var root = JX.DOM.find(document, 'div', 'conpherence-layout');
       var widget_pane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
       var widget_header = JX.DOM.find(widget_pane, 'a', 'widgets-selector');
+      var adder = JX.DOM.find(widget_pane, 'a', 'conpherence-widget-adder');
       JX.DOM.setContent(
         widget_header,
         widget_data.name);
       JX.DOM.appendContent(
         widget_header,
         JX.$N('span', { className : 'caret' }));
+      if (widget_data.hasCreate) {
+        JX.DOM.show(adder);
+      } else {
+        JX.DOM.hide(adder);
+      }
     }
 
     for (var widget in config.widgetRegistry) {
@@ -214,6 +220,39 @@ JX.behavior('conpherence-widget-pane', function(config) {
         toggleWidget(data);
       }
     });
+
+  /**
+   * Generified adding new stuff to widgets technology!
+   */
+  JX.Stratcom.listen(
+    ['click'],
+    'conpherence-widget-adder',
+    function (e) {
+      e.kill();
+      var widgets = config.widgetRegistry;
+      var active_widget = null;
+      var href = null;
+      for (var widget in widgets) {
+        if (widgets[widget].name == _selectedWidgetName) {
+          href = widgets[widget].createHref;
+          active_widget = widget;
+          break;
+        }
+      }
+      new JX.Workflow(href, {})
+        .setHandler(function () {
+          JX.Stratcom.invoke(
+            'conpherence-reload-widget',
+            null,
+            {
+              threadID : _loadedWidgetsID,
+              widget : active_widget
+            }
+          );
+        })
+        .start();
+    }
+  );
 
   /* people widget */
   JX.Stratcom.listen(

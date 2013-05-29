@@ -82,22 +82,28 @@ final class ConpherenceLayoutView extends AphrontView {
           'conpherence-message-pane' => array(
             'name' => pht('Thread'),
             'deviceOnly' => true,
+            'hasCreate' => false
           ),
           'widgets-people' => array(
             'name' => pht('Participants'),
             'deviceOnly' => false,
+            'hasCreate' => false
           ),
           'widgets-files' => array(
             'name' => pht('Files'),
             'deviceOnly' => false,
+            'hasCreate' => false
           ),
           'widgets-calendar' => array(
             'name' => pht('Calendar'),
             'deviceOnly' => false,
+            'hasCreate' => true,
+            'createHref' => '/calendar/status/create/'
           ),
           'widgets-settings' => array(
             'name' => pht('Settings'),
             'deviceOnly' => false,
+            'hasCreate' => false
           ),
         )));
 

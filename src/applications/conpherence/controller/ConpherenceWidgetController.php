@@ -65,6 +65,11 @@ final class ConpherenceWidgetController extends
     $conpherence = $this->getConpherence();
 
     $widgets = array();
+    $new_icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
+      ->setSpriteIcon('new-grey')
+      ->setHref($this->getWidgetURI())
+      ->addSigil('conpherence-widget-adder');
     $widgets[] = phutil_tag(
       'div',
       array(
@@ -75,6 +80,7 @@ final class ConpherenceWidgetController extends
       ->setHeaderTitle(pht('Participants'))
       ->setHeaderHref('#')
       ->setDropdown(true)
+      ->addAction($new_icon)
       ->addHeaderSigil('widgets-selector'));
     $user = $this->getRequest()->getUser();
     // now the widget bodies
@@ -193,11 +199,11 @@ final class ConpherenceWidgetController extends
     $content = array();
     $layout = id(new AphrontMultiColumnView())
       ->setFluidLayout(true);
-    $timestamps = $this->getCalendarWidgetWeekTimestamps();
+    $timestamps = $this->getCalendarWidgetTimestamps();
     $today = $timestamps['today'];
-    $weekstamps = $timestamps['weekstamps'];
+    $epoch_stamps = $timestamps['epoch_stamps'];
     $one_day = 24 * 60 * 60;
-    foreach ($weekstamps as $time => $day) {
+    foreach ($epoch_stamps as $time => $day) {
       // build a header for the new day
       if ($day->format('w') == $today->format('w')) {
           $active_class = 'today';
@@ -226,7 +232,6 @@ final class ConpherenceWidgetController extends
           ));
 
       $week_day_number = $day->format('w');
-
 
       $day->setTime(0, 0, 0);
       $epoch_start = $day->format('U');
@@ -371,24 +376,20 @@ final class ConpherenceWidgetController extends
       );
   }
 
-  private function getCalendarWidgetWeekTimestamps() {
+  private function getCalendarWidgetTimestamps() {
     $user = $this->getRequest()->getUser();
     $timezone = new DateTimeZone($user->getTimezoneIdentifier());
 
-    $today = id(new DateTime('now', $timezone));
-    $monday = clone $today;
-    $monday
-      ->modify('+1 day')
-      ->modify('last monday');
+    $today = id(new DateTime('today', $timezone));
     $timestamps = array();
-    for ($day = 0; $day < 7; $day++) {
-      $timestamp = clone $monday;
+    for ($day = 0; $day < 3; $day++) {
+      $timestamp = clone $today;
       $timestamps[] = $timestamp->modify(sprintf('+%d days', $day));
     }
 
     return array(
       'today' => $today,
-      'weekstamps' => $timestamps
+      'epoch_stamps' => $timestamps
     );
   }
 

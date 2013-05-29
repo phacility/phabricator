@@ -217,21 +217,21 @@ final class ConpherenceThreadQuery
     $file_phids = array_mergev($file_phids);
 
     // statuses of everyone currently in the conpherence
-    // for a rolling one week window
-    $start_of_week = phabricator_format_local_time(
-      strtotime('last monday', strtotime('tomorrow')),
+    // for a rolling three day window
+    $start_epoch = phabricator_format_local_time(
+      strtotime('today', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
-    $end_of_week = phabricator_format_local_time(
-      strtotime('last monday +1 week', strtotime('tomorrow')),
+    $end_epoch = phabricator_format_local_time(
+      strtotime('+3 days', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $statuses = id(new PhabricatorUserStatus())
       ->loadAllWhere(
         'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
         $participant_phids,
-        $start_of_week,
-        $end_of_week);
+        $start_epoch,
+        $end_epoch);
     $statuses = mgroup($statuses, 'getUserPHID');
 
     // attached files

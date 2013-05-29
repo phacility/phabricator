@@ -138,11 +138,7 @@ JX.behavior('conpherence-menu', function(config) {
     }
 
     if (_thread.visible !== null || !config.hasWidgets) {
-      markWidgetLoading(true);
-      var widget_uri = config.baseURI + 'widget/' + data.threadID + '/';
-      new JX.Workflow(widget_uri, {})
-        .setHandler(JX.bind(null, onWidgetResponse, data.threadID))
-        .start();
+      reloadWidget(data);
     } else {
      JX.Stratcom.invoke(
       'conpherence-update-widgets',
@@ -191,7 +187,29 @@ JX.behavior('conpherence-menu', function(config) {
     JX.DOM.alterClass(widgets_root, 'loading', loading);
   }
 
-  function onWidgetResponse(thread_id, response) {
+  function reloadWidget(data) {
+    markWidgetLoading(true);
+    if (!data.widget) {
+      data.widget = getDefaultWidget();
+    }
+    var widget_uri = config.baseURI + 'widget/' + data.threadID + '/';
+    new JX.Workflow(widget_uri, {})
+      .setHandler(JX.bind(null, onWidgetResponse, data.threadID, data.widget))
+      .start();
+  }
+  JX.Stratcom.listen(
+    'conpherence-reload-widget',
+    null,
+    function (e) {
+      var data = e.getData();
+      if (data.threadID != _thread.selected) {
+        return;
+      }
+      reloadWidget(data);
+    }
+  );
+
+  function onWidgetResponse(thread_id, widget, response) {
     // we got impatient and this is no longer the right answer :/
     if (_thread.selected != thread_id) {
       return;
@@ -204,7 +222,7 @@ JX.behavior('conpherence-menu', function(config) {
       'conpherence-update-widgets',
       null,
       {
-        widget : getDefaultWidget(),
+        widget : widget,
         buildSelectors : true,
         toggleWidget : true,
         threadID : _thread.selected
