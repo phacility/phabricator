@@ -55,12 +55,20 @@ final class PhabricatorPasteQuery
 
     $pastes = $table->loadAllFromArray($data);
 
-    if ($pastes && $this->needRawContent) {
-      $this->loadRawContent($pastes);
+    return $pastes;
+  }
+
+  protected function willFilterPage(array $pastes) {
+    if (!$pastes) {
+      return $pastes;
     }
 
-    if ($pastes && $this->needContent) {
-      $this->loadContent($pastes);
+    if ($this->needRawContent) {
+      $pastes = $this->loadRawContent($pastes);
+    }
+
+    if ($this->needContent) {
+      $pastes = $this->loadContent($pastes);
     }
 
     return $pastes;
@@ -113,14 +121,16 @@ final class PhabricatorPasteQuery
       $file_phids);
     $files = mpull($files, null, 'getPHID');
 
-    foreach ($pastes as $paste) {
+    foreach ($pastes as $key => $paste) {
       $file = idx($files, $paste->getFilePHID());
-      if ($file) {
-        $paste->attachRawContent($file->loadFileData());
-      } else {
-        $paste->attachRawContent('');
+      if (!$file) {
+        unset($pastes[$key]);
+        continue;
       }
+      $paste->attachRawContent($file->loadFileData());
     }
+
+    return $pastes;
   }
 
   private function loadContent(array $pastes) {
@@ -134,34 +144,38 @@ final class PhabricatorPasteQuery
       $keys[] = $this->getContentCacheKey($paste);
     }
 
-
     $caches = $cache->getKeys($keys);
+    $results = array();
 
     $need_raw = array();
-    foreach ($pastes as $paste) {
+    foreach ($pastes as $key => $paste) {
       $key = $this->getContentCacheKey($paste);
       if (isset($caches[$key])) {
         $paste->attachContent(phutil_safe_html($caches[$key]));
+        $results[$key] = $paste;
       } else {
-        $need_raw[] = $paste;
+        $need_raw[$key] = $paste;
       }
     }
 
     if (!$need_raw) {
-      return;
+      return $results;
     }
 
     $write_data = array();
 
-    $this->loadRawContent($need_raw);
-    foreach ($need_raw as $paste) {
+    $need_raw = $this->loadRawContent($need_raw);
+    foreach ($need_raw as $key => $paste) {
       $content = $this->buildContent($paste);
       $paste->attachContent($content);
 
       $write_data[$this->getContentCacheKey($paste)] = (string)$content;
+      $results[$key] = $paste;
     }
 
     $cache->setKeys($write_data);
+
+    return $results;
   }
 
 
