@@ -29,11 +29,12 @@ final class PhabricatorMacroEditController
       }
     } else {
       $macro = new PhabricatorFileImageMacro();
+      $macro->setAuthorPHID($user->getPHID());
     }
 
     $errors = array();
     $e_name = true;
-    $e_file = pht('Provide a URL or a file');
+    $e_file = null;
     $file = null;
     $can_fetch = PhabricatorEnv::getEnvConfig('security.allow-outbound-http');
 
@@ -97,6 +98,7 @@ final class PhabricatorMacroEditController
 
       if (!$macro->getID() && !$file) {
         $errors[] = pht('You must upload an image to create a macro.');
+        $e_file = pht('Required');
       }
 
       if (!$errors) {
@@ -242,12 +244,11 @@ final class PhabricatorMacroEditController
         ->setUser($request->getUser());
 
       if ($can_fetch) {
-        $upload_form
-          ->appendChild(
-            id(new AphrontFormTextControl())
-              ->setLabel(pht('URL'))
-              ->setName('url')
-              ->setValue($request->getStr('url')));
+        $upload_form->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel(pht('URL'))
+            ->setName('url')
+            ->setValue($request->getStr('url')));
       }
 
       $upload_form

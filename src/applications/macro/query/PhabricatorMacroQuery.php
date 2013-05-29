@@ -52,28 +52,13 @@ final class PhabricatorMacroQuery
 
     $rows = queryfx_all(
       $conn,
-      'SELECT m.* FROM %T m %Q %Q %Q %Q',
+      'SELECT m.* FROM %T m %Q %Q %Q',
       $macro_table->getTableName(),
-      $this->buildJoinClause($conn),
       $this->buildWhereClause($conn),
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
 
     return $macro_table->loadAllFromArray($rows);
-  }
-
-  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $joins = array();
-
-    if ($this->authors) {
-      $file_table = new PhabricatorFile();
-      $joins[] = qsprintf(
-        $conn,
-        'JOIN %T f ON m.filePHID = f.phid',
-        $file_table->getTableName());
-    }
-
-    return implode(' ', $joins);
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
@@ -96,7 +81,7 @@ final class PhabricatorMacroQuery
     if ($this->authors) {
       $where[] = qsprintf(
         $conn,
-        'f.authorPHID IN (%Ls)',
+        'm.authorPHID IN (%Ls)',
         $this->authors);
     }
 

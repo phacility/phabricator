@@ -56,10 +56,7 @@ final class PhabricatorMacroListController
       $author_phids = array();
     }
 
-    $files = mpull($macros, 'getFile');
-    if ($files) {
-      $author_phids += mpull($files, 'getAuthorPHID', 'getAuthorPHID');
-    }
+    $author_phids += mpull($macros, 'getAuthorPHID', 'getAuthorPHID');
 
     $this->loadHandles($author_phids);
     $author_handles = array_select_keys($this->getLoadedHandles(), $authors);
@@ -102,18 +99,23 @@ final class PhabricatorMacroListController
       if ($file) {
         $item->setImageURI($file->getThumb280x210URI());
         $item->setImageSize(280, 210);
-        if ($file->getAuthorPHID()) {
-          $author_handle = $this->getHandle($file->getAuthorPHID());
-          $item->appendChild(
-            pht('Created by %s', $author_handle->renderLink()));
-        }
-        $datetime = phabricator_date($file->getDateCreated(), $viewer);
+      }
+
+      if ($macro->getDateCreated()) {
+        $datetime = phabricator_date($macro->getDateCreated(), $viewer);
         $item->appendChild(
           phutil_tag(
             'div',
             array(),
             pht('Created on %s', $datetime)));
       }
+
+      if ($macro->getAuthorPHID()) {
+        $author_handle = $this->getHandle($macro->getAuthorPHID());
+        $item->appendChild(
+          pht('Created by %s', $author_handle->renderLink()));
+      }
+
       $item->setURI($this->getApplicationURI('/view/'.$macro->getID().'/'));
       $item->setHeader($macro->getName());
 

@@ -1318,6 +1318,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130524.repoxactions.sql'),
       ),
+      '20130529.macroauthor.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130529.macroauthor.sql'),
+      ),
+      '20130529.macroauthormig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130529.macroauthormig.php'),
+      ),
     );
   }
 }

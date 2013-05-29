@@ -6,6 +6,7 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
     PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface {
 
+  protected $authorPHID;
   protected $filePHID;
   protected $phid;
   protected $name;
