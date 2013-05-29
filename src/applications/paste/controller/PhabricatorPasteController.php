@@ -32,7 +32,7 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     $nav->addFilter('savedqueries', pht('Edit Queries...'));
 
     $nav->addLabel(pht('Search'));
-    $nav->addFilter('filter/advanced', pht('Advanced Search'));
+    $nav->addFilter('query/advanced', pht('Advanced Search'));
 
     $nav->selectFilter(null);
 

@@ -27,59 +27,95 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
     $nav = $this->buildSideNavView();
 
-    if ($engine->isBuiltinQuery($this->queryKey)) {
-      $saved_query = $engine->buildSavedQueryFromBuiltin($this->queryKey);
-    } else {
+    $named_query = null;
+    $run_query = true;
+    $query_key = $this->queryKey;
+    if ($this->queryKey == 'advanced') {
+      $run_query = false;
+      $query_key = $request->getStr('query');
+    }
+
+    if ($engine->isBuiltinQuery($query_key)) {
+      $saved_query = $engine->buildSavedQueryFromBuiltin($query_key);
+      $named_query = $engine->getBuiltinQuery($query_key);
+    } else if ($query_key) {
       $saved_query = id(new PhabricatorSavedQueryQuery())
         ->setViewer($user)
-        ->withQueryKeys(array($this->queryKey))
+        ->withQueryKeys(array($query_key))
         ->executeOne();
 
       if (!$saved_query) {
         return new Aphront404Response();
       }
-    }
 
-    $query = id(new PhabricatorPasteSearchEngine())
-      ->buildQueryFromSavedQuery($saved_query);
+      $named_query = id(new PhabricatorNamedQueryQuery())
+        ->setViewer($user)
+        ->withQueryKeys(array($saved_query->getQueryKey()))
+        ->withEngineClassNames(array(get_class($engine)))
+        ->withUserPHIDs(array($user->getPHID()))
+        ->executeOne();
+    } else {
+      $saved_query = $engine->buildSavedQueryFromRequest($request);
+    }
 
     $filter = $nav->selectFilter(
       'query/'.$saved_query->getQueryKey(),
-      'filter/advanced');
+      'query/advanced');
 
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-    $pastes = $query->setViewer($request->getUser())
-      ->needContent(true)
-      ->executeWithCursorPager($pager);
+    $form = id(new AphrontFormView())
+      ->setNoShading(true)
+      ->setUser($user);
 
-    $list = $this->buildPasteList($pastes);
-    $list->setPager($pager);
-    $list->setNoDataString(pht("No results found for this query."));
+    $engine->buildSearchForm($form, $saved_query);
 
-    if ($this->queryKey !== null || $filter == "filter/advanced") {
-      $form = id(new AphrontFormView())
-        ->setNoShading(true)
-        ->setUser($user);
+    $submit = id(new AphrontFormSubmitControl())
+      ->setValue(pht('Execute Query'));
 
-      $engine->buildSearchForm($form, $saved_query);
-
-      $submit = id(new AphrontFormSubmitControl())
-        ->setValue(pht('Execute Query'));
-
-      if ($filter == 'filter/advanced') {
-        $submit->addCancelButton(
-          '/search/edit/'.$saved_query->getQueryKey().'/',
-          pht('Save Custom Query...'));
-      }
-
-      $form->appendChild($submit);
-
-      $filter_view = id(new AphrontListFilterView())->appendChild($form);
-      $nav->appendChild($filter_view);
+    if ($run_query && !$named_query) {
+      $submit->addCancelButton(
+        '/search/edit/'.$saved_query->getQueryKey().'/',
+        pht('Save Custom Query...'));
     }
 
-    $nav->appendChild($list);
+    $form->appendChild($submit);
+    $filter_view = id(new AphrontListFilterView())->appendChild($form);
+
+    if ($run_query && $named_query) {
+      if ($named_query->getIsBuiltin()) {
+        $description = pht(
+          'Showing results for query "%s".',
+          $named_query->getQueryName());
+      } else {
+        $description = pht(
+          'Showing results for saved query "%s".',
+          $named_query->getQueryName());
+      }
+
+      $filter_view->setCollapsed(
+        pht('Edit Query...'),
+        pht('Hide Query'),
+        $description,
+        $this->getApplicationURI('query/advanced/?query='.$query_key));
+    }
+
+    $nav->appendChild($filter_view);
+
+    if ($run_query) {
+      $query = id(new PhabricatorPasteSearchEngine())
+        ->buildQueryFromSavedQuery($saved_query);
+
+      $pager = new AphrontCursorPagerView();
+      $pager->readFromRequest($request);
+      $pastes = $query->setViewer($request->getUser())
+        ->needContent(true)
+        ->executeWithCursorPager($pager);
+
+      $list = $this->buildPasteList($pastes);
+      $list->setPager($pager);
+      $list->setNoDataString(pht("No results found for this query."));
+
+      $nav->appendChild($list);
+    }
 
     $crumbs = $this
       ->buildApplicationCrumbs($nav)

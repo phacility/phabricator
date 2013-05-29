@@ -107,6 +107,17 @@ abstract class PhabricatorApplicationSearchEngine {
   /**
    * @task builtin
    */
+  public function getBuiltinQuery($query_key) {
+    if (!$this->isBuiltinQuery($query_key)) {
+      throw new Exception("'{$query_key}' is not a builtin!");
+    }
+    return idx($this->getBuiltinQueries(), $query_key);
+  }
+
+
+  /**
+   * @task builtin
+   */
   protected function getBuiltinQueryNames() {
     return array();
   }
