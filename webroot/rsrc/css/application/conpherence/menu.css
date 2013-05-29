@@ -21,7 +21,13 @@
   margin: 0px 0px 16px 0px;
 }
 
-.conpherence-menu-pane {
+.conpherence-menu-pane .menu-loading-icon {
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.conpherence-menu-pane,
+.loading .menu-loading-icon {
   width: 100%;
   position: absolute;
   overflow-x: hidden;
@@ -30,7 +36,8 @@
   bottom: 0;
 }
 .device-desktop .conpherence-layout .conpherence-menu-pane,
-.device-desktop .conpherence-layout .phabricator-nav-column-background {
+.device-desktop .conpherence-layout .phabricator-nav-column-background,
+.device-desktop .loading .menu-loading-icon {
   width: 280px;
 }
 .device .conpherence-menu-pane {
@@ -63,8 +70,14 @@
 }
 
 .conpherence-content-pane {
+  display: none;
   margin-left: 0px;
   position: relative;
+}
+
+.device-desktop .conpherence-content-pane,
+.device .conpherence-role-thread .conpherence-content-pane {
+  display: block;
 }
 
 .conpherence-menu .conpherence-menu-item-view {
@@ -83,6 +96,10 @@
 .conpherence-menu .conpherence-selected {
   background: rgba(0, 0, 0, .6);
   border-left: 2px solid #66CCFF;
+}
+
+.conpherence-menu .loading {
+  font-style: italic;
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {

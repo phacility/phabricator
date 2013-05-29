@@ -84,6 +84,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $unread_count = $data['unread_count'];
     $epoch = $data['epoch'];
     $image = $data['image'];
+    $dom_id = $thread->getPHID().'-nav-item';
 
     return id(new ConpherenceMenuItemView())
       ->setUser($user)
@@ -98,7 +99,8 @@ final class ConpherenceThreadListView extends AphrontView {
       ->setMetadata(
         array(
           'title' => $data['js_title'],
-          'id' => $thread->getID(),
+          'id' => $dom_id,
+          'threadID' => $thread->getID(),
           ));
   }
 

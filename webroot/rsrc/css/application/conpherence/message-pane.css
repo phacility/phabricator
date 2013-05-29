@@ -2,22 +2,25 @@
  * @provides conpherence-message-pane-css
  */
 
-.conpherence-message-pane {
+.conpherence-message-pane,
+.loading .messages-loading-mask,
+.loading .messages-loading-icon {
   position: fixed;
   left: 280px;
   right: 241px;
   top: 76px;
+  bottom: 0px;
   min-width: 300px;
   width: auto;
-  height: 100%;
 }
 
-.device .conpherence-message-pane {
+.device .conpherence-message-pane,
+.device .loading .messages-loading-mask,
+.device .loading .messages-loading-icon {
   left: 0;
   right: 0;
   width: 100%;
 }
-
 
 .conpherence-show-older-messages {
   display: block;
@@ -26,6 +29,10 @@
   text-align: center;
   padding: 10px;
   color: #18559D;
+}
+
+.conpherence-show-older-messages-loading {
+  font-style: italic;
 }
 
 .conpherence-message-pane .conpherence-messages {
@@ -45,6 +52,31 @@
   bottom: 3em;
   width: 100%;
   box-shadow: none;
+}
+
+.conpherence-message-pane .messages-loading-mask {
+  opacity: .22;
+  background: #222;
+  display: none;
+}
+.conpherence-message-pane .messages-loading-icon {
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.loading .messages-loading-mask,
+.loading .messages-loading-icon {
+  display: block;
+  z-index: 500;
+}
+
+.loading .header-loading-mask {
+  height: 31px;
+  position: absolute;
+  width: 100%;
+  z-index: 5;
+  background: #222;
+  opacity: .22;
 }
 
 .conpherence-message-pane .phabricator-form-view {

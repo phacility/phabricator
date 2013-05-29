@@ -918,7 +918,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-menu-css' =>
   array(
-    'uri' => '/res/c955650e/rsrc/css/application/conpherence/menu.css',
+    'uri' => '/res/60f38fbd/rsrc/css/application/conpherence/menu.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -927,7 +927,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-message-pane-css' =>
   array(
-    'uri' => '/res/383af93e/rsrc/css/application/conpherence/message-pane.css',
+    'uri' => '/res/d9e90066/rsrc/css/application/conpherence/message-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -945,7 +945,7 @@ celerity_register_resource_map(array(
   ),
   'conpherence-widget-pane-css' =>
   array(
-    'uri' => '/res/6f836b19/rsrc/css/application/conpherence/widget-pane.css',
+    'uri' => '/res/b218398a/rsrc/css/application/conpherence/widget-pane.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1294,25 +1294,24 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-menu' =>
   array(
-    'uri' => '/res/7181099a/rsrc/js/application/conpherence/behavior-menu.js',
+    'uri' => '/res/478fc4f3/rsrc/js/application/conpherence/behavior-menu.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-util',
-      3 => 'javelin-request',
-      4 => 'javelin-stratcom',
-      5 => 'javelin-workflow',
-      6 => 'javelin-behavior-device',
-      7 => 'javelin-history',
-      8 => 'javelin-vector',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-workflow',
+      5 => 'javelin-behavior-device',
+      6 => 'javelin-history',
+      7 => 'javelin-vector',
     ),
     'disk' => '/rsrc/js/application/conpherence/behavior-menu.js',
   ),
   'javelin-behavior-conpherence-pontificate' =>
   array(
-    'uri' => '/res/88ac3361/rsrc/js/application/conpherence/behavior-pontificate.js',
+    'uri' => '/res/d6c5860f/rsrc/js/application/conpherence/behavior-pontificate.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1326,7 +1325,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-conpherence-widget-pane' =>
   array(
-    'uri' => '/res/3d426c01/rsrc/js/application/conpherence/behavior-widget-pane.js',
+    'uri' => '/res/232893cf/rsrc/js/application/conpherence/behavior-widget-pane.js',
     'type' => 'js',
     'requires' =>
     array(

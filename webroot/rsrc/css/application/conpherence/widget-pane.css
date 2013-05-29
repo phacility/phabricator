@@ -2,12 +2,14 @@
  * @provides conpherence-widget-pane-css
  */
 
-.conpherence-widget-pane {
+.conpherence-widget-pane,
+.loading .widgets-loading-mask,
+.loading .widgets-loading-icon {
   position: fixed;
   right: 0px;
   top: 74px;
+  bottom: 0px;
   width: 240px;
-  height: 100%;
   border-width: 0 0 0 1px;
   border-color: #CCC;
   border-style: solid;
@@ -15,9 +17,27 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.device .conpherence-widget-pane {
+.device .conpherence-widget-pane,
+.device .loading .widgets-loading-mask,
+.device .loading .widgets-loading-icon {
   top: 44px;
   width: 100%;
+}
+
+.conpherence-widget-pane .widgets-loading-mask {
+  opacity: .22;
+  background: #222;
+  display: none;
+}
+.conpherence-widget-pane .widgets-loading-icon {
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.loading .widgets-loading-mask,
+.loading .widgets-loading-icon {
+  display: block;
+  z-index: 500;
 }
 
 .conpherence-widget-pane .aphront-form-input {
@@ -79,6 +99,10 @@
   padding: 20px;
   text-align: center;
   color: #555;
+}
+.device .conpherence-widget-pane #widgets-files .no-files {
+  width: 60px;
+  margin: 0px auto 0px auto;
 }
 .conpherence-widget-pane #widgets-files .file-entry {
   padding: 10px 0;

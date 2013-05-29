@@ -50,7 +50,16 @@ abstract class ConpherenceController extends PhabricatorController {
       ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
       ->setWorkflow(true));
 
-    return $crumbs;
+    return hsprintf(
+      '%s',
+      array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'header-loading-mask'
+          ),
+          ''),
+        $crumbs));
   }
 
   protected function renderConpherenceTransactions(

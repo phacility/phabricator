@@ -51,14 +51,23 @@ final class ConpherenceLayoutView extends AphrontView {
 
   public function render() {
     require_celerity_resource('conpherence-menu-css');
+    require_celerity_resource('conpherence-message-pane-css');
+    require_celerity_resource('conpherence-widget-pane-css');
 
     $layout_id = celerity_generate_unique_node_id();
 
+    $selected_id = null;
+    $selected_thread_id = null;
+    if ($this->thread) {
+      $selected_id = $this->thread->getPHID() . '-nav-item';
+      $selected_thread_id = $this->thread->getID();
+    }
     Javelin::initBehavior('conpherence-menu',
       array(
-        'base_uri' => $this->baseURI,
+        'baseURI' => $this->baseURI,
         'layoutID' => $layout_id,
-        'selectedID' => ($this->thread ? $this->thread->getID() : null),
+        'selectedID' => $selected_id,
+        'selectedThreadID' => $selected_thread_id,
         'role' => $this->role,
         'hasThreadList' => (bool)$this->threadView,
         'hasThread' => (bool)$this->messages,
@@ -92,6 +101,9 @@ final class ConpherenceLayoutView extends AphrontView {
           ),
         )));
 
+
+    $icon_48 = celerity_get_resource_uri('/rsrc/image/loading/loading_48.gif');
+    $loading_style = 'background-image: url('.$icon_48.');';
     return javelin_tag(
       'div',
       array(
@@ -114,7 +126,14 @@ final class ConpherenceLayoutView extends AphrontView {
             'class' => 'conpherence-menu-pane phabricator-side-menu',
             'sigil' => 'conpherence-menu-pane',
           ),
-          nonempty($this->threadView, '')),
+          nonempty(
+            $this->threadView,
+            phutil_tag(
+              'div',
+              array(
+                'class' => 'menu-loading-icon',
+                'style' => $loading_style),
+              ''))),
         javelin_tag(
           'div',
           array(
@@ -159,12 +178,32 @@ final class ConpherenceLayoutView extends AphrontView {
                 'id' => 'conpherence-widget-pane',
                 'sigil' => 'conpherence-widget-pane',
               ),
-              ''),
+              array(
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'widgets-loading-mask'
+                  ),
+                  ''),
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'widgets-loading-icon',
+                    'style' => $loading_style,
+                  ),
+                  ''),
+                javelin_tag(
+                  'div',
+                  array(
+                    'sigil' => 'conpherence-widgets-holder'
+                  ),
+                  ''))),
             javelin_tag(
               'div',
               array(
                 'class' => 'conpherence-message-pane',
-                'id' => 'conpherence-message-pane'
+                'id' => 'conpherence-message-pane',
+                'sigil' => 'conpherence-message-pane'
               ),
               array(
                 javelin_tag(
@@ -175,6 +214,18 @@ final class ConpherenceLayoutView extends AphrontView {
                     'sigil' => 'conpherence-messages',
                   ),
                   nonempty($this->messages, '')),
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'messages-loading-mask',
+                  ),
+                  ''),
+                phutil_tag(
+                  'div',
+                  array(
+                    'class' => 'messages-loading-icon',
+                    'style' => $loading_style,
+                  )),
                 javelin_tag(
                   'div',
                   array(

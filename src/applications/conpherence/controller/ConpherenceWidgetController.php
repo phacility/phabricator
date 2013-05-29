@@ -61,7 +61,6 @@ final class ConpherenceWidgetController extends
   }
 
   private function renderWidgetPaneContent() {
-    require_celerity_resource('conpherence-widget-pane-css');
     require_celerity_resource('sprite-conpherence-css');
     $conpherence = $this->getConpherence();
 
@@ -73,7 +72,7 @@ final class ConpherenceWidgetController extends
       ),
       id(new PhabricatorActionHeaderView())
       ->setHeaderColor(PhabricatorActionHeaderView::HEADER_GREY)
-      ->setHeaderTitle('')
+      ->setHeaderTitle(pht('Participants'))
       ->setHeaderHref('#')
       ->setDropdown(true)
       ->addHeaderSigil('widgets-selector'));

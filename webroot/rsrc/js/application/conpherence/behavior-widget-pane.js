@@ -13,80 +13,173 @@
 
 JX.behavior('conpherence-widget-pane', function(config) {
 
-  var build_widget_selector = function (data) {
-    var widgets = config.widgetRegistry;
+  /**
+   * There can be race conditions around loading the messages or the widgets
+   * first. Keep track of what widgets we've loaded with this variable.
+   */
+  var _loadedWidgetsID = null;
+
+  /**
+   * At any given time there can be only one selected widget. Keep track of
+   * which one it is by the user-facing name for ease of use with
+   * PhabricatorDropdownMenuItems.
+   */
+  var _selectedWidgetName = null;
+
+  /**
+   * This is potentially built each time the user switches conpherence threads
+   * or when the result JX.Device.getDevice() changes from desktop to some
+   * other value.
+   */
+  var buildDeviceWidgetSelector = function (data) {
+    var device_header = _getDeviceWidgetHeader();
+    if (!device_header) {
+      return;
+    }
+    JX.DOM.show(device_header);
+    var device_menu = new JX.PhabricatorDropdownMenu(device_header);
+    data.deviceMenu = true;
+    _buildWidgetSelector(device_menu, data);
+  };
+
+  /**
+   * This is potentially built each time the user switches conpherence threads
+   * or when the result JX.Device.getDevice() changes from mobile or tablet to
+   * desktop.
+   */
+  var buildDesktopWidgetSelector = function (data) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var widgetPane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
-    var widgetHeader = JX.DOM.find(widgetPane, 'a', 'widgets-selector');
-    var mobileWidgetHeader = null;
+    var widget_pane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+    var widget_header = JX.DOM.find(widget_pane, 'a', 'widgets-selector');
+    var menu = new JX.PhabricatorDropdownMenu(widget_header);
+    menu.toggleAlignDropdownRight(false);
+    data.deviceMenu = false;
+    _buildWidgetSelector(menu, data);
+  };
+
+  /**
+   * Workhorse that actually builds the widget selector. Note some fancy bits
+   * where we listen for the "open" event and enable / disable widgets as
+   * appropos.
+   */
+  var _buildWidgetSelector = function (menu, data) {
+    _loadedWidgetsID = data.threadID;
+    var widgets = config.widgetRegistry;
+    for (var widget in widgets) {
+      var widget_data = widgets[widget];
+      if (widget_data.deviceOnly && data.deviceMenu === false) {
+        continue;
+      }
+      menu.addItem(new JX.PhabricatorMenuItem(
+        widget_data.name,
+        JX.bind(null, toggleWidget, { widget : widget }),
+        '#'
+      ).setDisabled(widget == data.widget));
+    }
+
+    menu.listen(
+     'open',
+     JX.bind(menu, function () {
+       for (var ii = 0; ii < this._items.length; ii++) {
+         var item = this._items[ii];
+         var name = item.getName();
+         if (name == _selectedWidgetName) {
+           item.setDisabled(true);
+         } else {
+           item.setDisabled(false);
+         }
+       }
+     }));
+  };
+
+  /**
+   * Since this is not always on the page, avoid having a repeat
+   * try / catch block and consolidate into this helper function.
+   */
+  var _getDeviceWidgetHeader = function () {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var device_header = null;
     try {
-      mobileWidgetHeader = JX.DOM.find(
+      device_header = JX.DOM.find(
         root,
         'a',
         'device-widgets-selector');
     } catch (ex) {
-      // is okay - no mobileWidgetHeader yet...
+      // is okay - no deviceWidgetHeader yet... but bail time
     }
-    var widgetData = widgets[data.widget];
-    JX.DOM.setContent(
-      widgetHeader,
-      widgetData.name);
-    JX.DOM.appendContent(
-      widgetHeader,
-      JX.$N('span', { className : 'caret' }));
-    if (mobileWidgetHeader) {
-      // this is fragile but adding a sigil to this element is awkward
-      var mobileWidgetHeaderSpans = JX.DOM.scry(mobileWidgetHeader, 'span');
-      var mobileWidgetHeaderSpan = mobileWidgetHeaderSpans[1];
-      JX.DOM.setContent(
-        mobileWidgetHeaderSpan,
-        widgetData.name);
-    }
-
-    var menu = new JX.PhabricatorDropdownMenu(widgetHeader);
-    menu.toggleAlignDropdownRight(false);
-    var deviceMenu = null;
-    if (mobileWidgetHeader) {
-      deviceMenu = new JX.PhabricatorDropdownMenu(mobileWidgetHeader);
-    }
-
-    for (var widget in widgets) {
-      widgetData = widgets[widget];
-      if (mobileWidgetHeader) {
-        deviceMenu.addItem(new JX.PhabricatorMenuItem(
-          widgetData.name,
-          JX.bind(null, build_widget_selector, { widget : widget }),
-          '#'
-          ).setDisabled(widget == data.widget));
-      }
-      if (widgetData.deviceOnly) {
-        continue;
-      }
-      menu.addItem(new JX.PhabricatorMenuItem(
-        widgetData.name,
-        JX.bind(null, build_widget_selector, { widget : widget }),
-        '#'
-      ).setDisabled(widget == data.widget));
-    }
-    if (data.no_toggle) {
-      return;
-    }
-    toggle_widget(data);
+    return device_header;
   };
 
-  var toggle_widget = function (data) {
+  /**
+   * Responder to the 'conpherence-did-redraw-thread' event, this bad boy
+   * hides or shows the device widget selector as appropros.
+   */
+  var _didRedrawThread = function (data) {
+    if (_loadedWidgetsID === null || _loadedWidgetsID != data.threadID) {
+      return;
+    }
+    var device = JX.Device.getDevice();
+    var device_selector = _getDeviceWidgetHeader();
+    if (device == 'desktop') {
+      JX.DOM.hide(device_selector);
+    } else {
+      JX.DOM.show(device_selector);
+    }
+    if (data.buildDeviceWidgetSelector) {
+      buildDeviceWidgetSelector(data);
+    }
+    toggleWidget(data);
+  };
+  JX.Stratcom.listen(
+    'conpherence-did-redraw-thread',
+    null,
+    function (e) {
+      _didRedrawThread(e.getData());
+    }
+  );
+
+  /**
+   * Toggling a widget involves showing / hiding the appropriate widget
+   * bodies as well as updating the selectors to have the label on the
+   * newly selected widget.
+   */
+  var toggleWidget = function (data) {
     var widgets = config.widgetRegistry;
-    var widgetData = widgets[data.widget];
+    var widget_data = widgets[data.widget];
     var device = JX.Device.getDevice();
     var is_desktop = device == 'desktop';
 
-    if (widgetData.deviceOnly && is_desktop) {
+    if (widget_data.deviceOnly && is_desktop) {
       return;
+    }
+    _selectedWidgetName = widget_data.name;
+
+    var device_header = _getDeviceWidgetHeader();
+    if (device_header) {
+      // this is fragile but adding a sigil to this element is awkward
+      var device_header_spans = JX.DOM.scry(device_header, 'span');
+      var device_header_span = device_header_spans[1];
+      JX.DOM.setContent(
+        device_header_span,
+        widget_data.name);
+    }
+
+    // don't update the non-device selector with device only widget stuff
+    if (!widget_data.deviceOnly) {
+      var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+      var widget_pane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+      var widget_header = JX.DOM.find(widget_pane, 'a', 'widgets-selector');
+      JX.DOM.setContent(
+        widget_header,
+        widget_data.name);
+      JX.DOM.appendContent(
+        widget_header,
+        JX.$N('span', { className : 'caret' }));
     }
 
     for (var widget in config.widgetRegistry) {
-      widgetData = widgets[widget];
-      if (widgetData.deviceOnly && is_desktop) {
+      widget_data = widgets[widget];
+      if (widget_data.deviceOnly && is_desktop) {
         // some one off code for conpherence messages which are device-only
         // as a widget, but shown always on the desktop
         if (widget == 'conpherence-message-pane') {
@@ -109,13 +202,18 @@ JX.behavior('conpherence-widget-pane', function(config) {
   };
 
   JX.Stratcom.listen(
-    'conpherence-toggle-widget',
+    'conpherence-update-widgets',
     null,
     function (e) {
-      build_widget_selector(e.getData());
-    }
-  );
-
+      var data = e.getData();
+      if (data.buildSelectors) {
+        buildDesktopWidgetSelector(data);
+        buildDeviceWidgetSelector(data);
+      }
+      if (data.toggleWidget) {
+        toggleWidget(data);
+      }
+    });
 
   /* people widget */
   JX.Stratcom.listen(
@@ -126,19 +224,19 @@ JX.behavior('conpherence-widget-pane', function(config) {
       var root = e.getNode('conpherence-layout');
       var form = e.getNode('tag:form');
       var data = e.getNodeData('add-person');
-      var peopleRoot = e.getNode('widgets-people');
+      var people_root = e.getNode('widgets-people');
       var messages = null;
       try {
         messages = JX.DOM.find(root, 'div', 'conpherence-messages');
       } catch (ex) {
       }
-      var latestTransactionData = JX.Stratcom.getData(
+      var latest_transaction_data = JX.Stratcom.getData(
         JX.DOM.find(
           root,
           'input',
           'latest-transaction-id'
       ));
-      data.latest_transaction_id = latestTransactionData.id;
+      data.latest_transaction_id = latest_transaction_data.id;
       JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function (r) {
         if (messages) {
@@ -148,7 +246,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
 
         // update the people widget
         JX.DOM.setContent(
-          peopleRoot,
+          people_root,
           JX.$H(r.people_widget)
         );
       }))
@@ -160,7 +258,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
     ['touchstart', 'mousedown'],
     'remove-person',
     function (e) {
-      var peopleRoot = e.getNode('widgets-people');
+      var people_root = e.getNode('widgets-people');
       var form = JX.DOM.find(peopleRoot, 'form');
       var data = e.getNodeData('remove-person');
       // we end up re-directing to conpherence home
