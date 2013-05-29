@@ -17,8 +17,9 @@ $args->parseStandardArguments();
 $workflows = array(
   new PhabricatorFilesManagementEnginesWorkflow(),
   new PhabricatorFilesManagementMigrateWorkflow(),
-  new PhutilHelpArgumentWorkflow(),
   new PhabricatorFilesManagementRebuildWorkflow(),
+  new PhabricatorFilesManagementPurgeWorkflow(),
+  new PhutilHelpArgumentWorkflow(),
 );
 
 $args->parseWorkflows($workflows);

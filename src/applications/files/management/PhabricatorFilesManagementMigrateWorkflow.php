@@ -41,39 +41,8 @@ final class PhabricatorFilesManagementMigrateWorkflow
 
     $engine = PhabricatorFile::buildEngine($engine_id);
 
-    if ($args->getArg('all')) {
-      if ($args->getArg('names')) {
-        throw new PhutilArgumentUsageException(
-          "Specify either a list of files or `--all`, but not both.");
-      }
-      $iterator = new LiskMigrationIterator(new PhabricatorFile());
-    } else if ($args->getArg('names')) {
-      $iterator = array();
-
-      foreach ($args->getArg('names') as $name) {
-        $name = trim($name);
-
-        $id = preg_replace('/^F/i', '', $name);
-        if (ctype_digit($id)) {
-          $file = id(new PhabricatorFile())->loadOneWhere(
-            'id = %d',
-            $id);
-          if (!$file) {
-            throw new PhutilArgumentUsageException(
-              "No file exists with id '{$name}'.");
-          }
-        } else {
-          $file = id(new PhabricatorFile())->loadOneWhere(
-            'phid = %d',
-            $name);
-          if (!$file) {
-            throw new PhutilArgumentUsageException(
-              "No file exists with PHID '{$name}'.");
-          }
-        }
-        $iterator[] = $file;
-      }
-    } else {
+    $iterator = $this->buildIterator($args);
+    if (!$iterator) {
       throw new PhutilArgumentUsageException(
         "Either specify a list of files to migrate, or use `--all` ".
         "to migrate all files.");
