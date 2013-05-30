@@ -229,67 +229,82 @@ JX.behavior('conpherence-widget-pane', function(config) {
     'conpherence-widget-adder',
     function (e) {
       e.kill();
+
       var widgets = config.widgetRegistry;
-      var active_widget = null;
-      var href = null;
+      // the widget key might be in node data, but otherwise use the
+      // selected widget
+      var event_data = e.getNodeData('conpherence-widget-adder');
+      var widget_key = _selectedWidgetName;
+      if (event_data.widget) {
+        widget_key = widgets[event_data.widget].name;
+      }
+
+      var widget_to_update = null;
+      var create_data = null;
       for (var widget in widgets) {
-        if (widgets[widget].name == _selectedWidgetName) {
-          href = widgets[widget].createHref;
-          active_widget = widget;
+        if (widgets[widget].name == widget_key) {
+          create_data = widgets[widget].createData;
+          widget_to_update = widget;
           break;
         }
       }
-      new JX.Workflow(href, {})
-        .setHandler(function () {
-          JX.Stratcom.invoke(
-            'conpherence-reload-widget',
-            null,
-            {
-              threadID : _loadedWidgetsID,
-              widget : active_widget
-            }
-          );
-        })
-        .start();
-    }
-  );
-
-  /* people widget */
-  JX.Stratcom.listen(
-    ['submit', 'didSyntheticSubmit'],
-    'add-person',
-    function (e) {
-      e.kill();
-      var root = e.getNode('conpherence-layout');
-      var form = e.getNode('tag:form');
-      var data = e.getNodeData('add-person');
-      var people_root = e.getNode('widgets-people');
-      var messages = null;
-      try {
-        messages = JX.DOM.find(root, 'div', 'conpherence-messages');
-      } catch (ex) {
+      // this should be impossible, but hey
+      if (!widget_to_update) {
+        return;
       }
+      var href = config.widgetBaseUpdateURI + _loadedWidgetsID + '/';
+      if (create_data.customHref) {
+        href = create_data.customHref;
+      }
+
+      var root = JX.DOM.find(document, 'div', 'conpherence-layout');
       var latest_transaction_data = JX.Stratcom.getData(
         JX.DOM.find(
           root,
           'input',
           'latest-transaction-id'
       ));
-      data.latest_transaction_id = latest_transaction_data.id;
-      JX.Workflow.newFromForm(form, data)
-      .setHandler(JX.bind(this, function (r) {
-        if (messages) {
-          JX.DOM.appendContent(messages, JX.$H(r.transactions));
-          messages.scrollTop = messages.scrollHeight;
-        }
+      var data = {
+        latest_transaction_id : latest_transaction_data.id,
+        action : create_data.action
+      };
 
-        // update the people widget
-        JX.DOM.setContent(
-          people_root,
-          JX.$H(r.people_widget)
-        );
-      }))
-      .start();
+      new JX.Workflow(href, data)
+        .setHandler(function (r) {
+          if (create_data.refreshFromResponse) {
+            var messages = null;
+            try {
+              messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+            } catch (ex) {
+            }
+            if (messages) {
+              JX.DOM.appendContent(messages, JX.$H(r.transactions));
+              messages.scrollTop = messages.scrollHeight;
+            }
+
+            if (r.people_widget) {
+              try {
+                var people_root = JX.DOM.find(root, 'div', 'widgets-people');
+                // update the people widget
+                JX.DOM.setContent(
+                  people_root,
+                  JX.$H(r.people_widget));
+              } catch (ex) {
+              }
+            }
+
+          // otherwise let's redraw the widget somewhat lazily
+          } else {
+            JX.Stratcom.invoke(
+              'conpherence-reload-widget',
+              null,
+              {
+                threadID : _loadedWidgetsID,
+                widget : widget_to_update
+              });
+          }
+        })
+        .start();
     }
   );
 
@@ -297,11 +312,10 @@ JX.behavior('conpherence-widget-pane', function(config) {
     ['touchstart', 'mousedown'],
     'remove-person',
     function (e) {
-      var people_root = e.getNode('widgets-people');
-      var form = JX.DOM.find(peopleRoot, 'form');
+      var href = config.widgetBaseUpdateURI + _loadedWidgetsID + '/';
       var data = e.getNodeData('remove-person');
       // we end up re-directing to conpherence home
-      JX.Workflow.newFromForm(form, data)
+      new JX.Workflow(href, data)
       .start();
     }
   );

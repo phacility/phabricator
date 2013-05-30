@@ -13,6 +13,22 @@ abstract class ConpherenceController extends PhabricatorController {
       pht('New Message'),
       $this->getApplicationURI('new/'));
 
+    $nav->addMenuItem(
+      id(new PhabricatorMenuItemView())
+      ->setName(pht('Add Participants'))
+      ->setType(PhabricatorMenuItemView::TYPE_LINK)
+      ->setHref('#')
+      ->addSigil('conpherence-widget-adder')
+      ->setMetadata(array('widget' => 'widgets-people')));
+
+    $nav->addMenuItem(
+      id(new PhabricatorMenuItemView())
+      ->setName(pht('New Calendar Item'))
+      ->setType(PhabricatorMenuItemView::TYPE_LINK)
+      ->setHref('/calendar/status/create/')
+      ->addSigil('conpherence-widget-adder')
+      ->setMetadata(array('widget' => 'widgets-calendar')));
+
     return $nav;
   }
 

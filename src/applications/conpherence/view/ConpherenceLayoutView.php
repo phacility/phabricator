@@ -77,7 +77,7 @@ final class ConpherenceLayoutView extends AphrontView {
     Javelin::initBehavior(
       'conpherence-widget-pane',
       array(
-        'selectChar' => "\xE2\x96\xBC",
+        'widgetBaseUpdateURI' => $this->baseURI . 'update/',
         'widgetRegistry' => array(
           'conpherence-message-pane' => array(
             'name' => pht('Thread'),
@@ -87,7 +87,12 @@ final class ConpherenceLayoutView extends AphrontView {
           'widgets-people' => array(
             'name' => pht('Participants'),
             'deviceOnly' => false,
-            'hasCreate' => false
+            'hasCreate' => true,
+            'createData' => array(
+              'refreshFromResponse' => true,
+              'action' => ConpherenceUpdateActions::ADD_PERSON,
+              'customHref' => null
+            )
           ),
           'widgets-files' => array(
             'name' => pht('Files'),
@@ -98,7 +103,11 @@ final class ConpherenceLayoutView extends AphrontView {
             'name' => pht('Calendar'),
             'deviceOnly' => false,
             'hasCreate' => true,
-            'createHref' => '/calendar/status/create/'
+            'createData' => array(
+              'refreshFromResponse' => false,
+              'action' => ConpherenceUpdateActions::ADD_STATUS,
+              'customHref' => '/calendar/status/create/'
+            )
           ),
           'widgets-settings' => array(
             'name' => pht('Settings'),

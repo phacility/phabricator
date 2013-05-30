@@ -69,6 +69,7 @@ final class ConpherenceWidgetController extends
       ->setSpriteSheet(PHUIIconView::SPRITE_ACTIONS)
       ->setSpriteIcon('new-grey')
       ->setHref($this->getWidgetURI())
+      ->setMetadata(array('widget' => null))
       ->addSigil('conpherence-widget-adder');
     $widgets[] = phutil_tag(
       'div',
