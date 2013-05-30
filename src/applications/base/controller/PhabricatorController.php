@@ -141,7 +141,7 @@ abstract class PhabricatorController extends AphrontController {
     if (!$this->getCurrentApplication()) {
       throw new Exception("No application!");
     }
-    return $this->getCurrentApplication()->getBaseURI().ltrim($path, '/');
+    return $this->getCurrentApplication()->getApplicationURI($path);
   }
 
   public function buildApplicationPage($view, array $options) {

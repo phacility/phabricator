@@ -98,6 +98,10 @@ abstract class PhabricatorApplication {
     return null;
   }
 
+  public function getApplicationURI($path = '') {
+    return $this->getBaseURI().ltrim($path, '/');
+  }
+
   public function getIconURI() {
     return null;
   }
