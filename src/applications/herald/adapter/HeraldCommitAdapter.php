@@ -114,8 +114,8 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
       ));
 
     $raw = DiffusionQuery::callConduitWithDiffusionRequest(
-      $drequest,
       PhabricatorUser::getOmnipotentUser(),
+      $drequest,
       'diffusion.rawdiffquery',
       array(
         'commit' => $this->commit->getCommitIdentifier(),
