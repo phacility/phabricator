@@ -133,6 +133,22 @@
   margin-left: 45px;
 }
 
+.conpherence-message-pane .date-marker {
+  border-top: 1px solid #bfbfbf;
+  margin: 5px 15px;
+  min-height: auto;
+}
+.conpherence-message-pane .date-marker .date {
+  position: relative;
+  top: -8px;
+  left: 45px;
+  background-color: #FFF;
+  width: auto;
+  color: #BFBFBF;
+  font-size: 11px;
+  padding: 0px 5px;
+}
+
 .device-phone .conpherence-message-pane .phabricator-transaction-detail {
   min-height: auto;
 }

@@ -108,13 +108,41 @@ abstract class ConpherenceController extends PhabricatorController {
       }
     }
     $engine->process();
+    // we're going to insert a dummy date marker transaction for breaks
+    // between days. some setup required!
+    $previous_transaction = null;
+    $date_marker_transaction = id(new ConpherenceTransaction())
+      ->setTransactionType(ConpherenceTransactionType::TYPE_DATE_MARKER)
+      ->makeEphemeral();
+    $date_marker_transaction_view = id(new ConpherenceTransactionView())
+      ->setUser($user)
+      ->setConpherenceTransaction($date_marker_transaction)
+      ->setHandles($handles)
+      ->setMarkupEngine($engine);
     foreach ($transactions as $transaction) {
+      if ($previous_transaction) {
+        $previous_day = phabricator_format_local_time(
+          $previous_transaction->getDateCreated(),
+          $user,
+          'Ymd');
+        $current_day = phabricator_format_local_time(
+          $transaction->getDateCreated(),
+          $user,
+          'Ymd');
+        // date marker transaction time!
+        if ($previous_day != $current_day) {
+          $date_marker_transaction->setDateCreated(
+            $transaction->getDateCreated());
+          $rendered_transactions[] = $date_marker_transaction_view->render();
+        }
+      }
       $rendered_transactions[] = id(new ConpherenceTransactionView())
         ->setUser($user)
         ->setConpherenceTransaction($transaction)
         ->setHandles($handles)
         ->setMarkupEngine($engine)
         ->render();
+      $previous_transaction = $transaction;
     }
     $latest_transaction_id = $transaction->getID();
 
