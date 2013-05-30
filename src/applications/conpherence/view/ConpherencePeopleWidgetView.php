@@ -29,17 +29,12 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
               'action' => 'remove_person',
             )
           ),
-          phutil_tag(
-            'span',
-            array(
-              'class' => 'icon'
-            ),
-            'x'));
+          hsprintf('<span class="close-icon">&times;</span>'));
       }
       $body[] = phutil_tag(
         'div',
         array(
-          'class' => 'person-entry'
+          'class' => 'person-entry grouped'
         ),
         array(
           phutil_tag(

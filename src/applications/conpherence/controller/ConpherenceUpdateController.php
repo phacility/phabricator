@@ -181,18 +181,20 @@ final class ConpherenceUpdateController
     $user = $request->getUser();
     $add_person = $request->getStr('add_person');
 
-    $body = id(new AphrontFormTokenizerControl())
-      ->setPlaceholder(pht('Add participants...'))
-      ->setName('add_person')
+    $form = id(new AphrontFormLayoutView())
       ->setUser($user)
-      ->setDatasource('/typeahead/common/users/')
-      ->setLimit(1);
+      ->setFullWidth(true)
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+        ->setName('add_person')
+        ->setUser($user)
+        ->setDatasource('/typeahead/common/users/'));
 
     require_celerity_resource('conpherence-update-css');
     return id(new AphrontDialogView())
-      ->setTitle(pht('Update Conpherence Participants'))
+      ->setTitle(pht('Add Participants'))
       ->addHiddenInput('action', 'add_person')
-      ->appendChild($body);
+      ->appendChild($form);
     }
 
   private function renderRemovePersonDialogue(
@@ -219,7 +221,8 @@ final class ConpherenceUpdateController
 
     require_celerity_resource('conpherence-update-css');
     return id(new AphrontDialogView())
-      ->setTitle(pht('Update Conpherence Participants'))
+      ->setTitle(pht('Remove Participants'))
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
       ->addHiddenInput('action', 'remove_person')
       ->addHiddenInput('__continue__', true)
       ->addHiddenInput('remove_person', $remove_person)

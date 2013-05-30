@@ -7,7 +7,7 @@
 .loading .widgets-loading-icon {
   position: fixed;
   right: 0px;
-  top: 74px;
+  top: 76px;
   bottom: 0px;
   width: 240px;
   border-width: 0 0 0 1px;
@@ -80,7 +80,7 @@
   overflow-y: auto;
   bottom: 0px;
   width: 100%;
-  top: 74px;
+  top: 76px;
 }
 
 #widgets-settings {
@@ -88,7 +88,7 @@
 }
 
 .device-desktop .conpherence-widget-pane .widgets-body {
-  top: 106px;
+  top: 108px;
   width: 240px;
 }
 
@@ -343,8 +343,7 @@
 }
 
 .conpherence-widget-pane .person-entry {
-  clear: both;
-  padding: 10px 0px 0px 10px;
+  padding: 8px 0 0 8px;
 }
 
 .conpherence-widget-pane .person-entry a {
@@ -360,7 +359,6 @@
 
 .conpherence-widget-pane .person-entry .pic {
   float: left;
-  clear: left;
   margin: 0 8px 0 0;
   width: 35px;
   padding: 0;
@@ -368,26 +366,21 @@
 
 .conpherence-widget-pane .person-entry .remove {
   float: right;
-  clear: right;
-  margin: 0;
   width: 20px;
-  height: 20px;
-  text-align: center;
-  font-size: 22px;
-  font-weight: bold;
-  padding: 8px 0 8px 0p
+  font-size: 18px;
+  padding: 5px 0 8px 0;
 }
 
 .conpherence-widget-pane .person-entry .remove:hover {
   text-decoration: none;
 }
 
-.conpherence-widget-pane .person-entry .remove .icon {
+.conpherence-widget-pane .person-entry .remove .close-icon {
   color: #bfbfbf;
 }
 
-.conpherence-widget-pane .person-entry .remove:hover .icon {
-  color: #18559d;
+.conpherence-widget-pane .person-entry .remove:hover .close-icon {
+  color: #000;
 }
 
 /* settings widget */
