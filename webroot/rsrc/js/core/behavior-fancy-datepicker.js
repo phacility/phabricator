@@ -70,11 +70,19 @@ JX.behavior('fancy-datepicker', function(config) {
     root = null;
   };
 
+  var ontoggle = function(e) {
+    var box = e.getTarget();
+    root = e.getNode('phabricator-date-control');
+    JX.Stratcom.getData(root).disabled = !box.checked;
+    redraw_inputs();
+  };
+
   var get_inputs = function() {
     return {
       y: JX.DOM.find(root, 'select', 'year-input'),
       m: JX.DOM.find(root, 'select', 'month-input'),
-      d: JX.DOM.find(root, 'select', 'day-input')
+      d: JX.DOM.find(root, 'select', 'day-input'),
+      t: JX.DOM.find(root, 'input', 'time-input')
     };
   };
 
@@ -99,6 +107,23 @@ JX.behavior('fancy-datepicker', function(config) {
         render_month(),
         render_day()
       ]);
+  };
+
+  var redraw_inputs = function() {
+    var inputs = get_inputs();
+    var disabled = JX.Stratcom.getData(root).disabled;
+    for (var k in inputs) {
+      if (disabled) {
+        inputs[k].setAttribute('disabled', 'disabled');
+      } else {
+        inputs[k].removeAttribute('disabled');
+      }
+    }
+
+    var box = JX.DOM.scry(root, 'input', 'calendar-enable');
+    if (box.length) {
+      box[0].checked = !disabled;
+    }
   };
 
   // Render a cell for the date picker.
@@ -201,6 +226,7 @@ JX.behavior('fancy-datepicker', function(config) {
 
 
   JX.Stratcom.listen('click', 'calendar-button', onopen);
+  JX.Stratcom.listen('change', 'calendar-enable', ontoggle);
 
   JX.Stratcom.listen(
     'click',
@@ -236,6 +262,10 @@ JX.behavior('fancy-datepicker', function(config) {
           setTimeout(JX.bind(null, onclose, e), 150);
           break;
       }
+
+      // Enable the control.
+      JX.Stratcom.getData(root).disabled = false;
+      redraw_inputs();
 
       render();
     });

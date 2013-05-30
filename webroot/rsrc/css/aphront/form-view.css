@@ -278,6 +278,12 @@ table.aphront-form-control-checkbox-layout th {
   margin: 2px;
   display: inline;
 }
+.aphront-form-date-container input.aphront-form-date-enabled-input {
+  width: auto;
+  display: inline;
+  margin-right: 8px;
+  font-size: 16px;
+}
 
 .aphront-form-date-container input.aphront-form-date-time-input {
   width: 7em;

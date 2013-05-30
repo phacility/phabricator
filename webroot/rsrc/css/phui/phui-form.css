@@ -127,3 +127,8 @@ input::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
   color: #999999;
 }
+
+
+select[disabled="disabled"] {
+  opacity: 0.5;
+}
