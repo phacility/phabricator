@@ -320,7 +320,7 @@ final class ConpherenceUpdateController
     }
 
     $content = array(
-      'transactions' => $rendered_transactions,
+      'transactions' => hsprintf('%s', $rendered_transactions),
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),

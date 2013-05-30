@@ -11,10 +11,20 @@
 }
 
 .conpherence-layout .conpherence-no-threads {
-  height 80%;
-  width: 80%;
-  padding: 10%;
   text-align: center;
+  position: fixed;
+  left: 280px;
+  right: 241px;
+  top: 76px;
+  bottom: 0px;
+  min-width: 300px;
+  width: auto;
+}
+
+.device .conpherence-layout .conpherence-no-threads {
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 
 .conpherence-layout .conpherence-no-threads .text {

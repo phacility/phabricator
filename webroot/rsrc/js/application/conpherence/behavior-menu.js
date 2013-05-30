@@ -451,6 +451,8 @@ JX.behavior('conpherence-menu', function(config) {
         } else {
           var nothreads = JX.DOM.find(layout, 'div', 'conpherence-no-threads');
           nothreads.style.display = 'block';
+          markThreadLoading(false);
+          markWidgetLoading(false);
         }
       }
     }

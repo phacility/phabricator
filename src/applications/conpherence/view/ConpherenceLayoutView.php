@@ -158,6 +158,14 @@ final class ConpherenceLayoutView extends AphrontView {
             javelin_tag(
               'div',
               array(
+                'class' => 'conpherence-header-pane',
+                'id' => 'conpherence-header-pane',
+                'sigil' => 'conpherence-header-pane',
+              ),
+              nonempty($this->header, '')),
+            javelin_tag(
+              'div',
+              array(
                 'class' => 'conpherence-no-threads',
                 'sigil' => 'conpherence-no-threads',
                 'style' => 'display: none;',
@@ -178,14 +186,6 @@ final class ConpherenceLayoutView extends AphrontView {
                   ),
                   pht('Send a Message'))
             )),
-            javelin_tag(
-              'div',
-              array(
-                'class' => 'conpherence-header-pane',
-                'id' => 'conpherence-header-pane',
-                'sigil' => 'conpherence-header-pane',
-              ),
-              nonempty($this->header, '')),
             javelin_tag(
               'div',
               array(

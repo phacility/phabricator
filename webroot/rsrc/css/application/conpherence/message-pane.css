@@ -4,7 +4,8 @@
 
 .conpherence-message-pane,
 .loading .messages-loading-mask,
-.loading .messages-loading-icon {
+.loading .messages-loading-icon,
+.conpherence-layout .conpherence-no-threads {
   position: fixed;
   left: 280px;
   right: 241px;
@@ -16,10 +17,19 @@
 
 .device .conpherence-message-pane,
 .device .loading .messages-loading-mask,
-.device .loading .messages-loading-icon {
+.device .loading .messages-loading-icon,
+.device .conpherence-layout .conpherence-no-threads {
   left: 0;
   right: 0;
   width: 100%;
+}
+
+.conpherence-layout .conpherence-no-threads {
+  text-align: center;
+}
+
+.conpherence-layout .conpherence-no-threads .text {
+  margin: 16px 0px 16px 0px;
 }
 
 .conpherence-show-older-messages {
