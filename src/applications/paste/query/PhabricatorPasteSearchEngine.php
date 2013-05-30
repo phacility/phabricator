@@ -70,12 +70,8 @@ final class PhabricatorPasteSearchEngine
         ->setValue($author_tokens));
   }
 
-  public function getQueryResultsPageURI($query_key) {
-    return '/paste/query/'.$query_key.'/';
-  }
-
-  public function getQueryManagementURI() {
-    return '/paste/savedqueries/';
+  protected function getURI($path) {
+    return '/paste/'.$path;
   }
 
   public function getBuiltinQueryNames() {

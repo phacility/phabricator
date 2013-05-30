@@ -63,7 +63,9 @@ abstract class PhabricatorApplicationSearchEngine {
    * @return  string  URI where the query can be executed.
    * @task uri
    */
-  abstract public function getQueryResultsPageURI($query_key);
+  public function getQueryResultsPageURI($query_key) {
+    return $this->getURI('query/'.$query_key.'/');
+  }
 
 
   /**
@@ -73,12 +75,54 @@ abstract class PhabricatorApplicationSearchEngine {
    * @return  string  URI where queries can be managed.
    * @task uri
    */
-  abstract public function getQueryManagementURI();
+  public function getQueryManagementURI() {
+    return $this->getURI('query/edit/');
+  }
+
+
+  /**
+   * Return the URI to a path within the application. Used to construct default
+   * URIs for management and results.
+   *
+   * @return string URI to path.
+   * @task uri
+   */
+  abstract protected function getURI($path);
 
 
   public function newSavedQuery() {
     return id(new PhabricatorSavedQuery())
       ->setEngineClassName(get_class($this));
+  }
+
+
+  public function addNavigationItems(AphrontSideNavFilterView $nav) {
+    $viewer = $this->requireViewer();
+
+    $nav->addLabel(pht('Queries'));
+
+    $named_queries = id(new PhabricatorNamedQueryQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withEngineClassNames(array(get_class($this)))
+      ->execute();
+
+    $named_queries = $named_queries + $this->getBuiltinQueries($viewer);
+
+    foreach ($named_queries as $query) {
+      $key = $query->getQueryKey();
+      $uri = $this->getQueryResultsPageURI($key);
+      $nav->addFilter('query/'.$key, $query->getQueryName(), $uri);
+    }
+
+    $manage_uri = $this->getQueryManagementURI();
+    $nav->addFilter('query/edit', pht('Edit Queries...'), $manage_uri);
+
+    $nav->addLabel(pht('Search'));
+    $advanced_uri = $this->getQueryResultsPageURI('advanced');
+    $nav->addFilter('query/advanced', pht('Advanced Search'), $advanced_uri);
+
+    return $this;
   }
 
 
