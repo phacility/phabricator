@@ -1,97 +1,39 @@
 <?php
 
-final class PhabricatorMacroListController
-  extends PhabricatorMacroController {
+final class PhabricatorMacroListController extends PhabricatorMacroController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  private $filter;
+  private $key;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter', 'active');
+    $this->key = idx($data, 'key', 'active');
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->key)
+      ->setSearchEngine(new PhabricatorMacroSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $pager = id(new AphrontCursorPagerView())
-      ->readFromRequest($request);
+    return $this->delegateToController($controller);
+  }
 
-    $query = new PhabricatorMacroQuery();
-    $query->setViewer($viewer);
+  public function renderResultsList(array $macros) {
+    assert_instances_of($macros, 'PhabricatorFileImageMacro');
+    $viewer = $this->getRequest()->getUser();
 
-    $filter = $request->getStr('name');
-    if (strlen($filter)) {
-      $query->withNameLike($filter);
-    }
-
-    $authors = $request->getArr('authors');
-
-    if ($authors) {
-      $query->withAuthorPHIDs($authors);
-    }
-
-    $has_search = $filter || $authors;
-
-    if ($this->filter == 'my') {
-      $query->withAuthorPHIDs(array($viewer->getPHID()));
-      // For pre-filling the tokenizer
-      $authors = array($viewer->getPHID());
-    }
-
-    if ($this->filter == 'active') {
-      $query->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE);
-    }
-
-    $macros = $query->executeWithCursorPager($pager);
-    if ($has_search) {
-      $nodata = pht('There are no macros matching the filter.');
-    } else {
-      $nodata = pht('There are no image macros yet.');
-    }
-
-    if ($authors) {
-      $author_phids = array_fuse($authors);
-    } else {
-      $author_phids = array();
-    }
-
-    $author_phids += mpull($macros, 'getAuthorPHID', 'getAuthorPHID');
-
+    $author_phids = mpull($macros, 'getAuthorPHID', 'getAuthorPHID');
     $this->loadHandles($author_phids);
-    $author_handles = array_select_keys($this->getLoadedHandles(), $authors);
-
-    $filter_form = id(new AphrontFormView())
-      ->setMethod('GET')
-      ->setUser($request->getUser())
-      ->setNoShading(true)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('name')
-          ->setLabel(pht('Name'))
-          ->setValue($filter))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setName('authors')
-          ->setLabel(pht('Authors'))
-          ->setDatasource('/typeahead/common/users/')
-          ->setValue(mpull($author_handles, 'getFullName')))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Filter Image Macros')));
-
-    $filter_view = new AphrontListFilterView();
-    $filter_view->appendChild($filter_form);
-
-    $nav = $this->buildSideNavView(
-      $for_app = false,
-      $has_search);
-    $nav->selectFilter($has_search ? 'search' : $this->filter);
-
-    $nav->appendChild($filter_view);
+    $author_handles = array_select_keys(
+      $this->getLoadedHandles(),
+      $author_phids);
 
     $pinboard = new PhabricatorPinboardView();
-    $pinboard->setNoDataString($nodata);
     foreach ($macros as $macro) {
       $file = $macro->getFile();
 
@@ -108,6 +50,14 @@ final class PhabricatorMacroListController
             'div',
             array(),
             pht('Created on %s', $datetime)));
+      } else {
+        // Very old macros don't have a creation date. Rendering something
+        // keeps all the pins at the same height and avoids flow issues.
+        $item->appendChild(
+          phutil_tag(
+            'div',
+            array(),
+            pht('Created in ages long past')));
       }
 
       if ($macro->getAuthorPHID()) {
@@ -117,45 +67,17 @@ final class PhabricatorMacroListController
       }
 
       $item->setURI($this->getApplicationURI('/view/'.$macro->getID().'/'));
-      $item->setHeader($macro->getName());
+
+      $name = $macro->getName();
+      if ($macro->getIsDisabled()) {
+        $name = pht('%s (Disabled)', $name);
+      }
+      $item->setHeader($name);
 
       $pinboard->addItem($item);
     }
-    $nav->appendChild($pinboard);
 
-    if (!$has_search) {
-      $nav->appendChild($pager);
-      switch ($this->filter) {
-        case 'all':
-          $name = pht('All Macros');
-          break;
-        case 'my':
-          $name = pht('My Macros');
-          break;
-        case 'active':
-          $name = pht('Active Macros');
-          break;
-        default:
-          throw new Exception("Unknown filter $this->filter");
-          break;
-      }
-    } else {
-      $name = pht('Search');
-    }
+    return $pinboard;
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($name)
-        ->setHref($request->getRequestURI()));
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'device' => true,
-        'title' => pht('Image Macros'),
-        'dust' => true,
-      ));
   }
 }

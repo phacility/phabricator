@@ -84,9 +84,10 @@ final class PhabricatorApplicationSearchController
     $nav = $this->getNavigation();
 
     if ($request->isFormPost()) {
+      $saved_query = $engine->buildSavedQueryFromRequest($request);
+      $this->saveQuery($saved_query);
       return id(new AphrontRedirectResponse())->setURI(
-        $engine->getQueryResultsPageURI(
-          $engine->buildSavedQueryFromRequest($request)->getQueryKey()));
+        $engine->getQueryResultsPageURI($saved_query->getQueryKey()));
     }
 
     $named_query = null;
@@ -163,20 +164,24 @@ final class PhabricatorApplicationSearchController
     $nav->appendChild($filter_view);
 
     if ($run_query) {
-      $query = id(new PhabricatorPasteSearchEngine())
-        ->buildQueryFromSavedQuery($saved_query);
+      $query = $engine->buildQueryFromSavedQuery($saved_query);
 
       $pager = new AphrontCursorPagerView();
       $pager->readFromRequest($request);
-      $pastes = $query->setViewer($request->getUser())
-        ->needContent(true)
+      $objects = $query->setViewer($request->getUser())
         ->executeWithCursorPager($pager);
 
-      $list = $parent->renderResultsList($pastes);
-      $list->setPager($pager);
+      $list = $parent->renderResultsList($objects);
       $list->setNoDataString(pht("No results found for this query."));
 
       $nav->appendChild($list);
+
+      // TODO: This is a bit hacky.
+      if ($list instanceof PhabricatorObjectItemListView) {
+        $list->setPager($pager);
+      } else {
+        $nav->appendChild($pager);
+      }
     }
 
     if ($named_query) {
@@ -269,4 +274,17 @@ final class PhabricatorApplicationSearchController
         'dust' => true,
       ));
   }
+
+  private function saveQuery(PhabricatorSavedQuery $query) {
+    $query->setEngineClassName(get_class($this->getSearchEngine()));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    try {
+      $query->save();
+    } catch (AphrontQueryDuplicateKeyException $ex) {
+      // Ignore, this is just a repeated search.
+    }
+    unset($unguarded);
+  }
+
 }

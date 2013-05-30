@@ -20,14 +20,6 @@ final class PhabricatorPasteSearchEngine
       'authorPHIDs',
       array_values($request->getArr('authors')));
 
-    try {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $saved->save();
-      unset($unguarded);
-    } catch (AphrontQueryDuplicateKeyException $ex) {
-      // Ignore, this is just a repeated search.
-    }
-
     return $saved;
   }
 
@@ -39,6 +31,7 @@ final class PhabricatorPasteSearchEngine
    */
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPasteQuery())
+      ->needContent(true)
       ->withIDs($saved->getParameter('ids', array()))
       ->withPHIDs($saved->getParameter('phids', array()))
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))

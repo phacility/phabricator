@@ -15,6 +15,15 @@ final class PhabricatorMacroQuery
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
   const STATUS_ACTIVE = 'status-active';
+  const STATUS_DISABLED = 'status-disabled';
+
+  public static function getStatusOptions() {
+    return array(
+      self::STATUS_ACTIVE   => pht('Active Macros'),
+      self::STATUS_DISABLED => pht('Disabled Macros'),
+      self::STATUS_ANY      => pht('Active and Disabled Macros'),
+    );
+  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -99,10 +108,21 @@ final class PhabricatorMacroQuery
         $this->names);
     }
 
-    if ($this->status == self::STATUS_ACTIVE) {
-      $where[] = qsprintf(
-        $conn,
-        'm.isDisabled = 0');
+    switch ($this->status) {
+      case self::STATUS_ACTIVE:
+        $where[] = qsprintf(
+          $conn,
+          'm.isDisabled = 0');
+        break;
+      case self::STATUS_DISABLED:
+        $where[] = qsprintf(
+          $conn,
+          'm.isDisabled = 1');
+        break;
+      case self::STATUS_ANY:
+        break;
+      default:
+        throw new Exception("Unknown status '{$this->status}'!");
     }
 
     $where[] = $this->buildPagingClause($conn);
