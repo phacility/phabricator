@@ -106,10 +106,10 @@ abstract class PhabricatorApplicationSearchEngine {
   }
 
 
-  public function addNavigationItems(AphrontSideNavFilterView $nav) {
+  public function addNavigationItems(PhabricatorMenuView $menu) {
     $viewer = $this->requireViewer();
 
-    $nav->addLabel(pht('Queries'));
+    $menu->newLabel(pht('Queries'));
 
     $named_queries = id(new PhabricatorNamedQueryQuery())
       ->setViewer($viewer)
@@ -122,15 +122,15 @@ abstract class PhabricatorApplicationSearchEngine {
     foreach ($named_queries as $query) {
       $key = $query->getQueryKey();
       $uri = $this->getQueryResultsPageURI($key);
-      $nav->addFilter('query/'.$key, $query->getQueryName(), $uri);
+      $menu->newLink($query->getQueryName(), $uri, 'query/'.$key);
     }
 
     $manage_uri = $this->getQueryManagementURI();
-    $nav->addFilter('query/edit', pht('Edit Queries...'), $manage_uri);
+    $menu->newLink(pht('Edit Queries...'), $manage_uri, 'query/edit');
 
-    $nav->addLabel(pht('Search'));
+    $menu->newLabel(pht('Search'));
     $advanced_uri = $this->getQueryResultsPageURI('advanced');
-    $nav->addFilter('query/advanced', pht('Advanced Search'), $advanced_uri);
+    $menu->newLink(pht('Advanced Search'), $advanced_uri, 'query/advanced');
 
     return $this;
   }

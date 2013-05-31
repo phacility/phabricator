@@ -29,13 +29,9 @@ abstract class PhabricatorFileController extends PhabricatorController {
       $menu->newLink(pht('Upload File'), $this->getApplicationURI('/upload/'));
     }
 
-    $menu->newLabel(pht('Filters'));
-
-    $menu->newLink(pht('My Files'), $this->getApplicationURI('filter/my/'))
-      ->setKey('my');
-
-    $menu->newLink(pht('All Files'), $this->getApplicationURI('filter/all/'))
-      ->setKey('all');
+    id(new PhabricatorFileSearchEngine())
+      ->setViewer($this->getRequest()->getUser())
+      ->addNavigationItems($menu);
 
     return $menu;
   }

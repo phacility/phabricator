@@ -1338,6 +1338,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130530.pastekeys.sql'),
       ),
+      '20130531.filekeys.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130531.filekeys.sql'),
+      ),
     );
   }
 }

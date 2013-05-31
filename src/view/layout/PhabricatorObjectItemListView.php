@@ -93,6 +93,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
         $header,
         $items,
         $pager,
+        $this->renderChildren(),
       ));
   }
 

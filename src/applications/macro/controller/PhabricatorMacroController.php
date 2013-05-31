@@ -16,7 +16,7 @@ abstract class PhabricatorMacroController
 
     id(new PhabricatorMacroSearchEngine())
       ->setViewer($this->getRequest()->getUser())
-      ->addNavigationItems($nav);
+      ->addNavigationItems($nav->getMenu());
 
     return $nav;
   }

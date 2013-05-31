@@ -14,7 +14,7 @@ abstract class PhabricatorPasteController extends PhabricatorController {
 
     id(new PhabricatorPasteSearchEngine())
       ->setViewer($user)
-      ->addNavigationItems($nav);
+      ->addNavigationItems($nav->getMenu());
 
     $nav->selectFilter(null);
 

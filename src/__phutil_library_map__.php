@@ -1006,6 +1006,7 @@ phutil_register_library_map(array(
     'PhabricatorFileLinkView' => 'view/layout/PhabricatorFileLinkView.php',
     'PhabricatorFileListController' => 'applications/files/controller/PhabricatorFileListController.php',
     'PhabricatorFileQuery' => 'applications/files/query/PhabricatorFileQuery.php',
+    'PhabricatorFileSearchEngine' => 'applications/files/query/PhabricatorFileSearchEngine.php',
     'PhabricatorFileShortcutController' => 'applications/files/controller/PhabricatorFileShortcutController.php',
     'PhabricatorFileStorageBlob' => 'applications/files/storage/PhabricatorFileStorageBlob.php',
     'PhabricatorFileStorageConfigurationException' => 'applications/files/exception/PhabricatorFileStorageConfigurationException.php',
@@ -2812,8 +2813,13 @@ phutil_register_library_map(array(
     'PhabricatorFileInfoController' => 'PhabricatorFileController',
     'PhabricatorFileLinkListView' => 'AphrontView',
     'PhabricatorFileLinkView' => 'AphrontView',
-    'PhabricatorFileListController' => 'PhabricatorFileController',
+    'PhabricatorFileListController' =>
+    array(
+      0 => 'PhabricatorFileController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorFileQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorFileSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorFileShortcutController' => 'PhabricatorFileController',
     'PhabricatorFileStorageBlob' => 'PhabricatorFileDAO',
     'PhabricatorFileStorageConfigurationException' => 'Exception',
