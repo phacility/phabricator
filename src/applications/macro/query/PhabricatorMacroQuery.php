@@ -11,6 +11,8 @@ final class PhabricatorMacroQuery
   private $authors;
   private $names;
   private $nameLike;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
 
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
@@ -52,6 +54,16 @@ final class PhabricatorMacroQuery
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
     return $this;
   }
 
@@ -123,6 +135,20 @@ final class PhabricatorMacroQuery
         break;
       default:
         throw new Exception("Unknown status '{$this->status}'!");
+    }
+
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn,
+        'm.dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'm.dateCreated <= %d',
+        $this->dateCreatedBefore);
     }
 
     $where[] = $this->buildPagingClause($conn);

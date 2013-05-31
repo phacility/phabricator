@@ -12,6 +12,8 @@ final class PhabricatorMacroSearchEngine
     $saved->setParameter('status', $request->getStr('status'));
     $saved->setParameter('names', $request->getStrList('names'));
     $saved->setParameter('nameLike', $request->getStr('nameLike'));
+    $saved->setParameter('createdStart', $request->getStr('createdStart'));
+    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
     return $saved;
   }
@@ -37,6 +39,17 @@ final class PhabricatorMacroSearchEngine
     $like = $saved->getParameter('nameLike');
     if (strlen($like)) {
       $query->withNameLike($like);
+    }
+
+    $start = $this->parseDateTime($saved->getParameter('createdStart'));
+    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
+
+    if ($start) {
+      $query->withDateCreatedAfter($start);
+    }
+
+    if ($end) {
+      $query->withDateCreatedBefore($end);
     }
 
     return $query;
@@ -79,6 +92,14 @@ final class PhabricatorMacroSearchEngine
           ->setName('names')
           ->setLabel(pht('Exact Names'))
           ->setValue($names));
+
+    $this->buildDateRange(
+      $form,
+      $saved_query,
+      'createdStart',
+      pht('Created After'),
+      'createdEnd',
+      pht('Created Before'));
   }
 
   protected function getURI($path) {

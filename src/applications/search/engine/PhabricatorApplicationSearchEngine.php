@@ -6,12 +6,14 @@
  *
  * @task builtin  Builtin Queries
  * @task uri      Query URIs
+ * @task dates    Date Filters
  *
  * @group search
  */
 abstract class PhabricatorApplicationSearchEngine {
 
   private $viewer;
+  private $errors = array();
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -54,6 +56,14 @@ abstract class PhabricatorApplicationSearchEngine {
     AphrontFormView $form,
     PhabricatorSavedQuery $query);
 
+  public function getErrors() {
+    return $this->errors;
+  }
+
+  public function addError($error) {
+    $this->errors[] = $error;
+    return $this;
+  }
 
   /**
    * Return an application URI corresponding to the results page of a query.
@@ -181,5 +191,89 @@ abstract class PhabricatorApplicationSearchEngine {
    */
   public function buildSavedQueryFromBuiltin($query_key) {
     throw new Exception("Builtin '{$query_key}' is not supported!");
+  }
+
+
+/* -(  Dates  )-------------------------------------------------------------- */
+
+
+  /**
+   * @task dates
+   */
+  protected function parseDateTime($date_time) {
+    if (!strlen($date_time)) {
+      return null;
+    }
+
+    $viewer = $this->requireViewer();
+
+    $timezone = new DateTimeZone($viewer->getTimezoneIdentifier());
+
+    try {
+      $date = new DateTime($date_time, $timezone);
+      $timestamp = $date->format('U');
+    } catch (Exception $e) {
+      $timestamp = null;
+    }
+
+    return $timestamp;
+  }
+
+
+  /**
+   * @task dates
+   */
+  protected function buildDateRange(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $saved_query,
+    $start_key,
+    $start_name,
+    $end_key,
+    $end_name) {
+
+    $start_str = $saved_query->getParameter($start_key);
+    $start = null;
+    if (strlen($start_str)) {
+      $start = $this->parseDateTime($start_str);
+      if (!$start) {
+        $this->addError(
+          pht(
+            '"%s" date can not be parsed.',
+            $start_name));
+      }
+    }
+
+
+    $end_str = $saved_query->getParameter($end_key);
+    $end = null;
+    if (strlen($end_str)) {
+      $end = $this->parseDateTime($end_str);
+      if (!$end) {
+        $this->addError(
+          pht(
+            '"%s" date can not be parsed.',
+            $end_name));
+      }
+    }
+
+    if ($start && $end && ($start >= $end)) {
+      $this->addError(
+        pht(
+          '"%s" must be a date before "%s".',
+          $start_name,
+          $end_name));
+    }
+
+    $form
+      ->appendChild(
+        id(new PHUIFormFreeformDateControl())
+          ->setName($start_key)
+          ->setLabel($start_name)
+          ->setValue($start_str))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName($end_key)
+          ->setLabel($end_name)
+          ->setValue($end_str));
   }
 }

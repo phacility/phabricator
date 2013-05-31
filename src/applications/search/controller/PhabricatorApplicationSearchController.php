@@ -131,6 +131,14 @@ final class PhabricatorApplicationSearchController
 
     $engine->buildSearchForm($form, $saved_query);
 
+    $errors = $engine->getErrors();
+    if ($errors) {
+      $run_query = false;
+      $errors = id(new AphrontErrorView())
+        ->setTitle(pht('Query Errors'))
+        ->setErrors($errors);
+    }
+
     $submit = id(new AphrontFormSubmitControl())
       ->setValue(pht('Execute Query'));
 
@@ -182,6 +190,10 @@ final class PhabricatorApplicationSearchController
       } else {
         $nav->appendChild($pager);
       }
+    }
+
+    if ($errors) {
+      $nav->appendChild($errors);
     }
 
     if ($named_query) {

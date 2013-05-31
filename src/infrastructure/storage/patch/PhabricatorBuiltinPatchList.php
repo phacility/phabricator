@@ -1330,6 +1330,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130530.sessionhash.php'),
       ),
+      '20130530.macrodatekey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130530.macrodatekey.sql'),
+      ),
     );
   }
 }
