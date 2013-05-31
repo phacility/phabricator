@@ -142,7 +142,7 @@ final class PhabricatorApplicationSearchController
     $submit = id(new AphrontFormSubmitControl())
       ->setValue(pht('Execute Query'));
 
-    if ($run_query && !$named_query) {
+    if ($run_query && !$named_query && $user->isLoggedIn()) {
       $submit->addCancelButton(
         '/search/edit/'.$saved_query->getQueryKey().'/',
         pht('Save Custom Query...'));

@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
+final class PhabricatorUser
+  extends PhabricatorUserDAO
+  implements PhutilPerson, PhabricatorPolicyInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -728,5 +730,30 @@ EOBODY;
     }
     return $user;
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_PUBLIC;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getPHID() && ($viewer->getPHID() === $this->getPHID());
+  }
+
 
 }

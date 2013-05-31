@@ -125,8 +125,10 @@ abstract class PhabricatorApplicationSearchEngine {
       $menu->newLink($query->getQueryName(), $uri, 'query/'.$key);
     }
 
-    $manage_uri = $this->getQueryManagementURI();
-    $menu->newLink(pht('Edit Queries...'), $manage_uri, 'query/edit');
+    if ($viewer->isLoggedIn()) {
+      $manage_uri = $this->getQueryManagementURI();
+      $menu->newLink(pht('Edit Queries...'), $manage_uri, 'query/edit');
+    }
 
     $menu->newLabel(pht('Search'));
     $advanced_uri = $this->getQueryResultsPageURI('advanced');

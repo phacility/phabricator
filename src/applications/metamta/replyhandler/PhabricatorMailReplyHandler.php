@@ -285,9 +285,10 @@ EOBODY;
       return null;
     }
 
-    $user = head(id(new PhabricatorPeopleQuery())
-      ->withPhids(array($handle->getPHID()))
-      ->execute());
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($handle->getPHID()))
+      ->executeOne();
 
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();
