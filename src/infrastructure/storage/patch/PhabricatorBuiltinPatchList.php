@@ -1326,6 +1326,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130529.macroauthormig.php'),
       ),
+      '20130530.sessionhash.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130530.sessionhash.php'),
+      ),
     );
   }
 }

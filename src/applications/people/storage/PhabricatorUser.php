@@ -290,7 +290,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
         $try_type = $session_type.'-'.$ii;
         if (!in_array($try_type, $existing_sessions)) {
           $establish_type = $try_type;
-          $expect_key = $session_key;
+          $expect_key = PhabricatorHash::digest($session_key);
           $existing_sessions[] = $try_type;
 
           // Ensure the row exists so we can issue an update below. We don't
@@ -302,7 +302,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
             self::SESSION_TABLE,
             $this->getPHID(),
             $establish_type,
-            $session_key);
+            PhabricatorHash::digest($session_key));
           break;
         }
       }
@@ -325,7 +325,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
         'UPDATE %T SET sessionKey = %s, sessionStart = UNIX_TIMESTAMP()
           WHERE userPHID = %s AND type = %s AND sessionKey = %s',
         self::SESSION_TABLE,
-        $session_key,
+        PhabricatorHash::digest($session_key),
         $this->getPHID(),
         $establish_type,
         $expect_key);
@@ -365,7 +365,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
       'DELETE FROM %T WHERE userPHID = %s AND sessionKey = %s',
       self::SESSION_TABLE,
       $this->getPHID(),
-      $session_key);
+      PhabricatorHash::digest($session_key));
   }
 
   private function generateEmailToken(

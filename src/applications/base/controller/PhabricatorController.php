@@ -52,7 +52,7 @@ abstract class PhabricatorController extends AphrontController {
         $user->getTableName(),
         'phabricator_session',
         'web-',
-        $phsid);
+        PhabricatorHash::digest($phsid));
       if ($info) {
         $user->loadFromArray($info);
       }
