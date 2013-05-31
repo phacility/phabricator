@@ -77,7 +77,6 @@ $package_spec = array(
     'aphront-typeahead-control-css',
     'aphront-list-filter-view-css',
 
-    'phabricator-directory-css',
     'phabricator-jump-nav',
 
     'phabricator-remarkup-css',

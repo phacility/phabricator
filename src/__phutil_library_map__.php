@@ -3060,7 +3060,7 @@ phutil_register_library_map(array(
     ),
     'PhabricatorPeopleLogsController' => 'PhabricatorPeopleController',
     'PhabricatorPeopleProfileController' => 'PhabricatorPeopleController',
-    'PhabricatorPeopleQuery' => 'PhabricatorPolicyAwareCursorPagedQuery',
+    'PhabricatorPeopleQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorPeopleSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorPeopleTestDataGenerator' => 'PhabricatorTestDataGenerator',
     'PhabricatorPhabricatorOAuthConfigOptions' => 'PhabricatorApplicationConfigOptions',
