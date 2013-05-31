@@ -10,6 +10,10 @@ final class PhabricatorPasteQuery
 
   private $needContent;
   private $needRawContent;
+  private $languages;
+  private $includeNoLanguage;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -38,6 +42,28 @@ final class PhabricatorPasteQuery
 
   public function needRawContent($need_raw_content) {
     $this->needRawContent = $need_raw_content;
+    return $this;
+  }
+
+  public function withLanguages(array $languages) {
+    $this->includeNoLanguage = false;
+    foreach ($languages as $key => $language) {
+      if ($language === null) {
+        $languages[$key] = '';
+        continue;
+      }
+    }
+    $this->languages = $languages;
+    return $this;
+  }
+
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
     return $this;
   }
 
@@ -105,6 +131,27 @@ final class PhabricatorPasteQuery
         $conn_r,
         'parentPHID IN (%Ls)',
         $this->parentPHIDs);
+    }
+
+    if ($this->languages) {
+      $where[] = qsprintf(
+        $conn_r,
+        'language IN (%Ls)',
+        $this->languages);
+    }
+
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn_r,
+        'dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn_r,
+        'dateCreated <= %d',
+        $this->dateCreatedBefore);
     }
 
     return $this->formatWhereClause($where);
