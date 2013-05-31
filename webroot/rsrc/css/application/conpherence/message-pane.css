@@ -65,28 +65,14 @@
 }
 
 .conpherence-message-pane .messages-loading-mask {
-  opacity: .22;
-  background: #222;
+  opacity: .6;
+  background: #fff;
   display: none;
 }
-.conpherence-message-pane .messages-loading-icon {
-  background-repeat: no-repeat;
-  background-position: center center;
-}
 
-.loading .messages-loading-mask,
-.loading .messages-loading-icon {
+.loading .messages-loading-mask {
   display: block;
   z-index: 500;
-}
-
-.loading .header-loading-mask {
-  height: 31px;
-  position: absolute;
-  width: 100%;
-  z-index: 5;
-  background: #222;
-  opacity: .22;
 }
 
 .conpherence-message-pane .phabricator-form-view {
@@ -134,21 +120,19 @@
 }
 
 .conpherence-message-pane .date-marker {
-  border-top: 1px solid #bfbfbf;
+  border-top: 1px solid #d7d7d7;
   margin: 5px 15px;
   min-height: auto;
 }
 .conpherence-message-pane .date-marker .date {
   position: relative;
   top: -8px;
-  left: 45px;
+  left: 40px;
   background-color: #FFF;
-  width: auto;
-  color: #BFBFBF;
+  color: #bfbfbf;
   font-size: 11px;
   padding: 0px 5px;
 }
-
 .device-phone .conpherence-message-pane .phabricator-transaction-detail {
   min-height: auto;
 }

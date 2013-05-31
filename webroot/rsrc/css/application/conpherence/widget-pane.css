@@ -3,8 +3,7 @@
  */
 
 .conpherence-widget-pane,
-.loading .widgets-loading-mask,
-.loading .widgets-loading-icon {
+.loading .widgets-loading-mask {
   position: fixed;
   right: 0px;
   top: 76px;
@@ -18,24 +17,18 @@
 }
 
 .device .conpherence-widget-pane,
-.device .loading .widgets-loading-mask,
-.device .loading .widgets-loading-icon {
+.device .loading .widgets-loading-mask {
   top: 44px;
   width: 100%;
 }
 
 .conpherence-widget-pane .widgets-loading-mask {
-  opacity: .22;
-  background: #222;
+  opacity: .6;
+  background: #fff;
   display: none;
 }
-.conpherence-widget-pane .widgets-loading-icon {
-  background-repeat: no-repeat;
-  background-position: center center;
-}
 
-.loading .widgets-loading-mask,
-.loading .widgets-loading-icon {
+.loading .widgets-loading-mask {
   display: block;
   z-index: 500;
 }

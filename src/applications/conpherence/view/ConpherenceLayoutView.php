@@ -117,8 +117,6 @@ final class ConpherenceLayoutView extends AphrontView {
         )));
 
 
-    $icon_48 = celerity_get_resource_uri('/rsrc/image/loading/loading_48.gif');
-    $loading_style = 'background-image: url('.$icon_48.');';
     return javelin_tag(
       'div',
       array(
@@ -141,14 +139,7 @@ final class ConpherenceLayoutView extends AphrontView {
             'class' => 'conpherence-menu-pane phabricator-side-menu',
             'sigil' => 'conpherence-menu-pane',
           ),
-          nonempty(
-            $this->threadView,
-            phutil_tag(
-              'div',
-              array(
-                'class' => 'menu-loading-icon',
-                'style' => $loading_style),
-              ''))),
+          $this->threadView),
         javelin_tag(
           'div',
           array(
@@ -200,13 +191,6 @@ final class ConpherenceLayoutView extends AphrontView {
                     'class' => 'widgets-loading-mask'
                   ),
                   ''),
-                phutil_tag(
-                  'div',
-                  array(
-                    'class' => 'widgets-loading-icon',
-                    'style' => $loading_style,
-                  ),
-                  ''),
                 javelin_tag(
                   'div',
                   array(
@@ -235,12 +219,6 @@ final class ConpherenceLayoutView extends AphrontView {
                     'class' => 'messages-loading-mask',
                   ),
                   ''),
-                phutil_tag(
-                  'div',
-                  array(
-                    'class' => 'messages-loading-icon',
-                    'style' => $loading_style,
-                  )),
                 javelin_tag(
                   'div',
                   array(

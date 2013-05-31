@@ -24,8 +24,6 @@ JX.behavior('conpherence-pontificate', function(config) {
     } catch (ex) {
       // Ignore; maybe no files widget
     }
-    JX.DOM.alterClass(header_root, 'loading', true);
-    JX.DOM.alterClass(messages_root, 'loading', true);
     JX.DOM.alterClass(form_root, 'loading', true);
 
     JX.Workflow.newFromForm(form)

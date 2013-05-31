@@ -31,13 +31,7 @@
   margin: 0px 0px 16px 0px;
 }
 
-.conpherence-menu-pane .menu-loading-icon {
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-.conpherence-menu-pane,
-.loading .menu-loading-icon {
+.conpherence-menu-pane {
   width: 100%;
   position: absolute;
   overflow-x: hidden;
@@ -46,8 +40,7 @@
   bottom: 0;
 }
 .device-desktop .conpherence-layout .conpherence-menu-pane,
-.device-desktop .conpherence-layout .phabricator-nav-column-background,
-.device-desktop .loading .menu-loading-icon {
+.device-desktop .conpherence-layout .phabricator-nav-column-background {
   width: 280px;
 }
 .device .conpherence-menu-pane {
