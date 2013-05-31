@@ -217,13 +217,15 @@ final class ConpherenceThreadQuery
     $file_phids = array_mergev($file_phids);
 
     // statuses of everyone currently in the conpherence
-    // for a rolling three day window
+    // we show sunday -> saturday in a list *AND* a window
+    // of today -> +2 days. If its saturday we need
+    // +2 days.
     $start_epoch = phabricator_format_local_time(
-      strtotime('today', strtotime('tomorrow')),
+      strtotime('last sunday', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $end_epoch = phabricator_format_local_time(
-      strtotime('+3 days', strtotime('tomorrow')),
+      strtotime('last sunday +8 days', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $statuses = id(new PhabricatorUserStatus())

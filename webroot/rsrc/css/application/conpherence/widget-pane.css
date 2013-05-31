@@ -140,8 +140,12 @@
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
   width: 240px;
 }
-.device .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
-  margin: 2px 0px 0px 0px;
+.device-phone .conpherence-widget-pane #widgets-calendar
+.aphront-multi-column-view {
+  display: none;
+}
+.device-tablet .conpherence-widget-pane #widgets-calendar
+.aphront-multi-column-view {
   width: 100%;
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
@@ -150,6 +154,11 @@
   border-right: 1px solid #bfbfbf;
   text-align: center;
 }
+.device-phone .conpherence-widget-pane #widgets-calendar
+.aphront-multi-column-view .aphront-multi-column-column {
+  border-right: 0;
+}
+
 .device-phone .conpherence-widget-pane #widgets-calendar
 .aphront-multi-column-fluid .aphront-multi-column-5-up
 .aphront-multi-column-column-outer {
@@ -248,22 +257,13 @@
   font-size: 11px;
 }
 
-.conpherence-widget-pane #widgets-calendar .divider {
-  float: left;
-  clear: both;
-  width: 220px;
+.conpherence-widget-pane #widgets-calendar .top-border {
+  border-top: 1px solid #E7E7E7;
+}
+
+.conpherence-widget-pane #widgets-calendar .user-status {
+  padding: 10px 0px 10px 0px;
   margin: 0px 0px 0px 10px;
-  border: 1px dashed #bfbfbf;
-}
-.conpherence-widget-pane #widgets-calendar .divider {
-  width: 96%;
-  margin: 0px 0px 0px 2%;
-}
-.conpherence-widget-pane #widgets-calendar .spacer {
-  float: left;
-  clear: both;
-  height: 10px;
-  width: 100%;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .icon {
@@ -284,9 +284,8 @@
 
 .conpherence-widget-pane #widgets-calendar .user-status .description {
   width: 195px;
-  float: left;
   text-overflow: ellipsis;
-  margin: 0 0 10px 10px;
+  margin: 0 0 0px 20px;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .participant {
