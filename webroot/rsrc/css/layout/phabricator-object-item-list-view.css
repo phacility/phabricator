@@ -60,7 +60,7 @@
 }
 
 .phabricator-object-item-content {
-  margin-top: 2px;
+  margin-top: 4px;
   overflow: hidden;
 }
 
@@ -95,7 +95,6 @@
   vertical-align: middle;
   text-align: right;
   border-left: 1px solid #c0c5d1;
-  background: #e9e9f9;
   box-shadow: inset 1px 0 1px 0px rgba(0, 0, 0, 0.07);
 }
 
@@ -113,7 +112,7 @@
 }
 
 .phabricator-object-item-actions .phabricator-menu-item-view:hover {
-  background: #d9d9ee;
+  background: #e9e9f9;
 }
 
 .phabricator-object-item-actions .phabricator-menu-item-icon {
@@ -204,7 +203,7 @@
 
 .phabricator-object-icon-pane {
   float: right;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .device .phabricator-object-item-no-icon-images .phabricator-object-icon-pane {
@@ -405,7 +404,7 @@
 }
 
 .phabricator-object-item-handle-icon {
-  margin-left: 3px;
+  margin: 1px;
   width: 28px;
   height: 28px;
   display: inline-block;
@@ -424,9 +423,9 @@
   float: right;
   clear: right;
   padding: 0 10px;
-  margin: 3px 0;
+  margin: 5px 0;
   font-size: 11px;
-  color: #333333;
+  color: #666;
   white-space: nowrap;
   overflow: hidden;
   text-align: right;
@@ -447,7 +446,7 @@
 }
 
 .phabricator-object-list-cards .phabricator-object-item-frame {
-  min-height: 41px;
+  min-height: 50px;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-selected {
