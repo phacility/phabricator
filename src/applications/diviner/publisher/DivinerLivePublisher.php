@@ -104,9 +104,9 @@ final class DivinerLivePublisher extends DivinerPublisher {
       if ($this->shouldGenerateDocumentForAtom($atom)) {
         $content = $this->getRenderer()->renderAtom($atom);
 
-        $this->loadAtomStorageForSymbol($symbol)
+        $storage = $this->loadAtomStorageForSymbol($symbol)
           ->setAtomData($atom->toDictionary())
-          ->setContent(phutil_safe_html($content))
+          ->setContent((string)phutil_safe_html($content))
           ->save();
       }
     }

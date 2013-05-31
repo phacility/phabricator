@@ -1,6 +1,6 @@
 <?php
 
-final class DivinerListController extends PhabricatorController {
+final class DivinerLegacyController extends DivinerController {
 
   public function processRequest() {
 
