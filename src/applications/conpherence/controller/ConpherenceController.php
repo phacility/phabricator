@@ -58,7 +58,7 @@ abstract class ConpherenceController extends PhabricatorController {
     if ($conpherence->getTitle()) {
       $title = $conpherence->getTitle();
     } else {
-      $title = pht('Conpherence');
+      $title = pht('[No Title]');
     }
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())

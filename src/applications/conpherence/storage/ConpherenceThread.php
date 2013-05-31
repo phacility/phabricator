@@ -160,7 +160,7 @@ final class ConpherenceThread extends ConpherenceDAO
     $title = $js_title = $this->getTitle();
     if (!$title) {
       $title = $lucky_handle->getName();
-      $js_title = pht('Conpherence');
+      $js_title = pht('[No Title]');
     }
     $img_src = $lucky_handle->getImageURI();
 

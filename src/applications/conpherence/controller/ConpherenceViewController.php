@@ -93,7 +93,7 @@ final class ConpherenceViewController extends
 
     $title = $conpherence->getTitle();
     if (!$title) {
-      $title = pht('Conpherence');
+      $title = pht('[No Title]');
     }
     return $this->buildApplicationPage(
       $layout,
