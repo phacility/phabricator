@@ -6,8 +6,8 @@
 final class ConduitAPI_conpherence_createthread_Method
   extends ConduitAPI_conpherence_Method {
 
-
   public function getMethodDescription() {
+    return pht('Create a new conpherence thread.');
   }
 
   public function defineParamTypes() {
@@ -24,8 +24,10 @@ final class ConduitAPI_conpherence_createthread_Method
 
   public function defineErrorTypes() {
     return array(
-      'ERR_EMPTY_PARTICIPANT_PHIDS' => 'You must specify participant phids.',
-      'ERR_EMPTY_MESSAGE' => 'You must specify a message.'
+      'ERR_EMPTY_PARTICIPANT_PHIDS' => pht(
+        'You must specify participant phids.'),
+      'ERR_EMPTY_MESSAGE' => pht(
+        'You must specify a message.')
     );
   }
 
@@ -55,11 +57,9 @@ final class ConduitAPI_conpherence_createthread_Method
       }
     }
 
-    $id = $conpherence->getID();
-    $uri = $this->getApplication()->getApplicationURI($id);
     return array(
-      'conpherenceID' => $id,
+      'conpherenceID' => $conpherence->getID(),
       'conpherencePHID' => $conpherence->getPHID(),
-      'conpherenceURI' => $uri);
+      'conpherenceURI' => $this->getConpherenceURI($conpherence));
   }
 }

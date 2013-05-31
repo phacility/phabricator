@@ -11,4 +11,10 @@ abstract class ConduitAPI_conpherence_Method
       'PhabricatorApplicationConpherence');
   }
 
+  final protected function getConpherenceURI(ConpherenceThread $conpherence) {
+    $id = $conpherence->getID();
+    return PhabricatorEnv::getProductionURI(
+      $this->getApplication()->getApplicationURI($id));
+  }
+
 }
