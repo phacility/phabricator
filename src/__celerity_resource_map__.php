@@ -3636,7 +3636,7 @@ celerity_register_resource_map(array(
   ),
   'phriction-document-css' =>
   array(
-    'uri' => '/res/14e08350/rsrc/css/application/phriction/phriction-document-css.css',
+    'uri' => '/res/97a9ef40/rsrc/css/application/phriction/phriction-document-css.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3651,6 +3651,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/phui/phui-box.css',
+  ),
+  'phui-document-view-css' =>
+  array(
+    'uri' => '/res/ca376da1/rsrc/css/phui/phui-document.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-document.css',
   ),
   'phui-feed-story-css' =>
   array(
