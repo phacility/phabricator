@@ -35,6 +35,7 @@ final class DivinerAtomListController extends DivinerController
     foreach ($symbols as $symbol) {
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($symbol->getName())
+        ->setHref($symbol->getURI())
         ->addIcon('none', $symbol->getType());
 
       $list->addItem($item);

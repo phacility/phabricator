@@ -5,6 +5,7 @@ final class DivinerBookQuery
 
   private $ids;
   private $phids;
+  private $names;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +14,11 @@ final class DivinerBookQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withNames(array $names) {
+    $this->names = $names;
     return $this;
   }
 
@@ -46,6 +52,13 @@ final class DivinerBookQuery
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->names) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name IN (%Ls)',
+        $this->names);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

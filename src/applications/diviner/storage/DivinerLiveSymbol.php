@@ -13,6 +13,8 @@ final class DivinerLiveSymbol extends DivinerDAO
   protected $identityHash;
 
   private $book;
+  private $content;
+  private $atom;
 
   public function getConfiguration() {
     return array(
@@ -36,6 +38,46 @@ final class DivinerLiveSymbol extends DivinerDAO
   public function attachBook(DivinerLiveBook $book) {
     $this->book = $book;
     return $this;
+  }
+
+  public function getContent() {
+    if ($this->content === null) {
+      throw new Exception("Call attachAtom() before getContent()!");
+    }
+    return $this->content;
+  }
+
+  public function getAtom() {
+    if ($this->atom === null) {
+      throw new Exception("Call attachAtom() before getAtom()!");
+    }
+    return $this->atom;
+  }
+
+  public function attachAtom(DivinerLiveAtom $atom) {
+    $this->content = $atom->getContent();
+    $this->atom = DivinerAtom::newFromDictionary($atom->getAtomData());
+    return $this;
+  }
+
+  public function getURI() {
+    $parts = array(
+      'book',
+      $this->getBook()->getName(),
+      $this->getType(),
+    );
+
+    if ($this->getContext()) {
+      $parts[] = $this->getContext();
+    }
+
+    $parts[] = $this->getName();
+
+    if ($this->getAtomIndex()) {
+      $parts[] = $this->getAtomIndex();
+    }
+
+    return '/'.implode('/', $parts).'/';
   }
 
   public function save() {

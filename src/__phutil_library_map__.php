@@ -505,6 +505,7 @@ phutil_register_library_map(array(
     'DivinerArticleAtomizer' => 'applications/diviner/atomizer/DivinerArticleAtomizer.php',
     'DivinerAtom' => 'applications/diviner/atom/DivinerAtom.php',
     'DivinerAtomCache' => 'applications/diviner/cache/DivinerAtomCache.php',
+    'DivinerAtomController' => 'applications/diviner/controller/DivinerAtomController.php',
     'DivinerAtomListController' => 'applications/diviner/controller/DivinerAtomListController.php',
     'DivinerAtomQuery' => 'applications/diviner/query/DivinerAtomQuery.php',
     'DivinerAtomRef' => 'applications/diviner/atom/DivinerAtomRef.php',
@@ -2326,6 +2327,7 @@ phutil_register_library_map(array(
     'DiffusionView' => 'AphrontView',
     'DivinerArticleAtomizer' => 'DivinerAtomizer',
     'DivinerAtomCache' => 'DivinerDiskCache',
+    'DivinerAtomController' => 'DivinerController',
     'DivinerAtomListController' =>
     array(
       0 => 'DivinerController',
