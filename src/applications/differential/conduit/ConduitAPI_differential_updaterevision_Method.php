@@ -60,9 +60,9 @@ final class ConduitAPI_differential_updaterevision_Method
     $editor->setActor($request->getUser());
     $editor->setContentSource($content_source);
     $fields = $request->getValue('fields');
+    $editor->addDiff($diff, $request->getValue('message'));
     $editor->copyFieldsFromConduit($fields);
 
-    $editor->addDiff($diff, $request->getValue('message'));
     $editor->save();
 
     return array(
