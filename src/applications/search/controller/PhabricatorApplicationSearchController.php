@@ -299,4 +299,8 @@ final class PhabricatorApplicationSearchController
     unset($unguarded);
   }
 
+  protected function buildApplicationMenu() {
+    return $this->getDelegatingController()->buildApplicationMenu();
+  }
+
 }

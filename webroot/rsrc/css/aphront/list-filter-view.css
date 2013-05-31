@@ -36,8 +36,8 @@
 .device-phone .aphront-list-filter-view-content .aphront-form-view
   .aphront-form-input {
   width: 98%;
-  margin-left: 0%;
-  margin-right: 0%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .aphront-list-filter-view-collapsible .aphront-list-filter-view-content {
@@ -52,6 +52,12 @@
   text-align: right;
 }
 
+.device .aphront-list-filter-reveal {
+  width: 98%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .aphront-list-filter-reveal a {
   font-weight: bold;
 }
@@ -60,4 +66,10 @@
   margin-right: 20%;
   color: #666666;
   float: left;
+}
+
+.device .aphront-list-filter-description {
+  float: none;
+  text-align: left;
+  margin-right: 0;
 }
