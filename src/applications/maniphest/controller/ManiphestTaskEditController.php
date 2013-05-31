@@ -242,6 +242,13 @@ final class ManiphestTaskEditController extends ManiphestController {
           $workflow = $parent_task->getID();
         }
 
+        if ($request->isAjax()) {
+          return id(new AphrontAjaxResponse())->setContent(
+            array(
+              'tasks' => $this->renderSingleTask($task),
+            ));
+        }
+
         $redirect_uri = '/T'.$task->getID();
 
         if ($workflow) {
@@ -354,12 +361,15 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $project_tokenizer_id = celerity_generate_unique_node_id();
 
-    $form = new AphrontFormView();
-    $form->setFlexible(true);
-    $form
-      ->setUser($user)
-      ->setAction($request->getRequestURI()->getPath())
-      ->addHiddenInput('template', $template_id);
+    if ($request->isAjax()) {
+      $form = new AphrontFormLayoutView();
+    } else {
+      $form = new AphrontFormView();
+      $form->setFlexible(true);
+      $form
+        ->setUser($user)
+        ->addHiddenInput('template', $template_id);
+    }
 
     if ($parent_task) {
       $form
@@ -484,6 +494,22 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $form
       ->appendChild($description_control);
+
+
+    if ($request->isAjax()) {
+      $dialog = id(new AphrontDialogView())
+        ->setUser($user)
+        ->setWidth(AphrontDialogView::WIDTH_FULL)
+        ->setTitle($header_name)
+        ->appendChild(
+          array(
+            $error_view,
+            $form,
+          ))
+        ->addCancelButton($cancel_uri)
+        ->addSubmitButton($button_name);
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
 
     $form
       ->appendChild(
