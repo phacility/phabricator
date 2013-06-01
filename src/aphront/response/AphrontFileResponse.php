@@ -43,6 +43,7 @@ final class AphrontFileResponse extends AphrontResponse {
   public function getHeaders() {
     $headers = array(
       array('Content-Type', $this->getMimeType()),
+      array('Content-Length', strlen($this->content)),
     );
 
     if (strlen($this->getDownload())) {
