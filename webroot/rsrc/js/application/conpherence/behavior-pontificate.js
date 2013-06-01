@@ -55,8 +55,6 @@ JX.behavior('conpherence-pontificate', function(config) {
           { id : r.conpherence_phid + '-nav-item' }
           );
 
-        JX.DOM.alterClass(header_root, 'loading', false);
-        JX.DOM.alterClass(messages_root, 'loading', false);
         JX.DOM.alterClass(form_root, 'loading', false);
       }))
     .start();

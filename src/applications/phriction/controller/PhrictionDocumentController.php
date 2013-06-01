@@ -190,6 +190,7 @@ final class PhrictionDocumentController
         $core_page,
       ),
       array(
+        'pageObjects' => array($document->getPHID()),
         'title'   => $page_title,
         'device'  => true,
         'dust'    => true,
