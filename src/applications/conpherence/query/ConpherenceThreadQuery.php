@@ -225,7 +225,7 @@ final class ConpherenceThreadQuery
       $this->getViewer(),
       'U');
     $end_epoch = phabricator_format_local_time(
-      strtotime('last sunday +8 days', strtotime('tomorrow')),
+      strtotime('last sunday +9 days', strtotime('tomorrow')),
       $this->getViewer(),
       'U');
     $statuses = id(new PhabricatorUserStatus())

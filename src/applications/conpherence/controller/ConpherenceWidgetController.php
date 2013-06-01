@@ -385,7 +385,7 @@ final class ConpherenceWidgetController extends
 
     $first_day = new DateTime('last sunday', $timezone);
     $timestamps = array();
-    for ($day = 0; $day < 8; $day++) {
+    for ($day = 0; $day < 9; $day++) {
       $timestamp = clone $first_day;
       $timestamps[] = $timestamp->modify(sprintf('+%d days', $day));
     }
