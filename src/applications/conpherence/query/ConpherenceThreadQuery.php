@@ -218,8 +218,8 @@ final class ConpherenceThreadQuery
 
     // statuses of everyone currently in the conpherence
     // we show sunday -> saturday in a list *AND* a window
-    // of today -> +2 days. If its saturday we need
-    // +2 days.
+    // of today -> +2 days. Ergo, if its saturday we need
+    // +2 days, for +9 days total.
     $start_epoch = phabricator_format_local_time(
       strtotime('last sunday', strtotime('tomorrow')),
       $this->getViewer(),

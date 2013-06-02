@@ -243,7 +243,6 @@ final class ConpherenceWidgetController extends
 
       $week_day_number = $day->format('w');
 
-      $day->setTime(0, 0, 0);
       $epoch_start = $day->format('U');
       $next_day = clone $day;
       $next_day->modify('+1 day');
@@ -325,7 +324,7 @@ final class ConpherenceWidgetController extends
       }
       if ($is_today || ($calendar_columns && $calendar_columns < 3)) {
         $active_class = '';
-        if ($day->format('Ymd') == $today->format('Ymd')) {
+        if ($is_today) {
           $active_class = '-active';
         }
         $inner_layout = array();
@@ -383,11 +382,18 @@ final class ConpherenceWidgetController extends
     $user = $this->getRequest()->getUser();
     $timezone = new DateTimeZone($user->getTimezoneIdentifier());
 
-    $first_day = new DateTime('last sunday', $timezone);
+    $start_epoch = phabricator_format_local_time(
+      strtotime('last sunday', strtotime('tomorrow')),
+      $user,
+      'U');
+    $first_day = new DateTime('@'.$start_epoch, $timezone);
     $timestamps = array();
     for ($day = 0; $day < 9; $day++) {
       $timestamp = clone $first_day;
-      $timestamps[] = $timestamp->modify(sprintf('+%d days', $day));
+      $timestamp->modify(sprintf('+%d days', $day));
+      // set the timezone again 'cuz DateTime is weird
+      $timestamp->setTimeZone($timezone);
+      $timestamps[] = $timestamp;
     }
     return array(
       'today' => new DateTime('today', $timezone),
