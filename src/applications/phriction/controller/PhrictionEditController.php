@@ -229,17 +229,16 @@ final class PhrictionEditController
     $header = id(new PhabricatorHeaderView())
       ->setHeader($panel_header);
 
-    $preview_panel = hsprintf(
-      '<div class="phriction-wrap">
-        <div class="phriction-content">
-        <div class="phriction-document-preview-header plt pll">%s</div>
-        <div id="document-preview">
-          <div class="aphront-panel-preview-loading-text">%s</div>
-        </div>
-        </div>
+    $preview_content = hsprintf(
+      '<div class="phriction-document-preview-header plt pll">%s</div>
+      <div id="document-preview">
+        <div class="aphront-panel-preview-loading-text">%s</div>
       </div>',
       pht('Document Preview'),
       pht('Loading preview...'));
+
+    $preview_panel = id(new PHUIDocumentView())
+      ->appendChild($preview_content);
 
     Javelin::initBehavior(
       'phriction-document-preview',
