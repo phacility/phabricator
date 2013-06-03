@@ -3,11 +3,18 @@
 final class AphrontFormDateControl extends AphrontFormControl {
 
   private $initialTime;
+  private $zone;
 
   private $valueDay;
   private $valueMonth;
   private $valueYear;
   private $valueTime;
+  private $allowNull;
+
+  public function setAllowNull($allow_null) {
+    $this->allowNull = $allow_null;
+    return $this;
+  }
 
   const TIME_START_OF_DAY         = 'start-of-day';
   const TIME_END_OF_DAY           = 'end-of-day';
@@ -20,19 +27,17 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
-    $user = $this->user;
-    if (!$this->user) {
-      throw new Exception(
-        pht("Call setUser() before readValueFromRequest()!"));
-    }
-
-    $user_zone = $user->getTimezoneIdentifier();
-    $zone = new DateTimeZone($user_zone);
-
     $day = $request->getInt($this->getDayInputName());
     $month = $request->getInt($this->getMonthInputName());
     $year = $request->getInt($this->getYearInputName());
     $time = $request->getStr($this->getTimeInputName());
+    $enabled = $request->getBool($this->getCheckboxInputName());
+
+    if ($this->allowNull && !$enabled) {
+      $this->setError(null);
+      $this->setValue(null);
+      return;
+    }
 
     $err = $this->getError();
 
@@ -44,6 +49,8 @@ final class AphrontFormDateControl extends AphrontFormControl {
 
       // Assume invalid.
       $err = 'Invalid';
+
+      $zone = $this->getTimezone();
 
       try {
         $date = new DateTime("{$year}-{$month}-{$day} {$time}", $zone);
@@ -59,32 +66,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         $this->setValue(null);
       }
     } else {
-      // TODO: We could eventually allow these to be customized per install or
-      // per user or both, but let's wait and see.
-      switch ($this->initialTime) {
-        case self::TIME_START_OF_DAY:
-        default:
-          $time = '12:00 AM';
-          break;
-        case self::TIME_START_OF_BUSINESS:
-          $time = '9:00 AM';
-          break;
-        case self::TIME_END_OF_BUSINESS:
-          $time = '5:00 PM';
-          break;
-        case self::TIME_END_OF_DAY:
-          $time = '11:59 PM';
-          break;
-      }
-
-      $today = $this->formatTime(time(), 'Y-m-d');
-      try {
-        $date = new DateTime("{$today} {$time}", $zone);
-        $value = $date->format('U');
-      } catch (Exception $ex) {
-        $value = null;
-      }
-
+      $value = $this->getInitialValue();
       if ($value) {
         $this->setValue($value);
       } else {
@@ -176,7 +158,20 @@ final class AphrontFormDateControl extends AphrontFormControl {
     return $this->getName().'_t';
   }
 
+  private function getCheckboxInputName() {
+    return $this->getName().'_e';
+  }
+
   protected function renderInput() {
+
+    $disabled = null;
+    if ($this->getValue() === null) {
+      $this->setValue($this->getInitialValue());
+      if ($this->allowNull) {
+        $disabled = 'disabled';
+      }
+    }
+
     $min_year = $this->getMinYear();
     $max_year = $this->getMaxYear();
 
@@ -198,6 +193,20 @@ final class AphrontFormDateControl extends AphrontFormControl {
       12 => pht('Dec'),
     );
 
+    $checkbox = null;
+    if ($this->allowNull) {
+      $checkbox = javelin_tag(
+        'input',
+        array(
+          'type' => 'checkbox',
+          'name' => $this->getCheckboxInputName(),
+          'sigil' => 'calendar-enable',
+          'class' => 'aphront-form-date-enabled-input',
+          'value' => 1,
+          'checked' => ($disabled === null ? 'checked' : null),
+        ));
+    }
+
     $years = range($this->getMinYear(), $this->getMaxYear());
     $years = array_fuse($years);
 
@@ -207,6 +216,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       array(
         'name' => $this->getDayInputName(),
         'sigil' => 'day-input',
+        'disabled' => $disabled,
       ));
 
     $months_sel = AphrontFormSelectControl::renderSelectTag(
@@ -215,6 +225,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       array(
         'name' => $this->getMonthInputName(),
         'sigil' => 'month-input',
+        'disabled' => $disabled,
       ));
 
     $years_sel = AphrontFormSelectControl::renderSelectTag(
@@ -223,6 +234,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       array(
         'name'  => $this->getYearInputName(),
         'sigil' => 'year-input',
+        'disabled' => $disabled,
       ));
 
     $cal_icon = javelin_tag(
@@ -234,7 +246,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       '');
 
-    $time_sel = phutil_tag(
+    $time_sel = javelin_tag(
       'input',
       array(
         'name'  => $this->getTimeInputName(),
@@ -242,6 +254,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'value' => $this->getTimeInputValue(),
         'type'  => 'text',
         'class' => 'aphront-form-date-time-input',
+        'disabled' => $disabled,
       ),
       '');
 
@@ -252,14 +265,65 @@ final class AphrontFormDateControl extends AphrontFormControl {
       array(
         'class' => 'aphront-form-date-container',
         'sigil' => 'phabricator-date-control',
+        'meta'  => array(
+          'disabled' => (bool)$disabled,
+        ),
       ),
       array(
+        $checkbox,
         $days_sel,
         $months_sel,
         $years_sel,
         $cal_icon,
         $time_sel,
       ));
+  }
+
+  private function getTimezone() {
+    if ($this->zone) {
+      return $this->zone;
+    }
+
+    $user = $this->getUser();
+    if (!$this->getUser()) {
+      throw new Exception("Call setUser() before getTimezone()!");
+    }
+
+    $user_zone = $user->getTimezoneIdentifier();
+    $this->zone = new DateTimeZone($user_zone);
+    return $this->zone;
+  }
+
+  private function getInitialValue() {
+    $zone = $this->getTimezone();
+
+    // TODO: We could eventually allow these to be customized per install or
+    // per user or both, but let's wait and see.
+    switch ($this->initialTime) {
+      case self::TIME_START_OF_DAY:
+      default:
+        $time = '12:00 AM';
+        break;
+      case self::TIME_START_OF_BUSINESS:
+        $time = '9:00 AM';
+        break;
+      case self::TIME_END_OF_BUSINESS:
+        $time = '5:00 PM';
+        break;
+      case self::TIME_END_OF_DAY:
+        $time = '11:59 PM';
+        break;
+    }
+
+    $today = $this->formatTime(time(), 'Y-m-d');
+    try {
+      $date = new DateTime("{$today} {$time}", $zone);
+      $value = $date->format('U');
+    } catch (Exception $ex) {
+      $value = null;
+    }
+
+    return $value;
   }
 
 }

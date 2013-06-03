@@ -1,58 +1,46 @@
 <?php
 
-/**
- * Provides search functionality for the paste application.
- *
- * @group search
- */
 final class PhabricatorPasteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
-  /**
-   * Create a saved query object from the request.
-   *
-   * @param AphrontRequest The search request.
-   * @return The saved query that is built.
-   */
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
       'authorPHIDs',
       array_values($request->getArr('authors')));
 
-    try {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $saved->save();
-      unset($unguarded);
-    } catch (AphrontQueryDuplicateKeyException $ex) {
-      // Ignore, this is just a repeated search.
+    $languages = $request->getStrList('languages');
+    if ($request->getBool('noLanguage')) {
+      $languages[] = null;
     }
+    $saved->setParameter('languages', $languages);
+
+    $saved->setParameter('createdStart', $request->getStr('createdStart'));
+    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
     return $saved;
   }
 
-  /**
-   * Executes the saved query.
-   *
-   * @param PhabricatorSavedQuery
-   * @return The result of the query.
-   */
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPasteQuery())
-      ->withIDs($saved->getParameter('ids', array()))
-      ->withPHIDs($saved->getParameter('phids', array()))
+      ->needContent(true)
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))
-      ->withParentPHIDs($saved->getParameter('parentPHIDs', array()));
+      ->withLanguages($saved->getParameter('languages', array()));
+
+    $start = $this->parseDateTime($saved->getParameter('createdStart'));
+    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
+
+    if ($start) {
+      $query->withDateCreatedAfter($start);
+    }
+
+    if ($end) {
+      $query->withDateCreatedBefore($end);
+    }
 
     return $query;
   }
 
-  /**
-   * Builds the search form using the request.
-   *
-   * @param PhabricatorSavedQuery The query to populate the form with.
-   * @return AphrontFormView The built form.
-   */
   public function buildSearchForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
@@ -62,25 +50,53 @@ final class PhabricatorPasteSearchEngine
       ->loadHandles();
     $author_tokens = mpull($handles, 'getFullName', 'getPHID');
 
-    $form->appendChild(
-      id(new AphrontFormTokenizerControl())
-        ->setDatasource('/typeahead/common/users/')
-        ->setName('authors')
-        ->setLabel(pht('Authors'))
-        ->setValue($author_tokens));
+    $languages = $saved_query->getParameter('languages', array());
+    $no_language = false;
+    foreach ($languages as $key => $language) {
+      if ($language === null) {
+        $no_language = true;
+        unset($languages[$key]);
+        continue;
+      }
+    }
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/users/')
+          ->setName('authors')
+          ->setLabel(pht('Authors'))
+          ->setValue($author_tokens))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('languages')
+          ->setLabel(pht('Languages'))
+          ->setValue(implode(', ', $languages)))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'noLanguage',
+            1,
+            pht('Find Pastes with no specified language.'),
+            $no_language));
+
+    $this->buildDateRange(
+      $form,
+      $saved_query,
+      'createdStart',
+      pht('Created After'),
+      'createdEnd',
+      pht('Created Before'));
+
   }
 
-  public function getQueryResultsPageURI($query_key) {
-    return '/paste/query/'.$query_key.'/';
-  }
-
-  public function getQueryManagementURI() {
-    return '/paste/savedqueries/';
+  protected function getURI($path) {
+    return '/paste/'.$path;
   }
 
   public function getBuiltinQueryNames() {
     $names = array(
-      'all'       => pht('All Pastes'),
+      'all' => pht('All Pastes'),
     );
 
     if ($this->requireViewer()->isLoggedIn()) {

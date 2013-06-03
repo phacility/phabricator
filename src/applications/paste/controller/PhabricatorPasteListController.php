@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorPasteListController extends PhabricatorPasteController {
+final class PhabricatorPasteListController extends PhabricatorPasteController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
   private $queryKey;
 
@@ -14,92 +15,15 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorPasteSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $engine = id(new PhabricatorPasteSearchEngine())
-      ->setViewer($user);
-
-    if ($request->isFormPost()) {
-      return id(new AphrontRedirectResponse())->setURI(
-        $engine->getQueryResultsPageURI(
-          $engine->buildSavedQueryFromRequest($request)->getQueryKey()));
-    }
-
-    $nav = $this->buildSideNavView();
-
-    if ($engine->isBuiltinQuery($this->queryKey)) {
-      $saved_query = $engine->buildSavedQueryFromBuiltin($this->queryKey);
-    } else {
-      $saved_query = id(new PhabricatorSavedQueryQuery())
-        ->setViewer($user)
-        ->withQueryKeys(array($this->queryKey))
-        ->executeOne();
-
-      if (!$saved_query) {
-        return new Aphront404Response();
-      }
-    }
-
-    $query = id(new PhabricatorPasteSearchEngine())
-      ->buildQueryFromSavedQuery($saved_query);
-
-    $filter = $nav->selectFilter(
-      'query/'.$saved_query->getQueryKey(),
-      'filter/advanced');
-
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-    $pastes = $query->setViewer($request->getUser())
-      ->needContent(true)
-      ->executeWithCursorPager($pager);
-
-    $list = $this->buildPasteList($pastes);
-    $list->setPager($pager);
-    $list->setNoDataString(pht("No results found for this query."));
-
-    if ($this->queryKey !== null || $filter == "filter/advanced") {
-      $form = id(new AphrontFormView())
-        ->setNoShading(true)
-        ->setUser($user);
-
-      $engine->buildSearchForm($form, $saved_query);
-
-      $submit = id(new AphrontFormSubmitControl())
-        ->setValue(pht('Execute Query'));
-
-      if ($filter == 'filter/advanced') {
-        $submit->addCancelButton(
-          '/search/edit/'.$saved_query->getQueryKey().'/',
-          pht('Save Custom Query...'));
-      }
-
-      $form->appendChild($submit);
-
-      $filter_view = id(new AphrontListFilterView())->appendChild($form);
-      $nav->appendChild($filter_view);
-    }
-
-    $nav->appendChild($list);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs($nav)
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht("Pastes"))
-          ->setHref($this->getApplicationURI('filter/'.$filter.'/')));
-
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht("Pastes"),
-        'device' => true,
-        'dust' => true,
-      ));
+    return $this->delegateToController($controller);
   }
 
-  private function buildPasteList(array $pastes) {
+  public function renderResultsList(array $pastes) {
     assert_instances_of($pastes, 'PhabricatorPaste');
 
     $user = $this->getRequest()->getUser();

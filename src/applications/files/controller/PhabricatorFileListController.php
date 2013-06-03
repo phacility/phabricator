@@ -1,79 +1,36 @@
 <?php
 
-final class PhabricatorFileListController extends PhabricatorFileController {
+final class PhabricatorFileListController extends PhabricatorFileController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  private $filter;
+  private $key;
 
-  private function setFilter($filter) {
-    $this->filter = $filter;
-    return $this;
-  }
-
-  private function getFilter() {
-    return $this->filter;
+  public function shouldAllowPublic() {
+    return true;
   }
 
   public function willProcessRequest(array $data) {
-    $this->setFilter(idx($data, 'filter', 'my'));
+    $this->key = idx($data, 'key', 'authored');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->key)
+      ->setSearchEngine(new PhabricatorFileSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $pager = id(new AphrontCursorPagerView())
-      ->readFromRequest($request);
-
-    $query = id(new PhabricatorFileQuery())
-      ->setViewer($user);
-
-    switch ($this->getFilter()) {
-      case 'my':
-        $query->withAuthorPHIDs(array($user->getPHID()));
-        $query->showOnlyExplicitUploads(true);
-        $header = pht('Files You Uploaded');
-        break;
-      case 'all':
-      default:
-        $header = pht('All Files');
-        break;
-    }
-
-    $files = $query->executeWithCursorPager($pager);
-    $this->loadHandles(mpull($files, 'getAuthorPHID'));
-
-    $highlighted = $request->getStrList('h');
-    $file_list = $this->buildFileList($files, $highlighted);
-
-    $side_nav = $this->buildSideNavView();
-    $side_nav->selectFilter($this->getFilter());
-
-    $side_nav->appendChild(
-      array(
-        $file_list,
-        $pager,
-        new PhabricatorGlobalUploadTargetView(),
-      ));
-
-    $side_nav->setCrumbs(
-      $this
-        ->buildApplicationCrumbs()
-        ->addCrumb(
-          id(new PhabricatorCrumbView())
-            ->setName($header)
-            ->setHref($request->getRequestURI())));
-
-    return $this->buildApplicationPage(
-      $side_nav,
-      array(
-        'title' => 'Files',
-        'device' => true,
-        'dust' => true,
-      ));
+    return $this->delegateToController($controller);
   }
 
-  private function buildFileList(array $files, array $highlighted_ids) {
+  public function renderResultsList(array $files) {
     assert_instances_of($files, 'PhabricatorFile');
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $highlighted_ids = $request->getStrList('h');
+    $this->loadHandles(mpull($files, 'getAuthorPHID'));
 
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -117,6 +74,8 @@ final class PhabricatorFileListController extends PhabricatorFileController {
 
       $list_view->addItem($item);
     }
+
+    $list_view->appendChild(new PhabricatorGlobalUploadTargetView());
 
     return $list_view;
   }

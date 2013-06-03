@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorObjectItemListView extends AphrontView {
+final class PhabricatorObjectItemListView extends AphrontTagView {
 
   private $header;
   private $items;
@@ -45,10 +45,32 @@ final class PhabricatorObjectItemListView extends AphrontView {
     return $this;
   }
 
-  public function render() {
+  protected function getTagName() {
+    return 'ul';
+  }
+
+  protected function getTagAttributes() {
+    $classes = array();
+
+    $classes[] = 'phabricator-object-item-list-view';
+    if ($this->stackable) {
+      $classes[] = 'phabricator-object-list-stackable';
+    }
+    if ($this->cards) {
+      $classes[] = 'phabricator-object-list-cards';
+    }
+    if ($this->flush) {
+      $classes[] = 'phabricator-object-list-flush';
+    }
+
+    return array(
+      'class' => $classes,
+    );
+  }
+
+  protected function getTagContent() {
     require_celerity_resource('phabricator-object-item-list-view-css');
 
-    $classes = array();
     $header = null;
     if (strlen($this->header)) {
       $header = phutil_tag(
@@ -73,27 +95,12 @@ final class PhabricatorObjectItemListView extends AphrontView {
       $pager = $this->pager;
     }
 
-    $classes[] = 'phabricator-object-item-list-view';
-    if ($this->stackable) {
-      $classes[] = 'phabricator-object-list-stackable';
-    }
-    if ($this->cards) {
-      $classes[] = 'phabricator-object-list-cards';
-    }
-    if ($this->flush) {
-      $classes[] = 'phabricator-object-list-flush';
-    }
-
-    return phutil_tag(
-      'ul',
-      array(
-        'class' => implode(' ', $classes),
-      ),
-      array(
-        $header,
-        $items,
-        $pager,
-      ));
+    return array(
+      $header,
+      $items,
+      $pager,
+      $this->renderChildren(),
+    );
   }
 
 }

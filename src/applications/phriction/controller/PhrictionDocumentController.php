@@ -163,18 +163,16 @@ final class PhrictionDocumentController
     $header = id(new PhabricatorHeaderView())
       ->setHeader($page_title);
 
-    $page_content = hsprintf(
-      '<div class="phriction-wrap">
-        <div class="phriction-content">
-          %s%s%s%s%s
-        </div>
-        <div class="phriction-fake-space"></div>
-      </div>',
-      $header,
-      $actions,
-      $properties,
-      $move_notice,
-      $core_content);
+    $page_content = id(new PHUIDocumentView())
+      ->setOffset(true)
+      ->appendChild(
+        array(
+          $header,
+          $actions,
+          $properties,
+          $move_notice,
+          $core_content,
+        ));
 
     $core_page = phutil_tag(
       'div',
@@ -192,6 +190,7 @@ final class PhrictionDocumentController
         $core_page,
       ),
       array(
+        'pageObjects' => array($document->getPHID()),
         'title'   => $page_title,
         'device'  => true,
         'dust'    => true,
@@ -420,15 +419,24 @@ final class PhrictionDocumentController
       $list[] = phutil_tag('li', array(), pht('More...'));
     }
 
-    return hsprintf(
-      '<div class="phriction-wrap">
-        <div class="phriction-children">
-        <div class="phriction-children-header">%s</div>
-        %s
-        </div>
-      </div>',
-      pht('Document Hierarchy'),
-      phutil_tag('ul', array(), $list));
+    $content = array(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'phriction-children-header',
+        ),
+        pht('Document Hierarchy')),
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'phriction-children',
+        ),
+        phutil_tag('ul', array(), $list)),
+    );
+
+    return id(new PHUIDocumentView())
+      ->setOffset(true)
+      ->appendChild($content);
   }
 
   private function renderChildDocumentLink(array $info) {

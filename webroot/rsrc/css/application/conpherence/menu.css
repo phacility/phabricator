@@ -11,10 +11,20 @@
 }
 
 .conpherence-layout .conpherence-no-threads {
-  height 80%;
-  width: 80%;
-  padding: 10%;
   text-align: center;
+  position: fixed;
+  left: 280px;
+  right: 241px;
+  top: 76px;
+  bottom: 0px;
+  min-width: 300px;
+  width: auto;
+}
+
+.device .conpherence-layout .conpherence-no-threads {
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 
 .conpherence-layout .conpherence-no-threads .text {
@@ -63,8 +73,14 @@
 }
 
 .conpherence-content-pane {
+  display: none;
   margin-left: 0px;
   position: relative;
+}
+
+.device-desktop .conpherence-content-pane,
+.device .conpherence-role-thread .conpherence-content-pane {
+  display: block;
 }
 
 .conpherence-menu .conpherence-menu-item-view {
@@ -83,6 +99,10 @@
 .conpherence-menu .conpherence-selected {
   background: rgba(0, 0, 0, .6);
   border-left: 2px solid #66CCFF;
+}
+
+.conpherence-menu .loading {
+  font-style: italic;
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {

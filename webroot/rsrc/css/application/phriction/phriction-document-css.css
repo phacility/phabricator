@@ -17,59 +17,6 @@
   margin: .25em 0;
 }
 
-.device-desktop .phriction-offset {
-  padding-right: 160px;
-}
-
-.phriction-wrap {
-  margin-bottom: 20px;
-}
-
-.device-desktop .phriction-wrap {
-  position: relative;
-  border-left: 1px solid #e7e7e7;
-  border-right: 1px solid #e7e7e7;
-  border-bottom: 1px solid #c0c5d1;
-  max-width: 800px;
-  margin: 20px auto;
-}
-
-.phriction-content {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  min-height: 240px;
-  background: #fff;
-}
-
-.device-desktop .phriction-wrap {
-}
-
-.device-desktop .phriction-content .phabricator-action-list-view {
-  margin: 10px 10px 0 0;
-  background: #f7f7f7;
-}
-
-.device-phone .phriction-content .phabricator-action-list-view {
-  margin: 0;
-  border-bottom: 1px solid #c0c5d1;
-  background: #f7f7f7;
-}
-
-.phriction-content .phabricator-header-shell {
-  border-top: none;
-}
-
-.phriction-content .phabricator-remarkup {
-  padding: 20px;
-}
-
-.device-phone .phriction-content .phabricator-remarkup {
-  padding: 10px;
-}
-
-.phriction-content .phriction-link {
-  font-weight: bold;
-}
-
 .phriction-breadcrumbs {
   font-size: 12px;
   color: #666666;
@@ -77,12 +24,6 @@
 
 .phriction-document-crumbs a {
   font-weight: bold;
-}
-
-.phriction-children {
-  max-width: 800px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .phriction-children ul {
@@ -97,21 +38,6 @@
   padding: 10px 0 10px 20px;
   font-weight: bold;
   margin-bottom: 15px;
-}
-
-.device-desktop .phriction-content .phabricator-action-list-view {
-  position: absolute;
-  top: 50px;
-  right: -172px;
-  float: none;
-  background: #fff;
-  border-radius: 0;
-  box-shadow: none;
-  border: none;
-  border-top: 1px solid #e7e7e7;
-  border-bottom: 1px solid #e7e7e7;
-  border-right: 1px solid #e7e7e7;
-  width: 160px;
 }
 
 .phriction-document-preview-header {
@@ -147,11 +73,6 @@
   text-align: right;
 }
 
-.device-phone .phriction-content .phabricator-remarkup-toc {
-  width: 120px;
-}
-
-.phriction-content .phabricator-remarkup .remarkup-code-block {
-  clear: both;
-  margin: 20px 0;
+.phui-document-content .phriction-link {
+  font-weight: bold;
 }

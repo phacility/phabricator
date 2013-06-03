@@ -70,7 +70,7 @@ final class ConpherenceViewController extends
       $form = null;
       $content = array('messages' => $messages);
     } else {
-      $header = $this->renderHeaderPaneContent();
+      $header = $this->buildHeaderPaneContent($conpherence);
       $form = $this->renderFormContent($data['latest_transaction_id']);
       $content = array(
         'header' => $header,
@@ -93,7 +93,7 @@ final class ConpherenceViewController extends
 
     $title = $conpherence->getTitle();
     if (!$title) {
-      $title = pht('Conpherence');
+      $title = pht('[No Title]');
     }
     return $this->buildApplicationPage(
       $layout,
@@ -103,18 +103,9 @@ final class ConpherenceViewController extends
       ));
   }
 
-  private function renderHeaderPaneContent() {
-    $conpherence = $this->getConpherence();
-    $header = $this->buildHeaderPaneContent($conpherence);
-    return hsprintf('%s', $header);
-  }
-
-
   private function renderMessagePaneContent(
     array $transactions,
     $oldest_transaction_id) {
-
-    require_celerity_resource('conpherence-message-pane-css');
 
     $scrollbutton = '';
     if ($oldest_transaction_id) {

@@ -3,7 +3,6 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-util
- *           javelin-request
  *           javelin-stratcom
  *           javelin-workflow
  *           javelin-behavior-device
@@ -13,27 +12,66 @@
 
 JX.behavior('conpherence-menu', function(config) {
 
-  var thread = {
+  /**
+   * State for displayed thread.
+   */
+  var _thread = {
     selected: null,
-    node: null,
-    visible: null
+    visible: null,
+    node: null
   };
 
-  function selectthreadid(id, updatePageData) {
-    var threads = JX.DOM.scry(document.body, 'a', 'conpherence-menu-click');
-    for (var ii = 0; ii < threads.length; ii++) {
-      var data = JX.Stratcom.getData(threads[ii]);
-      if (data.id == id) {
-        selectthread(threads[ii], updatePageData);
-        return;
-      }
+  /**
+   * Current role of this behavior. The two possible roles are to show a 'list'
+   * of threads or a specific 'thread'. On devices, this behavior stays in the
+   * 'list' role indefinitely, treating clicks normally and the next page
+   * loads the behavior with role = 'thread'. On desktop, this behavior
+   * auto-loads a thread as part of the 'list' role. As the thread loads the
+   * role is changed to 'thread'.
+   */
+  var _currentRole = null;
+
+  /**
+   * When _oldDevice is null the code is executing for the first time.
+   */
+  var _oldDevice = null;
+
+  /**
+   * Initializes this behavior based on all the configuraton jonx and the
+   * result of JX.Device.getDevice();
+   */
+  function init() {
+    _currentRole = config.role;
+
+    if (_currentRole == 'thread') {
+      markThreadsLoading(true);
+    } else {
+      markThreadLoading(true);
     }
+    markWidgetLoading(true);
+    onDeviceChange();
+  }
+  init();
+
+  /**
+   * Selecting threads
+   */
+  JX.Stratcom.listen(
+    'conpherence-selectthread',
+    null,
+    function (e) {
+      selectThreadByID(e.getData().id);
+    }
+  );
+
+  function selectThreadByID(id, update_page_data) {
+    var thread = JX.$(id);
+    selectThread(thread, update_page_data);
   }
 
-  function selectthread(node, updatePageData) {
-
-    if (thread.node) {
-      JX.DOM.alterClass(thread.node, 'conpherence-selected', false);
+  function selectThread(node, update_page_data) {
+    if (_thread.node) {
+      JX.DOM.alterClass(_thread.node, 'conpherence-selected', false);
       // keep the unread-count hidden still. big TODO once we ajax in updates
       // to threads to make this work right and move threads between read /
       // unread
@@ -42,37 +80,28 @@ JX.behavior('conpherence-menu', function(config) {
     JX.DOM.alterClass(node, 'conpherence-selected', true);
     JX.DOM.alterClass(node, 'hide-unread-count', true);
 
-    thread.node = node;
+    _thread.node = node;
 
     var data = JX.Stratcom.getData(node);
-    thread.selected = data.id;
+    _thread.selected = data.threadID;
 
-    if (updatePageData) {
-      updatepagedata(data);
+    if (update_page_data) {
+      updatePageData(data);
     }
 
-    redrawthread();
+    redrawThread();
   }
 
-  JX.Stratcom.listen(
-    'conpherence-selectthread',
-    null,
-    function (e) {
-      var node = JX.$(e.getData().id);
-      selectthread(node);
-    }
-  );
-
-  function updatepagedata(data) {
-    var uri_suffix = thread.selected + '/';
+  function updatePageData(data) {
+    var uri_suffix = _thread.selected + '/';
     if (data.use_base_uri) {
       uri_suffix = '';
     }
-    JX.History.replace(config.base_uri + uri_suffix);
+    JX.History.replace(config.baseURI + uri_suffix);
     if (data.title) {
       document.title = data.title;
-    } else if (thread.node) {
-      var threadData = JX.Stratcom.getData(thread.node);
+    } else if (_thread.node) {
+      var threadData = JX.Stratcom.getData(_thread.node);
       document.title = threadData.title;
     }
   }
@@ -81,60 +110,128 @@ JX.behavior('conpherence-menu', function(config) {
     'conpherence-update-page-data',
     null,
     function (e) {
-      updatepagedata(e.getData());
+      updatePageData(e.getData());
     }
   );
 
-  function redrawthread() {
-    if (!thread.node) {
+  function redrawThread() {
+    if (!_thread.node) {
       return;
     }
 
-    if (thread.visible == thread.selected) {
+    if (_thread.visible == _thread.selected) {
       return;
     }
 
-    var data = JX.Stratcom.getData(thread.node);
+    var data = JX.Stratcom.getData(_thread.node);
 
-    if (thread.visible !== null || !config.hasThread) {
-      var uri = config.base_uri + data.id + '/';
+    if (_thread.visible !== null || !config.hasThread) {
+      markThreadLoading(true);
+      var uri = config.baseURI + data.threadID + '/';
       new JX.Workflow(uri, {})
-        .setHandler(onloadthreadresponse)
+        .setHandler(JX.bind(null, onLoadThreadResponse, data.threadID))
         .start();
+    } else if (config.hasThread) {
+      _scrollMessageWindow();
     } else {
-      didredrawthread();
+      didRedrawThread();
     }
 
-    if (thread.visible !== null || !config.hasWidgets) {
-      var widget_uri = config.base_uri + 'widget/' + data.id + '/';
-      new JX.Workflow(widget_uri, {})
-        .setHandler(onwidgetresponse)
-        .start();
+    if (_thread.visible !== null || !config.hasWidgets) {
+      reloadWidget(data);
     } else {
-      updatetoggledwidget();
-    }
-
-    thread.visible = thread.selected;
-  }
-
-  function onwidgetresponse(response) {
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var widgetsRoot = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
-    JX.DOM.setContent(widgetsRoot, JX.$H(response.widgets));
-    updatetoggledwidget();
-  }
-
-  function updatetoggledwidget(no_toggle) {
-    JX.Stratcom.invoke(
-      'conpherence-toggle-widget',
+     JX.Stratcom.invoke(
+      'conpherence-update-widgets',
       null,
       {
-        widget : getdefaultwidget(),
-        no_toggle : no_toggle
+        widget : getDefaultWidget(),
+        buildSelectors : false,
+        toggleWidget : true,
+        threadID : _thread.selected
       });
+    }
+
+    _thread.visible = _thread.selected;
   }
 
-  function getdefaultwidget() {
+  function markThreadsLoading(loading) {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var menu = JX.DOM.find(root, 'div', 'conpherence-menu-pane');
+    JX.DOM.alterClass(menu, 'loading', loading);
+  }
+
+  function markThreadLoading(loading) {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+
+    JX.DOM.alterClass(header_root, 'loading', loading);
+    JX.DOM.alterClass(messages_root, 'loading', loading);
+    JX.DOM.alterClass(form_root, 'loading', loading);
+
+    try {
+      var textarea = JX.DOM.find(form, 'textarea');
+      textarea.disabled = loading;
+      var button = JX.DOM.find(form, 'button');
+      button.disabled = loading;
+    } catch (ex) {
+      // haven't loaded it yet!
+    }
+  }
+
+  function markWidgetLoading(loading) {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var widgets_root = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
+
+    JX.DOM.alterClass(widgets_root, 'loading', loading);
+  }
+
+  function reloadWidget(data) {
+    markWidgetLoading(true);
+    if (!data.widget) {
+      data.widget = getDefaultWidget();
+    }
+    var widget_uri = config.baseURI + 'widget/' + data.threadID + '/';
+    new JX.Workflow(widget_uri, {})
+      .setHandler(JX.bind(null, onWidgetResponse, data.threadID, data.widget))
+      .start();
+  }
+  JX.Stratcom.listen(
+    'conpherence-reload-widget',
+    null,
+    function (e) {
+      var data = e.getData();
+      if (data.threadID != _thread.selected) {
+        return;
+      }
+      reloadWidget(data);
+    }
+  );
+
+  function onWidgetResponse(thread_id, widget, response) {
+    // we got impatient and this is no longer the right answer :/
+    if (_thread.selected != thread_id) {
+      return;
+    }
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var widgets_root = JX.DOM.find(root, 'div', 'conpherence-widgets-holder');
+    JX.DOM.setContent(widgets_root, JX.$H(response.widgets));
+
+    JX.Stratcom.invoke(
+      'conpherence-update-widgets',
+      null,
+      {
+        widget : widget,
+        buildSelectors : true,
+        toggleWidget : true,
+        threadID : _thread.selected
+      });
+
+    markWidgetLoading(false);
+  }
+
+  function getDefaultWidget() {
     var device = JX.Device.getDevice();
     var widget = 'conpherence-message-pane';
     if (device == 'desktop') {
@@ -143,48 +240,55 @@ JX.behavior('conpherence-menu', function(config) {
     return widget;
   }
 
-  function onloadthreadresponse(response) {
+  function onLoadThreadResponse(thread_id, response) {
+    // we got impatient and this is no longer the right answer :/
+    if (_thread.selected != thread_id) {
+      return;
+    }
     var header = JX.$H(response.header);
     var messages = JX.$H(response.messages);
     var form = JX.$H(response.form);
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var headerRoot = JX.DOM.find(root, 'div', 'conpherence-header-pane');
-    var messagesRoot = JX.DOM.find(root, 'div', 'conpherence-messages');
-    var formRoot = JX.DOM.find(root, 'div', 'conpherence-form');
-    JX.DOM.setContent(headerRoot, header);
-    JX.DOM.setContent(messagesRoot, messages);
-    JX.DOM.setContent(formRoot, form);
+    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    JX.DOM.setContent(header_root, header);
+    JX.DOM.setContent(messages_root, messages);
+    JX.DOM.setContent(form_root, form);
 
-    didredrawthread();
+    markThreadLoading(false);
+
+    didRedrawThread(true);
   }
 
-  function didredrawthread() {
+  /**
+   * This function is a wee bit tricky. Internally, we want to scroll the
+   * message window and let other stuff - notably widgets - redraw / build if
+   * necessary. Externally, we want a hook to scroll the message window
+   * - notably when the widget selector is used to invoke the message pane.
+   * The following three functions get 'er done.
+   */
+   function didRedrawThread(build_device_widget_selector) {
+     _scrollMessageWindow();
+     JX.Stratcom.invoke(
+       'conpherence-did-redraw-thread',
+       null,
+       {
+         widget : getDefaultWidget(),
+         threadID : _thread.selected,
+         buildDeviceWidgetSelector : build_device_widget_selector
+       });
+  }
+  function _scrollMessageWindow() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messagesRoot = JX.DOM.find(root, 'div', 'conpherence-messages');
-    messagesRoot.scrollTop = messagesRoot.scrollHeight;
-
-    try {
-      var device = JX.Device.getDevice();
-      var deviceWidgetSelector = JX.DOM.find(
-        root,
-        'a',
-        'device-widgets-selector');
-      if (device != 'desktop') {
-        JX.DOM.show(deviceWidgetSelector);
-        updatetoggledwidget(true);
-      } else {
-        JX.DOM.hide(deviceWidgetSelector);
-      }
-    } catch (ex) {
-      // not here yet
-    }
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
+    messages_root.scrollTop = messages_root.scrollHeight;
   }
-
   JX.Stratcom.listen(
     'conpherence-redraw-thread',
     null,
     function (e) {
-      didredrawthread();
+      _scrollMessageWindow();
     }
   );
 
@@ -202,7 +306,7 @@ JX.behavior('conpherence-menu', function(config) {
       }
 
       e.kill();
-      selectthread(e.getNode('conpherence-menu-click'), true);
+      selectThread(e.getNode('conpherence-menu-click'), true);
     });
 
   JX.Stratcom.listen('click', 'conpherence-edit-metadata', function (e) {
@@ -241,126 +345,147 @@ JX.behavior('conpherence-menu', function(config) {
       .start();
   });
 
+  var _loadingTransactionID = null;
   JX.Stratcom.listen('click', 'show-older-messages', function(e) {
     e.kill();
     var data = e.getNodeData('show-older-messages');
-    var oldest_transaction_id = data.oldest_transaction_id;
-    var conf_id = thread.selected;
-    JX.DOM.remove(e.getNode('show-older-messages'));
+    if (data.oldest_transaction_id == _loadingTransactionID) {
+      return;
+    }
+    _loadingTransactionID = data.oldest_transaction_id;
+    var node = e.getNode('show-older-messages');
+    JX.DOM.setContent(node, 'Loading...');
+    JX.DOM.alterClass(node, 'conpherence-show-older-messages-loading', true);
+
+    var conf_id = _thread.selected;
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    new JX.Request(config.base_uri + conf_id + '/', function(r) {
+    new JX.Workflow(config.baseURI + conf_id + '/', data)
+    .setHandler(function(r) {
+      JX.DOM.remove(node);
       var messages = JX.$H(r.messages);
       JX.DOM.prependContent(
         messages_root,
         JX.$H(messages));
-    }).setData({ oldest_transaction_id : oldest_transaction_id }).send();
+    }).start();
   });
 
-  // On mobile, we just show a thread list, so we don't want to automatically
-  // select or load any threads. On Desktop, we automatically select the first
-  // thread.
-  var old_device = null;
-  function ondevicechange() {
+  /**
+   * On devices, we just show a thread list, so we don't want to automatically
+   * select or load any threads. On desktop, we automatically select the first
+   * thread, changing the _currentRole from list to thread.
+   */
+  function onDeviceChange() {
     var new_device = JX.Device.getDevice();
-    if (new_device === old_device) {
+    if (new_device === _oldDevice) {
       return;
     }
 
-    if (old_device === null) {
-      old_device = new_device;
-      if (config.role == 'list') {
+    if (_oldDevice === null) {
+      _oldDevice = new_device;
+      if (_currentRole == 'list') {
         if (new_device != 'desktop') {
           return;
         }
       } else {
-        loadthreads();
+        loadThreads();
         return;
       }
     }
     var update_toggled_widget =
-      new_device == 'desktop' || old_device == 'desktop';
-    old_device = new_device;
+      new_device == 'desktop' || _oldDevice == 'desktop';
+    _oldDevice = new_device;
 
-    if (thread.visible !== null && update_toggled_widget) {
-      updatetoggledwidget();
+    if (_thread.visible !== null && update_toggled_widget) {
+      JX.Stratcom.invoke(
+        'conpherence-did-redraw-thread',
+        null,
+        {
+          widget : getDefaultWidget(),
+          threadID : _thread.selected
+        });
     }
 
-    if (config.role == 'list') {
-      didloadthreads();
-      config.role = 'thread';
+    if (_currentRole == 'list' && new_device == 'desktop') {
+      // this selects a thread and loads it
+      didLoadThreads();
+      _currentRole = 'thread';
       var root = JX.DOM.find(document, 'div', 'conpherence-layout');
       JX.DOM.alterClass(root, 'conpherence-role-list', false);
       JX.DOM.alterClass(root, 'conpherence-role-thread', true);
     }
   }
+  JX.Stratcom.listen('phabricator-device-change', null, onDeviceChange);
 
-  JX.Stratcom.listen('phabricator-device-change', null, ondevicechange);
-  ondevicechange();
-
-  function loadthreads() {
-    var uri = config.base_uri + 'thread/' + config.selectedID + '/';
+  function loadThreads() {
+    markThreadsLoading(true);
+    var uri = config.baseURI + 'thread/' + config.selectedThreadID + '/';
     new JX.Workflow(uri)
-      .setHandler(onloadthreadsresponse)
+      .setHandler(onLoadThreadsResponse)
       .start();
   }
 
-  function onloadthreadsresponse(r) {
+  function onLoadThreadsResponse(r) {
     var layout = JX.$(config.layoutID);
     var menu = JX.DOM.find(layout, 'div', 'conpherence-menu-pane');
     JX.DOM.setContent(menu, JX.$H(r));
 
-    config.selectedID && selectthreadid(config.selectedID);
+    config.selectedID && selectThreadByID(config.selectedID);
 
-    thread.node.scrollIntoView();
+    _thread.node.scrollIntoView();
+
+    markThreadsLoading(false);
   }
 
-  function didloadthreads() {
+  function didLoadThreads() {
     // If there's no thread selected yet, select the current thread or the
     // first thread.
-    if (!thread.selected) {
+    if (!_thread.selected) {
       if (config.selectedID) {
-        selectthreadid(config.selectedID, true);
+        selectThreadByID(config.selectedID, true);
       } else {
         var layout = JX.$(config.layoutID);
         var threads = JX.DOM.scry(layout, 'a', 'conpherence-menu-click');
         if (threads.length) {
-          selectthread(threads[0]);
+          selectThread(threads[0]);
         } else {
           var nothreads = JX.DOM.find(layout, 'div', 'conpherence-no-threads');
           nothreads.style.display = 'block';
+          markThreadLoading(false);
+          markWidgetLoading(false);
         }
       }
     }
-    redrawthread();
   }
 
-  var handlethreadscrollers = function (e) {
+  var handleThreadScrollers = function (e) {
     e.kill();
 
     var data = e.getNodeData('conpherence-menu-scroller');
     var scroller = e.getNode('conpherence-menu-scroller');
+    JX.DOM.alterClass(scroller, 'loading', true);
+    JX.DOM.setContent(scroller.firstChild, 'Loading...');
     new JX.Workflow(scroller.href, data)
       .setHandler(
-        JX.bind(null, threadscrollerresponse, scroller, data.direction))
+        JX.bind(null, threadScrollerResponse, scroller, data.direction))
       .start();
   };
 
-  var threadscrollerresponse = function (scroller, direction, r) {
+  var threadScrollerResponse = function (scroller, direction, r) {
     var html = JX.$H(r.html);
 
-    var threadPhids = r.phids;
-    var reselectId = null;
+    var thread_phids = r.phids;
+    var reselect_id = null;
     // remove any threads that are in the list that we just got back
     // in the result set; things have changed and they'll be in the
     // right place soon
-    for (var ii = 0; ii < threadPhids.length; ii++) {
+    for (var ii = 0; ii < thread_phids.length; ii++) {
       try {
-        var nodeId = threadPhids[ii] + '-nav-item';
-        var node = JX.$(nodeId);
-        var nodeData = JX.Stratcom.getData(node);
-        if (nodeData.id == thread.selected) {
-          reselectId = nodeId;
+        var node_id = thread_phids[ii] + '-nav-item';
+        var node = JX.$(node_id);
+        var node_data = JX.Stratcom.getData(node);
+        if (node_data.id == _thread.selected) {
+          reselect_id = node_id;
         }
         JX.DOM.remove(node);
       } catch (ex) {
@@ -369,8 +494,8 @@ JX.behavior('conpherence-menu', function(config) {
     }
 
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var menuRoot = JX.DOM.find(root, 'div', 'conpherence-menu-pane');
-    var scrollY = 0;
+    var menu_root = JX.DOM.find(root, 'div', 'conpherence-menu-pane');
+    var scroll_y = 0;
     // we have to do some hyjinx in the up case to make the menu scroll to
     // where it should
     if (direction == 'up') {
@@ -382,16 +507,16 @@ JX.behavior('conpherence-menu', function(config) {
       document.body.appendChild(test_size);
       var html_size = JX.Vector.getDim(test_size);
       JX.DOM.remove(test_size);
-      scrollY = html_size.y;
+      scroll_y = html_size.y;
     }
     JX.DOM.replace(scroller, html);
-    menuRoot.scrollTop += scrollY;
+    menu_root.scrollTop += scroll_y;
 
-    if (reselectId) {
+    if (reselect_id) {
       JX.Stratcom.invoke(
         'conpherence-selectthread',
         null,
-        { id : reselectId }
+        { id : reselect_id }
       );
     }
   };
@@ -399,7 +524,7 @@ JX.behavior('conpherence-menu', function(config) {
   JX.Stratcom.listen(
     ['click'],
     'conpherence-menu-scroller',
-    handlethreadscrollers
+    handleThreadScrollers
   );
 
 });

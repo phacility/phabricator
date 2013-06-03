@@ -9,10 +9,6 @@
   box-shadow: 0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5);
 }
 
-.device-phone .aphront-dialog-view {
-  width: 300px;
-}
-
 .aphront-dialog-head .phabricator-action-header {
   border-bottom: 1px solid #d4dadf;
   padding: 5px 15px;
@@ -38,7 +34,6 @@
   background: #ffffff;
   padding: 20px 15px;
   border: none;
-  overflow: hidden;
 }
 
 .aphront-dialog-tail {

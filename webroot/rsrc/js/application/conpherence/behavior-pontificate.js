@@ -14,13 +14,17 @@ JX.behavior('conpherence-pontificate', function(config) {
     var form = e.getNode('tag:form');
 
     var root = e.getNode('conpherence-layout');
-    var messages = JX.DOM.find(root, 'div', 'conpherence-messages');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
     var fileWidget = null;
     try {
       fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
     } catch (ex) {
       // Ignore; maybe no files widget
     }
+    JX.DOM.alterClass(form_root, 'loading', true);
 
     JX.Workflow.newFromForm(form)
       .setHandler(JX.bind(this, function(r) {
@@ -49,7 +53,9 @@ JX.behavior('conpherence-pontificate', function(config) {
           'conpherence-selectthread',
           null,
           { id : r.conpherence_phid + '-nav-item' }
-        );
+          );
+
+        JX.DOM.alterClass(form_root, 'loading', false);
       }))
     .start();
   };

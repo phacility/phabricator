@@ -5,6 +5,81 @@
  */
 final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
+  const ERROR_EMPTY_PARTICIPANTS = 'error-empty-participants';
+  const ERROR_EMPTY_MESSAGE = 'error-empty-message';
+
+  public static function createConpherence(
+    PhabricatorUser $creator,
+    array $participant_phids,
+    $title,
+    $message,
+    PhabricatorContentSource $source) {
+
+    $conpherence = id(new ConpherenceThread())
+      ->attachParticipants(array())
+      ->attachFilePHIDs(array())
+      ->setMessageCount(0);
+    $files = array();
+    $errors = array();
+    if (empty($participant_phids)) {
+      $errors[] = self::ERROR_EMPTY_PARTICIPANTS;
+    } else {
+      $participant_phids[] = $creator->getPHID();
+      $participant_phids = array_unique($participant_phids);
+      $conpherence->setRecentParticipantPHIDs(
+        array_slice($participant_phids, 0, 10));
+    }
+
+    if (empty($message)) {
+      $errors[] = self::ERROR_EMPTY_MESSAGE;
+    }
+
+    $file_phids =
+      PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+        array($message));
+    if ($file_phids) {
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($creator)
+        ->withPHIDs($file_phids)
+        ->execute();
+    }
+
+    if (!$errors) {
+      $conpherence->openTransaction();
+      $conpherence->save();
+      $xactions = array();
+      $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
+        ->setNewValue(array('+' => $participant_phids));
+      if ($files) {
+        $xactions[] = id(new ConpherenceTransaction())
+          ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
+          ->setNewValue(array('+' => mpull($files, 'getPHID')));
+      }
+      if ($title) {
+        $xactions[] = id(new ConpherenceTransaction())
+          ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+          ->setNewValue($title);
+      }
+      $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new ConpherenceTransactionComment())
+          ->setContent($message)
+          ->setConpherencePHID($conpherence->getPHID()));
+
+      id(new ConpherenceEditor())
+        ->setContentSource($source)
+        ->setContinueOnNoEffect(true)
+        ->setActor($creator)
+        ->applyTransactions($conpherence, $xactions);
+
+      $conpherence->saveTransaction();
+    }
+
+    return array($errors, $conpherence);
+  }
+
   public function generateTransactionsFromText(
     ConpherenceThread $conpherence,
     $text) {

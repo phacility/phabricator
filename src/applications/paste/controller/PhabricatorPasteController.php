@@ -12,27 +12,9 @@ abstract class PhabricatorPasteController extends PhabricatorController {
       $nav->addFilter('create', pht('Create Paste'));
     }
 
-    $nav->addLabel(pht('Queries'));
-
-    $engine = id(new PhabricatorPasteSearchEngine())
-      ->setViewer($user);
-
-    $named_queries = id(new PhabricatorNamedQueryQuery())
+    id(new PhabricatorPasteSearchEngine())
       ->setViewer($user)
-      ->withUserPHIDs(array($user->getPHID()))
-      ->withEngineClassNames(array(get_class($engine)))
-      ->execute();
-
-    $named_queries = $named_queries + $engine->getBuiltinQueries($user);
-
-    foreach ($named_queries as $query) {
-      $nav->addFilter('query/'.$query->getQueryKey(), $query->getQueryName());
-    }
-
-    $nav->addFilter('savedqueries', pht('Edit Queries...'));
-
-    $nav->addLabel(pht('Search'));
-    $nav->addFilter('filter/advanced', pht('Advanced Search'));
+      ->addNavigationItems($nav->getMenu());
 
     $nav->selectFilter(null);
 

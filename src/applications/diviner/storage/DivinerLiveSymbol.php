@@ -1,6 +1,7 @@
 <?php
 
-final class DivinerLiveSymbol extends DivinerDAO {
+final class DivinerLiveSymbol extends DivinerDAO
+  implements PhabricatorPolicyInterface {
 
   protected $phid;
   protected $bookPHID;
@@ -10,6 +11,10 @@ final class DivinerLiveSymbol extends DivinerDAO {
   protected $atomIndex;
   protected $graphHash;
   protected $identityHash;
+
+  private $book;
+  private $content;
+  private $atom;
 
   public function getConfiguration() {
     return array(
@@ -21,6 +26,58 @@ final class DivinerLiveSymbol extends DivinerDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_ATOM);
+  }
+
+  public function getBook() {
+    if ($this->book === null) {
+      throw new Exception("Call attachBook() before getBook()!");
+    }
+    return $this->book;
+  }
+
+  public function attachBook(DivinerLiveBook $book) {
+    $this->book = $book;
+    return $this;
+  }
+
+  public function getContent() {
+    if ($this->content === null) {
+      throw new Exception("Call attachAtom() before getContent()!");
+    }
+    return $this->content;
+  }
+
+  public function getAtom() {
+    if ($this->atom === null) {
+      throw new Exception("Call attachAtom() before getAtom()!");
+    }
+    return $this->atom;
+  }
+
+  public function attachAtom(DivinerLiveAtom $atom) {
+    $this->content = $atom->getContent();
+    $this->atom = DivinerAtom::newFromDictionary($atom->getAtomData());
+    return $this;
+  }
+
+  public function getURI() {
+    $parts = array(
+      'book',
+      $this->getBook()->getName(),
+      $this->getType(),
+    );
+
+    if ($this->getContext()) {
+      $parts[] = $this->getContext();
+    }
+
+    $parts[] = $this->getName();
+
+    if ($this->getAtomIndex()) {
+      $parts[] = $this->getAtomIndex();
+    }
+
+    return '/'.implode('/', $parts).'/';
   }
 
   public function save() {
@@ -44,5 +101,21 @@ final class DivinerLiveSymbol extends DivinerDAO {
     return parent::save();
   }
 
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return $this->getBook()->getCapabilities();
+  }
+
+
+  public function getPolicy($capability) {
+    return $this->getBook()->getPolicy($capability);
+  }
+
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getBook()->hasAutomaticCapability($capability, $viewer);
+  }
 
 }

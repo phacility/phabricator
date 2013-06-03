@@ -180,9 +180,12 @@ final class AphrontDialogView extends AphrontView {
 
     $content = hsprintf(
       '%s%s%s',
-      phutil_tag('div', array('class' => 'aphront-dialog-head'), $header),
-      phutil_tag('div', array('class' => 'aphront-dialog-body'), $children),
-      phutil_tag('div', array('class' => 'aphront-dialog-tail'), $buttons));
+      phutil_tag('div',
+        array('class' => 'aphront-dialog-head'), $header),
+      phutil_tag('div',
+        array('class' => 'aphront-dialog-body grouped'), $children),
+      phutil_tag('div',
+        array('class' => 'aphront-dialog-tail'), $buttons));
 
     if ($this->renderAsForm) {
       return phabricator_form(

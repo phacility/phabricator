@@ -21,12 +21,6 @@ input.phabricator-jump-nav[type='text'] {
   text-align: left;
 }
 
-.phabricator-jump-nav-container .aphront-list-filter-view-controls {
+.phabricator-jump-nav-container form {
   padding: 20px;
-}
-
-.phabricator-jump-nav-container .aphront-list-filter-view-controls h1 {
-  color: #555;
-  padding-top: 4px;
-  margin-bottom: 0.67em;
 }

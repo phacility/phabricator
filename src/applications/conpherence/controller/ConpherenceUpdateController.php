@@ -54,13 +54,12 @@ final class ConpherenceUpdateController
           break;
         case ConpherenceUpdateActions::ADD_PERSON:
           $xactions = array();
-          $person_tokenizer = $request->getArr('add_person');
-          $person_phid = reset($person_tokenizer);
-          if ($person_phid) {
+          $person_phids = $request->getArr('add_person');
+          if (!empty($person_phids)) {
             $xactions[] = id(new ConpherenceTransaction())
               ->setTransactionType(
                 ConpherenceTransactionType::TYPE_PARTICIPANTS)
-              ->setNewValue(array('+' => array($person_phid)));
+              ->setNewValue(array('+' => $person_phids));
           }
           break;
         case ConpherenceUpdateActions::REMOVE_PERSON:
@@ -153,6 +152,9 @@ final class ConpherenceUpdateController
     }
 
     switch ($action) {
+      case ConpherenceUpdateActions::ADD_PERSON:
+        $dialogue = $this->renderAddPersonDialogue($conpherence);
+        break;
       case ConpherenceUpdateActions::REMOVE_PERSON:
         $dialogue = $this->renderRemovePersonDialogue($conpherence);
         break;
@@ -171,6 +173,29 @@ final class ConpherenceUpdateController
         ->addCancelButton($this->getApplicationURI($conpherence->getID().'/')));
 
   }
+
+  private function renderAddPersonDialogue(
+    ConpherenceThread $conpherence) {
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    $add_person = $request->getStr('add_person');
+
+    $form = id(new AphrontFormLayoutView())
+      ->setUser($user)
+      ->setFullWidth(true)
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+        ->setName('add_person')
+        ->setUser($user)
+        ->setDatasource('/typeahead/common/users/'));
+
+    require_celerity_resource('conpherence-update-css');
+    return id(new AphrontDialogView())
+      ->setTitle(pht('Add Participants'))
+      ->addHiddenInput('action', 'add_person')
+      ->appendChild($form);
+    }
 
   private function renderRemovePersonDialogue(
     ConpherenceThread $conpherence) {
@@ -196,7 +221,8 @@ final class ConpherenceUpdateController
 
     require_celerity_resource('conpherence-update-css');
     return id(new AphrontDialogView())
-      ->setTitle(pht('Update Conpherence Participants'))
+      ->setTitle(pht('Remove Participants'))
+      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
       ->addHiddenInput('action', 'remove_person')
       ->addHiddenInput('__continue__', true)
       ->addHiddenInput('remove_person', $remove_person)
@@ -294,7 +320,7 @@ final class ConpherenceUpdateController
     }
 
     $content = array(
-      'transactions' => $rendered_transactions,
+      'transactions' => hsprintf('%s', $rendered_transactions),
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),

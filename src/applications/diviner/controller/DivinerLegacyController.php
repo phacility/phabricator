@@ -1,6 +1,6 @@
 <?php
 
-final class DivinerListController extends PhabricatorController {
+final class DivinerLegacyController extends DivinerController {
 
   public function processRequest() {
 
@@ -26,37 +26,35 @@ final class DivinerListController extends PhabricatorController {
       ),
     );
 
-    require_celerity_resource('phabricator-directory-css');
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $out = array();
+    $list = id(new PhabricatorObjectItemListView())
+      ->setUser($viewer);
+
     foreach ($links as $href => $link) {
-      $name = $link['name'];
-      $flavor = $link['flavor'];
+      $item = id(new PhabricatorObjectItemView())
+        ->setHref($href)
+        ->setHeader($link['name'])
+        ->addAttribute($link['flavor']);
 
-      $link = phutil_tag(
-        'a',
-        array(
-          'href'    => $href,
-          'target'  => '_blank',
-        ),
-        $name);
-
-      $out[] = hsprintf(
-        '<div class="aphront-directory-item">'.
-          '<h1>%s</h1>'.
-          '<p>%s</p>'.
-        '</div>',
-        $link,
-        $flavor);
+      $list->addItem($item);
     }
 
-    $out = phutil_tag('div', array('class' => 'aphront-directory-list'), $out);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Documentation')));
 
     return $this->buildApplicationPage(
-      $out,
       array(
+        $crumbs,
+        $list,
+      ),
+      array(
+        'title' => pht('Documentation'),
+        'dust' => true,
         'device' => true,
-        'title' => 'Documentation',
       ));
   }
 }

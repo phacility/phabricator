@@ -7,14 +7,15 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
   implements PhabricatorPolicyInterface {
 
   protected $parameters = array();
-  protected $queryKey = "";
-  protected $engineClassName = "PhabricatorPasteSearchEngine";
+  protected $queryKey;
+  protected $engineClassName;
 
   public function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
-        'parameters' => self::SERIALIZATION_JSON), )
-      + parent::getConfiguration();
+        'parameters' => self::SERIALIZATION_JSON,
+      ),
+    ) + parent::getConfiguration();
   }
 
   public function setParameter($key, $value) {

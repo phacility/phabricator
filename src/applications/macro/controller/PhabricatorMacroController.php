@@ -3,7 +3,7 @@
 abstract class PhabricatorMacroController
   extends PhabricatorController {
 
-  protected function buildSideNavView($for_app = false, $has_search = false) {
+  protected function buildSideNavView($for_app = false) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
@@ -14,16 +14,9 @@ abstract class PhabricatorMacroController
         $this->getApplicationURI('/create/'));
     }
 
-    $nav->addLabel(pht('Macros'));
-    $nav->addFilter('active', pht('Active Macros'));
-    $nav->addFilter('all', pht('All Macros'));
-    $nav->addFilter('my', pht('My Macros'));
-    if ($has_search) {
-      $nav->addFilter('search',
-        pht('Search'),
-        $this->getRequest()->getRequestURI());
-    }
-
+    id(new PhabricatorMacroSearchEngine())
+      ->setViewer($this->getRequest()->getUser())
+      ->addNavigationItems($nav->getMenu());
 
     return $nav;
   }

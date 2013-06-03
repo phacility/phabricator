@@ -9,15 +9,9 @@ final class ConpherenceNewController extends ConpherenceController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $conpherence = id(new ConpherenceThread())
-      ->attachParticipants(array())
-      ->attachFilePHIDs(array())
-      ->setMessageCount(0);
     $title = pht('New Message');
     $participants = array();
     $message = '';
-    $files = array();
-    $errors = array();
     $e_participants = null;
     $e_message = null;
 
@@ -29,70 +23,30 @@ final class ConpherenceNewController extends ConpherenceController {
 
     if ($request->isFormPost()) {
       $participants = $request->getArr('participants');
-      if (empty($participants)) {
-        $e_participants = true;
-        $errors[] = pht('You must specify participants.');
-      } else {
-        $participants[] = $user->getPHID();
-        $participants = array_unique($participants);
-        $conpherence->setRecentParticipantPHIDs(
-          array_slice($participants, 0, 10));
-      }
-
       $message = $request->getStr('message');
-      if (empty($message)) {
-        $e_message = true;
-        $errors[] = pht('You must write a message.');
-      }
+      list($error_codes, $conpherence) = ConpherenceEditor::createConpherence(
+        $user,
+        $participants,
+        $conpherence_title = null,
+        $message,
+        PhabricatorContentSource::newFromRequest($request));
 
-      $file_phids =
-        PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
-          array($message));
-      if ($file_phids) {
-        $files = id(new PhabricatorFileQuery())
-          ->setViewer($user)
-          ->withPHIDs($file_phids)
-          ->execute();
-      }
-
-      if (!$errors) {
-        $conpherence->openTransaction();
-        $conpherence->save();
-        $xactions = array();
-        $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
-          ->setNewValue(array('+' => $participants));
-        if ($files) {
-          $xactions[] = id(new ConpherenceTransaction())
-            ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
-            ->setNewValue(array('+' => mpull($files, 'getPHID')));
+      if ($error_codes) {
+        foreach ($error_codes as $error_code) {
+          switch ($error_code) {
+            case ConpherenceEditor::ERROR_EMPTY_MESSAGE:
+              $e_message = true;
+              break;
+            case ConpherenceEditor::ERROR_EMPTY_PARTICIPANTS:
+              $e_participants = true;
+              break;
+          }
         }
-        $xactions[] = id(new ConpherenceTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-          ->attachComment(
-            id(new ConpherenceTransactionComment())
-            ->setContent($message)
-            ->setConpherencePHID($conpherence->getPHID()));
-
-        id(new ConpherenceEditor())
-          ->setContentSourceFromRequest($request)
-          ->setContinueOnNoEffect(true)
-          ->setActor($user)
-          ->applyTransactions($conpherence, $xactions);
-
-        $conpherence->saveTransaction();
-
+      } else {
         $uri = $this->getApplicationURI($conpherence->getID());
         return id(new AphrontRedirectResponse())
           ->setURI($uri);
       }
-    }
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle(pht('Conpherence Errors'))
-        ->setErrors($errors);
     }
 
     $participant_handles = array();

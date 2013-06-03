@@ -44,6 +44,8 @@ final class ConduitAPI_user_query_Method
     $limit       = $request->getValue('limit',     100);
 
     $query = new PhabricatorPeopleQuery();
+    $query->setViewer($request->getUser());
+
     if ($usernames) {
       $query->withUsernames($usernames);
     }

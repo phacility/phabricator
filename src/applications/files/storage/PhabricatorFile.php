@@ -429,7 +429,13 @@ final class PhabricatorFile extends PhabricatorFileDAO
     // If this is the only file using the storage, delete storage
     if (!$other_file) {
       $engine = $this->instantiateStorageEngine();
-      $engine->deleteFile($this->getStorageHandle());
+      try {
+        $engine->deleteFile($this->getStorageHandle());
+      } catch (Exception $ex) {
+        // In the worst case, we're leaving some data stranded in a storage
+        // engine, which is fine.
+        phlog($ex);
+      }
     }
 
     return $ret;

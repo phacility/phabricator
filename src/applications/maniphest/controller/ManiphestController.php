@@ -84,4 +84,27 @@ abstract class ManiphestController extends PhabricatorController {
     return $this->defaultQuery;
   }
 
+  protected function renderSingleTask(ManiphestTask $task) {
+    $user = $this->getRequest()->getUser();
+
+    $phids = $task->getProjectPHIDs();
+    if ($task->getOwnerPHID()) {
+      $phids[] = $task->getOwnerPHID();
+    }
+
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($user)
+      ->loadHandles();
+
+    $view = id(new ManiphestTaskListView())
+      ->setUser($user)
+      ->setShowSubpriorityControls(true)
+      ->setShowBatchControls(true)
+      ->setHandles($handles)
+      ->setTasks(array($task));
+
+    return $view;
+  }
+
+
 }

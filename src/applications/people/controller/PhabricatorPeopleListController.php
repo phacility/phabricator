@@ -1,29 +1,37 @@
 <?php
 
-final class PhabricatorPeopleListController
-  extends PhabricatorPeopleController {
+final class PhabricatorPeopleListController extends PhabricatorPeopleController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $key;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function shouldRequireAdmin() {
+    return false;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->key = idx($data, 'key', 'all');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->key)
+      ->setSearchEngine(new PhabricatorPeopleSearchEngine())
+      ->setNavigation($this->buildSideNavView());
+
+    return $this->delegateToController($controller);
+  }
+
+  public function renderResultsList(array $users) {
+    assert_instances_of($users, 'PhabricatorUser');
+
+    $request = $this->getRequest();
     $viewer = $request->getUser();
-    $is_admin = $viewer->getIsAdmin();
-
-    $user = new PhabricatorUser();
-
-    $count = queryfx_one(
-      $user->establishConnection('r'),
-      'SELECT COUNT(*) N FROM %T',
-      $user->getTableName());
-    $count = idx($count, 'N', 0);
-
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('page', 0));
-    $pager->setCount($count);
-    $pager->setURI($request->getRequestURI(), 'page');
-
-    $users = id(new PhabricatorPeopleQuery())
-      ->needPrimaryEmail(true)
-      ->executeWithOffsetPager($pager);
 
     $list = new PhabricatorObjectItemListView();
 
@@ -40,7 +48,7 @@ final class PhabricatorPeopleListController
 
       $item = new PhabricatorObjectItemView();
       $item->setHeader($user->getFullName())
-        ->setHref('/people/edit/'.$user->getID().'/')
+        ->setHref('/p/'.$user->getUsername().'/')
         ->addAttribute(hsprintf('%s %s',
             phabricator_date($user->getDateCreated(), $viewer),
             phabricator_time($user->getDateCreated(), $viewer)))
@@ -58,31 +66,17 @@ final class PhabricatorPeopleListController
         $item->addIcon('computer', pht('System Agent'));
       }
 
+      if ($viewer->getIsAdmin()) {
+        $uid = $user->getID();
+        $item->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setIcon('edit')
+            ->setHref($this->getApplicationURI('edit/'.$uid.'/')));
+      }
+
       $list->addItem($item);
     }
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('People (%d)', number_format($count)));
-
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('User Directory'))
-          ->setHref('/people/'));
-
-    $nav = $this->buildSideNavView();
-    $nav->selectFilter('people');
-    $nav->appendChild($header);
-    $nav->appendChild($list);
-    $nav->appendChild($pager);
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title'  => pht('People'),
-        'device' => true,
-        'dust'   => true,
-      ));
+    return $list;
   }
 }

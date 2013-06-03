@@ -32,12 +32,33 @@ final class ConpherenceTransactionView extends AphrontView {
   }
 
   public function render() {
+    $user = $this->getUser();
     $transaction = $this->getConpherenceTransaction();
+    switch ($transaction->getTransactionType()) {
+      case ConpherenceTransactionType::TYPE_DATE_MARKER:
+        return phutil_tag(
+          'div',
+          array(
+            'class' => 'date-marker'
+          ),
+          array(
+            phutil_tag(
+              'span',
+              array(
+                'class' => 'date',
+              ),
+              phabricator_format_local_time(
+                $transaction->getDateCreated(),
+                $user,
+              'M jS, Y'))));
+        break;
+    }
+
     $handles = $this->getHandles();
     $transaction->setHandles($handles);
     $author = $handles[$transaction->getAuthorPHID()];
     $transaction_view = id(new PhabricatorTransactionView())
-      ->setUser($this->getUser())
+      ->setUser($user)
       ->setEpoch($transaction->getDateCreated())
       ->setContentSource($transaction->getContentSource());
 

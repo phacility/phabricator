@@ -51,25 +51,9 @@ final class ManiphestSubpriorityController extends ManiphestController {
     $task->setSubpriority($new_sub);
     $task->save();
 
-    $phids = $task->getProjectPHIDs();
-    if ($task->getOwnerPHID()) {
-      $phids[] = $task->getOwnerPHID();
-    }
-
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->setViewer($user)
-      ->loadHandles();
-
-    $view = id(new ManiphestTaskListView())
-      ->setUser($user)
-      ->setShowSubpriorityControls(true)
-      ->setShowBatchControls(true)
-      ->setHandles($handles)
-      ->setTasks(array($task));
-
     return id(new AphrontAjaxResponse())->setContent(
       array(
-        'tasks' => $view,
+        'tasks' => $this->renderSingleTask($task),
       ));
   }
 

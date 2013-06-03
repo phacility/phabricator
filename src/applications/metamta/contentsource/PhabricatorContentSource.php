@@ -46,6 +46,12 @@ final class PhabricatorContentSource {
       ));
   }
 
+  public static function newFromConduitRequest(ConduitAPIRequest $request) {
+    return self::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+  }
+
   public function serialize() {
     return json_encode(array(
       'source' => $this->getSource(),

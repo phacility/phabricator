@@ -50,27 +50,25 @@ final class PhabricatorCountdownEditController
       $e_text = null;
       if (!strlen($title)) {
         $e_text = pht('Required');
-        $errors[] = pht('You must give it a name.');
+        $errors[] = pht('You must give the countdown a name.');
       }
 
-      // If the user types something like "5 PM", convert it to a timestamp
-      // using their local time, not the server time.
-      $timezone = new DateTimeZone($user->getTimezoneIdentifier());
-
-      try {
-        $date = new DateTime($epoch, $timezone);
-        $timestamp = $date->format('U');
-      } catch (Exception $e) {
-        $errors[] = pht('You entered an incorrect date. You can enter date'.
-          ' like \'2011-06-26 13:33:37\' to create an event at'.
-          ' 13:33:37 on the 26th of June 2011.');
-        $timestamp = null;
+      if (strlen($epoch)) {
+        $timestamp = PhabricatorTime::parseLocalTime($epoch, $user);
+        if (!$timestamp) {
+          $errors[] = pht(
+            'You entered an incorrect date. You can enter date '.
+            'like \'2011-06-26 13:33:37\' to create an event at '.
+            '13:33:37 on the 26th of June 2011.');
+        }
+      } else {
+        $e_epoch = pht('Required');
+        $errors[] = pht('You must specify the end date for a countdown.');
       }
-
-      $countdown->setTitle($title);
-      $countdown->setEpoch($timestamp);
 
       if (!count($errors)) {
+        $countdown->setTitle($title);
+        $countdown->setEpoch($timestamp);
         $countdown->setAuthorPHID($user->getPHID());
         $countdown->save();
         return id(new AphrontRedirectResponse())
@@ -84,9 +82,7 @@ final class PhabricatorCountdownEditController
     }
 
     if ($countdown->getEpoch()) {
-      $display_epoch = phabricator_datetime(
-        $countdown->getEpoch(),
-        $user);
+      $display_epoch = phabricator_datetime($countdown->getEpoch(), $user);
     } else {
       $display_epoch = $request->getStr('epoch');
     }

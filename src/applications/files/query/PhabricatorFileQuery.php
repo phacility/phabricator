@@ -8,6 +8,8 @@ final class PhabricatorFileQuery
   private $authorPHIDs;
   private $explicitUploads;
   private $transforms;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -21,6 +23,16 @@ final class PhabricatorFileQuery
 
   public function withAuthorPHIDs(array $phids) {
     $this->authorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
     return $this;
   }
 
@@ -154,6 +166,20 @@ final class PhabricatorFileQuery
         }
       }
       $where[] = qsprintf($conn_r, '(%Q)', implode(') OR (', $clauses));
+    }
+
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn_r,
+        'f.dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn_r,
+        'f.dateCreated <= %d',
+        $this->dateCreatedBefore);
     }
 
     return $this->formatWhereClause($where);

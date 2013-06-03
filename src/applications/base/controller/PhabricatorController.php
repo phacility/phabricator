@@ -52,7 +52,7 @@ abstract class PhabricatorController extends AphrontController {
         $user->getTableName(),
         'phabricator_session',
         'web-',
-        $phsid);
+        PhabricatorHash::digest($phsid));
       if ($info) {
         $user->loadFromArray($info);
       }
@@ -141,7 +141,7 @@ abstract class PhabricatorController extends AphrontController {
     if (!$this->getCurrentApplication()) {
       throw new Exception("No application!");
     }
-    return $this->getCurrentApplication()->getBaseURI().ltrim($path, '/');
+    return $this->getCurrentApplication()->getApplicationURI($path);
   }
 
   public function buildApplicationPage($view, array $options) {
