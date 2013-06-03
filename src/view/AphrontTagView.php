@@ -14,7 +14,6 @@ abstract class AphrontTagView extends AphrontView {
   private $mustCapture;
   private $workflow;
 
-
   public function setWorkflow($workflow) {
     $this->workflow = $workflow;
     return $this;
@@ -90,6 +89,10 @@ abstract class AphrontTagView extends AphrontView {
     return $this->renderChildren();
   }
 
+  protected function renderTagContainer($tag) {
+    return $tag;
+  }
+
   protected function willRender() {
     return;
   }
@@ -151,9 +154,11 @@ abstract class AphrontTagView extends AphrontView {
       }
     }
 
-    return javelin_tag(
+    $tag = javelin_tag(
       $this->getTagName(),
       $attributes,
       $this->getTagContent());
+
+    return $this->renderTagContainer($tag);
   }
 }
