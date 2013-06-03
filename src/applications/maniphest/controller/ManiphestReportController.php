@@ -709,11 +709,8 @@ final class ManiphestReportController extends ManiphestController {
     // Do locale-aware parsing so that the user's timezone is assumed for
     // time windows like "3 PM", rather than assuming the server timezone.
 
-    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
-    try {
-      $date = new DateTime($window_str, $timezone);
-      $window_epoch = $date->format('U');
-    } catch (Exception $e) {
+    $window_epoch = PhabricatorTime::parseLocalTime($window_str, $user);
+    if (!$window_epoch) {
       $error = 'Invalid';
       $window_epoch = time() - (60 * 60 * 24 * 7);
     }

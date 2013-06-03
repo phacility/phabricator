@@ -207,18 +207,7 @@ abstract class PhabricatorApplicationSearchEngine {
       return null;
     }
 
-    $viewer = $this->requireViewer();
-
-    $timezone = new DateTimeZone($viewer->getTimezoneIdentifier());
-
-    try {
-      $date = new DateTime($date_time, $timezone);
-      $timestamp = $date->format('U');
-    } catch (Exception $e) {
-      $timestamp = null;
-    }
-
-    return $timestamp;
+    return PhabricatorTime::parseLocalTime($date_time, $this->requireViewer());
   }
 
 
