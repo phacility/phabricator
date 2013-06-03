@@ -200,7 +200,7 @@ final class ConpherenceWidgetController extends
     $content = array();
     $layout = id(new AphrontMultiColumnView())
       ->setFluidLayout(true);
-    $timestamps = $this->getCalendarWidgetTimestamps();
+    $timestamps = ConpherenceTimeUtil::getCalendarWidgetTimestamps($user);
     $today = $timestamps['today'];
     $epoch_stamps = $timestamps['epoch_stamps'];
     $one_day = 24 * 60 * 60;
@@ -378,32 +378,9 @@ final class ConpherenceWidgetController extends
       );
   }
 
-  private function getCalendarWidgetTimestamps() {
-    $user = $this->getRequest()->getUser();
-    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
-
-    $start_epoch = phabricator_format_local_time(
-      strtotime('last sunday', strtotime('tomorrow')),
-      $user,
-      'U');
-    $first_day = new DateTime('@'.$start_epoch, $timezone);
-    $timestamps = array();
-    for ($day = 0; $day < 9; $day++) {
-      $timestamp = clone $first_day;
-      $timestamp->modify(sprintf('+%d days', $day));
-      // set the timezone again 'cuz DateTime is weird
-      $timestamp->setTimeZone($timezone);
-      $timestamps[] = $timestamp;
-    }
-    return array(
-      'today' => new DateTime('today', $timezone),
-      'epoch_stamps' => $timestamps
-    );
-  }
-
   private function getWidgetURI() {
     $conpherence = $this->getConpherence();
     return $this->getApplicationURI('update/'.$conpherence->getID().'/');
   }
 
-  }
+}

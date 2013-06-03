@@ -216,18 +216,10 @@ final class ConpherenceThreadQuery
     $participant_phids = array_mergev($participant_phids);
     $file_phids = array_mergev($file_phids);
 
-    // statuses of everyone currently in the conpherence
-    // we show sunday -> saturday in a list *AND* a window
-    // of today -> +2 days. Ergo, if its saturday we need
-    // +2 days, for +9 days total.
-    $start_epoch = phabricator_format_local_time(
-      strtotime('last sunday', strtotime('tomorrow')),
-      $this->getViewer(),
-      'U');
-    $end_epoch = phabricator_format_local_time(
-      strtotime('last sunday +9 days', strtotime('tomorrow')),
-      $this->getViewer(),
-      'U');
+    $epochs = ConpherenceTimeUtil::getCalendarEventEpochs(
+      $this->getViewer());
+    $start_epoch = $epochs['start_epoch'];
+    $end_epoch = $epochs['end_epoch'];
     $statuses = id(new PhabricatorUserStatus())
       ->loadAllWhere(
         'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
