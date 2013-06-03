@@ -82,6 +82,47 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitle();
   }
 
+  public function getTitleForFeed() {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case PholioTransactionType::TYPE_NAME:
+        if ($old === null) {
+          return pht(
+            '%s created %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s renamed %s from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old,
+            $new);
+        }
+        break;
+      case PholioTransactionType::TYPE_DESCRIPTION:
+        return pht(
+          '%s updated the description for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
+      case PholioTransactionType::TYPE_INLINE:
+        return pht(
+          '%s added an inline comment to %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
+    }
+
+    return parent::getTitleForFeed();
+  }
+
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
       case PholioTransactionType::TYPE_DESCRIPTION:
