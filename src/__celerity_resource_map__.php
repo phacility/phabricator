@@ -3275,7 +3275,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-project-tag-css' =>
   array(
-    'uri' => '/res/1b5efcb2/rsrc/css/application/projects/project-tag.css',
+    'uri' => '/res/383b8c30/rsrc/css/application/projects/project-tag.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4199,7 +4199,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/a9f14d76/javelin.pkg.js',
       'type' => 'js',
     ),
-    '6b1fccc6' =>
+    '03ab92cf' =>
     array(
       'name' => 'maniphest.pkg.css',
       'symbols' =>
@@ -4209,7 +4209,7 @@ celerity_register_resource_map(array(
         2 => 'aphront-attached-file-view-css',
         3 => 'phabricator-project-tag-css',
       ),
-      'uri' => '/res/pkg/6b1fccc6/maniphest.pkg.css',
+      'uri' => '/res/pkg/03ab92cf/maniphest.pkg.css',
       'type' => 'css',
     ),
     '1621e522' =>
@@ -4229,7 +4229,7 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-attached-file-view-css' => '6b1fccc6',
+    'aphront-attached-file-view-css' => '03ab92cf',
     'aphront-dialog-view-css' => '8e459ff2',
     'aphront-error-view-css' => '8e459ff2',
     'aphront-form-view-css' => '8e459ff2',
@@ -4328,8 +4328,8 @@ celerity_register_resource_map(array(
     'javelin-vector' => 'a9f14d76',
     'javelin-workflow' => 'a9f14d76',
     'lightbox-attachment-css' => '8e459ff2',
-    'maniphest-task-summary-css' => '6b1fccc6',
-    'maniphest-transaction-detail-css' => '6b1fccc6',
+    'maniphest-task-summary-css' => '03ab92cf',
+    'maniphest-transaction-detail-css' => '03ab92cf',
     'phabricator-action-list-view-css' => '8e459ff2',
     'phabricator-application-launch-view-css' => '8e459ff2',
     'phabricator-busy' => '98f60e3f',
@@ -4358,7 +4358,7 @@ celerity_register_resource_map(array(
     'phabricator-object-selector-css' => 'dd27a69b',
     'phabricator-phtize' => '98f60e3f',
     'phabricator-prefab' => '98f60e3f',
-    'phabricator-project-tag-css' => '6b1fccc6',
+    'phabricator-project-tag-css' => '03ab92cf',
     'phabricator-property-list-view-css' => '8e459ff2',
     'phabricator-remarkup-css' => '8e459ff2',
     'phabricator-shaped-request' => '9488bb69',
