@@ -257,6 +257,11 @@ abstract class PhabricatorApplicationTransactionEditor
     throw new Exception("Capability not supported!");
   }
 
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+  }
+
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
     return $this;
@@ -264,11 +269,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function setContentSourceFromRequest(AphrontRequest $request) {
     return $this->setContentSource(
-      PhabricatorContentSource::newForSource(
-        PhabricatorContentSource::SOURCE_WEB,
-        array(
-          'ip' => $request->getRemoteAddr(),
-        )));
+      PhabricatorContentSource::newFromRequest($request));
   }
 
   public function getContentSource() {
@@ -385,6 +386,8 @@ abstract class PhabricatorApplicationTransactionEditor
       foreach ($xactions as $xaction) {
         $this->applyExternalEffects($object, $xaction);
       }
+
+      $this->applyFinalEffects($object, $xactions);
 
       if ($read_locking) {
         $object->endReadLocking();
@@ -564,10 +567,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $this->mentionedPHIDs = $phids;
 
-    if (!$phids) {
-      return null;
-    }
-
     if ($object->getPHID()) {
       // Don't try to subscribe already-subscribed mentions: we want to generate
       // a dialog about an action having no effect if the user explicitly adds
@@ -581,6 +580,10 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
     $phids = array_values($phids);
+
+    if (!$phids) {
+      return null;
+    }
 
     $xaction = newv(get_class(head($xactions)), array());
     $xaction->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);

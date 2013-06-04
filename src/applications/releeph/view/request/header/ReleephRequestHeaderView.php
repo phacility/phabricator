@@ -55,7 +55,8 @@ final class ReleephRequestHeaderView extends AphrontView {
     $rr_div_class =
       'releeph-request-header '.
       'releeph-request-header-border '.
-      'releeph-border-color-'.ReleephRequest::getStatusClassSuffixFor($status);
+      'releeph-border-color-'.
+      ReleephRequestStatus::getStatusClassSuffixFor($status);
 
     $hidden_link = phutil_tag(
       'a',
@@ -225,7 +226,7 @@ final class ReleephRequestHeaderView extends AphrontView {
     $right_buttons = array();
 
     $user_phid = $this->user->getPHID();
-    $is_pusher = $this->releephProject->isPusherPHID($user_phid);
+    $is_pusher = $this->releephProject->isAuthoritativePHID($user_phid);
     $is_requestor = $this->releephRequest->getRequestUserPHID() === $user_phid;
 
     $current_intent = idx(

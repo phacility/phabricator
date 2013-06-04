@@ -54,5 +54,6 @@ JX.behavior('refresh-csrf', function(config) {
 
   JX.Request.listen('finally', function(r) {
     JX.Busy.done();
-  })
+  });
+
 });

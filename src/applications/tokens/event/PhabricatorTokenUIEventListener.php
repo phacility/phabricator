@@ -96,6 +96,8 @@ final class PhabricatorTokenUIEventListener
       ->setViewer($user)
       ->loadHandles();
 
+    Javelin::initBehavior('phabricator-tooltips');
+
     $list = array();
     foreach ($tokens_given as $token_given) {
       if (!idx($tokens, $token_given->getTokenPHID())) {

@@ -1,6 +1,7 @@
 <?php
 
-final class ReleephRequest extends ReleephDAO {
+final class ReleephRequest extends ReleephDAO
+  implements PhabricatorPolicyInterface {
 
   protected $phid;
   protected $branchID;
@@ -9,15 +10,13 @@ final class ReleephRequest extends ReleephDAO {
   protected $userIntents = array();
   protected $inBranch;
   protected $pickStatus;
+  protected $mailKey;
 
   // Information about the thing being requested
-  protected $requestCommitIdentifier;
   protected $requestCommitPHID;
-  protected $requestCommitOrdinal;
 
   // Information about the last commit to the releeph branch
   protected $commitIdentifier;
-  protected $committedByUserPHID;
   protected $commitPHID;
 
   // Pre-populated handles that we'll bulk load in ReleephBranch
@@ -35,14 +34,6 @@ final class ReleephRequest extends ReleephDAO {
   const PICK_MANUAL   = 4; // old
   const REVERT_OK     = 5;
   const REVERT_FAILED = 6;
-
-  const STATUS_REQUESTED       = 1;
-  const STATUS_NEEDS_PICK      = 2;  // aka approved
-  const STATUS_REJECTED        = 3;
-  const STATUS_ABANDONED       = 4;
-  const STATUS_PICKED          = 5;
-  const STATUS_REVERTED        = 6;
-  const STATUS_NEEDS_REVERT    = 7;  // aka revert requested
 
   public function shouldBeInBranch() {
     return
@@ -67,7 +58,7 @@ final class ReleephRequest extends ReleephDAO {
 
     $found_pusher_want = false;
     foreach ($this->userIntents as $phid => $intent) {
-      if ($project->isPusherPHID($phid)) {
+      if ($project->isAuthoritativePHID($phid)) {
         if ($intent == self::INTENT_PASS) {
           return self::INTENT_PASS;
         }
@@ -94,48 +85,29 @@ final class ReleephRequest extends ReleephDAO {
   private function calculateStatus() {
     if ($this->shouldBeInBranch()) {
       if ($this->getInBranch()) {
-        return self::STATUS_PICKED;
+        return ReleephRequestStatus::STATUS_PICKED;
       } else {
-        return self::STATUS_NEEDS_PICK;
+        return ReleephRequestStatus::STATUS_NEEDS_PICK;
       }
     } else {
       if ($this->getInBranch()) {
-        return self::STATUS_NEEDS_REVERT;
+        return ReleephRequestStatus::STATUS_NEEDS_REVERT;
       } else {
         $has_been_in_branch = $this->getCommitIdentifier();
         // Regardless of why we reverted something, always say reverted if it
         // was once in the branch.
         if ($has_been_in_branch) {
-          return self::STATUS_REVERTED;
+          return ReleephRequestStatus::STATUS_REVERTED;
         } elseif ($this->getPusherIntent() === ReleephRequest::INTENT_PASS) {
           // Otherwise, if it has never been in the branch, explicitly say why:
-          return self::STATUS_REJECTED;
+          return ReleephRequestStatus::STATUS_REJECTED;
         } elseif ($this->getRequestorIntent() === ReleephRequest::INTENT_WANT) {
-          return self::STATUS_REQUESTED;
+          return ReleephRequestStatus::STATUS_REQUESTED;
         } else {
-          return self::STATUS_ABANDONED;
+          return ReleephRequestStatus::STATUS_ABANDONED;
         }
       }
     }
-  }
-
-  public static function getStatusDescriptionFor($status) {
-    static $descriptions = array(
-      self::STATUS_REQUESTED       => 'Requested',
-      self::STATUS_REJECTED        => 'Rejected',
-      self::STATUS_ABANDONED       => 'Abandoned',
-      self::STATUS_PICKED          => 'Picked',
-      self::STATUS_REVERTED        => 'Reverted',
-      self::STATUS_NEEDS_PICK      => 'Needs Pick',
-      self::STATUS_NEEDS_REVERT    => 'Needs Revert',
-    );
-    return idx($descriptions, $status, '??');
-  }
-
-  public static function getStatusClassSuffixFor($status) {
-    $description = self::getStatusDescriptionFor($status);
-    $class = str_replace(' ', '-', strtolower($description));
-    return $class;
   }
 
 
@@ -154,6 +126,13 @@ final class ReleephRequest extends ReleephDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       ReleephPHIDConstants::PHID_TYPE_RERQ);
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
 
@@ -228,10 +207,13 @@ final class ReleephRequest extends ReleephDAO {
   }
 
   public function loadRequestCommitDiffPHID() {
-    $revision_phid = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getRequestCommitPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
-    return reset($revision_phid);
+    $commit = $this->loadPhabricatorRepositoryCommit();
+    if ($commit) {
+      $edges = $this
+        ->loadPhabricatorRepositoryCommit()
+        ->loadRelativeEdges(PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+      return head(array_keys($edges));
+    }
   }
 
 
@@ -264,13 +246,19 @@ final class ReleephRequest extends ReleephDAO {
   }
 
   public function loadPhabricatorRepositoryCommitData() {
-    return $this->loadOneRelative(
-      new PhabricatorRepositoryCommitData(),
-      'commitID',
-      'getRequestCommitOrdinal');
+    $commit = $this->loadPhabricatorRepositoryCommit();
+    if ($commit) {
+      return $commit->loadOneRelative(
+        new PhabricatorRepositoryCommitData(),
+        'commitID');
+    }
   }
 
   public function loadDifferentialRevision() {
+    $diff_phid = $this->loadRequestCommitDiffPHID();
+    if (!$diff_phid) {
+      return null;
+    }
     return $this->loadOneRelative(
         new DifferentialRevision(),
         'phid',
@@ -298,11 +286,26 @@ final class ReleephRequest extends ReleephDAO {
     throw new Exception('`status` is now deprecated!');
   }
 
-
 /* -(  Make magic Lisk methods private  )------------------------------------ */
 
   private function setUserIntents(array $ar) {
     return parent::setUserIntents($ar);
+  }
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

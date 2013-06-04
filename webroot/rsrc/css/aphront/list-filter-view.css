@@ -2,47 +2,74 @@
  * @provides aphront-list-filter-view-css
  */
 
-.aphront-filter-table-wrapper {
+.aphront-list-filter-view {
   border-left: 1px solid #e7e7e7;
   border-right: 1px solid #e7e7e7;
   border-bottom: 1px solid #c0c5d1;
+  background: #fff;
+
   margin: 0 20px;
-}
-
-.device-phone .aphront-filter-table-wrapper {
-  margin: 0;
   padding: 0;
-  background: #fff;
-}
-
-.aphront-list-filter-view {
-  background: #fff;
-  width: 100%;
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-.aphront-list-filter-view-controls {
-  width: 100%;
+.device-phone .aphront-list-filter-view {
+  margin: 0;
 }
 
-.aphront-list-filter-view-controls .aphront-form-view {
+.aphront-list-filter-view-content .aphront-form-view {
   border-left: none;
   border-right: none;
   padding: 12px 0 6px;
 }
 
-.aphront-list-filter-view-controls .aphront-form-view .aphront-form-label {
+.aphront-list-filter-view-content .aphront-form-view .aphront-form-label {
   width: 12%;
 }
 
-.aphront-list-filter-view-controls .aphront-form-view .aphront-form-input {
+.aphront-list-filter-view-content .aphront-form-view .aphront-form-input {
   width: 70%;
   margin-left: 13%;
   margin-right: 17%;
 }
 
-.device-phone .aphront-list-filter-view-controls .aphront-form-view .aphront-form-input {
+.device-phone .aphront-list-filter-view-content .aphront-form-view
+  .aphront-form-input {
   width: 98%;
-  margin-left: 0%;
-  margin-right: 0%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.aphront-list-filter-view-collapsible .aphront-list-filter-view-content {
+  border-top: 1px solid #e7e7e7;
+}
+
+.aphront-list-filter-reveal {
+  margin-left: 13%;
+  margin-right: 17%;
+  padding: 4px;
+  overflow: hidden;
+  text-align: right;
+}
+
+.device .aphront-list-filter-reveal {
+  width: 98%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.aphront-list-filter-reveal a {
+  font-weight: bold;
+}
+
+.aphront-list-filter-description {
+  margin-right: 20%;
+  color: #666666;
+  float: left;
+}
+
+.device .aphront-list-filter-description {
+  float: none;
+  text-align: left;
+  margin-right: 0;
 }

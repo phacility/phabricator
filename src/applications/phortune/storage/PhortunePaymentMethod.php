@@ -11,12 +11,16 @@ final class PhortunePaymentMethod extends PhortuneDAO
   const STATUS_FAILED     = 'payment:failed';
   const STATUS_REMOVED    = 'payment:removed';
 
-  protected $name;
+  protected $name = '';
   protected $status;
   protected $accountPHID;
   protected $authorPHID;
-  protected $expiresEpoch;
-  protected $metadata;
+  protected $expires;
+  protected $metadata = array();
+  protected $brand;
+  protected $lastFourDigits;
+  protected $providerType;
+  protected $providerDomain;
 
   private $account;
 
@@ -44,6 +48,45 @@ final class PhortunePaymentMethod extends PhortuneDAO
       throw new Exception("Call attachAccount() before getAccount()!");
     }
     return $this->account;
+  }
+
+  public function getDescription() {
+    return '...';
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return idx($this->getMetadata(), $key, $default);
+  }
+
+  public function setMetadataValue($key, $value) {
+    $this->metadata[$key] = $value;
+    return $this;
+  }
+
+  public function buildPaymentProvider() {
+    $providers = PhortunePaymentProvider::getAllProviders();
+
+    $accept = array();
+    foreach ($providers as $provider) {
+      if ($provider->canHandlePaymentMethod($this)) {
+        $accept[] = $provider;
+      }
+    }
+
+    if (!$accept) {
+      throw new PhortuneNoPaymentProviderException($this);
+    }
+
+    if (count($accept) > 1) {
+      throw new PhortuneMultiplePaymentProvidersException($this, $accept);
+    }
+
+    return head($accept);
+  }
+
+  public function setExpires($year, $month) {
+    $this->expires = $year.'-'.$month;
+    return $this;
   }
 
 

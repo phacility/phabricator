@@ -39,7 +39,8 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
 
     $request = DiffusionRequest::newFromDictionary(
       array(
-        'repository'  => $this->getRepository(),
+        'user' => PhabricatorUser::getOmnipotentUser(),
+        'repository' => $this->getRepository(),
       ));
     return $request->generateURI(
       array(

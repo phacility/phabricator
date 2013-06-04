@@ -23,7 +23,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
   }
 
   public function getApplicationGroup() {
-    return self::GROUP_ADMIN;
+    return self::GROUP_ORGANIZATION;
   }
 
   public function canUninstall() {
@@ -39,7 +39,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/people/' => array(
-        '' => 'PhabricatorPeopleListController',
+        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorPeopleListController',
         'logs/' => 'PhabricatorPeopleLogsController',
         'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',

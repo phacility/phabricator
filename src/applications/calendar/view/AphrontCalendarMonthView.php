@@ -2,6 +2,7 @@
 
 final class AphrontCalendarMonthView extends AphrontView {
 
+  private $day;
   private $month;
   private $year;
   private $holidays = array();
@@ -27,7 +28,8 @@ final class AphrontCalendarMonthView extends AphrontView {
     return $this;
   }
 
-  public function __construct($month, $year) {
+  public function __construct($month, $year, $day = null) {
+    $this->day = $day;
     $this->month = $month;
     $this->year = $year;
   }
@@ -65,6 +67,11 @@ final class AphrontCalendarMonthView extends AphrontView {
       $holiday = idx($this->holidays, $day->format('Y-m-d'));
       $class = 'aphront-calendar-day';
       $weekday = $day->format('w');
+
+      if ($day_number == $this->day) {
+        $class .= ' aphront-calendar-today';
+      }
+
       if ($holiday || $weekday == 0 || $weekday == 6) {
         $class .= ' aphront-calendar-not-work-day';
       }

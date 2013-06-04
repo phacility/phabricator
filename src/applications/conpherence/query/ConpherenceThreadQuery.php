@@ -11,8 +11,6 @@ final class ConpherenceThreadQuery
   private $phids;
   private $ids;
   private $needWidgetData;
-  private $needHeaderPics;
-  private $needOrigPics;
   private $needTransactions;
   private $needParticipantCache;
   private $needFilePHIDs;
@@ -27,16 +25,6 @@ final class ConpherenceThreadQuery
 
   public function needParticipantCache($participant_cache) {
     $this->needParticipantCache = $participant_cache;
-    return $this;
-  }
-
-  public function needOrigPics($need_orig_pics) {
-    $this->needOrigPics = $need_orig_pics;
-    return $this;
-  }
-
-  public function needHeaderPics($need_header_pics) {
-    $this->needHeaderPics = $need_header_pics;
     return $this;
   }
 
@@ -109,12 +97,6 @@ final class ConpherenceThreadQuery
       }
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
-      }
-      if ($this->needOrigPics) {
-        $this->loadOrigPics($conpherences);
-      }
-      if ($this->needHeaderPics) {
-        $this->loadHeaderPics($conpherences);
       }
     }
 
@@ -234,22 +216,16 @@ final class ConpherenceThreadQuery
     $participant_phids = array_mergev($participant_phids);
     $file_phids = array_mergev($file_phids);
 
-    // statuses of everyone currently in the conpherence
-    // for a rolling one week window
-    $start_of_week = phabricator_format_local_time(
-      strtotime('last monday', strtotime('tomorrow')),
-      $this->getViewer(),
-      'U');
-    $end_of_week = phabricator_format_local_time(
-      strtotime('last monday +1 week', strtotime('tomorrow')),
-      $this->getViewer(),
-      'U');
+    $epochs = ConpherenceTimeUtil::getCalendarEventEpochs(
+      $this->getViewer());
+    $start_epoch = $epochs['start_epoch'];
+    $end_epoch = $epochs['end_epoch'];
     $statuses = id(new PhabricatorUserStatus())
       ->loadAllWhere(
         'userPHID in (%Ls) AND dateTo >= %d AND dateFrom <= %d',
         $participant_phids,
-        $start_of_week,
-        $end_of_week);
+        $start_epoch,
+        $end_epoch);
     $statuses = mgroup($statuses, 'getUserPHID');
 
     // attached files
@@ -299,44 +275,6 @@ final class ConpherenceThreadQuery
         'files_authors' => $files_authors
       );
       $conpherence->attachWidgetData($widget_data);
-    }
-
-    return $this;
-  }
-
-  private function loadOrigPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_ORIG);
-  }
-
-  private function loadHeaderPics(array $conpherences) {
-    return $this->loadPics(
-      $conpherences,
-      ConpherenceImageData::SIZE_HEAD);
-  }
-
-  private function loadPics(array $conpherences, $size) {
-    $conpherence_pic_phids = array();
-    foreach ($conpherences as $conpherence) {
-      $phid = $conpherence->getImagePHID($size);
-      if ($phid) {
-        $conpherence_pic_phids[$conpherence->getPHID()] = $phid;
-      }
-    }
-
-    if (!$conpherence_pic_phids) {
-      return $this;
-    }
-
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($conpherence_pic_phids)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
-
-    foreach ($conpherence_pic_phids as $conpherence_phid => $pic_phid) {
-      $conpherences[$conpherence_phid]->setImage($files[$pic_phid], $size);
     }
 
     return $this;

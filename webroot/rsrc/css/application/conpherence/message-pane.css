@@ -2,23 +2,35 @@
  * @provides conpherence-message-pane-css
  */
 
-.conpherence-message-pane {
+.conpherence-message-pane,
+.loading .messages-loading-mask,
+.loading .messages-loading-icon,
+.conpherence-layout .conpherence-no-threads {
   position: fixed;
-  left: 300px;
-  right: 281px;
-  top: 125px;
+  left: 280px;
+  right: 241px;
+  top: 76px;
+  bottom: 0px;
   min-width: 300px;
   width: auto;
-  height: 100%;
 }
 
-.device .conpherence-message-pane {
+.device .conpherence-message-pane,
+.device .loading .messages-loading-mask,
+.device .loading .messages-loading-icon,
+.device .conpherence-layout .conpherence-no-threads {
   left: 0;
   right: 0;
-  top: 85px;
   width: 100%;
 }
 
+.conpherence-layout .conpherence-no-threads {
+  text-align: center;
+}
+
+.conpherence-layout .conpherence-no-threads .text {
+  margin: 16px 0px 16px 0px;
+}
 
 .conpherence-show-older-messages {
   display: block;
@@ -29,12 +41,16 @@
   color: #18559D;
 }
 
+.conpherence-show-older-messages-loading {
+  font-style: italic;
+}
+
 .conpherence-message-pane .conpherence-messages {
   position: fixed;
-  left: 300px;
-  right: 281px;
-  top: 125px;
-  bottom: 142px;
+  left: 280px;
+  right: 241px;
+  top: 76px;
+  bottom: 190px;
   overflow-y: auto;
   box-shadow: inset 1px 4px 5px rgba(0,0,0,0.1);
   -webkit-overflow-scrolling: touch;
@@ -43,21 +59,31 @@
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;
-  top: 85px;
   bottom: 3em;
   width: 100%;
   box-shadow: none;
 }
 
+.conpherence-message-pane .messages-loading-mask {
+  opacity: .6;
+  background: #fff;
+  display: none;
+}
+
+.loading .messages-loading-mask {
+  display: block;
+  z-index: 500;
+}
+
 .conpherence-message-pane .phabricator-form-view {
   border-width: 0;
   background: none;
-  height: 143px;
+  height: 190px;
   padding: 0;
   position: fixed;
   bottom: 0;
-  left: 300px;
-  right: 281px;
+  left: 280px;
+  right: 241px;
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {
@@ -79,7 +105,13 @@
 }
 
 .conpherence-message-pane .phabricator-transaction-view {
-  margin: 10px 0 10px 15px;
+  margin: 5px 15px;
+  background-size: 35px;
+  min-height: auto;
+}
+
+.device-phone .conpherence-message-pane .phabricator-transaction-view {
+  margin: 0 10px 0 0;
 }
 
 .conpherence-message-pane .phabricator-transaction-detail {
@@ -87,24 +119,58 @@
   margin-left: 45px;
 }
 
+.conpherence-message-pane .date-marker {
+  border-top: 1px solid #d7d7d7;
+  margin: 5px 15px;
+  min-height: auto;
+}
+.conpherence-message-pane .date-marker .date {
+  position: relative;
+  top: -8px;
+  left: 40px;
+  background-color: #FFF;
+  color: #bfbfbf;
+  font-size: 11px;
+  padding: 0px 5px;
+}
+.device-phone .conpherence-message-pane .phabricator-transaction-detail {
+  min-height: auto;
+}
+
+.conpherence-message-pane .conpherence-edited {
+  color: #888;
+  margin: 0;
+}
+
+.device-phone .conpherence-message-pane .conpherence-edited {
+  color: #888;
+  margin: 0 10px;
+}
+
+.conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
+ padding: 0 0 5px 45px;
+ font-style: italic;
+}
+
+.device-phone .conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
+ padding: 0 0 5px 35px;
+}
+
 .conpherence-message-pane .phabricator-transaction-info,
 .conpherence-message-pane .phabricator-content-source-view {
   color: #b7b7b7;
+  line-height: 16px;
 }
 
 .conpherence-message-pane .phabricator-transaction-header,
 .conpherence-message-pane .phabricator-transaction-info,
 .conpherence-message-pane .phabricator-transaction-content {
   background: none;
+  padding: 0;
 }
 
 .conpherence-message-pane .phabricator-transaction-content {
-  padding-top: 0;
-}
-
-.conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
-  padding: 0 1em 0 1em;
-  margin-top: -4px;
+  padding: 2px 0 8px 0;
 }
 
 .conpherence-message-pane .aphront-form-control {
@@ -121,13 +187,14 @@
 }
 
 .conpherence-message-pane .remarkup-assist-textarea {
-  height: 6em;
+  height: 124px;
   padding: 6px;
   border-width: 0 0 1px 0;
   border-color: #e7e7e7;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  resize: none;
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {

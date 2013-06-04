@@ -48,7 +48,7 @@ final class PonderQuestionAskController extends PonderController {
     $error_view = null;
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
+        ->setTitle(pht('Form Errors'))
         ->setErrors($errors);
     }
 
@@ -72,7 +72,7 @@ final class PonderQuestionAskController extends PonderController {
           ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue('Ask Away!'));
+        ->setValue(pht('Ask Away!')));
 
     $preview = hsprintf(
       '<div class="aphront-panel-flush">'.
@@ -106,7 +106,8 @@ final class PonderQuestionAskController extends PonderController {
       $nav,
       array(
         'device' => true,
-        'title'  => 'Ask a Question',
+        'dust' => true,
+        'title'  => pht('Ask a Question'),
       ));
   }
 

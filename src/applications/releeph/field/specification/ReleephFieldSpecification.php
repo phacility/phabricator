@@ -1,6 +1,7 @@
 <?php
 
-abstract class ReleephFieldSpecification {
+abstract class ReleephFieldSpecification
+  implements PhabricatorMarkupInterface {
 
   abstract public function getName();
 
@@ -8,6 +9,22 @@ abstract class ReleephFieldSpecification {
 
   public function getStorageKey() {
     return null;
+  }
+
+  public function getRequiredStorageKey() {
+    $key = $this->getStorageKey();
+    if ($key === null) {
+      throw new ReleephFieldSpecificationIncompleteException($this);
+    }
+    if (strpos($key, '.') !== false) {
+      /**
+       * Storage keys are reused for form controls, and periods in form control
+       * names break HTML forms.
+       */
+      throw new Exception(
+        "You can't use '.' in storage keys!");
+    }
+    return $key;
   }
 
   final public function isEditable() {
@@ -36,6 +53,17 @@ abstract class ReleephFieldSpecification {
     return;
   }
 
+  /**
+   * Turn values as they are stored in a ReleephRequest into a text that can be
+   * rendered as a transactions old/new values.
+   */
+  public function normalizeForTransactionView(
+    PhabricatorApplicationTransaction $xaction,
+    $value) {
+
+    return $value;
+  }
+
 
 /* -(  Header View  )-------------------------------------------------------- */
 
@@ -57,13 +85,6 @@ abstract class ReleephFieldSpecification {
 
   public function renderEditControl(AphrontRequest $request) {
     throw new ReleephFieldSpecificationIncompleteException($this);
-  }
-
-  public function setValueFromAphrontRequest(AphrontRequest $request) {
-    $data = $request->getRequestData();
-    $value = idx($data, $this->getRequiredStorageKey());
-    $this->validate($value);
-    $this->setValue($value);
   }
 
 
@@ -239,23 +260,65 @@ abstract class ReleephFieldSpecification {
   }
 
 
-/* -(  Implementation  )----------------------------------------------------- */
+/* -(  Markup Interface  )--------------------------------------------------- */
 
-  protected function getRequiredStorageKey() {
-    $key = $this->getStorageKey();
-    if ($key === null) {
-      throw new ReleephFieldSpecificationIncompleteException($this);
-    }
-    if (strpos($key, '.') !== false) {
-      /**
-       * Storage keys are reused for form controls, and periods in form control
-       * names break HTML forms.
-       */
-      throw new Exception(
-        "You can't use '.' in storage keys!");
-    }
-    return $key;
+  const MARKUP_FIELD_GENERIC = 'releeph:generic-markup-field';
+
+  private $engine;
+
+  /**
+   * ReleephFieldSpecification implements much of PhabricatorMarkupInterface
+   * for you.  If you return true from `shouldMarkup()`, and implement
+   * `getMarkupText()` then your text will be rendered through the Phabricator
+   * markup pipeline.
+   *
+   * Output is retrievable with `getMarkupEngineOutput()`.
+   */
+  public function shouldMarkup() {
+    return false;
   }
+
+  public function getMarkupText($field) {
+    throw new ReleephFieldSpecificationIncompleteException($this);
+  }
+
+  final public function getMarkupEngineOutput() {
+    return $this->engine->getOutput($this, self::MARKUP_FIELD_GENERIC);
+  }
+
+  final public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
+    $this->engine = $engine;
+    $engine->addObject($this, self::MARKUP_FIELD_GENERIC);
+    return $this;
+  }
+
+  final public function getMarkupFieldKey($field) {
+    return sprintf(
+      '%s:%s:%s:%s',
+      $this->getReleephRequest()->getPHID(),
+      $this->getStorageKey(),
+      $field,
+      PhabricatorHash::digest($this->getMarkupText($field)));
+  }
+
+  final public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+  }
+
+  final public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+
+    return $output;
+  }
+
+  final public function shouldUseMarkupCache($field) {
+    return true;
+  }
+
+
+/* -(  Implementation  )----------------------------------------------------- */
 
   /**
    * The "hook" functions ##appendSelectControlsHook()## and

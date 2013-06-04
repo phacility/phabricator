@@ -5,6 +5,81 @@
  */
 final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
+  const ERROR_EMPTY_PARTICIPANTS = 'error-empty-participants';
+  const ERROR_EMPTY_MESSAGE = 'error-empty-message';
+
+  public static function createConpherence(
+    PhabricatorUser $creator,
+    array $participant_phids,
+    $title,
+    $message,
+    PhabricatorContentSource $source) {
+
+    $conpherence = id(new ConpherenceThread())
+      ->attachParticipants(array())
+      ->attachFilePHIDs(array())
+      ->setMessageCount(0);
+    $files = array();
+    $errors = array();
+    if (empty($participant_phids)) {
+      $errors[] = self::ERROR_EMPTY_PARTICIPANTS;
+    } else {
+      $participant_phids[] = $creator->getPHID();
+      $participant_phids = array_unique($participant_phids);
+      $conpherence->setRecentParticipantPHIDs(
+        array_slice($participant_phids, 0, 10));
+    }
+
+    if (empty($message)) {
+      $errors[] = self::ERROR_EMPTY_MESSAGE;
+    }
+
+    $file_phids =
+      PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+        array($message));
+    if ($file_phids) {
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($creator)
+        ->withPHIDs($file_phids)
+        ->execute();
+    }
+
+    if (!$errors) {
+      $conpherence->openTransaction();
+      $conpherence->save();
+      $xactions = array();
+      $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
+        ->setNewValue(array('+' => $participant_phids));
+      if ($files) {
+        $xactions[] = id(new ConpherenceTransaction())
+          ->setTransactionType(ConpherenceTransactionType::TYPE_FILES)
+          ->setNewValue(array('+' => mpull($files, 'getPHID')));
+      }
+      if ($title) {
+        $xactions[] = id(new ConpherenceTransaction())
+          ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+          ->setNewValue($title);
+      }
+      $xactions[] = id(new ConpherenceTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new ConpherenceTransactionComment())
+          ->setContent($message)
+          ->setConpherencePHID($conpherence->getPHID()));
+
+      id(new ConpherenceEditor())
+        ->setContentSource($source)
+        ->setContinueOnNoEffect(true)
+        ->setActor($creator)
+        ->applyTransactions($conpherence, $xactions);
+
+      $conpherence->saveTransaction();
+    }
+
+    return array($errors, $conpherence);
+  }
+
   public function generateTransactionsFromText(
     ConpherenceThread $conpherence,
     $text) {
@@ -45,8 +120,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
 
     $types[] = ConpherenceTransactionType::TYPE_TITLE;
-    $types[] = ConpherenceTransactionType::TYPE_PICTURE;
-    $types[] = ConpherenceTransactionType::TYPE_PICTURE_CROP;
     $types[] = ConpherenceTransactionType::TYPE_PARTICIPANTS;
     $types[] = ConpherenceTransactionType::TYPE_FILES;
 
@@ -60,10 +133,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_TITLE:
         return $object->getTitle();
-      case ConpherenceTransactionType::TYPE_PICTURE:
-        return $object->getImagePHID(ConpherenceImageData::SIZE_ORIG);
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
-        return $object->getImagePHID(ConpherenceImageData::SIZE_HEAD);
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         return $object->getParticipantPHIDs();
       case ConpherenceTransactionType::TYPE_FILES:
@@ -77,8 +146,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_TITLE:
-      case ConpherenceTransactionType::TYPE_PICTURE:
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
         return $xaction->getNewValue();
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
       case ConpherenceTransactionType::TYPE_FILES:
@@ -115,16 +182,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       case ConpherenceTransactionType::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
         break;
-      case ConpherenceTransactionType::TYPE_PICTURE:
-        $object->setImagePHID(
-          $xaction->getNewValue(),
-          ConpherenceImageData::SIZE_ORIG);
-        break;
-      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
-        $object->setImagePHID(
-          $xaction->getNewValue(),
-          ConpherenceImageData::SIZE_HEAD);
-        break;
     }
     $this->updateRecentParticipantPHIDs($object, $xaction);
   }
@@ -140,9 +197,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $object->setRecentParticipantPHIDs($participants);
   }
 
-  /**
-   * For now this only supports adding more files and participants.
-   */
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -169,33 +223,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             $file_phid);
         }
         $editor->save();
-        // fallthrough
-      case PhabricatorTransactions::TYPE_COMMENT:
-        $xaction_phid = $xaction->getPHID();
-        $behind = ConpherenceParticipationStatus::BEHIND;
-        $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
-        $participants = $object->getParticipants();
-        $user = $this->getActor();
-        $time = time();
-        foreach ($participants as $phid => $participant) {
-          if ($phid != $user->getPHID()) {
-            if ($participant->getParticipationStatus() != $behind) {
-              $participant->setBehindTransactionPHID($xaction_phid);
-              // decrement one as this is the message putting them behind!
-              $participant->setSeenMessageCount($object->getMessageCount() - 1);
-            }
-            $participant->setParticipationStatus($behind);
-            $participant->setDateTouched($time);
-          } else {
-            $participant->setSeenMessageCount($object->getMessageCount());
-            $participant->setParticipationStatus($up_to_date);
-            $participant->setDateTouched($time);
-          }
-          $participant->save();
-        }
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
-
         $participants = $object->getParticipants();
 
         $old_map = array_fuse($xaction->getOldValue());
@@ -229,7 +258,37 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         }
         $object->attachParticipants($participants);
         break;
-     }
+    }
+  }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // update everyone's participation status on the last xaction -only-
+    $xaction = end($xactions);
+    $xaction_phid = $xaction->getPHID();
+    $behind = ConpherenceParticipationStatus::BEHIND;
+    $up_to_date = ConpherenceParticipationStatus::UP_TO_DATE;
+    $participants = $object->getParticipants();
+    $user = $this->getActor();
+    $time = time();
+    foreach ($participants as $phid => $participant) {
+      if ($phid != $user->getPHID()) {
+        if ($participant->getParticipationStatus() != $behind) {
+          $participant->setBehindTransactionPHID($xaction_phid);
+          // decrement one as this is the message putting them behind!
+          $participant->setSeenMessageCount($object->getMessageCount() - 1);
+        }
+        $participant->setParticipationStatus($behind);
+        $participant->setDateTouched($time);
+      } else {
+        $participant->setSeenMessageCount($object->getMessageCount());
+        $participant->setParticipationStatus($up_to_date);
+        $participant->setDateTouched($time);
+      }
+      $participant->save();
+    }
   }
 
   protected function mergeTransactions(
@@ -239,7 +298,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $type = $u->getTransactionType();
     switch ($type) {
       case ConpherenceTransactionType::TYPE_TITLE:
-      case ConpherenceTransactionType::TYPE_PICTURE:
         return $v;
       case ConpherenceTransactionType::TYPE_FILES:
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:

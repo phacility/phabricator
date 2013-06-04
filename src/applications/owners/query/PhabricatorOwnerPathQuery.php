@@ -4,10 +4,12 @@ final class PhabricatorOwnerPathQuery {
 
   public static function loadAffectedPaths(
     PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorUser $user) {
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(
+        'user'        => $user,
         'repository'  => $repository,
         'commit'      => $commit->getCommitIdentifier(),
       ));

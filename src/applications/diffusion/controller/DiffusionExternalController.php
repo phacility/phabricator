@@ -65,14 +65,14 @@ final class DiffusionExternalController extends DiffusionController {
       $desc .= $id;
 
       $content = id(new AphrontErrorView())
-        ->setTitle('Unknown External')
+        ->setTitle(pht('Unknown External'))
         ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
         ->appendChild(phutil_tag(
           'p',
           array(),
-          "This external ({$desc}) does not appear in any tracked ".
+          pht("This external (%s) does not appear in any tracked ".
           "repository. It may exist in an untracked repository that ".
-          "Diffusion does not know about."));
+          "Diffusion does not know about.", $desc)));
     } else if (count($commits) == 1) {
       $commit = head($commits);
       $repo = $repositories[$commit->getRepositoryID()];
@@ -110,8 +110,8 @@ final class DiffusionExternalController extends DiffusionController {
       $table = new AphrontTableView($rows);
       $table->setHeaders(
         array(
-          'Commit',
-          'Description',
+          pht('Commit'),
+          pht('Description'),
         ));
       $table->setColumnClasses(
         array(
@@ -120,16 +120,18 @@ final class DiffusionExternalController extends DiffusionController {
         ));
 
       $content = new AphrontPanelView();
-      $content->setHeader('Multiple Matching Commits');
+      $content->setHeader(pht('Multiple Matching Commits'));
       $content->setCaption(
-        'This external reference matches multiple known commits.');
+        pht('This external reference matches multiple known commits.'));
       $content->appendChild($table);
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $content,
       array(
-        'title' => 'Unresolvable External',
+        'title' => pht('Unresolvable External'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

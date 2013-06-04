@@ -7,8 +7,16 @@ final class DiffusionChangeController extends DiffusionController {
 
     $content = array();
 
-    $diff_query = DiffusionDiffQuery::newFromDiffusionRequest($drequest);
-    $changeset = $diff_query->loadChangeset();
+    $data = $this->callConduitWithDiffusionRequest(
+      'diffusion.diffquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath()));
+    $drequest->setCommit($data['effectiveCommit']);
+    $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
+    $diff = DifferentialDiff::newFromRawChanges($raw_changes);
+    $changesets = $diff->getChangesets();
+    $changeset = reset($changesets);
 
     if (!$changeset) {
       // TODO: Refine this.
@@ -28,7 +36,7 @@ final class DiffusionChangeController extends DiffusionController {
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
       array(
-        0 => $diff_query->getRenderingReference(),
+        0 => $drequest->generateURI(array('action' => 'rendering-ref'))
       ));
 
     $raw_params = array(
@@ -66,7 +74,9 @@ final class DiffusionChangeController extends DiffusionController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Change',
+        'title' => pht('Change'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

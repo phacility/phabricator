@@ -25,6 +25,7 @@
 .phui-feed-story-body {
   padding: 0 10px 10px;
   color: #444444;
+  word-break: break-word;
 }
 
 .phui-feed-story-foot {
@@ -32,27 +33,26 @@
   font-size: 11px;
   background: #f7f7f7;
   padding: 10px;
+  line-height: 14px;
 }
 
-.phui-feed-story-foot .phui-icon-item-link {
+.phui-feed-story-foot .phui-icon-view {
   float: left;
   display: inline-block;
   margin-right: 5px;
 }
 
 .phui-feed-story-bigtext-post {
-  font-size: 15px;
-  font-weight: 200;
   line-height: 18px;
   color: #444;
 }
 
 .phui-feed-story-bigtext-post h3 {
-  font-size: 24px;
-  font-weight: 100;
+  font-size: 18px;
+  font-weight: 200;
   line-height: 18px;
-  color: #444;
-  margin: 10px 0;
+  color: #39444f;
+  margin: 0 0 5px 0;
 }
 
 .phui-feed-token-bar {
@@ -61,8 +61,9 @@
   padding-top: 10px;
 }
 
-.phui-feed-token-bar .phui-icon-item-link {
+.phui-feed-token-bar .phui-icon-view {
   margin-right: 2px;
+  display: inline-block;
 }
 
 .phui-feed-story-action-list {

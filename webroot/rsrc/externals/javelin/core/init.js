@@ -32,7 +32,7 @@
       return;
     }
     holding_queues[name] = [];
-    JX[name] = function() { holding_queues[name].push(arguments); }
+    JX[name] = function() { holding_queues[name].push(arguments); };
   }
 
   JX.flushHoldingQueue = function(name, fn) {
@@ -40,7 +40,7 @@
       fn.apply(null, holding_queues[name][ii]);
     }
     holding_queues[name] = {};
-  }
+  };
 
   makeHoldingQueue('install');
   makeHoldingQueue('behavior');
@@ -107,7 +107,7 @@
         return false;
       }
     }
-  }
+  };
 
   JX.enableDispatch = function(target, type) {
     if (__DEV__) {
@@ -165,7 +165,8 @@
     }
   }
 
-  for (var ii = 0; ii < document_events.length; ++ii) {
+  var ii;
+  for (ii = 0; ii < document_events.length; ++ii) {
     JX.enableDispatch(root, document_events[ii]);
   }
 
@@ -182,7 +183,7 @@
   ];
 
 
-  for (var ii = 0; ii < window_events.length; ++ii) {
+  for (ii = 0; ii < window_events.length; ++ii) {
     JX.enableDispatch(window, window_events[ii]);
   }
 
@@ -212,7 +213,7 @@
       '<script' +
       ' defer="defer"' +
       ' onreadystatechange="' + ready + '"' +
-      '><\/sc' + 'ript\>');
+      '><\/sc' + 'ript' + '>');
   }
 
   JX.onload = function(func) {
@@ -221,5 +222,6 @@
     } else {
       onload.push(func);
     }
-  }
+  };
+
 })();

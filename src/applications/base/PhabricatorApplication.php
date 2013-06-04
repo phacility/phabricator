@@ -98,6 +98,10 @@ abstract class PhabricatorApplication {
     return null;
   }
 
+  public function getApplicationURI($path = '') {
+    return $this->getBaseURI().ltrim($path, '/');
+  }
+
   public function getIconURI() {
     return null;
   }
@@ -246,50 +250,48 @@ abstract class PhabricatorApplication {
         break;
       }
     }
+
+    if (!$selected) {
+      throw new Exception("No application '{$class_name}'!");
+    }
+
     return $selected;
   }
 
   public static function getAllApplications() {
-    $classes = id(new PhutilSymbolLoader())
-            ->setAncestorClass(__CLASS__)
-            ->setConcreteOnly(true)
-            ->selectAndLoadSymbols();
-
-    $apps = array();
-
-    foreach ($classes as $class) {
-      $app = newv($class['name'], array());
-      $apps[] = $app;
-    }
-
-    // Reorder the applications into "application order". Notably, this ensures
-    // their event handlers register in application order.
-    $apps = msort($apps, 'getApplicationOrder');
-    $apps = mgroup($apps, 'getApplicationGroup');
-    $apps = array_select_keys($apps, self::getApplicationGroups()) + $apps;
-    $apps = array_mergev($apps);
-
-    return $apps;
-  }
-
-  public static function getAllInstalledApplications() {
     static $applications;
 
-    if (empty($applications)) {
-      $all_applications = self::getAllApplications();
-      $apps = array();
-      foreach ($all_applications as $app) {
-        if (!$app->isInstalled()) {
-          continue;
-        }
+    if ($applications === null) {
+      $apps = id(new PhutilSymbolLoader())
+        ->setAncestorClass(__CLASS__)
+        ->loadObjects();
 
-        $apps[] = $app;
-      }
+      // Reorder the applications into "application order". Notably, this
+      // ensures their event handlers register in application order.
+      $apps = msort($apps, 'getApplicationOrder');
+      $apps = mgroup($apps, 'getApplicationGroup');
+      $apps = array_select_keys($apps, self::getApplicationGroups()) + $apps;
+      $apps = array_mergev($apps);
 
       $applications = $apps;
     }
 
+
     return $applications;
+  }
+
+  public static function getAllInstalledApplications() {
+    $all_applications = self::getAllApplications();
+    $apps = array();
+    foreach ($all_applications as $app) {
+      if (!$app->isInstalled()) {
+        continue;
+      }
+
+      $apps[] = $app;
+    }
+
+    return $apps;
   }
 
 }

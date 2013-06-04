@@ -1,0 +1,78 @@
+/**
+ * @provides phui-document-view-css
+ */
+
+.phui-document-view {
+  margin-bottom: 20px;
+}
+
+.device-desktop .phui-document-view {
+  position: relative;
+  border-left: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  border-bottom: 1px solid #c0c5d1;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.phui-document-content {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  min-height: 240px;
+  background: #fff;
+
+  /* NOTE: This fixes margins, not floats, and can not be replaced with
+     the ".group" class. See T3150.
+  */
+  overflow: hidden;
+}
+
+.device-desktop .phui-document-content .phabricator-action-list-view {
+  margin: 10px 10px 0 0;
+  background: #f7f7f7;
+}
+
+.device-phone .phui-document-content .phabricator-action-list-view {
+  margin: 0;
+  border-bottom: 1px solid #c0c5d1;
+  background: #f7f7f7;
+}
+
+.phui-document-content .phabricator-header-shell {
+  border-top: none;
+}
+
+.phui-document-content .phabricator-remarkup {
+  padding: 20px;
+}
+
+.device-phone .phui-document-content .phabricator-remarkup {
+  padding: 10px;
+}
+
+.device-desktop .phui-document-content .phabricator-action-list-view {
+  position: absolute;
+  top: 50px;
+  right: -172px;
+  float: none;
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  border-top: 1px solid #e7e7e7;
+  border-bottom: 1px solid #e7e7e7;
+  border-right: 1px solid #e7e7e7;
+  width: 160px;
+}
+
+.device-phone .phui-document-content .phabricator-remarkup-toc {
+  width: 120px;
+}
+
+.phui-document-content .phabricator-remarkup .remarkup-code-block {
+  clear: both;
+  margin: 20px 0;
+}
+
+.device-desktop .phui-document-offset {
+  padding-right: 160px;
+}

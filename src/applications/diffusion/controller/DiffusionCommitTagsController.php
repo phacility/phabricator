@@ -3,6 +3,7 @@
 final class DiffusionCommitTagsController extends DiffusionController {
 
   public function willProcessRequest(array $data) {
+    $data['user'] = $this->getRequest()->getUser();
     $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
   }
 
@@ -10,9 +11,19 @@ final class DiffusionCommitTagsController extends DiffusionController {
     $request = $this->getDiffusionRequest();
     $tag_limit = 10;
 
-    $tag_query = DiffusionCommitTagsQuery::newFromDiffusionRequest($request);
-    $tag_query->setLimit($tag_limit + 1);
-    $tags = $tag_query->loadTags();
+    $tags = array();
+    try {
+      $tags = DiffusionRepositoryTag::newFromConduit(
+        $this->callConduitWithDiffusionRequest(
+          'diffusion.tagsquery',
+          array(
+            'commit' => $request->getCommit(),
+            'limit' => $tag_limit + 1)));
+    } catch (ConduitException $ex) {
+      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
+        throw $ex;
+      }
+    }
 
     $has_more_tags = (count($tags) > $tag_limit);
     $tags = array_slice($tags, 0, $tag_limit);
@@ -40,10 +51,10 @@ final class DiffusionCommitTagsController extends DiffusionController {
               'action'  => 'tags',
             )),
         ),
-        "More tags\xE2\x80\xA6");
+        pht("More Tags\xE2\x80\xA6"));
     }
 
     return id(new AphrontAjaxResponse())
-      ->setContent($tag_links ? implode(', ', $tag_links) : 'None');
+      ->setContent($tag_links ? implode(', ', $tag_links) : pht('None'));
   }
 }

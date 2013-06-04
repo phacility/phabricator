@@ -4,6 +4,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   private $objectName;
   private $header;
+  private $subhead;
   private $href;
   private $attributes = array();
   private $icons = array();
@@ -14,6 +15,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $handleIcons = array();
   private $bylines = array();
   private $grippable;
+  private $actions = array();
 
   public function setObjectName($name) {
     $this->objectName = $name;
@@ -61,12 +63,25 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     return $this;
   }
 
+  public function setSubHead($subhead) {
+    $this->subhead = $subhead;
+    return $this;
+  }
+
   public function getHeader() {
     return $this->header;
   }
 
   public function addByline($byline) {
     $this->bylines[] = $byline;
+    return $this;
+  }
+
+  public function addAction(PhabricatorMenuItemView $action) {
+    if (count($this->actions) >= 3) {
+      throw new Exception("Limit 3 actions per item.");
+    }
+    $this->actions[] = $action;
     return $this;
   }
 
@@ -107,7 +122,9 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   }
 
   public function addAttribute($attribute) {
-    $this->attributes[] = $attribute;
+    if (!empty($attribute)) {
+      $this->attributes[] = $attribute;
+    }
     return $this;
   }
 
@@ -141,6 +158,12 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     if ($this->bylines) {
       $item_classes[] = 'phabricator-object-item-with-bylines';
+    }
+
+    if ($this->actions) {
+      $n = count($this->actions);
+      $item_classes[] = 'phabricator-object-item-with-actions';
+      $item_classes[] = 'phabricator-object-item-with-'.$n.'-actions';
     }
 
     switch ($this->effect) {
@@ -211,7 +234,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           'span',
           array(
             'class' => 'phabricator-object-item-icon-image '.
-                       'sprite-icon action-'.$icon,
+                       'sprite-icons icons-'.$icon,
           ),
           '');
 
@@ -284,6 +307,16 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $bylines);
     }
 
+    $subhead = null;
+    if ($this->subhead) {
+      $subhead = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-subhead',
+        ),
+        $this->subhead);
+    }
+
     if ($icons) {
       $icons = phutil_tag(
         'div',
@@ -315,6 +348,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           ));
         $first = false;
       }
+
       $attrs = phutil_tag(
         'ul',
         array(
@@ -353,15 +387,16 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         'class' => implode(' ', $content_classes),
       ),
       array(
+        $subhead,
         $attrs,
         $this->renderChildren(),
         $foot,
       ));
 
-    return phutil_tag(
+    $box = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-object-item-frame',
+        'class' => 'phabricator-object-item-content-box',
       ),
       array(
         $grippable,
@@ -370,15 +405,38 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $bylines,
         $content,
       ));
+
+    $actions = array();
+    if ($this->actions) {
+      foreach (array_reverse($this->actions) as $action) {
+        $actions[] = $action;
+      }
+      $actions = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-object-item-actions',
+        ),
+        $actions);
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-object-item-frame',
+      ),
+      array(
+        $actions,
+        $box,
+      ));
   }
 
   private function renderFootIcon($icon, $label) {
-    require_celerity_resource('sprite-icon-css');
+    require_celerity_resource('sprite-icons-css');
 
     $icon = phutil_tag(
       'span',
       array(
-        'class' => 'sprite-icon action-'.$icon,
+        'class' => 'sprite-icons icons-'.$icon,
       ),
       '');
 

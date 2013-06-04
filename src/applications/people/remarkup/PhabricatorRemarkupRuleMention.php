@@ -71,6 +71,7 @@ final class PhabricatorRemarkupRuleMention
     $usernames = array_keys($metadata);
 
     $users = id(new PhabricatorPeopleQuery())
+      ->setViewer($this->getEngine()->getConfig('viewer'))
       ->withUsernames($usernames)
       ->execute();
 

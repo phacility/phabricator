@@ -46,19 +46,19 @@ final class ReleephProjectEditController extends ReleephController {
       $pusher_phids = $request->getArr('pushers');
 
       if (!$project_name) {
-        $e_name = 'Required';
+        $e_name = pht('Required');
         $errors[] =
-          'Your releeph project should have a simple descriptive name';
+          pht('Your releeph project should have a simple descriptive name');
       }
 
       if (!$trunk_branch) {
-        $e_trunk_branch = 'Required';
+        $e_trunk_branch = pht('Required');
         $errors[] =
-          'You must specify which branch you will be picking from.';
+          pht('You must specify which branch you will be picking from.');
       }
 
       if ($release_counter && !is_int($release_counter)) {
-        $errors[] = "Release counter must be a positive integer!";
+        $errors[] = pht("Release counter must be a positive integer!");
       }
 
       $other_releeph_projects = id(new ReleephProject())
@@ -67,15 +67,16 @@ final class ReleephProjectEditController extends ReleephController {
         'getName', 'getID');
 
       if (in_array($project_name, $other_releeph_project_names)) {
-        $errors[] = "Releeph project name {$project_name} is already taken";
+        $errors[] = pht("Releeph project name %s is already taken",
+          $project_name);
       }
 
       foreach ($test_paths as $test_path) {
         $result = @preg_match($test_path, '');
         $is_a_valid_regexp = $result !== false;
         if (!$is_a_valid_regexp) {
-          $errors[] = 'Please provide a valid regular expression: '.
-            "{$test_path} is not valid";
+          $errors[] = pht('Please provide a valid regular expression: '.
+            '%s is not valid', $test_path);
         }
       }
 
@@ -103,7 +104,7 @@ final class ReleephProjectEditController extends ReleephController {
           ->interpolate($branch_template);
 
         if ($template_errors) {
-          $e_branch_template = 'Invalid!';
+          $e_branch_template = pht('Whoopsies!');
           foreach ($template_errors as $template_error) {
             $errors[] = "Template error: {$template_error}";
           }
@@ -122,7 +123,7 @@ final class ReleephProjectEditController extends ReleephController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
     }
 
     $projects = mpull(
@@ -146,17 +147,17 @@ final class ReleephProjectEditController extends ReleephController {
     }
 
     $basic_inset = id(new AphrontFormInsetView())
-      ->setTitle('Basics')
+      ->setTitle(pht('Basics'))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($project_name)
           ->setError($e_name)
-          ->setCaption('A name like "Thrift" but not "Thrift releases".'))
+          ->setCaption(pht('A name like "Thrift" but not "Thrift releases".')))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Repository')
+          ->setLabel(pht('Repository'))
           ->setValue(
               $this
                 ->getReleephProject()
@@ -164,60 +165,60 @@ final class ReleephProjectEditController extends ReleephController {
                 ->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Arc Project')
+          ->setLabel(pht('Arc Project'))
           ->setValue(
               $this->getReleephProject()->loadArcanistProject()->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Releeph Project PHID')
+          ->setLabel(pht('Releeph Project PHID'))
           ->setValue(
               $this->getReleephProject()->getPHID()))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Phabricator Project')
+          ->setLabel(pht('Phabricator Project'))
           ->setValue($phabricator_project_id)
           ->setName('projectID')
           ->setOptions($projects))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Trunk')
+          ->setLabel(pht('Trunk'))
           ->setValue($trunk_branch)
           ->setName('trunkBranch')
           ->setError($e_trunk_branch))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Release counter')
+          ->setLabel(pht('Release counter'))
           ->setValue($release_counter)
           ->setName('releaseCounter')
           ->setCaption(
-            "Used by the command line branch cutter's %N field"))
+            pht("Used by the command line branch cutter's %%N field")))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Pick Instructions')
+          ->setLabel(pht('Pick Instructions'))
           ->setValue($pick_failure_instructions)
           ->setName('pickFailureInstructions')
           ->setCaption(
-            "Instructions for pick failures, which will be used " .
-            "in emails generated by failed picks"))
+            pht("Instructions for pick failures, which will be used " .
+            "in emails generated by failed picks")))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Tests paths')
+          ->setLabel(pht('Tests paths'))
           ->setValue(implode("\n", $test_paths))
           ->setName('testPaths')
           ->setCaption(
-            'List of strings that all test files contain in their path '.
+            pht('List of strings that all test files contain in their path '.
             'in this project. One string per line. '.
-            'Examples: \'__tests__\', \'/javatests/\'...'));
+            'Examples: \'__tests__\', \'/javatests/\'...')));
 
     $pushers_inset = id(new AphrontFormInsetView())
-      ->setTitle('Pushers')
+      ->setTitle(pht('Pushers'))
       ->appendChild(
-        'Pushers are allowed to approve Releeph requests to be committed. '.
+        pht('Pushers are allowed to approve Releeph requests to be committed. '.
         'to this project\'s branches.  If you leave this blank then anyone '.
-        'is allowed to approve requests.')
+        'is allowed to approve requests.'))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Pushers')
+          ->setLabel(pht('Pushers'))
           ->setName('pushers')
           ->setDatasource('/typeahead/common/users/')
           ->setValue($pusher_tokens));
@@ -233,17 +234,17 @@ final class ReleephProjectEditController extends ReleephController {
       $field_selector_options[$selector_name] = $selector_name;
     }
 
-    $field_selector_blurb = hsprintf(
+    $field_selector_blurb = pht(
         "If you you have additional information to render about Releeph ".
         "requests, or want to re-arrange the UI, implement a ".
         "<tt>ReleephFieldSelector</tt> and select it here.");
 
     $fields_inset = id(new AphrontFormInsetView())
-      ->setTitle('Fields')
+      ->setTitle(pht('Fields'))
       ->appendChild($field_selector_blurb)
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Selector')
+          ->setLabel(pht('Selector'))
           ->setName('fieldSelector')
           ->setValue($field_selector)
           ->setOptions($field_selector_options));
@@ -251,18 +252,10 @@ final class ReleephProjectEditController extends ReleephController {
     $commit_author_inset = $this->buildCommitAuthorInset($commit_author);
 
     // Build the Template inset
-    $markup_engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
-
-    // From DifferentialUnitFieldSpecification...
-    $markup_engine->setConfig('viewer', $request->getUser());
-
-    $help_markup = phutil_tag(
-      'div',
-      array(
-        'class' => 'phabricator-remarkup',
-      ),
-      phutil_safe_html(
-        $markup_engine->markupText(ReleephBranchTemplate::getHelpRemarkup())));
+    $help_markup = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($this->getBranchHelpText()),
+      'default',
+      $request->getUser());
 
     $branch_template_input = id(new AphrontFormTextControl())
       ->setName('branchTemplate')
@@ -270,19 +263,19 @@ final class ReleephProjectEditController extends ReleephController {
       ->setLabel('Template')
       ->setError($e_branch_template)
       ->setCaption(
-        "Leave this blank to use your installation's default.");
+        pht("Leave this blank to use your installation's default."));
 
     $branch_template_preview = id(new ReleephBranchPreviewView())
-      ->setLabel('Preview')
+      ->setLabel(pht('Preview'))
       ->addControl('template', $branch_template_input)
       ->addStatic('arcProjectID', $arc_project_id)
       ->addStatic('isSymbolic', false)
       ->addStatic('projectName', $this->getReleephProject()->getName());
 
     $template_inset = id(new AphrontFormInsetView())
-      ->setTitle('Branch Cutting')
+      ->setTitle(pht('Branch Cutting'))
       ->appendChild(
-        'Provide a pattern for creating new branches.')
+        pht('Provide a pattern for creating new branches.'))
       ->appendChild($branch_template_input)
       ->appendChild($branch_template_preview)
       ->appendChild($help_markup);
@@ -300,16 +293,16 @@ final class ReleephProjectEditController extends ReleephController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/releeph/project/')
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = id(new AphrontPanelView())
-      ->setHeader('Edit Releeph Project')
+      ->setHeader(pht('Edit Releeph Project'))
       ->appendChild($form)
       ->setWidth(AphrontPanelView::WIDTH_FORM);
 
     return $this->buildStandardPageResponse(
       array($error_view, $panel),
-      array('title' => 'Edit Releeph Project'));
+      array('title' => pht('Edit Releeph Project')));
   }
 
   private function buildCommitAuthorInset($current) {
@@ -329,6 +322,7 @@ final class ReleephProjectEditController extends ReleephController {
 
     $vcs_name = PhabricatorRepositoryType::getNameForRepositoryType($vcs_type);
 
+    // pht?
     $help_markup = hsprintf(<<<EOTEXT
 When your project's release engineers run <tt>arc releeph</tt>, they will be
 listed as the <strong>committer</strong> of the code committed to release
@@ -348,21 +342,21 @@ EOTEXT
     $options = array(
       array(
         'value'   => ReleephProject::COMMIT_AUTHOR_FROM_DIFF,
-        'label'   => 'Original Author',
+        'label'   => pht('Original Author'),
         'caption' =>
-          "The author of the original commit in {$trunk}.",
+          pht('The author of the original commit in: %s.', $trunk),
       ),
       array(
         'value'   => ReleephProject::COMMIT_AUTHOR_REQUESTOR,
-        'label'   => 'Requestor',
+        'label'   => pht('Requestor'),
         'caption' =>
-          "The person who requested that this code go into the release.",
+          pht('The person who requested that this code go into the release.'),
       ),
       array(
         'value'   => ReleephProject::COMMIT_AUTHOR_NONE,
-        'label'   => "None",
+        'label'   => pht('None'),
         'caption' =>
-          "Only record the default committer information.",
+          pht('Only record the default committer information.'),
       ),
     );
 
@@ -371,7 +365,7 @@ EOTEXT
     }
 
     $control = id(new AphrontFormRadioButtonControl())
-      ->setLabel('Author')
+      ->setLabel(pht('Author'))
       ->setName('commitWithAuthor')
       ->setValue($current);
 
@@ -380,9 +374,60 @@ EOTEXT
     }
 
     return id(new AphrontFormInsetView())
-      ->setTitle('Authors')
+      ->setTitle(pht('Authors'))
       ->appendChild($help_markup)
       ->appendChild($control);
+  }
+
+  private function getBranchHelpText() {
+    return <<<EOTEXT
+
+==== Interpolations ====
+
+| Code  | Meaning
+| ----- | -------
+| `%P`  | The name of your project, with spaces changed to "-".
+| `%p`  | Like %P, but all lowercase.
+| `%Y`  | The four digit year associated with the branch date.
+| `%m`  | The two digit month.
+| `%d`  | The two digit day.
+| `%v`  | The handle of the commit where the branch was cut ("rXYZa4b3c2d1").
+| `%V`  | The abbreviated commit id where the branch was cut ("a4b3c2d1").
+| `%..` | Any other sequence interpreted by `strftime()`.
+| `%%`  | A literal percent sign.
+
+
+==== Tips for Branch Templates ====
+
+Use a directory to separate your release branches from other branches:
+
+  lang=none
+  releases/%Y-%M-%d-%v
+  => releases/2012-30-16-rHERGE32cd512a52b7
+
+Include a second hierarchy if you share your repository with other projects:
+
+  lang=none
+  releases/%P/%p-release-%Y%m%d-%V
+  => releases/Tintin/tintin-release-20121116-32cd512a52b7
+
+Keep your branch names simple, avoiding strange punctuation, most of which is
+forbidden or escaped anyway:
+
+  lang=none, counterexample
+  releases//..clown-releases..//`date --iso=seconds`-$(sudo halt)
+
+Include the date early in your template, in an order which sorts properly:
+
+  lang=none
+  releases/%Y%m%d-%v
+  => releases/20121116-rHERGE32cd512a52b7 (good!)
+
+  releases/%V-%m.%d.%Y
+  => releases/32cd512a52b7-11.16.2012 (awful!)
+
+
+EOTEXT;
   }
 
 }

@@ -117,13 +117,7 @@ final class PhabricatorConfigEditor
     $editor = id(new PhabricatorConfigEditor())
            ->setActor($request->getUser())
            ->setContinueOnNoEffect(true)
-           ->setContentSource(
-             PhabricatorContentSource::newForSource(
-               PhabricatorContentSource::SOURCE_WEB,
-               array(
-                 'ip' => $request->getRemoteAddr(),
-               )));
-
+           ->setContentSourceFromRequest($request);
 
     $editor->applyTransactions($config_entry, array($xaction));
   }

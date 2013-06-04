@@ -16,14 +16,13 @@ final class PonderQuestionDetailView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('ponder-core-view-css');
 
     $question = $this->question;
     $handles = $this->handles;
     $user = $this->user;
 
     $panel = id(new AphrontPanelView())
-      ->addClass("ponder-panel");
+      ->setNoBackground(true);
 
     $contentview = new PonderPostBodyView();
     $contentview

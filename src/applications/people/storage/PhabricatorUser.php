@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
+final class PhabricatorUser
+  extends PhabricatorUserDAO
+  implements PhutilPerson, PhabricatorPolicyInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -290,7 +292,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
         $try_type = $session_type.'-'.$ii;
         if (!in_array($try_type, $existing_sessions)) {
           $establish_type = $try_type;
-          $expect_key = $session_key;
+          $expect_key = PhabricatorHash::digest($session_key);
           $existing_sessions[] = $try_type;
 
           // Ensure the row exists so we can issue an update below. We don't
@@ -302,7 +304,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
             self::SESSION_TABLE,
             $this->getPHID(),
             $establish_type,
-            $session_key);
+            PhabricatorHash::digest($session_key));
           break;
         }
       }
@@ -325,7 +327,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
         'UPDATE %T SET sessionKey = %s, sessionStart = UNIX_TIMESTAMP()
           WHERE userPHID = %s AND type = %s AND sessionKey = %s',
         self::SESSION_TABLE,
-        $session_key,
+        PhabricatorHash::digest($session_key),
         $this->getPHID(),
         $establish_type,
         $expect_key);
@@ -365,7 +367,7 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
       'DELETE FROM %T WHERE userPHID = %s AND sessionKey = %s',
       self::SESSION_TABLE,
       $this->getPHID(),
-      $session_key);
+      PhabricatorHash::digest($session_key));
   }
 
   private function generateEmailToken(
@@ -590,7 +592,6 @@ EOBODY;
       ->addTos(array($this->getPHID()))
       ->setSubject('[Phabricator] Welcome to Phabricator')
       ->setBody($body)
-      ->setFrom($admin->getPHID())
       ->saveAndSend();
   }
 
@@ -630,7 +631,6 @@ EOBODY;
       ->addTos(array($this->getPHID()))
       ->setSubject('[Phabricator] Username Changed')
       ->setBody($body)
-      ->setFrom($admin->getPHID())
       ->saveAndSend();
   }
 
@@ -730,5 +730,30 @@ EOBODY;
     }
     return $user;
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_PUBLIC;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getPHID() && ($viewer->getPHID() === $this->getPHID());
+  }
+
 
 }

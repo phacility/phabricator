@@ -29,12 +29,10 @@ JX.behavior('aphlict-dropdown', function(config) {
       return;
     }
     request = new JX.Request('/notification/panel/', function(response) {
-      var display = (response.number > 999)
-        ? "\u221E"
-        : response.number;
+      var display = (response.number > 999) ? "\u221E" : response.number;
 
       JX.DOM.setContent(count, display);
-      if (response.number == 0) {
+      if (response.number === 0) {
         JX.DOM.alterClass(bubble, 'alert-unread', false);
       } else {
         JX.DOM.alterClass(bubble, 'alert-unread', true);
@@ -102,7 +100,7 @@ JX.behavior('aphlict-dropdown', function(config) {
       visible = !visible;
       e.kill();
     }
-  )
+  );
 
   JX.Stratcom.listen('notification-panel-update', null, function() {
     dirty = true;

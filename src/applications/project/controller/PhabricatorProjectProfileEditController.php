@@ -79,7 +79,7 @@ final class PhabricatorProjectProfileEditController
         $editor->setActor($user);
         $editor->applyTransactions($xactions);
       } catch (PhabricatorProjectNameCollisionException $ex) {
-        $e_name = 'Not Unique';
+        $e_name = pht('Not Unique');
         $errors[] = $ex->getMessage();
       }
 
@@ -151,6 +151,7 @@ final class PhabricatorProjectProfileEditController
       ->setUser($user)
       ->setAction($action)
       ->setEncType('multipart/form-data')
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -219,18 +220,12 @@ final class PhabricatorProjectProfileEditController
           ->addCancelButton('/project/view/'.$project->getID().'/')
           ->setValue(pht('Save')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader($header_name);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground();
-    $panel->appendChild($form);
-
     $nav = $this->buildLocalNavigation($project);
     $nav->selectFilter('edit');
     $nav->appendChild(
       array(
         $error_view,
-        $panel,
+        $form,
       ));
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
@@ -249,6 +244,7 @@ final class PhabricatorProjectProfileEditController
       array(
         'title' => $title,
         'device' => true,
+        'dust' => true,
       ));
   }
 }

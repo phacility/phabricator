@@ -23,9 +23,8 @@
      element extend off the bottom of the screen to prevent this. */
   bottom: -480px;
   width: 205px;
-  background: #33383b;
-  box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.05);
-  background-image: url(/rsrc/image/menu_texture.png);
+  background: #303539;
+  box-shadow: inset -3px 0 3px rgba(0, 0, 0, 0.5);
 }
 
 .phabricator-nav-column-background,

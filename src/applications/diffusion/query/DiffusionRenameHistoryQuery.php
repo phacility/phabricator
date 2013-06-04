@@ -5,6 +5,12 @@ final class DiffusionRenameHistoryQuery {
   private $oldCommit;
   private $wasCreated;
   private $request;
+  private $viewer;
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
 
   public function getWasCreated() {
     return $this->wasCreated;
@@ -72,10 +78,11 @@ final class DiffusionRenameHistoryQuery {
   }
 
   private function loadCommitId($commit_identifier) {
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %d AND commitIdentifier = %s',
-      $this->request->getRepository()->getID(),
-      $commit_identifier);
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($this->viewer)
+      ->withIdentifiers(array($commit_identifier))
+      ->withDefaultRepository($this->request->getRepository())
+      ->executeOne();
     return $commit->getID();
   }
 

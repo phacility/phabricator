@@ -46,4 +46,28 @@ final class DifferentialBranchFieldSpecification
     }
   }
 
+  public function didWriteRevision(DifferentialRevisionEditor $editor) {
+    $branch = $this->getDiff()->getBranch();
+    $match = null;
+    if (preg_match('/^T(\d+)/i', $branch, $match)) { // No $ to allow T123_demo.
+      list(, $task_id) = $match;
+      $task = id(new ManiphestTask())->load($task_id);
+      if ($task) {
+        id(new PhabricatorEdgeEditor())
+          ->setActor($this->getUser())
+          ->addEdge(
+            $this->getRevision()->getPHID(),
+            PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
+            $task->getPHID())
+          ->save();
+      }
+    }
+  }
+
+  public function getCommitMessageTips() {
+    return array(
+      'Name branch "T123" to attach the diff to a task.',
+    );
+  }
+
 }

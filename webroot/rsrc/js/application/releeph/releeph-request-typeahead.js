@@ -1,15 +1,10 @@
 /**
  * @provides javelin-behavior-releeph-request-typeahead
  * @requires javelin-behavior
- *           javelin-util
  *           javelin-dom
  *           javelin-typeahead
- *           javelin-tokenizer
- *           javelin-typeahead-preloaded-source
  *           javelin-typeahead-ondemand-source
  *           javelin-dom
- *           javelin-stratcom
- *           javelin-util
  */
 
 JX.behavior('releeph-request-typeahead', function(config) {
@@ -48,7 +43,7 @@ JX.behavior('releeph-request-typeahead', function(config) {
               'div',
               { className: 'summary' },
               summary
-            ),
+            )
           ]
         );
 

@@ -29,11 +29,12 @@ final class PhabricatorMacroEditController
       }
     } else {
       $macro = new PhabricatorFileImageMacro();
+      $macro->setAuthorPHID($user->getPHID());
     }
 
     $errors = array();
     $e_name = true;
-    $e_file = pht('Provide a URL or a file');
+    $e_file = null;
     $file = null;
     $can_fetch = PhabricatorEnv::getEnvConfig('security.allow-outbound-http');
 
@@ -97,6 +98,7 @@ final class PhabricatorMacroEditController
 
       if (!$macro->getID() && !$file) {
         $errors[] = pht('You must upload an image to create a macro.');
+        $e_file = pht('Required');
       }
 
       if (!$errors) {
@@ -118,12 +120,7 @@ final class PhabricatorMacroEditController
           $editor = id(new PhabricatorMacroEditor())
             ->setActor($user)
             ->setContinueOnNoEffect(true)
-            ->setContentSource(
-              PhabricatorContentSource::newForSource(
-                PhabricatorContentSource::SOURCE_WEB,
-                array(
-                  'ip' => $request->getRemoteAddr(),
-                )));
+            ->setContentSourceFromRequest($request);
 
           $xactions = $editor->applyTransactions($original, $xactions);
 
@@ -156,6 +153,7 @@ final class PhabricatorMacroEditController
 
     $form
       ->setEncType('multipart/form-data')
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -219,7 +217,7 @@ final class PhabricatorMacroEditController
 
     if ($macro->getID()) {
       $title = pht('Edit Image Macro');
-      $crumb = pht('Edit');
+      $crumb = pht('Edit Macro');
 
       $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
@@ -227,7 +225,7 @@ final class PhabricatorMacroEditController
           ->setName(pht('Macro "%s"', $macro->getName())));
     } else {
       $title = pht('Create Image Macro');
-      $crumb = pht('Create');
+      $crumb = pht('Create Macro');
     }
 
     $crumbs->addCrumb(
@@ -246,12 +244,11 @@ final class PhabricatorMacroEditController
         ->setUser($request->getUser());
 
       if ($can_fetch) {
-        $upload_form
-          ->appendChild(
-            id(new AphrontFormTextControl())
-              ->setLabel(pht('URL'))
-              ->setName('url')
-              ->setValue($request->getStr('url')));
+        $upload_form->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel(pht('URL'))
+            ->setName('url')
+            ->setValue($request->getStr('url')));
       }
 
       $upload_form
@@ -266,17 +263,11 @@ final class PhabricatorMacroEditController
       $upload = array($upload_header, $upload_form);
     }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Create New Macro'));
-    $panel->setNoBackground();
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $error_view,
-        $panel,
+        $form,
         $upload,
       ),
       array(

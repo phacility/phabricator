@@ -242,6 +242,13 @@ final class ManiphestTaskEditController extends ManiphestController {
           $workflow = $parent_task->getID();
         }
 
+        if ($request->isAjax()) {
+          return id(new AphrontAjaxResponse())->setContent(
+            array(
+              'tasks' => $this->renderSingleTask($task),
+            ));
+        }
+
         $redirect_uri = '/T'.$task->getID();
 
         if ($workflow) {
@@ -354,11 +361,15 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $project_tokenizer_id = celerity_generate_unique_node_id();
 
-    $form = new AphrontFormView();
-    $form
-      ->setUser($user)
-      ->setAction($request->getRequestURI()->getPath())
-      ->addHiddenInput('template', $template_id);
+    if ($request->isAjax()) {
+      $form = new AphrontFormLayoutView();
+    } else {
+      $form = new AphrontFormView();
+      $form->setFlexible(true);
+      $form
+        ->setUser($user)
+        ->addHiddenInput('template', $template_id);
+    }
 
     if ($parent_task) {
       $form
@@ -484,13 +495,20 @@ final class ManiphestTaskEditController extends ManiphestController {
     $form
       ->appendChild($description_control);
 
-    if (!$task->getID()) {
-      $form
+
+    if ($request->isAjax()) {
+      $dialog = id(new AphrontDialogView())
+        ->setUser($user)
+        ->setWidth(AphrontDialogView::WIDTH_FULL)
+        ->setTitle($header_name)
         ->appendChild(
-          id(new AphrontFormDragAndDropUploadControl())
-            ->setLabel(pht('Attached Files'))
-            ->setName('files')
-            ->setActivatedClass('aphront-panel-view-drag-and-drop'));
+          array(
+            $error_view,
+            $form,
+          ))
+        ->addCancelButton($cancel_uri)
+        ->addSubmitButton($button_name);
+      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     $form
@@ -499,11 +517,6 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->addCancelButton($cancel_uri)
           ->setValue($button_name));
 
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->setHeader($header_name);
-    $panel->appendChild($form);
-    $panel->setNoBackground();
     $inst1 = pht('Description Preview');
     $inst2 = pht('Loading preview...');
 
@@ -550,7 +563,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       array(
         $crumbs,
         $error_view,
-        $panel,
+        $form,
         $description_preview_panel,
       ),
       array(

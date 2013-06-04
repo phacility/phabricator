@@ -38,8 +38,7 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return array(
       '/F(?P<id>[1-9]\d*)' => 'PhabricatorFileShortcutController',
       '/file/' => array(
-        '' => 'PhabricatorFileListController',
-        'filter/(?P<filter>\w+)/' => 'PhabricatorFileListController',
+        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorFileListController',
         'upload/' => 'PhabricatorFileUploadController',
         'dropupload/' => 'PhabricatorFileDropUploadController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
@@ -49,6 +48,7 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
         'proxy/' => 'PhabricatorFileProxyController',
         'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/(?P<key>[^/]+)/'
           => 'PhabricatorFileTransformController',
+        'uploaddialog/' => 'PhabricatorFileUploadDialogController',
       ),
     );
   }

@@ -15,57 +15,52 @@
 }
 
 .aphront-form-view label.aphront-form-label {
-  padding-top: 4px;
+  padding-top: 5px;
   width: 19%;
   float: left;
   text-align: right;
   font-weight: bold;
   font-size: 13px;
-  color: #666;
+  color: #757c88;
+  text-shadow: 0 1px rgba(255,255,255,1);
 }
 
-.device-phone .aphront-form-view label.aphront-form-label {
+.device-phone .aphront-form-view label.aphront-form-label,
+.aphront-form-full-width.aphront-form-view label.aphront-form-label {
   display: block;
   float: none;
   text-align: left;
   width: 100%;
-  color: #777;
   margin-bottom: 3px;
 }
 
 .aphront-form-input {
   margin-left: 20%;
-  margin-right: 25%;
-  width: 55%;
+  margin-right: 20%;
+  width: 60%;
 }
 
-.device-phone .aphront-form-input {
+.device-phone .aphront-form-input,
+.aphront-form-full-width .aphront-form-input {
   margin-left: 0%;
   margin-right: 0%;
   width: 100%;
 }
 
-.aphront-form-control-text .aphront-form-input input,
-.aphront-form-control-password .aphront-form-input input {
-  font-size: 13px;
-  padding: 4px 4px;
-  color: #333;
-  vertical-align: middle;
-  background-color: #ffffff;
-  border: 1px solid #96A6C5;
-  border-radius: 3px;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-}
-
 .aphront-form-error {
-  width: 23%;
+  width: 18%;
   float: right;
   color: #aa0000;
   font-weight: bold;
   padding-top: 4px;
 }
 
-.device-phone .aphront-form-error {
+.aphront-dialog-body .aphront-form-full-width {
+  margin-top: -10px;
+}
+
+.device-phone .aphront-form-error,
+.aphront-form-full-width .aphront-form-error {
   float: none;
   width: 100%;
 }
@@ -80,16 +75,14 @@
   font-size: 11px;
 }
 
-.aphront-form-input input,
+.aphront-form-input input {
+  width: 100%;
+}
+
 .aphront-form-input textarea {
-  font-size: 13px;
   display: block;
   width: 100%;
   box-sizing: border-box;
-}
-
-
-.aphront-form-input textarea {
   height: 12em;
 }
 
@@ -97,17 +90,24 @@
   padding: 4px;
 }
 
+.aphront-form-full-width .aphront-form-control {
+  padding: 4px 0;
+}
+
 .aphront-form-control-submit button,
 .aphront-form-control-submit a.button {
   float: right;
+  margin: 0.5em 0 0 2%;
+}
+
+.phui-form-control-multi-submit input {
+  float: right;
   margin: 0.5em 0 0em 2%;
+  width: auto;
 }
 
 .aphront-form-control-textarea textarea.aphront-textarea-very-short {
-  height: 3em;
-  border: 1px solid #96A6C5;
-  border-radius: 3px;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  height: 44px;
 }
 
 .aphront-form-control-textarea textarea.aphront-textarea-very-tall {
@@ -118,17 +118,17 @@
   padding-top: 2px;
 }
 
-
 .aphront-form-view .aphront-form-caption {
   font-size: 12px;
   color: #888;
   padding: 2px;
   text-align: right;
-  margin-right: 25%;
+  margin-right: 20%;
   margin-left: 20%;
 }
 
-.device-phone .aphront-form-view .aphront-form-caption {
+.device-phone .aphront-form-view .aphront-form-caption,
+.aphront-form-full-width .aphront-form-view .aphront-form-caption {
   margin-right: 0%;
 }
 
@@ -138,7 +138,17 @@
 }
 
 .aphront-form-instructions {
-  margin: 0.75em 3% 1.25em;
+  width: 60%;
+  margin-left: 20%;
+  padding: 10px 4px;
+}
+
+
+
+.device .aphront-form-instructions,
+.aphront-form-full-width .aphront-form-instructions {
+  width: 100%;
+  margin: 0;
 }
 
 .aphront-form-important {
@@ -152,10 +162,9 @@
   margin: .5em 2em;
 }
 
-
 .aphront-form-control-static .aphront-form-input,
 .aphront-form-control-markup .aphront-form-input {
-  padding-top: 4px;
+  padding-top: 6px;
   font-size: 13px;
 }
 
@@ -205,10 +214,16 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .aphront-form-inset {
-  margin: 0 0 1em;
-  padding: .75em;
-  background: #f3f3f3;
-  border: 1px solid #afafaf;
+  margin: 0 0 10px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #d4dae0;
+}
+
+.aphront-form-inset h1 {
+  color: #777;
+  font-weight: normal;
+  padding-bottom: 10px;
 }
 
 .aphront-form-drag-and-drop-file-list {
@@ -262,6 +277,12 @@ table.aphront-form-control-checkbox-layout th {
 .aphront-form-date-container select {
   margin: 2px;
   display: inline;
+}
+.aphront-form-date-container input.aphront-form-date-enabled-input {
+  width: auto;
+  display: inline;
+  margin-right: 8px;
+  font-size: 16px;
 }
 
 .aphront-form-date-container input.aphront-form-date-time-input {
@@ -407,4 +428,12 @@ table.aphront-form-control-checkbox-layout th {
 
 .aphront-form-control-counted-togglebuttons .toggle.disabled:hover {
   background-color: #a7a7a7;
+}
+
+.phui-form-divider hr {
+  height: 1px;
+  border: 0;
+  background: #c0c0c0;
+  width: 85%;
+  margin: 15px auto;
 }

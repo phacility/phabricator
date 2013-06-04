@@ -11,7 +11,6 @@ final class ConpherenceThread extends ConpherenceDAO
   protected $title;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
-  protected $imagePHIDs = array();
   protected $mailKey;
 
   private $participants;
@@ -26,7 +25,6 @@ final class ConpherenceThread extends ConpherenceDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'recentParticipantPHIDs' => self::SERIALIZATION_JSON,
-        'imagePHIDs' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }
@@ -41,33 +39,6 @@ final class ConpherenceThread extends ConpherenceDAO
       $this->setMailKey(Filesystem::readRandomCharacters(20));
     }
     return parent::save();
-  }
-
-  public function getImagePHID($size) {
-    $image_phids = $this->getImagePHIDs();
-    return idx($image_phids, $size);
-  }
-  public function setImagePHID($phid, $size) {
-    $image_phids = $this->getImagePHIDs();
-    $image_phids[$size] = $phid;
-    return $this->setImagePHIDs($image_phids);
-  }
-
-  public function getImage($size) {
-    $images = $this->getImages();
-    return idx($images, $size);
-  }
-  public function setImage(PhabricatorFile $file, $size) {
-    $files = $this->getImages();
-    $files[$size] = $file;
-    return $this->setImages($files);
-  }
-  public function setImages(array $files) {
-    $this->images = $files;
-    return $this;
-  }
-  private function getImages() {
-    return $this->images;
   }
 
   public function attachParticipants(array $participants) {
@@ -162,16 +133,6 @@ final class ConpherenceThread extends ConpherenceDAO
     return $this->widgetData;
   }
 
-  public function loadImageURI($size) {
-    $file = $this->getImage($size);
-
-    if ($file) {
-      return $file->getBestURI();
-    }
-
-    return PhabricatorUser::getDefaultProfileImageURI();
-  }
-
   public function getDisplayData(PhabricatorUser $user, $size) {
     $recent_phids = $this->getRecentParticipantPHIDs();
     $handles = $this->getHandles();
@@ -196,19 +157,12 @@ final class ConpherenceThread extends ConpherenceDAO
       $lucky_handle = reset($handles);
     }
 
-    $title = $this->getTitle();
+    $title = $js_title = $this->getTitle();
     if (!$title) {
       $title = $lucky_handle->getName();
+      $js_title = pht('[No Title]');
     }
-
-    $image = $this->getImagePHID($size);
-    if ($image) {
-      $img_src = $this->getImage($size)->getBestURI();
-      $img_class = 'custom-';
-    } else {
-      $img_src = $lucky_handle->getImageURI();
-      $img_class = null;
-    }
+    $img_src = $lucky_handle->getImageURI();
 
     $count = 0;
     $final = false;
@@ -238,11 +192,11 @@ final class ConpherenceThread extends ConpherenceDAO
 
     return array(
       'title' => $title,
+      'js_title' => $js_title,
       'subtitle' => $subtitle,
       'unread_count' => $unread_count,
       'epoch' => $this->getDateModified(),
       'image' => $img_src,
-      'image_class' => $img_class,
     );
   }
 

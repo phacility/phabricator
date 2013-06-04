@@ -54,8 +54,12 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       'table' => array(
         'tip' => pht('Table'),
-      )
+      ),
+      'image' => array(
+        'tip' => pht('Upload File'),
+      ),
     );
+
     if (!$this->disableMacro and function_exists('imagettftext')) {
       $actions[] = array(
         'spacer' => true,
@@ -132,7 +136,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         $meta['tip'] = $tip;
       }
 
-      require_celerity_resource('sprite-icon-css');
+      require_celerity_resource('sprite-icons-css');
 
       $buttons[] = javelin_tag(
         'a',
@@ -148,7 +152,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         phutil_tag(
           'div',
           array(
-            'class' => 'remarkup-assist sprite-icon remarkup-assist-'.$action,
+            'class' => 'remarkup-assist sprite-icons remarkup-assist-'.$action,
           ),
           ''));
     }

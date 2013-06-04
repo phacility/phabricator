@@ -22,7 +22,6 @@ final class PholioMockEmbedView extends AphrontView {
 
     require_celerity_resource('pholio-css');
 
-
     $mock_link = phutil_tag(
       'a',
       array(
@@ -89,7 +88,7 @@ final class PholioMockEmbedView extends AphrontView {
         'span',
          array(
            'class' =>
-             'pholio-mock-embed-icon sprite-icon action-'.$icon_name.'-grey',
+             'pholio-mock-embed-icon sprite-icons icons-'.$icon_name.'-grey',
          ),
          ' ');
       $count = phutil_tag('span', array(), $icon_value);

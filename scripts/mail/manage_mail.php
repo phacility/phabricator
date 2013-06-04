@@ -17,6 +17,8 @@ $args->parseStandardArguments();
 $workflows = array(
   new PhabricatorMailManagementResendWorkflow(),
   new PhutilHelpArgumentWorkflow(),
+  new PhabricatorMailManagementShowOutboundWorkflow(),
+  new PhabricatorMailManagementShowInboundWorkflow(),
 );
 
 $args->parseWorkflows($workflows);

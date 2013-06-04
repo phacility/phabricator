@@ -10,6 +10,10 @@ final class PhabricatorPasteQuery
 
   private $needContent;
   private $needRawContent;
+  private $languages;
+  private $includeNoLanguage;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -41,6 +45,28 @@ final class PhabricatorPasteQuery
     return $this;
   }
 
+  public function withLanguages(array $languages) {
+    $this->includeNoLanguage = false;
+    foreach ($languages as $key => $language) {
+      if ($language === null) {
+        $languages[$key] = '';
+        continue;
+      }
+    }
+    $this->languages = $languages;
+    return $this;
+  }
+
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
   protected function loadPage() {
     $table = new PhabricatorPaste();
     $conn_r = $table->establishConnection('r');
@@ -55,12 +81,20 @@ final class PhabricatorPasteQuery
 
     $pastes = $table->loadAllFromArray($data);
 
-    if ($pastes && $this->needRawContent) {
-      $this->loadRawContent($pastes);
+    return $pastes;
+  }
+
+  protected function willFilterPage(array $pastes) {
+    if (!$pastes) {
+      return $pastes;
     }
 
-    if ($pastes && $this->needContent) {
-      $this->loadContent($pastes);
+    if ($this->needRawContent) {
+      $pastes = $this->loadRawContent($pastes);
+    }
+
+    if ($this->needContent) {
+      $pastes = $this->loadContent($pastes);
     }
 
     return $pastes;
@@ -99,6 +133,27 @@ final class PhabricatorPasteQuery
         $this->parentPHIDs);
     }
 
+    if ($this->languages) {
+      $where[] = qsprintf(
+        $conn_r,
+        'language IN (%Ls)',
+        $this->languages);
+    }
+
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn_r,
+        'dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn_r,
+        'dateCreated <= %d',
+        $this->dateCreatedBefore);
+    }
+
     return $this->formatWhereClause($where);
   }
 
@@ -113,14 +168,16 @@ final class PhabricatorPasteQuery
       $file_phids);
     $files = mpull($files, null, 'getPHID');
 
-    foreach ($pastes as $paste) {
+    foreach ($pastes as $key => $paste) {
       $file = idx($files, $paste->getFilePHID());
-      if ($file) {
-        $paste->attachRawContent($file->loadFileData());
-      } else {
-        $paste->attachRawContent('');
+      if (!$file) {
+        unset($pastes[$key]);
+        continue;
       }
+      $paste->attachRawContent($file->loadFileData());
     }
+
+    return $pastes;
   }
 
   private function loadContent(array $pastes) {
@@ -134,34 +191,38 @@ final class PhabricatorPasteQuery
       $keys[] = $this->getContentCacheKey($paste);
     }
 
-
     $caches = $cache->getKeys($keys);
+    $results = array();
 
     $need_raw = array();
-    foreach ($pastes as $paste) {
+    foreach ($pastes as $key => $paste) {
       $key = $this->getContentCacheKey($paste);
       if (isset($caches[$key])) {
         $paste->attachContent(phutil_safe_html($caches[$key]));
+        $results[$key] = $paste;
       } else {
-        $need_raw[] = $paste;
+        $need_raw[$key] = $paste;
       }
     }
 
     if (!$need_raw) {
-      return;
+      return $results;
     }
 
     $write_data = array();
 
-    $this->loadRawContent($need_raw);
-    foreach ($need_raw as $paste) {
+    $need_raw = $this->loadRawContent($need_raw);
+    foreach ($need_raw as $key => $paste) {
       $content = $this->buildContent($paste);
       $paste->attachContent($content);
 
       $write_data[$this->getContentCacheKey($paste)] = (string)$content;
+      $results[$key] = $paste;
     }
 
     $cache->setKeys($write_data);
+
+    return $results;
   }
 
 

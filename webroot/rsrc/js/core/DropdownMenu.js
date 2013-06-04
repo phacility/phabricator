@@ -45,6 +45,13 @@ JX.install('PhabricatorDropdownMenu', {
     _menu : null,
     _open : false,
     _items : null,
+    _alignRight : true,
+
+    // By default, the dropdown will have its right edge aligned with the
+    // right edge of _node. Making this false does left edge alignment
+    toggleAlignDropdownRight : function (bool) {
+      this._alignRight = bool;
+    },
 
     open : function() {
       if (this._open) {
@@ -127,10 +134,15 @@ JX.install('PhabricatorDropdownMenu', {
 
       var m = JX.Vector.getDim(this._menu);
 
-      JX.$V(this._node)
-        .add(JX.Vector.getDim(this._node))
-        .add(JX.$V(-m.x, 0))
-        .setPos(this._menu);
+      var v = JX.$V(this._node);
+      var d = JX.Vector.getDim(this._node);
+      if (this._alignRight) {
+        v = v.add(d)
+             .add(JX.$V(-m.x, 0));
+      } else {
+        v = v.add(0, d.y);
+      }
+      v.setPos(this._menu);
 
       JX.DOM.alterClass(this._node, 'dropdown-open', true);
     },

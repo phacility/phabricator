@@ -12,6 +12,7 @@ final class ReleephRequestActionController extends ReleephController {
   public function processRequest() {
     $request = $this->getRequest();
 
+    $releeph_project = $this->getReleephProject();
     $releeph_branch  = $this->getReleephBranch();
     $releeph_request = $this->getReleephRequest();
 
@@ -24,8 +25,12 @@ final class ReleephRequestActionController extends ReleephController {
 
     $origin_uri = $releeph_request->loadReleephBranch()->getURI();
 
-    $editor = id(new ReleephRequestEditor($releeph_request))
-      ->setActor($user);
+    $editor = id(new ReleephRequestTransactionalEditor())
+      ->setActor($user)
+      ->setContinueOnNoEffect(true)
+      ->setContentSourceFromRequest($request);
+
+    $xactions = array();
 
     switch ($action) {
       case 'want':
@@ -34,20 +39,52 @@ final class ReleephRequestActionController extends ReleephController {
           'want' => ReleephRequest::INTENT_WANT,
           'pass' => ReleephRequest::INTENT_PASS);
         $intent = $action_map[$action];
-        $editor->changeUserIntent($user, $intent);
+        $xactions[] = id(new ReleephRequestTransaction())
+          ->setTransactionType(ReleephRequestTransaction::TYPE_USER_INTENT)
+          ->setMetadataValue(
+            'isAuthoritative',
+            $releeph_project->isAuthoritative($user))
+          ->setNewValue($intent);
         break;
 
       case 'mark-manually-picked':
-        $editor->markManuallyActioned('pick');
-        break;
-
       case 'mark-manually-reverted':
-        $editor->markManuallyActioned('revert');
+        if (
+          $releeph_request->getRequestUserPHID() === $user->getPHID() ||
+          $releeph_project->isAuthoritative($user)) {
+
+          // We're all good!
+        } else {
+          throw new Exception(
+            "Bug!  Only pushers or the requestor can manually change a ".
+            "request's in-branch status!");
+        }
+
+        if ($action === 'mark-manually-picked') {
+          $in_branch = 1;
+          $intent = ReleephRequest::INTENT_WANT;
+        } else {
+          $in_branch = 0;
+          $intent = ReleephRequest::INTENT_PASS;
+        }
+
+        $xactions[] = id(new ReleephRequestTransaction())
+          ->setTransactionType(ReleephRequestTransaction::TYPE_USER_INTENT)
+          ->setMetadataValue('isManual', true)
+          ->setMetadataValue('isAuthoritative', true)
+          ->setNewValue($intent);
+
+        $xactions[] = id(new ReleephRequestTransaction())
+          ->setTransactionType(ReleephRequestTransaction::TYPE_MANUAL_IN_BRANCH)
+          ->setNewValue($in_branch);
+
         break;
 
       default:
         throw new Exception("unknown or unimplemented action {$action}");
     }
+
+    $editor->applyTransactions($releeph_request, $xactions);
 
     // If we're adding a new user to userIntents, we'll have to re-populate
     // request handles to load that user's data.

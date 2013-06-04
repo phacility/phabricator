@@ -41,17 +41,17 @@ final class ReleephBranchAccessController extends ReleephController {
         ->setURI($origin_uri);
     }
 
-    $button_text = ucfirst($this->action).' Branch';
-    $message = hsprintf(
-      '<p>Really %s the branch <i>%s</i>?</p>',
+    $button_text = pht('%s Branch', $this->action);
+    $text = pht('Really %s the branch: %s?',
       $this->action,
       $rph_branch->getBasename());
+    $message = phutil_tag('p', array(), $text);
 
 
     $dialog = new AphrontDialogView();
     $dialog
       ->setUser($request->getUser())
-      ->setTitle('Confirm')
+      ->setTitle(pht('Confirm'))
       ->appendChild($message)
       ->addSubmitButton($button_text)
       ->addCancelButton($origin_uri);

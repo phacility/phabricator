@@ -25,6 +25,6 @@ final class DiffusionMercurialCommitParentsQuery
       }
     }
 
-    return self::loadCommitsByIdentifiers($hashes);
+    return self::loadCommitsByIdentifiers($hashes, $drequest);
   }
 }

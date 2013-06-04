@@ -27,13 +27,20 @@ final class DiffusionPathCompleteController extends DiffusionController {
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'repository'  => $repository,
-        'path'        => $query_dir,
+        'user' => $request->getUser(),
+        'repository' => $repository,
+        'path' => $query_dir,
       ));
+    $this->setDiffusionRequest($drequest);
 
-    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-    $browse_query->setViewer($request->getUser());
-    $paths = $browse_query->loadPaths();
+    $browse_results = DiffusionBrowseResultSet::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.browsequery',
+        array(
+          'path' => $drequest->getPath(),
+          'commit' => $drequest->getCommit(),
+        )));
+    $paths = $browse_results->getPaths();
 
     $output = array();
     foreach ($paths as $path) {

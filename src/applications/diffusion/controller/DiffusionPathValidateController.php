@@ -22,21 +22,28 @@ final class DiffusionPathValidateController extends DiffusionController {
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'repository'  => $repository,
-        'path'        => $path,
+        'user' => $request->getUser(),
+        'repository' => $repository,
+        'path' => $path,
       ));
+    $this->setDiffusionRequest($drequest);
 
-    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-    $browse_query->setViewer($request->getUser());
-    $browse_query->needValidityOnly(true);
-    $valid = $browse_query->loadPaths();
+    $browse_results = DiffusionBrowseResultSet::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.browsequery',
+        array(
+          'path' => $drequest->getPath(),
+          'commit' => $drequest->getCommit(),
+          'needValidityOnly' => true,
+        )));
+    $valid = $browse_results->isValidResults();
 
     if (!$valid) {
-      switch ($browse_query->getReasonForEmptyResultSet()) {
-        case DiffusionBrowseQuery::REASON_IS_FILE:
+      switch ($browse_results->getReasonForEmptyResultSet()) {
+        case DiffusionBrowseResultSet::REASON_IS_FILE:
           $valid = true;
           break;
-        case DiffusionBrowseQuery::REASON_IS_EMPTY:
+        case DiffusionBrowseResultSet::REASON_IS_EMPTY:
           $valid = true;
           break;
       }
@@ -49,12 +56,12 @@ final class DiffusionPathValidateController extends DiffusionController {
     if (!$valid) {
       $branch = $drequest->getBranch();
       if ($branch) {
-        $message = 'Not found in '.$branch;
+        $message = pht('Not found in %s', $branch);
       } else {
-        $message = 'Not found at HEAD';
+        $message = pht('Not found at HEAD');
       }
     } else {
-      $message = 'OK';
+      $message = pht('OK');
     }
 
     $output['message'] = $message;

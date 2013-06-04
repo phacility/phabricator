@@ -31,7 +31,7 @@ final class PonderCommentSaveController extends PonderController {
     if (!strlen(trim($content))) {
       $dialog = new AphrontDialogView();
       $dialog->setUser($request->getUser());
-      $dialog->setTitle('Empty comment');
+      $dialog->setTitle(pht('Empty Comment'));
       $dialog->appendChild(phutil_tag('p', array(), pht(
         'Your comment must not be empty.')));
       $dialog->addCancelButton('/Q'.$question_id);

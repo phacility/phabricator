@@ -32,7 +32,7 @@ final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
       // system generated files don't have authors
       if ($file->getAuthorPHID()) {
         $who_done_it_text = pht(
-          'by %s ',
+          'By %s ',
           $files_authors[$file->getPHID()]->renderLink());
       }
       $date_text = phabricator_relative_date(
@@ -44,32 +44,7 @@ final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
         array(
           'class' => 'file-uploaded-by'
         ),
-        pht('Uploaded %s%s.', $who_done_it_text, $date_text));
-
-      $extra = '';
-      if ($file->isViewableImage()) {
-        $meta = $file_view->getMetadata();
-        $extra = javelin_tag(
-          'a',
-          array(
-            'sigil' => 'lightboxable',
-            'meta' => $meta,
-            'class' => 'file-extra',
-          ),
-          phutil_tag(
-            'img',
-            array(
-              'src' => $file->getThumb160x120URI()
-            ),
-            ''));
-      }
-
-      $divider = phutil_tag(
-        'div',
-        array(
-          'class' => 'divider'
-        ),
-        '');
+        pht('%s%s.', $who_done_it_text, $date_text));
 
       $files_html[] = phutil_tag(
         'div',
@@ -79,10 +54,17 @@ final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
         array(
           $icon_view,
           $file_view,
-          $who_done_it,
-          $extra,
-          $divider
+          $who_done_it
         ));
+    }
+
+    if (empty($files)) {
+      $files_html[] = javelin_tag(
+        'div',
+        array(
+          'class' => 'no-files',
+          'sigil' => 'no-files'),
+        pht('No files.'));
     }
 
     return phutil_tag(

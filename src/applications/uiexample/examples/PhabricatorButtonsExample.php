@@ -33,11 +33,25 @@ final class PhabricatorButtonsExample extends PhabricatorUIExample {
             array(
               'class' => $class,
             ),
-            ucwords($size.' '.$color.' '.$tag));
+            phutil_utf8_ucwords($size.' '.$color.' '.$tag));
 
           $view[] = hsprintf('<br /><br />');
         }
       }
+    }
+
+    foreach ($colors as $color) {
+      $caret = phutil_tag('span', array('class' => 'caret'), '');
+      $view[] = phutil_tag(
+          'a',
+            array(
+              'class' => $color.' button dropdown'
+            ),
+          array(
+            phutil_utf8_ucwords($color.' Dropdown'),
+            $caret,
+          ));
+        $view[] = hsprintf('<br /><br />');
     }
 
     return phutil_tag('div', array('style' => 'margin: 1em 2em;'), $view);

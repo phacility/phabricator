@@ -40,12 +40,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $needs_blame = true;
     }
 
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $this->diffusionRequest);
-    $file_query->setViewer($request->getUser());
-    $file_query->setNeedsBlame($needs_blame);
-    $file_query->loadFileContent();
-    $data = $file_query->getRawData();
+    $file_content = DiffusionFileContent::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.filecontentquery',
+        array(
+          'commit' => $drequest->getCommit(),
+          'path' => $drequest->getPath(),
+          'needsBlame' => $needs_blame,
+        )));
+    $data = $file_content->getCorpus();
 
     if ($selected === 'raw') {
       return $this->buildRawResponse($path, $data);
@@ -56,7 +59,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
     // Build the content of the file.
     $corpus = $this->buildCorpus(
       $selected,
-      $file_query,
+      $file_content,
       $needs_blame,
       $drequest,
       $path,
@@ -81,17 +84,17 @@ final class DiffusionBrowseFileController extends DiffusionController {
     if ($follow) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $notice->setTitle('Unable to Continue');
+      $notice->setTitle(pht('Unable to Continue'));
       switch ($follow) {
         case 'first':
           $notice->appendChild(
-            "Unable to continue tracing the history of this file because ".
-            "this commit is the first commit in the repository.");
+            pht("Unable to continue tracing the history of this file because ".
+            "this commit is the first commit in the repository."));
           break;
         case 'created':
           $notice->appendChild(
-            "Unable to continue tracing the history of this file because ".
-            "this commit created the file.");
+            pht("Unable to continue tracing the history of this file because ".
+            "this commit created the file."));
           break;
       }
       $content[] = $notice;
@@ -101,10 +104,10 @@ final class DiffusionBrowseFileController extends DiffusionController {
     if ($renamed) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $notice->setTitle('File Renamed');
+      $notice->setTitle(pht('File Renamed'));
       $notice->appendChild(
-        "File history passes through a rename from '".$drequest->getPath().
-        "' to '".$renamed."'.");
+        pht("File history passes through a rename from '%s' to '%s'.",
+          $drequest->getPath(), $renamed));
       $content[] = $notice;
     }
 
@@ -160,12 +163,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
       '/'.$drequest->getPath());
   }
 
-  private function buildCorpus($selected,
-                               DiffusionFileContentQuery $file_query,
-                               $needs_blame,
-                               DiffusionRequest $drequest,
-                               $path,
-                               $data) {
+  private function buildCorpus(
+    $selected,
+    DiffusionFileContent $file_content,
+    $needs_blame,
+    DiffusionRequest $drequest,
+    $path,
+    $data) {
 
     if (ArcanistDiffUtils::isHeuristicBinaryFile($data)) {
       $file = $this->loadFileForData($path, $data);
@@ -189,15 +193,16 @@ final class DiffusionBrowseFileController extends DiffusionController {
           array(
             'style' => $style,
           ),
-          $file_query->getRawData());
+          $file_content->getCorpus());
 
           break;
 
       case 'plainblame':
         $style =
           "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
-        list($text_list, $rev_list, $blame_dict) =
-          $file_query->getBlameData();
+        $text_list = $file_content->getTextList();
+        $rev_list = $file_content->getRevList();
+        $blame_dict = $file_content->getBlameDict();
 
         $rows = array();
         foreach ($text_list as $k => $line) {
@@ -213,15 +218,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
             'style' => $style,
           ),
           implode("\n", $rows));
-
         break;
 
       case 'highlighted':
       case 'blame':
       default:
         require_celerity_resource('syntax-highlighting-css');
-
-        list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
+        $text_list = $file_content->getTextList();
+        $rev_list = $file_content->getRevList();
+        $blame_dict = $file_content->getBlameDict();
 
         $text_list = implode("\n", $text_list);
         $text_list = PhabricatorSyntaxHighlighter::highlightWithFilename(
@@ -230,7 +235,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $text_list = explode("\n", $text_list);
 
         $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
-          $needs_blame, $drequest, $file_query, $selected);
+          $needs_blame, $drequest, $selected);
 
         $corpus_table = javelin_tag(
           'table',
@@ -423,7 +428,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
     array $blame_dict,
     $needs_blame,
     DiffusionRequest $drequest,
-    DiffusionFileContentQuery $file_query,
     $selected) {
 
     $handles = array();
@@ -643,7 +647,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           if ($revision_id) {
             $revision = idx($revisions, $revision_id);
             if (!$revision) {
-              $tooltip = '(Invalid revision)';
+              $tooltip = pht('(Invalid revision)');
             } else {
               $tooltip =
                 phabricator_date($revision->getDateModified(), $user).
@@ -671,7 +675,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
               'href'  => $uri->setQueryParam('view', 'blame'),
               'sigil' => 'has-tooltip',
               'meta'  => array(
-                'tip'     => 'Skip Past This Commit',
+                'tip'     => pht('Skip Past This Commit'),
                 'align'   => 'E',
                 'size'    => 300,
               ),
@@ -862,6 +866,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $rename_query = new DiffusionRenameHistoryQuery();
         $rename_query->setRequest($drequest);
         $rename_query->setOldCommit($grandparent->getCommitIdentifier());
+        $rename_query->setViewer($request->getUser());
         $old_filename = $rename_query->loadOldFilename();
         $was_created = $rename_query->getWasCreated();
       }
@@ -923,44 +928,48 @@ final class DiffusionBrowseFileController extends DiffusionController {
       return null;
     }
 
-    $diff_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
-    $diff_query->setAgainstCommit($target_commit);
-    try {
-      $raw_diff = $diff_query->loadRawDiff();
-      $old_line = 0;
-      $new_line = 0;
+    $raw_diff = $this->callConduitWithDiffusionRequest(
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath(),
+        'againstCommit' => $target_commit));
+    $old_line = 0;
+    $new_line = 0;
 
-      foreach (explode("\n", $raw_diff) as $text) {
-        if ($text[0] == '-' || $text[0] == ' ') {
-          $old_line++;
-        }
-        if ($text[0] == '+' || $text[0] == ' ') {
-          $new_line++;
-        }
-        if ($new_line == $line) {
-          return $old_line;
-        }
+    foreach (explode("\n", $raw_diff) as $text) {
+      if ($text[0] == '-' || $text[0] == ' ') {
+        $old_line++;
       }
-
-      // We didn't find the target line.
-      return $line;
-
-    } catch (Exception $ex) {
-      return $line;
+      if ($text[0] == '+' || $text[0] == ' ') {
+        $new_line++;
+      }
+      if ($new_line == $line) {
+        return $old_line;
+      }
     }
+
+    // We didn't find the target line.
+    return $line;
   }
 
   private function loadParentRevisionOf($commit) {
     $drequest = $this->getDiffusionRequest();
+    $user = $this->getRequest()->getUser();
 
     $before_req = DiffusionRequest::newFromDictionary(
       array(
+        'user' => $user,
         'repository' => $drequest->getRepository(),
         'commit'     => $commit,
       ));
 
-    $query = DiffusionCommitParentsQuery::newFromDiffusionRequest($before_req);
-    $parents = $query->loadParents();
+    $parents = DiffusionQuery::callConduitWithDiffusionRequest(
+      $user,
+      $before_req,
+      'diffusion.commitparentsquery',
+      array(
+        'commit' => $commit));
 
     return head($parents);
   }

@@ -113,18 +113,35 @@ abstract class AphrontApplicationConfiguration {
       }
     }
 
-    $path     = $request->getPath();
-    $host     = $request->getHost();
-    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-    $prod_uri = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
-    $file_uri = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    $path         = $request->getPath();
+    $host         = $request->getHost();
+    $base_uri     = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    $prod_uri     = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
+    $file_uri     = PhabricatorEnv::getEnvConfig(
+      'security.alternate-file-domain');
+    $conduit_uris = PhabricatorEnv::getEnvConfig('conduit.servers');
+    $allowed_uris = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
+
+    $uris = array_merge(
+      array(
+        $base_uri,
+        $prod_uri,
+        $file_uri,
+      ),
+      $conduit_uris,
+      $allowed_uris);
+
+    $host_match = false;
+    foreach ($uris as $uri) {
+      if ($host === id(new PhutilURI($uri))->getDomain()) {
+        $host_match = true;
+        break;
+      }
+    }
 
     // NOTE: If the base URI isn't defined yet, don't activate alternate
     // domains.
-    if ($base_uri &&
-        $host != id(new PhutilURI($base_uri))->getDomain() &&
-        $host != id(new PhutilURI($prod_uri))->getDomain() &&
-        $host != id(new PhutilURI($file_uri))->getDomain()) {
+    if ($base_uri && !$host_match) {
 
       try {
         $blog = id(new PhameBlogQuery())

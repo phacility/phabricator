@@ -28,7 +28,7 @@ final class ReleephProjectViewController extends ReleephController {
       $crumbs->addAction(
         id(new PhabricatorMenuItemView())
           ->setHref($releeph_project->getURI('cutbranch'))
-          ->setName('Cut New Branch')
+          ->setName(pht('Cut New Branch'))
           ->setIcon('create'));
     }
 
@@ -38,7 +38,7 @@ final class ReleephProjectViewController extends ReleephController {
         $view,
       ),
       array(
-        'title' => $releeph_project->getName().' Releeph Project'
+        'title' => $releeph_project->getName()
       ));
   }
 

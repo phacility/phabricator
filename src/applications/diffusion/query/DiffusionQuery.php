@@ -1,6 +1,6 @@
 <?php
 
-abstract class DiffusionQuery {
+abstract class DiffusionQuery extends PhabricatorQuery {
 
   private $request;
 
@@ -13,6 +13,16 @@ abstract class DiffusionQuery {
     DiffusionRequest $request) {
 
     $repository = $request->getRepository();
+
+    $obj = self::initQueryObject($base_class, $repository);
+    $obj->request = $request;
+
+    return $obj;
+  }
+
+  final protected static function initQueryObject(
+    $base_class,
+    PhabricatorRepository $repository) {
 
     $map = array(
       PhabricatorRepositoryType::REPOSITORY_TYPE_GIT        => 'Git',
@@ -27,13 +37,36 @@ abstract class DiffusionQuery {
 
     $class = str_replace('Diffusion', 'Diffusion'.$name, $base_class);
     $obj = new $class();
-    $obj->request = $request;
-
     return $obj;
   }
 
   final protected function getRequest() {
     return $this->request;
+  }
+
+  final public static function callConduitWithDiffusionRequest(
+    PhabricatorUser $user,
+    DiffusionRequest $drequest,
+    $method,
+    array $params = array()) {
+
+    $repository = $drequest->getRepository();
+
+    $core_params = array(
+      'callsign' => $repository->getCallsign()
+    );
+    $params = $params + $core_params;
+
+    return id(new ConduitCall(
+      $method,
+      $params
+    ))
+    ->setUser($user)
+    ->execute();
+  }
+
+  public function execute() {
+    return $this->executeQuery();
   }
 
   abstract protected function executeQuery();
@@ -42,7 +75,9 @@ abstract class DiffusionQuery {
 /* -(  Query Utilities  )---------------------------------------------------- */
 
 
-  final protected function loadCommitsByIdentifiers(array $identifiers) {
+  final public static function loadCommitsByIdentifiers(
+    array $identifiers,
+    DiffusionRequest $drequest) {
     if (!$identifiers) {
       return array();
     }
@@ -50,7 +85,6 @@ abstract class DiffusionQuery {
     $commits = array();
     $commit_data = array();
 
-    $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
     $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
@@ -98,14 +132,16 @@ abstract class DiffusionQuery {
     return $commits;
   }
 
-  final protected function loadHistoryForCommitIdentifiers(array $identifiers) {
+  final public static function loadHistoryForCommitIdentifiers(
+    array $identifiers,
+    DiffusionRequest $drequest) {
+
     if (!$identifiers) {
       return array();
     }
 
-    $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
-    $commits = self::loadCommitsByIdentifiers($identifiers);
+    $commits = self::loadCommitsByIdentifiers($identifiers, $drequest);
 
     if (!$commits) {
       return array();

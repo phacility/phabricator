@@ -6,68 +6,28 @@
 abstract class ConpherenceController extends PhabricatorController {
   private $conpherences;
 
-  /**
-   * Try for a full set of unread conpherences, and if we fail
-   * load read conpherences. Additional conpherences in either category
-   * are loaded asynchronously.
-   */
-  public function loadStartingConpherences($current_selection_epoch = null) {
-    $user = $this->getRequest()->getUser();
-
-    $read_participant_query = id(new ConpherenceParticipantQuery())
-      ->withParticipantPHIDs(array($user->getPHID()));
-    $read_status =  ConpherenceParticipationStatus::UP_TO_DATE;
-    if ($current_selection_epoch) {
-      $read_one = $read_participant_query
-        ->withParticipationStatus($read_status)
-        ->withDateTouched($current_selection_epoch, '>')
-        ->execute();
-
-      $read_two = $read_participant_query
-        ->withDateTouched($current_selection_epoch, '<=')
-        ->execute();
-
-      $read = array_merge($read_one, $read_two);
-
-    } else {
-      $read = $read_participant_query
-        ->withParticipationStatus($read_status)
-        ->execute();
-    }
-
-    $unread_status = ConpherenceParticipationStatus::BEHIND;
-    $unread = id(new ConpherenceParticipantQuery())
-      ->withParticipantPHIDs(array($user->getPHID()))
-      ->withParticipationStatus($unread_status)
-      ->execute();
-
-    $all_participation = $unread + $read;
-    $all_conpherence_phids = array_keys($all_participation);
-    $all_conpherences = array();
-    if ($all_conpherence_phids) {
-      $all_conpherences = id(new ConpherenceThreadQuery())
-        ->setViewer($user)
-        ->withPHIDs($all_conpherence_phids)
-        ->needParticipantCache(true)
-        ->execute();
-    }
-    $unread_conpherences = array_select_keys(
-      $all_conpherences,
-      array_keys($unread));
-
-    $read_conpherences = array_select_keys(
-      $all_conpherences,
-      array_keys($read));
-
-    return array($unread_conpherences, $read_conpherences);
-  }
-
   public function buildApplicationMenu() {
     $nav = new PhabricatorMenuView();
 
     $nav->newLink(
       pht('New Message'),
       $this->getApplicationURI('new/'));
+
+    $nav->addMenuItem(
+      id(new PhabricatorMenuItemView())
+      ->setName(pht('Add Participants'))
+      ->setType(PhabricatorMenuItemView::TYPE_LINK)
+      ->setHref('#')
+      ->addSigil('conpherence-widget-adder')
+      ->setMetadata(array('widget' => 'widgets-people')));
+
+    $nav->addMenuItem(
+      id(new PhabricatorMenuItemView())
+      ->setName(pht('New Calendar Item'))
+      ->setType(PhabricatorMenuItemView::TYPE_LINK)
+      ->setHref('/calendar/status/create/')
+      ->addSigil('conpherence-widget-adder')
+      ->setMetadata(array('widget' => 'widgets-calendar')));
 
     return $nav;
   }
@@ -78,62 +38,44 @@ abstract class ConpherenceController extends PhabricatorController {
     $crumbs
       ->addAction(
         id(new PhabricatorMenuItemView())
-          ->setName(pht('New Message'))
-          ->setHref($this->getApplicationURI('new/'))
-          ->setIcon('create'))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('Conpherence')));
-
+        ->setName(pht('New Message'))
+        ->setHref($this->getApplicationURI('new/'))
+        ->setIcon('create')
+        ->setWorkflow(true))
+      ->addAction(
+        id(new PhabricatorMenuItemView())
+        ->setName(pht('Thread'))
+        ->setHref('#')
+        ->setIcon('action-menu')
+        ->setStyle('display: none;')
+        ->addClass('device-widgets-selector')
+        ->addSigil('device-widgets-selector'));
     return $crumbs;
   }
 
   protected function buildHeaderPaneContent(ConpherenceThread $conpherence) {
-    $user = $this->getRequest()->getUser();
-    $display_data = $conpherence->getDisplayData(
-      $user,
-      ConpherenceImageData::SIZE_HEAD);
-    $edit_href = $this->getApplicationURI('update/'.$conpherence->getID().'/');
-    $class_mod = $display_data['image_class'];
+    $crumbs = $this->buildApplicationCrumbs();
+    if ($conpherence->getTitle()) {
+      $title = $conpherence->getTitle();
+    } else {
+      $title = pht('[No Title]');
+    }
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+      ->setName($title)
+      ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
+      ->setWorkflow(true));
 
-    return array(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'upload-photo'
-        ),
-        pht('Drop photo here to change this Conpherence photo.')),
-      javelin_tag(
-        'a',
-        array(
-          'class' => 'edit',
-          'href' => $edit_href,
-          'sigil' => 'conpherence-edit-metadata',
-          'meta' => array(
-            'action' => 'metadata'
-          )
-        ),
-        ''),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'header-image',
-          'style' => 'background-image: url('.$display_data['image'].');'
-        ),
-        ''),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'title',
-        ),
-        $display_data['title']),
-      phutil_tag(
-        'div',
-        array(
-          'class' => $class_mod.'subtitle',
-        ),
-        $display_data['subtitle']),
-    );
+    return hsprintf(
+      '%s',
+      array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'header-loading-mask'
+          ),
+          ''),
+        $crumbs));
   }
 
   protected function renderConpherenceTransactions(
@@ -166,13 +108,41 @@ abstract class ConpherenceController extends PhabricatorController {
       }
     }
     $engine->process();
+    // we're going to insert a dummy date marker transaction for breaks
+    // between days. some setup required!
+    $previous_transaction = null;
+    $date_marker_transaction = id(new ConpherenceTransaction())
+      ->setTransactionType(ConpherenceTransactionType::TYPE_DATE_MARKER)
+      ->makeEphemeral();
+    $date_marker_transaction_view = id(new ConpherenceTransactionView())
+      ->setUser($user)
+      ->setConpherenceTransaction($date_marker_transaction)
+      ->setHandles($handles)
+      ->setMarkupEngine($engine);
     foreach ($transactions as $transaction) {
+      if ($previous_transaction) {
+        $previous_day = phabricator_format_local_time(
+          $previous_transaction->getDateCreated(),
+          $user,
+          'Ymd');
+        $current_day = phabricator_format_local_time(
+          $transaction->getDateCreated(),
+          $user,
+          'Ymd');
+        // date marker transaction time!
+        if ($previous_day != $current_day) {
+          $date_marker_transaction->setDateCreated(
+            $transaction->getDateCreated());
+          $rendered_transactions[] = $date_marker_transaction_view->render();
+        }
+      }
       $rendered_transactions[] = id(new ConpherenceTransactionView())
         ->setUser($user)
         ->setConpherenceTransaction($transaction)
         ->setHandles($handles)
         ->setMarkupEngine($engine)
         ->render();
+      $previous_transaction = $transaction;
     }
     $latest_transaction_id = $transaction->getID();
 

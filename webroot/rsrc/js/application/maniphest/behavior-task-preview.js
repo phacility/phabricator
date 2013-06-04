@@ -19,7 +19,7 @@ JX.behavior('maniphest-description-preview', function(config) {
     return {
       description : textarea.value
     };
-  }
+  };
 
   var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
   var trigger = JX.bind(request, request.trigger);

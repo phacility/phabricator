@@ -27,6 +27,7 @@ final class ConduitAPI_releeph_request_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $user = $request->getUser();
     $branch_phid = $request->getValue('branchPHID');
     $releeph_branch = id(new ReleephBranch())
       ->loadOneWhere('phid = %s', $branch_phid);
@@ -42,6 +43,7 @@ final class ConduitAPI_releeph_request_Method
     $requested_commits = array();
     $things = $request->getValue('things');
     $finder = id(new ReleephCommitFinder())
+      ->setUser($user)
       ->setReleephProject($releeph_project);
     foreach ($things as $thing) {
       try {
@@ -74,7 +76,7 @@ final class ConduitAPI_releeph_request_Method
     foreach ($requested_commits as $thing => $commit) {
       $phid = $commit->getPHID();
       $handles = id(new PhabricatorObjectHandleData(array($phid)))
-        ->setViewer($request->getUser())
+        ->setViewer($user)
         ->loadHandles();
       $name = id($handles[$phid])->getName();
 
@@ -84,7 +86,25 @@ final class ConduitAPI_releeph_request_Method
       if ($existing_releeph_request) {
         $releeph_request = $existing_releeph_request;
       } else {
-        $releeph_request = new ReleephRequest();
+        $releeph_request = id(new ReleephRequest())
+          ->setRequestUserPHID($user->getPHID())
+          ->setBranchID($releeph_branch->getID())
+          ->setInBranch(0);
+
+        $xactions = array();
+
+        $xactions[] = id(new ReleephRequestTransaction())
+          ->setTransactionType(ReleephRequestTransaction::TYPE_REQUEST)
+          ->setNewValue($commit->getPHID());
+
+        $xactions[] = id(new ReleephRequestTransaction())
+          ->setTransactionType(ReleephRequestTransaction::TYPE_USER_INTENT)
+          ->setMetadataValue('userPHID', $user->getPHID())
+          ->setMetadataValue(
+            'isAuthoritative',
+            $releeph_project->isAuthoritative($user))
+          ->setNewValue(ReleephRequest::INTENT_WANT);
+
         foreach ($fields as $field) {
           if (!$field->isEditable()) {
             continue;
@@ -97,13 +117,20 @@ final class ConduitAPI_releeph_request_Method
               ->setErrorDescription($ex->getMessage());
           }
         }
-        id(new ReleephRequestEditor($releeph_request))
-          ->setActor($request->getUser())
-          ->create($commit, $releeph_branch);
+
+        $editor = id(new ReleephRequestTransactionalEditor())
+          ->setActor($user)
+          ->setContinueOnNoEffect(true)
+          ->setContentSource(
+            PhabricatorContentSource::newForSource(
+              PhabricatorContentSource::SOURCE_CONDUIT,
+              array()));
+
+        $editor->applyTransactions($releeph_request, $xactions);
       }
 
       $releeph_branch->populateReleephRequestHandles(
-        $request->getUser(),
+        $user,
         array($releeph_request));
       $rq_handles = $releeph_request->getHandles();
       $requestor_phid = $releeph_request->getRequestUserPHID();

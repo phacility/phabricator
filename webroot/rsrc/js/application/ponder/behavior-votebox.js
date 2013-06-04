@@ -28,7 +28,7 @@ JX.behavior('ponder-votebox', function(config) {
     JX.DOM.alterClass(upv, 'ponder-vote-active', (data.vote > 0));
 
     var downv = JX.DOM.find(root, 'a', 'downvote');
-    JX.DOM.alterClass(downv, 'ponder-vote-active', (data.vote < 0))
+    JX.DOM.alterClass(downv, 'ponder-vote-active', (data.vote < 0));
 
     JX.DOM.setContent(
       JX.DOM.find(root, 'div', 'ponder-vote-count'),
@@ -36,7 +36,7 @@ JX.behavior('ponder-votebox', function(config) {
 
     new JX.Request(e.getTarget().href, JX.bag)
       .setData({vote: data.vote})
-      .send()
+      .send();
   }
 
   JX.Stratcom.listen(

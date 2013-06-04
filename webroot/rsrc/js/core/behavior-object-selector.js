@@ -79,7 +79,7 @@ JX.behavior('phabricator-object-selector', function(config) {
     var cells = [
       JX.$N('td', {}, view_object_link),
       JX.$N('th', {}, select_object_link),
-      JX.$N('td', {}, select_object_button),
+      JX.$N('td', {}, select_object_button)
     ];
 
     var table = JX.$N(
@@ -109,7 +109,7 @@ JX.behavior('phabricator-object-selector', function(config) {
 
   function sendQuery() {
     query_timer = null;
-    JX.DOM.setContent(JX.$(config.results), renderNote('Loading...'))
+    JX.DOM.setContent(JX.$(config.results), renderNote('Loading...'));
     new JX.Request(config.uri, JX.bind(null, onreceive, ++n))
       .setData({
         filter: JX.$(config.filter).value,

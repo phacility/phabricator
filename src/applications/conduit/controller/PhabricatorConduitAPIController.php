@@ -35,7 +35,8 @@ final class PhabricatorConduitAPIController
       $metadata = idx($params, '__conduit__', array());
       unset($params['__conduit__']);
 
-      $call = new ConduitCall($method, $params);
+      $call = new ConduitCall(
+        $method, $params, idx($metadata, 'isProxied', false));
 
       $result = null;
 
@@ -282,7 +283,7 @@ final class PhabricatorConduitAPIController
       id(new PhabricatorUser())->establishConnection('r'),
       'SELECT * FROM %T WHERE sessionKey = %s',
       PhabricatorUser::SESSION_TABLE,
-      $session_key);
+      PhabricatorHash::digest($session_key));
     if (!$session) {
       return array(
         'ERR-INVALID-SESSION',

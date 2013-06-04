@@ -4,62 +4,52 @@
     "gradient-blue-header"      : {
       "name" : "gradient-blue-header",
       "rule" : ".gradient-blue-header",
-      "hash" : "dd82b6d737f9f683c0d6e70eff59e872"
+      "hash" : "bcfc1d3e93ea8585af5b5ca52b08e944"
     },
     "gradient-breadcrumbs"      : {
       "name" : "gradient-breadcrumbs",
       "rule" : ".gradient-breadcrumbs",
-      "hash" : "3d0f8634df5bc29eaf2a5a01bae79cf1"
+      "hash" : "ed46fe9544216513a3958900c688a808"
     },
     "gradient-dark-grey-header" : {
       "name" : "gradient-dark-grey-header",
       "rule" : ".gradient-dark-grey-header",
-      "hash" : "2bdb9bec730405a8fc0a1eca4f3538c2"
+      "hash" : "e8762dd2849410a7e4fba8f972f946ff"
     },
     "gradient-dark-menu-label"  : {
       "name" : "gradient-dark-menu-label",
       "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label",
-      "hash" : "e0d4a455142f9c4745d36ad8b7dd3f78"
+      "hash" : "8a11efa454f788aa2419ed8c745dece2"
     },
     "gradient-green-header"     : {
       "name" : "gradient-green-header",
       "rule" : ".gradient-green-header",
-      "hash" : "d61297d23aa31fa1de51e2b9b5974554"
+      "hash" : "848b563e846e187b688e899a9d838e40"
     },
     "gradient-grey-header"      : {
       "name" : "gradient-grey-header",
       "rule" : ".gradient-grey-header",
-      "hash" : "f1453896068a8dd0d7885457c8e371bc"
-    },
-    "gradient-menu-hover"       : {
-      "name" : "gradient-menu-hover",
-      "rule" : ".gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover",
-      "hash" : "e6e064156d66952180e99b00996ffc38"
+      "hash" : "1c8f8d61984e3fc5a7e528b9bd4d484a"
     },
     "gradient-menu-label"       : {
       "name" : "gradient-menu-label",
       "rule" : ".gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label",
-      "hash" : "04b9943f5b06c8cb21fe6b96714e6662"
-    },
-    "gradient-menu-selected"    : {
-      "name" : "gradient-menu-selected",
-      "rule" : ".gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus",
-      "hash" : "9b4b039fba177b90bc26f0e6eece339d"
+      "hash" : "e2aa8e74c3b2c0b18de34d336d318b5c"
     },
     "gradient-red-header"       : {
       "name" : "gradient-red-header",
       "rule" : ".gradient-red-header",
-      "hash" : "27a76645065953a8440d0c3d2b192c82"
+      "hash" : "070a2e01f611bfaf5207be25eebdd6f2"
     },
     "gradient-yellow-header"    : {
       "name" : "gradient-yellow-header",
       "rule" : ".gradient-yellow-header",
-      "hash" : "181e68e61f29071c3ec3810694c2ef08"
+      "hash" : "166ee67c5201416cfa598c1eb86bf92a"
     }
   },
   "scales"  : [
     1
   ],
-  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-filetree a.phabricator-filetree-item:hover, .phabricator-filetree a.phabricator-active-nav-focus {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
+  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
   "type"    : "repeat-x"
 }

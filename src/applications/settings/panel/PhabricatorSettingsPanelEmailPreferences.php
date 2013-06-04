@@ -203,16 +203,15 @@ final class PhabricatorSettingsPanelEmailPreferences
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Email Preferences'));
-    $panel->appendChild($form);
-    $panel->setNoBackground();
+    $header = new PhabricatorHeaderView();
+    $header->setHeader(pht('Email Preferences'));
 
     return id(new AphrontNullView())
       ->appendChild(
         array(
           $notice,
-          $panel,
+          $header,
+          $form,
         ));
   }
 

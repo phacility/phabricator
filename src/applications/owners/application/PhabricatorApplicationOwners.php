@@ -11,7 +11,7 @@ final class PhabricatorApplicationOwners extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Group Source Code';
+    return pht('Group Source Code');
   }
 
   public function getTitleGlyph() {

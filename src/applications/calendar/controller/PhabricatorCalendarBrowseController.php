@@ -11,6 +11,8 @@ final class PhabricatorCalendarBrowseController
     $year    = $request->getInt('year', $year_d);
     $month_d = phabricator_format_local_time($now, $user, 'm');
     $month   = $request->getInt('month', $month_d);
+    $day   = phabricator_format_local_time($now, $user, 'j');
+
 
     $holidays = id(new PhabricatorCalendarHoliday())->loadAllWhere(
       'day BETWEEN %s AND %s',
@@ -23,7 +25,12 @@ final class PhabricatorCalendarBrowseController
         strtotime("{$year}-{$month}-01"),
         strtotime("{$year}-{$month}-01 next month"));
 
-    $month_view = new AphrontCalendarMonthView($month, $year);
+    if ($month == $month_d && $year == $year_d) {
+      $month_view = new AphrontCalendarMonthView($month, $year, $day);
+    } else {
+      $month_view = new AphrontCalendarMonthView($month, $year);
+    }
+
     $month_view->setBrowseURI($request->getRequestURI());
     $month_view->setUser($user);
     $month_view->setHolidays($holidays);

@@ -35,14 +35,24 @@ final class HeraldRuleEditHistoryController extends HeraldController {
     $panel->appendChild($list_view);
     $panel->setNoBackground();
 
+    $crumbs = $this
+      ->buildApplicationCrumbs($can_create = false)
+      ->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Edit History'))
+          ->setHref($this->getApplicationURI('herald/history')));
+
     $nav = $this->renderNav();
     $nav->selectFilter('history');
     $nav->appendChild($panel);
+    $nav->setCrumbs($crumbs);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Rule Edit History',
+        'title' => pht('Rule Edit History'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

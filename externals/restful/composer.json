@@ -1,0 +1,18 @@
+{
+    "name": "bninja/restful",
+    "description": "Library for writing RESTful PHP clients.",
+    "homepage": "http://github.com/bninja/restful",
+    "license": "MIT",
+    "keywords": ["http", "api", "client", "rest"],
+    "version": "0.1.7",
+    "authors": [
+    ],
+    "require": {
+        "nategood/httpful": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "RESTful": "src/"
+        }
+    }
+}

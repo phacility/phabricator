@@ -206,4 +206,15 @@ final class PHUIFeedStoryView extends AphrontView {
       ->addMargin(PHUI::MARGIN_MEDIUM_BOTTOM)
       ->appendChild(array($head, $body, $foot));
   }
+
+  public function setAppIconFromPHID($phid) {
+    switch(phid_get_type($phid)) {
+      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+        $this->setAppIcon("pholio-dark");
+        break;
+      case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+        $this->setAppIcon("macro-dark");
+        break;
+    }
+  }
 }

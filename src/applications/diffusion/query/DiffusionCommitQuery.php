@@ -3,8 +3,10 @@
 final class DiffusionCommitQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $identifiers;
   private $phids;
+  private $defaultRepository;
 
   /**
    * Load commits by partial or full identifiers, e.g. "rXab82393", "rX1234",
@@ -14,6 +16,25 @@ final class DiffusionCommitQuery
    */
   public function withIdentifiers(array $identifiers) {
     $this->identifiers = $identifiers;
+    return $this;
+  }
+
+  /**
+   * If a default repository is provided, ambiguous commit identifiers will
+   * be assumed to belong to the default repository.
+   *
+   * For example, "r123" appearing in a commit message in repository X is
+   * likely to be unambiguously "rX123". Normally the reference would be
+   * considered ambiguous, but if you provide a default repository it will
+   * be correctly resolved.
+   */
+  public function withDefaultRepository(PhabricatorRepository $repository) {
+    $this->defaultRepository = $repository;
+    return $this;
+  }
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
@@ -74,6 +95,12 @@ final class DiffusionCommitQuery
         preg_match('/^(?:r([A-Z]+))?(.*)$/', $identifier, $matches);
         $repo = nonempty($matches[1], null);
         $identifier = nonempty($matches[2], null);
+
+        if ($repo === null) {
+          if ($this->defaultRepository) {
+            $repo = $this->defaultRepository->getCallsign();
+          }
+        }
 
         if ($repo === null) {
           if (strlen($identifier) < $min_unqualified) {
@@ -141,6 +168,13 @@ final class DiffusionCommitQuery
       }
 
       $where[] = '('.implode(' OR ', $sql).')';
+    }
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
     }
 
     if ($this->phids) {

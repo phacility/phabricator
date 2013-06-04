@@ -363,8 +363,10 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'repository'  => $repository,
-        'commit'      => $commit->getCommitIdentifier(),
+        'user' => PhabricatorUser::getOmnipotentUser(),
+        'initFromConduit' => false,
+        'repository' => $repository,
+        'commit' => $commit->getCommitIdentifier(),
       ));
 
     $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);

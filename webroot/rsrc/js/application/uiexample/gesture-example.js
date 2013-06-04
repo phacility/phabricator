@@ -62,8 +62,10 @@ JX.behavior('phabricator-gesture-example', function(config) {
     cxt.fillStyle = '#dfdfdf';
     cxt.fillRect(0, 0, d.x, d.y);
 
-    for (var ii = 0; ii < strokes.length; ii++) {
-      var s = strokes[ii];
+    var s;
+    var ii;
+    for (ii = 0; ii < strokes.length; ii++) {
+      s = strokes[ii];
       cxt.strokeStyle = 'rgba(0, 0, 0, 0.50)';
       cxt.beginPath();
         cxt.moveTo(s[0], s[1]);
@@ -71,8 +73,8 @@ JX.behavior('phabricator-gesture-example', function(config) {
       cxt.stroke();
     }
 
-    for (var ii = 0; ii < current.length; ii++) {
-      var s = current[ii];
+    for (ii = 0; ii < current.length; ii++) {
+      s = current[ii];
       cxt.strokeStyle = 'rgba(255, 0, 0, 1)';
       cxt.beginPath();
         cxt.moveTo(s[0], s[1]);

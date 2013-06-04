@@ -143,6 +143,7 @@ final class PhabricatorSearchController
     $search_form
       ->setUser($user)
       ->setAction('/search/')
+      ->setNoShading(true)
       ->appendChild(
         phutil_tag(
           'input',
@@ -198,8 +199,7 @@ final class PhabricatorSearchController
         id(new AphrontFormSubmitControl())
           ->setValue('Search'));
 
-    $search_panel = new AphrontPanelView();
-    $search_panel->setHeader('Search Phabricator');
+    $search_panel = new AphrontListFilterView();
     $search_panel->appendChild($search_form);
 
     require_celerity_resource('phabricator-search-results-css');
@@ -241,6 +241,7 @@ final class PhabricatorSearchController
             ->setObject(idx($objects, $phid));
           $results[] = $view->render();
         }
+
         $results = hsprintf(
           '<div class="phabricator-search-result-list">'.
             '%s'.
@@ -254,17 +255,26 @@ final class PhabricatorSearchController
             '<p class="phabricator-search-no-results">No search results.</p>'.
           '</div>');
       }
+      $results = id(new PHUIBoxView())
+        ->addMargin(PHUI::MARGIN_LARGE)
+        ->addPadding(PHUI::PADDING_LARGE)
+        ->setShadow(true)
+        ->appendChild($results)
+        ->addClass('phabricator-search-result-box');
     } else {
       $results = null;
     }
 
-    return $this->buildStandardPageResponse(
+
+    return $this->buildApplicationPage(
       array(
         $search_panel,
         $results,
       ),
       array(
-        'title' => 'Search Results',
+        'title' => pht('Search Results'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

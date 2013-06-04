@@ -187,6 +187,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'phrequent',
       ),
+      'db.diviner' => array(
+        'type' => 'db',
+        'name' => 'diviner',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1245,6 +1249,98 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130423.updateexternalaccount.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20130423.updateexternalaccount.sql'),
+      ),
+      '20130423.phortunepaymentrevised.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130423.phortunepaymentrevised.sql'),
+      ),
+      '20130423.conpherenceindices.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130423.conpherenceindices.sql'),
+      ),
+      '20130426.search_savedquery.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130426.search_savedquery.sql'),
+      ),
+      '20130502.countdownrevamp1.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130502.countdownrevamp1.sql'),
+      ),
+      '20130502.countdownrevamp2.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130502.countdownrevamp2.php'),
+      ),
+      '20130502.countdownrevamp3.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130502.countdownrevamp3.sql'),
+      ),
+      '20130507.releephrqsimplifycols.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130507.releephrqsimplifycols.sql'),
+      ),
+      '20130507.releephrqmailkey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130507.releephrqmailkey.sql'),
+      ),
+      '20130507.releephrqmailkeypop.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130507.releephrqmailkeypop.php'),
+      ),
+      '20130508.search_namedquery.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130508.search_namedquery.sql'),
+      ),
+      '20130508.releephtransactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130508.releephtransactions.sql'),
+      ),
+      '20130508.releephtransactionsmig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130508.releephtransactionsmig.php'),
+      ),
+      '20130513.receviedmailstatus.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130513.receviedmailstatus.sql'),
+      ),
+      '20130519.diviner.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130519.diviner.sql'),
+      ),
+      '20130521.dropconphimages.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130521.dropconphimages.sql'),
+      ),
+      '20130523.maniphest_owners.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130523.maniphest_owners.sql'),
+      ),
+      '20130524.repoxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130524.repoxactions.sql'),
+      ),
+      '20130529.macroauthor.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130529.macroauthor.sql'),
+      ),
+      '20130529.macroauthormig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130529.macroauthormig.php'),
+      ),
+      '20130530.sessionhash.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130530.sessionhash.php'),
+      ),
+      '20130530.macrodatekey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130530.macrodatekey.sql'),
+      ),
+      '20130530.pastekeys.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130530.pastekeys.sql'),
+      ),
+      '20130531.filekeys.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130531.filekeys.sql'),
       ),
     );
   }

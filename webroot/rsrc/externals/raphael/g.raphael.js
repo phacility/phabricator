@@ -1,6 +1,7 @@
 /**
  * @provides raphael-g
  * @do-not-minify
+ * @nolint
  */
 /*!
  * g.Raphael 0.5 - Charting library, based on Raphaël

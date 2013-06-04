@@ -547,7 +547,6 @@ return array(
   // preferences.
   'metamta.vary-subjects' => true,
 
-
 // -- Auth ------------------------------------------------------------------ //
 
   // Can users login with a username/password, or by following the link from
@@ -849,6 +848,9 @@ return array(
 
   // Contains a list of uninstalled applications
   'phabricator.uninstalled-applications' => array(),
+
+  // Allowing non-members to interact with tasks over email.
+  'phabricator.allow-email-users' => false,
 
 // -- Welcome Screen -------------------------------------------------------- //
 

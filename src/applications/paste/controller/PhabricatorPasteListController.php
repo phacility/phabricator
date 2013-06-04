@@ -1,65 +1,29 @@
 <?php
 
-final class PhabricatorPasteListController extends PhabricatorPasteController {
+final class PhabricatorPasteListController extends PhabricatorPasteController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  public function shouldRequireLogin() {
-    return false;
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
   }
 
-  private $filter;
-
   public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter');
+    $this->queryKey = idx($data, 'queryKey', 'all');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorPasteSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $saved_query = new PhabricatorSavedQuery();
-
-    $nav = $this->buildSideNavView($this->filter);
-    $filter = $nav->getSelectedFilter();
-
-    $engine = id(new PhabricatorPasteSearchEngine())
-      ->setPasteSearchFilter($filter);
-    $saved_query = $engine->buildSavedQueryFromRequest($request);
-    $query = $engine->buildQueryFromSavedQuery($saved_query);
-
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-    $pastes = $query->setViewer($request->getUser())
-      ->needContent(true)
-      ->executeWithCursorPager($pager);
-
-    $list = $this->buildPasteList($pastes);
-    $list->setPager($pager);
-    $list->setNoDataString(pht("No results found for this query."));
-
-    $nav->appendChild(
-      array(
-        $list,
-      ));
-
-    $crumbs = $this
-      ->buildApplicationCrumbs($nav)
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht("Pastes"))
-          ->setHref($this->getApplicationURI('filter/'.$filter.'/')));
-
-    $nav->setCrumbs($crumbs);
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht("Pastes"),
-        'device' => true,
-        'dust' => true,
-      ));
+    return $this->delegateToController($controller);
   }
 
-  private function buildPasteList(array $pastes) {
+  public function renderResultsList(array $pastes) {
     assert_instances_of($pastes, 'PhabricatorPaste');
 
     $user = $this->getRequest()->getUser();

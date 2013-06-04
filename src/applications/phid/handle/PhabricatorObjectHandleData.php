@@ -205,6 +205,13 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($vars, null, 'getPHID');
 
+      case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
+        $xusr_dao = new PhabricatorExternalAccount();
+        $xusrs = $xusr_dao->loadAllWhere(
+          'phid in (%Ls)',
+          $phids);
+        return mpull($xusrs, null, 'getPHID');
+
     }
   }
 
@@ -675,6 +682,41 @@ final class PhabricatorObjectHandleData {
               $handle->setName($key);
               $handle->setFullName('Phlux Variable "'.$key.'"');
               $handle->setURI('/phlux/view/'.$key.'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName('Unknown Display Name');
+            } else {
+              $xusr = $objects[$phid];
+              $display_name = $xusr->getDisplayName();
+              $handle->setName($display_name);
+              $handle->setFullName($display_name.' (External User)');
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_CDWN:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName('Unknown Countdown');
+            } else {
+              $countdown = $objects[$phid];
+              $handle->setName($countdown->getTitle());
+              $handle->setFullName($countdown->getTitle());
+              $handle->setURI('/countdown/'.$countdown->getID().'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

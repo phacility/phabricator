@@ -27,14 +27,23 @@ These are inline styles, and can be applied to most text:
   [[wiki page | name]]      # Named link to Phriction
   http://xyz/               # Link to web
   [[http://xyz/ | name]]    # Named link to web
-
+  [name](http://xyz/)       # Alternate Link
 
 These are block styles, and must be separated from surrounding text by
 empty lines:
 
   = Large Header =
+
   == Smaller Header ==
+
+  Also a Large Header
+  ===================
+
+  Also a Smaller Header
+  ---------------------
+
   > Quoted Text
+
   Use "- " or "* " for bulleted lists, and "# " for numbered lists.
   Use ``` or indent two spaces for code.
   Use %%% for a literal block.
@@ -63,7 +72,13 @@ Make **headers** like this:
 
   ===== Very Small Header =====
 
-You can optionally omit the trailing "=" signs -- that is, these are the same:
+  Alternate Large Header
+  ======================
+
+  Alternate Smaller Header
+  ------------------------
+
+You can optionally omit the trailing `=` signs -- that is, these are the same:
 
   == Smaller Header ==
 
@@ -245,6 +260,10 @@ work within Phabricator or on the internet at large:
 
   [[/herald/transcript/ | Herald Transcripts]]
   [[http://www.boring-legal-documents.com/ | exciting legal documents]]
+
+Markdown-style links are also supported:
+
+  [Toil](http://www.trouble.com)
 
 = Linking to Objects =
 

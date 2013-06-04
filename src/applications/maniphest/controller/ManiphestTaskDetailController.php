@@ -258,11 +258,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setID('transaction-comments')
           ->setUser($user))
       ->appendChild(
-        id(new AphrontFormDragAndDropUploadControl())
-          ->setLabel(pht('Attached Files'))
-          ->setName('files')
-          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? pht('Submit') : pht('Avast!')));
 
@@ -331,9 +326,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $transaction_view->setAuxiliaryFields($aux_fields);
     $transaction_view->setMarkupEngine($engine);
 
-    PhabricatorFeedStoryNotification::updateObjectNotificationViews(
-      $user, $task->getPHID());
-
     $object_name = 'T'.$task->getID();
     $actions = $this->buildActionView($task);
 
@@ -383,6 +375,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
   private function buildActionView(ManiphestTask $task) {
     $viewer = $this->getRequest()->getUser();
+    $viewer_phid = $viewer->getPHID();
+    $viewer_is_cc = in_array($viewer_phid, $task->getCCPHIDs());
 
     $id = $task->getID();
     $phid = $task->getPHID();
@@ -397,11 +391,30 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setIcon('edit')
         ->setHref($this->getApplicationURI("/task/edit/{$id}/")));
 
+    if ($task->getOwnerPHID() === $viewer_phid) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Automatically Subscribed'))
+          ->setDisabled(true)
+          ->setIcon('subscribe-auto'));
+    } else {
+      $action = $viewer_is_cc ? 'rem' : 'add';
+      $name   = $viewer_is_cc ? 'Unsubscribe' : 'Subscribe';
+      $icon   = $viewer_is_cc ? 'subscribe-delete' : 'subscribe-add';
+
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht($name))
+          ->setHref("/maniphest/subscribe/{$action}/{$id}/")
+          ->setRenderAsForm(true)
+          ->setUser($viewer)
+          ->setIcon($icon));
+    }
+
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Merge Duplicates'))
         ->setHref("/search/attach/{$phid}/TASK/merge/")
-        ->setWorkflow(true)
         ->setWorkflow(true)
         ->setIcon('merge'));
 

@@ -86,8 +86,14 @@ final class PhabricatorCalendarEditStatusController
                                                        'Y'),
             $redirect => true,
           ));
-        return id(new AphrontRedirectResponse())
-          ->setURI($uri);
+        if ($request->isAjax()) {
+          $response = id(new AphrontAjaxResponse())
+            ->setContent(array('redirect_uri' => $uri));
+        } else {
+          $response = id(new AphrontRedirectResponse())
+            ->setURI($uri);
+        }
+        return $response;
       }
     }
 
@@ -109,22 +115,52 @@ final class PhabricatorCalendarEditStatusController
       ->setName('description')
       ->setValue($status->getDescription());
 
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->setFlexible(true)
+    if ($request->isAjax()) {
+      $dialog = id(new AphrontDialogView())
+        ->setUser($user)
+        ->setTitle($page_title)
+        ->setWidth(AphrontDialogView::WIDTH_FORM);
+      if ($this->isCreate()) {
+        $dialog->setSubmitURI($this->getApplicationURI('status/create/'));
+      } else {
+        $dialog->setSubmitURI(
+          $this->getApplicationURI('status/edit/'.$status->getID().'/'));
+      }
+      $form = new AphrontFormLayoutView();
+      if ($error_view) {
+        $form->appendChild($error_view);
+      }
+    } else {
+      $form = id(new AphrontFormView())
+        ->setUser($user)
+        ->setFlexible(true);
+    }
+
+    $form
       ->appendChild($status_select)
       ->appendChild($start_time)
       ->appendChild($end_time)
       ->appendChild($description);
 
-    $submit = id(new AphrontFormSubmitControl())
-      ->setValue($submit_label);
+    if ($request->isAjax()) {
+      $dialog->addSubmitButton($submit_label);
+      $submit = $dialog;
+    } else {
+      $submit = id(new AphrontFormSubmitControl())
+        ->setValue($submit_label);
+    }
     if ($this->isCreate()) {
       $submit->addCancelButton($this->getApplicationURI());
     } else {
       $submit->addCancelButton(
         $this->getApplicationURI('status/delete/'.$status->getID().'/'),
         pht('Delete Status'));
+    }
+
+    if ($request->isAjax()) {
+      $dialog->appendChild($form);
+      return id(new AphrontDialogResponse())
+        ->setDialog($dialog);
     }
     $form->appendChild($submit);
 

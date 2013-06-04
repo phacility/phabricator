@@ -687,6 +687,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   private function loadEmailAndNameDataFromPHIDs(array &$phids) {
     $users = array();
+    $xusrs = array();
     $mlsts = array();
     // first iteration - group by types to do data fetches
     foreach ($phids as $phid => $type) {
@@ -694,11 +695,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         case PhabricatorPHIDConstants::PHID_TYPE_USER:
           $users[] = $phid;
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
+          $xusrs[] = $phid;
+          break;
         case PhabricatorPHIDConstants::PHID_TYPE_MLST:
           $mlsts[] = $phid;
           break;
       }
     }
+
     $user_emails = array();
     if ($users) {
       $user_emails = id(new PhabricatorUserEmail())->loadAllWhere(
@@ -708,6 +713,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $user_emails = mpull($user_emails, null, 'getUserPHID');
       $users = mpull($users, null, 'getPHID');
     }
+
+    if ($xusrs) {
+      $xusrs = id(new PhabricatorExternalAccount())->loadAllWhere(
+        'phid IN (%Ls)', $xusrs);
+      $xusrs = mpull($xusrs, null, 'getPHID');
+    }
+
     if ($mlsts) {
       $mlsts = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
         'phid IN (%Ls)', $mlsts);
@@ -731,6 +743,17 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           $email = isset($user_emails[$phid]) ?
                    $user_emails[$phid]->getAddress() :
                    $default;
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
+          $xusr = $xusrs[$phid];
+          if ($xusr) {
+            $name = $xusr->getDisplayName();
+            $email = $xusr->getAccountID();
+            $accountType = $xusr->getAccountType();
+            if ($accountType == 'email') {
+              $is_mailable = true;
+            }
+          }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_MLST:
           $mlst = $mlsts[$phid];

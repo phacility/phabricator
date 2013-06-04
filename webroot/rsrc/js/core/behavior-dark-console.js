@@ -12,6 +12,11 @@ JX.behavior('dark-console', function(config, statics) {
   var root = statics.root || setup_console();
 
   config.key = config.key || root.getAttribute('data-console-key');
+
+  if (!('color' in config)) {
+    config.color = root.getAttribute('data-console-color');
+  }
+
   add_request(config);
 
   // Do first-time setup.
@@ -71,13 +76,21 @@ JX.behavior('dark-console', function(config, statics) {
       href: '#'
     };
 
-    var link = JX.$N('a', attr, config.uri);
+    var link = JX.$N('a', attr, [get_bullet(config.color), ' ', config.uri]);
     statics.el.reqs.appendChild(link);
     statics.req.all[config.key] = link;
 
     if (!statics.req.current) {
       select_request(config.key);
     }
+  }
+
+
+  function get_bullet(color) {
+    if (!color) {
+      return null;
+    }
+    return JX.$N('span', {style: {color: color}}, "\u2022");
   }
 
 
@@ -155,12 +168,7 @@ JX.behavior('dark-console', function(config, statics) {
         href: '#'
       };
 
-      var bullet = null;
-      if (tab.color) {
-        bullet = JX.$N('span', {style: {color: tab.color}}, "\u2022");
-      }
-
-      var link = JX.$N('a', attr, [bullet, ' ', tab.name]);
+      var link = JX.$N('a', attr, [get_bullet(tab.color), ' ', tab.name]);
       links.push(link);
       statics.tab.all[tab['class']] = link;
       first = first || tab['class'];

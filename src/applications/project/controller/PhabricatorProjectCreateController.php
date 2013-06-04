@@ -107,13 +107,6 @@ final class PhabricatorProjectCreateController
             ->setValue(pht('Create'))
             ->addCancelButton('/project/'));
 
-      $panel = new AphrontPanelView();
-      $panel
-        ->setWidth(AphrontPanelView::WIDTH_FORM)
-        ->setHeader(pht('Create a New Project'))
-        ->setNoBackground()
-        ->appendChild($form);
-
       $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
       $crumbs->addCrumb(
         id(new PhabricatorCrumbView())
@@ -124,11 +117,12 @@ final class PhabricatorProjectCreateController
         array(
           $crumbs,
           $error_view,
-          $panel,
+          $form,
         ),
         array(
           'title' => pht('Create New Project'),
-          'device' => true
+          'device' => true,
+          'dust' => true,
         ));
     }
   }

@@ -6,6 +6,8 @@
  *           javelin-dom
  *           javelin-magical-init
  *           javelin-vector
+ *           javelin-request
+ *           javelin-util
  * @javelin
  */
 
@@ -46,7 +48,6 @@ JX.behavior('phabricator-nav', function(config) {
         element: background,
         parameter: 'width',
         start: JX.Vector.getDim(background).x,
-        start: JX.Vector.getDim(background).x,
         minWidth: 1
       },
       {
@@ -74,8 +75,9 @@ JX.behavior('phabricator-nav', function(config) {
 
     var dx = JX.$V(e).x - dragging.x;
     var panel;
+    var k;
 
-    for (var k = 0; k < track.length; k++) {
+    for (k = 0; k < track.length; k++) {
       panel = track[k];
       if (!panel.minWidth) {
         continue;
@@ -86,7 +88,7 @@ JX.behavior('phabricator-nav', function(config) {
       }
     }
 
-    for (var k = 0; k < track.length; k++) {
+    for (k = 0; k < track.length; k++) {
       panel = track[k];
       var v = (panel.start + (dx * (panel.scale || 1)));
       panel.element.style[panel.parameter] = v + 'px';
@@ -115,7 +117,7 @@ JX.behavior('phabricator-nav', function(config) {
     JX.DOM.alterClass(main, 'has-local-nav', !collapsed);
     JX.DOM.alterClass(main, 'has-drag-nav', !collapsed);
     resetdrag();
-    new JX.Request('/settings/adjust/', JX.Bag)
+    new JX.Request('/settings/adjust/', JX.bag)
       .setData({ key : 'nav-collapsed', value : (collapsed ? 1 : 0) })
       .send();
   });

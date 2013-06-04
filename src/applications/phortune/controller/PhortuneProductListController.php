@@ -44,7 +44,8 @@ final class PhortuneProductListController extends PhabricatorController {
         ->setObjectName($product->getID())
         ->setHeader($product->getProductName())
         ->setHref($view_uri)
-        ->addAttribute(PhortuneUtil::formatCurrency($price))
+        ->addAttribute(
+          PhortuneCurrency::newFromUSDCents($price)->formatForDisplay())
         ->addAttribute($product->getTypeName());
 
       $product_list->addItem($item);

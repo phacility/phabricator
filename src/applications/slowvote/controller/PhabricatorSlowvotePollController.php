@@ -44,48 +44,16 @@ final class PhabricatorSlowvotePollController
       $comment_text = $viewer_comment->getCommentText();
     }
 
-    if ($request->isFormPost()) {
-      $comment = idx($comments_by_user, $viewer_phid, null);
-      if ($comment) {
-        $comment->delete();
-      }
+    if ($request->isAjax()) {
+      $embed = id(new SlowvoteEmbedView())
+        ->setPoll($poll)
+        ->setOptions($options)
+        ->setViewerChoices($viewer_choices);
 
-      $comment_text = $request->getStr('comments');
-      if (strlen($comment_text)) {
-        id(new PhabricatorSlowvoteComment())
-          ->setAuthorPHID($viewer_phid)
-          ->setPollID($poll->getID())
-          ->setCommentText($comment_text)
-          ->save();
-      }
-
-      $votes = $request->getArr('vote');
-
-      switch ($poll->getMethod()) {
-        case PhabricatorSlowvotePoll::METHOD_PLURALITY:
-          // Enforce only one vote.
-          $votes = array_slice($votes, 0, 1);
-          break;
-        case PhabricatorSlowvotePoll::METHOD_APPROVAL:
-          // No filtering.
-          break;
-        default:
-          throw new Exception("Unknown poll method!");
-      }
-
-      foreach ($viewer_choices as $viewer_choice) {
-        $viewer_choice->delete();
-      }
-
-      foreach ($votes as $vote) {
-        id(new PhabricatorSlowvoteChoice())
-          ->setAuthorPHID($viewer_phid)
-          ->setPollID($poll->getID())
-          ->setOptionID($vote)
-          ->save();
-      }
-
-      return id(new AphrontRedirectResponse())->setURI('/V'.$poll->getID());
+      return id(new AphrontAjaxResponse())
+        ->setContent(array(
+          'pollID' => $poll->getID(),
+          'contentHTML' => $embed->render()));
     }
 
     require_celerity_resource('phabricator-slowvote-css');
@@ -159,6 +127,7 @@ final class PhabricatorSlowvotePollController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setAction(sprintf('/vote/%d/', $poll->getID()))
       ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">%s</p>',
         $instructions))

@@ -57,7 +57,7 @@ final class PonderCommentListView extends AphrontView {
           '<th><a name="comment-%s" /></th>'.
           '<td>'.
             '<div class="phabricator-remarkup ponder-comment-markup">'.
-              '%s&nbsp;&mdash;%s&nbsp;<span class="ponder-datestamp">%s</span>'.
+              '%s -%s <span class="ponder-datestamp">%s</span>'.
             '</div>'.
           '</td>'.
         '</tr>',

@@ -69,12 +69,7 @@ final class PhluxEditController extends PhluxController {
         $editor = id(new PhluxVariableEditor())
           ->setActor($user)
           ->setContinueOnNoEffect(true)
-          ->setContentSource(
-            PhabricatorContentSource::newForSource(
-              PhabricatorContentSource::SOURCE_WEB,
-              array(
-                'ip' => $request->getRemoteAddr(),
-              )));
+          ->setContentSourceFromRequest($request);
 
         $xactions = array();
         $xactions[] = id(new PhluxTransaction())

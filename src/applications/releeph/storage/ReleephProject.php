@@ -51,7 +51,7 @@ final class ReleephProject extends ReleephDAO
       $this->getID(),
       $path
     );
-    return PhabricatorEnv::getProductionURI(implode('/', $components));
+    return implode('/', $components);
   }
 
   public function setDetail($key, $value) {
@@ -94,13 +94,22 @@ final class ReleephProject extends ReleephDAO
     return $this->getDetail('pushers', array());
   }
 
-  public function isPusherPHID($phid) {
-    $pusher_phids = $this->getDetail('pushers', array());
-    return in_array($phid, $pusher_phids);
+  public function isPusher(PhabricatorUser $user) {
+    // TODO Deprecate this once `isPusher` is out of the Facebook codebase.
+    return $this->isAuthoritative($user);
   }
 
-  public function isPusher(PhabricatorUser $user) {
-    return $this->isPusherPHID($user->getPHID());
+  public function isAuthoritative(PhabricatorUser $user) {
+    return $this->isAuthoritativePHID($user->getPHID());
+  }
+
+  public function isAuthoritativePHID($phid) {
+    $pushers = $this->getPushers();
+    if (!$pushers) {
+      return true;
+    } else {
+      return in_array($phid, $pushers);
+    }
   }
 
   public function loadPhabricatorRepository() {

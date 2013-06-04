@@ -53,7 +53,9 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
   public function loadAffectedPaths() {
     if ($this->affectedPaths === null) {
       $result = PhabricatorOwnerPathQuery::loadAffectedPaths(
-        $this->repository, $this->commit);
+        $this->repository,
+        $this->commit,
+        PhabricatorUser::getOmnipotentUser());
       $this->affectedPaths = $result;
     }
     return $this->affectedPaths;
@@ -106,14 +108,19 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
   private function loadCommitDiff() {
     $drequest = DiffusionRequest::newFromDictionary(
       array(
+        'user' => PhabricatorUser::getOmnipotentUser(),
         'repository' => $this->repository,
         'commit' => $this->commit->getCommitIdentifier(),
       ));
 
-    $raw = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
-      ->setTimeout(60 * 60 * 15)
-      ->setLinesOfContext(0)
-      ->loadRawDiff();
+    $raw = DiffusionQuery::callConduitWithDiffusionRequest(
+      PhabricatorUser::getOmnipotentUser(),
+      $drequest,
+      'diffusion.rawdiffquery',
+      array(
+        'commit' => $this->commit->getCommitIdentifier(),
+        'timeout' => 60 * 60 * 15,
+        'linesOfContext' => 0));
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw);
@@ -197,7 +204,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'Great success at doing nothing.');
+            pht('Great success at doing nothing.'));
           break;
         case HeraldActionConfig::ACTION_EMAIL:
           foreach ($effect->getTarget() as $phid) {
@@ -206,7 +213,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'Added address to email targets.');
+            pht('Added address to email targets.'));
           break;
         case HeraldActionConfig::ACTION_AUDIT:
           foreach ($effect->getTarget() as $phid) {
@@ -218,7 +225,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
-            'Triggered an audit.');
+            pht('Triggered an audit.'));
           break;
         case HeraldActionConfig::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(

@@ -3,7 +3,7 @@
  * @generated
  */
 
-.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-filetree a.phabricator-filetree-item:hover, .phabricator-filetree a.phabricator-active-nav-focus {
+.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label {
   background-image: url(/rsrc/image/sprite-gradient.png);
   background-repeat: repeat-x;
 }
@@ -12,15 +12,15 @@
 
 
 .gradient-blue-header {
-  background-position: 0px -141px;
+  background-position: 0px -83px;
 }
 
 .gradient-breadcrumbs {
-  background-position: 0px -109px;
+  background-position: 0px -51px;
 }
 
 .gradient-dark-grey-header {
-  background-position: 0px -212px;
+  background-position: 0px -154px;
 }
 
 .gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label {
@@ -28,29 +28,21 @@
 }
 
 .gradient-green-header {
-  background-position: 0px -283px;
+  background-position: 0px -225px;
 }
 
 .gradient-grey-header {
-  background-position: 0px -354px;
-}
-
-.gradient-menu-hover, .device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover, .phabricator-filetree a.phabricator-filetree-item:hover {
-  background-position: 0px -51px;
+  background-position: 0px -296px;
 }
 
 .gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label {
   background-position: 0px 0px;
 }
 
-.gradient-menu-selected, .phabricator-side-menu .phabricator-menu-item-selected, .device-desktop .phabricator-side-menu a.phabricator-menu-item-selected:hover, .phabricator-nav-local a.phabricator-active-nav-focus {
-  background-position: 0px -80px;
-}
-
 .gradient-red-header {
-  background-position: 0px -425px;
+  background-position: 0px -367px;
 }
 
 .gradient-yellow-header {
-  background-position: 0px -496px;
+  background-position: 0px -438px;
 }

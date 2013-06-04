@@ -16,7 +16,7 @@ JX.behavior('phabricator-search-typeahead', function(config) {
   function transform(object) {
     var attr = {
       className: 'phabricator-main-search-typeahead-result'
-    }
+    };
 
     if (object[6]) {
       attr.style = {backgroundImage: 'url('+object[6]+')'};
@@ -59,7 +59,8 @@ JX.behavior('phabricator-search-typeahead', function(config) {
 
     var tokens = this.tokenize(value);
 
-    for (var ii = 0; ii < list.length; ii++) {
+    var ii;
+    for (ii = 0; ii < list.length; ii++) {
       var item = list[ii];
       if (!item.priority) {
         continue;
@@ -91,7 +92,7 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     // we show 3 applications, then 3 users, etc.
     var type_count = 0;
     var current_type = null;
-    for (var ii = 0; ii < list.length; ii++) {
+    for (ii = 0; ii < list.length; ii++) {
       if (list.length <= config.limit) {
         break;
       }

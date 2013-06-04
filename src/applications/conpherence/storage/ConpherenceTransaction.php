@@ -39,9 +39,12 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         return ($old === null);
       case ConpherenceTransactionType::TYPE_TITLE:
-      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransactionType::TYPE_DATE_MARKER:
         return false;
       case ConpherenceTransactionType::TYPE_FILES:
+        return true;
+      // we used to have them so just always hide
+      case ConpherenceTransactionType::TYPE_PICTURE:
       case ConpherenceTransactionType::TYPE_PICTURE_CROP:
         return true;
     }
@@ -98,10 +101,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
         }
         return $title;
         break;
-      case ConpherenceTransactionType::TYPE_PICTURE:
-        return pht(
-          '%s updated the conpherence image.',
-          $this->renderHandleLink($author_phid));
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
@@ -142,15 +141,14 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
     $phids[] = $this->getAuthorPHID();
     switch ($this->getTransactionType()) {
-      case ConpherenceTransactionType::TYPE_PICTURE:
       case ConpherenceTransactionType::TYPE_TITLE:
       case ConpherenceTransactionType::TYPE_FILES:
+      case ConpherenceTransactionType::TYPE_DATE_MARKER:
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         $phids = array_merge($phids, $this->getOldValue());
         $phids = array_merge($phids, $this->getNewValue());
         break;
-
     }
 
     return $phids;

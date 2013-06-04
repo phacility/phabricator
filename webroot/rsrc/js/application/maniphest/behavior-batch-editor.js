@@ -79,7 +79,7 @@ JX.behavior('maniphest-batch-editor', function(config) {
           vfunc = function() { return status_select.value; };
           break;
       }
-    };
+    }
 
     JX.DOM.listen(action_select, 'change', null, update);
     update();

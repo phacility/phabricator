@@ -29,7 +29,7 @@ JX.behavior('phabricator-active-nav', function(config) {
         'phabricator-active-nav-focus',
         selected);
     }
-  }
+  };
 
 
   /**
@@ -49,7 +49,8 @@ JX.behavior('phabricator-active-nav', function(config) {
 
     // Sort the markers by Y position, descending.
     var markinfo = [];
-    for (var ii = 0; ii < markers.length; ii++) {
+    var ii;
+    for (ii = 0; ii < markers.length; ii++) {
       markinfo.push({
         marker: markers[ii],
         position: JX.$V(markers[ii]).y - 15
@@ -60,7 +61,7 @@ JX.behavior('phabricator-active-nav', function(config) {
     // Find the first marker above the current scroll position, or the first
     // marker in the document if we're above all the markers.
     var active = null;
-    for (var ii = 0; ii < markinfo.length; ii++) {
+    for (ii = 0; ii < markinfo.length; ii++) {
       active = markinfo[ii].marker;
       if (markinfo[ii].position <= scroll_position) {
         break;
@@ -72,13 +73,13 @@ JX.behavior('phabricator-active-nav', function(config) {
 
     // If we get above the first marker, select it.
     selectnav(active && JX.Stratcom.getData(active).anchor);
-  }
+  };
 
   var pending = null;
   var onviewportchange = function(e) {
     pending && clearTimeout(pending);
     pending = setTimeout(updateposition, 100);
-  }
+  };
 
   JX.Stratcom.listen('scroll', null, onviewportchange);
   JX.Stratcom.listen('resize', null, onviewportchange);

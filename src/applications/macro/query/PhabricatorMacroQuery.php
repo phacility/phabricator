@@ -11,10 +11,21 @@ final class PhabricatorMacroQuery
   private $authors;
   private $names;
   private $nameLike;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
 
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
   const STATUS_ACTIVE = 'status-active';
+  const STATUS_DISABLED = 'status-disabled';
+
+  public static function getStatusOptions() {
+    return array(
+      self::STATUS_ACTIVE   => pht('Active Macros'),
+      self::STATUS_DISABLED => pht('Disabled Macros'),
+      self::STATUS_ANY      => pht('Active and Disabled Macros'),
+    );
+  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -46,34 +57,29 @@ final class PhabricatorMacroQuery
     return $this;
   }
 
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
   protected function loadPage() {
     $macro_table = new PhabricatorFileImageMacro();
     $conn = $macro_table->establishConnection('r');
 
     $rows = queryfx_all(
       $conn,
-      'SELECT * FROM %T m %Q %Q %Q %Q',
+      'SELECT m.* FROM %T m %Q %Q %Q',
       $macro_table->getTableName(),
-      $this->buildJoinClause($conn),
       $this->buildWhereClause($conn),
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
 
     return $macro_table->loadAllFromArray($rows);
-  }
-
-  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $joins = array();
-
-    if ($this->authors) {
-      $file_table = new PhabricatorFile();
-      $joins[] = qsprintf(
-        $conn,
-        'JOIN %T f ON m.filePHID = f.phid',
-        $file_table->getTableName());
-    }
-
-    return implode(' ', $joins);
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
@@ -96,7 +102,7 @@ final class PhabricatorMacroQuery
     if ($this->authors) {
       $where[] = qsprintf(
         $conn,
-        'f.authorPHID IN (%Ls)',
+        'm.authorPHID IN (%Ls)',
         $this->authors);
     }
 
@@ -114,10 +120,35 @@ final class PhabricatorMacroQuery
         $this->names);
     }
 
-    if ($this->status == self::STATUS_ACTIVE) {
+    switch ($this->status) {
+      case self::STATUS_ACTIVE:
+        $where[] = qsprintf(
+          $conn,
+          'm.isDisabled = 0');
+        break;
+      case self::STATUS_DISABLED:
+        $where[] = qsprintf(
+          $conn,
+          'm.isDisabled = 1');
+        break;
+      case self::STATUS_ANY:
+        break;
+      default:
+        throw new Exception("Unknown status '{$this->status}'!");
+    }
+
+    if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
         $conn,
-        'm.isDisabled = 0');
+        'm.dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'm.dateCreated <= %d',
+        $this->dateCreatedBefore);
     }
 
     $where[] = $this->buildPagingClause($conn);

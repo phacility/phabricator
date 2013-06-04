@@ -3,21 +3,18 @@
  * @requires aphront-typeahead-control-css
  */
 
-div.jx-tokenizer {
+body div.jx-tokenizer {
   background: transparent;
   position: relative;
-  display: block;
   width: 100%;
 }
 
-div.jx-tokenizer-container {
-  background: #fff;
-  border: 1px solid #96A6C5;
+body div.jx-tokenizer-container {
   position: relative;
-  width: 100%;
-  padding: 0 2px;
-  border-radius: 3px;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  display: block;
+  padding: 0;
+  min-height: 30px;
+  height: auto;
 }
 
 var.jx-tokenizer-metrics {
@@ -26,44 +23,54 @@ var.jx-tokenizer-metrics {
   top: 20px;
 }
 
-input.jx-tokenizer-input {
+body input.jx-tokenizer-input {
   border: 1px solid transparent;
   border-width: 1px 0px;
   padding: 3px;
   outline: none;
   float: left;
+  width: 100%;
+  border-shadow: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  font-size: 13px;
+  color: #333;
+  height: 26px;
 }
 
-span.jx-tokenizer-x-placeholder {
-  padding: 0 2px;
+body input.jx-tokenizer-input:focus {
+  box-shadow: none;
+  -webkit-box-shadow: none;
+  border-color: transparent;
+}
+
+body input.jx-typeahead-placeholder {
+  margin-left: 4px;
+  color: #777
+}
+
+a.jx-tokenizer-x {
+  padding-left: 4px;
+}
+
+a.jx-tokenizer-x:hover {
+  color: #000;
+  text-decoration: none;
 }
 
 a.jx-tokenizer-token {
-  padding: 2px 0 2px 5px;
+  padding: 2px 6px 3px;
   border:  1px solid #a4bdec;
   margin: 3px 2px 0 4px;
   background: #dee7f8;
   float: left;
-  cursor: text;
-  font-size: 12px;
+  cursor: pointer;
   border-radius: 3px;
+  color: #333;
+
 }
 
 a.jx-tokenizer-token:hover {
   text-decoration: none;
   background: #bbcef1;
-  cursor: text;
 }
-
-a.jx-tokenizer-token a.jx-tokenizer-x {
-  color: #627aad;
-  font-family: Arial, sans-serif;
-  font-weight: normal;
-  cursor: pointer;
-  padding: 0 4px;
-}
-
-a.jx-tokenizer-token a.jx-tokenizer-x:hover {
-  text-decoration: none;
-}
-

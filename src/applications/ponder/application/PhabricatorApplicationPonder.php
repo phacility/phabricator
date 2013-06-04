@@ -7,7 +7,7 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Find Answers';
+    return pht('Find Answers');
   }
 
   public function getIconName() {

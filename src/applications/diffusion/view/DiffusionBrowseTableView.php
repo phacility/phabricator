@@ -200,7 +200,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
             array(
               'href' => $editor_link,
             ),
-            'Edit');
+            pht('Edit'));
         }
       }
 
@@ -228,15 +228,15 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        'History',
-        'Edit',
-        'Path',
-        ($lint ? $lint : 'Lint'),
-        'Modified',
-        'Date',
-        'Time',
-        'Author/Committer',
-        'Details',
+        pht('History'),
+        pht('Edit'),
+        pht('Path'),
+        ($lint ? $lint : pht('Lint')),
+        pht('Modified'),
+        pht('Date'),
+        pht('Time'),
+        pht('Author/Committer'),
+        pht('Details'),
       ));
     $view->setColumnClasses(
       array(

@@ -34,9 +34,9 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     $editor = new DifferentialRevisionEditor($revision);
     $editor->setActor($actor);
+    $editor->addDiff($diff, null);
     $editor->copyFieldsFromConduit($fields);
 
-    $editor->addDiff($diff, null);
     $editor->save();
 
     return $revision;
@@ -48,18 +48,18 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $revision = $this->revision;
     $revision->loadRelationships();
 
-    $aux_fields = DifferentialFieldSelector::newSelector()
+    $all_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
 
-    foreach ($aux_fields as $key => $aux_field) {
+    $aux_fields = array();
+    foreach ($all_fields as $aux_field) {
       $aux_field->setRevision($revision);
+      $aux_field->setDiff($this->diff);
       $aux_field->setUser($actor);
-      if (!$aux_field->shouldAppearOnCommitMessage()) {
-        unset($aux_fields[$key]);
+      if ($aux_field->shouldAppearOnCommitMessage()) {
+        $aux_fields[$aux_field->getCommitMessageKey()] = $aux_field;
       }
     }
-
-    $aux_fields = mpull($aux_fields, null, 'getCommitMessageKey');
 
     foreach ($fields as $field => $value) {
       if (empty($aux_fields[$field])) {
@@ -73,8 +73,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $aux_field->validateField();
     }
 
-    $aux_fields = array_values($aux_fields);
-    $this->setAuxiliaryFields($aux_fields);
+    $this->setAuxiliaryFields($all_fields);
   }
 
   public function setAuxiliaryFields(array $auxiliary_fields) {

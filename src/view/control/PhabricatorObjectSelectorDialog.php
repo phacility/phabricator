@@ -124,8 +124,15 @@ final class PhabricatorObjectSelectorDialog {
             <td class="phabricator-object-selector-search-text">%s</td>
           </tr>
         </table>',
-        phutil_tag('select', array('id' => $filter_id), $options),
-        phutil_tag('input', array('id' => $query_id))));
+        phutil_tag(
+          'select',
+            array('id' => $filter_id),
+          $options),
+        phutil_tag(
+          'input',
+            array(
+              'id' => $query_id,
+              'type' => 'text'))));
 
     $result_box = phutil_tag(
       'div',

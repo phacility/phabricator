@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneProductViewController extends PhabricatorController {
+final class PhortuneProductViewController extends PhortuneController {
 
   private $productID;
 
@@ -26,7 +26,11 @@ final class PhortuneProductViewController extends PhabricatorController {
     $header = id(new PhabricatorHeaderView())
       ->setHeader($product->getProductName());
 
+    $account = $this->loadActiveAccount($user);
+
     $edit_uri = $this->getApplicationURI('product/edit/'.$product->getID().'/');
+    $cart_uri = $this->getApplicationURI(
+      $account->getID().'/buy/'.$product->getID().'/');
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
@@ -34,7 +38,14 @@ final class PhortuneProductViewController extends PhabricatorController {
         id(new PhabricatorActionView())
           ->setName(pht('Edit Product'))
           ->setHref($edit_uri)
-          ->setIcon('edit'));
+          ->setIcon('edit'))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setUser($user)
+          ->setName(pht('Purchase'))
+          ->setHref($cart_uri)
+          ->setIcon('new')
+          ->setRenderAsForm(true));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
@@ -52,7 +63,8 @@ final class PhortuneProductViewController extends PhabricatorController {
       ->addProperty(pht('Type'), $product->getTypeName())
       ->addProperty(
         pht('Price'),
-        PhortuneUtil::formatCurrency($product->getPriceInCents()));
+        PhortuneCurrency::newFromUSDCents($product->getPriceInCents())
+          ->formatForDisplay());
 
     $xactions = id(new PhortuneProductTransactionQuery())
       ->setViewer($user)

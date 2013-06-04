@@ -235,6 +235,8 @@ final class DiffusionLintSaveRunner {
     $futures = array();
     foreach ($this->blame as $path => $lines) {
       $drequest = DiffusionRequest::newFromDictionary(array(
+        'user' => PhabricatorUser::getOmnipotentUser(),
+        'initFromConduit' => false,
         'repository' => $repository,
         'branch' => $this->branch->getName(),
         'path' => $path,

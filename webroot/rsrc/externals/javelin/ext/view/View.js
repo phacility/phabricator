@@ -82,8 +82,11 @@ JX.install('View', {
       var result = [];
       var should_repack = false;
 
-      for(var ii = 0; ii < this._childKeys.length; ii++) {
-        var key = this._childKeys[ii];
+      var ii;
+      var key;
+
+      for (ii = 0; ii < this._childKeys.length; ii++) {
+        key = this._childKeys[ii];
         if (this._rawChildren[key] === undefined) {
           should_repack = true;
         } else {
@@ -93,8 +96,8 @@ JX.install('View', {
 
       if (should_repack) {
         var new_child_keys = [];
-        for(var ii = 0; ii < this._childKeys.length; ii++) {
-          var key = this._childKeys[ii];
+        for (ii = 0; ii < this._childKeys.length; ii++) {
+          key = this._childKeys[ii];
           if (this._rawChildren[key] !== undefined) {
             new_child_keys.push(key);
           }

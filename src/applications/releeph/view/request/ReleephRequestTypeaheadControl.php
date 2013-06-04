@@ -2,6 +2,8 @@
 
 final class ReleephRequestTypeaheadControl extends AphrontFormControl {
 
+  const PLACEHOLDER = 'Type a commit id or first line of commit message...';
+
   private $repo;
   private $startTime;
 
@@ -42,7 +44,7 @@ final class ReleephRequestTypeaheadControl extends AphrontFormControl {
     Javelin::initBehavior('releeph-request-typeahead', array(
       'id'  => $id,
       'src' => '/releeph/request/typeahead/',
-      'placeholder' => 'Type a commit id or first line of commit message...',
+      'placeholder' => self::PLACEHOLDER,
       'value'       => $this->getValue(),
       'aux' => array(
         'repo'      => $this->repo->getID(),

@@ -145,4 +145,107 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     $this->assertEqual($ttl, $file->getTTL());
   }
 
+  public function testFileTransformDelete() {
+    // We want to test that a file deletes all its inbound transformation
+    // records and outbound transformed derivatives when it is deleted.
+
+    // First, we create a chain of transforms, A -> B -> C.
+
+    $engine = new PhabricatorTestStorageEngine();
+
+    $params = array(
+      'name' => 'test.txt',
+      'storageEngines' => array(
+        $engine,
+      ),
+    );
+
+    $a = PhabricatorFile::newFromFileData('a', $params);
+    $b = PhabricatorFile::newFromFileData('b', $params);
+    $c = PhabricatorFile::newFromFileData('c', $params);
+
+    id(new PhabricatorTransformedFile())
+      ->setOriginalPHID($a->getPHID())
+      ->setTransform('test:a->b')
+      ->setTransformedPHID($b->getPHID())
+      ->save();
+
+    id(new PhabricatorTransformedFile())
+      ->setOriginalPHID($b->getPHID())
+      ->setTransform('test:b->c')
+      ->setTransformedPHID($c->getPHID())
+      ->save();
+
+    // Now, verify that A -> B and B -> C exist.
+
+    $xform_a = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withTransforms(
+        array(
+          array(
+            'originalPHID' => $a->getPHID(),
+            'transform'    => true,
+          ),
+        ))
+      ->execute();
+
+    $this->assertEqual(1, count($xform_a));
+    $this->assertEqual($b->getPHID(), head($xform_a)->getPHID());
+
+    $xform_b = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withTransforms(
+        array(
+          array(
+            'originalPHID' => $b->getPHID(),
+            'transform'    => true,
+          ),
+        ))
+      ->execute();
+
+    $this->assertEqual(1, count($xform_b));
+    $this->assertEqual($c->getPHID(), head($xform_b)->getPHID());
+
+    // Delete "B".
+
+    $b->delete();
+
+    // Now, verify that the A -> B and B -> C links are gone.
+
+    $xform_a = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withTransforms(
+        array(
+          array(
+            'originalPHID' => $a->getPHID(),
+            'transform'    => true,
+          ),
+        ))
+      ->execute();
+
+    $this->assertEqual(0, count($xform_a));
+
+    $xform_b = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withTransforms(
+        array(
+          array(
+            'originalPHID' => $b->getPHID(),
+            'transform'    => true,
+          ),
+        ))
+      ->execute();
+
+    $this->assertEqual(0, count($xform_b));
+
+    // Also verify that C has been deleted.
+
+    $alternate_c = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($c->getPHID()))
+      ->execute();
+
+    $this->assertEqual(array(), $alternate_c);
+  }
+
 }

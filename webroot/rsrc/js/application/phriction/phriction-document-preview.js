@@ -19,7 +19,7 @@ JX.behavior('phriction-document-preview', function(config) {
     return {
       document : textarea.value
     };
-  }
+  };
 
   var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
   var trigger = JX.bind(request, request.trigger);

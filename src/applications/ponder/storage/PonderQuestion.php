@@ -5,7 +5,8 @@ final class PonderQuestion extends PonderDAO
     PhabricatorMarkupInterface,
     PonderVotableInterface,
     PhabricatorSubscribableInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorTokenReceiverInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -188,6 +189,14 @@ final class PonderQuestion extends PonderDAO
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
   }
 
 }

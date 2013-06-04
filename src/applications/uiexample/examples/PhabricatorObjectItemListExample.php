@@ -152,7 +152,41 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
         ->setHeader(pht("Don't let go!"))
         ->setHref('#')
         ->setGrippable(true)
-        ->setBarColor('green'));
+        ->setBarColor('green')
+        ->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setHref('#')
+            ->setIcon('delete')));
+
+    $out[] = array($head, $list);
+
+    $head = id(new PhabricatorHeaderView())
+      ->setHeader(pht('List With Actions'));
+    $list = new PhabricatorObjectItemListView();
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht('You Have The Power'))
+        ->setHref('#')
+        ->setBarColor('blue')
+        ->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setHref('#')
+            ->setIcon('edit')));
+
+    $list->addItem(
+      id(new PhabricatorObjectItemView())
+        ->setHeader(pht('Believe In Yourself'))
+        ->setHref('#')
+        ->setBarColor('violet')
+        ->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setHref('#')
+            ->setIcon('edit'))
+        ->addAction(
+          id(new PhabricatorMenuItemView())
+            ->setHref('#')
+            ->setIcon('delete')));
 
     $out[] = array($head, $list);
 
@@ -165,6 +199,8 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
     $list->addItem(
       id(new PhabricatorObjectItemView())
         ->setHeader(pht('Ace of Hearts'))
+        ->setSubHead(
+          pht('This is the most powerful card in the game "Hearts".'))
         ->setHref('#')
         ->addAttribute(pht('Suit: Hearts'))
         ->addAttribute(pht('Rank: Ace'))
@@ -226,7 +262,7 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
 
     $head = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Effects'));
+      ->setHeader(pht('Colors'));
 
     $list = new PhabricatorObjectItemListView();
 

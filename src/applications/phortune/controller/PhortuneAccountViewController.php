@@ -111,7 +111,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     foreach ($methods as $method) {
       $item = new PhabricatorObjectItemView();
-      $item->setHeader($method->getName());
+      $item->setHeader($method->getBrand().' / '.$method->getLastFourDigits());
 
       switch ($method->getStatus()) {
         case PhortunePaymentMethod::STATUS_ACTIVE:
@@ -125,10 +125,6 @@ final class PhortuneAccountViewController extends PhortuneController {
           'Added %s by %s',
           phabricator_datetime($method->getDateCreated(), $user),
           $this->getHandle($method->getAuthorPHID())->renderLink()));
-
-      if ($method->getExpiresEpoch() < time() + (60 * 60 * 24 * 30)) {
-        $item->addAttribute(pht('Expires Soon!'));
-      }
 
       $list->addItem($item);
     }

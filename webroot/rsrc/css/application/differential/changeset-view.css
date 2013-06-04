@@ -174,8 +174,8 @@ td.cov-X {
 
 .differential-diff td.show-more,
 .differential-diff td.differential-shield {
-  font-family: "Verdana";
-  font-size:   11px;
+  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font-size:   12px;
   white-space: normal;
 }
 
@@ -211,8 +211,8 @@ td.cov-X {
 .differential-meta-notice {
   border:           1px solid #ffdd99;
   background:       #ffeeaa;
-  font-family:      "Verdana";
-  font-size:        11px;
+  font-family:      "Helvetica Neue", "Arial", sans-serif;
+  font-size:        12px;
   padding:          1em;
   margin:           0 0 6px 0;
 }
@@ -236,8 +236,8 @@ td.cov-X {
 .differential-inline-comment-edit {
   background:         #f9f9f1;
   border:             1px solid #aaaa88;
-  font-family:        Verdana;
-  font-size:          11px;
+  font-family:        "Helvetica Neue", "Arial", sans-serif;
+  font-size:          12px;
   margin:             6px 0px;
   padding:            8px 10px;
   width:              100%;
@@ -290,7 +290,7 @@ td.cov-X {
 
 
 .differential-inline-comment-edit-textarea {
-  width: 99%;
+  width: 100%;
   height: 12em;
 }
 
@@ -355,7 +355,7 @@ td.cov-X {
   text-align: center;
   background: #ffeeaa;
   margin: 3px 0 1px;
-  font: 11px "Verdana";
+  font: 12px;
   color: 444444;
 }
 
@@ -364,11 +364,12 @@ td.cov-X {
 }
 
 .differential-inline-comment-edit {
-  padding: 8px 18px 8px 12px;
+  padding: 10px;
 }
 
 .differential-inline-comment-edit-buttons {
-  padding: 2px 0px;
+  padding: 5px 0 0 0;
+
 }
 
 .differential-inline-comment-edit-buttons button {
@@ -379,7 +380,6 @@ td.cov-X {
 .differential-inline-comment-edit-title {
   font-weight:    bold;
   color:          #333333;
-  border-bottom:  1px solid #ccccaa;
   padding-bottom: 2px;
   margin-bottom:  6px;
 }

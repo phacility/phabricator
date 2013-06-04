@@ -6,9 +6,9 @@ final class HeraldRuleTypeConfig {
   const RULE_TYPE_PERSONAL = 'personal';
 
   public static function getRuleTypeMap() {
-    static $map = array(
-      self::RULE_TYPE_GLOBAL     => 'Global',
-      self::RULE_TYPE_PERSONAL   => 'Personal',
+    $map = array(
+      self::RULE_TYPE_GLOBAL     => pht('Global'),
+      self::RULE_TYPE_PERSONAL   => pht('Personal'),
     );
     return $map;
   }

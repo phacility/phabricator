@@ -22,7 +22,7 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
       'ifSupported'   => $this->showIfSupportedID,
       'instructions'  => $instructions_id,
       'uploadURI'     => '/file/dropupload/',
-      'browseURI'     => '/file/filter/my/',
+      'browseURI'     => '/file/query/authored/',
     ));
 
     return phutil_tag(

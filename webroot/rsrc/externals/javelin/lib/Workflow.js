@@ -144,7 +144,13 @@ JX.install('Workflow', {
         var d = JX.Vector.getDim(this._root);
         var v = JX.Vector.getViewport();
         var s = JX.Vector.getScroll();
-        JX.$V((v.x - d.x) / 2, s.y + 100).setPos(this._root);
+
+        // Normally, we position dialogs 100px from the top of the screen.
+        // Use more space if the dialog is large (at least roughly the size
+        // of the viewport).
+        var offset = Math.min(Math.max(20, (v.y - d.y) / 2), 100);
+        JX.$V((v.x - d.x) / 2, s.y + offset).setPos(this._root);
+
         try {
           JX.DOM.focus(JX.DOM.find(this._root, 'button', '__default__'));
           var inputs = JX.DOM.scry(this._root, 'input')
@@ -163,6 +169,12 @@ JX.install('Workflow', {
           }
           target && JX.DOM.focus(target);
         } catch (_ignored) {}
+
+        // The `focus()` call may have scrolled the window. Scroll it back to
+        // where it was before -- we want to focus the control, but not adjust
+        // the scroll position.
+        window.scrollTo(s.x, s.y);
+
       } else if (this.getHandler()) {
         this.getHandler()(r);
         this._pop();
@@ -282,7 +294,7 @@ JX.install('Workflow', {
 
       JX.Workflow._pop();
       e.prevent();
-    };
+    }
 
     JX.Stratcom.listen('keydown', null, close_dialog_when_user_presses_escape);
   }

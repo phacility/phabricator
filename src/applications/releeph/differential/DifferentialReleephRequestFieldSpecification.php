@@ -268,9 +268,26 @@ final class DifferentialReleephRequestFieldSpecification
       $actor = id(new PhabricatorUser())
         ->loadOneWhere('phid = %s', $actor_phid);
 
-      id(new ReleephRequestEditor($releeph_request))
+      $xactions = array();
+
+      $xactions[] = id(new ReleephRequestTransaction())
+        ->setTransactionType(ReleephRequestTransaction::TYPE_DISCOVERY)
+        ->setMetadataValue('action', $action)
+        ->setMetadataValue('authorPHID',
+          $data->getCommitDetail('authorPHID'))
+        ->setMetadataValue('committerPHID',
+          $data->getCommitDetail('committerPHID'))
+        ->setNewValue($commit->getPHID());
+
+      $editor = id(new ReleephRequestTransactionalEditor())
         ->setActor($actor)
-        ->discoverCommit($action, $commit, $data);
+        ->setContinueOnNoEffect(true)
+        ->setContentSource(
+          PhabricatorContentSource::newForSource(
+            PhabricatorContentSource::SOURCE_UNKNOWN,
+            array()));
+
+      $editor->applyTransactions($releeph_request, $xactions);
     }
   }
 
@@ -310,8 +327,9 @@ final class DifferentialReleephRequestFieldSpecification
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
           DiffusionRequest::newFromDictionary(array(
-            'repository'  => $repo,
-            'commit'      => $commit->getCommitIdentifier(),
+            'user' => $this->getUser(),
+            'repository' => $repo,
+            'commit' => $commit->getCommitIdentifier(),
           )));
         $path_changes = $change_query->loadChanges();
         $commit_paths = mpull($path_changes, 'getPath');

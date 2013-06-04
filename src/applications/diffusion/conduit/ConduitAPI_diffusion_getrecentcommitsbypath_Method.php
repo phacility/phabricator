@@ -16,6 +16,7 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
     return array(
       'callsign' => 'required string',
       'path' => 'required string',
+      'branch' => 'optional string',
       'limit' => 'optional int',
     );
   }
@@ -32,19 +33,29 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
   protected function execute(ConduitAPIRequest $request) {
     $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'callsign'  => $request->getValue('callsign'),
-        'path'      => $request->getValue('path'),
+        'user' => $request->getUser(),
+        'callsign' => $request->getValue('callsign'),
+        'path' => $request->getValue('path'),
+        'branch' => $request->getValue('branch'),
       ));
 
     $limit = nonempty(
       $request->getValue('limit'),
       self::DEFAULT_LIMIT);
 
-    $history = DiffusionHistoryQuery::newFromDiffusionRequest($drequest)
-    ->setLimit($limit)
-    ->needDirectChanges(true)
-    ->needChildChanges(true)
-    ->loadHistory();
+    $history_result = DiffusionQuery::callConduitWithDiffusionRequest(
+      $request->getUser(),
+      $drequest,
+      'diffusion.historyquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'path' => $drequest->getPath(),
+        'offset' => 0,
+        'limit' => $limit,
+        'needDirectChanges' => true,
+        'needChildChanges' => true));
+    $history = DiffusionPathChange::newFromConduit(
+      $history_result['pathChanges']);
 
     $raw_commit_identifiers = mpull($history, 'getCommitIdentifier');
     $result = array();

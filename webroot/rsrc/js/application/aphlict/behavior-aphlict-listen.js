@@ -29,9 +29,7 @@ JX.behavior('aphlict-listen', function(config) {
         .send();
     } else if (__DEV__) {
       if (config.debug) {
-        var details = message
-          ? JX.JSON.stringify(message)
-          : '';
+        var details = message ? JX.JSON.stringify(message) : '';
 
         new JX.Notification()
           .setContent('(Aphlict) [' + type + '] ' + details)
@@ -65,7 +63,7 @@ JX.behavior('aphlict-listen', function(config) {
         .setContent('Page updated, click to reload.')
         .alterClassName('jx-notification-alert', true)
         .setDuration(0);
-      reload.listen('activate', function(e) { JX.$U().go(); })
+      reload.listen('activate', function(e) { JX.$U().go(); });
       reload.show();
 
       showing_reload = true;
@@ -80,11 +78,11 @@ JX.behavior('aphlict-listen', function(config) {
 
   // Add Flash object to page
   JX.$(config.containerID).innerHTML =
-    '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">'
-    + '<param name="movie" value="/rsrc/swf/aphlict.swf" />'
-    + '<param name="allowScriptAccess" value="always" />'
-    + '<param name="wmode" value="opaque" />'
-    + '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque"'
-      + 'width="0" height="0" id="' + config.id + '">'
-    + '</embed></object>'; //Evan sanctioned
+    '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">' +
+      '<param name="movie" value="/rsrc/swf/aphlict.swf" />' +
+      '<param name="allowScriptAccess" value="always" />' +
+      '<param name="wmode" value="opaque" />' +
+      '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque"' +
+        'width="0" height="0" id="' + config.id + '">' +
+    '</embed></object>'; //Evan sanctioned
 });

@@ -40,7 +40,6 @@ final class ConpherenceViewController extends
     $query = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
-      ->needHeaderPics(true)
       ->needParticipantCache(true)
       ->needTransactions(true)
       ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT);
@@ -50,6 +49,9 @@ final class ConpherenceViewController extends
         ->setBeforeTransactionID($before_transaction_id);
     }
     $conpherence = $query->executeOne();
+    if (!$conpherence) {
+      return new Aphront404Response();
+    }
     $this->setConpherence($conpherence);
 
     $participant = $conpherence->getParticipant($user->getPHID());
@@ -68,7 +70,7 @@ final class ConpherenceViewController extends
       $form = null;
       $content = array('messages' => $messages);
     } else {
-      $header = $this->renderHeaderPaneContent();
+      $header = $this->buildHeaderPaneContent($conpherence);
       $form = $this->renderFormContent($data['latest_transaction_id']);
       $content = array(
         'header' => $header,
@@ -89,27 +91,21 @@ final class ConpherenceViewController extends
       ->setReplyForm($form)
       ->setRole('thread');
 
+    $title = $conpherence->getTitle();
+    if (!$title) {
+      $title = pht('[No Title]');
+    }
     return $this->buildApplicationPage(
       $layout,
       array(
-        'title' => $conpherence->getTitle(),
+        'title' => $title,
         'device' => true,
       ));
   }
 
-  private function renderHeaderPaneContent() {
-    require_celerity_resource('conpherence-header-pane-css');
-    $conpherence = $this->getConpherence();
-    $header = $this->buildHeaderPaneContent($conpherence);
-    return hsprintf('%s', $header);
-  }
-
-
   private function renderMessagePaneContent(
     array $transactions,
     $oldest_transaction_id) {
-
-    require_celerity_resource('conpherence-message-pane-css');
 
     $scrollbutton = '';
     if ($oldest_transaction_id) {

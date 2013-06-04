@@ -7,4 +7,5 @@ final class ConpherenceUpdateActions extends ConpherenceConstants {
   const ADD_PERSON = 'add_person';
   const REMOVE_PERSON = 'remove_person';
   const NOTIFICATIONS = 'notifications';
+  const ADD_STATUS = 'add_status';
 }

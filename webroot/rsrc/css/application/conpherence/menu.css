@@ -11,10 +11,20 @@
 }
 
 .conpherence-layout .conpherence-no-threads {
-  height 80%;
-  width: 80%;
-  padding: 10%;
   text-align: center;
+  position: fixed;
+  left: 280px;
+  right: 241px;
+  top: 76px;
+  bottom: 0px;
+  min-width: 300px;
+  width: auto;
+}
+
+.device .conpherence-layout .conpherence-no-threads {
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 
 .conpherence-layout .conpherence-no-threads .text {
@@ -22,44 +32,55 @@
 }
 
 .conpherence-menu-pane {
-  width: 300px;
+  width: 100%;
   position: absolute;
   overflow-x: hidden;
   overflow-y: auto;
   top: 0;
   bottom: 0;
 }
+.device-desktop .conpherence-layout .conpherence-menu-pane,
+.device-desktop .conpherence-layout .phabricator-nav-column-background {
+  width: 280px;
+}
+.device .conpherence-menu-pane {
+  top: 41px;
+}
+.device .conpherence-role-list .conpherence-menu-pane {
+  top: 0px;
+}
 
 .device-phone .conpherence-menu-pane {
   -webkit-overflow-scrolling: touch;
 }
 
-.conpherence-content-pane {
-  margin-left: 300px;
-  position: relative;
-}
-
 .conpherence-layout .phabricator-nav-column-background {
   display: block;
-  width: 300px;
-}
-
-.device .conpherence-menu-pane {
-  top: 41px;
-}
-
-.device .phabricator-nav-column-background {
-  top: 86px;
-}
-
-.device .conpherence-menu-pane,
-.device .phabricator-nav-column-background {
-  display: none;
   width: 100%;
 }
 
-.device .conpherence-content-pane {
-  margin-left: 0;
+.device .phabricator-nav-column-background {
+  top: 44px;
+}
+
+.device .conpherence-role-thread .conpherence-menu-pane,
+.device .conpherence-role-thread .phabricator-nav-column-background {
+  display: none;
+}
+
+.device-desktop .conpherence-content-pane {
+  margin-left: 280px;
+}
+
+.conpherence-content-pane {
+  display: none;
+  margin-left: 0px;
+  position: relative;
+}
+
+.device-desktop .conpherence-content-pane,
+.device .conpherence-role-thread .conpherence-content-pane {
+  display: block;
 }
 
 .conpherence-menu .conpherence-menu-item-view {
@@ -78,6 +99,10 @@
 .conpherence-menu .conpherence-selected {
   background: rgba(0, 0, 0, .6);
   border-left: 2px solid #66CCFF;
+}
+
+.conpherence-menu .loading {
+  font-style: italic;
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
@@ -105,6 +130,9 @@
   font-size: 13px;
   color: #ffffff;
   text-shadow: 0px 1px 1px #000000;
+  overflow: hidden;
+  width: 140px;
+  text-overflow: ellipsis;
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-subtitle {
@@ -148,6 +176,6 @@
   border-top: solid 1px #3B3D3E;
   padding: 20px 0;
   margin: 0px auto;
-  width: 300px;
+  width: 280px;
   text-align: center;
 }

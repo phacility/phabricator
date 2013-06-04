@@ -2,48 +2,69 @@
 
 final class PhrequentListController extends PhrequentController {
 
+  private $view;
+
+  public function willProcessRequest(array $data) {
+    $this->view = idx($data, 'view', "current");
+  }
+
+  private function getArrToStrList($key) {
+    $arr = $this->getRequest()->getArr($key);
+    $arr = implode(',', $arr);
+    return nonempty($arr, null);
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildNav('usertime');
+    if ($request->isFormPost()) {
+      // Redirect to GET so URIs can be copy/pasted.
 
-    $form = id(new AphrontFormView())
-    ->setUser($user)
-    ->setNoShading(true);
+      $order = $request->getStr('o');
+      $order = nonempty($order, null);
 
-    $form->appendChild(
-      id(new AphrontFormToggleButtonsControl())
-      ->setName('o')
-      ->setLabel(pht('Sort Order'))
-      ->setBaseURI($request->getRequestURI(), 'o')
-      ->setValue($request->getStr('o', 's'))
-      ->setButtons(
-        array(
-             's'   => pht('Started'),
-             'e'   => pht('Ended'),
-             'd'   => pht('Duration'),
-        )));
+      $ended = $request->getStr('e');
+      $ended = nonempty($ended, null);
 
-    $form->appendChild(
-      id(new AphrontFormToggleButtonsControl())
-      ->setName('e')
-      ->setLabel(pht('Ended'))
-      ->setBaseURI($request->getRequestURI(), 'e')
-      ->setValue($request->getStr('e', 'a'))
-      ->setButtons(
-        array(
-             'y'   => pht('Yes'),
-             'n'   => pht('No'),
-             'a'   => pht('All'),
-        )));
+      $uri = $request->getRequestURI()
+        ->alter('users', $this->getArrToStrList('set_users'))
+        ->alter('o',     $order)
+        ->alter('e',     $ended);
 
-    $filter = new AphrontListFilterView();
-    $filter->appendChild($form);
+      return id(new AphrontRedirectResponse())->setURI($uri);
+    }
 
-    $query = new PhrequentUserTimeQuery();
+    $nav = $this->buildNav($this->view);
 
-    switch ($request->getStr('o', 's')) {
+    $has_user_filter = array(
+      "current" => true,
+      "recent" => true,
+    );
+
+    $user_phids = $request->getStrList('users', array());
+    if (isset($has_user_filter[$this->view])) {
+      $user_phids = array($user->getPHID());
+    }
+
+    switch ($this->view) {
+      case "current":
+      case "allcurrent":
+        $order_key_default = "s";
+        $ended_key_default = "n";
+        break;
+      case "recent":
+      case "allrecent":
+        $order_key_default = "s";
+        $ended_key_default = "y";
+        break;
+      default:
+        $order_key_default = "s";
+        $ended_key_default = "a";
+        break;
+    }
+
+    switch ($request->getStr('o', $order_key_default)) {
       case 's':
         $order = PhrequentUserTimeQuery::ORDER_STARTED;
         break;
@@ -56,9 +77,8 @@ final class PhrequentListController extends PhrequentController {
       default:
         throw new Exception("Unknown order!");
     }
-    $query->setOrder($order);
 
-    switch ($request->getStr('e', 'a')) {
+    switch ($request->getStr('e', $ended_key_default)) {
       case 'a':
         $ended = PhrequentUserTimeQuery::ENDED_ALL;
         break;
@@ -71,7 +91,15 @@ final class PhrequentListController extends PhrequentController {
       default:
         throw new Exception("Unknown ended!");
     }
+
+    $filter = new AphrontListFilterView();
+    $filter->appendChild(
+      $this->buildForm($user_phids, $order_key_default, $ended_key_default));
+
+    $query = new PhrequentUserTimeQuery();
+    $query->setOrder($order);
     $query->setEnded($ended);
+    $query->setUsers($user_phids);
 
     $pager = new AphrontPagerView();
     $pager->setPageSize(500);
@@ -97,6 +125,7 @@ final class PhrequentListController extends PhrequentController {
       id(new PhabricatorCrumbView())
         ->setName($title)
         ->setHref($this->getApplicationURI('/')));
+
     $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
@@ -106,6 +135,62 @@ final class PhrequentListController extends PhrequentController {
         'device' => true,
       ));
 
+  }
+
+  protected function buildForm(array $user_phids, $order_key_default,
+                               $ended_key_default) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->setNoShading(true)
+      ->setAction($this->getApplicationURI("/view/custom/"));
+
+    $user_handles = id(new PhabricatorObjectHandleData($user_phids))
+      ->setViewer($user)
+      ->loadHandles();
+    $tokens = array();
+    foreach ($user_phids as $phid) {
+      $tokens[$phid] = $user_handles[$phid]->getFullName();
+    }
+    $form->appendChild(
+      id(new AphrontFormTokenizerControl())
+        ->setDatasource('/typeahead/common/searchowner/')
+        ->setName('set_users')
+        ->setLabel(pht('Users'))
+        ->setValue($tokens));
+
+    $form->appendChild(
+      id(new AphrontFormToggleButtonsControl())
+        ->setName('o')
+        ->setLabel(pht('Sort Order'))
+        ->setBaseURI($request->getRequestURI(), 'o')
+        ->setValue($request->getStr('o', $order_key_default))
+        ->setButtons(
+          array(
+            's'   => pht('Started'),
+            'e'   => pht('Ended'),
+            'd'   => pht('Duration'),
+          )));
+
+    $form->appendChild(
+      id(new AphrontFormToggleButtonsControl())
+        ->setName('e')
+        ->setLabel(pht('Ended'))
+        ->setBaseURI($request->getRequestURI(), 'e')
+        ->setValue($request->getStr('e', $ended_key_default))
+        ->setButtons(
+          array(
+            'y'   => pht('Yes'),
+            'n'   => pht('No'),
+            'a'   => pht('All'),
+          )));
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())->setValue(pht('Filter Objects')));
+
+    return $form;
   }
 
   protected function buildTableView(array $usertimes) {

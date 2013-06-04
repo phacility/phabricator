@@ -1,0 +1,851 @@
+/**
+ * @provides sprite-icons-css
+ * @generated
+ */
+
+.sprite-icons {
+  background-image: url(/rsrc/image/sprite-icons.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-icons {
+    background-image: url(/rsrc/image/sprite-icons-X2.png);
+    background-size: 210px 225px;
+  }
+}
+
+
+.icons-action-menu {
+  background-position: 0px 0px;
+}
+
+.icons-arrow_left {
+  background-position: -15px 0px;
+}
+
+.icons-arrow_right {
+  background-position: -30px 0px;
+}
+
+.icons-attach {
+  background-position: -45px 0px;
+}
+
+.icons-blame {
+  background-position: -60px 0px;
+}
+
+.icons-check {
+  background-position: -75px 0px;
+}
+
+.icons-comment {
+  background-position: -90px 0px;
+}
+
+.icons-computer {
+  background-position: -105px 0px;
+}
+
+.icons-create {
+  background-position: -120px 0px;
+}
+
+.icons-delete {
+  background-position: -135px 0px;
+}
+
+.icons-disable {
+  background-position: -150px 0px;
+}
+
+.icons-dislike {
+  background-position: -165px 0px;
+}
+
+.icons-download-alt {
+  background-position: -180px 0px;
+}
+
+.icons-download {
+  background-position: -195px 0px;
+}
+
+.icons-edit {
+  background-position: 0px -15px;
+}
+
+.icons-enable {
+  background-position: -15px -15px;
+}
+
+.icons-file {
+  background-position: -30px -15px;
+}
+
+.icons-flag-0 {
+  background-position: -45px -15px;
+}
+
+.icons-flag-1 {
+  background-position: -60px -15px;
+}
+
+.icons-flag-2 {
+  background-position: -75px -15px;
+}
+
+.icons-flag-3 {
+  background-position: -90px -15px;
+}
+
+.icons-flag-4 {
+  background-position: -105px -15px;
+}
+
+.icons-flag-5 {
+  background-position: -120px -15px;
+}
+
+.icons-flag-6 {
+  background-position: -135px -15px;
+}
+
+.icons-flag-7 {
+  background-position: -150px -15px;
+}
+
+.icons-flag-ghost {
+  background-position: -165px -15px;
+}
+
+.icons-flag {
+  background-position: -180px -15px;
+}
+
+.icons-folder-open {
+  background-position: -195px -15px;
+}
+
+.icons-fork {
+  background-position: 0px -30px;
+}
+
+.icons-herald {
+  background-position: -15px -30px;
+}
+
+.icons-highlight {
+  background-position: -30px -30px;
+}
+
+.icons-history {
+  background-position: -45px -30px;
+}
+
+.icons-image {
+  background-position: -60px -30px;
+}
+
+.icons-like {
+  background-position: -75px -30px;
+}
+
+.icons-link {
+  background-position: -90px -30px;
+}
+
+.icons-lint-info {
+  background-position: -105px -30px;
+}
+
+.icons-lint-ok {
+  background-position: -120px -30px;
+}
+
+.icons-lint-warning {
+  background-position: -135px -30px;
+}
+
+.icons-lock {
+  background-position: -150px -30px;
+}
+
+.icons-love {
+  background-position: -165px -30px;
+}
+
+.icons-merge {
+  background-position: -180px -30px;
+}
+
+.icons-message {
+  background-position: -195px -30px;
+}
+
+.icons-meta-mta {
+  background-position: 0px -45px;
+}
+
+.icons-move {
+  background-position: -15px -45px;
+}
+
+.icons-new {
+  background-position: -30px -45px;
+}
+
+.icons-none {
+  background-position: -45px -45px;
+}
+
+.icons-perflab {
+  background-position: -60px -45px;
+}
+
+.icons-preview {
+  background-position: -75px -45px;
+}
+
+.icons-refresh {
+  background-position: -90px -45px;
+}
+
+.icons-remove {
+  background-position: -105px -45px;
+}
+
+.icons-search {
+  background-position: -120px -45px;
+}
+
+.icons-start-sandcastle {
+  background-position: -135px -45px;
+}
+
+.icons-subscribe-add {
+  background-position: -150px -45px;
+}
+
+.icons-subscribe-auto {
+  background-position: -165px -45px;
+}
+
+.icons-subscribe-delete {
+  background-position: -180px -45px;
+}
+
+.icons-tag {
+  background-position: -195px -45px;
+}
+
+.icons-transcript {
+  background-position: 0px -60px;
+}
+
+.icons-undo {
+  background-position: -15px -60px;
+}
+
+.icons-unlock {
+  background-position: -30px -60px;
+}
+
+.icons-unmerge {
+  background-position: -45px -60px;
+}
+
+.icons-unpublish {
+  background-position: -60px -60px;
+}
+
+.icons-upload {
+  background-position: -75px -60px;
+}
+
+.icons-warning {
+  background-position: -90px -60px;
+}
+
+.icons-world {
+  background-position: -105px -60px;
+}
+
+.icons-action-menu-grey {
+  background-position: -120px -60px;
+}
+
+.icons-arrow_left-grey {
+  background-position: -135px -60px;
+}
+
+.icons-arrow_right-grey {
+  background-position: -150px -60px;
+}
+
+.icons-attach-grey {
+  background-position: -165px -60px;
+}
+
+.icons-blame-grey {
+  background-position: -180px -60px;
+}
+
+.icons-check-grey {
+  background-position: -195px -60px;
+}
+
+.icons-comment-grey {
+  background-position: 0px -75px;
+}
+
+.icons-computer-grey {
+  background-position: -15px -75px;
+}
+
+.icons-create-grey {
+  background-position: -30px -75px;
+}
+
+.icons-delete-grey {
+  background-position: -45px -75px;
+}
+
+.icons-disable-grey {
+  background-position: -60px -75px;
+}
+
+.icons-dislike-grey {
+  background-position: -75px -75px;
+}
+
+.icons-download-alt-grey {
+  background-position: -90px -75px;
+}
+
+.icons-download-grey {
+  background-position: -105px -75px;
+}
+
+.icons-edit-grey {
+  background-position: -120px -75px;
+}
+
+.icons-enable-grey {
+  background-position: -135px -75px;
+}
+
+.icons-file-grey {
+  background-position: -150px -75px;
+}
+
+.icons-flag-0-grey {
+  background-position: -165px -75px;
+}
+
+.icons-flag-1-grey {
+  background-position: -180px -75px;
+}
+
+.icons-flag-2-grey {
+  background-position: -195px -75px;
+}
+
+.icons-flag-3-grey {
+  background-position: 0px -90px;
+}
+
+.icons-flag-4-grey {
+  background-position: -15px -90px;
+}
+
+.icons-flag-5-grey {
+  background-position: -30px -90px;
+}
+
+.icons-flag-6-grey {
+  background-position: -45px -90px;
+}
+
+.icons-flag-7-grey {
+  background-position: -60px -90px;
+}
+
+.icons-flag-ghost-grey {
+  background-position: -75px -90px;
+}
+
+.icons-flag-grey {
+  background-position: -90px -90px;
+}
+
+.icons-folder-open-grey {
+  background-position: -105px -90px;
+}
+
+.icons-fork-grey {
+  background-position: -120px -90px;
+}
+
+.icons-herald-grey {
+  background-position: -135px -90px;
+}
+
+.icons-highlight-grey {
+  background-position: -150px -90px;
+}
+
+.icons-history-grey {
+  background-position: -165px -90px;
+}
+
+.icons-image-grey {
+  background-position: -180px -90px;
+}
+
+.icons-like-grey {
+  background-position: -195px -90px;
+}
+
+.icons-link-grey {
+  background-position: 0px -105px;
+}
+
+.icons-lint-info-grey {
+  background-position: -15px -105px;
+}
+
+.icons-lint-ok-grey {
+  background-position: -30px -105px;
+}
+
+.icons-lint-warning-grey {
+  background-position: -45px -105px;
+}
+
+.icons-lock-grey {
+  background-position: -60px -105px;
+}
+
+.icons-love-grey {
+  background-position: -75px -105px;
+}
+
+.icons-merge-grey {
+  background-position: -90px -105px;
+}
+
+.icons-message-grey {
+  background-position: -105px -105px;
+}
+
+.icons-meta-mta-grey {
+  background-position: -120px -105px;
+}
+
+.icons-move-grey {
+  background-position: -135px -105px;
+}
+
+.icons-new-grey {
+  background-position: -150px -105px;
+}
+
+.icons-none-grey {
+  background-position: -165px -105px;
+}
+
+.icons-perflab-grey {
+  background-position: -180px -105px;
+}
+
+.icons-preview-grey {
+  background-position: -195px -105px;
+}
+
+.icons-refresh-grey {
+  background-position: 0px -120px;
+}
+
+.icons-remove-grey {
+  background-position: -15px -120px;
+}
+
+.icons-search-grey {
+  background-position: -30px -120px;
+}
+
+.icons-start-sandcastle-grey {
+  background-position: -45px -120px;
+}
+
+.icons-subscribe-add-grey {
+  background-position: -60px -120px;
+}
+
+.icons-subscribe-auto-grey {
+  background-position: -75px -120px;
+}
+
+.icons-subscribe-delete-grey {
+  background-position: -90px -120px;
+}
+
+.icons-tag-grey {
+  background-position: -105px -120px;
+}
+
+.icons-transcript-grey {
+  background-position: -120px -120px;
+}
+
+.icons-undo-grey {
+  background-position: -135px -120px;
+}
+
+.icons-unlock-grey {
+  background-position: -150px -120px;
+}
+
+.icons-unmerge-grey {
+  background-position: -165px -120px;
+}
+
+.icons-unpublish-grey {
+  background-position: -180px -120px;
+}
+
+.icons-upload-grey {
+  background-position: -195px -120px;
+}
+
+.icons-warning-grey {
+  background-position: 0px -135px;
+}
+
+.icons-world-grey {
+  background-position: -15px -135px;
+}
+
+.icons-action-menu-white, .device-desktop .phabricator-action-view:hover .icons-action-menu {
+  background-position: -30px -135px;
+}
+
+.icons-arrow_left-white, .device-desktop .phabricator-action-view:hover .icons-arrow_left {
+  background-position: -45px -135px;
+}
+
+.icons-arrow_right-white, .device-desktop .phabricator-action-view:hover .icons-arrow_right {
+  background-position: -60px -135px;
+}
+
+.icons-attach-white, .device-desktop .phabricator-action-view:hover .icons-attach {
+  background-position: -75px -135px;
+}
+
+.icons-blame-white, .device-desktop .phabricator-action-view:hover .icons-blame {
+  background-position: -90px -135px;
+}
+
+.icons-check-white, .device-desktop .phabricator-action-view:hover .icons-check {
+  background-position: -105px -135px;
+}
+
+.icons-comment-white, .device-desktop .phabricator-action-view:hover .icons-comment {
+  background-position: -120px -135px;
+}
+
+.icons-computer-white, .device-desktop .phabricator-action-view:hover .icons-computer {
+  background-position: -135px -135px;
+}
+
+.icons-create-white, .device-desktop .phabricator-action-view:hover .icons-create {
+  background-position: -150px -135px;
+}
+
+.icons-delete-white, .device-desktop .phabricator-action-view:hover .icons-delete {
+  background-position: -165px -135px;
+}
+
+.icons-disable-white, .device-desktop .phabricator-action-view:hover .icons-disable {
+  background-position: -180px -135px;
+}
+
+.icons-dislike-white, .device-desktop .phabricator-action-view:hover .icons-dislike {
+  background-position: -195px -135px;
+}
+
+.icons-download-alt-white, .device-desktop .phabricator-action-view:hover .icons-download-alt {
+  background-position: 0px -150px;
+}
+
+.icons-download-white, .device-desktop .phabricator-action-view:hover .icons-download {
+  background-position: -15px -150px;
+}
+
+.icons-edit-white, .device-desktop .phabricator-action-view:hover .icons-edit {
+  background-position: -30px -150px;
+}
+
+.icons-enable-white, .device-desktop .phabricator-action-view:hover .icons-enable {
+  background-position: -45px -150px;
+}
+
+.icons-file-white, .device-desktop .phabricator-action-view:hover .icons-file {
+  background-position: -60px -150px;
+}
+
+.icons-flag-0-white, .device-desktop .phabricator-action-view:hover .icons-flag-0 {
+  background-position: -75px -150px;
+}
+
+.icons-flag-1-white, .device-desktop .phabricator-action-view:hover .icons-flag-1 {
+  background-position: -90px -150px;
+}
+
+.icons-flag-2-white, .device-desktop .phabricator-action-view:hover .icons-flag-2 {
+  background-position: -105px -150px;
+}
+
+.icons-flag-3-white, .device-desktop .phabricator-action-view:hover .icons-flag-3 {
+  background-position: -120px -150px;
+}
+
+.icons-flag-4-white, .device-desktop .phabricator-action-view:hover .icons-flag-4 {
+  background-position: -135px -150px;
+}
+
+.icons-flag-5-white, .device-desktop .phabricator-action-view:hover .icons-flag-5 {
+  background-position: -150px -150px;
+}
+
+.icons-flag-6-white, .device-desktop .phabricator-action-view:hover .icons-flag-6 {
+  background-position: -165px -150px;
+}
+
+.icons-flag-7-white, .device-desktop .phabricator-action-view:hover .icons-flag-7 {
+  background-position: -180px -150px;
+}
+
+.icons-flag-ghost-white, .device-desktop .phabricator-action-view:hover .icons-flag-ghost {
+  background-position: -195px -150px;
+}
+
+.icons-flag-white, .device-desktop .phabricator-action-view:hover .icons-flag {
+  background-position: 0px -165px;
+}
+
+.icons-folder-open-white, .device-desktop .phabricator-action-view:hover .icons-folder-open {
+  background-position: -15px -165px;
+}
+
+.icons-fork-white, .device-desktop .phabricator-action-view:hover .icons-fork {
+  background-position: -30px -165px;
+}
+
+.icons-herald-white, .device-desktop .phabricator-action-view:hover .icons-herald {
+  background-position: -45px -165px;
+}
+
+.icons-highlight-white, .device-desktop .phabricator-action-view:hover .icons-highlight {
+  background-position: -60px -165px;
+}
+
+.icons-history-white, .device-desktop .phabricator-action-view:hover .icons-history {
+  background-position: -75px -165px;
+}
+
+.icons-image-white, .device-desktop .phabricator-action-view:hover .icons-image {
+  background-position: -90px -165px;
+}
+
+.icons-like-white, .device-desktop .phabricator-action-view:hover .icons-like {
+  background-position: -105px -165px;
+}
+
+.icons-link-white, .device-desktop .phabricator-action-view:hover .icons-link {
+  background-position: -120px -165px;
+}
+
+.icons-lint-info-white, .device-desktop .phabricator-action-view:hover .icons-lint-info {
+  background-position: -135px -165px;
+}
+
+.icons-lint-ok-white, .device-desktop .phabricator-action-view:hover .icons-lint-ok {
+  background-position: -150px -165px;
+}
+
+.icons-lint-warning-white, .device-desktop .phabricator-action-view:hover .icons-lint-warning {
+  background-position: -165px -165px;
+}
+
+.icons-lock-white, .device-desktop .phabricator-action-view:hover .icons-lock {
+  background-position: -180px -165px;
+}
+
+.icons-love-white, .device-desktop .phabricator-action-view:hover .icons-love {
+  background-position: -195px -165px;
+}
+
+.icons-merge-white, .device-desktop .phabricator-action-view:hover .icons-merge {
+  background-position: 0px -180px;
+}
+
+.icons-message-white, .device-desktop .phabricator-action-view:hover .icons-message {
+  background-position: -15px -180px;
+}
+
+.icons-meta-mta-white, .device-desktop .phabricator-action-view:hover .icons-meta-mta {
+  background-position: -30px -180px;
+}
+
+.icons-move-white, .device-desktop .phabricator-action-view:hover .icons-move {
+  background-position: -45px -180px;
+}
+
+.icons-new-white, .device-desktop .phabricator-action-view:hover .icons-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.icons-new-grey {
+  background-position: -60px -180px;
+}
+
+.icons-none-white, .device-desktop .phabricator-action-view:hover .icons-none {
+  background-position: -75px -180px;
+}
+
+.icons-perflab-white, .device-desktop .phabricator-action-view:hover .icons-perflab {
+  background-position: -90px -180px;
+}
+
+.icons-preview-white, .device-desktop .phabricator-action-view:hover .icons-preview {
+  background-position: -105px -180px;
+}
+
+.icons-refresh-white, .device-desktop .phabricator-action-view:hover .icons-refresh {
+  background-position: -120px -180px;
+}
+
+.icons-remove-white, .device-desktop .phabricator-action-view:hover .icons-remove {
+  background-position: -135px -180px;
+}
+
+.icons-search-white, .device-desktop .phabricator-action-view:hover .icons-search {
+  background-position: -150px -180px;
+}
+
+.icons-start-sandcastle-white, .device-desktop .phabricator-action-view:hover .icons-start-sandcastle {
+  background-position: -165px -180px;
+}
+
+.icons-subscribe-add-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-add {
+  background-position: -180px -180px;
+}
+
+.icons-subscribe-auto-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-auto {
+  background-position: -195px -180px;
+}
+
+.icons-subscribe-delete-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-delete {
+  background-position: 0px -195px;
+}
+
+.icons-tag-white, .device-desktop .phabricator-action-view:hover .icons-tag {
+  background-position: -15px -195px;
+}
+
+.icons-transcript-white, .device-desktop .phabricator-action-view:hover .icons-transcript {
+  background-position: -30px -195px;
+}
+
+.icons-undo-white, .device-desktop .phabricator-action-view:hover .icons-undo {
+  background-position: -45px -195px;
+}
+
+.icons-unlock-white, .device-desktop .phabricator-action-view:hover .icons-unlock {
+  background-position: -60px -195px;
+}
+
+.icons-unmerge-white, .device-desktop .phabricator-action-view:hover .icons-unmerge {
+  background-position: -75px -195px;
+}
+
+.icons-unpublish-white, .device-desktop .phabricator-action-view:hover .icons-unpublish {
+  background-position: -90px -195px;
+}
+
+.icons-upload-white, .device-desktop .phabricator-action-view:hover .icons-upload {
+  background-position: -105px -195px;
+}
+
+.icons-warning-white, .device-desktop .phabricator-action-view:hover .icons-warning {
+  background-position: -120px -195px;
+}
+
+.icons-world-white, .device-desktop .phabricator-action-view:hover .icons-world {
+  background-position: -135px -195px;
+}
+
+.remarkup-assist-b {
+  background-position: -150px -195px;
+}
+
+.remarkup-assist-chaos {
+  background-position: -165px -195px;
+}
+
+.remarkup-control-chaos-mode .remarkup-assist-chaos {
+  background-position: -180px -195px;
+}
+
+.remarkup-assist-code {
+  background-position: -195px -195px;
+}
+
+.remarkup-assist-help {
+  background-position: 0px -210px;
+}
+
+.remarkup-assist-i {
+  background-position: -15px -210px;
+}
+
+.remarkup-assist-image {
+  background-position: -30px -210px;
+}
+
+.remarkup-assist-larger {
+  background-position: -45px -210px;
+}
+
+.remarkup-assist-meme {
+  background-position: -60px -210px;
+}
+
+.remarkup-assist-ol {
+  background-position: -75px -210px;
+}
+
+.remarkup-assist-order {
+  background-position: -90px -210px;
+}
+
+.remarkup-control-order-mode .remarkup-assist-order {
+  background-position: -105px -210px;
+}
+
+.remarkup-assist-table {
+  background-position: -120px -210px;
+}
+
+.remarkup-assist-tag {
+  background-position: -135px -210px;
+}
+
+.remarkup-assist-tt {
+  background-position: -150px -210px;
+}
+
+.remarkup-assist-ul {
+  background-position: -165px -210px;
+}

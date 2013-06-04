@@ -39,6 +39,11 @@ final class SlowvoteEmbedView extends AphrontView {
     }
 
     require_celerity_resource('phabricator-slowvote-css');
+    require_celerity_resource('javelin-behavior-slowvote-embed');
+
+    $config = array(
+      'pollID' => $this->poll->getID());
+    Javelin::initBehavior('slowvote-embed', $config);
 
     $user_choices = array();
     if (!empty($this->viewerChoices)) {
@@ -56,17 +61,30 @@ final class SlowvoteEmbedView extends AphrontView {
 
       $selected = '';
 
+
       if (idx($user_choices, $option->getID(), false)) {
         $classes .= ' phabricator-slowvote-embed-option-selected';
         $selected = '@';
       }
 
-      $option_text = phutil_tag(
+      $is_selected = javelin_tag(
         'div',
         array(
-          'class' => $classes
+          'class' => 'phabricator-slowvote-embed-option-vote',
+          'sigil' => 'slowvote-embed-vote'
         ),
-        $selected.$option->getName());
+        $selected);
+
+      $option_text = javelin_tag(
+        'div',
+        array(
+          'class' => $classes,
+          'sigil' => 'slowvote-option',
+          'meta' => array(
+            'optionID' => $option->getID()
+          )
+        ),
+        array($is_selected, $option->getName()));
 
       $options[] = phutil_tag(
         'div',
@@ -95,11 +113,16 @@ final class SlowvoteEmbedView extends AphrontView {
       array(),
       $options);
 
-    return phutil_tag(
+    return javelin_tag(
       'div',
       array(
-        'class' => 'phabricator-slowvote-embed'
+        'class' => 'phabricator-slowvote-embed',
+        'sigil' => 'slowvote-embed',
+        'meta' => array(
+          'pollID' => $this->poll->getID()
+        )
       ),
       array($header, $body));
   }
+
 }

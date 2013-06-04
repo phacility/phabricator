@@ -309,21 +309,28 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
           // build query to validate path
           $drequest = DiffusionRequest::newFromDictionary(
             array(
+              'user' => $this->getActor(),
               'repository'  => $repository,
               'path'        => $path,
             ));
-          $query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-          $query->setViewer($this->getActor());
-          $query->needValidityOnly(true);
-          $valid = $query->loadPaths();
+          $results = DiffusionBrowseResultSet::newFromConduit(
+            DiffusionQuery::callConduitWithDiffusionRequest(
+              $this->getActor(),
+              $drequest,
+              'diffusion.browsequery',
+              array(
+                'commit' => $drequest->getCommit(),
+                'path' => $path,
+                'needValidityOnly' => true)));
+          $valid = $results->isValidResults();
           $is_directory = true;
           if (!$valid) {
-            switch ($query->getReasonForEmptyResultSet()) {
-              case DiffusionBrowseQuery::REASON_IS_FILE:
+            switch ($results->getReasonForEmptyResultSet()) {
+              case DiffusionBrowseResultSet::REASON_IS_FILE:
                 $valid = true;
                 $is_directory = false;
                 break;
-              case DiffusionBrowseQuery::REASON_IS_EMPTY:
+              case DiffusionBrowseResultSet::REASON_IS_EMPTY:
                 $valid = true;
                 break;
             }

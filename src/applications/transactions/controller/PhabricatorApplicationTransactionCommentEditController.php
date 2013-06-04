@@ -49,12 +49,7 @@ final class PhabricatorApplicationTransactionCommentEditController
 
       $editor = id(new PhabricatorApplicationTransactionCommentEditor())
         ->setActor($user)
-        ->setContentSource(
-          $content_source = PhabricatorContentSource::newForSource(
-            PhabricatorContentSource::SOURCE_WEB,
-            array(
-              'ip' => $request->getRemoteAddr(),
-            )))
+        ->setContentSourceFromRequest($request)
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {

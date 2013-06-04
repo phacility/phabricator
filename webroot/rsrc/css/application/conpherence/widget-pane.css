@@ -2,23 +2,35 @@
  * @provides conpherence-widget-pane-css
  */
 
-.conpherence-widget-pane {
+.conpherence-widget-pane,
+.loading .widgets-loading-mask {
   position: fixed;
   right: 0px;
-  top: 125px;
-  width: 280px;
-  height: 100%;
+  top: 76px;
+  bottom: 0px;
+  width: 240px;
   border-width: 0 0 0 1px;
   border-color: #CCC;
   border-style: solid;
-  background: url('/rsrc/image/texture/dust_background.jpeg');
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.device .conpherence-widget-pane {
+.device .conpherence-widget-pane,
+.device .loading .widgets-loading-mask {
   top: 44px;
   width: 100%;
+}
+
+.conpherence-widget-pane .widgets-loading-mask {
+  opacity: .6;
+  background: #fff;
+  display: none;
+}
+
+.loading .widgets-loading-mask {
+  display: block;
+  z-index: 500;
 }
 
 .conpherence-widget-pane .aphront-form-input {
@@ -28,71 +40,69 @@
 
 .conpherence-widget-pane .aphront-form-inset {
   border: 0;
-  background: url('/rsrc/image/texture/dust_background.jpeg');
 }
 
 .conpherence-widget-pane .widgets-header {
-  background-color: #d8dce2;
-  box-shadow: 0px 2px 2px rgba(0,0,0,0.15);
+  background: #F5F5F5;
+  border-bottom: 1px solid #ccc;
 }
 
-.conpherence-widget-pane .widgets-header .widgets-header-icon-holder {
-  height: 40px;
-  width: 280px;
-  margin: 0px auto;
-}
-
-.device-desktop .conpherence-widget-pane .widgets-header
-.widgets-header-icon-holder {
-  width: 175px;
-}
-
-.conpherence-widget-pane .widgets-header .sprite-conpherence {
-  display: block;
-  width: 29px;
-  height: 34px;
-  margin: 4px 0px 0px 14px;
-  float: left;
-  clear: none;
-}
-
-.conpherence-widget-pane .widgets-header .conpherence_list_on,
-.conpherence-widget-pane .widgets-header .conpherence_conversation_on,
-.conpherence-widget-pane .widgets-header .conpherence_people_on,
-.conpherence-widget-pane .widgets-header .conpherence_files_on,
-.conpherence-widget-pane .widgets-header .conpherence_calendar_on,
-.conpherence-widget-pane .widgets-header .conpherence_settings_on {
-  border-bottom: 3px solid #525252;
-}
-
-.device-desktop .conpherence-widget-pane .widgets-header
-#conpherence-menu-pane-toggle,
-.device-desktop .conpherence-widget-pane .widgets-header
-#conpherence-message-pane-toggle {
+.device .conpherence-widget-pane .widgets-header {
   display: none;
+}
+
+.conpherence-widget-pane .widgets-header .caret {
+  float: none;
+  height: 0px;
+  width: 0px;
+  margin-right: 0px;
+  border-top-color: #000;
+}
+
+.device-desktop .conpherence-layout .device-widgets-selector {
+  display: none;
+}
+
+.dropdown-menu-frame {
+  width: 200px !important;
+  margin-top: 4px;
 }
 
 .conpherence-widget-pane .widgets-body {
   position: fixed;
   overflow-y: auto;
-  top: 165px;
   bottom: 0px;
   width: 100%;
+  top: 76px;
 }
 
-.device .conpherence-widget-pane .widgets-body {
-  top: 85px;
+#widgets-settings {
+ padding: 3px 6px;
+}
+
+.device-desktop .conpherence-widget-pane .widgets-body {
+  top: 108px;
+  width: 240px;
 }
 
 /* files widget */
 
+.conpherence-widget-pane #widgets-files .no-files {
+  width: 200px;
+  padding: 20px;
+  text-align: center;
+  color: #555;
+}
+.device .conpherence-widget-pane #widgets-files .no-files {
+  width: 60px;
+  margin: 0px auto 0px auto;
+}
 .conpherence-widget-pane #widgets-files .file-entry {
-  padding: 12px 0px 14px 0px;
+  padding: 10px 0;
+  margin: 0 5px 0 10px;
+  border-bottom: 1px solid #e7e7e7;
 }
 .conpherence-widget-pane #widgets-files .file-icon {
-  position: relative;
-  top: 0px;
-  left: 8px;
   width: 32px;
   height: 32px;
   float: left;
@@ -101,36 +111,19 @@
   display: block;
   position: relative;
   top: -4px;
-  left: 20px;
+  left: 10px;
   overflow-x: hidden;
-  width: 210px;
+  width: 165px;
   font-weight: bold;
+  text-overflow: ellipsis;
 }
 .conpherence-widget-pane #widgets-files .file-uploaded-by {
   color: #a1a5a9;
   position: relative;
   top: 0px;
-  left: 20px;
-  width: 210px;
+  left: 10px;
+  width: 170px;
   font-size: 11px;
-}
-
-.conpherence-widget-pane #widgets-files .file-extra {
-  display: block;
-  height: 120px;
-  width: 160px;
-  margin: 8px 0px 8px 52px;
-  border: 1px solid #7289b7;
-  box-shadow: 0 0px 5px rgba(0,0,0,.25);
-  background: #fff;
-}
-
-.conpherence-widget-pane #widgets-files .divider {
-  float: left;
-  clear: both;
-  width: 210px;
-  margin: 8px 0px 0px 50px;
-  border: 1px dashed #bfbfbf;
 }
 
 .device .conpherence-widget-pane #widgets-files .file-title,
@@ -145,10 +138,14 @@
 /* calendar widget */
 
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
-  margin: 2px 0px 0px 0px;
-  width: 280px;
+  width: 240px;
 }
-.device .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view {
+.device-phone .conpherence-widget-pane #widgets-calendar
+.aphront-multi-column-view {
+  display: none;
+}
+.device-tablet .conpherence-widget-pane #widgets-calendar
+.aphront-multi-column-view {
   width: 100%;
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
@@ -158,10 +155,23 @@
   text-align: center;
 }
 .device-phone .conpherence-widget-pane #widgets-calendar
+.aphront-multi-column-view .aphront-multi-column-column {
+  border-right: 0;
+}
+
+.device-phone .conpherence-widget-pane #widgets-calendar
 .aphront-multi-column-fluid .aphront-multi-column-5-up
 .aphront-multi-column-column-outer {
   width: 20%;
+  margin-bottom: 0px;
+  float: left;
+  clear: none;
 }
+
+.conpherence-widget-pane .no-events {
+  color: #999;
+}
+
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
 .aphront-multi-column-column-last {
   border-right: 0;
@@ -202,73 +212,66 @@
   background-color: rgb(102, 204, 255);
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
-.aphront-multi-column-column .day-name {
+ .day-name {
   padding: 5px 0px 0px 0px;
   font-size: 12px;
 }
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
-.aphront-multi-column-column .day-number {
+ .day-number {
   font-size: 16px;
-  padding: 5px 0px 5px 0px;
-}
-.conpherence-widget-pane #widgets-calendar .day-header {
-  float: left;
-  clear: both;
-  background-color: #d8dce2;
-  border-top: 1px solid #bfbfbf;
-  border-bottom: 1px solid #bfbfbf;
-  padding: 5px 10px 5px 10px;
-  width: 260px;
-}
-.device .conpherence-widget-pane #widgets-calendar .day-header {
-  width: 98%;
-  padding: 5px 1% 5px 1%;
-}
-.conpherence-widget-pane #widgets-calendar .day-header .day-name {
-  float: left;
-  clear: none;
-}
-.conpherence-widget-pane #widgets-calendar .day-header .day-date {
-  float: right;
-  clear: none;
+  padding: 0 0 5px 0;
 }
 
-.conpherence-widget-pane #widgets-calendar .divider {
-  float: left;
-  clear: both;
-  width: 260px;
-  margin: 0px 0px 0px 10px;
-  border: 1px dashed #bfbfbf;
+.conpherence-widget-pane #widgets-calendar .day-header {
+  overflow: hidden;
+  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+  background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
+  border-top: 1px solid #e7e7e7;
+  border-bottom: 1px solid #d7d7d7;
+  padding: 5px 10px 5px 10px;
 }
-.conpherence-widget-pane #widgets-calendar .divider {
-  width: 96%;
-  margin: 0px 0px 0px 2%;
+
+.conpherence-widget-pane #widgets-calendar .day-header.today {
+  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
+  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
+  border-top: none;
+  border-bottom: none;
 }
-.conpherence-widget-pane #widgets-calendar .spacer {
+
+.conpherence-widget-pane #widgets-calendar .day-header.today .day-name,
+.conpherence-widget-pane #widgets-calendar .day-header.today .day-date {
+  color: #fff;
+}
+
+.conpherence-widget-pane #widgets-calendar .day-header .day-name {
   float: left;
-  clear: both;
-  height: 10px;
-  width: 100%;
+  color: #555759;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.conpherence-widget-pane #widgets-calendar .day-header .day-date {
+  float: right;
+  color: #555759;
+  font-size: 11px;
+}
+
+.conpherence-widget-pane #widgets-calendar .top-border {
+  border-top: 1px solid #E7E7E7;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status {
-  float: left;
-  clear: both;
-  height: 60px;
-  width: 280px;
-}
-.device .conpherence-widget-pane #widgets-calendar .user-status {
-  width: 100%;
+  padding: 10px 0px 10px 0px;
+  margin: 0px 0px 0px 10px;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .icon {
-  border-radius: 10px;
-  position: relative;
-  top: 24px;
-  left: 10px;
-  height: 16px;
-  width: 16px;
-  box-shadow: 0px 0px 1px #000;
+  border-radius: 8px;
+  height: 14px;
+  width: 14px;
+  margin-top: 7px;
+  float: left;
 }
 
 .conpherence-widget-pane #widgets-calendar .sporadic .icon {
@@ -279,29 +282,16 @@
   background-color: rgb(102, 204, 255);
 }
 
-.conpherence-widget-pane #widgets-calendar .user-status .epoch-range {
-  float: right;
-  font-style: italic;
-  position: relative;
-  top: 24px;
-  right: 10px;
-  font-size: 11px;
-}
-
 .conpherence-widget-pane #widgets-calendar .user-status .description {
-  position: relative;
-  left: 40px;
-  top: 0px;
-  width: 260px;
+  width: 195px;
+  text-overflow: ellipsis;
+  margin: 0 0 0px 20px;
 }
 
 .conpherence-widget-pane #widgets-calendar .user-status .participant {
-  position: relative;
-  left: 40px;
-  top: 0px;
-  font-style: italic;
   font-size: 11px;
-  width: 260px;
+  color: #888;
+  padding-top: 2px;
 }
 
 .device .conpherence-widget-pane #widgets-calendar .user-status .description,
@@ -320,107 +310,73 @@
 }
 
 /* people widget */
-.conpherence-widget-pane .people-widget-header {
-  float: left;
-  width: 280px;
-}
-.conpherence-widget-pane .people-widget-header .divider {
-  float: left;
-  clear: both;
-  width: 260px;
-  margin: 0px 0px 0px 10px;
-  border: 1px dashed #bfbfbf;
-}
-.device .conpherence-widget-pane .people-widget-header .divider {
-  width: 96%;
-  margin: 0px 0px 0px 2%;
-}
 .conpherence-widget-pane .people-widget-header .add-people-widget {
-  float: left;
-  padding: 10px 0px 10px 0px;
-  width: 280px;
-}
-
-.device .conpherence-widget-pane .people-widget-header,
-.device .conpherence-widget-pane .people-widget-header .add-people-widget {
-  width: 100%;
+  padding: 10px 0 5px 0;
+  overflow: hidden;
 }
 
 .conpherence-widget-pane .people-widget-header .add-people-widget
 .aphront-form-control-tokenizer {
   float: left;
-  width: 180px;
+  width: 150px;
   padding: 0px 0px 0px 10px
 }
+
 .device .conpherence-widget-pane .people-widget-header .add-people-widget
 .aphront-form-control-tokenizer {
   width: 70%;
 }
+
 .conpherence-widget-pane .people-widget-header .add-people-widget
 .people-add-button {
   float: right;
-  margin: 2px 10px 0px 0px;
+  margin: 2px 8px 0px 0px;
   padding: 3px 16px 4px 16px;
 }
-@-moz-document url-prefix() {
-  .conpherence-widget-pane .people-widget-header .add-people-widget
-  .people-add-button {
-    margin: -1px 10px 0px 0px;
-  }
-}
-.conpherence-widget-pane .person-entry {
-  float: left;
-  width: 270px;
-  clear: both;
-  padding: 10px 0px 0px 8px;
-}
 
-.device .conpherence-widget-pane .person-entry {
-  width: 98%;
-  padding: 10px 0px 0px 2%;
+.conpherence-widget-pane .person-entry {
+  padding: 8px 0 0 8px;
 }
 
 .conpherence-widget-pane .person-entry a {
   float: left;
-  clear: none;
-  font-size: 14px;
   font-weight: bold;
-  width: 164px;
+  line-height: 20px;
+}
+
+.conpherence-widget-pane .person-entry a img {
+  height: 35px;
+  width: 35px;
 }
 
 .conpherence-widget-pane .person-entry .pic {
   float: left;
-  clear: left;
-  margin: 0px 10px 0px 0px;
-  width: 50px;
+  margin: 0 8px 0 0;
+  width: 35px;
   padding: 0;
 }
 
 .conpherence-widget-pane .person-entry .remove {
   float: right;
-  clear: right;
-  margin: 0;
-  width: 34px;
-  height: 36px;
-  text-align: center;
-  font-size: 22px;
-  font-weight: bold;
-  padding: 8px 0px 8px 0px;
+  width: 20px;
+  font-size: 18px;
+  padding: 5px 0 8px 0;
 }
 
 .conpherence-widget-pane .person-entry .remove:hover {
   text-decoration: none;
 }
 
-.conpherence-widget-pane .person-entry .remove .icon {
+.conpherence-widget-pane .person-entry .remove .close-icon {
   color: #bfbfbf;
 }
 
-.conpherence-widget-pane .person-entry .remove:hover .icon {
-  color: #18559d;
+.conpherence-widget-pane .person-entry .remove:hover .close-icon {
+  color: #000;
 }
 
 /* settings widget */
+.conpherence-widget-pane .title-update,
 .conpherence-widget-pane .notifications-update {
-  margin: 2px 0px 0px 8px;
+  margin: 3px 0px 0px 4px;
 }

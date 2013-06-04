@@ -28,6 +28,10 @@
   padding-left: 2px;
 }
 
+.phabricator-action-header-icon-item .phui-icon-view {
+  display: inline-block;
+}
+
 .phabricator-action-header-icon-item .phabricator-tag-view {
   margin: 4px 2px 0;
 }
@@ -35,6 +39,7 @@
 .phabricator-action-header-link {
   color: #333;
 }
+
 
 .gradient-green-header .phabricator-action-header-title,
 .gradient-red-header .phabricator-action-header-title,

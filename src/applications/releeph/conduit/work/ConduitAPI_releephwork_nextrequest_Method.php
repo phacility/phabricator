@@ -71,7 +71,7 @@ final class ConduitAPI_releephwork_nextrequest_Method
      * This is easy for $needs_pick as the ordinal is stored.  It is hard for
      * reverts, as we have to look that information up.
      */
-    $needs_pick = msort($needs_pick, 'getRequestCommitOrdinal');
+    $needs_pick = $this->sortPicks($needs_pick);
     $needs_revert = $this->sortReverts($needs_revert);
 
     /**
@@ -95,8 +95,9 @@ final class ConduitAPI_releephwork_nextrequest_Method
     } elseif ($needs_pick) {
       $releeph_request = head($needs_pick);
       $action = 'pick';
-      $commit_id = $releeph_request->getRequestCommitIdentifier();
-      $commit_phid = $releeph_request->getRequestCommitPHID();
+      $commit = $releeph_request->loadPhabricatorRepositoryCommit();
+      $commit_id = $commit->getCommitIdentifier();
+      $commit_phid = $commit->getPHID();
     } else {
       // Return early if there's nothing to do!
       return array();
@@ -163,6 +164,18 @@ final class ConduitAPI_releephwork_nextrequest_Method
       'needsPick'         => mpull($needs_pick, 'getID'),
       'newAuthorPHID'     => $new_author_phid,
     );
+  }
+
+  private function sortPicks(array $releeph_requests) {
+    $surrogate = array();
+    foreach ($releeph_requests as $rq) {
+      // TODO: it's likely that relying on the `id` column to provide
+      // trunk-commit-order is thoroughly broken.
+      $ordinal = (int) $rq->loadPhabricatorRepositoryCommit()->getID();
+      $surrogate[$ordinal] = $rq;
+    }
+    ksort($surrogate);
+    return $surrogate;
   }
 
   /**

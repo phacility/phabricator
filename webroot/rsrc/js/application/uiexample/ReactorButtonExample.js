@@ -1,9 +1,9 @@
 /**
  * @provides phabricator-uiexample-reactor-button
  * @requires javelin-install
- *           javelin-view
- *           javelin-util
  *           javelin-dom
+ *           javelin-util
+ *           javelin-dynval
  *           javelin-reactor-dom
  */
 

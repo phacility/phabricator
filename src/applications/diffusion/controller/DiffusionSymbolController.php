@@ -119,12 +119,12 @@ final class DiffusionSymbolController extends DiffusionController {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Type',
-        'Context',
-        'Name',
-        'Language',
-        'Project',
-        'File',
+        pht('Type'),
+        pht('Context'),
+        pht('Name'),
+        pht('Language'),
+        pht('Project'),
+        pht('File'),
       ));
     $table->setColumnClasses(
       array(
@@ -136,18 +136,20 @@ final class DiffusionSymbolController extends DiffusionController {
         '',
       ));
     $table->setNoDataString(
-      "No matching symbol could be found in any indexed project.");
+      pht("No matching symbol could be found in any indexed project."));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Similar Symbols');
+    $panel->setHeader(pht('Similar Symbols'));
     $panel->appendChild($table);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $panel,
       ),
       array(
-        'title' => 'Find Symbol',
+        'title' => pht('Find Symbol'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

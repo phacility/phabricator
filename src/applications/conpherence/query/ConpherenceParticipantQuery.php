@@ -1,35 +1,61 @@
 <?php
 
 /**
+ * Query class that answers these questions:
+ *
+ * - Q: What are the conpherences to show when I land on /conpherence/ ?
+ * - A:
+ *
+ *     id(new ConpherenceParticipantQuery())
+ *     ->withParticipantPHIDs(array($my_phid))
+ *     ->execute();
+ *
+ * - Q: What are the next set of conpherences as I scroll up (more recent) or
+ *      down (less recent) this list of conpherences?
+ * - A:
+ *
+ *     id(new ConpherenceParticipantQuery())
+ *     ->withParticipantPHIDs(array($my_phid))
+ *     ->withParticipantCursor($top_participant)
+ *     ->setOrder(ConpherenceParticipantQuery::ORDER_NEWER)
+ *     ->execute();
+ *
+ *     -or-
+ *
+ *     id(new ConpherenceParticipantQuery())
+ *     ->withParticipantPHIDs(array($my_phid))
+ *     ->withParticipantCursor($bottom_participant)
+ *     ->setOrder(ConpherenceParticipantQuery::ORDER_OLDER)
+ *     ->execute();
+ *
+ * For counts of read, un-read, or all conpherences by participant, see
+ * @{class:ConpherenceParticipantCountQuery}.
+ *
  * @group conpherence
  */
 final class ConpherenceParticipantQuery
   extends PhabricatorOffsetPagedQuery {
 
-  private $conpherencePHIDs;
-  private $participantPHIDs;
-  private $dateTouched;
-  private $dateTouchedSort;
-  private $participationStatus;
+  const LIMIT = 100;
+  const ORDER_NEWER = 'newer';
+  const ORDER_OLDER = 'older';
 
-  public function withConpherencePHIDs(array $phids) {
-    $this->conpherencePHIDs = $phids;
-    return $this;
-  }
+  private $participantPHIDs;
+  private $participantCursor;
+  private $order = self::ORDER_OLDER;
 
   public function withParticipantPHIDs(array $phids) {
     $this->participantPHIDs = $phids;
     return $this;
   }
 
-  public function withDateTouched($date, $sort = null) {
-    $this->dateTouched = $date;
-    $this->dateTouchedSort = $sort ? $sort : '<';
+  public function withParticipantCursor(ConpherenceParticipant $participant) {
+    $this->participantCursor = $participant;
     return $this;
   }
 
-  public function withParticipationStatus($participation_status) {
-    $this->participationStatus = $participation_status;
+  public function setOrder($order) {
+    $this->order = $order;
     return $this;
   }
 
@@ -49,18 +75,15 @@ final class ConpherenceParticipantQuery
 
     $participants = mpull($participants, null, 'getConpherencePHID');
 
+    if ($this->order == self::ORDER_NEWER) {
+      $participants = array_reverse($participants);
+    }
+
     return $participants;
   }
 
   private function buildWhereClause($conn_r) {
     $where = array();
-
-    if ($this->conpherencePHIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'conpherencePHID IN (%Ls)',
-        $this->conpherencePHIDs);
-    }
 
     if ($this->participantPHIDs) {
       $where[] = qsprintf(
@@ -69,28 +92,41 @@ final class ConpherenceParticipantQuery
         $this->participantPHIDs);
     }
 
-    if ($this->participationStatus !== null) {
+    if ($this->participantCursor) {
+      $date_touched = $this->participantCursor->getDateTouched();
+      $id = $this->participantCursor->getID();
+      if ($this->order == self::ORDER_OLDER) {
+        $compare_date = '<';
+        $compare_id = '<=';
+      } else {
+        $compare_date = '>';
+        $compare_id = '>=';
+      }
       $where[] = qsprintf(
         $conn_r,
-        'participationStatus = %d',
-        $this->participationStatus);
-    }
-
-    if ($this->dateTouched) {
-      if ($this->dateTouchedSort) {
-        $where[] = qsprintf(
-          $conn_r,
-          'dateTouched %Q %d',
-          $this->dateTouchedSort,
-          $this->dateTouched);
-      }
+        '(dateTouched %Q %d OR (dateTouched = %d AND id %Q %d))',
+        $compare_date,
+        $date_touched,
+        $date_touched,
+        $compare_id,
+        $id);
     }
 
     return $this->formatWhereClause($where);
   }
 
   private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
-    return 'ORDER BY dateTouched DESC';
+
+    $order_word = ($this->order == self::ORDER_OLDER) ? 'DESC' : 'ASC';
+    // if these are different direction we won't get as efficient a query
+    // see http://dev.mysql.com/doc/refman/5.5/en/order-by-optimization.html
+    $order = qsprintf(
+      $conn_r,
+      'ORDER BY dateTouched %Q, id %Q',
+      $order_word,
+      $order_word);
+
+    return $order;
   }
 
 }

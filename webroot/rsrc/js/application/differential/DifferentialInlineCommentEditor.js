@@ -162,8 +162,9 @@ JX.install('DifferentialInlineCommentEditor', {
         return;
       }
 
+      var textarea;
       try {
-        var textarea = JX.DOM.find(
+        textarea = JX.DOM.find(
           document.body, // TODO: use getDialogRootNode() when available
           'textarea',
           'differential-inline-comment-edit-textarea');
@@ -180,16 +181,15 @@ JX.install('DifferentialInlineCommentEditor', {
 
       // If the user hasn't edited the text (i.e., no change from original for
       // 'edit' or no text at all), don't offer them an undo.
-      if (text == this.getOriginalText() || text == '') {
+      if (text == this.getOriginalText() || text === '') {
         return;
       }
 
       // Save the text so we can 'undo' back to it.
       this._undoText = text;
 
-      var template = this.getOnRight()
-        ? this.getTemplates().r
-        : this.getTemplates().l;
+      var templates = this.getTemplates();
+      var template = this.getOnRight() ? templates.r : templates.l;
       template = JX.$N('div', JX.$H(template));
 
       // NOTE: Operation order matters here; we can't remove anything until

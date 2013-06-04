@@ -8,6 +8,7 @@
 
 .owners-path-editor-table td {
   padding: 2px 4px;
+  vertical-align: middle;
 }
 
 .owners-path-editor-table select.owners-repo {
@@ -15,11 +16,10 @@
 }
 
 .owners-path-editor-table input {
-  width: 450px;
+  width: 400px;
 }
 
 .owners-path-editor-table div.error-display {
-  width: 200px;
   padding: 4px 12px 0;
 }
 

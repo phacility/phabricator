@@ -60,7 +60,7 @@
 }
 
 .phabricator-object-item-content {
-  margin-top: 2px;
+  margin-top: 4px;
   overflow: hidden;
 }
 
@@ -79,6 +79,66 @@
 
 .phabricator-object-item-grippable .phabricator-object-item-frame {
   padding-left: 11px;
+}
+
+/* - Item Actions --------------------------------------------------------------
+
+  Action buttons, like "Edit" and "Delete".
+
+*/
+
+.phabricator-object-item-actions {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  vertical-align: middle;
+  text-align: right;
+  border-left: 1px solid #c0c5d1;
+  box-shadow: inset 1px 0 1px 0px rgba(0, 0, 0, 0.07);
+}
+
+.phabricator-object-item-actions .phabricator-menu-item-view {
+  float: right;
+  height: 100%;
+  width: 24px;
+  display: inline-block;
+  position: relative;
+}
+
+.phabricator-object-item-actions .phabricator-menu-item-view +
+.phabricator-menu-item-view {
+  border-right: 1px solid #d6d6e9;
+}
+
+.phabricator-object-item-actions .phabricator-menu-item-view:hover {
+  background: #e9e9f9;
+}
+
+.phabricator-object-item-actions .phabricator-menu-item-icon {
+  width: 14px;
+  height: 14px;
+  position: absolute;
+  display: block;
+  top: 50%;
+  margin-top: -7px;
+  left: 5px;
+}
+
+.phabricator-object-item-actions .phabricator-menu-item-name {
+  display: none;
+}
+
+.phabricator-object-item-with-1-actions .phabricator-object-item-content-box {
+  margin-right: 24px;
+}
+
+.phabricator-object-item-with-2-actions .phabricator-object-item-content-box {
+  margin-right: 48px;
+}
+
+.phabricator-object-item-with-3-actions .phabricator-object-item-content-box {
+  margin-right: 72px;
 }
 
 
@@ -100,6 +160,17 @@
 .device-desktop .phabricator-object-list-stackable
   .phabricator-object-item:hover {
   background: #e9ecf5;
+}
+
+/* - Subhead -------------------------------------------------------------------
+
+  Descriptive Text or Links under the main header, before attributes.
+
+*/
+
+.phabricator-object-item-subhead {
+  color: #777;
+  padding: 0 8px 6px;
 }
 
 
@@ -132,7 +203,7 @@
 
 .phabricator-object-icon-pane {
   float: right;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .device .phabricator-object-item-no-icon-images .phabricator-object-icon-pane {
@@ -274,6 +345,11 @@
   background: #bfdcff;
 }
 
+.phabricator-object-list-flush .aphront-error-view {
+  margin: 0;
+  background: #fff;
+}
+
 
 /* - Foot Icons ----------------------------------------------------------------
 
@@ -303,7 +379,7 @@
   position: relative;
 }
 
-.phabricator-object-item-foot-icon .sprite-icon {
+.phabricator-object-item-foot-icon .sprite-icons {
   width: 14px;
   height: 14px;
   position: absolute;
@@ -328,7 +404,7 @@
 }
 
 .phabricator-object-item-handle-icon {
-  margin-left: 3px;
+  margin: 1px;
   width: 28px;
   height: 28px;
   display: inline-block;
@@ -347,9 +423,9 @@
   float: right;
   clear: right;
   padding: 0 10px;
-  margin: 3px 0;
+  margin: 5px 0;
   font-size: 11px;
-  color: #333333;
+  color: #666;
   white-space: nowrap;
   overflow: hidden;
   text-align: right;
@@ -370,7 +446,7 @@
 }
 
 .phabricator-object-list-cards .phabricator-object-item-frame {
-  min-height: 41px;
+  min-height: 50px;
 }
 
 .phabricator-object-list-cards .phabricator-object-item-selected {

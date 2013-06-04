@@ -47,8 +47,8 @@ final class PhabricatorOwnersDetailController
 
     $rows = array();
 
-    $rows[] = array('Name', $package->getName());
-    $rows[] = array('Description', $package->getDescription());
+    $rows[] = array(pht('Name'), $package->getName());
+    $rows[] = array(pht('Description'), $package->getDescription());
 
     $primary_owner = null;
     $primary_phid = $package->getPrimaryOwnerPHID();
@@ -58,18 +58,20 @@ final class PhabricatorOwnersDetailController
         array(),
         $handles[$primary_phid]->renderLink());
     }
-    $rows[] = array('Primary Owner', $primary_owner);
+    $rows[] = array(pht('Primary Owner'), $primary_owner);
 
     $owner_links = array();
     foreach ($owners as $owner) {
       $owner_links[] = $handles[$owner->getUserPHID()]->renderLink();
     }
     $owner_links = phutil_implode_html(phutil_tag('br'), $owner_links);
-    $rows[] = array('Owners', $owner_links);
+    $rows[] = array(pht('Owners'), $owner_links);
 
     $rows[] = array(
-      'Auditing',
-      $package->getAuditingEnabled() ? 'Enabled' : 'Disabled',
+      pht('Auditing'),
+      $package->getAuditingEnabled() ?
+        pht('Enabled') :
+        pht('Disabled'),
     );
 
     $path_links = array();
@@ -99,7 +101,7 @@ final class PhabricatorOwnersDetailController
         $path_link);
     }
     $path_links = phutil_implode_html(phutil_tag('br'), $path_links);
-    $rows[] = array('Paths', $path_links);
+    $rows[] = array(pht('Paths'), $path_links);
 
     $table = new AphrontTableView($rows);
     $table->setColumnClasses(
@@ -109,7 +111,9 @@ final class PhabricatorOwnersDetailController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Package Details for "'.$package->getName().'"');
+    $panel->setNoBackground();
+    $panel->setHeader(
+      pht('Package Details for "%s"', $package->getName()));
     $panel->addButton(
       javelin_tag(
         'a',
@@ -118,7 +122,7 @@ final class PhabricatorOwnersDetailController
           'class' => 'button grey',
           'sigil' => 'workflow',
         ),
-        'Delete Package'));
+        pht('Delete Package')));
     $panel->addButton(
       phutil_tag(
         'a',
@@ -126,7 +130,7 @@ final class PhabricatorOwnersDetailController
           'href' => '/owners/edit/'.$package->getID().'/',
           'class' => 'button',
         ),
-        'Edit Package'));
+        pht('Edit Package')));
     $panel->appendChild($table);
 
     $key = 'package/'.$package->getID();
@@ -154,14 +158,14 @@ final class PhabricatorOwnersDetailController
 
       $commit_views[] = array(
         'view'    => $view,
-        'header'  => 'Commits in this Package that Need Attention',
+        'header'  => pht('Commits in this Package that Need Attention'),
         'button'  => phutil_tag(
           'a',
           array(
             'href'  => $commit_uri->alter('status', 'open'),
             'class' => 'button grey',
           ),
-          'View All Problem Commits'),
+          pht('View All Problem Commits')),
       );
     }
 
@@ -175,18 +179,18 @@ final class PhabricatorOwnersDetailController
     $view = new PhabricatorAuditCommitListView();
     $view->setUser($user);
     $view->setCommits($all_commits);
-    $view->setNoDataString('No commits in this package.');
+    $view->setNoDataString(pht('No commits in this package.'));
 
     $commit_views[] = array(
       'view'    => $view,
-      'header'  => 'Recent Commits in Package',
+      'header'  => pht('Recent Commits in Package'),
       'button'  => phutil_tag(
         'a',
         array(
           'href'  => $commit_uri,
           'class' => 'button grey',
         ),
-        'View All Package Commits'),
+        pht('View All Package Commits')),
     );
 
     $phids = array();
@@ -199,6 +203,7 @@ final class PhabricatorOwnersDetailController
     $commit_panels = array();
     foreach ($commit_views as $commit_view) {
       $commit_panel = new AphrontPanelView();
+      $commit_panel->setNoBackground();
       $commit_panel->setHeader($commit_view['header']);
       if (isset($commit_view['button'])) {
         $commit_panel->addButton($commit_view['button']);
@@ -209,19 +214,24 @@ final class PhabricatorOwnersDetailController
       $commit_panels[] = $commit_panel;
     }
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView();
+    $nav->appendChild($panel);
+    $nav->appendChild($commit_panels);
+
+    return $this->buildApplicationPage(
       array(
-        $panel,
-        $commit_panels,
+        $nav,
       ),
       array(
-        'title' => "Package '".$package->getName()."'",
+        'title' => pht("Package %s", $package->getName()),
+        'dust' => true,
+        'device' => true,
       ));
   }
 
   protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
     $package = $this->package;
-    $view->addFilter('package/'.$package->getID(), 'Details');
+    $view->addFilter('package/'.$package->getID(), pht('Details'));
   }
 
 }

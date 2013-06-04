@@ -1,0 +1,19 @@
+After registering your application at wepay.com (or stage.wepay.com), you
+need to make two updates to this application:
+
+1 - set your client_id and client_secret in _shared.php
+2 - set the redirect_uri in login.php
+
+That should be enough to start making API calls against WePay's API.  While
+this is by no means a production-ready example, it should provide you a 
+couple ideas on how to get running.
+
+It also defaults to requesting all possible scope fields in the
+authentication request. We suggest limiting the request to the minimum
+your application requires, which will maximize the chance the user
+grants permissions to your application. You can customize this in
+login.php.
+
+If you have any questions, please contact the API team: api@wepay.com
+
+- WePay

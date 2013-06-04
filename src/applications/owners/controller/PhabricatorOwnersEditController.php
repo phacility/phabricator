@@ -65,21 +65,21 @@ final class PhabricatorOwnersEditController
       }
 
       if (!strlen($package->getName())) {
-        $e_name = 'Required';
-        $errors[] = 'Package name is required.';
+        $e_name = pht('Required');
+        $errors[] = pht('Package name is required.');
       } else {
         $e_name = null;
       }
 
       if (!$package->getPrimaryOwnerPHID()) {
-        $e_primary = 'Required';
-        $errors[] = 'Package must have a primary owner.';
+        $e_primary = pht('Required');
+        $errors[] = pht('Package must have a primary owner.');
       } else {
         $e_primary = null;
       }
 
       if (!$path_refs) {
-        $errors[] = 'Package must include at least one path.';
+        $errors[] = pht('Package must include at least one path.');
       }
 
       if (!$errors) {
@@ -93,8 +93,8 @@ final class PhabricatorOwnersEditController
           return id(new AphrontRedirectResponse())
             ->setURI('/owners/package/'.$package->getID().'/');
         } catch (AphrontQueryDuplicateKeyException $ex) {
-          $e_name = 'Duplicate';
-          $errors[] = 'Package name must be unique.';
+          $e_name = pht('Duplicate');
+          $errors[] = pht('Package name must be unique.');
         }
       }
     } else {
@@ -115,7 +115,7 @@ final class PhabricatorOwnersEditController
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Package Errors');
+      $error_view->setTitle(pht('Package Errors'));
       $error_view->setErrors($errors);
     }
 
@@ -134,10 +134,10 @@ final class PhabricatorOwnersEditController
     $token_all_owners = mpull($token_all_owners, 'getFullName');
 
     if ($package->getID()) {
-      $title = 'Edit Package';
+      $title = pht('Edit Package');
       $side_nav_filter = 'edit/'.$this->id;
     } else {
-      $title = 'New Package';
+      $title = pht('New Package');
       $side_nav_filter = 'new';
     }
     $this->setSideNavFilter($side_nav_filter);
@@ -181,16 +181,17 @@ final class PhabricatorOwnersEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setName('name')
           ->setValue($package->getName())
           ->setError($e_name))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/usersorprojects/')
-          ->setLabel('Primary Owner')
+          ->setLabel(pht('Primary Owner'))
           ->setName('primary')
           ->setLimit(1)
           ->setValue($token_primary_owner)
@@ -198,20 +199,21 @@ final class PhabricatorOwnersEditController
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/usersorprojects/')
-          ->setLabel('Owners')
+          ->setLabel(pht('Owners'))
           ->setName('owners')
           ->setValue($token_all_owners))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('auditing')
-          ->setLabel('Auditing')
-          ->setCaption('With auditing enabled, all future commits that touch '.
-                       'this package will be reviewed to make sure an owner '.
-                       'of the package is involved and the commit message has '.
-                       'a valid revision, reviewed by, and author.')
+          ->setLabel(pht('Auditing'))
+          ->setCaption(
+            pht('With auditing enabled, all future commits that touch '.
+                'this package will be reviewed to make sure an owner '.
+                'of the package is involved and the commit message has '.
+                'a valid revision, reviewed by, and author.'))
           ->setOptions(array(
-            'disabled'  => 'Disabled',
-            'enabled'   => 'Enabled',
+            'disabled'  => pht('Disabled'),
+            'enabled'   => pht('Enabled'),
           ))
           ->setValue(
             $package->getAuditingEnabled()
@@ -219,7 +221,7 @@ final class PhabricatorOwnersEditController
               : 'disabled'))
       ->appendChild(
         id(new AphrontFormInsetView())
-          ->setTitle('Paths')
+          ->setTitle(pht('Paths'))
           ->addDivAttributes(array('id' => 'path-editor'))
           ->setRightButton(javelin_tag(
               'a',
@@ -229,9 +231,10 @@ final class PhabricatorOwnersEditController
                 'sigil' => 'addpath',
                 'mustcapture' => true,
               ),
-              'Add New Path'))
-          ->setDescription('Specify the files and directories which comprise '.
-                           'this package.')
+              pht('Add New Path')))
+          ->setDescription(
+            pht('Specify the files and directories which comprise '.
+                'this package.'))
           ->setContent(javelin_tag(
               'table',
               array(
@@ -241,32 +244,38 @@ final class PhabricatorOwnersEditController
               '')))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Description')
+          ->setLabel(pht('Description'))
           ->setName('description')
           ->setValue($package->getDescription()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
-          ->setValue('Save Package'));
+          ->setValue(pht('Save Package')));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader($title);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->appendChild($error_view);
-    $panel->appendChild($form);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($title);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $nav = $this->buildSideNavView();
+    $nav->appendChild($error_view);
+    $nav->appendChild($header);
+    $nav->appendChild($form);
+
+    return $this->buildApplicationPage(
+      array(
+        $nav,
+      ),
       array(
         'title' => $title,
+        'device' => true,
+        'dust' => true,
       ));
   }
 
   protected function getExtraPackageViews(AphrontSideNavFilterView $view) {
     if ($this->id) {
-      $view->addFilter('edit/'.$this->id, 'Edit');
+      $view->addFilter('edit/'.$this->id, pht('Edit'));
     } else {
-      $view->addFilter('new', 'New');
+      $view->addFilter('new', pht('New'));
     }
   }
 }

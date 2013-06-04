@@ -353,12 +353,10 @@ final class PhabricatorDirectoryMainController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Jump Nav');
     $panel->setNoBackground();
     // $panel->appendChild();
 
     $list_filter = new AphrontListFilterView();
-    $list_filter->appendChild(phutil_tag('h1', array(), 'Jump Nav'));
     $list_filter->appendChild($form);
 
     $container = phutil_tag('div',

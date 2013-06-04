@@ -46,8 +46,10 @@ JX.install('Prefab', {
      *
      */
     buildTokenizer : function(config) {
+      var root;
+
       try {
-        var root = config.root || JX.$(config.id);
+        root = config.root || JX.$(config.id);
       } catch (ex) {
         // If the root element does not exist, just return without building
         // anything. This happens in some cases -- like Conpherence -- where we

@@ -3,7 +3,7 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
- *           javelin-util
+ *           javelin-request
  *           phabricator-keyboard-shortcut
  *           phabricator-notification
  */
@@ -45,8 +45,8 @@ JX.behavior('releeph-request-state-change', function(config) {
 
   function keynavMarkup() {
     var headers = getRequestHeaderNodes();
-    for (ii in headers) {
-      JX.DOM.alterClass(headers[ii], 'focus', ii == keynav_cursor);
+    for (var k in headers) {
+      JX.DOM.alterClass(headers[k], 'focus', k == keynav_cursor);
     }
   }
 

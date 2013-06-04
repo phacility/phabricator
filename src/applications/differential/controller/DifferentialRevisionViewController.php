@@ -398,9 +398,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $page_pane->appendChild($comment_form->render());
     }
 
-    PhabricatorFeedStoryNotification::updateObjectNotificationViews(
-      $user, $revision->getPHID());
-
     $object_id = 'D'.$revision->getID();
 
     $top_anchor = id(new PhabricatorAnchorView())
@@ -445,6 +442,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $content,
       array(
         'title' => $object_id.' '.$revision->getTitle(),
+        'pageObjects' => array($revision->getPHID()),
       ));
   }
 

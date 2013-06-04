@@ -10,30 +10,73 @@ final class PhabricatorMetaMTAReceiveController
 
     if ($request->isFormPost()) {
       $received = new PhabricatorMetaMTAReceivedMail();
-      $header_content = array();
+      $header_content = array(
+        'Message-ID' => Filesystem::readRandomCharacters(12),
+      );
       $from = $request->getStr('sender');
       $to = $request->getStr('receiver');
       $uri = '/mail/received/';
 
       if (!empty($from)) {
         $header_content['from'] = $from;
+      } else {
+        // If the user doesn't provide a "From" address, use their primary
+        // address.
+        $header_content['from'] = $user->loadPrimaryEmail()->getAddress();
       }
 
       if (preg_match('/.+@.+/', $to)) {
         $header_content['to'] = $to;
       } else {
-        $receiver = PhabricatorMetaMTAReceivedMail::loadReceiverObject($to);
 
-        if (!$receiver) {
-          throw new Exception(pht("No such task or revision!"));
+        // We allow the user to use an object name instead of a real address
+        // as a convenience. To build the mail, we build a similar message and
+        // look for a receiver which will accept it.
+        $pseudohash = PhabricatorObjectMailReceiver::computeMailHash('x', 'y');
+        $pseudomail = id(new PhabricatorMetaMTAReceivedMail())
+          ->setHeaders(
+            array(
+              'to' => $to.'+1+'.$pseudohash,
+            ));
+
+        $receivers = id(new PhutilSymbolLoader())
+          ->setAncestorClass('PhabricatorMailReceiver')
+          ->loadObjects();
+
+        $receiver = null;
+        foreach ($receivers as $possible_receiver) {
+          if (!$possible_receiver->isEnabled()) {
+            continue;
+          }
+          if (!$possible_receiver->canAcceptMail($pseudomail)) {
+            continue;
+          }
+          $receiver = $possible_receiver;
+          break;
         }
 
-        $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
-        $receiver->getMailKey(),
-        $user->getPHID());
+        if (!$receiver) {
+          throw new Exception(
+            "No configured mail receiver can accept mail to '{$to}'.");
+        }
 
-        $header_content['to'] =
-          $to.'+'.$user->getID().'+'.$hash.'@';
+        if (!($receiver instanceof PhabricatorObjectMailReceiver)) {
+          $class = get_class($receiver);
+          throw new Exception(
+            "Receiver '{$class}' accepts mail to '{$to}', but is not a ".
+            "subclass of PhabricatorObjectMailReceiver.");
+        }
+
+        $object = $receiver->loadMailReceiverObject($to, $user);
+        if (!$object) {
+          throw new Exception("No such object '{$to}'!");
+        }
+
+        $hash = PhabricatorObjectMailReceiver::computeMailHash(
+          $object->getMailKey(),
+          $user->getPHID());
+
+        $header_content['to'] = $to.'+'.$user->getID().'+'.$hash.'@test.com';
       }
 
       $received->setHeaders($header_content);
@@ -41,11 +84,6 @@ final class PhabricatorMetaMTAReceiveController
         array(
           'text' => $request->getStr('body'),
         ));
-
-      // Make up some unique value, since this column isn't nullable.
-      $received->setMessageIDHash(
-        PhabricatorHash::digestForIndex(
-          Filesystem::readRandomBytes(12)));
 
       $received->save();
 

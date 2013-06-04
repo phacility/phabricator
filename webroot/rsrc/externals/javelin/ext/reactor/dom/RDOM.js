@@ -3,6 +3,7 @@
  * @provides javelin-reactor-dom
  * @requires javelin-dom
  *           javelin-dynval
+ *           javelin-reactor
  *           javelin-reactornode
  *           javelin-install
  *           javelin-util

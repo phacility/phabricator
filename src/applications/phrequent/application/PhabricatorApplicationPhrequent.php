@@ -36,6 +36,7 @@ final class PhabricatorApplicationPhrequent extends PhabricatorApplication {
     return array(
       '/phrequent/' => array(
         '' => 'PhrequentListController',
+        'view/(?P<view>\w+)/' => 'PhrequentListController',
         'track/(?P<verb>[a-z]+)/(?P<phid>[^/]+)/'
           => 'PhrequentTrackController'
       ),

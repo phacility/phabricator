@@ -17,9 +17,9 @@ abstract class DiffusionRequest {
   protected $line;
   protected $symbolicCommit;
   protected $commit;
-  protected $branch;
   protected $commitType = 'commit';
   protected $tagContent;
+  protected $branch;
   protected $lint;
 
   protected $repository;
@@ -27,6 +27,9 @@ abstract class DiffusionRequest {
   protected $repositoryCommitData;
   protected $stableCommitName;
   protected $arcanistProjects;
+
+  private $initFromConduit = true;
+  private $user;
 
   abstract protected function getSupportsBranches();
   abstract protected function didInitialize();
@@ -91,6 +94,7 @@ abstract class DiffusionRequest {
     $use_branches = $object->getSupportsBranches();
     $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
 
+    $object->setUser($request->getUser());
     $object->initializeFromDictionary($parsed);
     $object->lint = $request->getStr('lint');
     return $object;
@@ -167,18 +171,39 @@ abstract class DiffusionRequest {
    * @task new
    */
   final private function initializeFromDictionary(array $data) {
-    $this->path           = idx($data, 'path');
-    $this->symbolicCommit = idx($data, 'commit');
-    $this->commit         = idx($data, 'commit');
-    $this->line           = idx($data, 'line');
+    $this->path            = idx($data, 'path');
+    $this->symbolicCommit  = idx($data, 'commit');
+    $this->commit          = idx($data, 'commit');
+    $this->line            = idx($data, 'line');
+    $this->initFromConduit = idx($data, 'initFromConduit', true);
 
     if ($this->getSupportsBranches()) {
       $this->branch = idx($data, 'branch');
     }
 
+    if (!$this->getUser()) {
+      $user = idx($data, 'user');
+      if (!$user) {
+        throw new Exception(
+          'You must provide a PhabricatorUser in the dictionary!');
+      }
+      $this->setUser($user);
+    }
+
     $this->didInitialize();
   }
 
+  final protected function shouldInitFromConduit() {
+    return $this->initFromConduit;
+  }
+
+  final public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+  final public function getUser() {
+    return $this->user;
+  }
 
   public function getRepository() {
     return $this->repository;
@@ -281,6 +306,9 @@ abstract class DiffusionRequest {
    *                a symbolic commit reference.
    */
   public function getStableCommitName() {
+    if (!$this->stableCommitName) {
+      $this->queryStableCommitName();
+    }
     return $this->stableCommitName;
   }
 
@@ -580,4 +608,46 @@ abstract class DiffusionRequest {
       "Guide' in the documentation for help setting up repositories.");
   }
 
+  final protected function expandCommitName() {
+    if ($this->shouldInitFromConduit()) {
+      $commit_data = DiffusionQuery::callConduitWithDiffusionRequest(
+        $this->getUser(),
+        $this,
+        'diffusion.expandshortcommitquery',
+        array(
+          'commit' => $this->commit
+        ));
+    } else {
+      $repository = $this->getRepository();
+      $this->validateWorkingCopy($repository->getLocalPath());
+      $query = DiffusionExpandShortNameQuery::newFromRepository(
+        $repository);
+      $query->setCommit($this->commit);
+      $commit_data = $query->expand();
+    }
+
+    $this->commit = $commit_data['commit'];
+    $this->commitType = $commit_data['commitType'];
+    $this->tagContent = $commit_data['tagContent'];
+  }
+
+  private function queryStableCommitName() {
+    if ($this->commit) {
+      $this->stableCommitName = $this->commit;
+    } else if ($this->shouldInitFromConduit()) {
+      $this->stableCommitName = DiffusionQuery::callConduitWithDiffusionRequest(
+        $this->getUser(),
+        $this,
+        'diffusion.stablecommitnamequery',
+        array(
+          'branch' => $this->getBranch()
+        ));
+    } else {
+      $query = DiffusionStableCommitNameQuery::newFromRepository(
+        $this->getRepository());
+      $query->setBranch($this->getBranch());
+      $this->stableCommitName = $query->load();
+    }
+    return $this->stableCommitName;
+  }
 }

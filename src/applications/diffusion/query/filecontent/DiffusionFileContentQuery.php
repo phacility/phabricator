@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * NOTE: this class should only be used where local access to the repository
+ * is guaranteed and NOT from within the Diffusion application. Diffusion
+ * should use Conduit method 'diffusion.filecontentquery' to get this sort
+ * of data.
+ */
 abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
   private $needsBlame;
@@ -40,11 +46,30 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
     return $this->fileContent->getCorpus();
   }
 
+  /**
+   * Pretty hairy function. If getNeedsBlame is false, this returns
+   *
+   *   ($text_list, array(), array())
+   *
+   * Where $text_list is the raw file content with trailing new lines stripped.
+   *
+   * If getNeedsBlame is true, this returns
+   *
+   *   ($text_list, $line_rev_dict, $blame_dict)
+   *
+   * Where $text_list is just the lines of code -- the raw file content will
+   * contain lots of blame data, $line_rev_dict is a dictionary of line number
+   * => revision id, and $blame_dict is another complicated data structure.
+   * In detail, $blame_dict contains [revision id][author] keys, as well
+   * as [commit id][authorPhid] and [commit id][epoch] keys.
+   *
+   * @return ($text_list, $line_rev_dict, $blame_dict)
+   */
   final public function getBlameData() {
     $raw_data = preg_replace('/\n$/', '', $this->getRawData());
 
     $text_list = array();
-    $rev_list = array();
+    $line_rev_dict = array();
     $blame_dict = array();
 
     if (!$this->getNeedsBlame()) {
@@ -56,14 +81,14 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
         list($rev_id, $author, $text) = $lines[$k];
         $text_list[$k] = $text;
-        $rev_list[$k] = $rev_id;
+        $line_rev_dict[$k] = $rev_id;
       }
 
-      $rev_list = $this->processRevList($rev_list);
+      $line_rev_dict = $this->processRevList($line_rev_dict);
 
       foreach ($lines as $k => $line) {
         list($rev_id, $author, $text) = $line;
-        $rev_id = $rev_list[$k];
+        $rev_id = $line_rev_dict[$k];
 
         if (!isset($blame_dict[$rev_id])) {
           $blame_dict[$rev_id]['author'] = $author;
@@ -75,7 +100,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
       $commits = id(new PhabricatorAuditCommitQuery())
         ->withIdentifiers(
           $repository->getID(),
-          array_unique($rev_list))
+          array_unique($line_rev_dict))
         ->execute();
 
       foreach ($commits as $commit) {
@@ -101,7 +126,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
    }
 
-    return array($text_list, $rev_list, $blame_dict);
+    return array($text_list, $line_rev_dict, $blame_dict);
   }
 
   abstract protected function tokenizeLine($line);

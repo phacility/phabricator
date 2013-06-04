@@ -24,21 +24,21 @@ final class ReleephProjectCreateController extends ReleephController {
 
     if ($request->isFormPost()) {
       if (!$name) {
-        $e_name = 'Required';
+        $e_name = pht('Required');
         $errors[] =
-          'Your releeph project should have a simple descriptive name.';
+          pht('Your Releeph project should have a simple descriptive name.');
       }
 
       if (!$trunk_branch) {
-        $e_trunk_branch = 'Required';
+        $e_trunk_branch = pht('Required');
         $errors[] =
-          'You must specify which branch you will be picking from.';
+          pht('You must specify which branch you will be picking from.');
       }
 
       $all_names = mpull(id(new ReleephProject())->loadAll(), 'getName');
 
       if (in_array($name, $all_names)) {
-        $errors[] = "Releeph project name {$name} is already taken";
+        $errors[] = pht('Releeph project name %s is already taken', $name);
       }
 
       $arc_project = $arc_projects[$arc_pr_id];
@@ -63,7 +63,7 @@ final class ReleephProjectCreateController extends ReleephController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle('Form Errors');
+      $error_view->setTitle(pht('Form Errors'));
     }
 
     // Make our own optgroup select control
@@ -88,19 +88,19 @@ final class ReleephProjectCreateController extends ReleephController {
     }
 
     $project_name_input = id(new AphrontFormTextControl())
-      ->setLabel('Name')
+      ->setLabel(pht('Name'))
       ->setDisableAutocomplete(true)
       ->setName('name')
       ->setValue($name)
       ->setError($e_name)
-      ->setCaption('A name like "Thrift" but not "Thrift releases".');
+      ->setCaption(pht('A name like "Thrift" but not "Thrift releases".'));
 
     $arc_project_input = id(new AphrontFormSelectControl())
-      ->setLabel('Arc Project')
+      ->setLabel(pht('Arc Project'))
       ->setName('arcPrID')
       ->setValue($arc_pr_id)
-      ->setCaption(hsprintf(
-        "If your Arc project isn't listed, associate it with a repository %s",
+      ->setCaption(pht(
+        'If your Arc project isn\'t listed, associate it with a repository %s',
         phutil_tag(
           'a',
           array(
@@ -111,7 +111,7 @@ final class ReleephProjectCreateController extends ReleephController {
       ->setOptions($arc_project_choices);
 
     $branch_name_preview = id(new ReleephBranchPreviewView())
-      ->setLabel('Example Branch')
+      ->setLabel(pht('Example Branch'))
       ->addControl('projectName', $project_name_input)
       ->addControl('arcProjectID', $arc_project_input)
       ->addStatic('template', '')
@@ -123,27 +123,27 @@ final class ReleephProjectCreateController extends ReleephController {
       ->appendChild($arc_project_input)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Trunk')
+          ->setLabel(pht('Trunk'))
           ->setName('trunkBranch')
           ->setValue($trunk_branch)
           ->setError($e_trunk_branch)
-          ->setCaption('The development branch, '.
-              'from which requests will be picked.'))
+          ->setCaption(pht('The development branch, '.
+              'from which requests will be picked.')))
       ->appendChild($branch_name_preview)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/releeph/project/')
-          ->setValue('Create'));
+          ->setValue(pht('Create')));
 
     $panel = id(new AphrontPanelView())
-      ->setHeader('Create Releeph Project')
+      ->setHeader(pht('Create Releeph Project'))
       ->appendChild($form)
       ->setWidth(AphrontPanelView::WIDTH_FORM);
 
     return $this->buildStandardPageResponse(
       array($error_view, $panel),
       array(
-        'title' => 'Create new Releeph Project'
+        'title' => pht('Create New Releeph Project')
       ));
   }
 }

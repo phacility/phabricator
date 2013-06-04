@@ -7,6 +7,18 @@ abstract class AphrontController extends Phobject {
 
   private $request;
   private $currentApplication;
+  private $delegatingController;
+
+
+  public function setDelegatingController(
+    AphrontController $delegating_controller) {
+    $this->delegatingController = $delegating_controller;
+    return $this;
+  }
+
+  public function getDelegatingController() {
+    return $this->delegatingController;
+  }
 
   public function willBeginExecution() {
     return;
@@ -31,6 +43,13 @@ abstract class AphrontController extends Phobject {
   }
 
   final public function delegateToController(AphrontController $controller) {
+    $controller->setDelegatingController($this);
+
+    $application = $this->getCurrentApplication();
+    if ($application) {
+      $controller->setCurrentApplication($application);
+    }
+
     return $controller->processRequest();
   }
 

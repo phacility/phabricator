@@ -13,7 +13,7 @@ final class PhabricatorFeedPublicStreamController
     }
 
     $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $viewer = PhabricatorUser::getOmnipotentUser();
 
     $query = new PhabricatorFeedQuery();
     $query->setViewer($viewer);

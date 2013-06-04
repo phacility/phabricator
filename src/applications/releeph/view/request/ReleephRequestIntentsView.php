@@ -38,18 +38,13 @@ final class ReleephRequestIntentsView extends AphrontView {
     $request = $this->releephRequest;
     $handles = $request->getHandles();
 
-    $is_want = $render_intent == ReleephRequest::INTENT_WANT;
-    $should = $request->shouldBeInBranch();
-
     $pusher_links = array();
     $user_links = array();
 
     $intents = $request->getUserIntents();
     foreach ($intents as $user_phid => $user_intent) {
       if ($user_intent == $render_intent) {
-        $is_pusher = $project->isPusherPHID($user_phid);
-
-        if ($is_pusher) {
+        if ($project->isAuthoritativePHID($user_phid)) {
           $pusher_links[] = phutil_tag(
             'span',
             array(

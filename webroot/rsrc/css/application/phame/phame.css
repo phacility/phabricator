@@ -21,6 +21,10 @@
   margin: 0px 0px 16px 0px;
 }
 
+.device-desktop .phame-post-list {
+  max-width: 600px;
+}
+
 .blog-post-list {
   clear: left;
   float: left;
