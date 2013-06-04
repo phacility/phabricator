@@ -21,4 +21,27 @@ abstract class DivinerController extends PhabricatorController {
     return $menu;
   }
 
+  protected function renderAtomList(array $symbols) {
+    assert_instances_of($symbols, 'DivinerLiveSymbol');
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $list = id(new PhabricatorObjectItemListView())
+      ->setUser($user);
+
+    foreach ($symbols as $symbol) {
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($symbol->getTitle())
+        ->setHref($symbol->getURI())
+        ->addIcon('none', $symbol->getType());
+
+      $item->addAttribute(phutil_safe_html($symbol->getSummary()));
+
+      $list->addItem($item);
+    }
+
+    return $list;
+  }
+
 }

@@ -1,4 +1,34 @@
 {
   "name" : "phabricator",
-  "root" : "../../../"
+  "title" : "Phabricator User Documentation",
+  "root" : "../../../",
+  "groups" : {
+    "intro" : {
+      "name" : "Introduction"
+    },
+    "config" : {
+      "name" : "Configuration"
+    },
+    "userguide" : {
+      "name" : "Application User Guides"
+    },
+    "differential" : {
+      "name" : "Differential (Code Review)"
+    },
+    "diffusion" : {
+      "name" : "Diffusion (Repository Browser)"
+    },
+    "maniphest" : {
+      "name" : "Maniphest (Task Tracking)"
+    },
+    "slowvote" : {
+      "name" : "Slowvote (Polls)"
+    },
+    "herald" : {
+      "name" : "Herald (Notifications)"
+    },
+    "phriction" : {
+      "name" : "Phriction (Wiki)"
+    }
+  }
 }

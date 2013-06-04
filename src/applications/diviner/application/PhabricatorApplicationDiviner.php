@@ -25,6 +25,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
         'query/((?<key>[^/]+)/)?' => 'DivinerAtomListController',
       ),
       '/docs/(?P<keyword>[^/]+)/' => 'DivinerJumpController',
+      '/book/(?P<book>[^/]+)/' => 'DivinerBookController',
       '/book/'.
         '(?P<book>[^/]+)/'.
         '(?P<type>[^/]+)/'.

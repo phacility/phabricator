@@ -12,6 +12,11 @@ final class DivinerLiveSymbol extends DivinerDAO
   protected $graphHash;
   protected $identityHash;
 
+  protected $title;
+  protected $groupName;
+  protected $summary;
+  protected $isDocumentable = 0;
+
   private $book;
   private $content;
   private $atom;
@@ -80,6 +85,10 @@ final class DivinerLiveSymbol extends DivinerDAO
     return '/'.implode('/', $parts).'/';
   }
 
+  public function getSortKey() {
+    return $this->getTitle();
+  }
+
   public function save() {
 
     // NOTE: The identity hash is just a sanity check because the unique tuple
@@ -99,6 +108,14 @@ final class DivinerLiveSymbol extends DivinerDAO
     }
 
     return parent::save();
+  }
+
+  public function getTitle() {
+    $title = parent::getTitle();
+    if (!strlen($title)) {
+      $title = $this->getName();
+    }
+    return $title;
   }
 
 

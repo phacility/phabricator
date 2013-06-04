@@ -131,7 +131,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $this->buildAtomCache();
     $this->buildGraphCache();
 
-    $this->publishDocumentation();
+    $this->publishDocumentation($args->getArg('clean'));
   }
 
 /* -(  Atom Cache  )--------------------------------------------------------- */
@@ -439,13 +439,14 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
   }
 
 
-  private function publishDocumentation() {
+  private function publishDocumentation($clean) {
     $atom_cache = $this->getAtomCache();
     $graph_map = $atom_cache->getGraphMap();
 
     $this->log(pht('PUBLISHING DOCUMENTATION'));
 
     $publisher = new DivinerLivePublisher();
+    $publisher->setDropCaches($clean);
     $publisher->setConfig($this->getAllConfig());
     $publisher->setAtomCache($atom_cache);
     $publisher->setRenderer(new DivinerDefaultRenderer());
