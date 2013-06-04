@@ -144,7 +144,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $head = array();
     $tail = array();
 
-    // Move inline comments to the end, so the comments preceed them.
+    // Move inline comments to the end, so the comments precede them.
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
       if ($type == PholioTransactionType::TYPE_INLINE) {

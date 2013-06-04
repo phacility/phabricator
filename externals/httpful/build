@@ -48,4 +48,4 @@ $return_code = 0;
 passthru("git add $phar_path", $return_code);
 exit_unless($return_code === 0, "Unable to add download files to git.");
 echo "[ OK ]\n";
-echo "\nBuild completed sucessfully.\n\n";
+echo "\nBuild completed successfully.\n\n";
