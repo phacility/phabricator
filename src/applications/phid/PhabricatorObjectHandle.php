@@ -61,12 +61,12 @@ final class PhabricatorObjectHandle {
     }
     return $this->getName();
   }
-  
+
   public function setTitle($title) {
     $this->title = $title;
     return $this;
   }
-  
+
   public function getTitle() {
     return $this->title;
   }

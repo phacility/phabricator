@@ -113,8 +113,7 @@ if (!$is_new) {
   if (!$verify_email->getIsVerified()) {
     $set_verified = phutil_console_confirm(
       'Should the primary email address be verified?',
-      $default_no = true
-    );
+      $default_no = true);
   } else {
     // already verified so let's not make a fuss
     $verify_email = null;

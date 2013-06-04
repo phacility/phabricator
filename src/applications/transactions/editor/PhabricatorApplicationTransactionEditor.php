@@ -841,7 +841,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $head = array();
     $tail = array();
 
-    // Move bare comments to the end, so the actions preceed them.
+    // Move bare comments to the end, so the actions precede them.
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
       if ($type == PhabricatorTransactions::TYPE_COMMENT) {

@@ -47,8 +47,7 @@ final class PhabricatorCrumbsView extends AphrontView {
             array(
               'class' => 'phabricator-crumbs-action-name'
             ),
-          $action->getName()
-        );
+          $action->getName());
 
         $action_sigils = $action->getSigils();
         if ($action->getWorkflow()) {
