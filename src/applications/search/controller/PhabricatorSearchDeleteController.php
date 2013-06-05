@@ -36,12 +36,7 @@ final class PhabricatorSearchDeleteController
       ->executeOne();
 
     if (!$named_query && $engine->isBuiltinQuery($key)) {
-      $named_query = id(new PhabricatorNamedQuery())
-        ->setUserPHID($user->getPHID())
-        ->setQueryName('(BUILTIN)')
-        ->setQueryKey($key)
-        ->setEngineClassName($this->engineClass)
-        ->setIsBuiltin(true);
+      $named_query = $engine->getBuiltinQuery($key);
     }
 
     if (!$named_query) {

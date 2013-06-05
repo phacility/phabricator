@@ -464,3 +464,20 @@
   .phabricator-object-item-frame {
   border-color: #99ccff;
 }
+
+
+.drag-ghost {
+  position: relative;
+  border: 1px dashed #aaaaaa;
+  background: #f9f9f9;
+  margin: 4px;
+}
+
+.drag-dragging {
+  position: relative;
+  opacity: 0.8;
+}
+
+.drag-sending {
+  opacity: 0.5;
+}

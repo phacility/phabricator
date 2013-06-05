@@ -37,6 +37,7 @@ final class PhabricatorApplicationSearch extends PhabricatorApplication {
         'edit/(?P<queryKey>[^/]+)/' => 'PhabricatorSearchEditController',
         'delete/(?P<queryKey>[^/]+)/(?P<engine>[^/]+)/'
           => 'PhabricatorSearchDeleteController',
+        'order/(?P<engine>[^/]+)/' => 'PhabricatorSearchOrderController',
         ),
     );
   }

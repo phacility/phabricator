@@ -157,6 +157,8 @@ abstract class PhabricatorApplicationSearchEngine {
       unset($builtin[$key]);
     }
 
+    $named_queries = msort($named_queries, 'getSortKey');
+
     return $named_queries + $builtin;
   }
 
@@ -181,12 +183,15 @@ abstract class PhabricatorApplicationSearchEngine {
     $names = $this->getBuiltinQueryNames();
 
     $queries = array();
+    $sequence = 0;
     foreach ($names as $key => $name) {
       $queries[$key] = id(new PhabricatorNamedQuery())
+        ->setUserPHID($this->requireViewer()->getPHID())
+        ->setEngineClassName(get_class($this))
         ->setQueryName($name)
         ->setQueryKey($key)
-        ->setIsBuiltin(true)
-        ->makeEphemeral();
+        ->setSequence((1 << 24) + $sequence++)
+        ->setIsBuiltin(true);
     }
 
     return $queries;

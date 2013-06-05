@@ -228,16 +228,22 @@ final class PhabricatorApplicationSearchController
 
     $named_queries = $engine->loadAllNamedQueries();
 
+    $list_id = celerity_generate_unique_node_id();
+
     $list = new PhabricatorObjectItemListView();
     $list->setUser($user);
+    $list->setID($list_id);
+
+    Javelin::initBehavior(
+      'search-reorder-queries',
+      array(
+        'listID' => $list_id,
+        'orderURI' => '/search/order/'.get_class($engine).'/',
+      ));
 
     foreach ($named_queries as $named_query) {
       $class = get_class($engine);
       $key = $named_query->getQueryKey();
-
-      $date_created = phabricator_datetime(
-        $named_query->getDateCreated(),
-        $user);
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($named_query->getQueryName())
@@ -263,12 +269,18 @@ final class PhabricatorApplicationSearchController
         }
         $item->setBarColor('grey');
       } else {
-        $item->addIcon('none', $date_created);
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('edit')
             ->setHref('/search/edit/'.$key.'/'));
       }
+
+      $item->setGrippable(true);
+      $item->addSigil('named-query');
+      $item->setMetadata(
+        array(
+          'queryKey' => $named_query->getQueryKey(),
+        ));
 
       $list->addItem($item);
     }

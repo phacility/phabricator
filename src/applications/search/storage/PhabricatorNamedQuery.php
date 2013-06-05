@@ -15,6 +15,10 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   protected $isDisabled = 0;
   protected $sequence   = 0;
 
+  public function getSortKey() {
+    return sprintf('~%010d%010d', $this->sequence, $this->getID());
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

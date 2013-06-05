@@ -50,6 +50,10 @@
   z-index: 5;
 }
 
+.drag-dragging {
+  z-index: 5;
+}
+
 .phabricator-crumbs-view {
   z-index: 3;
 }
