@@ -2,7 +2,12 @@
 
 final class PHUIListView extends AphrontTagView {
 
+  const NAVBAR_LIST = 'phui-list-navbar';
+  const SIDENAV_LIST = 'phui-list-sidenav';
+  const TABBAR_LIST = 'phui-list-tabbar';
+
   private $items = array();
+  private $type;
 
   protected function canAppendChild() {
     return false;
@@ -165,9 +170,20 @@ final class PHUIListView extends AphrontTagView {
     return 'ul';
   }
 
+  public function setType($type) {
+    $this->type = $type;
+    return $this;
+  }
+
   protected function getTagAttributes() {
+    require_celerity_resource('phui-list-view-css');
+    $classes = array();
+    $classes[] = 'phui-list-view';
+    if ($this->type) {
+      $classes[] = $this->type;
+    }
     return array(
-      'class' => 'phui-list-view',
+      'class' => implode(' ', $classes),
     );
   }
 

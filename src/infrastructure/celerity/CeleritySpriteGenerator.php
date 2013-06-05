@@ -40,6 +40,8 @@ final class CeleritySpriteGenerator {
         if ($color == 'white') {
           $tcss[] = '.device-desktop .phabricator-action-view:hover '.
             '.icons-'.$icon;
+          $tcss[] = '.device-desktop .phui-list-item-href:hover '.
+            '.icons-'.$icon;
           if ($icon == 'new') {
             // Hover state for the "+" icons on homepage tiles.
             $tcss[] = '.phabricator-application-launch-create:hover '.

@@ -83,6 +83,7 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $sidenav = id(new PHUIListView())
+      ->setType(PHUIListView::SIDENAV_LIST)
       ->addMenuItem($action)
       ->addMenuItem($action1)
       ->addMenuItem($action2)
@@ -128,6 +129,7 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $topnav = id(new PHUIListView())
+      ->setType(PHUIListView::NAVBAR_LIST)
       ->addMenuItem($home)
       ->addMenuItem($item1)
       ->addMenuItem($item2)
