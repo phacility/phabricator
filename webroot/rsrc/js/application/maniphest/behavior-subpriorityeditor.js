@@ -30,7 +30,7 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
     });
 
   draggable.listen('shouldBeginDrag', function(e) {
-    if (e.getNode('slippery')) {
+    if (e.getNode('slippery') || e.getNode('maniphest-edit-task')) {
       JX.Stratcom.context().kill();
     }
   });

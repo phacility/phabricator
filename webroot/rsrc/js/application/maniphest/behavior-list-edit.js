@@ -18,12 +18,15 @@ JX.behavior('maniphest-list-editor', function(config) {
     new JX.FX(new_task).setDuration(500).start({opacity: [0, 1]});
   };
 
-  JX.Stratcom.listen('click', 'maniphest-edit-task', function(e) {
-    e.kill();
-    var task = e.getNode('maniphest-task');
-    JX.Workflow.newFromLink(e.getNode('maniphest-edit-task'))
-      .setHandler(JX.bind(null, onedit, task))
-      .start();
+  JX.Stratcom.listen(
+    'click',
+    ['maniphest-edit-task', 'tag:a'],
+    function(e) {
+      e.kill();
+      var task = e.getNode('maniphest-task');
+      JX.Workflow.newFromLink(e.getNode('tag:a'))
+        .setHandler(JX.bind(null, onedit, task))
+        .start();
   });
 
 });

@@ -125,9 +125,8 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
           if ($is_hide) {
             $label_id = celerity_generate_unique_node_id();
             $attrs = array();
-            $attrs['style'] = 'display: none;';
-            $attrs['id'] = $label_id;
-            $label->setContainerAttrs($attrs);
+            $label->setStyle('display: none;');
+            $label->setID($label_id);
             $tile_ids[] = $label_id;
           }
 

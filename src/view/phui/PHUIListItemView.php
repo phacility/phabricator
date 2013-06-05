@@ -19,15 +19,6 @@ final class PHUIListItemView extends AphrontTagView {
   private $selected;
   private $containerAttrs;
 
-  public function setProperty($property) {
-    $this->property = $property;
-    return $this;
-  }
-
-  public function getProperty() {
-    return $this->property;
-  }
-
   public function setSelected($selected) {
     $this->selected = $selected;
     return $this;
@@ -91,34 +82,26 @@ final class PHUIListItemView extends AphrontTagView {
     return $this->isExternal;
   }
 
-  // Maybe should be add ?
-  public function setContainerAttrs($attrs) {
-    $this->containerAttrs = $attrs;
-    return $this;
-  }
-
   protected function getTagName() {
-    return $this->href ? 'a' : 'div';
-  }
-
-  protected function renderTagContainer($tag) {
-    $classes = array(
-      'phui-list-item-view',
-      'phui-list-item-'.$this->type,
-      $this->icon ? 'phui-list-item-has-icon' : null,
-      $this->selected ? 'phui-list-item-selected' : null
-    );
-
-    // This is derptastical
-    $this->containerAttrs['class'] = implode(' ', array_filter($classes));
-
-    return phutil_tag('li', $this->containerAttrs, $tag);
+    return 'li';
   }
 
   protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'phui-list-item-view';
+    $classes[] = 'phui-list-item-'.$this->type;
+
+    if ($this->icon) {
+      $classes[] = 'phui-list-item-has-icon';
+    }
+
+    if ($this->selected) {
+      $classes[] = 'phui-list-item-selected';
+    }
+
     return array(
-      'class' => $this->href ? 'phui-list-item-href' : '',
-      'href' => $this->href);
+      'class' => $classes,
+    );
   }
 
   protected function getTagContent() {
@@ -149,11 +132,17 @@ final class PHUIListItemView extends AphrontTagView {
         ->setSpriteIcon($this->icon);
     }
 
-    return array(
-      $icon,
-      $this->renderChildren(),
-      $name,
-    );
+    return phutil_tag(
+      $this->href ? 'a' : 'div',
+      array(
+        'href' => $this->href,
+        'class' => $this->href ? 'phui-list-item-href' : null,
+      ),
+      array(
+        $icon,
+        $this->renderChildren(),
+        $name,
+      ));
   }
 
 }
