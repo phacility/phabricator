@@ -1346,6 +1346,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130602.morediviner.sql'),
       ),
+      '20130602.namedqueries.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130602.namedqueries.sql'),
+      ),
     );
   }
 }

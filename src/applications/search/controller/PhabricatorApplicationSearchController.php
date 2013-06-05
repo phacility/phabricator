@@ -226,40 +226,47 @@ final class PhabricatorApplicationSearchController
     $engine = $this->getSearchEngine();
     $nav = $this->getNavigation();
 
-    $named_queries = id(new PhabricatorNamedQueryQuery())
-      ->setViewer($user)
-      ->withUserPHIDs(array($user->getPHID()))
-      ->withEngineClassNames(array(get_class($engine)))
-      ->execute();
-
-    $named_queries += $engine->getBuiltinQueries();
+    $named_queries = $engine->loadAllNamedQueries();
 
     $list = new PhabricatorObjectItemListView();
     $list->setUser($user);
 
     foreach ($named_queries as $named_query) {
+      $class = get_class($engine);
+      $key = $named_query->getQueryKey();
+
       $date_created = phabricator_datetime(
         $named_query->getDateCreated(),
         $user);
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($named_query->getQueryName())
-        ->setHref($engine->getQueryResultsPageURI($named_query->getQueryKey()));
+        ->setHref($engine->getQueryResultsPageURI($key));
+
+      if ($named_query->getIsBuiltin() && $named_query->getIsDisabled()) {
+        $icon = 'new';
+      } else {
+        $icon = 'delete';
+      }
+
+      $item->addAction(
+        id(new PhabricatorMenuItemView())
+          ->setIcon($icon)
+          ->setHref('/search/delete/'.$key.'/'.$class.'/')
+          ->setWorkflow(true));
 
       if ($named_query->getIsBuiltin()) {
-        $item->addIcon('lock-grey', pht('Builtin'));
+        if ($named_query->getIsDisabled()) {
+          $item->addIcon('delete-grey', pht('Disabled'));
+        } else {
+          $item->addIcon('lock-grey', pht('Builtin'));
+        }
         $item->setBarColor('grey');
       } else {
-        $item->addIcon('none', $date_created);
-        $item->addAction(
-          id(new PhabricatorMenuItemView())
-            ->setIcon('delete')
-            ->setHref('/search/delete/'.$named_query->getQueryKey().'/')
-            ->setWorkflow(true));
         $item->addAction(
           id(new PhabricatorMenuItemView())
             ->setIcon('edit')
-            ->setHref('/search/edit/'.$named_query->getQueryKey().'/'));
+            ->setHref('/search/edit/'.$key.'/'));
       }
 
       $list->addItem($item);

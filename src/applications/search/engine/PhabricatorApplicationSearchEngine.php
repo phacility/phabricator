@@ -111,13 +111,7 @@ abstract class PhabricatorApplicationSearchEngine {
 
     $menu->newLabel(pht('Queries'));
 
-    $named_queries = id(new PhabricatorNamedQueryQuery())
-      ->setViewer($viewer)
-      ->withUserPHIDs(array($viewer->getPHID()))
-      ->withEngineClassNames(array(get_class($this)))
-      ->execute();
-
-    $named_queries = $named_queries + $this->getBuiltinQueries($viewer);
+    $named_queries = $this->loadEnabledNamedQueries();
 
     foreach ($named_queries as $query) {
       $key = $query->getQueryKey();
@@ -135,6 +129,45 @@ abstract class PhabricatorApplicationSearchEngine {
     $menu->newLink(pht('Advanced Search'), $advanced_uri, 'query/advanced');
 
     return $this;
+  }
+
+  public function loadAllNamedQueries() {
+    $viewer = $this->requireViewer();
+
+    $named_queries = id(new PhabricatorNamedQueryQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->withEngineClassNames(array(get_class($this)))
+      ->execute();
+    $named_queries = mpull($named_queries, null, 'getQueryKey');
+
+    $builtin = $this->getBuiltinQueries($viewer);
+    $builtin = mpull($builtin, null, 'getQueryKey');
+
+    foreach ($named_queries as $key => $named_query) {
+      if ($named_query->getIsBuiltin()) {
+        if (isset($builtin[$key])) {
+          $named_queries[$key]->setQueryName($builtin[$key]->getQueryName());
+          unset($builtin[$key]);
+        } else {
+          unset($named_queries[$key]);
+        }
+      }
+
+      unset($builtin[$key]);
+    }
+
+    return $named_queries + $builtin;
+  }
+
+  public function loadEnabledNamedQueries() {
+    $named_queries = $this->loadAllNamedQueries();
+    foreach ($named_queries as $key => $named_query) {
+      if ($named_query->getIsBuiltin() && $named_query->getIsDisabled()) {
+        unset($named_queries[$key]);
+      }
+    }
+    return $named_queries;
   }
 
 
