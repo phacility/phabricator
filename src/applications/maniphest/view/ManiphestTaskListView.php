@@ -101,7 +101,7 @@ final class ManiphestTaskListView extends ManiphestView {
 
       if ($this->showBatchControls) {
         $item->addAction(
-          id(new PhabricatorMenuItemView())
+          id(new PHUIListItemView())
             ->setIcon('edit')
             ->addSigil('maniphest-edit-task')
             ->setHref('/maniphest/task/edit/'.$task->getID().'/'));

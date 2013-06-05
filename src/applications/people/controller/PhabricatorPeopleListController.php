@@ -69,7 +69,7 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
       if ($viewer->getIsAdmin()) {
         $uid = $user->getID();
         $item->addAction(
-          id(new PhabricatorMenuItemView())
+          id(new PHUIListItemView())
             ->setIcon('edit')
             ->setHref($this->getApplicationURI('edit/'.$uid.'/')));
       }

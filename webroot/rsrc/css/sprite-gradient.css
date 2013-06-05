@@ -3,7 +3,7 @@
  * @generated
  */
 
-.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label {
+.sprite-gradient, .phabricator-dark-menu .phui-list-item-type-label, .phabricator-side-menu .phui-list-item-type-label {
   background-image: url(/rsrc/image/sprite-gradient.png);
   background-repeat: repeat-x;
 }
@@ -23,7 +23,7 @@
   background-position: 0px -154px;
 }
 
-.gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label {
+.gradient-dark-menu-label, .phabricator-dark-menu .phui-list-item-type-label {
   background-position: 0px -25px;
 }
 
@@ -35,7 +35,7 @@
   background-position: 0px -296px;
 }
 
-.gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label {
+.gradient-menu-label, .phabricator-side-menu .phui-list-item-type-label {
   background-position: 0px 0px;
 }
 

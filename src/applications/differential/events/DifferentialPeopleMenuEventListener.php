@@ -24,7 +24,7 @@ final class DifferentialPeopleMenuEventListener extends PhutilEventListener {
     $name = pht('Revisions');
 
     $menu->addMenuItemToLabel('activity',
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
       ->setIsExternal(true)
       ->setHref($href)
       ->setName($name)

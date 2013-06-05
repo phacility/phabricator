@@ -274,31 +274,24 @@
 */
 
 .device .phabricator-dark-menu,
-.device .phabricator-dark-menu a.phabricator-menu-item-type-link {
+.device .phabricator-dark-menu a.phui-list-item-href {
   color: #fff;
-
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-label {
+.device .phabricator-dark-menu .phui-list-item-type-label {
   text-transform: uppercase;
   font-size: 12px;
   background-color: #151719;
-  padding: 0 0 0 12px;
-  height: 25px;
+  padding: 5px 0;
+  display: block;
   font-weight: bold;
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-label
-  .phabricator-menu-item-name {
-  display: block;
-  padding: 6px 0 0;
-}
-
-.device .phabricator-dark-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phui-list-item-href {
   border-width: 1px 0;
   border-style: solid;
   border-color: #34373b transparent #282c2d;
-  background-image: url(/rsrc/image/texture/dark-menu.png);
+  background-image: url(/res/41ee673a/rsrc/image/texture/dark-menu.png);
   padding: 4px 0;
   display: block;
 }
@@ -328,15 +321,15 @@
   padding-top: 44px;
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phui-list-item-type-link {
   font-size: 15px;
   min-height: 30px;
   line-height: 28px;
 }
 
-.device .phabricator-menu-item-type-link
-  .phabricator-core-menu-icon + .phabricator-menu-item-name {
-  margin-left: 36px;
+.device .phui-list-item-type-link
+  .phabricator-core-menu-icon + .phui-list-item-name {
+  margin-left: 30px;
 }
 
 .device-desktop .phabricator-application-menu {
@@ -346,22 +339,22 @@
   vertical-align: top;
 }
 
-.device-desktop .phabricator-application-menu a.phabricator-menu-item-view,
-.device-desktop .phabricator-application-menu .phabricator-menu-item-name {
+.device-desktop .phabricator-application-menu a.phui-list-item-view,
+.device-desktop .phabricator-application-menu .phui-list-item-name {
   display: none;
 }
 
 .device-desktop .phabricator-application-menu
-  a.phabricator-menu-item-view.phabricator-core-menu-item {
+  a.phui-list-item-view.phabricator-core-menu-item {
   display: block;
 }
 
 .device-desktop .phabricator-application-menu
-  a.phabricator-menu-item-view.phabricator-core-menu-item:hover {
+  a.phui-list-item-view.phabricator-core-menu-item:hover {
   background-color: #1e2225;
 }
 
-.device-desktop .phabricator-application-menu .phabricator-menu-item-view {
+.device-desktop .phabricator-application-menu .phui-list-item-view {
   display: block;
   float: left;
   position: relative;
@@ -401,10 +394,10 @@
 }
 
 .device .phabricator-application-menu,
-.device-desktop .phabricator-dark-menu .phabricator-menu-item-type-label {
+.device-desktop .phabricator-dark-menu .phui-list-item-type-label {
   display: none;
 }
 
-.phabricator-application-menu .phabricator-menu-item-name {
+.phabricator-application-menu .phui-list-item-name {
   padding-left: 12px;
 }

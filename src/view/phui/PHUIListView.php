@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorMenuView extends AphrontTagView {
+final class PHUIListView extends AphrontTagView {
 
   private $items = array();
 
@@ -9,8 +9,8 @@ final class PhabricatorMenuView extends AphrontTagView {
   }
 
   public function newLabel($name, $key = null) {
-    $item = id(new PhabricatorMenuItemView())
-      ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+    $item = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LABEL)
       ->setName($name);
 
     if ($key !== null) {
@@ -23,8 +23,8 @@ final class PhabricatorMenuView extends AphrontTagView {
   }
 
   public function newLink($name, $href, $key = null) {
-    $item = id(new PhabricatorMenuItemView())
-      ->setType(PhabricatorMenuItemView::TYPE_LINK)
+    $item = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LINK)
       ->setName($name)
       ->setHref($href);
 
@@ -38,8 +38,8 @@ final class PhabricatorMenuView extends AphrontTagView {
   }
 
   public function newButton($name, $href) {
-    $item = id(new PhabricatorMenuItemView())
-      ->setType(PhabricatorMenuItemView::TYPE_BUTTON)
+    $item = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_BUTTON)
       ->setName($name)
       ->setHref($href);
 
@@ -48,11 +48,11 @@ final class PhabricatorMenuView extends AphrontTagView {
     return $item;
   }
 
-  public function addMenuItem(PhabricatorMenuItemView $item) {
+  public function addMenuItem(PHUIListItemView $item) {
     return $this->addMenuItemAfter(null, $item);
   }
 
-  public function addMenuItemAfter($key, PhabricatorMenuItemView $item) {
+  public function addMenuItemAfter($key, PHUIListItemView $item) {
     if ($key === null) {
       $this->items[] = $item;
       return $this;
@@ -75,7 +75,7 @@ final class PhabricatorMenuView extends AphrontTagView {
     return $this;
   }
 
-  public function addMenuItemBefore($key, PhabricatorMenuItemView $item) {
+  public function addMenuItemBefore($key, PHUIListItemView $item) {
     if ($key === null) {
       array_unshift($this->items, $item);
       return $this;
@@ -95,11 +95,11 @@ final class PhabricatorMenuView extends AphrontTagView {
     return $this;
   }
 
-  public function addMenuItemToLabel($key, PhabricatorMenuItemView $item) {
+  public function addMenuItemToLabel($key, PHUIListItemView $item) {
     $this->requireKey($key);
 
     $other = $this->getItem($key);
-    if ($other->getType() != PhabricatorMenuItemView::TYPE_LABEL) {
+    if ($other->getType() != PHUIListItemView::TYPE_LABEL) {
       throw new Exception(pht("Menu item '%s' is not a label!", $key));
     }
 
@@ -111,7 +111,7 @@ final class PhabricatorMenuView extends AphrontTagView {
           $seen = true;
         }
       } else {
-        if ($other->getType() == PhabricatorMenuItemView::TYPE_LABEL) {
+        if ($other->getType() == PHUIListItemView::TYPE_LABEL) {
           break;
         }
       }
@@ -161,9 +161,13 @@ final class PhabricatorMenuView extends AphrontTagView {
     }
   }
 
+  public function getTagName() {
+    return 'ul';
+  }
+
   protected function getTagAttributes() {
     return array(
-      'class' => 'phabricator-menu-view',
+      'class' => 'phui-list-view',
     );
   }
 

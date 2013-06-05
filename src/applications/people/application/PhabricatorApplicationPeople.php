@@ -61,7 +61,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     if ($user->isLoggedIn()) {
       $image = $user->loadProfileImageURI();
 
-      $item = new PhabricatorMenuItemView();
+      $item = new PHUIListItemView();
       $item->setName($user->getUsername());
       $item->setHref('/p/'.$user->getUsername().'/');
       $item->addClass('phabricator-core-menu-item');

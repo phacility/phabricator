@@ -1,12 +1,14 @@
 <?php
 
-final class PhabricatorMenuItemView extends AphrontTagView {
+final class PHUIListItemView extends AphrontTagView {
 
   const TYPE_LINK     = 'type-link';
   const TYPE_SPACER   = 'type-spacer';
   const TYPE_LABEL    = 'type-label';
   const TYPE_BUTTON   = 'type-button';
   const TYPE_CUSTOM   = 'type-custom';
+  const TYPE_DIVIDER  = 'type-divider';
+  const TYPE_ICON     = 'type-icon';
 
   private $name;
   private $href;
@@ -15,6 +17,7 @@ final class PhabricatorMenuItemView extends AphrontTagView {
   private $key;
   private $icon;
   private $selected;
+  private $containerAttrs;
 
   public function setProperty($property) {
     $this->property = $property;
@@ -88,18 +91,34 @@ final class PhabricatorMenuItemView extends AphrontTagView {
     return $this->isExternal;
   }
 
+  // Maybe should be add ?
+  public function setContainerAttrs($attrs) {
+    $this->containerAttrs = $attrs;
+    return $this;
+  }
+
   protected function getTagName() {
     return $this->href ? 'a' : 'div';
   }
 
+  protected function renderTagContainer($tag) {
+    $classes = array(
+      'phui-list-item-view',
+      'phui-list-item-'.$this->type,
+      $this->icon ? 'phui-list-item-has-icon' : null,
+      $this->selected ? 'phui-list-item-selected' : null
+    );
+
+    // This is derptastical
+    $this->containerAttrs['class'] = implode(' ', array_filter($classes));
+
+    return phutil_tag('li', $this->containerAttrs, $tag);
+  }
+
   protected function getTagAttributes() {
     return array(
-      'class' => array(
-        'phabricator-menu-item-view',
-        'phabricator-menu-item-'.$this->type,
-      ),
-      'href' => $this->href,
-    );
+      'class' => $this->href ? 'phui-list-item-href' : '',
+      'href' => $this->href);
   }
 
   protected function getTagContent() {
@@ -115,7 +134,7 @@ final class PhabricatorMenuItemView extends AphrontTagView {
       $name = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-menu-item-name',
+          'class' => 'phui-list-item-name',
         ),
         array(
           $this->name,
@@ -125,7 +144,7 @@ final class PhabricatorMenuItemView extends AphrontTagView {
 
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->addClass('phabricator-menu-item-icon')
+        ->addClass('phui-list-item-icon')
         ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
         ->setSpriteIcon($this->icon);
     }

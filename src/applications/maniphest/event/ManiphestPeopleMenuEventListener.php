@@ -23,7 +23,7 @@ final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
     $name = pht('Tasks');
 
     $menu->addMenuItemToLabel('activity',
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
       ->setIsExternal(true)
       ->setHref($href)
       ->setName($name)

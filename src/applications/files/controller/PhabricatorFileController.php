@@ -5,7 +5,7 @@ abstract class PhabricatorFileController extends PhabricatorController {
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Upload File'))
         ->setIcon('create') // TODO: Get @chad to build an "upload" icon.
         ->setHref($this->getApplicationURI('/upload/')));
@@ -23,7 +23,7 @@ abstract class PhabricatorFileController extends PhabricatorController {
   }
 
   private function buildMenu($for_devices) {
-    $menu = new PhabricatorMenuView();
+    $menu = new PHUIListView();
 
     if ($for_devices) {
       $menu->newLink(pht('Upload File'), $this->getApplicationURI('/upload/'));

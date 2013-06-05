@@ -554,7 +554,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         ->setName($header_name)
         ->setHref($this->getApplicationURI('/task/create/')))
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setHref($this->getApplicationURI('/task/create/'))
           ->setName(pht('Create Task'))
           ->setIcon('create'));

@@ -126,7 +126,8 @@ abstract class AphrontTagView extends AphrontView {
     $tag_view_attributes = array(
       'id' => $this->id,
 
-      'class' => $this->classes ? implode(' ', $this->classes) : null,
+      'class' => $this->classes ?
+        implode(' ', array_filter($this->classes)) : null,
       'style' => $this->style,
 
       'meta' => $this->metadata,

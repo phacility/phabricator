@@ -15,7 +15,7 @@ final class PhabricatorCrumbsView extends AphrontView {
     return $this;
   }
 
-  public function addAction(PhabricatorMenuItemView $action) {
+  public function addAction(PHUIListItemView $action) {
     $this->actions[] = $action;
     return $this;
   }

@@ -32,13 +32,13 @@
  border-radius: 3px;
 }
 
-.phabricator-workpanel-view .phabricator-menu-item-icon {
+.phabricator-workpanel-view .phui-list-item-icon {
   height: 12px;
   width: 12px;
   display: inline-block;
 }
 
-.phabricator-workpanel-view .phabricator-menu-item-name {
+.phabricator-workpanel-view .phui-list-item-name {
   padding-left: 5px;
   display: inline-block;
 }

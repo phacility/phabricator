@@ -250,7 +250,7 @@ final class PhabricatorApplicationSearchController
       }
 
       $item->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setIcon($icon)
           ->setHref('/search/delete/'.$key.'/'.$class.'/')
           ->setWorkflow(true));
@@ -263,8 +263,9 @@ final class PhabricatorApplicationSearchController
         }
         $item->setBarColor('grey');
       } else {
+        $item->addIcon('none', $date_created);
         $item->addAction(
-          id(new PhabricatorMenuItemView())
+          id(new PHUIListItemView())
             ->setIcon('edit')
             ->setHref('/search/edit/'.$key.'/'));
       }

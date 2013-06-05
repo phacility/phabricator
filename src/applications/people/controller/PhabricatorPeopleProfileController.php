@@ -55,7 +55,7 @@ final class PhabricatorPeopleProfileController
     $profile = $user->loadUserProfile();
     $username = phutil_escape_uri($user->getUserName());
 
-    $menu = new PhabricatorMenuView();
+    $menu = new PHUIListView();
     foreach ($this->getMainFilters($username) as $filter) {
       $menu->newLink($filter['name'], $filter['href'], $filter['key']);
     }
@@ -91,11 +91,11 @@ final class PhabricatorPeopleProfileController
           $added_label = true;
         }
         $menu->addMenuItem(
-          id(new PhabricatorMenuItemView())
+          id(new PHUIListItemView())
           ->setIsExternal(true)
           ->setName($name)
           ->setHref($href)
-          ->setType(PhabricatorMenuItemView::TYPE_LINK));
+          ->setType(PHUIListItemView::TYPE_LINK));
       }
     }
 

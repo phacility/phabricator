@@ -1,0 +1,16 @@
+/**
+ * @provides phui-list-view-css
+ */
+
+.phui-list-item {
+  line-height: 16px;
+}
+
+.phui-list-item-header,
+.phui-list-item-header a {
+  color: #9ca5b5;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 12px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.90);
+}

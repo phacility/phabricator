@@ -24,7 +24,7 @@ final class AuditPeopleMenuEventListener extends PhutilEventListener {
     $name = pht('Commits');
 
     $menu->addMenuItemToLabel('activity',
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
       ->setIsExternal(true)
       ->setName($name)
       ->setHref($href)

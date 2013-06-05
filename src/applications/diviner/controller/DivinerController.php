@@ -12,7 +12,7 @@ abstract class DivinerController extends PhabricatorController {
   }
 
   private function buildMenu() {
-    $menu = new PhabricatorMenuView();
+    $menu = new PHUIListView();
 
     id(new DivinerAtomSearchEngine())
       ->setViewer($this->getRequest()->getUser())

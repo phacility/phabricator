@@ -24,7 +24,7 @@ abstract class HeraldController extends PhabricatorController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Herald Rule'))
         ->setHref($this->getApplicationURI('new/'))
         ->setIcon('create'));

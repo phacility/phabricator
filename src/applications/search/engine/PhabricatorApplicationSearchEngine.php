@@ -106,7 +106,7 @@ abstract class PhabricatorApplicationSearchEngine {
   }
 
 
-  public function addNavigationItems(PhabricatorMenuView $menu) {
+  public function addNavigationItems(PHUIListView $menu) {
     $viewer = $this->requireViewer();
 
     $menu->newLabel(pht('Queries'));
