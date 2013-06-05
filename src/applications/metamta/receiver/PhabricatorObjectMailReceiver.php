@@ -120,7 +120,7 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
   }
 
   private function matchObjectAddressInMail(
-    PhabricatorMetaMTAReceivedmail $mail) {
+    PhabricatorMetaMTAReceivedMail $mail) {
 
     foreach ($mail->getToAddresses() as $address) {
       $parts = $this->matchObjectAddress($address);
