@@ -338,6 +338,17 @@ EODOC
         ->addExample(
           'gwashington (George Washington) <gwashington@example.com>',
           'full'),
+      $this->newOption('metamta.email-body-limit', 'int', 524288)
+        ->setDescription(
+          pht(
+            'You can set a limit for the maximum byte size of outbound mail. '.
+            'Mail which is larger than this limit will be truncated before '.
+            'being sent. This can be useful if your MTA rejects mail which '.
+            'exceeds some limit (this is reasonably common). Specify a value '.
+            'in bytes.'))
+        ->setSummary(pht('Global cap for size of generated emails (bytes).'))
+        ->addExample(524288, pht('Truncate at 512KB'))
+        ->addExample(1048576, pht('Truncate at 1MB'))
     );
   }
 
