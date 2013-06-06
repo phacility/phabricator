@@ -42,7 +42,7 @@ final class PHUIListExample extends PhabricatorUIExample {
     $action5 = id(new PHUIListItemView())
       ->setName('Subscribe')
       ->setHref('#')
-      ->setIcon('subscribe-add')
+      ->setIcon('check')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $actionmenu = id(new PHUIListView())

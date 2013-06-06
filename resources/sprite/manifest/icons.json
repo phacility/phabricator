@@ -796,51 +796,6 @@
       "rule" : ".icons-start-sandcastle-white, .device-desktop .phabricator-action-view:hover .icons-start-sandcastle, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-start-sandcastle",
       "hash" : "40d1583f799732728f26b8f05066b241"
     },
-    "icons-subscribe-add"            : {
-      "name" : "icons-subscribe-add",
-      "rule" : ".icons-subscribe-add",
-      "hash" : "133ad9e3a38f20d2460f558de3f71d09"
-    },
-    "icons-subscribe-add-grey"       : {
-      "name" : "icons-subscribe-add-grey",
-      "rule" : ".icons-subscribe-add-grey",
-      "hash" : "67fc8a303205ca2219badbf59f3bd15c"
-    },
-    "icons-subscribe-add-white"      : {
-      "name" : "icons-subscribe-add-white",
-      "rule" : ".icons-subscribe-add-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-add, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-subscribe-add",
-      "hash" : "cec0acb841b0035a4a82873441b2e54e"
-    },
-    "icons-subscribe-auto"           : {
-      "name" : "icons-subscribe-auto",
-      "rule" : ".icons-subscribe-auto",
-      "hash" : "b14648970a1a1fb29d1981b4d00464b6"
-    },
-    "icons-subscribe-auto-grey"      : {
-      "name" : "icons-subscribe-auto-grey",
-      "rule" : ".icons-subscribe-auto-grey",
-      "hash" : "980f27ed95a0ceb95fd629237bc1919c"
-    },
-    "icons-subscribe-auto-white"     : {
-      "name" : "icons-subscribe-auto-white",
-      "rule" : ".icons-subscribe-auto-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-auto, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-subscribe-auto",
-      "hash" : "88cd74cfdc56d8e0ccc4bc6f584ec7c2"
-    },
-    "icons-subscribe-delete"         : {
-      "name" : "icons-subscribe-delete",
-      "rule" : ".icons-subscribe-delete",
-      "hash" : "7b2f40a2bb3053aee9e73744fdc228e4"
-    },
-    "icons-subscribe-delete-grey"    : {
-      "name" : "icons-subscribe-delete-grey",
-      "rule" : ".icons-subscribe-delete-grey",
-      "hash" : "e1bd9aa4e20759584ac1ac84cbaf36b7"
-    },
-    "icons-subscribe-delete-white"   : {
-      "name" : "icons-subscribe-delete-white",
-      "rule" : ".icons-subscribe-delete-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-delete, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-subscribe-delete",
-      "hash" : "6c2216a1d2ea9786a7beae8487ae5520"
-    },
     "icons-tag"                      : {
       "name" : "icons-tag",
       "rule" : ".icons-tag",
