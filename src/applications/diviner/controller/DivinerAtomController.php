@@ -126,7 +126,7 @@ final class DivinerAtomController extends DivinerController {
             ->setHref('#'.$key));
       }
 
-      $document->setSideNav($side);
+      $document->setSideNav($side, PHUIDocumentView::NAV_TOP);
     }
 
     return $this->buildApplicationPage(

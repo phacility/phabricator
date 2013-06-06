@@ -126,4 +126,5 @@
 
 .device-phone .phui-list-view.phui-list-navbar > li {
   float: none;
+  border: none;
 }

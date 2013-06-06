@@ -3682,7 +3682,7 @@ celerity_register_resource_map(array(
   ),
   'phui-document-view-css' =>
   array(
-    'uri' => '/res/994a3474/rsrc/css/phui/phui-document.css',
+    'uri' => '/res/fe374dee/rsrc/css/phui/phui-document.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3718,7 +3718,7 @@ celerity_register_resource_map(array(
   ),
   'phui-list-view-css' =>
   array(
-    'uri' => '/res/bdc66aff/rsrc/css/phui/phui-list.css',
+    'uri' => '/res/09f24365/rsrc/css/phui/phui-list.css',
     'type' => 'css',
     'requires' =>
     array(
