@@ -103,7 +103,7 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
       ->addMenuItem($item1);
 
     $home = id(new PHUIListItemView())
-      ->setIcon('transcript')
+      ->setIcon('home')
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_ICON);
 

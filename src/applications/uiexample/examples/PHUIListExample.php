@@ -125,7 +125,7 @@ final class PHUIListExample extends PhabricatorUIExample {
     /* Top Navigation */
 
     $home = id(new PHUIListItemView())
-      ->setIcon('transcript')
+      ->setIcon('home')
       ->setHref('#')
       ->setType(PHUIListItemView::TYPE_ICON);
 
