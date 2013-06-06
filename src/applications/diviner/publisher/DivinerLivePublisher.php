@@ -113,11 +113,6 @@ final class DivinerLivePublisher extends DivinerPublisher {
         ->setGroupName($ref->getGroup());
 
       if ($is_documentable) {
-        $storage = $this->loadAtomStorageForSymbol($symbol)
-          ->setAtomData($atom->toDictionary())
-          ->setContent(null)
-          ->save();
-
         $renderer = $this->getRenderer();
         $summary = $renderer->renderAtomSummary($atom);
         $summary = (string)phutil_safe_html($summary);
@@ -125,6 +120,13 @@ final class DivinerLivePublisher extends DivinerPublisher {
       }
 
       $symbol->save();
+
+      if ($is_documentable) {
+        $storage = $this->loadAtomStorageForSymbol($symbol)
+          ->setAtomData($atom->toDictionary())
+          ->setContent(null)
+          ->save();
+      }
     }
   }
 
