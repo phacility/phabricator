@@ -35,7 +35,9 @@ final class PhabricatorApplicationSearch extends PhabricatorApplication {
         'hovercard/(?P<mode>retrieve|test)/' =>
           'PhabricatorSearchHovercardController',
         'edit/(?P<queryKey>[^/]+)/' => 'PhabricatorSearchEditController',
-        'delete/(?P<queryKey>[^/]+)/' => 'PhabricatorSearchDeleteController',
+        'delete/(?P<queryKey>[^/]+)/(?P<engine>[^/]+)/'
+          => 'PhabricatorSearchDeleteController',
+        'order/(?P<engine>[^/]+)/' => 'PhabricatorSearchOrderController',
         ),
     );
   }

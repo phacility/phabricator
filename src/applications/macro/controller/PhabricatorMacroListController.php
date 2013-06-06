@@ -10,7 +10,7 @@ final class PhabricatorMacroListController extends PhabricatorMacroController
   }
 
   public function willProcessRequest(array $data) {
-    $this->key = idx($data, 'key', 'active');
+    $this->key = idx($data, 'key');
   }
 
   public function processRequest() {

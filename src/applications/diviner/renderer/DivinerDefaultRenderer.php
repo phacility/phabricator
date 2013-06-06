@@ -182,12 +182,13 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
   }
 
   protected function getBlockMarkupEngine() {
-    $engine = PhabricatorMarkupEngine::newMarkupEngine(
-      array(
-        'preserve-linebreaks' => false,
-      ));
+    $engine = PhabricatorMarkupEngine::newMarkupEngine(array());
+
+    $engine->setConfig('preserve-linebreaks', false);
     $engine->setConfig('viewer', new PhabricatorUser());
     $engine->setConfig('diviner.renderer', $this);
+    $engine->setConfig('header.generate-toc', true);
+
     return $engine;
   }
 

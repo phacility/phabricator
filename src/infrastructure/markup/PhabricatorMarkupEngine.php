@@ -120,15 +120,17 @@ final class PhabricatorMarkupEngine {
 
     // Load or build the preprocessor caches.
     $blocks = $this->loadPreprocessorCaches($engines, $objects);
+    $blocks = mpull($blocks, 'getCacheData');
+
+    $this->engineCaches = $blocks;
 
     // Finalize the output.
     foreach ($objects as $key => $info) {
-      $data = $blocks[$key]->getCacheData();
       $engine = $engines[$key];
       $field = $info['field'];
       $object = $info['object'];
 
-      $output = $engine->postprocessText($data);
+      $output = $engine->postprocessText($blocks[$key]);
       $output = $object->didMarkupText($field, $output, $engine);
       $this->objects[$key]['output'] = $output;
     }
@@ -149,18 +151,47 @@ final class PhabricatorMarkupEngine {
    */
   public function getOutput(PhabricatorMarkupInterface $object, $field) {
     $key = $this->getMarkupFieldKey($object, $field);
+    $this->requireKeyProcessed($key);
 
+    return $this->objects[$key]['output'];
+  }
+
+
+  /**
+   * Retrieve engine metadata for a given field.
+   *
+   * @param PhabricatorMarkupInterface  The object to retrieve.
+   * @param string                      The field to retrieve.
+   * @param string                      The engine metadata field to retrieve.
+   * @param wild                        Optional default value.
+   * @task markup
+   */
+  public function getEngineMetadata(
+    PhabricatorMarkupInterface $object,
+    $field,
+    $metadata_key,
+    $default = null) {
+
+    $key = $this->getMarkupFieldKey($object, $field);
+    $this->requireKeyProcessed($key);
+
+    return idx($this->engineCaches[$key]['metadata'], $metadata_key, $default);
+  }
+
+
+  /**
+   * @task markup
+   */
+  private function requireKeyProcessed($key) {
     if (empty($this->objects[$key])) {
       throw new Exception(
-        "Call addObject() before getOutput() (key = '{$key}').");
+        "Call addObject() before using results (key = '{$key}').");
     }
 
     if (!isset($this->objects[$key]['output'])) {
       throw new Exception(
-        "Call process() before getOutput().");
+        "Call process() before using results.");
     }
-
-    return $this->objects[$key]['output'];
   }
 
 

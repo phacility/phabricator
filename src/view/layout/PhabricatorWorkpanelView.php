@@ -22,7 +22,7 @@ final class PhabricatorWorkpanelView extends AphrontView {
     return $this;
   }
 
-  public function setFooterAction(PhabricatorMenuItemView $footer_action) {
+  public function setFooterAction(PHUIListItemView $footer_action) {
     $this->footerAction = $footer_action;
     return $this;
   }
@@ -34,7 +34,7 @@ final class PhabricatorWorkpanelView extends AphrontView {
     if ($this->footerAction) {
       $footer_tag = $this->footerAction;
       $footer = phutil_tag(
-        'div',
+        'ul',
           array(
             'class' => 'phabricator-workpanel-footer-action mst ps'
           ),

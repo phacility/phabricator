@@ -18,20 +18,23 @@ final class DivinerLivePublisher extends DivinerPublisher {
           ->save();
       }
 
+      $book->setConfigurationData($this->getConfigurationData())->save();
+
       $this->book = $book;
     }
     return $this->book;
   }
 
   private function loadSymbolForAtom(DivinerAtom $atom) {
-    $symbol = id(new DivinerLiveSymbol())->loadOneWhere(
-      'bookPHID = %s AND type = %s AND name = %s AND context = %ns
-        AND atomIndex = %d',
-      $this->loadBook()->getPHID(),
-      $atom->getType(),
-      $atom->getName(),
-      $atom->getContext(),
-      $this->getAtomSimilarIndex($atom));
+    $symbol = id(new DivinerAtomQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBookPHIDs(array($this->loadBook()->getPHID()))
+      ->withTypes(array($atom->getType()))
+      ->withNames(array($atom->getName()))
+      ->withContexts(array($atom->getContext()))
+      ->withIndexes(array($this->getAtomSimilarIndex($atom)))
+      ->withIncludeUndocumentable(true)
+      ->executeOne();
 
     if ($symbol) {
       return $symbol;
@@ -97,16 +100,31 @@ final class DivinerLivePublisher extends DivinerPublisher {
   protected function createDocumentsByHash(array $hashes) {
     foreach ($hashes as $hash) {
       $atom = $this->getAtomFromGraphHash($hash);
+      $ref = $atom->getRef();
 
       $symbol = $this->loadSymbolForAtom($atom);
-      $symbol->setGraphHash($hash)->save();
 
-      if ($this->shouldGenerateDocumentForAtom($atom)) {
-        $content = $this->getRenderer()->renderAtom($atom);
+      $is_documentable = $this->shouldGenerateDocumentForAtom($atom);
 
+      $symbol
+        ->setGraphHash($hash)
+        ->setIsDocumentable((int)$is_documentable)
+        ->setTitle($ref->getTitle())
+        ->setGroupName($ref->getGroup());
+
+      if ($is_documentable) {
+        $renderer = $this->getRenderer();
+        $summary = $renderer->renderAtomSummary($atom);
+        $summary = (string)phutil_safe_html($summary);
+        $symbol->setSummary($summary);
+      }
+
+      $symbol->save();
+
+      if ($is_documentable) {
         $storage = $this->loadAtomStorageForSymbol($symbol)
           ->setAtomData($atom->toDictionary())
-          ->setContent((string)phutil_safe_html($content))
+          ->setContent(null)
           ->save();
       }
     }

@@ -37,7 +37,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   }
 
   public function __construct() {
-    $this->menu = new PhabricatorMenuView();
+    $this->menu = new PHUIListView();
   }
 
   public function addClass($class) {
@@ -45,7 +45,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this;
   }
 
-  public static function newFromMenu(PhabricatorMenuView $menu) {
+  public static function newFromMenu(PHUIListView $menu) {
     $object = new AphrontSideNavFilterView();
     $object->setBaseURI(new PhutilURI('/'));
     $object->menu = $menu;
@@ -80,7 +80,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->menu;
   }
 
-  public function addMenuItem(PhabricatorMenuItemView $item) {
+  public function addMenuItem(PHUIListItemView $item) {
     $this->menu->addMenuItem($item);
     return $this;
   }
@@ -91,12 +91,12 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function addFilter($key, $name, $uri = null) {
     return $this->addThing(
-      $key, $name, $uri, PhabricatorMenuItemView::TYPE_LINK);
+      $key, $name, $uri, PHUIListItemView::TYPE_LINK);
   }
 
   public function addButton($key, $name, $uri = null) {
     return $this->addThing(
-      $key, $name, $uri, PhabricatorMenuItemView::TYPE_BUTTON);
+      $key, $name, $uri, PHUIListItemView::TYPE_BUTTON);
   }
 
   private function addThing(
@@ -105,7 +105,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $uri = null,
     $type) {
 
-    $item = id(new PhabricatorMenuItemView())
+    $item = id(new PHUIListItemView())
       ->setName($name)
       ->setType($type);
 
@@ -128,16 +128,16 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function addCustomBlock($block) {
     $this->menu->addMenuItem(
-      id(new PhabricatorMenuItemView())
-        ->setType(PhabricatorMenuItemView::TYPE_CUSTOM)
+      id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_CUSTOM)
         ->appendChild($block));
     return $this;
   }
 
   public function addLabel($name) {
     return $this->addMenuItem(
-      id(new PhabricatorMenuItemView())
-        ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+      id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_LABEL)
         ->setName($name));
   }
 
@@ -175,7 +175,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     if ($this->selectedFilter !== null) {
       $selected_item = $this->menu->getItem($this->selectedFilter);
       if ($selected_item) {
-        $selected_item->addClass('phabricator-menu-item-selected');
+        $selected_item->addClass('phui-list-item-selected');
       }
     }
 

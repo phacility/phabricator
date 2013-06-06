@@ -29,7 +29,7 @@ abstract class PhabricatorMacroController
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Macro'))
         ->setHref($this->getApplicationURI('/create/'))
         ->setIcon('create'));

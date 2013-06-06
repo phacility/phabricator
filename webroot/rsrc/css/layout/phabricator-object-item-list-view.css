@@ -98,7 +98,7 @@
   box-shadow: inset 1px 0 1px 0px rgba(0, 0, 0, 0.07);
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-view {
+.phabricator-object-item-actions .phui-list-item-view {
   float: right;
   height: 100%;
   width: 24px;
@@ -106,16 +106,23 @@
   position: relative;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-view +
-.phabricator-menu-item-view {
+.phabricator-object-item-actions .phui-list-item-view +
+.phui-list-item-view {
   border-right: 1px solid #d6d6e9;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-view:hover {
+.phabricator-object-item-actions .phui-list-item-href {
+  display: inline-block;
+  position: relative;
+  width: 24px;
+  height: 100%;
+}
+
+.phabricator-object-item-actions .phui-list-item-href:hover {
   background: #e9e9f9;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-icon {
+.phabricator-object-item-actions .phui-list-item-icon {
   width: 14px;
   height: 14px;
   position: absolute;
@@ -125,7 +132,7 @@
   left: 5px;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-name {
+.phabricator-object-item-actions .phui-list-item-name {
   display: none;
 }
 
@@ -456,4 +463,27 @@
 .phabricator-object-list-cards .phabricator-object-item-selected
   .phabricator-object-item-frame {
   border-color: #99ccff;
+}
+
+
+/* - Draggable List ------------------------------------------------------------
+
+  These classes are applied by and/or provided for use with JX.DraggableList.
+
+*/
+
+.drag-ghost {
+  position: relative;
+  border: 1px dashed #aaaaaa;
+  background: #f9f9f9;
+  margin: 4px;
+}
+
+.drag-dragging {
+  position: relative;
+  opacity: 0.9;
+}
+
+.drag-sending {
+  opacity: 0.75;
 }

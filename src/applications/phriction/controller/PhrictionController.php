@@ -51,14 +51,14 @@ abstract class PhrictionController extends PhabricatorController {
 
     if (get_class($this) != 'PhrictionListController') {
       $crumbs->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setName(pht('Index'))
           ->setHref('/phriction/')
           ->setIcon('transcript'));
     }
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('New Document'))
         ->setHref('/phriction/new/?slug='.$this->getDocumentSlug())
         ->setWorkflow(true)

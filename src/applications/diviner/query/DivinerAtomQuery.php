@@ -10,6 +10,7 @@ final class DivinerAtomQuery
   private $types;
   private $contexts;
   private $indexes;
+  private $includeUndocumentable;
 
   private $needAtoms;
 
@@ -50,6 +51,11 @@ final class DivinerAtomQuery
 
   public function needAtoms($need) {
     $this->needAtoms = $need;
+    return $this;
+  }
+
+  public function withIncludeUndocumentable($include) {
+    $this->includeUndocumentable = $include;
     return $this;
   }
 
@@ -180,6 +186,12 @@ final class DivinerAtomQuery
         $conn_r,
         'atomIndex IN (%Ld)',
         $this->indexes);
+    }
+
+    if (!$this->includeUndocumentable) {
+      $where[] = qsprintf(
+        $conn_r,
+        'isDocumentable = 1');
     }
 
     $where[] = $this->buildPagingClause($conn_r);

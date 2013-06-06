@@ -285,6 +285,10 @@ return array(
   //      mostly never arrive.
   'metamta.can-send-as-user'    => false,
 
+  // Limit the maximum size of the body of an email generated for a diff
+  // (in bytes).
+  'metamta.email-body-limit'    => 524288,
+
   // Adapter class to use to transmit mail to the MTA. The default uses
   // PHPMailerLite, which will invoke "sendmail". This is appropriate
   // if sendmail actually works on your host, but if you haven't configured mail

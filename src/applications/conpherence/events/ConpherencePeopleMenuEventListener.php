@@ -24,7 +24,7 @@ final class ConpherencePeopleMenuEventListener extends PhutilEventListener {
     $name = pht('Message');
 
     $menu->addMenuItemBefore('activity',
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
       ->setIsExternal(true)
       ->setName($name)
       ->setHref($conpherence_uri)

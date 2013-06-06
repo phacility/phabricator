@@ -6,20 +6,17 @@
 final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   implements PhabricatorPolicyInterface {
 
-  protected $queryKey = "";
-  protected $queryName = "";
-  protected $userPHID = "";
-  protected $engineClassName = "";
+  protected $queryKey;
+  protected $queryName;
+  protected $userPHID;
+  protected $engineClassName;
 
-  private $isBuiltin;
+  protected $isBuiltin  = 0;
+  protected $isDisabled = 0;
+  protected $sequence   = 0;
 
-  public function setIsBuiltin($is_builtin) {
-    $this->isBuiltin = $is_builtin;
-    return $this;
-  }
-
-  public function getIsBuiltin() {
-    return $this->isBuiltin;
+  public function getSortKey() {
+    return sprintf('~%010d%010d', $this->sequence, $this->getID());
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

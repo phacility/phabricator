@@ -2,27 +2,28 @@
  * @provides phabricator-side-menu-view-css
  */
 
-.phabricator-side-menu .phabricator-menu-item-view {
+.phabricator-side-menu .phui-list-item-view {
   display: block;
   white-space: nowrap;
   text-decoration: none;
   font-size: 13px;
 }
 
-.phabricator-side-menu .phabricator-menu-item-type-link {
+.phabricator-side-menu .phui-list-item-href {
+  display: block;
   padding: 6px 8px 6px 24px;
   color: #e1e2e5;
   text-shadow: rgba(0, 0, 0, 1) 0px 1px 1px;
 }
 
-.phabricator-side-menu .phabricator-menu-item-selected,
-.device-desktop .phabricator-side-menu
- .phabricator-menu-item-selected.phabricator-menu-item-type-link:hover {
+.phabricator-side-menu .phui-list-item-selected,
+.device-desktop .phui-side-menu
+ .phui-list-item-selected.phui-list-item-href:hover {
   background-color: #305c85;
   color: #fff;
 }
 
-.phabricator-side-menu .phabricator-menu-item-type-label {
+.phabricator-side-menu .phui-list-item-type-label {
   padding: 6px 8px 4px 12px;
   color: #f7f7f7;
   text-transform: uppercase;
@@ -32,8 +33,8 @@
   background-color: #000;
 }
 
-.phabricator-dark-menu .phabricator-menu-item-type-button,
-.phabricator-side-menu .phabricator-menu-item-type-button {
+.phabricator-dark-menu .phui-list-item-type-button,
+.phabricator-side-menu .phui-list-item-type-button {
   width: 50%;
   padding: 5px 8px;
   display: block;
@@ -47,11 +48,11 @@
   text-align: center;
 }
 
-.phabricator-side-menu .phabricator-menu-item-type-button:hover {
+.phabricator-side-menu .phui-list-item-type-button:hover {
   background-color: #1e2225;
 }
 
-.device-desktop .phabricator-side-menu a.phabricator-menu-item-type-link:hover {
+.device-desktop .phabricator-side-menu a.phui-list-item-href:hover {
   text-decoration: none;
   background-color: #1e2225;
 }

@@ -38,6 +38,18 @@ final class ManiphestTaskEditController extends ManiphestController {
         if ($default_projects) {
           $task->setProjectPHIDs(explode(';', $default_projects));
         }
+
+        $task->setDescription($request->getStr('description'));
+
+        $assign = $request->getStr('assign');
+        if (strlen($assign)) {
+          $assign_user = id(new PhabricatorUser())->loadOneWhere(
+            'username = %s',
+            $assign);
+          if ($assign_user) {
+            $task->setOwnerPHID($assign_user->getPHID());
+          }
+        }
       }
 
       $file_phids = $request->getArr('files', array());
@@ -554,7 +566,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         ->setName($header_name)
         ->setHref($this->getApplicationURI('/task/create/')))
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setHref($this->getApplicationURI('/task/create/'))
           ->setName(pht('Create Task'))
           ->setIcon('create'));

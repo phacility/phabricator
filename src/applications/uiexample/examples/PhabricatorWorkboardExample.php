@@ -103,7 +103,7 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
           ->setCards($list)
           ->setHeader('Business Stuff')
           ->setFooterAction(
-            id(new PhabricatorMenuItemView())
+            id(new PHUIListItemView())
               ->setName(pht('Add Task'))
               ->setIcon('new')
               ->setHref('/maniphest/task/create/'));

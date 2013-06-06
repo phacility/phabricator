@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorMenuViewTestCase extends PhabricatorTestCase {
+final class PHUIListViewTestCase extends PhabricatorTestCase {
 
   public function testAppend() {
     $menu = $this->newABCMenu();
@@ -73,7 +73,7 @@ final class PhabricatorMenuViewTestCase extends PhabricatorTestCase {
   }
 
   public function testAppendLabel() {
-    $menu = new PhabricatorMenuView();
+    $menu = new PHUIListView();
     $menu->addMenuItem($this->newLabel('fruit'));
     $menu->addMenuItem($this->newLabel('animals'));
 
@@ -107,21 +107,21 @@ final class PhabricatorMenuViewTestCase extends PhabricatorTestCase {
   }
 
   private function newLink($key) {
-    return id(new PhabricatorMenuItemView())
+    return id(new PHUIListItemView())
       ->setKey($key)
       ->setHref('#')
       ->setName('Link');
   }
 
   private function newLabel($key) {
-    return id(new PhabricatorMenuItemView())
-      ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+    return id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LABEL)
       ->setKey($key)
       ->setName('Label');
   }
 
   private function newABCMenu() {
-    $menu = new PhabricatorMenuView();
+    $menu = new PHUIListView();
 
     $menu->addMenuItem($this->newLink('a'));
     $menu->addMenuItem($this->newLink('b'));
@@ -130,7 +130,7 @@ final class PhabricatorMenuViewTestCase extends PhabricatorTestCase {
     return $menu;
   }
 
-  private function assertMenuKeys(array $expect, PhabricatorMenuView $menu) {
+  private function assertMenuKeys(array $expect, PHUIListView $menu) {
     $items = $menu->getItems();
     $keys = mpull($items, 'getKey');
     $keys = array_values($keys);

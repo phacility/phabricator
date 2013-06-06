@@ -416,7 +416,7 @@ final class ManiphestTaskListController extends ManiphestController {
         id(new PhabricatorCrumbView())
           ->setName($title))
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setHref($this->getApplicationURI('/task/create/'))
           ->setName(pht('Create Task'))
           ->setIcon('create'));

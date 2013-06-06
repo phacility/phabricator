@@ -18,7 +18,7 @@
     },
     "gradient-dark-menu-label"  : {
       "name" : "gradient-dark-menu-label",
-      "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phabricator-menu-item-type-label",
+      "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phui-list-item-type-label",
       "hash" : "8a11efa454f788aa2419ed8c745dece2"
     },
     "gradient-green-header"     : {
@@ -33,7 +33,7 @@
     },
     "gradient-menu-label"       : {
       "name" : "gradient-menu-label",
-      "rule" : ".gradient-menu-label, .phabricator-side-menu .phabricator-menu-item-type-label",
+      "rule" : ".gradient-menu-label, .phabricator-side-menu .phui-list-item-type-label",
       "hash" : "e2aa8e74c3b2c0b18de34d336d318b5c"
     },
     "gradient-red-header"       : {
@@ -50,6 +50,6 @@
   "scales"  : [
     1
   ],
-  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, .phabricator-dark-menu .phabricator-menu-item-type-label, .phabricator-side-menu .phabricator-menu-item-type-label {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
+  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, .phabricator-dark-menu .phui-list-item-type-label, .phabricator-side-menu .phui-list-item-type-label {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
   "type"    : "repeat-x"
 }

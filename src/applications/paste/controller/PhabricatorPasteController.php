@@ -29,7 +29,7 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Paste'))
         ->setHref($this->getApplicationURI('create/'))
         ->setIcon('create'));

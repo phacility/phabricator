@@ -15,7 +15,7 @@ final class PhabricatorCrumbsView extends AphrontView {
     return $this;
   }
 
-  public function addAction(PhabricatorMenuItemView $action) {
+  public function addAction(PHUIListItemView $action) {
     $this->actions[] = $action;
     return $this;
   }
@@ -47,8 +47,7 @@ final class PhabricatorCrumbsView extends AphrontView {
             array(
               'class' => 'phabricator-crumbs-action-name'
             ),
-          $action->getName()
-        );
+          $action->getName());
 
         $action_sigils = $action->getSigils();
         if ($action->getWorkflow()) {

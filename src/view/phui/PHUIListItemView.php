@@ -1,12 +1,14 @@
 <?php
 
-final class PhabricatorMenuItemView extends AphrontTagView {
+final class PHUIListItemView extends AphrontTagView {
 
   const TYPE_LINK     = 'type-link';
   const TYPE_SPACER   = 'type-spacer';
   const TYPE_LABEL    = 'type-label';
   const TYPE_BUTTON   = 'type-button';
   const TYPE_CUSTOM   = 'type-custom';
+  const TYPE_DIVIDER  = 'type-divider';
+  const TYPE_ICON     = 'type-icon';
 
   private $name;
   private $href;
@@ -15,15 +17,7 @@ final class PhabricatorMenuItemView extends AphrontTagView {
   private $key;
   private $icon;
   private $selected;
-
-  public function setProperty($property) {
-    $this->property = $property;
-    return $this;
-  }
-
-  public function getProperty() {
-    return $this->property;
-  }
+  private $containerAttrs;
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -89,16 +83,24 @@ final class PhabricatorMenuItemView extends AphrontTagView {
   }
 
   protected function getTagName() {
-    return $this->href ? 'a' : 'div';
+    return 'li';
   }
 
   protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'phui-list-item-view';
+    $classes[] = 'phui-list-item-'.$this->type;
+
+    if ($this->icon) {
+      $classes[] = 'phui-list-item-has-icon';
+    }
+
+    if ($this->selected) {
+      $classes[] = 'phui-list-item-selected';
+    }
+
     return array(
-      'class' => array(
-        'phabricator-menu-item-view',
-        'phabricator-menu-item-'.$this->type,
-      ),
-      'href' => $this->href,
+      'class' => $classes,
     );
   }
 
@@ -115,7 +117,7 @@ final class PhabricatorMenuItemView extends AphrontTagView {
       $name = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-menu-item-name',
+          'class' => 'phui-list-item-name',
         ),
         array(
           $this->name,
@@ -125,16 +127,22 @@ final class PhabricatorMenuItemView extends AphrontTagView {
 
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->addClass('phabricator-menu-item-icon')
+        ->addClass('phui-list-item-icon')
         ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
         ->setSpriteIcon($this->icon);
     }
 
-    return array(
-      $icon,
-      $this->renderChildren(),
-      $name,
-    );
+    return phutil_tag(
+      $this->href ? 'a' : 'div',
+      array(
+        'href' => $this->href,
+        'class' => $this->href ? 'phui-list-item-href' : null,
+      ),
+      array(
+        $icon,
+        $this->renderChildren(),
+        $name,
+      ));
   }
 
 }

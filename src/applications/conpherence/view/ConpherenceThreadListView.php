@@ -33,7 +33,7 @@ final class ConpherenceThreadListView extends AphrontView {
   public function render() {
     require_celerity_resource('conpherence-menu-css');
 
-    $menu = id(new PhabricatorMenuView())
+    $menu = id(new PHUIListView())
       ->addClass('conpherence-menu')
       ->setID('conpherence-menu');
 
@@ -69,8 +69,8 @@ final class ConpherenceThreadListView extends AphrontView {
   }
 
   private function renderThreadItem(ConpherenceThread $thread) {
-    return id(new PhabricatorMenuItemView())
-      ->setType(PhabricatorMenuItemView::TYPE_CUSTOM)
+    return id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_CUSTOM)
       ->setName($this->renderThread($thread));
   }
 
@@ -105,7 +105,7 @@ final class ConpherenceThreadListView extends AphrontView {
   }
 
   private function addThreadsToMenu(
-    PhabricatorMenuView $menu,
+    PHUIListView $menu,
     array $conpherences) {
 
     if ($this->scrollUpParticipant->getID()) {
@@ -139,11 +139,11 @@ final class ConpherenceThreadListView extends AphrontView {
     } else {
       $name = pht('Load Older Threads');
     }
-    $item = id(new PhabricatorMenuItemView())
+    $item = id(new PHUIListItemView())
       ->addSigil('conpherence-menu-scroller')
       ->setName($name)
       ->setHref($this->baseURI)
-      ->setType(PhabricatorMenuItemView::TYPE_BUTTON)
+      ->setType(PHUIListItemView::TYPE_BUTTON)
       ->setMetadata(array(
         'participant_id' => $participant->getID(),
         'conpherence_phid' => $participant->getConpherencePHID(),
@@ -160,8 +160,8 @@ final class ConpherenceThreadListView extends AphrontView {
       ),
       pht('No conpherences.'));
 
-    return id(new PhabricatorMenuItemView())
-      ->setType(PhabricatorMenuItemView::TYPE_CUSTOM)
+    return id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_CUSTOM)
       ->setName($message);
   }
 

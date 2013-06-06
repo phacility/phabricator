@@ -39,7 +39,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
 
     if ($viewer->getIsAdmin()) {
       $crumbs->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setName(pht('Create New User'))
           ->setHref($this->getApplicationURI('edit'))
           ->setIcon('create'));

@@ -86,15 +86,13 @@ final class ManiphestTaskListView extends ManiphestView {
         $item->addSigil('maniphest-task');
       }
 
-      if ($task->getProjectPHIDs()) {
-        $projects_view = new ManiphestTaskProjectsView();
-        $projects_view->setHandles(
-          array_select_keys(
-            $handles,
-            $task->getProjectPHIDs()));
+      $projects_view = new ManiphestTaskProjectsView();
+      $projects_view->setHandles(
+        array_select_keys(
+          $handles,
+          $task->getProjectPHIDs()));
 
-        $item->addAttribute($projects_view);
-      }
+      $item->addAttribute($projects_view);
 
       $item->setMetadata(
         array(
@@ -103,7 +101,7 @@ final class ManiphestTaskListView extends ManiphestView {
 
       if ($this->showBatchControls) {
         $item->addAction(
-          id(new PhabricatorMenuItemView())
+          id(new PHUIListItemView())
             ->setIcon('edit')
             ->addSigil('maniphest-edit-task')
             ->setHref('/maniphest/task/edit/'.$task->getID().'/'));
