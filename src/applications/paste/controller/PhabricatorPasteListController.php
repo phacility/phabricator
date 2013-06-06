@@ -10,7 +10,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController
   }
 
   public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey', 'all');
+    $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {

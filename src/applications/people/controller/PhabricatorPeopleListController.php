@@ -14,7 +14,7 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
   }
 
   public function willProcessRequest(array $data) {
-    $this->key = idx($data, 'key', 'all');
+    $this->key = idx($data, 'key');
   }
 
   public function processRequest() {

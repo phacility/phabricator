@@ -96,11 +96,13 @@ final class PhabricatorApplicationSearchController
     if ($this->queryKey == 'advanced') {
       $run_query = false;
       $query_key = $request->getStr('query');
+    } else if (!strlen($this->queryKey)) {
+      $query_key = head_key($engine->loadEnabledNamedQueries());
     }
 
     if ($engine->isBuiltinQuery($query_key)) {
       $saved_query = $engine->buildSavedQueryFromBuiltin($query_key);
-      $named_query = $engine->getBuiltinQuery($query_key);
+      $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
     } else if ($query_key) {
       $saved_query = id(new PhabricatorSavedQueryQuery())
         ->setViewer($user)
@@ -111,12 +113,7 @@ final class PhabricatorApplicationSearchController
         return new Aphront404Response();
       }
 
-      $named_query = id(new PhabricatorNamedQueryQuery())
-        ->setViewer($user)
-        ->withQueryKeys(array($saved_query->getQueryKey()))
-        ->withEngineClassNames(array(get_class($engine)))
-        ->withUserPHIDs(array($user->getPHID()))
-        ->executeOne();
+      $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
     } else {
       $saved_query = $engine->buildSavedQueryFromRequest($request);
     }
