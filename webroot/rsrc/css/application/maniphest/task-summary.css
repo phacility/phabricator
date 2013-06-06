@@ -75,22 +75,6 @@
   width: 100%;
 }
 
-.maniphest-subpriority-target {
-  position: relative;
-  border: 1px dashed #aaaaaa;
-  background: #f9f9f9;
-  margin: 4px;
-}
-
-.maniphest-task-loading {
-  opacity: 0.75;
-}
-
-.maniphest-task-dragging {
-  position: relative;
-  opacity: 0.90;
-}
-
 .maniphest-list-container {
   padding: 20px;
 }

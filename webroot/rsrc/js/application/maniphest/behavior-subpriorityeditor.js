@@ -2,7 +2,6 @@
  * @provides javelin-behavior-maniphest-subpriority-editor
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-vector
  *           javelin-stratcom
  *           javelin-workflow
  *           phabricator-draggable-list
@@ -16,7 +15,6 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
       var heads = JX.DOM.scry(document.body, 'h1',  'task-group');
       return tasks.concat(heads);
     })
-    .setGhostNode(JX.$N('li', {className: 'maniphest-subpriority-target'}))
     .setGhostHandler(function(ghost, target) {
       if (target.nextSibling) {
         if (JX.DOM.isType(target, 'h1')) {
@@ -35,15 +33,6 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
     }
   });
 
-  draggable.listen('didBeginDrag', function(node) {
-    draggable.getGhostNode().style.height = JX.Vector.getDim(node).y + 'px';
-    JX.DOM.alterClass(node, 'maniphest-task-dragging', true);
-  });
-
-  draggable.listen('didEndDrag', function(node) {
-    JX.DOM.alterClass(node, 'maniphest-task-dragging', false);
-  });
-
   draggable.listen('didDrop', function(node, after) {
     var data = {
       task: JX.Stratcom.getData(node).taskID
@@ -56,7 +45,7 @@ JX.behavior('maniphest-subpriority-editor', function(config) {
     }
 
     draggable.lock();
-    JX.DOM.alterClass(node, 'maniphest-task-loading', true);
+    JX.DOM.alterClass(node, 'drag-sending', true);
 
     var onresponse = function(r) {
       var nodes = JX.$H(r.tasks).getFragment().firstChild;

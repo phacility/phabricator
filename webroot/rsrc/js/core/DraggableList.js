@@ -33,8 +33,7 @@ JX.install('DraggableList', {
     'didDrop'],
 
   properties : {
-    findItemsHandler : null,
-    ghostNode: null
+    findItemsHandler : null
   },
 
   members : {
@@ -46,6 +45,7 @@ JX.install('DraggableList', {
     _targets : null,
     _dimensions : null,
     _ghostHandler : null,
+    _ghostNode : null,
 
     setGhostHandler : function(handler) {
       this._ghostHandler = handler;
@@ -54,6 +54,13 @@ JX.install('DraggableList', {
 
     getGhostHandler : function() {
       return this._ghostHandler || JX.bind(this, this._defaultGhostHandler);
+    },
+
+    getGhostNode : function() {
+      if (!this._ghostNode) {
+        this._ghostNode = JX.$N('li', {className: 'drag-ghost'});
+      }
+      return this._ghostNode;
     },
 
     _defaultGhostHandler : function(ghost, target) {
@@ -79,13 +86,6 @@ JX.install('DraggableList', {
     },
 
     _ondrag : function(e) {
-      if (__DEV__) {
-        var ghost = this.getGhostNode();
-        if (!ghost) {
-          JX.$E('JX.Draggable._ondrag(): No ghostNode set!');
-        }
-      }
-
       if (this._dragging) {
         // Don't start dragging if we're already dragging something.
         return;
@@ -123,7 +123,11 @@ JX.install('DraggableList', {
       this._targets = targets;
       this._target = null;
 
-      this.invoke('didBeginDrag', this._dragging);
+      if (!this.invoke('didBeginDrag', this._dragging).getPrevented()) {
+        var ghost =  this.getGhostNode();
+        ghost.style.height = JX.Vector.getDim(this._dragging).y + 'px';
+        JX.DOM.alterClass(this._dragging, 'drag-dragging', true);
+      }
     },
 
     _onmove : function(e) {
@@ -249,7 +253,10 @@ JX.install('DraggableList', {
         this.invoke('didCancelDrag', dragging);
       }
 
-      this.invoke('didEndDrag', dragging);
+      if (!this.invoke('didEndDrag', dragging).getPrevented()) {
+        JX.DOM.alterClass(dragging, 'drag-dragging', false);
+      }
+
       e.kill();
     },
 
