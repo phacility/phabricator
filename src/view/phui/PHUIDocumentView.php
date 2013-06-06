@@ -21,11 +21,13 @@ final class PHUIDocumentView extends AphrontTagView {
   }
 
   public function setSideNav(PHUIListView $list) {
+    $list->setType(PHUIListView::SIDENAV_LIST);
     $this->sidenav = $list;
     return $this;
   }
 
   public function setTopNav(PHUIListView $list) {
+    $list->setType(PHUIListView::NAVBAR_LIST);
     $this->topnav = $list;
     return $this;
   }

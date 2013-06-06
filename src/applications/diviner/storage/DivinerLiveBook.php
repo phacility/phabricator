@@ -35,6 +35,16 @@ final class DivinerLiveBook extends DivinerDAO
     return $this->getConfig('title', $this->getName());
   }
 
+  public function getShortTitle() {
+    return $this->getConfig('short', $this->getTitle());
+  }
+
+  public function getGroupName($group) {
+    $groups = $this->getConfig('groups');
+    $spec = idx($groups, $group, array());
+    return idx($spec, 'name', pht('Free Radicals'));
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
   public function getCapabilities() {

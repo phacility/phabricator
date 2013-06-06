@@ -29,7 +29,7 @@ final class DivinerBookController extends DivinerController {
 
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
-        ->setName($book->getTitle())
+        ->setName($book->getShortTitle())
         ->setHref('/book/'.$book->getName().'/'));
 
     $header = id(new PhabricatorHeaderView())->setHeader($book->getTitle());
@@ -56,19 +56,7 @@ final class DivinerBookController extends DivinerController {
 
     $out = array();
     foreach ($groups as $group => $atoms) {
-      $group_info = idx($group_spec, $group);
-      if (!is_array($group_info)) {
-        $group_info = array();
-      }
-
-      $group_name = idx($group_info, 'name');
-      if (!strlen($group_name)) {
-        if (strlen($group)) {
-          $group_name = $group;
-        } else {
-          $group_name = pht('Free Radicals');
-        }
-      }
+      $group_name = $book->getGroupName($group);
 
       $out[] = id(new PhabricatorHeaderView())
         ->setHeader($group_name);

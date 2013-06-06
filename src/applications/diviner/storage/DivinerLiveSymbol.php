@@ -1,7 +1,7 @@
 <?php
 
 final class DivinerLiveSymbol extends DivinerDAO
-  implements PhabricatorPolicyInterface {
+  implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
 
   protected $phid;
   protected $bookPHID;
@@ -18,7 +18,6 @@ final class DivinerLiveSymbol extends DivinerDAO
   protected $isDocumentable = 0;
 
   private $book;
-  private $content;
   private $atom;
 
   public function getConfiguration() {
@@ -45,13 +44,6 @@ final class DivinerLiveSymbol extends DivinerDAO
     return $this;
   }
 
-  public function getContent() {
-    if ($this->content === null) {
-      throw new Exception("Call attachAtom() before getContent()!");
-    }
-    return $this->content;
-  }
-
   public function getAtom() {
     if ($this->atom === null) {
       throw new Exception("Call attachAtom() before getAtom()!");
@@ -60,7 +52,6 @@ final class DivinerLiveSymbol extends DivinerDAO
   }
 
   public function attachAtom(DivinerLiveAtom $atom) {
-    $this->content = $atom->getContent();
     $this->atom = DivinerAtom::newFromDictionary($atom->getAtomData());
     return $this;
   }
@@ -133,6 +124,43 @@ final class DivinerLiveSymbol extends DivinerDAO
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return $this->getBook()->hasAutomaticCapability($capability, $viewer);
+  }
+
+
+/* -(  Markup Interface  )--------------------------------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    return $this->getPHID().':'.$field.':'.$this->getGraphHash();
+  }
+
+
+  public function newMarkupEngine($field) {
+    $engine = PhabricatorMarkupEngine::newMarkupEngine(array());
+
+    $engine->setConfig('preserve-linebreaks', false);
+//    $engine->setConfig('diviner.renderer', new DivinerDefaultRenderer());
+    $engine->setConfig('header.generate-toc', true);
+
+    return $engine;
+  }
+
+
+  public function getMarkupText($field) {
+    return $this->getAtom()->getDocblockText();
+  }
+
+
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+
+  public function shouldUseMarkupCache($field) {
+    return true;
   }
 
 }

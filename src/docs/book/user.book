@@ -1,6 +1,7 @@
 {
   "name" : "phabricator",
   "title" : "Phabricator User Documentation",
+  "short" : "Phabricator User Docs",
   "root" : "../../../",
   "groups" : {
     "intro" : {
