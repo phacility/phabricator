@@ -25,8 +25,11 @@ final class PhabricatorUserConfigOptions
       );
     }
 
+    $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
+
     return array(
-      $this->newOption('user.fields', 'wild', $default)
+      $this->newOption('user.fields', $custom_field_type, $default)
+        ->setCustomData(id(new PhabricatorUser())->getCustomFieldBaseClass())
         ->setDescription(pht("Select and reorder user profile fields.")),
     );
   }

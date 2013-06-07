@@ -15,6 +15,10 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
       return;
     }
 
+    if ($option->isCustomType()) {
+      return $option->getCustomObject()->validateOption($option, $value);
+    }
+
     switch ($option->getType()) {
       case 'bool':
         if ($value !== true &&
