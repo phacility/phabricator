@@ -146,7 +146,7 @@ abstract class PhabricatorApplicationTransactionEditor
         return $this->getEdgeTransactionNewValue($xaction);
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
-        return $field->getNewValueForApplicationTransactions();
+        return $field->getNewValueFromApplicationTransactions($xaction);
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
     }

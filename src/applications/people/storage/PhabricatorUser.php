@@ -2,7 +2,10 @@
 
 final class PhabricatorUser
   extends PhabricatorUserDAO
-  implements PhutilPerson, PhabricatorPolicyInterface {
+  implements
+    PhutilPerson,
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -32,6 +35,7 @@ final class PhabricatorUser
   private $status = null;
   private $preferences = null;
   private $omnipotent = false;
+  private $customFields = array();
 
   protected function readField($field) {
     switch ($field) {
@@ -755,5 +759,29 @@ EOBODY;
     return $this->getPHID() && ($viewer->getPHID() === $this->getPHID());
   }
 
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array();
+    // TODO: PhabricatorEnv::getEnvConfig('user.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'PhabricatorUserCustomFieldInterface';
+  }
+
+  public function getCustomFields($role) {
+    if (idx($this->customFields, $role) === null) {
+      PhabricatorCustomField::raiseUnattachedException($this, $role);
+    }
+    return $this->customFields[$role];
+  }
+
+  public function attachCustomFields($role, array $fields) {
+    $this->customFields[$role] = $fields;
+    return $this;
+  }
 
 }

@@ -14,7 +14,7 @@ abstract class PhabricatorCustomField {
   private $object;
 
   const ROLE_APPLICATIONTRANSACTIONS  = 'ApplicationTransactions';
-  const ROLE_APPLICAITONSEARCH        = 'ApplicationSearch';
+  const ROLE_APPLICATIONSEARCH        = 'ApplicationSearch';
   const ROLE_STORAGE                  = 'storage';
   const ROLE_DEFAULT                  = 'default';
 
@@ -44,14 +44,6 @@ abstract class PhabricatorCustomField {
       $fields = $object->getCustomFields($role);
     } catch (PhabricatorCustomFieldNotAttachedException $ex) {
       $base_class = $object->getCustomFieldBaseClass();
-
-      if (!($base_class instanceof PhabricatorCustomField)) {
-        $obj_class = get_class($object);
-        throw new Exception(
-          "Object (of class '{$obj_class}') returned '{$base_class}' as its ".
-          "getCustomFieldBaseClass(), but this is not a recognized subclass ".
-          "of PhabricatorCustomField.");
-      }
 
       $spec = $object->getCustomFieldSpecificationForRole($role);
       if (!is_array($spec)) {
@@ -87,7 +79,6 @@ abstract class PhabricatorCustomField {
     PhabricatorCustomFieldInterface $object,
     $role,
     $field_key) {
-
     return idx(self::getObjectFields($object, $role), $field_key);
   }
 
@@ -96,12 +87,6 @@ abstract class PhabricatorCustomField {
    * @task apps
    */
   public static function buildFieldList($base_class, array $spec) {
-    $this_class = __CLASS__;
-    if (!($base_class instanceof $this_class)) {
-      throw new Exception(
-        "Base class ('{$base_class}') must extend '{$this_class}'.");
-    }
-
     $field_objects = id(new PhutilSymbolLoader())
       ->setAncestorClass($base_class)
       ->loadObjects();
@@ -124,12 +109,12 @@ abstract class PhabricatorCustomField {
     }
 
     foreach ($fields as $key => $field) {
-      if (!$field->isEnabled()) {
+      if (!$field->isFieldEnabled()) {
         unset($fields[$key]);
       }
     }
 
-    $fields = array_select_keys($fields, array_keys($spec));
+    $fields = array_select_keys($fields, array_keys($spec)) + $fields;
 
     foreach ($spec as $key => $config) {
       if (empty($fields[$key])) {
@@ -151,7 +136,7 @@ abstract class PhabricatorCustomField {
 
   /**
    * Return a key which uniquely identifies this field, like
-   * "mycompany.dinosaur.count". Normally you should provide some level of
+   * "mycompany:dinosaur:count". Normally you should provide some level of
    * namespacing to prevent collisions.
    *
    * @return string String which uniquely identifies this field.
@@ -278,6 +263,7 @@ abstract class PhabricatorCustomField {
    */
   final public function setObject(PhabricatorCustomFieldInterface $object) {
     $this->object = $object;
+    $this->didSetObject($object);
     return $this;
   }
 
@@ -290,6 +276,17 @@ abstract class PhabricatorCustomField {
    */
   final public function getObject() {
     return $this->object;
+  }
+
+
+  /**
+   * This is a hook, primarily for subclasses to load object data.
+   *
+   * @return PhabricatorCustomFieldInterface The object this field belongs to.
+   * @return void
+   */
+  protected function didSetObject(PhabricatorCustomFieldInterface $object) {
+    return;
   }
 
 
@@ -526,6 +523,14 @@ abstract class PhabricatorCustomField {
   /**
    * @task appxaction
    */
+  public function getNewValueForApplicationTransactions() {
+    return $this->getValueForStorage();
+  }
+
+
+  /**
+   * @task appxaction
+   */
   public function setValueFromApplicationTransactions($value) {
     return $this->setValueFromStorage($value);
   }
@@ -534,7 +539,7 @@ abstract class PhabricatorCustomField {
   /**
    * @task appxaction
    */
-  public function getNewValueForApplicationTransactions(
+  public function getNewValueFromApplicationTransactions(
     PhabricatorApplicationTransaction $xaction) {
     return $xaction->getNewValue();
   }
@@ -592,5 +597,33 @@ abstract class PhabricatorCustomField {
 
     return;
   }
+
+
+/* -(  Edit View  )---------------------------------------------------------- */
+
+
+  /**
+   * @task edit
+   */
+  public function shouldAppearOnEditView() {
+    return false;
+  }
+
+
+  /**
+   * @task edit
+   */
+  public function readValueFromRequest(AphrontRequest $request) {
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  /**
+   * @task edit
+   */
+  public function renderEditControl() {
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
 
 }

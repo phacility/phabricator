@@ -30,7 +30,7 @@ interface PhabricatorCustomFieldInterface {
     if (idx($this->customFields, $role) === null) {
       PhabricatorCustomField::raiseUnattachedException($this, $role);
     }
-    return $this->customFields;
+    return $this->customFields[$role];
   }
 
   public function attachCustomFields($role, array $fields) {
