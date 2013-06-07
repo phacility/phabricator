@@ -113,6 +113,10 @@ final class PhabricatorUser
     }
     $result = parent::save();
 
+    if ($this->profile) {
+      $this->profile->save();
+    }
+
     $this->updateNameTokens();
 
     id(new PhabricatorSearchIndexer())
@@ -764,8 +768,7 @@ EOBODY;
 
 
   public function getCustomFieldSpecificationForRole($role) {
-    return array();
-    // TODO: PhabricatorEnv::getEnvConfig('user.fields');
+    return PhabricatorEnv::getEnvConfig('user.fields');
   }
 
   public function getCustomFieldBaseClass() {

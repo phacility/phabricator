@@ -1544,6 +1544,8 @@ phutil_register_library_map(array(
     'PhabricatorUITooltipExample' => 'applications/uiexample/examples/PhabricatorUITooltipExample.php',
     'PhabricatorUnitsTestCase' => 'view/__tests__/PhabricatorUnitsTestCase.php',
     'PhabricatorUser' => 'applications/people/storage/PhabricatorUser.php',
+    'PhabricatorUserBlurbField' => 'applications/people/customfield/PhabricatorUserBlurbField.php',
+    'PhabricatorUserConfigOptions' => 'applications/people/config/PhabricatorUserConfigOptions.php',
     'PhabricatorUserCustomField' => 'applications/people/customfield/PhabricatorUserCustomField.php',
     'PhabricatorUserCustomFieldInterface' => 'applications/people/customfield/PhabricatorUserCustomFieldInterface.php',
     'PhabricatorUserDAO' => 'applications/people/storage/PhabricatorUserDAO.php',
@@ -1562,6 +1564,7 @@ phutil_register_library_map(array(
     'PhabricatorUserStatusInvalidEpochException' => 'applications/people/exception/PhabricatorUserStatusInvalidEpochException.php',
     'PhabricatorUserStatusOverlapException' => 'applications/people/exception/PhabricatorUserStatusOverlapException.php',
     'PhabricatorUserTestCase' => 'applications/people/storage/__tests__/PhabricatorUserTestCase.php',
+    'PhabricatorUserTitleField' => 'applications/people/customfield/PhabricatorUserTitleField.php',
     'PhabricatorUserTransaction' => 'applications/people/storage/PhabricatorUserTransaction.php',
     'PhabricatorWorkboardExample' => 'applications/uiexample/examples/PhabricatorWorkboardExample.php',
     'PhabricatorWorkboardView' => 'view/layout/PhabricatorWorkboardView.php',
@@ -3385,6 +3388,8 @@ phutil_register_library_map(array(
       2 => 'PhabricatorPolicyInterface',
       3 => 'PhabricatorCustomFieldInterface',
     ),
+    'PhabricatorUserBlurbField' => 'PhabricatorUserCustomField',
+    'PhabricatorUserConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorUserCustomField' =>
     array(
       0 => 'PhabricatorCustomField',
@@ -3406,6 +3411,7 @@ phutil_register_library_map(array(
     'PhabricatorUserStatusInvalidEpochException' => 'Exception',
     'PhabricatorUserStatusOverlapException' => 'Exception',
     'PhabricatorUserTestCase' => 'PhabricatorTestCase',
+    'PhabricatorUserTitleField' => 'PhabricatorUserCustomField',
     'PhabricatorUserTransaction' => 'PhabricatorApplicationTransaction',
     'PhabricatorWorkboardExample' => 'PhabricatorUIExample',
     'PhabricatorWorkboardView' => 'AphrontView',
