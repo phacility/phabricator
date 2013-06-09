@@ -66,7 +66,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       $item = new PHUIListItemView();
       $item->setName($user->getUsername());
       $item->setHref('/p/'.$user->getUsername().'/');
-      $item->addClass('phabricator-core-menu-item');
+      $item->addClass('core-menu-item');
 
       $classes = array(
         'phabricator-core-menu-icon',
