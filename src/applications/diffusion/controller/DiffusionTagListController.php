@@ -18,7 +18,7 @@ final class DiffusionTagListController extends DiffusionController {
       'offset' => $pager->getOffset());
     if ($drequest->getRawCommit()) {
       $is_commit = true;
-      $params['commit'] = $request->getCommit();
+      $params['commit'] = $drequest->getRawCommit();
     } else {
       $is_commit = false;
     }
