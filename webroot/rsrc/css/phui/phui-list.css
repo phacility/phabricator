@@ -2,10 +2,6 @@
  * @provides phui-list-view-css
  */
 
-.phui-list-item {
-  line-height: 16px;
-}
-
 .phui-list-item-header,
 .phui-list-item-header a {
   color: #9ca5b5;
@@ -56,6 +52,10 @@
   position: relative;
 }
 
+.phui-list-sidenav .phui-list-item-view {
+  overflow: hidden;
+}
+
 .phui-list-sidenav .phui-list-item-href {
   display: block;
   padding: 2px 16px;
@@ -69,7 +69,7 @@
   padding: 2px 10px;
 }
 
-.phui-list-sidenav .phui-list-item-href:hover {
+.device-desktop .phui-list-sidenav .phui-list-item-href:hover {
   background: #005588;
   background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
   background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
@@ -122,4 +122,9 @@
   height: 14px;
   width: 14px;
   display: block;
+}
+
+.device-phone .phui-list-view.phui-list-navbar > li {
+  float: none;
+  border: none;
 }

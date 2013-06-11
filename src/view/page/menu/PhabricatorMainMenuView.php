@@ -166,7 +166,6 @@ final class PhabricatorMainMenuView extends AphrontView {
     if ($actions) {
       $view->addMenuItem(
         id(new PHUIListItemView())
-          ->addClass('phabricator-core-item-device')
           ->setType(PHUIListItemView::TYPE_LABEL)
           ->setName(pht('Actions')));
       foreach ($actions as $action) {
@@ -185,8 +184,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     if ($user->isLoggedIn()) {
       $view->addMenuItem(
         id(new PHUIListItemView())
-          ->addClass('phui-list-item-type-link')
-          ->addClass('phabricator-core-menu-item')
+          ->addClass('core-menu-item')
           ->setName(pht('Log Out'))
           ->setHref('/logout/')
           ->appendChild($this->renderMenuIcon('power-light-large')));

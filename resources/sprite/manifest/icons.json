@@ -14,7 +14,7 @@
     "icons-action-menu-white"        : {
       "name" : "icons-action-menu-white",
       "rule" : ".icons-action-menu-white, .device-desktop .phabricator-action-view:hover .icons-action-menu, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-action-menu",
-      "hash" : "ac36502e57190d41edd56a88c6bbac3f"
+      "hash" : "00e485cb276b12e8b68a4cb0a8797f0e"
     },
     "icons-arrow_left"               : {
       "name" : "icons-arrow_left",
@@ -29,7 +29,7 @@
     "icons-arrow_left-white"         : {
       "name" : "icons-arrow_left-white",
       "rule" : ".icons-arrow_left-white, .device-desktop .phabricator-action-view:hover .icons-arrow_left, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-arrow_left",
-      "hash" : "568c21c4c9a8566534217df23785742e"
+      "hash" : "d58023faf291b015bd661dd407ea4956"
     },
     "icons-arrow_right"              : {
       "name" : "icons-arrow_right",
@@ -44,7 +44,7 @@
     "icons-arrow_right-white"        : {
       "name" : "icons-arrow_right-white",
       "rule" : ".icons-arrow_right-white, .device-desktop .phabricator-action-view:hover .icons-arrow_right, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-arrow_right",
-      "hash" : "bb7b86a01ae828cff6513bcd2f3aa4cb"
+      "hash" : "49ab99fbd64d32d4b806e76822451bf8"
     },
     "icons-attach"                   : {
       "name" : "icons-attach",
@@ -59,7 +59,7 @@
     "icons-attach-white"             : {
       "name" : "icons-attach-white",
       "rule" : ".icons-attach-white, .device-desktop .phabricator-action-view:hover .icons-attach, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-attach",
-      "hash" : "0630990259eb5bf60daf66938e476e3b"
+      "hash" : "a0d3782a4236b48b37177e20c3693d79"
     },
     "icons-blame"                    : {
       "name" : "icons-blame",
@@ -74,7 +74,7 @@
     "icons-blame-white"              : {
       "name" : "icons-blame-white",
       "rule" : ".icons-blame-white, .device-desktop .phabricator-action-view:hover .icons-blame, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-blame",
-      "hash" : "e899f31c8741d1354d9c6bb6126a366d"
+      "hash" : "cc0ce5ec8d7f8525de1104e6c431830a"
     },
     "icons-check"                    : {
       "name" : "icons-check",
@@ -89,7 +89,7 @@
     "icons-check-white"              : {
       "name" : "icons-check-white",
       "rule" : ".icons-check-white, .device-desktop .phabricator-action-view:hover .icons-check, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-check",
-      "hash" : "41bcb4cbe0d53381cbe868646295692e"
+      "hash" : "4f736c725aa17dced72790b9e289e4dd"
     },
     "icons-comment"                  : {
       "name" : "icons-comment",
@@ -104,7 +104,7 @@
     "icons-comment-white"            : {
       "name" : "icons-comment-white",
       "rule" : ".icons-comment-white, .device-desktop .phabricator-action-view:hover .icons-comment, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-comment",
-      "hash" : "b55545a93b51d878ce36d16acd7cd048"
+      "hash" : "01a6206d77662de8bcbe8e402ba493ee"
     },
     "icons-computer"                 : {
       "name" : "icons-computer",
@@ -119,7 +119,7 @@
     "icons-computer-white"           : {
       "name" : "icons-computer-white",
       "rule" : ".icons-computer-white, .device-desktop .phabricator-action-view:hover .icons-computer, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-computer",
-      "hash" : "de5094239fd7401523c0ca9094a95b2f"
+      "hash" : "eec30cac2b896348f48a6fed13f254d0"
     },
     "icons-create"                   : {
       "name" : "icons-create",
@@ -134,7 +134,7 @@
     "icons-create-white"             : {
       "name" : "icons-create-white",
       "rule" : ".icons-create-white, .device-desktop .phabricator-action-view:hover .icons-create, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-create",
-      "hash" : "c1bb6dfc0e60a03e5a461b233dd3d788"
+      "hash" : "4e1c0e227dce99c26d6f8bdbb3fa4b5b"
     },
     "icons-delete"                   : {
       "name" : "icons-delete",
@@ -149,7 +149,7 @@
     "icons-delete-white"             : {
       "name" : "icons-delete-white",
       "rule" : ".icons-delete-white, .device-desktop .phabricator-action-view:hover .icons-delete, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-delete",
-      "hash" : "52293bba4122e811a684d87cf3b33106"
+      "hash" : "a925268a638431f331ab17915253347b"
     },
     "icons-disable"                  : {
       "name" : "icons-disable",
@@ -164,7 +164,7 @@
     "icons-disable-white"            : {
       "name" : "icons-disable-white",
       "rule" : ".icons-disable-white, .device-desktop .phabricator-action-view:hover .icons-disable, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-disable",
-      "hash" : "dd9f601ccd08a2b461f58f0f45d7afb5"
+      "hash" : "3e4c405df5d7ee481bd35c571534104e"
     },
     "icons-dislike"                  : {
       "name" : "icons-dislike",
@@ -179,7 +179,7 @@
     "icons-dislike-white"            : {
       "name" : "icons-dislike-white",
       "rule" : ".icons-dislike-white, .device-desktop .phabricator-action-view:hover .icons-dislike, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-dislike",
-      "hash" : "d9e3aaabcf23d4c02dd5d6efbb81f1e1"
+      "hash" : "96b7063a9297f64ff775190e2923d90a"
     },
     "icons-download"                 : {
       "name" : "icons-download",
@@ -199,7 +199,7 @@
     "icons-download-alt-white"       : {
       "name" : "icons-download-alt-white",
       "rule" : ".icons-download-alt-white, .device-desktop .phabricator-action-view:hover .icons-download-alt, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-download-alt",
-      "hash" : "a219e57c885017f78dac3382b42fcfa6"
+      "hash" : "879d5757474e9fbdc87784a987fe4342"
     },
     "icons-download-grey"            : {
       "name" : "icons-download-grey",
@@ -209,7 +209,7 @@
     "icons-download-white"           : {
       "name" : "icons-download-white",
       "rule" : ".icons-download-white, .device-desktop .phabricator-action-view:hover .icons-download, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-download",
-      "hash" : "78173912b4de530664f4fe7043328194"
+      "hash" : "8a511b7c1c5dcf96ae4af895fd1e9e96"
     },
     "icons-edit"                     : {
       "name" : "icons-edit",
@@ -224,7 +224,7 @@
     "icons-edit-white"               : {
       "name" : "icons-edit-white",
       "rule" : ".icons-edit-white, .device-desktop .phabricator-action-view:hover .icons-edit, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-edit",
-      "hash" : "a548852b84143fcfc42b31b77a915e36"
+      "hash" : "9273b4d1a9f001aeba1eaac7ee4de00d"
     },
     "icons-enable"                   : {
       "name" : "icons-enable",
@@ -239,7 +239,7 @@
     "icons-enable-white"             : {
       "name" : "icons-enable-white",
       "rule" : ".icons-enable-white, .device-desktop .phabricator-action-view:hover .icons-enable, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-enable",
-      "hash" : "2777f6a3fd33ae8cd124e5215bbbc55f"
+      "hash" : "e00d26ac67a0e1694b92c4a906930f9f"
     },
     "icons-file"                     : {
       "name" : "icons-file",
@@ -254,7 +254,7 @@
     "icons-file-white"               : {
       "name" : "icons-file-white",
       "rule" : ".icons-file-white, .device-desktop .phabricator-action-view:hover .icons-file, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-file",
-      "hash" : "f23f65da6ecc18cdb313a48884cf8fa1"
+      "hash" : "0a89623e32b4a1aa86e79a3a8fe6927e"
     },
     "icons-flag"                     : {
       "name" : "icons-flag",
@@ -404,7 +404,7 @@
     "icons-flag-white"               : {
       "name" : "icons-flag-white",
       "rule" : ".icons-flag-white, .device-desktop .phabricator-action-view:hover .icons-flag, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-flag",
-      "hash" : "659955f2ad7f0ddfe6efa36f7e38573e"
+      "hash" : "d02ba761bfefc1aa90d8a554479d1d52"
     },
     "icons-folder-open"              : {
       "name" : "icons-folder-open",
@@ -419,7 +419,7 @@
     "icons-folder-open-white"        : {
       "name" : "icons-folder-open-white",
       "rule" : ".icons-folder-open-white, .device-desktop .phabricator-action-view:hover .icons-folder-open, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-folder-open",
-      "hash" : "aa9bb68d3e27f4252708c872dc7e7374"
+      "hash" : "7ee2ccc6b3a04a524f6368b229d37f70"
     },
     "icons-fork"                     : {
       "name" : "icons-fork",
@@ -434,7 +434,7 @@
     "icons-fork-white"               : {
       "name" : "icons-fork-white",
       "rule" : ".icons-fork-white, .device-desktop .phabricator-action-view:hover .icons-fork, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-fork",
-      "hash" : "6866412f5a3c294432d3d6ea72e5054e"
+      "hash" : "fb3f6ce20dccc2e2520cf18b2490a8cc"
     },
     "icons-herald"                   : {
       "name" : "icons-herald",
@@ -449,7 +449,7 @@
     "icons-herald-white"             : {
       "name" : "icons-herald-white",
       "rule" : ".icons-herald-white, .device-desktop .phabricator-action-view:hover .icons-herald, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-herald",
-      "hash" : "3a521d059bd64fcd4644f5f81d46fa85"
+      "hash" : "30ca9558082b29a8d97f0345e55dd080"
     },
     "icons-highlight"                : {
       "name" : "icons-highlight",
@@ -464,7 +464,7 @@
     "icons-highlight-white"          : {
       "name" : "icons-highlight-white",
       "rule" : ".icons-highlight-white, .device-desktop .phabricator-action-view:hover .icons-highlight, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-highlight",
-      "hash" : "53c33508a10cf94e95dc3a36f2cf0a3a"
+      "hash" : "f595c9b5e3de3125c1e46d9c01a49534"
     },
     "icons-history"                  : {
       "name" : "icons-history",
@@ -479,7 +479,7 @@
     "icons-history-white"            : {
       "name" : "icons-history-white",
       "rule" : ".icons-history-white, .device-desktop .phabricator-action-view:hover .icons-history, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-history",
-      "hash" : "18b8bc42691c52790f994213be9c35ed"
+      "hash" : "abf579dc51ba5e04544d2eaf45df155c"
     },
     "icons-home"                     : {
       "name" : "icons-home",
@@ -494,7 +494,7 @@
     "icons-home-white"               : {
       "name" : "icons-home-white",
       "rule" : ".icons-home-white, .device-desktop .phabricator-action-view:hover .icons-home, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-home",
-      "hash" : "24ec141dc77fed5b7f29fa4c7f751532"
+      "hash" : "103dc5430ffd3a5a1c9460d1ec7fe390"
     },
     "icons-image"                    : {
       "name" : "icons-image",
@@ -509,7 +509,7 @@
     "icons-image-white"              : {
       "name" : "icons-image-white",
       "rule" : ".icons-image-white, .device-desktop .phabricator-action-view:hover .icons-image, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-image",
-      "hash" : "5011b76f87091413f5c03876e0548bc3"
+      "hash" : "f5335904fbc92dfe42f0f6d82c0ab718"
     },
     "icons-like"                     : {
       "name" : "icons-like",
@@ -524,7 +524,7 @@
     "icons-like-white"               : {
       "name" : "icons-like-white",
       "rule" : ".icons-like-white, .device-desktop .phabricator-action-view:hover .icons-like, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-like",
-      "hash" : "c3bf3d84e94c6c479345ab82d56908b7"
+      "hash" : "0465339035bb3bc0eb2649c9e1f91fd6"
     },
     "icons-link"                     : {
       "name" : "icons-link",
@@ -539,7 +539,7 @@
     "icons-link-white"               : {
       "name" : "icons-link-white",
       "rule" : ".icons-link-white, .device-desktop .phabricator-action-view:hover .icons-link, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-link",
-      "hash" : "c12c9254f3a02a74c5da4569e08eb23c"
+      "hash" : "77b91a595f24007ebeb492938efae34a"
     },
     "icons-lint-info"                : {
       "name" : "icons-lint-info",
@@ -554,7 +554,7 @@
     "icons-lint-info-white"          : {
       "name" : "icons-lint-info-white",
       "rule" : ".icons-lint-info-white, .device-desktop .phabricator-action-view:hover .icons-lint-info, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-lint-info",
-      "hash" : "feb678fe5e1c919850bd55984b13f362"
+      "hash" : "5bf95b49dda78bc78f98ca81dcaa88ef"
     },
     "icons-lint-ok"                  : {
       "name" : "icons-lint-ok",
@@ -569,7 +569,7 @@
     "icons-lint-ok-white"            : {
       "name" : "icons-lint-ok-white",
       "rule" : ".icons-lint-ok-white, .device-desktop .phabricator-action-view:hover .icons-lint-ok, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-lint-ok",
-      "hash" : "873174329b90e45eaf2e75c62ef6c3f9"
+      "hash" : "58103f905dffb698b31a516000cee50d"
     },
     "icons-lint-warning"             : {
       "name" : "icons-lint-warning",
@@ -584,7 +584,7 @@
     "icons-lint-warning-white"       : {
       "name" : "icons-lint-warning-white",
       "rule" : ".icons-lint-warning-white, .device-desktop .phabricator-action-view:hover .icons-lint-warning, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-lint-warning",
-      "hash" : "0f91463cf0b360eae5dc2449358546cf"
+      "hash" : "0f4dc192c9c136447fc7108f8f124db8"
     },
     "icons-lock"                     : {
       "name" : "icons-lock",
@@ -599,7 +599,7 @@
     "icons-lock-white"               : {
       "name" : "icons-lock-white",
       "rule" : ".icons-lock-white, .device-desktop .phabricator-action-view:hover .icons-lock, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-lock",
-      "hash" : "eb661d97b96796c7cbfe4ff2ca394050"
+      "hash" : "5813bd52f85bae662dd38dd6b1a32a60"
     },
     "icons-love"                     : {
       "name" : "icons-love",
@@ -614,7 +614,7 @@
     "icons-love-white"               : {
       "name" : "icons-love-white",
       "rule" : ".icons-love-white, .device-desktop .phabricator-action-view:hover .icons-love, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-love",
-      "hash" : "a1f166d90bb048f3c3c1d3cd0dc16014"
+      "hash" : "65591f2e20b95779aae3d35980e093f5"
     },
     "icons-merge"                    : {
       "name" : "icons-merge",
@@ -629,7 +629,7 @@
     "icons-merge-white"              : {
       "name" : "icons-merge-white",
       "rule" : ".icons-merge-white, .device-desktop .phabricator-action-view:hover .icons-merge, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-merge",
-      "hash" : "4b0cc5d88822aaf50216bba91f1594f2"
+      "hash" : "c14463222f2f72ef6e4cfea24cf19ac8"
     },
     "icons-message"                  : {
       "name" : "icons-message",
@@ -644,7 +644,7 @@
     "icons-message-white"            : {
       "name" : "icons-message-white",
       "rule" : ".icons-message-white, .device-desktop .phabricator-action-view:hover .icons-message, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-message",
-      "hash" : "5a2705490240a35ae2d1a797d1aa3f25"
+      "hash" : "fcbfde0adc3e8b35dc958becb3a58ca0"
     },
     "icons-meta-mta"                 : {
       "name" : "icons-meta-mta",
@@ -659,7 +659,7 @@
     "icons-meta-mta-white"           : {
       "name" : "icons-meta-mta-white",
       "rule" : ".icons-meta-mta-white, .device-desktop .phabricator-action-view:hover .icons-meta-mta, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-meta-mta",
-      "hash" : "4ea8142b6b4589d1032ac80ae9384882"
+      "hash" : "a28fcf8fcdd8ea48121887229a930b3f"
     },
     "icons-move"                     : {
       "name" : "icons-move",
@@ -674,7 +674,7 @@
     "icons-move-white"               : {
       "name" : "icons-move-white",
       "rule" : ".icons-move-white, .device-desktop .phabricator-action-view:hover .icons-move, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-move",
-      "hash" : "45e18e686a9d645d28c1a0d7b0429fb6"
+      "hash" : "e8d5332802c299f4ffa244091ca0d2f4"
     },
     "icons-new"                      : {
       "name" : "icons-new",
@@ -689,7 +689,7 @@
     "icons-new-white"                : {
       "name" : "icons-new-white",
       "rule" : ".icons-new-white, .device-desktop .phabricator-action-view:hover .icons-new, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.icons-new-grey",
-      "hash" : "2b03df9be8391589a8b6ce58748ea5f6"
+      "hash" : "58d004330176465bf3f0ffe1fa5dea29"
     },
     "icons-none"                     : {
       "name" : "icons-none",
@@ -719,7 +719,7 @@
     "icons-perflab-white"            : {
       "name" : "icons-perflab-white",
       "rule" : ".icons-perflab-white, .device-desktop .phabricator-action-view:hover .icons-perflab, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-perflab",
-      "hash" : "7c929fafc6543adcee33d3a055cf33d6"
+      "hash" : "0df59548a5457b0ad14221f423e5f076"
     },
     "icons-preview"                  : {
       "name" : "icons-preview",
@@ -734,7 +734,7 @@
     "icons-preview-white"            : {
       "name" : "icons-preview-white",
       "rule" : ".icons-preview-white, .device-desktop .phabricator-action-view:hover .icons-preview, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-preview",
-      "hash" : "fd6945fc62c75f6b8c644c20280d4878"
+      "hash" : "583d874475402c09d5a07a9987fa7010"
     },
     "icons-refresh"                  : {
       "name" : "icons-refresh",
@@ -749,7 +749,7 @@
     "icons-refresh-white"            : {
       "name" : "icons-refresh-white",
       "rule" : ".icons-refresh-white, .device-desktop .phabricator-action-view:hover .icons-refresh, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-refresh",
-      "hash" : "ed6e0c673b733c748c3580db87fc8e80"
+      "hash" : "fa2e6930785778cf4b33b2c7801e0799"
     },
     "icons-remove"                   : {
       "name" : "icons-remove",
@@ -764,7 +764,7 @@
     "icons-remove-white"             : {
       "name" : "icons-remove-white",
       "rule" : ".icons-remove-white, .device-desktop .phabricator-action-view:hover .icons-remove, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-remove",
-      "hash" : "24d87d07142c331c3690753067868e8b"
+      "hash" : "7c3010fb4596d60360153e1b4f563d54"
     },
     "icons-search"                   : {
       "name" : "icons-search",
@@ -779,7 +779,7 @@
     "icons-search-white"             : {
       "name" : "icons-search-white",
       "rule" : ".icons-search-white, .device-desktop .phabricator-action-view:hover .icons-search, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-search",
-      "hash" : "a3e1394513794607f899d2e3a5df25db"
+      "hash" : "36d2ea64eff865d5844c6b0d20e479d2"
     },
     "icons-start-sandcastle"         : {
       "name" : "icons-start-sandcastle",
@@ -794,52 +794,7 @@
     "icons-start-sandcastle-white"   : {
       "name" : "icons-start-sandcastle-white",
       "rule" : ".icons-start-sandcastle-white, .device-desktop .phabricator-action-view:hover .icons-start-sandcastle, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-start-sandcastle",
-      "hash" : "40d1583f799732728f26b8f05066b241"
-    },
-    "icons-subscribe-add"            : {
-      "name" : "icons-subscribe-add",
-      "rule" : ".icons-subscribe-add",
-      "hash" : "133ad9e3a38f20d2460f558de3f71d09"
-    },
-    "icons-subscribe-add-grey"       : {
-      "name" : "icons-subscribe-add-grey",
-      "rule" : ".icons-subscribe-add-grey",
-      "hash" : "67fc8a303205ca2219badbf59f3bd15c"
-    },
-    "icons-subscribe-add-white"      : {
-      "name" : "icons-subscribe-add-white",
-      "rule" : ".icons-subscribe-add-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-add, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-subscribe-add",
-      "hash" : "cec0acb841b0035a4a82873441b2e54e"
-    },
-    "icons-subscribe-auto"           : {
-      "name" : "icons-subscribe-auto",
-      "rule" : ".icons-subscribe-auto",
-      "hash" : "b14648970a1a1fb29d1981b4d00464b6"
-    },
-    "icons-subscribe-auto-grey"      : {
-      "name" : "icons-subscribe-auto-grey",
-      "rule" : ".icons-subscribe-auto-grey",
-      "hash" : "980f27ed95a0ceb95fd629237bc1919c"
-    },
-    "icons-subscribe-auto-white"     : {
-      "name" : "icons-subscribe-auto-white",
-      "rule" : ".icons-subscribe-auto-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-auto, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-subscribe-auto",
-      "hash" : "88cd74cfdc56d8e0ccc4bc6f584ec7c2"
-    },
-    "icons-subscribe-delete"         : {
-      "name" : "icons-subscribe-delete",
-      "rule" : ".icons-subscribe-delete",
-      "hash" : "7b2f40a2bb3053aee9e73744fdc228e4"
-    },
-    "icons-subscribe-delete-grey"    : {
-      "name" : "icons-subscribe-delete-grey",
-      "rule" : ".icons-subscribe-delete-grey",
-      "hash" : "e1bd9aa4e20759584ac1ac84cbaf36b7"
-    },
-    "icons-subscribe-delete-white"   : {
-      "name" : "icons-subscribe-delete-white",
-      "rule" : ".icons-subscribe-delete-white, .device-desktop .phabricator-action-view:hover .icons-subscribe-delete, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-subscribe-delete",
-      "hash" : "6c2216a1d2ea9786a7beae8487ae5520"
+      "hash" : "e450750eb2390d8755d139e817afea37"
     },
     "icons-tag"                      : {
       "name" : "icons-tag",
@@ -854,7 +809,7 @@
     "icons-tag-white"                : {
       "name" : "icons-tag-white",
       "rule" : ".icons-tag-white, .device-desktop .phabricator-action-view:hover .icons-tag, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-tag",
-      "hash" : "762d1c931afdf13294f33b7269341cec"
+      "hash" : "4a2f8b30fcc5cfad8d47137709e5ea4a"
     },
     "icons-transcript"               : {
       "name" : "icons-transcript",
@@ -869,7 +824,7 @@
     "icons-transcript-white"         : {
       "name" : "icons-transcript-white",
       "rule" : ".icons-transcript-white, .device-desktop .phabricator-action-view:hover .icons-transcript, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-transcript",
-      "hash" : "a03d9e634b694a190a8d7e22823c707c"
+      "hash" : "7fff355a64cc625b90ede8a025ef79d6"
     },
     "icons-undo"                     : {
       "name" : "icons-undo",
@@ -884,7 +839,7 @@
     "icons-undo-white"               : {
       "name" : "icons-undo-white",
       "rule" : ".icons-undo-white, .device-desktop .phabricator-action-view:hover .icons-undo, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-undo",
-      "hash" : "1a1c261ed135bdc9783cb188ed8d30ce"
+      "hash" : "b84c09647af16dc40068e18ff7b16259"
     },
     "icons-unlock"                   : {
       "name" : "icons-unlock",
@@ -899,7 +854,7 @@
     "icons-unlock-white"             : {
       "name" : "icons-unlock-white",
       "rule" : ".icons-unlock-white, .device-desktop .phabricator-action-view:hover .icons-unlock, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-unlock",
-      "hash" : "c41bd078c9794e677dd5ba778e7925dc"
+      "hash" : "4bb6ef8b729edb00f85a0ad348c8e199"
     },
     "icons-unmerge"                  : {
       "name" : "icons-unmerge",
@@ -914,7 +869,7 @@
     "icons-unmerge-white"            : {
       "name" : "icons-unmerge-white",
       "rule" : ".icons-unmerge-white, .device-desktop .phabricator-action-view:hover .icons-unmerge, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-unmerge",
-      "hash" : "db646c417440b31460e6366f68a99443"
+      "hash" : "ab9c5cdac57461d6a903e58c27ec93c1"
     },
     "icons-unpublish"                : {
       "name" : "icons-unpublish",
@@ -929,7 +884,7 @@
     "icons-unpublish-white"          : {
       "name" : "icons-unpublish-white",
       "rule" : ".icons-unpublish-white, .device-desktop .phabricator-action-view:hover .icons-unpublish, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-unpublish",
-      "hash" : "c14edc015995951a89f2dc7af25fb9c1"
+      "hash" : "12e7cf6eefc9ac159cdeb47cfdde4aa3"
     },
     "icons-upload"                   : {
       "name" : "icons-upload",
@@ -944,7 +899,7 @@
     "icons-upload-white"             : {
       "name" : "icons-upload-white",
       "rule" : ".icons-upload-white, .device-desktop .phabricator-action-view:hover .icons-upload, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-upload",
-      "hash" : "4cbacef7ebf21bcc200486623dbf02e0"
+      "hash" : "e957fb2f8605218897bb71e17caaeb16"
     },
     "icons-warning"                  : {
       "name" : "icons-warning",
@@ -959,7 +914,7 @@
     "icons-warning-white"            : {
       "name" : "icons-warning-white",
       "rule" : ".icons-warning-white, .device-desktop .phabricator-action-view:hover .icons-warning, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-warning",
-      "hash" : "8c5bea2c612e64cbf9caf55a87239885"
+      "hash" : "8dac77f60d83285f82ab543782d5dfa3"
     },
     "icons-world"                    : {
       "name" : "icons-world",
@@ -974,7 +929,7 @@
     "icons-world-white"              : {
       "name" : "icons-world-white",
       "rule" : ".icons-world-white, .device-desktop .phabricator-action-view:hover .icons-world, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-world",
-      "hash" : "a3d987f57f2351d8604bf341716435b8"
+      "hash" : "47723b84d57aedc684a27c7e2478cc01"
     },
     "remarkup-assist-text_b"         : {
       "name" : "remarkup-assist-text_b",

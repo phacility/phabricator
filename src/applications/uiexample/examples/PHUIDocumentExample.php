@@ -45,7 +45,7 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
     $action5 = id(new PHUIListItemView())
       ->setName('Subscribe')
       ->setHref('#')
-      ->setIcon('subscribe-add')
+      ->setIcon('check')
       ->setType(PHUIListItemView::TYPE_LINK);
 
     $divider = id(new PHUIListItemView)

@@ -236,67 +236,72 @@ final class PhabricatorConfigEditController
       return array($e_value, $errors, $value, $xaction);
     }
 
-    $type = $option->getType();
-    $set_value = null;
+    if ($option->isCustomType()) {
+      $info = $option->getCustomObject()->readRequest($option, $request);
+      list($e_value, $errors, $set_value, $value) = $info;
+    } else {
+      $type = $option->getType();
+      $set_value = null;
 
-    switch ($type) {
-      case 'int':
-        if (preg_match('/^-?[0-9]+$/', trim($value))) {
-          $set_value = (int)$value;
-        } else {
-          $e_value = pht('Invalid');
-          $errors[] = pht('Value must be an integer.');
-        }
-        break;
-      case 'string':
-      case 'enum':
-        $set_value = (string)$value;
-        break;
-      case 'list<string>':
-        $set_value = $request->getStrList('value');
-        break;
-      case 'set':
-        $set_value = array_fill_keys($request->getStrList('value'), true);
-        break;
-      case 'bool':
-        switch ($value) {
-          case 'true':
-            $set_value = true;
-            break;
-          case 'false':
-            $set_value = false;
-            break;
-          default:
-            $e_value = pht('Invalid');
-            $errors[] = pht('Value must be boolean, "true" or "false".');
-            break;
-        }
-        break;
-      case 'class':
-        if (!class_exists($value)) {
-          $e_value = pht('Invalid');
-          $errors[] = pht('Class does not exist.');
-        } else {
-          $base = $option->getBaseClass();
-          if (!is_subclass_of($value, $base)) {
-            $e_value = pht('Invalid');
-            $errors[] = pht('Class is not of valid type.');
+      switch ($type) {
+        case 'int':
+          if (preg_match('/^-?[0-9]+$/', trim($value))) {
+            $set_value = (int)$value;
           } else {
-            $set_value = $value;
+            $e_value = pht('Invalid');
+            $errors[] = pht('Value must be an integer.');
           }
-        }
-        break;
-      default:
-        $json = json_decode($value, true);
-        if ($json === null && strtolower($value) != 'null') {
-          $e_value = pht('Invalid');
-          $errors[] = pht(
-            'The given value must be valid JSON. This means, among '.
-            'other things, that you must wrap strings in double-quotes.');
-        } else {
-          $set_value = $json;
-        }
-        break;
+          break;
+        case 'string':
+        case 'enum':
+          $set_value = (string)$value;
+          break;
+        case 'list<string>':
+          $set_value = $request->getStrList('value');
+          break;
+        case 'set':
+          $set_value = array_fill_keys($request->getStrList('value'), true);
+          break;
+        case 'bool':
+          switch ($value) {
+            case 'true':
+              $set_value = true;
+              break;
+            case 'false':
+              $set_value = false;
+              break;
+            default:
+              $e_value = pht('Invalid');
+              $errors[] = pht('Value must be boolean, "true" or "false".');
+              break;
+          }
+          break;
+        case 'class':
+          if (!class_exists($value)) {
+            $e_value = pht('Invalid');
+            $errors[] = pht('Class does not exist.');
+          } else {
+            $base = $option->getBaseClass();
+            if (!is_subclass_of($value, $base)) {
+              $e_value = pht('Invalid');
+              $errors[] = pht('Class is not of valid type.');
+            } else {
+              $set_value = $value;
+            }
+          }
+          break;
+        default:
+          $json = json_decode($value, true);
+          if ($json === null && strtolower($value) != 'null') {
+            $e_value = pht('Invalid');
+            $errors[] = pht(
+              'The given value must be valid JSON. This means, among '.
+              'other things, that you must wrap strings in double-quotes.');
+          } else {
+            $set_value = $json;
+          }
+          break;
+      }
     }
 
     if (!$errors) {
@@ -320,22 +325,26 @@ final class PhabricatorConfigEditController
       return null;
     }
 
-    $type = $option->getType();
-    $value = $entry->getValue();
-    switch ($type) {
-      case 'int':
-      case 'string':
-      case 'enum':
-      case 'class':
-        return $value;
-      case 'bool':
-        return $value ? 'true' : 'false';
-      case 'list<string>':
-        return implode("\n", nonempty($value, array()));
-      case 'set':
-        return implode("\n", nonempty(array_keys($value), array()));
-      default:
-        return PhabricatorConfigJSON::prettyPrintJSON($value);
+    if ($option->isCustomType()) {
+      return $option->getCustomObject()->getDisplayValue($option, $entry);
+    } else {
+      $type = $option->getType();
+      $value = $entry->getValue();
+      switch ($type) {
+        case 'int':
+        case 'string':
+        case 'enum':
+        case 'class':
+          return $value;
+        case 'bool':
+          return $value ? 'true' : 'false';
+        case 'list<string>':
+          return implode("\n", nonempty($value, array()));
+        case 'set':
+          return implode("\n", nonempty(array_keys($value), array()));
+        default:
+          return PhabricatorConfigJSON::prettyPrintJSON($value);
+      }
     }
   }
 
@@ -344,63 +353,70 @@ final class PhabricatorConfigEditController
     $display_value,
     $e_value) {
 
-    $type = $option->getType();
-    switch ($type) {
-      case 'int':
-      case 'string':
-        $control = id(new AphrontFormTextControl());
-        break;
-      case 'bool':
-        $control = id(new AphrontFormSelectControl())
-          ->setOptions(
+    if ($option->isCustomType()) {
+      $control = $option->getCustomObject()->renderControl(
+        $option,
+        $display_value,
+        $e_value);
+    } else {
+      $type = $option->getType();
+      switch ($type) {
+        case 'int':
+        case 'string':
+          $control = id(new AphrontFormTextControl());
+          break;
+        case 'bool':
+          $control = id(new AphrontFormSelectControl())
+            ->setOptions(
+              array(
+                ''      => pht('(Use Default)'),
+                'true'  => idx($option->getBoolOptions(), 0),
+                'false' => idx($option->getBoolOptions(), 1),
+              ));
+          break;
+        case 'enum':
+          $options = array_mergev(
             array(
-              ''      => pht('(Use Default)'),
-              'true'  => idx($option->getBoolOptions(), 0),
-              'false' => idx($option->getBoolOptions(), 1),
+              array('' => pht('(Use Default)')),
+              $option->getEnumOptions(),
             ));
-        break;
-      case 'enum':
-        $options = array_mergev(
-          array(
-            array('' => pht('(Use Default)')),
-            $option->getEnumOptions(),
-          ));
-        $control = id(new AphrontFormSelectControl())
-          ->setOptions($options);
-        break;
-      case 'class':
-        $symbols = id(new PhutilSymbolLoader())
-          ->setType('class')
-          ->setAncestorClass($option->getBaseClass())
-          ->setConcreteOnly(true)
-          ->selectSymbolsWithoutLoading();
-        $names = ipull($symbols, 'name', 'name');
-        asort($names);
-        $names = array(
-          '' => pht('(Use Default)'),
-        ) + $names;
+          $control = id(new AphrontFormSelectControl())
+            ->setOptions($options);
+          break;
+        case 'class':
+          $symbols = id(new PhutilSymbolLoader())
+            ->setType('class')
+            ->setAncestorClass($option->getBaseClass())
+            ->setConcreteOnly(true)
+            ->selectSymbolsWithoutLoading();
+          $names = ipull($symbols, 'name', 'name');
+          asort($names);
+          $names = array(
+            '' => pht('(Use Default)'),
+          ) + $names;
 
-        $control = id(new AphrontFormSelectControl())
-          ->setOptions($names);
-        break;
-      case 'list<string>':
-      case 'set':
-        $control = id(new AphrontFormTextAreaControl())
-          ->setCaption(pht('Separate values with newlines or commas.'));
-        break;
-      default:
-        $control = id(new AphrontFormTextAreaControl())
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-          ->setCustomClass('PhabricatorMonospaced')
-          ->setCaption(pht('Enter value in JSON.'));
-        break;
+          $control = id(new AphrontFormSelectControl())
+            ->setOptions($names);
+          break;
+        case 'list<string>':
+        case 'set':
+          $control = id(new AphrontFormTextAreaControl())
+            ->setCaption(pht('Separate values with newlines or commas.'));
+          break;
+        default:
+          $control = id(new AphrontFormTextAreaControl())
+            ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+            ->setCustomClass('PhabricatorMonospaced')
+            ->setCaption(pht('Enter value in JSON.'));
+          break;
+      }
+
+      $control
+        ->setLabel(pht('Value'))
+        ->setError($e_value)
+        ->setValue($display_value)
+        ->setName('value');
     }
-
-    $control
-      ->setLabel(pht('Value'))
-      ->setError($e_value)
-      ->setValue($display_value)
-      ->setName('value');
 
     if ($option->getLocked()) {
       $control->setDisabled(true);

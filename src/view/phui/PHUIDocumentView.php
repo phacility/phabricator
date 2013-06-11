@@ -2,6 +2,10 @@
 
 final class PHUIDocumentView extends AphrontTagView {
 
+  /* For mobile displays, where do you want the sidebar */
+  const NAV_BOTTOM = 'nav_bottom';
+  const NAV_TOP = 'nav_top';
+
   private $offset;
   private $header;
   private $sidenav;
@@ -9,6 +13,7 @@ final class PHUIDocumentView extends AphrontTagView {
   private $crumbs;
   private $bookname;
   private $bookdescription;
+  private $mobileview;
 
   public function setOffset($offset) {
     $this->offset = $offset;
@@ -20,9 +25,10 @@ final class PHUIDocumentView extends AphrontTagView {
     return $this;
   }
 
-  public function setSideNav(PHUIListView $list) {
+  public function setSideNav(PHUIListView $list, $display = self::NAV_BOTTOM) {
     $list->setType(PHUIListView::SIDENAV_LIST);
     $this->sidenav = $list;
+    $this->mobileview = $display;
     return $this;
   }
 
@@ -128,15 +134,18 @@ final class PHUIDocumentView extends AphrontTagView {
           $crumbs
         ));
 
+    if ($this->mobileview == self::NAV_BOTTOM) {
+      $order = array($content_inner, $sidenav);
+    } else {
+      $order = array($sidenav, $content_inner);
+    }
+
     $content = phutil_tag(
         'div',
         array(
           'class' => 'phui-document-content',
         ),
-        array(
-          $sidenav,
-          $content_inner
-        ));
+        $order);
 
     $view = phutil_tag(
       'div',

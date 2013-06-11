@@ -78,6 +78,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;
     }
 
+    if ($this->object instanceof PhabricatorCustomFieldInterface) {
+      $types[] = PhabricatorTransactions::TYPE_CUSTOMFIELD;
+    }
+
     return $types;
   }
 
@@ -121,6 +125,9 @@ abstract class PhabricatorApplicationTransactionEditor
           $old_edges = $old_edges[$edge_src][$edge_type];
         }
         return $old_edges;
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->getOldValueForApplicationTransactions();
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -137,6 +144,9 @@ abstract class PhabricatorApplicationTransactionEditor
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->getNewValueFromApplicationTransactions($xaction);
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
     }
@@ -161,6 +171,9 @@ abstract class PhabricatorApplicationTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
         return $xaction->hasComment();
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->getApplicationTransactionHasEffect($xaction);
     }
 
     return ($xaction->getOldValue() !== $xaction->getNewValue());
@@ -176,6 +189,9 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         break;
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->applyApplicationTransactionInternalEffects($xaction);
     }
     return $this->applyCustomInternalTransaction($object, $xaction);
   }
@@ -240,6 +256,9 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $editor->save();
         break;
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->applyApplicationTransactionExternalEffects($xaction);
     }
 
     return $this->applyCustomExternalTransaction($object, $xaction);
@@ -1242,6 +1261,43 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function supportsSearch() {
     return false;
+  }
+
+
+/* -( Custom Fields  )------------------------------------------------------- */
+
+
+  /**
+   * @task customfield
+   */
+  private function getCustomFieldForTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $field_key = $xaction->getMetadataValue('customfield:key');
+    if (!$field_key) {
+      throw new Exception(
+        "Custom field transaction has no 'customfield:key'!");
+    }
+
+    $field = PhabricatorCustomField::getObjectField(
+      $object,
+      PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
+      $field_key);
+
+    if (!$field) {
+      throw new Exception(
+        "Custom field transaction has invalid 'customfield:key'; field ".
+        "'{$field_key}' is disabled or does not exist.");
+    }
+
+    if (!$field->shouldAppearInApplicationTransactions()) {
+      throw new Exception(
+        "Custom field transaction '{$field_key}' does not implement ".
+        "integration for ApplicationTransactions.");
+    }
+
+    return $field;
   }
 
 }

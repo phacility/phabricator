@@ -504,14 +504,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
       if (!$viewer_is_owner && !$viewer_is_reviewer) {
         $action = $viewer_is_cc ? 'rem' : 'add';
         $links[] = array(
-          'icon'    => $viewer_is_cc ? 'subscribe-delete' : 'subscribe-add',
+          'icon'    => $viewer_is_cc ? 'disable' : 'check',
           'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
           'name'    => $viewer_is_cc ? pht('Unsubscribe') : pht('Subscribe'),
           'instant' => true,
         );
       } else {
         $links[] = array(
-          'icon'     => 'subscribe-auto',
+          'icon'     => 'enable',
           'name'     => pht('Automatically Subscribed'),
           'disabled' => true,
         );

@@ -44,6 +44,8 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',
         'ldap/' => 'PhabricatorPeopleLdapController',
+        'editprofile/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfileEditController',
       ),
       '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
         => 'PhabricatorPeopleProfileController',
@@ -64,7 +66,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       $item = new PHUIListItemView();
       $item->setName($user->getUsername());
       $item->setHref('/p/'.$user->getUsername().'/');
-      $item->addClass('phabricator-core-menu-item');
+      $item->addClass('core-menu-item');
 
       $classes = array(
         'phabricator-core-menu-icon',

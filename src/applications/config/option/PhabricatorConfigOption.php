@@ -17,6 +17,8 @@ final class PhabricatorConfigOption
   private $hidden;
   private $masked;
   private $baseClass;
+  private $customData;
+  private $customObject;
 
   public function setBaseClass($base_class) {
     $this->baseClass = $base_class;
@@ -176,6 +178,29 @@ final class PhabricatorConfigOption
 
   public function getType() {
     return $this->type;
+  }
+
+  public function isCustomType() {
+    return !strncmp($this->getType(), 'custom:', 7);
+  }
+
+  public function getCustomObject() {
+    if (!$this->customObject) {
+      if (!$this->isCustomType()) {
+        throw new Exception("This option does not have a custom type!");
+      }
+      $this->customObject = newv(substr($this->getType(), 7), array());
+    }
+    return $this->customObject;
+  }
+
+  public function getCustomData() {
+    return $this->customData;
+  }
+
+  public function setCustomData($data) {
+    $this->customData = $data;
+    return $this;
   }
 
 /* -(  PhabricatorMarkupInterface  )----------------------------------------- */
