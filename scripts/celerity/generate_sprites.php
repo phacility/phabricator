@@ -38,6 +38,7 @@ $sheets = array(
   'tokens' => $generator->buildTokenSheet(),
   'docs' => $generator->buildDocsSheet(),
   'gradient' => $generator->buildGradientSheet(),
+  'login' => $generator->buildLoginSheet(),
 );
 
 list($err) = exec_manual('optipng');

@@ -1,0 +1,79 @@
+/**
+ * @provides sprite-login-css
+ * @generated
+ */
+
+.sprite-login {
+  background-image: url(/rsrc/image/sprite-login.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-login {
+    background-image: url(/rsrc/image/sprite-login-X2.png);
+    background-size: 140px 140px;
+  }
+}
+
+
+.login_Amazon {
+  background-position: 0px 0px;
+}
+
+.login_Asana {
+  background-position: -35px 0px;
+}
+
+.login_Disqus {
+  background-position: -70px 0px;
+}
+
+.login_Dropbox {
+  background-position: -105px 0px;
+}
+
+.login_Facebook {
+  background-position: 0px -35px;
+}
+
+.login_Generic {
+  background-position: -35px -35px;
+}
+
+.login_Github {
+  background-position: -70px -35px;
+}
+
+.login_Google {
+  background-position: -105px -35px;
+}
+
+.login_HTTP {
+  background-position: 0px -70px;
+}
+
+.login_LDAP {
+  background-position: -35px -70px;
+}
+
+.login_Linkedin {
+  background-position: -70px -70px;
+}
+
+.login_Openid {
+  background-position: -105px -70px;
+}
+
+.login_Phabricator {
+  background-position: 0px -105px;
+}
+
+.login_Twitter {
+  background-position: -35px -105px;
+}
+
+.login_Yahoo {
+  background-position: -70px -105px;
+}

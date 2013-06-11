@@ -623,6 +623,20 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/sprite-icons.png',
     'type' => 'png',
   ),
+  '/rsrc/image/sprite-login-X2.png' =>
+  array(
+    'hash' => '0836f6f5ae0f181d32814811998c84ce',
+    'uri' => '/res/0836f6f5/rsrc/image/sprite-login-X2.png',
+    'disk' => '/rsrc/image/sprite-login-X2.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/sprite-login.png' =>
+  array(
+    'hash' => 'e11c22448d143e85e6be034894e138c5',
+    'uri' => '/res/e11c2244/rsrc/image/sprite-login.png',
+    'disk' => '/rsrc/image/sprite-login.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/sprite-menu-X2.png' =>
   array(
     'hash' => '867092041ce0a62b7e50136213ca7be1',
@@ -3967,6 +3981,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/sprite-icons.css',
+  ),
+  'sprite-login-css' =>
+  array(
+    'uri' => '/res/7294661a/rsrc/css/sprite-login.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/sprite-login.css',
   ),
   'sprite-menu-css' =>
   array(
