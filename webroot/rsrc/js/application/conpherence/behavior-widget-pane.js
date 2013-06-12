@@ -258,19 +258,18 @@ JX.behavior('conpherence-widget-pane', function(config) {
       }
 
       var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-      var latest_transaction_data = JX.Stratcom.getData(
-        JX.DOM.find(
-          root,
-          'input',
-          'latest-transaction-id'
-      ));
+      var latest_transaction_dom = JX.DOM.find(
+        root,
+        'input',
+        'latest-transaction-id');
       var data = {
-        latest_transaction_id : latest_transaction_data.id,
+        latest_transaction_id : latest_transaction_dom.value,
         action : create_data.action
       };
 
       new JX.Workflow(href, data)
         .setHandler(function (r) {
+          latest_transaction_dom.value = r.latest_transaction_id;
           if (create_data.refreshFromResponse) {
             var messages = null;
             try {
