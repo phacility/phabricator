@@ -694,7 +694,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -180px;
 }
 
-.icons-new-white, .device-desktop .phabricator-action-view:hover .icons-new, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.icons-new-grey {
+.icons-new-white, .device-desktop .phabricator-action-view:hover .icons-new, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-new {
   background-position: -15px -180px;
 }
 

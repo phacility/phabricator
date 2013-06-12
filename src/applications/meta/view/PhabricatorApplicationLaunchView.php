@@ -130,7 +130,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
       if ($application->getQuickCreateURI()) {
         $classes[] = 'phabricator-application-create-icon';
         $classes[] = 'sprite-icons';
-        $classes[] = 'icons-new-grey';
+        $classes[] = 'icons-new-white';
         $plus_icon = phutil_tag(
           'span',
           array(
