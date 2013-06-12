@@ -3,6 +3,21 @@
 final class PhabricatorSetupCheckStorage extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
+    $upload_limit = PhabricatorEnv::getEnvConfig('storage.upload-size-limit');
+    if (!$upload_limit) {
+      $message = pht(
+        'The Phabricator file upload limit is not configured. You may only '.
+        'be able to upload very small files until you configure it, because '.
+        'some PHP default limits are very low (as low as 2MB).');
+
+      $this
+        ->newIssue('config.storage.upload-size-limit')
+        ->setShortName(pht('Upload Limit'))
+        ->setName(pht('Upload Limit Not Yet Configured'))
+        ->setMessage($message)
+        ->addPhabricatorConfig('storage.upload-size-limit');
+    }
+
     $local_path = PhabricatorEnv::getEnvConfig('storage.local-disk.path');
     if (!$local_path) {
       return;
