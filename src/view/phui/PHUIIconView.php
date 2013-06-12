@@ -8,6 +8,7 @@ final class PHUIIconView extends AphrontTagView {
   const SPRITE_TOKENS = 'tokens';
   const SPRITE_PAYMENTS = 'payments';
   const SPRITE_ICONS = 'icons';
+  const SPRITE_LOGIN = 'login';
 
   const HEAD_SMALL = 'phuihead-small';
   const HEAD_MEDIUM = 'phuihead-medium';

@@ -32,6 +32,11 @@
   width: 60px;
 }
 
+.phui-icon-view.sprite-login {
+  height: 34px;
+  width: 34px;
+}
+
 .phui-icon-view.phuihead-medium {
   height: 50px;
   width: 50px;
