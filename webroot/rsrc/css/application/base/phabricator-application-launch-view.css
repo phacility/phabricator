@@ -62,13 +62,13 @@ a.application-tile-full.application-tile-create {
   text-align: center;
 }
 
-a.phabricator-application-launch-create:hover {
+.device-desktop a.phabricator-application-launch-create:hover {
   background-color: #1e2225;
   color: #fff;
   text-decoration: none;
 }
 
-a.phabricator-application-launch-container:hover {
+.device-desktop a.phabricator-application-launch-container:hover {
   background-color: #1e2225;
   text-decoration: none;
 }

@@ -42,11 +42,6 @@ final class CeleritySpriteGenerator {
             '.icons-'.$icon;
           $tcss[] = '.device-desktop .phui-list-sidenav '.
             '.phui-list-item-href:hover .icons-'.$icon;
-          if ($icon == 'new') {
-            // Hover state for the "+" icons on homepage tiles.
-            $tcss[] = '.phabricator-application-launch-create:hover '.
-                      '.phabricator-application-create-icon.icons-new-grey';
-          }
         }
 
         $sprite->setTargetCSS(implode(', ', $tcss));

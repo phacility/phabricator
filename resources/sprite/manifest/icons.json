@@ -688,7 +688,7 @@
     },
     "icons-new-white"                : {
       "name" : "icons-new-white",
-      "rule" : ".icons-new-white, .device-desktop .phabricator-action-view:hover .icons-new, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-new, .phabricator-application-launch-create:hover .phabricator-application-create-icon.icons-new-grey",
+      "rule" : ".icons-new-white, .device-desktop .phabricator-action-view:hover .icons-new, .device-desktop .phui-list-sidenav .phui-list-item-href:hover .icons-new",
       "hash" : "58d004330176465bf3f0ffe1fa5dea29"
     },
     "icons-none"                     : {

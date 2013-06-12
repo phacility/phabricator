@@ -156,12 +156,9 @@ final class ConpherenceViewController extends
             'type' => 'hidden',
             'name' => 'latest_transaction_id',
             'value' => $latest_transaction_id,
-            'sigil' => 'latest-transaction-id',
-            'meta' => array(
-              'id' => $latest_transaction_id
-            )
+            'sigil' => 'latest-transaction-id'
           ),
-        ''))
+          ''))
       ->render();
 
     return $form;

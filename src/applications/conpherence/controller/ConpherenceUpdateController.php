@@ -319,6 +319,10 @@ final class ConpherenceUpdateController
         break;
     }
 
+    $people_html = null;
+    if ($people_widget) {
+      $people_html = hsprintf('%s', $people_widget->render());
+    }
     $content = array(
       'transactions' => hsprintf('%s', $rendered_transactions),
       'latest_transaction_id' => $new_latest_transaction_id,
@@ -326,7 +330,7 @@ final class ConpherenceUpdateController
       'conpherence_phid' => $conpherence->getPHID(),
       'header' => hsprintf('%s', $header),
       'file_widget' => $file_widget ? $file_widget->render() : null,
-      'people_widget' => $people_widget ? $people_widget->render() : null,
+      'people_widget' => $people_html,
     );
 
     return $content;

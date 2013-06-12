@@ -1,752 +1,767 @@
 {
   "version" : 1,
   "sprites" : {
-    "apps-adventure-blue-large"     : {
+    "apps-adventure-blue-large"       : {
       "name" : "apps-adventure-blue-large",
       "rule" : ".apps-adventure-blue-large, .phabricator-crumb-view:hover .apps-adventure-dark-large",
       "hash" : "0509fb4d048c93a6b8af646944709479"
     },
-    "apps-adventure-dark-large"     : {
+    "apps-adventure-dark-large"       : {
       "name" : "apps-adventure-dark-large",
       "rule" : ".apps-adventure-dark-large",
       "hash" : "bd23a9b83a7026a417d31f454c434161"
     },
-    "apps-adventure-light-large"    : {
+    "apps-adventure-light-large"      : {
       "name" : "apps-adventure-light-large",
       "rule" : ".apps-adventure-light-large",
       "hash" : "3fb2fcd6e3745c9580346ea897aa65ab"
     },
-    "apps-application-blue-large"   : {
+    "apps-application-blue-large"     : {
       "name" : "apps-application-blue-large",
       "rule" : ".apps-application-blue-large, .phabricator-crumb-view:hover .apps-application-dark-large",
       "hash" : "fc889d8c9e69078f291c2ab51ff4343e"
     },
-    "apps-application-dark-large"   : {
+    "apps-application-dark-large"     : {
       "name" : "apps-application-dark-large",
       "rule" : ".apps-application-dark-large",
       "hash" : "e348c2fc0cda05120bb678248409cfad"
     },
-    "apps-application-light-large"  : {
+    "apps-application-light-large"    : {
       "name" : "apps-application-light-large",
       "rule" : ".apps-application-light-large",
       "hash" : "3b2d8072002ea88aa8c09c5189694653"
     },
-    "apps-audit-blue-large"         : {
+    "apps-audit-blue-large"           : {
       "name" : "apps-audit-blue-large",
       "rule" : ".apps-audit-blue-large, .phabricator-crumb-view:hover .apps-audit-dark-large",
       "hash" : "9f869222b0aab808cf0e0cd662d9e72b"
     },
-    "apps-audit-dark-large"         : {
+    "apps-audit-dark-large"           : {
       "name" : "apps-audit-dark-large",
       "rule" : ".apps-audit-dark-large",
       "hash" : "6222153f10afce62ebc5190a011f6ac0"
     },
-    "apps-audit-light-large"        : {
+    "apps-audit-light-large"          : {
       "name" : "apps-audit-light-large",
       "rule" : ".apps-audit-light-large",
       "hash" : "4defc8b4fbfd5f1a1a023829f6f9ceb9"
     },
-    "apps-calendar-blue-large"      : {
+    "apps-authentication-blue-large"  : {
+      "name" : "apps-authentication-blue-large",
+      "rule" : ".apps-authentication-blue-large, .phabricator-crumb-view:hover .apps-authentication-dark-large",
+      "hash" : "6a6061a987f18cb8127e49c6663f4fe3"
+    },
+    "apps-authentication-dark-large"  : {
+      "name" : "apps-authentication-dark-large",
+      "rule" : ".apps-authentication-dark-large",
+      "hash" : "591224019d38d0b5faec6923a12388e7"
+    },
+    "apps-authentication-light-large" : {
+      "name" : "apps-authentication-light-large",
+      "rule" : ".apps-authentication-light-large",
+      "hash" : "ee884df6c42fc58dfa0f33e1c5d22f09"
+    },
+    "apps-calendar-blue-large"        : {
       "name" : "apps-calendar-blue-large",
       "rule" : ".apps-calendar-blue-large, .phabricator-crumb-view:hover .apps-calendar-dark-large",
       "hash" : "6f6c4fa212eba26c85471bdc2e94b706"
     },
-    "apps-calendar-dark-large"      : {
+    "apps-calendar-dark-large"        : {
       "name" : "apps-calendar-dark-large",
       "rule" : ".apps-calendar-dark-large",
       "hash" : "a520b5d737b84ca39020319126f940b1"
     },
-    "apps-calendar-light-large"     : {
+    "apps-calendar-light-large"       : {
       "name" : "apps-calendar-light-large",
       "rule" : ".apps-calendar-light-large",
       "hash" : "cdcf72fd3ebe6265c6c84044996a0f10"
     },
-    "apps-chatlog-blue-large"       : {
+    "apps-chatlog-blue-large"         : {
       "name" : "apps-chatlog-blue-large",
       "rule" : ".apps-chatlog-blue-large, .phabricator-crumb-view:hover .apps-chatlog-dark-large",
       "hash" : "8b52f731f5aaea0fb61974f72157c9af"
     },
-    "apps-chatlog-dark-large"       : {
+    "apps-chatlog-dark-large"         : {
       "name" : "apps-chatlog-dark-large",
       "rule" : ".apps-chatlog-dark-large",
       "hash" : "c6c6c0b312e1de94c44b32186f95ba9c"
     },
-    "apps-chatlog-light-large"      : {
+    "apps-chatlog-light-large"        : {
       "name" : "apps-chatlog-light-large",
       "rule" : ".apps-chatlog-light-large",
       "hash" : "005a18858e65be19e330147dda0c440f"
     },
-    "apps-conduit-blue-large"       : {
+    "apps-conduit-blue-large"         : {
       "name" : "apps-conduit-blue-large",
       "rule" : ".apps-conduit-blue-large, .phabricator-crumb-view:hover .apps-conduit-dark-large",
       "hash" : "7549d63a976dbb650faaceb58aaa3d9e"
     },
-    "apps-conduit-dark-large"       : {
+    "apps-conduit-dark-large"         : {
       "name" : "apps-conduit-dark-large",
       "rule" : ".apps-conduit-dark-large",
       "hash" : "091090790dd5cc5482d9c71460935fd8"
     },
-    "apps-conduit-light-large"      : {
+    "apps-conduit-light-large"        : {
       "name" : "apps-conduit-light-large",
       "rule" : ".apps-conduit-light-large",
       "hash" : "3a9dd111ec843efd2048200bb537b455"
     },
-    "apps-conpherence-blue-large"   : {
+    "apps-conpherence-blue-large"     : {
       "name" : "apps-conpherence-blue-large",
       "rule" : ".apps-conpherence-blue-large, .phabricator-crumb-view:hover .apps-conpherence-dark-large",
       "hash" : "b487ce2815d07b56338802d283aadc9c"
     },
-    "apps-conpherence-dark-large"   : {
+    "apps-conpherence-dark-large"     : {
       "name" : "apps-conpherence-dark-large",
       "rule" : ".apps-conpherence-dark-large",
       "hash" : "10edcded8fded2339a1fdffd78e685ed"
     },
-    "apps-conpherence-light-large"  : {
+    "apps-conpherence-light-large"    : {
       "name" : "apps-conpherence-light-large",
       "rule" : ".apps-conpherence-light-large",
       "hash" : "4467dbd8438f72401b57cc16f3a3a369"
     },
-    "apps-countdown-blue-large"     : {
+    "apps-countdown-blue-large"       : {
       "name" : "apps-countdown-blue-large",
       "rule" : ".apps-countdown-blue-large, .phabricator-crumb-view:hover .apps-countdown-dark-large",
       "hash" : "405ddda3cc0c914287763036e37df797"
     },
-    "apps-countdown-dark-large"     : {
+    "apps-countdown-dark-large"       : {
       "name" : "apps-countdown-dark-large",
       "rule" : ".apps-countdown-dark-large",
       "hash" : "5d4bd6a3a59ee6fc7ec1c3d2c665aa9e"
     },
-    "apps-countdown-light-large"    : {
+    "apps-countdown-light-large"      : {
       "name" : "apps-countdown-light-large",
       "rule" : ".apps-countdown-light-large",
       "hash" : "aefb7a38be433393086579b25c7066eb"
     },
-    "apps-daemon-blue-large"        : {
+    "apps-daemon-blue-large"          : {
       "name" : "apps-daemon-blue-large",
       "rule" : ".apps-daemon-blue-large, .phabricator-crumb-view:hover .apps-daemon-dark-large",
       "hash" : "58f90e6a7bb66482884d9f8a5898b7ed"
     },
-    "apps-daemon-dark-large"        : {
+    "apps-daemon-dark-large"          : {
       "name" : "apps-daemon-dark-large",
       "rule" : ".apps-daemon-dark-large",
       "hash" : "3ada181435fe3294e5399e4252f8049b"
     },
-    "apps-daemon-light-large"       : {
+    "apps-daemon-light-large"         : {
       "name" : "apps-daemon-light-large",
       "rule" : ".apps-daemon-light-large",
       "hash" : "f91e115d5fb25718d21732243cc079d4"
     },
-    "apps-differential-blue-large"  : {
+    "apps-differential-blue-large"    : {
       "name" : "apps-differential-blue-large",
       "rule" : ".apps-differential-blue-large, .phabricator-crumb-view:hover .apps-differential-dark-large",
       "hash" : "646a6f77909115b9d48f2e88d3975aad"
     },
-    "apps-differential-dark-large"  : {
+    "apps-differential-dark-large"    : {
       "name" : "apps-differential-dark-large",
       "rule" : ".apps-differential-dark-large",
       "hash" : "0e3beccd4aa5445f5219525d50579970"
     },
-    "apps-differential-light-large" : {
+    "apps-differential-light-large"   : {
       "name" : "apps-differential-light-large",
       "rule" : ".apps-differential-light-large",
       "hash" : "6d27ebc71ef3a78a5b972cb774024c71"
     },
-    "apps-diffusion-blue-large"     : {
+    "apps-diffusion-blue-large"       : {
       "name" : "apps-diffusion-blue-large",
       "rule" : ".apps-diffusion-blue-large, .phabricator-crumb-view:hover .apps-diffusion-dark-large",
       "hash" : "7ec644b09f8e56dd565fc9ec0d244f66"
     },
-    "apps-diffusion-dark-large"     : {
+    "apps-diffusion-dark-large"       : {
       "name" : "apps-diffusion-dark-large",
       "rule" : ".apps-diffusion-dark-large",
       "hash" : "b85b84d415fc4692a2f86597b888a5db"
     },
-    "apps-diffusion-light-large"    : {
+    "apps-diffusion-light-large"      : {
       "name" : "apps-diffusion-light-large",
       "rule" : ".apps-diffusion-light-large",
       "hash" : "28a6d4f1eb8ac6b39f860f37643adec4"
     },
-    "apps-diviner-blue-large"       : {
+    "apps-diviner-blue-large"         : {
       "name" : "apps-diviner-blue-large",
       "rule" : ".apps-diviner-blue-large, .phabricator-crumb-view:hover .apps-diviner-dark-large",
       "hash" : "a3b7d32c3d9b80e320c1f420016605e0"
     },
-    "apps-diviner-dark-large"       : {
+    "apps-diviner-dark-large"         : {
       "name" : "apps-diviner-dark-large",
       "rule" : ".apps-diviner-dark-large",
       "hash" : "d808f0f4ece13af010e18f032f0dcc6f"
     },
-    "apps-diviner-light-large"      : {
+    "apps-diviner-light-large"        : {
       "name" : "apps-diviner-light-large",
       "rule" : ".apps-diviner-light-large",
       "hash" : "5002148c68c7ec415bebab5becfb4630"
     },
-    "apps-drydock-blue-large"       : {
+    "apps-drydock-blue-large"         : {
       "name" : "apps-drydock-blue-large",
       "rule" : ".apps-drydock-blue-large, .phabricator-crumb-view:hover .apps-drydock-dark-large",
       "hash" : "3154a5eb6a852abab58f5af4bf726575"
     },
-    "apps-drydock-dark-large"       : {
+    "apps-drydock-dark-large"         : {
       "name" : "apps-drydock-dark-large",
       "rule" : ".apps-drydock-dark-large",
       "hash" : "8c48692a7b02f8673d2fc5420b53ac4d"
     },
-    "apps-drydock-light-large"      : {
+    "apps-drydock-light-large"        : {
       "name" : "apps-drydock-light-large",
       "rule" : ".apps-drydock-light-large",
       "hash" : "e05d65b91702767cf027eb0b63a37b4f"
     },
-    "apps-fact-blue-large"          : {
+    "apps-fact-blue-large"            : {
       "name" : "apps-fact-blue-large",
       "rule" : ".apps-fact-blue-large, .phabricator-crumb-view:hover .apps-fact-dark-large",
       "hash" : "754c0154aa20b742cecb9a21ac6ca489"
     },
-    "apps-fact-dark-large"          : {
+    "apps-fact-dark-large"            : {
       "name" : "apps-fact-dark-large",
       "rule" : ".apps-fact-dark-large",
       "hash" : "3cf03586b53692c26978f2859c91b089"
     },
-    "apps-fact-light-large"         : {
+    "apps-fact-light-large"           : {
       "name" : "apps-fact-light-large",
       "rule" : ".apps-fact-light-large",
       "hash" : "12315afc83750eebe6cd53cf31b4914e"
     },
-    "apps-feed-blue-large"          : {
+    "apps-feed-blue-large"            : {
       "name" : "apps-feed-blue-large",
       "rule" : ".apps-feed-blue-large, .phabricator-crumb-view:hover .apps-feed-dark-large",
       "hash" : "40adb545b7791af405c2af74cbce25b0"
     },
-    "apps-feed-dark-large"          : {
+    "apps-feed-dark-large"            : {
       "name" : "apps-feed-dark-large",
       "rule" : ".apps-feed-dark-large",
       "hash" : "1d42c713aa65ceb1ba83ff20e0a9f5d4"
     },
-    "apps-feed-light-large"         : {
+    "apps-feed-light-large"           : {
       "name" : "apps-feed-light-large",
       "rule" : ".apps-feed-light-large",
       "hash" : "3ca4012e0a20dc438d1bde5568ca4a54"
     },
-    "apps-files-blue-large"         : {
+    "apps-files-blue-large"           : {
       "name" : "apps-files-blue-large",
       "rule" : ".apps-files-blue-large, .phabricator-crumb-view:hover .apps-files-dark-large",
       "hash" : "6b104cdecc59dd6a2b7ad80593e64bf5"
     },
-    "apps-files-dark-large"         : {
+    "apps-files-dark-large"           : {
       "name" : "apps-files-dark-large",
       "rule" : ".apps-files-dark-large",
       "hash" : "698bc8702c9e2e8535457e3a0106ce86"
     },
-    "apps-files-light-large"        : {
+    "apps-files-light-large"          : {
       "name" : "apps-files-light-large",
       "rule" : ".apps-files-light-large",
       "hash" : "3120729c859f63c322956a62255ea277"
     },
-    "apps-flags-blue-large"         : {
+    "apps-flags-blue-large"           : {
       "name" : "apps-flags-blue-large",
       "rule" : ".apps-flags-blue-large, .phabricator-crumb-view:hover .apps-flags-dark-large",
       "hash" : "768654309d5c6dda89d7598cf8b24b74"
     },
-    "apps-flags-dark-large"         : {
+    "apps-flags-dark-large"           : {
       "name" : "apps-flags-dark-large",
       "rule" : ".apps-flags-dark-large",
       "hash" : "35d42bde8206adc11ea54cc3ac288932"
     },
-    "apps-flags-light-large"        : {
+    "apps-flags-light-large"          : {
       "name" : "apps-flags-light-large",
       "rule" : ".apps-flags-light-large",
       "hash" : "5d5e3c7ac1ddda9042ea3b3d2777e27c"
     },
-    "apps-harbormaster-blue-large"  : {
+    "apps-harbormaster-blue-large"    : {
       "name" : "apps-harbormaster-blue-large",
       "rule" : ".apps-harbormaster-blue-large, .phabricator-crumb-view:hover .apps-harbormaster-dark-large",
       "hash" : "c4c81a696f9a4e1242324a1e420ab35b"
     },
-    "apps-harbormaster-dark-large"  : {
+    "apps-harbormaster-dark-large"    : {
       "name" : "apps-harbormaster-dark-large",
       "rule" : ".apps-harbormaster-dark-large",
       "hash" : "3c04eec4a91d96a10d515c1f9b8978b2"
     },
-    "apps-harbormaster-light-large" : {
+    "apps-harbormaster-light-large"   : {
       "name" : "apps-harbormaster-light-large",
       "rule" : ".apps-harbormaster-light-large",
       "hash" : "9bfe6e18744b5746744104bc1efa912f"
     },
-    "apps-help-blue-large"          : {
+    "apps-help-blue-large"            : {
       "name" : "apps-help-blue-large",
       "rule" : ".apps-help-blue-large, .phabricator-crumb-view:hover .apps-help-dark-large",
       "hash" : "d0fe3856424c359831387c6411a0956f"
     },
-    "apps-help-dark-large"          : {
+    "apps-help-dark-large"            : {
       "name" : "apps-help-dark-large",
       "rule" : ".apps-help-dark-large",
       "hash" : "cb5a6b7244780bbc0bec5aaf2a130dfb"
     },
-    "apps-help-light-large"         : {
+    "apps-help-light-large"           : {
       "name" : "apps-help-light-large",
       "rule" : ".apps-help-light-large",
       "hash" : "125ad3aee619c3e789d85db7da91c9c7"
     },
-    "apps-herald-blue-large"        : {
+    "apps-herald-blue-large"          : {
       "name" : "apps-herald-blue-large",
       "rule" : ".apps-herald-blue-large, .phabricator-crumb-view:hover .apps-herald-dark-large",
       "hash" : "564bbf8a17fdb4578a5e10f02c068822"
     },
-    "apps-herald-dark-large"        : {
+    "apps-herald-dark-large"          : {
       "name" : "apps-herald-dark-large",
       "rule" : ".apps-herald-dark-large",
       "hash" : "1e3b612160abbfc6f42c5b6c35499f20"
     },
-    "apps-herald-light-large"       : {
+    "apps-herald-light-large"         : {
       "name" : "apps-herald-light-large",
       "rule" : ".apps-herald-light-large",
       "hash" : "196c77eb0588a0453592810afe7efe0c"
     },
-    "apps-home-blue-large"          : {
+    "apps-home-blue-large"            : {
       "name" : "apps-home-blue-large",
       "rule" : ".apps-home-blue-large, .phabricator-crumb-view:hover .apps-home-dark-large",
       "hash" : "702a5bc08248e636f4088f4d816bac94"
     },
-    "apps-home-dark-large"          : {
+    "apps-home-dark-large"            : {
       "name" : "apps-home-dark-large",
       "rule" : ".apps-home-dark-large",
       "hash" : "8c6fff938641378ee504bf473a34defc"
     },
-    "apps-home-light-large"         : {
+    "apps-home-light-large"           : {
       "name" : "apps-home-light-large",
       "rule" : ".apps-home-light-large",
       "hash" : "51b74f90f877258c47145807fd18e388"
     },
-    "apps-logo-blue-large"          : {
+    "apps-logo-blue-large"            : {
       "name" : "apps-logo-blue-large",
       "rule" : ".apps-logo-blue-large, .phabricator-crumb-view:hover .apps-logo-dark-large",
       "hash" : "69dfc24f011d28b6072d437a36161fa7"
     },
-    "apps-logo-dark-large"          : {
+    "apps-logo-dark-large"            : {
       "name" : "apps-logo-dark-large",
       "rule" : ".apps-logo-dark-large",
       "hash" : "2002d5458bcd09e292bf2e9fc17d62a0"
     },
-    "apps-logo-light-large"         : {
+    "apps-logo-light-large"           : {
       "name" : "apps-logo-light-large",
       "rule" : ".apps-logo-light-large",
       "hash" : "56e015e168d46ffdaaba0c6fa99822bb"
     },
-    "apps-macro-blue-large"         : {
+    "apps-macro-blue-large"           : {
       "name" : "apps-macro-blue-large",
       "rule" : ".apps-macro-blue-large, .phabricator-crumb-view:hover .apps-macro-dark-large",
       "hash" : "9a3e3f547f299745c3489286786f21ea"
     },
-    "apps-macro-dark-large"         : {
+    "apps-macro-dark-large"           : {
       "name" : "apps-macro-dark-large",
       "rule" : ".apps-macro-dark-large",
       "hash" : "ddd429dc24e7c7ae328b8a4489eb9175"
     },
-    "apps-macro-light-large"        : {
+    "apps-macro-light-large"          : {
       "name" : "apps-macro-light-large",
       "rule" : ".apps-macro-light-large",
       "hash" : "a7bf42efa03a52ff4c498fd68913e634"
     },
-    "apps-mail-blue-large"          : {
+    "apps-mail-blue-large"            : {
       "name" : "apps-mail-blue-large",
       "rule" : ".apps-mail-blue-large, .phabricator-crumb-view:hover .apps-mail-dark-large",
       "hash" : "8896adff632593c97a8e645a98de3e8d"
     },
-    "apps-mail-dark-large"          : {
+    "apps-mail-dark-large"            : {
       "name" : "apps-mail-dark-large",
       "rule" : ".apps-mail-dark-large",
       "hash" : "6432a08fd203ac359dc97b584e0a6c07"
     },
-    "apps-mail-light-large"         : {
+    "apps-mail-light-large"           : {
       "name" : "apps-mail-light-large",
       "rule" : ".apps-mail-light-large",
       "hash" : "b5d2f0a8ccace78bbd4c547ffe5ab416"
     },
-    "apps-maniphest-blue-large"     : {
+    "apps-maniphest-blue-large"       : {
       "name" : "apps-maniphest-blue-large",
       "rule" : ".apps-maniphest-blue-large, .phabricator-crumb-view:hover .apps-maniphest-dark-large",
       "hash" : "78984a9d2fd49593af452ae6609695d4"
     },
-    "apps-maniphest-dark-large"     : {
+    "apps-maniphest-dark-large"       : {
       "name" : "apps-maniphest-dark-large",
       "rule" : ".apps-maniphest-dark-large",
       "hash" : "cab7745300b9d2d9252a31f00961cb5e"
     },
-    "apps-maniphest-light-large"    : {
+    "apps-maniphest-light-large"      : {
       "name" : "apps-maniphest-light-large",
       "rule" : ".apps-maniphest-light-large",
       "hash" : "094a77fc53f07ba0b1556d7aa3375cfb"
     },
-    "apps-metamta-blue-large"       : {
+    "apps-metamta-blue-large"         : {
       "name" : "apps-metamta-blue-large",
       "rule" : ".apps-metamta-blue-large, .phabricator-crumb-view:hover .apps-metamta-dark-large",
       "hash" : "a816ae9d535c407e406bed70e4c4bef3"
     },
-    "apps-metamta-dark-large"       : {
+    "apps-metamta-dark-large"         : {
       "name" : "apps-metamta-dark-large",
       "rule" : ".apps-metamta-dark-large",
       "hash" : "a606b97f2345efe32b1a34587ed3b7b0"
     },
-    "apps-metamta-light-large"      : {
+    "apps-metamta-light-large"        : {
       "name" : "apps-metamta-light-large",
       "rule" : ".apps-metamta-light-large",
       "hash" : "384fe180c146aae5f10aa734c2ba5651"
     },
-    "apps-owners-blue-large"        : {
+    "apps-owners-blue-large"          : {
       "name" : "apps-owners-blue-large",
       "rule" : ".apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large",
       "hash" : "b967fef9b4c42ae8c4458c2a9afd1463"
     },
-    "apps-owners-dark-large"        : {
+    "apps-owners-dark-large"          : {
       "name" : "apps-owners-dark-large",
       "rule" : ".apps-owners-dark-large",
       "hash" : "01be8451fbb612b975dd3c821ef19bbe"
     },
-    "apps-owners-light-large"       : {
+    "apps-owners-light-large"         : {
       "name" : "apps-owners-light-large",
       "rule" : ".apps-owners-light-large",
       "hash" : "5eeeebd97c62a680195244781fc39eeb"
     },
-    "apps-paste-blue-large"         : {
+    "apps-paste-blue-large"           : {
       "name" : "apps-paste-blue-large",
       "rule" : ".apps-paste-blue-large, .phabricator-crumb-view:hover .apps-paste-dark-large",
       "hash" : "099824fa00964a20a87e41a81d0a6ae3"
     },
-    "apps-paste-dark-large"         : {
+    "apps-paste-dark-large"           : {
       "name" : "apps-paste-dark-large",
       "rule" : ".apps-paste-dark-large",
       "hash" : "9c47ee87939bf25079c894fbd4d6d383"
     },
-    "apps-paste-light-large"        : {
+    "apps-paste-light-large"          : {
       "name" : "apps-paste-light-large",
       "rule" : ".apps-paste-light-large",
       "hash" : "5d1485f2e96ec8a0da1081f02701e0b9"
     },
-    "apps-people-blue-large"        : {
+    "apps-people-blue-large"          : {
       "name" : "apps-people-blue-large",
       "rule" : ".apps-people-blue-large, .phabricator-crumb-view:hover .apps-people-dark-large",
       "hash" : "185dba3e96e16b74b3f6dbf9d6ae5422"
     },
-    "apps-people-dark-large"        : {
+    "apps-people-dark-large"          : {
       "name" : "apps-people-dark-large",
       "rule" : ".apps-people-dark-large",
       "hash" : "bcc355d6ef3681397597995bd2a7f2b3"
     },
-    "apps-people-light-large"       : {
+    "apps-people-light-large"         : {
       "name" : "apps-people-light-large",
       "rule" : ".apps-people-light-large",
       "hash" : "996077831ee507d016536b57f44e52d3"
     },
-    "apps-phage-blue-large"         : {
+    "apps-phage-blue-large"           : {
       "name" : "apps-phage-blue-large",
       "rule" : ".apps-phage-blue-large, .phabricator-crumb-view:hover .apps-phage-dark-large",
       "hash" : "ed85496a4d3d451dde3115dd02d9e2ac"
     },
-    "apps-phage-dark-large"         : {
+    "apps-phage-dark-large"           : {
       "name" : "apps-phage-dark-large",
       "rule" : ".apps-phage-dark-large",
       "hash" : "a36cebcd08eebe541ca25515e6967948"
     },
-    "apps-phage-light-large"        : {
+    "apps-phage-light-large"          : {
       "name" : "apps-phage-light-large",
       "rule" : ".apps-phage-light-large",
       "hash" : "26f0085b214257faab3324c5887b6f76"
     },
-    "apps-phame-blue-large"         : {
+    "apps-phame-blue-large"           : {
       "name" : "apps-phame-blue-large",
       "rule" : ".apps-phame-blue-large, .phabricator-crumb-view:hover .apps-phame-dark-large",
       "hash" : "86a9c9ff13be7f9ad63bf806451fe70a"
     },
-    "apps-phame-dark-large"         : {
+    "apps-phame-dark-large"           : {
       "name" : "apps-phame-dark-large",
       "rule" : ".apps-phame-dark-large",
       "hash" : "df73634d3cef65f6d287b4e403725fe9"
     },
-    "apps-phame-light-large"        : {
+    "apps-phame-light-large"          : {
       "name" : "apps-phame-light-large",
       "rule" : ".apps-phame-light-large",
       "hash" : "68e29657ff2422773727d07303db5281"
     },
-    "apps-phid-blue-large"          : {
+    "apps-phid-blue-large"            : {
       "name" : "apps-phid-blue-large",
       "rule" : ".apps-phid-blue-large, .phabricator-crumb-view:hover .apps-phid-dark-large",
       "hash" : "174373bf52ec78748446b28b143d2cce"
     },
-    "apps-phid-dark-large"          : {
+    "apps-phid-dark-large"            : {
       "name" : "apps-phid-dark-large",
       "rule" : ".apps-phid-dark-large",
       "hash" : "d1916c03adf0350fce0fd1258aa323ec"
     },
-    "apps-phid-light-large"         : {
+    "apps-phid-light-large"           : {
       "name" : "apps-phid-light-large",
       "rule" : ".apps-phid-light-large",
       "hash" : "6a0b438b4c274fe61adfa0e21c069c73"
     },
-    "apps-phlux-blue-large"         : {
+    "apps-phlux-blue-large"           : {
       "name" : "apps-phlux-blue-large",
       "rule" : ".apps-phlux-blue-large, .phabricator-crumb-view:hover .apps-phlux-dark-large",
       "hash" : "4e237442860cabf117fc843e34b8bb0e"
     },
-    "apps-phlux-dark-large"         : {
+    "apps-phlux-dark-large"           : {
       "name" : "apps-phlux-dark-large",
       "rule" : ".apps-phlux-dark-large",
       "hash" : "9a15854e253eac3ca6f8bea32e911162"
     },
-    "apps-phlux-light-large"        : {
+    "apps-phlux-light-large"          : {
       "name" : "apps-phlux-light-large",
       "rule" : ".apps-phlux-light-large",
       "hash" : "5cbb03e1569ea8722cadd8f074f1f850"
     },
-    "apps-pholio-blue-large"        : {
+    "apps-pholio-blue-large"          : {
       "name" : "apps-pholio-blue-large",
       "rule" : ".apps-pholio-blue-large, .phabricator-crumb-view:hover .apps-pholio-dark-large",
       "hash" : "a81650e8da29b6cff76580dc6baac0df"
     },
-    "apps-pholio-dark-large"        : {
+    "apps-pholio-dark-large"          : {
       "name" : "apps-pholio-dark-large",
       "rule" : ".apps-pholio-dark-large",
       "hash" : "3d02ad19cf0b2e81edafc0e47e131cee"
     },
-    "apps-pholio-light-large"       : {
+    "apps-pholio-light-large"         : {
       "name" : "apps-pholio-light-large",
       "rule" : ".apps-pholio-light-large",
       "hash" : "1d11f75c735e22e9328b81040e5d413d"
     },
-    "apps-phortune-blue-large"      : {
+    "apps-phortune-blue-large"        : {
       "name" : "apps-phortune-blue-large",
       "rule" : ".apps-phortune-blue-large, .phabricator-crumb-view:hover .apps-phortune-dark-large",
       "hash" : "78c71081f4f3c8f5075041f5e6c802a1"
     },
-    "apps-phortune-dark-large"      : {
+    "apps-phortune-dark-large"        : {
       "name" : "apps-phortune-dark-large",
       "rule" : ".apps-phortune-dark-large",
       "hash" : "7e8a5ad784e4353309c8ae496dff9141"
     },
-    "apps-phortune-light-large"     : {
+    "apps-phortune-light-large"       : {
       "name" : "apps-phortune-light-large",
       "rule" : ".apps-phortune-light-large",
       "hash" : "fae63e1b2078ae2da749cea129950030"
     },
-    "apps-phpast-blue-large"        : {
+    "apps-phpast-blue-large"          : {
       "name" : "apps-phpast-blue-large",
       "rule" : ".apps-phpast-blue-large, .phabricator-crumb-view:hover .apps-phpast-dark-large",
       "hash" : "d88417d692d4e11826906bf939e99600"
     },
-    "apps-phpast-dark-large"        : {
+    "apps-phpast-dark-large"          : {
       "name" : "apps-phpast-dark-large",
       "rule" : ".apps-phpast-dark-large",
       "hash" : "2f5db781700735aaf2ef3915451459ff"
     },
-    "apps-phpast-light-large"       : {
+    "apps-phpast-light-large"         : {
       "name" : "apps-phpast-light-large",
       "rule" : ".apps-phpast-light-large",
       "hash" : "1de84bb2aba7c22b78e0b74628aefce1"
     },
-    "apps-phrequent-blue-large"     : {
+    "apps-phrequent-blue-large"       : {
       "name" : "apps-phrequent-blue-large",
       "rule" : ".apps-phrequent-blue-large, .phabricator-crumb-view:hover .apps-phrequent-dark-large",
       "hash" : "65c872d3969cb1cbe7f0bd506ef36cca"
     },
-    "apps-phrequent-dark-large"     : {
+    "apps-phrequent-dark-large"       : {
       "name" : "apps-phrequent-dark-large",
       "rule" : ".apps-phrequent-dark-large",
       "hash" : "98c392d11698acc093c81fd899b32f19"
     },
-    "apps-phrequent-light-large"    : {
+    "apps-phrequent-light-large"      : {
       "name" : "apps-phrequent-light-large",
       "rule" : ".apps-phrequent-light-large",
       "hash" : "8411d312b9f649aa5ae0621088bb25f5"
     },
-    "apps-phriction-blue-large"     : {
+    "apps-phriction-blue-large"       : {
       "name" : "apps-phriction-blue-large",
       "rule" : ".apps-phriction-blue-large, .phabricator-crumb-view:hover .apps-phriction-dark-large",
       "hash" : "8b29e0ee777d2d4d1ec2a91b3f910017"
     },
-    "apps-phriction-dark-large"     : {
+    "apps-phriction-dark-large"       : {
       "name" : "apps-phriction-dark-large",
       "rule" : ".apps-phriction-dark-large",
       "hash" : "63ab802a41c87ef69b30718e9946ffb0"
     },
-    "apps-phriction-light-large"    : {
+    "apps-phriction-light-large"      : {
       "name" : "apps-phriction-light-large",
       "rule" : ".apps-phriction-light-large",
       "hash" : "e122d15b4ff0956ad37329b79fbfdc3a"
     },
-    "apps-ponder-blue-large"        : {
+    "apps-ponder-blue-large"          : {
       "name" : "apps-ponder-blue-large",
       "rule" : ".apps-ponder-blue-large, .phabricator-crumb-view:hover .apps-ponder-dark-large",
       "hash" : "76436677bc26190c4fd3993c6cd6034f"
     },
-    "apps-ponder-dark-large"        : {
+    "apps-ponder-dark-large"          : {
       "name" : "apps-ponder-dark-large",
       "rule" : ".apps-ponder-dark-large",
       "hash" : "54beefa78bd1aae4a35f57d6f08be1d8"
     },
-    "apps-ponder-light-large"       : {
+    "apps-ponder-light-large"         : {
       "name" : "apps-ponder-light-large",
       "rule" : ".apps-ponder-light-large",
       "hash" : "80bc15e0ffe9010975e643456baf9563"
     },
-    "apps-power-blue-large"         : {
+    "apps-power-blue-large"           : {
       "name" : "apps-power-blue-large",
       "rule" : ".apps-power-blue-large, .phabricator-crumb-view:hover .apps-power-dark-large",
       "hash" : "e7e42f93324499a3194dfd73b6ae7b1b"
     },
-    "apps-power-dark-large"         : {
+    "apps-power-dark-large"           : {
       "name" : "apps-power-dark-large",
       "rule" : ".apps-power-dark-large",
       "hash" : "d22328989a099998c340525bf485bb75"
     },
-    "apps-power-light-large"        : {
+    "apps-power-light-large"          : {
       "name" : "apps-power-light-large",
       "rule" : ".apps-power-light-large",
       "hash" : "84e7423a510311b237f3bfe4e700b346"
     },
-    "apps-projects-blue-large"      : {
+    "apps-projects-blue-large"        : {
       "name" : "apps-projects-blue-large",
       "rule" : ".apps-projects-blue-large, .phabricator-crumb-view:hover .apps-projects-dark-large",
       "hash" : "997f71636ccc6af73e75198cbb379469"
     },
-    "apps-projects-dark-large"      : {
+    "apps-projects-dark-large"        : {
       "name" : "apps-projects-dark-large",
       "rule" : ".apps-projects-dark-large",
       "hash" : "8d33919d561678a4b206c73f17b23411"
     },
-    "apps-projects-light-large"     : {
+    "apps-projects-light-large"       : {
       "name" : "apps-projects-light-large",
       "rule" : ".apps-projects-light-large",
       "hash" : "22aa7d0cc5c8808eee523b8d4b022e97"
     },
-    "apps-releeph-blue-large"       : {
+    "apps-releeph-blue-large"         : {
       "name" : "apps-releeph-blue-large",
       "rule" : ".apps-releeph-blue-large, .phabricator-crumb-view:hover .apps-releeph-dark-large",
       "hash" : "ef3155ec0b10e5e75fdefb214d7e0d1a"
     },
-    "apps-releeph-dark-large"       : {
+    "apps-releeph-dark-large"         : {
       "name" : "apps-releeph-dark-large",
       "rule" : ".apps-releeph-dark-large",
       "hash" : "d5ca94cade1a437e0967b9d33e7ecbcd"
     },
-    "apps-releeph-light-large"      : {
+    "apps-releeph-light-large"        : {
       "name" : "apps-releeph-light-large",
       "rule" : ".apps-releeph-light-large",
       "hash" : "aa7a60713d6308688ac697304ae67bd8"
     },
-    "apps-repositories-blue-large"  : {
+    "apps-repositories-blue-large"    : {
       "name" : "apps-repositories-blue-large",
       "rule" : ".apps-repositories-blue-large, .phabricator-crumb-view:hover .apps-repositories-dark-large",
       "hash" : "a41af8e724aa960c2748c132f1fb696c"
     },
-    "apps-repositories-dark-large"  : {
+    "apps-repositories-dark-large"    : {
       "name" : "apps-repositories-dark-large",
       "rule" : ".apps-repositories-dark-large",
       "hash" : "d9bb66b0e220714f09c17df6c615465a"
     },
-    "apps-repositories-light-large" : {
+    "apps-repositories-light-large"   : {
       "name" : "apps-repositories-light-large",
       "rule" : ".apps-repositories-light-large",
       "hash" : "51eb3a6cbbc934bc5ea457ed37c38064"
     },
-    "apps-settings-blue-large"      : {
+    "apps-settings-blue-large"        : {
       "name" : "apps-settings-blue-large",
       "rule" : ".apps-settings-blue-large, .phabricator-crumb-view:hover .apps-settings-dark-large",
       "hash" : "3623ea33b34613d3d527094a238913ae"
     },
-    "apps-settings-dark-large"      : {
+    "apps-settings-dark-large"        : {
       "name" : "apps-settings-dark-large",
       "rule" : ".apps-settings-dark-large",
       "hash" : "d80deac60d655bf3e52a1229cba69dfb"
     },
-    "apps-settings-light-large"     : {
+    "apps-settings-light-large"       : {
       "name" : "apps-settings-light-large",
       "rule" : ".apps-settings-light-large",
       "hash" : "a754e26164dac005b5e230f99b94851a"
     },
-    "apps-setup-blue-large"         : {
+    "apps-setup-blue-large"           : {
       "name" : "apps-setup-blue-large",
       "rule" : ".apps-setup-blue-large, .phabricator-crumb-view:hover .apps-setup-dark-large",
       "hash" : "3e6503e724de415ff6f2ba950616cd6b"
     },
-    "apps-setup-dark-large"         : {
+    "apps-setup-dark-large"           : {
       "name" : "apps-setup-dark-large",
       "rule" : ".apps-setup-dark-large",
       "hash" : "249661f744dfd6244280f0c2e42d452e"
     },
-    "apps-setup-light-large"        : {
+    "apps-setup-light-large"          : {
       "name" : "apps-setup-light-large",
       "rule" : ".apps-setup-light-large",
       "hash" : "39d37bf9ff87e4dad2432a547008bbf5"
     },
-    "apps-slowvote-blue-large"      : {
+    "apps-slowvote-blue-large"        : {
       "name" : "apps-slowvote-blue-large",
       "rule" : ".apps-slowvote-blue-large, .phabricator-crumb-view:hover .apps-slowvote-dark-large",
       "hash" : "8e31e0f5e778c9edbd0da4612359d755"
     },
-    "apps-slowvote-dark-large"      : {
+    "apps-slowvote-dark-large"        : {
       "name" : "apps-slowvote-dark-large",
       "rule" : ".apps-slowvote-dark-large",
       "hash" : "ab081bf44dc1e2f9bf782d28b3cdc522"
     },
-    "apps-slowvote-light-large"     : {
+    "apps-slowvote-light-large"       : {
       "name" : "apps-slowvote-light-large",
       "rule" : ".apps-slowvote-light-large",
       "hash" : "b908c23ed5b1a5af8d2645c3704e1db0"
     },
-    "apps-token-blue-large"         : {
+    "apps-token-blue-large"           : {
       "name" : "apps-token-blue-large",
       "rule" : ".apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large",
       "hash" : "3bf65ffafa2b122eb60f626473232e40"
     },
-    "apps-token-dark-large"         : {
+    "apps-token-dark-large"           : {
       "name" : "apps-token-dark-large",
       "rule" : ".apps-token-dark-large",
       "hash" : "2a84d5ef0a513a1c57897d8fbf7346df"
     },
-    "apps-token-light-large"        : {
+    "apps-token-light-large"          : {
       "name" : "apps-token-light-large",
       "rule" : ".apps-token-light-large",
       "hash" : "258a406e20227a202066913ca4fe63ac"
     },
-    "apps-uiexamples-blue-large"    : {
+    "apps-uiexamples-blue-large"      : {
       "name" : "apps-uiexamples-blue-large",
       "rule" : ".apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large",
       "hash" : "24ea65da28397859eab59d9d5cc3d182"
     },
-    "apps-uiexamples-dark-large"    : {
+    "apps-uiexamples-dark-large"      : {
       "name" : "apps-uiexamples-dark-large",
       "rule" : ".apps-uiexamples-dark-large",
       "hash" : "a200274e5aab9e6f036d95816dfd1a58"
     },
-    "apps-uiexamples-light-large"   : {
+    "apps-uiexamples-light-large"     : {
       "name" : "apps-uiexamples-light-large",
       "rule" : ".apps-uiexamples-light-large",
       "hash" : "783d7b5507c7d2c5b54dafa48bfb16b4"
     },
-    "apps-workphlow-blue-large"     : {
+    "apps-workphlow-blue-large"       : {
       "name" : "apps-workphlow-blue-large",
       "rule" : ".apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large",
       "hash" : "c6629e2fd3bafe8bb3fbf5145bbf190a"
     },
-    "apps-workphlow-dark-large"     : {
+    "apps-workphlow-dark-large"       : {
       "name" : "apps-workphlow-dark-large",
       "rule" : ".apps-workphlow-dark-large",
       "hash" : "7de748184d0acc8ef5028fbb9fafab72"
     },
-    "apps-workphlow-light-large"    : {
+    "apps-workphlow-light-large"      : {
       "name" : "apps-workphlow-light-large",
       "rule" : ".apps-workphlow-light-large",
       "hash" : "f4c28448cfe72304d153a77dc2f34197"
     },
-    "apps-xhprof-blue-large"        : {
+    "apps-xhprof-blue-large"          : {
       "name" : "apps-xhprof-blue-large",
       "rule" : ".apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large",
       "hash" : "e55fcaa0d27b88591927545aaaeb3b45"
     },
-    "apps-xhprof-dark-large"        : {
+    "apps-xhprof-dark-large"          : {
       "name" : "apps-xhprof-dark-large",
       "rule" : ".apps-xhprof-dark-large",
       "hash" : "9d70d3e125981dc2366603c3b90c043e"
     },
-    "apps-xhprof-light-large"       : {
+    "apps-xhprof-light-large"         : {
       "name" : "apps-xhprof-light-large",
       "rule" : ".apps-xhprof-light-large",
       "hash" : "60d566581dbffaab5a61d5bd73ad5ab3"

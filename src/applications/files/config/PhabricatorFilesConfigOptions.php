@@ -143,17 +143,17 @@ final class PhabricatorFilesConfigOptions
             "used to render text like 'Maximum file size: 10MB' on ".
             "interfaces where users can upload files, and files larger than ".
             "this size will be rejected. \n\n".
-            "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
-            "suffix.\n\n".
-            "NOTE: Setting this to a large size is **NOT** sufficient to ".
+            "NOTE: **Setting this to a large size is NOT sufficient to ".
             "allow users to upload large files. You must also configure a ".
-            "number of other settings. To configure file upload limits, ".
+            "number of other settings.** To configure file upload limits, ".
             "consult the article 'Configuring File Upload Limits' in the ".
             "documentation. Once you've configured some limit across all ".
             "levels of the server, you can set this limit to an appropriate ".
             "value and the UI will then reflect the actual configured ".
-            "limit."))
-        ->addExample('10M', pht("Valid setting.")),
+            "limit.\n\n".
+            "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
+            "suffix."))
+        ->addExample('10M', pht("Allow Uploads 10MB or Smaller")),
      $this->newOption('files.enable-imagemagick', 'bool', false)
        ->setBoolOptions(
          array(

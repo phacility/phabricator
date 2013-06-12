@@ -1,252 +1,257 @@
 {
   "version" : 1,
   "sprites" : {
-    "apps-adventure-dark"    : {
+    "apps-adventure-dark"      : {
       "name" : "apps-adventure-dark",
       "rule" : ".apps-adventure-dark",
       "hash" : "a28314cca031158b744be7bf71612261"
     },
-    "apps-application-dark"  : {
+    "apps-application-dark"    : {
       "name" : "apps-application-dark",
       "rule" : ".apps-application-dark",
       "hash" : "cb6533f585c2ab831916aee29ab29338"
     },
-    "apps-audit-dark"        : {
+    "apps-audit-dark"          : {
       "name" : "apps-audit-dark",
       "rule" : ".apps-audit-dark",
       "hash" : "1b6b4d4fc3954309e7af1c777401511d"
     },
-    "apps-calendar-dark"     : {
+    "apps-authentication-dark" : {
+      "name" : "apps-authentication-dark",
+      "rule" : ".apps-authentication-dark",
+      "hash" : "937173ef05d25f3bcd7b039d97866487"
+    },
+    "apps-calendar-dark"       : {
       "name" : "apps-calendar-dark",
       "rule" : ".apps-calendar-dark",
       "hash" : "ace8540406796c442b7e821d7009a354"
     },
-    "apps-chatlog-dark"      : {
+    "apps-chatlog-dark"        : {
       "name" : "apps-chatlog-dark",
       "rule" : ".apps-chatlog-dark",
       "hash" : "a9fc7a1da24693ced95accf6646d658b"
     },
-    "apps-conduit-dark"      : {
+    "apps-conduit-dark"        : {
       "name" : "apps-conduit-dark",
       "rule" : ".apps-conduit-dark",
       "hash" : "731db33ba8fa2971e4d3d1feff1ac574"
     },
-    "apps-conpherence-dark"  : {
+    "apps-conpherence-dark"    : {
       "name" : "apps-conpherence-dark",
       "rule" : ".apps-conpherence-dark",
       "hash" : "03f9399cbd1dc70cb132bb3b4308c246"
     },
-    "apps-countdown-dark"    : {
+    "apps-countdown-dark"      : {
       "name" : "apps-countdown-dark",
       "rule" : ".apps-countdown-dark",
       "hash" : "9db932741a6d3d64b8df7a8e28b0025e"
     },
-    "apps-daemon-dark"       : {
+    "apps-daemon-dark"         : {
       "name" : "apps-daemon-dark",
       "rule" : ".apps-daemon-dark",
       "hash" : "83a2aefb0e297b22bb40fbe76537dbcc"
     },
-    "apps-differential-dark" : {
+    "apps-differential-dark"   : {
       "name" : "apps-differential-dark",
       "rule" : ".apps-differential-dark",
       "hash" : "47c31971aeeba0b0cf3dae7c3f34d746"
     },
-    "apps-diffusion-dark"    : {
+    "apps-diffusion-dark"      : {
       "name" : "apps-diffusion-dark",
       "rule" : ".apps-diffusion-dark",
       "hash" : "b6bf9ca076cea40ae409844669b8bcf8"
     },
-    "apps-diviner-dark"      : {
+    "apps-diviner-dark"        : {
       "name" : "apps-diviner-dark",
       "rule" : ".apps-diviner-dark",
       "hash" : "356f063869ad2e9b881844a7ee9813ba"
     },
-    "apps-drydock-dark"      : {
+    "apps-drydock-dark"        : {
       "name" : "apps-drydock-dark",
       "rule" : ".apps-drydock-dark",
       "hash" : "30bddd91ffd0c3dba57a0156717f28be"
     },
-    "apps-fact-dark"         : {
+    "apps-fact-dark"           : {
       "name" : "apps-fact-dark",
       "rule" : ".apps-fact-dark",
       "hash" : "029a4b291e7ec8df75f656ad90443fd1"
     },
-    "apps-feed-dark"         : {
+    "apps-feed-dark"           : {
       "name" : "apps-feed-dark",
       "rule" : ".apps-feed-dark",
       "hash" : "b1ba15483949965dc40f8afe1fed36f3"
     },
-    "apps-files-dark"        : {
+    "apps-files-dark"          : {
       "name" : "apps-files-dark",
       "rule" : ".apps-files-dark",
       "hash" : "7ac5474f6c77942a4a002c7236bb02bd"
     },
-    "apps-flags-dark"        : {
+    "apps-flags-dark"          : {
       "name" : "apps-flags-dark",
       "rule" : ".apps-flags-dark",
       "hash" : "d32b409cac006890391cbf3deaf9c66c"
     },
-    "apps-harbormaster-dark" : {
+    "apps-harbormaster-dark"   : {
       "name" : "apps-harbormaster-dark",
       "rule" : ".apps-harbormaster-dark",
       "hash" : "71490d2cba389b33791db899fa86ac43"
     },
-    "apps-help-dark"         : {
+    "apps-help-dark"           : {
       "name" : "apps-help-dark",
       "rule" : ".apps-help-dark",
       "hash" : "59c2301a521deec631bb4373b6b5932c"
     },
-    "apps-herald-dark"       : {
+    "apps-herald-dark"         : {
       "name" : "apps-herald-dark",
       "rule" : ".apps-herald-dark",
       "hash" : "39dee5205e7fd0193db1249e8c58476a"
     },
-    "apps-home-dark"         : {
+    "apps-home-dark"           : {
       "name" : "apps-home-dark",
       "rule" : ".apps-home-dark",
       "hash" : "4a90080e06032017e21a1cadcd6d0993"
     },
-    "apps-logo-dark"         : {
+    "apps-logo-dark"           : {
       "name" : "apps-logo-dark",
       "rule" : ".apps-logo-dark",
       "hash" : "124cad7ef1ba1abb032beb50f3e4b9db"
     },
-    "apps-macro-dark"        : {
+    "apps-macro-dark"          : {
       "name" : "apps-macro-dark",
       "rule" : ".apps-macro-dark",
       "hash" : "8c5b3dee46497cdecc7b21ed0e83afa4"
     },
-    "apps-mail-dark"         : {
+    "apps-mail-dark"           : {
       "name" : "apps-mail-dark",
       "rule" : ".apps-mail-dark",
       "hash" : "73b7a7b1bd0efca32d7d57039b7515d9"
     },
-    "apps-maniphest-dark"    : {
+    "apps-maniphest-dark"      : {
       "name" : "apps-maniphest-dark",
       "rule" : ".apps-maniphest-dark",
       "hash" : "f69f9b71fba0a3cb2ad3f989b9e80aa3"
     },
-    "apps-metamta-dark"      : {
+    "apps-metamta-dark"        : {
       "name" : "apps-metamta-dark",
       "rule" : ".apps-metamta-dark",
       "hash" : "d7c8b12880351a5214747e5fec9a6047"
     },
-    "apps-owners-dark"       : {
+    "apps-owners-dark"         : {
       "name" : "apps-owners-dark",
       "rule" : ".apps-owners-dark",
       "hash" : "6820f0ed3b1c2a02ee8523b7ca16bd73"
     },
-    "apps-paste-dark"        : {
+    "apps-paste-dark"          : {
       "name" : "apps-paste-dark",
       "rule" : ".apps-paste-dark",
       "hash" : "dc7b5739ae96c7df35bd115b5a890432"
     },
-    "apps-people-dark"       : {
+    "apps-people-dark"         : {
       "name" : "apps-people-dark",
       "rule" : ".apps-people-dark",
       "hash" : "be18920c5e1ce28e92bef89b01196d6d"
     },
-    "apps-phage-dark"        : {
+    "apps-phage-dark"          : {
       "name" : "apps-phage-dark",
       "rule" : ".apps-phage-dark",
       "hash" : "7a15eec085afcc137b50b23781889526"
     },
-    "apps-phame-dark"        : {
+    "apps-phame-dark"          : {
       "name" : "apps-phame-dark",
       "rule" : ".apps-phame-dark",
       "hash" : "bcb80ee46f3a68c9218132537c1ad403"
     },
-    "apps-phid-dark"         : {
+    "apps-phid-dark"           : {
       "name" : "apps-phid-dark",
       "rule" : ".apps-phid-dark",
       "hash" : "30abc202bd6d191d0686ac601b4827d9"
     },
-    "apps-phlux-dark"        : {
+    "apps-phlux-dark"          : {
       "name" : "apps-phlux-dark",
       "rule" : ".apps-phlux-dark",
       "hash" : "67c98e15d093726c13325dfb7b130d5b"
     },
-    "apps-pholio-dark"       : {
+    "apps-pholio-dark"         : {
       "name" : "apps-pholio-dark",
       "rule" : ".apps-pholio-dark",
       "hash" : "a7c0eed5e0acf244d77a40ba48605de3"
     },
-    "apps-phortune-dark"     : {
+    "apps-phortune-dark"       : {
       "name" : "apps-phortune-dark",
       "rule" : ".apps-phortune-dark",
       "hash" : "2ddad4cb503d2b3ae7662717170684ce"
     },
-    "apps-phpast-dark"       : {
+    "apps-phpast-dark"         : {
       "name" : "apps-phpast-dark",
       "rule" : ".apps-phpast-dark",
       "hash" : "c9be5edad0b04067552f15460871f608"
     },
-    "apps-phrequent-dark"    : {
+    "apps-phrequent-dark"      : {
       "name" : "apps-phrequent-dark",
       "rule" : ".apps-phrequent-dark",
       "hash" : "eb16969e42515916a040014870270a04"
     },
-    "apps-phriction-dark"    : {
+    "apps-phriction-dark"      : {
       "name" : "apps-phriction-dark",
       "rule" : ".apps-phriction-dark",
       "hash" : "8a1035b1cbc512ed0845939158d266a3"
     },
-    "apps-ponder-dark"       : {
+    "apps-ponder-dark"         : {
       "name" : "apps-ponder-dark",
       "rule" : ".apps-ponder-dark",
       "hash" : "2b38741f594a8c8501262dc5069b7ef1"
     },
-    "apps-power-dark"        : {
+    "apps-power-dark"          : {
       "name" : "apps-power-dark",
       "rule" : ".apps-power-dark",
       "hash" : "6203c8631039352f62884cb36862c53a"
     },
-    "apps-projects-dark"     : {
+    "apps-projects-dark"       : {
       "name" : "apps-projects-dark",
       "rule" : ".apps-projects-dark",
       "hash" : "c982e15e33f1ede39ece69f281300d52"
     },
-    "apps-releeph-dark"      : {
+    "apps-releeph-dark"        : {
       "name" : "apps-releeph-dark",
       "rule" : ".apps-releeph-dark",
       "hash" : "7f2ce7d637dac9200cdbdf39878e3448"
     },
-    "apps-repositories-dark" : {
+    "apps-repositories-dark"   : {
       "name" : "apps-repositories-dark",
       "rule" : ".apps-repositories-dark",
       "hash" : "6703a039b6d3fe08a15d358c25febe91"
     },
-    "apps-settings-dark"     : {
+    "apps-settings-dark"       : {
       "name" : "apps-settings-dark",
       "rule" : ".apps-settings-dark",
       "hash" : "a5ebbb89a36998a4f4a42e8ae43eedd2"
     },
-    "apps-setup-dark"        : {
+    "apps-setup-dark"          : {
       "name" : "apps-setup-dark",
       "rule" : ".apps-setup-dark",
       "hash" : "3d959dc32fab465dd68df57a19fcd64c"
     },
-    "apps-slowvote-dark"     : {
+    "apps-slowvote-dark"       : {
       "name" : "apps-slowvote-dark",
       "rule" : ".apps-slowvote-dark",
       "hash" : "e5aeb00a1f7b70e20a41f7a494e2aad3"
     },
-    "apps-token-dark"        : {
+    "apps-token-dark"          : {
       "name" : "apps-token-dark",
       "rule" : ".apps-token-dark",
       "hash" : "5a35e3577ace0fc01296aaefd77703b7"
     },
-    "apps-uiexamples-dark"   : {
+    "apps-uiexamples-dark"     : {
       "name" : "apps-uiexamples-dark",
       "rule" : ".apps-uiexamples-dark",
       "hash" : "78f717f6d01fcb9c636065218839d93a"
     },
-    "apps-workphlow-dark"    : {
+    "apps-workphlow-dark"      : {
       "name" : "apps-workphlow-dark",
       "rule" : ".apps-workphlow-dark",
       "hash" : "60df1eab180a860e4022b349c7e76a2e"
     },
-    "apps-xhprof-dark"       : {
+    "apps-xhprof-dark"         : {
       "name" : "apps-xhprof-dark",
       "rule" : ".apps-xhprof-dark",
       "hash" : "02b12b5beeb1a044699046247d065dc3"

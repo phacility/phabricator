@@ -146,7 +146,7 @@ final class PhabricatorAuditListView extends AphrontView {
           ->addByline(pht('Auditor: %s', $auditor_handle->renderLink()));
 
       if (array_key_exists($audit->getID(), $this->getHighlightedAudits())) {
-        $item->setBarColor('yellow');
+        $item->setEffect('highlighted');
       }
 
       $list->addItem($item);

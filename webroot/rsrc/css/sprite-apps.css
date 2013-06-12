@@ -30,190 +30,194 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -30px 0px;
 }
 
-.apps-calendar-dark {
+.apps-authentication-dark {
   background-position: -45px 0px;
 }
 
-.apps-chatlog-dark {
+.apps-calendar-dark {
   background-position: -60px 0px;
 }
 
-.apps-conduit-dark {
+.apps-chatlog-dark {
   background-position: -75px 0px;
 }
 
-.apps-conpherence-dark {
+.apps-conduit-dark {
   background-position: -90px 0px;
 }
 
-.apps-countdown-dark {
+.apps-conpherence-dark {
   background-position: 0px -15px;
 }
 
-.apps-daemon-dark {
+.apps-countdown-dark {
   background-position: -15px -15px;
 }
 
-.apps-differential-dark {
+.apps-daemon-dark {
   background-position: -30px -15px;
 }
 
-.apps-diffusion-dark {
+.apps-differential-dark {
   background-position: -45px -15px;
 }
 
-.apps-diviner-dark {
+.apps-diffusion-dark {
   background-position: -60px -15px;
 }
 
-.apps-drydock-dark {
+.apps-diviner-dark {
   background-position: -75px -15px;
 }
 
-.apps-fact-dark {
+.apps-drydock-dark {
   background-position: -90px -15px;
 }
 
-.apps-feed-dark {
+.apps-fact-dark {
   background-position: 0px -30px;
 }
 
-.apps-files-dark {
+.apps-feed-dark {
   background-position: -15px -30px;
 }
 
-.apps-flags-dark {
+.apps-files-dark {
   background-position: -30px -30px;
 }
 
-.apps-harbormaster-dark {
+.apps-flags-dark {
   background-position: -45px -30px;
 }
 
-.apps-help-dark {
+.apps-harbormaster-dark {
   background-position: -60px -30px;
 }
 
-.apps-herald-dark {
+.apps-help-dark {
   background-position: -75px -30px;
 }
 
-.apps-home-dark {
+.apps-herald-dark {
   background-position: -90px -30px;
 }
 
-.apps-logo-dark {
+.apps-home-dark {
   background-position: 0px -45px;
 }
 
-.apps-macro-dark {
+.apps-logo-dark {
   background-position: -15px -45px;
 }
 
-.apps-mail-dark {
+.apps-macro-dark {
   background-position: -30px -45px;
 }
 
-.apps-maniphest-dark {
+.apps-mail-dark {
   background-position: -45px -45px;
 }
 
-.apps-metamta-dark {
+.apps-maniphest-dark {
   background-position: -60px -45px;
 }
 
-.apps-owners-dark {
+.apps-metamta-dark {
   background-position: -75px -45px;
 }
 
-.apps-paste-dark {
+.apps-owners-dark {
   background-position: -90px -45px;
 }
 
-.apps-people-dark {
+.apps-paste-dark {
   background-position: 0px -60px;
 }
 
-.apps-phage-dark {
+.apps-people-dark {
   background-position: -15px -60px;
 }
 
-.apps-phame-dark {
+.apps-phage-dark {
   background-position: -30px -60px;
 }
 
-.apps-phid-dark {
+.apps-phame-dark {
   background-position: -45px -60px;
 }
 
-.apps-phlux-dark {
+.apps-phid-dark {
   background-position: -60px -60px;
 }
 
-.apps-pholio-dark {
+.apps-phlux-dark {
   background-position: -75px -60px;
 }
 
-.apps-phortune-dark {
+.apps-pholio-dark {
   background-position: -90px -60px;
 }
 
-.apps-phpast-dark {
+.apps-phortune-dark {
   background-position: 0px -75px;
 }
 
-.apps-phrequent-dark {
+.apps-phpast-dark {
   background-position: -15px -75px;
 }
 
-.apps-phriction-dark {
+.apps-phrequent-dark {
   background-position: -30px -75px;
 }
 
-.apps-ponder-dark {
+.apps-phriction-dark {
   background-position: -45px -75px;
 }
 
-.apps-power-dark {
+.apps-ponder-dark {
   background-position: -60px -75px;
 }
 
-.apps-projects-dark {
+.apps-power-dark {
   background-position: -75px -75px;
 }
 
-.apps-releeph-dark {
+.apps-projects-dark {
   background-position: -90px -75px;
 }
 
-.apps-repositories-dark {
+.apps-releeph-dark {
   background-position: 0px -90px;
 }
 
-.apps-settings-dark {
+.apps-repositories-dark {
   background-position: -15px -90px;
 }
 
-.apps-setup-dark {
+.apps-settings-dark {
   background-position: -30px -90px;
 }
 
-.apps-slowvote-dark {
+.apps-setup-dark {
   background-position: -45px -90px;
 }
 
-.apps-token-dark {
+.apps-slowvote-dark {
   background-position: -60px -90px;
 }
 
-.apps-uiexamples-dark {
+.apps-token-dark {
   background-position: -75px -90px;
 }
 
-.apps-workphlow-dark {
+.apps-uiexamples-dark {
   background-position: -90px -90px;
 }
 
-.apps-xhprof-dark {
+.apps-workphlow-dark {
   background-position: 0px -105px;
+}
+
+.apps-xhprof-dark {
+  background-position: -15px -105px;
 }

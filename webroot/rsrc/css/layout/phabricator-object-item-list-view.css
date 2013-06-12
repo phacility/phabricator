@@ -345,7 +345,13 @@
 */
 
 .phabricator-object-item-highlighted {
-  background: #ffffb2;
+  background: rgb(253, 255, 221);
+}
+
+.phabricator-object-list-cards
+ .phabricator-object-item.phabricator-object-item-highlighted {
+  background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
+  background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
 }
 
 .phabricator-object-item-selected {
