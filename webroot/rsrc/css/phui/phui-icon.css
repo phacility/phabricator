@@ -17,7 +17,8 @@
   width: 24px;
 }
 
-.phui-icon-view.sprite-apps {
+.phui-icon-view.sprite-apps,
+.phui-icon-view.sprite-icons {
   height: 14px;
   width: 14px;
 }

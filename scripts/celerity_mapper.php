@@ -67,7 +67,7 @@ $package_spec = array(
   'core.pkg.css' => array(
     'phabricator-core-css',
     'phabricator-zindex-css',
-    'phabricator-core-buttons-css',
+    'phui-button-css',
     'phabricator-standard-page-view',
     'aphront-dialog-view-css',
     'aphront-form-view-css',
@@ -104,7 +104,7 @@ $package_spec = array(
     'phabricator-crumbs-view-css',
     'phabricator-object-item-list-view-css',
     'global-drag-and-drop-css',
-    'spacing-css',
+    'phui-spacing-css',
     'phui-form-css',
     'phui-icon-view-css',
 
