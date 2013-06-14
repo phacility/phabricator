@@ -233,7 +233,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %s AND commitIdentifier = %s',
+      'repositoryID = %d AND commitIdentifier = %s',
       $repository->getID(),
       $target);
 
@@ -254,7 +254,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $target) {
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %s AND commitIdentifier = %s',
+      'repositoryID = %d AND commitIdentifier = %s',
       $repository->getID(),
       $target);
 
@@ -362,7 +362,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $branch) {
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %s AND commitIdentifier = %s',
+      'repositoryID = %d AND commitIdentifier = %s',
       $repository->getID(),
       $commit_identifier);
 
