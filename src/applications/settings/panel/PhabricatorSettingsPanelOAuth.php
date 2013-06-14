@@ -68,10 +68,9 @@ final class PhabricatorSettingsPanelOAuth
     $provider_name = $provider->getProviderName();
     $provider_key  = $provider->getProviderKey();
 
-    $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-      'userID = %d AND oauthProvider = %s',
-      $user->getID(),
-      $provider->getProviderKey());
+    $oauth_info = PhabricatorUserOAuthInfo::loadOneByUserAndProviderKey(
+      $user,
+      $provider_key);
 
     $form = new AphrontFormView();
     $form->setUser($user);

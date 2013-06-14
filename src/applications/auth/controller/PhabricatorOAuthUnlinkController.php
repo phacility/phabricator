@@ -21,9 +21,8 @@ final class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
 
     $provider_key = $provider->getProviderKey();
 
-    $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-      'userID = %d AND oauthProvider = %s',
-      $user->getID(),
+    $oauth_info = PhabricatorUserOAuthInfo::loadOneByUserAndProviderKey(
+      $user,
       $provider_key);
 
     if (!$oauth_info) {

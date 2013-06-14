@@ -64,9 +64,7 @@ final class PhabricatorPeopleProfileController
     // NOTE: applications install the various links through PhabricatorEvent
     // listeners
 
-    $oauths = id(new PhabricatorUserOAuthInfo())->loadAllWhere(
-      'userID = %d',
-      $user->getID());
+    $oauths = PhabricatorUserOAuthInfo::loadAllOAuthProvidersByUser($user);
     $oauths = mpull($oauths, null, 'getOAuthProvider');
 
     $providers = PhabricatorOAuthProvider::getAllProviders();

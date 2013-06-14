@@ -89,9 +89,8 @@ final class PhabricatorOAuthLoginController
         }
       }
 
-      $existing_oauth = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-        'userID = %d AND oauthProvider = %s',
-        $current_user->getID(),
+      $existing_oauth = PhabricatorUserOAuthInfo::loadOneByUserAndProviderKey(
+        $current_user,
         $provider_key);
 
       if ($existing_oauth) {
@@ -181,25 +180,6 @@ final class PhabricatorOAuthLoginController
             'accounts, log in to your Phabricator account and then go to '.
             'Settings.',
             $provider_name)));
-
-        $user = id(new PhabricatorUser())
-          ->loadOneWhere('phid = %s', $known_email->getUserPHID());
-        $oauth_infos = id(new PhabricatorUserOAuthInfo())
-          ->loadAllWhere('userID = %d', $user->getID());
-        if ($oauth_infos) {
-          $providers = array();
-          foreach ($oauth_infos as $info) {
-            $provider = $info->getOAuthProvider();
-            $providers[] = PhabricatorOAuthProvider::newProvider($provider)
-              ->getProviderName();
-          }
-          $dialog->appendChild(phutil_tag(
-            'p',
-            array(),
-            pht(
-              'The account is associated with: %s.',
-              implode(', ', $providers))));
-        }
 
         $dialog->addCancelButton('/login/');
 
@@ -300,8 +280,7 @@ final class PhabricatorOAuthLoginController
 
   private function retrieveOAuthInfo(PhabricatorOAuthProvider $provider) {
 
-    $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-      'oauthProvider = %s and oauthUID = %s',
+    $oauth_info = PhabricatorUserOAuthInfo::loadOneByProviderKeyAndAccountID(
       $provider->getProviderKey(),
       $provider->retrieveUserID());
 
