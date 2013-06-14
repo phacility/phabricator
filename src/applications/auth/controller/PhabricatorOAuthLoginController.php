@@ -7,7 +7,6 @@ final class PhabricatorOAuthLoginController
   private $userID;
 
   private $accessToken;
-  private $tokenExpires;
   private $oauthState;
 
   public function shouldRequireLogin() {
@@ -121,7 +120,6 @@ final class PhabricatorOAuthLoginController
           'Link your %s account to your Phabricator account?',
           $provider_name)));
         $dialog->addHiddenInput('confirm_token', $provider->getAccessToken());
-        $dialog->addHiddenInput('expires', $oauth_info->getTokenExpires());
         $dialog->addHiddenInput('state', $this->oauthState);
         $dialog->addHiddenInput('scope', $oauth_info->getTokenScope());
         $dialog->addSubmitButton('Link Accounts');
@@ -262,7 +260,6 @@ final class PhabricatorOAuthLoginController
 
     $token = $request->getStr('confirm_token');
     if ($token) {
-      $this->tokenExpires = $request->getInt('expires');
       $this->accessToken  = $token;
       $this->oauthState   = $request->getStr('state');
       return null;
@@ -295,7 +292,6 @@ final class PhabricatorOAuthLoginController
       return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
     }
 
-    $this->tokenExpires = $provider->getTokenExpiryFromArray($data);
     $this->accessToken  = $token;
     $this->oauthState   = $request->getStr('state');
 
@@ -325,19 +321,8 @@ final class PhabricatorOAuthLoginController
     $oauth_info->setAccountURI($provider->retrieveUserAccountURI());
     $oauth_info->setAccountName($provider->retrieveUserAccountName());
     $oauth_info->setToken($provider->getAccessToken());
-    $oauth_info->setTokenStatus(PhabricatorUserOAuthInfo::TOKEN_STATUS_GOOD);
+    $oauth_info->setTokenStatus('unused');
     $oauth_info->setTokenScope($scope);
-
-    // If we have out-of-date expiration info, just clear it out. Then replace
-    // it with good info if the provider gave it to us.
-    $expires = $oauth_info->getTokenExpires();
-    if ($expires <= time()) {
-      $expires = null;
-    }
-    if ($this->tokenExpires) {
-      $expires = $this->tokenExpires;
-    }
-    $oauth_info->setTokenExpires($expires);
 
     return $oauth_info;
   }

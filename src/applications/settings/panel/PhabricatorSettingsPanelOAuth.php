@@ -73,10 +73,6 @@ final class PhabricatorSettingsPanelOAuth
       $user->getID(),
       $provider->getProviderKey());
 
-    if ($request->isFormPost() && $oauth_info) {
-      $notice = $this->refreshProfileImage($request, $oauth_info);
-    }
-
     $form = new AphrontFormView();
     $form->setUser($user);
 
@@ -98,8 +94,6 @@ final class PhabricatorSettingsPanelOAuth
           id(new AphrontFormSubmitControl())
             ->setValue(pht("Link %s Account \xC2\xBB", $provider_name)));
     } else {
-      $expires = $oauth_info->getTokenExpires();
-
       $form
         ->appendChild(hsprintf(
           '<p class="aphront-form-instructions">%s</p>',
@@ -121,12 +115,6 @@ final class PhabricatorSettingsPanelOAuth
             ->setLabel(pht('%s URI', $provider_name))
             ->setValue($oauth_info->getAccountURI()));
 
-      if (!$expires || $expires > time()) {
-        $form->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->setValue(pht('Refresh Profile Image from %s', $provider_name)));
-      }
-
       if (!$provider->isProviderLinkPermanent()) {
         $unlink = pht('Unlink %s Account', $provider_name);
         $unlink_form = new AphrontFormView();
@@ -143,69 +131,6 @@ final class PhabricatorSettingsPanelOAuth
               ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));
         $forms['Unlink Account'] = $unlink_form;
       }
-
-      if ($expires) {
-        if ($expires <= time()) {
-          $expires_text = pht("Expired");
-        } else {
-          $expires_text = phabricator_datetime($expires, $user);
-        }
-      } else {
-        $expires_text = pht('No Information Available');
-      }
-
-      $scope = $oauth_info->getTokenScope();
-      if (!$scope) {
-        $scope = pht('No Information Available');
-      }
-
-      $status = $oauth_info->getTokenStatus();
-      $readable_status = PhabricatorUserOAuthInfo::getReadableTokenStatus(
-        $status);
-      $rappable_status = PhabricatorUserOAuthInfo::getRappableTokenStatus(
-        $status);
-      $beat = self::getBeat();
-
-      // The plenty %2$s are supposed to point at the line break
-      $rap = pht(
-        '%1$s Yo yo yo %2$s'.
-        'My name\'s DJ Token and I\'m here to say %2$s'.
-        // pronounce as "dollar rappable status" for meter to work
-        '%3$s, hey hey hey hey %2$s'.
-        'I rap \'bout tokens, that might be why %2$s'.
-        'I\'m such a cool and popular guy',
-        $beat,
-        hsprintf('<br />'),
-        $rappable_status);
-
-      $token_form = new AphrontFormView();
-      $token_form
-        ->setUser($user)
-        ->appendChild(hsprintf(
-          '<p class="aphront-form-instructions">%s</p>',
-          $rap))
-        ->appendChild(
-          id(new AphrontFormStaticControl())
-            ->setLabel(pht('Token Status'))
-            ->setValue($readable_status))
-        ->appendChild(
-          id(new AphrontFormStaticControl())
-            ->setLabel(pht('Expires'))
-            ->setValue($expires_text))
-        ->appendChild(
-          id(new AphrontFormStaticControl())
-            ->setLabel(pht('Scope'))
-            ->setValue($scope));
-
-      if ($expires <= time()) {
-        $this->prepareAuthForm($token_form);
-        $token_form
-          ->appendChild(
-            id(new AphrontFormSubmitControl())
-              ->setValue(pht('Refresh %s Token', $provider_name)));
-      }
-
-      $forms['Account Token Information'] = $token_form;
     }
 
     $header = new PhabricatorHeaderView();
@@ -228,76 +153,5 @@ final class PhabricatorSettingsPanelOAuth
           $header,
           $formbox,
         ));
-  }
-
-  private function refreshProfileImage(
-    AphrontRequest $request,
-    PhabricatorUserOAuthInfo $oauth_info) {
-
-    $user         = $request->getUser();
-    $provider     = $this->provider;
-    $error        = false;
-    $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
-    $token        = $oauth_info->getToken();
-    try {
-      $userinfo_uri->setQueryParam('access_token', $token);
-      $user_data = HTTPSFuture::loadContent($userinfo_uri);
-      $provider->setUserData($user_data);
-      $provider->setAccessToken($token);
-      $image = $provider->retrieveUserProfileImage();
-      if ($image) {
-        $file = PhabricatorFile::newFromFileData(
-          $image,
-          array(
-            'name' => $provider->getProviderKey().'-profile.jpg',
-            'authorPHID' => $user->getPHID(),
-          ));
-
-        $xformer = new PhabricatorImageTransformer();
-
-        // Resize OAuth image to a reasonable size
-        $small_xformed = $xformer->executeProfileTransform(
-          $file,
-          $width = 50,
-          $min_height = 50,
-          $max_height = 50);
-
-        $user->setProfileImagePHID($small_xformed->getPHID());
-        $user->save();
-      } else {
-        $error = pht('Unable to retrieve image.');
-      }
-    } catch (Exception $e) {
-      if ($e instanceof PhabricatorOAuthProviderException) {
-        // Check plz
-        $error = pht('Unable to retrieve image from %s',
-                         $provider->getProviderName());
-      } else {
-        $error = pht('Unable to save image.');
-      }
-    }
-    $notice = new AphrontErrorView();
-    if ($error) {
-      $notice
-        ->setTitle(pht('Error Refreshing Profile Picture'))
-        ->setErrors(array($error));
-    } else {
-      $notice
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(pht('Successfully Refreshed Profile Picture'));
-    }
-    return $notice;
-  }
-
-  private static function getBeat() {
-    // Gangsta's Paradise (karaoke version).
-    // Chosen because it's the only thing I listen to.
-    $song_id = pht("Gangsta's Paradise");
-
-    // Make a musical note which you can click for the beat.
-    $beat = hsprintf(
-      '<a href="javascript:void(0);" onclick="%s">&#9835;</a>',
-      jsprintf('alert(%s); return 0;', pht("Think about %s.", $song_id)));
-    return $beat;
   }
 }
