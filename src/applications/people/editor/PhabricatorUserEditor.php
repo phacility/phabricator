@@ -317,6 +317,13 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $oauth->delete();
       }
 
+      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
+        'userPHID = %s',
+        $user->getPHID());
+      foreach ($externals as $external) {
+        $external->delete();
+      }
+
       $prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
         'userPHID = %s',
         $user->getPHID());
