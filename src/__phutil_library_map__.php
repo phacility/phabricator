@@ -3405,7 +3405,6 @@ phutil_register_library_map(array(
     'PhabricatorUserEmail' => 'PhabricatorUserDAO',
     'PhabricatorUserLDAPInfo' => 'PhabricatorUserDAO',
     'PhabricatorUserLog' => 'PhabricatorUserDAO',
-    'PhabricatorUserOAuthInfo' => 'PhabricatorUserDAO',
     'PhabricatorUserPreferences' => 'PhabricatorUserDAO',
     'PhabricatorUserProfile' => 'PhabricatorUserDAO',
     'PhabricatorUserProfileEditor' => 'PhabricatorApplicationTransactionEditor',

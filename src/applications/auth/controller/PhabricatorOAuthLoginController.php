@@ -120,7 +120,6 @@ final class PhabricatorOAuthLoginController
           $provider_name)));
         $dialog->addHiddenInput('confirm_token', $provider->getAccessToken());
         $dialog->addHiddenInput('state', $this->oauthState);
-        $dialog->addHiddenInput('scope', $oauth_info->getTokenScope());
         $dialog->addSubmitButton('Link Accounts');
         $dialog->addCancelButton($provider->getSettingsPanelURI());
 
@@ -284,24 +283,16 @@ final class PhabricatorOAuthLoginController
       $provider->getProviderKey(),
       $provider->retrieveUserID());
 
-    $scope = $this->getRequest()->getStr('scope');
-
     if (!$oauth_info) {
-      $oauth_info = new PhabricatorUserOAuthInfo();
+      $oauth_info = new PhabricatorUserOAuthInfo(
+        new PhabricatorExternalAccount());
       $oauth_info->setOAuthProvider($provider->getProviderKey());
       $oauth_info->setOAuthUID($provider->retrieveUserID());
-      // some providers don't tell you what scope you got, so default
-      // to the minimum Phabricator requires rather than assuming no scope
-      if (!$scope) {
-        $scope = $provider->getMinimumScope();
-      }
     }
 
     $oauth_info->setAccountURI($provider->retrieveUserAccountURI());
     $oauth_info->setAccountName($provider->retrieveUserAccountName());
     $oauth_info->setToken($provider->getAccessToken());
-    $oauth_info->setTokenStatus('unused');
-    $oauth_info->setTokenScope($scope);
 
     return $oauth_info;
   }

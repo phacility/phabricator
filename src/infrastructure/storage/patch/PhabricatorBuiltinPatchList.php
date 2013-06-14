@@ -1358,6 +1358,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130607.xaccount.sql'),
       ),
+      '20130611.migrateoauth.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130611.migrateoauth.php'),
+      ),
     );
   }
 }
