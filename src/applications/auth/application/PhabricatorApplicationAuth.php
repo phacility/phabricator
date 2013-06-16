@@ -41,6 +41,29 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',
       ),
+
+      '/login/' => array(
+        '' => 'PhabricatorLoginController',
+        'email/' => 'PhabricatorEmailLoginController',
+        'etoken/(?P<token>\w+)/' => 'PhabricatorEmailTokenController',
+        'refresh/' => 'PhabricatorRefreshCSRFController',
+        'mustverify/' => 'PhabricatorMustVerifyEmailController',
+      ),
+
+      '/logout/' => 'PhabricatorLogoutController',
+
+      '/oauth/' => array(
+        '(?P<provider>\w+)/' => array(
+          'login/'     => 'PhabricatorOAuthLoginController',
+          'diagnose/'  => 'PhabricatorOAuthDiagnosticsController',
+          'unlink/'    => 'PhabricatorOAuthUnlinkController',
+        ),
+      ),
+
+      '/ldap/' => array(
+        'login/' => 'PhabricatorLDAPLoginController',
+        'unlink/'    => 'PhabricatorLDAPUnlinkController',
+      ),
     );
   }
 

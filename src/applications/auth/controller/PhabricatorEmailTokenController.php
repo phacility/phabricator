@@ -71,11 +71,9 @@ final class PhabricatorEmailTokenController
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       $target_email->setIsVerified(1);
       $target_email->save();
-      $session_key = $target_user->establishSession('web');
     unset($unguarded);
 
-    $request->setCookie('phusr', $target_user->getUsername());
-    $request->setCookie('phsid', $session_key);
+    $this->establishWebSession($target_user);
 
     $next = '/';
     if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
@@ -95,14 +93,8 @@ final class PhabricatorEmailTokenController
           ));
     }
 
-    $uri = new PhutilURI('/login/validate/');
-    $uri->setQueryParams(
-      array(
-        'phusr' => $target_user->getUsername(),
-        'next'  => $next,
-      ));
+    $request->setCookie('next_uri', $next);
 
-    return id(new AphrontRedirectResponse())
-      ->setURI((string)$uri);
+    return $this->buildLoginValidateResponse($target_user);
   }
 }

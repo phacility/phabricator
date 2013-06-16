@@ -146,20 +146,11 @@ final class PhabricatorOAuthLoginController
         $oauth_info,
         $provider);
 
-      $session_key = $known_user->establishSession('web');
-
       $this->saveOAuthInfo($oauth_info);
 
-      $request->setCookie('phusr', $known_user->getUsername());
-      $request->setCookie('phsid', $session_key);
+      $this->establishWebSession($known_user);
 
-      $uri = new PhutilURI('/login/validate/');
-      $uri->setQueryParams(
-        array(
-          'phusr' => $known_user->getUsername(),
-        ));
-
-      return id(new AphrontRedirectResponse())->setURI((string)$uri);
+      return $this->buildLoginValidateResponse($known_user);
     }
 
     $oauth_email = $provider->retrieveUserEmail();
