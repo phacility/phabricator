@@ -80,7 +80,8 @@ final class PhabricatorAuthLoginController
             pht(
               'The external account ("%s") you just authenticated with is '.
               'not configured to allow account linking on this Phabricator '.
-              'install. An administrator may have recently disabled it.'));
+              'install. An administrator may have recently disabled it.',
+              $provider->getProviderName()));
         }
       }
     }
@@ -90,8 +91,20 @@ final class PhabricatorAuthLoginController
   }
 
   private function processLoginUser(PhabricatorExternalAccount $account) {
-    // TODO: Implement.
-    return new Aphront404Response();
+    $user = id(new PhabricatorUser())->loadOneWhere(
+      'phid = %s',
+      $account->getUserPHID());
+
+    if (!$user) {
+      return $this->renderError(
+        pht(
+          'The external account you just logged in with is not associated '.
+          'with a valid Phabricator user.'));
+    }
+
+    $this->establishWebSession($user);
+
+    return $this->buildLoginValidateResponse($user);
   }
 
   private function processRegisterUser(PhabricatorExternalAccount $account) {

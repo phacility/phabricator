@@ -138,20 +138,9 @@ final class PhabricatorAuthStartController
   }
 
   private function renderError($message) {
-    $title = pht('Authentication Failure');
-
-    $view = new AphrontErrorView();
-    $view->setTitle($title);
-    $view->appendChild($message);
-
-    return $this->buildApplicationPage(
-      $view,
-      array(
-        'title' => $title,
-        'device' => true,
-        'dust' => true,
-      ));
+    return $this->renderErrorPage(
+      pht('Authentication Failure'),
+      array($message));
   }
-
 
 }

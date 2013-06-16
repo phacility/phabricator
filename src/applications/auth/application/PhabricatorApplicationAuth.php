@@ -39,6 +39,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
         'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',
         'register/(?P<akey>[^/]+)/' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
+        'validate/' => 'PhabricatorAuthValidateController',
       ),
     );
   }
