@@ -1,27 +1,27 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthFacebook
+final class PhabricatorAuthProviderOAuthGitHub
   extends PhabricatorAuthProviderOAuth {
 
   public function getProviderName() {
-    return pht('Facebook');
+    return pht('GitHub');
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthFacebook();
+    return new PhutilAuthAdapterOAuthGitHub();
   }
 
   public function isEnabled() {
     return parent::isEnabled() &&
-           PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
+           PhabricatorEnv::getEnvConfig('github.auth-enabled');
   }
 
   protected function getOAuthClientID() {
-    return PhabricatorEnv::getEnvConfig('facebook.application-id');
+    return PhabricatorEnv::getEnvConfig('github.application-id');
   }
 
   protected function getOAuthClientSecret() {
-    $secret = PhabricatorEnv::getEnvConfig('facebook.application-secret');
+    $secret = PhabricatorEnv::getEnvConfig('github.application-secret');
     if ($secret) {
       return new PhutilOpaqueEnvelope($secret);
     }
@@ -33,7 +33,7 @@ final class PhabricatorAuthProviderOAuthFacebook
   }
 
   public function shouldAllowRegistration() {
-    return PhabricatorEnv::getEnvConfig('facebook.registration-enabled');
+    return PhabricatorEnv::getEnvConfig('github.registration-enabled');
   }
 
   public function shouldAllowAccountLink() {
@@ -41,7 +41,7 @@ final class PhabricatorAuthProviderOAuthFacebook
   }
 
   public function shouldAllowAccountUnlink() {
-    return !PhabricatorEnv::getEnvConfig('facebook.auth-permanent');
+    return !PhabricatorEnv::getEnvConfig('github.auth-permanent');
   }
 
 }
