@@ -1,0 +1,20 @@
+/**
+ * @provides auth-css
+ */
+
+.phabricator-login-buttons {
+  max-width: 450px;
+  margin: auto;
+}
+
+.phabricator-login-buttons .phabricator-login-button .button {
+  width: 180px;
+}
+
+.device-desktop .phabricator-login-buttons .aphront-multi-column-column-last {
+  text-align: right;
+}
+
+.device .phabricator-login-buttons {
+  text-align: center;
+}

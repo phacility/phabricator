@@ -93,8 +93,7 @@ final class PHUIButtonView extends AphrontTagView {
       $subtext = null;
       if ($this->subtext) {
         $subtext = phutil_tag(
-          'span', array('class' => 'phui-button-subtext'), $this->subtext);
-        $subtext = hsprintf('<br />%s', $subtext);
+          'div', array('class' => 'phui-button-subtext'), $this->subtext);
       }
       $text = phutil_tag(
         'div', array('class' => 'phui-button-text'), array($text, $subtext));

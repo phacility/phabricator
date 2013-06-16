@@ -36,35 +36,33 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return $adapter;
   }
 
+  public function isLoginFormAButton() {
+    return true;
+  }
+
   public function buildLoginForm(
     PhabricatorAuthStartController $controller) {
 
     $request = $controller->getRequest();
     $viewer = $request->getUser();
 
-    $form = id(new AphrontFormView())
-      ->setUser($viewer);
-
-    $submit = new AphrontFormSubmitControl();
-
     if ($this->shouldAllowRegistration()) {
-      $submit->setValue(
-        pht("Login or Register with %s \xC2\xBB", $this->getProviderName()));
-      $header = pht("Login or Register with %s", $this->getProviderName());
+      $button_text = pht('Login or Register');
     } else {
-      $submit->setValue(
-        pht("Login with %s \xC2\xBB", $this->getProviderName()));
-      $header = pht("Login with %s", $this->getProviderName());
+      $button_text = pht('Login');
     }
 
-    $form->appendChild($submit);
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+      ->setSpriteIcon($this->getLoginIcon());
 
-    // TODO: This is pretty hideous.
-    $panel = new AphrontPanelView();
-    $panel->setHeader($header);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setNoBackground(true);
-    $panel->appendChild($form);
+    $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setSize(PHUIButtonView::BIG)
+        ->setColor(PHUIButtonView::GREY)
+        ->setIcon($icon)
+        ->setText($button_text)
+        ->setSubtext($this->getProviderName());
 
     $adapter = $this->getAdapter();
     $adapter->setState(PhabricatorHash::digest($request->getCookie('phcid')));
@@ -73,14 +71,25 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     $params = $uri->getQueryParams();
     $uri->setQueryParams(array());
 
-    $form->setAction((string)$uri);
+    $content = array($button);
+
     foreach ($params as $key => $value) {
-      $form->addHiddenInput($key, $value);
+      $content[] = phutil_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => $key,
+          'value' => $value,
+        ));
     }
 
-    $form->setMethod('GET');
-
-    return $panel;
+    return phabricator_form(
+      $viewer,
+      array(
+        'method' => 'GET',
+        'action' => (string)$uri,
+      ),
+      $content);
   }
 
   public function processLoginRequest(

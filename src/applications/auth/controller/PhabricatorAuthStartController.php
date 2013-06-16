@@ -65,9 +65,51 @@ final class PhabricatorAuthStartController
       $request->setCookie('phcid', Filesystem::readRandomCharacters(16));
     }
 
-    $out = array();
+    $not_buttons = array();
+    $are_buttons = array();
+    $providers = msort($providers, 'getLoginOrder');
     foreach ($providers as $provider) {
-      $out[] = $provider->buildLoginForm($this);
+      if ($provider->isLoginFormAButton()) {
+        $are_buttons[] = $provider->buildLoginForm($this);
+      } else {
+        $not_buttons[] = $provider->buildLoginForm($this);
+      }
+    }
+
+    $out = array();
+    $out[] = $not_buttons;
+    if ($are_buttons) {
+      require_celerity_resource('auth-css');
+
+      foreach ($are_buttons as $key => $button) {
+        $are_buttons[$key] = phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-login-button mmb',
+          ),
+          $button);
+      }
+
+      // If we only have one button, add a second pretend button so that we
+      // always have two columns. This makes it easier to get the alignments
+      // looking reasonable.
+      if (count($are_buttons) == 1) {
+        $are_buttons[] = null;
+      }
+
+      $button_columns = id(new AphrontMultiColumnView())
+        ->setFluidLayout(true);
+      $are_buttons = array_chunk($are_buttons, ceil(count($are_buttons) / 2));
+      foreach ($are_buttons as $column) {
+        $button_columns->addColumn($column);
+      }
+
+      $out[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-login-buttons',
+        ),
+        $button_columns);
     }
 
     $login_message = PhabricatorEnv::getEnvConfig('auth.login-message');

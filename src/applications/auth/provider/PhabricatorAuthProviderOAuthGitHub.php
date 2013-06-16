@@ -11,6 +11,10 @@ final class PhabricatorAuthProviderOAuthGitHub
     return new PhutilAuthAdapterOAuthGitHub();
   }
 
+  protected function getLoginIcon() {
+    return 'Github';
+  }
+
   public function isEnabled() {
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('github.auth-enabled');

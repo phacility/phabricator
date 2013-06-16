@@ -11,6 +11,10 @@ final class PhabricatorAuthProviderOAuthDisqus
     return new PhutilAuthAdapterOAuthDisqus();
   }
 
+  protected function getLoginIcon() {
+    return 'Disqus';
+  }
+
   public function isEnabled() {
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('disqus.auth-enabled');

@@ -11,6 +11,10 @@ final class PhabricatorAuthProviderOAuthFacebook
     return new PhutilAuthAdapterOAuthFacebook();
   }
 
+  protected function getLoginIcon() {
+    return 'Facebook';
+  }
+
   public function isEnabled() {
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('facebook.auth-enabled');

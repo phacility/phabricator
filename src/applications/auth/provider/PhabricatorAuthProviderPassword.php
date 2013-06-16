@@ -24,6 +24,11 @@ final class PhabricatorAuthProviderPassword
     return $this->adapter;
   }
 
+  public function getLoginOrder() {
+    // Make sure username/password appears first if it is enabled.
+    return '100-'.$this->getProviderName();
+  }
+
   public function shouldAllowLogin() {
     return true;
   }

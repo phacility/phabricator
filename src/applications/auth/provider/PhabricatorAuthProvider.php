@@ -167,4 +167,16 @@ abstract class PhabricatorAuthProvider {
     throw new Exception("Not implemented!");
   }
 
+  public function getLoginOrder() {
+    return '500-'.$this->getProviderName();
+  }
+
+  protected function getLoginIcon() {
+    return 'Generic';
+  }
+
+  public function isLoginFormAButton() {
+    return false;
+  }
+
 }

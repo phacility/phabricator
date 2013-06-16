@@ -67,11 +67,17 @@ final class PhabricatorAuthProviderLDAP
 
     $viewer = $request->getUser();
 
-    $submit = id(new AphrontFormSubmitControl())
-      ->setValue(pht('Login or Register'));
+    $dialog = id(new AphrontDialogView())
+      ->setSubmitURI($this->getLoginURI())
+      ->setUser($viewer);
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Login with LDAP'));
+    if ($this->shouldAllowRegistration()) {
+      $dialog->setTitle(pht('Login or Register with LDAP'));
+      $dialog->addSubmitButton(pht('Login or Register'));
+    } else {
+      $dialog->setTitle(pht('Login with LDAP'));
+      $dialog->addSubmitButton(pht('Login'));
+    }
 
     $v_user = $request->getStr('ldap_username');
 
@@ -87,10 +93,9 @@ final class PhabricatorAuthProviderLDAP
       $errors[] = pht('Username or password are incorrect.');
     }
 
-    $form = id(new AphrontFormView())
-      ->setAction($this->getLoginURI())
+    $form = id(new AphrontFormLayoutView())
       ->setUser($viewer)
-      ->setFlexible(true)
+      ->setFullWidth(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('LDAP Username')
@@ -101,18 +106,17 @@ final class PhabricatorAuthProviderLDAP
         id(new AphrontFormPasswordControl())
           ->setLabel('LDAP Password')
           ->setName('ldap_password')
-          ->setError($e_pass))
-      ->appendChild($submit);
+          ->setError($e_pass));
 
     if ($errors) {
       $errors = id(new AphrontErrorView())->setErrors($errors);
     }
 
-    return array(
-      $errors,
-      $header,
-      $form,
-    );
+    $dialog->appendChild($errors);
+    $dialog->appendChild($form);
+
+
+    return $dialog;
   }
 
   public function processLoginRequest(

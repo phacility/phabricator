@@ -11,6 +11,10 @@ final class PhabricatorAuthProviderOAuthGoogle
     return new PhutilAuthAdapterOAuthGoogle();
   }
 
+  protected function getLoginIcon() {
+    return 'Google';
+  }
+
   public function isEnabled() {
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('google.auth-enabled');
