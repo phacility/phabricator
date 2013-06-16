@@ -32,6 +32,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/auth/' => array(
+        'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',
         'register/(?P<akey>[^/]+)/' => 'PhabricatorAuthRegisterController',
       ),
     );
