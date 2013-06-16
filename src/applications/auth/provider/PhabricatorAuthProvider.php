@@ -54,7 +54,12 @@ abstract class PhabricatorAuthProvider {
 
   abstract public function getProviderName();
   abstract public function getAdapter();
-  abstract public function isEnabled();
+
+  public function isEnabled() {
+    // TODO: Remove once we switch to the new auth stuff.
+    return false;
+  }
+
   abstract public function shouldAllowLogin();
   abstract public function shouldAllowRegistration();
   abstract public function shouldAllowAccountLink();
@@ -74,7 +79,7 @@ abstract class PhabricatorAuthProvider {
     return;
   }
 
-  protected function willRegisterAccount(PhabricatorExternalAccount $account) {
+  public function willRegisterAccount(PhabricatorExternalAccount $account) {
     return;
   }
 

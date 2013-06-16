@@ -18,12 +18,20 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
   }
 
   public function isEnabled() {
-    return $this->getOAuthClientID() && $this->getOAuthClientSecret();
+    return parent::isEnabled() &&
+           $this->getOAuthClientID() &&
+           $this->getOAuthClientSecret();
   }
 
   protected function configureAdapter(PhutilAuthAdapterOAuth $adapter) {
-    $adapter->setClientID($this->getOAuthClientID());
-    $adapter->setClientSecret($this->getOAuthClientSecret());
+    if ($this->getOAuthClientID()) {
+      $adapter->setClientID($this->getOAuthClientID());
+    }
+
+    if ($this->getOAuthClientSecret()) {
+      $adapter->setClientSecret($this->getOAuthClientSecret());
+    }
+
     $adapter->setRedirectURI($this->getLoginURI());
     return $adapter;
   }

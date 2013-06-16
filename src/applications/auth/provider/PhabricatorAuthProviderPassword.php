@@ -10,8 +10,7 @@ final class PhabricatorAuthProviderPassword
   }
 
   public function isEnabled() {
-    // TODO: Remove this once we switch to the new auth mechanism.
-    return false &&
+    return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
   }
 
