@@ -10,6 +10,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return false;
   }
 
+  public function getBaseURI() {
+    return '/auth/';
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {
@@ -34,6 +38,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       '/auth/' => array(
         'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',
         'register/(?P<akey>[^/]+)/' => 'PhabricatorAuthRegisterController',
+        'start/' => 'PhabricatorAuthStartController',
       ),
     );
   }

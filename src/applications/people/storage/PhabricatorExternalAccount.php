@@ -38,7 +38,7 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO {
   }
 
   public function getProviderKey() {
-    return $this->getAccountType().':'.$this->accountDomain();
+    return $this->getAccountType().':'.$this->getAccountDomain();
   }
 
   public function save() {

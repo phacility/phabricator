@@ -38,7 +38,7 @@ abstract class PhabricatorAuthProvider {
     return $providers;
   }
 
-  public static function getEnabledProviders() {
+  public static function getAllEnabledProviders() {
     $providers = self::getAllProviders();
     foreach ($providers as $key => $provider) {
       if (!$provider->isEnabled()) {
@@ -49,15 +49,20 @@ abstract class PhabricatorAuthProvider {
   }
 
   public static function getEnabledProviderByKey($provider_key) {
-    return idx(self::getEnabledProviders(), $provider_key);
+    return idx(self::getAllEnabledProviders(), $provider_key);
   }
 
   abstract public function getProviderName();
-  abstract public function getAdapater();
+  abstract public function getAdapter();
   abstract public function isEnabled();
   abstract public function shouldAllowLogin();
   abstract public function shouldAllowRegistration();
   abstract public function shouldAllowAccountLink();
+  abstract public function shouldAllowAccountUnlink();
+
+  abstract public function buildLoginForm(
+    PhabricatorAuthStartController $controller);
+
   abstract public function processLoginRequest(
     PhabricatorAuthLoginController $controller);
 
@@ -71,22 +76,38 @@ abstract class PhabricatorAuthProvider {
 
   protected function loadOrCreateAccount($account_id) {
     if (!strlen($account_id)) {
-      throw new Exception("loadOrCreateAccount(...): empty account ID!");
+      throw new Exception(
+        "loadOrCreateAccount(...): empty account ID!");
     }
 
     $adapter = $this->getAdapter();
+    $adapter_class = get_class($adapter);
+
+    if (!strlen($adapter->getAdapterType())) {
+      throw new Exception(
+        "AuthAdapter (of class '{$adapter_class}') has an invalid ".
+        "implementation: no adapter type.");
+    }
+
+    if (!strlen($adapter->getAdapterDomain())) {
+      throw new Exception(
+        "AuthAdapter (of class '{$adapter_class}') has an invalid ".
+        "implementation: no adapter domain.");
+    }
+
     $account = id(new PhabricatorExternalAccount())->loadOneWhere(
       'accountType = %s AND accountDomain = %s AND accountID = %s',
-      $adapter->getProviderType(),
-      $adapter->getProviderDomain(),
+      $adapter->getAdapterType(),
+      $adapter->getAdapterDomain(),
       $account_id);
     if (!$account) {
       $account = id(new PhabricatorExternalAccount())
-        ->setAccountType($adapter->getProviderType())
-        ->setAccountDomain($adapter->getProviderDomain())
+        ->setAccountType($adapter->getAdapterType())
+        ->setAccountDomain($adapter->getAdapterDomain())
         ->setAccountID($account_id);
     }
 
+    $account->setDisplayName('');
     $account->setUsername($adapter->getAccountName());
     $account->setRealName($adapter->getAccountRealName());
     $account->setEmail($adapter->getAccountEmail());
@@ -120,6 +141,10 @@ abstract class PhabricatorAuthProvider {
     return $account;
   }
 
-
+  protected function getLoginURI() {
+    $app = PhabricatorApplication::getByClass('PhabricatorApplicationAuth');
+    $uri = $app->getApplicationURI('/login/'.$this->getProviderKey().'/');
+    return PhabricatorEnv::getURI($uri);
+  }
 
 }
