@@ -2,20 +2,6 @@
 
 abstract class PhabricatorAuthProvider {
 
-  private $adapter;
-
-  public function setAdapater(PhutilAuthAdapter $adapter) {
-    $this->adapter = $adapter;
-    return $this;
-  }
-
-  public function getAdapater() {
-    if ($this->adapter === null) {
-      throw new Exception("Call setAdapter() before getAdapter()!");
-    }
-    return $this->adapter;
-  }
-
   public function getProviderKey() {
     return $this->getAdapter()->getAdapterKey();
   }
@@ -67,6 +53,7 @@ abstract class PhabricatorAuthProvider {
   }
 
   abstract public function getProviderName();
+  abstract public function getAdapater();
   abstract public function isEnabled();
   abstract public function shouldAllowLogin();
   abstract public function shouldAllowRegistration();
@@ -77,5 +64,62 @@ abstract class PhabricatorAuthProvider {
   public function createProviders() {
     return array($this);
   }
+
+  protected function willSaveAccount(PhabricatorExternalAccount $account) {
+    return;
+  }
+
+  protected function loadOrCreateAccount($account_id) {
+    if (!strlen($account_id)) {
+      throw new Exception("loadOrCreateAccount(...): empty account ID!");
+    }
+
+    $adapter = $this->getAdapter();
+    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
+      'accountType = %s AND accountDomain = %s AND accountID = %s',
+      $adapter->getProviderType(),
+      $adapter->getProviderDomain(),
+      $account_id);
+    if (!$account) {
+      $account = id(new PhabricatorExternalAccount())
+        ->setAccountType($adapter->getProviderType())
+        ->setAccountDomain($adapter->getProviderDomain())
+        ->setAccountID($account_id);
+    }
+
+    $account->setUsername($adapter->getAccountName());
+    $account->setRealName($adapter->getAccountRealName());
+    $account->setEmail($adapter->getAccountEmail());
+    $account->setAccountURI($adapter->getAccountURI());
+
+    try {
+      $name = PhabricatorSlug::normalize($this->getProviderName());
+      $name = $name.'-profile.jpg';
+
+      // TODO: If the image has not changed, we do not need to make a new
+      // file entry for it, but there's no convenient way to do this with
+      // PhabricatorFile right now. The storage will get shared, so the impact
+      // here is negligible.
+
+      $image_uri = $account->getAccountImageURI();
+      $image_file = PhabricatorFile::newFromFileDownload(
+        $image_uri,
+        array(
+          'name' => $name,
+        ));
+
+      $account->setProfileImagePHID($image_file->getPHID());
+    } catch (Exception $ex) {
+      $account->setProfileImagePHID(null);
+    }
+
+    $this->willSaveAccount($account);
+
+    $account->save();
+
+    return $account;
+  }
+
+
 
 }

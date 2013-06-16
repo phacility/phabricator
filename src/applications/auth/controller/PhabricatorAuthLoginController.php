@@ -157,4 +157,16 @@ final class PhabricatorAuthLoginController
       ));
   }
 
+  public function buildProviderErrorResponse(
+    PhabricatorAuthProvider $provider,
+    $message) {
+
+    $message = pht(
+      'Authentication provider ("%s") encountered an error during login. %s',
+      $provider->getProviderName(),
+      $message);
+
+    return $this->renderError($message);
+  }
+
 }
