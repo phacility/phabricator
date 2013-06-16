@@ -62,6 +62,7 @@ final class PhabricatorAuthStartController
 
     if (!$request->isFormPost()) {
       $request->setCookie('next_uri', $next_uri);
+      $request->setCookie('phcid', Filesystem::readRandomCharacters(16));
     }
 
     $out = array();

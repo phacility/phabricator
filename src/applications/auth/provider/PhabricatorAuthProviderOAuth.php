@@ -67,7 +67,7 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     $panel->appendChild($form);
 
     $adapter = $this->getAdapter();
-
+    $adapter->setState(PhabricatorHash::digest($request->getCookie('phcid')));
 
     $uri = new PhutilURI($adapter->getAuthenticateURI());
     $params = $uri->getQueryParams();
@@ -111,6 +111,29 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
           'response.'));
 
       return array($account, $response);
+    }
+
+    if ($adapter->supportsStateParameter()) {
+      $phcid = $request->getCookie('phcid');
+      if (!strlen($phcid)) {
+        $response = $controller->buildProviderErrorResponse(
+          $this,
+          pht(
+            'Your browser did not submit a "phcid" cookie with OAuth state '.
+            'information in the request. Check that cookies are enabled. '.
+            'If this problem persists, you may need to clear your cookies.'));
+      }
+
+      $state = $request->getStr('state');
+      $expect = PhabricatorHash::digest($phcid);
+      if ($state !== $expect) {
+        $response = $controller->buildProviderErrorResponse(
+          $this,
+          pht(
+            'The OAuth provider did not return the correct "state" parameter '.
+            'in its response. If this problem persists, you may need to clear '.
+            'your cookies.'));
+      }
     }
 
     $adapter->setCode($code);

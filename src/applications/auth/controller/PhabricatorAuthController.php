@@ -39,7 +39,12 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
     $request->setCookie('phusr', $user->getUsername());
     $request->setCookie('phsid', $session_key);
+
+    // Clear the registration key.
     $request->clearCookie('phreg');
+
+    // Clear the client ID / OAuth state key.
+    $request->clearCookie('phcid');
   }
 
   protected function buildLoginValidateResponse(PhabricatorUser $user) {
