@@ -228,6 +228,8 @@ abstract class PhabricatorController extends AphrontController {
         $response->setContent($view->render());
         return $response;
       } else {
+        $response->getDialog()->setIsStandalone(true);
+
         return id(new AphrontAjaxResponse())
           ->setContent(array(
             'dialog' => $response->buildResponseString(),

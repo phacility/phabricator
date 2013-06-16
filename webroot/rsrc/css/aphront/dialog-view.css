@@ -4,10 +4,21 @@
 
 .aphront-dialog-view {
   width: 480px;
-  margin: auto;
+  margin: 16px auto;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
+
+/* The "standalone" dialog (which is delivered over Ajax and appears above
+   an existing page) has a more pronounced shadow than dialogs do when they
+   are embedded in a page. */
+.aphront-dialog-view-standalone {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  margin: auto;
+}
+
 
 .aphront-dialog-head .phabricator-action-header {
   border-bottom: 1px solid #d4dadf;
@@ -43,7 +54,10 @@
   border-top: 1px solid #d4dadf;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
-  text-align: right;
+}
+
+.aphront-dialog-foot {
+  padding: 6px;
 }
 
 .aphront-dialog-tail button,

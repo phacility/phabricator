@@ -59,17 +59,25 @@ final class PhabricatorAuthProviderPassword
 
     $viewer = $request->getUser();
 
-    $submit = id(new AphrontFormSubmitControl())
-      ->setValue(pht('Login'));
+    $dialog = id(new AphrontDialogView())
+      ->setSubmitURI($this->getLoginURI())
+      ->setUser($viewer)
+      ->setTitle(pht('Login to Phabricator'))
+      ->addSubmitButton(pht('Login'));
 
     if ($this->shouldAllowRegistration()) {
-      $submit->addCancelButton(
+      $dialog->addCancelButton(
         '/auth/register/',
         pht('Register New Account'));
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Login to Phabricator'));
+    $dialog->addFooter(
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/login/email/',
+        ),
+        pht('Forgot your password?')));
 
     $v_user = nonempty(
       $request->getStr('username'),
@@ -97,13 +105,16 @@ final class PhabricatorAuthProviderPassword
       $errors[] = pht('Username or password are incorrect.');
     }
 
-    $form = id(new AphrontFormView())
-      ->setAction($this->getLoginURI())
-      ->setUser($viewer)
-      ->setFlexible(true)
+    if ($errors) {
+      $errors = id(new AphrontErrorView())->setErrors($errors);
+    }
+
+    $form = id(new AphrontFormLayoutView())
+      ->setFullWidth(true)
+      ->appendChild($errors)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Username/Email')
+          ->setLabel('Username or Email')
           ->setName('username')
           ->setValue($v_user)
           ->setError($e_user))
@@ -111,14 +122,7 @@ final class PhabricatorAuthProviderPassword
         id(new AphrontFormPasswordControl())
           ->setLabel('Password')
           ->setName('password')
-          ->setError($e_pass)
-          ->setCaption(
-            phutil_tag(
-              'a',
-              array(
-                'href' => '/login/email/',
-              ),
-              pht('Forgot your password?'))));
+          ->setError($e_pass));
 
     if ($require_captcha) {
         $form->appendChild(
@@ -126,18 +130,9 @@ final class PhabricatorAuthProviderPassword
             ->setError($e_captcha));
     }
 
-    $form
-      ->appendChild($submit);
+    $dialog->appendChild($form);
 
-    if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
-    }
-
-    return array(
-      $errors,
-      $header,
-      $form,
-    );
+    return $dialog;
   }
 
   public function processLoginRequest(
