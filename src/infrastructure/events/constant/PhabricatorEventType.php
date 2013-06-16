@@ -36,4 +36,6 @@ final class PhabricatorEventType extends PhutilEventType {
   const TYPE_UI_DIDRENDERHOVERCARD          = 'ui.didRenderHovercard';
 
   const TYPE_PEOPLE_DIDRENDERMENU           = 'people.didRenderMenu';
+  const TYPE_AUTH_WILLREGISTERUSER          = 'auth.willRegisterUser';
+
 }

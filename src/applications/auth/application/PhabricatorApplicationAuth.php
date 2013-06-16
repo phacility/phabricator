@@ -29,4 +29,12 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return $items;
   }
 
+  public function getRoutes() {
+    return array(
+      '/auth/' => array(
+        'register/(?P<akey>[^/]+)/' => 'PhabricatorAuthRegisterController',
+      ),
+    );
+  }
+
 }
