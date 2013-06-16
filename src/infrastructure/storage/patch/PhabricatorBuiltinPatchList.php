@@ -1362,6 +1362,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130611.migrateoauth.php'),
       ),
+      '20130611.nukeldap.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130611.nukeldap.php'),
+      ),
     );
   }
 }

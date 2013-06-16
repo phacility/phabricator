@@ -6,11 +6,13 @@ final class PhabricatorLDAPUnlinkController extends PhabricatorAuthController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $ldap_info = id(new PhabricatorUserLDAPInfo())->loadOneWhere(
-      'userID = %d',
-      $user->getID());
+    $ldap_account = id(new PhabricatorExternalAccount())->loadOneWhere(
+      'userPHID = %s AND accountType = %s AND accountDomain = %s',
+      $user->getPHID(),
+      'ldap',
+      'self');
 
-    if (!$ldap_info) {
+    if (!$ldap_account) {
       return new Aphront400Response();
     }
 
@@ -27,7 +29,7 @@ final class PhabricatorLDAPUnlinkController extends PhabricatorAuthController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $ldap_info->delete();
+    $ldap_account->delete();
 
     return id(new AphrontRedirectResponse())
       ->setURI('/settings/panel/ldap/');

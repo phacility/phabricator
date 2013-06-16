@@ -116,7 +116,7 @@ extends PhabricatorAuthController {
             ->setActor($user)
             ->createNewUser($user, $email_obj);
 
-          $ldap_info->setUserID($user->getID());
+          $ldap_info->setUserPHID($user->getPHID());
           $ldap_info->save();
 
           $session_key = $user->establishSession('web');

@@ -96,10 +96,12 @@ final class PhabricatorPeopleLdapController
           ->setActor($admin)
           ->createNewUser($user, $email_obj);
 
-        $ldap_info = new PhabricatorUserLDAPInfo();
-        $ldap_info->setLDAPUsername($username);
-        $ldap_info->setUserID($user->getID());
-        $ldap_info->save();
+        id(new PhabricatorExternalAccount())
+          ->setUserPHID($user->getPHID())
+          ->setAccountType('ldap')
+          ->setAccountDomain('self')
+          ->setAccountID($username)
+          ->save();
 
         $header = pht('Successfully added %s', $username);
         $attribute = null;

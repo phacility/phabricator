@@ -23,13 +23,15 @@ final class PhabricatorSettingsPanelLDAP
   public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
-    $ldap_info = id(new PhabricatorUserLDAPInfo())->loadOneWhere(
-      'userID = %d',
-      $user->getID());
+    $ldap_account = id(new PhabricatorExternalAccount())->loadOneWhere(
+      'userPHID = %s AND accountType = %s AND accountDomain = %s',
+      $user->getPHID(),
+      'ldap',
+      'self');
 
     $forms = array();
 
-    if (!$ldap_info) {
+    if (!$ldap_account) {
       $unlink = pht('Link LDAP Account');
       $unlink_form = new AphrontFormView();
       $unlink_form
