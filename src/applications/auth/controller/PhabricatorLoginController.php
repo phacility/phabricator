@@ -138,8 +138,7 @@ final class PhabricatorLoginController
         }
 
         if (!$errors) {
-          $this->establishWebSession($user);
-          return $this->buildLoginValidateResponse($user);
+          return $this->loginUser($user);
         } else {
           $log = PhabricatorUserLog::newLog(
             null,

@@ -205,13 +205,11 @@ final class PhabricatorAuthRegisterController
 
           $user->saveTransaction();
 
-          $this->establishWebSession($user);
-
           if (!$email_obj->getIsVerified()) {
             $email_obj->sendVerificationEmail($user);
           }
 
-          return $this->buildLoginValidateResponse($user);
+          return $this->loginUser($user);
         } catch (AphrontQueryDuplicateKeyException $exception) {
           $same_username = id(new PhabricatorUser())->loadOneWhere(
             'userName = %s',
@@ -480,7 +478,7 @@ final class PhabricatorAuthRegisterController
     }
   }
 
-  private function renderError($message) {
+  protected function renderError($message) {
     return $this->renderErrorPage(
       pht('Registration Failed'),
       array($message));

@@ -107,9 +107,7 @@ final class PhabricatorAuthLoginController
           'with a valid Phabricator user.'));
     }
 
-    $this->establishWebSession($user);
-
-    return $this->buildLoginValidateResponse($user);
+    return $this->loginUser($user);
   }
 
   private function processRegisterUser(PhabricatorExternalAccount $account) {
@@ -161,7 +159,7 @@ final class PhabricatorAuthLoginController
     return null;
   }
 
-  private function renderError($message) {
+  protected function renderError($message) {
     $title = pht('Login Failed');
 
     $view = new AphrontErrorView();

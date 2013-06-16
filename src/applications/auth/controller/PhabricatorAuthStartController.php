@@ -180,7 +180,7 @@ final class PhabricatorAuthStartController
     return id(new AphrontPlainTextResponse())->setContent($message);
   }
 
-  private function renderError($message) {
+  protected function renderError($message) {
     return $this->renderErrorPage(
       pht('Authentication Failure'),
       array($message));

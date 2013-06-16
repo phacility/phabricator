@@ -73,8 +73,6 @@ final class PhabricatorEmailTokenController
       $target_email->save();
     unset($unguarded);
 
-    $this->establishWebSession($target_user);
-
     $next = '/';
     if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
       $panels = id(new PhabricatorSettingsPanelOAuth())->buildPanels();
@@ -95,6 +93,6 @@ final class PhabricatorEmailTokenController
 
     $request->setCookie('next_uri', $next);
 
-    return $this->buildLoginValidateResponse($target_user);
+    return $this->loginUser($target_user);
   }
 }

@@ -148,9 +148,7 @@ final class PhabricatorOAuthLoginController
 
       $this->saveOAuthInfo($oauth_info);
 
-      $this->establishWebSession($known_user);
-
-      return $this->buildLoginValidateResponse($known_user);
+      return $this->loginUser($known_user);
     }
 
     $oauth_email = $provider->retrieveUserEmail();

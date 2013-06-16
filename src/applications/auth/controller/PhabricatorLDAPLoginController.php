@@ -90,9 +90,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
 
           $this->saveLDAPInfo($ldap_info);
 
-          $this->establishWebSession($known_user);
-
-          return $this->buildLoginValidateResponse($known_user);
+          return $this->loginUser($known_user);
         }
 
         $controller = newv('PhabricatorLDAPRegistrationController',
