@@ -437,3 +437,7 @@ table.aphront-form-control-checkbox-layout th {
   width: 85%;
   margin: 15px auto;
 }
+
+.recaptcha_only_if_privacy {
+  display: none;
+}

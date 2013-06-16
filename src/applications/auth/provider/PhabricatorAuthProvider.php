@@ -74,6 +74,10 @@ abstract class PhabricatorAuthProvider {
     return;
   }
 
+  protected function willRegisterAccount(PhabricatorExternalAccount $account) {
+    return;
+  }
+
   protected function loadOrCreateAccount($account_id) {
     if (!strlen($account_id)) {
       throw new Exception(
@@ -107,7 +111,6 @@ abstract class PhabricatorAuthProvider {
         ->setAccountID($account_id);
     }
 
-    $account->setDisplayName('');
     $account->setUsername($adapter->getAccountName());
     $account->setRealName($adapter->getAccountRealName());
     $account->setEmail($adapter->getAccountEmail());
@@ -145,6 +148,18 @@ abstract class PhabricatorAuthProvider {
     $app = PhabricatorApplication::getByClass('PhabricatorApplicationAuth');
     $uri = $app->getApplicationURI('/login/'.$this->getProviderKey().'/');
     return PhabricatorEnv::getURI($uri);
+  }
+
+  public function isDefaultRegistrationProvider() {
+    return false;
+  }
+
+  public function shouldRequireRegistrationPassword() {
+    return false;
+  }
+
+  public function getDefaultExternalAccount() {
+    throw new Exception("Not implemented!");
   }
 
 }

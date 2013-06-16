@@ -30,6 +30,11 @@ final class PhabricatorAuthLoginController
       return $response;
     }
 
+    if (!$account) {
+      throw new Exception(
+        "Auth provider failed to load an account from processLoginRequest()!");
+    }
+
     if ($account->getUserPHID()) {
       // The account is already attached to a Phabricator user, so this is
       // either a login or a bad account link request.
@@ -165,6 +170,31 @@ final class PhabricatorAuthLoginController
       $view,
       array(
         'title' => $title,
+        'device' => true,
+        'dust' => true,
+      ));
+  }
+
+  public function buildProviderPageResponse(
+    PhabricatorAuthProvider $provider,
+    $content) {
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Login'))
+        ->setHref($this->getApplicationURI('start/')));
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($provider->getProviderName()));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $content,
+      ),
+      array(
+        'title' => pht('Login'),
         'device' => true,
         'dust' => true,
       ));
