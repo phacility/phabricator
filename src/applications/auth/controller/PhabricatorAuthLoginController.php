@@ -123,7 +123,9 @@ final class PhabricatorAuthLoginController
     // key.
 
     $registration_key = Filesystem::readRandomCharacters(32);
-    $account->setProperty('registrationKey', $registration_key);
+    $account->setProperty(
+      'registrationKey',
+      PhabricatorHash::digest($registration_key));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       $account->save();

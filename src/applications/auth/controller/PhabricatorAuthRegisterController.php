@@ -359,7 +359,13 @@ final class PhabricatorAuthRegisterController
           'Check that cookies are enabled and try again.'));
     }
 
-    if ($registration_key != $account->getProperty('registrationKey')) {
+    // We store the digest of the key rather than the key itself to prevent a
+    // theoretical attacker with read-only access to the database from
+    // hijacking registration sessions.
+
+    $actual = $account->getProperty('registrationKey');
+    $expect = PhabricatorHash::digest($registration_key);
+    if ($actual !== $expect) {
       return $this->renderError(
         pht(
           'Your browser submitted a different registration key than the one '.
