@@ -9,6 +9,11 @@ final class PhabricatorAuthProviderPassword
     return pht('Username/Password');
   }
 
+  public function getDescriptionForCreate() {
+    return pht(
+      'Allow users to login or register using a username and password.');
+  }
+
   public function isEnabled() {
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');

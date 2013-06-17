@@ -40,6 +40,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
 
         '(query/(?P<key>[^/]+)/)?' =>
           'PhabricatorAuthListController',
+        'config/new/' => 'PhabricatorAuthNewController',
 
 */
         'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',

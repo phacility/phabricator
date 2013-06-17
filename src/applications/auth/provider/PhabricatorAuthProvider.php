@@ -2,6 +2,14 @@
 
 abstract class PhabricatorAuthProvider {
 
+  public function getNameForCreate() {
+    return $this->getProviderName();
+  }
+
+  public function getDescriptionForCreate() {
+    return null;
+  }
+
   public function getProviderKey() {
     return $this->getAdapter()->getAdapterKey();
   }
@@ -14,13 +22,24 @@ abstract class PhabricatorAuthProvider {
     return $this->getAdapter()->getAdapterDomain();
   }
 
-  public static function getAllProviders() {
+  public static function getAllBaseProviders() {
     static $providers;
 
     if ($providers === null) {
       $objects = id(new PhutilSymbolLoader())
         ->setAncestorClass(__CLASS__)
         ->loadObjects();
+      $providers = $objects;
+    }
+
+    return $providers;
+  }
+
+  public static function getAllProviders() {
+    static $providers;
+
+    if ($providers === null) {
+      $objects = self::getAllBaseProviders();
 
       $providers = array();
       $from_class_map = array();

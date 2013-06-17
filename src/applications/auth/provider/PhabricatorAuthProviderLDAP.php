@@ -9,6 +9,13 @@ final class PhabricatorAuthProviderLDAP
     return pht('LDAP');
   }
 
+  public function getDescriptionForCreate() {
+    return pht(
+      'Configure a connection to an LDAP server so that users can use their '.
+      'LDAP credentials to log in to Phabricator.');
+  }
+
+
   public function isEnabled() {
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('ldap.auth-enabled');

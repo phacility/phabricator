@@ -8,6 +8,11 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
   abstract protected function getOAuthClientSecret();
   abstract protected function newOAuthAdapter();
 
+
+  public function getDescriptionForCreate() {
+    return pht('Configure %s OAuth.', $this->getProviderName());
+  }
+
   public function getAdapter() {
     if (!$this->adapter) {
       $adapter = $this->newOAuthAdapter();
