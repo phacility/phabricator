@@ -47,7 +47,10 @@ final class PhabricatorAuthStartController
       return $this->renderError(
         pht(
           "This Phabricator install is not configured with any enabled ".
-          "authentication providers which can be used to log in."));
+          "authentication providers which can be used to log in. If you ".
+          "have accidentally locked yourself out by disabling all providers, ".
+          "you can use `phabricator/bin/auth recover <username>` to ".
+          "recover access to an administrative account."));
     }
 
     $next_uri = $request->getStr('next');

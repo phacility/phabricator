@@ -823,6 +823,8 @@ phutil_register_library_map(array(
     'PhabricatorAuthLinkController' => 'applications/auth/controller/PhabricatorAuthLinkController.php',
     'PhabricatorAuthListController' => 'applications/auth/controller/config/PhabricatorAuthListController.php',
     'PhabricatorAuthLoginController' => 'applications/auth/controller/PhabricatorAuthLoginController.php',
+    'PhabricatorAuthManagementRecoverWorkflow' => 'applications/auth/management/PhabricatorAuthManagementRecoverWorkflow.php',
+    'PhabricatorAuthManagementWorkflow' => 'applications/auth/management/PhabricatorAuthManagementWorkflow.php',
     'PhabricatorAuthNewController' => 'applications/auth/controller/config/PhabricatorAuthNewController.php',
     'PhabricatorAuthProvider' => 'applications/auth/provider/PhabricatorAuthProvider.php',
     'PhabricatorAuthProviderConfig' => 'applications/auth/storage/PhabricatorAuthProviderConfig.php',
@@ -2704,6 +2706,8 @@ phutil_register_library_map(array(
       1 => 'PhabricatorApplicationSearchResultsControllerInterface',
     ),
     'PhabricatorAuthLoginController' => 'PhabricatorAuthController',
+    'PhabricatorAuthManagementRecoverWorkflow' => 'PhabricatorAuthManagementWorkflow',
+    'PhabricatorAuthManagementWorkflow' => 'PhutilArgumentWorkflow',
     'PhabricatorAuthNewController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthProviderConfig' =>
     array(
