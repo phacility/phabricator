@@ -28,12 +28,32 @@ final class PhabricatorAuthListController
     foreach ($configs as $config) {
       $item = new PhabricatorObjectItemView();
 
-      $edit_uri = $this->getApplicationURI('config/edit/'.$config->getID().'/');
+      $id = $config->getID();
+
+      $edit_uri = $this->getApplicationURI('config/edit/'.$id.'/');
+      $enable_uri = $this->getApplicationURI('config/enable/'.$id.'/');
+      $disable_uri = $this->getApplicationURI('config/disable/'.$id.'/');
 
       // TODO: Needs to be built out.
       $item
         ->setHeader($config->getProviderType())
         ->setHref($edit_uri);
+
+      if ($config->getIsEnabled()) {
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('delete')
+            ->setHref($disable_uri)
+            ->addSigil('workflow'));
+      } else {
+        $item->setBarColor('grey');
+        $item->addIcon('delete-grey', pht('Disabled'));
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('new')
+            ->setHref($enable_uri)
+            ->addSigil('workflow'));
+      }
 
       $list->addItem($item);
     }

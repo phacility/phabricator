@@ -158,6 +158,18 @@ final class PhabricatorAuthEditController
         'existing Phabricator accounts. If you disable this, Phabricator '.
         'accounts will be permanently bound to provider accounts.'));
 
+    $status_tag = id(new PhabricatorTagView())
+      ->setType(PhabricatorTagView::TYPE_STATE);
+    if ($config->getIsEnabled()) {
+      $status_tag
+        ->setName(pht('Enabled'))
+        ->setBackgroundColor('green');
+    } else {
+      $status_tag
+        ->setName(pht('Disabled'))
+        ->setBackgroundColor('red');
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->setFlexible(true)
@@ -165,6 +177,10 @@ final class PhabricatorAuthEditController
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Provider'))
           ->setValue($provider->getProviderName()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel(pht('Status'))
+          ->setValue($status_tag))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->setLabel(pht('Allow'))

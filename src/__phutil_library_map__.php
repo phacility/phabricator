@@ -818,6 +818,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthConfirmLinkController' => 'applications/auth/controller/PhabricatorAuthConfirmLinkController.php',
     'PhabricatorAuthController' => 'applications/auth/controller/PhabricatorAuthController.php',
     'PhabricatorAuthDAO' => 'applications/auth/storage/PhabricatorAuthDAO.php',
+    'PhabricatorAuthDisableController' => 'applications/auth/controller/config/PhabricatorAuthDisableController.php',
     'PhabricatorAuthEditController' => 'applications/auth/controller/config/PhabricatorAuthEditController.php',
     'PhabricatorAuthLinkController' => 'applications/auth/controller/PhabricatorAuthLinkController.php',
     'PhabricatorAuthListController' => 'applications/auth/controller/config/PhabricatorAuthListController.php',
@@ -2694,6 +2695,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthConfirmLinkController' => 'PhabricatorAuthController',
     'PhabricatorAuthController' => 'PhabricatorController',
     'PhabricatorAuthDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorAuthDisableController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthEditController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthLinkController' => 'PhabricatorAuthController',
     'PhabricatorAuthListController' =>
