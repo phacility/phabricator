@@ -491,6 +491,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return (string) $uri;
   }
 
+  public function getProfileThumbURI() {
+    $path = '/file/xform/thumb-profile/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
+  }
+
   public function getThumb60x45URI() {
     $path = '/file/xform/thumb-60x45/'.$this->getPHID().'/'
       .$this->getSecretKey().'/';

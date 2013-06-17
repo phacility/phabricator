@@ -246,6 +246,7 @@ a.toggle-fixed {
 .button.big.has-icon {
   padding: 6px 20px 6px 12px;
   border-radius: 4px;
+  text-align: left;
 }
 
 .button.big.has-icon .phui-button-text {
@@ -257,7 +258,6 @@ a.toggle-fixed {
 .button.big.has-icon .phui-button-subtext {
   color: #888;
   font-size: 12px;
-  line-height: 16px;
+  line-height: 14px;
   font-weight: normal;
-  float: left;
 }

@@ -72,7 +72,6 @@
 
 .loading .messages-loading-mask {
   display: block;
-  z-index: 500;
 }
 
 .conpherence-message-pane .phabricator-form-view {

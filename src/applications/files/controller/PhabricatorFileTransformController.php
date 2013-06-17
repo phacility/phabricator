@@ -49,6 +49,9 @@ final class PhabricatorFileTransformController
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
     switch ($this->transform) {
+      case 'thumb-profile':
+        $xformed_file = $this->executeThumbTransform($file, 50, 50);
+        break;
       case 'thumb-280x210':
         $xformed_file = $this->executeThumbTransform($file, 280, 210);
         break;

@@ -34,11 +34,13 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
 
         if ($current_user->getPHID()) {
           if ($ldap_info->getID()) {
-            $existing_ldap = id(new PhabricatorUserLDAPInfo())->loadOneWhere(
-              'userID = %d',
-              $current_user->getID());
+            $existing_ldap = id(new PhabricatorExternalAccount())->loadOneWhere(
+              'accountType = %s AND accountDomain = %s AND userPHID = %s',
+              'ldap',
+              'self',
+              $current_user->getPHID());
 
-            if ($ldap_info->getUserID() != $current_user->getID() ||
+            if ($ldap_info->getUserPHID() != $current_user->getPHID() ||
                 $existing_ldap) {
               $dialog = new AphrontDialogView();
               $dialog->setUser($current_user);
@@ -71,7 +73,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
             return id(new AphrontDialogResponse())->setDialog($dialog);
           }
 
-          $ldap_info->setUserID($current_user->getID());
+          $ldap_info->setUserPHID($current_user->getPHID());
 
           $this->saveLDAPInfo($ldap_info);
 
@@ -79,26 +81,16 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
             ->setURI('/settings/panel/ldap/');
         }
 
-        if ($ldap_info->getID()) {
+        if ($ldap_info->getUserPHID()) {
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-          $known_user = id(new PhabricatorUser())->load(
-              $ldap_info->getUserID());
-
-          $session_key = $known_user->establishSession('web');
+          $known_user = id(new PhabricatorUser())->loadOneWhere(
+            'phid = %s',
+            $ldap_info->getUserPHID());
 
           $this->saveLDAPInfo($ldap_info);
 
-          $request->setCookie('phusr', $known_user->getUsername());
-          $request->setCookie('phsid', $session_key);
-
-          $uri = new PhutilURI('/login/validate/');
-          $uri->setQueryParams(
-            array(
-              'phusr' => $known_user->getUsername(),
-            ));
-
-          return id(new AphrontRedirectResponse())->setURI((string)$uri);
+          return $this->loginUser($known_user);
         }
 
         $controller = newv('PhabricatorLDAPRegistrationController',
@@ -152,19 +144,23 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
   }
 
   private function retrieveLDAPInfo(PhabricatorLDAPProvider $provider) {
-    $ldap_info = id(new PhabricatorUserLDAPInfo())->loadOneWhere(
-      'ldapUsername = %s',
+    $ldap_info = id(new PhabricatorExternalAccount())->loadOneWhere(
+      'accountType = %s AND accountDomain = %s AND accountID = %s',
+      'ldap',
+      'self',
       $provider->retrieveUsername());
 
     if (!$ldap_info) {
-      $ldap_info = new PhabricatorUserLDAPInfo();
-      $ldap_info->setLDAPUsername($provider->retrieveUsername());
+      $ldap_info = id(new PhabricatorExternalAccount())
+        ->setAccountType('ldap')
+        ->setAccountDomain('self')
+        ->setAccountID($provider->retrieveUsername());
     }
 
     return $ldap_info;
   }
 
-  private function saveLDAPInfo(PhabricatorUserLDAPInfo $info) {
+  private function saveLDAPInfo(PhabricatorExternalAccount $info) {
     // UNGUARDED WRITES: Logging-in users don't have their CSRF set up yet.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     $info->save();

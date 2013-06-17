@@ -275,6 +275,7 @@ final class AphrontRequest {
 
   final public function clearCookie($name) {
     $this->setCookie($name, '', time() - (60 * 60 * 24 * 30));
+    unset($_COOKIE[$name]);
   }
 
   final public function setCookie($name, $value, $expire = null) {
@@ -317,6 +318,8 @@ final class AphrontRequest {
       $base_domain,
       $is_secure,
       $http_only = true);
+
+    $_COOKIE[$name] = $value;
 
     return $this;
   }

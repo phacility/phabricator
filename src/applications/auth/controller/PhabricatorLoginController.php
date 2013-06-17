@@ -138,18 +138,7 @@ final class PhabricatorLoginController
         }
 
         if (!$errors) {
-          $session_key = $user->establishSession('web');
-
-          $request->setCookie('phusr', $user->getUsername());
-          $request->setCookie('phsid', $session_key);
-
-          $uri = id(new PhutilURI('/login/validate/'))
-            ->setQueryParams(
-              array('phusr' => $user->getUsername()
-            ));
-
-          return id(new AphrontRedirectResponse())
-            ->setURI((string)$uri);
+          return $this->loginUser($user);
         } else {
           $log = PhabricatorUserLog::newLog(
             null,
