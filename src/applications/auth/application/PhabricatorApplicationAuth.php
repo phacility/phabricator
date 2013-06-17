@@ -2,10 +2,6 @@
 
 final class PhabricatorApplicationAuth extends PhabricatorApplication {
 
-  public function shouldAppearInLaunchView() {
-    return false;
-  }
-
   public function canUninstall() {
     return false;
   }
@@ -33,9 +29,19 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return $items;
   }
 
+  public function shouldAppearInLaunchView() {
+    return false;
+  }
+
   public function getRoutes() {
     return array(
       '/auth/' => array(
+/*
+
+        '(query/(?P<key>[^/]+)/)?' =>
+          'PhabricatorAuthListController',
+
+*/
         'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
