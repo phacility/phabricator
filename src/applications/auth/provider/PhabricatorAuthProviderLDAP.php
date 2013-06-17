@@ -63,22 +63,28 @@ final class PhabricatorAuthProviderLDAP
     return true;
   }
 
-  protected function renderLoginForm(AphrontRequest $request, $is_link) {
+  protected function renderLoginForm(AphrontRequest $request, $mode) {
     $viewer = $request->getUser();
 
     $dialog = id(new AphrontDialogView())
       ->setSubmitURI($this->getLoginURI())
       ->setUser($viewer);
 
-    if ($is_link) {
+    if ($mode == 'link') {
       $dialog->setTitle(pht('Link LDAP Account'));
       $dialog->addSubmitButton(pht('Link Accounts'));
-    } else if ($this->shouldAllowRegistration()) {
-      $dialog->setTitle(pht('Login or Register with LDAP'));
-      $dialog->addSubmitButton(pht('Login or Register'));
+      $dialog->addCancelButton($this->getSettingsURI());
     } else {
-      $dialog->setTitle(pht('Login with LDAP'));
-      $dialog->addSubmitButton(pht('Login'));
+      if ($this->shouldAllowRegistration()) {
+        $dialog->setTitle(pht('Login or Register with LDAP'));
+        $dialog->addSubmitButton(pht('Login or Register'));
+      } else {
+        $dialog->setTitle(pht('Login with LDAP'));
+        $dialog->addSubmitButton(pht('Login'));
+      }
+      if ($mode == 'login') {
+        $dialog->addCancelButton($this->getStartURI());
+      }
     }
 
     $v_user = $request->getStr('ldap_username');
@@ -137,7 +143,7 @@ final class PhabricatorAuthProviderLDAP
     if (!strlen($username) || !$has_password) {
       $response = $controller->buildProviderPageResponse(
         $this,
-        $this->renderLoginForm($request));
+        $this->renderLoginForm($request, 'login'));
       return array($account, $response);
     }
 

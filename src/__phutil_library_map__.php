@@ -1009,6 +1009,7 @@ phutil_register_library_map(array(
     'PhabricatorExampleEventListener' => 'infrastructure/events/PhabricatorExampleEventListener.php',
     'PhabricatorExtendingPhabricatorConfigOptions' => 'applications/config/option/PhabricatorExtendingPhabricatorConfigOptions.php',
     'PhabricatorExternalAccount' => 'applications/people/storage/PhabricatorExternalAccount.php',
+    'PhabricatorExternalAccountQuery' => 'applications/auth/query/PhabricatorExternalAccountQuery.php',
     'PhabricatorFacebookConfigOptions' => 'applications/config/option/PhabricatorFacebookConfigOptions.php',
     'PhabricatorFactAggregate' => 'applications/fact/storage/PhabricatorFactAggregate.php',
     'PhabricatorFactChartController' => 'applications/fact/controller/PhabricatorFactChartController.php',
@@ -2892,7 +2893,12 @@ phutil_register_library_map(array(
     'PhabricatorEventType' => 'PhutilEventType',
     'PhabricatorExampleEventListener' => 'PhutilEventListener',
     'PhabricatorExtendingPhabricatorConfigOptions' => 'PhabricatorApplicationConfigOptions',
-    'PhabricatorExternalAccount' => 'PhabricatorUserDAO',
+    'PhabricatorExternalAccount' =>
+    array(
+      0 => 'PhabricatorUserDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
+    'PhabricatorExternalAccountQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFacebookConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorFactAggregate' => 'PhabricatorFactDAO',
     'PhabricatorFactChartController' => 'PhabricatorFactController',

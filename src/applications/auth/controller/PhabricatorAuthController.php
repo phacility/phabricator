@@ -114,9 +114,18 @@ abstract class PhabricatorAuthController extends PhabricatorController {
       return array($account, $provider, $response);
     }
 
-    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
-      'accountSecret = %s',
-      $account_key);
+    // NOTE: We're using the omnipotent user because the actual user may not
+    // be logged in yet, and because we want to tailor an error message to
+    // distinguish between "not usable" and "does not exist". We do explicit
+    // checks later on to make sure this account is valid for the intended
+    // operation.
+
+    $account = id(new PhabricatorExternalAccountQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withAccountSecrets(array($account_key))
+      ->needImages(true)
+      ->executeOne();
+
     if (!$account) {
       $response = $this->renderError(pht('No valid linkable account.'));
       return array($account, $provider, $response);

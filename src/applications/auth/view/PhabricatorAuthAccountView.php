@@ -89,19 +89,7 @@ final class PhabricatorAuthAccountView extends AphrontView {
         $account_uri);
     }
 
-    // TODO: This fetch is sketchy. We should probably build
-    // ExternalAccountQuery and move the logic there.
-
-    $image_uri = PhabricatorUser::getDefaultProfileImageURI();
-    if ($account->getProfileImagePHID()) {
-      $image = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs(array($account->getProfileImagePHID()))
-        ->executeOne();
-      if ($image) {
-        $image_uri = $image->getProfileThumbURI();
-      }
-    }
+    $image_uri = $account->getProfileImageFile()->getProfileThumbURI();
 
     return phutil_tag(
       'div',

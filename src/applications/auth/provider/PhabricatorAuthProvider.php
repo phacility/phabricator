@@ -108,7 +108,7 @@ abstract class PhabricatorAuthProvider {
 
   public function buildLoginForm(
     PhabricatorAuthStartController $controller) {
-    return $this->renderLoginForm($controller->getRequest(), $is_link = false);
+    return $this->renderLoginForm($controller->getRequest(), $mode = 'start');
   }
 
   abstract public function processLoginRequest(
@@ -116,12 +116,12 @@ abstract class PhabricatorAuthProvider {
 
   public function buildLinkForm(
     PhabricatorAuthLinkController $controller) {
-    return $this->renderLoginForm($controller->getRequest(), $is_link = true);
+    return $this->renderLoginForm($controller->getRequest(), $mode = 'link');
   }
 
   protected function renderLoginForm(
     AphrontRequest $request,
-    $is_link) {
+    $mode) {
     throw new Exception("Not implemented!");
   }
 
@@ -213,14 +213,20 @@ abstract class PhabricatorAuthProvider {
     return $account;
   }
 
-  protected function getLoginURI() {
+  public function getLoginURI() {
     $app = PhabricatorApplication::getByClass('PhabricatorApplicationAuth');
     $uri = $app->getApplicationURI('/login/'.$this->getProviderKey().'/');
     return PhabricatorEnv::getURI($uri);
   }
 
-  protected function getCancelLinkURI() {
+  public function getSettingsURI() {
     return '/settings/panel/external/';
+  }
+
+  public function getStartURI() {
+    $app = PhabricatorApplication::getByClass('PhabricatorApplicationAuth');
+    $uri = $app->getApplicationURI('/start/');
+    return $uri;
   }
 
   public function isDefaultRegistrationProvider() {
