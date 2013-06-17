@@ -15,7 +15,8 @@ EOSYNOPSIS
 $args->parseStandardArguments();
 
 $workflows = array(
-  new PhabricatorAuthManagementListWorkflow(),
+  new PhabricatorAuthManagementRecoverWorkflow(),
+  new PhabricatorAuthManagementLDAPWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );
 
