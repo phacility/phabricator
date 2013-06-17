@@ -44,10 +44,10 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return true;
   }
 
-  protected function renderLoginForm(AphrontRequest $request, $is_link) {
+  protected function renderLoginForm(AphrontRequest $request, $mode) {
     $viewer = $request->getUser();
 
-    if ($is_link) {
+    if ($mode == 'link') {
       $button_text = pht('Link External Account');
     } else if ($this->shouldAllowRegistration()) {
       $button_text = pht('Login or Register');

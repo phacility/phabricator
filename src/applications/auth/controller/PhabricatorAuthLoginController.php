@@ -178,10 +178,19 @@ final class PhabricatorAuthLoginController
     $content) {
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Login'))
-        ->setHref($this->getApplicationURI('start/')));
+
+    if ($this->getRequest()->getUser()->isLoggedIn()) {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Link Account'))
+          ->setHref($provider->getSettingsURI()));
+    } else {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Login'))
+          ->setHref($this->getApplicationURI('start/')));
+    }
+
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($provider->getProviderName()));
