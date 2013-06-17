@@ -23,9 +23,7 @@ abstract class PhabricatorOAuthProvider {
   abstract public function getTestURIs();
 
   public function getSettingsPanelURI() {
-    $panel = new PhabricatorSettingsPanelOAuth();
-    $panel->setOAuthProvider($this);
-    return $panel->getPanelURI();
+    return '/settings/panel/external/';
   }
 
   /**

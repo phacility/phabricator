@@ -49,29 +49,24 @@ final class PhabricatorAuthProviderLDAP
   }
 
   public function shouldAllowAccountLink() {
-    return false;
+    return true;
   }
 
   public function shouldAllowAccountUnlink() {
-    return false;
+    return true;
   }
 
-  public function buildLoginForm(
-    PhabricatorAuthStartController $controller) {
-
-    $request = $controller->getRequest();
-    return $this->renderLoginForm($request);
-  }
-
-  private function renderLoginForm(AphrontRequest $request) {
-
+  protected function renderLoginForm(AphrontRequest $request, $is_link) {
     $viewer = $request->getUser();
 
     $dialog = id(new AphrontDialogView())
       ->setSubmitURI($this->getLoginURI())
       ->setUser($viewer);
 
-    if ($this->shouldAllowRegistration()) {
+    if ($is_link) {
+      $dialog->setTitle(pht('Link LDAP Account'));
+      $dialog->addSubmitButton(pht('Link Accounts'));
+    } else if ($this->shouldAllowRegistration()) {
       $dialog->setTitle(pht('Login or Register with LDAP'));
       $dialog->addSubmitButton(pht('Login or Register'));
     } else {

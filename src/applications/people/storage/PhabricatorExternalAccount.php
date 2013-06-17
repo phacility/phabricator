@@ -57,4 +57,19 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO {
     return idx($this->properties, $key, $default);
   }
 
+  public function isUsableForLogin() {
+    $key = $this->getProviderKey();
+    $provider = PhabricatorAuthProvider::getEnabledProviderByKey($key);
+
+    if (!$provider) {
+      return false;
+    }
+
+    if (!$provider->shouldAllowLogin()) {
+      return false;
+    }
+
+    return true;
+  }
+
 }

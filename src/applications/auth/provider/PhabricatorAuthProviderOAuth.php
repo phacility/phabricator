@@ -40,13 +40,12 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return true;
   }
 
-  public function buildLoginForm(
-    PhabricatorAuthStartController $controller) {
-
-    $request = $controller->getRequest();
+  protected function renderLoginForm(AphrontRequest $request, $is_link) {
     $viewer = $request->getUser();
 
-    if ($this->shouldAllowRegistration()) {
+    if ($is_link) {
+      $button_text = pht('Link External Account');
+    } else if ($this->shouldAllowRegistration()) {
       $button_text = pht('Login or Register');
     } else {
       $button_text = pht('Login');
@@ -57,7 +56,6 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
       ->setSpriteIcon($this->getLoginIcon());
 
     $button = id(new PHUIButtonView())
-        ->setTag('a')
         ->setSize(PHUIButtonView::BIG)
         ->setColor(PHUIButtonView::GREY)
         ->setIcon($icon)
@@ -91,7 +89,6 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
       ),
       $content);
   }
-
   public function processLoginRequest(
     PhabricatorAuthLoginController $controller) {
 

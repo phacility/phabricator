@@ -4,8 +4,6 @@ final class PhabricatorAuthRegisterController
   extends PhabricatorAuthController {
 
   private $accountKey;
-  private $account;
-  private $provider;
 
   public function shouldRequireLogin() {
     return false;
@@ -23,16 +21,30 @@ final class PhabricatorAuthRegisterController
     }
 
     if (strlen($this->accountKey)) {
-      $response = $this->loadAccount();
+      $result = $this->loadAccountForRegistrationOrLinking($this->accountKey);
+      list($account, $provider, $response) = $result;
     } else {
-      $response = $this->loadDefaultAccount();
+      list($account, $provider, $response) = $this->loadDefaultAccount();
     }
 
     if ($response) {
       return $response;
     }
 
-    $account = $this->account;
+    if (!$provider->shouldAllowRegistration()) {
+
+      // TODO: This is a routine error if you click "Login" on an external
+      // auth source which doesn't allow registration. The error should be
+      // more tailored.
+
+      return $this->renderError(
+        pht(
+          'The account you are attempting to register with uses an '.
+          'authentication provider ("%s") which does not allow registration. '.
+          'An administrator may have recently disabled registration with this '.
+          'provider.',
+          $provider->getProviderName()));
+    }
 
     $user = new PhabricatorUser();
 
@@ -88,7 +100,7 @@ final class PhabricatorAuthRegisterController
     $can_edit_email = $profile->getCanEditEmail();
     $can_edit_realname = $profile->getCanEditRealName();
 
-    $must_set_password = $this->provider->shouldRequireRegistrationPassword();
+    $must_set_password = $provider->shouldRequireRegistrationPassword();
 
     $can_edit_anything = $profile->getCanEditAnything() || $must_set_password;
     $force_verify = $profile->getShouldVerifyEmail();
@@ -200,7 +212,7 @@ final class PhabricatorAuthRegisterController
             }
 
             $account->setUserPHID($user->getPHID());
-            $this->provider->willRegisterAccount($account);
+            $provider->willRegisterAccount($account);
             $account->save();
 
           $user->saveTransaction();
@@ -315,134 +327,38 @@ final class PhabricatorAuthRegisterController
       ));
   }
 
-  private function loadAccount() {
-    $request = $this->getRequest();
-
-    if (!$this->accountKey) {
-      return $this->renderError(pht('Request did not include account key.'));
-    }
-
-    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
-      'accountSecret = %s',
-      $this->accountKey);
-
-    if (!$account) {
-      return $this->renderError(pht('No registration account.'));
-    }
-
-    if ($account->getUserPHID()) {
-      return $this->renderError(
-        pht(
-          'The account you are attempting to register with is already '.
-          'registered to another user.'));
-    }
-
-    $registration_key = $request->getCookie('phreg');
-
-    // NOTE: This registration key check is not strictly necessary, because
-    // we're only creating new accounts, not linking existing accounts. It
-    // might be more hassle than it is worth, especially for email.
-    //
-    // The attack this prevents is getting to the registration screen, then
-    // copy/pasting the URL and getting someone else to click it and complete
-    // the process. They end up with an account bound to credentials you
-    // control. This doesn't really let you do anything meaningful, though,
-    // since you could have simply completed the process yourself.
-
-    if (!$registration_key) {
-      return $this->renderError(
-        pht(
-          'Your browser did not submit a registration key with the request. '.
-          'You must use the same browser to begin and complete registration. '.
-          'Check that cookies are enabled and try again.'));
-    }
-
-    // We store the digest of the key rather than the key itself to prevent a
-    // theoretical attacker with read-only access to the database from
-    // hijacking registration sessions.
-
-    $actual = $account->getProperty('registrationKey');
-    $expect = PhabricatorHash::digest($registration_key);
-    if ($actual !== $expect) {
-      return $this->renderError(
-        pht(
-          'Your browser submitted a different registration key than the one '.
-          'associated with this account. You may need to clear your cookies.'));
-    }
-
-    $other_account = id(new PhabricatorExternalAccount())->loadAllWhere(
-      'accountType = %s AND accountDomain = %s AND accountID = %s
-        AND id != %d',
-      $account->getAccountType(),
-      $account->getAccountDomain(),
-      $account->getAccountID(),
-      $account->getID());
-
-    if ($other_account) {
-      return $this->renderError(
-        pht(
-          'The account you are attempting to register with already belongs '.
-          'to another user.'));
-    }
-
-    $provider = PhabricatorAuthProvider::getEnabledProviderByKey(
-      $account->getProviderKey());
-
-    if (!$provider) {
-      return $this->renderError(
-        pht(
-          'The account you are attempting to register with uses a nonexistent '.
-          'or disabled authentication provider (with key "%s"). An '.
-          'administrator may have recently disabled this provider.',
-          $account->getProviderKey()));
-    }
-
-    if (!$provider->shouldAllowRegistration()) {
-
-      // TODO: This is a routine error if you click "Login" on an external
-      // auth source which doesn't allow registration. The error should be
-      // more tailored.
-
-      return $this->renderError(
-        pht(
-          'The account you are attempting to register with uses an '.
-          'authentication provider ("%s") which does not allow registration. '.
-          'An administrator may have recently disabled registration with this '.
-          'provider.',
-          $provider->getProviderName()));
-    }
-
-    $this->account = $account;
-    $this->provider = $provider;
-
-    return null;
-  }
-
   private function loadDefaultAccount() {
     $providers = PhabricatorAuthProvider::getAllEnabledProviders();
-    foreach ($providers as $key => $provider) {
-      if (!$provider->shouldAllowRegistration()) {
+    $account = null;
+    $provider = null;
+    $response = null;
+
+    foreach ($providers as $key => $candidate_provider) {
+      if (!$candidate_provider->shouldAllowRegistration()) {
         unset($providers[$key]);
         continue;
       }
-      if (!$provider->isDefaultRegistrationProvider()) {
+      if (!$candidate_provider->isDefaultRegistrationProvider()) {
         unset($providers[$key]);
       }
     }
 
     if (!$providers) {
-      return $this->renderError(
+      $response = $this->renderError(
         pht(
           "There are no configured default registration providers."));
+      return array($account, $provider, $response);
     } else if (count($providers) > 1) {
-      return $this->renderError(
+      $response = $this->renderError(
         pht(
           "There are too many configured default registration providers."));
+      return array($account, $provider, $response);
     }
 
-    $this->account = $provider->getDefaultExternalAccount();
-    $this->provider = $provider;
-    return null;
+    $provider = head($providers);
+    $account = $provider->getDefaultExternalAccount();
+
+    return array($account, $provider, $response);
   }
 
   private function loadProfilePicture(PhabricatorExternalAccount $account) {

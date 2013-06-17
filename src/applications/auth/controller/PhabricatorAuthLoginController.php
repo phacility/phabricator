@@ -111,8 +111,23 @@ final class PhabricatorAuthLoginController
   }
 
   private function processRegisterUser(PhabricatorExternalAccount $account) {
+    $account_secret = $account->getAccountSecret();
+    $register_uri = $this->getApplicationURI('register/'.$account_secret.'/');
+    return $this->setAccountKeyAndContinue($account, $register_uri);
+  }
+
+  private function processLinkUser(PhabricatorExternalAccount $account) {
+    $account_secret = $account->getAccountSecret();
+    $confirm_uri = $this->getApplicationURI('confirmlink/'.$account_secret.'/');
+    return $this->setAccountKeyAndContinue($account, $confirm_uri);
+  }
+
+  private function setAccountKeyAndContinue(
+    PhabricatorExternalAccount $account,
+    $next_uri) {
+
     if ($account->getUserPHID()) {
-      throw new Exception("Account is already registered.");
+      throw new Exception("Account is already registered or linked.");
     }
 
     // Regenerate the registration secret key, set it on the external account,
@@ -131,14 +146,7 @@ final class PhabricatorAuthLoginController
 
     $this->getRequest()->setCookie('phreg', $registration_key);
 
-    $account_secret = $account->getAccountSecret();
-    $register_uri = $this->getApplicationURI('register/'.$account_secret.'/');
-    return id(new AphrontRedirectResponse())->setURI($register_uri);
-  }
-
-  private function processLinkUser(PhabricatorExternalAccount $account) {
-    // TODO: Implement.
-    return new Aphront404Response();
+    return id(new AphrontRedirectResponse())->setURI($next_uri);
   }
 
   private function loadProvider() {
@@ -160,19 +168,9 @@ final class PhabricatorAuthLoginController
   }
 
   protected function renderError($message) {
-    $title = pht('Login Failed');
-
-    $view = new AphrontErrorView();
-    $view->setTitle($title);
-    $view->appendChild($message);
-
-    return $this->buildApplicationPage(
-      $view,
-      array(
-        'title' => $title,
-        'device' => true,
-        'dust' => true,
-      ));
+    return $this->renderErrorPage(
+      pht('Login Failed'),
+      array($message));
   }
 
   public function buildProviderPageResponse(

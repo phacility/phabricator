@@ -6,6 +6,14 @@ abstract class PhabricatorAuthProvider {
     return $this->getAdapter()->getAdapterKey();
   }
 
+  public function getProviderType() {
+    return $this->getAdapter()->getAdapterType();
+  }
+
+  public function getProviderDomain() {
+    return $this->getAdapter()->getAdapterDomain();
+  }
+
   public static function getAllProviders() {
     static $providers;
 
@@ -56,8 +64,7 @@ abstract class PhabricatorAuthProvider {
   abstract public function getAdapter();
 
   public function isEnabled() {
-    // TODO: Remove once we switch to the new auth stuff.
-    return false;
+    return true;
   }
 
   abstract public function shouldAllowLogin();
@@ -65,11 +72,24 @@ abstract class PhabricatorAuthProvider {
   abstract public function shouldAllowAccountLink();
   abstract public function shouldAllowAccountUnlink();
 
-  abstract public function buildLoginForm(
-    PhabricatorAuthStartController $controller);
+  public function buildLoginForm(
+    PhabricatorAuthStartController $controller) {
+    return $this->renderLoginForm($controller->getRequest(), $is_link = false);
+  }
 
   abstract public function processLoginRequest(
     PhabricatorAuthLoginController $controller);
+
+  public function buildLinkForm(
+    PhabricatorAuthLinkController $controller) {
+    return $this->renderLoginForm($controller->getRequest(), $is_link = true);
+  }
+
+  protected function renderLoginForm(
+    AphrontRequest $request,
+    $is_link) {
+    throw new Exception("Not implemented!");
+  }
 
   public function createProviders() {
     return array($this);
@@ -144,7 +164,9 @@ abstract class PhabricatorAuthProvider {
 
     $this->willSaveAccount($account);
 
-    $account->save();
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $account->save();
+    unset($unguarded);
 
     return $account;
   }
@@ -153,6 +175,10 @@ abstract class PhabricatorAuthProvider {
     $app = PhabricatorApplication::getByClass('PhabricatorApplicationAuth');
     $uri = $app->getApplicationURI('/login/'.$this->getProviderKey().'/');
     return PhabricatorEnv::getURI($uri);
+  }
+
+  protected function getCancelLinkURI() {
+    return '/settings/panel/external/';
   }
 
   public function isDefaultRegistrationProvider() {

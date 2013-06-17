@@ -8,7 +8,7 @@
 }
 
 .phabricator-login-buttons .phabricator-login-button .button {
-  width: 180px;
+  width: 216px;
 }
 
 .device-desktop .phabricator-login-buttons .aphront-multi-column-column-last {
@@ -16,5 +16,9 @@
 }
 
 .device .phabricator-login-buttons {
+  text-align: center;
+}
+
+.phabricator-link-button {
   text-align: center;
 }

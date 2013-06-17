@@ -51,13 +51,16 @@ final class PhabricatorAuthProviderPassword
 
   public function buildLoginForm(
     PhabricatorAuthStartController $controller) {
-
     $request = $controller->getRequest();
-
-    return $this->renderLoginForm($request);
+    return $this->renderPasswordLoginForm($request);
   }
 
-  private function renderLoginForm(
+  public function buildLinkForm(
+    PhabricatorAuthLinkController $controller) {
+    throw new Exception("Password providers can't be linked.");
+  }
+
+  private function renderPasswordLoginForm(
     AphrontRequest $request,
     $require_captcha = false,
     $captcha_valid = false) {
@@ -195,7 +198,7 @@ final class PhabricatorAuthProviderPassword
 
       $response = $controller->buildProviderPageResponse(
         $this,
-        $this->renderLoginForm(
+        $this->renderPasswordLoginForm(
           $request,
           $require_captcha,
           $captcha_valid));

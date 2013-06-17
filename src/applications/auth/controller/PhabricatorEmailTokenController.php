@@ -75,13 +75,7 @@ final class PhabricatorEmailTokenController
 
     $next = '/';
     if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
-      $panels = id(new PhabricatorSettingsPanelOAuth())->buildPanels();
-      foreach ($panels as $panel) {
-        if ($panel->isEnabled()) {
-          $next = $panel->getPanelURI();
-          break;
-        }
-      }
+      $next = '/settings/panel/external/';
     } else if (PhabricatorEnv::getEnvConfig('account.editable')) {
       $next = (string)id(new PhutilURI('/settings/panel/password/'))
         ->setQueryParams(

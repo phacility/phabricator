@@ -40,6 +40,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',
+        'unlink/(?P<pkey>[^/]+)/' => 'PhabricatorAuthUnlinkController',
+        'link/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLinkController',
+        'confirmlink/(?P<akey>[^/]+)/'
+          => 'PhabricatorAuthConfirmLinkController',
       ),
 
       '/login/' => array(
@@ -56,13 +60,11 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
         '(?P<provider>\w+)/' => array(
           'login/'     => 'PhabricatorOAuthLoginController',
           'diagnose/'  => 'PhabricatorOAuthDiagnosticsController',
-          'unlink/'    => 'PhabricatorOAuthUnlinkController',
         ),
       ),
 
       '/ldap/' => array(
         'login/' => 'PhabricatorLDAPLoginController',
-        'unlink/'    => 'PhabricatorLDAPUnlinkController',
       ),
     );
   }

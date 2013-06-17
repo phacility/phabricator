@@ -14,7 +14,7 @@ final class PHUIButtonView extends AphrontTagView {
   private $text;
   private $subtext;
   private $color;
-  private $tag = 'a';
+  private $tag = 'button';
   private $dropdown;
   private $icon;
 
