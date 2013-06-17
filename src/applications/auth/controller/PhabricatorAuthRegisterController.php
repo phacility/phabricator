@@ -23,8 +23,10 @@ final class PhabricatorAuthRegisterController
     if (strlen($this->accountKey)) {
       $result = $this->loadAccountForRegistrationOrLinking($this->accountKey);
       list($account, $provider, $response) = $result;
+      $is_default = false;
     } else {
       list($account, $provider, $response) = $this->loadDefaultAccount();
+      $is_default = true;
     }
 
     if ($response) {
@@ -259,10 +261,24 @@ final class PhabricatorAuthRegisterController
     }
 
     $form = id(new AphrontFormView())
-      ->setUser($request->getUser())
+      ->setUser($request->getUser());
+
+    if (!$is_default) {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('External Account'))
+          ->setValue(
+            id(new PhabricatorAuthAccountView())
+              ->setUser($request->getUser())
+              ->setExternalAccount($account)
+              ->setAuthProvider($provider)));
+    }
+
+
+    $form
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('Username'))
+          ->setLabel(pht('Phabricator Username'))
           ->setName('username')
           ->setValue($value_username)
           ->setError($e_username));
@@ -305,7 +321,8 @@ final class PhabricatorAuthRegisterController
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue(pht('Create Account')));
+        ->addCancelButton($this->getApplicationURI('start/'))
+        ->setValue(pht('Register Phabricator Account')));
 
     $title = pht('Phabricator Registration');
 
@@ -313,6 +330,9 @@ final class PhabricatorAuthRegisterController
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName(pht('Register')));
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($provider->getProviderName()));
 
     return $this->buildApplicationPage(
       array(
