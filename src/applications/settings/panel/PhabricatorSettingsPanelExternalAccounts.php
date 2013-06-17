@@ -23,9 +23,12 @@ final class PhabricatorSettingsPanelExternalAccounts
     $viewer = $request->getUser();
 
     $providers = PhabricatorAuthProvider::getAllProviders();
-    $accounts = id(new PhabricatorExternalAccount())->loadAllWhere(
-      'userPHID = %s',
-      $viewer->getPHID());
+
+    $accounts = id(new PhabricatorExternalAccountQuery())
+      ->setViewer($viewer)
+      ->withUserPHIDs(array($viewer->getPHID()))
+      ->needImages(true)
+      ->execute();
 
     $linked_head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Linked Accounts and Authentication'));
