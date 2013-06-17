@@ -3,7 +3,6 @@
 final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
   implements PhabricatorPolicyInterface {
 
-  protected $phid;
   protected $providerClass;
   protected $providerType;
   protected $providerDomain;
@@ -23,6 +22,7 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
 
   public function getConfiguration() {
     return array(
+      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),

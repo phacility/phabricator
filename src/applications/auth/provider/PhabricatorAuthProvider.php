@@ -110,6 +110,11 @@ abstract class PhabricatorAuthProvider {
     throw new Exception("Not implemented!");
   }
 
+  public function extendEditForm(AphrontFormView $form) {
+
+  }
+
+
   public function createProviders() {
     return array($this);
   }

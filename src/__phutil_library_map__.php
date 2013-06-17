@@ -818,6 +818,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthConfirmLinkController' => 'applications/auth/controller/PhabricatorAuthConfirmLinkController.php',
     'PhabricatorAuthController' => 'applications/auth/controller/PhabricatorAuthController.php',
     'PhabricatorAuthDAO' => 'applications/auth/storage/PhabricatorAuthDAO.php',
+    'PhabricatorAuthEditController' => 'applications/auth/controller/config/PhabricatorAuthEditController.php',
     'PhabricatorAuthLinkController' => 'applications/auth/controller/PhabricatorAuthLinkController.php',
     'PhabricatorAuthListController' => 'applications/auth/controller/config/PhabricatorAuthListController.php',
     'PhabricatorAuthLoginController' => 'applications/auth/controller/PhabricatorAuthLoginController.php',
@@ -825,6 +826,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthProvider' => 'applications/auth/provider/PhabricatorAuthProvider.php',
     'PhabricatorAuthProviderConfig' => 'applications/auth/storage/PhabricatorAuthProviderConfig.php',
     'PhabricatorAuthProviderConfigController' => 'applications/auth/controller/config/PhabricatorAuthProviderConfigController.php',
+    'PhabricatorAuthProviderConfigEditor' => 'applications/auth/editor/PhabricatorAuthProviderConfigEditor.php',
     'PhabricatorAuthProviderConfigQuery' => 'applications/auth/query/PhabricatorAuthProviderConfigQuery.php',
     'PhabricatorAuthProviderConfigSearchEngine' => 'applications/auth/query/PhabricatorAuthProviderConfigSearchEngine.php',
     'PhabricatorAuthProviderConfigTransaction' => 'applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php',
@@ -2692,6 +2694,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthConfirmLinkController' => 'PhabricatorAuthController',
     'PhabricatorAuthController' => 'PhabricatorController',
     'PhabricatorAuthDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorAuthEditController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthLinkController' => 'PhabricatorAuthController',
     'PhabricatorAuthListController' =>
     array(
@@ -2706,6 +2709,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'PhabricatorAuthProviderConfigController' => 'PhabricatorAuthController',
+    'PhabricatorAuthProviderConfigEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorAuthProviderConfigQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorAuthProviderConfigSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorAuthProviderConfigTransaction' => 'PhabricatorApplicationTransaction',

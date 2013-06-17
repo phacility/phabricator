@@ -5,6 +5,7 @@ final class PhabricatorAuthProviderConfigQuery
 
   private $ids;
   private $phids;
+  private $providerClasses;
 
   const STATUS_ALL = 'status:all';
   const STATUS_ENABLED = 'status:enabled';
@@ -23,6 +24,11 @@ final class PhabricatorAuthProviderConfigQuery
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withProviderClasses(array $classes) {
+    $this->providerClasses = $classes;
     return $this;
   }
 
@@ -63,6 +69,13 @@ final class PhabricatorAuthProviderConfigQuery
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->providerClasses) {
+      $where[] = qsprintf(
+        $conn_r,
+        'providerClass IN (%Ls)',
+        $this->providerClasses);
     }
 
     $status = $this->status;

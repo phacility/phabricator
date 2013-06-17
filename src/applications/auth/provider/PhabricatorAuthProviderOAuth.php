@@ -8,7 +8,6 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
   abstract protected function getOAuthClientSecret();
   abstract protected function newOAuthAdapter();
 
-
   public function getDescriptionForCreate() {
     return pht('Configure %s OAuth.', $this->getProviderName());
   }
@@ -169,6 +168,37 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     }
 
     return array($this->loadOrCreateAccount($account_id), $response);
+  }
+
+  public function extendEditForm(
+    AphrontFormView $form) {
+
+    $v_id = $this->getOAuthClientID();
+
+    $secret = $this->getOAuthClientSecret();
+    if ($secret) {
+      $v_secret = str_repeat('*', strlen($secret->openEnvelope()));
+    } else {
+      $v_secret = '';
+    }
+
+    $e_id = strlen($v_id) ? null : true;
+    $e_secret = strlen($v_secret) ? null : true;
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('OAuth App ID'))
+          ->setName('oauth:app:id')
+          ->setValue($v_id)
+          ->setError($e_id))
+      ->appendChild(
+        id(new AphrontFormPasswordControl())
+          ->setLabel(pht('OAuth App Secret'))
+          ->setName('oauth:app:secret')
+          ->setValue($v_secret)
+          ->setError($e_secret));
+
   }
 
 }

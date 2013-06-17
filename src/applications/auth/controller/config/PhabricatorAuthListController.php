@@ -26,7 +26,14 @@ final class PhabricatorAuthListController
 
     $list = new PhabricatorObjectItemListView();
     foreach ($configs as $config) {
-      $item = new PHUIListItemView();
+      $item = new PhabricatorObjectItemView();
+
+      $edit_uri = $this->getApplicationURI('config/edit/'.$config->getID().'/');
+
+      // TODO: Needs to be built out.
+      $item
+        ->setHeader($config->getProviderType())
+        ->setHref($edit_uri);
 
       $list->addItem($item);
     }
