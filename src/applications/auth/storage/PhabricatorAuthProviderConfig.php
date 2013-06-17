@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO {
+final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
+  implements PhabricatorPolicyInterface {
 
   protected $phid;
   protected $providerClass;
@@ -37,5 +38,28 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO {
     return $this;
   }
 
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_ADMIN;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
 
 }
