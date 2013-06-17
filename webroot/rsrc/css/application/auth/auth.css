@@ -22,3 +22,21 @@
 .phabricator-link-button {
   text-align: center;
 }
+
+.auth-account-view {
+  border: 1px solid #aaaaaa;
+  background-repeat: no-repeat;
+  background-position: 4px 4px;
+  padding: 4px 4px 4px 62px;
+  min-height: 50px;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.auth-account-view-name {
+  font-weight: bold;
+}
+
+.auth-account-view-provider-name {
+  color: #888888;
+}

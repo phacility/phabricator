@@ -74,6 +74,21 @@ final class PhabricatorSettingsPanelExternalAccounts
           ->setDisabled(!$can_unlink)
           ->setHref('/auth/unlink/'.$account->getProviderKey().'/'));
 
+      $account_view = id(new PhabricatorAuthAccountView())
+        ->setExternalAccount($account);
+
+      if ($provider) {
+        $account_view->setAuthProvider($provider);
+      }
+
+      $item->appendChild(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'mmr mml mst mmb',
+          ),
+          $account_view));
+
       $linked->addItem($item);
     }
 
