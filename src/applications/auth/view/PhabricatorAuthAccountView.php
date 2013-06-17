@@ -95,7 +95,7 @@ final class PhabricatorAuthAccountView extends AphrontView {
     $image_uri = PhabricatorUser::getDefaultProfileImageURI();
     if ($account->getProfileImagePHID()) {
       $image = id(new PhabricatorFileQuery())
-        ->setUser(PhabricatorUser::getOmnipotentUser())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
         ->withPHIDs(array($account->getProfileImagePHID()))
         ->executeOne();
       if ($image) {

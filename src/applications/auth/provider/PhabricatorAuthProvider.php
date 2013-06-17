@@ -150,12 +150,15 @@ abstract class PhabricatorAuthProvider {
       // PhabricatorFile right now. The storage will get shared, so the impact
       // here is negligible.
 
-      $image_uri = $account->getAccountImageURI();
-      $image_file = PhabricatorFile::newFromFileDownload(
-        $image_uri,
-        array(
-          'name' => $name,
-        ));
+      $image_uri = $adapter->getAccountImageURI();
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $image_file = PhabricatorFile::newFromFileDownload(
+          $image_uri,
+          array(
+            'name' => $name,
+          ));
+      unset($unguarded);
 
       $account->setProfileImagePHID($image_file->getPHID());
     } catch (Exception $ex) {
