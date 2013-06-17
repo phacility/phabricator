@@ -2,6 +2,21 @@
 
 abstract class PhabricatorAuthProvider {
 
+  private $providerConfig;
+
+  public function attachProviderConfig(PhabricatorAuthProviderConfig $config) {
+    $this->providerConfig = $config;
+    return $this;
+  }
+
+  public function getProviderConfig() {
+    if ($this->config === null) {
+      throw new Exception(
+        "Call attachProviderConfig() before getProviderConfig()!");
+    }
+    return $this->config;
+  }
+
   public function getNameForCreate() {
     return $this->getProviderName();
   }

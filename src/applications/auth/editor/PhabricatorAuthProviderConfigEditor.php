@@ -21,13 +21,17 @@ final class PhabricatorAuthProviderConfigEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:
-        return $object->getIsEnabled();
+        if ($object->getIsEnabled() === null) {
+          return null;
+        } else {
+          return (int)$object->getIsEnabled();
+        }
       case PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION:
-        return $object->getShouldAllowRegistration();
+        return (int)$object->getShouldAllowRegistration();
       case PhabricatorAuthProviderConfigTransaction::TYPE_LINK:
-        return $object->getShouldAllowLink();
+        return (int)$object->getShouldAllowLink();
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
-        return $object->getShouldAllowUnlink();
+        return (int)$object->getShouldAllowUnlink();
       case PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY:
         // TODO
         throw new Exception("TODO");
@@ -51,7 +55,6 @@ final class PhabricatorAuthProviderConfigEditor
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-
     $v = $xaction->getNewValue();
     switch ($xaction->getTransactionType()) {
       case PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE:

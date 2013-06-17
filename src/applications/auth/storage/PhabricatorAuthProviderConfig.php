@@ -7,13 +7,15 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
   protected $providerType;
   protected $providerDomain;
 
-  protected $isEnabled                = 0;
+  protected $isEnabled;
   protected $shouldAllowLogin         = 0;
   protected $shouldAllowRegistration  = 0;
   protected $shouldAllowLink          = 0;
   protected $shouldAllowUnlink        = 0;
 
   protected $properties = array();
+
+  private $provider;
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
@@ -36,6 +38,23 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
+  }
+
+  public function getProvider() {
+    if (!$this->provider) {
+      $base = PhabricatorAuthProvider::getAllBaseProviders();
+      $found = null;
+      foreach ($base as $provider) {
+        if (get_class($provider) == $this->providerClass) {
+          $found = $provider;
+          break;
+        }
+      }
+      if ($found) {
+        $this->provider = id(clone $found)->attachProviderConfig($this);
+      }
+    }
+    return $this->provider;
   }
 
 

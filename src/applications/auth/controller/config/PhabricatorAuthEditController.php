@@ -15,7 +15,6 @@ final class PhabricatorAuthEditController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $provider = null;
     if ($this->configID) {
       $config = id(new PhabricatorAuthProviderConfigQuery())
         ->setViewer($viewer)
@@ -27,6 +26,11 @@ final class PhabricatorAuthEditController
         ->withIDs(array($this->configID))
         ->executeOne();
       if (!$config) {
+        return new Aphront404Response();
+      }
+
+      $provider = $config->getProvider();
+      if (!$provider) {
         return new Aphront404Response();
       }
 
@@ -88,17 +92,17 @@ final class PhabricatorAuthEditController
       $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
         ->setTransactionType(
           PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION)
-        ->setNewValue($request->getInt('allowRegistration'));
+        ->setNewValue($request->getInt('allowRegistration', 0));
 
       $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
         ->setTransactionType(
           PhabricatorAuthProviderConfigTransaction::TYPE_LINK)
-        ->setNewValue($request->getInt('allowLink'));
+        ->setNewValue($request->getInt('allowLink', 0));
 
       $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
         ->setTransactionType(
           PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK)
-        ->setNewValue($request->getInt('allowUnlink'));
+        ->setNewValue($request->getInt('allowUnlink', 0));
 
       if (!$errors) {
         $editor = id(new PhabricatorAuthProviderConfigEditor())
@@ -199,8 +203,14 @@ final class PhabricatorAuthEditController
 
     $xaction_view = null;
     if (!$is_new) {
-      $xactions = id(new PhabricatorAuthProviderConfigTransactionQuery());
-      // TOOD: ...
+      $xactions = id(new PhabricatorAuthProviderConfigTransactionQuery())
+        ->withObjectPHIDs(array($config->getPHID()))
+        ->setViewer($viewer)
+        ->execute();
+
+      $xaction_view = id(new PhabricatorApplicationTransactionView())
+        ->setUser($viewer)
+        ->setTransactions($xactions);
     }
 
     return $this->buildApplicationPage(
@@ -208,7 +218,7 @@ final class PhabricatorAuthEditController
         $crumbs,
         $errors,
         $form,
-        $xaction_view
+        $xaction_view,
       ),
       array(
         'title' => $title,
