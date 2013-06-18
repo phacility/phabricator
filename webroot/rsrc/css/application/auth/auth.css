@@ -4,7 +4,7 @@
 
 .phabricator-login-buttons {
   max-width: 508px;
-  margin: auto;
+  margin: 16px auto;
 }
 
 .phabricator-login-buttons .phabricator-login-button .button {

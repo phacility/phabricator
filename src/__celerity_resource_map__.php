@@ -923,7 +923,7 @@ celerity_register_resource_map(array(
   ),
   'auth-css' =>
   array(
-    'uri' => '/res/911e97cb/rsrc/css/application/auth/auth.css',
+    'uri' => '/res/751cacaa/rsrc/css/application/auth/auth.css',
     'type' => 'css',
     'requires' =>
     array(
