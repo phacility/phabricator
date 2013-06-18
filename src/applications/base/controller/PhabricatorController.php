@@ -224,6 +224,7 @@ abstract class PhabricatorController extends AphrontController {
         $view->appendChild(hsprintf(
           '<div style="padding: 2em 0;">%s</div>',
           $response->buildResponseString()));
+        $view->setDust(true);
         $response = new AphrontWebpageResponse();
         $response->setContent($view->render());
         return $response;

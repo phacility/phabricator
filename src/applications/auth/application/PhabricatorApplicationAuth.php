@@ -21,12 +21,13 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     $items = array();
 
     if ($user->isLoggedIn()) {
-      $item = new PHUIListItemView();
-      $item->setName(pht('Log Out'));
-      $item->setIcon('power');
-      $item->setWorkflow(true);
-      $item->setHref('/logout/');
-      $item->setSelected(($controller instanceof PhabricatorLogoutController));
+      $item = id(new PHUIListItemView())
+        ->addClass('core-menu-item')
+        ->setName(pht('Log Out'))
+        ->setIcon('power')
+        ->setWorkflow(true)
+        ->setHref('/logout/')
+        ->setSelected(($controller instanceof PhabricatorLogoutController));
       $items[] = $item;
     }
 
