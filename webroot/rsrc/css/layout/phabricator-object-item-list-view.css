@@ -294,43 +294,43 @@
 */
 
 .phabricator-object-item-bar-color-red {
-  border-left-color: #cc0000;
+  border-left-color: #c0392b;
 }
 
 .phabricator-object-item-bar-color-orange {
-  border-left-color: #cc7300;
+  border-left-color: #e67e22;
 }
 
 .phabricator-object-item-bar-color-yellow {
-  border-left-color: #ccc000;
+  border-left-color: #f1c40f;
 }
 
 .phabricator-object-item-bar-color-green {
-  border-left-color: #009b2d;
+  border-left-color: #27ae60;
 }
 
 .phabricator-object-item-bar-color-sky {
-  border-left-color: #6498cf;
+  border-left-color: #3498db;
 }
 
 .phabricator-object-item-bar-color-blue {
-  border-left-color: #00659a;
+  border-left-color: #2980b9;
 }
 
-.phabricator-object-item-bar-color-indigo {
+.phabricator-object-item-bar-color-indigo { /* TODO */
   border-left-color: #3a00cc;
 }
 
 .phabricator-object-item-bar-color-violet {
-  border-left-color: #67009b;
+  border-left-color: #8e44ad;
 }
 
 .phabricator-object-item-bar-color-magenta {
-  border-left-color: #cc00c0;
+  border-left-color: #cB4d9f;
 }
 
 .phabricator-object-item-bar-color-grey {
-  border-left-color: #999999;
+  border-left-color: #7f8cbd;
 }
 
 .phabricator-object-item-bar-color-black {
