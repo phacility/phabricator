@@ -3,12 +3,12 @@
  */
 
 .phabricator-login-buttons {
-  max-width: 450px;
+  max-width: 508px;
   margin: auto;
 }
 
 .phabricator-login-buttons .phabricator-login-button .button {
-  width: 216px;
+  width: 246px;
 }
 
 .device-desktop .phabricator-login-buttons .aphront-multi-column-column-last {
