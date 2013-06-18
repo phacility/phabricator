@@ -9,6 +9,19 @@ final class PhabricatorAuthProviderConfigTransaction
   const TYPE_UNLINK         = 'config:unlink';
   const TYPE_PROPERTY       = 'config:property';
 
+  const PROPERTY_KEY        = 'auth:property';
+
+  private $provider;
+
+  public function setProvider(PhabricatorAuthProvider $provider) {
+    $this->provider = $provider;
+    return $this;
+  }
+
+  public function getProvider() {
+    return $this->provider;
+  }
+
   public function getApplicationName() {
     return 'auth';
   }
@@ -113,7 +126,14 @@ final class PhabricatorAuthProviderConfigTransaction
         }
         break;
       case self::TYPE_PROPERTY:
-        // TODO
+        $provider = $this->getProvider();
+        if ($provider) {
+          $title = $provider->renderConfigPropertyTransactionTitle($this);
+          if (strlen($title)) {
+            return $title;
+          }
+        }
+
         return pht(
           '%s edited a property of this provider.',
           $this->renderHandleLink($author_phid));

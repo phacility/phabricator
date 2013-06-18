@@ -125,11 +125,6 @@ abstract class PhabricatorAuthProvider {
     throw new Exception("Not implemented!");
   }
 
-  public function extendEditForm(AphrontFormView $form) {
-
-  }
-
-
   public function createProviders() {
     return array($this);
   }
@@ -256,6 +251,38 @@ abstract class PhabricatorAuthProvider {
 
   public function isLoginFormAButton() {
     return false;
+  }
+
+  public function renderConfigPropertyTransactionTitle(
+    PhabricatorAuthProviderConfigTransaction $xaction) {
+
+    return null;
+  }
+
+  public function readFormValuesFromProvider() {
+    return array();
+  }
+
+  public function readFormValuesFromRequest(AphrontRequest $request) {
+    return array();
+  }
+
+  public function processEditForm(
+    AphrontRequest $request,
+    array $values) {
+
+    $errors = array();
+    $issues = array();
+
+    return array($errors, $issues, $values);
+  }
+
+  public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues) {
+    return;
   }
 
 }

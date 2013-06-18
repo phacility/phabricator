@@ -170,35 +170,127 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return array($this->loadOrCreateAccount($account_id), $response);
   }
 
-  public function extendEditForm(
-    AphrontFormView $form) {
+  const PROPERTY_APP_ID = 'oauth:app:id';
+  const PROPERTY_APP_SECRET = 'oauth:app:secret';
 
-    $v_id = $this->getOAuthClientID();
-
+  public function readFormValuesFromProvider() {
     $secret = $this->getOAuthClientSecret();
     if ($secret) {
-      $v_secret = str_repeat('*', strlen($secret->openEnvelope()));
-    } else {
-      $v_secret = '';
+      $secret = $secret->openEnvelope();
     }
 
-    $e_id = strlen($v_id) ? null : true;
-    $e_secret = strlen($v_secret) ? null : true;
+    return array(
+      self::PROPERTY_APP_ID     => $this->getOAuthClientID(),
+      self::PROPERTY_APP_SECRET => $secret,
+    );
+  }
+
+  public function readFormValuesFromRequest(AphrontRequest $request) {
+    return array(
+      self::PROPERTY_APP_ID     => $request->getStr(self::PROPERTY_APP_ID),
+      self::PROPERTY_APP_SECRET => $request->getStr(self::PROPERTY_APP_SECRET),
+    );
+  }
+
+  public function processEditForm(
+    AphrontRequest $request,
+    array $values) {
+    $errors = array();
+    $issues = array();
+
+    $key_id = self::PROPERTY_APP_ID;
+    $key_secret = self::PROPERTY_APP_SECRET;
+
+    if (!strlen($values[$key_id])) {
+      $errors[] = pht('Application ID is required.');
+      $issues[$key_id] = pht('Required');
+    }
+
+    if (!strlen($values[$key_secret])) {
+      $errors[] = pht('Application secret is required.');
+      $issues[$key_id] = pht('Required');
+    }
+
+    // If the user has not changed the secret, don't update it (that is,
+    // don't cause a bunch of "****" to be written to the database).
+    if (preg_match('/^[*]+$/', $values[$key_secret])) {
+      unset($values[$key_secret]);
+    }
+
+    return array($errors, $issues, $values);
+  }
+
+  public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues) {
+
+    $key_id = self::PROPERTY_APP_ID;
+    $key_secret = self::PROPERTY_APP_SECRET;
+
+    $v_id = $values[$key_id];
+    $v_secret = $values[$key_secret];
+    if ($v_secret) {
+      $v_secret = str_repeat('*', strlen($v_secret));
+    }
+
+    $e_id = idx($issues, $key_id, $request->isFormPost() ? null : true);
+    $e_secret = idx($issues, $key_secret, $request->isFormPost() ? null : true);
 
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('OAuth App ID'))
-          ->setName('oauth:app:id')
+          ->setName($key_id)
           ->setValue($v_id)
           ->setError($e_id))
       ->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel(pht('OAuth App Secret'))
-          ->setName('oauth:app:secret')
+          ->setName($key_secret)
           ->setValue($v_secret)
           ->setError($e_secret));
+  }
 
+  public function renderConfigPropertyTransactionTitle(
+    PhabricatorAuthProviderConfigTransaction $xaction) {
+
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+    $key = $xaction->getMetadataValue(
+      PhabricatorAuthProviderConfigTransaction::PROPERTY_KEY);
+
+    switch ($key) {
+      case self::PROPERTY_APP_ID:
+        if (strlen($old)) {
+          return pht(
+            '%s updated the OAuth application ID for this provider from '.
+            '"%s" to "%s".',
+            $xaction->renderHandleLink($author_phid),
+            $old,
+            $new);
+        } else {
+          return pht(
+            '%s set the OAuth application ID for this provider to '.
+            '"%s".',
+            $xaction->renderHandleLink($author_phid),
+            $new);
+        }
+      case self::PROPERTY_APP_SECRET:
+        if (strlen($old)) {
+          return pht(
+            '%s updated the OAuth application secret for this provider.',
+            $xaction->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s set the OAuth application seceret for this provider.',
+            $xaction->renderHandleLink($author_phid));
+        }
+    }
+
+    return parent::renderConfigPropertyTransactionTitle($xaction);
   }
 
 }

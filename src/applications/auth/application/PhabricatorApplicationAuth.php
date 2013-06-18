@@ -10,6 +10,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return '/auth/';
   }
 
+  public function getIconName() {
+    return 'authentication';
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {

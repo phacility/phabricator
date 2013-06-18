@@ -77,34 +77,48 @@ final class PhabricatorAuthEditController
     $v_unlink = $config->getShouldAllowUnlink();
 
     if ($request->isFormPost()) {
+
+      $properties = $provider->readFormValuesFromRequest($request);
+      list($errors, $issues, $properties) = $provider->processEditForm(
+        $request,
+        $properties);
+
       $xactions = array();
 
-      if ($is_new) {
+      if (!$errors) {
+        if ($is_new) {
+          $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
+            ->setTransactionType(
+              PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE)
+            ->setNewValue(1);
+
+          $config->setProviderType($provider->getProviderType());
+          $config->setProviderDomain($provider->getProviderDomain());
+        }
+
         $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
           ->setTransactionType(
-            PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE)
-          ->setNewValue(1);
+            PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION)
+          ->setNewValue($request->getInt('allowRegistration', 0));
 
-        $config->setProviderType($provider->getProviderType());
-        $config->setProviderDomain($provider->getProviderDomain());
-      }
+        $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
+          ->setTransactionType(
+            PhabricatorAuthProviderConfigTransaction::TYPE_LINK)
+          ->setNewValue($request->getInt('allowLink', 0));
 
-      $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
-        ->setTransactionType(
-          PhabricatorAuthProviderConfigTransaction::TYPE_REGISTRATION)
-        ->setNewValue($request->getInt('allowRegistration', 0));
+        $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
+          ->setTransactionType(
+            PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK)
+          ->setNewValue($request->getInt('allowUnlink', 0));
 
-      $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
-        ->setTransactionType(
-          PhabricatorAuthProviderConfigTransaction::TYPE_LINK)
-        ->setNewValue($request->getInt('allowLink', 0));
+        foreach ($properties as $key => $value) {
+          $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
+            ->setTransactionType(
+              PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY)
+            ->setMetadataValue('auth:property', $key)
+            ->setNewValue($value);
+        }
 
-      $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
-        ->setTransactionType(
-          PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK)
-        ->setNewValue($request->getInt('allowUnlink', 0));
-
-      if (!$errors) {
         $editor = id(new PhabricatorAuthProviderConfigEditor())
           ->setActor($viewer)
           ->setContentSourceFromRequest($request)
@@ -114,6 +128,9 @@ final class PhabricatorAuthEditController
         return id(new AphrontRedirectResponse())->setURI(
           $this->getApplicationURI());
       }
+    } else {
+      $properties = $provider->readFormValuesFromProvider();
+      $issues = array();
     }
 
     if ($errors) {
@@ -204,7 +221,7 @@ final class PhabricatorAuthEditController
             $str_unlink,
             $v_unlink));
 
-    $provider->extendEditForm($form);
+    $provider->extendEditForm($request, $form, $properties, $issues);
 
     $form
       ->appendChild(
@@ -223,6 +240,10 @@ final class PhabricatorAuthEditController
         ->withObjectPHIDs(array($config->getPHID()))
         ->setViewer($viewer)
         ->execute();
+
+      foreach ($xactions as $xaction) {
+        $xaction->setProvider($provider);
+      }
 
       $xaction_view = id(new PhabricatorApplicationTransactionView())
         ->setUser($viewer)
