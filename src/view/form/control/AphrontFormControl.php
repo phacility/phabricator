@@ -199,10 +199,14 @@ abstract class AphrontFormControl extends AphrontView {
       $caption = null;
     }
 
+    $classes = array();
+    $classes[] = 'aphront-form-control';
+    $classes[] = $custom_class;
+
     return phutil_tag(
       'div',
       array(
-        'class' => "aphront-form-control {$custom_class}",
+        'class' => implode(' ', $classes),
         'id' => $this->controlID,
         'style' => $this->controlStyle,
       ),

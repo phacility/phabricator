@@ -6,8 +6,13 @@
  * These styles are overrides for .aphront-form-view
  */
 .aphront-form-view-shaded {
-  border: 1px solid #d4dae0;
+  border-top: 1px solid #d4dae0;
+  border-bottom: 1px solid #d4dae0;
   background: #f4f5f8;
+}
+
+.aphront-panel-width-form .aphront-form-view-shaded {
+  border: 1px solid #d4dae0;
 }
 
 .aphront-form-view-padded {
@@ -28,7 +33,6 @@
 .device-phone .aphront-form-view label.aphront-form-label,
 .aphront-form-full-width.aphront-form-view label.aphront-form-label {
   display: block;
-  float: none;
   text-align: left;
   width: 100%;
   margin-bottom: 3px;
@@ -50,7 +54,7 @@
 .aphront-form-error {
   width: 18%;
   float: right;
-  color: #aa0000;
+  color: #c13728;
   font-weight: bold;
   padding-top: 4px;
 }

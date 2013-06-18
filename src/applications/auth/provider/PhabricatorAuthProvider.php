@@ -180,28 +180,33 @@ abstract class PhabricatorAuthProvider {
     $account->setEmail($adapter->getAccountEmail());
     $account->setAccountURI($adapter->getAccountURI());
 
-    try {
-      $name = PhabricatorSlug::normalize($this->getProviderName());
-      $name = $name.'-profile.jpg';
+    $account->setProfileImagePHID(null);
+    $image_uri = $adapter->getAccountImageURI();
+    if ($image_uri) {
+      try {
+        $name = PhabricatorSlug::normalize($this->getProviderName());
+        $name = $name.'-profile.jpg';
 
-      // TODO: If the image has not changed, we do not need to make a new
-      // file entry for it, but there's no convenient way to do this with
-      // PhabricatorFile right now. The storage will get shared, so the impact
-      // here is negligible.
+        // TODO: If the image has not changed, we do not need to make a new
+        // file entry for it, but there's no convenient way to do this with
+        // PhabricatorFile right now. The storage will get shared, so the impact
+        // here is negligible.
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+          $image_file = PhabricatorFile::newFromFileDownload(
+            $image_uri,
+            array(
+              'name' => $name,
+            ));
+        unset($unguarded);
 
-      $image_uri = $adapter->getAccountImageURI();
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $image_file = PhabricatorFile::newFromFileDownload(
-          $image_uri,
-          array(
-            'name' => $name,
-          ));
-      unset($unguarded);
-
-      $account->setProfileImagePHID($image_file->getPHID());
-    } catch (Exception $ex) {
-      $account->setProfileImagePHID(null);
+        if ($image_file) {
+          $account->setProfileImagePHID($image_file->getPHID());
+        }
+      } catch (Exception $ex) {
+        // Log this but proceed, it's not especially important that we
+        // be able to pull profile images.
+        phlog($ex);
+      }
     }
 
     $this->willSaveAccount($account);

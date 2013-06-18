@@ -104,6 +104,8 @@ final class PhabricatorSettingsPanelExternalAccounts
         pht('Your account is linked with all available providers.'));
 
     $accounts = mpull($accounts, null, 'getProviderKey');
+
+    $providers = PhabricatorAuthProvider::getAllEnabledProviders();
     $providers = msort($providers, 'getProviderName');
     foreach ($providers as $key => $provider) {
       if (isset($accounts[$key])) {
