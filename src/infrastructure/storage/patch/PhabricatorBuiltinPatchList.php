@@ -191,6 +191,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'diviner',
       ),
+      'db.auth' => array(
+        'type' => 'db',
+        'name' => 'auth',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1353,6 +1357,22 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130606.userxactions.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20130606.userxactions.sql'),
+      ),
+      '20130607.xaccount.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130607.xaccount.sql'),
+      ),
+      '20130611.migrateoauth.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130611.migrateoauth.php'),
+      ),
+      '20130611.nukeldap.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130611.nukeldap.php'),
+      ),
+      '20130613.authdb.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130613.authdb.sql'),
       ),
     );
   }

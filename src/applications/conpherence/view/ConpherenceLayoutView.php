@@ -172,7 +172,7 @@ final class ConpherenceLayoutView extends AphrontView {
                   'a',
                   array(
                     'href' => '/conpherence/new/',
-                    'class' => 'button',
+                    'class' => 'button grey',
                     'sigil' => 'workflow',
                   ),
                   pht('Send a Message'))

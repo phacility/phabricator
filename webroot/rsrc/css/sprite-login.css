@@ -18,62 +18,62 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 
-.login_Amazon {
+.login-Amazon {
   background-position: 0px 0px;
 }
 
-.login_Asana {
+.login-Asana {
   background-position: -35px 0px;
 }
 
-.login_Disqus {
+.login-Disqus {
   background-position: -70px 0px;
 }
 
-.login_Dropbox {
+.login-Dropbox {
   background-position: -105px 0px;
 }
 
-.login_Facebook {
+.login-Facebook {
   background-position: 0px -35px;
 }
 
-.login_Generic {
+.login-Generic {
   background-position: -35px -35px;
 }
 
-.login_Github {
+.login-Github {
   background-position: -70px -35px;
 }
 
-.login_Google {
+.login-Google {
   background-position: -105px -35px;
 }
 
-.login_HTTP {
+.login-HTTP {
   background-position: 0px -70px;
 }
 
-.login_LDAP {
+.login-LDAP {
   background-position: -35px -70px;
 }
 
-.login_Linkedin {
+.login-Linkedin {
   background-position: -70px -70px;
 }
 
-.login_Openid {
+.login-Openid {
   background-position: -105px -70px;
 }
 
-.login_Phabricator {
+.login-Phabricator {
   background-position: 0px -105px;
 }
 
-.login_Twitter {
+.login-Twitter {
   background-position: -35px -105px;
 }
 
-.login_Yahoo {
+.login-Yahoo {
   background-position: -70px -105px;
 }

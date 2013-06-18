@@ -30,7 +30,6 @@
 
 .loading .widgets-loading-mask {
   display: block;
-  z-index: 500;
 }
 
 .conpherence-widget-pane .aphront-form-input {

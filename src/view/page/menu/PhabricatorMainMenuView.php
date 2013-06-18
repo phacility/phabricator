@@ -146,11 +146,9 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $actions = array();
     foreach ($applications as $application) {
-      if ($application->shouldAppearInLaunchView()) {
-        $app_actions = $application->buildMainMenuItems($user, $controller);
-        foreach ($app_actions as $action) {
-          $actions[] = $action;
-        }
+      $app_actions = $application->buildMainMenuItems($user, $controller);
+      foreach ($app_actions as $action) {
+        $actions[] = $action;
       }
     }
 
@@ -179,15 +177,6 @@ final class PhabricatorMainMenuView extends AphrontView {
         }
         $view->addMenuItem($action);
       }
-    }
-
-    if ($user->isLoggedIn()) {
-      $view->addMenuItem(
-        id(new PHUIListItemView())
-          ->addClass('core-menu-item')
-          ->setName(pht('Log Out'))
-          ->setHref('/logout/')
-          ->appendChild($this->renderMenuIcon('power-light-large')));
     }
 
     return $view;

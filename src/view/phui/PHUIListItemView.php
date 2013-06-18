@@ -18,6 +18,7 @@ final class PHUIListItemView extends AphrontTagView {
   private $icon;
   private $selected;
   private $containerAttrs;
+  private $disabled;
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -104,6 +105,15 @@ final class PHUIListItemView extends AphrontTagView {
     );
   }
 
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function getDisabled() {
+    return $this->disabled;
+  }
+
   protected function getTagContent() {
     $name = null;
     $icon = null;
@@ -126,10 +136,15 @@ final class PHUIListItemView extends AphrontTagView {
     }
 
     if ($this->icon) {
+      $icon_name = $this->icon;
+      if ($this->getDisabled()) {
+        $icon_name .= '-grey';
+      }
+
       $icon = id(new PHUIIconView())
         ->addClass('phui-list-item-icon')
         ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon($this->icon);
+        ->setSpriteIcon($icon_name);
     }
 
     return phutil_tag(

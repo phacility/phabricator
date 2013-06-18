@@ -303,18 +303,11 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     }
 
     $user->openTransaction();
-      $ldaps = id(new PhabricatorUserLDAPInfo())->loadAllWhere(
-        'userID = %d',
-        $user->getID());
-      foreach ($ldaps as $ldap) {
-        $ldap->delete();
-      }
-
-      $oauths = id(new PhabricatorUserOAuthInfo())->loadAllWhere(
-        'userID = %d',
-        $user->getID());
-      foreach ($oauths as $oauth) {
-        $oauth->delete();
+      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
+        'userPHID = %s',
+        $user->getPHID());
+      foreach ($externals as $external) {
+        $external->delete();
       }
 
       $prefs = id(new PhabricatorUserPreferences())->loadAllWhere(

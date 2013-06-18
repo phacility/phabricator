@@ -144,9 +144,12 @@ final class DiffusionCommitQuery
             }
             $sql[] = qsprintf(
               $conn_r,
-              '(repositoryID = %d AND commitIdentifier = %d)',
+              '(repositoryID = %d AND commitIdentifier = %s)',
               $repo->getID(),
-              $ref['identifier']);
+              // NOTE: Because the 'commitIdentifier' column is a string, MySQL
+              // ignores the index if we hand it an integer. Hand it a string.
+              // See T3377.
+              (int)$ref['identifier']);
           } else {
             if (strlen($ref['identifier']) < $min_qualified) {
               continue;

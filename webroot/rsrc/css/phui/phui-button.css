@@ -1,5 +1,5 @@
 /**
- * @provides phabricator-core-buttons-css
+ * @provides phui-button-css
  */
 
 
@@ -223,4 +223,41 @@ a.toggle-fixed {
 
 .grey.dropdown .caret {
   border-top-color: #000;
+}
+
+/* Icons */
+.button.has-icon {
+  position: relative;
+}
+
+.button .phui-icon-view {
+  display: inline-block;
+  position: absolute;
+  top: 5px;
+  left: 8px;
+}
+
+.button.has_icon .phui-button-text {
+  margin-left: 16px;
+}
+
+/* Login Buttons */
+
+.button.big.has-icon {
+  padding: 6px 20px 6px 12px;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.button.big.has-icon .phui-button-text {
+  margin-left: 36px;
+  font-size: 14px;
+  display: block;
+}
+
+.button.big.has-icon .phui-button-subtext {
+  color: #888;
+  font-size: 12px;
+  line-height: 15px;
+  font-weight: normal;
 }

@@ -7,7 +7,6 @@ final class PhabricatorOAuthLoginController
   private $userID;
 
   private $accessToken;
-  private $tokenExpires;
   private $oauthState;
 
   public function shouldRequireLogin() {
@@ -90,9 +89,8 @@ final class PhabricatorOAuthLoginController
         }
       }
 
-      $existing_oauth = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-        'userID = %d AND oauthProvider = %s',
-        $current_user->getID(),
+      $existing_oauth = PhabricatorUserOAuthInfo::loadOneByUserAndProviderKey(
+        $current_user,
         $provider_key);
 
       if ($existing_oauth) {
@@ -121,9 +119,7 @@ final class PhabricatorOAuthLoginController
           'Link your %s account to your Phabricator account?',
           $provider_name)));
         $dialog->addHiddenInput('confirm_token', $provider->getAccessToken());
-        $dialog->addHiddenInput('expires', $oauth_info->getTokenExpires());
         $dialog->addHiddenInput('state', $this->oauthState);
-        $dialog->addHiddenInput('scope', $oauth_info->getTokenScope());
         $dialog->addSubmitButton('Link Accounts');
         $dialog->addCancelButton($provider->getSettingsPanelURI());
 
@@ -150,20 +146,9 @@ final class PhabricatorOAuthLoginController
         $oauth_info,
         $provider);
 
-      $session_key = $known_user->establishSession('web');
-
       $this->saveOAuthInfo($oauth_info);
 
-      $request->setCookie('phusr', $known_user->getUsername());
-      $request->setCookie('phsid', $session_key);
-
-      $uri = new PhutilURI('/login/validate/');
-      $uri->setQueryParams(
-        array(
-          'phusr' => $known_user->getUsername(),
-        ));
-
-      return id(new AphrontRedirectResponse())->setURI((string)$uri);
+      return $this->loginUser($known_user);
     }
 
     $oauth_email = $provider->retrieveUserEmail();
@@ -183,25 +168,6 @@ final class PhabricatorOAuthLoginController
             'accounts, log in to your Phabricator account and then go to '.
             'Settings.',
             $provider_name)));
-
-        $user = id(new PhabricatorUser())
-          ->loadOneWhere('phid = %s', $known_email->getUserPHID());
-        $oauth_infos = id(new PhabricatorUserOAuthInfo())
-          ->loadAllWhere('userID = %d', $user->getID());
-        if ($oauth_infos) {
-          $providers = array();
-          foreach ($oauth_infos as $info) {
-            $provider = $info->getOAuthProvider();
-            $providers[] = PhabricatorOAuthProvider::newProvider($provider)
-              ->getProviderName();
-          }
-          $dialog->appendChild(phutil_tag(
-            'p',
-            array(),
-            pht(
-              'The account is associated with: %s.',
-              implode(', ', $providers))));
-        }
 
         $dialog->addCancelButton('/login/');
 
@@ -262,7 +228,6 @@ final class PhabricatorOAuthLoginController
 
     $token = $request->getStr('confirm_token');
     if ($token) {
-      $this->tokenExpires = $request->getInt('expires');
       $this->accessToken  = $token;
       $this->oauthState   = $request->getStr('state');
       return null;
@@ -295,7 +260,6 @@ final class PhabricatorOAuthLoginController
       return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
     }
 
-    $this->tokenExpires = $provider->getTokenExpiryFromArray($data);
     $this->accessToken  = $token;
     $this->oauthState   = $request->getStr('state');
 
@@ -304,40 +268,20 @@ final class PhabricatorOAuthLoginController
 
   private function retrieveOAuthInfo(PhabricatorOAuthProvider $provider) {
 
-    $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-      'oauthProvider = %s and oauthUID = %s',
+    $oauth_info = PhabricatorUserOAuthInfo::loadOneByProviderKeyAndAccountID(
       $provider->getProviderKey(),
       $provider->retrieveUserID());
 
-    $scope = $this->getRequest()->getStr('scope');
-
     if (!$oauth_info) {
-      $oauth_info = new PhabricatorUserOAuthInfo();
+      $oauth_info = new PhabricatorUserOAuthInfo(
+        new PhabricatorExternalAccount());
       $oauth_info->setOAuthProvider($provider->getProviderKey());
       $oauth_info->setOAuthUID($provider->retrieveUserID());
-      // some providers don't tell you what scope you got, so default
-      // to the minimum Phabricator requires rather than assuming no scope
-      if (!$scope) {
-        $scope = $provider->getMinimumScope();
-      }
     }
 
     $oauth_info->setAccountURI($provider->retrieveUserAccountURI());
     $oauth_info->setAccountName($provider->retrieveUserAccountName());
     $oauth_info->setToken($provider->getAccessToken());
-    $oauth_info->setTokenStatus(PhabricatorUserOAuthInfo::TOKEN_STATUS_GOOD);
-    $oauth_info->setTokenScope($scope);
-
-    // If we have out-of-date expiration info, just clear it out. Then replace
-    // it with good info if the provider gave it to us.
-    $expires = $oauth_info->getTokenExpires();
-    if ($expires <= time()) {
-      $expires = null;
-    }
-    if ($this->tokenExpires) {
-      $expires = $this->tokenExpires;
-    }
-    $oauth_info->setTokenExpires($expires);
 
     return $oauth_info;
   }

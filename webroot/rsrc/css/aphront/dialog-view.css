@@ -3,15 +3,31 @@
  */
 
 .aphront-dialog-view {
-  width: 480px;
-  margin: auto;
+  width: 540px;
+  margin: 32px auto 16px;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.5);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
+
+.device-phone .aphront-dialog-view {
+  margin: 16px;
+  width: auto;
+}
+
+/* The "standalone" dialog (which is delivered over Ajax and appears above
+   an existing page) has a more pronounced shadow than dialogs do when they
+   are embedded in a page. */
+.aphront-dialog-view-standalone {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  margin: auto;
+}
+
 
 .aphront-dialog-head .phabricator-action-header {
   border-bottom: 1px solid #d4dadf;
-  padding: 5px 15px;
+  padding: 4px 16px;
   white-space: nowrap;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
@@ -32,18 +48,22 @@
 
 .aphront-dialog-body {
   background: #ffffff;
-  padding: 20px 15px;
+  padding: 16px;
   border: none;
 }
 
 .aphront-dialog-tail {
   border: none;
   background: #fff;
-  padding: 8px 10px;
+  padding: 8px 16px;
   border-top: 1px solid #d4dadf;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
-  text-align: right;
+}
+
+.aphront-dialog-foot {
+  padding: 6px 0;
+  float: left;
 }
 
 .aphront-dialog-tail button,

@@ -450,8 +450,8 @@ final class CeleritySpriteGenerator {
     $prefix = 'login_';
     foreach ($icons as $icon) {
       $sprite = id(clone $template)
-        ->setName($prefix.$icon)
-        ->setTargetCSS('.'.$prefix.$icon);
+        ->setName('login-'.$icon)
+        ->setTargetCSS('.login-'.$icon);
 
       foreach ($scales as $scale_key => $scale) {
         $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');

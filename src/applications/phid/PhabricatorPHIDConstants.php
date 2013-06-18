@@ -47,6 +47,7 @@ final class PhabricatorPHIDConstants {
 
   const PHID_TYPE_BOOK    = 'BOOK';
   const PHID_TYPE_ATOM    = 'ATOM';
+  const PHID_TYPE_AUTH    = 'AUTH';
 
   const PHID_TYPE_VOID    = 'VOID';
   const PHID_VOID         = 'PHID-VOID-00000000000000000000';

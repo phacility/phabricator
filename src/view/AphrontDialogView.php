@@ -12,6 +12,17 @@ final class AphrontDialogView extends AphrontView {
   private $renderAsForm = true;
   private $formID;
   private $headerColor = PhabricatorActionHeaderView::HEADER_DARK_GREY;
+  private $footers = array();
+  private $isStandalone;
+
+  public function setIsStandalone($is_standalone) {
+    $this->isStandalone = $is_standalone;
+    return $this;
+  }
+
+  public function getIsStandalone() {
+    return $this->isStandalone;
+  }
 
   private $width      = 'default';
   const WIDTH_DEFAULT = 'default';
@@ -48,6 +59,11 @@ final class AphrontDialogView extends AphrontView {
 
     $this->cancelURI = $uri;
     $this->cancelText = $text;
+    return $this;
+  }
+
+  public function addFooter($footer) {
+    $this->footers[] = $footer;
     return $this;
   }
 
@@ -132,6 +148,10 @@ final class AphrontDialogView extends AphrontView {
         throw new Exception("Unknown dialog width '{$this->width}'!");
     }
 
+    if ($this->isStandalone) {
+      $more .= ' aphront-dialog-view-standalone';
+    }
+
     $attributes = array(
       'class'   => 'aphront-dialog-view '.$more,
       'sigil'   => 'jx-dialog',
@@ -171,21 +191,44 @@ final class AphrontDialogView extends AphrontView {
         array_merge($hidden_inputs, $buttons)));
     }
 
-    $buttons[] = phutil_tag('div', array('style' => 'clear: both;'), '');
     $children = $this->renderChildren();
 
     $header = new PhabricatorActionHeaderView();
     $header->setHeaderTitle($this->title);
     $header->setHeaderColor($this->headerColor);
 
-    $content = hsprintf(
-      '%s%s%s',
+    $footer = null;
+    if ($this->footers) {
+      $footer = phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-dialog-foot',
+        ),
+        $this->footers);
+    }
+
+    $content = array(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-dialog-head',
+        ),
+        $header),
       phutil_tag('div',
-        array('class' => 'aphront-dialog-head'), $header),
-      phutil_tag('div',
-        array('class' => 'aphront-dialog-body grouped'), $children),
-      phutil_tag('div',
-        array('class' => 'aphront-dialog-tail'), $buttons));
+        array(
+          'class' => 'aphront-dialog-body grouped',
+        ),
+        $children),
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-dialog-tail grouped',
+        ),
+        array(
+          $buttons,
+          $footer,
+        )),
+    );
 
     if ($this->renderAsForm) {
       return phabricator_form(

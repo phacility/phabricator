@@ -17,7 +17,8 @@
   width: 24px;
 }
 
-.phui-icon-view.sprite-apps {
+.phui-icon-view.sprite-apps,
+.phui-icon-view.sprite-icons {
   height: 14px;
   width: 14px;
 }
@@ -30,6 +31,11 @@
 .phui-icon-view.sprite-payments {
   height: 32px;
   width: 60px;
+}
+
+.phui-icon-view.sprite-login {
+  height: 34px;
+  width: 34px;
 }
 
 .phui-icon-view.phuihead-medium {

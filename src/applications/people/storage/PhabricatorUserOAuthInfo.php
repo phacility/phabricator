@@ -1,54 +1,160 @@
 <?php
 
-final class PhabricatorUserOAuthInfo extends PhabricatorUserDAO {
+final class PhabricatorUserOAuthInfo {
 
-  const TOKEN_STATUS_NONE     = 'none';
-  const TOKEN_STATUS_GOOD     = 'good';
-  const TOKEN_STATUS_FAIL     = 'fail';
-  const TOKEN_STATUS_EXPIRED  = 'xpyr';
+  private $account;
+  private $token;
 
-  protected $userID;
-  protected $oauthProvider;
-  protected $oauthUID;
-
-  protected $accountURI;
-  protected $accountName;
-
-  protected $token;
-  protected $tokenExpires;
-  protected $tokenScope;
-  protected $tokenStatus;
-
-  public function getTokenStatus() {
-    if (!$this->token) {
-      return self::TOKEN_STATUS_NONE;
-    }
-
-    if ($this->tokenExpires && $this->tokenExpires <= time()) {
-      return self::TOKEN_STATUS_EXPIRED;
-    }
-
-    return $this->tokenStatus;
+  public function getID() {
+    return $this->account->getID();
   }
 
-  public static function getReadableTokenStatus($status) {
-    static $map = array(
-      self::TOKEN_STATUS_NONE     => 'No Token',
-      self::TOKEN_STATUS_GOOD     => 'Token Good',
-      self::TOKEN_STATUS_FAIL     => 'Token Failed',
-      self::TOKEN_STATUS_EXPIRED  => 'Token Expired',
-    );
-    return idx($map, $status, 'Unknown');
+  public function setToken($token) {
+    $this->token = $token;
+    return $this;
   }
 
-  public static function getRappableTokenStatus($status) {
-    static $map = array(
-      self::TOKEN_STATUS_NONE     => 'There is no token',
-      self::TOKEN_STATUS_GOOD     => 'Your token is good',
-      self::TOKEN_STATUS_FAIL     => 'Your token has failed',
-      self::TOKEN_STATUS_EXPIRED  => 'Your token is old',
+  public function getToken() {
+    return $this->token;
+  }
+
+  public function __construct(PhabricatorExternalAccount $account) {
+    $this->account = $account;
+  }
+
+  public function setAccountURI($value) {
+    $this->account->setAccountURI($value);
+    return $this;
+  }
+
+  public function getAccountURI() {
+    return $this->account->getAccountURI();
+  }
+
+  public function setAccountName($account_name) {
+    $this->account->setUsername($account_name);
+    return $this;
+  }
+
+  public function getAccountName() {
+    return $this->account->getUsername();
+  }
+
+  public function setUserID($user_id) {
+    $user = id(new PhabricatorUser())->loadOneWhere('id = %d', $user_id);
+    if (!$user) {
+      throw new Exception("No such user with given ID!");
+    }
+    $this->account->setUserPHID($user->getPHID());
+    return $this;
+  }
+
+  public function getUserID() {
+    $phid = $this->account->getUserPHID();
+    if (!$phid) {
+      return null;
+    }
+
+    $user = id(new PhabricatorUser())->loadOneWhere('phid = %s', $phid);
+    if (!$user) {
+      throw new Exception("No such user with given PHID!");
+    }
+
+    return $user->getID();
+  }
+
+  public function setOAuthUID($oauth_uid) {
+    $this->account->setAccountID($oauth_uid);
+    return $this;
+  }
+
+  public function getOAuthUID() {
+    return $this->account->getAccountID();
+  }
+
+  public function setOAuthProvider($oauth_provider) {
+    $domain = self::getDomainForProvider($oauth_provider);
+    $this->account->setAccountType($oauth_provider);
+    $this->account->setAccountDomain($domain);
+
+    return $this;
+  }
+
+  public function getOAuthProvider() {
+    return $this->account->getAccountType();
+  }
+
+  public static function loadOneByUserAndProviderKey(
+    PhabricatorUser $user,
+    $provider_key) {
+
+    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
+      'userPHID = %s AND accountType = %s AND accountDomain = %s',
+      $user->getPHID(),
+      $provider_key,
+      self::getDomainForProvider($provider_key));
+
+    if (!$account) {
+      return null;
+    }
+
+    return new PhabricatorUserOAuthInfo($account);
+  }
+
+  public static function loadAllOAuthProvidersByUser(
+    PhabricatorUser $user) {
+
+    $accounts = id(new PhabricatorExternalAccount())->loadAllWhere(
+      'userPHID = %s',
+      $user->getPHID());
+
+    $results = array();
+    foreach ($accounts as $account) {
+      $results[] = new PhabricatorUserOAuthInfo($account);
+    }
+
+    return $results;
+  }
+
+  public static function loadOneByProviderKeyAndAccountID(
+    $provider_key,
+    $account_id) {
+
+    $account = id(new PhabricatorExternalAccount())->loadOneWhere(
+      'accountType = %s AND accountDomain = %s AND accountID = %s',
+      $provider_key,
+      self::getDomainForProvider($provider_key),
+      $account_id);
+
+    if (!$account) {
+      return null;
+    }
+
+    return new PhabricatorUserOAuthInfo($account);
+  }
+
+  public function save() {
+    $this->account->save();
+    return $this;
+  }
+
+  private static function getDomainForProvider($provider_key) {
+    $domain_map = array(
+      'disqus'      => 'disqus.com',
+      'facebook'    => 'facebook.com',
+      'github'      => 'github.com',
+      'google'      => 'google.com',
     );
-    return idx($map, $status, 'This code\'s got bugs');
+
+    try {
+      $phabricator_oauth_uri = new PhutilURI(
+        PhabricatorEnv::getEnvConfig('phabricator.oauth-uri'));
+      $domain_map['phabricator'] = $phabricator_oauth_uri->getDomain();
+    } catch (Exception $ex) {
+      // Ignore.
+    }
+
+    return idx($domain_map, $provider_key);
   }
 
 }
