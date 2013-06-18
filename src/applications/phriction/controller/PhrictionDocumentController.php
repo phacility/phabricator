@@ -318,22 +318,28 @@ final class PhrictionDocumentController
     $content_dao = new PhrictionContent();
     $conn = $document_dao->establishConnection('r');
 
+    $depth = PhabricatorEnv::getEnvConfig('phriction.hierarchy-display-levels');
+
+    if ($depth == 0) {
+      return;
+    }
+
     $limit = 250;
     $d_child = PhabricatorSlug::getDepth($slug) + 1;
-    $d_grandchild = PhabricatorSlug::getDepth($slug) + 2;
+    $d_total = PhabricatorSlug::getDepth($slug) + $depth;
 
     // Select children and grandchildren.
     $children = queryfx_all(
       $conn,
       'SELECT d.slug, d.depth, c.title FROM %T d JOIN %T c
         ON d.contentID = c.id
-        WHERE d.slug LIKE %> AND d.slug != %s
+        WHERE d.slug LIKE %> AND d.depth IN (%Ld)
           AND d.status IN (%Ld)
         ORDER BY d.depth, c.title LIMIT %d',
       $document_dao->getTableName(),
       $content_dao->getTableName(),
       ($slug == '/' ? '' : $slug),
-      ($slug == '/' ? '' : $slug),
+      range($d_child, $d_total),
       array(
         PhrictionDocumentStatus::STATUS_EXISTS,
         PhrictionDocumentStatus::STATUS_STUB,
@@ -360,7 +366,7 @@ final class PhrictionDocumentController
     if (count($children) == $limit) {
       $more_children = true;
       foreach ($children as $child) {
-        if ($child['depth'] == $d_grandchild) {
+        if ($child['depth'] > $d_child) {
           $more_children = false;
         }
       }
