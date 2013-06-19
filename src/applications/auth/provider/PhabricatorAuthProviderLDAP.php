@@ -31,6 +31,8 @@ final class PhabricatorAuthProviderLDAP
             PhabricatorEnv::getEnvConfig('ldap.search_attribute'))
         ->setUsernameAttribute(
             PhabricatorEnv::getEnvConfig('ldap.username-attribute'))
+        ->setRealNameAttributes(
+            PhabricatorEnv::getEnvConfig('ldap.real_name_attributes'))
         ->setLDAPVersion(PhabricatorEnv::getEnvConfig('ldap.version'))
         ->setLDAPReferrals(PhabricatorEnv::getEnvConfig('ldap.referrals'))
         ->setLDAPStartTLS(PhabricatorEnv::getEnvConfig('ldap.start-tls'))
@@ -169,6 +171,245 @@ final class PhabricatorAuthProviderLDAP
     }
 
     return array($this->loadOrCreateAccount($account_id), $response);
+  }
+
+
+  const KEY_HOSTNAME                = 'ldap:host';
+  const KEY_PORT                    = 'ldap:port';
+  const KEY_DISTINGUISHED_NAME      = 'ldap:dn';
+  const KEY_SEARCH_ATTRIBUTE        = 'ldap:search-attribute';
+  const KEY_USERNAME_ATTRIBUTE      = 'ldap:username-attribute';
+  const KEY_REALNAME_ATTRIBUTES     = 'ldap:realname-attributes';
+  const KEY_VERSION                 = 'ldap:version';
+  const KEY_REFERRALS               = 'ldap:referrals';
+  const KEY_START_TLS               = 'ldap:start-tls';
+  const KEY_ANONYMOUS_USERNAME      = 'ldap:anoynmous-username';
+  const KEY_ANONYMOUS_PASSWORD      = 'ldap:anonymous-password';
+  const KEY_SEARCH_FIRST            = 'ldap:search-first';
+  const KEY_ACTIVEDIRECTORY_DOMAIN  = 'ldap:activedirectory-domain';
+
+  private function getPropertyKeys() {
+    return array(
+      self::KEY_HOSTNAME,
+      self::KEY_PORT,
+      self::KEY_DISTINGUISHED_NAME,
+      self::KEY_SEARCH_ATTRIBUTE,
+      self::KEY_USERNAME_ATTRIBUTE,
+      self::KEY_VERSION,
+      self::KEY_REFERRALS,
+      self::KEY_START_TLS,
+      self::KEY_ANONYMOUS_USERNAME,
+      self::KEY_ANONYMOUS_PASSWORD,
+      self::KEY_SEARCH_FIRST,
+      self::KEY_ACTIVEDIRECTORY_DOMAIN,
+    );
+  }
+
+  private function getPropertyLabels() {
+    return array(
+      self::KEY_HOSTNAME => pht('LDAP Hostname'),
+      self::KEY_PORT => pht('LDAP Port'),
+      self::KEY_DISTINGUISHED_NAME => pht('Base Distinguished Name'),
+      self::KEY_SEARCH_ATTRIBUTE => pht('Search Attribute'),
+      self::KEY_USERNAME_ATTRIBUTE => pht('Username Attribute'),
+      self::KEY_REALNAME_ATTRIBUTES => pht('Realname Attributes'),
+      self::KEY_VERSION => pht('LDAP Version'),
+      self::KEY_REFERRALS => pht('Enable Referrals'),
+      self::KEY_START_TLS => pht('Use TLS'),
+      self::KEY_SEARCH_FIRST => pht('Search First'),
+      self::KEY_ANONYMOUS_USERNAME => pht('Anonymous Username'),
+      self::KEY_ANONYMOUS_PASSWORD => pht('Anonymous Password'),
+      self::KEY_ACTIVEDIRECTORY_DOMAIN => pht('ActiveDirectory Domain'),
+    );
+  }
+
+  public function readFormValuesFromProvider() {
+    return array(
+      self::KEY_HOSTNAME =>
+        PhabricatorEnv::getEnvConfig('ldap.hostname'),
+      self::KEY_PORT =>
+        PhabricatorEnv::getEnvConfig('ldap.port'),
+      self::KEY_DISTINGUISHED_NAME =>
+        PhabricatorEnv::getEnvConfig('ldap.base_dn'),
+      self::KEY_SEARCH_ATTRIBUTE =>
+        PhabricatorEnv::getEnvConfig('ldap.search_attribute'),
+      self::KEY_USERNAME_ATTRIBUTE =>
+        PhabricatorEnv::getEnvConfig('ldap.username-attribute'),
+      self::KEY_REALNAME_ATTRIBUTES =>
+        PhabricatorEnv::getEnvConfig('ldap.real_name_attributes'),
+      self::KEY_VERSION =>
+        PhabricatorEnv::getEnvConfig('ldap.version'),
+      self::KEY_REFERRALS =>
+        PhabricatorEnv::getEnvConfig('ldap.referrals'),
+      self::KEY_START_TLS =>
+        PhabricatorEnv::getEnvConfig('ldap.start-tls'),
+      self::KEY_ANONYMOUS_USERNAME =>
+        PhabricatorEnv::getEnvConfig('ldap.anonymous-user-name'),
+      self::KEY_ANONYMOUS_PASSWORD =>
+        PhabricatorEnv::getEnvConfig('ldap.anonymous-user-password'),
+      self::KEY_SEARCH_FIRST =>
+        PhabricatorEnv::getEnvConfig('ldap.search-first'),
+      self::KEY_ACTIVEDIRECTORY_DOMAIN =>
+        PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain'),
+    );
+  }
+
+  public function readFormValuesFromRequest(AphrontRequest $request) {
+    $values = array();
+    foreach ($this->getPropertyKeys() as $key) {
+      switch ($key) {
+        case self::KEY_REALNAME_ATTRIBUTES:
+          $values[$key] = $request->getStrList($key);
+          break;
+        default:
+          $values[$key] = $request->getStr($key);
+          break;
+      }
+    }
+    return $values;
+  }
+
+  public function processEditForm(
+    AphrontRequest $request,
+    array $values) {
+    $errors = array();
+    $issues = array();
+    return array($errors, $issues, $values);
+  }
+
+  public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues) {
+
+    $labels = $this->getPropertyLabels();
+
+    $captions = array(
+      self::KEY_HOSTNAME =>
+        pht('Example: %s',
+          hsprintf('<tt>%s</tt>', pht('ldap.example.com'))),
+      self::KEY_DISTINGUISHED_NAME =>
+        pht('Example: %s',
+          hsprintf('<tt>%s</tt>', pht('ou=People, dc=example, dc=com'))),
+      self::KEY_SEARCH_ATTRIBUTE =>
+        pht('Example: %s',
+          hsprintf('<tt>%s</tt>', pht('sn'))),
+      self::KEY_USERNAME_ATTRIBUTE =>
+        pht('Optional, if different from search attribute.'),
+      self::KEY_REALNAME_ATTRIBUTES =>
+        pht('Optional. Example: %s',
+          hsprintf('<tt>%s</tt>', pht('firstname, lastname'))),
+      self::KEY_REFERRALS =>
+        pht('Follow referrals. Disable this for Windows AD 2003.'),
+      self::KEY_START_TLS =>
+        pht('Start TLS after binding to the LDAP server.'),
+      self::KEY_SEARCH_FIRST =>
+        pht(
+          'When the user enters their username, search for a matching '.
+          'record using the "Search Attribute", then try to bind using '.
+          'the DN for the record. This is useful if usernames are not '.
+          'part of the record DN.'),
+      self::KEY_ANONYMOUS_USERNAME =>
+        pht('Username to bind with before searching.'),
+      self::KEY_ANONYMOUS_PASSWORD =>
+        pht('Password to bind with before searching.'),
+    );
+
+    $types = array(
+      self::KEY_REFERRALS           => 'checkbox',
+      self::KEY_START_TLS           => 'checkbox',
+      self::KEY_SEARCH_FIRST        => 'checkbox',
+      self::KEY_REALNAME_ATTRIBUTES => 'list',
+      self::KEY_ANONYMOUS_PASSWORD  => 'password',
+    );
+
+    foreach ($labels as $key => $label) {
+      $caption = idx($captions, $key);
+      $type = idx($types, $key);
+      $value = idx($values, $key);
+
+      $control = null;
+      switch ($type) {
+        case 'checkbox':
+          $control = id(new AphrontFormCheckboxControl())
+            ->addCheckbox(
+              $key,
+              1,
+              hsprintf('<strong>%s:</strong> %s', $label, $caption),
+              $value);
+          break;
+        case 'list':
+          $control = id(new AphrontFormTextControl())
+            ->setName($key)
+            ->setLabel($label)
+            ->setCaption($caption)
+            ->setValue(implode(', ', $value));
+          break;
+        case 'password':
+          $control = id(new AphrontFormPasswordControl())
+            ->setName($key)
+            ->setLabel($label)
+            ->setCaption($caption)
+            ->setValue($value);
+          break;
+        default:
+          $control = id(new AphrontFormTextControl())
+            ->setName($key)
+            ->setLabel($label)
+            ->setCaption($caption)
+            ->setValue($value);
+          break;
+      }
+
+      $form->appendChild($control);
+    }
+  }
+
+  public function renderConfigPropertyTransactionTitle(
+    PhabricatorAuthProviderConfigTransaction $xaction) {
+
+    $author_phid = $xaction->getAuthorPHID();
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+    $key = $xaction->getMetadataValue(
+      PhabricatorAuthProviderConfigTransaction::PROPERTY_KEY);
+
+    $labels = $this->getPropertyLabels();
+    if (isset($labels[$key])) {
+      $label = $labels[$key];
+
+      $mask = false;
+      switch ($key) {
+        case self::KEY_ANONYMOUS_PASSWORD:
+          $mask = true;
+          break;
+      }
+
+      if ($mask) {
+        return pht(
+          '%s updated the "%s" value.',
+          $xaction->renderHandleLink($author_phid),
+          $label);
+      }
+
+      if (!strlen($old)) {
+        return pht(
+          '%s set the "%s" value to "%s".',
+          $xaction->renderHandleLink($author_phid),
+          $label,
+          $new);
+      } else {
+        return pht(
+          '%s changed the "%s" value from "%s" to "%s".',
+          $xaction->renderHandleLink($author_phid),
+          $label,
+          $old,
+          $new);
+      }
+    }
+
+    return parent::renderConfigPropertyTransactionTitle($xaction);
   }
 
 }

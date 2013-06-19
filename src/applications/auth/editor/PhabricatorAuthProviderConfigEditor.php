@@ -33,8 +33,9 @@ final class PhabricatorAuthProviderConfigEditor
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
         return (int)$object->getShouldAllowUnlink();
       case PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY:
-        // TODO
-        throw new Exception("TODO");
+        $key = $xaction->getMetadataValue(
+          PhabricatorAuthProviderConfigTransaction::PROPERTY_KEY);
+        return $object->getProperty($key);
     }
   }
 
@@ -66,8 +67,9 @@ final class PhabricatorAuthProviderConfigEditor
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
         return $object->setShouldAllowUnlink($v);
       case PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY:
-        // TODO
-        throw new Exception("TODO");
+        $key = $xaction->getMetadataValue(
+          PhabricatorAuthProviderConfigTransaction::PROPERTY_KEY);
+        return $object->setProperty($key, $v);
     }
   }
 

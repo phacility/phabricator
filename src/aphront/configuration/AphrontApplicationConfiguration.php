@@ -56,18 +56,6 @@ abstract class AphrontApplicationConfiguration {
   public function willBuildRequest() {
   }
 
-  /**
-   * Hook for synchronizing account information from OAuth workflows.
-   *
-   * @task hook
-   */
-  public function willAuthenticateUserWithOAuth(
-    PhabricatorUser $user,
-    PhabricatorUserOAuthInfo $oauth_info,
-    PhabricatorOAuthProvider $provider) {
-    return;
-  }
-
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 
@@ -106,10 +94,10 @@ abstract class AphrontApplicationConfiguration {
 
     if (PhabricatorEnv::getEnvConfig('security.require-https')) {
       if (!$request->isHTTPS()) {
-        $uri = $request->getRequestURI();
-        $uri->setDomain($request->getHost());
-        $uri->setProtocol('https');
-        return $this->buildRedirectController($uri);
+        $https_uri = $request->getRequestURI();
+        $https_uri->setDomain($request->getHost());
+        $https_uri->setProtocol('https');
+        return $this->buildRedirectController($https_uri);
       }
     }
 
@@ -183,8 +171,8 @@ abstract class AphrontApplicationConfiguration {
         // will be a GET without parameters.
 
         if ($controller && !$request->isHTTPPost()) {
-          $uri = $request->getRequestURI()->setPath($path.'/');
-          return $this->buildRedirectController($uri);
+          $slash_uri = $request->getRequestURI()->setPath($path.'/');
+          return $this->buildRedirectController($slash_uri);
         }
       }
       return $this->build404Controller();

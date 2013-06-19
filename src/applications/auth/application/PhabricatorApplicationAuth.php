@@ -10,6 +10,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return '/auth/';
   }
 
+  public function getIconName() {
+    return 'authentication';
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {
@@ -17,12 +21,13 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     $items = array();
 
     if ($user->isLoggedIn()) {
-      $item = new PHUIListItemView();
-      $item->setName(pht('Log Out'));
-      $item->setIcon('power');
-      $item->setWorkflow(true);
-      $item->setHref('/logout/');
-      $item->setSelected(($controller instanceof PhabricatorLogoutController));
+      $item = id(new PHUIListItemView())
+        ->addClass('core-menu-item')
+        ->setName(pht('Log Out'))
+        ->setIcon('power')
+        ->setWorkflow(true)
+        ->setHref('/logout/')
+        ->setSelected(($controller instanceof PhabricatorLogoutController));
       $items[] = $item;
     }
 
@@ -58,8 +63,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           => 'PhabricatorAuthConfirmLinkController',
       ),
 
+      '/oauth/google/login/' => 'PhabricatorAuthOldOAuthRedirectController',
+
       '/login/' => array(
-        '' => 'PhabricatorLoginController',
+        '' => 'PhabricatorAuthStartController',
         'email/' => 'PhabricatorEmailLoginController',
         'etoken/(?P<token>\w+)/' => 'PhabricatorEmailTokenController',
         'refresh/' => 'PhabricatorRefreshCSRFController',
@@ -67,17 +74,6 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       ),
 
       '/logout/' => 'PhabricatorLogoutController',
-
-      '/oauth/' => array(
-        '(?P<provider>\w+)/' => array(
-          'login/'     => 'PhabricatorOAuthLoginController',
-          'diagnose/'  => 'PhabricatorOAuthDiagnosticsController',
-        ),
-      ),
-
-      '/ldap/' => array(
-        'login/' => 'PhabricatorLDAPLoginController',
-      ),
     );
   }
 

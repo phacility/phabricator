@@ -42,7 +42,7 @@ a.phabricator-tag-view:hover {
 
 .phabricator-tag-type-state {
   color: #ffffff;
-  text-shadow: rgba(0, 0, 0, 0.40) 0px -1px 1px;
+  text-shadow: rgba(100, 100, 100, 0.40) 0px -1px 1px;
 }
 
 .phabricator-tag-type-object,
@@ -57,38 +57,33 @@ a.phabricator-tag-type-object:link {
 }
 
 .phabricator-tag-color-red {
-  background-color: #e12320;
-  border-color: #e12320;
-}
-
-.phabricator-tag-color-redorange {
-  background-color: #ff6604;
-  border-color: #ff6604;
+  background-color: #c0392b;
+  border-color: #c0392b;
 }
 
 .phabricator-tag-color-orange {
-  background-color: #fa9400;
-  border-color: #fa9400;
+  background-color: #F39C12;
+  border-color: #F39C12;
 }
 
 .phabricator-tag-color-yellow {
-  background-color: #f2ed5b;
-  border-color: #f2ed5b;
+  background-color: #f1c40f;
+  border-color: #f1c40f;
 }
 
 .phabricator-tag-color-blue {
-  background-color: #0573d2;
-  border-color: #0573d2;
+  background-color: #2980b9;
+  border-color: #2980b9;
 }
 
 .phabricator-tag-color-magenta {
-  background-color: #ce00ce;
+  background-color: #cb4d9f;
   border-color: #ce00ce;
 }
 
 .phabricator-tag-color-green {
-  background-color: #438944;
-  border-color: #438944;
+  background-color: #27ae60;
+  border-color: #27ae60;
 }
 
 .phabricator-tag-color-black {
@@ -102,8 +97,8 @@ a.phabricator-tag-type-object:link {
 }
 
 .phabricator-tag-color-white {
-  background-color: #ffffff;
-  border-color: #ffffff;
+  background-color: #f7f7f7;
+  border-color: #f7f7f7;
 }
 
 .phabricator-tag-color-object {

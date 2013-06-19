@@ -48,4 +48,9 @@ final class PhabricatorAuthProviderOAuthGoogle
     return !PhabricatorEnv::getEnvConfig('google.auth-permanent');
   }
 
+  public function getLoginURI() {
+    // TODO: Clean this up. See PhabricatorAuthOldOAuthRedirectController.
+    return PhabricatorEnv::getURI('/oauth/google/login/');
+  }
+
 }
