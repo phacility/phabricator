@@ -44,6 +44,13 @@ final class PhabricatorAuthStartController
     }
 
     if (!$providers) {
+      if ($this->isFirstTimeSetup()) {
+        // If this is a fresh install, let the user register their admin
+        // account.
+        return id(new AphrontRedirectResponse())
+          ->setURI($this->getApplicationURI('/register/'));
+      }
+
       return $this->renderError(
         pht(
           "This Phabricator install is not configured with any enabled ".

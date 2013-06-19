@@ -20,10 +20,15 @@ final class PhabricatorAuthRegisterController
       return $this->renderError(pht('You are already logged in.'));
     }
 
+    $is_setup = false;
     if (strlen($this->accountKey)) {
       $result = $this->loadAccountForRegistrationOrLinking($this->accountKey);
       list($account, $provider, $response) = $result;
       $is_default = false;
+    } else if ($this->isFirstTimeSetup()) {
+      list($account, $provider, $response) = $this->loadSetupAccount();
+      $is_default = true;
+      $is_setup = true;
     } else {
       list($account, $provider, $response) = $this->loadDefaultAccount();
       $is_default = true;
@@ -213,6 +218,10 @@ final class PhabricatorAuthRegisterController
               $editor->changePassword($user, $envelope);
             }
 
+            if ($is_setup) {
+              $editor->makeAdminUser($user, true);
+            }
+
             $account->setUserPHID($user->getPHID());
             $provider->willRegisterAccount($account);
             $account->save();
@@ -319,24 +328,53 @@ final class PhabricatorAuthRegisterController
           ->setError($e_realname));
     }
 
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->addCancelButton($this->getApplicationURI('start/'))
-        ->setValue(pht('Register Phabricator Account')));
+    $submit = id(new AphrontFormSubmitControl());
 
-    $title = pht('Phabricator Registration');
+    if ($is_setup) {
+      $submit
+        ->setValue(pht('Create Admin Account'));
+    } else {
+      $submit
+        ->addCancelButton($this->getApplicationURI('start/'))
+        ->setValue(pht('Register Phabricator Account'));
+    }
+
+
+    $form->appendChild($submit);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Register')));
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($provider->getProviderName()));
+
+    if ($is_setup) {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Setup Admin Account')));
+        $title = pht('Welcome to Phabricator');
+    } else {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Register')));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($provider->getProviderName()));
+        $title = pht('Phabricator Registration');
+    }
+
+    $welcome_view = null;
+    if ($is_setup) {
+      $welcome_view = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle(pht('Welcome to Phabricator'))
+        ->appendChild(
+          pht(
+            'Installation is complete. Register your administrator account '.
+            'below to log in. You will be able to configure options and add '.
+            'other authentication mechanisms (like LDAP or OAuth) later on.'));
+    }
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $welcome_view,
         $error_view,
         $form,
       ),
@@ -378,6 +416,13 @@ final class PhabricatorAuthRegisterController
     $provider = head($providers);
     $account = $provider->getDefaultExternalAccount();
 
+    return array($account, $provider, $response);
+  }
+
+  private function loadSetupAccount() {
+    $provider = new PhabricatorAuthProviderPassword();
+    $account = $provider->getDefaultExternalAccount();
+    $response = null;
     return array($account, $provider, $response);
   }
 
