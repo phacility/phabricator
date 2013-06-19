@@ -130,7 +130,7 @@ class AphrontDefaultApplicationConfiguration
         //
         // Possibly we should add a header here like "you need to login to see
         // the thing you are trying to look at".
-        $login_controller = new PhabricatorLoginController($request);
+        $login_controller = new PhabricatorAuthStartController($request);
         return $login_controller->processRequest();
       }
 

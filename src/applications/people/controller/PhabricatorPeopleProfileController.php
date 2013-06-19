@@ -64,39 +64,6 @@ final class PhabricatorPeopleProfileController
     // NOTE: applications install the various links through PhabricatorEvent
     // listeners
 
-    $oauths = PhabricatorUserOAuthInfo::loadAllOAuthProvidersByUser($user);
-    $oauths = mpull($oauths, null, 'getOAuthProvider');
-
-    $providers = PhabricatorOAuthProvider::getAllProviders();
-    $added_label = false;
-    foreach ($providers as $provider) {
-      if (!$provider->isProviderEnabled()) {
-        continue;
-      }
-
-      $provider_key = $provider->getProviderKey();
-
-      if (!isset($oauths[$provider_key])) {
-        continue;
-      }
-
-      $name = pht('%s Profile', $provider->getProviderName());
-      $href = $oauths[$provider_key]->getAccountURI();
-
-      if ($href) {
-        if (!$added_label) {
-          $menu->newLabel(pht('Linked Accounts'), 'linked_accounts');
-          $added_label = true;
-        }
-        $menu->addMenuItem(
-          id(new PHUIListItemView())
-          ->setIsExternal(true)
-          ->setName($name)
-          ->setHref($href)
-          ->setType(PHUIListItemView::TYPE_LINK));
-      }
-    }
-
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_PEOPLE_DIDRENDERMENU,
       array(

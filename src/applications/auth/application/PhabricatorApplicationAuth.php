@@ -63,8 +63,10 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           => 'PhabricatorAuthConfirmLinkController',
       ),
 
+      '/oauth/google/login/' => 'PhabricatorAuthOldOAuthRedirectController',
+
       '/login/' => array(
-        '' => 'PhabricatorLoginController',
+        '' => 'PhabricatorAuthStartController',
         'email/' => 'PhabricatorEmailLoginController',
         'etoken/(?P<token>\w+)/' => 'PhabricatorEmailTokenController',
         'refresh/' => 'PhabricatorRefreshCSRFController',
@@ -72,17 +74,6 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       ),
 
       '/logout/' => 'PhabricatorLogoutController',
-
-      '/oauth/' => array(
-        '(?P<provider>\w+)/' => array(
-          'login/'     => 'PhabricatorOAuthLoginController',
-          'diagnose/'  => 'PhabricatorOAuthDiagnosticsController',
-        ),
-      ),
-
-      '/ldap/' => array(
-        'login/' => 'PhabricatorLDAPLoginController',
-      ),
     );
   }
 
