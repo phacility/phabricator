@@ -17,7 +17,7 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       'd35400' => 'Base Orange',
       'f1c40f' => 'Base Yellow',
       '27ae60' => 'Base Green',
-      '298094' => 'Base Blue',
+      '2980b9' => 'Base Blue',
       'c6539d' => 'Base Indigo',
       '8e44ad' => 'Base Violet',
     );

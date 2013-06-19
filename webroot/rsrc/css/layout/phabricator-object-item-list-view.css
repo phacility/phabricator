@@ -18,7 +18,7 @@
   background: #ffffff;
   border-style: solid;
   border-color: #c0c5d1;
-  border-width: 0 0 0 3px;
+  border-width: 0 0 0 4px;
   margin: 5px 0;
 
   overflow: hidden;
@@ -330,7 +330,7 @@
 }
 
 .phabricator-object-item-bar-color-grey {
-  border-left-color: #7f8cbd;
+  border-left-color: #bdc3c7;
 }
 
 .phabricator-object-item-bar-color-black {
