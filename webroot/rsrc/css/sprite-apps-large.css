@@ -486,146 +486,158 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -232px -261px;
 }
 
-.apps-ponder-light-large {
+.apps-policy-light-large {
   background-position: -261px -261px;
 }
 
-.apps-ponder-dark-large {
+.apps-policy-dark-large {
   background-position: -290px -261px;
 }
 
-.apps-ponder-blue-large, .phabricator-crumb-view:hover .apps-ponder-dark-large {
+.apps-policy-blue-large, .phabricator-crumb-view:hover .apps-policy-dark-large {
   background-position: -319px -261px;
 }
 
-.apps-power-light-large {
+.apps-ponder-light-large {
   background-position: 0px -290px;
 }
 
-.apps-power-dark-large {
+.apps-ponder-dark-large {
   background-position: -29px -290px;
 }
 
-.apps-power-blue-large, .phabricator-crumb-view:hover .apps-power-dark-large {
+.apps-ponder-blue-large, .phabricator-crumb-view:hover .apps-ponder-dark-large {
   background-position: -58px -290px;
 }
 
-.apps-projects-light-large {
+.apps-power-light-large {
   background-position: -87px -290px;
 }
 
-.apps-projects-dark-large {
+.apps-power-dark-large {
   background-position: -116px -290px;
 }
 
-.apps-projects-blue-large, .phabricator-crumb-view:hover .apps-projects-dark-large {
+.apps-power-blue-large, .phabricator-crumb-view:hover .apps-power-dark-large {
   background-position: -145px -290px;
 }
 
-.apps-releeph-light-large {
+.apps-projects-light-large {
   background-position: -174px -290px;
 }
 
-.apps-releeph-dark-large {
+.apps-projects-dark-large {
   background-position: -203px -290px;
 }
 
-.apps-releeph-blue-large, .phabricator-crumb-view:hover .apps-releeph-dark-large {
+.apps-projects-blue-large, .phabricator-crumb-view:hover .apps-projects-dark-large {
   background-position: -232px -290px;
 }
 
-.apps-repositories-light-large {
+.apps-releeph-light-large {
   background-position: -261px -290px;
 }
 
-.apps-repositories-dark-large {
+.apps-releeph-dark-large {
   background-position: -290px -290px;
 }
 
-.apps-repositories-blue-large, .phabricator-crumb-view:hover .apps-repositories-dark-large {
+.apps-releeph-blue-large, .phabricator-crumb-view:hover .apps-releeph-dark-large {
   background-position: -319px -290px;
 }
 
-.apps-settings-light-large {
+.apps-repositories-light-large {
   background-position: 0px -319px;
 }
 
-.apps-settings-dark-large {
+.apps-repositories-dark-large {
   background-position: -29px -319px;
 }
 
-.apps-settings-blue-large, .phabricator-crumb-view:hover .apps-settings-dark-large {
+.apps-repositories-blue-large, .phabricator-crumb-view:hover .apps-repositories-dark-large {
   background-position: -58px -319px;
 }
 
-.apps-setup-light-large {
+.apps-settings-light-large {
   background-position: -87px -319px;
 }
 
-.apps-setup-dark-large {
+.apps-settings-dark-large {
   background-position: -116px -319px;
 }
 
-.apps-setup-blue-large, .phabricator-crumb-view:hover .apps-setup-dark-large {
+.apps-settings-blue-large, .phabricator-crumb-view:hover .apps-settings-dark-large {
   background-position: -145px -319px;
 }
 
-.apps-slowvote-light-large {
+.apps-setup-light-large {
   background-position: -174px -319px;
 }
 
-.apps-slowvote-dark-large {
+.apps-setup-dark-large {
   background-position: -203px -319px;
 }
 
-.apps-slowvote-blue-large, .phabricator-crumb-view:hover .apps-slowvote-dark-large {
+.apps-setup-blue-large, .phabricator-crumb-view:hover .apps-setup-dark-large {
   background-position: -232px -319px;
 }
 
-.apps-token-light-large {
+.apps-slowvote-light-large {
   background-position: -261px -319px;
 }
 
-.apps-token-dark-large {
+.apps-slowvote-dark-large {
   background-position: -290px -319px;
 }
 
-.apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large {
+.apps-slowvote-blue-large, .phabricator-crumb-view:hover .apps-slowvote-dark-large {
   background-position: -319px -319px;
 }
 
-.apps-uiexamples-light-large {
+.apps-token-light-large {
   background-position: 0px -348px;
 }
 
-.apps-uiexamples-dark-large {
+.apps-token-dark-large {
   background-position: -29px -348px;
 }
 
-.apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large {
+.apps-token-blue-large, .phabricator-crumb-view:hover .apps-token-dark-large {
   background-position: -58px -348px;
 }
 
-.apps-workphlow-light-large {
+.apps-uiexamples-light-large {
   background-position: -87px -348px;
 }
 
-.apps-workphlow-dark-large {
+.apps-uiexamples-dark-large {
   background-position: -116px -348px;
 }
 
-.apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large {
+.apps-uiexamples-blue-large, .phabricator-crumb-view:hover .apps-uiexamples-dark-large {
   background-position: -145px -348px;
 }
 
-.apps-xhprof-light-large {
+.apps-workphlow-light-large {
   background-position: -174px -348px;
 }
 
-.apps-xhprof-dark-large {
+.apps-workphlow-dark-large {
   background-position: -203px -348px;
 }
 
-.apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large {
+.apps-workphlow-blue-large, .phabricator-crumb-view:hover .apps-workphlow-dark-large {
   background-position: -232px -348px;
+}
+
+.apps-xhprof-light-large {
+  background-position: -261px -348px;
+}
+
+.apps-xhprof-dark-large {
+  background-position: -290px -348px;
+}
+
+.apps-xhprof-blue-large, .phabricator-crumb-view:hover .apps-xhprof-dark-large {
+  background-position: -319px -348px;
 }

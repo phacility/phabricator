@@ -174,50 +174,54 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -45px -75px;
 }
 
-.apps-ponder-dark {
+.apps-policy-dark {
   background-position: -60px -75px;
 }
 
-.apps-power-dark {
+.apps-ponder-dark {
   background-position: -75px -75px;
 }
 
-.apps-projects-dark {
+.apps-power-dark {
   background-position: -90px -75px;
 }
 
-.apps-releeph-dark {
+.apps-projects-dark {
   background-position: 0px -90px;
 }
 
-.apps-repositories-dark {
+.apps-releeph-dark {
   background-position: -15px -90px;
 }
 
-.apps-settings-dark {
+.apps-repositories-dark {
   background-position: -30px -90px;
 }
 
-.apps-setup-dark {
+.apps-settings-dark {
   background-position: -45px -90px;
 }
 
-.apps-slowvote-dark {
+.apps-setup-dark {
   background-position: -60px -90px;
 }
 
-.apps-token-dark {
+.apps-slowvote-dark {
   background-position: -75px -90px;
 }
 
-.apps-uiexamples-dark {
+.apps-token-dark {
   background-position: -90px -90px;
 }
 
-.apps-workphlow-dark {
+.apps-uiexamples-dark {
   background-position: 0px -105px;
 }
 
-.apps-xhprof-dark {
+.apps-workphlow-dark {
   background-position: -15px -105px;
+}
+
+.apps-xhprof-dark {
+  background-position: -30px -105px;
 }
