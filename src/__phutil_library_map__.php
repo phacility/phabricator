@@ -834,7 +834,6 @@ phutil_register_library_map(array(
     'PhabricatorAuthProviderConfigController' => 'applications/auth/controller/config/PhabricatorAuthProviderConfigController.php',
     'PhabricatorAuthProviderConfigEditor' => 'applications/auth/editor/PhabricatorAuthProviderConfigEditor.php',
     'PhabricatorAuthProviderConfigQuery' => 'applications/auth/query/PhabricatorAuthProviderConfigQuery.php',
-    'PhabricatorAuthProviderConfigSearchEngine' => 'applications/auth/query/PhabricatorAuthProviderConfigSearchEngine.php',
     'PhabricatorAuthProviderConfigTransaction' => 'applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php',
     'PhabricatorAuthProviderConfigTransactionQuery' => 'applications/auth/query/PhabricatorAuthProviderConfigTransactionQuery.php',
     'PhabricatorAuthProviderLDAP' => 'applications/auth/provider/PhabricatorAuthProviderLDAP.php',
@@ -2689,11 +2688,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthDisableController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthEditController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthLinkController' => 'PhabricatorAuthController',
-    'PhabricatorAuthListController' =>
-    array(
-      0 => 'PhabricatorAuthProviderConfigController',
-      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
-    ),
+    'PhabricatorAuthListController' => 'PhabricatorAuthProviderConfigController',
     'PhabricatorAuthLoginController' => 'PhabricatorAuthController',
     'PhabricatorAuthManagementLDAPWorkflow' => 'PhabricatorAuthManagementWorkflow',
     'PhabricatorAuthManagementRecoverWorkflow' => 'PhabricatorAuthManagementWorkflow',
@@ -2708,7 +2703,6 @@ phutil_register_library_map(array(
     'PhabricatorAuthProviderConfigController' => 'PhabricatorAuthController',
     'PhabricatorAuthProviderConfigEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorAuthProviderConfigQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
-    'PhabricatorAuthProviderConfigSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorAuthProviderConfigTransaction' => 'PhabricatorApplicationTransaction',
     'PhabricatorAuthProviderConfigTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorAuthProviderLDAP' => 'PhabricatorAuthProvider',

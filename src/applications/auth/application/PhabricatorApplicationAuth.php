@@ -43,7 +43,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       '/auth/' => array(
 /*
 
-        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorAuthListController',
+        '' => 'PhabricatorAuthListController',
         'config/' => array(
           'new/' => 'PhabricatorAuthNewController',
           'new/(?P<className>[^/]+)/' => 'PhabricatorAuthEditController',
