@@ -59,7 +59,7 @@
     "apps-authentication-light-large" : {
       "name" : "apps-authentication-light-large",
       "rule" : ".apps-authentication-light-large",
-      "hash" : "38b3540265c224a02a4295975863e58c"
+      "hash" : "034256f1056033424b936e94debaa9ad"
     },
     "apps-calendar-blue-large"        : {
       "name" : "apps-calendar-blue-large",
@@ -599,7 +599,7 @@
     "apps-policy-light-large"         : {
       "name" : "apps-policy-light-large",
       "rule" : ".apps-policy-light-large",
-      "hash" : "807452aae82386d24d86a44ea3749f5f"
+      "hash" : "fc07ff7b5f17fe7701f0967a2cc05ff1"
     },
     "apps-ponder-blue-large"          : {
       "name" : "apps-ponder-blue-large",
