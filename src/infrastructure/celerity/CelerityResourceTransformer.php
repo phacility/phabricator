@@ -9,6 +9,7 @@ final class CelerityResourceTransformer {
   private $rawResourceMap;
   private $celerityMap;
   private $translateURICallback;
+  private $currentPath;
 
   public function setTranslateURICallback($translate_uricallback) {
     $this->translateURICallback = $translate_uricallback;
@@ -38,6 +39,7 @@ final class CelerityResourceTransformer {
 
     switch ($type) {
       case 'css':
+        $data = $this->replaceCSSVariables($path, $data);
         $data = preg_replace_callback(
           '@url\s*\((\s*[\'"]?.*?)\)@s',
           nonempty(
@@ -117,6 +119,29 @@ final class CelerityResourceTransformer {
     }
 
     return 'url('.$uri.')';
+  }
+
+  private function replaceCSSVariables($path, $data) {
+    $this->currentPath = $path;
+    return preg_replace_callback(
+      '/{\$([^}]+)}/',
+      array($this, 'replaceCSSVariable'),
+      $data);
+  }
+
+  public function replaceCSSVariable($matches) {
+    static $map = array(
+      'red' => '#c0392b',
+    );
+
+    $var_name = $matches[1];
+    if (empty($map[$var_name])) {
+      $path = $this->currentPath;
+      throw new Exception(
+        "CSS file '{$path}' has unknown variable '{$var_name}'.");
+    }
+
+    return $map[$var_name];
   }
 
 }

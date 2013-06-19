@@ -160,7 +160,7 @@
 }
 
 .phabricator-timeline-red .phabricator-timeline-border {
-  border-color: #c0392b;
+  border-color: {$red};
 }
 
 .phabricator-timeline-orange .phabricator-timeline-border {
@@ -200,7 +200,7 @@
 }
 
 .phabricator-timeline-red .phabricator-timeline-icon-fill {
-  background-color: #c0392b;
+  background-color: {$red};
 }
 
 .phabricator-timeline-orange .phabricator-timeline-icon-fill {
