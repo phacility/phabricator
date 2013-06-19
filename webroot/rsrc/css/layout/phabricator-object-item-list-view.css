@@ -345,7 +345,7 @@
 */
 
 .phabricator-object-item-highlighted {
-  background: rgb(253, 255, 221);
+  background: #fdf5d4;
 }
 
 .phabricator-object-list-cards
@@ -355,7 +355,7 @@
 }
 
 .phabricator-object-item-selected {
-  background: #bfdcff;
+  background: #daeaf3;
 }
 
 .phabricator-object-list-flush .aphront-error-view {

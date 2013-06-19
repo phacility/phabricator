@@ -14,12 +14,19 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
 
     $colors = array(
       'c0392b' => 'Base Red',
+      'f4dddb' => '83% Red',
       'd35400' => 'Base Orange',
+      'f7e2d4' => '83% Orange',
       'f1c40f' => 'Base Yellow',
+      'fdf5d4' => '83% Yellow',
       '27ae60' => 'Base Green',
+      'dbf2e4' => '83% Green',
       '2980b9' => 'Base Blue',
+      'daeaf3' => '83% Blue',
       'c6539d' => 'Base Indigo',
+      'f5e2ef' => '83% Indigo',
       '8e44ad' => 'Base Violet',
+      'ecdff1' => '83% Violet'
     );
 
     $darks = array(
@@ -41,7 +48,9 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
     }
 
     $c_column = array();
+    $url = array();
     foreach ($colors as $color => $name) {
+      $url[] = $color;
       $c_column[] = phutil_tag(
         'div',
         array(
@@ -50,12 +59,20 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
         $name.' #'.$color);
     }
 
+    $color_url = phutil_tag(
+      'a',
+      array(
+        'href' => 'http://color.hailpixel.com/#'.implode(',', $url),
+        'class' => 'button grey mlb'),
+      'Color Palette');
+
     $layout1 = id(new PHUIBoxView())
       ->appendChild($d_column)
       ->setShadow(true)
       ->addPadding(PHUI::PADDING_LARGE);
 
     $layout2 = id(new PHUIBoxView())
+      ->appendChild($color_url)
       ->appendChild($c_column)
       ->setShadow(true)
       ->addPadding(PHUI::PADDING_LARGE);

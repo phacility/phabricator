@@ -16,9 +16,9 @@
   font-size: 11px;
   overflow: hidden;
 
-  background: #f3f6ff;
+  background: #daeaf3;
   color: #444444;
-  border: 1px solid #afbfcf;
+  border: 1px solid #2980b9;
 
   cursor: pointer;
 
@@ -28,21 +28,21 @@
 }
 
 .jx-notification-alert {
-  background: #ffffa0;
-  border: 1px solid #aaaa60;
+  background: #fdf5d4;
+  border: 1px solid #f1c40f;
 }
 
 .jx-notification-debug {
-  background: #ffa0ff;
-  border: 1px solid #aa60aa;
+  background: #f5e2ef;
+  border: 1px solid #c6539d;
 }
 
 .jx-notification-done {
-  background: #d0ffd0;
-  border: 1px solid #60aa60;
+  background: #dbf2e4;
+  border: 1px solid #27ae60;
 }
 
 .jx-notification-error {
-  background: #ffd0d0;
-  border: 1px solid #aa6060;
+  background: #f4dddb;
+  border: 1px solid #c0392b;
 }
