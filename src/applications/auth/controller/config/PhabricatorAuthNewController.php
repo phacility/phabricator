@@ -46,7 +46,7 @@ final class PhabricatorAuthNewController
       ->setName('provider')
       ->setError($e_provider);
 
-    $providers = msort($providers, 'getProviderName');
+    $providers = msort($providers, 'getLoginOrder');
     foreach ($providers as $provider) {
       $options->addButton(
         get_class($provider),
