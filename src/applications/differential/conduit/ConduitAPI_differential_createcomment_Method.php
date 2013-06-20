@@ -17,6 +17,8 @@ final class ConduitAPI_differential_createcomment_Method
       'action'         => 'optional string',
       'silent'         => 'optional bool',
       'attach_inlines' => 'optional bool',
+      'added_reviewers'   => 'optional array<phids>',
+      'removed_reviewers' => 'optional array<phids>'
     );
   }
 
@@ -56,6 +58,17 @@ final class ConduitAPI_differential_createcomment_Method
     $editor->setMessage($request->getValue('message'));
     $editor->setNoEmail($request->getValue('silent'));
     $editor->setAttachInlineComments($request->getValue('attach_inlines'));
+
+    $added_reviewers = $request->getValue('added_reviewers', array());
+    if ($added_reviewers) {
+      $editor->setAddedReviewers($added_reviewers);
+    }
+
+    $removed_reviewers = $request->getValue('removed_reviewers', array());
+    if ($removed_reviewers) {
+      $editor->setAddedReviewers($removed_reviewers);
+    }
+
     $editor->save();
 
     return array(
