@@ -96,7 +96,7 @@ final class PhamePost extends PhameDAO
     $options = array();
 
     if ($current == 'facebook' ||
-        PhabricatorEnv::getEnvConfig('facebook.application-id')) {
+        PhabricatorAuthProviderOAuthFacebook::getFacebookApplicationID()) {
       $options['facebook'] = 'Facebook';
     }
     if ($current == 'disqus' ||

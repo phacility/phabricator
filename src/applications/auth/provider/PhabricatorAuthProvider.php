@@ -75,48 +75,25 @@ abstract class PhabricatorAuthProvider {
         ->execute();
 
       $providers = array();
-      if ($configs) {
-        foreach ($configs as $config) {
-          if (!isset($objects[$config->getProviderClass()])) {
-            // This configuration is for a provider which is not installed.
-            continue;
-          }
-
-          $object = clone $objects[$config->getProviderClass()];
-          $object->attachProviderConfig($config);
-
-          $key = $object->getProviderKey();
-          if (isset($providers[$key])) {
-            throw new Exception(
-              pht(
-                "Two authentication providers use the same provider key ".
-                "('%s'). Each provider must be identified by a unique ".
-                "key.",
-                $key));
-          }
-          $providers[$key] = $object;
+      foreach ($configs as $config) {
+        if (!isset($objects[$config->getProviderClass()])) {
+          // This configuration is for a provider which is not installed.
+          continue;
         }
-      } else {
-        // TODO: Remove this once we transition to be completely database
-        // driven.
-        $from_class_map = array();
-        foreach ($objects as $object) {
-          $from_class = get_class($object);
-          $object_providers = $object->createProviders();
-          assert_instances_of($object_providers, 'PhabricatorAuthProvider');
-          foreach ($object_providers as $provider) {
-            $key = $provider->getProviderKey();
-            if (isset($providers[$key])) {
-              $first_class = $from_class_map[$key];
-              throw new Exception(
-                "PhabricatorAuthProviders '{$first_class}' and ".
-                "'{$from_class}' both created authentication providers ".
-                "identified by key '{$key}'. Provider keys must be unique.");
-            }
-            $providers[$key] = $provider;
-            $from_class_map[$key] = $from_class;
-          }
+
+        $object = clone $objects[$config->getProviderClass()];
+        $object->attachProviderConfig($config);
+
+        $key = $object->getProviderKey();
+        if (isset($providers[$key])) {
+          throw new Exception(
+            pht(
+              "Two authentication providers use the same provider key ".
+              "('%s'). Each provider must be identified by a unique ".
+              "key.",
+              $key));
         }
+        $providers[$key] = $object;
       }
     }
 
@@ -141,38 +118,23 @@ abstract class PhabricatorAuthProvider {
   abstract public function getAdapter();
 
   public function isEnabled() {
-    if ($this->hasProviderConfig()) {
-      return $this->getProviderConfig()->getIsEnabled();
-    }
-    return true;
+    return $this->getProviderConfig()->getIsEnabled();
   }
 
   public function shouldAllowLogin() {
-    if ($this->hasProviderConfig()) {
-      return $this->getProviderConfig()->getShouldAllowLogin();
-    }
-    return true;
+    return $this->getProviderConfig()->getShouldAllowLogin();
   }
 
   public function shouldAllowRegistration() {
-    if ($this->hasProviderConfig()) {
-      return $this->getProviderConfig()->getShouldAllowRegistration();
-    }
-    return true;
+    return $this->getProviderConfig()->getShouldAllowRegistration();
   }
 
   public function shouldAllowAccountLink() {
-    if ($this->hasProviderConfig()) {
-      return $this->getProviderConfig()->getShouldAllowLink();
-    }
-    return true;
+    return $this->getProviderConfig()->getShouldAllowLink();
   }
 
   public function shouldAllowAccountUnlink() {
-    if ($this->hasProviderConfig()) {
-      return $this->getProviderConfig()->getShouldAllowUnlink();
-    }
-    return true;
+    return $this->getProviderConfig()->getShouldAllowUnlink();
   }
 
   public function buildLoginForm(

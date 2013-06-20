@@ -34,15 +34,13 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return $items;
   }
 
-  public function shouldAppearInLaunchView() {
-    return false;
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
   }
 
   public function getRoutes() {
     return array(
       '/auth/' => array(
-/*
-
         '' => 'PhabricatorAuthListController',
         'config/' => array(
           'new/' => 'PhabricatorAuthNewController',
@@ -51,8 +49,6 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           '(?P<action>enable|disable)/(?P<id>\d+)/' =>
             'PhabricatorAuthDisableController',
         ),
-
-*/
         'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',

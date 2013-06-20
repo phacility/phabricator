@@ -14,15 +14,6 @@ final class PhabricatorAuthProviderPassword
       'Allow users to login or register using a username and password.');
   }
 
-  public function isEnabled() {
-    if ($this->hasProviderConfig()) {
-      return parent::isEnabled();
-    }
-
-    return parent::isEnabled() &&
-           PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
-  }
-
   public function getAdapter() {
     if (!$this->adapter) {
       $adapter = new PhutilAuthAdapterEmpty();

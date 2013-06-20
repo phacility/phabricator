@@ -4,8 +4,6 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
   protected $adapter;
 
-  abstract protected function getOAuthClientID();
-  abstract protected function getOAuthClientSecret();
   abstract protected function newOAuthAdapter();
 
   public function getDescriptionForCreate() {
@@ -21,34 +19,12 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return $this->adapter;
   }
 
-  public function isEnabled() {
-    if ($this->hasProviderConfig()) {
-      return parent::isEnabled();
-    }
-
-    return parent::isEnabled() &&
-           $this->getOAuthClientID() &&
-           $this->getOAuthClientSecret();
-  }
-
   protected function configureAdapter(PhutilAuthAdapterOAuth $adapter) {
-
-    if ($this->hasProviderConfig()) {
-      $config = $this->getProviderConfig();
-      $adapter->setClientID($config->getProperty(self::PROPERTY_APP_ID));
-      $adapter->setClientSecret(
-        new PhutilOpaqueEnvelope(
-          $config->getProperty(self::PROPERTY_APP_SECRET)));
-    } else {
-      if ($this->getOAuthClientID()) {
-        $adapter->setClientID($this->getOAuthClientID());
-      }
-
-      if ($this->getOAuthClientSecret()) {
-        $adapter->setClientSecret($this->getOAuthClientSecret());
-      }
-    }
-
+    $config = $this->getProviderConfig();
+    $adapter->setClientID($config->getProperty(self::PROPERTY_APP_ID));
+    $adapter->setClientSecret(
+      new PhutilOpaqueEnvelope(
+        $config->getProperty(self::PROPERTY_APP_SECRET)));
     $adapter->setRedirectURI($this->getLoginURI());
     return $adapter;
   }
@@ -187,18 +163,9 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
   const PROPERTY_APP_SECRET = 'oauth:app:secret';
 
   public function readFormValuesFromProvider() {
-
-    if ($this->hasProviderConfig()) {
-      $config = $this->getProviderConfig();
-      $id = $config->getProperty(self::PROPERTY_APP_ID);
-      $secret = $config->getProperty(self::PROPERTY_APP_SECRET);
-    } else {
-      $id = $this->getOAuthClientID();
-      $secret = $this->getOAuthClientSecret();
-      if ($secret) {
-        $secret = $secret->openEnvelope();
-      }
-    }
+    $config = $this->getProviderConfig();
+    $id = $config->getProperty(self::PROPERTY_APP_ID);
+    $secret = $config->getProperty(self::PROPERTY_APP_SECRET);
 
     return array(
       self::PROPERTY_APP_ID     => $id,
