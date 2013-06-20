@@ -25,16 +25,24 @@ final class PhabricatorAuthListController
       if ($provider) {
         $name = $provider->getProviderName();
       } else {
-        $name = $config->getProviderType();
+        $name = $config->getProviderType().' ('.$config->getProviderClass().')';
       }
 
       $item
-        ->setHeader($name)
-        ->setHref($edit_uri);
+        ->setHeader($name);
 
-      $domain = $provider->getProviderDomain();
-      if ($domain !== 'self') {
-        $item->addAttribute($domain);
+      if ($provider) {
+        $item->setHref($edit_uri);
+      } else {
+        $item->addAttribute(pht('Provider Implementation Missing!'));
+      }
+
+      $domain = null;
+      if ($provider) {
+        $domain = $provider->getProviderDomain();
+        if ($domain !== 'self') {
+          $item->addAttribute($domain);
+        }
       }
 
       if ($config->getShouldAllowRegistration()) {
