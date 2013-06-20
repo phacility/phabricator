@@ -110,6 +110,10 @@ final class PhabricatorAuthEditController
             ->setNewValue($value);
         }
 
+        if ($is_new) {
+          $config->save();
+        }
+
         $editor = id(new PhabricatorAuthProviderConfigEditor())
           ->setActor($viewer)
           ->setContentSourceFromRequest($request)
