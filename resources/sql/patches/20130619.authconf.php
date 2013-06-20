@@ -45,6 +45,7 @@ $config_map = array(
   ),
   'PhabricatorAuthProviderPassword'       => array(
     'enabled' => 'auth.password-auth-enabled',
+    'enabled-default' => true,
     'registration' => false,
     'type' => 'password',
     'domain' => 'self',
@@ -53,7 +54,10 @@ $config_map = array(
 
 foreach ($config_map as $provider_class => $spec) {
   $enabled_key = idx($spec, 'enabled');
-  $enabled = PhabricatorEnv::getEnvConfigIfExists($enabled_key);
+  $enabled_default = idx($spec, 'enabled-default', false);
+  $enabled = PhabricatorEnv::getEnvConfigIfExists(
+    $enabled_key,
+    $enabled_default);
 
   if (!$enabled) {
     echo pht("Skipping %s (not enabled).\n", $provider_class);
