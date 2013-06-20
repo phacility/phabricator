@@ -217,6 +217,15 @@ abstract class PhabricatorApplicationTransactionEditor
             array_diff_key($new_map, $old_map)));
 
         $subeditor->save();
+
+        // for the rest of these edits, subscribers should include those just
+        // added as well as those just removed.
+        $subscribers = array_unique(array_merge(
+          $this->subscribers,
+          $xaction->getOldValue(),
+          $xaction->getNewValue()));
+        $this->subscribers = $subscribers;
+
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         $old = $xaction->getOldValue();
@@ -307,14 +316,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $actor = $this->requireActor();
 
-    if ($object->getPHID() &&
-        ($object instanceof PhabricatorSubscribableInterface)) {
-      $subs = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-        $object->getPHID());
-      $this->subscribers = array_fuse($subs);
-    } else {
-      $this->subscribers = array();
-    }
+    $this->loadSubscribers($object);
 
     $xactions = $this->applyImplicitCC($object, $xactions);
 
@@ -502,6 +504,17 @@ abstract class PhabricatorApplicationTransactionEditor
     }
     foreach ($xactions as $key => $xaction) {
       $xaction->setHandles(array_select_keys($handles, $phids[$key]));
+    }
+  }
+
+  private function loadSubscribers(PhabricatorLiskDAO $object) {
+    if ($object->getPHID() &&
+        ($object instanceof PhabricatorSubscribableInterface)) {
+      $subs = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $object->getPHID());
+      $this->subscribers = array_fuse($subs);
+    } else {
+      $this->subscribers = array();
     }
   }
 
@@ -1017,8 +1030,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $email_to = $this->getMailTo($object);
-    $email_cc = $this->getMailCC($object);
+    $email_to = array_unique($this->getMailTo($object));
+    $email_cc = array_unique($this->getMailCC($object));
 
     $phids = array_merge($email_to, $email_cc);
     $handles = id(new PhabricatorObjectHandleData($phids))
@@ -1203,9 +1216,9 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    return array_merge(
+    return array_unique(array_merge(
       $this->getMailTo($object),
-      $this->getMailCC($object));
+      $this->getMailCC($object)));
   }
 
 
