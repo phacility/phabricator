@@ -35,12 +35,6 @@ final class PhabricatorAuthProviderPassword
     return '100-'.$this->getProviderName();
   }
 
-  public function shouldAllowRegistration() {
-    // TODO: Hard code this as "false" for now so we don't inadvertantly open
-    // up password registration where it did not previously exist.
-    return false;
-  }
-
   public function shouldAllowAccountLink() {
     return false;
   }
