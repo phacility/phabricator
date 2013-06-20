@@ -15,8 +15,17 @@ final class PhabricatorAuthProviderLDAP
       'LDAP credentials to log in to Phabricator.');
   }
 
+  public function getDefaultProviderConfig() {
+    return parent::getDefaultProviderConfig()
+      ->setProperty(self::KEY_PORT, 389)
+      ->setProperty(self::KEY_VERSION, 3);
+  }
 
   public function isEnabled() {
+    if ($this->hasProviderConfig()) {
+      return parent::isEnabled();
+    }
+
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('ldap.auth-enabled');
   }
@@ -47,22 +56,6 @@ final class PhabricatorAuthProviderLDAP
       $this->adapter = $adapter;
     }
     return $this->adapter;
-  }
-
-  public function shouldAllowLogin() {
-    return true;
-  }
-
-  public function shouldAllowRegistration() {
-    return true;
-  }
-
-  public function shouldAllowAccountLink() {
-    return true;
-  }
-
-  public function shouldAllowAccountUnlink() {
-    return true;
   }
 
   protected function renderLoginForm(AphrontRequest $request, $mode) {

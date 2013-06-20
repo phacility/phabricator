@@ -16,6 +16,10 @@ final class PhabricatorAuthProviderOAuthDisqus
   }
 
   public function isEnabled() {
+    if ($this->hasProviderConfig()) {
+      return parent::isEnabled();
+    }
+
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('disqus.auth-enabled');
   }
@@ -32,19 +36,18 @@ final class PhabricatorAuthProviderOAuthDisqus
     return null;
   }
 
-  public function shouldAllowLogin() {
-    return true;
-  }
-
   public function shouldAllowRegistration() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowRegistration();
+    }
     return PhabricatorEnv::getEnvConfig('disqus.registration-enabled');
   }
 
-  public function shouldAllowAccountLink() {
-    return true;
-  }
-
   public function shouldAllowAccountUnlink() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowAccountUnlink();
+    }
+
     return !PhabricatorEnv::getEnvConfig('disqus.auth-permanent');
   }
 

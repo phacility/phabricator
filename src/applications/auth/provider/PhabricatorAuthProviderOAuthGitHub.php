@@ -16,6 +16,10 @@ final class PhabricatorAuthProviderOAuthGitHub
   }
 
   public function isEnabled() {
+    if ($this->hasProviderConfig()) {
+      return parent::isEnabled();
+    }
+
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('github.auth-enabled');
   }
@@ -32,19 +36,17 @@ final class PhabricatorAuthProviderOAuthGitHub
     return null;
   }
 
-  public function shouldAllowLogin() {
-    return true;
-  }
-
   public function shouldAllowRegistration() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowRegistration();
+    }
     return PhabricatorEnv::getEnvConfig('github.registration-enabled');
   }
 
-  public function shouldAllowAccountLink() {
-    return true;
-  }
-
   public function shouldAllowAccountUnlink() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowAccountUnlink();
+    }
     return !PhabricatorEnv::getEnvConfig('github.auth-permanent');
   }
 

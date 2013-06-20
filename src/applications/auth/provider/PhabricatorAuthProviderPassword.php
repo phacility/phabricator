@@ -15,6 +15,10 @@ final class PhabricatorAuthProviderPassword
   }
 
   public function isEnabled() {
+    if ($this->hasProviderConfig()) {
+      return parent::isEnabled();
+    }
+
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
   }
@@ -32,10 +36,6 @@ final class PhabricatorAuthProviderPassword
   public function getLoginOrder() {
     // Make sure username/password appears first if it is enabled.
     return '100-'.$this->getProviderName();
-  }
-
-  public function shouldAllowLogin() {
-    return true;
   }
 
   public function shouldAllowRegistration() {

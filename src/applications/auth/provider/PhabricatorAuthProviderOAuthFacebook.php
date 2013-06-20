@@ -9,6 +9,11 @@ final class PhabricatorAuthProviderOAuthFacebook
     return pht('Facebook');
   }
 
+  public function getDefaultProviderConfig() {
+    return parent::getDefaultProviderConfig()
+      ->setProperty(self::KEY_REQUIRE_SECURE, 1);
+  }
+
   protected function newOAuthAdapter() {
     $secure_only = PhabricatorEnv::getEnvConfig('facebook.require-https-auth');
     return id(new PhutilAuthAdapterOAuthFacebook())
@@ -20,6 +25,10 @@ final class PhabricatorAuthProviderOAuthFacebook
   }
 
   public function isEnabled() {
+    if ($this->hasProviderConfig()) {
+      return parent::isEnabled();
+    }
+
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
   }
@@ -36,19 +45,17 @@ final class PhabricatorAuthProviderOAuthFacebook
     return null;
   }
 
-  public function shouldAllowLogin() {
-    return true;
-  }
-
   public function shouldAllowRegistration() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowRegistration();
+    }
     return PhabricatorEnv::getEnvConfig('facebook.registration-enabled');
   }
 
-  public function shouldAllowAccountLink() {
-    return true;
-  }
-
   public function shouldAllowAccountUnlink() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowAccountUnlink();
+    }
     return !PhabricatorEnv::getEnvConfig('facebook.auth-permanent');
   }
 

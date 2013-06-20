@@ -16,6 +16,9 @@ final class PhabricatorAuthProviderOAuthGoogle
   }
 
   public function isEnabled() {
+    if ($this->hasProviderConfig()) {
+      return parent::isEnabled();
+    }
     return parent::isEnabled() &&
            PhabricatorEnv::getEnvConfig('google.auth-enabled');
   }
@@ -32,19 +35,17 @@ final class PhabricatorAuthProviderOAuthGoogle
     return null;
   }
 
-  public function shouldAllowLogin() {
-    return true;
-  }
-
   public function shouldAllowRegistration() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowRegistration();
+    }
     return PhabricatorEnv::getEnvConfig('google.registration-enabled');
   }
 
-  public function shouldAllowAccountLink() {
-    return true;
-  }
-
   public function shouldAllowAccountUnlink() {
+    if ($this->hasProviderConfig()) {
+      return parent::shouldAllowAccountUnlink();
+    }
     return !PhabricatorEnv::getEnvConfig('google.auth-permanent');
   }
 

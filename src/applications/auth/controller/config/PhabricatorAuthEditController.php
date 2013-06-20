@@ -60,12 +60,8 @@ final class PhabricatorAuthEditController
         throw new Exception("This provider is already configured!");
       }
 
-      $config = id(new PhabricatorAuthProviderConfig())
-        ->setProviderClass(get_class($provider))
-        ->setShouldAllowLogin(1)
-        ->setShouldAllowRegistration(1)
-        ->setShouldAllowLink(1)
-        ->setShouldAllowUnlink(1);
+      $config = $provider->getDefaultProviderConfig();
+      $provider->attachProviderConfig($config);
 
       $is_new = true;
     }
@@ -87,11 +83,6 @@ final class PhabricatorAuthEditController
 
       if (!$errors) {
         if ($is_new) {
-          $xactions[] = id(new PhabricatorAuthProviderConfigTransaction())
-            ->setTransactionType(
-              PhabricatorAuthProviderConfigTransaction::TYPE_ENABLE)
-            ->setNewValue(1);
-
           $config->setProviderType($provider->getProviderType());
           $config->setProviderDomain($provider->getProviderDomain());
         }
@@ -177,7 +168,11 @@ final class PhabricatorAuthEditController
 
     $status_tag = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE);
-    if ($config->getIsEnabled()) {
+    if ($is_new) {
+      $status_tag
+        ->setName(pht('New Provider'))
+        ->setBackgroundColor('blue');
+    } else if ($config->getIsEnabled()) {
       $status_tag
         ->setName(pht('Enabled'))
         ->setBackgroundColor('green');
