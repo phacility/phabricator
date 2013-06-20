@@ -47,12 +47,6 @@ final class PhabricatorExtendingPhabricatorConfigOptions
         ->setBaseClass('AphrontApplicationConfiguration')
         // TODO: This could probably use some better documentation.
         ->setDescription(pht("Application configuration class.")),
-       $this->newOption(
-         'controller.oauth-registration',
-         'class',
-         'PhabricatorOAuthDefaultRegistrationController')
-        ->setBaseClass('PhabricatorOAuthRegistrationController')
-        ->setDescription(pht("OAuth registration controller.")),
     );
   }
 

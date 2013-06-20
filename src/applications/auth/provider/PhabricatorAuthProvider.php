@@ -21,6 +21,10 @@ abstract class PhabricatorAuthProvider {
     return $this->providerConfig;
   }
 
+  public function getConfigurationHelp() {
+    return null;
+  }
+
   public function getDefaultProviderConfig() {
     return id(new PhabricatorAuthProviderConfig())
       ->setProviderClass(get_class($this))

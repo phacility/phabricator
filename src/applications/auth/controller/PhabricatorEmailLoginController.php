@@ -10,7 +10,7 @@ final class PhabricatorEmailLoginController
   public function processRequest() {
     $request = $this->getRequest();
 
-    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+    if (!PhabricatorAuthProviderPassword::getPasswordProvider()) {
       return new Aphront400Response();
     }
 

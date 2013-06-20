@@ -14,6 +14,18 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return 'authentication';
   }
 
+  public function getHelpURI() {
+    // NOTE: Although reasonable help exists for this in "Configuring Accounts
+    // and Registration", specifying a help URI here means we get the menu
+    // item in all the login/link interfaces, which is confusing and not
+    // helpful.
+
+    // TODO: Special case this, or split the auth and auth administration
+    // applications?
+
+    return null;
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {

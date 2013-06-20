@@ -9,6 +9,25 @@ final class PhabricatorAuthProviderOAuthFacebook
     return pht('Facebook');
   }
 
+  public function getConfigurationHelp() {
+    $uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
+    return pht(
+      'To configure Facebook OAuth, create a new Facebook Application here:'.
+      "\n\n".
+      'https://developers.facebook.com/apps'.
+      "\n\n".
+      'You should use these settings in your application:'.
+      "\n\n".
+      "  - **Site URL**: Set this to your full domain with protocol. For ".
+      "    this Phabricator install, the correct value is: `%s`\n".
+      "  - **Site Domain**: Set this to the full domain without a protocol. ".
+      "    For this Phabricator install, the correct value is: `%s`\n\n".
+      "After creating your new application, copy the **App ID** and ".
+      "**App Secret** to the fields above.",
+      (string)$uri,
+      $uri->getDomain());
+  }
+
   public function getDefaultProviderConfig() {
     return parent::getDefaultProviderConfig()
       ->setProperty(self::KEY_REQUIRE_SECURE, 1);

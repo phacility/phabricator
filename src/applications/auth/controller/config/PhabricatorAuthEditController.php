@@ -224,6 +224,12 @@ final class PhabricatorAuthEditController
           ->addCancelButton($cancel_uri)
           ->setValue($button));
 
+    $help = $provider->getConfigurationHelp();
+    if ($help) {
+      $form->appendChild(id(new PHUIFormDividerControl()));
+      $form->appendRemarkupInstructions($help);
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())

@@ -13,19 +13,6 @@ final class PhabricatorAuthenticationConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption(
-        'auth.password-auth-enabled', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht("Allow password authentication"),
-            pht("Don't allow password authentication")
-          ))
-        ->setSummary(pht("Enables password-based authentication."))
-        ->setDescription(
-          pht(
-            "Can users login with a username/password, or by following the ".
-            "link from a password reset email? You can disable this and ".
-            "configure one or more OAuth providers instead.")),
       $this->newOption('auth.sessions.web', 'int', 5)
         ->setSummary(
           pht("Number of web sessions a user can have simultaneously."))

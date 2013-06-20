@@ -553,11 +553,6 @@ return array(
 
 // -- Auth ------------------------------------------------------------------ //
 
-  // Can users login with a username/password, or by following the link from
-  // a password reset email? You can disable this and configure one or more
-  // OAuth providers instead.
-  'auth.password-auth-enabled'  => true,
-
   // Maximum number of simultaneous web sessions each user is permitted to have.
   // Setting this to "1" will prevent a user from logging in on more than one
   // browser at the same time.
@@ -1031,10 +1026,6 @@ return array(
 
   'aphront.default-application-configuration-class' =>
     'AphrontDefaultApplicationConfiguration',
-
-  'controller.oauth-registration' =>
-    'PhabricatorOAuthDefaultRegistrationController',
-
 
   // Directory that phd (the Phabricator daemon control script) should use to
   // track running daemons.
