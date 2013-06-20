@@ -151,6 +151,7 @@ EOBODY;
       array(
         'title' => pht('Forgot Password'),
         'device' => true,
+        'dust' => true,
       ));
   }
 
