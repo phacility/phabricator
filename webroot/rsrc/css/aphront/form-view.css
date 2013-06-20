@@ -190,6 +190,7 @@ table.aphront-form-control-radio-layout th {
   color: #222222;
 }
 
+
 table.aphront-form-control-checkbox-layout th {
   padding-top: 2px;
   padding-left: 8px;
@@ -202,6 +203,12 @@ table.aphront-form-control-checkbox-layout th {
 .aphront-form-control-checkbox-layout td input {
   margin-top: 4px;
   width: auto;
+}
+
+
+.aphront-form-control-radio-layout label.disabled,
+.aphront-form-control-checkbox-layout label.disabled {
+  color: #777777;
 }
 
 .aphront-form-radio-caption {

@@ -56,8 +56,22 @@ final class PhabricatorAuthEditController
         ->execute();
 
       if ($configs) {
-        // TODO: We could link to the other config's edit interface here.
-        throw new Exception("This provider is already configured!");
+        $id = head($configs)->getID();
+        $dialog = id(new AphrontDialogView())
+          ->setUser($viewer)
+          ->setMethod('GET')
+          ->setSubmitURI($this->getApplicationURI('config/edit/'.$id.'/'))
+          ->setTitle(pht('Provider Already Configured'))
+          ->appendChild(
+            pht(
+              'This provider ("%s") already exists, and you can not add more '.
+              'than one instance of it. You can edit the existing provider, '.
+              'or you can choose a different provider.',
+              $provider->getProviderName()))
+          ->addCancelButton($this->getApplicationURI('config/new/'))
+          ->addSubmitButton(pht('Edit Existing Provider'));
+
+        return id(new AphrontDialogResponse())->setDialog($dialog);
       }
 
       $config = $provider->getDefaultProviderConfig();
