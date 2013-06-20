@@ -16,9 +16,9 @@
   font-size: 11px;
   overflow: hidden;
 
-  background: #daeaf3;
+  background: {$lightsky};
   color: #444444;
-  border: 1px solid #2980b9;
+  border: 1px solid {$sky};
 
   cursor: pointer;
 
@@ -28,21 +28,21 @@
 }
 
 .jx-notification-alert {
-  background: #fdf5d4;
-  border: 1px solid #f1c40f;
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
 }
 
 .jx-notification-debug {
-  background: #f5e2ef;
-  border: 1px solid #c6539d;
+  background: {$lightindigo};
+  border: 1px solid {$indigo};
 }
 
 .jx-notification-done {
-  background: #dbf2e4;
-  border: 1px solid #27ae60;
+  background: {$lightgreen};
+  border: 1px solid {$green};
 }
 
 .jx-notification-error {
-  background: #f4dddb;
-  border: 1px solid #c0392b;
+  background: {$lightred};
+  border: 1px solid {$red};
 }

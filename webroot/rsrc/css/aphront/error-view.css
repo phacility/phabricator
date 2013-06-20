@@ -36,19 +36,19 @@
 }
 
 .aphront-error-severity-error {
-  color: #c0392b;
-  border-color: #c0392b;
-  background: #f4dddb;
+  color: {$red};
+  border-color: {$red};
+  background: {$lightred};
 }
 
 .aphront-error-severity-error .aphront-error-view-head {
-  color: #c0392b;
+  color: {$red};
 }
 
 .aphront-error-severity-warning {
   color: #bc7837;
-  border-color: #f1c40f;
-  background: #fdf5d4;
+  border-color: {$yellow};
+  background: {$lightyellow};
 }
 
 .aphront-error-severity-warning .aphront-error-view-head {
@@ -56,13 +56,13 @@
 }
 
 .aphront-error-severity-notice {
-  color: #2980b9;
-  border-color: #2980b9;
-  background: #daeaf3;
+  color: {$blue};
+  border-color: {$blue};
+  background: {$lightblue};
 }
 
 .aphront-error-severity-notice .aphront-error-view-head {
-  color: #2980b9;
+  color: {$blue};
 }
 
 .aphront-error-severity-nodata {

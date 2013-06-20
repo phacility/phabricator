@@ -41,7 +41,7 @@ final class ManiphestTaskListView extends ManiphestView {
 
     $status_map = ManiphestTaskStatus::getTaskStatusMap();
     $color_map = array(
-      ManiphestTaskPriority::PRIORITY_UNBREAK_NOW => 'magenta',
+      ManiphestTaskPriority::PRIORITY_UNBREAK_NOW => 'indigo',
       ManiphestTaskPriority::PRIORITY_TRIAGE => 'violet',
       ManiphestTaskPriority::PRIORITY_HIGH => 'red',
       ManiphestTaskPriority::PRIORITY_NORMAL => 'orange',
