@@ -14,6 +14,13 @@ final class AphrontDialogView extends AphrontView {
   private $headerColor = PhabricatorActionHeaderView::HEADER_DARK_GREY;
   private $footers = array();
   private $isStandalone;
+  private $method = 'POST';
+
+
+  public function setMethod($method) {
+    $this->method = $method;
+    return $this;
+  }
 
   public function setIsStandalone($is_standalone) {
     $this->isStandalone = $is_standalone;
@@ -159,7 +166,7 @@ final class AphrontDialogView extends AphrontView {
 
     $form_attributes = array(
       'action'  => $this->submitURI,
-      'method'  => 'post',
+      'method'  => $this->method,
       'id'      => $this->formID,
     );
 

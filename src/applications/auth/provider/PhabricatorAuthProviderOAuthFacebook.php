@@ -9,54 +9,45 @@ final class PhabricatorAuthProviderOAuthFacebook
     return pht('Facebook');
   }
 
+  public function getConfigurationHelp() {
+    $uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
+    return pht(
+      'To configure Facebook OAuth, create a new Facebook Application here:'.
+      "\n\n".
+      'https://developers.facebook.com/apps'.
+      "\n\n".
+      'You should use these settings in your application:'.
+      "\n\n".
+      "  - **Site URL**: Set this to your full domain with protocol. For ".
+      "    this Phabricator install, the correct value is: `%s`\n".
+      "  - **Site Domain**: Set this to the full domain without a protocol. ".
+      "    For this Phabricator install, the correct value is: `%s`\n\n".
+      "After creating your new application, copy the **App ID** and ".
+      "**App Secret** to the fields above.",
+      (string)$uri,
+      $uri->getDomain());
+  }
+
+  public function getDefaultProviderConfig() {
+    return parent::getDefaultProviderConfig()
+      ->setProperty(self::KEY_REQUIRE_SECURE, 1);
+  }
+
   protected function newOAuthAdapter() {
-    $secure_only = PhabricatorEnv::getEnvConfig('facebook.require-https-auth');
+    $require_secure = $this->getProviderConfig()->getProperty(
+      self::KEY_REQUIRE_SECURE);
+
     return id(new PhutilAuthAdapterOAuthFacebook())
-      ->setRequireSecureBrowsing($secure_only);
+      ->setRequireSecureBrowsing($require_secure);
   }
 
   protected function getLoginIcon() {
     return 'Facebook';
   }
 
-  public function isEnabled() {
-    return parent::isEnabled() &&
-           PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
-  }
-
-  protected function getOAuthClientID() {
-    return PhabricatorEnv::getEnvConfig('facebook.application-id');
-  }
-
-  protected function getOAuthClientSecret() {
-    $secret = PhabricatorEnv::getEnvConfig('facebook.application-secret');
-    if ($secret) {
-      return new PhutilOpaqueEnvelope($secret);
-    }
-    return null;
-  }
-
-  public function shouldAllowLogin() {
-    return true;
-  }
-
-  public function shouldAllowRegistration() {
-    return PhabricatorEnv::getEnvConfig('facebook.registration-enabled');
-  }
-
-  public function shouldAllowAccountLink() {
-    return true;
-  }
-
-  public function shouldAllowAccountUnlink() {
-    return !PhabricatorEnv::getEnvConfig('facebook.auth-permanent');
-  }
-
   public function readFormValuesFromProvider() {
-    $require_secure = PhabricatorEnv::getEnvConfig(
-      'facebook.require-https-auth');
-
-    // TODO: When we read from config, default this on for new providers.
+    $require_secure = $this->getProviderConfig()->getProperty(
+      self::KEY_REQUIRE_SECURE);
 
     return parent::readFormValuesFromProvider() + array(
       self::KEY_REQUIRE_SECURE => $require_secure,
@@ -123,5 +114,15 @@ final class PhabricatorAuthProviderOAuthFacebook
     return parent::renderConfigPropertyTransactionTitle($xaction);
   }
 
+  public static function getFacebookApplicationID() {
+    $providers = PhabricatorAuthProvider::getAllProviders();
+    $fb_provider = idx($providers, 'facebook:facebook.com');
+    if (!$fb_provider) {
+      return null;
+    }
+
+    return $fb_provider->getProperty(
+      PhabricatorAuthProviderOAuth::PROPERTY_APP_ID);
+  }
 
 }

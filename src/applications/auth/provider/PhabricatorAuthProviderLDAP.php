@@ -15,54 +15,46 @@ final class PhabricatorAuthProviderLDAP
       'LDAP credentials to log in to Phabricator.');
   }
 
-
-  public function isEnabled() {
-    return parent::isEnabled() &&
-           PhabricatorEnv::getEnvConfig('ldap.auth-enabled');
+  public function getDefaultProviderConfig() {
+    return parent::getDefaultProviderConfig()
+      ->setProperty(self::KEY_PORT, 389)
+      ->setProperty(self::KEY_VERSION, 3);
   }
 
   public function getAdapter() {
     if (!$this->adapter) {
+      $conf = $this->getProviderConfig();
       $adapter = id(new PhutilAuthAdapterLDAP())
-        ->setHostname(PhabricatorEnv::getEnvConfig('ldap.hostname'))
-        ->setPort(PhabricatorEnv::getEnvConfig('ldap.port'))
-        ->setBaseDistinguishedName(PhabricatorEnv::getEnvConfig('ldap.base_dn'))
+        ->setHostname(
+          $conf->getProperty(self::KEY_HOSTNAME))
+        ->setPort(
+          $conf->getProperty(self::KEY_PORT))
+        ->setBaseDistinguishedName(
+          $conf->getProperty(self::KEY_DISTINGUISHED_NAME))
         ->setSearchAttribute(
-            PhabricatorEnv::getEnvConfig('ldap.search_attribute'))
+          $conf->getProperty(self::KEY_SEARCH_ATTRIBUTE))
         ->setUsernameAttribute(
-            PhabricatorEnv::getEnvConfig('ldap.username-attribute'))
+          $conf->getProperty(self::KEY_USERNAME_ATTRIBUTE))
         ->setRealNameAttributes(
-            PhabricatorEnv::getEnvConfig('ldap.real_name_attributes'))
-        ->setLDAPVersion(PhabricatorEnv::getEnvConfig('ldap.version'))
-        ->setLDAPReferrals(PhabricatorEnv::getEnvConfig('ldap.referrals'))
-        ->setLDAPStartTLS(PhabricatorEnv::getEnvConfig('ldap.start-tls'))
+          $conf->getProperty(self::KEY_REALNAME_ATTRIBUTES, array()))
+        ->setLDAPVersion(
+          $conf->getProperty(self::KEY_VERSION))
+        ->setLDAPReferrals(
+          $conf->getProperty(self::KEY_REFERRALS))
+        ->setLDAPStartTLS(
+          $conf->getProperty(self::KEY_START_TLS))
         ->setAnonymousUsername(
-            PhabricatorEnv::getEnvConfig('ldap.anonymous-user-name'))
+          $conf->getProperty(self::KEY_ANONYMOUS_USERNAME))
         ->setAnonymousPassword(
-            new PhutilOpaqueEnvelope(
-              PhabricatorEnv::getEnvConfig('ldap.anonymous-user-password')))
-        ->setSearchFirst(PhabricatorEnv::getEnvConfig('ldap.search-first'))
+          new PhutilOpaqueEnvelope(
+            $conf->getProperty(self::KEY_ANONYMOUS_PASSWORD)))
+        ->setSearchFirst(
+          $conf->getProperty(self::KEY_SEARCH_FIRST))
         ->setActiveDirectoryDomain(
-            PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain'));
+          $conf->getProperty(self::KEY_ACTIVEDIRECTORY_DOMAIN));
       $this->adapter = $adapter;
     }
     return $this->adapter;
-  }
-
-  public function shouldAllowLogin() {
-    return true;
-  }
-
-  public function shouldAllowRegistration() {
-    return true;
-  }
-
-  public function shouldAllowAccountLink() {
-    return true;
-  }
-
-  public function shouldAllowAccountUnlink() {
-    return true;
   }
 
   protected function renderLoginForm(AphrontRequest $request, $mode) {
@@ -224,34 +216,11 @@ final class PhabricatorAuthProviderLDAP
   }
 
   public function readFormValuesFromProvider() {
-    return array(
-      self::KEY_HOSTNAME =>
-        PhabricatorEnv::getEnvConfig('ldap.hostname'),
-      self::KEY_PORT =>
-        PhabricatorEnv::getEnvConfig('ldap.port'),
-      self::KEY_DISTINGUISHED_NAME =>
-        PhabricatorEnv::getEnvConfig('ldap.base_dn'),
-      self::KEY_SEARCH_ATTRIBUTE =>
-        PhabricatorEnv::getEnvConfig('ldap.search_attribute'),
-      self::KEY_USERNAME_ATTRIBUTE =>
-        PhabricatorEnv::getEnvConfig('ldap.username-attribute'),
-      self::KEY_REALNAME_ATTRIBUTES =>
-        PhabricatorEnv::getEnvConfig('ldap.real_name_attributes'),
-      self::KEY_VERSION =>
-        PhabricatorEnv::getEnvConfig('ldap.version'),
-      self::KEY_REFERRALS =>
-        PhabricatorEnv::getEnvConfig('ldap.referrals'),
-      self::KEY_START_TLS =>
-        PhabricatorEnv::getEnvConfig('ldap.start-tls'),
-      self::KEY_ANONYMOUS_USERNAME =>
-        PhabricatorEnv::getEnvConfig('ldap.anonymous-user-name'),
-      self::KEY_ANONYMOUS_PASSWORD =>
-        PhabricatorEnv::getEnvConfig('ldap.anonymous-user-password'),
-      self::KEY_SEARCH_FIRST =>
-        PhabricatorEnv::getEnvConfig('ldap.search-first'),
-      self::KEY_ACTIVEDIRECTORY_DOMAIN =>
-        PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain'),
-    );
+    $properties = array();
+    foreach ($this->getPropertyLabels() as $key => $ignored) {
+      $properties[$key] = $this->getProviderConfig()->getProperty($key);
+    }
+    return $properties;
   }
 
   public function readFormValuesFromRequest(AphrontRequest $request) {
@@ -259,7 +228,7 @@ final class PhabricatorAuthProviderLDAP
     foreach ($this->getPropertyKeys() as $key) {
       switch ($key) {
         case self::KEY_REALNAME_ATTRIBUTES:
-          $values[$key] = $request->getStrList($key);
+          $values[$key] = $request->getStrList($key, array());
           break;
         default:
           $values[$key] = $request->getStr($key);
@@ -344,7 +313,7 @@ final class PhabricatorAuthProviderLDAP
             ->setName($key)
             ->setLabel($label)
             ->setCaption($caption)
-            ->setValue(implode(', ', $value));
+            ->setValue($value ? implode(', ', $value) : null);
           break;
         case 'password':
           $control = id(new AphrontFormPasswordControl())
@@ -410,6 +379,18 @@ final class PhabricatorAuthProviderLDAP
     }
 
     return parent::renderConfigPropertyTransactionTitle($xaction);
+  }
+
+  public static function getLDAPProvider() {
+    $providers = self::getAllEnabledProviders();
+
+    foreach ($providers as $provider) {
+      if ($provider instanceof PhabricatorAuthProviderLDAP) {
+        return $provider;
+      }
+    }
+
+    return null;
   }
 
 }

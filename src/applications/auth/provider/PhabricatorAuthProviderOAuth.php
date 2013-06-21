@@ -4,8 +4,6 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
   protected $adapter;
 
-  abstract protected function getOAuthClientID();
-  abstract protected function getOAuthClientSecret();
   abstract protected function newOAuthAdapter();
 
   public function getDescriptionForCreate() {
@@ -21,21 +19,12 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return $this->adapter;
   }
 
-  public function isEnabled() {
-    return parent::isEnabled() &&
-           $this->getOAuthClientID() &&
-           $this->getOAuthClientSecret();
-  }
-
   protected function configureAdapter(PhutilAuthAdapterOAuth $adapter) {
-    if ($this->getOAuthClientID()) {
-      $adapter->setClientID($this->getOAuthClientID());
-    }
-
-    if ($this->getOAuthClientSecret()) {
-      $adapter->setClientSecret($this->getOAuthClientSecret());
-    }
-
+    $config = $this->getProviderConfig();
+    $adapter->setClientID($config->getProperty(self::PROPERTY_APP_ID));
+    $adapter->setClientSecret(
+      new PhutilOpaqueEnvelope(
+        $config->getProperty(self::PROPERTY_APP_SECRET)));
     $adapter->setRedirectURI($this->getLoginURI());
     return $adapter;
   }
@@ -174,13 +163,12 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
   const PROPERTY_APP_SECRET = 'oauth:app:secret';
 
   public function readFormValuesFromProvider() {
-    $secret = $this->getOAuthClientSecret();
-    if ($secret) {
-      $secret = $secret->openEnvelope();
-    }
+    $config = $this->getProviderConfig();
+    $id = $config->getProperty(self::PROPERTY_APP_ID);
+    $secret = $config->getProperty(self::PROPERTY_APP_SECRET);
 
     return array(
-      self::PROPERTY_APP_ID     => $this->getOAuthClientID(),
+      self::PROPERTY_APP_ID     => $id,
       self::PROPERTY_APP_SECRET => $secret,
     );
   }
@@ -208,7 +196,7 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
     if (!strlen($values[$key_secret])) {
       $errors[] = pht('Application secret is required.');
-      $issues[$key_id] = pht('Required');
+      $issues[$key_secret] = pht('Required');
     }
 
     // If the user has not changed the secret, don't update it (that is,

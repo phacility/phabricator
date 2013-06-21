@@ -5,32 +5,41 @@ Describes how to configure user access to Phabricator.
 
 = Overview =
 
-Phabricator supports a number of login systems, like traditional
-username/password, Facebook OAuth, GitHub OAuth, and Google OAuth. You can
-enable or disable these systems to configure who can register for and access
-your install, and how users with existing accounts can login.
+Phabricator supports a number of login systems. You can enable or disable these
+systems to configure who can register for and access your install, and how users
+with existing accounts can login.
 
-By default, only username/password auth is enabled, and there are no valid
-accounts. Start by creating a new account with the
-##phabricator/bin/accountadmin## script.
+Methods of logging in are called **Authentication Providers**. For example,
+there is a "Username/Password" authentication provider available, which allows
+users to log in with a traditional username and password. Other providers
+support logging in with other credentials. For example:
 
-= Using accountadmin =
+  - **Username/Password:** Users use a username and password to log in or
+    register.
+  - **LDAP:** Users use LDAP credentials to log in or register.
+  - **OAuth:** Users use accounts on a supported OAuth2 provider (like
+    GitHub, Facebook, or Google) to log in or register.
+  - **Other Providers:** More providers are available, and Phabricator
+    can be extended with custom providers. See the "Auth" application for
+    a list of available providers.
 
-##accountadmin## is a user-friendly command line interface for creating and
-editing accounts. To use ##accountadmin##, just run the script:
+By default, no providers are enabled. You must use the "Auth" application to
+add one or more providers after you complete the installation process.
 
-  $ ./phabricator/bin/accountadmin
-  Enter a username to create a new account or edit an existing account.
+After you add a provider, you can link it to existing accounts (for example,
+associate an existing Phabricator account with a GitHub OAuth account) or users
+can use it to register new accounts (assuming you enable these options).
 
-    Enter a username:
+= Recovering Administrator Accounts =
 
-This will walk you through the process of creating an initial user account.
-Once you've created an account, you can login with it and use the web console
-to create and manage accounts more easily (provided you make your first account
-an administrator).
+If you accidentally lock yourself out of Phabricator, you can use the `bin/auth`
+script to recover access to an administrator account. To recover access, run:
 
-You can use this script later to create or edit accounts if you, for example,
-accidentally remove your admin flag.
+  phabricator/ $ ./bin/auth recover <username>
+
+...where `<username>` is the admin account username you want to recover access
+to. This will give you a link which will log you in as the specified
+administrative user.
 
 = Managing Accounts with the Web Console =
 
@@ -38,114 +47,20 @@ To manage accounts from the web, login as an administrator account and go to
 ##/people/## or click "People" on the homepage. Provided you're an admin,
 you'll see options to create or edit accounts.
 
-= Managing Accounts from the Command Line =
+= Manually Creating New Accounts =
 
-You can use ##scripts/user/add_user.php## to batch create accounts. Run it
-like:
+There are two ways to manually create new accounts: via the web UI using
+the "People" application (this is easiest), or via the CLI using the
+`accountadmin` binary (this has a few more options).
 
-  $ ./add_user.php <username> <email> <realname> <admin>
+To use the CLI script, run:
 
-For example:
+  phabricator/ $ ./bin/accountadmin
 
-  $ ./add_user.php alincoln alincoln@logcabin.com 'Abraham Lincoln' tjefferson
-
-This will create a new ##alincoln## user and send them a "Welcome to
-Phabricator" email from ##tjefferson## with instructions on how to log in and
-set a password.
-
-= Configuring Facebook OAuth =
-
-You can configure Facebook OAuth to allow login, login and registration, or
-nothing (the default). If registration is not allowed, users must have an
-existing account in order to link a Facebook account to it, but can use
-Facebook to login once the accounts are linked.
-
-To configure Facebook OAuth, create a new Facebook Application:
-
-https://developers.facebook.com/apps
-
-You should set these things in your application:
-
-  - **Site URL**: Set this to your full domain with protocol, like
-    "##https://phabricator.example.com/##".
-  - **Site Domain**: Set this to the entire domain, like ##example.com##. You
-    might be able to get away with including the subdomain if you want to
-    scope more tightly.
-
-Once that is set up, edit your Phabricator configuration and set these keys:
-
-  - **facebook.auth-enabled**: set this to ##true##.
-  - **facebook.application-id**: set to your Facebook application's ID. Make
-    sure you set this as a string.
-  - **facebook.application-secret**: set to your Facebook application's
-    secret key.
-  - **facebook.registration-enabled**: set this to ##true## to let users
-    register for your install with a Facebook account (this is a very open
-    setting) or ##false## to prevent users from registering with Facebook.
-  - **facebook.auth-permanent**: you can set this to prevent account unlinking.
-    It is unlikely you want to prevent it, but Facebook's internal install uses
-    this option since Facebook uses Facebook as its only auth mechanism.
-
-= Configuring GitHub OAuth =
-
-You can configure GitHub OAuth to allow login, login and registration, or
-nothing (the default).
-
-To configure GitHub OAuth, create a new GitHub Application:
-
-https://github.com/settings/applications/new
-
-You should set these things in your application:
-
-  - **URL**: Set this to the full domain with protocol, like
-    "##https://phabricator.example.com/##".
-  - **Callback URL**: Set this to your domain plus "##/oauth/github/login/##",
-    like "##https://phabricator.example.com/oauth/github/login/##".
-
-Once you've created an application, edit your Phabricator configuration and
-set these keys:
-
-  - **github.auth-enabled**: set this to ##true##.
-  - **github.application-id**: set this to your application/client ID.
-  - **github.application-secret**: set this to your application secret.
-  - **github.registration-enabled**: set to ##true## to let users register with
-    just GitHub credentials (this is a very open setting) or ##false## to
-    prevent users from registering. If set to ##false##, users may still link
-    existing accounts and use GitHub to login, they just can't create new
-    accounts.
-  - **github.auth-permanent**: set to ##true## to prevent unlinking Phabricator
-    accounts from GitHub accounts.
-
-= Configuring Google OAuth =
-
-You can configure Google OAuth to allow login, login and registration, or
-nothing (the default).
-
-To configure Google OAuth, create a new Google "API Project":
-
-https://code.google.com/apis/console/
-
-You don't need to enable any **Services**, just go to **API Access**, click
-**"Create an OAuth 2.0 client ID..."**, and configure these settings:
-
-  - Click **More Options** next to **Authorized Redirect APIs** and add the
-    full domain (with protocol) plus ##/oauth/google/login/## to the list.
-    For example, ##https://phabricator.example.com/oauth/google/login/##
-  - Click **Create Client ID**.
-
-Once you've created a client ID, edit your Phabricator configuration and set
-these keys:
-
-  - **google.auth-enabled**: set this to ##true##.
-  - **google.application-id**: set this to your Client ID (from above).
-  - **google.application-secret**: set this to your Client Secret (from above).
-  - **google.registration-enabled**: set this to ##true## to let users register
-    with just Google credentials (this is a very open setting) or ##false## to
-    prevent users from registering. If set to ##false##, users may still link
-    existing accounts and use Google to login, they jus can't create new
-    accounts.
-  - **google.auth-permanent**: set this to ##true## to prevent unlinking
-    Phabricator accounts from Google accounts.
+Some options (like setting passwords and changing certain account flags) are
+only available from the CLI. You can also use this script to make a user
+an administrator (if you accidentally remove your admin flag) or create an
+administrative account.
 
 = Next Steps =
 

@@ -160,35 +160,35 @@
 }
 
 .phabricator-timeline-red .phabricator-timeline-border {
-  border-color: #c0392b;
+  border-color: {$red};
 }
 
 .phabricator-timeline-orange .phabricator-timeline-border {
-  border-color: #d35400;
+  border-color: {$orange};
 }
 
 .phabricator-timeline-yellow .phabricator-timeline-border {
-  border-color: #f1c40f;
+  border-color: {$yellow};
 }
 
 .phabricator-timeline-green .phabricator-timeline-border {
-  border-color: #27ae60;
+  border-color: {$green};
 }
 
 .phabricator-timeline-sky .phabricator-timeline-border {
-  border-color: #3498db;
+  border-color: {$sky};
 }
 
 .phabricator-timeline-blue .phabricator-timeline-border {
-  border-color: #2980b9;
+  border-color: {$blue};
 }
 
 .phabricator-timeline-indigo .phabricator-timeline-border {
-  border-color: #c6539d;
+  border-color: {$indigo};
 }
 
 .phabricator-timeline-violet .phabricator-timeline-border {
-  border-color: #8e44ad;
+  border-color: {$violet};
 }
 
 .phabricator-timeline-grey .phabricator-timeline-border {
@@ -200,35 +200,35 @@
 }
 
 .phabricator-timeline-red .phabricator-timeline-icon-fill {
-  background-color: #c0392b;
+  background-color: {$red};
 }
 
 .phabricator-timeline-orange .phabricator-timeline-icon-fill {
-  background-color: #d35400;
+  background-color: {$orange};
 }
 
 .phabricator-timeline-yellow .phabricator-timeline-icon-fill {
-  background-color: #f1c40f;
+  background-color: {$yellow};
 }
 
 .phabricator-timeline-green .phabricator-timeline-icon-fill {
-  background-color: #27ae60;
+  background-color: {$green};
 }
 
 .phabricator-timeline-sky .phabricator-timeline-icon-fill {
-  background-color: #3498db;
+  background-color: {$sky};
 }
 
 .phabricator-timeline-blue .phabricator-timeline-icon-fill {
-  background-color: #2980b9;
+  background-color: {$blue};
 }
 
 .phabricator-timeline-indigo .phabricator-timeline-icon-fill {
-  background-color: #c6539d;
+  background-color: {$indigo};
 }
 
 .phabricator-timeline-violet .phabricator-timeline-icon-fill {
-  background-color: #8e44ad;
+  background-color: {$violet};
 }
 
 .phabricator-timeline-grey .phabricator-timeline-icon-fill {

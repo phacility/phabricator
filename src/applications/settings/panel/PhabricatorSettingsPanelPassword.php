@@ -25,7 +25,7 @@ final class PhabricatorSettingsPanelPassword
 
     // ...or this install doesn't support password authentication at all.
 
-    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+    if (!PhabricatorAuthProviderPassword::getPasswordProvider()) {
       return false;
     }
 

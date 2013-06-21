@@ -49,17 +49,17 @@
     "apps-authentication-blue-large"  : {
       "name" : "apps-authentication-blue-large",
       "rule" : ".apps-authentication-blue-large, .phabricator-crumb-view:hover .apps-authentication-dark-large",
-      "hash" : "6a6061a987f18cb8127e49c6663f4fe3"
+      "hash" : "9a8389120be19de5b0fba2814736d2c4"
     },
     "apps-authentication-dark-large"  : {
       "name" : "apps-authentication-dark-large",
       "rule" : ".apps-authentication-dark-large",
-      "hash" : "591224019d38d0b5faec6923a12388e7"
+      "hash" : "478a7a1ae296ccf988ccce89bc7de25d"
     },
     "apps-authentication-light-large" : {
       "name" : "apps-authentication-light-large",
       "rule" : ".apps-authentication-light-large",
-      "hash" : "ee884df6c42fc58dfa0f33e1c5d22f09"
+      "hash" : "034256f1056033424b936e94debaa9ad"
     },
     "apps-calendar-blue-large"        : {
       "name" : "apps-calendar-blue-large",
@@ -585,6 +585,21 @@
       "name" : "apps-phriction-light-large",
       "rule" : ".apps-phriction-light-large",
       "hash" : "e122d15b4ff0956ad37329b79fbfdc3a"
+    },
+    "apps-policy-blue-large"          : {
+      "name" : "apps-policy-blue-large",
+      "rule" : ".apps-policy-blue-large, .phabricator-crumb-view:hover .apps-policy-dark-large",
+      "hash" : "23a55bb7794a0fd01cc5eefc78cff3b3"
+    },
+    "apps-policy-dark-large"          : {
+      "name" : "apps-policy-dark-large",
+      "rule" : ".apps-policy-dark-large",
+      "hash" : "44080f0d70116bc2f56cc9c879caf3de"
+    },
+    "apps-policy-light-large"         : {
+      "name" : "apps-policy-light-large",
+      "rule" : ".apps-policy-light-large",
+      "hash" : "fc07ff7b5f17fe7701f0967a2cc05ff1"
     },
     "apps-ponder-blue-large"          : {
       "name" : "apps-ponder-blue-large",

@@ -29,6 +29,28 @@ abstract class PhabricatorAuthController extends PhabricatorController {
 
   }
 
+  /**
+   * Returns true if this install is newly setup (i.e., there are no user
+   * accounts yet). In this case, we enter a special mode to permit creation
+   * of the first account form the web UI.
+   */
+  protected function isFirstTimeSetup() {
+    // If there are any auth providers, this isn't first time setup, even if
+    // we don't have accounts.
+    if (PhabricatorAuthProvider::getAllEnabledProviders()) {
+      return false;
+    }
+
+    // Otherwise, check if there are any user accounts. If not, we're in first
+    // time setup.
+    $any_users = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setLimit(1)
+      ->execute();
+
+    return !$any_users;
+  }
+
 
   /**
    * Log a user into a web session and return an @{class:AphrontResponse} which

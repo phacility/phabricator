@@ -4,12 +4,18 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
 
   private $buttons = array();
 
-  public function addButton($value, $label, $caption, $class = null) {
+  public function addButton(
+    $value,
+    $label,
+    $caption,
+    $class = null,
+    $disabled = false) {
     $this->buttons[] = array(
       'value'   => $value,
       'label'   => $label,
       'caption' => $caption,
       'class' => $class,
+      'disabled' => $disabled,
     );
     return $this;
   }
@@ -32,7 +38,9 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
           'checked' => ($button['value'] == $this->getValue())
             ? 'checked'
             : null,
-          'disabled' => $this->getDisabled() ? 'disabled' : null,
+          'disabled' => ($this->getDisabled() || $button['disabled'])
+            ? 'disabled'
+            : null,
         ));
       $label = phutil_tag(
         'label',

@@ -612,7 +612,7 @@ EOBODY;
     $new_username = $this->getUserName();
 
     $password_instructions = null;
-    if (PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+    if (PhabricatorAuthProviderPassword::getPasswordProvider()) {
       $uri = $this->getEmailLoginURI();
       $password_instructions = <<<EOTXT
 If you use a password to login, you'll need to reset it before you can login

@@ -57,33 +57,38 @@ a.phabricator-tag-type-object:link {
 }
 
 .phabricator-tag-color-red {
-  background-color: #c0392b;
-  border-color: #c0392b;
+  background-color: {$red};
+  border-color: {$red};
 }
 
 .phabricator-tag-color-orange {
-  background-color: #F39C12;
-  border-color: #F39C12;
+  background-color: {$orange};
+  border-color: {$orange};
 }
 
 .phabricator-tag-color-yellow {
-  background-color: #f1c40f;
-  border-color: #f1c40f;
+  background-color: {$yellow};
+  border-color: {$yellow};
 }
 
 .phabricator-tag-color-blue {
-  background-color: #2980b9;
-  border-color: #2980b9;
+  background-color: {$blue};
+  border-color: {$blue};
 }
 
-.phabricator-tag-color-magenta {
-  background-color: #cb4d9f;
-  border-color: #ce00ce;
+.phabricator-tag-color-indigo {
+  background-color: {$indigo};
+  border-color: {$indigo};
 }
 
 .phabricator-tag-color-green {
-  background-color: #27ae60;
-  border-color: #27ae60;
+  background-color: {$green};
+  border-color: {$green};
+}
+
+.phabricator-tag-color-violet {
+  background-color: {$violet};
+  border-color: {$violet};
 }
 
 .phabricator-tag-color-black {

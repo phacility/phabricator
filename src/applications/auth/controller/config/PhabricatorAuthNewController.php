@@ -46,12 +46,31 @@ final class PhabricatorAuthNewController
       ->setName('provider')
       ->setError($e_provider);
 
-    $providers = msort($providers, 'getProviderName');
+    $configured = PhabricatorAuthProvider::getAllProviders();
+    $configured_classes = array();
+    foreach ($configured as $configured_provider) {
+      $configured_classes[get_class($configured_provider)] = true;
+    }
+
+    // Sort providers by login order, and move disabled providers to the
+    // bottom.
+    $providers = msort($providers, 'getLoginOrder');
+    $providers = array_diff_key($providers, $configured_classes) + $providers;
+
     foreach ($providers as $provider) {
+      if (isset($configured_classes[get_class($provider)])) {
+        $disabled = true;
+        $description = pht('This provider is already configured.');
+      } else {
+        $disabled = false;
+        $description = $provider->getDescriptionForCreate();
+      }
       $options->addButton(
         get_class($provider),
         $provider->getNameForCreate(),
-        $provider->getDescriptionForCreate());
+        $description,
+        $disabled ? 'disabled' : null,
+        $disabled);
     }
 
     $form = id(new AphrontFormView())

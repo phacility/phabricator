@@ -150,7 +150,7 @@ final class PhamePostView extends AphrontView {
   }
 
   private function renderFacebookComments() {
-    $fb_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
+    $fb_id = PhabricatorAuthProviderOAuthFacebook::getFacebookApplicationID();
     if (!$fb_id) {
       return null;
     }

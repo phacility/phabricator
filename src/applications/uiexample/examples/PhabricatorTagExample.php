@@ -124,7 +124,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
     $tags[] = hsprintf('<br /><br />');
     $tags[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
-      ->setBackgroundColor(PhabricatorTagView::COLOR_MAGENTA)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_INDIGO)
       ->setDotColor(PhabricatorTagView::COLOR_YELLOW)
       ->setBarColor(PhabricatorTagView::COLOR_BLUE)
       ->setName('Easter');

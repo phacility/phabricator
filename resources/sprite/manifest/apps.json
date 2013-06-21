@@ -19,7 +19,7 @@
     "apps-authentication-dark" : {
       "name" : "apps-authentication-dark",
       "rule" : ".apps-authentication-dark",
-      "hash" : "937173ef05d25f3bcd7b039d97866487"
+      "hash" : "5ae0f7e5d45df5da12ecc447f44bc7d9"
     },
     "apps-calendar-dark"       : {
       "name" : "apps-calendar-dark",
@@ -195,6 +195,11 @@
       "name" : "apps-phriction-dark",
       "rule" : ".apps-phriction-dark",
       "hash" : "8a1035b1cbc512ed0845939158d266a3"
+    },
+    "apps-policy-dark"         : {
+      "name" : "apps-policy-dark",
+      "rule" : ".apps-policy-dark",
+      "hash" : "2704a7b1f48628ca89cc863d56adcdd6"
     },
     "apps-ponder-dark"         : {
       "name" : "apps-ponder-dark",

@@ -41,7 +41,7 @@
   cursor: pointer;
 }
 
-.device-desktop .phabricator-notification:hover {
+.device-desktop .phabricator-notification-menu .phabricator-notification:hover {
   background: #f4f6f9;
 }
 
