@@ -46,3 +46,7 @@
   background: {$lightred};
   border: 1px solid {$red};
 }
+
+.jx-notification-container .phabricator-notification {
+  padding: 0;
+}
