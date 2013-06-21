@@ -1378,6 +1378,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130619.authconf.php'),
       ),
+      '20130620.diffxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130620.diffxactions.sql'),
+      ),
     );
   }
 }
