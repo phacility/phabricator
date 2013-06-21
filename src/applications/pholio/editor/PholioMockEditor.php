@@ -120,7 +120,49 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $body = parent::buildMailBody($object, $xactions);
+    $body = new PhabricatorMetaMTAMailBody();
+    $headers = array();
+    $comments = array();
+    $inline_comments = array();
+
+    foreach ($xactions as $xaction) {
+      $comment = $xaction->getComment();
+      switch ($xaction->getTransactionType()) {
+        case PholioTransactionType::TYPE_INLINE:
+          if ($comment && strlen($comment->getContent())) {
+            $inline_comments[] = $comment;
+          }
+          break;
+        case PhabricatorTransactions::TYPE_COMMENT:
+          if ($comment && strlen($comment->getContent())) {
+            $comments[] = $comment->getContent();
+          }
+        // fallthrough
+        default:
+          $headers[] = id(clone $xaction)
+            ->setRenderingTarget('text')
+            ->getTitle();
+          break;
+      }
+    }
+
+    $body->addRawSection(implode("\n", $headers));
+
+    foreach ($comments as $comment) {
+      $body->addRawSection($comment);
+    }
+
+    if ($inline_comments) {
+      $body->addRawSection(pht('INLINE COMMENTS'));
+      foreach ($inline_comments as $comment) {
+        $text = pht(
+          'Image %d: %s',
+          $comment->getImageID(),
+          $comment->getContent());
+        $body->addRawSection($text);
+      }
+    }
+
     $body->addTextSection(
       pht('MOCK DETAIL'),
       PhabricatorEnv::getProductionURI('/M'.$object->getID()));
