@@ -15,12 +15,6 @@ return array(
   'differential.require-test-plan-field' => false,
   'differential.allow-reopen' => true,
 
-  // Allow logins via google.
-  'google.auth-enabled' => true,
-  'google.auth-permanent' => true,
-  // Allow anyone with a google account to register.
-  'google.registration-enabled' => true,
-
   // Logging.
   'log.access.path'             => '/home/ubuntu/logs/phabricator.log',
 
@@ -59,5 +53,4 @@ return array(
     '@\.q$@' => 'mysql',
   ),
 
-) + phabricator_read_config_file('custom/khan-google.conf.php')
-  + phabricator_read_config_file('production');
+) + phabricator_read_config_file('production');
