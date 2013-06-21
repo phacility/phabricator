@@ -71,7 +71,8 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           => 'PhabricatorAuthConfirmLinkController',
       ),
 
-      '/oauth/google/login/' => 'PhabricatorAuthOldOAuthRedirectController',
+      '/oauth/(?P<provider>\w+)/login/'
+        => 'PhabricatorAuthOldOAuthRedirectController',
 
       '/login/' => array(
         '' => 'PhabricatorAuthStartController',

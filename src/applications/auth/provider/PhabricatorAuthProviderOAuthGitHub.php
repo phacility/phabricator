@@ -36,4 +36,9 @@ final class PhabricatorAuthProviderOAuthGitHub
     return 'Github';
   }
 
+  public function getLoginURI() {
+    // TODO: Clean this up. See PhabricatorAuthOldOAuthRedirectController.
+    return PhabricatorEnv::getURI('/oauth/github/login/');
+  }
+
 }
