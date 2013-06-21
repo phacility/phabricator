@@ -9,14 +9,15 @@ final class PhabricatorAuthProviderPassword
     return pht('Username/Password');
   }
 
+  public function getConfigurationHelp() {
+    return pht(
+      'You can select a minimum password length by setting '.
+      '`account.minimum-password-length` in configuration.');
+  }
+
   public function getDescriptionForCreate() {
     return pht(
       'Allow users to login or register using a username and password.');
-  }
-
-  public function isEnabled() {
-    return parent::isEnabled() &&
-           PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
   }
 
   public function getAdapter() {
@@ -32,14 +33,6 @@ final class PhabricatorAuthProviderPassword
   public function getLoginOrder() {
     // Make sure username/password appears first if it is enabled.
     return '100-'.$this->getProviderName();
-  }
-
-  public function shouldAllowLogin() {
-    return true;
-  }
-
-  public function shouldAllowRegistration() {
-    return true;
   }
 
   public function shouldAllowAccountLink() {
@@ -232,6 +225,18 @@ final class PhabricatorAuthProviderPassword
   public function willRegisterAccount(PhabricatorExternalAccount $account) {
     parent::willRegisterAccount($account);
     $account->setAccountID($account->getUserPHID());
+  }
+
+  public static function getPasswordProvider() {
+    $providers = self::getAllEnabledProviders();
+
+    foreach ($providers as $provider) {
+      if ($provider instanceof PhabricatorAuthProviderPassword) {
+        return $provider;
+      }
+    }
+
+    return null;
   }
 
 }

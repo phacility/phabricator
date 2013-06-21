@@ -16,9 +16,9 @@
   font-size: 11px;
   overflow: hidden;
 
-  background: #f3f6ff;
+  background: {$lightsky};
   color: #444444;
-  border: 1px solid #afbfcf;
+  border: 1px solid {$sky};
 
   cursor: pointer;
 
@@ -28,21 +28,25 @@
 }
 
 .jx-notification-alert {
-  background: #ffffa0;
-  border: 1px solid #aaaa60;
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
 }
 
 .jx-notification-debug {
-  background: #ffa0ff;
-  border: 1px solid #aa60aa;
+  background: {$lightindigo};
+  border: 1px solid {$indigo};
 }
 
 .jx-notification-done {
-  background: #d0ffd0;
-  border: 1px solid #60aa60;
+  background: {$lightgreen};
+  border: 1px solid {$green};
 }
 
 .jx-notification-error {
-  background: #ffd0d0;
-  border: 1px solid #aa6060;
+  background: {$lightred};
+  border: 1px solid {$red};
+}
+
+.jx-notification-container .phabricator-notification {
+  padding: 0;
 }

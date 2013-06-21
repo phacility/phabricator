@@ -44,6 +44,13 @@ final class PhabricatorAuthStartController
     }
 
     if (!$providers) {
+      if ($this->isFirstTimeSetup()) {
+        // If this is a fresh install, let the user register their admin
+        // account.
+        return id(new AphrontRedirectResponse())
+          ->setURI($this->getApplicationURI('/register/'));
+      }
+
       return $this->renderError(
         pht(
           "This Phabricator install is not configured with any enabled ".
@@ -139,7 +146,7 @@ final class PhabricatorAuthStartController
 
   private function processAjaxRequest() {
     $request = $this->getRequest();
-    $viewer = $request->getViewer();
+    $viewer = $request->getUser();
 
     // We end up here if the user clicks a workflow link that they need to
     // login to use. We give them a dialog saying "You need to login...".
@@ -162,7 +169,7 @@ final class PhabricatorAuthStartController
 
   private function processConduitRequest() {
     $request = $this->getRequest();
-    $viewer = $request->getViewer();
+    $viewer = $request->getUser();
 
     // A common source of errors in Conduit client configuration is getting
     // the request path wrong. The client will end up here, so make some

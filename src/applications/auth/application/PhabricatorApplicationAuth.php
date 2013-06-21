@@ -14,6 +14,18 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return 'authentication';
   }
 
+  public function getHelpURI() {
+    // NOTE: Although reasonable help exists for this in "Configuring Accounts
+    // and Registration", specifying a help URI here means we get the menu
+    // item in all the login/link interfaces, which is confusing and not
+    // helpful.
+
+    // TODO: Special case this, or split the auth and auth administration
+    // applications?
+
+    return null;
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {
@@ -34,16 +46,14 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     return $items;
   }
 
-  public function shouldAppearInLaunchView() {
-    return false;
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
   }
 
   public function getRoutes() {
     return array(
       '/auth/' => array(
-/*
-
-        '(query/(?P<key>[^/]+)/)?' => 'PhabricatorAuthListController',
+        '' => 'PhabricatorAuthListController',
         'config/' => array(
           'new/' => 'PhabricatorAuthNewController',
           'new/(?P<className>[^/]+)/' => 'PhabricatorAuthEditController',
@@ -51,8 +61,6 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           '(?P<action>enable|disable)/(?P<id>\d+)/' =>
             'PhabricatorAuthDisableController',
         ),
-
-*/
         'login/(?P<pkey>[^/]+)/' => 'PhabricatorAuthLoginController',
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
@@ -63,8 +71,11 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
           => 'PhabricatorAuthConfirmLinkController',
       ),
 
+      '/oauth/(?P<provider>\w+)/login/'
+        => 'PhabricatorAuthOldOAuthRedirectController',
+
       '/login/' => array(
-        '' => 'PhabricatorLoginController',
+        '' => 'PhabricatorAuthStartController',
         'email/' => 'PhabricatorEmailLoginController',
         'etoken/(?P<token>\w+)/' => 'PhabricatorEmailTokenController',
         'refresh/' => 'PhabricatorRefreshCSRFController',
@@ -72,17 +83,6 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
       ),
 
       '/logout/' => 'PhabricatorLogoutController',
-
-      '/oauth/' => array(
-        '(?P<provider>\w+)/' => array(
-          'login/'     => 'PhabricatorOAuthLoginController',
-          'diagnose/'  => 'PhabricatorOAuthDiagnosticsController',
-        ),
-      ),
-
-      '/ldap/' => array(
-        'login/' => 'PhabricatorLDAPLoginController',
-      ),
     );
   }
 

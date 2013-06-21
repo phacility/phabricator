@@ -9,12 +9,30 @@ abstract class PhabricatorAuthProvider {
     return $this;
   }
 
+  public function hasProviderConfig() {
+    return (bool)$this->providerConfig;
+  }
+
   public function getProviderConfig() {
-    if ($this->config === null) {
+    if ($this->providerConfig === null) {
       throw new Exception(
         "Call attachProviderConfig() before getProviderConfig()!");
     }
-    return $this->config;
+    return $this->providerConfig;
+  }
+
+  public function getConfigurationHelp() {
+    return null;
+  }
+
+  public function getDefaultProviderConfig() {
+    return id(new PhabricatorAuthProviderConfig())
+      ->setProviderClass(get_class($this))
+      ->setIsEnabled(1)
+      ->setShouldAllowLogin(1)
+      ->setShouldAllowRegistration(1)
+      ->setShouldAllowLink(1)
+      ->setShouldAllowUnlink(1);
   }
 
   public function getNameForCreate() {
@@ -56,24 +74,30 @@ abstract class PhabricatorAuthProvider {
     if ($providers === null) {
       $objects = self::getAllBaseProviders();
 
+      $configs = id(new PhabricatorAuthProviderConfigQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->execute();
+
       $providers = array();
-      $from_class_map = array();
-      foreach ($objects as $object) {
-        $from_class = get_class($object);
-        $object_providers = $object->createProviders();
-        assert_instances_of($object_providers, 'PhabricatorAuthProvider');
-        foreach ($object_providers as $provider) {
-          $key = $provider->getProviderKey();
-          if (isset($providers[$key])) {
-            $first_class = $from_class_map[$key];
-            throw new Exception(
-              "PhabricatorAuthProviders '{$first_class}' and '{$from_class}' ".
-              "both created authentication providers identified by key ".
-              "'{$key}'. Provider keys must be unique.");
-          }
-          $providers[$key] = $provider;
-          $from_class_map[$key] = $from_class;
+      foreach ($configs as $config) {
+        if (!isset($objects[$config->getProviderClass()])) {
+          // This configuration is for a provider which is not installed.
+          continue;
         }
+
+        $object = clone $objects[$config->getProviderClass()];
+        $object->attachProviderConfig($config);
+
+        $key = $object->getProviderKey();
+        if (isset($providers[$key])) {
+          throw new Exception(
+            pht(
+              "Two authentication providers use the same provider key ".
+              "('%s'). Each provider must be identified by a unique ".
+              "key.",
+              $key));
+        }
+        $providers[$key] = $object;
       }
     }
 
@@ -98,13 +122,24 @@ abstract class PhabricatorAuthProvider {
   abstract public function getAdapter();
 
   public function isEnabled() {
-    return true;
+    return $this->getProviderConfig()->getIsEnabled();
   }
 
-  abstract public function shouldAllowLogin();
-  abstract public function shouldAllowRegistration();
-  abstract public function shouldAllowAccountLink();
-  abstract public function shouldAllowAccountUnlink();
+  public function shouldAllowLogin() {
+    return $this->getProviderConfig()->getShouldAllowLogin();
+  }
+
+  public function shouldAllowRegistration() {
+    return $this->getProviderConfig()->getShouldAllowRegistration();
+  }
+
+  public function shouldAllowAccountLink() {
+    return $this->getProviderConfig()->getShouldAllowLink();
+  }
+
+  public function shouldAllowAccountUnlink() {
+    return $this->getProviderConfig()->getShouldAllowUnlink();
+  }
 
   public function buildLoginForm(
     PhabricatorAuthStartController $controller) {

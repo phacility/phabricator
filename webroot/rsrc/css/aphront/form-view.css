@@ -32,9 +32,9 @@
 
 .device-phone .aphront-form-view label.aphront-form-label,
 .aphront-form-full-width.aphront-form-view label.aphront-form-label {
-  display: block;
+  float: left;
   text-align: left;
-  width: 100%;
+  width: auto;
   margin-bottom: 3px;
 }
 
@@ -54,9 +54,9 @@
 .aphront-form-error {
   width: 18%;
   float: right;
-  color: #c13728;
+  color: {$red};
   font-weight: bold;
-  padding-top: 4px;
+  padding-top: 5px;
 }
 
 .aphront-dialog-body .aphront-form-full-width {
@@ -65,8 +65,8 @@
 
 .device-phone .aphront-form-error,
 .aphront-form-full-width .aphront-form-error {
-  float: none;
-  width: 100%;
+  float: right;
+  width: auto;
 }
 
 .device-phone .aphront-form-drag-and-drop-upload {
@@ -190,6 +190,7 @@ table.aphront-form-control-radio-layout th {
   color: #222222;
 }
 
+
 table.aphront-form-control-checkbox-layout th {
   padding-top: 2px;
   padding-left: 8px;
@@ -202,6 +203,12 @@ table.aphront-form-control-checkbox-layout th {
 .aphront-form-control-checkbox-layout td input {
   margin-top: 4px;
   width: auto;
+}
+
+
+.aphront-form-control-radio-layout label.disabled,
+.aphront-form-control-checkbox-layout label.disabled {
+  color: #777777;
 }
 
 .aphront-form-radio-caption {

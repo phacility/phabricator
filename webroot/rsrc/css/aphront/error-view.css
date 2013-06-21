@@ -8,6 +8,10 @@
   border-width: 1px;
 }
 
+form.aphront-dialog-view .aphront-error-view {
+  margin: 8px 0;
+}
+
 .aphront-error-view {
   margin: 20px;
 }
@@ -36,35 +40,33 @@
 }
 
 .aphront-error-severity-error {
-  color: #b94a48;
-  border-color: #eed3d7;
-  background: #f2dede;
+  color: {$red};
+  border-color: {$red};
+  background: {$lightred};
 }
 
 .aphront-error-severity-error .aphront-error-view-head {
-  color: #aa0000;
+  color: {$red};
 }
 
 .aphront-error-severity-warning {
   color: #bc7837;
-  border-color: #ebdcc1;
-  background: #fcf8e3;
+  border-color: {$yellow};
+  background: {$lightyellow};
 }
 
 .aphront-error-severity-warning .aphront-error-view-head {
   color: #bc7837;
-  background: #fcf8e3;
 }
 
 .aphront-error-severity-notice {
-  color: #3a87ad;
-  border-color: #a4bdec;
-  background: #dee7f8;
+  color: {$blue};
+  border-color: {$blue};
+  background: {$lightblue};
 }
 
 .aphront-error-severity-notice .aphront-error-view-head {
-  color: #3a87ad;
-  background: #dee7f8;
+  color: {$blue};
 }
 
 .aphront-error-severity-nodata {

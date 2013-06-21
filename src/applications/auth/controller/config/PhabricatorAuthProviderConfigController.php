@@ -17,11 +17,6 @@ abstract class PhabricatorAuthProviderConfigController
         pht('Add Authentication Provider'),
         $this->getApplicationURI('/config/new/'));
     }
-
-    id(new PhabricatorAuthProviderConfigSearchEngine())
-      ->setViewer($this->getRequest()->getUser())
-      ->addNavigationItems($nav->getMenu());
-
     return $nav;
   }
 

@@ -7,11 +7,11 @@ final class PhabricatorTagView extends AphrontView {
   const TYPE_STATE          = 'state';
 
   const COLOR_RED           = 'red';
-  const COLOR_REDORANGE     = 'redorange';
   const COLOR_ORANGE        = 'orange';
   const COLOR_YELLOW        = 'yellow';
   const COLOR_BLUE          = 'blue';
-  const COLOR_MAGENTA       = 'magenta';
+  const COLOR_INDIGO        = 'indigo';
+  const COLOR_VIOLET        = 'violet';
   const COLOR_GREEN         = 'green';
   const COLOR_BLACK         = 'black';
   const COLOR_GREY          = 'grey';
@@ -165,11 +165,11 @@ final class PhabricatorTagView extends AphrontView {
   public static function getColors() {
     return array(
       self::COLOR_RED,
-      self::COLOR_REDORANGE,
       self::COLOR_ORANGE,
       self::COLOR_YELLOW,
       self::COLOR_BLUE,
-      self::COLOR_MAGENTA,
+      self::COLOR_INDIGO,
+      self::COLOR_VIOLET,
       self::COLOR_GREEN,
       self::COLOR_BLACK,
       self::COLOR_GREY,

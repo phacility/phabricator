@@ -1,28 +1,15 @@
 <?php
 
 final class PhabricatorAuthListController
-  extends PhabricatorAuthProviderConfigController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
-
-  private $key;
-
-  public function willProcessRequest(array $data) {
-    $this->key = idx($data, 'key');
-  }
+  extends PhabricatorAuthProviderConfigController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
-      ->setQueryKey($this->key)
-      ->setSearchEngine(new PhabricatorAuthProviderConfigSearchEngine())
-      ->setNavigation($this->buildSideNavView());
+    $viewer = $request->getUser();
 
-    return $this->delegateToController($controller);
-  }
-
-  public function renderResultsList(array $configs) {
-    assert_instances_of($configs, 'PhabricatorAuthProviderConfig');
-    $viewer = $this->getRequest()->getUser();
+    $configs = id(new PhabricatorAuthProviderConfigQuery())
+      ->setViewer($viewer)
+      ->execute();
 
     $list = new PhabricatorObjectItemListView();
     foreach ($configs as $config) {
@@ -34,12 +21,36 @@ final class PhabricatorAuthListController
       $enable_uri = $this->getApplicationURI('config/enable/'.$id.'/');
       $disable_uri = $this->getApplicationURI('config/disable/'.$id.'/');
 
-      // TODO: Needs to be built out.
+      $provider = $config->getProvider();
+      if ($provider) {
+        $name = $provider->getProviderName();
+      } else {
+        $name = $config->getProviderType().' ('.$config->getProviderClass().')';
+      }
+
       $item
-        ->setHeader($config->getProviderType())
-        ->setHref($edit_uri);
+        ->setHeader($name);
+
+      if ($provider) {
+        $item->setHref($edit_uri);
+      } else {
+        $item->addAttribute(pht('Provider Implementation Missing!'));
+      }
+
+      $domain = null;
+      if ($provider) {
+        $domain = $provider->getProviderDomain();
+        if ($domain !== 'self') {
+          $item->addAttribute($domain);
+        }
+      }
+
+      if ($config->getShouldAllowRegistration()) {
+        $item->addAttribute(pht('Allows Registration'));
+      }
 
       if ($config->getIsEnabled()) {
+        $item->setBarColor('green');
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('delete')
@@ -58,7 +69,37 @@ final class PhabricatorAuthListController
       $list->addItem($item);
     }
 
-    return $list;
+    $list->setNoDataString(
+      pht(
+        '%s You have not added authentication providers yet. Use "%s" to add '.
+        'a provider, which will let users register new Phabricator accounts '.
+        'and log in.',
+        phutil_tag(
+          'strong',
+          array(),
+          pht('No Providers Configured:')),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $this->getApplicationURI('config/new/'),
+          ),
+          pht('Add Authentication Provider'))));
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Auth Providers')));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $list,
+      ),
+      array(
+        'title' => pht('Authentication Providers'),
+        'dust' => true,
+        'device' => true,
+      ));
   }
 
 }

@@ -122,7 +122,7 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
           'some other parts; most of these parts are pretty squishy'))
         ->addFootIcon('search-white', pht('Respiration!'))
         ->addHandleIcon($handle, pht('You have a cardiovascular system!'))
-        ->setBarColor('magenta'));
+        ->setBarColor('indigo'));
 
 
     $out[] = array($head, $list);

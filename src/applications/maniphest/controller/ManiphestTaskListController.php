@@ -577,6 +577,7 @@ final class ManiphestTaskListController extends ManiphestController {
       $author_phids,
       $project_group_phids,
       $any_project_phids,
+      $any_user_project_phids,
       array_mergev(mpull($data, 'getProjectPHIDs')));
     $handles = id(new PhabricatorObjectHandleData($handle_phids))
       ->setViewer($viewer)
