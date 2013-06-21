@@ -8,6 +8,10 @@
   border-width: 1px;
 }
 
+form.aphront-dialog-view .aphront-error-view {
+  margin: 8px 0;
+}
+
 .aphront-error-view {
   margin: 20px;
 }

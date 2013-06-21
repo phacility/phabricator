@@ -32,9 +32,9 @@
 
 .device-phone .aphront-form-view label.aphront-form-label,
 .aphront-form-full-width.aphront-form-view label.aphront-form-label {
-  display: block;
+  float: left;
   text-align: left;
-  width: 100%;
+  width: auto;
   margin-bottom: 3px;
 }
 
@@ -54,9 +54,9 @@
 .aphront-form-error {
   width: 18%;
   float: right;
-  color: #c13728;
+  color: {$red};
   font-weight: bold;
-  padding-top: 4px;
+  padding-top: 5px;
 }
 
 .aphront-dialog-body .aphront-form-full-width {
@@ -65,8 +65,8 @@
 
 .device-phone .aphront-form-error,
 .aphront-form-full-width .aphront-form-error {
-  float: none;
-  width: 100%;
+  float: right;
+  width: auto;
 }
 
 .device-phone .aphront-form-drag-and-drop-upload {
