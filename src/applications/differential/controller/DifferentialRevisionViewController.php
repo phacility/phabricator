@@ -194,12 +194,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
           pht('Show All Files Inline'))));
       $warning = $warning->render();
 
-      $my_inlines = id(new DifferentialInlineComment())->loadAllWhere(
-        'revisionID = %d AND commentID IS NULL AND authorPHID = %s AND '.
-          'changesetID IN (%Ld)',
-        $this->revisionID,
-        $user->getPHID(),
-        mpull($changesets, 'getID'));
+      $my_inlines = id(new DifferentialInlineCommentQuery())
+        ->withDraftComments($user->getPHID(), $this->revisionID)
+        ->execute();
 
       $visible_changesets = array();
       foreach ($inlines + $my_inlines as $inline) {
@@ -643,10 +640,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       return $inline_comments;
     }
 
-    $inline_comments = id(new DifferentialInlineComment())
-      ->loadAllWhere(
-        'commentID in (%Ld)',
-        $comment_ids);
+    $inline_comments = id(new DifferentialInlineCommentQuery())
+      ->withCommentIDs($comment_ids)
+      ->execute();
 
     $load_changesets = array();
     foreach ($inline_comments as $inline) {

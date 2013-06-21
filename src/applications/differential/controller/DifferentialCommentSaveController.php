@@ -39,10 +39,9 @@ final class DifferentialCommentSaveController extends DifferentialController {
         ->setAddedCCs($ccs)
         ->save();
     } catch (DifferentialActionHasNoEffectException $no_effect) {
-      $has_inlines = id(new DifferentialInlineComment())->loadAllWhere(
-        'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
-        $request->getUser()->getPHID(),
-        $revision->getID());
+      $has_inlines = id(new DifferentialInlineCommentQuery())
+        ->withDraftComments($request->getUser()->getPHID(), $revision->getID())
+        ->execute();
 
       $dialog = new AphrontDialogView();
       $dialog->setUser($request->getUser());

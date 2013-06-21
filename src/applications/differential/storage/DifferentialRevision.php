@@ -199,9 +199,9 @@ final class DifferentialRevision extends DifferentialDAO
         $comment->delete();
       }
 
-      $inlines = id(new DifferentialInlineComment())->loadAllWhere(
-        'revisionID = %d',
-        $this->getID());
+      $inlines = id(new DifferentialInlineCommentQuery())
+        ->withRevisionIDs(array($this->getID()))
+        ->execute();
       foreach ($inlines as $inline) {
         $inline->delete();
       }
