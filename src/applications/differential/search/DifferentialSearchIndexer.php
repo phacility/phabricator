@@ -53,7 +53,9 @@ final class DifferentialSearchIndexer
         time());
     }
 
-    $comments = $rev->loadRelatives(new DifferentialComment(), 'revisionID');
+    $comments = id(new DifferentialCommentQuery())
+      ->withRevisionIDs(array($rev->getID()))
+      ->execute();
 
     $inlines = $rev->loadRelatives(
       new DifferentialInlineComment(),

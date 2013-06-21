@@ -153,9 +153,9 @@ final class DifferentialRevision extends DifferentialDAO
     if (!$this->getID()) {
       return array();
     }
-    return id(new DifferentialComment())->loadAllWhere(
-      'revisionID = %d',
-      $this->getID());
+    return id(new DifferentialCommentQuery())
+      ->withRevisionIDs(array($this->getID()))
+      ->execute();
   }
 
   public function loadActiveDiff() {
@@ -192,9 +192,9 @@ final class DifferentialRevision extends DifferentialDAO
         self::TABLE_COMMIT,
         $this->getID());
 
-      $comments = id(new DifferentialComment())->loadAllWhere(
-        'revisionID = %d',
-        $this->getID());
+      $comments = id(new DifferentialCommentQuery())
+        ->withRevisionIDs(array($this->getID()))
+        ->execute();
       foreach ($comments as $comment) {
         $comment->delete();
       }
