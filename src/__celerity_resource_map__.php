@@ -2442,7 +2442,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-fx' =>
   array(
-    'uri' => '/res/c7cefec3/rsrc/externals/javelin/ext/fx/FX.js',
+    'uri' => '/res/23fb3d44/rsrc/externals/javelin/ext/fx/FX.js',
     'type' => 'js',
     'requires' =>
     array(
