@@ -1382,6 +1382,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130620.diffxactions.sql'),
       ),
+      '20130621.diffcommentphid.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130621.diffcommentphid.sql'),
+      ),
+      '20130621.diffcommentphidmig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130621.diffcommentphidmig.php'),
+      ),
     );
   }
 }
