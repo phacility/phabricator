@@ -2100,20 +2100,22 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-transaction-comment-form' =>
   array(
-    'uri' => '/res/7591a57f/rsrc/js/application/transactions/behavior-transaction-comment-form.js',
+    'uri' => '/res/dddc07e9/rsrc/js/application/transactions/behavior-transaction-comment-form.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-util',
-      3 => 'phabricator-shaped-request',
+      3 => 'javelin-fx',
+      4 => 'javelin-request',
+      5 => 'phabricator-shaped-request',
     ),
     'disk' => '/rsrc/js/application/transactions/behavior-transaction-comment-form.js',
   ),
   'javelin-behavior-phabricator-transaction-list' =>
   array(
-    'uri' => '/res/f1fbb474/rsrc/js/application/transactions/behavior-transaction-list.js',
+    'uri' => '/res/e7a015a7/rsrc/js/application/transactions/behavior-transaction-list.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2153,7 +2155,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/0632e7d9/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/983e2e81/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(

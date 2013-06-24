@@ -71,8 +71,10 @@ final class PholioMockViewController extends PholioController {
     require_celerity_resource('pholio-css');
     require_celerity_resource('pholio-inline-comments-css');
 
+    $comment_form_id = celerity_generate_unique_node_id();
     $output = id(new PholioMockImagesView())
       ->setRequestURI($request->getRequestURI())
+      ->setCommentFormID($comment_form_id)
       ->setUser($user)
       ->setMock($mock)
       ->setImageID($this->imageID);
@@ -82,7 +84,7 @@ final class PholioMockViewController extends PholioController {
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
-    $add_comment = $this->buildAddCommentView($mock);
+    $add_comment = $this->buildAddCommentView($mock, $comment_form_id);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $crumbs->setActionList($actions);
@@ -182,7 +184,7 @@ final class PholioMockViewController extends PholioController {
     return $properties;
   }
 
-  private function buildAddCommentView(PholioMock $mock) {
+  private function buildAddCommentView(PholioMock $mock, $comment_form_id) {
     $user = $this->getRequest()->getUser();
 
     $draft = PhabricatorDraft::newFromUserAndKey($user, $mock->getPHID());
@@ -202,6 +204,7 @@ final class PholioMockViewController extends PholioController {
 
     $form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
+      ->setFormID($comment_form_id)
       ->setDraft($draft)
       ->setSubmitButtonName($button_name)
       ->setAction($this->getApplicationURI('/comment/'.$mock->getID().'/'))
