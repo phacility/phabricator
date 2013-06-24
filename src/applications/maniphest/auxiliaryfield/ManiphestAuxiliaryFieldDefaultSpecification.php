@@ -205,8 +205,10 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_USER:
       case self::TYPE_USERS:
         return json_encode($this->getValue());
-      default:
+      case self::TYPE_DATE:
         return (int)$this->getValue();
+      default:
+        return $this->getValue();
     }
   }
 
