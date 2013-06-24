@@ -20,12 +20,6 @@ final class DifferentialComment extends DifferentialDAO
 
   private $arbitraryDiffForFacebook;
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_XACT,
-      PhabricatorPHIDConstants::PHID_TYPE_DREV);
-  }
-
   public function giveFacebookSomeArbitraryDiff(DifferentialDiff $diff) {
     $this->arbitraryDiffForFacebook = $diff;
     return $this;
@@ -33,7 +27,6 @@ final class DifferentialComment extends DifferentialDAO
 
   public function getConfiguration() {
     return array(
-      self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
