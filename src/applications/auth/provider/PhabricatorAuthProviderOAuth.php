@@ -343,4 +343,34 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return null;
   }
 
+  public function willRenderLinkedAccount(
+    PhabricatorUser $viewer,
+    PhabricatorObjectItemView $item,
+    PhabricatorExternalAccount $account) {
+
+    // Get a valid token, possibly refreshing it.
+    $oauth_token = $this->getOAuthAccessToken($account);
+
+    $item->addAttribute(pht('OAuth2 Account'));
+
+    if ($oauth_token) {
+      $oauth_expires = $account->getProperty('oauth.token.access.expires');
+      if ($oauth_expires) {
+        $item->addAttribute(
+          pht(
+            'Active OAuth Token (Expires: %s)',
+            phabricator_datetime($oauth_expires, $viewer)));
+      } else {
+        $item->addAttribute(
+          pht(
+            'Active OAuth Token'));
+      }
+    } else {
+      $item->addAttribute(pht('No OAuth Access Token'));
+    }
+
+    parent::willRenderLinkedAccount($viewer, $item, $account);
+  }
+
+
 }

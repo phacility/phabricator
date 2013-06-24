@@ -320,4 +320,22 @@ abstract class PhabricatorAuthProvider {
     return;
   }
 
+  public function willRenderLinkedAccount(
+    PhabricatorUser $viewer,
+    PhabricatorObjectItemView $item,
+    PhabricatorExternalAccount $account) {
+
+    $account_view = id(new PhabricatorAuthAccountView())
+      ->setExternalAccount($account)
+      ->setAuthProvider($this);
+
+    $item->appendChild(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'mmr mml mst mmb',
+        ),
+        $account_view));
+  }
+
 }
