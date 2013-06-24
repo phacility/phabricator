@@ -284,9 +284,20 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
   protected function willSaveAccount(PhabricatorExternalAccount $account) {
     parent::willSaveAccount($account);
 
-    $oauth_token = $this->getAdapter()->getAccessToken();
-    $account->setProperty('oauth.token', $oauth_token);
+    $adapter = $this->getAdapter();
 
+    $oauth_token = $adapter->getAccessToken();
+    $account->setProperty('oauth.token.access', $oauth_token);
+
+    if ($adapter->supportsTokenRefresh()) {
+      $refresh_token = $adapter->getRefreshToken();
+      $account->setProperty('oauth.token.refresh', $refresh_token);
+    } else {
+      $account->setProperty('oauth.token.refresh', null);
+    }
+
+    $expires = $adapter->getAccessTokenExpires();
+    $account->setProperty('oauth.token.access.expires', $expires);
   }
 
 }
