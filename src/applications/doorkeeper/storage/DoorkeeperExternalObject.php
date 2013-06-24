@@ -39,15 +39,12 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
   public function getObjectKey() {
     $key = parent::getObjectKey();
     if ($key === null) {
-      $key = PhabricatorHash::digestForIndex(
-        implode(
-          ':',
-          array(
-            $this->getApplicationType(),
-            $this->getApplicationDomain(),
-            $this->getObjectType(),
-            $this->getObjectID(),
-          )));
+      $key = id(new DoorkeeperObjectRef())
+        ->setApplicationType($this->getApplicationType())
+        ->setApplicationDomain($this->getApplicationDomain())
+        ->setObjectType($this->getObjectType())
+        ->setObjectID($this->getObjectID())
+        ->getObjectKey();
     }
     return $key;
   }
@@ -56,6 +53,7 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
     if (!$this->objectKey) {
       $this->objectKey = $this->getObjectKey();
     }
+
     return parent::save();
   }
 

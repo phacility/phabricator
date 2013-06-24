@@ -35,4 +35,16 @@ final class PhabricatorAuthProviderOAuthAsana
     return 'Asana';
   }
 
+  public static function getAsanaProvider() {
+    $providers = self::getAllEnabledProviders();
+
+    foreach ($providers as $provider) {
+      if ($provider instanceof PhabricatorAuthProviderOAuthAsana) {
+        return $provider;
+      }
+    }
+
+    return null;
+  }
+
 }

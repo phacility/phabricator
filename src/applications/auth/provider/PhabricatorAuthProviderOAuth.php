@@ -281,4 +281,12 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
     return parent::renderConfigPropertyTransactionTitle($xaction);
   }
 
+  protected function willSaveAccount(PhabricatorExternalAccount $account) {
+    parent::willSaveAccount($account);
+
+    $oauth_token = $this->getAdapter()->getAccessToken();
+    $account->setProperty('oauth.token', $oauth_token);
+
+  }
+
 }
