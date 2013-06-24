@@ -29,7 +29,9 @@ final class DifferentialInlineCommentEditController
   }
 
   protected function loadComment($id) {
-    return id(new DifferentialInlineComment())->load($id);
+    return id(new DifferentialInlineCommentQuery())
+      ->withIDs(array($id))
+      ->executeOne();
   }
 
   protected function loadCommentForEdit($id) {

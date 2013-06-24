@@ -53,13 +53,14 @@ final class DifferentialSearchIndexer
         time());
     }
 
-    $comments = $rev->loadRelatives(new DifferentialComment(), 'revisionID');
+    $comments = id(new DifferentialCommentQuery())
+      ->withRevisionIDs(array($rev->getID()))
+      ->execute();
 
-    $inlines = $rev->loadRelatives(
-      new DifferentialInlineComment(),
-      'revisionID',
-      'getID',
-      '(commentID IS NOT NULL)');
+    $inlines = id(new DifferentialInlineCommentQuery())
+      ->withRevisionIDs(array($rev->getID()))
+      ->withNotDraft(true)
+      ->execute();
 
     $touches = array();
 

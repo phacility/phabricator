@@ -34,15 +34,15 @@ final class ConduitAPI_differential_getrevisioncomments_Method
       return $results;
     }
 
-    $comments = id(new DifferentialComment())->loadAllWhere(
-      'revisionID IN (%Ld)',
-      $revision_ids);
+    $comments = id(new DifferentialCommentQuery())
+      ->withRevisionIDs($revision_ids)
+      ->execute();
 
     $with_inlines = $request->getValue('inlines');
     if ($with_inlines) {
-      $inlines = id(new DifferentialInlineComment())->loadAllWhere(
-        'revisionID IN (%Ld)',
-        $revision_ids);
+      $inlines = id(new DifferentialInlineCommentQuery())
+        ->withRevisionIDs($revision_ids)
+        ->execute();
       $changesets = array();
       if ($inlines) {
         $changesets = id(new DifferentialChangeset())->loadAllWhere(

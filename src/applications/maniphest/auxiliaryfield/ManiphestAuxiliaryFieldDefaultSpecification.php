@@ -100,6 +100,9 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_DATE:
         $control = new AphrontFormDateControl();
         $control->setUser($this->getUser());
+        if (!$this->isRequired()) {
+          $control->setAllowNull(true);
+        }
         break;
       case self::TYPE_REMARKUP:
         $control = new PhabricatorRemarkupControl();
@@ -132,7 +135,9 @@ class ManiphestAuxiliaryFieldDefaultSpecification
           (bool)$this->getValue());
         break;
       case self::TYPE_DATE:
-        $control->setValue($this->getValue());
+        if ($this->getValue() > 0) {
+          $control->setValue($this->getValue());
+        }
         $control->setName('auxiliary_date_'.$this->getAuxiliaryKey());
         break;
       case self::TYPE_USER:
@@ -169,6 +174,19 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
     }
 
+    $stripped_auxiliary_key = preg_replace(
+      '/[\w\d\.\-\:]+/', '', $this->getAuxiliaryKey());
+
+    if (strlen($stripped_auxiliary_key)) {
+      $unique_key_chars = array_unique(str_split($stripped_auxiliary_key));
+      $unique_key_chars = implode(" ,", $unique_key_chars);
+      $control->setDisabled(true);
+      $control->setCaption(
+        "This control is not configured correctly, the key must only contain
+        ( a-z, A-Z, 0-9, ., -, : ) but has ( {$unique_key_chars} ), so it can
+        not be rendered, go fix your config.");
+    }
+
     return $control;
   }
 
@@ -200,6 +218,8 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_USER:
       case self::TYPE_USERS:
         return json_encode($this->getValue());
+      case self::TYPE_DATE:
+        return (int)$this->getValue();
       default:
         return $this->getValue();
     }
@@ -216,9 +236,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
       case self::TYPE_DATE:
         $value = (int)$value;
-        if ($value <= 0) {
-          return $this->setDefaultValue($value);
-        }
+        $this->setDefaultValue($value);
         break;
       default:
         break;
@@ -243,7 +261,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_SELECT:
         return true;
       case self::TYPE_DATE:
-        if ((int)$this->getValue() <= 0) {
+        if ((int)$this->getValue() <= 0 && $this->isRequired()) {
           throw new ManiphestAuxiliaryFieldValidationException(
             pht(
               '%s must be a valid date.',
@@ -367,7 +385,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         // fields normally, users can change the type of an existing field and
         // leave us with uninterpretable data in old transactions.
         if ((int)$new <= 0) {
-          $new_display = "(invalid epoch timestamp: {$new})";
+          $new_display = "none";
         } else {
           $new_display = phabricator_datetime($new, $this->getUser());
         }
@@ -375,7 +393,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
           $desc = "set field '{$label}' to '{$new_display}'";
         } else {
           if ((int)$old <= 0) {
-            $old_display = "(invalid epoch timestamp: {$old})";
+            $old_display = "none";
           } else {
             $old_display = phabricator_datetime($old, $this->getUser());
           }

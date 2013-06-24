@@ -268,10 +268,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
       return;
     }
 
-    return id(new DifferentialInlineComment())->loadAllWhere(
-      'changesetID IN (%Ld) AND (commentID IS NOT NULL OR authorPHID = %s)',
-      $changeset_ids,
-      $author_phid);
+    return id(new DifferentialInlineCommentQuery())
+      ->withViewerAndChangesetIDs($author_phid, $changeset_ids)
+      ->execute();
   }
 
   private function buildRawFileResponse(
