@@ -269,7 +269,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     return id(new DifferentialInlineCommentQuery())
-      ->withAuthorAndChangesetIDs($author_phid, $changeset_ids)
+      ->withViewerAndChangesetIDs($author_phid, $changeset_ids)
       ->execute();
   }
 

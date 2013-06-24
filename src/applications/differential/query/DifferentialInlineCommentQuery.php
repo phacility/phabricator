@@ -11,7 +11,7 @@ final class DifferentialInlineCommentQuery
   private $ids;
   private $commentIDs;
 
-  private $authorAndChangesetIDs;
+  private $viewerAndChangesetIDs;
   private $draftComments;
   private $draftsByAuthors;
 
@@ -35,8 +35,8 @@ final class DifferentialInlineCommentQuery
     return $this;
   }
 
-  public function withAuthorAndChangesetIDs($author_phid, array $ids) {
-    $this->authorAndChangesetIDs = array($author_phid, $ids);
+  public function withViewerAndChangesetIDs($author_phid, array $ids) {
+    $this->viewerAndChangesetIDs = array($author_phid, $ids);
     return $this;
   }
 
@@ -98,13 +98,13 @@ final class DifferentialInlineCommentQuery
         $this->commentIDs);
     }
 
-    if ($this->authorAndChangesetIDs) {
-      list($phid, $ids) = $this->authorAndChangesetIDs;
+    if ($this->viewerAndChangesetIDs) {
+      list($phid, $ids) = $this->viewerAndChangesetIDs;
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID = %s AND changesetID IN (%Ld)',
-        $phid,
-        $ids);
+        'changesetID IN (%Ld) AND (authorPHID = %s OR commentID IS NOT NULL)',
+        $ids,
+        $phid);
     }
 
     if ($this->draftComments) {
