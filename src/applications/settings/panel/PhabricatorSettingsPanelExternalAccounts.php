@@ -70,6 +70,14 @@ final class PhabricatorSettingsPanelExternalAccounts
 
       $can_unlink = $can_unlink && (!$can_login || ($login_accounts > 1));
 
+      $can_refresh = $provider && $provider->shouldAllowAccountRefresh();
+      if ($can_refresh) {
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('refresh')
+            ->setHref('/auth/refresh/'.$account->getProviderKey().'/'));
+      }
+
       $item->addAction(
         id(new PHUIListItemView())
           ->setIcon('delete')

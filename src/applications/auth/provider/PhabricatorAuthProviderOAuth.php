@@ -38,6 +38,8 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
     if ($mode == 'link') {
       $button_text = pht('Link External Account');
+    } else if ($mode == 'refresh') {
+      $button_text = pht('Refresh Account Link');
     } else if ($this->shouldAllowRegistration()) {
       $button_text = pht('Login or Register');
     } else {

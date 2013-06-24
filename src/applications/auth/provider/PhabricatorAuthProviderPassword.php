@@ -246,4 +246,8 @@ final class PhabricatorAuthProviderPassword
     return;
   }
 
+  public function shouldAllowAccountRefresh() {
+    return false;
+  }
+
 }

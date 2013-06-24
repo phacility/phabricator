@@ -154,6 +154,15 @@ abstract class PhabricatorAuthProvider {
     return $this->renderLoginForm($controller->getRequest(), $mode = 'link');
   }
 
+  public function shouldAllowAccountRefresh() {
+    return true;
+  }
+
+  public function buildRefreshForm(
+    PhabricatorAuthLinkController $controller) {
+    return $this->renderLoginForm($controller->getRequest(), $mode = 'refresh');
+  }
+
   protected function renderLoginForm(
     AphrontRequest $request,
     $mode) {
