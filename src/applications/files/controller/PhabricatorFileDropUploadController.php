@@ -3,6 +3,9 @@
 final class PhabricatorFileDropUploadController
   extends PhabricatorFileController {
 
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -10,7 +13,7 @@ final class PhabricatorFileDropUploadController
     // NOTE: Throws if valid CSRF token is not present in the request.
     $request->validateCSRF();
 
-    $data = file_get_contents('php://input');
+    $data = PhabricatorStartup::getRawInput();
     $name = $request->getStr('name');
 
     $file = PhabricatorFile::newFromXHRUpload(
