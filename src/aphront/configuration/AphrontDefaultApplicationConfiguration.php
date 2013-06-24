@@ -83,7 +83,7 @@ class AphrontDefaultApplicationConfiguration
 
   public function buildRequest() {
     $request = new AphrontRequest($this->getHost(), $this->getPath());
-    $request->setRequestData($_GET + $_POST);
+    $request->setRequestData($_POST + $_GET);
     $request->setApplicationConfiguration($this);
     return $request;
   }

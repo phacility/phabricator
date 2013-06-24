@@ -34,6 +34,13 @@ try {
   $host = AphrontRequest::getHTTPHeader('Host');
   $path = $_REQUEST['__path__'];
 
+  $parser   = new PhutilQueryStringParser();
+  $_GET     = $parser->parseQueryString(
+    isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : "");
+  $_POST    = $parser->parseQueryString(
+    (string)file_get_contents('php://input'));
+  $_REQUEST = $_POST + $_GET;
+
   switch ($host) {
     default:
       $config_key = 'aphront.default-application-configuration-class';
