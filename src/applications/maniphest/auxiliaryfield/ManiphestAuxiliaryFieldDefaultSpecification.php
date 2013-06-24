@@ -174,6 +174,19 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
     }
 
+    $stripped_auxiliary_key = preg_replace(
+      '/[\w\d\.\-\:]+/', '', $this->getAuxiliaryKey());
+
+    if (strlen($stripped_auxiliary_key)) {
+      $unique_key_chars = array_unique(str_split($stripped_auxiliary_key));
+      $unique_key_chars = implode(" ,", $unique_key_chars);
+      $control->setDisabled(true);
+      $control->setCaption(
+        "This control is not configured correctly, the key must only contain
+        ( a-z, A-Z, 0-9, ., -, : ) but has ( {$unique_key_chars} ), so it can
+        not be rendered, go fix your config.");
+    }
+
     return $control;
   }
 
