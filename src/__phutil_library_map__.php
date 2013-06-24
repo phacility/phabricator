@@ -533,6 +533,8 @@ phutil_register_library_map(array(
     'DivinerRenderer' => 'applications/diviner/renderer/DivinerRenderer.php',
     'DivinerStaticPublisher' => 'applications/diviner/publisher/DivinerStaticPublisher.php',
     'DivinerWorkflow' => 'applications/diviner/workflow/DivinerWorkflow.php',
+    'DoorkeeperDAO' => 'applications/doorkeeper/storage/DoorkeeperDAO.php',
+    'DoorkeeperExternalObject' => 'applications/doorkeeper/storage/DoorkeeperExternalObject.php',
     'DrydockAllocatorWorker' => 'applications/drydock/worker/DrydockAllocatorWorker.php',
     'DrydockApacheWebrootInterface' => 'applications/drydock/interface/webroot/DrydockApacheWebrootInterface.php',
     'DrydockBlueprint' => 'applications/drydock/blueprint/DrydockBlueprint.php',
@@ -2404,6 +2406,12 @@ phutil_register_library_map(array(
     'DivinerRemarkupRuleSymbol' => 'PhutilRemarkupRule',
     'DivinerStaticPublisher' => 'DivinerPublisher',
     'DivinerWorkflow' => 'PhutilArgumentWorkflow',
+    'DoorkeeperDAO' => 'PhabricatorLiskDAO',
+    'DoorkeeperExternalObject' =>
+    array(
+      0 => 'DoorkeeperDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'DrydockAllocatorWorker' => 'PhabricatorWorker',
     'DrydockApacheWebrootInterface' => 'DrydockWebrootInterface',
     'DrydockCommandInterface' => 'DrydockInterface',
