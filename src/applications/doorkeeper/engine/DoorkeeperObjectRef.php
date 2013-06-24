@@ -44,7 +44,7 @@ final class DoorkeeperObjectRef extends Phobject {
   }
 
   public function getAttribute($key, $default = null) {
-    return idx($this->attribute, $key, $default);
+    return idx($this->attributes, $key, $default);
   }
 
   public function setAttribute($key, $value) {
@@ -89,6 +89,13 @@ final class DoorkeeperObjectRef extends Phobject {
 
   public function getApplicationType() {
     return $this->applicationType;
+  }
+
+  public function getFullName() {
+    return coalesce(
+      $this->getAttribute('fullname'),
+      $this->getAttribute('name'),
+      pht('External Object'));
   }
 
   public function getObjectKey() {

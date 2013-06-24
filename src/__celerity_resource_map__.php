@@ -1652,6 +1652,20 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/diffusion/behavior-pull-lastmodified.js',
   ),
+  'javelin-behavior-doorkeeper-tag' =>
+  array(
+    'uri' => '/res/59480572/rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-json',
+      3 => 'javelin-workflow',
+      4 => 'javelin-magical-init',
+    ),
+    'disk' => '/rsrc/js/application/doorkeeper/behavior-doorkeeper-tag.js',
+  ),
   'javelin-behavior-error-log' =>
   array(
     'uri' => '/res/acefdea7/rsrc/js/core/behavior-error-log.js',

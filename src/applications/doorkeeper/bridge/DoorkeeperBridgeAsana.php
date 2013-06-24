@@ -25,6 +25,10 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
       ->withAccountDomains(array($provider->getProviderDomain()))
       ->execute();
 
+    if (!$accounts) {
+      return;
+    }
+
     // TODO: If the user has several linked Asana accounts, we just pick the
     // first one arbitrarily. We might want to try using all of them or do
     // something with more finesse. There's no UI way to link multiple accounts
@@ -47,10 +51,16 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
 
     $results = array();
     foreach (Futures($futures) as $key => $future) {
-      $results[$key] = $future->resolve();
+      try {
+        $results[$key] = $future->resolve();
+      } catch (Exception $ex) {
+        // TODO: For now, ignore this stuff.
+      }
     }
 
     foreach ($refs as $ref) {
+      $ref->setAttribute('name', pht('Asana Task %s', $ref->getObjectID()));
+
       $result = idx($results, $ref->getObjectKey());
       if (!$result) {
         continue;
@@ -58,7 +68,8 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
 
       $ref->setIsVisible(true);
       $ref->setAttribute('asana.data', $result);
-      $ref->setAttribute('name', $result['name']);
+      $ref->setAttribute('fullname', pht('Asana: %s', $result['name']));
+      $ref->setAttribute('title', $result['name']);
       $ref->setAttribute('description', $result['notes']);
 
       $obj = $ref->getExternalObject();
