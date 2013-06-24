@@ -126,13 +126,14 @@ final class PhabricatorAuthManagementRefreshWorkflow
           new PhutilNumber(
             $account->getProperty('oauth.token.access.expires') - time())));
 
-      $adapter->refreshAccessToken($refresh_token);
+      $provider->getOAuthAccessToken($account, $force_refresh = true);
 
       $console->writeOut(
         "+ %s\n",
         pht(
           "Refreshed token, new token expires in %s seconds.",
-          new PhutilNumber($adapter->getAccessTokenExpires() - time())));
+          new PhutilNumber(
+            $account->getProperty('oauth.token.access.expires') - time())));
 
     }
 

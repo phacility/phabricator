@@ -283,7 +283,11 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
   protected function willSaveAccount(PhabricatorExternalAccount $account) {
     parent::willSaveAccount($account);
+    $this->synchronizeOAuthAccount($account);
+  }
 
+  protected function synchronizeOAuthAccount(
+    PhabricatorExternalAccount $account) {
     $adapter = $this->getAdapter();
 
     $oauth_token = $adapter->getAccessToken();
@@ -298,6 +302,45 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
     $expires = $adapter->getAccessTokenExpires();
     $account->setProperty('oauth.token.access.expires', $expires);
+  }
+
+  public function getOAuthAccessToken(
+    PhabricatorExternalAccount $account,
+    $force_refresh = false) {
+
+    if ($account->getProviderKey() !== $this->getProviderKey()) {
+      throw new Exception("Account does not match provider!");
+    }
+
+    if (!$force_refresh) {
+      $access_expires = $account->getProperty('oauth.token.access.expires');
+      $access_token = $account->getProperty('oauth.token.access');
+
+      // Don't return a token with fewer than this many seconds remaining until
+      // it expires.
+      $shortest_token = 60;
+
+      if ($access_token) {
+        if ($access_expires > (time() + $shortest_token)) {
+          return $access_token;
+        }
+      }
+    }
+
+    $refresh_token = $account->getProperty('oauth.token.refresh');
+    if ($refresh_token) {
+      $adapter = $this->getAdapter();
+      if ($adapter->supportsTokenRefresh()) {
+        $adapter->refreshAccessToken($refresh_token);
+
+        $this->synchronizeOAuthAccount($account);
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+          $account->save();
+        unset($unguarded);
+      }
+    }
+
+    return null;
   }
 
 }

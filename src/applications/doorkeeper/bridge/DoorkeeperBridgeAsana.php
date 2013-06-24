@@ -35,7 +35,7 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
     // right now so this is currently moot.
     $account = head($accounts);
 
-    $token = $account->getProperty('oauth.token.access');
+    $token = $provider->getOAuthAccessToken($account);
     if (!$token) {
       return;
     }
