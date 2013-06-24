@@ -30,11 +30,6 @@ final class DifferentialInlineCommentQuery
     return $this;
   }
 
-  public function withCommentIDs(array $ids) {
-    $this->commentIDs = $ids;
-    return $this;
-  }
-
   public function withViewerAndChangesetIDs($author_phid, array $ids) {
     $this->viewerAndChangesetIDs = array($author_phid, $ids);
     return $this;
@@ -89,13 +84,6 @@ final class DifferentialInlineCommentQuery
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
-    }
-
-    if ($this->commentIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'commentID in (%Ld)',
-        $this->commentIDs);
     }
 
     if ($this->viewerAndChangesetIDs) {
