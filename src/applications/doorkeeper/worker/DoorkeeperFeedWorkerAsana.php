@@ -69,10 +69,21 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $reviewer_phids = $revision->getReviewers();
     $cc_phids = $revision->getCCPHIDs();
 
+    switch ($revision->getStatus()) {
+      case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+        $active_phids = $reviewer_phids;
+        $passive_phids = array();
+        break;
+      default:
+        $active_phids = array();
+        $passive_phids = $reviewer_phids;
+        break;
+    }
+
     return array(
       $author_phid,
-      $reviewer_phids,
-      array(),
+      $active_phids,
+      $passive_phids,
       $cc_phids);
   }
 
@@ -90,9 +101,20 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $notes = implode("\n\n", $notes);
 
+    switch ($revision->getStatus()) {
+      case ArcanistDifferentialRevisionStatus::CLOSED:
+      case ArcanistDifferentialRevisionStatus::ABANDONED:
+        $is_completed = true;
+        break;
+      default:
+        $is_completed = false;
+        break;
+    }
+
     return array(
       'name' => $name,
       'notes' => $notes,
+      'completed' => $is_completed,
     );
   }
 
