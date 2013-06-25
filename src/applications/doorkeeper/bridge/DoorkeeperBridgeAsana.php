@@ -77,14 +77,18 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
         continue;
       }
 
-      $id = $result['id'];
-      $uri = "https://app.asana.com/0/{$id}/{$id}";
-      $obj->setObjectURI($uri);
+      $this->fillObjectFromData($obj, $result);
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $obj->save();
       unset($unguarded);
     }
+  }
+
+  public function fillObjectFromData(DoorkeeperExternalObject $obj, $result) {
+    $id = $result['id'];
+    $uri = "https://app.asana.com/0/{$id}/{$id}";
+    $obj->setObjectURI($uri);
   }
 
 }
