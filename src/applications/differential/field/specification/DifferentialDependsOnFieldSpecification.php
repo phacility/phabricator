@@ -22,8 +22,8 @@ final class DifferentialDependsOnFieldSpecification
     }
 
     $links = array();
-    foreach ($revision_phids as $revision_phids) {
-      $links[] = $this->getHandle($revision_phids)->renderLink();
+    foreach ($revision_phids as $revision_phid) {
+      $links[] = $this->getHandle($revision_phid)->renderLink();
     }
 
     return phutil_implode_html(phutil_tag('br'), $links);

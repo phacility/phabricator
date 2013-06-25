@@ -16,6 +16,7 @@ $args->parseStandardArguments();
 
 $workflows = array(
   new PhabricatorAuthManagementRecoverWorkflow(),
+  new PhabricatorAuthManagementRefreshWorkflow(),
   new PhabricatorAuthManagementLDAPWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );

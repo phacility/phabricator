@@ -18,6 +18,7 @@ final class PhabricatorStartup {
   private static $startTime;
   private static $globals = array();
   private static $capturingOutput;
+  private static $rawInput;
 
 
 /* -(  Accessing Request Information  )-------------------------------------- */
@@ -61,6 +62,13 @@ final class PhabricatorStartup {
     return self::$globals[$key];
   }
 
+  /**
+   * @task info
+   */
+  public static function getRawInput() {
+    return self::$rawInput;
+  }
+
 
 /* -(  Startup Hooks  )------------------------------------------------------ */
 
@@ -89,6 +97,8 @@ final class PhabricatorStartup {
     self::detectPostMaxSizeTriggered();
 
     self::beginOutputCapture();
+
+    self::$rawInput = (string)file_get_contents('php://input');
   }
 
 

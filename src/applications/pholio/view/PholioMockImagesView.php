@@ -5,6 +5,15 @@ final class PholioMockImagesView extends AphrontView {
   private $mock;
   private $imageID;
   private $requestURI;
+  private $commentFormID;
+
+  public function setCommentFormID($comment_form_id) {
+    $this->commentFormID = $comment_form_id;
+    return $this;
+  }
+  public function getCommentFormID() {
+    return $this->commentFormID;
+  }
 
   public function setRequestURI(PhutilURI $request_uri) {
     $this->requestURI = $request_uri;
@@ -72,6 +81,7 @@ final class PholioMockImagesView extends AphrontView {
       'mockID' => $mock->getID(),
       'panelID' => $panel_id,
       'viewportID' => $viewport_id,
+      'commentFormID' => $this->getCommentFormID(),
       'images' => $images,
       'selectedID' => $selected_id,
       'loggedIn' => $this->getUser()->isLoggedIn(),

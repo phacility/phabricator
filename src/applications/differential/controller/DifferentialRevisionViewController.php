@@ -80,7 +80,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $comments);
 
     $all_changesets = $changesets;
-    $inlines = $this->loadInlineComments($comments, $all_changesets);
+    $inlines = $this->loadInlineComments(
+      $revision,
+      $all_changesets);
 
     $object_phids = array_merge(
       $revision->getReviewers(),
@@ -194,12 +196,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
           pht('Show All Files Inline'))));
       $warning = $warning->render();
 
-      $my_inlines = id(new DifferentialInlineComment())->loadAllWhere(
-        'revisionID = %d AND commentID IS NULL AND authorPHID = %s AND '.
-          'changesetID IN (%Ld)',
-        $this->revisionID,
-        $user->getPHID(),
-        mpull($changesets, 'getID'));
+      $my_inlines = id(new DifferentialInlineCommentQuery())
+        ->withDraftComments($user->getPHID(), $this->revisionID)
+        ->execute();
 
       $visible_changesets = array();
       foreach ($inlines + $my_inlines as $inline) {
@@ -632,21 +631,17 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return $actions_dict;
   }
 
-  private function loadInlineComments(array $comments, array &$changesets) {
-    assert_instances_of($comments, 'DifferentialComment');
+  private function loadInlineComments(
+    DifferentialRevision $revision,
+    array &$changesets) {
     assert_instances_of($changesets, 'DifferentialChangeset');
 
     $inline_comments = array();
 
-    $comment_ids = array_filter(mpull($comments, 'getID'));
-    if (!$comment_ids) {
-      return $inline_comments;
-    }
-
-    $inline_comments = id(new DifferentialInlineComment())
-      ->loadAllWhere(
-        'commentID in (%Ld)',
-        $comment_ids);
+    $inline_comments = id(new DifferentialInlineCommentQuery())
+      ->withRevisionIDs(array($revision->getID()))
+      ->withNotDraft(true)
+      ->execute();
 
     $load_changesets = array();
     foreach ($inline_comments as $inline) {

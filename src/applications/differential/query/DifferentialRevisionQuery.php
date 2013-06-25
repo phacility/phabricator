@@ -492,9 +492,9 @@ final class DifferentialRevisionQuery {
         $this->draftRevisions[] = substr($draft->getDraftKey(), $len);
       }
 
-      $inlines = id(new DifferentialInlineComment())->loadAllWhere(
-        'commentID IS NULL AND authorPHID IN (%Ls)',
-        $this->draftAuthors);
+      $inlines = id(new DifferentialInlineCommentQuery())
+        ->withDraftsByAuthors($this->draftAuthors)
+        ->execute();
       foreach ($inlines as $inline) {
         $this->draftRevisions[] = $inline->getRevisionID();
       }

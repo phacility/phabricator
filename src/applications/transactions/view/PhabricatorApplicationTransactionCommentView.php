@@ -172,6 +172,11 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     return $this->previewTimelineID;
   }
 
+  public function setFormID($id) {
+    $this->formID = $id;
+    return $this;
+  }
+
   private function getFormID() {
     if (!$this->formID) {
       $this->formID = celerity_generate_unique_node_id();

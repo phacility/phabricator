@@ -154,6 +154,15 @@ abstract class PhabricatorAuthProvider {
     return $this->renderLoginForm($controller->getRequest(), $mode = 'link');
   }
 
+  public function shouldAllowAccountRefresh() {
+    return true;
+  }
+
+  public function buildRefreshForm(
+    PhabricatorAuthLinkController $controller) {
+    return $this->renderLoginForm($controller->getRequest(), $mode = 'refresh');
+  }
+
   protected function renderLoginForm(
     AphrontRequest $request,
     $mode) {
@@ -318,6 +327,24 @@ abstract class PhabricatorAuthProvider {
     array $values,
     array $issues) {
     return;
+  }
+
+  public function willRenderLinkedAccount(
+    PhabricatorUser $viewer,
+    PhabricatorObjectItemView $item,
+    PhabricatorExternalAccount $account) {
+
+    $account_view = id(new PhabricatorAuthAccountView())
+      ->setExternalAccount($account)
+      ->setAuthProvider($this);
+
+    $item->appendChild(
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'mmr mml mst mmb',
+        ),
+        $account_view));
   }
 
 }

@@ -123,8 +123,15 @@ final class ManiphestTaskEditController extends ManiphestController {
         $errors[] = pht('Title is required.');
       }
 
-      foreach ($aux_fields as $aux_field) {
+      foreach ($aux_fields as $aux_arr_key => $aux_field) {
         $aux_field->setValueFromRequest($request);
+        $aux_key = $aux_field->getAuxiliaryKey();
+        $aux_old_value = $task->getAuxiliaryAttribute($aux_key);
+
+        if ((int)$aux_old_value === $aux_field->getValueForStorage()) {
+          unset($aux_fields[$aux_arr_key]);
+          continue;
+        }
 
         if ($aux_field->isRequired() && !$aux_field->getValue()) {
           $errors[] = pht('%s is required.', $aux_field->getLabel());

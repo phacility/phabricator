@@ -15,8 +15,8 @@ final class PhabricatorAuthManagementLDAPWorkflow
     $console = PhutilConsole::getConsole();
     $console->getServer()->setEnableLog(true);
 
-    $provider = new PhabricatorAuthProviderLDAP();
-    if (!$provider->isEnabled()) {
+    $provider = PhabricatorAuthProviderLDAP::getLDAPProvider();
+    if (!$provider) {
       $console->writeOut(
         "%s\n",
         "The LDAP authentication provider is not enabled.");

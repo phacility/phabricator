@@ -70,6 +70,14 @@ final class PhabricatorSettingsPanelExternalAccounts
 
       $can_unlink = $can_unlink && (!$can_login || ($login_accounts > 1));
 
+      $can_refresh = $provider && $provider->shouldAllowAccountRefresh();
+      if ($can_refresh) {
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('refresh')
+            ->setHref('/auth/refresh/'.$account->getProviderKey().'/'));
+      }
+
       $item->addAction(
         id(new PHUIListItemView())
           ->setIcon('delete')
@@ -77,20 +85,9 @@ final class PhabricatorSettingsPanelExternalAccounts
           ->setDisabled(!$can_unlink)
           ->setHref('/auth/unlink/'.$account->getProviderKey().'/'));
 
-      $account_view = id(new PhabricatorAuthAccountView())
-        ->setExternalAccount($account);
-
       if ($provider) {
-        $account_view->setAuthProvider($provider);
+        $provider->willRenderLinkedAccount($viewer, $item, $account);
       }
-
-      $item->appendChild(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'mmr mml mst mmb',
-          ),
-          $account_view));
 
       $linked->addItem($item);
     }

@@ -195,6 +195,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'auth',
       ),
+      'db.doorkeeper' => array(
+        'type' => 'db',
+        'name' => 'doorkeeper',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1377,6 +1381,26 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130619.authconf.php' => array(
         'type' => 'php',
         'name' => $this->getPatchPath('20130619.authconf.php'),
+      ),
+      '20130620.diffxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130620.diffxactions.sql'),
+      ),
+      '20130621.diffcommentphid.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130621.diffcommentphid.sql'),
+      ),
+      '20130621.diffcommentphidmig.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130621.diffcommentphidmig.php'),
+      ),
+      '20130621.diffcommentunphid.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130621.diffcommentunphid.sql'),
+      ),
+      '20130622.doorkeeper.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130622.doorkeeper.sql'),
       ),
     );
   }

@@ -81,10 +81,27 @@ class AphrontDefaultApplicationConfiguration
     );
   }
 
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
   public function buildRequest() {
+    $parser = new PhutilQueryStringParser();
+    $data   = array();
+
+    $raw_input = PhabricatorStartup::getRawInput();
+    if (strlen($raw_input)) {
+      $data += $parser->parseQueryString($raw_input);
+    } else if ($_POST) {
+      $data += $_POST;
+    }
+
+    $data += $parser->parseQueryString(
+      isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : "");
+
     $request = new AphrontRequest($this->getHost(), $this->getPath());
-    $request->setRequestData($_GET + $_POST);
+    $request->setRequestData($data);
     $request->setApplicationConfiguration($this);
+
     return $request;
   }
 

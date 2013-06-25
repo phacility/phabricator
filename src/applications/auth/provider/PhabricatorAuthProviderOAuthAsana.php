@@ -12,11 +12,11 @@ final class PhabricatorAuthProviderOAuthAsana
     $login_uri = $this->getLoginURI();
 
     return pht(
-      "To configure Asana OAuth, create a new application by logging in to ".
-      "Asana and going to **Account Settings**, then **Apps**, then ".
-      "**Add New Application**.".
+      "To configure Asana OAuth, create a new application here:".
       "\n\n".
-      "Use these settings:".
+      "https://app.asana.com/-/account_api".
+      "\n\n".
+      "When creating your application, use these settings:".
       "\n\n".
       "  - **App URL:** Set this to: `%s`\n".
       "  - **Redirect URL:** Set this to: `%s`".
@@ -33,6 +33,18 @@ final class PhabricatorAuthProviderOAuthAsana
 
   protected function getLoginIcon() {
     return 'Asana';
+  }
+
+  public static function getAsanaProvider() {
+    $providers = self::getAllEnabledProviders();
+
+    foreach ($providers as $provider) {
+      if ($provider instanceof PhabricatorAuthProviderOAuthAsana) {
+        return $provider;
+      }
+    }
+
+    return null;
   }
 
 }

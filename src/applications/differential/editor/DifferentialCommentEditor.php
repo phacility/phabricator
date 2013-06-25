@@ -116,10 +116,9 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
     $inline_comments = array();
     if ($this->attachInlineComments) {
-      $inline_comments = id(new DifferentialInlineComment())->loadAllWhere(
-        'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
-        $actor_phid,
-        $revision->getID());
+      $inline_comments = id(new DifferentialInlineCommentQuery())
+        ->withDraftComments($actor_phid, $revision->getID())
+        ->execute();
     }
 
     switch ($action) {
