@@ -85,9 +85,8 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $notes = array(
       $revision->getSummary(),
       $uri,
-      "\xE2\x9A\xA0 DO NOT EDIT THIS TASK \xE2\x9A\xA0\n".
-      "Your changes will not be reflected in Phabricator.",
-  );
+      $this->getSynchronizationWarning(),
+    );
 
     $notes = implode("\n\n", $notes);
 
@@ -95,6 +94,34 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       'name' => $name,
       'notes' => $notes,
     );
+  }
+
+  private function getAsanaSubtaskData($object) {
+    $revision = $object;
+
+    $name = '[Differential] Review Request';
+    $uri = PhabricatorEnv::getProductionURI('/D'.$revision->getID());
+
+    $notes = array(
+      $revision->getSummary(),
+      $uri,
+      $this->getSynchronizationWarning(),
+    );
+
+    $notes = implode("\n\n", $notes);
+
+    return array(
+      'name' => '[Differential] Review Request',
+      'notes' => $notes,
+    );
+  }
+
+  private function getSynchronizationWarning() {
+    return
+      "\xE2\x9A\xA0 DO NOT EDIT THIS TASK \xE2\x9A\xA0\n".
+      "\xE2\x98\xA0 Your changes will not be reflected in Phabricator.\n".
+      "\xE2\x98\xA0 Your changes will be destroyed the next time state ".
+      "is synchronized.";
   }
 
   protected function doWork() {
@@ -261,6 +288,152 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       array(
         'text' => $story->renderText(),
       ));
+
+
+    // Now, handle the subtasks.
+
+    $sub_editor = id(new PhabricatorEdgeEditor())
+      ->setActor($viewer);
+
+    // First, find all the object references in Phabricator for tasks that we
+    // know about and import their objects from Asana.
+    $sub_edges = $edges[$src_phid][$etype_sub];
+    $sub_refs = array();
+    $subtask_data = $this->getAsanaSubtaskData($object);
+    $have_phids = array();
+
+    if ($sub_edges) {
+      $refs = id(new DoorkeeperImportEngine())
+        ->setViewer($possessed_user)
+        ->withPHIDs(array_keys($sub_edges))
+        ->execute();
+
+      foreach ($refs as $ref) {
+        if (!$ref->getIsVisible()) {
+          $ref->getExternalObject()->delete();
+          continue;
+        }
+        $have_phids[$ref->getExternalObject()->getPHID()] = $ref;
+      }
+    }
+
+    // Remove any edges in Phabricator which don't have valid tasks in Asana.
+    // These are likely tasks which have been deleted. We're going to respawn
+    // them.
+    foreach ($sub_edges as $sub_phid => $sub_edge) {
+      if (isset($have_phids[$sub_phid])) {
+        continue;
+      }
+
+      $this->log(
+        "Removing subtask edge to %s, foreign object is not visible.\n",
+        $sub_phid);
+      $sub_editor->removeEdge($src_phid, $etype_sub, $sub_phid);
+      unset($sub_edges[$sub_phid]);
+    }
+
+
+    // For each active or passive user, we're looking for an existing, valid
+    // task. If we find one we're going to update it; if we don't, we'll
+    // create one. We ignore extra subtasks that we didn't create (we gain
+    // nothing by deleting them and might be nuking something important) and
+    // ignore subtasks which have been moved across workspaces or replanted
+    // under new parents (this stuff is too edge-casey to bother checking for
+    // and complicated to fix, as it needs extra API calls). However, we do
+    // clean up subtasks we created whose owners are no longer associated
+    // with the object.
+
+    $subtask_states = array_fill_keys($active_phids, false) +
+                      array_fill_keys($passive_phids, true);
+
+    // Continue with only those users who have Asana credentials.
+
+    $subtask_states = array_select_keys(
+      $subtask_states,
+      array_keys($phid_aid_map));
+
+    $need_subtasks = $subtask_states;
+
+    $user_to_ref_map = array();
+    $nuke_refs = array();
+    foreach ($sub_edges as $sub_phid => $sub_edge) {
+      $user_phid = idx($sub_edge['data'], 'userPHID');
+
+      if (isset($need_subtasks[$user_phid])) {
+        unset($need_subtasks[$user_phid]);
+        $user_to_ref_map[$user_phid] = $have_phids[$sub_phid];
+      } else {
+        // This user isn't associated with the object anymore, so get rid
+        // of their task and edge.
+        $nuke_refs[$sub_phid] = $have_phids[$sub_phid];
+      }
+    }
+
+    // These are tasks we know about but which are no longer relevant -- for
+    // example, because a user has been removed as a reviewer. Remove them and
+    // their edges.
+
+    foreach ($nuke_refs as $sub_phid => $ref) {
+      $sub_editor->removeEdge($src_phid, $etype_sub, $sub_phid);
+      $this->makeAsanaAPICall(
+        $oauth_token,
+        'tasks/'.$ref->getObjectID(),
+        'DELETE',
+        array());
+      $ref->getExternalObject()->delete();
+    }
+
+    // For each user that we don't have a subtask for, create a new subtask.
+
+    foreach ($need_subtasks as $user_phid => $is_completed) {
+      $subtask = $this->makeAsanaAPICall(
+        $oauth_token,
+        'tasks',
+        'POST',
+        $subtask_data + array(
+          'assignee' => $phid_aid_map[$user_phid],
+          'completed' => $is_completed,
+          'parent' => $parent_ref->getObjectID(),
+        ));
+
+      $subtask_ref = $this->newRefFromResult(
+        DoorkeeperBridgeAsana::OBJTYPE_TASK,
+        $subtask);
+
+      $user_to_ref_map[$user_phid] = $subtask_ref;
+
+      // We don't need to synchronize this subtask's state because we just
+      // set it when we created it.
+      unset($subtask_states[$user_phid]);
+
+      // Add an edge to track this subtask.
+      $sub_editor->addEdge(
+        $src_phid,
+        $etype_sub,
+        $subtask_ref->getExternalObject()->getPHID(),
+        array(
+          'data' => array(
+            'userPHID' => $user_phid,
+          ),
+        ));
+    }
+
+    // Synchronize all the previously-existing subtasks.
+
+    foreach ($subtask_states as $user_phid => $is_completed) {
+      $this->makeAsanaAPICall(
+        $oauth_token,
+        'tasks/'.$user_to_ref_map[$user_phid]->getObjectID(),
+        'PUT',
+        $subtask_data + array(
+          'assignee' => $phid_aid_map[$user_phid],
+          'completed' => $is_completed,
+        ));
+    }
+
+    // Update edges on our side.
+
+    $sub_editor->save();
 
   }
 
