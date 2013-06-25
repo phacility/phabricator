@@ -259,7 +259,7 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         if ($edge_cursor <= $story->getChronologicalKey()) {
           $this->log("Updating main task.\n");
 
-          // TODO: We need to synchronize 'followers' separately.
+          // We need to synchronize follower data separately.
           $put_data = $main_data;
           unset($put_data['followers']);
 
@@ -268,6 +268,22 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
             "tasks/".$parent_ref->getObjectID(),
             'PUT',
             $put_data);
+
+          // To synchronize follower data, just add all the followers. The task
+          // might have additional followers, but we can't really tell how they
+          // got there: were they CC'd and then unsubscribed, or did they
+          // manually follow the task? Assume the latter since it's easier and
+          // less destructive and the former is rare.
+
+          if ($main_data['followers']) {
+            $this->makeAsanaAPICall(
+              $oauth_token,
+              'tasks/'.$parent_ref->getObjectID().'/addFollowers',
+              'POST',
+              array(
+                'followers' => $main_data['followers'],
+              ));
+          }
         } else {
           $this->log(
             "Skipping main task update, cursor is ahead of the story.\n");
