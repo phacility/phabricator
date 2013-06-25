@@ -169,4 +169,11 @@ abstract class PhabricatorWorker {
     self::$runAllTasksInProcess = $all;
   }
 
+  protected function log($pattern /* $args */) {
+    $console = PhutilConsole::getConsole();
+    $argv = func_get_args();
+    call_user_func_array(array($console, 'writeLog'), $argv);
+    return $this;
+  }
+
 }
