@@ -212,7 +212,7 @@ final class PhamePostView extends AphrontView {
     // protip - try some  var disqus_developer = 1; action to test locally
     $disqus_js = CelerityStaticResourceResponse::renderInlineScript(
       jsprintf(
-        ' var disqus_shortname = "phabricator";'.
+        ' var disqus_shortname = %s;'.
         ' var disqus_identifier = %s;'.
         ' var disqus_url = %s;'.
         ' var disqus_title = %s;'.
@@ -224,6 +224,7 @@ final class PhamePostView extends AphrontView {
         '(document.getElementsByTagName("head")[0] ||'.
         ' document.getElementsByTagName("body")[0]).appendChild(dsq);'.
         '})();',
+        $disqus_shortname,
         $post->getPHID(),
         $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle()),
         $post->getTitle()));
