@@ -339,6 +339,8 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
           $account->save();
         unset($unguarded);
+
+        return $account->getProperty('oauth.token.access');
       }
     }
 
