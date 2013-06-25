@@ -189,12 +189,26 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $phid_aid_map = $this->lookupAsanaUserIDs($all_phids);
 
+    if (!$phid_aid_map) {
+      throw new PhabricatorWorkerPermanentFailureException(
+        'No related users have linked Asana accounts.');
+    }
+
     $owner_asana_id = idx($phid_aid_map, $owner_phid);
     $all_follow_asana_ids = array_select_keys($phid_aid_map, $all_follow_phids);
     $all_follow_asana_ids = array_values($all_follow_asana_ids);
 
-    list($possessed_user, $oauth_token) = $this->findAnyValidAsanaAccessToken(
+    // Even if the actor isn't a reviewer, etc., try to use their account so
+    // we can post in the correct voice. If we miss, we'll try all the other
+    // related users.
+
+    $try_users = array_merge(
+      array($data->getAuthorPHID()),
       array_keys($phid_aid_map));
+    $try_users = array_filter($try_users);
+
+    list($possessed_user, $oauth_token) = $this->findAnyValidAsanaAccessToken(
+      $try_users);
     if (!$oauth_token) {
       throw new PhabricatorWorkerPermanentFailureException(
         'Unable to find any Asana user with valid credentials to '.
