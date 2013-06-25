@@ -96,6 +96,6 @@ a.handle-disabled {
 
 .setup-warning-callout {
   position: relative;
-  padding: 0.75em 1em;
-  background: #ffffbb;
+  padding: 8px 16px;
+  background: {$lightyellow};
 }
