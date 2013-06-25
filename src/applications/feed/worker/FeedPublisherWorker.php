@@ -15,6 +15,14 @@ final class FeedPublisherWorker extends FeedPushWorker {
         ));
     }
 
+    if (PhabricatorEnv::getEnvConfig('asana.workspace-id')) {
+      PhabricatorWorker::scheduleTask(
+        'DoorkeeperFeedWorkerAsana',
+        array(
+          'key' => $story->getChronologicalKey(),
+        ));
+    }
+
   }
 
 

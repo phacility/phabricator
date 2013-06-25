@@ -538,6 +538,7 @@ phutil_register_library_map(array(
     'DoorkeeperDAO' => 'applications/doorkeeper/storage/DoorkeeperDAO.php',
     'DoorkeeperExternalObject' => 'applications/doorkeeper/storage/DoorkeeperExternalObject.php',
     'DoorkeeperExternalObjectQuery' => 'applications/doorkeeper/query/DoorkeeperExternalObjectQuery.php',
+    'DoorkeeperFeedWorkerAsana' => 'applications/doorkeeper/worker/DoorkeeperFeedWorkerAsana.php',
     'DoorkeeperImportEngine' => 'applications/doorkeeper/engine/DoorkeeperImportEngine.php',
     'DoorkeeperObjectRef' => 'applications/doorkeeper/engine/DoorkeeperObjectRef.php',
     'DoorkeeperRemarkupRuleAsana' => 'applications/doorkeeper/remarkup/DoorkeeperRemarkupRuleAsana.php',
@@ -811,6 +812,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationXHProf' => 'applications/xhprof/application/PhabricatorApplicationXHProf.php',
     'PhabricatorApplicationsController' => 'applications/meta/controller/PhabricatorApplicationsController.php',
     'PhabricatorApplicationsListController' => 'applications/meta/controller/PhabricatorApplicationsListController.php',
+    'PhabricatorAsanaConfigOptions' => 'applications/doorkeeper/option/PhabricatorAsanaConfigOptions.php',
     'PhabricatorAuditActionConstants' => 'applications/audit/constants/PhabricatorAuditActionConstants.php',
     'PhabricatorAuditAddCommentController' => 'applications/audit/controller/PhabricatorAuditAddCommentController.php',
     'PhabricatorAuditComment' => 'applications/audit/storage/PhabricatorAuditComment.php',
@@ -2428,6 +2430,7 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'DoorkeeperExternalObjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'DoorkeeperFeedWorkerAsana' => 'FeedPushWorker',
     'DoorkeeperImportEngine' => 'Phobject',
     'DoorkeeperObjectRef' => 'Phobject',
     'DoorkeeperRemarkupRuleAsana' => 'PhutilRemarkupRule',
@@ -2690,6 +2693,7 @@ phutil_register_library_map(array(
     'PhabricatorApplicationXHProf' => 'PhabricatorApplication',
     'PhabricatorApplicationsController' => 'PhabricatorController',
     'PhabricatorApplicationsListController' => 'PhabricatorApplicationsController',
+    'PhabricatorAsanaConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorAuditAddCommentController' => 'PhabricatorAuditController',
     'PhabricatorAuditComment' =>
     array(
