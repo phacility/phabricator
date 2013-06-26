@@ -16,6 +16,18 @@ final class PhabricatorConfigEditController
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$this->key])) {
+      $ancient = PhabricatorSetupCheckExtraConfig::getAncientConfig();
+      if (isset($ancient[$this->key])) {
+        $desc = pht(
+          "This configuration has been removed. You can safely delete ".
+          "it.\n\n%s",
+          $ancient[$this->key]);
+      } else {
+        $desc = pht(
+          "This configuration option is unknown. It may be misspelled, ".
+          "or have existed in a previous version of Phabricator.");
+      }
+
       // This may be a dead config entry, which existed in the past but no
       // longer exists. Allow it to be edited so it can be reviewed and
       // deleted.
@@ -23,10 +35,7 @@ final class PhabricatorConfigEditController
         ->setKey($this->key)
         ->setType('wild')
         ->setDefault(null)
-        ->setDescription(
-          pht(
-            "This configuration option is unknown. It may be misspelled, ".
-            "or have existed in a previous version of Phabricator."));
+        ->setDescription($desc);
       $group = null;
       $group_uri = $this->getApplicationURI();
     } else {
@@ -464,20 +473,6 @@ final class PhabricatorConfigEditController
   private function renderDefaults(PhabricatorConfigOption $option) {
     $stack = PhabricatorEnv::getConfigSourceStack();
     $stack = $stack->getStack();
-
-    /*
-
-      TODO: Once DatabaseSource lands, do this:
-
-      foreach ($stack as $key => $source) {
-        unset($stack[$key]);
-        if ($source instanceof PhabricatorConfigDatabaseSource) {
-          break;
-        }
-      }
-
-    */
-
 
     $table = array();
     $table[] = hsprintf(
