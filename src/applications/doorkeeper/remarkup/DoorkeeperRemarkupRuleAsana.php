@@ -23,7 +23,12 @@ final class DoorkeeperRemarkupRuleAsana
       'token' => $token,
       'href' => $matches[0],
       'tag' => array(
-        'ref' => array('asana', 'asana.com', 'asana:task', $matches[2]),
+        'ref' => array(
+          DoorkeeperBridgeAsana::APPTYPE_ASANA,
+          DoorkeeperBridgeAsana::APPDOMAIN_ASANA,
+          DoorkeeperBridgeAsana::OBJTYPE_TASK,
+          $matches[2],
+        ),
         'extra' => array(
           'asana.context' => $matches[1],
         ),

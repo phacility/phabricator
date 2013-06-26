@@ -20,4 +20,7 @@ abstract class DoorkeeperBridge extends Phobject {
   abstract public function canPullRef(DoorkeeperObjectRef $ref);
   abstract public function pullRefs(array $refs);
 
+  public function fillObjectFromData(DoorkeeperExternalObject $obj, $result) {
+  }
+
 }

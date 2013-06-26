@@ -156,6 +156,8 @@ final class PhameBlogViewController extends PhameController {
       $blog,
       PhabricatorPolicyCapability::CAN_JOIN);
 
+    $must_use_form = $blog->getDomain();
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('new')
@@ -169,7 +171,7 @@ final class PhameBlogViewController extends PhameController {
         ->setUser($user)
         ->setIcon('world')
         ->setHref($this->getApplicationURI('live/'.$blog->getID().'/'))
-        ->setRenderAsForm(true)
+        ->setRenderAsForm($must_use_form)
         ->setName(pht('View Live')));
 
     $actions->addAction(

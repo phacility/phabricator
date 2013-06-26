@@ -3,7 +3,8 @@
 final class DoorkeeperImportEngine extends Phobject {
 
   private $viewer;
-  private $refs;
+  private $refs = array();
+  private $phids = array();
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -24,23 +25,42 @@ final class DoorkeeperImportEngine extends Phobject {
     return $this->refs;
   }
 
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
+
   public function execute() {
     $refs = $this->getRefs();
     $viewer = $this->getViewer();
 
     $keys = mpull($refs, 'getObjectKey');
     if ($keys) {
-      $xobjs = id(new DoorkeeperExternalObject())->loadAllWhere(
-        'objectKey IN (%Ls)',
-        $keys);
+      $xobjs = id(new DoorkeeperExternalObjectQuery())
+        ->setViewer($viewer)
+        ->withObjectKeys($keys)
+        ->execute();
       $xobjs = mpull($xobjs, null, 'getObjectKey');
       foreach ($refs as $ref) {
         $xobj = idx($xobjs, $ref->getObjectKey());
         if (!$xobj) {
-          $xobj = $ref->newExternalObject()
+          $xobj = $ref
+            ->newExternalObject()
             ->setImporterPHID($viewer->getPHID());
         }
         $ref->attachExternalObject($xobj);
+      }
+    }
+
+    if ($this->phids) {
+      $xobjs = id(new DoorkeeperExternalObjectQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($this->phids)
+        ->execute();
+      foreach ($xobjs as $xobj) {
+        $ref = $xobj->getRef();
+        $ref->attachExternalObject($xobj);
+        $refs[$ref->getObjectKey()] = $ref;
       }
     }
 
@@ -55,12 +75,13 @@ final class DoorkeeperImportEngine extends Phobject {
       $bridge->setViewer($viewer);
     }
 
+    $working_set = $refs;
     foreach ($bridges as $bridge) {
       $bridge_refs = array();
-      foreach ($refs as $key => $ref) {
+      foreach ($working_set as $key => $ref) {
         if ($bridge->canPullRef($ref)) {
           $bridge_refs[$key] = $ref;
-          unset($refs[$key]);
+          unset($working_set[$key]);
         }
       }
       if ($bridge_refs) {
@@ -68,7 +89,7 @@ final class DoorkeeperImportEngine extends Phobject {
       }
     }
 
-    return $this->getRefs();
+    return $refs;
   }
 
 }

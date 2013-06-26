@@ -72,7 +72,7 @@ final class PhabricatorAuthManagementRefreshWorkflow
       $console->writeOut(
         "%s\n",
         pht(
-          "Found %s accounts to refresh.",
+          "Found %s account(s) to refresh.",
           new PhutilNumber(count($accounts))));
     }
 
@@ -126,7 +126,13 @@ final class PhabricatorAuthManagementRefreshWorkflow
           new PhutilNumber(
             $account->getProperty('oauth.token.access.expires') - time())));
 
-      $provider->getOAuthAccessToken($account, $force_refresh = true);
+      $token = $provider->getOAuthAccessToken($account, $force_refresh = true);
+      if (!$token) {
+        $console->writeOut(
+          "* %s\n",
+          pht('Unable to refresh token!'));
+        continue;
+      }
 
       $console->writeOut(
         "+ %s\n",

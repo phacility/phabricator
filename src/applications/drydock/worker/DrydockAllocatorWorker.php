@@ -23,7 +23,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     return $this->lease;
   }
 
-  private function log($message) {
+  private function logToDrydock($message) {
     DrydockBlueprint::writeLog(
       null,
       $this->loadLease(),
@@ -32,7 +32,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
   protected function doWork() {
     $lease = $this->loadLease();
-    $this->log('Allocating Lease');
+    $this->logToDrydock('Allocating Lease');
 
     try {
       $this->allocateLease($lease);
@@ -60,7 +60,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       $lease->getResourceType(),
       DrydockResourceStatus::STATUS_OPEN);
 
-    $this->log(
+    $this->logToDrydock(
       pht('Found %d Open Resource(s)', count($pool)));
 
     $candidates = array();
@@ -77,7 +77,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       }
     }
 
-    $this->log(pht('%d Open Resource(s) Remain', count($candidates)));
+    $this->logToDrydock(pht('%d Open Resource(s) Remain', count($candidates)));
 
     $resource = null;
     if ($candidates) {
@@ -94,7 +94,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
     if (!$resource) {
       $blueprints = DrydockBlueprint::getAllBlueprintsForResource($type);
 
-      $this->log(
+      $this->logToDrydock(
         pht('Found %d Blueprints', count($blueprints)));
 
       foreach ($blueprints as $key => $candidate_blueprint) {
@@ -104,7 +104,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
         }
       }
 
-      $this->log(
+      $this->logToDrydock(
         pht('%d Blueprints Enabled', count($blueprints)));
 
       foreach ($blueprints as $key => $candidate_blueprint) {
@@ -114,14 +114,14 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
         }
       }
 
-      $this->log(
+      $this->logToDrydock(
         pht('%d Blueprints Can Allocate', count($blueprints)));
 
       if (!$blueprints) {
         $lease->setStatus(DrydockLeaseStatus::STATUS_BROKEN);
         $lease->save();
 
-        $this->log(
+        $this->logToDrydock(
           "There are no resources of type '{$type}' available, and no ".
           "blueprints which can allocate new ones.");
 

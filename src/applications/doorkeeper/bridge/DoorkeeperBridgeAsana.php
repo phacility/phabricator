@@ -2,10 +2,24 @@
 
 final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
 
+  const APPTYPE_ASANA   = 'asana';
+  const APPDOMAIN_ASANA = 'asana.com';
+  const OBJTYPE_TASK    = 'asana:task';
+
   public function canPullRef(DoorkeeperObjectRef $ref) {
-    return ($ref->getApplicationType() == 'asana') &&
-           ($ref->getApplicationDomain() == 'asana.com') &&
-           ($ref->getObjectType() == 'asana:task');
+    if ($ref->getApplicationType() != self::APPTYPE_ASANA) {
+      return false;
+    }
+
+    if ($ref->getApplicationDomain() != self::APPDOMAIN_ASANA) {
+      return false;
+    }
+
+    $types = array(
+      self::OBJTYPE_TASK => true,
+    );
+
+    return isset($types[$ref->getObjectType()]);
   }
 
   public function pullRefs(array $refs) {
@@ -77,14 +91,18 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
         continue;
       }
 
-      $id = $result['id'];
-      $uri = "https://app.asana.com/0/{$id}/{$id}";
-      $obj->setObjectURI($uri);
+      $this->fillObjectFromData($obj, $result);
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $obj->save();
       unset($unguarded);
     }
+  }
+
+  public function fillObjectFromData(DoorkeeperExternalObject $obj, $result) {
+    $id = $result['id'];
+    $uri = "https://app.asana.com/0/{$id}/{$id}";
+    $obj->setObjectURI($uri);
   }
 
 }
