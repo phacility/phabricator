@@ -79,9 +79,11 @@ JX.behavior('phabricator-transaction-list', function(config) {
     ['submit', 'didSyntheticSubmit'],
     'transaction-append',
     function(e) {
+      e.kill();
       var form = e.getTarget();
+      JX.DOM.invoke(form, 'willSubmit');
 
-      JX.Workflow.newFromForm(form, {anchor: next_anchor})
+      JX.Workflow.newFromForm(form, { anchor : next_anchor })
         .setHandler(function(response) {
           ontransactions(response);
 
@@ -92,7 +94,6 @@ JX.behavior('phabricator-transaction-list', function(config) {
         })
         .start();
 
-      e.kill();
     });
 
 });

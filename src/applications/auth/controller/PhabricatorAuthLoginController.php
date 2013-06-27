@@ -50,10 +50,11 @@ final class PhabricatorAuthLoginController
               $provider->getProviderName()));
         }
       } else if ($viewer->getPHID() == $account->getUserPHID()) {
-        return $this->renderError(
-          pht(
-            'This external account ("%s") is already linked to your '.
-            'Phabricator account.'));
+        // This is either an attempt to re-link an existing and already
+        // linked account (which is silly) or a refresh of an external account
+        // (e.g., an OAuth account).
+        return id(new AphrontRedirectResponse())
+          ->setURI('/settings/panel/external/');
       } else {
         return $this->renderError(
           pht(

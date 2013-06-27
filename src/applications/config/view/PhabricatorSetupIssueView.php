@@ -177,7 +177,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
     } else {
       $update = array();
       foreach ($configs as $config) {
-        if (!idx($options, $config) || $options[$config]->getLocked()) {
+        if (idx($options, $config) && $options[$config]->getLocked()) {
           continue;
         }
         $link = phutil_tag(

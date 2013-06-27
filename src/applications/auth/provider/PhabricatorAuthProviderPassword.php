@@ -239,4 +239,15 @@ final class PhabricatorAuthProviderPassword
     return null;
   }
 
+  public function willRenderLinkedAccount(
+    PhabricatorUser $viewer,
+    PhabricatorObjectItemView $item,
+    PhabricatorExternalAccount $account) {
+    return;
+  }
+
+  public function shouldAllowAccountRefresh() {
+    return false;
+  }
+
 }

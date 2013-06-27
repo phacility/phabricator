@@ -4,9 +4,15 @@ final class PhabricatorFeedQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $filterPHIDs;
+  private $chronologicalKeys;
 
   public function setFilterPHIDs(array $phids) {
     $this->filterPHIDs = $phids;
+    return $this;
+  }
+
+  public function withChronologicalKeys(array $keys) {
+    $this->chronologicalKeys = $keys;
     return $this;
   }
 
@@ -52,6 +58,24 @@ final class PhabricatorFeedQuery
         $conn_r,
         'ref.objectPHID IN (%Ls)',
         $this->filterPHIDs);
+    }
+
+    if ($this->chronologicalKeys) {
+      // NOTE: We want to use integers in the query so we can take advantage
+      // of keys, but can't use %d on 32-bit systems. Make sure all the keys
+      // are integers and then format them raw.
+
+      $keys = $this->chronologicalKeys;
+      foreach ($keys as $key) {
+        if (!ctype_digit($key)) {
+          throw new Exception("Key '{$key}' is not a valid chronological key!");
+        }
+      }
+
+      $where[] = qsprintf(
+        $conn_r,
+        'ref.chronologicalKey IN (%Q)',
+        implode(', ', $keys));
     }
 
     $where[] = $this->buildPagingClause($conn_r);

@@ -68,6 +68,10 @@ final class PhabricatorAuthProviderLDAP
       $dialog->setTitle(pht('Link LDAP Account'));
       $dialog->addSubmitButton(pht('Link Accounts'));
       $dialog->addCancelButton($this->getSettingsURI());
+    } else if ($mode == 'refresh') {
+      $dialog->setTitle(pht('Refresh LDAP Account'));
+      $dialog->addSubmitButton(pht('Refresh Account'));
+      $dialog->addCancelButton($this->getSettingsURI());
     } else {
       if ($this->shouldAllowRegistration()) {
         $dialog->setTitle(pht('Login or Register with LDAP'));

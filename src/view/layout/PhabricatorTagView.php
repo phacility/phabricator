@@ -28,6 +28,17 @@ final class PhabricatorTagView extends AphrontView {
   private $dotColor;
   private $barColor;
   private $closed;
+  private $external;
+  private $id;
+
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  public function getID() {
+    return $this->id;
+  }
 
   public function setType($type) {
     $this->type = $type;
@@ -135,20 +146,24 @@ final class PhabricatorTagView extends AphrontView {
       return javelin_tag(
         'a',
         array(
+          'id' => $this->id,
           'href'  => $this->href,
           'class' => implode(' ', $classes),
           'sigil' => 'hovercard',
           'meta'  => array(
             'hoverPHID' => $this->phid,
           ),
+          'target' => $this->external ? '_blank' : null,
         ),
         array($bar, $content));
     } else {
       return phutil_tag(
         $this->href ? 'a' : 'span',
         array(
+          'id' => $this->id,
           'href'  => $this->href,
           'class' => implode(' ', $classes),
+          'target' => $this->external ? '_blank' : null,
         ),
         array($bar, $content));
     }
@@ -178,6 +193,15 @@ final class PhabricatorTagView extends AphrontView {
       self::COLOR_OBJECT,
       self::COLOR_PERSON,
     );
+  }
+
+  public function setExternal($external) {
+    $this->external = $external;
+    return $this;
+  }
+
+  public function getExternal() {
+    return $this->external;
   }
 
 }

@@ -38,6 +38,8 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
     if ($mode == 'link') {
       $button_text = pht('Link External Account');
+    } else if ($mode == 'refresh') {
+      $button_text = pht('Refresh Account Link');
     } else if ($this->shouldAllowRegistration()) {
       $button_text = pht('Login or Register');
     } else {
@@ -280,5 +282,99 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
     return parent::renderConfigPropertyTransactionTitle($xaction);
   }
+
+  protected function willSaveAccount(PhabricatorExternalAccount $account) {
+    parent::willSaveAccount($account);
+    $this->synchronizeOAuthAccount($account);
+  }
+
+  protected function synchronizeOAuthAccount(
+    PhabricatorExternalAccount $account) {
+    $adapter = $this->getAdapter();
+
+    $oauth_token = $adapter->getAccessToken();
+    $account->setProperty('oauth.token.access', $oauth_token);
+
+    if ($adapter->supportsTokenRefresh()) {
+      $refresh_token = $adapter->getRefreshToken();
+      $account->setProperty('oauth.token.refresh', $refresh_token);
+    } else {
+      $account->setProperty('oauth.token.refresh', null);
+    }
+
+    $expires = $adapter->getAccessTokenExpires();
+    $account->setProperty('oauth.token.access.expires', $expires);
+  }
+
+  public function getOAuthAccessToken(
+    PhabricatorExternalAccount $account,
+    $force_refresh = false) {
+
+    if ($account->getProviderKey() !== $this->getProviderKey()) {
+      throw new Exception("Account does not match provider!");
+    }
+
+    if (!$force_refresh) {
+      $access_expires = $account->getProperty('oauth.token.access.expires');
+      $access_token = $account->getProperty('oauth.token.access');
+
+      // Don't return a token with fewer than this many seconds remaining until
+      // it expires.
+      $shortest_token = 60;
+
+      if ($access_token) {
+        if ($access_expires > (time() + $shortest_token)) {
+          return $access_token;
+        }
+      }
+    }
+
+    $refresh_token = $account->getProperty('oauth.token.refresh');
+    if ($refresh_token) {
+      $adapter = $this->getAdapter();
+      if ($adapter->supportsTokenRefresh()) {
+        $adapter->refreshAccessToken($refresh_token);
+
+        $this->synchronizeOAuthAccount($account);
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+          $account->save();
+        unset($unguarded);
+
+        return $account->getProperty('oauth.token.access');
+      }
+    }
+
+    return null;
+  }
+
+  public function willRenderLinkedAccount(
+    PhabricatorUser $viewer,
+    PhabricatorObjectItemView $item,
+    PhabricatorExternalAccount $account) {
+
+    // Get a valid token, possibly refreshing it.
+    $oauth_token = $this->getOAuthAccessToken($account);
+
+    $item->addAttribute(pht('OAuth2 Account'));
+
+    if ($oauth_token) {
+      $oauth_expires = $account->getProperty('oauth.token.access.expires');
+      if ($oauth_expires) {
+        $item->addAttribute(
+          pht(
+            'Active OAuth Token (Expires: %s)',
+            phabricator_datetime($oauth_expires, $viewer)));
+      } else {
+        $item->addAttribute(
+          pht(
+            'Active OAuth Token'));
+      }
+    } else {
+      $item->addAttribute(pht('No OAuth Access Token'));
+    }
+
+    parent::willRenderLinkedAccount($viewer, $item, $account);
+  }
+
 
 }

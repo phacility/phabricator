@@ -449,18 +449,18 @@ final class PhabricatorMarkupEngine {
       $rules[] = new PhabricatorRemarkupRuleYoutube();
     }
 
-    $rules[] = new PhutilRemarkupRuleHyperlink();
-    $rules[] = new PhrictionRemarkupRule();
-
-    $rules[] = new PhabricatorRemarkupRuleEmbedFile();
-    $rules[] = new PhabricatorCountdownRemarkupRule();
-
     $applications = PhabricatorApplication::getAllInstalledApplications();
     foreach ($applications as $application) {
       foreach ($application->getRemarkupRules() as $rule) {
         $rules[] = $rule;
       }
     }
+
+    $rules[] = new PhutilRemarkupRuleHyperlink();
+    $rules[] = new PhrictionRemarkupRule();
+
+    $rules[] = new PhabricatorRemarkupRuleEmbedFile();
+    $rules[] = new PhabricatorCountdownRemarkupRule();
 
     if ($options['macros']) {
       $rules[] = new PhabricatorRemarkupRuleImageMacro();
