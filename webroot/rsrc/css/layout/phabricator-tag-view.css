@@ -42,7 +42,7 @@ a.phabricator-tag-view:hover {
 
 .phabricator-tag-type-state {
   color: #ffffff;
-  text-shadow: rgba(0, 0, 0, 0.40) 0px -1px 1px;
+  text-shadow: rgba(100, 100, 100, 0.40) 0px -1px 1px;
 }
 
 .phabricator-tag-type-object,
@@ -57,38 +57,38 @@ a.phabricator-tag-type-object:link {
 }
 
 .phabricator-tag-color-red {
-  background-color: #e12320;
-  border-color: #e12320;
-}
-
-.phabricator-tag-color-redorange {
-  background-color: #ff6604;
-  border-color: #ff6604;
+  background-color: {$red};
+  border-color: {$red};
 }
 
 .phabricator-tag-color-orange {
-  background-color: #fa9400;
-  border-color: #fa9400;
+  background-color: {$orange};
+  border-color: {$orange};
 }
 
 .phabricator-tag-color-yellow {
-  background-color: #f2ed5b;
-  border-color: #f2ed5b;
+  background-color: {$yellow};
+  border-color: {$yellow};
 }
 
 .phabricator-tag-color-blue {
-  background-color: #0573d2;
-  border-color: #0573d2;
+  background-color: {$blue};
+  border-color: {$blue};
 }
 
-.phabricator-tag-color-magenta {
-  background-color: #ce00ce;
-  border-color: #ce00ce;
+.phabricator-tag-color-indigo {
+  background-color: {$indigo};
+  border-color: {$indigo};
 }
 
 .phabricator-tag-color-green {
-  background-color: #438944;
-  border-color: #438944;
+  background-color: {$green};
+  border-color: {$green};
+}
+
+.phabricator-tag-color-violet {
+  background-color: {$violet};
+  border-color: {$violet};
 }
 
 .phabricator-tag-color-black {
@@ -102,8 +102,8 @@ a.phabricator-tag-type-object:link {
 }
 
 .phabricator-tag-color-white {
-  background-color: #ffffff;
-  border-color: #ffffff;
+  background-color: #f7f7f7;
+  border-color: #f7f7f7;
 }
 
 .phabricator-tag-color-object {

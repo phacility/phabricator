@@ -103,6 +103,10 @@
   width: 220px;
 }
 
+.device .phabricator-main-menu-search {
+  height: 40px;
+}
+
 .phabricator-main-menu-search-container {
   padding: 10px 0;
   position: relative;
@@ -126,7 +130,7 @@
 }
 
 .device .phabricator-main-menu-search-container {
-  padding: 0;
+  padding: 4px 0;
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input {
@@ -185,7 +189,7 @@
 }
 
 .device .phabricator-main-menu-search button {
-  top: 3px;
+  top: 7px;
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
@@ -217,6 +221,11 @@
   color: #888;
   font-size: 11px;
   font-weight: normal;
+}
+
+.device .phabricator-application-menu-expanded.phabricator-search-menu-expanded
+ .phabricator-search-menu {
+  padding: 0;
 }
 
 
@@ -274,27 +283,20 @@
 */
 
 .device .phabricator-dark-menu,
-.device .phabricator-dark-menu a.phabricator-menu-item-type-link {
+.device .phabricator-dark-menu a.phui-list-item-href {
   color: #fff;
-
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-label {
+.device .phabricator-dark-menu .phui-list-item-type-label {
   text-transform: uppercase;
   font-size: 12px;
   background-color: #151719;
-  padding: 0 0 0 12px;
-  height: 25px;
+  padding: 5px 0;
+  display: block;
   font-weight: bold;
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-label
-  .phabricator-menu-item-name {
-  display: block;
-  padding: 6px 0 0;
-}
-
-.device .phabricator-dark-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phui-list-item-href {
   border-width: 1px 0;
   border-style: solid;
   border-color: #34373b transparent #282c2d;
@@ -320,7 +322,6 @@
 
 .device-desktop .phabricator-search-menu {
   float: right;
-  margin-right: 116px;
 }
 
 .device .phabricator-search-menu-expanded .phabricator-search-menu {
@@ -328,49 +329,40 @@
   padding-top: 44px;
 }
 
-.device .phabricator-dark-menu .phabricator-menu-item-type-link {
+.device .phabricator-dark-menu .phui-list-item-type-link {
   font-size: 15px;
   min-height: 30px;
   line-height: 28px;
 }
 
-.device .phabricator-menu-item-type-link
-  .phabricator-core-menu-icon + .phabricator-menu-item-name {
-  margin-left: 36px;
+.device .phui-list-item-type-link
+  .phabricator-core-menu-icon + .phui-list-item-name {
+  margin-left: 30px;
 }
 
 .device-desktop .phabricator-application-menu {
-  position: absolute;
-  right: 0;
-  top: 0;
-  vertical-align: top;
+  float: right;
 }
 
-.device-desktop .phabricator-application-menu a.phabricator-menu-item-view,
-.device-desktop .phabricator-application-menu .phabricator-menu-item-name {
+.device-desktop .phabricator-application-menu .phui-list-item-view,
+.device-desktop .phabricator-application-menu .phui-list-item-name  {
   display: none;
 }
 
-.device-desktop .phabricator-application-menu
-  a.phabricator-menu-item-view.phabricator-core-menu-item {
+.device-desktop .phabricator-application-menu .phui-list-item-view.core-menu-item {
   display: block;
 }
 
 .device-desktop .phabricator-application-menu
-  a.phabricator-menu-item-view.phabricator-core-menu-item:hover {
+ .core-menu-item.phui-list-item-view:hover {
   background-color: #1e2225;
 }
 
-.device-desktop .phabricator-application-menu .phabricator-menu-item-view {
-  display: block;
+.device-desktop .phabricator-application-menu .phui-list-item-view {
   float: left;
   position: relative;
   min-width: 40px;
   height: 44px;
-}
-
-.device-desktop .phabricator-application-menu .phabricator-core-item-device {
-  display: none;
 }
 
 .device-desktop .phabricator-core-menu-icon {
@@ -401,10 +393,10 @@
 }
 
 .device .phabricator-application-menu,
-.device-desktop .phabricator-dark-menu .phabricator-menu-item-type-label {
+.device-desktop .phabricator-dark-menu .phui-list-item-type-label {
   display: none;
 }
 
-.phabricator-application-menu .phabricator-menu-item-name {
+.phabricator-application-menu .phui-list-item-name {
   padding-left: 12px;
 }

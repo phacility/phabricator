@@ -89,10 +89,6 @@ abstract class AphrontTagView extends AphrontView {
     return $this->renderChildren();
   }
 
-  protected function renderTagContainer($tag) {
-    return $tag;
-  }
-
   protected function willRender() {
     return;
   }
@@ -126,7 +122,7 @@ abstract class AphrontTagView extends AphrontView {
     $tag_view_attributes = array(
       'id' => $this->id,
 
-      'class' => $this->classes ? implode(' ', $this->classes) : null,
+      'class' => implode(' ', $this->classes),
       'style' => $this->style,
 
       'meta' => $this->metadata,
@@ -154,11 +150,9 @@ abstract class AphrontTagView extends AphrontView {
       }
     }
 
-    $tag = javelin_tag(
+    return javelin_tag(
       $this->getTagName(),
       $attributes,
       $this->getTagContent());
-
-    return $this->renderTagContainer($tag);
   }
 }

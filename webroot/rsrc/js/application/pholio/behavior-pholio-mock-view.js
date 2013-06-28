@@ -551,6 +551,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
       var edit = new JX.Request(editURI, function(r) {
         load_inline_comment(data.id);
+        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
       });
       edit.addData({
         op: 'update',
@@ -598,6 +599,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
         interrupt_typing();
         redraw_inlines(active_image.id);
+        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
       };
 
       JX.Workflow.newFromForm(form, data)
@@ -627,6 +629,7 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   load_inline_comments();
+  JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
 
   JX.Stratcom.listen('resize', null, redraw_image);
   redraw_image();

@@ -32,7 +32,7 @@ abstract class PonderController extends PhabricatorController {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setName(pht('New Question'))
           ->setHref('/ponder/question/ask')
           ->setIcon('create'));

@@ -150,8 +150,11 @@ Now, navigate to whichever subdomain you set up. You should see instructions to
 continue setup. The rest of this document contains additional instructions for
 specific setup steps.
 
-When you see the login screen, continue with @{article:Configuring Accounts and
-Registration}.
+When you resolve any issues and see the welcome screen, enter credentials to
+create your initial administrator account. After you log in, you'll want to
+configure how other users will be able to log in or register -- until you do,
+no one else will be able to sign up or log in. For more information, see
+@{article:Configuring Accounts and Registration}.
 
 = Storage: Configuring MySQL =
 

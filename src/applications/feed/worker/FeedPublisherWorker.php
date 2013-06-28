@@ -1,38 +1,29 @@
 <?php
 
-final class FeedPublisherWorker extends PhabricatorWorker {
+final class FeedPublisherWorker extends FeedPushWorker {
 
   protected function doWork() {
-    $task_data  = $this->getTaskData();
-    $chrono_key = $task_data['chrono_key'];
-    $uri        = $task_data['uri'];
+    $story = $this->loadFeedStory();
 
-    $story = id(new PhabricatorFeedStoryData())
-      ->loadOneWhere('chronologicalKey = %s', $chrono_key);
-
-    if (!$story) {
-      throw new PhabricatorWorkerPermanentFailureException(
-        'Feed story was deleted.'
-      );
+    $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks');
+    foreach ($uris as $uri) {
+      PhabricatorWorker::scheduleTask(
+        'FeedPublisherHTTPWorker',
+        array(
+          'key' => $story->getChronologicalKey(),
+          'uri' => $uri,
+        ));
     }
 
-    $data = array(
-      'storyID'         => $story->getID(),
-      'storyType'       => $story->getStoryType(),
-      'storyData'       => $story->getStoryData(),
-      'storyAuthorPHID' => $story->getAuthorPHID(),
-      'epoch'           => $story->getEpoch(),
-    );
-
-    id(new HTTPFuture($uri, $data))
-      ->setMethod('POST')
-      ->setTimeout(30)
-      ->resolvex();
+    if (PhabricatorEnv::getEnvConfig('asana.workspace-id')) {
+      PhabricatorWorker::scheduleTask(
+        'DoorkeeperFeedWorkerAsana',
+        array(
+          'key' => $story->getChronologicalKey(),
+        ));
+    }
 
   }
 
-  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
-    return max($task->getFailureCount(), 1) * 60;
-  }
 
 }

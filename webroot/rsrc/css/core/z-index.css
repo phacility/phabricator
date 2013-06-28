@@ -34,6 +34,10 @@
   z-index: 4;
 }
 
+.conpherence-layout .conpherence-no-threads {
+  z-index: 4;
+}
+
 .conpherence-menu-pane {
   z-index: 4;
 }
@@ -42,11 +46,16 @@
   z-index: 4;
 }
 
+.loading .messages-loading-mask,
+.loading .widgets-loading-mask {
+  z-index: 5;
+}
+
 .dark-console {
   z-index: 5;
 }
 
-.maniphest-task-dragging {
+.drag-dragging {
   z-index: 5;
 }
 

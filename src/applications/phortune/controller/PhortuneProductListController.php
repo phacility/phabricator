@@ -22,7 +22,7 @@ final class PhortuneProductListController extends PhabricatorController {
         ->setName('Products')
         ->setHref($this->getApplicationURI('product/')));
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Product'))
         ->setHref($this->getApplicationURI('product/edit/'))
         ->setIcon('create'));

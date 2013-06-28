@@ -39,10 +39,10 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
 
     if ($user->isLoggedIn()) {
       $selected = ($controller instanceof PhabricatorSettingsMainController);
-      $item = new PhabricatorMenuItemView();
+      $item = new PHUIListItemView();
       $item->setName(pht('Settings'));
       $item->setIcon('settings');
-      $item->addClass('phabricator-core-menu-item');
+      $item->addClass('core-menu-item');
       $item->setSelected($selected);
       $item->setHref('/settings/');
       $items[] = $item;

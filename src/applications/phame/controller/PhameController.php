@@ -96,12 +96,12 @@ abstract class PhameController extends PhabricatorController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('New Blog'))
         ->setHref($this->getApplicationURI('/blog/new'))
         ->setIcon('create'));
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('New Post'))
         ->setHref($this->getApplicationURI('/post/new'))
         ->setIcon('new'));

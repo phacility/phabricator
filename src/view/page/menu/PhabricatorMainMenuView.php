@@ -6,7 +6,7 @@ final class PhabricatorMainMenuView extends AphrontView {
   private $controller;
   private $applicationMenu;
 
-  public function setApplicationMenu(PhabricatorMenuView $application_menu) {
+  public function setApplicationMenu(PHUIListView $application_menu) {
     $this->applicationMenu = $application_menu;
     return $this;
   }
@@ -106,7 +106,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     Javelin::initBehavior('phabricator-keyboard-shortcuts', $keyboard_config);
 
     if ($result) {
-      $result = id(new PhabricatorMenuItemView())
+      $result = id(new PHUIListItemView())
         ->addClass('phabricator-main-menu-search')
         ->appendChild($result);
     }
@@ -146,18 +146,16 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $actions = array();
     foreach ($applications as $application) {
-      if ($application->shouldAppearInLaunchView()) {
-        $app_actions = $application->buildMainMenuItems($user, $controller);
-        foreach ($app_actions as $action) {
-          $actions[] = $action;
-        }
+      $app_actions = $application->buildMainMenuItems($user, $controller);
+      foreach ($app_actions as $action) {
+        $actions[] = $action;
       }
     }
 
     $view = $this->getApplicationMenu();
 
     if (!$view) {
-      $view = new PhabricatorMenuView();
+      $view = new PHUIListView();
     }
 
     $view->addClass('phabricator-dark-menu');
@@ -165,9 +163,8 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     if ($actions) {
       $view->addMenuItem(
-        id(new PhabricatorMenuItemView())
-          ->addClass('phabricator-core-item-device')
-          ->setType(PhabricatorMenuItemView::TYPE_LABEL)
+        id(new PHUIListItemView())
+          ->setType(PHUIListItemView::TYPE_LABEL)
           ->setName(pht('Actions')));
       foreach ($actions as $action) {
         $icon = $action->getIcon();
@@ -180,16 +177,6 @@ final class PhabricatorMainMenuView extends AphrontView {
         }
         $view->addMenuItem($action);
       }
-    }
-
-    if ($user->isLoggedIn()) {
-      $view->addMenuItem(
-        id(new PhabricatorMenuItemView())
-          ->addClass('phabricator-menu-item-type-link')
-          ->addClass('phabricator-core-menu-item')
-          ->setName(pht('Log Out'))
-          ->setHref('/logout/')
-          ->appendChild($this->renderMenuIcon('power-light-large')));
     }
 
     return $view;
@@ -221,7 +208,7 @@ final class PhabricatorMainMenuView extends AphrontView {
 
   private function renderPhabricatorSearchMenu() {
 
-    $view = new PhabricatorMenuView();
+    $view = new PHUIListView();
     $view->addClass('phabricator-dark-menu');
     $view->addClass('phabricator-search-menu');
 

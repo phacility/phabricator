@@ -7,24 +7,24 @@ abstract class ConpherenceController extends PhabricatorController {
   private $conpherences;
 
   public function buildApplicationMenu() {
-    $nav = new PhabricatorMenuView();
+    $nav = new PHUIListView();
 
     $nav->newLink(
       pht('New Message'),
       $this->getApplicationURI('new/'));
 
     $nav->addMenuItem(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
       ->setName(pht('Add Participants'))
-      ->setType(PhabricatorMenuItemView::TYPE_LINK)
+      ->setType(PHUIListItemView::TYPE_LINK)
       ->setHref('#')
       ->addSigil('conpherence-widget-adder')
       ->setMetadata(array('widget' => 'widgets-people')));
 
     $nav->addMenuItem(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
       ->setName(pht('New Calendar Item'))
-      ->setType(PhabricatorMenuItemView::TYPE_LINK)
+      ->setType(PHUIListItemView::TYPE_LINK)
       ->setHref('/calendar/status/create/')
       ->addSigil('conpherence-widget-adder')
       ->setMetadata(array('widget' => 'widgets-calendar')));
@@ -37,13 +37,13 @@ abstract class ConpherenceController extends PhabricatorController {
 
     $crumbs
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
         ->setName(pht('New Message'))
         ->setHref($this->getApplicationURI('new/'))
         ->setIcon('create')
         ->setWorkflow(true))
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
         ->setName(pht('Thread'))
         ->setHref('#')
         ->setIcon('action-menu')

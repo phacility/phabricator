@@ -9,7 +9,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
   // $length: 0 based (0 meaning 1 line)
   private function createNewComment($line, $length) {
     $comment = $this->createComment();
-    $comment->setIsNewFile(True);
+    $comment->setIsNewFile(true);
     $comment->setLineNumber($line);
     $comment->setLineLength($length);
     return $comment;
@@ -18,7 +18,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
   // $length: 0 based (0 meaning 1 line)
   private function createOldComment($line, $length) {
     $comment = $this->createComment();
-    $comment->setIsNewFile(False);
+    $comment->setIsNewFile(false);
     $comment->setLineNumber($line);
     $comment->setLineLength($length);
     return $comment;

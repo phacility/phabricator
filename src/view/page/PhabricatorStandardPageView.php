@@ -18,7 +18,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $pageObjects = array();
   private $applicationMenu;
 
-  public function setApplicationMenu(PhabricatorMenuView $application_menu) {
+  public function setApplicationMenu(PHUIListView $application_menu) {
     $this->applicationMenu = $application_menu;
     return $this;
   }
@@ -128,9 +128,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     require_celerity_resource('phabricator-core-css');
     require_celerity_resource('phabricator-zindex-css');
-    require_celerity_resource('phabricator-core-buttons-css');
-    require_celerity_resource('spacing-css');
-    require_celerity_resource('phui-form-css'); // Evan will hate this
+    require_celerity_resource('phui-button-css');
+    require_celerity_resource('phui-spacing-css');
+    require_celerity_resource('phui-form-css');
     require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
 

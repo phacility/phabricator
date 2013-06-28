@@ -77,7 +77,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     return $this;
   }
 
-  public function addAction(PhabricatorMenuItemView $action) {
+  public function addAction(PHUIListItemView $action) {
     if (count($this->actions) >= 3) {
       throw new Exception("Limit 3 actions per item.");
     }
@@ -412,7 +412,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $actions[] = $action;
       }
       $actions = phutil_tag(
-        'div',
+        'ul',
         array(
           'class' => 'phabricator-object-item-actions',
         ),

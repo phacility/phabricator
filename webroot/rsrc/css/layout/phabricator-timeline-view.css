@@ -160,83 +160,83 @@
 }
 
 .phabricator-timeline-red .phabricator-timeline-border {
-  border-color: #cc0000;
+  border-color: {$red};
 }
 
 .phabricator-timeline-orange .phabricator-timeline-border {
-  border-color: #cc7300;
+  border-color: {$orange};
 }
 
 .phabricator-timeline-yellow .phabricator-timeline-border {
-  border-color: #ccc000;
+  border-color: {$yellow};
 }
 
 .phabricator-timeline-green .phabricator-timeline-border {
-  border-color: #009b2d;
+  border-color: {$green};
 }
 
 .phabricator-timeline-sky .phabricator-timeline-border {
-  border-color: #6498cf;
+  border-color: {$sky};
 }
 
 .phabricator-timeline-blue .phabricator-timeline-border {
-  border-color: #00659a;
+  border-color: {$blue};
 }
 
 .phabricator-timeline-indigo .phabricator-timeline-border {
-  border-color: #3a00cc;
+  border-color: {$indigo};
 }
 
 .phabricator-timeline-violet .phabricator-timeline-border {
-  border-color: #67009b;
+  border-color: {$violet};
 }
 
 .phabricator-timeline-grey .phabricator-timeline-border {
-  border-color: #999999;
+  border-color: #888;
 }
 
 .phabricator-timeline-black .phabricator-timeline-border {
-  border-color: #333333;
+  border-color: #333;
 }
 
 .phabricator-timeline-red .phabricator-timeline-icon-fill {
-  background-color: #cc0000;
+  background-color: {$red};
 }
 
 .phabricator-timeline-orange .phabricator-timeline-icon-fill {
-  background-color: #cc7300;
+  background-color: {$orange};
 }
 
 .phabricator-timeline-yellow .phabricator-timeline-icon-fill {
-  background-color: #ccc000;
+  background-color: {$yellow};
 }
 
 .phabricator-timeline-green .phabricator-timeline-icon-fill {
-  background-color: #009b2d;
+  background-color: {$green};
 }
 
 .phabricator-timeline-sky .phabricator-timeline-icon-fill {
-  background-color: #6498cf;
+  background-color: {$sky};
 }
 
 .phabricator-timeline-blue .phabricator-timeline-icon-fill {
-  background-color: #00659a;
+  background-color: {$blue};
 }
 
 .phabricator-timeline-indigo .phabricator-timeline-icon-fill {
-  background-color: #3a00cc;
+  background-color: {$indigo};
 }
 
 .phabricator-timeline-violet .phabricator-timeline-icon-fill {
-  background-color: #67009b;
+  background-color: {$violet};
 }
 
 .phabricator-timeline-grey .phabricator-timeline-icon-fill {
-  background-color: #999999;
+  background-color: #888;
 }
 
 .phabricator-timeline-black .phabricator-timeline-icon-fill {
-  background-color: #333333;
+  background-color: #333;
 }
 
 .phabricator-timeline-shell.anchor-target {

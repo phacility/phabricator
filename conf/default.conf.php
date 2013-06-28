@@ -285,6 +285,10 @@ return array(
   //      mostly never arrive.
   'metamta.can-send-as-user'    => false,
 
+  // Limit the maximum size of the body of an email generated for a diff
+  // (in bytes).
+  'metamta.email-body-limit'    => 524288,
+
   // Adapter class to use to transmit mail to the MTA. The default uses
   // PHPMailerLite, which will invoke "sendmail". This is appropriate
   // if sendmail actually works on your host, but if you haven't configured mail
@@ -549,11 +553,6 @@ return array(
 
 // -- Auth ------------------------------------------------------------------ //
 
-  // Can users login with a username/password, or by following the link from
-  // a password reset email? You can disable this and configure one or more
-  // OAuth providers instead.
-  'auth.password-auth-enabled'  => true,
-
   // Maximum number of simultaneous web sessions each user is permitted to have.
   // Setting this to "1" will prevent a user from logging in on more than one
   // browser at the same time.
@@ -610,162 +609,6 @@ return array(
   // When users set or reset a password, it must have at least this many
   // characters.
   'account.minimum-password-length'  => 8,
-
-
-// -- Facebook OAuth -------------------------------------------------------- //
-
-  // Can users use Facebook credentials to login to Phabricator?
-  'facebook.auth-enabled'       => false,
-
-  // Can users use Facebook credentials to create new Phabricator accounts?
-  'facebook.registration-enabled' => true,
-
-  // Are Facebook accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'facebook.auth-permanent'     => false,
-
-  // The Facebook "Application ID" to use for Facebook API access.
-  'facebook.application-id'     => null,
-
-  // The Facebook "Application Secret" to use for Facebook API access.
-  'facebook.application-secret' => null,
-
-  // Should Phabricator reject requests made by users with
-  // Secure Browsing disabled?
-  'facebook.require-https-auth' => false,
-
-// -- GitHub OAuth ---------------------------------------------------------- //
-
-  // Can users use GitHub credentials to login to Phabricator?
-  'github.auth-enabled'         => false,
-
-  // Can users use GitHub credentials to create new Phabricator accounts?
-  'github.registration-enabled' => true,
-
-  // Are GitHub accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'github.auth-permanent'       => false,
-
-  // The GitHub "Client ID" to use for GitHub API access.
-  'github.application-id'       => null,
-
-  // The GitHub "Secret" to use for GitHub API access.
-  'github.application-secret'   => null,
-
-
-// -- Google OAuth ---------------------------------------------------------- //
-
-  // Can users use Google credentials to login to Phabricator?
-  'google.auth-enabled'         => false,
-
-  // Can users use Google credentials to create new Phabricator accounts?
-  'google.registration-enabled' => true,
-
-  // Are Google accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'google.auth-permanent'       => false,
-
-  // The Google "Client ID" to use for Google API access.
-  'google.application-id'       => null,
-
-  // The Google "Client Secret" to use for Google API access.
-  'google.application-secret'   => null,
-
-// -- LDAP Auth ----------------------------------------------------- //
-  // Enable ldap auth
-  'ldap.auth-enabled'         => false,
-
-  // The LDAP server hostname
-  'ldap.hostname' => null,
-
-  // The LDAP server port
-  'ldap.port' => 389,
-
-  // The LDAP base domain name
-  'ldap.base_dn' => null,
-
-  // The attribute to be regarded as 'username'. Has to be unique
-  'ldap.search_attribute' => null,
-
-  // Perform a search to find a user
-  // Many LDAP installations do not have the username in the dn, if this is
-  // true for you set this to true and configure the username_attribute below
-  'ldap.search-first'         => false,
-
-  // The attribute to search for if you have to search for a user
-  'ldap.username-attribute' => null,
-
-  // The attribute(s) to be regarded as 'real name'.
-  // If more then one attribute is supplied the values of the attributes in
-  // the array will be joined
-  'ldap.real_name_attributes' => array(),
-
-  // A domain name to use when authenticating against Active Directory
-  // (e.g. 'example.com')
-  'ldap.activedirectory_domain' => null,
-
-  // The LDAP version
-  'ldap.version' => 3,
-
-  // LDAP Referrals Option
-  // Whether referrals should be followed by the client
-  // Should be set to 0 if you use Windows 2003 AD
-  'ldap.referrals' => true,
-
-  // The anonymous user name to use before searching a user.
-  // Many LDAP installations require login even before searching a user, set
-  // this option to enable it.
-  'ldap.anonymous-user-name'     => null,
-
-  // The password of the LDAP anonymous user.
-  'ldap.anonymous-user-password' => null,
-
-  // Whether to use STARTTLS
-  'ldap.start-tls' => false,
-
-
-// -- Disqus OAuth ---------------------------------------------------------- //
-
-  // Can users use Disqus credentials to login to Phabricator?
-  'disqus.auth-enabled'         => false,
-
-  // Can users use Disqus credentials to create new Phabricator accounts?
-  'disqus.registration-enabled' => true,
-
-  // Are Disqus accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'disqus.auth-permanent'       => false,
-
-  // The Disqus "Client ID" to use for Disqus API access.
-  'disqus.application-id'       => null,
-
-  // The Disqus "Client Secret" to use for Disqus API access.
-  'disqus.application-secret'   => null,
-
-
-// -- Phabricator OAuth ----------------------------------------------------- //
-
-  // Meta-town -- Phabricator is itself an OAuth Provider
-  // TODO -- T887 -- make this support multiple Phabricator instances!
-
-  // The URI of the Phabricator instance to use as an OAuth server.
-  'phabricator.oauth-uri'            => null,
-
-  // Can users use Phabricator credentials to login to Phabricator?
-  'phabricator.auth-enabled'         => false,
-
-  // Can users use Phabricator credentials to create new Phabricator accounts?
-  'phabricator.registration-enabled' => true,
-
-  // Are Phabricator accounts permanently linked to Phabricator accounts, or can
-  // the user unlink them?
-  'phabricator.auth-permanent'       => false,
-
-  // The Phabricator "Client ID" to use for Phabricator API access.
-  'phabricator.application-id'       => null,
-
-  // The Phabricator "Client Secret" to use for Phabricator API access.
-  'phabricator.application-secret'   => null,
 
 
 // -- Recaptcha ------------------------------------------------------------- //
@@ -1183,10 +1026,6 @@ return array(
 
   'aphront.default-application-configuration-class' =>
     'AphrontDefaultApplicationConfiguration',
-
-  'controller.oauth-registration' =>
-    'PhabricatorOAuthDefaultRegistrationController',
-
 
   // Directory that phd (the Phabricator daemon control script) should use to
   // track running daemons.

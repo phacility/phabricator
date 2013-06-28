@@ -7,11 +7,11 @@ final class PhabricatorTagView extends AphrontView {
   const TYPE_STATE          = 'state';
 
   const COLOR_RED           = 'red';
-  const COLOR_REDORANGE     = 'redorange';
   const COLOR_ORANGE        = 'orange';
   const COLOR_YELLOW        = 'yellow';
   const COLOR_BLUE          = 'blue';
-  const COLOR_MAGENTA       = 'magenta';
+  const COLOR_INDIGO        = 'indigo';
+  const COLOR_VIOLET        = 'violet';
   const COLOR_GREEN         = 'green';
   const COLOR_BLACK         = 'black';
   const COLOR_GREY          = 'grey';
@@ -28,6 +28,17 @@ final class PhabricatorTagView extends AphrontView {
   private $dotColor;
   private $barColor;
   private $closed;
+  private $external;
+  private $id;
+
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  public function getID() {
+    return $this->id;
+  }
 
   public function setType($type) {
     $this->type = $type;
@@ -135,20 +146,24 @@ final class PhabricatorTagView extends AphrontView {
       return javelin_tag(
         'a',
         array(
+          'id' => $this->id,
           'href'  => $this->href,
           'class' => implode(' ', $classes),
           'sigil' => 'hovercard',
           'meta'  => array(
             'hoverPHID' => $this->phid,
           ),
+          'target' => $this->external ? '_blank' : null,
         ),
         array($bar, $content));
     } else {
       return phutil_tag(
         $this->href ? 'a' : 'span',
         array(
+          'id' => $this->id,
           'href'  => $this->href,
           'class' => implode(' ', $classes),
+          'target' => $this->external ? '_blank' : null,
         ),
         array($bar, $content));
     }
@@ -165,11 +180,11 @@ final class PhabricatorTagView extends AphrontView {
   public static function getColors() {
     return array(
       self::COLOR_RED,
-      self::COLOR_REDORANGE,
       self::COLOR_ORANGE,
       self::COLOR_YELLOW,
       self::COLOR_BLUE,
-      self::COLOR_MAGENTA,
+      self::COLOR_INDIGO,
+      self::COLOR_VIOLET,
       self::COLOR_GREEN,
       self::COLOR_BLACK,
       self::COLOR_GREY,
@@ -178,6 +193,15 @@ final class PhabricatorTagView extends AphrontView {
       self::COLOR_OBJECT,
       self::COLOR_PERSON,
     );
+  }
+
+  public function setExternal($external) {
+    $this->external = $external;
+    return $this;
+  }
+
+  public function getExternal() {
+    return $this->external;
   }
 
 }

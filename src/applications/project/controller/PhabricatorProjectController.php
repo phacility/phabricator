@@ -71,7 +71,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Project'))
         ->setHref($this->getApplicationURI('create/'))
         ->setIcon('create'));

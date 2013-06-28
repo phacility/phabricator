@@ -3,16 +3,78 @@
  */
 
 .phui-document-view {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  position: relative;
 }
 
 .device-desktop .phui-document-view {
-  position: relative;
   border-left: 1px solid #e7e7e7;
   border-right: 1px solid #e7e7e7;
   border-bottom: 1px solid #c0c5d1;
+  max-width: 960px;
+  margin: 16px auto;
+}
+
+.device-desktop .phui-document-view.phui-offset-view {
   max-width: 800px;
-  margin: 20px auto;
+}
+
+.phui-document-sidenav {
+  position:absolute;
+  width: 200px;
+  text-overflow: ellipsis;
+  top: 0;
+  right: 0;
+}
+
+.device-phone .phui-document-sidenav {
+  position: static;
+  width: auto;
+  border-top: 1px solid #d7d7d7;
+  border-bottom: 1px solid #d7d7d7;
+}
+
+.device-phone .phui-sidenav-view .phui-document-inner {
+ margin: 0;
+}
+
+.phui-sidenav-view .phui-document-inner {
+  margin-right: 200px;
+  border-right: 1px solid #e7e7e7;
+  background: #fff;
+}
+
+.phui-document-bookname {
+  padding: 8px 16px;
+  color: #9ca5b5;
+}
+
+.phui-document-bookname .bookname {
+  font-size: 14px;
+  font-weight: bold;
+  float: left;
+}
+
+.phui-document-bookname .bookdescription {
+  font-size: 14px;
+  float: right;
+}
+
+.phui-document-content .phabricator-header-shell {
+  background-color: #f6f7f8;
+  border-top: 1px solid #e7e7e7;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.phui-document-content .phabricator-header-view {
+  padding: 16px;
+}
+
+.phui-document-content .phabricator-property-list-view {
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  background-color: #f6f7f8;
 }
 
 .phui-document-content {
@@ -37,16 +99,12 @@
   background: #f7f7f7;
 }
 
-.phui-document-content .phabricator-header-shell {
-  border-top: none;
-}
-
 .phui-document-content .phabricator-remarkup {
-  padding: 20px;
+  padding: 16px;
 }
 
 .device-phone .phui-document-content .phabricator-remarkup {
-  padding: 10px;
+  padding: 8px;
 }
 
 .device-desktop .phui-document-content .phabricator-action-list-view {
@@ -70,7 +128,7 @@
 
 .phui-document-content .phabricator-remarkup .remarkup-code-block {
   clear: both;
-  margin: 20px 0;
+  margin: 16px 0;
 }
 
 .device-desktop .phui-document-offset {

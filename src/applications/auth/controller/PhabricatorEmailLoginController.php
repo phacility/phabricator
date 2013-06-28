@@ -10,7 +10,7 @@ final class PhabricatorEmailLoginController
   public function processRequest() {
     $request = $this->getRequest();
 
-    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+    if (!PhabricatorAuthProviderPassword::getPasswordProvider()) {
       return new Aphront400Response();
     }
 
@@ -110,10 +110,17 @@ EOBODY;
 
     }
 
-    $email_auth = new AphrontFormView();
+    $error_view = null;
+    if ($errors) {
+      $error_view = new AphrontErrorView();
+      $error_view->setErrors($errors);
+    }
+
+    $email_auth = new AphrontFormLayoutView();
+    $email_auth->appendChild($error_view);
     $email_auth
-      ->setAction('/login/email/')
       ->setUser($request->getUser())
+      ->setFullWidth(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Email'))
@@ -123,34 +130,30 @@ EOBODY;
       ->appendChild(
         id(new AphrontFormRecaptchaControl())
           ->setLabel(pht('Captcha'))
-          ->setError($e_captcha))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue(pht('Send Email')));
+          ->setError($e_captcha));
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle(pht('Login Error'));
-      $error_view->setErrors($errors);
-    }
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Reset Password')));
 
-
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild(phutil_tag('h1', array(), pht(
-      'Forgot Password / Email Login')));
-    $panel->appendChild($email_auth);
-    $panel->setNoBackground();
+    $dialog = new AphrontDialogView();
+    $dialog->setUser($request->getUser());
+    $dialog->setTitle(pht(
+      'Forgot Password / Email Login'));
+    $dialog->appendChild($email_auth);
+    $dialog->addSubmitButton(pht('Send Email'));
+    $dialog->setSubmitURI('/login/email/');
 
     return $this->buildApplicationPage(
       array(
-        $error_view,
-        $panel,
+        $crumbs,
+        $dialog,
       ),
       array(
         'title' => pht('Forgot Password'),
         'device' => true,
+        'dust' => true,
       ));
   }
 

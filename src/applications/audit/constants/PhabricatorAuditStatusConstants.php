@@ -35,10 +35,10 @@ final class PhabricatorAuditStatusConstants {
   public static function getStatusColor($code) {
     switch ($code) {
       case self::CONCERNED:
-        $color = 'orange';
+        $color = 'red';
         break;
       case self::AUDIT_REQUIRED:
-        $color = 'red';
+        $color = 'orange';
         break;
       default:
         $color = null;

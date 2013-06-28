@@ -1,0 +1,130 @@
+/**
+ * @provides phui-list-view-css
+ */
+
+.phui-list-item-header,
+.phui-list-item-header a {
+  color: #9ca5b5;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 12px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.90);
+}
+
+/* - Sidenav and Actions -------------------------------------------------------
+
+  Sidebar and Action Menus
+
+*/
+
+.phui-list-sidenav {
+  padding: 4px 0;
+}
+
+.phui-list-sidenav .phui-list-item-type-label .phui-list-item-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #9ca5b5;
+  text-transform: uppercase;
+  padding: 4px 8px 4px 8px;
+  display: block;
+}
+
+.phui-list-sidenav .phui-list-item-type-divider {
+  margin: 8px 8px 12px 8px;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.phui-list-sidenav .phui-list-item-icon {
+  height: 14px;
+  width: 14px;
+  display: inline-block;
+  position: absolute;
+  top: 4px;
+}
+
+.phui-list-sidenav .phui-list-item-icon + .phui-list-item-name {
+  padding-left: 20px;
+}
+
+.phui-list-sidenav .phui-list-item-has-icon {
+  margin: 0;
+  position: relative;
+}
+
+.phui-list-sidenav .phui-list-item-view {
+  overflow: hidden;
+}
+
+.phui-list-sidenav .phui-list-item-href {
+  display: block;
+  padding: 2px 16px;
+  clear: both;
+  line-height: 20px;
+  color: #333333;
+  white-space: nowrap;
+}
+
+.phui-list-sidenav .phui-list-item-has-icon .phui-list-item-href {
+  padding: 2px 10px;
+}
+
+.device-desktop .phui-list-sidenav .phui-list-item-href:hover {
+  background: #005588;
+  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
+  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* - Top, Full Width Navigations -----------------------------------------------
+
+  Sets a page or box with a top navbar
+
+*/
+
+.phui-list-view.phui-list-navbar {
+  list-style: none;
+  overflow: hidden;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.phui-list-view.phui-list-navbar > li {
+  list-style: none;
+  float: left;
+  display: block;
+  border-right: 1px solid #e7e7e7;
+}
+
+.phui-list-view.phui-list-navbar > li > * {
+  display: block;
+}
+
+.phui-list-navbar .phui-list-item-href {
+ color: #9ca5b5;
+ padding: 8px 16px;
+ font-size: 12px;
+}
+
+.phui-list-navbar .phui-list-item-selected .phui-list-item-href {
+  background: #f6f7f8;
+  color: #555;
+}
+
+.phui-list-navbar .phui-list-item-href:hover {
+  background: #e8e9ec;
+  color: #555;
+  text-decoration: none;
+}
+
+.phui-list-navbar .phui-list-item-icon {
+  height: 14px;
+  width: 14px;
+  display: block;
+}
+
+.device-phone .phui-list-view.phui-list-navbar > li {
+  float: none;
+  border: none;
+}

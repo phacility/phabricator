@@ -71,21 +71,11 @@ final class PhabricatorEmailTokenController
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       $target_email->setIsVerified(1);
       $target_email->save();
-      $session_key = $target_user->establishSession('web');
     unset($unguarded);
 
-    $request->setCookie('phusr', $target_user->getUsername());
-    $request->setCookie('phsid', $session_key);
-
     $next = '/';
-    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
-      $panels = id(new PhabricatorSettingsPanelOAuth())->buildPanels();
-      foreach ($panels as $panel) {
-        if ($panel->isEnabled()) {
-          $next = $panel->getPanelURI();
-          break;
-        }
-      }
+    if (!PhabricatorAuthProviderPassword::getPasswordProvider()) {
+      $next = '/settings/panel/external/';
     } else if (PhabricatorEnv::getEnvConfig('account.editable')) {
       $next = (string)id(new PhutilURI('/settings/panel/password/'))
         ->setQueryParams(
@@ -95,14 +85,8 @@ final class PhabricatorEmailTokenController
           ));
     }
 
-    $uri = new PhutilURI('/login/validate/');
-    $uri->setQueryParams(
-      array(
-        'phusr' => $target_user->getUsername(),
-        'next'  => $next,
-      ));
+    $request->setCookie('next_uri', $next);
 
-    return id(new AphrontRedirectResponse())
-      ->setURI((string)$uri);
+    return $this->loginUser($target_user);
   }
 }

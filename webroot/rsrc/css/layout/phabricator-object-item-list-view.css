@@ -18,7 +18,7 @@
   background: #ffffff;
   border-style: solid;
   border-color: #c0c5d1;
-  border-width: 0 0 0 3px;
+  border-width: 0 0 0 4px;
   margin: 5px 0;
 
   overflow: hidden;
@@ -98,7 +98,7 @@
   box-shadow: inset 1px 0 1px 0px rgba(0, 0, 0, 0.07);
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-view {
+.phabricator-object-item-actions .phui-list-item-view {
   float: right;
   height: 100%;
   width: 24px;
@@ -106,16 +106,23 @@
   position: relative;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-view +
-.phabricator-menu-item-view {
+.phabricator-object-item-actions .phui-list-item-view +
+.phui-list-item-view {
   border-right: 1px solid #d6d6e9;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-view:hover {
+.phabricator-object-item-actions .phui-list-item-href {
+  display: inline-block;
+  position: relative;
+  width: 24px;
+  height: 100%;
+}
+
+.phabricator-object-item-actions .phui-list-item-href:hover {
   background: #e9e9f9;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-icon {
+.phabricator-object-item-actions .phui-list-item-icon {
   width: 14px;
   height: 14px;
   position: absolute;
@@ -125,7 +132,7 @@
   left: 5px;
 }
 
-.phabricator-object-item-actions .phabricator-menu-item-name {
+.phabricator-object-item-actions .phui-list-item-name {
   display: none;
 }
 
@@ -287,43 +294,39 @@
 */
 
 .phabricator-object-item-bar-color-red {
-  border-left-color: #cc0000;
+  border-left-color: {$red};
 }
 
 .phabricator-object-item-bar-color-orange {
-  border-left-color: #cc7300;
+  border-left-color: {$orange};
 }
 
 .phabricator-object-item-bar-color-yellow {
-  border-left-color: #ccc000;
+  border-left-color: {$yellow};
 }
 
 .phabricator-object-item-bar-color-green {
-  border-left-color: #009b2d;
+  border-left-color: {$green};
 }
 
 .phabricator-object-item-bar-color-sky {
-  border-left-color: #6498cf;
+  border-left-color: {$sky};
 }
 
 .phabricator-object-item-bar-color-blue {
-  border-left-color: #00659a;
+  border-left-color: {$blue};
 }
 
 .phabricator-object-item-bar-color-indigo {
-  border-left-color: #3a00cc;
+  border-left-color: {$indigo};
 }
 
 .phabricator-object-item-bar-color-violet {
-  border-left-color: #67009b;
-}
-
-.phabricator-object-item-bar-color-magenta {
-  border-left-color: #cc00c0;
+  border-left-color: {$violet};
 }
 
 .phabricator-object-item-bar-color-grey {
-  border-left-color: #999999;
+  border-left-color: #bdc3c7;
 }
 
 .phabricator-object-item-bar-color-black {
@@ -338,11 +341,17 @@
 */
 
 .phabricator-object-item-highlighted {
-  background: #ffffb2;
+  background: {$lightyellow};
+}
+
+.phabricator-object-list-cards
+ .phabricator-object-item.phabricator-object-item-highlighted {
+  background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
+  background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
 }
 
 .phabricator-object-item-selected {
-  background: #bfdcff;
+  background: {$lightblue};
 }
 
 .phabricator-object-list-flush .aphront-error-view {
@@ -456,4 +465,27 @@
 .phabricator-object-list-cards .phabricator-object-item-selected
   .phabricator-object-item-frame {
   border-color: #99ccff;
+}
+
+
+/* - Draggable List ------------------------------------------------------------
+
+  These classes are applied by and/or provided for use with JX.DraggableList.
+
+*/
+
+.drag-ghost {
+  position: relative;
+  border: 1px dashed #aaaaaa;
+  background: #f9f9f9;
+  margin: 4px;
+}
+
+.drag-dragging {
+  position: relative;
+  opacity: 0.9;
+}
+
+.drag-sending {
+  opacity: 0.75;
 }

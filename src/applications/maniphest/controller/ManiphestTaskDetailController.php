@@ -336,7 +336,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setHref('/'.$object_name))
       ->setActionList($actions)
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setHref($this->getApplicationURI('/task/create/'))
           ->setName(pht('Create Task'))
           ->setIcon('create'));
@@ -396,15 +396,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
         id(new PhabricatorActionView())
           ->setName(pht('Automatically Subscribed'))
           ->setDisabled(true)
-          ->setIcon('subscribe-auto'));
+          ->setIcon('enable'));
     } else {
       $action = $viewer_is_cc ? 'rem' : 'add';
-      $name   = $viewer_is_cc ? 'Unsubscribe' : 'Subscribe';
-      $icon   = $viewer_is_cc ? 'subscribe-delete' : 'subscribe-add';
+      $name   = $viewer_is_cc ? pht('Unsubscribe') : pht('Subscribe');
+      $icon   = $viewer_is_cc ? 'disable' : 'check';
 
       $view->addAction(
         id(new PhabricatorActionView())
-          ->setName(pht($name))
+          ->setName($name)
           ->setHref("/maniphest/subscribe/{$action}/{$id}/")
           ->setRenderAsForm(true)
           ->setUser($viewer)

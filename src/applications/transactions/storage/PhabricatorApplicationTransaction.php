@@ -163,7 +163,7 @@ abstract class PhabricatorApplicationTransaction
     return $this->handles;
   }
 
-  protected function renderHandleLink($phid) {
+  public function renderHandleLink($phid) {
     if ($this->renderingTarget == self::TARGET_HTML) {
       return $this->getHandle($phid)->renderLink();
     } else {
@@ -171,7 +171,7 @@ abstract class PhabricatorApplicationTransaction
     }
   }
 
-  protected function renderHandleList(array $phids) {
+  public function renderHandleList(array $phids) {
     $links = array();
     foreach ($phids as $phid) {
       $links[] = $this->renderHandleLink($phid);

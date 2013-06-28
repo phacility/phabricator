@@ -24,24 +24,7 @@ final class DivinerAtomListController extends DivinerController
   }
 
   public function renderResultsList(array $symbols) {
-    assert_instances_of($symbols, 'DivinerLiveSymbol');
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $list = id(new PhabricatorObjectItemListView())
-      ->setUser($user);
-
-    foreach ($symbols as $symbol) {
-      $item = id(new PhabricatorObjectItemView())
-        ->setHeader($symbol->getName())
-        ->setHref($symbol->getURI())
-        ->addIcon('none', $symbol->getType());
-
-      $list->addItem($item);
-    }
-
-    return $list;
+    return $this->renderAtomList($symbols);
   }
 
 }

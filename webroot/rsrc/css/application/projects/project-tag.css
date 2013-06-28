@@ -23,6 +23,16 @@
   white-space: nowrap;
 }
 
+.phabricator-project-tag.phabricator-project-tag-grey {
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  color: #888;
+}
+
+.phabricator-project-tag.phabricator-project-tag-grey:hover {
+  background: #e7e7e7;
+}
+
 .phabricator-project-tag:last-child {
   margin-right: 0px;
 }

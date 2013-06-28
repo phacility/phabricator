@@ -355,7 +355,7 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
    * response to edits, and is primarily useful when performing migrations. You
    * should not normally need to use it.
    *
-   * @param bool True to supress events related to edits.
+   * @param bool True to suppress events related to edits.
    * @return this
    * @task internal
    */

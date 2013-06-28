@@ -70,7 +70,7 @@ final class ReleephBranchViewController extends ReleephController {
     if ($releeph_branch->isActive()) {
       $create_uri = $releeph_branch->getURI('request/');
       $crumbs->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setHref($create_uri)
           ->setName(pht('Request Pick'))
           ->setIcon('create'));

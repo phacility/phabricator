@@ -53,6 +53,11 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   const TYPE_TEST_NO_CYCLE              = 9000;
 
+  const TYPE_PHOB_HAS_ASANATASK         = 80001;
+  const TYPE_ASANATASK_HAS_PHOB         = 80000;
+
+  const TYPE_PHOB_HAS_ASANASUBTASK      = 80003;
+  const TYPE_ASANASUBTASK_HAS_PHOB      = 80002;
 
   public static function getInverse($edge_type) {
     static $map = array(
@@ -100,6 +105,13 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_DREV_HAS_COMMIT => self::TYPE_COMMIT_HAS_DREV,
       self::TYPE_COMMIT_HAS_DREV => self::TYPE_DREV_HAS_COMMIT,
+
+      self::TYPE_PHOB_HAS_ASANATASK => self::TYPE_ASANATASK_HAS_PHOB,
+      self::TYPE_ASANATASK_HAS_PHOB => self::TYPE_PHOB_HAS_ASANATASK,
+
+      self::TYPE_PHOB_HAS_ASANASUBTASK => self::TYPE_ASANASUBTASK_HAS_PHOB,
+      self::TYPE_ASANASUBTASK_HAS_PHOB => self::TYPE_PHOB_HAS_ASANASUBTASK,
+
     );
 
     return idx($map, $edge_type);
@@ -136,6 +148,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
+      PhabricatorPHIDConstants::PHID_TYPE_XOBJ  => 'DoorkeeperExternalObject',
     );
 
     $class = idx($class_map, $phid_type);

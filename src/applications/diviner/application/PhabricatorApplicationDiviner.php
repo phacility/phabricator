@@ -25,6 +25,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
         'query/((?<key>[^/]+)/)?' => 'DivinerAtomListController',
       ),
       '/docs/(?P<keyword>[^/]+)/' => 'DivinerJumpController',
+      '/book/(?P<book>[^/]+)/' => 'DivinerBookController',
       '/book/'.
         '(?P<book>[^/]+)/'.
         '(?P<type>[^/]+)/'.
@@ -50,8 +51,9 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     }
 
     if ($application && $application->getHelpURI()) {
-      $item = new PhabricatorMenuItemView();
+      $item = new PHUIListItemView();
       $item->setName(pht('%s Help', $application->getName()));
+      $item->addClass('core-menu-item');
       $item->setIcon('help');
       $item->setHref($application->getHelpURI());
       $items[] = $item;

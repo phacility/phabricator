@@ -51,6 +51,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
           'erlang' => 'Erlang',
           'haskell' => 'Haskell',
           'html' => 'HTML',
+          'invisible' => 'Invisible',
           'java' => 'Java',
           'js' => 'Javascript',
           'mysql' => 'MySQL',

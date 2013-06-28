@@ -50,7 +50,7 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
         ->setName($title));
 
     $crumbs->addAction(
-      id(new PhabricatorMenuItemView())
+      id(new PHUIListItemView())
         ->setName(pht('Create Package'))
         ->setHref('/owners/new/')
         ->setIcon('create'));

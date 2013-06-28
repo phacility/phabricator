@@ -24,30 +24,6 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorTypeaheadCommonDatasourceController',
       ),
 
-      '/login/' => array(
-        '' => 'PhabricatorLoginController',
-        'email/' => 'PhabricatorEmailLoginController',
-        'etoken/(?P<token>\w+)/' => 'PhabricatorEmailTokenController',
-        'refresh/' => 'PhabricatorRefreshCSRFController',
-        'validate/' => 'PhabricatorLoginValidateController',
-        'mustverify/' => 'PhabricatorMustVerifyEmailController',
-      ),
-
-      '/logout/' => 'PhabricatorLogoutController',
-
-      '/oauth/' => array(
-        '(?P<provider>\w+)/' => array(
-          'login/'     => 'PhabricatorOAuthLoginController',
-          'diagnose/'  => 'PhabricatorOAuthDiagnosticsController',
-          'unlink/'    => 'PhabricatorOAuthUnlinkController',
-        ),
-      ),
-
-      '/ldap/' => array(
-        'login/' => 'PhabricatorLDAPLoginController',
-        'unlink/'    => 'PhabricatorLDAPUnlinkController',
-      ),
-
       '/oauthserver/' => array(
         'auth/'          => 'PhabricatorOAuthServerAuthController',
         'test/'          => 'PhabricatorOAuthServerTestController',
@@ -105,10 +81,27 @@ class AphrontDefaultApplicationConfiguration
     );
   }
 
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
   public function buildRequest() {
+    $parser = new PhutilQueryStringParser();
+    $data   = array();
+
+    $raw_input = PhabricatorStartup::getRawInput();
+    if (strlen($raw_input)) {
+      $data += $parser->parseQueryString($raw_input);
+    } else if ($_POST) {
+      $data += $_POST;
+    }
+
+    $data += $parser->parseQueryString(
+      isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : "");
+
     $request = new AphrontRequest($this->getHost(), $this->getPath());
-    $request->setRequestData($_GET + $_POST);
+    $request->setRequestData($data);
     $request->setApplicationConfiguration($this);
+
     return $request;
   }
 
@@ -154,7 +147,7 @@ class AphrontDefaultApplicationConfiguration
         //
         // Possibly we should add a header here like "you need to login to see
         // the thing you are trying to look at".
-        $login_controller = new PhabricatorLoginController($request);
+        $login_controller = new PhabricatorAuthStartController($request);
         return $login_controller->processRequest();
       }
 

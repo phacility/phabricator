@@ -26,7 +26,7 @@ final class ReleephProjectViewController extends ReleephController {
 
     if ($releeph_project->getIsActive()) {
       $crumbs->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setHref($releeph_project->getURI('cutbranch'))
           ->setName(pht('Cut New Branch'))
           ->setIcon('create'));

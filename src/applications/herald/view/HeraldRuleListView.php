@@ -68,7 +68,7 @@ final class HeraldRuleListView extends AphrontView {
         ->addAttribute($edit_log)
         ->addIcon('none', $author)
         ->addAction(
-          id(new PhabricatorMenuItemView())
+          id(new PHUIListItemView())
             ->setHref('/herald/delete/'.$rule->getID().'/')
             ->setIcon('delete')
             ->setWorkflow(true));

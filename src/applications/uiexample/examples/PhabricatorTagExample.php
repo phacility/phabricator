@@ -11,79 +11,84 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
   }
 
   public function renderExample() {
-    $tags = array();
+    $intro = array();
 
-    $tags[] = 'Hey, ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = 'Hey, ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_PERSON)
       ->setName('@alincoln')
       ->setHref('#');
-    $tags[] = ' how is stuff?';
-    $tags[] = hsprintf('<br /><br />');
+    $intro[] = ' how is stuff?';
+    $intro[] = hsprintf('<br /><br />');
 
 
-    $tags[] = 'Did you hear that ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = 'Did you hear that ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_PERSON)
       ->setName('@gwashington')
       ->setDotColor(PhabricatorTagView::COLOR_RED)
       ->setHref('#');
-    $tags[] = ' is away, ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = ' is away, ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_PERSON)
       ->setName('@tjefferson')
       ->setDotColor(PhabricatorTagView::COLOR_ORANGE)
       ->setHref('#');
-    $tags[] = ' has some errands, and ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = ' has some errands, and ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_PERSON)
       ->setName('@rreagan')
       ->setDotColor(PhabricatorTagView::COLOR_GREY)
       ->setHref('#');
-    $tags[] = ' is gone?';
-    $tags[] = hsprintf('<br /><br />');
+    $intro[] = ' is gone?';
+    $intro[] = hsprintf('<br /><br />');
 
-    $tags[] = 'Take a look at ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = 'Take a look at ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_OBJECT)
       ->setName('D123')
       ->setHref('#');
-    $tags[] = ' when you get a chance.';
-    $tags[] = hsprintf('<br /><br />');
+    $intro[] = ' when you get a chance.';
+    $intro[] = hsprintf('<br /><br />');
 
-    $tags[] = 'Hmm? ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = 'Hmm? ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_OBJECT)
       ->setName('D123')
       ->setClosed(true)
       ->setHref('#');
-    $tags[] = ' is ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = ' is ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
       ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
       ->setName('Abandoned');
-    $tags[] = '.';
-    $tags[] = hsprintf('<br /><br />');
+    $intro[] = '.';
+    $intro[] = hsprintf('<br /><br />');
 
-    $tags[] = 'I hope someone is going to ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = 'I hope someone is going to ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_OBJECT)
       ->setName('T123: Water The Dog')
-      ->setBarColor(PhabricatorTagView::COLOR_REDORANGE)
+      ->setBarColor(PhabricatorTagView::COLOR_RED)
       ->setHref('#');
-    $tags[] = ' -- that task is ';
-    $tags[] = id(new PhabricatorTagView())
+    $intro[] = ' -- that task is ';
+    $intro[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
-      ->setBackgroundColor(PhabricatorTagView::COLOR_REDORANGE)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_RED)
       ->setName('High Priority');
-    $tags[] = '!';
-    $tags[] = hsprintf('<br /><br />');
+    $intro[] = '!';
 
+    $intro = id(new PHUIBoxView())
+      ->appendChild($intro)
+      ->setShadow(true)
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
-    $tags[] = id(new PhabricatorHeaderView())
+    $header1 = id(new PhabricatorHeaderView())
       ->setHeader('Colors');
 
     $colors = PhabricatorTagView::getColors();
+    $tags = array();
     foreach ($colors as $color) {
       $tags[] = id(new PhabricatorTagView())
         ->setType(PhabricatorTagView::TYPE_STATE)
@@ -92,9 +97,17 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       $tags[] = hsprintf('<br /><br />');
     }
 
-    $tags[] = id(new PhabricatorHeaderView())
+    $content1 = id(new PHUIBoxView())
+      ->appendChild($tags)
+      ->setShadow(true)
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addMargin(PHUI::MARGIN_LARGE);
+
+    $header2 = id(new PhabricatorHeaderView())
       ->setHeader('Holidays?');
 
+
+    $tags = array();
     $tags[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
       ->setBackgroundColor(PhabricatorTagView::COLOR_GREEN)
@@ -111,14 +124,17 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
     $tags[] = hsprintf('<br /><br />');
     $tags[] = id(new PhabricatorTagView())
       ->setType(PhabricatorTagView::TYPE_STATE)
-      ->setBackgroundColor(PhabricatorTagView::COLOR_MAGENTA)
+      ->setBackgroundColor(PhabricatorTagView::COLOR_INDIGO)
       ->setDotColor(PhabricatorTagView::COLOR_YELLOW)
       ->setBarColor(PhabricatorTagView::COLOR_BLUE)
       ->setName('Easter');
 
-    return phutil_tag(
-      'div',
-      array('class' => 'ml'),
-      $tags);
+    $content2 = id(new PHUIBoxView())
+      ->appendChild($tags)
+      ->setShadow(true)
+      ->addPadding(PHUI::PADDING_LARGE)
+      ->addMargin(PHUI::MARGIN_LARGE);
+
+    return array($intro, $header1, $content1, $header2, $content2);
   }
 }

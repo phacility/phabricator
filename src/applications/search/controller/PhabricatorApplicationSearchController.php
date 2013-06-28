@@ -96,11 +96,13 @@ final class PhabricatorApplicationSearchController
     if ($this->queryKey == 'advanced') {
       $run_query = false;
       $query_key = $request->getStr('query');
+    } else if (!strlen($this->queryKey)) {
+      $query_key = head_key($engine->loadEnabledNamedQueries());
     }
 
     if ($engine->isBuiltinQuery($query_key)) {
       $saved_query = $engine->buildSavedQueryFromBuiltin($query_key);
-      $named_query = $engine->getBuiltinQuery($query_key);
+      $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
     } else if ($query_key) {
       $saved_query = id(new PhabricatorSavedQueryQuery())
         ->setViewer($user)
@@ -111,12 +113,7 @@ final class PhabricatorApplicationSearchController
         return new Aphront404Response();
       }
 
-      $named_query = id(new PhabricatorNamedQueryQuery())
-        ->setViewer($user)
-        ->withQueryKeys(array($saved_query->getQueryKey()))
-        ->withEngineClassNames(array(get_class($engine)))
-        ->withUserPHIDs(array($user->getPHID()))
-        ->executeOne();
+      $named_query = idx($engine->loadEnabledNamedQueries(), $query_key);
     } else {
       $saved_query = $engine->buildSavedQueryFromRequest($request);
     }
@@ -226,41 +223,61 @@ final class PhabricatorApplicationSearchController
     $engine = $this->getSearchEngine();
     $nav = $this->getNavigation();
 
-    $named_queries = id(new PhabricatorNamedQueryQuery())
-      ->setViewer($user)
-      ->withUserPHIDs(array($user->getPHID()))
-      ->withEngineClassNames(array(get_class($engine)))
-      ->execute();
+    $named_queries = $engine->loadAllNamedQueries();
 
-    $named_queries += $engine->getBuiltinQueries();
+    $list_id = celerity_generate_unique_node_id();
 
     $list = new PhabricatorObjectItemListView();
     $list->setUser($user);
+    $list->setID($list_id);
+
+    Javelin::initBehavior(
+      'search-reorder-queries',
+      array(
+        'listID' => $list_id,
+        'orderURI' => '/search/order/'.get_class($engine).'/',
+      ));
 
     foreach ($named_queries as $named_query) {
-      $date_created = phabricator_datetime(
-        $named_query->getDateCreated(),
-        $user);
+      $class = get_class($engine);
+      $key = $named_query->getQueryKey();
 
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($named_query->getQueryName())
-        ->setHref($engine->getQueryResultsPageURI($named_query->getQueryKey()));
+        ->setHref($engine->getQueryResultsPageURI($key));
+
+      if ($named_query->getIsBuiltin() && $named_query->getIsDisabled()) {
+        $icon = 'new';
+      } else {
+        $icon = 'delete';
+      }
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon($icon)
+          ->setHref('/search/delete/'.$key.'/'.$class.'/')
+          ->setWorkflow(true));
 
       if ($named_query->getIsBuiltin()) {
-        $item->addIcon('lock-grey', pht('Builtin'));
+        if ($named_query->getIsDisabled()) {
+          $item->addIcon('delete-grey', pht('Disabled'));
+        } else {
+          $item->addIcon('lock-grey', pht('Builtin'));
+        }
         $item->setBarColor('grey');
       } else {
-        $item->addIcon('none', $date_created);
         $item->addAction(
-          id(new PhabricatorMenuItemView())
-            ->setIcon('delete')
-            ->setHref('/search/delete/'.$named_query->getQueryKey().'/')
-            ->setWorkflow(true));
-        $item->addAction(
-          id(new PhabricatorMenuItemView())
+          id(new PHUIListItemView())
             ->setIcon('edit')
-            ->setHref('/search/edit/'.$named_query->getQueryKey().'/'));
+            ->setHref('/search/edit/'.$key.'/'));
       }
+
+      $item->setGrippable(true);
+      $item->addSigil('named-query');
+      $item->setMetadata(
+        array(
+          'queryKey' => $named_query->getQueryKey(),
+        ));
 
       $list->addItem($item);
     }

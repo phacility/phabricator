@@ -48,7 +48,7 @@ final class PhabricatorConfigIssueListController
   private function buildIssueList(array $issues) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PhabricatorObjectItemListView();
-    $list->setStackable(true);
+    $list->setCards(true);
     $ignored_items = array();
 
     foreach ($issues as $issue) {
@@ -56,7 +56,6 @@ final class PhabricatorConfigIssueListController
         $item = id(new PhabricatorObjectItemView())
           ->setHeader($issue->getName())
           ->setHref($href)
-          ->setBarColor('yellow')
           ->addAttribute($issue->getSummary());
       if (!$issue->getIsIgnored()) {
         $item->addIcon('warning', pht('Setup Warning'));
@@ -65,6 +64,7 @@ final class PhabricatorConfigIssueListController
                  array('href'  => '/config/ignore/'.$issue->getIssueKey().'/',
                        'sigil' => 'workflow'),
                  pht('Ignore'));
+        $item->setBarColor('yellow');
         $item->addAttribute($link);
         $list->addItem($item);
       } else {
@@ -75,6 +75,7 @@ final class PhabricatorConfigIssueListController
                        'sigil' => 'workflow'),
                  pht('Unignore'));
         $item->addAttribute($link);
+        $item->setBarColor('none');
         $ignored_items[] = $item;
       }
     }

@@ -11,9 +11,10 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/support/phame/libskin.php';
 
+    $this->cssResources = array();
     $css = $this->getPath('css/');
+
     if (Filesystem::pathExists($css)) {
-      $this->cssResources = array();
       foreach (Filesystem::listDirectory($css) as $path) {
         if (!preg_match('/.css$/', $path)) {
           continue;
@@ -26,8 +27,20 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
             'href'  => $this->getResourceURI('css/'.$path),
           ));
       }
-      $this->cssResources = phutil_implode_html("\n", $this->cssResources);
     }
+
+    $map = CelerityResourceMap::getInstance();
+    $symbol_info = $map->lookupSymbolInformation('syntax-highlighting-css');
+
+    $this->cssResources[] = phutil_tag(
+      'link',
+      array(
+        'rel'   => 'stylesheet',
+        'type'  => 'text/css',
+        'href'  => PhabricatorEnv::getCDNURI($symbol_info['uri']),
+      ));
+
+    $this->cssResources = phutil_implode_html("\n", $this->cssResources);
 
     $request = $this->getRequest();
     $content = $this->renderContent($request);

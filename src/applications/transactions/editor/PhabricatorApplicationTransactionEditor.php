@@ -78,6 +78,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $types[] = PhabricatorTransactions::TYPE_SUBSCRIBERS;
     }
 
+    if ($this->object instanceof PhabricatorCustomFieldInterface) {
+      $types[] = PhabricatorTransactions::TYPE_CUSTOMFIELD;
+    }
+
     return $types;
   }
 
@@ -121,6 +125,9 @@ abstract class PhabricatorApplicationTransactionEditor
           $old_edges = $old_edges[$edge_src][$edge_type];
         }
         return $old_edges;
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->getOldValueForApplicationTransactions();
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -137,6 +144,9 @@ abstract class PhabricatorApplicationTransactionEditor
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->getNewValueFromApplicationTransactions($xaction);
       default:
         return $this->getCustomTransactionNewValue($object, $xaction);
     }
@@ -161,6 +171,9 @@ abstract class PhabricatorApplicationTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
         return $xaction->hasComment();
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->getApplicationTransactionHasEffect($xaction);
     }
 
     return ($xaction->getOldValue() !== $xaction->getNewValue());
@@ -176,6 +189,9 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         break;
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->applyApplicationTransactionInternalEffects($xaction);
     }
     return $this->applyCustomInternalTransaction($object, $xaction);
   }
@@ -201,6 +217,15 @@ abstract class PhabricatorApplicationTransactionEditor
             array_diff_key($new_map, $old_map)));
 
         $subeditor->save();
+
+        // for the rest of these edits, subscribers should include those just
+        // added as well as those just removed.
+        $subscribers = array_unique(array_merge(
+          $this->subscribers,
+          $xaction->getOldValue(),
+          $xaction->getNewValue()));
+        $this->subscribers = $subscribers;
+
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         $old = $xaction->getOldValue();
@@ -240,6 +265,9 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $editor->save();
         break;
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->applyApplicationTransactionExternalEffects($xaction);
     }
 
     return $this->applyCustomExternalTransaction($object, $xaction);
@@ -288,14 +316,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $actor = $this->requireActor();
 
-    if ($object->getPHID() &&
-        ($object instanceof PhabricatorSubscribableInterface)) {
-      $subs = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-        $object->getPHID());
-      $this->subscribers = array_fuse($subs);
-    } else {
-      $this->subscribers = array();
-    }
+    $this->loadSubscribers($object);
 
     $xactions = $this->applyImplicitCC($object, $xactions);
 
@@ -483,6 +504,17 @@ abstract class PhabricatorApplicationTransactionEditor
     }
     foreach ($xactions as $key => $xaction) {
       $xaction->setHandles(array_select_keys($handles, $phids[$key]));
+    }
+  }
+
+  private function loadSubscribers(PhabricatorLiskDAO $object) {
+    if ($object->getPHID() &&
+        ($object instanceof PhabricatorSubscribableInterface)) {
+      $subs = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $object->getPHID());
+      $this->subscribers = array_fuse($subs);
+    } else {
+      $this->subscribers = array();
     }
   }
 
@@ -841,7 +873,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $head = array();
     $tail = array();
 
-    // Move bare comments to the end, so the actions preceed them.
+    // Move bare comments to the end, so the actions precede them.
     foreach ($xactions as $xaction) {
       $type = $xaction->getTransactionType();
       if ($type == PhabricatorTransactions::TYPE_COMMENT) {
@@ -998,8 +1030,8 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $email_to = $this->getMailTo($object);
-    $email_cc = $this->getMailCC($object);
+    $email_to = array_unique($this->getMailTo($object));
+    $email_cc = array_unique($this->getMailCC($object));
 
     $phids = array_merge($email_to, $email_cc);
     $handles = id(new PhabricatorObjectHandleData($phids))
@@ -1184,9 +1216,9 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    return array_merge(
+    return array_unique(array_merge(
       $this->getMailTo($object),
-      $this->getMailCC($object));
+      $this->getMailCC($object)));
   }
 
 
@@ -1242,6 +1274,43 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function supportsSearch() {
     return false;
+  }
+
+
+/* -( Custom Fields  )------------------------------------------------------- */
+
+
+  /**
+   * @task customfield
+   */
+  private function getCustomFieldForTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $field_key = $xaction->getMetadataValue('customfield:key');
+    if (!$field_key) {
+      throw new Exception(
+        "Custom field transaction has no 'customfield:key'!");
+    }
+
+    $field = PhabricatorCustomField::getObjectField(
+      $object,
+      PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS,
+      $field_key);
+
+    if (!$field) {
+      throw new Exception(
+        "Custom field transaction has invalid 'customfield:key'; field ".
+        "'{$field_key}' is disabled or does not exist.");
+    }
+
+    if (!$field->shouldAppearInApplicationTransactions()) {
+      throw new Exception(
+        "Custom field transaction '{$field_key}' does not implement ".
+        "integration for ApplicationTransactions.");
+    }
+
+    return $field;
   }
 
 }

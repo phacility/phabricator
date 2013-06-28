@@ -213,6 +213,8 @@ final class PhabricatorObjectHandleData {
         return mpull($xusrs, null, 'getPHID');
 
     }
+
+    return array();
   }
 
   public function loadHandles() {

@@ -38,13 +38,11 @@ JX.behavior('conpherence-pontificate', function(config) {
           );
         }
 
-        var inputs = JX.DOM.scry(form, 'input');
-        for (var ii = 0; ii < inputs.length; ii++) {
-          if (inputs[ii].name == 'latest_transaction_id') {
-            inputs[ii].value = r.latest_transaction_id;
-            break;
-          }
-        }
+        var latest_transaction_dom = JX.DOM.find(
+          root,
+          'input',
+          'latest-transaction-id');
+        latest_transaction_dom.value = r.latest_transaction_id;
 
         var textarea = JX.DOM.find(form, 'textarea');
         textarea.value = '';

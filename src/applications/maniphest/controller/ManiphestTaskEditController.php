@@ -38,6 +38,18 @@ final class ManiphestTaskEditController extends ManiphestController {
         if ($default_projects) {
           $task->setProjectPHIDs(explode(';', $default_projects));
         }
+
+        $task->setDescription($request->getStr('description'));
+
+        $assign = $request->getStr('assign');
+        if (strlen($assign)) {
+          $assign_user = id(new PhabricatorUser())->loadOneWhere(
+            'username = %s',
+            $assign);
+          if ($assign_user) {
+            $task->setOwnerPHID($assign_user->getPHID());
+          }
+        }
       }
 
       $file_phids = $request->getArr('files', array());
@@ -111,8 +123,15 @@ final class ManiphestTaskEditController extends ManiphestController {
         $errors[] = pht('Title is required.');
       }
 
-      foreach ($aux_fields as $aux_field) {
+      foreach ($aux_fields as $aux_arr_key => $aux_field) {
         $aux_field->setValueFromRequest($request);
+        $aux_key = $aux_field->getAuxiliaryKey();
+        $aux_old_value = $task->getAuxiliaryAttribute($aux_key);
+
+        if ((int)$aux_old_value === $aux_field->getValueForStorage()) {
+          unset($aux_fields[$aux_arr_key]);
+          continue;
+        }
 
         if ($aux_field->isRequired() && !$aux_field->getValue()) {
           $errors[] = pht('%s is required.', $aux_field->getLabel());
@@ -554,7 +573,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         ->setName($header_name)
         ->setHref($this->getApplicationURI('/task/create/')))
       ->addAction(
-        id(new PhabricatorMenuItemView())
+        id(new PHUIListItemView())
           ->setHref($this->getApplicationURI('/task/create/'))
           ->setName(pht('Create Task'))
           ->setIcon('create'));

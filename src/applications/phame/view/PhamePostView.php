@@ -150,7 +150,7 @@ final class PhamePostView extends AphrontView {
   }
 
   private function renderFacebookComments() {
-    $fb_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
+    $fb_id = PhabricatorAuthProviderOAuthFacebook::getFacebookApplicationID();
     if (!$fb_id) {
       return null;
     }
@@ -212,7 +212,7 @@ final class PhamePostView extends AphrontView {
     // protip - try some  var disqus_developer = 1; action to test locally
     $disqus_js = CelerityStaticResourceResponse::renderInlineScript(
       jsprintf(
-        ' var disqus_shortname = "phabricator";'.
+        ' var disqus_shortname = %s;'.
         ' var disqus_identifier = %s;'.
         ' var disqus_url = %s;'.
         ' var disqus_title = %s;'.
@@ -220,10 +220,11 @@ final class PhamePostView extends AphrontView {
         ' var dsq = document.createElement("script");'.
         ' dsq.type = "text/javascript";'.
         ' dsq.async = true;'.
-        ' dsq.src = "http://" + disqus_shortname + ".disqus.com/embed.js";'.
+        ' dsq.src = "//" + disqus_shortname + ".disqus.com/embed.js";'.
         '(document.getElementsByTagName("head")[0] ||'.
         ' document.getElementsByTagName("body")[0]).appendChild(dsq);'.
         '})();',
+        $disqus_shortname,
         $post->getPHID(),
         $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle()),
         $post->getTitle()));
