@@ -10,7 +10,7 @@ final class PhabricatorApplicationDoorkeeper extends PhabricatorApplication {
     return '/doorkeeper/';
   }
 
-  public function shouldAppearOnLaunchView() {
+  public function shouldAppearInLaunchView() {
     return false;
   }
 
