@@ -153,7 +153,7 @@ var send_server = net.createServer(function(socket) {
   });
 
   socket.on('error', function (e) {
-    log(cliient_name + 'Uncaught error in send server: ' + e);
+    log(client_name + 'Uncaught error in send server: ' + e);
   });
 }).listen(config.port);
 
