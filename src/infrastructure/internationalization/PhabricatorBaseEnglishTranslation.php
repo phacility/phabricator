@@ -304,6 +304,14 @@ abstract class PhabricatorBaseEnglishTranslation
       '%d rejection(s)' => array('%d rejection', '%d rejections'),
       '%d update(s)' => array('%d update', '%d updates'),
 
+      'This configuration value is defined in these %d '.
+      'configuration source(s): %s.' => array(
+        'This configuration value is defined in this '.
+        'configuration source: %2$s.',
+        'This configuration value is defined in these %d '.
+        'configuration sources: %s.',
+      ),
+
     );
   }
 

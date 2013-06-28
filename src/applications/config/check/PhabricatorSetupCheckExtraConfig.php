@@ -65,7 +65,7 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       }
 
       $message = $message."\n\n".pht(
-        "This configuration value is defined in in these %d ".
+        "This configuration value is defined in these %d ".
         "configuration source(s): %s.",
         count($found),
         implode(', ', $found));
