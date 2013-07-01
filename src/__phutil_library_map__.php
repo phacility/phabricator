@@ -920,6 +920,7 @@ phutil_register_library_map(array(
     'PhabricatorConduitDAO' => 'applications/conduit/storage/PhabricatorConduitDAO.php',
     'PhabricatorConduitListController' => 'applications/conduit/controller/PhabricatorConduitListController.php',
     'PhabricatorConduitLogController' => 'applications/conduit/controller/PhabricatorConduitLogController.php',
+    'PhabricatorConduitLogQuery' => 'applications/conduit/query/PhabricatorConduitLogQuery.php',
     'PhabricatorConduitMethodCallLog' => 'applications/conduit/storage/PhabricatorConduitMethodCallLog.php',
     'PhabricatorConduitMethodQuery' => 'applications/conduit/query/PhabricatorConduitMethodQuery.php',
     'PhabricatorConduitSearchEngine' => 'applications/conduit/query/PhabricatorConduitSearchEngine.php',
@@ -2820,7 +2821,12 @@ phutil_register_library_map(array(
       1 => 'PhabricatorApplicationSearchResultsControllerInterface',
     ),
     'PhabricatorConduitLogController' => 'PhabricatorConduitController',
-    'PhabricatorConduitMethodCallLog' => 'PhabricatorConduitDAO',
+    'PhabricatorConduitLogQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorConduitMethodCallLog' =>
+    array(
+      0 => 'PhabricatorConduitDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorConduitMethodQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorConduitSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorConduitTokenController' => 'PhabricatorConduitController',

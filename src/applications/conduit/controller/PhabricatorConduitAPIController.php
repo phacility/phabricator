@@ -124,18 +124,18 @@ final class PhabricatorConduitAPIController
       $connection_id = idx($result, 'connectionID');
     }
 
-    $log->setConnectionID($connection_id);
-    $log->setError((string)$error_code);
-    $log->setDuration(1000000 * ($time_end - $time_start));
+    $log
+      ->setCallerPHID(
+        isset($conduit_user)
+          ? $conduit_user->getPHID()
+          : null)
+      ->setConnectionID($connection_id)
+      ->setError((string)$error_code)
+      ->setDuration(1000000 * ($time_end - $time_start));
 
-    // TODO: This is a hack, but the insert is comparatively expensive and
-    // we only really care about having these logs for real CLI clients, if
-    // even that.
-    if (empty($metadata['authToken'])) {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $log->save();
-      unset($unguarded);
-    }
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    $log->save();
+    unset($unguarded);
 
     $response = id(new ConduitAPIResponse())
       ->setResult($result)
