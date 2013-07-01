@@ -12,7 +12,10 @@ final class DifferentialDiffViewController extends DifferentialController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $diff = id(new DifferentialDiff())->load($this->id);
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$diff) {
       return new Aphront404Response();
     }

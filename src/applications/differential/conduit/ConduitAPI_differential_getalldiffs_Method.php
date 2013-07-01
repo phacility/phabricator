@@ -32,9 +32,10 @@ final class ConduitAPI_differential_getalldiffs_Method
       return $results;
     }
 
-    $diffs = id(new DifferentialDiff())->loadAllWhere(
-      'revisionID IN (%Ld)',
-      $revision_ids);
+    $diffs = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withRevisionIDs($revision_ids)
+      ->execute();
 
     foreach ($diffs as $diff) {
       $results[] = array(

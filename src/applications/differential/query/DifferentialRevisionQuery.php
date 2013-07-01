@@ -413,6 +413,10 @@ final class DifferentialRevisionQuery {
     return $revisions;
   }
 
+  public function executeOne() {
+    return head($this->execute());
+  }
+
 
   /**
    * Determine if we should execute an optimized, fast-path query to fetch

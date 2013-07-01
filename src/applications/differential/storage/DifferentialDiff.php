@@ -1,6 +1,8 @@
 <?php
 
-final class DifferentialDiff extends DifferentialDAO {
+final class DifferentialDiff
+  extends DifferentialDAO
+  implements PhabricatorPolicyInterface {
 
   protected $revisionID;
   protected $authorPHID;
@@ -256,6 +258,24 @@ final class DifferentialDiff extends DifferentialDAO {
     }
 
     return $dict;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

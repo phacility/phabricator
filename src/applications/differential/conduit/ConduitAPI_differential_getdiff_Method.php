@@ -46,7 +46,10 @@ final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
     } else {
       $diff_id = $request->getValue('diff_id');
       if ($diff_id) {
-        $diff = id(new DifferentialDiff())->load($diff_id);
+        $diff = id(new DifferentialDiffQuery())
+          ->setViewer($request->getUser())
+          ->withIDs(array($diff_id))
+          ->executeOne();
       }
     }
 
