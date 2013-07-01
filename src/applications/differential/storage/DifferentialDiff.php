@@ -115,6 +115,10 @@ final class DifferentialDiff extends DifferentialDAO {
     assert_instances_of($changes, 'ArcanistDiffChange');
     $diff = new DifferentialDiff();
 
+    // There may not be any changes; initialize the changesets list so that
+    // we don't throw later when accessing it.
+    $diff->attachChangesets(array());
+
     $lines = 0;
     foreach ($changes as $change) {
       if ($change->getType() == ArcanistDiffChangeType::TYPE_MESSAGE) {
