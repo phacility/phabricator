@@ -199,6 +199,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'db',
         'name' => 'doorkeeper',
       ),
+      'db.legalpad' => array(
+        'type' => 'db',
+        'name' => 'legalpad',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1401,6 +1405,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130622.doorkeeper.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20130622.doorkeeper.sql'),
+      ),
+      '20130628.legalpadv0.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130628.legalpadv0.sql'),
       ),
     );
   }

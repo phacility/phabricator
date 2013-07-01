@@ -33,13 +33,6 @@ final class PhabricatorConfigManagementDeleteWorkflow
         "Too many arguments: expected one key.");
     }
 
-    $options = PhabricatorApplicationConfigOptions::loadAllOptions();
-    if (empty($options[$key])) {
-      throw new PhutilArgumentUsageException(
-        "No such configuration key '{$key}'! Use `config list` to list all ".
-        "keys.");
-    }
-
     $config = new PhabricatorConfigLocalSource();
     $values = $config->getKeys(array($key));
     if (!$values) {

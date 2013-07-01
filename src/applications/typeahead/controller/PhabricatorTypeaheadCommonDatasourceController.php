@@ -18,6 +18,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_rich_data = false;
 
     $need_users = false;
+    $need_agents = false;
     $need_applications = false;
     $need_all_users = false;
     $need_lists = false;
@@ -46,6 +47,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'users':
         $need_users = true;
+        break;
+      case 'authors':
+        $need_users = true;
+        $need_agents = true;
         break;
       case 'mailable':
         $need_users = true;
@@ -163,7 +168,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
 
       foreach ($users as $user) {
         if (!$need_all_users) {
-          if ($user->getIsSystemAgent()) {
+          if (!$need_agents && $user->getIsSystemAgent()) {
             continue;
           }
           if ($user->getIsDisabled()) {
