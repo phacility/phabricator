@@ -41,10 +41,16 @@ final class PhabricatorConduitLogController
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
-    $this->setShowSideNav(false);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Call Logs')));
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $panel,
+      ),
       array(
         'title' => 'Conduit Logs',
       ));

@@ -921,6 +921,8 @@ phutil_register_library_map(array(
     'PhabricatorConduitListController' => 'applications/conduit/controller/PhabricatorConduitListController.php',
     'PhabricatorConduitLogController' => 'applications/conduit/controller/PhabricatorConduitLogController.php',
     'PhabricatorConduitMethodCallLog' => 'applications/conduit/storage/PhabricatorConduitMethodCallLog.php',
+    'PhabricatorConduitMethodQuery' => 'applications/conduit/query/PhabricatorConduitMethodQuery.php',
+    'PhabricatorConduitSearchEngine' => 'applications/conduit/query/PhabricatorConduitSearchEngine.php',
     'PhabricatorConduitTokenController' => 'applications/conduit/controller/PhabricatorConduitTokenController.php',
     'PhabricatorConfigAllController' => 'applications/config/controller/PhabricatorConfigAllController.php',
     'PhabricatorConfigController' => 'applications/config/controller/PhabricatorConfigController.php',
@@ -2009,6 +2011,11 @@ phutil_register_library_map(array(
     'CelerityResourceController' => 'PhabricatorController',
     'CelerityResourceGraph' => 'AbstractDirectedGraph',
     'CelerityResourceTransformerTestCase' => 'PhabricatorTestCase',
+    'ConduitAPIMethod' =>
+    array(
+      0 => 'Phobject',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'ConduitAPI_arcanist_Method' => 'ConduitAPIMethod',
     'ConduitAPI_arcanist_projectinfo_Method' => 'ConduitAPI_arcanist_Method',
     'ConduitAPI_audit_Method' => 'ConduitAPIMethod',
@@ -2807,9 +2814,15 @@ phutil_register_library_map(array(
     'PhabricatorConduitConsoleController' => 'PhabricatorConduitController',
     'PhabricatorConduitController' => 'PhabricatorController',
     'PhabricatorConduitDAO' => 'PhabricatorLiskDAO',
-    'PhabricatorConduitListController' => 'PhabricatorConduitController',
+    'PhabricatorConduitListController' =>
+    array(
+      0 => 'PhabricatorConduitController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorConduitLogController' => 'PhabricatorConduitController',
     'PhabricatorConduitMethodCallLog' => 'PhabricatorConduitDAO',
+    'PhabricatorConduitMethodQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorConduitSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorConduitTokenController' => 'PhabricatorConduitController',
     'PhabricatorConfigAllController' => 'PhabricatorConfigController',
     'PhabricatorConfigController' => 'PhabricatorController',

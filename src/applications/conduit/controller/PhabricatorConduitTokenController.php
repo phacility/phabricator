@@ -28,26 +28,40 @@ final class PhabricatorConduitTokenController
       ->setToken(Filesystem::readRandomCharacters(40))
       ->save();
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Certificate Install Token');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    unset($unguarded);
 
-    $panel->appendChild(hsprintf(
-      '<p class="aphront-form-instructions">Copy and paste this token into '.
-      'the prompt given to you by "arc install-certificate":</p>'.
-      '<p style="padding: 0 0 1em 4em;">'.
-        '<strong>%s</strong>'.
-      '</p>'.
-      '<p class="aphront-form-instructions">arc will then complete the '.
-      'install process for you.</p>',
-      $token->getToken()));
+    $pre_instructions = pht(
+      'Copy and paste this token into the prompt given to you by '.
+      '`arc install-certificate`');
 
-    $this->setShowSideNav(false);
+    $post_instructions = pht(
+      'After you copy and paste this token, `arc` will complete '.
+      'the certificate install process for you.');
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->appendRemarkupInstructions($pre_instructions)
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setLabel(pht('Token'))
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
+          ->setValue($token->getToken()))
+      ->appendRemarkupInstructions($post_instructions);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Install Certificate')));
+
+    return $this->buildApplicationPage(
       array(
-        'title' => 'Certificate Install Token',
+        $crumbs,
+        $form,
+      ),
+      array(
+        'title' => pht('Certificate Install Token'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 }

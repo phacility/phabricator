@@ -38,7 +38,7 @@ final class PhabricatorApplicationConduit extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/conduit/' => array(
-        '' => 'PhabricatorConduitListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorConduitListController',
         'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
         'log/' => 'PhabricatorConduitLogController',
         'log/view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',
