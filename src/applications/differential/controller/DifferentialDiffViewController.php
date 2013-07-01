@@ -10,6 +10,7 @@ final class DifferentialDiffViewController extends DifferentialController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $diff = id(new DifferentialDiff())->load($this->id);
     if (!$diff) {
@@ -17,31 +18,19 @@ final class DifferentialDiffViewController extends DifferentialController {
     }
 
     if ($diff->getRevisionID()) {
-      $top_panel = new AphrontPanelView();
-      $top_panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-      $link = phutil_tag(
-        'a',
-        array(
-          'href' => PhabricatorEnv::getURI('/D'.$diff->getRevisionID()),
-        ),
-        'D'.$diff->getRevisionID());
-      $top_panel->appendChild(phutil_tag(
-        'h1',
-        array(),
-        pht('This diff belongs to revision %s', $link)));
+      $top_part = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->appendChild(
+          pht(
+            'This diff belongs to revision %s.',
+            phutil_tag(
+              'a',
+              array(
+                'href' => '/D'.$diff->getRevisionID(),
+              ),
+              'D'.$diff->getRevisionID())));
     } else {
-      $action_panel = new AphrontPanelView();
-      $action_panel->setHeader('Preview Diff');
-      $action_panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-      $action_panel->appendChild(hsprintf(
-        '<p class="aphront-panel-instructions">%s</p>',
-        pht(
-          'Review the diff for correctness. When you are satisfied, either '.
-          '<strong>create a new revision</strong> or <strong>update '.
-          'an existing revision</strong>.',
-          hsprintf(''))));
-
-      // TODO: implmenent optgroup support in AphrontFormSelectControl?
+      // TODO: implement optgroup support in AphrontFormSelectControl?
       $select = array();
       $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));
       $select[] = hsprintf(
@@ -49,10 +38,11 @@ final class DifferentialDiffViewController extends DifferentialController {
         pht('Create a new Revision...'));
       $select[] = hsprintf('</optgroup>');
 
-      $revision_data = new DifferentialRevisionListData(
-        DifferentialRevisionListData::QUERY_OPEN_OWNED,
-        array($request->getUser()->getPHID()));
-      $revisions = $revision_data->loadRevisions();
+      $revisions = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withAuthors(array($viewer->getPHID()))
+        ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+        ->execute();
 
       if ($revisions) {
         $select[] = hsprintf(
@@ -64,7 +54,7 @@ final class DifferentialDiffViewController extends DifferentialController {
             array(
               'value' => $revision->getID(),
             ),
-            $revision->getTitle());
+            'D'.$revision->getID().' '.$revision->getTitle());
         }
         $select[] = hsprintf('</optgroup>');
       }
@@ -74,12 +64,16 @@ final class DifferentialDiffViewController extends DifferentialController {
         array('name' => 'revisionID'),
         $select);
 
-      $action_form = new AphrontFormView();
-      $action_form
+      $form = id(new AphrontFormView())
         ->setUser($request->getUser())
         ->setAction('/differential/revision/edit/')
         ->addHiddenInput('diffID', $diff->getID())
         ->addHiddenInput('viaDiffView', 1)
+        ->setFlexible(true)
+        ->appendRemarkupInstructions(
+          pht(
+            'Review the diff for correctness. When you are satisfied, either '.
+            '**create a new revision** or **update an existing revision**.'))
         ->appendChild(
           id(new AphrontFormMarkupControl())
           ->setLabel(pht('Attach To'))
@@ -88,9 +82,7 @@ final class DifferentialDiffViewController extends DifferentialController {
           id(new AphrontFormSubmitControl())
           ->setValue(pht('Continue')));
 
-      $action_panel->appendChild($action_form);
-
-      $top_panel = $action_panel;
+      $top_part = $form;
     }
 
     $props = id(new DifferentialDiffProperty())->loadAllWhere(
@@ -120,6 +112,9 @@ final class DifferentialDiffViewController extends DifferentialController {
       }
     }
 
+    $property_head = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Properties'));
+
     $property_view = new PhabricatorPropertyListView();
     foreach ($dict as $key => $value) {
       $property_view->addProperty($key, $value);
@@ -147,17 +142,23 @@ final class DifferentialDiffViewController extends DifferentialController {
       ->setTitle(pht('Diff %d', $diff->getID()))
       ->setUser($request->getUser());
 
-    return $this->buildStandardPageResponse(
-      id(new DifferentialPrimaryPaneView())
-        ->appendChild(
-          array(
-            $top_panel->render(),
-            $property_view,
-            $table_of_contents->render(),
-            $details->render(),
-          )),
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Diff %d', $diff->getID())));
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $top_part,
+        $property_head,
+        $property_view,
+        $table_of_contents,
+        $details,
+      ),
       array(
         'title' => pht('Diff View'),
+        'dust' => true,
       ));
   }
 
