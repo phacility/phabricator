@@ -111,6 +111,7 @@ abstract class DiffusionController extends PhabricatorController {
     }
 
     $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($user)
       ->withPath($repository->getID(), $path_id)
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
@@ -125,7 +126,7 @@ abstract class DiffusionController extends PhabricatorController {
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
       ->setFields(DifferentialRevisionListView::getDefaultFields($user))
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($user)
       ->loadAssets();
 
     $phids = $view->getRequiredHandlePHIDs();

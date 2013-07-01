@@ -100,10 +100,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $this->repository,
         $this->commit);
       if ($hashes) {
-
-        $query = new DifferentialRevisionQuery();
-        $query->withCommitHashes($hashes);
-        $revisions = $query->execute();
+        $revisions = id(new DifferentialRevisionQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withCommitHashes($hashes)
+          ->execute();
 
         if (!empty($revisions)) {
           $revision = $this->identifyBestRevision($revisions);

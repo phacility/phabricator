@@ -183,10 +183,11 @@ final class PhabricatorDirectoryMainController
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
 
-    $revision_query = new DifferentialRevisionQuery();
-    $revision_query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
-    $revision_query->withResponsibleUsers(array($user_phid));
-    $revision_query->needRelationships(true);
+    $revision_query = id(new DifferentialRevisionQuery())
+      ->setViewer($user)
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withResponsibleUsers(array($user_phid))
+      ->needRelationships(true);
 
     // NOTE: We need to unlimit this query to hit the responsible user
     // fast-path.

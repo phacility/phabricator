@@ -803,6 +803,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $query = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getRequest()->getUser())
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
       ->setLimit(10)

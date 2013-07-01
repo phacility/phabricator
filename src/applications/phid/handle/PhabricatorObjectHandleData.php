@@ -108,11 +108,10 @@ final class PhabricatorObjectHandleData {
         return mpull($lists, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        // TODO: Update this to DifferentialRevisionQuery
-        $revision_dao = new DifferentialRevision();
-        $revisions = $revision_dao->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
+        $revisions = id(new DifferentialRevisionQuery())
+          ->setViewer($this->viewer)
+          ->withPHIDs($phids)
+          ->execute();
         return mpull($revisions, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_WIKI:

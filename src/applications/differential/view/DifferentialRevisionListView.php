@@ -61,6 +61,7 @@ final class DifferentialRevisionListView extends AphrontView {
       ->execute();
 
     $this->drafts = id(new DifferentialRevisionQuery())
+      ->setViewer($user)
       ->withIDs(mpull($this->revisions, 'getID'))
       ->withDraftRepliesByAuthors(array($user->getPHID()))
       ->execute();
