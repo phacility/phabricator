@@ -14,8 +14,6 @@
  */
 final class DifferentialRevisionQuery {
 
-  // TODO: Replace DifferentialRevisionListData with this class.
-
   private $pathIDs = array();
 
   private $status           = 'status-any';

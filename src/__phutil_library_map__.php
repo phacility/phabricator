@@ -403,7 +403,6 @@ phutil_register_library_map(array(
     'DifferentialRevisionIDFieldParserTestCase' => 'applications/differential/field/specification/__tests__/DifferentialRevisionIDFieldParserTestCase.php',
     'DifferentialRevisionIDFieldSpecification' => 'applications/differential/field/specification/DifferentialRevisionIDFieldSpecification.php',
     'DifferentialRevisionListController' => 'applications/differential/controller/DifferentialRevisionListController.php',
-    'DifferentialRevisionListData' => 'applications/differential/data/DifferentialRevisionListData.php',
     'DifferentialRevisionListView' => 'applications/differential/view/DifferentialRevisionListView.php',
     'DifferentialRevisionMailReceiver' => 'applications/differential/mail/DifferentialRevisionMailReceiver.php',
     'DifferentialRevisionQuery' => 'applications/differential/query/DifferentialRevisionQuery.php',
