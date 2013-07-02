@@ -173,16 +173,17 @@ final class PhabricatorApplicationSearchController
 
       $pager = new AphrontCursorPagerView();
       $pager->readFromRequest($request);
+      $pager->setPageSize($engine->getPageSize($saved_query));
       $objects = $query->setViewer($request->getUser())
         ->executeWithCursorPager($pager);
 
       $list = $parent->renderResultsList($objects);
-      $list->setNoDataString(pht("No results found for this query."));
 
       $nav->appendChild($list);
 
       // TODO: This is a bit hacky.
       if ($list instanceof PhabricatorObjectItemListView) {
+        $list->setNoDataString(pht("No results found for this query."));
         $list->setPager($pager);
       } else {
         $nav->appendChild($pager);

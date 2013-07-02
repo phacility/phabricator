@@ -56,7 +56,11 @@ final class ConduitAPI_differential_updateunitresults_Method
       throw new ConduitException('ERR_NO_RESULTS');
     }
 
-    $diff = id(new DifferentialDiff())->load($diff_id);
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($diff_id))
+      ->executeOne();
+
     $unit_results = $diff_property->getData();
     $postponed_count = 0;
     $unit_status = null;

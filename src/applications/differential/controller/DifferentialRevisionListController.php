@@ -237,9 +237,9 @@ final class DifferentialRevisionListController extends DifferentialController {
 
   private function buildQuery($filter, array $params) {
     $user_phids = $params['view_users'];
-    $query = new DifferentialRevisionQuery();
-
-    $query->needRelationships(true);
+    $query = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getRequest()->getUser())
+      ->needRelationships(true);
 
     switch ($filter) {
       case 'active':

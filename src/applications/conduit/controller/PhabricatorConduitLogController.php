@@ -8,24 +8,26 @@ final class PhabricatorConduitLogController
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $conn_table = new PhabricatorConduitConnectionLog();
     $call_table = new PhabricatorConduitMethodCallLog();
 
     $conn_r = $call_table->establishConnection('r');
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('page'));
-    $calls = $call_table->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
-    $calls = $pager->sliceResults($calls);
-    $pager->setURI(new PhutilURI('/conduit/log/'), 'page');
-    $pager->setEnableKeyboardShortcuts(true);
+    $pager = new AphrontCursorPagerView();
+    $pager->readFromRequest($request);
+    $pager->setPageSize(500);
 
-    $min = $pager->getOffset() + 1;
-    $max = ($min + count($calls) - 1);
+    $query = id(new PhabricatorConduitLogQuery())
+      ->setViewer($viewer);
+
+    $methods = $request->getStrList('methods');
+    if ($methods) {
+      $query->withMethods($methods);
+    }
+
+    $calls = $query->executeWithCursorPager($pager);
 
     $conn_ids = array_filter(mpull($calls, 'getConnectionID'));
     $conns = array();
@@ -36,17 +38,22 @@ final class PhabricatorConduitLogController
     }
 
     $table = $this->renderCallTable($calls, $conns);
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Conduit Method Calls ('.$min.'-'.$max.')');
-    $panel->appendChild($table);
-    $panel->appendChild($pager);
 
-    $this->setShowSideNav(false);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Call Logs')));
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $table,
+        $pager,
+      ),
       array(
         'title' => 'Conduit Logs',
+        'device' => true,
+        'dust' => true,
       ));
   }
 
@@ -54,30 +61,61 @@ final class PhabricatorConduitLogController
     assert_instances_of($calls, 'PhabricatorConduitMethodCallLog');
     assert_instances_of($conns, 'PhabricatorConduitConnectionLog');
 
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
+
+    $methods = id(new PhabricatorConduitMethodQuery())
+      ->setViewer($viewer)
+      ->execute();
+    $methods = mpull($methods, null, 'getAPIMethodName');
 
     $rows = array();
     foreach ($calls as $call) {
       $conn = idx($conns, $call->getConnectionID());
-      if (!$conn) {
-        // If there's no connection, use an empty object.
-        $conn = new PhabricatorConduitConnectionLog();
+      if ($conn) {
+        $name = $conn->getUserName();
+        $client = ' (via '.$conn->getClient().')';
+      } else {
+        $name = null;
+        $client = null;
       }
+
+      $method = idx($methods, $call->getMethod());
+      if ($method) {
+        switch ($method->getMethodStatus()) {
+          case ConduitAPIMethod::METHOD_STATUS_STABLE:
+            $status = null;
+            break;
+          case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
+            $status = pht('Unstable');
+            break;
+          case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
+            $status = pht('Deprecated');
+            break;
+        }
+      } else {
+        $status = pht('Unknown');
+      }
+
       $rows[] = array(
         $call->getConnectionID(),
-        $conn->getUserName(),
-        $call->getMethod(),
+        $name,
+        array($call->getMethod(), $client),
+        $status,
         $call->getError(),
         number_format($call->getDuration()).' us',
-        phabricator_datetime($call->getDateCreated(), $user),
+        phabricator_datetime($call->getDateCreated(), $viewer),
       );
     }
-    $table = new AphrontTableView($rows);
+
+    $table = id(new AphrontTableView($rows))
+      ->setDeviceReadyTable(true);
+
     $table->setHeaders(
       array(
         'Connection',
         'User',
         'Method',
+        'Status',
         'Error',
         'Duration',
         'Date',
@@ -87,6 +125,7 @@ final class PhabricatorConduitLogController
         '',
         '',
         'wide',
+        '',
         '',
         'n',
         'right',

@@ -81,6 +81,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
 
   public function loadStatus(PhabricatorUser $user) {
     $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($user)
       ->withResponsibleUsers(array($user->getPHID()))
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->needRelationships(true)

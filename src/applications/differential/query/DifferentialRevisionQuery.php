@@ -14,8 +14,6 @@
  */
 final class DifferentialRevisionQuery {
 
-  // TODO: Replace DifferentialRevisionListData with this class.
-
   private $pathIDs = array();
 
   private $status           = 'status-any';
@@ -413,6 +411,10 @@ final class DifferentialRevisionQuery {
     }
 
     return $revisions;
+  }
+
+  public function executeOne() {
+    return head($this->execute());
   }
 
 

@@ -1410,6 +1410,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130628.legalpadv0.sql'),
       ),
+      '20130701.conduitlog.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130701.conduitlog.sql'),
+      ),
     );
   }
 }

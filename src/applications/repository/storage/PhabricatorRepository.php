@@ -707,6 +707,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $all_offset = 0;
       }
 
+      $match = array_reverse($match);
       foreach ($match as $val) {
         list($s, $offset) = $val;
         $message = substr_replace(

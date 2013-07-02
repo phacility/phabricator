@@ -72,11 +72,12 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
     $time_end = microtime(true);
 
     $connection_id = idx($metadata, 'connectionID');
-    $log = new PhabricatorConduitMethodCallLog();
-    $log->setConnectionID($connection_id);
-    $log->setMethod($method);
-    $log->setError((string)$error_code);
-    $log->setDuration(1000000 * ($time_end - $time_start));
-    $log->save();
+    $log = id(new PhabricatorConduitMethodCallLog())
+      ->setCallerPHID($this->getUser()->getPHID())
+      ->setConnectionID($connection_id)
+      ->setMethod($method)
+      ->setError((string)$error_code)
+      ->setDuration(1000000 * ($time_end - $time_start))
+      ->save();
   }
 }

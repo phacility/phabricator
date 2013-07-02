@@ -5,7 +5,9 @@
  * @task  status  Method Status
  * @group conduit
  */
-abstract class ConduitAPIMethod {
+abstract class ConduitAPIMethod
+  extends Phobject
+  implements PhabricatorPolicyInterface {
 
   const METHOD_STATUS_STABLE      = 'stable';
   const METHOD_STATUS_UNSTABLE    = 'unstable';
@@ -19,6 +21,14 @@ abstract class ConduitAPIMethod {
 
   public function __construct() {
 
+  }
+
+  /**
+   * This is mostly for compatibility with
+   * @{class:AphrontCursorPagedPolicyAwareQuery}.
+   */
+  public function getID() {
+    return $this->getAPIMethodName();
   }
 
   /**
@@ -60,6 +70,29 @@ abstract class ConduitAPIMethod {
 
   public function getAPIMethodName() {
     return self::getAPIMethodNameFromClassName(get_class($this));
+  }
+
+  /**
+   * Return a key which sorts methods by application name, then method status,
+   * then method name.
+   */
+  public function getSortOrder() {
+    $name = $this->getAPIMethodName();
+
+    $map = array(
+      ConduitAPIMethod::METHOD_STATUS_STABLE      => 0,
+      ConduitAPIMethod::METHOD_STATUS_UNSTABLE    => 1,
+      ConduitAPIMethod::METHOD_STATUS_DEPRECATED  => 2,
+    );
+    $ord = idx($map, $this->getMethodStatus(), 0);
+
+    list($head, $tail) = explode('.', $name, 2);
+
+    return "{$head}.{$ord}.{$tail}";
+  }
+
+  public function getApplicationName() {
+    return head(explode('.', $this->getAPIMethodName(), 2));
   }
 
   public static function getClassNameFromAPIMethodName($method_name) {
@@ -127,6 +160,27 @@ abstract class ConduitAPIMethod {
         "same URI to identify the install. Edit your .arcconfig or ".
         "phabricator/conf so they agree on the URI for the install.");
     }
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    // The policy interface on Conduit calls is currently just to let us hook
+    // into ApplicationSearch. Calls are always visible (even to logged out
+    // users).
+    return true;
   }
 
 }

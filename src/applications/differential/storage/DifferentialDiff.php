@@ -1,6 +1,8 @@
 <?php
 
-final class DifferentialDiff extends DifferentialDAO {
+final class DifferentialDiff
+  extends DifferentialDAO
+  implements PhabricatorPolicyInterface {
 
   protected $revisionID;
   protected $authorPHID;
@@ -114,6 +116,10 @@ final class DifferentialDiff extends DifferentialDAO {
   public static function newFromRawChanges(array $changes) {
     assert_instances_of($changes, 'ArcanistDiffChange');
     $diff = new DifferentialDiff();
+
+    // There may not be any changes; initialize the changesets list so that
+    // we don't throw later when accessing it.
+    $diff->attachChangesets(array());
 
     $lines = 0;
     foreach ($changes as $change) {
@@ -252,6 +258,24 @@ final class DifferentialDiff extends DifferentialDAO {
     }
 
     return $dict;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }
