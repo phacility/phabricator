@@ -14,6 +14,10 @@
   padding: 0;
 }
 
+.phabricator-object-list-flush .aphront-error-view {
+  margin: 0;
+}
+
 .phabricator-object-item {
   background: #ffffff;
   border-style: solid;
@@ -306,6 +310,14 @@
 
   min-height: 18px;
   line-height: 18px;
+}
+
+/*
+ * Items with icon 'none' still have on mobile, thus creating a weird vertical
+ * margin for elements which follow
+ */
+.device-phone .phabricator-object-item-icon-none {
+  display: none;
 }
 
 .device-desktop .phabricator-object-item-icon {

@@ -2319,6 +2319,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionListController' => 'DifferentialController',
     'DifferentialRevisionListView' => 'AphrontView',
     'DifferentialRevisionMailReceiver' => 'PhabricatorObjectMailReceiver',
+    'DifferentialRevisionQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'DifferentialRevisionStatsView' => 'AphrontView',
     'DifferentialRevisionStatusFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialRevisionUpdateHistoryView' => 'AphrontView',

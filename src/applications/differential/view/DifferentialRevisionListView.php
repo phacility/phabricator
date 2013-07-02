@@ -76,23 +76,18 @@ final class DifferentialRevisionListView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
-    $fresh = null;
-    $stale = null;
+    $fresh = PhabricatorEnv::getEnvConfig('differential.days-fresh');
+    if ($fresh) {
+      $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
+        time(),
+        -$fresh);
+    }
 
-    if ($this->highlightAge) {
-      $fresh = PhabricatorEnv::getEnvConfig('differential.days-fresh');
-      if ($fresh) {
-        $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
-          time(),
-          -$fresh);
-      }
-
-      $stale = PhabricatorEnv::getEnvConfig('differential.days-stale');
-      if ($stale) {
-        $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
-          time(),
-          -$stale);
-      }
+    $stale = PhabricatorEnv::getEnvConfig('differential.days-stale');
+    if ($stale) {
+      $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
+        time(),
+        -$stale);
     }
 
     Javelin::initBehavior('phabricator-tooltips', array());
@@ -101,50 +96,30 @@ final class DifferentialRevisionListView extends AphrontView {
     $flagged = mpull($this->flags, null, 'getObjectPHID');
 
     foreach ($this->fields as $field) {
-      $field->setUser($this->user);
       $field->setHandles($this->handles);
     }
 
-    $cell_classes = array();
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
+    $list->setCards(true);
+    $list->setFlush(true);
+
     foreach ($this->revisions as $revision) {
+      $item = new PhabricatorObjectItemView();
+      $rev_fields = array();
+      $icons = array();
+
       $phid = $revision->getPHID();
-      $flag = '';
       if (isset($flagged[$phid])) {
-        $class = PhabricatorFlagColor::getCSSClass($flagged[$phid]->getColor());
-        $note = $flagged[$phid]->getNote();
-        $flag = javelin_tag(
-          'div',
-          $note ? array(
-            'class' => 'phabricator-flag-icon '.$class,
-            'sigil' => 'has-tooltip',
-            'meta'  => array(
-              'tip'   => $note,
-              'align' => 'N',
-              'size'  => 240,
-            ),
-          ) : array(
-            'class' => 'phabricator-flag-icon '.$class,
-          ),
-          '');
-
-      } else if (array_key_exists($revision->getID(), $this->drafts)) {
-        $src = '/rsrc/image/icon/fatcow/page_white_edit.png';
-        $flag = hsprintf(
-          '<a href="%s">%s</a>',
-          '/D'.$revision->getID().'#comment-preview',
-          phutil_tag(
-            'img',
-            array(
-              'src' => celerity_get_resource_uri($src),
-              'width' => 16,
-              'height' => 16,
-              'alt' => 'Draft',
-              'title' => pht('Draft Comment'),
-            )));
+        $icons['flag'] = array(
+          'icon' => 'flag-'.$flagged[$phid]->getColor(),
+        );
       }
-
-      $row = array($flag);
+      if (array_key_exists($revision->getID(), $this->drafts)) {
+        $icons['draft'] = array(
+          'icon' => 'file-white',
+          'href' => '/D'.$revision->getID().'#comment-preview',
+        );
+      }
 
       $modified = $revision->getDateModified();
 
@@ -152,38 +127,79 @@ final class DifferentialRevisionListView extends AphrontView {
         if (($fresh || $stale) &&
             $field instanceof DifferentialDateModifiedFieldSpecification) {
           if ($stale && $modified < $stale) {
-            $class = 'revision-age-old';
+            $days = floor((time() - $modified) / 60 / 60 / 24);
+            $icons['age'] = array(
+              'icon' => 'warning-white',
+              'label' => pht('Old (%d days)', $days),
+            );
           } else if ($fresh && $modified < $fresh) {
-            $class = 'revision-age-stale';
+            $days = floor((time() - $modified) / 60 / 60 / 24);
+            $icons['age'] = array(
+              'icon' => 'perflab-white',
+              'label' => pht('Stale (%d days)', $days),
+            );
           } else {
-            $class = 'revision-age-fresh';
+            // Fresh, noOp();
           }
-          $cell_classes[count($rows)][count($row)] = $class;
         }
 
-        $row[] = $field->renderValueForRevisionList($revision);
+        $rev_header = $field->renderHeaderForRevisionList();
+        $rev_fields[$rev_header] = $field
+          ->renderValueForRevisionList($revision);
       }
 
-      $rows[] = $row;
+      $status = $revision->getStatus();
+      $status_name =
+        ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
+
+      $flag_icon = null;
+      if (isset($icons['flag'])) {
+        $flag_icon = $icons['flag']['icon'];
+      }
+
+      $item->setObjectName('D'.$revision->getID());
+      $item->setHeader(phutil_tag('a',
+        array('href' => '/D'.$revision->getID()),
+        $revision->getTitle()));
+      $item->addAttribute($status_name);
+
+      // Author
+      $author_handle = $this->handles[$revision->getAuthorPHID()];
+      $item->addByline(pht('Author: %s', $author_handle->renderLink()));
+
+      // Reviewers
+      $item->addAttribute(pht('Reviewers: %s', $rev_fields['Reviewers']));
+
+      $do_not_display_age = array(
+        ArcanistDifferentialRevisionStatus::CLOSED => true,
+        ArcanistDifferentialRevisionStatus::ABANDONED => true,
+      );
+      if (isset($icons['age']) && !isset($do_not_display_age[$status])) {
+        $item->addFootIcon($icons['age']['icon'], $icons['age']['label']);
+      }
+      if (isset($icons['draft'])) {
+        $item->addFootIcon($icons['draft']['icon'], pht('Saved Draft'),
+          $icons['draft']['href']);
+      }
+
+      // Updated on
+      $item->addIcon($flag_icon ? $flag_icon : 'none',
+        hsprintf('%s', $rev_fields['Updated']));
+
+      // First remove the fields we already have
+      $count = 7;
+      $rev_fields = array_slice($rev_fields, $count);
+
+      // Then add each one of them
+      // TODO: Add render-to-foot-icon support
+      foreach ($rev_fields as $header => $field) {
+        $item->addAttribute(pht('%s: %s', $header, $field));
+      }
+
+      $list->addItem($item);
     }
 
-    $headers = array('');
-    $classes = array('');
-    foreach ($this->fields as $field) {
-      $headers[] = $field->renderHeaderForRevisionList();
-      $classes[] = $field->getColumnClassForRevisionList();
-    }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders($headers);
-    $table->setColumnClasses($classes);
-    $table->setCellClasses($cell_classes);
-
-    $table->setNoDataString(pht('No revisions found.'));
-
-    require_celerity_resource('differential-revision-history-css');
-
-    return $table->render();
+    return $list;
   }
 
   public static function getDefaultFields(PhabricatorUser $user) {

@@ -74,3 +74,8 @@ form.aphront-dialog-view .aphront-error-view {
   background: #f3f3f3;
   color: #666;
 }
+
+.make-me-sneeze .aphront-error-severity-nodata {
+  background: #fff;
+  border-color: #e6e6e6;
+}
