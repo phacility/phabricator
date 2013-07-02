@@ -46,26 +46,35 @@
 
 .aphront-list-filter-reveal {
   margin-left: 13%;
-  margin-right: 17%;
-  padding: 4px;
+  margin-right: 18%;
+  padding: 8px 0;
   overflow: hidden;
-  text-align: right;
+  text-align: center;
 }
 
 .device .aphront-list-filter-reveal {
   width: 98%;
-  margin-left: 0;
-  margin-right: 0;
+  margin: auto;
+  padding: 4px 0;
 }
 
 .aphront-list-filter-reveal a {
   font-weight: bold;
+  float: right;
+}
+
+.device .aphront-list-filter-reveal a {
+  margin: 4px auto 0;
+  float: none;
+  display: block;
 }
 
 .aphront-list-filter-description {
-  margin-right: 20%;
-  color: #666666;
+  margin-right: 25%;
   float: left;
+  text-align: left;
+  line-height: 25px;
+  color: #666666;
 }
 
 .device .aphront-list-filter-description {
