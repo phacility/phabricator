@@ -102,6 +102,7 @@ $workflows = array(
   new PhabricatorStorageManagementDestroyWorkflow(),
   new PhabricatorStorageManagementDumpWorkflow(),
   new PhabricatorStorageManagementStatusWorkflow(),
+  new PhabricatorStorageManagementProbeWorkflow(),
   new PhabricatorStorageManagementUpgradeWorkflow(),
 );
 
