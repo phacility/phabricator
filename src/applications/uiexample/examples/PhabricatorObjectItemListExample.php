@@ -289,57 +289,6 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $out[] = array($head, $list);
 
-    $head = id(new PhabricatorHeaderView())
-      ->setHeader(pht('State Icons'));
-    $list = new PhabricatorObjectItemListView();
-
-    $list->addItem(
-      id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Item With State'))
-        ->addStateIcon('blame'));
-
-    $list->addItem(
-      id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Grippable Item With State'))
-        ->setGrippable(true)
-        ->addStateIcon('blame'));
-
-    $list->addItem(
-      id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Two State'))
-        ->setStateIconColumns(2)
-        ->addStateIcon('blame')
-        ->addStateIcon('blame'));
-
-    $list->addItem(
-      id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Grippable Two State'))
-        ->setGrippable(true)
-        ->setStateIconColumns(2)
-        ->addStateIcon('blame')
-        ->addStateIcon('blame'));
-
-    $list->addItem(
-      id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Three State'))
-        ->addAttribute(pht('The quick brown fox...'))
-        ->setStateIconColumns(2)
-        ->addStateIcon('home')
-        ->addStateIcon('tag')
-        ->addStateIcon('unlock'));
-
-    $list->addItem(
-      id(new PhabricatorObjectItemView())
-        ->setHeader(pht('Four State'))
-        ->addAttribute(pht('...jumps over the lazy dog.'))
-        ->setStateIconColumns(2)
-        ->addStateIcon('world-grey', pht('World'))
-        ->addStateIcon('fork-grey', pht('Fork'))
-        ->addStateIcon('herald-grey', pht('Herald'))
-        ->addStateIcon('preview-grey', pht('Eye')));
-
-    $out[] = array($head, $list);
-
     return $out;
   }
 }

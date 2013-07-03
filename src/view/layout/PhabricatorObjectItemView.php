@@ -16,26 +16,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $bylines = array();
   private $grippable;
   private $actions = array();
-  private $stateIconColumns = 0;
-  private $stateIcons = array();
   private $headIcons = array();
-
-  public function setStateIconColumns($state_icon_columns) {
-    $this->stateIconColumns = $state_icon_columns;
-    return $this;
-  }
-
-  public function addStateIcon($name, $label = null, $attributes = array()) {
-    $this->stateIcons[] = array(
-      'name'        => $name,
-      'label'       => $label,
-      'attributes'  => $attributes,
-    );
-    if (!$this->stateIconColumns) {
-      $this->stateIconColumns = 1;
-    }
-    return $this;
-  }
 
   public function addHeadIcon($icon) {
     $this->headIcons[] = $icon;
@@ -206,11 +187,6 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     if ($this->getGrippable()) {
       $item_classes[] = 'phabricator-object-item-grippable';
-    }
-
-    if ($this->stateIconColumns) {
-      $cols = $this->stateIconColumns;
-      $item_classes[] = 'phabricator-object-item-state-'.$cols.'-cols';
     }
 
     return array(
@@ -424,34 +400,6 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         '');
     }
 
-    $state_icons = null;
-    if ($this->stateIconColumns) {
-      $state_icon_list = array();
-      foreach ($this->stateIcons as $state_icon) {
-        $sicon = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon($state_icon['name']);
-
-        if ($state_icon['label']) {
-          $sicon->addSigil('has-tooltip');
-          $sicon->setMetadata(
-            array(
-              'tip' => $state_icon['label'],
-            ));
-        }
-
-        $state_icon_list[] = $sicon;
-      }
-      $cols = $this->stateIconColumns;
-      $state_icons = phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-object-item-state-icons '.
-                     'state-icon-'.$cols.'-cols',
-        ),
-        $state_icon_list);
-    }
-
     $content = phutil_tag(
       'div',
       array(
@@ -471,7 +419,6 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       ),
       array(
         $grippable,
-        $state_icons,
         $header,
         $icons,
         $bylines,

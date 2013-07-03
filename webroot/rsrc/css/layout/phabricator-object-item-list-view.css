@@ -89,47 +89,8 @@
   background: url(/rsrc/image/texture/grip.png) center center no-repeat;
 }
 
-.phabricator-object-item-state-icons {
-  top: 0;
-  left: 4px;
-  width: 20px;
-  position: absolute;
-  padding: 6px 4px;
-}
-
-.phabricator-object-item-state-icons span.phui-icon-view {
-  display: inline-block;
-  margin: 1px 2px 2px;
-}
-
-.phabricator-object-item-grippable .phabricator-object-item-state-icons {
-  left: 15px;
-}
-
-.state-icon-2-cols {
-  width: 40px;
-}
-
 .phabricator-object-item-grippable .phabricator-object-item-frame {
   padding-left: 11px;
-}
-
-.phabricator-object-item-state-1-cols .phabricator-object-item-frame {
-  padding-left: 24px;
-}
-
-.phabricator-object-item-state-2-cols .phabricator-object-item-frame {
-  padding-left: 44px;
-}
-
-.phabricator-object-item-grippable.phabricator-object-item-state-1-cols
-  .phabricator-object-item-frame {
-  padding-left: 35px;
-}
-
-.phabricator-object-item-grippable.phabricator-object-item-state-2-cols
-  .phabricator-object-item-frame {
-  padding-left: 55px;
 }
 
 .phabricator-object-item-list-header {
