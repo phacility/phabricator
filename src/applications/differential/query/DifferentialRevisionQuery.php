@@ -376,11 +376,7 @@ final class DifferentialRevisionQuery {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 
-    if ($this->shouldUseResponsibleFastPath()) {
-      $data = $this->loadDataUsingResponsibleFastPath();
-    } else {
-      $data = $this->loadData();
-    }
+    $data = $this->loadData();
 
     $revisions = $table->loadAllFromArray($data);
 
@@ -417,65 +413,6 @@ final class DifferentialRevisionQuery {
     return head($this->execute());
   }
 
-
-  /**
-   * Determine if we should execute an optimized, fast-path query to fetch
-   * open revisions for one responsible user. This is used by the Differential
-   * dashboard and much faster when executed as a UNION ALL than with JOIN
-   * and WHERE, which is why we special case it.
-   */
-  private function shouldUseResponsibleFastPath() {
-    if ((count($this->responsibles) == 1) &&
-        ($this->status == self::STATUS_OPEN) &&
-        ($this->order == self::ORDER_MODIFIED) &&
-        !$this->offset &&
-        !$this->limit &&
-        !$this->subscribers &&
-        !$this->reviewers &&
-        !$this->ccs &&
-        !$this->authors &&
-        !$this->revIDs &&
-        !$this->commitHashes &&
-        !$this->phids &&
-        !$this->branches &&
-        !$this->arcanistProjectPHIDs) {
-      return true;
-    }
-    return false;
-  }
-
-
-  private function loadDataUsingResponsibleFastPath() {
-    $table = new DifferentialRevision();
-    $conn_r = $table->establishConnection('r');
-
-    $responsible_phid = reset($this->responsibles);
-    $open_statuses = array(
-      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
-      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
-      ArcanistDifferentialRevisionStatus::ACCEPTED,
-    );
-
-    return queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T WHERE authorPHID = %s AND status IN (%Ld)
-        UNION ALL
-       SELECT r.* FROM %T r JOIN %T rel
-        ON rel.revisionID = r.id
-        AND rel.relation = %s
-        AND rel.objectPHID = %s
-        WHERE r.status IN (%Ld) ORDER BY dateModified DESC',
-      $table->getTableName(),
-      $responsible_phid,
-      $open_statuses,
-
-      $table->getTableName(),
-      DifferentialRevision::RELATIONSHIP_TABLE,
-      DifferentialRevision::RELATION_REVIEWER,
-      $responsible_phid,
-      $open_statuses);
-  }
-
   private function loadData() {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
@@ -506,6 +443,54 @@ final class DifferentialRevisionQuery {
       }
     }
 
+    $selects = array();
+
+    // NOTE: If the query includes "responsiblePHIDs", we execute it as a
+    // UNION of revisions they own and revisions they're reviewing. This has
+    // much better performance than doing it with JOIN/WHERE.
+    if ($this->responsibles) {
+      $basic_authors = $this->authors;
+      $basic_reviewers = $this->reviewers;
+      try {
+        // Build the query where the responsible users are authors.
+        $this->authors = array_merge($basic_authors, $this->responsibles);
+        $this->reviewers = $basic_reviewers;
+        $selects[] = $this->buildSelectStatement($conn_r);
+
+        // Build the query where the responsible users are reviewers.
+        $this->authors = $basic_authors;
+        $this->reviewers = array_merge($basic_reviewers, $this->responsibles);
+        $selects[] = $this->buildSelectStatement($conn_r);
+
+        // Put everything back like it was.
+        $this->authors = $basic_authors;
+        $this->reviewers = $basic_reviewers;
+      } catch (Exception $ex) {
+        $this->authors = $basic_authors;
+        $this->reviewers = $basic_reviewers;
+        throw $ex;
+      }
+    } else {
+      $selects[] = $this->buildSelectStatement($conn_r);
+    }
+
+    if (count($selects) > 1) {
+      $query = qsprintf(
+        $conn_r,
+        '%Q %Q %Q',
+        implode(' UNION DISTINCT ', $selects),
+        $this->buildOrderByClause($conn_r, $is_global = true),
+        $this->buildLimitClause($conn_r));
+    } else {
+      $query = head($selects);
+    }
+
+    return queryfx_all($conn_r, '%Q', $query);
+  }
+
+  private function buildSelectStatement(AphrontDatabaseConnection $conn_r) {
+    $table = new DifferentialRevision();
+
     $select = qsprintf(
       $conn_r,
       'SELECT r.* FROM %T r',
@@ -515,7 +500,20 @@ final class DifferentialRevisionQuery {
     $where = $this->buildWhereClause($conn_r);
     $group_by = $this->buildGroupByClause($conn_r);
     $order_by = $this->buildOrderByClause($conn_r);
+    $limit = $this->buildLimitClause($conn_r);
 
+    return qsprintf(
+      $conn_r,
+      '(%Q %Q %Q %Q %Q %Q)',
+      $select,
+      $joins,
+      $where,
+      $group_by,
+      $order_by,
+      $limit);
+  }
+
+  private function buildLimitClause(AphrontDatabaseConnection $conn_r) {
     $limit = '';
     if ($this->offset || $this->limit) {
       $limit = qsprintf(
@@ -525,17 +523,8 @@ final class DifferentialRevisionQuery {
         $this->limit);
     }
 
-    return queryfx_all(
-      $conn_r,
-      '%Q %Q %Q %Q %Q %Q',
-      $select,
-      $joins,
-      $where,
-      $group_by,
-      $order_by,
-      $limit);
+    return $limit;
   }
-
 
 /* -(  Internals  )---------------------------------------------------------- */
 
@@ -594,17 +583,6 @@ final class DifferentialRevisionQuery {
           DifferentialRevision::RELATION_REVIEWER,
         ),
         $this->subscribers);
-    }
-
-    if ($this->responsibles) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'LEFT JOIN %T responsibles_rel ON responsibles_rel.revisionID = r.id '.
-        'AND responsibles_rel.relation = %s '.
-        'AND responsibles_rel.objectPHID in (%Ls)',
-        DifferentialRevision::RELATIONSHIP_TABLE,
-        DifferentialRevision::RELATION_REVIEWER,
-        $this->responsibles);
     }
 
     $joins = implode(' ', $joins);
@@ -673,13 +651,6 @@ final class DifferentialRevisionQuery {
         $conn_r,
         'r.phid IN (%Ls)',
         $this->phids);
-    }
-
-    if ($this->responsibles) {
-      $where[] = qsprintf(
-        $conn_r,
-        '(responsibles_rel.objectPHID IS NOT NULL OR r.authorPHID IN (%Ls))',
-        $this->responsibles);
     }
 
     if ($this->branches) {
@@ -786,11 +757,17 @@ final class DifferentialRevisionQuery {
   /**
    * @task internal
    */
-  private function buildOrderByClause($conn_r) {
+  private function buildOrderByClause($conn_r, $is_global = false) {
     switch ($this->order) {
       case self::ORDER_MODIFIED:
+        if ($is_global) {
+          return 'ORDER BY dateModified DESC';
+        }
         return 'ORDER BY r.dateModified DESC';
       case self::ORDER_CREATED:
+        if ($is_global) {
+          return 'ORDER BY dateCreated DESC';
+        }
         return 'ORDER BY r.dateCreated DESC';
       case self::ORDER_PATH_MODIFIED:
         if (!$this->pathIDs) {
