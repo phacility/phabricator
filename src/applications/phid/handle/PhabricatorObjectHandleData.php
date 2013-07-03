@@ -211,6 +211,14 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($xusrs, null, 'getPHID');
 
+      case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
+        $legds = id(new LegalpadDocumentQuery())
+          ->needDocumentBody(true)
+          ->withPHIDs($phids)
+          ->setViewer($this->viewer)
+          ->execute();
+        return mpull($legds, null, 'getPHID');
+
     }
 
     return array();
@@ -718,6 +726,24 @@ final class PhabricatorObjectHandleData {
               $handle->setName($countdown->getTitle());
               $handle->setFullName($countdown->getTitle());
               $handle->setURI('/countdown/'.$countdown->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName('Unknown Legalpad Document');
+            } else {
+              $document = $objects[$phid];
+              $handle->setName($document->getDocumentBody()->getTitle());
+              $handle->setFullName($document->getDocumentBody()->getTitle());
+              $handle->setURI('/legalpad/view/'.$document->getID().'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

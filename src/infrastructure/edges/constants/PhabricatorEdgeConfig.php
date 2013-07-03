@@ -51,6 +51,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_DREV_HAS_COMMIT            = 31;
   const TYPE_COMMIT_HAS_DREV            = 32;
 
+  const TYPE_OBJECT_HAS_CONTRIBUTOR     = 33;
+  const TYPE_CONTRIBUTED_TO_OBJECT      = 34;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -106,6 +109,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_DREV_HAS_COMMIT => self::TYPE_COMMIT_HAS_DREV,
       self::TYPE_COMMIT_HAS_DREV => self::TYPE_DREV_HAS_COMMIT,
 
+      self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_SUBSCRIBED_TO_OBJECT,
+      self::TYPE_CONTRIBUTED_TO_OBJECT => self::TYPE_OBJECT_HAS_CONTRIBUTOR,
+
       self::TYPE_PHOB_HAS_ASANATASK => self::TYPE_ASANATASK_HAS_PHOB,
       self::TYPE_ASANATASK_HAS_PHOB => self::TYPE_PHOB_HAS_ASANATASK,
 
@@ -149,6 +155,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
       PhabricatorPHIDConstants::PHID_TYPE_XOBJ  => 'DoorkeeperExternalObject',
+      PhabricatorPHIDConstants::PHID_TYPE_LEGD  => 'LegalpadDocument',
     );
 
     $class = idx($class_map, $phid_type);
