@@ -97,23 +97,18 @@ final class DifferentialRevisionListController extends DifferentialController {
 
       $pager = null;
       if ($this->getFilterAllowsPaging($this->filter)) {
-        $pager = new AphrontPagerView();
-        $pager->setOffset($request->getInt('page'));
-        $pager->setPageSize(1000);
-        $pager->setURI($uri, 'page');
-
-        $query->setOffset($pager->getOffset());
-        $query->setLimit($pager->getPageSize() + 1);
+        $pager = new AphrontCursorPagerView();
+        $pager->readFromRequest($request);
       }
 
       foreach ($controls as $control) {
         $this->applyControlToQuery($control, $query, $params);
       }
 
-      $revisions = $query->execute();
-
       if ($pager) {
-        $revisions = $pager->sliceResults($revisions);
+        $revisions = $query->executeWithCursorPager($pager);
+      } else {
+        $revisions = $query->execute();
       }
 
       $views = $this->buildViews(

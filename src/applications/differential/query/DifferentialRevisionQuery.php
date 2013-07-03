@@ -57,6 +57,8 @@ final class DifferentialRevisionQuery
   private $needCommitPHIDs    = false;
   private $needHashes         = false;
 
+  private $buildingGlobalOrder;
+
 
 /* -(  Query Configuration  )------------------------------------------------ */
 
@@ -439,11 +441,12 @@ final class DifferentialRevisionQuery
     }
 
     if (count($selects) > 1) {
+      $this->buildingGlobalOrder = true;
       $query = qsprintf(
         $conn_r,
         '%Q %Q %Q',
         implode(' UNION DISTINCT ', $selects),
-        $this->buildOrderByClause($conn_r, $is_global = true),
+        $this->buildOrderClause($conn_r),
         $this->buildLimitClause($conn_r));
     } else {
       $query = head($selects);
@@ -463,7 +466,10 @@ final class DifferentialRevisionQuery
     $joins = $this->buildJoinsClause($conn_r);
     $where = $this->buildWhereClause($conn_r);
     $group_by = $this->buildGroupByClause($conn_r);
-    $order_by = $this->buildOrderByClause($conn_r);
+
+    $this->buildingGlobalOrder = false;
+    $order_by = $this->buildOrderClause($conn_r);
+
     $limit = $this->buildLimitClause($conn_r);
 
     return qsprintf(
@@ -675,7 +681,7 @@ final class DifferentialRevisionQuery
           "Unknown revision status filter constant '{$this->status}'!");
     }
 
-    $where[] = $this->buildPagingCLause($conn_r);
+    $where[] = $this->buildPagingClause($conn_r);
     return $this->formatWhereClause($where);
   }
 
@@ -699,28 +705,99 @@ final class DifferentialRevisionQuery
     }
   }
 
+  private function loadCursorObject($id) {
+    $results = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs(array($id))
+      ->execute();
+    return head($results);
+  }
 
-  /**
-   * @task internal
-   */
-  private function buildOrderByClause($conn_r, $is_global = false) {
+  protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
+    $default = parent::buildPagingClause($conn_r);
+
+    $before_id = $this->getBeforeID();
+    $after_id = $this->getAfterID();
+
+    if (!$before_id && !$after_id) {
+      return $default;
+    }
+
+    if ($before_id) {
+      $cursor = $this->loadCursorObject($before_id);
+    } else {
+      $cursor = $this->loadCursorObject($after_id);
+    }
+
+    if (!$cursor) {
+      return null;
+    }
+
+    switch ($this->order) {
+      case self::ORDER_CREATED:
+        return $default;
+      case self::ORDER_MODIFIED:
+        if ($before_id) {
+          return qsprintf(
+            $conn_r,
+            '(r.dateModified %Q %d OR (r.dateModified = %d AND r.id %Q %d))',
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getDateModified(),
+            $cursor->getDateModified(),
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getID());
+        } else {
+          return qsprintf(
+            $conn_r,
+            '(r.dateModified %Q %d OR (r.dateModified = %d AND r.id %Q %d))',
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getDateModified(),
+            $cursor->getDateModified(),
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getID());
+        }
+      case self::ORDER_PATH_MODIFIED:
+        if ($before_id) {
+          return qsprintf(
+            $conn_r,
+            '(p.epoch %Q %d OR (p.epoch = %d AND r.id %Q %d))',
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getDateCreated(),
+            $cursor->getDateCreated(),
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getID());
+        } else {
+          return qsprintf(
+            $conn_r,
+            '(p.epoch %Q %d OR (p.epoch = %d AND r.id %Q %d))',
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getDateCreated(),
+            $cursor->getDateCreated(),
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getID());
+        }
+    }
+  }
+
+  protected function getPagingColumn() {
+    $is_global = $this->buildingGlobalOrder;
     switch ($this->order) {
       case self::ORDER_MODIFIED:
         if ($is_global) {
-          return 'ORDER BY dateModified DESC';
+          return 'dateModified';
         }
-        return 'ORDER BY r.dateModified DESC';
+        return 'r.dateModified';
       case self::ORDER_CREATED:
         if ($is_global) {
-          return 'ORDER BY dateCreated DESC';
+          return 'id';
         }
-        return 'ORDER BY r.dateCreated DESC';
+        return 'r.id';
       case self::ORDER_PATH_MODIFIED:
         if (!$this->pathIDs) {
           throw new Exception(
             "To use ORDER_PATH_MODIFIED, you must specify withPath().");
         }
-        return 'ORDER BY p.epoch DESC';
+        return 'p.epoch';
       default:
         throw new Exception("Unknown query order constant '{$this->order}'.");
     }
