@@ -18,6 +18,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $actions = array();
   private $stateIconColumns = 0;
   private $stateIcons = array();
+  private $headIcons = array();
 
   public function setStateIconColumns($state_icon_columns) {
     $this->stateIconColumns = $state_icon_columns;
@@ -33,6 +34,11 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     if (!$this->stateIconColumns) {
       $this->stateIconColumns = 1;
     }
+    return $this;
+  }
+
+  public function addHeadIcon($icon) {
+    $this->headIcons[] = $icon;
     return $this;
   }
 
@@ -244,6 +250,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         'sigil' => 'slippery',
       ),
       array(
+        $this->headIcons,
         $header_name,
         $header_link,
       ));

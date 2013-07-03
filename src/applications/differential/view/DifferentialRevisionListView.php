@@ -121,9 +121,14 @@ final class DifferentialRevisionListView extends AphrontView {
 
       $phid = $revision->getPHID();
       if (isset($flagged[$phid])) {
-        $icons['flag'] = array(
-          'icon' => 'flag-'.$flagged[$phid]->getColor(),
-        );
+        $flag = $flagged[$phid];
+        $flag_class = PhabricatorFlagColor::getCSSClass($flag->getColor());
+        $icons['flag'] = phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-flag-icon '.$flag_class,
+          ),
+          '');
       }
       if (array_key_exists($revision->getID(), $this->drafts)) {
         $icons['draft'] = array(
@@ -162,9 +167,8 @@ final class DifferentialRevisionListView extends AphrontView {
       $status_name =
         ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
-      $flag_icon = null;
       if (isset($icons['flag'])) {
-        $flag_icon = $icons['flag']['icon'];
+        $item->addHeadIcon($icons['flag']);
       }
 
       $item->setObjectName('D'.$revision->getID());
@@ -186,12 +190,6 @@ final class DifferentialRevisionListView extends AphrontView {
         $item->addStateIcon(
           $icons['draft']['icon'],
           pht('Saved Comments'));
-      } else {
-        $item->addStateIcon('none');
-      }
-
-      if ($flag_icon) {
-        $item->addStateIcon($flag_icon, pht('Flagged'));
       } else {
         $item->addStateIcon('none');
       }

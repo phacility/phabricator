@@ -57,8 +57,8 @@ final class PhabricatorFlagListView extends AphrontView {
       $item->addIcon('edit', $edit_link);
       $item->addIcon('delete', $remove_link);
 
-      $item->setHeader(hsprintf('%s %s',
-        $flag_icon, $flag->getHandle()->renderLink()));
+      $item->addHeadIcon($flag_icon);
+      $item->setHeader($flag->getHandle()->renderLink());
 
       $item->addAttribute(phabricator_datetime($flag->getDateCreated(), $user));
 
