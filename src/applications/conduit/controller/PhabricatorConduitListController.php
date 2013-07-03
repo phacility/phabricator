@@ -22,7 +22,9 @@ final class PhabricatorConduitListController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(array $methods) {
+  public function renderResultsList(
+    array $methods,
+    PhabricatorSavedQuery $query) {
     assert_instances_of($methods, 'ConduitAPIMethod');
 
     $viewer = $this->getRequest()->getUser();

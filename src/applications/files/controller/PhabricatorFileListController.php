@@ -23,7 +23,10 @@ final class PhabricatorFileListController extends PhabricatorFileController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(array $files) {
+  public function renderResultsList(
+    array $files,
+    PhabricatorSavedQuery $query) {
+
     assert_instances_of($files, 'PhabricatorFile');
 
     $request = $this->getRequest();
