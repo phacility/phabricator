@@ -264,8 +264,8 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .aphront-textarea-drag-and-drop {
-  background: #99ff99;
-  border-color: #669966;
+  background: {$lightgreen};
+  border-color: {$green};
 }
 
 .aphront-form-crop .crop-box {
