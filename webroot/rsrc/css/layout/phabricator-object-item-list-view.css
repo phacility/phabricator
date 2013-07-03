@@ -33,6 +33,10 @@
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
 }
 
+.phabricator-object-item .phui-icon-view {
+  display: inline-block;
+}
+
 .phabricator-object-item-frame {
   border-style: solid;
   border-color: #c0c5d1;

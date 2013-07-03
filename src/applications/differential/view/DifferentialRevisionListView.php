@@ -131,9 +131,7 @@ final class DifferentialRevisionListView extends AphrontView {
           '');
       }
       if (array_key_exists($revision->getID(), $this->drafts)) {
-        $icons['draft'] = array(
-          'icon' => 'file-grey',
-        );
+        $icons['draft'] = true;
       }
 
       $modified = $revision->getDateModified();
@@ -175,6 +173,19 @@ final class DifferentialRevisionListView extends AphrontView {
       $item->setHeader(phutil_tag('a',
         array('href' => '/D'.$revision->getID()),
         $revision->getTitle()));
+
+      if (isset($icons['draft'])) {
+        $draft = id(new PHUIIconView())
+          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
+          ->setSpriteIcon('file-grey')
+          ->addSigil('has-tooltip')
+          ->setMetadata(
+            array(
+              'tip' => pht('Unsubmitted Comments'),
+            ));
+        $item->addAttribute($draft);
+      }
+
       $item->addAttribute($status_name);
 
       // Author
@@ -183,16 +194,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
       // Reviewers
       $item->addAttribute(pht('Reviewers: %s', $rev_fields['Reviewers']));
-
-      $item->setStateIconColumns(1);
-
-      if (isset($icons['draft'])) {
-        $item->addStateIcon(
-          $icons['draft']['icon'],
-          pht('Saved Comments'));
-      } else {
-        $item->addStateIcon('none');
-      }
 
       $time_icon = 'none';
       $time_attr = array();
