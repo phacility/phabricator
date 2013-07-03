@@ -12,7 +12,8 @@
  * @task exec     Query Execution
  * @task internal Internals
  */
-final class DifferentialRevisionQuery {
+final class DifferentialRevisionQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $pathIDs = array();
 
@@ -50,24 +51,11 @@ final class DifferentialRevisionQuery {
    */
   const ORDER_PATH_MODIFIED = 'order-path-modified';
 
-  private $limit  = 1000;
-  private $offset = 0;
-
   private $needRelationships  = false;
   private $needActiveDiffs    = false;
   private $needDiffIDs        = false;
   private $needCommitPHIDs    = false;
   private $needHashes         = false;
-  private $viewer;
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
-  }
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -268,32 +256,6 @@ final class DifferentialRevisionQuery {
 
 
   /**
-   * Set result limit. If unspecified, defaults to 1000.
-   *
-   * @param int Result limit.
-   * @return this
-   * @task config
-   */
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
-
-
-  /**
-   * Set result offset. If unspecified, defaults to 0.
-   *
-   * @param int Result offset.
-   * @return this
-   * @task config
-   */
-  public function setOffset($offset) {
-    $this->offset = $offset;
-    return $this;
-  }
-
-
-  /**
    * Set whether or not the query will load and attach relationships.
    *
    * @param bool True to load and attach relationships.
@@ -372,45 +334,47 @@ final class DifferentialRevisionQuery {
    * @return list List of matching DifferentialRevision objects.
    * @task exec
    */
-  public function execute() {
+  public function loadPage() {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 
     $data = $this->loadData();
 
-    $revisions = $table->loadAllFromArray($data);
+    return $table->loadAllFromArray($data);
+  }
 
-    if ($revisions) {
-      if ($this->needRelationships) {
-        $this->loadRelationships($conn_r, $revisions);
-      }
+  public function willFilterPage(array $revisions) {
+    if (!$revisions) {
+      return $revisions;
+    }
 
-      if ($this->needCommitPHIDs) {
-        $this->loadCommitPHIDs($conn_r, $revisions);
-      }
+    $table = new DifferentialRevision();
+    $conn_r = $table->establishConnection('r');
 
-      $need_active = $this->needActiveDiffs;
-      $need_ids = $need_active ||
-                  $this->needDiffIDs;
+    if ($this->needRelationships) {
+      $this->loadRelationships($conn_r, $revisions);
+    }
 
-      if ($need_ids) {
-        $this->loadDiffIDs($conn_r, $revisions);
-      }
+    if ($this->needCommitPHIDs) {
+      $this->loadCommitPHIDs($conn_r, $revisions);
+    }
 
-      if ($need_active) {
-        $this->loadActiveDiffs($conn_r, $revisions);
-      }
+    $need_active = $this->needActiveDiffs;
+    $need_ids = $need_active || $this->needDiffIDs;
 
-      if ($this->needHashes) {
-        $this->loadHashes($conn_r, $revisions);
-      }
+    if ($need_ids) {
+      $this->loadDiffIDs($conn_r, $revisions);
+    }
+
+    if ($need_active) {
+      $this->loadActiveDiffs($conn_r, $revisions);
+    }
+
+    if ($this->needHashes) {
+      $this->loadHashes($conn_r, $revisions);
     }
 
     return $revisions;
-  }
-
-  public function executeOne() {
-    return head($this->execute());
   }
 
   private function loadData() {
@@ -513,18 +477,6 @@ final class DifferentialRevisionQuery {
       $limit);
   }
 
-  private function buildLimitClause(AphrontDatabaseConnection $conn_r) {
-    $limit = '';
-    if ($this->offset || $this->limit) {
-      $limit = qsprintf(
-        $conn_r,
-        'LIMIT %d, %d',
-        (int)$this->offset,
-        $this->limit);
-    }
-
-    return $limit;
-  }
 
 /* -(  Internals  )---------------------------------------------------------- */
 
@@ -723,13 +675,8 @@ final class DifferentialRevisionQuery {
           "Unknown revision status filter constant '{$this->status}'!");
     }
 
-    if ($where) {
-      $where = 'WHERE '.implode(' AND ', $where);
-    } else {
-      $where = '';
-    }
-
-    return $where;
+    $where[] = $this->buildPagingCLause($conn_r);
+    return $this->formatWhereClause($where);
   }
 
 
@@ -741,8 +688,7 @@ final class DifferentialRevisionQuery {
       $this->pathIDs,
       $this->ccs,
       $this->reviewers,
-      $this->subscribers,
-      $this->responsibles);
+      $this->subscribers);
 
     $needs_distinct = (count($join_triggers) > 1);
 
