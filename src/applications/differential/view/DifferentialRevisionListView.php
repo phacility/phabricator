@@ -11,6 +11,18 @@ final class DifferentialRevisionListView extends AphrontView {
   private $handles;
   private $fields;
   private $highlightAge;
+  private $header;
+  private $noDataString;
+
+  public function setNoDataString($no_data_string) {
+    $this->noDataString = $no_data_string;
+    return $this;
+  }
+
+  public function setHeader($header) {
+    $this->header = $header;
+    return $this;
+  }
 
   public function setFields(array $fields) {
     assert_instances_of($fields, 'DifferentialFieldSpecification');
@@ -101,7 +113,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
     $list = new PhabricatorObjectItemListView();
     $list->setCards(true);
-    $list->setFlush(true);
 
     foreach ($this->revisions as $revision) {
       $item = new PhabricatorObjectItemView();
@@ -116,8 +127,7 @@ final class DifferentialRevisionListView extends AphrontView {
       }
       if (array_key_exists($revision->getID(), $this->drafts)) {
         $icons['draft'] = array(
-          'icon' => 'file-white',
-          'href' => '/D'.$revision->getID().'#comment-preview',
+          'icon' => 'file-grey',
         );
       }
 
@@ -129,13 +139,13 @@ final class DifferentialRevisionListView extends AphrontView {
           if ($stale && $modified < $stale) {
             $days = floor((time() - $modified) / 60 / 60 / 24);
             $icons['age'] = array(
-              'icon' => 'warning-white',
+              'icon' => 'warning-grey',
               'label' => pht('Old (%d days)', $days),
             );
           } else if ($fresh && $modified < $fresh) {
             $days = floor((time() - $modified) / 60 / 60 / 24);
             $icons['age'] = array(
-              'icon' => 'perflab-white',
+              'icon' => 'perflab-grey',
               'label' => pht('Stale (%d days)', $days),
             );
           } else {
@@ -170,21 +180,36 @@ final class DifferentialRevisionListView extends AphrontView {
       // Reviewers
       $item->addAttribute(pht('Reviewers: %s', $rev_fields['Reviewers']));
 
-      $do_not_display_age = array(
-        ArcanistDifferentialRevisionStatus::CLOSED => true,
-        ArcanistDifferentialRevisionStatus::ABANDONED => true,
-      );
-      if (isset($icons['age']) && !isset($do_not_display_age[$status])) {
-        $item->addFootIcon($icons['age']['icon'], $icons['age']['label']);
+      $item->setStateIconColumns(1);
+      if ($this->highlightAge) {
+        $item->setStateIconColumns(2);
+        $do_not_display_age = array(
+          ArcanistDifferentialRevisionStatus::CLOSED => true,
+          ArcanistDifferentialRevisionStatus::ABANDONED => true,
+        );
+        if (isset($icons['age']) && !isset($do_not_display_age[$status])) {
+          $item->addStateIcon($icons['age']['icon'], $icons['age']['label']);
+        } else {
+          $item->addStateIcon('none');
+        }
       }
+
       if (isset($icons['draft'])) {
-        $item->addFootIcon($icons['draft']['icon'], pht('Saved Draft'),
-          $icons['draft']['href']);
+        $item->addStateIcon(
+          $icons['draft']['icon'],
+          pht('Saved Comments'));
+      } else {
+        $item->addStateIcon('none');
+      }
+
+      if ($flag_icon) {
+        $item->addStateIcon($flag_icon, pht('Flagged'));
+      } else {
+        $item->addStateIcon('none');
       }
 
       // Updated on
-      $item->addIcon($flag_icon ? $flag_icon : 'none',
-        hsprintf('%s', $rev_fields['Updated']));
+      $item->addIcon('none', $rev_fields['Updated']);
 
       // First remove the fields we already have
       $count = 7;
@@ -198,6 +223,9 @@ final class DifferentialRevisionListView extends AphrontView {
 
       $list->addItem($item);
     }
+
+    $list->setHeader($this->header);
+    $list->setNoDataString($this->noDataString);
 
     return $list;
   }

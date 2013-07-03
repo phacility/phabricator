@@ -10,6 +10,10 @@
   padding: 20px;
 }
 
+.phabricator-object-item-list-view + .phabricator-object-item-list-view {
+  padding-top: 0;
+}
+
 .phabricator-object-item-list-view.phabricator-object-list-flush {
   padding: 0;
 }
@@ -122,6 +126,11 @@
 .phabricator-object-item-grippable.phabricator-object-item-state-2-cols
   .phabricator-object-item-frame {
   padding-left: 55px;
+}
+
+.phabricator-object-item-list-header {
+  padding: 0 0 8px 0;
+  color: #555555;
 }
 
 /* - Item Actions --------------------------------------------------------------

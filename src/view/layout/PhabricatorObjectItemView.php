@@ -407,6 +407,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     $state_icons = null;
     if ($this->stateIconColumns) {
+      $state_icon_list = array();
       foreach ($this->stateIcons as $state_icon) {
         $sicon = id(new PHUIIconView())
           ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
@@ -420,7 +421,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
             ));
         }
 
-        $icon_list[] = $sicon;
+        $state_icon_list[] = $sicon;
       }
       $cols = $this->stateIconColumns;
       $state_icons = phutil_tag(
@@ -429,7 +430,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           'class' => 'phabricator-object-item-state-icons '.
                      'state-icon-'.$cols.'-cols',
         ),
-        $icon_list);
+        $state_icon_list);
     }
 
     $content = phutil_tag(
