@@ -133,12 +133,13 @@ abstract class DiffusionController extends PhabricatorController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    $panel = new AphrontPanelView();
-    $panel->setId('pending-differential-revisions');
-    $panel->setHeader('Pending Differential Revisions');
-    $panel->appendChild($view);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Pending Differential Revisions'));
 
-    return $panel;
+    return array(
+      $header,
+      $view,
+    );
   }
 
   private function buildCrumbList(array $spec = array()) {
