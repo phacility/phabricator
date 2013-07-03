@@ -181,18 +181,6 @@ final class DifferentialRevisionListView extends AphrontView {
       $item->addAttribute(pht('Reviewers: %s', $rev_fields['Reviewers']));
 
       $item->setStateIconColumns(1);
-      if ($this->highlightAge) {
-        $item->setStateIconColumns(2);
-        $do_not_display_age = array(
-          ArcanistDifferentialRevisionStatus::CLOSED => true,
-          ArcanistDifferentialRevisionStatus::ABANDONED => true,
-        );
-        if (isset($icons['age']) && !isset($do_not_display_age[$status])) {
-          $item->addStateIcon($icons['age']['icon'], $icons['age']['label']);
-        } else {
-          $item->addStateIcon('none');
-        }
-      }
 
       if (isset($icons['draft'])) {
         $item->addStateIcon(
@@ -208,8 +196,22 @@ final class DifferentialRevisionListView extends AphrontView {
         $item->addStateIcon('none');
       }
 
-      // Updated on
-      $item->addIcon('none', $rev_fields['Updated']);
+      $time_icon = 'none';
+      $time_attr = array();
+      if ($this->highlightAge) {
+        $do_not_display_age = array(
+          ArcanistDifferentialRevisionStatus::CLOSED => true,
+          ArcanistDifferentialRevisionStatus::ABANDONED => true,
+        );
+        if (isset($icons['age']) && !isset($do_not_display_age[$status])) {
+          $time_icon = $icons['age']['icon'];
+          $time_attr = array(
+            'tip' => $icons['age']['label'],
+          );
+        }
+      }
+
+      $item->addIcon($time_icon, $rev_fields['Updated'], $time_attr);
 
       // First remove the fields we already have
       $count = 7;
