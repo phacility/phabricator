@@ -22,6 +22,7 @@ final class LegalpadDocumentCommentController extends LegalpadController {
     $document = id(new LegalpadDocumentQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needDocumentBodies(true)
       ->executeOne();
 
     if (!$document) {

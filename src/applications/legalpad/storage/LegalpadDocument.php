@@ -15,6 +15,7 @@ final class LegalpadDocument extends LegalpadDAO
   protected $documentBodyPHID;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $mailKey;
 
   private $documentBody;
   private $contributors;
@@ -56,6 +57,13 @@ final class LegalpadDocument extends LegalpadDAO
   public function attachContributors(array $contributors) {
     $this->contributors = $contributors;
     return $this;
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
 /* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */

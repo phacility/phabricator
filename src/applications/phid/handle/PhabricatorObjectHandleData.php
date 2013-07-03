@@ -213,7 +213,7 @@ final class PhabricatorObjectHandleData {
 
       case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
         $legds = id(new LegalpadDocumentQuery())
-          ->needDocumentBody(true)
+          ->needDocumentBodies(true)
           ->withPHIDs($phids)
           ->setViewer($this->viewer)
           ->execute();

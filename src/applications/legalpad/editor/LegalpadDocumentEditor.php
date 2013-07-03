@@ -111,9 +111,64 @@ final class LegalpadDocumentEditor
     return parent::mergeTransactions($u, $v);
   }
 
+/* -(  Sending Mail  )------------------------------------------------------- */
+
   protected function supportsMail() {
-    return false;
+    return true;
   }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new LegalpadReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $phid = $object->getPHID();
+    $title = $object->getDocumentBody()->getTitle();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("L{$id}: {$title}")
+      ->addHeader('Thread-Topic', "L{$id}: {$phid}");
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array(
+      $object->getCreatorPHID(),
+      $this->requireActor()->getPHID(),
+    );
+  }
+
+  protected function shouldImplyCC(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case LegalpadTransactionType::TYPE_TEXT:
+      case LegalpadTransactionType::TYPE_TITLE:
+        return true;
+    }
+
+    return parent::shouldImplyCC($object, $xaction);
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addTextSection(
+      pht('DOCUMENT DETAIL'),
+      PhabricatorEnv::getProductionURI('/L'.$object->getID()));
+
+    return $body;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.legalpad.subject-prefix');
+  }
+
 
   protected function supportsFeed() {
     return false;
