@@ -100,10 +100,17 @@ final class AphrontListFilterView extends AphrontView {
       );
     }
 
-    return phutil_tag(
+    $content = phutil_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
+      ),
+      $content);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'aphront-list-filter-wrap'
       ),
       $content);
   }
