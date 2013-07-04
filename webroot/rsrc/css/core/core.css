@@ -113,16 +113,13 @@ img {
 
 .busy {
   position: fixed;
-  bottom: 8px;
-  right: 8px;
-
-  background: #ffffff url(/rsrc/image/loading.gif) center no-repeat;
-  width: 64px;
-  height: 64px;
-  opacity: 0.5;
-
-  border: 1px solid #444444;
-  border-radius: 8px;
+  bottom: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 5px;
+  opacity: 0.4;
+  background: #000 url(/res/cb6fc6eb/rsrc/image/loading/compass_24.gif) center no-repeat;
 }
 
 .grouped:after {
