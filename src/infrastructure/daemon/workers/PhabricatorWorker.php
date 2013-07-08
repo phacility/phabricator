@@ -59,7 +59,6 @@ abstract class PhabricatorWorker {
    *                                  retries, or to examine the execution
    *                                  exception if you want to react to
    *                                  different failures in different ways.
-   * @param   Exception               The exception which caused the failure.
    * @return  int|null                Number of seconds to wait between retries,
    *                                  or null for a default retry period
    *                                  (currently 60 seconds).
