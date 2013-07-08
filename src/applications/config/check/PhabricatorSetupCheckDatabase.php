@@ -12,6 +12,7 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
     $conn_user = $conf->getUser();
     $conn_pass = $conf->getPassword();
     $conn_host = $conf->getHost();
+    $conn_port = $conf->getPort();
 
     ini_set('mysql.connect_timeout', 2);
 
@@ -19,6 +20,7 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
       'user'      => $conn_user,
       'pass'      => $conn_pass,
       'host'      => $conn_host,
+      'port'      => $conn_port,
       'database'  => null,
     );
 

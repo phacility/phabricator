@@ -3,6 +3,7 @@
 final class PhabricatorStorageManagementAPI {
 
   private $host;
+  private $port;
   private $user;
   private $password;
   private $namespace;
@@ -43,6 +44,15 @@ final class PhabricatorStorageManagementAPI {
 
   public function getHost() {
     return $this->host;
+  }
+
+  public function setPort($port) {
+    $this->port = $port;
+    return $this;
+  }
+
+  public function getPort() {
+    return $this->port;
   }
 
   public function getDatabaseName($fragment) {

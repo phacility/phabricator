@@ -29,6 +29,10 @@ final class DefaultDatabaseConfigurationProvider
     return PhabricatorEnv::getEnvConfig('mysql.host');
   }
 
+  public function getPort() {
+    return PhabricatorEnv::getEnvConfig('mysql.port');
+  }
+
   public function getDatabase() {
     if (!$this->getDao()) {
       return null;
