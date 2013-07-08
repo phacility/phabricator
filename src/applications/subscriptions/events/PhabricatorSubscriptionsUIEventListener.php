@@ -5,13 +5,17 @@ final class PhabricatorSubscriptionsUIEventListener
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
+    $this->listen(PhabricatorEventType::TYPE_UI_WILLRENDERPROPERTIES);
   }
 
   public function handleEvent(PhutilEvent $event) {
     switch ($event->getType()) {
       case PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS:
         $this->handleActionEvent($event);
-      break;
+        break;
+      case PhabricatorEventType::TYPE_UI_WILLRENDERPROPERTIES:
+        $this->handlePropertyEvent($event);
+        break;
     }
   }
 
@@ -79,6 +83,38 @@ final class PhabricatorSubscriptionsUIEventListener
     $actions = $event->getValue('actions');
     $actions[] = $sub_action;
     $event->setValue('actions', $actions);
+  }
+
+  private function handlePropertyEvent($event) {
+    $user = $event->getUser();
+    $object = $event->getValue('object');
+
+    if (!$object || !$object->getPHID()) {
+      // No object, or the object has no PHID yet..
+      return;
+    }
+
+    if (!($object instanceof PhabricatorSubscribableInterface)) {
+      // This object isn't subscribable.
+      return;
+    }
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $object->getPHID());
+    if ($subscribers) {
+      $handles = id(new PhabricatorObjectHandleData($subscribers))
+        ->setViewer($user)
+        ->loadHandles();
+      $sub_view = array();
+      foreach ($subscribers as $subscriber) {
+        $sub_view[] = $handles[$subscriber]->renderLink();
+      }
+      $sub_view = phutil_implode_html(', ', $sub_view);
+    } else {
+      $sub_view = phutil_tag('em', array(), pht('None'));
+    }
+
+    $view = $event->getValue('view');
+    $view->addProperty(pht('Subscribers'), $sub_view);
   }
 
 }

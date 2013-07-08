@@ -68,7 +68,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ->setHeader($title);
 
     $actions = $this->buildActionView($document);
-    $properties = $this->buildPropertyView($document, $engine, $subscribers);
+    $properties = $this->buildPropertyView($document, $engine);
 
     $comment_form_id = celerity_generate_unique_node_id();
 
@@ -146,8 +146,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
   private function buildPropertyView(
     LegalpadDocument $document,
-    PhabricatorMarkupEngine $engine,
-    array $subscribers) {
+    PhabricatorMarkupEngine $engine) {
 
     $user = $this->getRequest()->getUser();
 
@@ -184,20 +183,6 @@ final class LegalpadDocumentViewController extends LegalpadController {
     $properties->addProperty(
       pht('Visible To'),
       $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
-
-    if ($subscribers) {
-      $sub_view = array();
-      foreach ($subscribers as $subscriber) {
-        $sub_view[] = $this->getHandle($subscriber)->renderLink();
-      }
-      $sub_view = phutil_implode_html(', ', $sub_view);
-    } else {
-      $sub_view = phutil_tag('em', array(), pht('None'));
-    }
-
-    $properties->addProperty(
-      pht('Subscribers'),
-      $sub_view);
 
     $properties->invokeWillRenderEvent();
 
