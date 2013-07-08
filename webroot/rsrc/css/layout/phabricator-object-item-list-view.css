@@ -10,8 +10,16 @@
   padding: 20px;
 }
 
+.phabricator-object-item-list-view + .phabricator-object-item-list-view {
+  padding-top: 0;
+}
+
 .phabricator-object-item-list-view.phabricator-object-list-flush {
   padding: 0;
+}
+
+.phabricator-object-item-list-view .aphront-error-view {
+  margin: 0;
 }
 
 .phabricator-object-item {
@@ -23,6 +31,10 @@
 
   overflow: hidden;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
+}
+
+.phabricator-object-item .phui-icon-view {
+  display: inline-block;
 }
 
 .phabricator-object-item-frame {
@@ -79,6 +91,11 @@
 
 .phabricator-object-item-grippable .phabricator-object-item-frame {
   padding-left: 11px;
+}
+
+.phabricator-object-item-list-header {
+  padding: 0 0 8px 0;
+  color: #555555;
 }
 
 /* - Item Actions --------------------------------------------------------------
@@ -267,6 +284,14 @@
 
   min-height: 18px;
   line-height: 18px;
+}
+
+/*
+ * Items with icon 'none' still have on mobile, thus creating a weird vertical
+ * margin for elements which follow
+ */
+.device-phone .phabricator-object-item-icon-none {
+  display: none;
 }
 
 .device-desktop .phabricator-object-item-icon {

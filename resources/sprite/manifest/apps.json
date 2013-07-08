@@ -111,6 +111,11 @@
       "rule" : ".apps-home-dark",
       "hash" : "4a90080e06032017e21a1cadcd6d0993"
     },
+    "apps-legalpad-dark"       : {
+      "name" : "apps-legalpad-dark",
+      "rule" : ".apps-legalpad-dark",
+      "hash" : "88d540034c93583f0d0ae93493e9b17c"
+    },
     "apps-logo-dark"           : {
       "name" : "apps-logo-dark",
       "rule" : ".apps-logo-dark",

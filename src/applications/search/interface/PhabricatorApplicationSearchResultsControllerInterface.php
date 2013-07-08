@@ -2,6 +2,8 @@
 
 interface PhabricatorApplicationSearchResultsControllerInterface {
 
-  public function renderResultsList(array $items);
+  public function renderResultsList(
+    array $items,
+    PhabricatorSavedQuery $query);
 
 }

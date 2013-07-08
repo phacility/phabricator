@@ -44,7 +44,7 @@ final class AphrontListFilterView extends AphrontView {
       $hide_action = javelin_tag(
         'a',
         array(
-          'class' => '',
+          'class' => 'button grey',
           'sigil' => 'reveal-content',
           'id' => $hide_action_id,
           'href' => $this->showHideHref,
@@ -65,7 +65,7 @@ final class AphrontListFilterView extends AphrontView {
       $show_action = javelin_tag(
         'a',
         array(
-          'class' => '',
+          'class' => 'button grey',
           'sigil' => 'reveal-content',
           'style' => 'display: none;',
           'href' => '#',
@@ -100,10 +100,17 @@ final class AphrontListFilterView extends AphrontView {
       );
     }
 
-    return phutil_tag(
+    $content = phutil_tag(
       'div',
       array(
         'class' => implode(' ', $classes),
+      ),
+      $content);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'aphront-list-filter-wrap'
       ),
       $content);
   }

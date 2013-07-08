@@ -114,7 +114,7 @@ final class PhabricatorProjectListController
         ->setHeader($row[0])
         ->setHref($row[1])
         ->addIcon($row[3], $row[2])
-        ->addIcon('edit', pht('Edit Project'), $row[7]);
+        ->addIcon('edit', pht('Edit Project'), array('href' => $row[7]));
       if ($row[4]) {
         $item->addAttribute($row[4]);
       }

@@ -177,7 +177,7 @@ final class PhabricatorApplicationSearchController
       $objects = $query->setViewer($request->getUser())
         ->executeWithCursorPager($pager);
 
-      $list = $parent->renderResultsList($objects);
+      $list = $parent->renderResultsList($objects, $saved_query);
 
       $nav->appendChild($list);
 

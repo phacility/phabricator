@@ -13,6 +13,7 @@ final class DifferentialDefaultFieldSelector
       new DifferentialReviewersFieldSpecification(),
       new DifferentialReviewedByFieldSpecification(),
       new DifferentialCCsFieldSpecification(),
+      new DifferentialViewPolicyFieldSpecification(),
       new DifferentialLintFieldSpecification(),
       new DifferentialUnitFieldSpecification(),
       new DifferentialCommitsFieldSpecification(),
@@ -30,6 +31,7 @@ final class DifferentialDefaultFieldSelector
       new DifferentialDateModifiedFieldSpecification(),
       new DifferentialDateCreatedFieldSpecification(),
       new DifferentialAuditorsFieldSpecification(),
+      new DifferentialDiffViewPolicyFieldSpecification(),
     );
 
     return $fields;

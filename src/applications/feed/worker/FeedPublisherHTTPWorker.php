@@ -16,7 +16,7 @@ final class FeedPublisherHTTPWorker extends FeedPushWorker {
       'epoch'           => $data->getEpoch(),
     );
 
-    id(new HTTPFuture($uri, $post_data))
+    id(new HTTPSFuture($uri, $post_data))
       ->setMethod('POST')
       ->setTimeout(30)
       ->resolvex();

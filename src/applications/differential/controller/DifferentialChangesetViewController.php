@@ -253,7 +253,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ),
       $detail->render()));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       array(
         $panel
       ),

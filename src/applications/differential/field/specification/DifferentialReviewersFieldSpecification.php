@@ -138,30 +138,13 @@ final class DifferentialReviewersFieldSpecification
   public function renderValueForRevisionList(DifferentialRevision $revision) {
     $primary_reviewer = $revision->getPrimaryReviewer();
     if ($primary_reviewer) {
-      $other_reviewers = array_flip($revision->getReviewers());
-      unset($other_reviewers[$primary_reviewer]);
-      if ($other_reviewers) {
-        $names = array();
-        foreach ($other_reviewers as $reviewer => $_) {
-          $names[] = $this->getHandle($reviewer)->getLinkName();
-        }
-        $suffix = javelin_tag(
-          'abbr',
-          array(
-            'sigil' => 'has-tooltip',
-            'meta'  => array(
-              'tip'   => implode(', ', $names),
-              'align' => 'E',
-            ),
-          ),
-          '(+'.(count($names)).')');
-      } else {
-        $suffix = null;
+      $names = array();
+
+      foreach ($revision->getReviewers() as $reviewer) {
+        $names[] = $this->getHandle($reviewer)->renderLink();
       }
-      return hsprintf(
-        '%s %s',
-        $this->getHandle($primary_reviewer)->renderLink(),
-        $suffix);
+
+      return phutil_implode_html(', ', $names);
     } else {
       return phutil_tag('em', array(), 'None');
     }
