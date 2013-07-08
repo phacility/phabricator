@@ -12,6 +12,10 @@ final class LegalpadDocumentSearchEngine
       'creatorPHIDs',
       array_values($request->getArr('creators')));
 
+    $saved->setParameter(
+      'contributorPHIDs',
+      array_values($request->getArr('contributors')));
+
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
@@ -22,7 +26,8 @@ final class LegalpadDocumentSearchEngine
     $query = id(new LegalpadDocumentQuery())
       ->needDocumentBodies(true)
       ->needContributors(true)
-      ->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()));
+      ->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()))
+      ->withContributorPHIDs($saved->getParameter('contributorPHIDs', array()));
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
     $end = $this->parseDateTime($saved->getParameter('createdEnd'));
@@ -41,11 +46,15 @@ final class LegalpadDocumentSearchEngine
   public function buildSearchForm(
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
-    $phids = $saved_query->getParameter('creatorPHIDs', array());
+
+    $creator_phids = $saved_query->getParameter('creatorPHIDs', array());
+    $contributor_phids = $saved_query->getParameter(
+      'contributorPHIDs', array());
+    $phids = array_merge($creator_phids, $contributor_phids);
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->setViewer($this->requireViewer())
       ->loadHandles();
-    $creator_tokens = mpull($handles, 'getFullName', 'getPHID');
+    $tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form
       ->appendChild(
@@ -53,7 +62,13 @@ final class LegalpadDocumentSearchEngine
           ->setDatasource('/typeahead/common/users/')
           ->setName('creators')
           ->setLabel(pht('Creators'))
-          ->setValue($creator_tokens));
+          ->setValue(array_select_keys($tokens, $creator_phids)))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/users/')
+          ->setName('contributors')
+          ->setLabel(pht('Contributors'))
+          ->setValue(array_select_keys($tokens, $contributor_phids)));
 
     $this->buildDateRange(
       $form,

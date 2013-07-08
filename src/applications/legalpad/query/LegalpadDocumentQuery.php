@@ -9,7 +9,7 @@ final class LegalpadDocumentQuery
   private $ids;
   private $phids;
   private $creatorPHIDs;
-  private $contributorPHIDs; // TODO - T3479
+  private $contributorPHIDs;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
 
@@ -62,8 +62,9 @@ final class LegalpadDocumentQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT legalpad_document.* FROM %T legalpad_document %Q %Q %Q',
+      'SELECT d.* FROM %T d %Q %Q %Q %Q',
       $table->getTableName(),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
@@ -89,6 +90,18 @@ final class LegalpadDocumentQuery
     return $documents;
   }
 
+  private function buildJoinClause($conn_r) {
+    $joins = array();
+
+    if ($this->contributorPHIDs) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN edge e ON e.src = d.phid');
+    }
+
+    return implode(' ', $joins);
+  }
+
   protected function buildWhereClause($conn_r) {
     $where = array();
 
@@ -97,36 +110,44 @@ final class LegalpadDocumentQuery
     if ($this->ids) {
       $where[] = qsprintf(
         $conn_r,
-        'id IN (%Ld)',
+        'd.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
+        'd.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->creatorPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'creatorPHID IN (%Ls)',
+        'd.creatorPHID IN (%Ls)',
         $this->creatorPHIDs);
     }
 
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
         $conn_r,
-        'dateCreated >= %d',
+        'd.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore) {
       $where[] = qsprintf(
         $conn_r,
-        'dateCreated <= %d',
+        'd.dateCreated <= %d',
         $this->dateCreatedBefore);
+    }
+
+    if ($this->contributorPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'e.type = %s AND e.dst IN (%Ls)',
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR,
+        $this->contributorPHIDs);
     }
 
     return $this->formatWhereClause($where);
