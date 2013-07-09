@@ -170,17 +170,36 @@ final class PhrictionListController
       case PhrictionChangeType::CHANGE_MOVE_HERE:
       case PhrictionChangeType::CHANGE_MOVE_AWAY:
         $change_ref = $content->getChangeRef();
-        $ref_doc = $docs_from_refs[$change_ref];
-        $ref_doc_slug = PhrictionDocument::getSlugURI(
-          $ref_doc->getSlug());
-        $ref_doc_link = hsprintf('<a href="%s">%1$s</a>', $ref_doc_slug);
-
-        if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
-          $change_type = pht('%s moved %s from %s', $author, $document_link,
-            $ref_doc_link);
+        $ref_doc = idx($docs_from_refs, $change_ref);
+        if (!$ref_doc) {
+          if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
+            $change_type = pht(
+              '%s moved %s from elsewhere',
+              $author,
+              $document_link);
+          } else {
+            $change_type = pht(
+              '%s moved %s to elsewhere',
+              $author,
+              $document_link);
+          }
         } else {
-          $change_type = pht('%s moved %s to %s', $author, $document_link,
-            $ref_doc_link);
+          $ref_doc_slug = PhrictionDocument::getSlugURI($ref_doc->getSlug());
+          $ref_doc_link = hsprintf('<a href="%s">%1$s</a>', $ref_doc_slug);
+
+          if ($change_type == PhrictionChangeType::CHANGE_MOVE_HERE) {
+            $change_type = pht(
+              '%s moved %s from %s',
+              $author,
+              $document_link,
+              $ref_doc_link);
+          } else {
+            $change_type = pht(
+              '%s moved %s to %s',
+              $author,
+              $document_link,
+              $ref_doc_link);
+          }
         }
         break;
       default:
@@ -200,7 +219,10 @@ final class PhrictionListController
     if ($version > 1) {
       $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
       $uri = $diff_uri->alter('l', $version - 1)->alter('r', $version);
-      $item->addIcon('history', pht('View Change'), $uri);
+      $item->addIcon('history', pht('View Change'),
+        array(
+          'href' => $uri,
+        ));
     } else {
       $item->addIcon('history-grey', pht('No diff available'));
     }
