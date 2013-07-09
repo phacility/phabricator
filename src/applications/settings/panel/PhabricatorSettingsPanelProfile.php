@@ -18,11 +18,6 @@ final class PhabricatorSettingsPanelProfile
   public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
-    $profile = $user->loadUserProfile();
-
-    $supported_formats = PhabricatorFile::getTransformableImageFormats();
-
-    $e_image = null;
     $errors = array();
     if ($request->isFormPost()) {
       $sex = $request->getStr('sex');
@@ -36,64 +31,8 @@ final class PhabricatorSettingsPanelProfile
       // Checked in runtime.
       $user->setTranslation($request->getStr('translation'));
 
-      $default_image = $request->getExists('default_image');
-      $gravatar_email = $request->getStr('gravatar');
-      if ($default_image) {
-        $profile->setProfileImagePHID(null);
-        $user->setProfileImagePHID(null);
-      } else if (!empty($gravatar_email) || $request->getFileExists('image')) {
-        $file = null;
-        if (!empty($gravatar_email)) {
-          // These steps recommended by:
-          // https://en.gravatar.com/site/implement/hash/
-          $trimmed = trim($gravatar_email);
-          $lower_cased = strtolower($trimmed);
-          $hash = md5($lower_cased);
-          $url = 'http://www.gravatar.com/avatar/'.($hash).'?s=200';
-          $file = PhabricatorFile::newFromFileDownload(
-            $url,
-            array(
-              'name' => 'gravatar',
-              'authorPHID' => $user->getPHID(),
-            ));
-        } else if ($request->getFileExists('image')) {
-          $file = PhabricatorFile::newFromPHPUpload(
-            $_FILES['image'],
-            array(
-              'authorPHID' => $user->getPHID(),
-            ));
-        }
-
-        $okay = $file->isTransformableImage();
-        if ($okay) {
-          $xformer = new PhabricatorImageTransformer();
-
-          // Generate the large picture for the profile page.
-          $large_xformed = $xformer->executeProfileTransform(
-            $file,
-            $width = 280,
-            $min_height = 140,
-            $max_height = 420);
-          $profile->setProfileImagePHID($large_xformed->getPHID());
-
-          // Generate the small picture for comments, etc.
-          $small_xformed = $xformer->executeProfileTransform(
-            $file,
-            $width = 50,
-            $min_height = 50,
-            $max_height = 50);
-          $user->setProfileImagePHID($small_xformed->getPHID());
-        } else {
-          $e_image = pht('Not Supported');
-          $errors[] =
-            pht('This server only supports these image formats:').
-              ' ' .implode(', ', $supported_formats);
-        }
-      }
-
       if (!$errors) {
         $user->save();
-        $profile->save();
         $response = id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?saved=true'));
         return $response;
@@ -116,7 +55,6 @@ final class PhabricatorSettingsPanelProfile
       }
     }
 
-    $img_src = $user->loadProfileImageURI();
     $profile_uri = PhabricatorEnv::getURI('/p/'.$user->getUsername().'/');
 
     $sexes = array(
@@ -144,7 +82,6 @@ final class PhabricatorSettingsPanelProfile
     $form = new AphrontFormView();
     $form
       ->setUser($request->getUser())
-      ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setOptions($sexes)
@@ -156,37 +93,11 @@ final class PhabricatorSettingsPanelProfile
           ->setOptions($translations)
           ->setLabel(pht('Translation'))
           ->setName('translation')
-          ->setValue($user->getTranslation()))
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Profile Image'))
-          ->setValue(
-            phutil_tag(
-              'img',
-              array(
-                'src' => $img_src,
-              ))))
-      ->appendChild(
-        id(new AphrontFormImageControl())
-          ->setLabel(pht('Change Image'))
-          ->setName('image')
-          ->setError($e_image)
-          ->setCaption(
-            pht('Supported formats: %s', implode(', ', $supported_formats))));
-
-    if (PhabricatorEnv::getEnvConfig('security.allow-outbound-http')) {
-      $form->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Import Gravatar'))
-          ->setName('gravatar')
-          ->setError($e_image)
-          ->setCaption(pht('Enter gravatar email address')));
-    }
+          ->setValue($user->getTranslation()));
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-        ->setValue(pht('Save'))
-        ->addCancelButton('/p/'.$user->getUsername().'/'));
+        ->setValue(pht('Save')));
 
     $header = new PhabricatorHeaderView();
     $header->setHeader(pht('Edit Profile Details'));

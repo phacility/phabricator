@@ -117,6 +117,14 @@ final class PhabricatorPeopleProfileController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('image')
+        ->setName(pht('Edit Profile Picture'))
+        ->setHref($this->getApplicationURI('picture/'.$user->getID().'/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     if ($viewer->getIsAdmin()) {
       $actions->addAction(
         id(new PhabricatorActionView())
