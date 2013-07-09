@@ -1765,6 +1765,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/core/behavior-konami.js',
   ),
+  'javelin-behavior-legalpad-document-preview' =>
+  array(
+    'uri' => '/res/d0ce5a8c/rsrc/js/application/legalpad/legalpad-document-preview.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-shaped-request',
+    ),
+    'disk' => '/rsrc/js/application/legalpad/legalpad-document-preview.js',
+  ),
   'javelin-behavior-lightbox-attachments' =>
   array(
     'uri' => '/res/72b4d3a8/rsrc/js/core/behavior-lightbox-attachments.js',
