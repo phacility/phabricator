@@ -1343,6 +1343,20 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/phortune/behavior-balanced-payment-form.js',
   ),
+  'javelin-behavior-config-reorder-fields' =>
+  array(
+    'uri' => '/res/691c5c8c/rsrc/js/application/config/behavior-reorder-fields.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'javelin-json',
+      4 => 'phabricator-draggable-list',
+    ),
+    'disk' => '/rsrc/js/application/config/behavior-reorder-fields.js',
+  ),
   'javelin-behavior-conpherence-menu' =>
   array(
     'uri' => '/res/f27205d4/rsrc/js/application/conpherence/behavior-menu.js',
