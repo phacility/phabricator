@@ -89,11 +89,10 @@ final class PhabricatorPeopleProfileController
 
     $picture = $user->loadProfileImageURI();
 
-    $header = new PhabricatorProfileHeaderView();
-    $header
-      ->setProfilePicture($picture)
-      ->setName($user->getUserName().' ('.$user->getRealName().')')
-      ->setDescription($profile->getTitle());
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($user->getUserName().' ('.$user->getRealName().')')
+      ->setSubheader($profile->getTitle())
+      ->setImage($picture);
 
     if ($user->getIsDisabled()) {
       $header->setStatus(pht('Disabled'));
@@ -106,7 +105,7 @@ final class PhabricatorPeopleProfileController
     }
 
     $nav->appendChild($header);
-    $header->appendChild($content);
+    $nav->appendChild($content);
 
     if ($user->getPHID() == $viewer->getPHID()) {
       $nav->addFilter(

@@ -5,6 +5,8 @@ final class PhabricatorHeaderView extends AphrontView {
   private $objectName;
   private $header;
   private $tags = array();
+  private $image;
+  private $subheader;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -21,10 +23,32 @@ final class PhabricatorHeaderView extends AphrontView {
     return $this;
   }
 
+  public function setImage($uri) {
+    $this->image = $uri;
+    return $this;
+  }
+
+  public function setSubheader($subheader) {
+    $this->subheader = $subheader;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('phabricator-header-view-css');
 
-    $header = array($this->header);
+    $image = null;
+    if ($this->image) {
+      $image = phutil_tag(
+        'span',
+        array(
+          'class' => 'phabricator-header-image',
+          'style' => 'background-image: url('.$this->image.')',
+        ),
+        '');
+    }
+
+    $header = array();
+    $header[] = $this->header;
 
     if ($this->objectName) {
       array_unshift(
@@ -48,17 +72,29 @@ final class PhabricatorHeaderView extends AphrontView {
         array_interleave(' ', $this->tags));
     }
 
+    if ($this->subheader) {
+      $header[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-header-subheader',
+        ),
+        $this->subheader);
+    }
+
     return phutil_tag(
       'div',
       array(
         'class' => 'phabricator-header-shell',
       ),
-      phutil_tag(
-        'h1',
-        array(
-          'class' => 'phabricator-header-view',
-        ),
-        $header));
+      array(
+        $image,
+        phutil_tag(
+          'h1',
+          array(
+            'class' => 'phabricator-header-view',
+          ),
+          $header),
+      ));
   }
 
 
