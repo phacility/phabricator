@@ -56,6 +56,7 @@ final class LegalpadDocumentEditor
 
     switch ($xaction->getTransactionType()) {
       case LegalpadTransactionType::TYPE_TITLE:
+        $object->setTitle($xaction->getNewValue());
         $body = $object->getDocumentBody();
         $body->setTitle($xaction->getNewValue());
         $this->setIsContribution(true);
@@ -86,7 +87,6 @@ final class LegalpadDocumentEditor
       $body->save();
 
       $object->setDocumentBodyPHID($body->getPHID());
-      $object->save();
 
       $actor = $this->getActor();
       $type = PhabricatorEdgeConfig::TYPE_CONTRIBUTED_TO_OBJECT;
@@ -94,6 +94,15 @@ final class LegalpadDocumentEditor
         ->addEdge($actor->getPHID(), $type, $object->getPHID())
         ->setActor($actor)
         ->save();
+
+      $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR;
+      $contributors = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $object->getPHID(),
+        $type);
+      $object->setRecentContributorPHIDs(array_slice($contributors, 0, 3));
+      $object->setContributorCount(count($contributors));
+
+      $object->save();
     }
   }
 

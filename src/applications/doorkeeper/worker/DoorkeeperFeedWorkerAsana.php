@@ -602,5 +602,13 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     return $ref;
   }
 
+  public function getMaximumRetryCount() {
+    return 4;
+  }
+
+  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
+    $count = $task->getFailureCount();
+    return (5 * 60) * pow(8, $count);
+  }
 
 }

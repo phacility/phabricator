@@ -54,6 +54,9 @@ final class PhabricatorTokenUIEventListener
         ->setName(pht('Rescind Token'))
         ->setIcon('dislike');
     }
+    if (!$user->isLoggedIn()) {
+      $token_action->setDisabled(true);
+    }
 
     $actions = $event->getValue('actions');
     $actions[] = $token_action;

@@ -1422,6 +1422,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'php',
         'name'    => $this->getPatchPath('legalpad-mailkey-populate.php'),
       ),
+      '20130703.legalpaddocdenorm.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.sql'),
+      ),
+      '20130703.legalpaddocdenorm.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.php'),
+      ),
     );
   }
 }

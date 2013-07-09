@@ -14,7 +14,11 @@ final class PhabricatorUserBlurbField
   }
 
   public function getFieldDescription() {
-    return pht('Short user summary.');
+    return pht('Short blurb about the user.');
+  }
+
+  public function canDisableField() {
+    return true;
   }
 
   protected function didSetObject(PhabricatorCustomFieldInterface $object) {

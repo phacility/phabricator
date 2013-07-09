@@ -21,6 +21,8 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $document = id(new LegalpadDocument())
         ->setVersions(0)
         ->setCreatorPHID($user->getPHID())
+        ->setContributorCount(0)
+        ->setRecentContributorPHIDs(array())
         ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
         ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
       $body = id(new LegalpadDocumentBody())
@@ -115,12 +117,14 @@ final class LegalpadDocumentEditController extends LegalpadController {
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormTextControl())
+        ->setID('document-title')
         ->setLabel(pht('Title'))
         ->setError($e_title)
         ->setValue($title)
         ->setName('title'))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+        ->setID('document-text')
         ->setLabel(pht('Text'))
         ->setError($e_text)
         ->setValue($text)
@@ -168,11 +172,34 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())->setName($short));
 
+    $preview_header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Document Preview'));
+    $preview_view = phutil_tag(
+      'div',
+      array(
+        'id' => 'document-preview'),
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'aphront-panel-preview-loading-text'),
+        pht('Loading preview...')));
+    $preview_panel = id(new PHUIDocumentView())
+      ->appendChild($preview_header)
+      ->appendChild($preview_view);
+    Javelin::initBehavior(
+      'legalpad-document-preview',
+      array(
+        'preview' => 'document-preview',
+        'title' => 'document-title',
+        'text' => 'document-text',
+        'uri' => $this->getApplicationURI('document/preview/')));
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $error_view,
         $form,
+        $preview_panel
       ),
       array(
         'title' => $title,
