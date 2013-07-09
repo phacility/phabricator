@@ -238,6 +238,8 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $extra_data = array();
     if ($main_edge) {
+      $extra_data = $main_edge['data'];
+
       $refs = id(new DoorkeeperImportEngine())
         ->setViewer($possessed_user)
         ->withPHIDs(array($main_edge['dst']))
@@ -289,8 +291,6 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
             "Skipping main task update, cursor is ahead of the story.\n");
         }
       }
-
-      $extra_data = $main_edge['data'];
     } else {
       $parent = $this->makeAsanaAPICall(
         $oauth_token,

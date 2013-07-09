@@ -32,6 +32,7 @@ final class DifferentialDefaultFieldSelector
       new DifferentialDateCreatedFieldSpecification(),
       new DifferentialAuditorsFieldSpecification(),
       new DifferentialDiffViewPolicyFieldSpecification(),
+      new DifferentialAsanaRepresentationFieldSpecification(),
     );
 
     return $fields;
