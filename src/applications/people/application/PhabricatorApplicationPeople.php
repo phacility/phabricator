@@ -54,6 +54,12 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     );
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorRemarkupRuleMention(),
+    );
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {

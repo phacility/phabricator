@@ -457,19 +457,11 @@ final class PhabricatorMarkupEngine {
     }
 
     $rules[] = new PhutilRemarkupRuleHyperlink();
-    $rules[] = new PhrictionRemarkupRule();
-
-    $rules[] = new PhabricatorRemarkupRuleEmbedFile();
-    $rules[] = new PhabricatorCountdownRemarkupRule();
 
     if ($options['macros']) {
       $rules[] = new PhabricatorRemarkupRuleImageMacro();
       $rules[] = new PhabricatorRemarkupRuleMeme();
     }
-
-    $rules[] = new DivinerRemarkupRuleSymbol();
-
-    $rules[] = new PhabricatorRemarkupRuleMention();
 
     $rules[] = new PhutilRemarkupRuleBold();
     $rules[] = new PhutilRemarkupRuleItalic();
@@ -485,7 +477,6 @@ final class PhabricatorMarkupEngine {
     $blocks[] = new PhutilRemarkupEngineRemarkupNoteBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupTableBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupSimpleTableBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupDefaultBlockRule();
 
     $custom_block_rule_classes = $options['custom-block'];
     if ($custom_block_rule_classes) {
@@ -494,15 +485,10 @@ final class PhabricatorMarkupEngine {
       }
     }
 
+    $blocks[] = new PhutilRemarkupEngineRemarkupDefaultBlockRule();
+
     foreach ($blocks as $block) {
-      if ($block instanceof PhutilRemarkupEngineRemarkupLiteralBlockRule) {
-        $literal_rules = array();
-        $literal_rules[] = new PhutilRemarkupRuleLinebreaks();
-        $block->setMarkupRules($literal_rules);
-      } else if (
-          !($block instanceof PhutilRemarkupEngineRemarkupCodeBlockRule)) {
-        $block->setMarkupRules($rules);
-      }
+      $block->setMarkupRules($rules);
     }
 
     $engine->setBlockRules($blocks);

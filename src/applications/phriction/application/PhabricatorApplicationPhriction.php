@@ -22,6 +22,12 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return "\xE2\x9A\xA1";
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhrictionRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       // Match "/w/" with slug "/".

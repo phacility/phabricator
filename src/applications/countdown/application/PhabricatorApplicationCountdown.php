@@ -29,6 +29,12 @@ final class PhabricatorApplicationCountdown extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorCountdownRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/countdown/' => array(
