@@ -24,8 +24,6 @@ final class LegalpadDocumentSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new LegalpadDocumentQuery())
-      ->needDocumentBodies(true)
-      ->needContributors(true)
       ->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()))
       ->withContributorPHIDs($saved->getParameter('contributorPHIDs', array()));
 

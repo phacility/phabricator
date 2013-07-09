@@ -10,6 +10,9 @@ final class LegalpadDocument extends LegalpadDAO
     PhabricatorApplicationTransactionInterface {
 
   protected $phid;
+  protected $title;
+  protected $contributorCount;
+  protected $recentContributorPHIDs = array();
   protected $creatorPHID;
   protected $versions;
   protected $documentBodyPHID;
@@ -23,6 +26,9 @@ final class LegalpadDocument extends LegalpadDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'recentContributorPHIDs' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 

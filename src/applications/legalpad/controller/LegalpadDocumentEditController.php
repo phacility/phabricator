@@ -21,6 +21,8 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $document = id(new LegalpadDocument())
         ->setVersions(0)
         ->setCreatorPHID($user->getPHID())
+        ->setContributorCount(0)
+        ->setRecentContributorPHIDs(array())
         ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
         ->setEditPolicy(PhabricatorPolicies::POLICY_USER);
       $body = id(new LegalpadDocumentBody())

@@ -29,18 +29,18 @@ final class LegalpadDocumentListController extends LegalpadController
 
     $user = $this->getRequest()->getUser();
 
-    $contributors = array_mergev(mpull($documents, 'getContributors'));
+    $contributors = array_mergev(
+      mpull($documents, 'getRecentContributorPHIDs'));
     $this->loadHandles($contributors);
 
     $list = new PhabricatorObjectItemListView();
     $list->setUser($user);
     foreach ($documents as $document) {
-      $document_body = $document->getDocumentBody();
       $last_updated = phabricator_date($document->getDateModified(), $user);
       $updater = $this->getHandle(
-        $document_body->getCreatorPHID())->renderLink();
+        reset($document->getRecentContributorPHIDs()))->renderLink();
 
-      $title = $document_body->getTitle();
+      $title = $document->getTitle();
 
       $item = id(new PhabricatorObjectItemView())
         ->setObjectName('L'.$document->getID())
