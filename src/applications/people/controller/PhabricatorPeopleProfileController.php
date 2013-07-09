@@ -104,22 +104,30 @@ final class PhabricatorPeopleProfileController
       }
     }
 
-    $nav->appendChild($header);
-    $nav->appendChild($content);
+    $actions = id(new PhabricatorActionListView())
+      ->setUser($viewer);
 
-    if ($user->getPHID() == $viewer->getPHID()) {
-      $nav->addFilter(
-        null,
-        pht('Edit Profile...'),
-        '/settings/panel/profile/');
-    }
+    $can_edit = ($user->getPHID() == $viewer->getPHID());
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setName(pht('Edit Profile'))
+        ->setHref($this->getApplicationURI('editprofile/'.$user->getID().'/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
 
     if ($viewer->getIsAdmin()) {
-      $nav->addFilter(
-        null,
-        pht('Administrate User...'),
-        '/people/edit/'.$user->getID().'/');
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('blame')
+          ->setName(pht('Administrate User'))
+          ->setHref($this->getApplicationURI('edit/'.$user->getID().'/')));
     }
+
+    $nav->appendChild($header);
+    $nav->appendChild($actions);
+    $nav->appendChild($content);
 
     return $this->buildApplicationPage(
       $nav,

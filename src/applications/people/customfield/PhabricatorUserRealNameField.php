@@ -26,6 +26,9 @@ final class PhabricatorUserRealNameField
   }
 
   public function getNewValueForApplicationTransactions() {
+    if (!$this->isEditable()) {
+      return $this->getObject()->getRealName();
+    }
     return $this->value;
   }
 
@@ -42,7 +45,12 @@ final class PhabricatorUserRealNameField
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setValue($this->value)
-      ->setLabel($this->getFieldName());
+      ->setLabel($this->getFieldName())
+      ->setDisabled(!$this->isEditable());
+  }
+
+  private function isEditable() {
+    return PhabricatorEnv::getEnvConfig('account.editable');
   }
 
 }

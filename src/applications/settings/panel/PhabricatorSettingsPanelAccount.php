@@ -17,20 +17,8 @@ final class PhabricatorSettingsPanelAccount
 
   public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
-    $editable = PhabricatorEnv::getEnvConfig('account.editable');
-
-    $e_realname = $editable ? true : null;
     $errors = array();
     if ($request->isFormPost()) {
-
-      if ($editable) {
-        $user->setRealName($request->getStr('realname'));
-        if (!strlen($user->getRealName())) {
-          $errors[] = pht('Real name must be nonempty.');
-          $e_realname = pht('Required');
-        }
-      }
-
       $new_timezone = $request->getStr('timezone');
       if (in_array($new_timezone, DateTimeZone::listIdentifiers(), true)) {
         $user->setTimezoneIdentifier($new_timezone);
@@ -72,13 +60,6 @@ final class PhabricatorSettingsPanelAccount
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Username'))
           ->setValue($user->getUsername()))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Real Name'))
-          ->setName('realname')
-          ->setError($e_realname)
-          ->setValue($user->getRealName())
-          ->setDisabled(!$editable))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Timezone'))

@@ -25,9 +25,6 @@ final class PhabricatorSettingsPanelProfile
     $e_image = null;
     $errors = array();
     if ($request->isFormPost()) {
-      $profile->setTitle($request->getStr('title'));
-      $profile->setBlurb($request->getStr('blurb'));
-
       $sex = $request->getStr('sex');
       $sexes = array(PhutilPerson::SEX_MALE, PhutilPerson::SEX_FEMALE);
       if (in_array($sex, $sexes)) {
@@ -149,12 +146,6 @@ final class PhabricatorSettingsPanelProfile
       ->setUser($request->getUser())
       ->setEncType('multipart/form-data')
       ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Title'))
-          ->setName('title')
-          ->setValue($profile->getTitle())
-          ->setCaption(pht('Serious business title.')))
-      ->appendChild(
         id(new AphrontFormSelectControl())
           ->setOptions($sexes)
           ->setLabel(pht('Sex'))
@@ -166,26 +157,6 @@ final class PhabricatorSettingsPanelProfile
           ->setLabel(pht('Translation'))
           ->setName('translation')
           ->setValue($user->getTranslation()))
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Profile URI'))
-          ->setValue(
-            phutil_tag(
-              'a',
-              array(
-                'href' => $profile_uri,
-              ),
-              $profile_uri)))
-      ->appendChild(hsprintf(
-        '<p class="aphront-form-instructions">%s</p>',
-        pht('Write something about yourself! Make sure to include important ' .
-          'information like your favorite Pokemon and which Starcraft race ' .
-          'you play.')))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel(pht('Blurb'))
-          ->setName('blurb')
-          ->setValue($profile->getBlurb()))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Profile Image'))
