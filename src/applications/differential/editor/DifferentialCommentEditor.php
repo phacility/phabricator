@@ -613,10 +613,6 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       'actor_phid'           => $actor_phid,
     );
 
-    // TODO: Get rid of this
-    id(new PhabricatorTimelineEvent('difx', $event_data))
-      ->recordEvent();
-
     id(new PhabricatorFeedStoryPublisher())
       ->setStoryType('PhabricatorFeedStoryDifferential')
       ->setStoryData($event_data)

@@ -307,13 +307,6 @@ final class PhabricatorRepositoryPullLocalDaemon
         $data->save();
       $commit->saveTransaction();
 
-      $event = new PhabricatorTimelineEvent(
-        'cmit',
-        array(
-          'id' => $commit->getID(),
-        ));
-      $event->recordEvent();
-
       $this->insertTask($repository, $commit);
 
       queryfx(

@@ -1430,6 +1430,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'php',
         'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.php'),
       ),
+      '20130709.droptimeline.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130709.droptimeline.sql'),
+      ),
     );
   }
 }

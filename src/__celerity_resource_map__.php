@@ -3011,7 +3011,7 @@ celerity_register_resource_map(array(
   ),
   'people-profile-css' =>
   array(
-    'uri' => '/res/1f0e94c5/rsrc/css/application/people/people-profile.css',
+    'uri' => '/res/d50d9502/rsrc/css/application/people/people-profile.css',
     'type' => 'css',
     'requires' =>
     array(

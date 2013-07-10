@@ -414,8 +414,6 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         : $this->getComments(),
       'actor_phid'           => $revision->getAuthorPHID(),
     );
-    id(new PhabricatorTimelineEvent('difx', $event_data))
-      ->recordEvent();
 
     $mailed_phids = array();
     if (!$this->silentUpdate) {
