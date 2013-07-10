@@ -139,6 +139,13 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
             "You can not resign from this revision because you are not ".
             "a reviewer.");
         }
+
+        list($added_reviewers, $ignored) = $this->alterReviewers();
+        if ($added_reviewers) {
+          $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
+          $metadata[$key] = $added_reviewers;
+        }
+
         DifferentialRevisionEditor::alterReviewers(
           $revision,
           $reviewer_phids,
