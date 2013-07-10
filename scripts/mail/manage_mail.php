@@ -21,6 +21,7 @@ $workflows = array(
   new PhabricatorMailManagementShowInboundWorkflow(),
   new PhabricatorMailManagementSendTestWorkflow(),
   new PhabricatorMailManagementReceiveTestWorkflow(),
+  new PhabricatorMailManagementListInboundWorkflow(),
 );
 
 $args->parseWorkflows($workflows);
