@@ -19,6 +19,7 @@ $workflows = array(
   new PhutilHelpArgumentWorkflow(),
   new PhabricatorMailManagementShowOutboundWorkflow(),
   new PhabricatorMailManagementShowInboundWorkflow(),
+  new PhabricatorMailManagementReceiveTestWorkflow(),
 );
 
 $args->parseWorkflows($workflows);

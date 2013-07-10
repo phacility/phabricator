@@ -17,7 +17,6 @@ abstract class PhabricatorMetaMTAController extends PhabricatorController {
     if ($this->getRequest()->getUser()->getIsAdmin()) {
       $nav->addLabel(pht('Diagnostics'));
       $nav->addFilter('send', pht('Send Test'));
-      $nav->addFilter('receive', pht('Receive Test'));
     }
 
     return $nav;

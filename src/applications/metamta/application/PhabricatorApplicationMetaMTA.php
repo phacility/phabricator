@@ -32,7 +32,6 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
         '' => 'PhabricatorMetaMTAListController',
         'send/' => 'PhabricatorMetaMTASendController',
         'view/(?P<id>[1-9]\d*)/' => 'PhabricatorMetaMTAViewController',
-        'receive/' => 'PhabricatorMetaMTAReceiveController',
         'received/' => 'PhabricatorMetaMTAReceivedListController',
         'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',
       ),
