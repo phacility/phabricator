@@ -37,8 +37,8 @@ final class LegalpadDocumentListController extends LegalpadController
     $list->setUser($user);
     foreach ($documents as $document) {
       $last_updated = phabricator_date($document->getDateModified(), $user);
-      $updater = $this->getHandle(
-        reset($document->getRecentContributorPHIDs()))->renderLink();
+      $recent_contributors = $document->getRecentContributorPHIDs();
+      $updater = $this->getHandle(reset($recent_contributors))->renderLink();
 
       $title = $document->getTitle();
 

@@ -40,7 +40,7 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/L(?P<id>\d+)/' => 'LegalpadDocumentViewController',
+      '/L(?P<id>\d+)' => 'LegalpadDocumentSignController',
       '/legalpad/' => array(
         '' => 'LegalpadDocumentListController',
         '(query/(?P<queryKey>[^/]+)/)?' => 'LegalpadDocumentListController',

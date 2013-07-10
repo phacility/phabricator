@@ -7,7 +7,6 @@ final class LegalpadDocumentBody extends LegalpadDAO
   implements
     PhabricatorMarkupInterface {
 
-  const MARKUP_FIELD_TITLE = 'markup:title';
   const MARKUP_FIELD_TEXT = 'markup:text ';
 
   protected $phid;
