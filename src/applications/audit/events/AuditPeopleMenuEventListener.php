@@ -26,7 +26,8 @@ final class AuditPeopleMenuEventListener extends PhutilEventListener {
     $href = '/audit/view/author/'.$username.'/';
 
     $actions[] = id(new PhabricatorActionView())
-      ->setIcon('transcript')
+      ->setIcon('audit-dark')
+      ->setIconSheet(PHUIIconView::SPRITE_APPS)
       ->setName(pht('View Commits'))
       ->setHref($href);
 

@@ -4,6 +4,7 @@ final class PhabricatorActionView extends AphrontView {
 
   private $name;
   private $icon;
+  private $iconSheet;
   private $href;
   private $disabled;
   private $workflow;
@@ -26,6 +27,11 @@ final class PhabricatorActionView extends AphrontView {
 
   public function setIcon($icon) {
     $this->icon = $icon;
+    return $this;
+  }
+
+  public function setIconSheet($sheet) {
+    $this->iconSheet = $sheet;
     return $this;
   }
 
@@ -53,20 +59,17 @@ final class PhabricatorActionView extends AphrontView {
 
     $icon = null;
     if ($this->icon) {
+      $sheet = nonempty($this->iconSheet, PHUIIconView::SPRITE_ICONS);
 
       $suffix = '';
       if ($this->disabled) {
         $suffix = '-grey';
       }
 
-      require_celerity_resource('sprite-icons-css');
-      $icon = phutil_tag(
-        'span',
-        array(
-          'class' => 'phabricator-action-view-icon sprite-icons '.
-                       'icons-'.$this->icon.$suffix,
-        ),
-        '');
+      $icon = id(new PHUIIconView())
+        ->addClass('phabricator-action-view-icon')
+        ->setSpriteIcon($this->icon.$suffix)
+        ->setSpriteSheet($sheet);
     }
 
     if ($this->href) {

@@ -25,7 +25,8 @@ final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
     $actions = $event->getValue('actions');
 
     $actions[] = id(new PhabricatorActionView())
-      ->setIcon('transcript')
+      ->setIcon('maniphest-dark')
+      ->setIconSheet(PHUIIconView::SPRITE_APPS)
       ->setName(pht('View Tasks'))
       ->setHref($href);
 
