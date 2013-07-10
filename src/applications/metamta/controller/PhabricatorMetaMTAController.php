@@ -14,11 +14,6 @@ abstract class PhabricatorMetaMTAController extends PhabricatorController {
     $nav->addFilter('sent', pht('Sent Mail'), $this->getApplicationURI());
     $nav->addFilter('received', pht('Received Mail'));
 
-    if ($this->getRequest()->getUser()->getIsAdmin()) {
-      $nav->addLabel(pht('Diagnostics'));
-      $nav->addFilter('send', pht('Send Test'));
-    }
-
     return $nav;
   }
 
