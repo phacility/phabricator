@@ -7,8 +7,6 @@ final class PhabricatorPeopleProfileController
   private $page;
 
   public function shouldRequireAdmin() {
-    // Default for people app is true
-    // We desire public access here
     return false;
   }
 
@@ -28,12 +26,12 @@ final class PhabricatorPeopleProfileController
   }
 
   public function processRequest() {
-
     $viewer = $this->getRequest()->getUser();
 
-    $user = id(new PhabricatorUser())->loadOneWhere(
-      'userName = %s',
-      $this->username);
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withUsernames(array($this->username))
+      ->executeOne();
     if (!$user) {
       return new Aphront404Response();
     }
@@ -61,10 +59,7 @@ final class PhabricatorPeopleProfileController
     $event->setUser($viewer);
     PhutilEventEngine::dispatchEvent($event);
     $nav = AphrontSideNavFilterView::newFromMenu($event->getValue('menu'));
-
-    $this->page = $nav->selectFilter($this->page, 'feed');
-
-    $content = $this->renderUserFeed($user);
+    $nav->selectFilter($this->page, 'feed');
 
     $picture = $user->loadProfileImageURI();
 
@@ -74,13 +69,38 @@ final class PhabricatorPeopleProfileController
       ->setImage($picture);
 
     if ($user->getIsDisabled()) {
-      $header->setStatus(pht('Disabled'));
-    } else {
-      $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
-        array($user->getPHID()));
-      if ($statuses) {
-        $header->setStatus(reset($statuses)->getTerseSummary($viewer));
-      }
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setBackgroundColor(PhabricatorTagView::COLOR_GREY)
+          ->setName(pht('Disabled')));
+    }
+
+    if ($user->getIsAdmin()) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setBackgroundColor(PhabricatorTagView::COLOR_RED)
+          ->setName(pht('Administrator')));
+    }
+
+    if ($user->getIsSystemAgent()) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
+          ->setName(pht('Bot')));
+    }
+
+
+    $statuses = id(new PhabricatorUserStatus())
+      ->loadCurrentStatuses(array($user->getPHID()));
+    if ($statuses) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setBackgroundColor(PhabricatorTagView::COLOR_ORANGE)
+          ->setName(head($statuses)->getTerseSummary($viewer)));
     }
 
     $actions = id(new PhabricatorActionListView())
@@ -117,7 +137,7 @@ final class PhabricatorPeopleProfileController
     $nav->appendChild($header);
     $nav->appendChild($actions);
     $nav->appendChild($properties);
-    $nav->appendChild($content);
+    $nav->appendChild($this->renderUserFeed($user));
 
     return $this->buildApplicationPage(
       $nav,
