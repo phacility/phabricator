@@ -17,6 +17,18 @@ final class PhabricatorUserRealNameField
     return pht('Stores the real name of the user, like "Abraham Lincoln".');
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
+  public function shouldAppearInApplicationTransactions() {
+    return true;
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
   protected function didSetObject(PhabricatorCustomFieldInterface $object) {
     $this->value = $object->getRealName();
   }

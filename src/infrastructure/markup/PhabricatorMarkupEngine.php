@@ -349,15 +349,6 @@ final class PhabricatorMarkupEngine {
   /**
    * @task engine
    */
-  public static function newProfileMarkupEngine() {
-    return self::newMarkupEngine(array(
-    ));
-  }
-
-
-  /**
-   * @task engine
-   */
   public static function newSlowvoteMarkupEngine() {
     return self::newMarkupEngine(array(
     ));

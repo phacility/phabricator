@@ -16,6 +16,7 @@ final class PhabricatorUserConfigOptions
     $default = array(
       id(new PhabricatorUserRealNameField())->getFieldKey() => true,
       id(new PhabricatorUserTitleField())->getFieldKey() => true,
+      id(new PhabricatorUserSinceField())->getFieldKey() => true,
       id(new PhabricatorUserBlurbField())->getFieldKey() => true,
     );
 

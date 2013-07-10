@@ -5,7 +5,6 @@ final class PhabricatorPeopleProfileController
 
   private $username;
   private $page;
-  private $profileUser;
 
   public function shouldRequireAdmin() {
     // Default for people app is true
@@ -18,10 +17,6 @@ final class PhabricatorPeopleProfileController
     $this->page = idx($data, 'page');
   }
 
-  public function getProfileUser() {
-    return $this->profileUser;
-  }
-
   private function getMainFilters($username) {
     return array(
       array(
@@ -29,11 +24,6 @@ final class PhabricatorPeopleProfileController
         'name' => pht('Feed'),
         'href' => '/p/'.$username.'/feed/'
       ),
-      array(
-        'key' => 'about',
-        'name' => pht('About'),
-        'href' => '/p/'.$username.'/about/'
-      )
     );
   }
 
@@ -47,8 +37,6 @@ final class PhabricatorPeopleProfileController
     if (!$user) {
       return new Aphront404Response();
     }
-
-    $this->profileUser = $user;
 
     require_celerity_resource('phabricator-profile-css');
 
@@ -76,16 +64,7 @@ final class PhabricatorPeopleProfileController
 
     $this->page = $nav->selectFilter($this->page, 'feed');
 
-    switch ($this->page) {
-      case 'feed':
-        $content = $this->renderUserFeed($user);
-        break;
-      case 'about':
-        $content = $this->renderBasicInformation($user, $profile);
-        break;
-      default:
-        throw new Exception("Unknown page '{$this->page}'!");
-    }
+    $content = $this->renderUserFeed($user);
 
     $picture = $user->loadProfileImageURI();
 
@@ -133,8 +112,11 @@ final class PhabricatorPeopleProfileController
           ->setHref($this->getApplicationURI('edit/'.$user->getID().'/')));
     }
 
+    $properties = $this->buildPropertyView($user);
+
     $nav->appendChild($header);
     $nav->appendChild($actions);
+    $nav->appendChild($properties);
     $nav->appendChild($content);
 
     return $this->buildApplicationPage(
@@ -146,55 +128,24 @@ final class PhabricatorPeopleProfileController
       ));
   }
 
-  private function renderBasicInformation($user, $profile) {
-
-    $blurb = nonempty(
-      $profile->getBlurb(),
-      '//'.pht('Nothing is known about this rare specimen.').'//');
-
+  private function buildPropertyView(PhabricatorUser $user) {
     $viewer = $this->getRequest()->getUser();
 
-    $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
-    $engine->setConfig('viewer', $viewer);
-    $blurb = $engine->markupText($blurb);
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($user);
 
-    $content = hsprintf(
-      '<div class="phabricator-profile-info-group profile-wrap-responsive">
-        <h1 class="phabricator-profile-info-header">%s</h1>
-        <div class="phabricator-profile-info-pane">
-          <table class="phabricator-profile-info-table">
-            <tr>
-              <th>%s</th>
-              <td>%s</td>
-            </tr>
-            <tr>
-              <th>%s</th>
-              <td>%s</td>
-            </tr>
-          </table>
-        </div>
-      </div>'.
-      '<div class="phabricator-profile-info-group profile-wrap-responsive">
-        <h1 class="phabricator-profile-info-header">%s</h1>
-        <div class="phabricator-profile-info-pane">
-          <table class="phabricator-profile-info-table">
-            <tr>
-              <th>%s</th>
-              <td>%s</td>
-            </tr>
-          </table>
-        </div>
-      </div>',
-      pht('Basic Information'),
-      pht('PHID'),
-      $user->getPHID(),
-      pht('User Since'),
-      phabricator_datetime($user->getDateCreated(), $viewer),
-      pht('Flavor Text'),
-      pht('Blurb'),
-      $blurb);
+    $fields = PhabricatorCustomField::getObjectFields(
+      $user,
+      PhabricatorCustomField::ROLE_VIEW);
 
-    return $content;
+    foreach ($fields as $field) {
+      $field->setViewer($viewer);
+    }
+
+    $view->applyCustomFields($fields);
+
+    return $view;
   }
 
   private function renderUserFeed(PhabricatorUser $user) {

@@ -17,6 +17,18 @@ final class PhabricatorUserTitleField
     return pht('User title, like "CEO" or "Assistant to the Manager".');
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
+  public function shouldAppearInApplicationTransactions() {
+    return true;
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
   protected function didSetObject(PhabricatorCustomFieldInterface $object) {
     $this->value = $object->loadUserProfile()->getTitle();
   }

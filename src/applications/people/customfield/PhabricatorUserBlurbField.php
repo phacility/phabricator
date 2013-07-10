@@ -17,7 +17,15 @@ final class PhabricatorUserBlurbField
     return pht('Short blurb about the user.');
   }
 
-  public function canDisableField() {
+  public function shouldAppearInApplicationTransactions() {
+    return true;
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
+  public function shouldAppearInPropertyView() {
     return true;
   }
 
@@ -47,6 +55,25 @@ final class PhabricatorUserBlurbField
       ->setName($this->getFieldKey())
       ->setValue($this->value)
       ->setLabel($this->getFieldName());
+  }
+
+  public function renderPropertyViewLabel() {
+    return null;
+  }
+
+  public function renderPropertyViewValue() {
+    $blurb = $this->getObject()->loadUserProfile()->getBlurb();
+    if (!strlen($blurb)) {
+      return null;
+    }
+    return PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($blurb),
+      'default',
+      $this->getViewer());
+  }
+
+  public function getStyleForPropertyView() {
+    return 'block';
   }
 
 }

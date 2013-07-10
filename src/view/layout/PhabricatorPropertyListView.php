@@ -81,7 +81,32 @@ final class PhabricatorPropertyListView extends AphrontView {
     $this->invokedWillRenderEvent = true;
   }
 
+  public function applyCustomFields(array $fields) {
+    assert_instances_of($fields, 'PhabricatorCustomField');
 
+    foreach ($fields as $field) {
+      $label = $field->renderPropertyViewLabel();
+      $value = $field->renderPropertyViewValue();
+      if ($value !== null) {
+        switch ($field->getStyleForPropertyView()) {
+          case 'property':
+            $this->addProperty($label, $value);
+            break;
+          case 'block':
+            $this->invokeWillRenderEvent();
+            if ($label !== null) {
+              $this->addSectionHeader($label);
+            }
+            $this->addTextContent($value);
+            break;
+          default:
+            throw new Exception(
+              "Unknown field property view style; valid styles are ".
+              "'block' and 'property'.");
+        }
+      }
+    }
+  }
 
   public function render() {
     $this->invokeWillRenderEvent();
