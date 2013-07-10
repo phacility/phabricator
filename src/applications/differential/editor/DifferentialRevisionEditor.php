@@ -593,7 +593,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     $options = array(
       'data' => array(
-        'state' => DifferentialReviewerStatus::STATUS_ADDED
+        'status' => DifferentialReviewerStatus::STATUS_ADDED
       )
     );
 
