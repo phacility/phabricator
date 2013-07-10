@@ -22,9 +22,15 @@ final class PhabricatorUserSinceField
   }
 
   public function renderPropertyViewValue() {
-    return phabricator_datetime(
+    $absolute = phabricator_datetime(
       $this->getObject()->getDateCreated(),
       $this->getViewer());
+
+    $relative = phabricator_format_relative_time_detailed(
+      time() - $this->getObject()->getDateCreated(),
+      $levels = 2);
+
+    return hsprintf('%s (%s)', $absolute, $relative);
   }
 
 }
