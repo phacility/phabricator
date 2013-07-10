@@ -407,7 +407,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $threading = self::getMailThreading($repository, $commit);
     list($thread_id, $thread_topic) = $threading;
 
-    $body       = $this->renderMailBody(
+    $body = $this->renderMailBody(
       $comment,
       "{$name}: {$summary}",
       $handle,
@@ -419,7 +419,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $author_phid = $data->getCommitDetail('authorPHID');
     if ($author_phid) {
-      $email_to[] = $author_phid;
+      $email_to[$author_phid] = true;
     }
 
     foreach ($other_comments as $other_comment) {
@@ -427,13 +427,22 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     }
 
     foreach ($requests as $request) {
-      if ($request->getAuditStatus() == PhabricatorAuditStatusConstants::CC) {
-        $email_cc[$request->getAuditorPHID()] = true;
-      } else if ($request->getAuditStatus() ==
-                 PhabricatorAuditStatusConstants::RESIGNED) {
-        unset($email_cc[$request->getAuditorPHID()]);
+      switch ($request->getAuditStatus()) {
+        case PhabricatorAuditStatusConstants::CC:
+        case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
+          $email_cc[$request->getAuditorPHID()] = true;
+          break;
+        case PhabricatorAuditStatusConstants::RESIGNED:
+          unset($email_cc[$request->getAuditorPHID()]);
+          break;
+        case PhabricatorAuditStatusConstants::CONCERNED:
+        case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
+          $email_to[$request->getAuditorPHID()] = true;
+          break;
       }
     }
+
+    $email_to = array_keys($email_to);
     $email_cc = array_keys($email_cc);
 
     $phids = array_merge($email_to, $email_cc);
