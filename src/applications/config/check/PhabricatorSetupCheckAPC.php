@@ -6,7 +6,8 @@ final class PhabricatorSetupCheckAPC extends PhabricatorSetupCheck {
     if (!extension_loaded('apc')) {
       $message = pht(
         "Installing the PHP extension 'APC' (Alternative PHP Cache) will ".
-        "dramatically improve performance.");
+        "dramatically improve performance. Note that APC versions 3.1.14 and ".
+        "3.1.15 are broken; 3.1.13 is recommended instead.");
 
       $this
         ->newIssue('extension.apc')

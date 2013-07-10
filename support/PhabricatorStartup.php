@@ -254,6 +254,21 @@ final class PhabricatorStartup {
         "disable it to run Phabricator. Consult the PHP manual for ".
         "instructions.");
     }
+
+    if (extension_loaded('apc')) {
+      $apc_version = phpversion('apc');
+      $known_bad = array(
+        '3.1.14' => true,
+        '3.1.15' => true,
+      );
+      if (isset($known_bad[$apc_version])) {
+        self::didFatal(
+          "You have APC {$apc_version} installed. This version of APC is ".
+          "known to be bad, and does not work with Phabricator (it will ".
+          "cause Phabricator to fatal unrecoverably with nonsense errors). ".
+          "Downgrade to version 3.1.13.");
+      }
+    }
   }
 
 
