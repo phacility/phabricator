@@ -4,7 +4,6 @@ final class PhabricatorPeopleProfileController
   extends PhabricatorPeopleController {
 
   private $username;
-  private $page;
 
   public function shouldRequireAdmin() {
     return false;
@@ -12,17 +11,6 @@ final class PhabricatorPeopleProfileController
 
   public function willProcessRequest(array $data) {
     $this->username = idx($data, 'username');
-    $this->page = idx($data, 'page');
-  }
-
-  private function getMainFilters($username) {
-    return array(
-      array(
-        'key' => 'feed',
-        'name' => pht('Feed'),
-        'href' => '/p/'.$username.'/feed/'
-      ),
-    );
   }
 
   public function processRequest() {
@@ -40,26 +28,6 @@ final class PhabricatorPeopleProfileController
 
     $profile = $user->loadUserProfile();
     $username = phutil_escape_uri($user->getUserName());
-
-    $menu = new PHUIListView();
-    foreach ($this->getMainFilters($username) as $filter) {
-      $menu->newLink($filter['name'], $filter['href'], $filter['key']);
-    }
-
-    $menu->newLabel(pht('Activity'), 'activity');
-    // NOTE: applications install the various links through PhabricatorEvent
-    // listeners
-
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_PEOPLE_DIDRENDERMENU,
-      array(
-        'menu' => $menu,
-        'person' => $user,
-      ));
-    $event->setUser($viewer);
-    PhutilEventEngine::dispatchEvent($event);
-    $nav = AphrontSideNavFilterView::newFromMenu($event->getValue('menu'));
-    $nav->selectFilter($this->page, 'feed');
 
     $picture = $user->loadProfileImageURI();
 
@@ -104,6 +72,7 @@ final class PhabricatorPeopleProfileController
     }
 
     $actions = id(new PhabricatorActionListView())
+      ->setObject($user)
       ->setUser($viewer);
 
     $can_edit = ($user->getPHID() == $viewer->getPHID());
@@ -134,13 +103,20 @@ final class PhabricatorPeopleProfileController
 
     $properties = $this->buildPropertyView($user);
 
-    $nav->appendChild($header);
-    $nav->appendChild($actions);
-    $nav->appendChild($properties);
-    $nav->appendChild($this->renderUserFeed($user));
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($user->getUsername()));
+    $feed = $this->renderUserFeed($user);
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $header,
+        $actions,
+        $properties,
+        $feed,
+      ),
       array(
         'title' => $user->getUsername(),
         'device' => true,

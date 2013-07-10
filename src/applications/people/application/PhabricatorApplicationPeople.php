@@ -49,7 +49,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfilePictureController',
       ),
-      '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
+      '/p/(?P<username>[\w._-]+)/'
         => 'PhabricatorPeopleProfileController',
       '/emailverify/(?P<code>[^/]+)/' =>
         'PhabricatorEmailVerificationController',

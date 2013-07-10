@@ -36,6 +36,9 @@ final class PhabricatorHeaderView extends AphrontView {
   public function render() {
     require_celerity_resource('phabricator-header-view-css');
 
+    $classes = array();
+    $classes[] = 'phabricator-header-shell';
+
     $image = null;
     if ($this->image) {
       $image = phutil_tag(
@@ -45,6 +48,7 @@ final class PhabricatorHeaderView extends AphrontView {
           'style' => 'background-image: url('.$this->image.')',
         ),
         '');
+      $classes[] = 'phabricator-header-has-image';
     }
 
     $header = array();
@@ -84,7 +88,7 @@ final class PhabricatorHeaderView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-header-shell',
+        'class' => implode(' ', $classes),
       ),
       array(
         $image,
