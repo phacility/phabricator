@@ -29,7 +29,7 @@ final class PhabricatorMailManagementListInboundWorkflow
       $args->getArg('limit'));
 
     if (!$mails) {
-      $console->writeErr("%s\n", "No received mail.");
+      $console->writeErr("%s\n", pht("No received mail."));
       return 0;
     }
 

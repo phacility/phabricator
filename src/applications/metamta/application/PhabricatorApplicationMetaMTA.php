@@ -6,10 +6,6 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
     return '/mail/';
   }
 
-  public function getShortDescription() {
-    return pht('View Mail Logs');
-  }
-
   public function getIconName() {
     return 'metamta';
   }
@@ -26,11 +22,17 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
     return false;
   }
 
+  public function shouldAppearInLaunchView() {
+    return false;
+  }
+
+  public function getTypeaheadURI() {
+    return null;
+  }
+
   public function getRoutes() {
     return array(
       $this->getBaseURI() => array(
-        '' => 'PhabricatorMetaMTAListController',
-        'view/(?P<id>[1-9]\d*)/' => 'PhabricatorMetaMTAViewController',
         'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',
       ),
     );

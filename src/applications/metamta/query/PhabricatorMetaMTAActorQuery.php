@@ -130,6 +130,7 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
     $lists = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
       'phid IN (%Ls)',
       $phids);
+    $lists = mpull($lists, null, 'getPHID');
 
     foreach ($phids as $phid) {
       $actor = $actors[$phid];

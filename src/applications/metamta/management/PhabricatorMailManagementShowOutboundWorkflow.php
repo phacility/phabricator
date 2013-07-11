@@ -57,8 +57,17 @@ final class PhabricatorMailManagementShowOutboundWorkflow
 
       $info[] = null;
       $info[] = pht('PARAMETERS');
-      foreach ($message->getParameters() as $key => $value) {
+      $parameters = $message->getParameters();
+      foreach ($parameters as $key => $value) {
         if ($key == 'body') {
+          continue;
+        }
+
+        if ($key == 'headers') {
+          continue;
+        }
+
+        if ($key == 'attachments') {
           continue;
         }
 
@@ -67,6 +76,39 @@ final class PhabricatorMailManagementShowOutboundWorkflow
         }
 
         $info[] = pht('%s: %s', $key, $value);
+      }
+
+      $info[] = null;
+      $info[] = pht('HEADERS');
+      foreach (idx($parameters, 'headers', array()) as $header) {
+        list($name, $value) = $header;
+        $info[] = "{$name}: {$value}";
+      }
+
+      $attachments = idx($parameters, 'attachments');
+      if ($attachments) {
+        $info[] = null;
+        $info[] = pht('ATTACHMENTS');
+        foreach ($attachments as $attachment) {
+          $info[] = $attachment['filename'];
+        }
+      }
+
+      $actors = $message->loadAllActors();
+      $actors = array_select_keys(
+        $actors,
+        array_merge($message->getToPHIDs(), $message->getCcPHIDs()));
+      $info[] = null;
+      $info[] = pht('RECIPIENTS');
+      foreach ($actors as $actor) {
+        if ($actor->isDeliverable()) {
+          $info[] = '  '.coalesce($actor->getName(), $actor->getPHID());
+        } else {
+          $info[] = '! '.coalesce($actor->getName(), $actor->getPHID());
+          foreach ($actor->getUndeliverableReasons() as $reason) {
+            $info[] = '    - '.$reason;
+          }
+        }
       }
 
       $info[] = null;
