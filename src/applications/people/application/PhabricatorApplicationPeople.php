@@ -51,8 +51,6 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       ),
       '/p/(?P<username>[\w._-]+)/'
         => 'PhabricatorPeopleProfileController',
-      '/emailverify/(?P<code>[^/]+)/' =>
-        'PhabricatorEmailVerificationController',
     );
   }
 

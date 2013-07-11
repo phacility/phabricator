@@ -83,6 +83,9 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
         'mustverify/' => 'PhabricatorMustVerifyEmailController',
       ),
 
+      '/emailverify/(?P<code>[^/]+)/' =>
+        'PhabricatorEmailVerificationController',
+
       '/logout/' => 'PhabricatorLogoutController',
     );
   }
