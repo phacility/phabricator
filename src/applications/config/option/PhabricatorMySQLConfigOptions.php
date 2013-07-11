@@ -70,6 +70,7 @@ final class PhabricatorMySQLConfigOptions
             "unless you are developing Phabricator and using namespaces to ".
             "separate multiple sandbox datasets.")),
         $this->newOption('mysql.port', 'string', '3306')
+        ->setLocked(true)
         ->setDescription(
           pht("MySQL port to use when connecting to the database.")),
     );

@@ -42,6 +42,7 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
         ->setMessage($message)
         ->setIsFatal(true)
         ->addRelatedPhabricatorConfig('mysql.host')
+        ->addRelatedPhabricatorConfig('mysql.port')
         ->addRelatedPhabricatorConfig('mysql.user')
         ->addRelatedPhabricatorConfig('mysql.pass');
       return;
