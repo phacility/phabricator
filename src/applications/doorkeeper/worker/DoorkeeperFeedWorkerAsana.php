@@ -89,8 +89,13 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
   private function getAsanaTaskData($object) {
     $revision = $object;
+    $prefix = $this->getTitlePrefix($object);
+    $title = $revision->getTitle();
+    $lines = pht(
+      '[Request, %d lines]',
+      new PhutilNumber($object->getLineCount()));
 
-    $name = '[Differential] D'.$revision->getID().': '.$revision->getTitle();
+    $name = $prefix.' '.$lines.' D'.$revision->getID().': '.$title;
     $uri = PhabricatorEnv::getProductionURI('/D'.$revision->getID());
 
     $notes = array(
@@ -120,8 +125,9 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
   private function getAsanaSubtaskData($object) {
     $revision = $object;
+    $prefix = $this->getTitlePrefix($object);
 
-    $name = '[Differential] Review Request';
+    $name = $prefix.' Review Request';
     $uri = PhabricatorEnv::getProductionURI('/D'.$revision->getID());
 
     $notes = array(
@@ -133,7 +139,7 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $notes = implode("\n\n", $notes);
 
     return array(
-      'name' => '[Differential] Review Request',
+      'name' => $prefix.' Review Request',
       'notes' => $notes,
     );
   }
@@ -609,6 +615,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
   public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
     $count = $task->getFailureCount();
     return (5 * 60) * pow(8, $count);
+  }
+
+  public function getTitlePrefix($object) {
+    return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
   }
 
 }
