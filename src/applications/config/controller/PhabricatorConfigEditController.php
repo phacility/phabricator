@@ -150,7 +150,20 @@ final class PhabricatorConfigEditController
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Description'))
-          ->setValue($description))
+          ->setValue($description));
+
+    if ($group) {
+      $extra = $group->renderContextualDescription(
+        $option,
+        $request);
+      if ($extra !== null) {
+        $form->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setValue($extra));
+      }
+    }
+
+    $form
       ->appendChild($control);
 
     $submit_control = id(new AphrontFormSubmitControl())
