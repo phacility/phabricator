@@ -631,7 +631,9 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   load_inline_comments();
-  JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+  if (config.loggedIn) {
+    JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+  }
 
   JX.Stratcom.listen('resize', null, redraw_image);
   redraw_image();
