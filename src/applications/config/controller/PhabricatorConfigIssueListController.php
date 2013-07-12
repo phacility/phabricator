@@ -68,6 +68,7 @@ final class PhabricatorConfigIssueListController
         $list->addItem($item);
       } else {
         $item->addIcon('none', pht('Ignored'));
+        $item->setDisabled(true);
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('preview')

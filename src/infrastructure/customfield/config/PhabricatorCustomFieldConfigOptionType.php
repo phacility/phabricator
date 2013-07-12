@@ -73,6 +73,7 @@ final class PhabricatorCustomFieldConfigOptionType
       }
 
       $disabled_item->addIcon('none', pht('Disabled'));
+      $disabled_item->setDisabled(true);
       $disabled_item->addAction(
         id(new PHUIListItemView())
           ->setHref('#')

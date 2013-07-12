@@ -262,10 +262,10 @@ final class PhabricatorApplicationSearchController
       if ($named_query->getIsBuiltin()) {
         if ($named_query->getIsDisabled()) {
           $item->addIcon('delete-grey', pht('Disabled'));
+          $item->setDisabled(true);
         } else {
           $item->addIcon('lock-grey', pht('Builtin'));
         }
-        $item->setBarColor('grey');
       } else {
         $item->addAction(
           id(new PHUIListItemView())
