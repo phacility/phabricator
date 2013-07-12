@@ -123,6 +123,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($document);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

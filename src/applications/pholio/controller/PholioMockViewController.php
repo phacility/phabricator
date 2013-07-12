@@ -109,6 +109,7 @@ final class PholioMockViewController extends PholioController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($mock);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

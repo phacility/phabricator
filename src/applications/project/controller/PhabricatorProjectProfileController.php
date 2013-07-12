@@ -94,6 +94,7 @@ final class PhabricatorProjectProfileController
 
     $action_list = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($request->getRequestURI())
       ->addAction($action);
 
     $nav_view->appendChild($header);

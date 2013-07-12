@@ -10,6 +10,15 @@ final class PhabricatorActionView extends AphrontView {
   private $workflow;
   private $renderAsForm;
   private $download;
+  private $objectURI;
+
+  public function setObjectURI($object_uri) {
+    $this->objectURI = $object_uri;
+    return $this;
+  }
+  public function getObjectURI() {
+    return $this->objectURI;
+  }
 
   public function setDownload($download) {
     $this->download = $download;
@@ -23,6 +32,22 @@ final class PhabricatorActionView extends AphrontView {
   public function setHref($href) {
     $this->href = $href;
     return $this;
+  }
+
+  /**
+   * If the user is not logged in and the action is relatively complicated,
+   * give them a generic login link that will re-direct to the page they're
+   * viewing.
+   */
+  public function getHref() {
+    if ($this->workflow || $this->renderAsForm) {
+      if (!$this->user || !$this->user->isLoggedIn()) {
+        return id(new PhutilURI('/auth/start/'))
+          ->setQueryParam('next', (string)$this->getObjectURI());
+      }
+    }
+
+    return $this->href;
   }
 
   public function setIcon($icon) {
@@ -97,7 +122,7 @@ final class PhabricatorActionView extends AphrontView {
         $item = phabricator_form(
           $this->user,
           array(
-            'action'    => $this->href,
+            'action'    => $this->getHref(),
             'method'    => 'POST',
             'sigil'     => implode(' ', $sigils),
           ),
@@ -106,7 +131,7 @@ final class PhabricatorActionView extends AphrontView {
         $item = javelin_tag(
           'a',
           array(
-            'href'  => $this->href,
+            'href'  => $this->getHref(),
             'class' => 'phabricator-action-view-item',
             'sigil' => $this->workflow ? 'workflow' : null,
           ),

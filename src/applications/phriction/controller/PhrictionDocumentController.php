@@ -273,6 +273,7 @@ final class PhrictionDocumentController
 
     $action_view = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($document);
 
     if (!$document->getID()) {

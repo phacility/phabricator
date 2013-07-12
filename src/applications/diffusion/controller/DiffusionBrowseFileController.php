@@ -378,6 +378,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     return id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->addAction($blame_button)
       ->addAction($highlight_button)
       ->addAction($lint_button)
@@ -821,6 +822,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($this->getRequest()->getUser())
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->addAction($this->createEditAction());
 
     return array($actions, $properties);
@@ -837,6 +839,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($this->getRequest()->getUser())
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->addAction($this->createEditAction())
       ->addAction(
         id(new PhabricatorActionView())

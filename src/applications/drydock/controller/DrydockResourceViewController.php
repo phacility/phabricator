@@ -76,6 +76,7 @@ final class DrydockResourceViewController extends DrydockController {
   private function buildActionListView(DrydockResource $resource) {
     $view = id(new PhabricatorActionListView())
       ->setUser($this->getRequest()->getUser())
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($resource);
 
     $can_close = ($resource->getStatus() == DrydockResourceStatus::STATUS_OPEN);

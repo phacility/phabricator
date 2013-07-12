@@ -38,6 +38,7 @@ final class PhabricatorPeopleProfileController
 
     $actions = id(new PhabricatorActionListView())
       ->setObject($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($viewer);
 
     $can_edit = ($user->getPHID() == $viewer->getPHID());

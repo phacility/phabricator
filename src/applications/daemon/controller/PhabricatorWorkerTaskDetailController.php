@@ -73,12 +73,13 @@ final class PhabricatorWorkerTaskDetailController
   }
 
   private function buildActionListView(PhabricatorWorkerTask $task) {
-    $user = $this->getRequest()->getUser();
-
-    $view = new PhabricatorActionListView();
-    $view->setUser($user);
-
+    $request = $this->getRequest();
+    $user = $request->getUser();
     $id = $task->getID();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObjectURI($request->getRequestURI());
 
     if ($task->isArchived()) {
       $result_success = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;

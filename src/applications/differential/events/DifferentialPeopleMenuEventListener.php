@@ -25,7 +25,6 @@ final class DifferentialPeopleMenuEventListener extends PhutilEventListener {
     $actions = $event->getValue('actions');
 
     $actions[] = id(new PhabricatorActionView())
-      ->setUser($event->getUser())
       ->setRenderAsForm(true)
       ->setIcon('differential-dark')
       ->setIconSheet(PHUIIconView::SPRITE_APPS)
