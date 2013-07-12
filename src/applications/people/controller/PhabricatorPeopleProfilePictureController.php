@@ -102,6 +102,7 @@ final class PhabricatorPeopleProfilePictureController
     $images = array();
 
     $current = $user->getProfileImagePHID();
+    $has_current = false;
     if ($current) {
       $files = id(new PhabricatorFileQuery())
         ->setViewer($viewer)
@@ -110,6 +111,7 @@ final class PhabricatorPeopleProfilePictureController
       if ($files) {
         $file = head($files);
         if ($file->isTransformableImage()) {
+          $has_current = true;
           $images[$current] = array(
             'uri' => $file->getBestURI(),
             'tip' => pht('Current Picture'),
@@ -242,15 +244,17 @@ final class PhabricatorPeopleProfilePictureController
       $buttons[] = $button;
     }
 
-    $form->appendChild(
-      id(new AphrontFormMarkupControl())
-        ->setLabel(pht('Current Picture'))
-        ->setValue(array_slice($buttons, 0, 1)));
+    if ($has_current) {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Current Picture'))
+          ->setValue(array_shift($buttons)));
+    }
 
     $form->appendChild(
       id(new AphrontFormMarkupControl())
         ->setLabel(pht('Use Picture'))
-        ->setValue(array_slice($buttons, 1)));
+        ->setValue($buttons));
 
     $upload_head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Upload New Picture'));
