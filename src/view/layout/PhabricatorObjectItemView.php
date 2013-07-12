@@ -427,7 +427,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     $actions = array();
     if ($this->actions) {
+      Javelin::initBehavior('phabricator-tooltips');
+
       foreach (array_reverse($this->actions) as $action) {
+        $action->setRenderNameAsTooltip(true);
         $actions[] = $action;
       }
       $actions = phutil_tag(
