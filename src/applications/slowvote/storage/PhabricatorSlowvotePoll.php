@@ -3,7 +3,8 @@
 /**
  * @group slowvote
  */
-final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO {
+final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
+  implements PhabricatorPolicyInterface {
 
   const RESPONSES_VISIBLE = 0;
   const RESPONSES_VOTERS  = 1;
@@ -13,7 +14,6 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO {
   const METHOD_APPROVAL   = 1;
 
   protected $question;
-  protected $phid;
   protected $authorPHID;
   protected $responseVisibility;
   protected $shuffle;
@@ -28,6 +28,25 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_POLL);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
 }

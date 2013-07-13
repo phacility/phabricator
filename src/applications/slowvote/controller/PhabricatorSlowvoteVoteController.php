@@ -16,7 +16,14 @@ final class PhabricatorSlowvoteVoteController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $poll = id(new PhabricatorSlowvotePoll())->load($this->id);
+    $poll = id(new PhabricatorSlowvoteQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
+    if (!$poll) {
+      return new Aphront404Response();
+    }
+
     $options = id(new PhabricatorSlowvoteOption())->loadAllWhere(
       'pollID = %d',
       $poll->getID());
