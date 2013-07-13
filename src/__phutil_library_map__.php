@@ -1533,6 +1533,7 @@ phutil_register_library_map(array(
     'PhabricatorSlowvotePoll' => 'applications/slowvote/storage/PhabricatorSlowvotePoll.php',
     'PhabricatorSlowvotePollController' => 'applications/slowvote/controller/PhabricatorSlowvotePollController.php',
     'PhabricatorSlowvoteQuery' => 'applications/slowvote/query/PhabricatorSlowvoteQuery.php',
+    'PhabricatorSlowvoteSearchEngine' => 'applications/slowvote/query/PhabricatorSlowvoteSearchEngine.php',
     'PhabricatorSlowvoteVoteController' => 'applications/slowvote/controller/PhabricatorSlowvoteVoteController.php',
     'PhabricatorSlug' => 'infrastructure/util/PhabricatorSlug.php',
     'PhabricatorSlugTestCase' => 'infrastructure/util/__tests__/PhabricatorSlugTestCase.php',
@@ -3482,7 +3483,11 @@ phutil_register_library_map(array(
     'PhabricatorSlowvoteController' => 'PhabricatorController',
     'PhabricatorSlowvoteCreateController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteDAO' => 'PhabricatorLiskDAO',
-    'PhabricatorSlowvoteListController' => 'PhabricatorSlowvoteController',
+    'PhabricatorSlowvoteListController' =>
+    array(
+      0 => 'PhabricatorSlowvoteController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PhabricatorSlowvoteOption' => 'PhabricatorSlowvoteDAO',
     'PhabricatorSlowvotePoll' =>
     array(
@@ -3490,7 +3495,8 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'PhabricatorSlowvotePollController' => 'PhabricatorSlowvoteController',
-    'PhabricatorSlowvoteQuery' => 'PhabricatorPolicyAwareCursorPagedQuery',
+    'PhabricatorSlowvoteQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorSlowvoteSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorSlowvoteVoteController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlugTestCase' => 'PhabricatorTestCase',
     'PhabricatorSortTableExample' => 'PhabricatorUIExample',
