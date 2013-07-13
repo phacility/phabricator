@@ -24,7 +24,7 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('projects-dark');
 
     $type = $data->getValue('type');

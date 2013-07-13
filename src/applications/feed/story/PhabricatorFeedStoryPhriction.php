@@ -21,7 +21,7 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $author_phid = $data->getAuthorPHID();
     $document_phid = $data->getValue('phid');
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('phriction-dark');
 
     $action = $data->getValue('action');
@@ -64,7 +64,6 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
         break;
     }
 
-    $view->setEpoch($data->getEpoch());
     $view->setImage($this->getHandle($author_phid)->getImageURI());
     $content = $this->renderSummary($data->getValue('content'));
     $view->appendChild($content);

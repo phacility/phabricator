@@ -29,11 +29,15 @@
 }
 
 .phui-feed-story-foot {
-  color: #777;
   font-size: 11px;
   background: #f7f7f7;
   padding: 10px;
   line-height: 14px;
+}
+
+.phui-feed-story-foot,
+.phui-feed-story-foot a {
+  color: #777;
 }
 
 .phui-feed-story-foot .phui-icon-view {

@@ -2235,7 +2235,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/014eb2bd/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/415cd66a/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3806,7 +3806,7 @@ celerity_register_resource_map(array(
   ),
   'phui-feed-story-css' =>
   array(
-    'uri' => '/res/253ac568/rsrc/css/phui/phui-feed-story.css',
+    'uri' => '/res/7960f59a/rsrc/css/phui/phui-feed-story.css',
     'type' => 'css',
     'requires' =>
     array(
