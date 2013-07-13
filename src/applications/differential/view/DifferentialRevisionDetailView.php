@@ -45,8 +45,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($revision)
-      ->setObjectURI($this->getRequest()->getRequestURI());
+      ->setObject($revision);
     foreach ($this->getActions() as $action) {
       $obj = id(new PhabricatorActionView())
         ->setIcon(idx($action, 'icon', 'edit'))
