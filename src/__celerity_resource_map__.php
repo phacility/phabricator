@@ -2282,7 +2282,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-ponder-votebox' =>
   array(
-    'uri' => '/res/d8c973a2/rsrc/js/application/ponder/behavior-votebox.js',
+    'uri' => '/res/c28daa12/rsrc/js/application/ponder/behavior-votebox.js',
     'type' => 'js',
     'requires' =>
     array(

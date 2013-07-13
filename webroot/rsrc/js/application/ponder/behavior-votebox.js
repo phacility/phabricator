@@ -16,6 +16,8 @@ JX.behavior('ponder-votebox', function(config) {
     var data = e.getNodeData('ponder-votable');
 
     if (data.vote != vote) {
+      // Remove the user's current vote, if they have one.
+      data.count -= data.vote;
       data.vote = vote;
       data.count += vote;
     } else {
