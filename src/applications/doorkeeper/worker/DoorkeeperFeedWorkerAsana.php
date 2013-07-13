@@ -163,6 +163,8 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $object = $this->getStoryObject();
     $src_phid = $object->getPHID();
 
+    $chronological_key = $story->getChronologicalKey();
+
     if (!$this->isObjectSupported($object)) {
       $this->log("Story is about an unsupported object type.\n");
       return;
@@ -189,8 +191,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       $follow_phids);
     $all_follow_phids = array_unique(array_filter($all_follow_phids));
 
-    $all_phids = $all_follow_phids;
-    $all_phids[] = $owner_phid;
+    $all_phids = array();
+    $all_phids = array_merge(
+      array($owner_phid),
+      $all_follow_phids);
     $all_phids = array_unique(array_filter($all_phids));
 
     $phid_aid_map = $this->lookupAsanaUserIDs($all_phids);
@@ -536,6 +540,12 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       ->withAccountTypes(array($provider->getProviderType()))
       ->withAccountDomains(array($provider->getProviderDomain()))
       ->execute();
+
+    // Reorder accounts in the original order.
+    // TODO: This needs to be adjusted if/when we allow you to link multiple
+    // accounts.
+    $accounts = mpull($accounts, null, 'getUserPHID');
+    $accounts = array_select_keys($accounts, $user_phids);
 
     $workspace_id = $this->getWorkspaceID();
 
