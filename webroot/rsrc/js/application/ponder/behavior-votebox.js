@@ -14,12 +14,18 @@ JX.behavior('ponder-votebox', function(config) {
 
     var root = e.getNode('ponder-votable');
     var data = e.getNodeData('ponder-votable');
+		var upvoted = (JX.DOM.find(e, 'a', 'upvote').className.indexOf('ponder-vote-active') > -1);
+		var downvoted = (JX.DOM.find(e, 'a', 'downvote').className.indexOf('ponder-vote-active') > -1);
 
     if (data.vote != vote) {
       // Remove the user's current vote, if they have one.
       data.count -= data.vote;
       data.vote = vote;
       data.count += vote;
+			
+			// User changed his mind
+			if (upvoted || downvoted)
+				data.count += vote;
     } else {
       // User is undoing their vote.
       data.vote = 0;
