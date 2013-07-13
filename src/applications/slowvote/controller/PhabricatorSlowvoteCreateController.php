@@ -74,9 +74,11 @@ final class PhabricatorSlowvoteCreateController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setFlexible(true)
       ->appendChild($instructions)
       ->appendChild(
-        id(new AphrontFormTextControl())
+        id(new AphrontFormTextAreaControl())
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setLabel(pht('Question'))
           ->setName('question')
           ->setValue($poll->getQuestion())
@@ -131,18 +133,12 @@ final class PhabricatorSlowvoteCreateController
           ->addCheckbox(
             'shuffle',
             1,
-            pht('Show choices in random order'),
+            pht('Show choices in random order.'),
             $poll->getShuffle()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Create Slowvote'))
           ->addCancelButton('/vote/'));
-
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setHeader(pht('Create Slowvote'));
-    $panel->setNoBackground();
-    $panel->appendChild($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addCrumb(
@@ -154,11 +150,12 @@ final class PhabricatorSlowvoteCreateController
       array(
         $crumbs,
         $error_view,
-        $panel,
+        $form,
       ),
       array(
         'title' => pht('Create Slowvote'),
         'device' => true,
+        'dust' => true,
       ));
   }
 
