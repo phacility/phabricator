@@ -69,6 +69,10 @@ final class PhabricatorMySQLConfigOptions
             "this namespace if you want. Normally, you should not do this ".
             "unless you are developing Phabricator and using namespaces to ".
             "separate multiple sandbox datasets.")),
+        $this->newOption('mysql.port', 'string', null)
+        ->setLocked(true)
+        ->setDescription(
+          pht("MySQL port to use when connecting to the database.")),
     );
   }
 
