@@ -42,6 +42,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
         => 'DiffusionCommitController',
       '/diffusion/' => array(
         '' => 'DiffusionHomeController',
+        'create/' => 'DiffusionRepositoryCreateController',
         '(?P<callsign>[A-Z]+)/' => array(
           '' => 'DiffusionRepositoryController',
 
