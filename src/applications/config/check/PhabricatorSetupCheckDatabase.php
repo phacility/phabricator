@@ -107,5 +107,36 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
             hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
       }
     }
+
+
+    $host = PhabricatorEnv::getEnvConfig('mysql.host');
+    $matches = null;
+    if (preg_match('/^([^:]+):(\d+)$/', $host, $matches)) {
+      $host = $matches[1];
+      $port = $matches[2];
+
+      $this->newIssue('storage.mysql.hostport')
+        ->setName(pht('Deprecated mysql.host Format'))
+        ->setSummary(
+          pht(
+            'Move port information from `mysql.host` to `mysql.port` in your '.
+            'config.'))
+        ->setMessage(
+          pht(
+            'Your `mysql.host` configuration contains a port number, but '.
+            'this usage is deprecated. Instead, put the port number in '.
+            '`mysql.port`.'))
+        ->addPhabricatorConfig('mysql.host')
+        ->addPhabricatorConfig('mysql.port')
+        ->addCommand(
+          hsprintf(
+            '<tt>phabricator/ $</tt> ./bin/config set mysql.host %s',
+            $host))
+        ->addCommand(
+          hsprintf(
+            '<tt>phabricator/ $</tt> ./bin/config set mysql.port %s',
+            $port));
+    }
+
   }
 }
