@@ -1442,6 +1442,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130711.trimrealnames.php'),
       ),
+      '20130714.votexactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130714.votexactions.sql'),
+      ),
     );
   }
 }

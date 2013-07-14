@@ -26,6 +26,9 @@ final class PhabricatorSlowvoteCreateController
       $poll->setShuffle((int)$request->getBool('shuffle', false));
       $poll->setMethod($request->getInt('method'));
 
+      $poll->setDescription('');
+      $poll->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+
       if (!strlen($poll->getQuestion())) {
         $e_question = pht('Required');
         $errors[] = pht('You must ask a poll question.');

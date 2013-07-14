@@ -14,10 +14,12 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   const METHOD_APPROVAL   = 1;
 
   protected $question;
+  protected $description;
   protected $authorPHID;
   protected $responseVisibility;
   protected $shuffle;
   protected $method;
+  protected $viewPolicy;
 
   public function getConfiguration() {
     return array(
@@ -42,7 +44,12 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->viewPolicy;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
