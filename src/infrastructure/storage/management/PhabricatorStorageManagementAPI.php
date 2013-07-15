@@ -45,6 +45,15 @@ final class PhabricatorStorageManagementAPI {
     return $this->host;
   }
 
+  public function setPort($port) {
+    $this->port = $port;
+    return $this;
+  }
+
+  public function getPort() {
+    return $this->port;
+  }
+
   public function getDatabaseName($fragment) {
     return $this->namespace.'_'.$fragment;
   }
@@ -74,6 +83,7 @@ final class PhabricatorStorageManagementAPI {
           'user'      => $this->user,
           'pass'      => $this->password,
           'host'      => $this->host,
+          'port'      => $this->port,
           'database'  => $fragment
             ? $database
             : null,

@@ -180,7 +180,7 @@ final class ManiphestTaskListController extends ManiphestController {
       }
       $form->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource('/typeahead/common/authors/')
           ->setName('set_authors')
           ->setLabel(pht('Authors'))
           ->setValue($tokens));

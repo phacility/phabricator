@@ -22,6 +22,7 @@ final class PhabricatorApplicationFeed extends PhabricatorApplication {
     return array(
       '/feed/' => array(
         'public/' => 'PhabricatorFeedPublicStreamController',
+        '(?P<id>\d+)/' => 'PhabricatorFeedDetailController',
         '(?:(?P<filter>[^/]+)/)?' => 'PhabricatorFeedMainController',
       ),
     );

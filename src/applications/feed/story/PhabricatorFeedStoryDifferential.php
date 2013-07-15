@@ -9,13 +9,11 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('differential-dark');
-    $view->setViewed($this->getHasViewed());
 
     $line = $this->getLineForData($data);
     $view->setTitle($line);
-    $view->setEpoch($data->getEpoch());
 
     $href = $this->getHandle($data->getValue('revision_phid'))->getURI();
     $view->setHref($href);

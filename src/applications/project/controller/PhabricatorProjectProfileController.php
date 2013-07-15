@@ -65,48 +65,41 @@ final class PhabricatorProjectProfileController
         $tasks,
         $content);
 
-    $header = new PhabricatorProfileHeaderView();
-    $header->setName($project->getName());
-    $header->setDescription(
-      phutil_utf8_shorten($profile->getBlurb(), 1024));
-    $header->setProfilePicture($picture);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($project->getName())
+      ->setSubheader(phutil_utf8_shorten($profile->getBlurb(), 1024))
+      ->setImage($picture);
 
     $action = null;
     if (!$project->isUserMember($user->getPHID())) {
-      $can_join = PhabricatorPolicyCapability::CAN_JOIN;
-
-      if (PhabricatorPolicyFilter::hasCapability($user, $project, $can_join)) {
-        $class = 'green';
-      } else {
-        $class = 'grey disabled';
-      }
-
-      $action = phabricator_form(
+      $can_join = PhabricatorPolicyFilter::hasCapability(
         $user,
-        array(
-          'action' => '/project/update/'.$project->getID().'/join/',
-          'method' => 'post',
-        ),
-        phutil_tag(
-          'button',
-          array(
-            'class' => $class,
-          ),
-          pht('Join Project')));
+        $project,
+        PhabricatorPolicyCapability::CAN_JOIN);
+
+      $action = id(new PhabricatorActionView())
+        ->setUser($user)
+        ->setRenderAsForm(true)
+        ->setHref('/project/update/'.$project->getID().'/join/')
+        ->setIcon('new')
+        ->setDisabled(!$can_join)
+        ->setName(pht('Join Project'));
     } else {
-      $action = javelin_tag(
-        'a',
-        array(
-          'href'  => '/project/update/'.$project->getID().'/leave/',
-          'sigil' => 'workflow',
-          'class' => 'grey button',
-        ),
-        pht('Leave Project...'));
+      $action = id(new PhabricatorActionView())
+        ->setWorkflow(true)
+        ->setHref('/project/update/'.$project->getID().'/leave/')
+        ->setIcon('delete')
+        ->setName(pht('Leave Project...'));
     }
 
-    $header->addAction($action);
+    $action_list = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObjectURI($request->getRequestURI())
+      ->addAction($action);
+
     $nav_view->appendChild($header);
-    $header->appendChild($content);
+    $nav_view->appendChild($action_list);
+    $nav_view->appendChild($content);
 
     return $this->buildApplicationPage(
       $nav_view,

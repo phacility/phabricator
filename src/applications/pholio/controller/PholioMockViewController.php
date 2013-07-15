@@ -37,16 +37,8 @@ final class PholioMockViewController extends PholioController {
       ->withObjectPHIDs(array($mock->getPHID()))
       ->execute();
 
-    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $mock->getPHID());
-
-    $phids = array();
-    $phids[] = $mock->getAuthorPHID();
-    foreach ($subscribers as $subscriber) {
-      $phids[] = $subscriber;
-    }
+    $phids = array($mock->getAuthorPHID());
     $this->loadHandles($phids);
-
 
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($user);
@@ -66,7 +58,7 @@ final class PholioMockViewController extends PholioController {
       ->setHeader($title);
 
     $actions = $this->buildActionView($mock);
-    $properties = $this->buildPropertyView($mock, $engine, $subscribers);
+    $properties = $this->buildPropertyView($mock, $engine);
 
     require_celerity_resource('pholio-css');
     require_celerity_resource('pholio-inline-comments-css');
@@ -117,6 +109,7 @@ final class PholioMockViewController extends PholioController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($mock);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -137,8 +130,7 @@ final class PholioMockViewController extends PholioController {
 
   private function buildPropertyView(
     PholioMock $mock,
-    PhabricatorMarkupEngine $engine,
-    array $subscribers) {
+    PhabricatorMarkupEngine $engine) {
 
     $user = $this->getRequest()->getUser();
 
@@ -161,20 +153,6 @@ final class PholioMockViewController extends PholioController {
     $properties->addProperty(
       pht('Visible To'),
       $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
-
-    if ($subscribers) {
-      $sub_view = array();
-      foreach ($subscribers as $subscriber) {
-        $sub_view[] = $this->getHandle($subscriber)->renderLink();
-      }
-      $sub_view = phutil_implode_html(', ', $sub_view);
-    } else {
-      $sub_view = phutil_tag('em', array(), pht('None'));
-    }
-
-    $properties->addProperty(
-      pht('Subscribers'),
-      $sub_view);
 
     $properties->invokeWillRenderEvent();
 

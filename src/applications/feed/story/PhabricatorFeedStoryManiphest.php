@@ -16,13 +16,11 @@ final class PhabricatorFeedStoryManiphest
   public function renderView() {
     $data = $this->getStoryData();
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('maniphest-dark');
-    $view->setViewed($this->getHasViewed());
 
     $line = $this->getLineForData($data);
     $view->setTitle($line);
-    $view->setEpoch($data->getEpoch());
 
     $action = $data->getValue('action');
 

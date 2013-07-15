@@ -34,6 +34,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($request->getRequestURI())
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Account'))
@@ -88,6 +89,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($request->getRequestURI())
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Add Payment Method'))

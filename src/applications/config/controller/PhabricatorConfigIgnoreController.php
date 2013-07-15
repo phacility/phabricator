@@ -20,21 +20,29 @@ final class PhabricatorConfigIgnoreController
       return id(new AphrontRedirectResponse())->setURI($issue_uri);
     }
 
-    // User just clicked the link, so show them the dialog.
     if ($this->verb == 'ignore') {
       $title = pht('Really ignore this setup issue?');
       $submit_title = pht('Ignore');
+      $body = pht(
+        "You can ignore an issue if you don't want to fix it, or plan to ".
+        "fix it later. Ignored issues won't appear on every page but will ".
+        "still be shown in the list of open issues.");
     } else if ($this->verb == 'unignore') {
-      $title = pht('Really unignore this setup issue?');
+      $title = pht('Unignore this setup issue?');
       $submit_title = pht('Unignore');
+      $body = pht(
+        "This issue will no longer be suppressed, and will return to its ".
+        "rightful place as a global setup warning.");
     } else {
       throw new Exception('Unrecognized verb: ' . $this->verb);
     }
-    $dialog = new AphrontDialogView();
-    $dialog->setTitle($title)
-           ->setUser($request->getUser())
-           ->addSubmitButton($submit_title)
-           ->addCancelButton($issue_uri);
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($request->getUser())
+      ->setTitle($title)
+      ->appendChild($body)
+      ->addSubmitButton($submit_title)
+      ->addCancelButton($issue_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

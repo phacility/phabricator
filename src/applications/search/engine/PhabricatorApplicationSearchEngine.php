@@ -305,4 +305,14 @@ abstract class PhabricatorApplicationSearchEngine {
           ->setLabel($end_name)
           ->setValue($end_str));
   }
+
+
+/* -(  Pagination  )--------------------------------------------------------- */
+
+
+  public function getPageSize(PhabricatorSavedQuery $saved) {
+    return $saved->getParameter('limit', 100);
+  }
+
+
 }

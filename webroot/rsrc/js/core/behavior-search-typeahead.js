@@ -51,7 +51,7 @@ JX.behavior('phabricator-search-typeahead', function(config) {
   var sort_handler = function(value, list, cmp) {
     var priority_hits = {};
     var type_priority = {
-      // TODO: Put jump nav hits like "D123" first.
+      'jump' : 1,
       'apps' : 2,
       'user' : 3,
       'symb' : 4

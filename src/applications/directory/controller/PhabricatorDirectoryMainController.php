@@ -183,14 +183,12 @@ final class PhabricatorDirectoryMainController
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
 
-    $revision_query = new DifferentialRevisionQuery();
-    $revision_query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
-    $revision_query->withResponsibleUsers(array($user_phid));
-    $revision_query->needRelationships(true);
+    $revision_query = id(new DifferentialRevisionQuery())
+      ->setViewer($user)
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withResponsibleUsers(array($user_phid))
+      ->needRelationships(true);
 
-    // NOTE: We need to unlimit this query to hit the responsible user
-    // fast-path.
-    $revision_query->setLimit(null);
     $revisions = $revision_query->execute();
 
     list($blocking, $active, ) = DifferentialRevisionQuery::splitResponsible(
@@ -229,7 +227,10 @@ final class PhabricatorDirectoryMainController
 
     $revision_view->setHandles($handles);
 
-    $panel->appendChild($revision_view);
+    $list_view = $revision_view->render();
+    $list_view->setFlush(true);
+
+    $panel->appendChild($list_view);
     $panel->setNoBackground();
 
     return $panel;

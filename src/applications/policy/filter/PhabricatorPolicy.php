@@ -18,7 +18,7 @@ final class PhabricatorPolicy {
 
     if (!$handle) {
       throw new Exception(
-        "Policy identifier is an object PHID ('{$phid_identifier}'), but no ".
+        "Policy identifier is an object PHID ('{$policy_identifier}'), but no ".
         "object handle was provided. A handle must be provided for object ".
         "policies.");
     }
@@ -26,7 +26,7 @@ final class PhabricatorPolicy {
     $handle_phid = $handle->getPHID();
     if ($policy_identifier != $handle_phid) {
       throw new Exception(
-        "Policy identifier is an object PHID ('{$phid_identifier}'), but ".
+        "Policy identifier is an object PHID ('{$policy_identifier}'), but ".
         "the provided handle has a different PHID ('{$handle_phid}'). The ".
         "handle must correspond to the policy identifier.");
     }

@@ -34,6 +34,13 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return false;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorRemarkupRuleEmbedFile(),
+    );
+  }
+
+
   public function getRoutes() {
     return array(
       '/F(?P<id>[1-9]\d*)' => 'PhabricatorFileShortcutController',

@@ -49,11 +49,10 @@ final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
         $commit);
     }
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('differential-dark');
 
     $view->setTitle($title);
-    $view->setEpoch($data->getEpoch());
 
     if ($data->getValue('authorPHID')) {
       $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());

@@ -331,6 +331,21 @@
       "rule" : ".apps-home-light-large",
       "hash" : "51b74f90f877258c47145807fd18e388"
     },
+    "apps-legalpad-blue-large"        : {
+      "name" : "apps-legalpad-blue-large",
+      "rule" : ".apps-legalpad-blue-large, .phabricator-crumb-view:hover .apps-legalpad-dark-large",
+      "hash" : "c2570d0cccbcd57fdab9e67579ab1176"
+    },
+    "apps-legalpad-dark-large"        : {
+      "name" : "apps-legalpad-dark-large",
+      "rule" : ".apps-legalpad-dark-large",
+      "hash" : "c5e140c481b2ce1aec09b3ab858d01a9"
+    },
+    "apps-legalpad-light-large"       : {
+      "name" : "apps-legalpad-light-large",
+      "rule" : ".apps-legalpad-light-large",
+      "hash" : "486d7dd91fb4ef4bfb210488a7f0033c"
+    },
     "apps-logo-blue-large"            : {
       "name" : "apps-logo-blue-large",
       "rule" : ".apps-logo-blue-large, .phabricator-crumb-view:hover .apps-logo-dark-large",

@@ -79,10 +79,10 @@ do any of this, consider using Amazon SES.
 = Adapter: SMTP =
 
 For most situations of using SMTP to send email, you could actually use
-'sendmail' or 'postfix' to do it. But some SMTP server requires authentication 
-and the 'sendmail' mailer doesn't work. If you want to try with postfix, for install
-instructions, consult the documentation for postfix as MTA and you could configure 
-to use SMTP then.
+'sendmail' or 'postfix' to do it. But some SMTP server requires authentication
+and the 'sendmail' mailer doesn't work. If you want to try with postfix, for
+install instructions, consult the documentation for postfix as MTA and you
+could configure to use SMTP then.
 
 To configure Phabricator to use SMTP, set these configuration keys:
 
@@ -165,15 +165,14 @@ For more information on using daemons, see @{article:Managing Daemons with phd}.
 
 = Testing and Debugging Outbound Email =
 
-Phabricator has a mail log and test console at ##/mail/##, or click the
-**MetaMTA** link from the homepage. This console shows all the mail Phabricator
-has attempted to deliver, plus debugging and error information.
+You can use the `bin/mail` utility to test, debug, and examine outbound mail. In
+particular:
 
-You can use the "Send New Message" button to send mail using the current
-configuration. This can help test that your setup is correct.
+  phabricator/ $ ./bin/mail list-outbound   # List outbound mail.
+  phabricator/ $ ./bin/mail show-outbound   # Show details about messages.
+  phabricator/ $ ./bin/mail send-test       # Send test messages.
 
-NOTE: when you send mail, "to" and "cc" must be valid users of the system, not
-arbitrary email addresses.
+Run `bin/mail help <command>` for more help on using these commands.
 
 You can monitor daemons using the Daemon Console (##/daemon/##, or click
 **Daemon Console** from the homepage).

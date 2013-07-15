@@ -18,6 +18,8 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       $n_cache_ttl = $this->collectGeneralCacheTTL();
       $n_cache  = $this->collectGeneralCaches();
       $n_files  = $this->collectExpiredFiles();
+      $n_clogs  = $this->collectExpiredConduitLogs();
+      $n_ccons  = $this->collectExpiredConduitConnections();
 
       $collected = array(
         'Herald Transcript'           => $n_herald,
@@ -28,6 +30,8 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
         'General Cache TTL'           => $n_cache_ttl,
         'General Cache Entries'       => $n_cache,
         'Temporary Files'             => $n_files,
+        'Conduit Logs'                => $n_clogs,
+        'Conduit Connections'         => $n_ccons,
       );
       $collected = array_filter($collected);
 
@@ -217,6 +221,44 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
     }
 
     return count($files);
+  }
+
+  private function collectExpiredConduitLogs() {
+    $key = 'gcdaemon.ttl.conduit-logs';
+    $ttl = PhabricatorEnv::getEnvConfig($key);
+    if ($ttl <= 0) {
+      return 0;
+    }
+
+    $table = new PhabricatorConduitMethodCallLog();
+    $conn_w = $table->establishConnection('w');
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE dateCreated < %d
+        ORDER BY dateCreated ASC LIMIT 100',
+      $table->getTableName(),
+      time() - $ttl);
+
+    return $conn_w->getAffectedRows();
+  }
+
+  private function collectExpiredConduitConnections() {
+    $key = 'gcdaemon.ttl.conduit-logs';
+    $ttl = PhabricatorEnv::getEnvConfig($key);
+    if ($ttl <= 0) {
+      return 0;
+    }
+
+    $table = new PhabricatorConduitConnectionLog();
+    $conn_w = $table->establishConnection('w');
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE dateCreated < %d
+        ORDER BY dateCreated ASC LIMIT 100',
+      $table->getTableName(),
+      time() - $ttl);
+
+    return $conn_w->getAffectedRows();
   }
 
 }

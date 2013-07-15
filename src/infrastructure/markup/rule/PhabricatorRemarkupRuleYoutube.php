@@ -6,6 +6,10 @@
 final class PhabricatorRemarkupRuleYoutube
   extends PhutilRemarkupRule {
 
+  public function getPriority() {
+    return 350.0;
+  }
+
   public function apply($text) {
     $this->uri = new PhutilURI($text);
 

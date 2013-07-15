@@ -311,6 +311,7 @@ JX.behavior('pholio-mock-view', function(config) {
       }
 
       drag_end = get_image_xy(JX.$V(e));
+      var scale = get_image_scale();
 
       resize_selection(16);
 
@@ -319,10 +320,9 @@ JX.behavior('pholio-mock-view', function(config) {
         var dialog = JX.$H(r).getFragment().firstChild;
         JX.DOM.appendContent(viewport, dialog);
 
-        JX.$V(
-          Math.min(drag_begin.x, drag_end.x),
-          Math.max(drag_begin.y, drag_end.y) + 4
-        ).setPos(dialog);
+        var x = Math.min(drag_begin.x * scale, drag_end.x * scale);
+        var y = Math.max(drag_begin.y * scale, drag_end.y * scale) + 4;
+        JX.$V(x, y).setPos(dialog);
 
         JX.DOM.focus(JX.DOM.find(dialog, 'textarea'));
       };
@@ -420,7 +420,7 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function position_inline_rectangle(inline, rect) {
-    var scale = active_image.tag.width / active_image.tag.naturalWidth;
+    var scale = get_image_scale();
 
     JX.$V(scale * inline.x, scale * inline.y).setPos(rect);
     JX.$V(scale * inline.width, scale * inline.height).setDim(rect);
@@ -443,7 +443,9 @@ JX.behavior('pholio-mock-view', function(config) {
 
   function get_image_scale() {
     var img = active_image.tag;
-    return img.width / img.naturalWidth;
+    return Math.min(
+      img.width / img.naturalWidth,
+      img.height / img.naturalHeight);
   }
 
   function redraw_selection() {
@@ -629,7 +631,9 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   load_inline_comments();
-  JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+  if (config.loggedIn) {
+    JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+  }
 
   JX.Stratcom.listen('resize', null, redraw_image);
   redraw_image();

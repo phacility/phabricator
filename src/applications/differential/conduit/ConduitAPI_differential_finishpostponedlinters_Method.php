@@ -35,7 +35,10 @@ final class ConduitAPI_differential_finishpostponedlinters_Method
     $diff_id = $request->getValue('diffID');
     $linter_map = $request->getValue('linters');
 
-    $diff = id(new DifferentialDiff())->load($diff_id);
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($diff_id))
+      ->executeOne();
     if (!$diff) {
       throw new ConduitException('ERR-BAD-DIFF');
     }

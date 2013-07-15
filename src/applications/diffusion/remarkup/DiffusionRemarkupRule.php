@@ -15,16 +15,12 @@ final class DiffusionRemarkupRule
     $min_unqualified = PhabricatorRepository::MINIMUM_UNQUALIFIED_HASH;
     $min_qualified   = PhabricatorRepository::MINIMUM_QUALIFIED_HASH;
 
-    // NOTE: The "(?<!/)" negative lookbehind prevents this rule from matching
-    // hashes or hash-like substrings in most URLs. For example, this will not
-    // match: http://www.example.com/article/28903218328/
-
     return
       'r[A-Z]+[1-9]\d*'.
       '|'.
       'r[A-Z]+[a-f0-9]{'.$min_qualified.',40}'.
       '|'.
-      '(?<!/)[a-f0-9]{'.$min_unqualified.',40}';
+      '[a-f0-9]{'.$min_unqualified.',40}';
   }
 
   protected function loadObjects(array $ids) {

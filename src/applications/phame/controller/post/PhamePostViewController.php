@@ -87,6 +87,7 @@ final class PhamePostViewController extends PhameController {
 
     $actions = id(new PhabricatorActionListView())
       ->setObject($post)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

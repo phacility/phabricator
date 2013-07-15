@@ -170,17 +170,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           array_unshift(
             $args,
             csprintf(
-              'ssh -l %s -i %s',
-              $this->getSSHLogin(),
-              $this->getSSHKeyfile()));
+              'ssh -l %P -i %P',
+              new PhutilOpaqueEnvelope($this->getSSHLogin()),
+              new PhutilOpaqueEnvelope($this->getSSHKeyfile())));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $command = call_user_func_array(
             'csprintf',
             array_merge(
               array(
-                "(ssh-add %s && HOME=%s git {$pattern})",
-                $this->getSSHKeyfile(),
+                "(ssh-add %P && HOME=%s git {$pattern})",
+                new PhutilOpaqueEnvelope($this->getSSHKeyfile()),
                 $empty,
               ),
               $args));
@@ -192,9 +192,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           array_unshift(
             $args,
             csprintf(
-              'ssh -l %s -i %s',
-              $this->getSSHLogin(),
-              $this->getSSHKeyfile()));
+              'ssh -l %P -i %P',
+              new PhutilOpaqueEnvelope($this->getSSHLogin()),
+              new PhutilOpaqueEnvelope($this->getSSHKeyfile())));
           break;
         default:
           throw new Exception("Unrecognized version control system.");
@@ -207,13 +207,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
             "--non-interactive ".
             "--no-auth-cache ".
             "--trust-server-cert ".
-            "--username %s ".
-            "--password %s ".
+            "--username %P ".
+            "--password %P ".
             $pattern;
           array_unshift(
             $args,
-            $this->getDetail('http-login'),
-            $this->getDetail('http-pass'));
+            new PhutilOpaqueEnvelope($this->getDetail('http-login')),
+            new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
           break;
         default:
           throw new Exception(
@@ -226,13 +226,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
               "svn ".
               "--non-interactive ".
               "--no-auth-cache ".
-              "--username %s ".
-              "--password %s ".
+              "--username %P ".
+              "--password %P ".
               $pattern;
             array_unshift(
               $args,
-              $this->getDetail('http-login'),
-              $this->getDetail('http-pass'));
+              new PhutilOpaqueEnvelope($this->getDetail('http-login')),
+              new PhutilOpaqueEnvelope($this->getDetail('http-pass')));
             break;
         default:
           throw new Exception(
@@ -707,6 +707,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $all_offset = 0;
       }
 
+      $match = array_reverse($match);
       foreach ($match as $val) {
         list($s, $offset) = $val;
         $message = substr_replace(

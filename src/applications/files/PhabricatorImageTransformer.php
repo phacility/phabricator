@@ -94,7 +94,6 @@ final class PhabricatorImageTransformer {
     }
 
     $cropped = $this->applyScaleWithImagemagick($file, $x, $scaled_y);
-
     if ($cropped != null) {
       return $cropped;
     }

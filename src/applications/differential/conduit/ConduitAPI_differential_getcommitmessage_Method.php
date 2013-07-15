@@ -32,15 +32,21 @@ final class ConduitAPI_differential_getcommitmessage_Method
     $id = $request->getValue('revision_id');
 
     if ($id) {
-      $revision = id(new DifferentialRevision())->load($id);
+      $revision = id(new DifferentialRevisionQuery())
+        ->withIDs(array($id))
+        ->setViewer($request->getUser())
+        ->needRelationships(true)
+        ->needReviewerStatus(true)
+        ->executeOne();
+
       if (!$revision) {
         throw new ConduitException('ERR_NOT_FOUND');
       }
     } else {
       $revision = new DifferentialRevision();
+      $revision->attachRelationships(array());
     }
 
-    $revision->loadRelationships();
 
     $is_edit = $request->getValue('edit');
     $is_create = ($is_edit == 'create');

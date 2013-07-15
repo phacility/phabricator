@@ -14,7 +14,19 @@ final class PhabricatorUserBlurbField
   }
 
   public function getFieldDescription() {
-    return pht('Short user summary.');
+    return pht('Short blurb about the user.');
+  }
+
+  public function shouldAppearInApplicationTransactions() {
+    return true;
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
+  public function shouldAppearInPropertyView() {
+    return true;
   }
 
   protected function didSetObject(PhabricatorCustomFieldInterface $object) {
@@ -43,6 +55,25 @@ final class PhabricatorUserBlurbField
       ->setName($this->getFieldKey())
       ->setValue($this->value)
       ->setLabel($this->getFieldName());
+  }
+
+  public function renderPropertyViewLabel() {
+    return null;
+  }
+
+  public function renderPropertyViewValue() {
+    $blurb = $this->getObject()->loadUserProfile()->getBlurb();
+    if (!strlen($blurb)) {
+      return null;
+    }
+    return PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())->setContent($blurb),
+      'default',
+      $this->getViewer());
+  }
+
+  public function getStyleForPropertyView() {
+    return 'block';
   }
 
 }

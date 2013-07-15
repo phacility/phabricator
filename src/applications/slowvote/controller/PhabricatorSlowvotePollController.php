@@ -18,7 +18,10 @@ final class PhabricatorSlowvotePollController
     $user = $request->getUser();
     $viewer_phid = $user->getPHID();
 
-    $poll = id(new PhabricatorSlowvotePoll())->load($this->id);
+    $poll = id(new PhabricatorSlowvoteQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$poll) {
       return new Aphront404Response();
     }
@@ -127,6 +130,7 @@ final class PhabricatorSlowvotePollController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setFlexible(true)
       ->setAction(sprintf('/vote/%d/', $poll->getID()))
       ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">%s</p>',
@@ -145,20 +149,33 @@ final class PhabricatorSlowvotePollController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Engage in Deliberations')));
 
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($poll->getQuestion());
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName('V'.$poll->getID()));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader($poll->getQuestion());
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->setNoBackground();
-    $panel->appendChild($form);
-    $panel->appendChild(hsprintf('<br /><br />'));
     $panel->appendChild($result_markup);
 
+    $content = array(
+      $form,
+      hsprintf('<br /><br />'),
+      $panel);
+
     return $this->buildApplicationPage(
-      $panel,
+      array(
+        $crumbs,
+        $header,
+        $content,
+      ),
       array(
         'title' => 'V'.$poll->getID().' '.$poll->getQuestion(),
         'device' => true,
+        'dust' => true,
       ));
   }
 

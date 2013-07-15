@@ -139,12 +139,19 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
             "You can not resign from this revision because you are not ".
             "a reviewer.");
         }
-        DifferentialRevisionEditor::alterReviewers(
+
+        list($added_reviewers, $ignored) = $this->alterReviewers();
+        if ($added_reviewers) {
+          $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
+          $metadata[$key] = $added_reviewers;
+        }
+
+        DifferentialRevisionEditor::updateReviewers(
           $revision,
-          $reviewer_phids,
-          $rem = array($actor_phid),
-          $add = array(),
-          $actor_phid);
+          $actor,
+          array(),
+          array($actor_phid));
+
         break;
 
       case DifferentialAction::ACTION_ABANDON:
@@ -198,14 +205,11 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::ACCEPTED);
 
-        if (!isset($reviewer_phids[$actor_phid])) {
-          DifferentialRevisionEditor::alterReviewers(
-            $revision,
-            $reviewer_phids,
-            $rem = array(),
-            $add = array($actor_phid),
-            $actor_phid);
-        }
+        DifferentialRevisionEditor::updateReviewerStatus(
+          $revision,
+          $this->getActor(),
+          $actor_phid,
+          DifferentialReviewerStatus::STATUS_ADDED);
         break;
 
       case DifferentialAction::ACTION_REQUEST:
@@ -271,14 +275,11 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
               "Unexpected revision state '{$revision_status}'!");
         }
 
-        if (!isset($reviewer_phids[$actor_phid])) {
-          DifferentialRevisionEditor::alterReviewers(
-            $revision,
-            $reviewer_phids,
-            $rem = array(),
-            $add = array($actor_phid),
-            $actor_phid);
-        }
+        DifferentialRevisionEditor::updateReviewerStatus(
+          $revision,
+          $this->getActor(),
+          $actor_phid,
+          DifferentialReviewerStatus::STATUS_REJECTED);
 
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVISION);
@@ -613,10 +614,6 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       'actor_phid'           => $actor_phid,
     );
 
-    // TODO: Get rid of this
-    id(new PhabricatorTimelineEvent('difx', $event_data))
-      ->recordEvent();
-
     id(new PhabricatorFeedStoryPublisher())
       ->setStoryType('PhabricatorFeedStoryDifferential')
       ->setStoryData($event_data)
@@ -696,12 +693,11 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $removed_reviewers = array_unique($removed_reviewers);
 
     if ($added_reviewers) {
-      DifferentialRevisionEditor::alterReviewers(
+      DifferentialRevisionEditor::updateReviewers(
         $revision,
-        $reviewer_phids,
-        $removed_reviewers,
+        $this->getActor(),
         $added_reviewers,
-        $actor_phid);
+        $removed_reviewers);
     }
 
     return array($added_reviewers, $removed_reviewers);

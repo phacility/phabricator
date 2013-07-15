@@ -15,10 +15,14 @@ EOSYNOPSIS
 $args->parseStandardArguments();
 
 $workflows = array(
-  new PhabricatorMailManagementResendWorkflow(),
   new PhutilHelpArgumentWorkflow(),
+  new PhabricatorMailManagementResendWorkflow(),
   new PhabricatorMailManagementShowOutboundWorkflow(),
   new PhabricatorMailManagementShowInboundWorkflow(),
+  new PhabricatorMailManagementSendTestWorkflow(),
+  new PhabricatorMailManagementReceiveTestWorkflow(),
+  new PhabricatorMailManagementListInboundWorkflow(),
+  new PhabricatorMailManagementListOutboundWorkflow(),
 );
 
 $args->parseWorkflows($workflows);

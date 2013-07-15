@@ -1,0 +1,13 @@
+/**
+ * @provides people-profile-css
+ */
+
+form.profile-image-form {
+  display: inline-block;
+  margin: 0 8px 8px 0;
+}
+
+button.profile-image-button {
+  padding: 4px;
+  margin: 0;
+}

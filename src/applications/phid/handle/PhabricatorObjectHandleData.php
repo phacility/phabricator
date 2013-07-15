@@ -108,11 +108,10 @@ final class PhabricatorObjectHandleData {
         return mpull($lists, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        // TODO: Update this to DifferentialRevisionQuery
-        $revision_dao = new DifferentialRevision();
-        $revisions = $revision_dao->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
+        $revisions = id(new DifferentialRevisionQuery())
+          ->setViewer($this->viewer)
+          ->withPHIDs($phids)
+          ->execute();
         return mpull($revisions, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
@@ -211,6 +210,22 @@ final class PhabricatorObjectHandleData {
           'phid in (%Ls)',
           $phids);
         return mpull($xusrs, null, 'getPHID');
+
+      case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
+        $legds = id(new LegalpadDocumentQuery())
+          ->needDocumentBodies(true)
+          ->withPHIDs($phids)
+          ->setViewer($this->viewer)
+          ->execute();
+        return mpull($legds, null, 'getPHID');
+
+      case PhabricatorPHIDConstants::PHID_TYPE_CONP:
+        $confs = id(new ConpherenceThreadQuery())
+          ->withPHIDs($phids)
+          ->setViewer($this->viewer)
+          ->execute();
+        return mpull($confs, null, 'getPHID');
+
 
     }
 
@@ -724,6 +739,47 @@ final class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName(pht('Unknown Legalpad Document'));
+            } else {
+              $document = $objects[$phid];
+              $handle->setName($document->getDocumentBody()->getTitle());
+              $handle->setFullName($document->getDocumentBody()->getTitle());
+              $handle->setURI('/legalpad/view/'.$document->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_CONP:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName(pht('Unknown Conpherence Thread'));
+            } else {
+              $thread = $objects[$phid];
+              $name = $thread->getTitle();
+              if (!strlen($name)) {
+                $name = pht('[No Title]');
+              }
+              $handle->setName($name);
+              $handle->setFullName($name);
+              $handle->setURI('/conpherence/'.$thread->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
 
         default:
           $loader = null;

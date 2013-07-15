@@ -38,7 +38,6 @@ final class PhrequentUIEventListener
       $object->getPHID());
     if (!$tracking) {
       $track_action = id(new PhabricatorActionView())
-        ->setUser($user)
         ->setName(pht('Start Tracking Time'))
         ->setIcon('history')
         ->setWorkflow(true)
@@ -46,7 +45,6 @@ final class PhrequentUIEventListener
         ->setHref('/phrequent/track/start/'.$object->getPHID().'/');
     } else {
       $track_action = id(new PhabricatorActionView())
-        ->setUser($user)
         ->setName(pht('Stop Tracking Time'))
         ->setIcon('history')
         ->setWorkflow(true)

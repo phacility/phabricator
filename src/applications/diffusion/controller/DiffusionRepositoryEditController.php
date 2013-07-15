@@ -70,6 +70,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $user = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -122,6 +123,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
     $user = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

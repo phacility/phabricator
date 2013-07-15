@@ -17,26 +17,25 @@ final class PhabricatorSettingsPanelAccount
 
   public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
-    $editable = PhabricatorEnv::getEnvConfig('account.editable');
-
-    $e_realname = $editable ? true : null;
     $errors = array();
     if ($request->isFormPost()) {
-
-      if ($editable) {
-        $user->setRealName($request->getStr('realname'));
-        if (!strlen($user->getRealName())) {
-          $errors[] = pht('Real name must be nonempty.');
-          $e_realname = pht('Required');
-        }
-      }
-
       $new_timezone = $request->getStr('timezone');
       if (in_array($new_timezone, DateTimeZone::listIdentifiers(), true)) {
         $user->setTimezoneIdentifier($new_timezone);
       } else {
         $errors[] = pht('The selected timezone is not a valid timezone.');
       }
+
+      $sex = $request->getStr('sex');
+      $sexes = array(PhutilPerson::SEX_MALE, PhutilPerson::SEX_FEMALE);
+      if (in_array($sex, $sexes)) {
+        $user->setSex($sex);
+      } else {
+        $user->setSex(null);
+      }
+
+      // Checked in runtime.
+      $user->setTranslation($request->getStr('translation'));
 
       if (!$errors) {
         $user->save();
@@ -57,28 +56,39 @@ final class PhabricatorSettingsPanelAccount
       }
     } else {
       $notice = new AphrontErrorView();
-      $notice->setTitle(pht('Form Errors'));
       $notice->setErrors($errors);
-      $notice = $notice->render();
     }
 
     $timezone_ids = DateTimeZone::listIdentifiers();
     $timezone_id_map = array_fuse($timezone_ids);
 
+    $sexes = array(
+      PhutilPerson::SEX_UNKNOWN => pht('Unspecified'),
+      PhutilPerson::SEX_MALE => pht('Male'),
+      PhutilPerson::SEX_FEMALE => pht('Female'),
+    );
+
+    $translations = array();
+    $symbols = id(new PhutilSymbolLoader())
+      ->setType('class')
+      ->setAncestorClass('PhabricatorTranslation')
+      ->setConcreteOnly(true)
+      ->selectAndLoadSymbols();
+    foreach ($symbols as $symbol) {
+      $class = $symbol['name'];
+      $translations[$class] = newv($class, array())->getName();
+    }
+    asort($translations);
+    $default = PhabricatorEnv::newObjectFromConfig('translation.provider');
+    $translations = array(
+      '' => pht('Server Default (%s)', $default->getName()),
+    ) + $translations;
+
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel(pht('Username'))
-          ->setValue($user->getUsername()))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Real Name'))
-          ->setName('realname')
-          ->setError($e_realname)
-          ->setValue($user->getRealName())
-          ->setDisabled(!$editable))
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Timezone'))
@@ -86,8 +96,20 @@ final class PhabricatorSettingsPanelAccount
           ->setOptions($timezone_id_map)
           ->setValue($user->getTimezoneIdentifier()))
       ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setOptions($sexes)
+          ->setLabel(pht('Sex'))
+          ->setName('sex')
+          ->setValue($user->getSex()))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setOptions($translations)
+          ->setLabel(pht('Translation'))
+          ->setName('translation')
+          ->setValue($user->getTranslation()))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Save')));
+          ->setValue(pht('Save Account Settings')));
 
     $header = new PhabricatorHeaderView();
     $header->setHeader(pht('Account Settings'));

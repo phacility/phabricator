@@ -23,7 +23,9 @@ final class PhabricatorPasteListController extends PhabricatorPasteController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(array $pastes) {
+  public function renderResultsList(
+    array $pastes,
+    PhabricatorSavedQuery $query) {
     assert_instances_of($pastes, 'PhabricatorPaste');
 
     $user = $this->getRequest()->getUser();

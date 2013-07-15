@@ -18,6 +18,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_rich_data = false;
 
     $need_users = false;
+    $need_agents = false;
     $need_applications = false;
     $need_all_users = false;
     $need_lists = false;
@@ -28,6 +29,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_arcanist_projects = false;
     $need_noproject = false;
     $need_symbols = false;
+    $need_jump_objects = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
@@ -35,6 +37,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_rich_data = true;
         $need_symbols = true;
         $need_projs = true;
+        $need_jump_objects = true;
         break;
       case 'searchowner':
         $need_users = true;
@@ -46,6 +49,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'users':
         $need_users = true;
+        break;
+      case 'authors':
+        $need_users = true;
+        $need_agents = true;
         break;
       case 'mailable':
         $need_users = true;
@@ -163,7 +170,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
 
       foreach ($users as $user) {
         if (!$need_all_users) {
-          if ($user->getIsSystemAgent()) {
+          if (!$need_agents && $user->getIsSystemAgent()) {
             continue;
           }
           if ($user->getIsDisabled()) {
@@ -291,6 +298,60 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayName($name)
           ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
           ->setPriorityType('symb');
+      }
+    }
+
+    if ($need_jump_objects) {
+      $response = PhabricatorJumpNavHandler::jumpPostResponse($query);
+
+      if ($response) {
+        $is_task = array();
+        $is_revision = array();
+
+        preg_match('/T[0-9]+/', $response->getURI(), $is_task);
+        preg_match('/D[0-9]+/', $response->getURI(), $is_revision);
+
+        if ($is_task) {
+          for ($i = 0; $i < count($is_task); $i++) {
+            $is_task[$i] = substr($is_task[$i], 1); // Remove leading 'T'.
+          }
+          $tasks = id(new ManiphestTaskQuery())
+            ->setViewer($viewer)
+            ->withTaskIDs($is_task)
+            ->execute();
+
+          if ($tasks) {
+            foreach ($tasks as $task) {
+              $results[] = id(new PhabricatorTypeaheadResult())
+                ->setName('T'.$task->getID())
+                ->setDisplayType("Task")
+                ->setURI('/T'.$task->getID())
+                ->setPHID($task->getPHID())
+                ->setPriorityType('jump');
+            }
+          }
+        }
+
+        if ($is_revision) {
+          for ($i = 0; $i < count($is_revision); $i++) {
+            $is_revision[$i] = substr($is_revision[$i], 1);
+          }
+          $revisions = id(new DifferentialRevisionQuery())
+            ->setViewer($viewer)
+            ->withIDs($is_revision)
+            ->execute();
+
+          if ($revisions) {
+            foreach ($revisions as $revision) {
+              $results[] = id(new PhabricatorTypeaheadResult())
+                ->setName('D'.$revision->getID())
+                ->setDisplayType("Revision")
+                ->setURI('/D'.$revision->getID())
+                ->setPHID($revision->getPHID())
+                ->setPriorityType('jump');
+            }
+          }
+        }
       }
     }
 

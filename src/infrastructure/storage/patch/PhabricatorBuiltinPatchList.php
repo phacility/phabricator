@@ -1410,6 +1410,38 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130628.legalpadv0.sql'),
       ),
+      '20130701.conduitlog.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130701.conduitlog.sql'),
+      ),
+      'legalpad-mailkey.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('legalpad-mailkey.sql'),
+      ),
+      'legalpad-mailkey-populate.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('legalpad-mailkey-populate.php'),
+      ),
+      '20130703.legalpaddocdenorm.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.sql'),
+      ),
+      '20130703.legalpaddocdenorm.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.php'),
+      ),
+      '20130709.legalpadsignature.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130709.legalpadsignature.sql'),
+      ),
+      '20130709.droptimeline.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130709.droptimeline.sql'),
+      ),
+      '20130711.trimrealnames.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130711.trimrealnames.php'),
+      ),
     );
   }
 }

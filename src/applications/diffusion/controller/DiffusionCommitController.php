@@ -860,7 +860,8 @@ final class DiffusionCommitController extends DiffusionController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($commit);
+      ->setObject($commit)
+      ->setObjectURI($request->getRequestURI());
 
     // TODO -- integrate permissions into whether or not this action is shown
     $uri = '/diffusion/'.$repository->getCallSign().'/commit/'.

@@ -1,6 +1,7 @@
 /**
  * @requires javelin-install
  *           javelin-dom
+ *           javelin-fx
  * @provides phabricator-busy
  * @javelin
  */
@@ -26,14 +27,13 @@ JX.install('Busy', {
       var self = JX.Busy;
       if (!self._depth) {
         self._indicator = JX.$N('div', {className: 'busy'});
-        self._indicator.style.display = 'none';
+        self._indicator.style.opacity = 0;
         document.body.appendChild(self._indicator);
 
         // Don't actually show the indicator for a little while, to prevent
         // it from flashing briefly for every Ajax request.
-        setTimeout(function() {
-          self._indicator && (self._indicator.style.display = '');
-        }, 500);
+
+        new JX.FX(self._indicator).setDuration(1000).start({opacity: [0, 0.8]});
       }
       self._depth++;
     },

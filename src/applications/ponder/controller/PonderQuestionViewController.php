@@ -100,13 +100,11 @@ final class PonderQuestionViewController extends PonderController {
   }
 
   private function buildActionListView(PonderQuestion $question) {
-    $viewer = $this->getRequest()->getUser();
-    $view = new PhabricatorActionListView();
-
-    $view->setUser($viewer);
-    $view->setObject($question);
-
-    return $view;
+    $request = $this->getRequest();
+    return id(new PhabricatorActionListView())
+      ->setUser($request->getUser())
+      ->setObject($question)
+      ->setObjectURI($request->getRequestURI());
   }
 
   private function buildPropertyListView(

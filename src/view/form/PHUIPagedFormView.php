@@ -31,6 +31,10 @@ final class PHUIPagedFormView extends AphrontTagView {
     }
     $this->pages[$key] = $page;
     $page->setPagedFormView($this, $key);
+
+    $this->selectedPage = null;
+    $this->complete = null;
+
     return $this;
   }
 
@@ -104,12 +108,7 @@ final class PHUIPagedFormView extends AphrontTagView {
   }
 
   public function readFromObject($object) {
-    foreach ($this->pages as $page) {
-      $page->validateObjectType($object);
-      $page->readFromObject($object);
-    }
-
-    return $this->processForm();
+    return $this->processForm($is_request = false, $object);
   }
 
   public function writeToResponse($response) {
@@ -122,21 +121,11 @@ final class PHUIPagedFormView extends AphrontTagView {
   }
 
   public function readFromRequest(AphrontRequest $request) {
-    $active_page = $request->getStr($this->getRequestKey('page'));
-
-    foreach ($this->pages as $key => $page) {
-      if ($key == $active_page) {
-        $page->readFromRequest($request);
-      } else {
-        $page->readSerializedValues($request);
-      }
-    }
-
-    $this->choosePage = $active_page;
+    $this->choosePage = $request->getStr($this->getRequestKey('page'));
     $this->nextPage = $request->getStr('__submit__');
     $this->prevPage = $request->getStr('__back__');
 
-    return $this->processForm();
+    return $this->processForm($is_request = true, $request);
   }
 
   public function setName($name) {
@@ -154,13 +143,7 @@ final class PHUIPagedFormView extends AphrontTagView {
     return $this;
   }
 
-  public function processForm() {
-    foreach ($this->pages as $key => $page) {
-      if (!$page->isValid()) {
-        break;
-      }
-    }
-
+  private function processForm($is_request, $source) {
     if ($this->pageExists($this->choosePage)) {
       $selected = $this->getPage($this->choosePage);
     } else {
@@ -182,20 +165,39 @@ final class PHUIPagedFormView extends AphrontTagView {
     }
 
     $validation_error = false;
+    $found_selected = false;
     foreach ($this->pages as $key => $page) {
-      if (!$page->isValid()) {
-        $validation_error = true;
-        break;
+      if ($is_request) {
+        if ($key === $this->choosePage) {
+          $page->readFromRequest($source);
+        } else {
+          $page->readSerializedValues($source);
+        }
+      } else {
+        $page->readFromObject($source);
       }
+
+      if (!$found_selected) {
+        $page->adjustFormPage();
+      }
+
       if ($page === $selected) {
-        break;
+        $found_selected = true;
+      }
+
+      if (!$found_selected || $is_attempt_complete) {
+        if (!$page->isValid()) {
+          $selected = $page;
+          $validation_error = true;
+          break;
+        }
       }
     }
 
     if ($is_attempt_complete && !$validation_error) {
       $this->complete = true;
     } else {
-      $this->selectedPage = $page;
+      $this->selectedPage = $selected;
     }
 
     return $this;
@@ -222,8 +224,11 @@ final class PHUIPagedFormView extends AphrontTagView {
       $this->getRequestKey('page'),
       $selected_page->getKey());
 
+    $errors = array();
+
     foreach ($this->pages as $page) {
       if ($page == $selected_page) {
+        $errors = $page->getPageErrors();
         continue;
       }
       foreach ($page->getSerializedValues() as $key => $value) {
@@ -246,7 +251,21 @@ final class PHUIPagedFormView extends AphrontTagView {
     $form->appendChild($selected_page);
     $form->appendChild($submit);
 
-    return $form;
+    if ($errors) {
+      $errors = id(new AphrontErrorView())->setErrors($errors);
+    }
+
+    $header = null;
+    if ($selected_page->getPageName()) {
+      $header = id(new PhabricatorHeaderView())
+        ->setHeader($selected_page->getPageName());
+    }
+
+    return array(
+      $header,
+      $errors,
+      $form,
+    );
   }
 
 }

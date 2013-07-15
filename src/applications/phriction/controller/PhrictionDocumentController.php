@@ -85,10 +85,8 @@ final class PhrictionDocumentController
       }
       $page_title = $content->getTitle();
 
-      $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-        $document->getPHID());
       $properties = $this
-        ->buildPropertyListView($document, $content, $slug, $subscribers);
+        ->buildPropertyListView($document, $content, $slug);
 
       $doc_status = $document->getStatus();
       $current_status = $content->getChangeType();
@@ -201,8 +199,7 @@ final class PhrictionDocumentController
   private function buildPropertyListView(
     PhrictionDocument $document,
     PhrictionContent $content,
-    $slug,
-    array $subscribers) {
+    $slug) {
 
     $viewer = $this->getRequest()->getUser();
     $view = id(new PhabricatorPropertyListView())
@@ -224,10 +221,6 @@ final class PhrictionDocumentController
         $content->getAuthorPHID(),
         $project_phid,
       ));
-
-    if ($subscribers) {
-      $phids = array_merge($phids, $subscribers);
-    }
 
     $this->loadHandles($phids);
 
@@ -253,11 +246,6 @@ final class PhrictionDocumentController
     }
     $view->addProperty(pht('Last Updated'), $when);
 
-    if ($subscribers) {
-      $subscribers = $this->renderHandlesForPHIDs($subscribers, ',');
-      $view->addProperty(pht('Subscribers'), $subscribers);
-    }
-
     return $view;
   }
 
@@ -273,6 +261,7 @@ final class PhrictionDocumentController
 
     $action_view = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($document);
 
     if (!$document->getID()) {

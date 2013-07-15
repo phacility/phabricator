@@ -32,6 +32,9 @@ final class PhabricatorGarbageCollectorConfigOptions
       'gcdaemon.ttl.general-cache' => array(
         30,
         pht('Number of seconds to retain general cache entries for.')),
+      'gcdaemon.ttl.conduit-logs' => array(
+        180,
+        pht('Number of seconds to retain Conduit call logs for.'))
     );
 
     $result = array();

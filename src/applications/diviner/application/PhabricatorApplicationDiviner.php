@@ -39,6 +39,12 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     return self::GROUP_COMMUNICATION;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new DivinerRemarkupRuleSymbol(),
+    );
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {

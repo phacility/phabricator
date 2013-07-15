@@ -19,10 +19,10 @@ final class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
 
   public function defineParamTypes() {
     $types = array(
-      DifferentialRevisionListData::QUERY_OPEN_OWNED,
-      DifferentialRevisionListData::QUERY_COMMITTABLE,
-      DifferentialRevisionListData::QUERY_REVISION_IDS,
-      DifferentialRevisionListData::QUERY_PHIDS,
+      'open',
+      'committable',
+      'revision-ids',
+      'phids',
     );
 
     $types = implode(', ', $types);
@@ -43,7 +43,7 @@ final class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $query = $request->getValue('query');
+    $type = $request->getValue('query');
     $guids = $request->getValue('guids');
 
     $results = array();
@@ -51,10 +51,31 @@ final class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
       return $results;
     }
 
-    $revisions = id(new DifferentialRevisionListData(
-      $query,
-      (array)$guids))
-      ->loadRevisions();
+    $query = id(new DifferentialRevisionQuery())
+      ->setViewer($request->getUser());
+
+    switch ($type) {
+      case 'open':
+        $query
+          ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+          ->withAuthors($guids);
+        break;
+      case 'committable':
+        $query
+          ->withStatus(DifferentialRevisionQuery::STATUS_ACCEPTED)
+          ->withAuthors($guids);
+        break;
+      case 'revision-ids':
+        $query
+          ->withIDs($guids);
+        break;
+      case 'phids':
+        $query
+          ->withPHIDs($guids);
+        break;
+    }
+
+    $revisions = $query->execute();
 
     foreach ($revisions as $revision) {
       $diff = $revision->loadActiveDiff();

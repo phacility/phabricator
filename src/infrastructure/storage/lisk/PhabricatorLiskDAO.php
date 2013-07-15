@@ -110,6 +110,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
           'user'      => $conf->getUser(),
           'pass'      => $conf->getPassword(),
           'host'      => $conf->getHost(),
+          'port'      => $conf->getPort(),
           'database'  => $conf->getDatabase(),
           'retries'   => 3,
         ),

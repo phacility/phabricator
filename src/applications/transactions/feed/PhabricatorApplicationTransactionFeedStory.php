@@ -32,12 +32,10 @@ class PhabricatorApplicationTransactionFeedStory
   }
 
   public function renderView() {
-    $view = new PHUIFeedStoryView();
-    $view->setViewed($this->getHasViewed());
+    $view = $this->newStoryView();
 
     $handle = $this->getHandle($this->getPrimaryObjectPHID());
     $view->setHref($handle->getURI());
-    $view->setEpoch($this->getPrimaryTransaction()->getDateCreated());
 
     $view->setAppIconFromPHID($handle->getPHID());
 

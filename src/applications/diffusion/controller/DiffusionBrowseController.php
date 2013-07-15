@@ -93,13 +93,15 @@ final class DiffusionBrowseController extends DiffusionController {
         $box->setShadow(true);
         $box->appendChild($readme);
         $box->addPadding(PHUI::PADDING_LARGE);
+        $box->addMargin(PHUI::MARGIN_LARGE);
 
-        $panel = new AphrontPanelView();
-        $panel->setHeader(pht('README'));
-        $panel->setNoBackground();
-        $panel->appendChild($box);
+        $header = id(new PhabricatorHeaderView())
+          ->setHeader(pht('README'));
 
-        $content[] = $panel;
+        $content[] = array(
+          $header,
+          $box,
+        );
       }
 
     }

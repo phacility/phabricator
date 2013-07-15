@@ -89,8 +89,13 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
   private function getAsanaTaskData($object) {
     $revision = $object;
+    $prefix = $this->getTitlePrefix($object);
+    $title = $revision->getTitle();
+    $lines = pht(
+      '[Request, %d lines]',
+      new PhutilNumber($object->getLineCount()));
 
-    $name = '[Differential] D'.$revision->getID().': '.$revision->getTitle();
+    $name = $prefix.' '.$lines.' D'.$revision->getID().': '.$title;
     $uri = PhabricatorEnv::getProductionURI('/D'.$revision->getID());
 
     $notes = array(
@@ -120,8 +125,9 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
   private function getAsanaSubtaskData($object) {
     $revision = $object;
+    $prefix = $this->getTitlePrefix($object);
 
-    $name = '[Differential] Review Request';
+    $name = $prefix.' Review Request';
     $uri = PhabricatorEnv::getProductionURI('/D'.$revision->getID());
 
     $notes = array(
@@ -133,7 +139,7 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $notes = implode("\n\n", $notes);
 
     return array(
-      'name' => '[Differential] Review Request',
+      'name' => $prefix.' Review Request',
       'notes' => $notes,
     );
   }
@@ -156,6 +162,8 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $object = $this->getStoryObject();
     $src_phid = $object->getPHID();
+
+    $chronological_key = $story->getChronologicalKey();
 
     if (!$this->isObjectSupported($object)) {
       $this->log("Story is about an unsupported object type.\n");
@@ -183,8 +191,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       $follow_phids);
     $all_follow_phids = array_unique(array_filter($all_follow_phids));
 
-    $all_phids = $all_follow_phids;
-    $all_phids[] = $owner_phid;
+    $all_phids = array();
+    $all_phids = array_merge(
+      array($owner_phid),
+      $all_follow_phids);
     $all_phids = array_unique(array_filter($all_phids));
 
     $phid_aid_map = $this->lookupAsanaUserIDs($all_phids);
@@ -238,6 +248,8 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $extra_data = array();
     if ($main_edge) {
+      $extra_data = $main_edge['data'];
+
       $refs = id(new DoorkeeperImportEngine())
         ->setViewer($possessed_user)
         ->withPHIDs(array($main_edge['dst']))
@@ -289,8 +301,6 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
             "Skipping main task update, cursor is ahead of the story.\n");
         }
       }
-
-      $extra_data = $main_edge['data'];
     } else {
       $parent = $this->makeAsanaAPICall(
         $oauth_token,
@@ -531,6 +541,12 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       ->withAccountDomains(array($provider->getProviderDomain()))
       ->execute();
 
+    // Reorder accounts in the original order.
+    // TODO: This needs to be adjusted if/when we allow you to link multiple
+    // accounts.
+    $accounts = mpull($accounts, null, 'getUserPHID');
+    $accounts = array_select_keys($accounts, $user_phids);
+
     $workspace_id = $this->getWorkspaceID();
 
     foreach ($accounts as $account) {
@@ -602,5 +618,17 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     return $ref;
   }
 
+  public function getMaximumRetryCount() {
+    return 4;
+  }
+
+  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
+    $count = $task->getFailureCount();
+    return (5 * 60) * pow(8, $count);
+  }
+
+  public function getTitlePrefix($object) {
+    return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
+  }
 
 }

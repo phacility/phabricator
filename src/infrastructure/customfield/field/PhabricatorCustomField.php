@@ -7,6 +7,9 @@
  * @task storage    Field Storage
  * @task appsearch  Integration with ApplicationSearch
  * @task appxaction Integration with ApplicationTransactions
+ * @task edit       Integration with edit views
+ * @task view       Integration with property views
+ * @task list       Integration with list views
  */
 abstract class PhabricatorCustomField {
 
@@ -17,6 +20,9 @@ abstract class PhabricatorCustomField {
   const ROLE_APPLICATIONSEARCH        = 'ApplicationSearch';
   const ROLE_STORAGE                  = 'storage';
   const ROLE_DEFAULT                  = 'default';
+  const ROLE_EDIT                     = 'edit';
+  const ROLE_VIEW                     = 'view';
+  const ROLE_LIST                     = 'list';
 
 
 /* -(  Building Applications with Custom Fields  )--------------------------- */
@@ -219,6 +225,12 @@ abstract class PhabricatorCustomField {
         return $this->shouldAppearInApplicationSearch();
       case self::ROLE_STORAGE:
         return ($this->getStorageKey() !== null);
+      case self::ROLE_EDIT:
+        return $this->shouldAppearInEditView();
+      case self::ROLE_VIEW:
+        return $this->shouldAppearInPropertyView();
+      case self::ROLE_LIST:
+        return $this->shouldAppearInListView();
       case self::ROLE_DEFAULT:
         return true;
       default:
@@ -605,7 +617,7 @@ abstract class PhabricatorCustomField {
   /**
    * @task edit
    */
-  public function shouldAppearOnEditView() {
+  public function shouldAppearInEditView() {
     return false;
   }
 
@@ -624,6 +636,61 @@ abstract class PhabricatorCustomField {
   public function renderEditControl() {
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
+
+
+/* -(  Property View  )------------------------------------------------------ */
+
+
+  /**
+   * @task view
+   */
+  public function shouldAppearInPropertyView() {
+    return false;
+  }
+
+
+  /**
+   * @task view
+   */
+  public function renderPropertyViewLabel() {
+    return $this->getFieldName();
+  }
+
+
+  /**
+   * @task view
+   */
+  public function renderPropertyViewValue() {
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  /**
+   * @task view
+   */
+  public function getStyleForPropertyView() {
+    return 'property';
+  }
+
+
+/* -(  List View  )---------------------------------------------------------- */
+
+
+  /**
+   * @task list
+   */
+  public function shouldAppearInListView() {
+    return false;
+  }
+
+
+  /**
+   * @task list
+   */
+  public function renderOnListItem(PhabricatorObjectItemView $view) {
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
 
 
 }

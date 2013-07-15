@@ -65,6 +65,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $view = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($file);
 
     if ($file->isViewableInBrowser()) {

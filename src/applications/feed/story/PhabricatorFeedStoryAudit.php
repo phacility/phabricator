@@ -10,7 +10,7 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $author_phid = $this->getAuthorPHID();
     $commit_phid = $this->getPrimaryObjectPHID();
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('audit-dark');
 
     $action = $this->getValue('action');
@@ -21,8 +21,6 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
       $this->linkTo($author_phid),
       $verb,
       $this->linkTo($commit_phid)));
-
-    $view->setEpoch($this->getEpoch());
 
     $comments = $this->getValue('content');
 
