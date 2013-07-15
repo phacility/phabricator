@@ -21,17 +21,15 @@ final class PhabricatorSlowvotePollController
     $poll = id(new PhabricatorSlowvoteQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needOptions(true)
+      ->needChoices(true)
       ->executeOne();
     if (!$poll) {
       return new Aphront404Response();
     }
 
-    $options = id(new PhabricatorSlowvoteOption())->loadAllWhere(
-      'pollID = %d',
-      $poll->getID());
-    $choices = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
-      'pollID = %d',
-      $poll->getID());
+    $options = $poll->getOptions();
+    $choices = $poll->getChoices();
 
     $choices_by_option = mgroup($choices, 'getOptionID');
     $choices_by_user = mgroup($choices, 'getAuthorPHID');
