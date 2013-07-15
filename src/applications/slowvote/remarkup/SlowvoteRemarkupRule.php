@@ -25,16 +25,11 @@ final class SlowvoteRemarkupRule
   protected function renderObjectEmbed($object, $handle, $options) {
     $viewer = $this->getEngine()->getConfig('viewer');
 
-    $options = $object->getOptions();
-    $choices = $object->getChoices();
-    $viewer_choices = $object->getViewerChoices($viewer);
-
     $embed = id(new SlowvoteEmbedView())
-      ->setPoll($object)
-      ->setOptions($options)
-      ->setViewerChoices($viewer_choices);
+      ->setUser($viewer)
+      ->setPoll($object);
 
-    return $embed->render();
+    return $embed;
   }
 
 }

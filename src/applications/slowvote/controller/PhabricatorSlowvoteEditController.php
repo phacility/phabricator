@@ -51,7 +51,7 @@ final class PhabricatorSlowvoteEditController
     if ($request->isFormPost()) {
       $v_question = $request->getStr('question');
       $v_description = $request->getStr('description');
-      $v_responses = $request->getInt('responses');
+      $v_responses = (int)$request->getInt('responses');
       $v_shuffle = (int)$request->getBool('shuffle');
 
       if ($is_new) {

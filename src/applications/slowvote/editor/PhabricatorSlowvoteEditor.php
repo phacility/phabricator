@@ -26,8 +26,14 @@ final class PhabricatorSlowvoteEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+        if ($old === null) {
+          return true;
+        }
         return ((int)$old !== (int)$new);
       case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+        if ($old === null) {
+          return true;
+        }
         return ((bool)$old !== (bool)$new);
     }
 

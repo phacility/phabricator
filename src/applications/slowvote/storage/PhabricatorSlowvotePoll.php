@@ -74,7 +74,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   }
 
   public function attachViewerChoices(PhabricatorUser $viewer, array $choices) {
-    assert_instances_of($choices, 'PhabricatorSlowvoteOption');
+    assert_instances_of($choices, 'PhabricatorSlowvoteChoice');
     $this->viewerChoices[$viewer->getPHID()] = $choices;
     return $this;
   }
