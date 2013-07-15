@@ -4,7 +4,9 @@
  * @group slowvote
  */
 final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorSubscribableInterface {
 
   const RESPONSES_VISIBLE = 0;
   const RESPONSES_VOTERS  = 1;
@@ -55,5 +57,14 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($phid == $this->getAuthorPHID());
+  }
+
 
 }

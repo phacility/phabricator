@@ -125,6 +125,9 @@ final class PhabricatorSlowvotePollController
     $header = id(new PhabricatorHeaderView())
       ->setHeader($poll->getQuestion());
 
+    $actions = $this->buildActionView($poll);
+    $properties = $this->buildPropertyView($poll);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -146,6 +149,8 @@ final class PhabricatorSlowvotePollController
       array(
         $crumbs,
         $header,
+        $actions,
+        $properties,
         $content,
         $xactions,
         $add_comment,
@@ -357,6 +362,45 @@ final class PhabricatorSlowvotePollController
     }
 
     return $result_markup;
+  }
+
+  private function buildActionView(PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($poll);
+
+    return $view;
+  }
+
+  private function buildPropertyView(PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($poll);
+
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $viewer,
+      $poll);
+
+    $view->addProperty(
+      pht('Visible To'),
+      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+
+    $view->invokeWillRenderEvent();
+
+    if (strlen($poll->getDescription())) {
+      $view->addTextSection(
+        $output = PhabricatorMarkupEngine::renderOneObject(
+          id(new PhabricatorMarkupOneOff())->setContent(
+            $poll->getDescription()),
+          'default',
+          $viewer));
+    }
+
+    return $view;
   }
 
   private function buildTransactions(PhabricatorSlowvotePoll $poll) {
