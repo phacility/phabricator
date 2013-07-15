@@ -7,6 +7,12 @@ final class PhabricatorSlowvoteEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
+
+    $types[] = PhabricatorSlowvoteTransaction::TYPE_QUESTION;
+    $types[] = PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION;
+    $types[] = PhabricatorSlowvoteTransaction::TYPE_RESPONSES;
+    $types[] = PhabricatorSlowvoteTransaction::TYPE_SHUFFLE;
 
     return $types;
   }
@@ -16,6 +22,14 @@ final class PhabricatorSlowvoteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
+        return $object->getQuestion();
+      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
+        return $object->getDescription();
+      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+        return $object->getResponseVisibility();
+      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+        return $object->getShuffle();
     }
   }
 
@@ -24,6 +38,11 @@ final class PhabricatorSlowvoteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
+      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
+      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+        return $xaction->getNewValue();
     }
   }
 
@@ -32,6 +51,18 @@ final class PhabricatorSlowvoteEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
+        $object->setQuestion($xaction->getNewValue());
+        break;
+      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
+        $object->setDescription($xaction->getNewValue());
+        break;
+      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+        $object->setResponseVisibility($xaction->getNewValue());
+        break;
+      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+        $object->setShuffle($xaction->getNewValue());
+        break;
     }
   }
 

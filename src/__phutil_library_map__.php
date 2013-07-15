@@ -1529,8 +1529,8 @@ phutil_register_library_map(array(
     'PhabricatorSlowvoteComment' => 'applications/slowvote/storage/PhabricatorSlowvoteComment.php',
     'PhabricatorSlowvoteCommentController' => 'applications/slowvote/controller/PhabricatorSlowvoteCommentController.php',
     'PhabricatorSlowvoteController' => 'applications/slowvote/controller/PhabricatorSlowvoteController.php',
-    'PhabricatorSlowvoteCreateController' => 'applications/slowvote/controller/PhabricatorSlowvoteCreateController.php',
     'PhabricatorSlowvoteDAO' => 'applications/slowvote/storage/PhabricatorSlowvoteDAO.php',
+    'PhabricatorSlowvoteEditController' => 'applications/slowvote/controller/PhabricatorSlowvoteEditController.php',
     'PhabricatorSlowvoteEditor' => 'applications/slowvote/editor/PhabricatorSlowvoteEditor.php',
     'PhabricatorSlowvoteListController' => 'applications/slowvote/controller/PhabricatorSlowvoteListController.php',
     'PhabricatorSlowvoteOption' => 'applications/slowvote/storage/PhabricatorSlowvoteOption.php',
@@ -3490,8 +3490,8 @@ phutil_register_library_map(array(
     'PhabricatorSlowvoteComment' => 'PhabricatorSlowvoteDAO',
     'PhabricatorSlowvoteCommentController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteController' => 'PhabricatorController',
-    'PhabricatorSlowvoteCreateController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorSlowvoteEditController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorSlowvoteListController' =>
     array(
@@ -3503,6 +3503,8 @@ phutil_register_library_map(array(
     array(
       0 => 'PhabricatorSlowvoteDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorSubscribableInterface',
+      3 => 'PhabricatorTokenReceiverInterface',
     ),
     'PhabricatorSlowvotePollController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',

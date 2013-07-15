@@ -391,7 +391,7 @@ final class PhabricatorSlowvotePollController
     $view->invokeWillRenderEvent();
 
     if (strlen($poll->getDescription())) {
-      $view->addTextSection(
+      $view->addTextContent(
         $output = PhabricatorMarkupEngine::renderOneObject(
           id(new PhabricatorMarkupOneOff())->setContent(
             $poll->getDescription()),

@@ -3,8 +3,14 @@
 /**
  * @group slowvote
  */
-final class PhabricatorSlowvoteCreateController
+final class PhabricatorSlowvoteEditController
   extends PhabricatorSlowvoteController {
+
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = idx($data, 'id');
+  }
 
   public function processRequest() {
 
@@ -13,23 +19,31 @@ final class PhabricatorSlowvoteCreateController
 
     $poll = new PhabricatorSlowvotePoll();
     $poll->setAuthorPHID($user->getPHID());
+    $poll->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+
+    $is_new = true;
 
     $e_question = true;
     $e_response = true;
     $errors = array();
 
+    $v_question = $poll->getQuestion();
+    $v_description = $poll->getDescription();
+    $v_responses = $poll->getResponseVisibility();
+    $v_shuffle = $poll->getShuffle();
+
     $responses = $request->getArr('response');
-
     if ($request->isFormPost()) {
-      $poll->setQuestion($request->getStr('question'));
-      $poll->setResponseVisibility($request->getInt('response_visibility'));
-      $poll->setShuffle((int)$request->getBool('shuffle', false));
-      $poll->setMethod($request->getInt('method'));
+      $v_question = $request->getStr('question');
+      $v_description = $request->getStr('description');
+      $v_responses = $request->getInt('responses');
+      $v_shuffle = (int)$request->getBool('shuffle');
 
-      $poll->setDescription('');
-      $poll->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+      if ($is_new) {
+        $poll->setMethod($request->getInt('method'));
+      }
 
-      if (!strlen($poll->getQuestion())) {
+      if (!strlen($v_question)) {
         $e_question = pht('Required');
         $errors[] = pht('You must ask a poll question.');
       } else {
@@ -44,7 +58,32 @@ final class PhabricatorSlowvoteCreateController
         $e_response = null;
       }
 
+      $xactions = array();
+      $template = id(new PhabricatorSlowvoteTransaction());
+
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_QUESTION)
+        ->setNewValue($v_question);
+
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION)
+        ->setNewValue($v_description);
+
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_RESPONSES)
+        ->setNewValue($v_responses);
+
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorSlowvoteTransaction::TYPE_SHUFFLE)
+        ->setNewValue($v_shuffle);
+
       if (empty($errors)) {
+        $editor = id(new PhabricatorSlowvoteEditor())
+          ->setActor($user)
+          ->setContinueOnNoEffect(true)
+          ->setContentSourceFromRequest($request)
+          ->applyTransactions($poll, $xactions);
+
         $poll->save();
 
         foreach ($responses as $response) {
@@ -84,8 +123,13 @@ final class PhabricatorSlowvoteCreateController
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setLabel(pht('Question'))
           ->setName('question')
-          ->setValue($poll->getQuestion())
-          ->setError($e_question));
+          ->setValue($v_question)
+          ->setError($e_question))
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+          ->setLabel(pht('Description'))
+          ->setName('description')
+          ->setValue($v_description));
 
     for ($ii = 0; $ii < 10; $ii++) {
       $n = ($ii + 1);
@@ -127,8 +171,8 @@ final class PhabricatorSlowvoteCreateController
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Responses'))
-          ->setName('response_visibility')
-          ->setValue($poll->getResponseVisibility())
+          ->setName('responses')
+          ->setValue($v_responses)
           ->setOptions($response_type_options))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
@@ -137,7 +181,7 @@ final class PhabricatorSlowvoteCreateController
             'shuffle',
             1,
             pht('Show choices in random order.'),
-            $poll->getShuffle()))
+            $v_shuffle))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Create Slowvote'))

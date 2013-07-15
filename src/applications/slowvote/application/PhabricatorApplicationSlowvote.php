@@ -42,7 +42,7 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
       '/vote/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorSlowvoteListController',
-        'create/' => 'PhabricatorSlowvoteCreateController',
+        'create/' => 'PhabricatorSlowvoteEditController',
         '(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteVoteController',
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteCommentController',
       ),
