@@ -395,6 +395,7 @@ phutil_register_library_map(array(
     'DifferentialRevertPlanFieldSpecification' => 'applications/differential/field/specification/DifferentialRevertPlanFieldSpecification.php',
     'DifferentialReviewRequestMail' => 'applications/differential/mail/DifferentialReviewRequestMail.php',
     'DifferentialReviewedByFieldSpecification' => 'applications/differential/field/specification/DifferentialReviewedByFieldSpecification.php',
+    'DifferentialReviewer' => 'applications/differential/storage/DifferentialReviewer.php',
     'DifferentialReviewerStatus' => 'applications/differential/constants/DifferentialReviewerStatus.php',
     'DifferentialReviewersFieldSpecification' => 'applications/differential/field/specification/DifferentialReviewersFieldSpecification.php',
     'DifferentialRevision' => 'applications/differential/storage/DifferentialRevision.php',

@@ -56,6 +56,7 @@ final class DifferentialRevisionQuery
   private $needDiffIDs        = false;
   private $needCommitPHIDs    = false;
   private $needHashes         = false;
+  private $needReviewerStatus = false;
 
   private $buildingGlobalOrder;
 
@@ -326,6 +327,19 @@ final class DifferentialRevisionQuery
   }
 
 
+  /**
+   * Set whether or not the query should load associated reviewer status.
+   *
+   * @param bool True to load and attach reviewers.
+   * @return this
+   * @task config
+   */
+  public function needReviewerStatus($need_reviewer_status) {
+    $this->needReviewerStatus = $need_reviewer_status;
+    return $this;
+  }
+
+
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
@@ -374,6 +388,10 @@ final class DifferentialRevisionQuery
 
     if ($this->needHashes) {
       $this->loadHashes($conn_r, $revisions);
+    }
+
+    if ($this->needReviewerStatus) {
+      $this->loadReviewers($conn_r, $revisions);
     }
 
     return $revisions;
@@ -902,6 +920,37 @@ final class DifferentialRevisionQuery
       $revision->attachHashes($list);
     }
   }
+
+  private function loadReviewers(
+    AphrontDatabaseConnection $conn_r,
+    array $revisions) {
+
+    assert_instances_of($revisions, 'DifferentialRevision');
+    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(mpull($revisions, 'getPHID'))
+      ->withEdgeTypes(array($edge_type))
+      ->needEdgeData(true)
+      ->execute();
+
+    foreach ($revisions as $revision) {
+      $revision_edges = $edges[$revision->getPHID()][$edge_type];
+
+      $reviewers = array();
+      foreach ($revision_edges as $user_phid => $edge) {
+        $data = $edge['data'];
+        $reviewers[] = new DifferentialReviewer(
+          $user_phid, $data['status'], idx($data, 'diff', null)
+        );
+      }
+
+      $revision->attachReviewerStatus($reviewers);
+    }
+
+  }
+
+
 
   public static function splitResponsible(array $revisions, array $user_phids) {
     $blocking = array();
