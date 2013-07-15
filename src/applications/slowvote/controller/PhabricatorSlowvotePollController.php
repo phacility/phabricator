@@ -140,6 +140,7 @@ final class PhabricatorSlowvotePollController
       $panel);
 
     $xactions = $this->buildTransactions($poll);
+    $add_comment = $this->buildCommentForm($poll);
 
     return $this->buildApplicationPage(
       array(
@@ -147,6 +148,7 @@ final class PhabricatorSlowvotePollController
         $header,
         $content,
         $xactions,
+        $add_comment,
       ),
       array(
         'title' => 'V'.$poll->getID().' '.$poll->getQuestion(),
@@ -383,5 +385,35 @@ final class PhabricatorSlowvotePollController
 
     return $timeline;
   }
+
+  private function buildCommentForm(PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getRequest()->getUser();
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = id(new PhabricatorHeaderView())
+      ->setHeader(
+        $is_serious
+          ? pht('Add Comment')
+          : pht('Enter Deliberations'));
+
+    $submit_button_name = $is_serious
+      ? pht('Add Comment')
+      : pht('Perhaps');
+
+    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $poll->getPHID());
+
+    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setDraft($draft)
+      ->setAction($this->getApplicationURI('/comment/'.$poll->getID().'/'))
+      ->setSubmitButtonName($submit_button_name);
+
+    return array(
+      $add_comment_header,
+      $add_comment_form,
+    );
+  }
+
 
 }

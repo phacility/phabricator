@@ -1527,9 +1527,11 @@ phutil_register_library_map(array(
     'PhabricatorSetupIssueView' => 'applications/config/view/PhabricatorSetupIssueView.php',
     'PhabricatorSlowvoteChoice' => 'applications/slowvote/storage/PhabricatorSlowvoteChoice.php',
     'PhabricatorSlowvoteComment' => 'applications/slowvote/storage/PhabricatorSlowvoteComment.php',
+    'PhabricatorSlowvoteCommentController' => 'applications/slowvote/controller/PhabricatorSlowvoteCommentController.php',
     'PhabricatorSlowvoteController' => 'applications/slowvote/controller/PhabricatorSlowvoteController.php',
     'PhabricatorSlowvoteCreateController' => 'applications/slowvote/controller/PhabricatorSlowvoteCreateController.php',
     'PhabricatorSlowvoteDAO' => 'applications/slowvote/storage/PhabricatorSlowvoteDAO.php',
+    'PhabricatorSlowvoteEditor' => 'applications/slowvote/editor/PhabricatorSlowvoteEditor.php',
     'PhabricatorSlowvoteListController' => 'applications/slowvote/controller/PhabricatorSlowvoteListController.php',
     'PhabricatorSlowvoteOption' => 'applications/slowvote/storage/PhabricatorSlowvoteOption.php',
     'PhabricatorSlowvotePoll' => 'applications/slowvote/storage/PhabricatorSlowvotePoll.php',
@@ -3486,9 +3488,11 @@ phutil_register_library_map(array(
     'PhabricatorSetupIssueView' => 'AphrontView',
     'PhabricatorSlowvoteChoice' => 'PhabricatorSlowvoteDAO',
     'PhabricatorSlowvoteComment' => 'PhabricatorSlowvoteDAO',
+    'PhabricatorSlowvoteCommentController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteController' => 'PhabricatorController',
     'PhabricatorSlowvoteCreateController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvoteDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorSlowvoteEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorSlowvoteListController' =>
     array(
       0 => 'PhabricatorSlowvoteController',

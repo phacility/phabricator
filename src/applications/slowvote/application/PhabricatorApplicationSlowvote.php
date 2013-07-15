@@ -44,6 +44,7 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
           => 'PhabricatorSlowvoteListController',
         'create/' => 'PhabricatorSlowvoteCreateController',
         '(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteVoteController',
+        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteCommentController',
       ),
     );
   }
