@@ -20,15 +20,17 @@ final class DifferentialRevisionEditController extends DifferentialController {
       $revision = id(new DifferentialRevisionQuery())
         ->setViewer($viewer)
         ->withIDs(array($this->id))
+        ->needRelationships(true)
+        ->needReviewerStatus(true)
         ->executeOne();
       if (!$revision) {
         return new Aphront404Response();
       }
     } else {
       $revision = new DifferentialRevision();
+      $revision->attachRelationships(array());
     }
 
-    $revision->loadRelationships();
     $aux_fields = $this->loadAuxiliaryFields($revision);
 
     $diff_id = $request->getInt('diffID');
