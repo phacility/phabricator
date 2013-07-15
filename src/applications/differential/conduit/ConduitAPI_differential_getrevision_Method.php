@@ -38,12 +38,17 @@ final class ConduitAPI_differential_getrevision_Method
     $diff = null;
 
     $revision_id = $request->getValue('revision_id');
-    $revision = id(new DifferentialRevision())->load($revision_id);
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($revision_id))
+      ->setViewer($request->getUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+
     if (!$revision) {
       throw new ConduitException('ERR_BAD_REVISION');
     }
 
-    $revision->loadRelationships();
     $reviewer_phids = array_values($revision->getReviewers());
 
     $diffs = $revision->loadDiffs();

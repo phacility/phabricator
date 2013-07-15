@@ -38,7 +38,12 @@ final class ConduitAPI_differential_markcommitted_Method
   protected function execute(ConduitAPIRequest $request) {
     $id = $request->getValue('revision_id');
 
-    $revision = id(new DifferentialRevision())->load($id);
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($id))
+      ->setViewer($request->getUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_NOT_FOUND');
     }
@@ -46,8 +51,6 @@ final class ConduitAPI_differential_markcommitted_Method
     if ($revision->getStatus() == ArcanistDifferentialRevisionStatus::CLOSED) {
       return;
     }
-
-    $revision->loadRelationships();
 
     $editor = new DifferentialCommentEditor(
       $revision,
