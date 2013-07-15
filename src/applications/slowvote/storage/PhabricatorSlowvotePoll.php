@@ -6,7 +6,8 @@
 final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorSubscribableInterface {
+    PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface {
 
   const RESPONSES_VISIBLE = 0;
   const RESPONSES_VOTERS  = 1;
@@ -108,6 +109,14 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
 
   public function isAutomaticallySubscribed($phid) {
     return ($phid == $this->getAuthorPHID());
+  }
+
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array($this->getAuthorPHID());
   }
 
 
