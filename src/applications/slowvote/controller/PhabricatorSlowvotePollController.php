@@ -370,6 +370,19 @@ final class PhabricatorSlowvotePollController
       ->setUser($viewer)
       ->setObject($poll);
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $poll,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Poll'))
+        ->setIcon('edit')
+        ->setHref($this->getApplicationURI('edit/'.$poll->getID().'/'))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     return $view;
   }
 

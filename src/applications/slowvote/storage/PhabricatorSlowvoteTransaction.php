@@ -114,5 +114,26 @@ final class PhabricatorSlowvoteTransaction
     return parent::getColor();
   }
 
+  public function hasChangeDetails() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
+        return true;
+    }
+    return parent::hasChangeDetails();
+  }
+
+  public function renderChangeDetails(PhabricatorUser $viewer) {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $view = id(new PhabricatorApplicationTransactionTextDiffDetailView())
+      ->setUser($viewer)
+      ->setOldText($old)
+      ->setNewText($new);
+
+    return $view->render();
+  }
+
+
 }
 

@@ -17,6 +17,24 @@ final class PhabricatorSlowvoteEditor
     return $types;
   }
 
+  protected function transactionHasEffect(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+        return ((int)$old !== (int)$new);
+      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+        return ((bool)$old !== (bool)$new);
+    }
+
+    return parent::transactionHasEffect($object, $xaction);
+  }
+
+
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {

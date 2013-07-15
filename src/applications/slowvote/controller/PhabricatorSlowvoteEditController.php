@@ -17,11 +17,26 @@ final class PhabricatorSlowvoteEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $poll = new PhabricatorSlowvotePoll();
-    $poll->setAuthorPHID($user->getPHID());
-    $poll->setViewPolicy(PhabricatorPolicies::POLICY_USER);
-
-    $is_new = true;
+    if ($this->id) {
+      $poll = id(new PhabricatorSlowvoteQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$poll) {
+        return new Aphront404Response();
+      }
+      $is_new = false;
+    } else {
+      $poll = id(new PhabricatorSlowvotePoll())
+        ->setAuthorPHID($user->getPHID())
+        ->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+      $is_new = true;
+    }
 
     $e_question = true;
     $e_response = true;
@@ -50,12 +65,14 @@ final class PhabricatorSlowvoteEditController
         $e_question = null;
       }
 
-      $responses = array_filter($responses);
-      if (empty($responses)) {
-        $errors[] = pht('You must offer at least one response.');
-        $e_response = pht('Required');
-      } else {
-        $e_response = null;
+      if ($is_new) {
+        $responses = array_filter($responses);
+        if (empty($responses)) {
+          $errors[] = pht('You must offer at least one response.');
+          $e_response = pht('Required');
+        } else {
+          $e_response = null;
+        }
       }
 
       $xactions = array();
@@ -81,16 +98,19 @@ final class PhabricatorSlowvoteEditController
         $editor = id(new PhabricatorSlowvoteEditor())
           ->setActor($user)
           ->setContinueOnNoEffect(true)
-          ->setContentSourceFromRequest($request)
-          ->applyTransactions($poll, $xactions);
+          ->setContentSourceFromRequest($request);
 
-        $poll->save();
+        $xactions = $editor->applyTransactions($poll, $xactions);
 
-        foreach ($responses as $response) {
-          $option = new PhabricatorSlowvoteOption();
-          $option->setName($response);
-          $option->setPollID($poll->getID());
-          $option->save();
+        if ($is_new) {
+          $poll->save();
+
+          foreach ($responses as $response) {
+            $option = new PhabricatorSlowvoteOption();
+            $option->setName($response);
+            $option->setPollID($poll->getID());
+            $option->save();
+          }
         }
 
         return id(new AphrontRedirectResponse())
@@ -131,18 +151,20 @@ final class PhabricatorSlowvoteEditController
           ->setName('description')
           ->setValue($v_description));
 
-    for ($ii = 0; $ii < 10; $ii++) {
-      $n = ($ii + 1);
-      $response = id(new AphrontFormTextControl())
-        ->setLabel(pht("Response %d", $n))
-        ->setName('response[]')
-        ->setValue(idx($responses, $ii, ''));
+    if ($is_new) {
+      for ($ii = 0; $ii < 10; $ii++) {
+        $n = ($ii + 1);
+        $response = id(new AphrontFormTextControl())
+          ->setLabel(pht("Response %d", $n))
+          ->setName('response[]')
+          ->setValue(idx($responses, $ii, ''));
 
-      if ($ii == 0) {
-        $response->setError($e_response);
+        if ($ii == 0) {
+          $response->setError($e_response);
+        }
+
+        $form->appendChild($response);
       }
-
-      $form->appendChild($response);
     }
 
     $poll_type_options = array(
@@ -161,13 +183,31 @@ final class PhabricatorSlowvoteEditController
         => pht('Only I can see the responses'),
     );
 
-    $form
-      ->appendChild(
+    if ($is_new) {
+      $form->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Vote Type'))
           ->setName('method')
           ->setValue($poll->getMethod())
-          ->setOptions($poll_type_options))
+          ->setOptions($poll_type_options));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel(pht('Vote Type'))
+          ->setValue(idx($poll_type_options, $poll->getMethod())));
+    }
+
+    if ($is_new) {
+      $title = pht('Create Slowvote');
+      $button = pht('Create');
+      $cancel_uri = $this->getApplicationURI();
+    } else {
+      $title = pht('Edit %s', 'V'.$poll->getID());
+      $button = pht('Save Changes');
+      $cancel_uri = '/V'.$poll->getID();
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Responses'))
@@ -184,14 +224,13 @@ final class PhabricatorSlowvoteEditController
             $v_shuffle))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Create Slowvote'))
-          ->addCancelButton('/vote/'));
+          ->setValue($button)
+          ->addCancelButton($cancel_uri));
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
-        ->setName(pht('Create Slowvote'))
-        ->setHref($this->getApplicationURI().'create/'));
+        ->setName($title));
 
     return $this->buildApplicationPage(
       array(
@@ -200,7 +239,7 @@ final class PhabricatorSlowvoteEditController
         $form,
       ),
       array(
-        'title' => pht('Create Slowvote'),
+        'title' => $title,
         'device' => true,
         'dust' => true,
       ));
