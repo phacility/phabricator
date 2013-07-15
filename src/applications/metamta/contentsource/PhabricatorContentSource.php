@@ -9,6 +9,7 @@ final class PhabricatorContentSource {
   const SOURCE_MOBILE   = 'mobile';
   const SOURCE_TABLET   = 'tablet';
   const SOURCE_FAX      = 'fax';
+  const SOURCE_LEGACY   = 'legacy';
 
   private $source;
   private $params = array();

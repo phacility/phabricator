@@ -32,33 +32,6 @@ final class PhabricatorSlowvoteVoteController
       $poll->getID(),
       $user->getPHID());
 
-    $comment_text = $request->getStr('comments');
-    $old_comment = id(new PhabricatorSlowvoteComment())->loadOneWhere(
-      'pollID = %d AND authorPHID = %s',
-      $poll->getID(),
-      $user->getPHID());
-
-    $update_comment = false;
-    if ($old_comment && $comment_text &&
-      $old_comment->getCommentText() !== $comment_text) {
-
-      $update_comment = true;
-    } else if (!$old_comment && $comment_text) {
-      $update_comment = true;
-    }
-
-    if ($update_comment) {
-      if ($old_comment) {
-        $old_comment->delete();
-      }
-
-      id(new PhabricatorSlowvoteComment())
-          ->setAuthorPHID($user->getPHID())
-          ->setPollID($poll->getID())
-          ->setCommentText($comment_text)
-          ->save();
-    }
-
     $old_votes = mpull($user_choices, null, 'getOptionID');
 
     if ($request->isAjax()) {

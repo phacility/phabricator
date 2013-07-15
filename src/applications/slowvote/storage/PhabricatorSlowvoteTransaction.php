@@ -16,7 +16,7 @@ final class PhabricatorSlowvoteTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    return new PhabricatorMacroTransactionComment();
+    return new PhabricatorSlowvoteTransactionComment();
   }
 
   public function getApplicationObjectTypeName() {

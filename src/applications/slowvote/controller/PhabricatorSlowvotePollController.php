@@ -32,20 +32,10 @@ final class PhabricatorSlowvotePollController
     $choices = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
       'pollID = %d',
       $poll->getID());
-    $comments = id(new PhabricatorSlowvoteComment())->loadAllWhere(
-      'pollID = %d',
-      $poll->getID());
 
     $choices_by_option = mgroup($choices, 'getOptionID');
-    $comments_by_user = mpull($comments, null, 'getAuthorPHID');
     $choices_by_user = mgroup($choices, 'getAuthorPHID');
     $viewer_choices = idx($choices_by_user, $viewer_phid, array());
-    $viewer_comment = idx($comments_by_user, $viewer_phid, null);
-
-    $comment_text = null;
-    if ($viewer_comment) {
-      $comment_text = $viewer_comment->getCommentText();
-    }
 
     if ($request->isAjax()) {
       $embed = id(new SlowvoteEmbedView())
@@ -63,7 +53,6 @@ final class PhabricatorSlowvotePollController
 
     $phids = array_merge(
       mpull($choices, 'getAuthorPHID'),
-      mpull($comments, 'getAuthorPHID'),
       array(
         $poll->getAuthorPHID(),
       ));
@@ -85,22 +74,14 @@ final class PhabricatorSlowvotePollController
         $option);
     }
 
-    $comments_by_option = array();
     switch ($poll->getMethod()) {
       case PhabricatorSlowvotePoll::METHOD_PLURALITY:
         $choice_ids = array();
         foreach ($choices_by_user as $user_phid => $user_choices) {
           $choice_ids[$user_phid] = head($user_choices)->getOptionID();
         }
-        foreach ($comments as $comment) {
-          $choice = idx($choice_ids, $comment->getAuthorPHID());
-          if ($choice) {
-            $comments_by_option[$choice][] = $comment;
-          }
-        }
         break;
       case PhabricatorSlowvotePoll::METHOD_APPROVAL:
-        // All comments are grouped in approval voting.
         break;
       default:
         throw new Exception("Unknown poll method!");
@@ -110,10 +91,8 @@ final class PhabricatorSlowvotePollController
       $poll,
       $options,
       $choices,
-      $comments,
       $viewer_choices,
       $choices_by_option,
-      $comments_by_option,
       $handles,
       $objects);
 
@@ -140,12 +119,6 @@ final class PhabricatorSlowvotePollController
           ->setLabel(pht('Vote'))
           ->setValue($option_markup))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel(pht('Comments'))
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
-          ->setName('comments')
-          ->setValue($comment_text))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Engage in Deliberations')));
 
@@ -166,11 +139,14 @@ final class PhabricatorSlowvotePollController
       hsprintf('<br /><br />'),
       $panel);
 
+    $xactions = $this->buildTransactions($poll);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $header,
         $content,
+        $xactions,
       ),
       array(
         'title' => 'V'.$poll->getID().' '.$poll->getQuestion(),
@@ -179,51 +155,6 @@ final class PhabricatorSlowvotePollController
       ));
   }
 
-  private function renderComments(array $comments, array $handles) {
-    assert_instances_of($comments, 'PhabricatorSlowvoteComment');
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-
-    $viewer = $this->getRequest()->getUser();
-
-    $engine = PhabricatorMarkupEngine::newSlowvoteMarkupEngine();
-    $engine->setConfig('viewer', $viewer);
-
-    $comment_markup = array();
-    foreach ($comments as $comment) {
-      $handle = $handles[$comment->getAuthorPHID()];
-
-      $markup = $engine->markupText($comment->getCommentText());
-
-      require_celerity_resource('phabricator-remarkup-css');
-
-      $comment_markup[] = hsprintf(
-        '<tr>'.
-          '<th>'.
-            '%s'.
-            '<div class="phabricator-slowvote-datestamp">%s</div>'.
-          '</th>'.
-          '<td>'.
-            '<div class="phabricator-remarkup">%s</div>'.
-          '</td>'.
-        '</tr>',
-        $handle->renderLink(),
-        phabricator_datetime($comment->getDateCreated(), $viewer),
-        $markup);
-    }
-
-    if ($comment_markup) {
-      $comment_markup = phutil_tag(
-        'table',
-        array(
-          'class' => 'phabricator-slowvote-comments',
-        ),
-        $comment_markup);
-    } else {
-      $comment_markup = null;
-    }
-
-    return $comment_markup;
-  }
 
   private function renderPollOption(
     PhabricatorSlowvotePoll $poll,
@@ -330,15 +261,12 @@ final class PhabricatorSlowvotePollController
     PhabricatorSlowvotePoll $poll,
     array $options,
     array $choices,
-    array $comments,
     array $viewer_choices,
     array $choices_by_option,
-    array $comments_by_option,
     array $handles,
     array $objects) {
     assert_instances_of($options, 'PhabricatorSlowvoteOption');
     assert_instances_of($choices, 'PhabricatorSlowvoteChoice');
-    assert_instances_of($comments, 'PhabricatorSlowvoteComment');
     assert_instances_of($viewer_choices, 'PhabricatorSlowvoteChoice');
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     assert_instances_of($objects, 'PhabricatorLiskDAO');
@@ -407,10 +335,6 @@ final class PhabricatorSlowvotePollController
         $user_markup = pht('This option has failed to appeal to anyone.');
       }
 
-      $comment_markup = $this->renderComments(
-        idx($comments_by_option, $id, array()),
-        $handles);
-
       $vote_count = $this->renderVoteCount(
         $poll,
         $choices,
@@ -422,26 +346,42 @@ final class PhabricatorSlowvotePollController
           '<h1>%s</h1>'.
           '<hr class="phabricator-slowvote-hr" />'.
           '%s'.
-          '<div style="clear: both;" />'.
+          '<div style="clear: both;"></div>'.
           '<hr class="phabricator-slowvote-hr" />'.
-          '%s'.
         '</div>',
         $vote_count,
         $option->getName(),
-        phutil_tag('div', array(), $user_markup),
-        $comment_markup));
-    }
-
-    if ($poll->getMethod() == PhabricatorSlowvotePoll::METHOD_APPROVAL &&
-        $comments) {
-      $comment_markup = $this->renderComments(
-        $comments,
-        $handles);
-      $result_markup->appendChild(
-        phutil_tag('h1', array(), pht('Motions Proposed for Consideration')));
-      $result_markup->appendChild($comment_markup);
+        phutil_tag('div', array(), $user_markup)));
     }
 
     return $result_markup;
   }
+
+  private function buildTransactions(PhabricatorSlowvotePoll $poll) {
+    $viewer = $this->getRequest()->getUser();
+
+    $xactions = id(new PhabricatorSlowvoteTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($poll->getPHID()))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
+    return $timeline;
+  }
+
 }
