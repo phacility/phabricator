@@ -32,7 +32,7 @@ final class AphrontJavelinView extends AphrontView {
       'id' => $id,
       'view' => $this->getName(),
       'params' => $this->getParameters(),
-      'children' => implode('', $this->renderChildren()),
+      'children' => phutil_implode_html('', $this->renderChildren()),
       'trigger_id' => $render_context,
     ));
 
