@@ -116,7 +116,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $lock = PhabricatorGlobalLock::newLock(get_class($this).':'.$revision_id);
       $lock->lock(5 * 60);
 
-      $revision = id(new DifferentialRevision())->load($revision_id);
+      // TODO: Check if a more restrictive viewer could be set here
+      $revision = id(new DifferentialRevisionQuery())
+        ->withIDs(array($revision_id))
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->needRelationships(true)
+        ->needReviewerStatus(true)
+        ->executeOne();
+
       if ($revision) {
         $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
         id(new PhabricatorEdgeEditor())
@@ -124,7 +131,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
           ->save();
 
-        $revision->loadRelationships();
         queryfx(
           $conn_w,
           'INSERT IGNORE INTO %T (revisionID, commitPHID) VALUES (%d, %s)',
