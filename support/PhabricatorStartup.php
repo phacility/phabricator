@@ -260,6 +260,7 @@ final class PhabricatorStartup {
       $known_bad = array(
         '3.1.14' => true,
         '3.1.15' => true,
+        '3.1.15-dev' => true,
       );
       if (isset($known_bad[$apc_version])) {
         self::didFatal(
