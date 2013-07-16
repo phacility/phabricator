@@ -222,6 +222,20 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%s added %d image(s): %s.' => array(
+        array(
+          '%s added an image: %3$s.',
+          '%s added images: %3$s.',
+        ),
+      ),
+
+      '%s removed %d image(s): %s.' => array(
+        array(
+          '%s removed an image: %3$s.',
+          '%s removed images: %3$s.',
+        ),
+      ),
+
       '%d people(s)' => array(
         array(
           '%d person',

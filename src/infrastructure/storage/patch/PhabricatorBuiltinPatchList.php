@@ -1454,6 +1454,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130715.voteedges.sql'),
       ),
+      '20130711.pholioimageobsolete.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete.sql'),
+      ),
+      '20130711.pholioimageobsolete.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete.php'),
+      ),
+      '20130711.pholioimageobsolete2.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete2.sql'),
+      ),
     );
   }
 }

@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group pholio
+ */
 final class PholioMockMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {

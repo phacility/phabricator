@@ -137,6 +137,11 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($mocks, null, 'getPHID');
 
+      case PhabricatorPHIDConstants::PHID_TYPE_PIMG:
+        $images = id(new PholioImage())
+          ->loadAllWhere('phid IN (%Ls)', $phids);
+        return mpull($images, null, 'getPHID');
+
       case PhabricatorPHIDConstants::PHID_TYPE_POLL:
         $polls = id(new PhabricatorSlowvotePoll())
           ->loadAllWhere('phid IN (%Ls)', $phids);
@@ -648,6 +653,26 @@ final class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+
+        case PhabricatorPHIDConstants::PHID_TYPE_PIMG:
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($objects[$phid])) {
+              $handle->setName('Unknown Image');
+            } else {
+              $image = $objects[$phid];
+              $handle->setName($image->getName());
+              $handle->setFullName($image->getName());
+              $handle->setURI(
+                '/M'.$image->getMockID().'/'.$image->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+
 
         case PhabricatorPHIDConstants::PHID_TYPE_POLL:
           foreach ($phids as $phid) {
