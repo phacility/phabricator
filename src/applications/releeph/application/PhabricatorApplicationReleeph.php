@@ -14,7 +14,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
     return '/releeph/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'releeph';
   }
 
