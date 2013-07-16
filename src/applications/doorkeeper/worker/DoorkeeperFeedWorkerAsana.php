@@ -185,28 +185,23 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $phids = $this->getRelatedUserPHIDs($object);
     list($owner_phid, $active_phids, $passive_phids, $follow_phids) = $phids;
 
-    $all_follow_phids = array_merge(
-      $active_phids,
-      $passive_phids,
-      $follow_phids);
-    $all_follow_phids = array_unique(array_filter($all_follow_phids));
-
     $all_phids = array();
     $all_phids = array_merge(
       array($owner_phid),
-      $all_follow_phids);
+      $active_phids,
+      $passive_phids,
+      $follow_phids);
     $all_phids = array_unique(array_filter($all_phids));
 
     $phid_aid_map = $this->lookupAsanaUserIDs($all_phids);
-
     if (!$phid_aid_map) {
       throw new PhabricatorWorkerPermanentFailureException(
         'No related users have linked Asana accounts.');
     }
 
     $owner_asana_id = idx($phid_aid_map, $owner_phid);
-    $all_follow_asana_ids = array_select_keys($phid_aid_map, $all_follow_phids);
-    $all_follow_asana_ids = array_values($all_follow_asana_ids);
+    $all_asana_ids = array_select_keys($phid_aid_map, $all_phids);
+    $all_asana_ids = array_values($all_asana_ids);
 
     // Even if the actor isn't a reviewer, etc., try to use their account so
     // we can post in the correct voice. If we miss, we'll try all the other
@@ -243,7 +238,7 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $main_data = $this->getAsanaTaskData($object) + array(
       'assignee' => $owner_asana_id,
-      'followers' => $all_follow_asana_ids,
+      'followers' => $all_asana_ids,
     );
 
     $extra_data = array();
@@ -261,7 +256,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
           'DoorkeeperExternalObject could not be loaded.');
       }
 
-      if (!$parent_ref->getIsVisible()) {
+      if ($parent_ref->getSyncFailed()) {
+        throw new Exception(
+          'Synchronization of parent task from Asana failed!');
+      } else if (!$parent_ref->getIsVisible()) {
         $this->log("Skipping main task update, object is no longer visible.\n");
         $extra_data['gone'] = true;
       } else {
@@ -341,17 +339,6 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         'this likely indicates the Asana task has been deleted.');
     }
 
-    // Post the feed story itself to the main Asana task.
-
-    $this->makeAsanaAPICall(
-      $oauth_token,
-      'tasks/'.$parent_ref->getObjectID().'/stories',
-      'POST',
-      array(
-        'text' => $story->renderText(),
-      ));
-
-
     // Now, handle the subtasks.
 
     $sub_editor = id(new PhabricatorEdgeEditor())
@@ -371,6 +358,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         ->execute();
 
       foreach ($refs as $ref) {
+        if ($ref->getSyncFailed()) {
+          throw new Exception(
+            'Synchronization of child task from Asana failed!');
+        }
         if (!$ref->getIsVisible()) {
           $ref->getExternalObject()->delete();
           continue;
@@ -497,6 +488,18 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $sub_editor->save();
 
+
+    // Post the feed story itself to the main Asana task. We do this last
+    // because everything else is idempotent, so this is the only effect we
+    // can't safely run more than once.
+
+    $this->makeAsanaAPICall(
+      $oauth_token,
+      'tasks/'.$parent_ref->getObjectID().'/stories',
+      'POST',
+      array(
+        'text' => $story->renderText(),
+      ));
   }
 
   private function lookupAsanaUserIDs($all_phids) {

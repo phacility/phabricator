@@ -941,8 +941,9 @@ final class DifferentialRevisionQuery
       foreach ($revision_edges as $user_phid => $edge) {
         $data = $edge['data'];
         $reviewers[] = new DifferentialReviewer(
-          $user_phid, $data['status'], idx($data, 'diff', null)
-        );
+          $user_phid,
+          idx($data, 'status'),
+          idx($data, 'diff'));
       }
 
       $revision->attachReviewerStatus($reviewers);
