@@ -113,7 +113,9 @@ final class DarkConsoleCore {
    * need to convert it to UTF-8.
    */
   private function sanitizeForJSON($data) {
-    if (is_array($data)) {
+    if (is_object($data)) {
+      return '<object:'.get_class($data).'>';
+    } else if (is_array($data)) {
       foreach ($data as $key => $value) {
         $data[$key] = $this->sanitizeForJSON($value);
       }

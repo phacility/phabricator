@@ -3561,12 +3561,13 @@ celerity_register_resource_map(array(
   ),
   'phabricator-uiexample-javelin-view' =>
   array(
-    'uri' => '/res/2da87384/rsrc/js/application/uiexample/JavelinViewExample.js',
+    'uri' => '/res/d42834b6/rsrc/js/application/uiexample/JavelinViewExample.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
+      2 => 'javelin-view',
     ),
     'disk' => '/rsrc/js/application/uiexample/JavelinViewExample.js',
   ),
