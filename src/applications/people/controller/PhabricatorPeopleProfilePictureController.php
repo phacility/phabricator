@@ -78,7 +78,11 @@ final class PhabricatorPeopleProfilePictureController
       }
 
       if (!$errors) {
-        $user->setProfileImagePHID($xformed->getPHID());
+        if ($is_default) {
+          $user->setProfileImagePHID(null);
+        } else {
+          $user->setProfileImagePHID($xformed->getPHID());
+        }
         $user->save();
         return id(new AphrontRedirectResponse())->setURI($profile_uri);
       }
