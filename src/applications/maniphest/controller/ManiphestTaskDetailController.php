@@ -413,7 +413,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setName(pht('Merge Duplicates'))
+        ->setName(pht('Merge Duplicates In'))
         ->setHref("/search/attach/{$phid}/TASK/merge/")
         ->setWorkflow(true)
         ->setIcon('merge'));
