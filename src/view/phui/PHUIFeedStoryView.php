@@ -14,6 +14,16 @@ final class PHUIFeedStoryView extends AphrontView {
   private $tokenBar = array();
   private $projects = array();
   private $actions = array();
+  private $chronologicalKey;
+
+  public function setChronologicalKey($chronological_key) {
+    $this->chronologicalKey = $chronological_key;
+    return $this;
+  }
+
+  public function getChronologicalKey() {
+    return $this->chronologicalKey;
+  }
 
   public function setTitle($title) {
     $this->title = $title;
@@ -182,6 +192,15 @@ final class PHUIFeedStoryView extends AphrontView {
       $foot = phabricator_datetime($this->epoch, $this->user);
     } else {
       $foot = pht('No time specified.');
+    }
+
+    if ($this->chronologicalKey) {
+      $foot = phutil_tag(
+        'a',
+        array(
+          'href' => '/feed/'.$this->chronologicalKey.'/',
+        ),
+        $foot);
     }
 
     $icon = null;

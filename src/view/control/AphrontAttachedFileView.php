@@ -1,18 +1,11 @@
 <?php
 
-final class AphrontAttachedFileView extends AphrontView {
-
-  private $file;
-
-  public function setFile(PhabricatorFile $file) {
-    $this->file = $file;
-    return $this;
-  }
+final class AphrontAttachedFileView extends AphrontAbstractAttachedFileView {
 
   public function render() {
     require_celerity_resource('aphront-attached-file-view-css');
 
-    $file = $this->file;
+    $file = $this->getFile();
     $phid = $file->getPHID();
 
     $thumb = phutil_tag(
@@ -23,26 +16,10 @@ final class AphrontAttachedFileView extends AphrontView {
         'height'  => 45,
       ));
 
-    $name = phutil_tag(
-      'a',
-      array(
-        'href'    => $file->getViewURI(),
-        'target'  => '_blank',
-      ),
-      $file->getName());
+    $name = $this->getName();
     $size = number_format($file->getByteSize()).' ' .pht('bytes');
 
-    $remove = javelin_tag(
-      'a',
-      array(
-        'class' => 'button grey',
-        'sigil' => 'aphront-attached-file-view-remove',
-        // NOTE: Using 'ref' here instead of 'meta' because the file upload
-        // endpoint doesn't receive request metadata and thus can't generate
-        // a valid response with node metadata.
-        'ref'   => $file->getPHID(),
-      ),
-      "\xE2\x9C\x96"); // "Heavy Multiplication X"
+    $remove = $this->getRemoveElement();
 
     return hsprintf(
       '<table class="aphront-attached-file-view">

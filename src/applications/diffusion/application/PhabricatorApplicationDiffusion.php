@@ -26,7 +26,6 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
 
   public function getEventListeners() {
     return array(
-      new DiffusionPeopleMenuEventListener(),
       new DiffusionHovercardEventListener(),
     );
   }
@@ -43,6 +42,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
         => 'DiffusionCommitController',
       '/diffusion/' => array(
         '' => 'DiffusionHomeController',
+        'create/' => 'DiffusionRepositoryCreateController',
         '(?P<callsign>[A-Z]+)/' => array(
           '' => 'DiffusionRepositoryController',
 

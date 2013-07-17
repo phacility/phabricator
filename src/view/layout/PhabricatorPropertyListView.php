@@ -81,7 +81,50 @@ final class PhabricatorPropertyListView extends AphrontView {
     $this->invokedWillRenderEvent = true;
   }
 
+  public function applyCustomFields(array $fields) {
+    assert_instances_of($fields, 'PhabricatorCustomField');
 
+    // Move all the blocks to the end, regardless of their configuration order,
+    // because it always looks silly to render a block in the middle of a list
+    // of properties.
+    $head = array();
+    $tail = array();
+    foreach ($fields as $key => $field) {
+      $style = $field->getStyleForPropertyView();
+      switch ($style) {
+        case 'property':
+          $head[$key] = $field;
+          break;
+        case 'block':
+          $tail[$key] = $field;
+          break;
+        default:
+          throw new Exception(
+            "Unknown field property view style '{$style}'; valid styles are ".
+            "'block' and 'property'.");
+      }
+    }
+    $fields = $head + $tail;
+
+    foreach ($fields as $field) {
+      $label = $field->renderPropertyViewLabel();
+      $value = $field->renderPropertyViewValue();
+      if ($value !== null) {
+        switch ($field->getStyleForPropertyView()) {
+          case 'property':
+            $this->addProperty($label, $value);
+            break;
+          case 'block':
+            $this->invokeWillRenderEvent();
+            if ($label !== null) {
+              $this->addSectionHeader($label);
+            }
+            $this->addTextContent($value);
+            break;
+        }
+      }
+    }
+  }
 
   public function render() {
     $this->invokeWillRenderEvent();

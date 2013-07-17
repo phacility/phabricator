@@ -61,6 +61,10 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $enable_reviewers = DifferentialAction::allowReviewers($action);
     $enable_ccs = ($action == DifferentialAction::ACTION_ADDCCS);
+    $add_reviewers_labels = array(
+      'add_reviewers' => pht('Add Reviewers'),
+      'resign' => pht('Suggest Reviewers'),
+    );
 
     $form = new AphrontFormView();
     $form
@@ -78,7 +82,8 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setOptions($this->actions))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Add Reviewers'))
+          ->setLabel($enable_reviewers ? $add_reviewers_labels[$action] :
+            $add_reviewers_labels['add_reviewers'])
           ->setName('reviewers')
           ->setControlID('add-reviewers')
           ->setControlStyle($enable_reviewers ? null : 'display: none')
@@ -108,11 +113,16 @@ final class DifferentialAddCommentView extends AphrontView {
       array(
         'dynamic' => array(
           'add-reviewers-tokenizer' => array(
-            'actions' => array('request_review' => 1, 'add_reviewers' => 1),
+            'actions' => array(
+              'request_review' => 1,
+              'add_reviewers' => 1,
+              'resign' => 1,
+            ),
             'src' => '/typeahead/common/users/',
             'value' => $this->reviewers,
             'row' => 'add-reviewers',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+            'labels' => $add_reviewers_labels,
             'placeholder' => pht('Type a user name...'),
           ),
           'add-ccs-tokenizer' => array(

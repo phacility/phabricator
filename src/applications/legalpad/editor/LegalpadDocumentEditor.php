@@ -169,7 +169,7 @@ final class LegalpadDocumentEditor
 
     $body->addTextSection(
       pht('DOCUMENT DETAIL'),
-      PhabricatorEnv::getProductionURI('/L'.$object->getID()));
+      PhabricatorEnv::getProductionURI('/legalpad/view/'.$object->getID().'/'));
 
     return $body;
   }

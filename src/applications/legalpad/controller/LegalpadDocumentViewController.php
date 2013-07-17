@@ -49,9 +49,6 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ->setViewer($user);
     $engine->addObject(
       $document_body,
-      LegalpadDocumentBody::MARKUP_FIELD_TITLE);
-    $engine->addObject(
-      $document_body,
       LegalpadDocumentBody::MARKUP_FIELD_TEXT);
     foreach ($xactions as $xaction) {
       if ($xaction->getComment()) {
@@ -126,6 +123,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($document);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(

@@ -1,0 +1,259 @@
+/**
+ * @provides sprite-status-css
+ * @generated
+ */
+
+.sprite-status {
+  background-image: url(/rsrc/image/sprite-status.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-status {
+    background-image: url(/rsrc/image/sprite-status-X2.png);
+    background-size: 120px 120px;
+  }
+}
+
+
+.status-accept-blue {
+  background-position: 0px 0px;
+}
+
+.status-accept-dark {
+  background-position: -15px 0px;
+}
+
+.status-accept-green {
+  background-position: -30px 0px;
+}
+
+.status-accept-red {
+  background-position: -45px 0px;
+}
+
+.status-accept-white {
+  background-position: -60px 0px;
+}
+
+.status-add-blue {
+  background-position: -75px 0px;
+}
+
+.status-add-dark {
+  background-position: -90px 0px;
+}
+
+.status-add-green {
+  background-position: -105px 0px;
+}
+
+.status-add-red {
+  background-position: 0px -15px;
+}
+
+.status-add-white {
+  background-position: -15px -15px;
+}
+
+.status-down-blue {
+  background-position: -30px -15px;
+}
+
+.status-down-dark {
+  background-position: -45px -15px;
+}
+
+.status-down-green {
+  background-position: -60px -15px;
+}
+
+.status-down-red {
+  background-position: -75px -15px;
+}
+
+.status-down-white {
+  background-position: -90px -15px;
+}
+
+.status-info-blue {
+  background-position: -105px -15px;
+}
+
+.status-info-dark {
+  background-position: 0px -30px;
+}
+
+.status-info-green {
+  background-position: -15px -30px;
+}
+
+.status-info-red {
+  background-position: -30px -30px;
+}
+
+.status-info-white {
+  background-position: -45px -30px;
+}
+
+.status-left-blue {
+  background-position: -60px -30px;
+}
+
+.status-left-dark {
+  background-position: -75px -30px;
+}
+
+.status-left-green {
+  background-position: -90px -30px;
+}
+
+.status-left-red {
+  background-position: -105px -30px;
+}
+
+.status-left-white {
+  background-position: 0px -45px;
+}
+
+.status-minus-blue {
+  background-position: -15px -45px;
+}
+
+.status-minus-dark {
+  background-position: -30px -45px;
+}
+
+.status-minus-green {
+  background-position: -45px -45px;
+}
+
+.status-minus-red {
+  background-position: -60px -45px;
+}
+
+.status-minus-white {
+  background-position: -75px -45px;
+}
+
+.status-open-blue {
+  background-position: -90px -45px;
+}
+
+.status-open-dark {
+  background-position: -105px -45px;
+}
+
+.status-open-green {
+  background-position: 0px -60px;
+}
+
+.status-open-red {
+  background-position: -15px -60px;
+}
+
+.status-open-white {
+  background-position: -30px -60px;
+}
+
+.status-question-blue {
+  background-position: -45px -60px;
+}
+
+.status-question-dark {
+  background-position: -60px -60px;
+}
+
+.status-question-green {
+  background-position: -75px -60px;
+}
+
+.status-question-red {
+  background-position: -90px -60px;
+}
+
+.status-question-white {
+  background-position: 0px -75px;
+}
+
+.status-reject-blue {
+  background-position: -15px -75px;
+}
+
+.status-reject-dark {
+  background-position: -30px -75px;
+}
+
+.status-reject-green {
+  background-position: -45px -75px;
+}
+
+.status-reject-red {
+  background-position: -60px -75px;
+}
+
+.status-reject-white {
+  background-position: -75px -75px;
+}
+
+.status-right-blue {
+  background-position: -90px -75px;
+}
+
+.status-right-dark {
+  background-position: 0px -90px;
+}
+
+.status-right-green {
+  background-position: -15px -90px;
+}
+
+.status-right-red {
+  background-position: -30px -90px;
+}
+
+.status-right-white {
+  background-position: -45px -90px;
+}
+
+.status-up-blue {
+  background-position: -60px -90px;
+}
+
+.status-up-dark {
+  background-position: -75px -90px;
+}
+
+.status-up-green {
+  background-position: -90px -90px;
+}
+
+.status-up-red {
+  background-position: 0px -105px;
+}
+
+.status-up-white {
+  background-position: -15px -105px;
+}
+
+.status-warning-blue {
+  background-position: -30px -105px;
+}
+
+.status-warning-dark {
+  background-position: -45px -105px;
+}
+
+.status-warning-green {
+  background-position: -60px -105px;
+}
+
+.status-warning-red {
+  background-position: -75px -105px;
+}
+
+.status-warning-white {
+  background-position: -90px -105px;
+}

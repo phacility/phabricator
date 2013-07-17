@@ -1430,6 +1430,42 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'php',
         'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.php'),
       ),
+      '20130709.legalpadsignature.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130709.legalpadsignature.sql'),
+      ),
+      '20130709.droptimeline.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130709.droptimeline.sql'),
+      ),
+      '20130711.trimrealnames.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130711.trimrealnames.php'),
+      ),
+      '20130714.votexactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130714.votexactions.sql'),
+      ),
+      '20130715.votecomments.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130715.votecomments.php'),
+      ),
+      '20130715.voteedges.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130715.voteedges.sql'),
+      ),
+      '20130711.pholioimageobsolete.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete.sql'),
+      ),
+      '20130711.pholioimageobsolete.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete.php'),
+      ),
+      '20130711.pholioimageobsolete2.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete2.sql'),
+      ),
     );
   }
 }

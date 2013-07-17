@@ -34,7 +34,7 @@ final class PhabricatorPeopleProfileEditController
 
     $fields = PhabricatorCustomField::getObjectFields(
       $user,
-      PhabricatorUserCustomFieldInterface::ROLE_EDIT);
+      PhabricatorCustomField::ROLE_EDIT);
 
     if ($request->isFormPost()) {
       $xactions = array();

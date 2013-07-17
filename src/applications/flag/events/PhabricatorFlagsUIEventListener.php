@@ -24,6 +24,13 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
       return;
     }
 
+    if (($object instanceof PhabricatorUser)) {
+      // Although there's no real reason not to let you flag users, it also
+      // makes less conceptual sense than flaging other types of objects. For
+      // now, don't allow it.
+      return;
+    }
+
     $flag = PhabricatorFlagQuery::loadUserFlag($user, $object->getPHID());
 
     if ($flag) {

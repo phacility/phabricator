@@ -46,11 +46,17 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
         'ldap/' => 'PhabricatorPeopleLdapController',
         'editprofile/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfileEditController',
+        'picture/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorPeopleProfilePictureController',
       ),
-      '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
+      '/p/(?P<username>[\w._-]+)/'
         => 'PhabricatorPeopleProfileController',
-      '/emailverify/(?P<code>[^/]+)/' =>
-        'PhabricatorEmailVerificationController',
+    );
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorRemarkupRuleMention(),
     );
   }
 

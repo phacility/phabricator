@@ -17,6 +17,16 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $grippable;
   private $actions = array();
   private $headIcons = array();
+  private $disabled;
+
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function getDisabled() {
+    return $this->disabled;
+  }
 
   public function addHeadIcon($icon) {
     $this->headIcons[] = $icon;
@@ -170,6 +180,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $n = count($this->actions);
       $item_classes[] = 'phabricator-object-item-with-actions';
       $item_classes[] = 'phabricator-object-item-with-'.$n.'-actions';
+    }
+
+    if ($this->disabled) {
+      $item_classes[] = 'phabricator-object-item-disabled';
     }
 
     switch ($this->effect) {
@@ -427,7 +441,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     $actions = array();
     if ($this->actions) {
+      Javelin::initBehavior('phabricator-tooltips');
+
       foreach (array_reverse($this->actions) as $action) {
+        $action->setRenderNameAsTooltip(true);
         $actions[] = $action;
       }
       $actions = phutil_tag(

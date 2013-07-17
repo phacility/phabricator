@@ -358,6 +358,24 @@
   border-left-color: #333333;
 }
 
+/* - Disabled ------------------------------------------------------------------
+
+  Disabled/inactive objects.
+
+*/
+
+.phabricator-object-item-disabled {
+  border-left-color: #d7d7d7;
+}
+
+.phabricator-object-item-disabled .phabricator-object-item-frame {
+  border-color: #d7d7d7;
+}
+
+.phabricator-object-item-disabled .phabricator-object-item-objname {
+  color: #777777;
+}
+
 
 /* - Effects -------------------------------------------------------------------
 

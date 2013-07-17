@@ -2,90 +2,124 @@
  * @provides phabricator-slowvote-css
  */
 
-.phabricator-slowvote-comments {
-  width: 100%;
+.slowvote-embed {
+  margin: 24px 12px;
+  background: #ffffff;
+  border-color: #888888;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 4px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.20),
+              inset 0 0 2px rgba(0, 0, 0, 0.10);
 }
 
-.phabricator-slowvote-comments th {
-  width: 150px;
-  text-align: right;
-  padding: 6px 4px 6px;
-  white-space: nowrap;
+.slowvote-header {
+  font-weight: bold;
+  line-height: 16px;
+  border-bottom: 1px solid #bbbbbb;
 }
 
-.phabricator-slowvote-comments td {
-  vertical-align: top;
-  padding: 6px 2px;
-  border-bottom: 1px solid #d0d0d0;
-}
-
-.phabricator-slowvote-datestamp {
-  font-size: 9px;
-  font-family: "Verdana";
+.slowvote-description {
   color: #666666;
-  margin-top: 1px;
+  padding: 8px;
+  border-bottom: 1px solid #bbbbbb;
 }
 
-.phabricator-slowvote-hr {
-  border: none;
-  height: 1px;
-  position: relative;
-  background: #c0c0c0;
+.slowvote-header-content {
+  padding: 8px;
 }
 
-.phabricator-slowvote-count {
-  float: right;
-  font-size: 13px;
-  font-weight: bold;
+.slowvote-body {
 }
 
-.phabricator-slowvote-label {
+.slowvote-body-content {
+  padding: 4px 16px;
+}
+
+.slowvote-option-label {
+  border: 1px solid #666666;
   display: block;
-  width: 100%;
-  font-size: 14px;
-  font-weight: bold;
-  color: #222222;
-  text-align: left;
-  margin: 0px 0px 6px;
-  padding: 6px 4px;
-  background: #cccccc;
-  border-bottom: 1px solid #aaaaaa;
-  cursor: pointer;
-}
-
-.aphront-form-input .phabricator-slowvote-label input {
-  display: inline;
-  width: auto;
-  margin-right: 12px;
-}
-
-.phabricator-slowvote-facepile {
-  width: 50px;
-  height: 50px;
-  overflow: hidden;
   position: relative;
-  float: left;
-  margin: 0px 4px 6px 0px;
+  padding: 8px 4px;
+  cursor: pointer;
+  font-weight: bold;
+  overflow: hidden;
+  background-color: {$lightblue};
 }
 
-.phabricator-slowvote-embed {
-  width: 400px;
-  background: #f7f7f7;
-  border: 1px solid #dbdbdb;
-  padding: 5px;
+.slowvote-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow: hidden;
+  background-color: {$blue};
 }
 
-.phabricator-slowvote-embed-option {
-  margin: 1px;
-  background: #F0FFFF;
+.slowvote-control-offset {
+  white-space: nowrap;
+  position: absolute;
+  left: 32px;
+  top: 8px;
+  width: 100%;
+  color: #000000;
+  text-shadow: 0 1px 0 #ffffff;
 }
 
-.phabricator-slowvote-embed-option-vote {
+.slowvote-bar .slowvote-control-offset {
+  color: #ffffff;
+  text-shadow: 0 1px 0 #000000;
+}
+
+.slowvote-option-label-group {
+  margin: 8px 0 16px;
+}
+
+.slowvote-option-label input[type="radio"],
+.slowvote-option-label input[type="checkbox"] {
+  margin: 0 12px 0 8px;
+  font-weight: bold;
+}
+
+.slowvote-above-the-bar {
+  position: relative;
+}
+
+.slowvote-status {
+  text-align: right;
+  color: #333333;
+  font-weight: normal;
+  padding: 2px 0;
+  line-height: 15px;
+  text-align: right;
+  font-size: 11px;
+}
+
+.slowvote-voter {
   display: inline-block;
-  width: 1em;
+  width: 25px;
+  height: 25px;
+  background: #f3f3f3;
+  background-size: 25px 25px;
 }
 
-.phabricator-slowvote-embed-option-text {
-  border: 1px solid #dbdbdb;
-  border-left: 0px;
+.slowvote-footer {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: #bbbbbb;
+  position: relative;
+}
+
+.slowvote-footer-content {
+  padding: 8px;
+  overflow: hidden;
+}
+
+.slowvote-footer-content .slowvote-hint {
+  line-height: 24px;
+  color: #888888;
+}
+
+.slowvote-footer-content button {
+  float: right;
 }

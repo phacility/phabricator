@@ -41,8 +41,9 @@ final class PhabricatorActionListExample extends PhabricatorUIExample {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $view = new PhabricatorActionListView();
-    $view->setUser($user);
+    $view = id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI());
 
     $view->addAction(
       id(new PhabricatorActionView())

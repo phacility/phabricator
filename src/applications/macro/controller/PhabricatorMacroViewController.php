@@ -106,11 +106,13 @@ final class PhabricatorMacroViewController
   }
 
   private function buildActionView(PhabricatorFileImageMacro $macro) {
-    $view = new PhabricatorActionListView();
-    $view->setUser($this->getRequest()->getUser());
-    $view->setObject($macro);
-    $view->addAction(
-      id(new PhabricatorActionView())
+    $request = $this->getRequest();
+    $view = id(new PhabricatorActionListView())
+      ->setUser($request->getUser())
+      ->setObject($macro)
+      ->setObjectURI($request->getRequestURI())
+      ->addAction(
+        id(new PhabricatorActionView())
         ->setName(pht('Edit Macro'))
         ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
         ->setIcon('edit'));

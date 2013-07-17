@@ -74,7 +74,8 @@ final class DifferentialAction {
 
   public static function allowReviewers($action) {
     if ($action == DifferentialAction::ACTION_ADDREVIEWERS ||
-        $action == DifferentialAction::ACTION_REQUEST) {
+        $action == DifferentialAction::ACTION_REQUEST ||
+        $action == DifferentialAction::ACTION_RESIGN) {
       return true;
     }
     return false;

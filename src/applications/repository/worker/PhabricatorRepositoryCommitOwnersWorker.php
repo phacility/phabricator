@@ -94,7 +94,6 @@ final class PhabricatorRepositoryCommitOwnersWorker
     if ($revision_id) {
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
-        $revision->loadRelationships();
         $revision_author_phid = $revision->getAuthorPHID();
         $revision_reviewedby_phid = $revision->loadReviewedBy();
         $commit_reviewedby_phid = $data->getCommitDetail('reviewerPHID');

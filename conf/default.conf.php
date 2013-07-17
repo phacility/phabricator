@@ -170,10 +170,11 @@ return array(
   // The password to use when connecting to MySQL.
   'mysql.pass' => '',
 
-  // The MySQL server to connect to. If you want to connect to a different
-  // port than the default (which is 3306), specify it in the hostname
-  // (e.g., db.example.com:1234).
+  // The MySQL server to connect to.
   'mysql.host' => 'localhost',
+
+  // If you want to connect to a different port than the default (which is 3306)
+  'mysql.port' => null,
 
   // Phabricator supports PHP extensions MySQL and MySQLi. It is possible to
   // implement also other access mechanism (e.g. PDO_MySQL). The class must

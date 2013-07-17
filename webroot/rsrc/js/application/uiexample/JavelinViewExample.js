@@ -2,6 +2,7 @@
  * @provides phabricator-uiexample-javelin-view
  * @requires javelin-install
  *           javelin-dom
+ *           javelin-view
  */
 
 JX.install('JavelinViewExample', {

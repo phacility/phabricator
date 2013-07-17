@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group pholio
+ */
 final class PholioInlineCommentView extends AphrontView {
 
   private $engine;

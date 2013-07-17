@@ -381,11 +381,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $id = $task->getID();
     $phid = $task->getPHID();
 
-    $view = new PhabricatorActionListView();
-    $view->setUser($viewer);
-    $view->setObject($task);
-
-    $view->addAction(
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($task)
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Task'))
         ->setIcon('edit')

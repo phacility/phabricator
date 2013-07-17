@@ -54,6 +54,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_CONTRIBUTOR     = 33;
   const TYPE_CONTRIBUTED_TO_OBJECT      = 34;
 
+  const TYPE_DREV_HAS_REVIEWER          = 35;
+  const TYPE_REVIEWER_FOR_DREV          = 36;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -118,6 +121,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_PHOB_HAS_ASANASUBTASK => self::TYPE_ASANASUBTASK_HAS_PHOB,
       self::TYPE_ASANASUBTASK_HAS_PHOB => self::TYPE_PHOB_HAS_ASANASUBTASK,
 
+      self::TYPE_DREV_HAS_REVIEWER => self::TYPE_REVIEWER_FOR_DREV,
+      self::TYPE_REVIEWER_FOR_DREV => self::TYPE_DREV_HAS_REVIEWER,
     );
 
     return idx($map, $edge_type);
@@ -156,6 +161,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
       PhabricatorPHIDConstants::PHID_TYPE_XOBJ  => 'DoorkeeperExternalObject',
       PhabricatorPHIDConstants::PHID_TYPE_LEGD  => 'LegalpadDocument',
+      PhabricatorPHIDConstants::PHID_TYPE_POLL  => 'PhabricatorSlowvotePoll',
     );
 
     $class = idx($class_map, $phid_type);

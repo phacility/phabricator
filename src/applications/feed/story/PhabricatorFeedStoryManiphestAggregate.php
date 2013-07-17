@@ -54,10 +54,8 @@ final class PhabricatorFeedStoryManiphestAggregate
         break;
     }
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('maniphest-dark');
-    $view->setEpoch($this->getEpoch());
-    $view->setViewed($this->getHasViewed());
     $view->setTitle($title);
 
     $href = $this->getHandle($data->getValue('taskPHID'))->getURI();

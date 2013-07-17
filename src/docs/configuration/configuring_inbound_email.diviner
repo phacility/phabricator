@@ -99,16 +99,22 @@ signatures are sufficient to authenticate the sender under your configuration,
 or you are willing to require all users to sign their email), file a feature
 request.
 
-= Testing =
+= Testing and Debugging Inbound Email =
 
-You can view a log of received mail by going to MetaMTA -> Received in the
-Phabricator web interface. This can help you determine if mail is being
-delivered to Phabricator or not.
+You can use the `bin/mail` utility to test and review inbound mail. This can
+help you determine if mail is being delivered to Phabricator or not:
 
-You can also use the "Test Receiver" button, but note that this just simulates
-receiving mail and doesn't send any information over the network. It is
+  phabricator/ $ ./bin/mail list-inbound   # List inbound messages.
+  phabricator/ $ ./bin-mail show-inbound   # Show details about a message.
+
+You can also test receiving mail, but note that this just simulates receiving
+the mail and doesn't send any information over the network. It is
 primarily aimed at developing email handlers: it will still work properly
 if your inbound email configuration is incorrect or even disabled.
+
+  phabricator/ $ ./bin/mail receive-test   # Receive test message.
+
+Run `bin/mail help <command>` for detailed help on using these commands.
 
 = SendGrid =
 
@@ -187,7 +193,7 @@ Now, you can actually configure sendmail to deliver to Phabricator. In
 
 Finally, edit ##/etc/mail/virtusertable## and add an entry like this:
 
-  @yourdomain.com	phabricator@localhost
+  @yourdomain.com phabricator@localhost
 
 That will forward all mail to @yourdomain.com to the Phabricator processing
 script. Run ##sudo /etc/mail/make## or similar and then restart sendmail with

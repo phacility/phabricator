@@ -25,6 +25,7 @@ $conf = PhabricatorEnv::newObjectFromConfig(
 
 $default_user       = $conf->getUser();
 $default_host       = $conf->getHost();
+$default_port       = $conf->getPort();
 $default_namespace  = PhabricatorLiskDAO::getDefaultStorageNamespace();
 
 try {
@@ -82,6 +83,7 @@ $api = new PhabricatorStorageManagementAPI();
 $api->setUser($args->getArg('user'));
 PhabricatorEnv::overrideConfig('mysql.user', $args->getArg('user'));
 $api->setHost($default_host);
+$api->setPort($default_port);
 $api->setPassword($password);
 $api->setNamespace($args->getArg('namespace'));
 

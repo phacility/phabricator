@@ -21,7 +21,12 @@
 }
 
 .device-desktop .phabricator-header-shell + .phabricator-action-list-view {
-  margin-top: -28px;
+  margin-top: -33px;
+}
+
+.device-desktop .phabricator-header-shell.phabricator-header-has-image +
+  .phabricator-action-list-view {
+  margin-top: -53px;
 }
 
 .device .phabricator-header-shell + .phabricator-action-list-view {

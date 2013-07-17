@@ -258,6 +258,13 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     return array();
   }
 
+  protected function newStoryView() {
+    return id(new PHUIFeedStoryView())
+      ->setChronologicalKey($this->getChronologicalKey())
+      ->setEpoch($this->getEpoch())
+      ->setViewed($this->getHasViewed());
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

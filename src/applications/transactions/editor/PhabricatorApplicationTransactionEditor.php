@@ -179,6 +179,19 @@ abstract class PhabricatorApplicationTransactionEditor
     return ($xaction->getOldValue() !== $xaction->getNewValue());
   }
 
+  protected function shouldApplyInitialEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return false;
+
+  }
+
+  protected function applyInitialEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    throw new Exception('Not implemented.');
+  }
+
   private function applyInternalEffects(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -338,24 +351,39 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $is_preview = $this->getIsPreview();
     $read_locking = false;
+    $transaction_open = false;
 
-    if (!$is_preview && $object->getID()) {
-      foreach ($xactions as $xaction) {
+    if (!$is_preview) {
+      if ($object->getID()) {
+        foreach ($xactions as $xaction) {
 
-        // If any of the transactions require a read lock, hold one and reload
-        // the object. We need to do this fairly early so that the call to
-        // `adjustTransactionValues()` (which populates old values) is based
-        // on the synchronized state of the object, which may differ from the
-        // state when it was originally loaded.
+          // If any of the transactions require a read lock, hold one and
+          // reload the object. We need to do this fairly early so that the
+          // call to `adjustTransactionValues()` (which populates old values)
+          // is based on the synchronized state of the object, which may differ
+          // from the state when it was originally loaded.
 
-        if ($this->shouldReadLock($object, $xaction)) {
-          $object->openTransaction();
-          $object->beginReadLocking();
-          $read_locking = true;
-          $object->reload();
-          break;
+          if ($this->shouldReadLock($object, $xaction)) {
+            $object->openTransaction();
+            $object->beginReadLocking();
+            $transaction_open = true;
+            $read_locking = true;
+            $object->reload();
+            break;
+          }
         }
       }
+
+      if ($this->shouldApplyInitialEffects($object, $xactions)) {
+        if (!$transaction_open) {
+          $object->openTransaction();
+          $transaction_open = true;
+        }
+      }
+    }
+
+    if ($this->shouldApplyInitialEffects($object, $xactions)) {
+      $this->applyInitialEffects($object, $xactions);
     }
 
     foreach ($xactions as $xaction) {
@@ -368,7 +396,10 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($read_locking) {
         $object->endReadLocking();
         $read_locking = false;
+      }
+      if ($transaction_open) {
         $object->killTransaction();
+        $transaction_open = false;
       }
       return array();
     }
@@ -384,7 +415,7 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setActor($actor)
       ->setContentSource($this->getContentSource());
 
-    if (!$read_locking) {
+    if (!$transaction_open) {
       $object->openTransaction();
     }
 

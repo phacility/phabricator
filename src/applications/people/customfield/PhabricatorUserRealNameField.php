@@ -17,6 +17,18 @@ final class PhabricatorUserRealNameField
     return pht('Stores the real name of the user, like "Abraham Lincoln".');
   }
 
+  public function canDisableField() {
+    return false;
+  }
+
+  public function shouldAppearInApplicationTransactions() {
+    return true;
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
   protected function didSetObject(PhabricatorCustomFieldInterface $object) {
     $this->value = $object->getRealName();
   }
@@ -26,6 +38,9 @@ final class PhabricatorUserRealNameField
   }
 
   public function getNewValueForApplicationTransactions() {
+    if (!$this->isEditable()) {
+      return $this->getObject()->getRealName();
+    }
     return $this->value;
   }
 
@@ -42,7 +57,12 @@ final class PhabricatorUserRealNameField
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setValue($this->value)
-      ->setLabel($this->getFieldName());
+      ->setLabel($this->getFieldName())
+      ->setDisabled(!$this->isEditable());
+  }
+
+  private function isEditable() {
+    return PhabricatorEnv::getEnvConfig('account.editable');
   }
 
 }

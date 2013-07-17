@@ -19,8 +19,12 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           $task = $task->executeTask();
           $ex = $task->getExecutionException();
           if ($ex) {
-            $this->log("Task {$id} failed!");
-            throw $ex;
+            if ($ex instanceof PhabricatorWorkerPermanentFailureException) {
+              $this->log("Task {$id} failed permanently.");
+            } else {
+              $this->log("Task {$id} failed!");
+              throw $ex;
+            }
           } else {
             $this->log("Task {$id} complete! Moved to archive.");
           }

@@ -290,6 +290,12 @@ EOBODY;
       ->withPHIDs(array($handle->getPHID()))
       ->executeOne();
 
+    if (!$user) {
+      // This may happen if a user was subscribed to something, and was then
+      // deleted.
+      return null;
+    }
+
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();
     $user_id = $user->getID();

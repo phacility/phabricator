@@ -79,7 +79,8 @@ final class PhabricatorApplicationDetailViewController
     PhabricatorUser $user, PhabricatorApplication $selected) {
 
     $view = id(new PhabricatorActionListView())
-          ->setUser($user);
+      ->setUser($user)
+      ->setObjectURI($this->getRequest()->getRequestURI());
 
     if ($selected->canUninstall()) {
       if ($selected->isInstalled()) {
