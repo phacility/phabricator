@@ -109,12 +109,12 @@
     "apps-conpherence-blue-large"     : {
       "name" : "apps-conpherence-blue-large",
       "rule" : ".apps-conpherence-blue-large, .phabricator-crumb-view:hover .apps-conpherence-dark-large",
-      "hash" : "b487ce2815d07b56338802d283aadc9c"
+      "hash" : "ff76132c29d0557f514998c28a8ad010"
     },
     "apps-conpherence-dark-large"     : {
       "name" : "apps-conpherence-dark-large",
       "rule" : ".apps-conpherence-dark-large",
-      "hash" : "10edcded8fded2339a1fdffd78e685ed"
+      "hash" : "97b415b21758f185d85776deb31a9dab"
     },
     "apps-conpherence-light-large"    : {
       "name" : "apps-conpherence-light-large",
