@@ -53,6 +53,11 @@ final class PhabricatorSlowvoteListController
         ->setHref('/V'.$poll->getID())
         ->addIcon('none', $date_created);
 
+      $description = $poll->getDescription();
+      if (strlen($description)) {
+        $item->addAttribute(phutil_utf8_shorten($poll->getDescription(), 120));
+      }
+
       if ($author) {
         $item->addByline(pht('Author: %s', $author));
       }

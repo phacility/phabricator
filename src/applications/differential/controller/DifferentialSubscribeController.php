@@ -15,7 +15,12 @@ final class DifferentialSubscribeController extends DifferentialController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $revision = id(new DifferentialRevision())->load($this->id);
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($this->id))
+      ->setViewer($request->getUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
     if (!$revision) {
       return new Aphront404Response();
     }
@@ -51,7 +56,6 @@ final class DifferentialSubscribeController extends DifferentialController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $revision->loadRelationships();
     $phid = $user->getPHID();
 
     switch ($this->action) {

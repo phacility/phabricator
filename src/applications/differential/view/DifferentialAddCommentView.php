@@ -63,6 +63,7 @@ final class DifferentialAddCommentView extends AphrontView {
     $enable_ccs = ($action == DifferentialAction::ACTION_ADDCCS);
     $add_reviewers_labels = array(
       'add_reviewers' => pht('Add Reviewers'),
+      'request_review' => pht('Add Reviewers'),
       'resign' => pht('Suggest Reviewers'),
     );
 

@@ -57,6 +57,7 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
           'edit/(?P<id>\d+)/' => 'PholioInlineEditController',
           'thumb/(?P<imageid>\d+)/' => 'PholioInlineThumbController'
         ),
+        'image/upload/' => 'PholioDropUploadController',
       ),
     );
   }

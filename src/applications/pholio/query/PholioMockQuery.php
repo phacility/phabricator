@@ -113,8 +113,9 @@ final class PholioMockQuery
 
     $mock_ids = mpull($mocks, 'getID');
     $all_images = id(new PholioImage())->loadAllWhere(
-      'mockID IN (%Ld)',
-      $mock_ids);
+      'mockID IN (%Ld) AND isObsolete = %d',
+      $mock_ids,
+      0);
 
     $file_phids = mpull($all_images, 'getFilePHID');
     $all_files = mpull(id(new PhabricatorFile())->loadAllWhere(
@@ -143,7 +144,8 @@ final class PholioMockQuery
     $image_groups = mgroup($all_images, 'getMockID');
 
     foreach ($mocks as $mock) {
-      $mock->attachImages($image_groups[$mock->getID()]);
+      $mock_images = $image_groups[$mock->getID()];
+      $mock->attachImages($mock_images);
     }
   }
 

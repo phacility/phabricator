@@ -1,0 +1,81 @@
+/**
+ * @provides pholio-edit-css
+ */
+
+.pholio-uploaded-image {
+  float: left;
+  margin: 0px 0px 12px 0px;
+}
+
+.pholio-uploaded-image .thumb-box {
+  border: 1px solid #D5D9DF;
+  border-radius: 3px;
+  min-width: 280px;
+  width: 48%;
+  float: left;
+}
+
+.pholio-uploaded-image .image-data {
+  width: 48%;
+  float: right;
+}
+
+.pholio-uploaded-image .thumb-box .title {
+  width: 100%;
+  float: left;
+  background: #EDF0F4;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border-bottom: 1px solid #D5D9DF;
+}
+
+.pholio-uploaded-image .thumb-box .thumb {
+  float: left;
+  background: white;
+  padding: 12px 0px 0px 0px;
+  width: 100%;
+}
+
+.pholio-uploaded-image .thumb-box .title .text {
+  width: 220px;
+  float: left;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 6px 0px 0px 8px;
+}
+
+.pholio-uploaded-image .thumb-box .title .remove {
+  float: right;
+}
+
+.pholio-uploaded-image .thumb-box .title .remove .button {
+  background: #EDF0F4;
+  border: none;
+}
+
+.pholio-uploaded-image .thumb-box .title .remove .button:hover {
+  box-shadow: inset 0 0 2px rgba(0,0,0,.2);
+}
+
+.pholio-uploaded-image .image-data .aphront-form-control {
+  padding: 0px 0px 4px 4px;
+}
+.pholio-uploaded-image .image-data .aphront-form-label {
+  text-align: left;
+  margin: 0px 0px 5px 0px;
+}
+.pholio-uploaded-image .image-data .aphront-form-input {
+  margin: 0;
+  width: 100%;
+}
+
+.aphront-form-input .aphront-form-drag-and-drop-file-list {
+  float: left;
+  width: 100%;
+}
+.aphront-form-input .aphront-form-drag-and-drop-file-list
+.drag-and-drop-file-target {
+  padding: 20px;
+  clear: both;
+}

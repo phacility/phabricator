@@ -53,7 +53,7 @@ JX.behavior('aphront-drag-and-drop', function(config) {
     pending--;
     redraw(true);
 
-    // This redraws the instructions.
+    // This redraws the instructions and clears "Upload complete!"
     setTimeout(redraw, 1000);
   });
 

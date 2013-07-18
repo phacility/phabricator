@@ -19,45 +19,15 @@ final class PhabricatorSlowvoteVoteController
     $poll = id(new PhabricatorSlowvoteQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needOptions(true)
+      ->needViewerChoices(true)
       ->executeOne();
     if (!$poll) {
       return new Aphront404Response();
     }
 
-    $options = id(new PhabricatorSlowvoteOption())->loadAllWhere(
-      'pollID = %d',
-      $poll->getID());
-    $user_choices = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
-      'pollID = %d AND authorPHID = %s',
-      $poll->getID(),
-      $user->getPHID());
-
-    $comment_text = $request->getStr('comments');
-    $old_comment = id(new PhabricatorSlowvoteComment())->loadOneWhere(
-      'pollID = %d AND authorPHID = %s',
-      $poll->getID(),
-      $user->getPHID());
-
-    $update_comment = false;
-    if ($old_comment && $comment_text &&
-      $old_comment->getCommentText() !== $comment_text) {
-
-      $update_comment = true;
-    } else if (!$old_comment && $comment_text) {
-      $update_comment = true;
-    }
-
-    if ($update_comment) {
-      if ($old_comment) {
-        $old_comment->delete();
-      }
-
-      id(new PhabricatorSlowvoteComment())
-          ->setAuthorPHID($user->getPHID())
-          ->setPollID($poll->getID())
-          ->setCommentText($comment_text)
-          ->save();
-    }
+    $options = $poll->getOptions();
+    $user_choices = $poll->getViewerChoices($user);
 
     $old_votes = mpull($user_choices, null, 'getOptionID');
 

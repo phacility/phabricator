@@ -105,6 +105,10 @@
   color: #888888;
 }
 
+.phabricator-action-view button[disabled] {
+  opacity: 1.0;
+}
+
 .device-desktop .phabricator-action-view-disabled:hover
   .phabricator-action-view-item,
 .device-desktop .phabricator-action-view-disabled:hover

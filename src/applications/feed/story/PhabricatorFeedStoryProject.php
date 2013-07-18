@@ -86,6 +86,21 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
             $this->renderHandleList($rem));
         }
         break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_VIEW:
+        $action = hsprintf(
+          'changed the visibility for %s.',
+          $this->linkTo($proj_phid));
+        break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_EDIT:
+        $action = hsprintf(
+          'changed the edit policy for %s.',
+          $this->linkTo($proj_phid));
+        break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_JOIN:
+        $action = hsprintf(
+          'changed the join policy for %s.',
+          $this->linkTo($proj_phid));
+        break;
       default:
         $action = hsprintf('updated project %s.', $this->linkTo($proj_phid));
         break;

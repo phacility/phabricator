@@ -1,0 +1,311 @@
+{
+  "version" : 1,
+  "sprites" : {
+    "status-accept-blue"    : {
+      "name" : "status-accept-blue",
+      "rule" : ".status-accept-blue",
+      "hash" : "c3bde2e1361bcd7259825ecaf2d4b2ff"
+    },
+    "status-accept-dark"    : {
+      "name" : "status-accept-dark",
+      "rule" : ".status-accept-dark",
+      "hash" : "a2ec73e144ea598be15b8acb63f3c096"
+    },
+    "status-accept-green"   : {
+      "name" : "status-accept-green",
+      "rule" : ".status-accept-green",
+      "hash" : "cf0c2339a111f54adfdcc0de5c18be22"
+    },
+    "status-accept-red"     : {
+      "name" : "status-accept-red",
+      "rule" : ".status-accept-red",
+      "hash" : "1466a3ed72f63971e38e669715cf5b98"
+    },
+    "status-accept-white"   : {
+      "name" : "status-accept-white",
+      "rule" : ".status-accept-white",
+      "hash" : "8ecccf5e2ce6658d8a1e963e4be6f6e9"
+    },
+    "status-add-blue"       : {
+      "name" : "status-add-blue",
+      "rule" : ".status-add-blue",
+      "hash" : "8860efdd8f90eed700ae48595ace6b38"
+    },
+    "status-add-dark"       : {
+      "name" : "status-add-dark",
+      "rule" : ".status-add-dark",
+      "hash" : "38dc8634ccfe6fa30f467e97436e1a30"
+    },
+    "status-add-green"      : {
+      "name" : "status-add-green",
+      "rule" : ".status-add-green",
+      "hash" : "5610cd9924ad6b3461a20dd050ef4866"
+    },
+    "status-add-red"        : {
+      "name" : "status-add-red",
+      "rule" : ".status-add-red",
+      "hash" : "9e0abe2b6e37ef5a1a2522ad01002704"
+    },
+    "status-add-white"      : {
+      "name" : "status-add-white",
+      "rule" : ".status-add-white",
+      "hash" : "1a8ab412f40c569acdc709fb281fefde"
+    },
+    "status-down-blue"      : {
+      "name" : "status-down-blue",
+      "rule" : ".status-down-blue",
+      "hash" : "25baf216cd311f321656a5f3a327c38c"
+    },
+    "status-down-dark"      : {
+      "name" : "status-down-dark",
+      "rule" : ".status-down-dark",
+      "hash" : "bb82d18b729ac30956200b655eafeeb8"
+    },
+    "status-down-green"     : {
+      "name" : "status-down-green",
+      "rule" : ".status-down-green",
+      "hash" : "c29ad19910664ecc94e0d1fa99a0a6c0"
+    },
+    "status-down-red"       : {
+      "name" : "status-down-red",
+      "rule" : ".status-down-red",
+      "hash" : "644f0d38cad5cc6797fe81ed30b9bc6a"
+    },
+    "status-down-white"     : {
+      "name" : "status-down-white",
+      "rule" : ".status-down-white",
+      "hash" : "5bc0af6641ef545218ecced2d25e9a10"
+    },
+    "status-info-blue"      : {
+      "name" : "status-info-blue",
+      "rule" : ".status-info-blue",
+      "hash" : "2acc8c62d8963bec9ce632de60a4da41"
+    },
+    "status-info-dark"      : {
+      "name" : "status-info-dark",
+      "rule" : ".status-info-dark",
+      "hash" : "d96f44c17e67d7c0c10a400e6ff294f1"
+    },
+    "status-info-green"     : {
+      "name" : "status-info-green",
+      "rule" : ".status-info-green",
+      "hash" : "28fc83a1f5bee4ac39a0dcd52e180818"
+    },
+    "status-info-red"       : {
+      "name" : "status-info-red",
+      "rule" : ".status-info-red",
+      "hash" : "fc26e5509140d8e9a3305a39c44773f0"
+    },
+    "status-info-white"     : {
+      "name" : "status-info-white",
+      "rule" : ".status-info-white",
+      "hash" : "b70025f459685371f8397b61944bef7d"
+    },
+    "status-left-blue"      : {
+      "name" : "status-left-blue",
+      "rule" : ".status-left-blue",
+      "hash" : "cdec5d2617cb7fcfbfea336881d267f0"
+    },
+    "status-left-dark"      : {
+      "name" : "status-left-dark",
+      "rule" : ".status-left-dark",
+      "hash" : "83b58d1cde130deb01971888ad0bcfc1"
+    },
+    "status-left-green"     : {
+      "name" : "status-left-green",
+      "rule" : ".status-left-green",
+      "hash" : "6b34445f1a034e71432a5823bed1c4d7"
+    },
+    "status-left-red"       : {
+      "name" : "status-left-red",
+      "rule" : ".status-left-red",
+      "hash" : "38ebb75c0fbcf6fe96def6c2ab70b343"
+    },
+    "status-left-white"     : {
+      "name" : "status-left-white",
+      "rule" : ".status-left-white",
+      "hash" : "9e89400271b55590e610188d93671934"
+    },
+    "status-minus-blue"     : {
+      "name" : "status-minus-blue",
+      "rule" : ".status-minus-blue",
+      "hash" : "61ef81a9b78b4de4bf6303f8d51c86ef"
+    },
+    "status-minus-dark"     : {
+      "name" : "status-minus-dark",
+      "rule" : ".status-minus-dark",
+      "hash" : "db4ddb69a22c7f6f09669fe3c488c4f0"
+    },
+    "status-minus-green"    : {
+      "name" : "status-minus-green",
+      "rule" : ".status-minus-green",
+      "hash" : "9e5402f65601ced38a967d4e17b80f1c"
+    },
+    "status-minus-red"      : {
+      "name" : "status-minus-red",
+      "rule" : ".status-minus-red",
+      "hash" : "bcaf148bc842e398f08d8c01506bd5b6"
+    },
+    "status-minus-white"    : {
+      "name" : "status-minus-white",
+      "rule" : ".status-minus-white",
+      "hash" : "c5a3771452dda603fbaee87371044f5a"
+    },
+    "status-open-blue"      : {
+      "name" : "status-open-blue",
+      "rule" : ".status-open-blue",
+      "hash" : "9632bb52d5f24941202848c2e3d4488a"
+    },
+    "status-open-dark"      : {
+      "name" : "status-open-dark",
+      "rule" : ".status-open-dark",
+      "hash" : "ca38ff5fc8a327d96cd1bbc23043fbb4"
+    },
+    "status-open-green"     : {
+      "name" : "status-open-green",
+      "rule" : ".status-open-green",
+      "hash" : "b4a2c17594a5301e2bd52a9df71819d3"
+    },
+    "status-open-red"       : {
+      "name" : "status-open-red",
+      "rule" : ".status-open-red",
+      "hash" : "f92b1544978d691da6912f937df54273"
+    },
+    "status-open-white"     : {
+      "name" : "status-open-white",
+      "rule" : ".status-open-white",
+      "hash" : "169dc0e8f36444ea30163181f9c88dc2"
+    },
+    "status-question-blue"  : {
+      "name" : "status-question-blue",
+      "rule" : ".status-question-blue",
+      "hash" : "44ebbdbe059ca77ae4dc6a6b98de1ccf"
+    },
+    "status-question-dark"  : {
+      "name" : "status-question-dark",
+      "rule" : ".status-question-dark",
+      "hash" : "5fdd5f2b089f4481a39760a50224d8b2"
+    },
+    "status-question-green" : {
+      "name" : "status-question-green",
+      "rule" : ".status-question-green",
+      "hash" : "326dfc6c1841410ce0f22d702c872c01"
+    },
+    "status-question-red"   : {
+      "name" : "status-question-red",
+      "rule" : ".status-question-red",
+      "hash" : "18dbec41627f8c047c4e736f84dacb33"
+    },
+    "status-question-white" : {
+      "name" : "status-question-white",
+      "rule" : ".status-question-white",
+      "hash" : "5e7f546f978d1d0545cad127ea3bcf80"
+    },
+    "status-reject-blue"    : {
+      "name" : "status-reject-blue",
+      "rule" : ".status-reject-blue",
+      "hash" : "b0f51db6aa6ee85a24a1f4c13812d7ef"
+    },
+    "status-reject-dark"    : {
+      "name" : "status-reject-dark",
+      "rule" : ".status-reject-dark",
+      "hash" : "9b28c36f6cbd6d5d5731b971193a151e"
+    },
+    "status-reject-green"   : {
+      "name" : "status-reject-green",
+      "rule" : ".status-reject-green",
+      "hash" : "fc171843df97bcdc6e4679682b3b31e4"
+    },
+    "status-reject-red"     : {
+      "name" : "status-reject-red",
+      "rule" : ".status-reject-red",
+      "hash" : "6de0dd95a92d33bda228aaa9ba6deee5"
+    },
+    "status-reject-white"   : {
+      "name" : "status-reject-white",
+      "rule" : ".status-reject-white",
+      "hash" : "e709a3fb3081a395900deaef0591066c"
+    },
+    "status-right-blue"     : {
+      "name" : "status-right-blue",
+      "rule" : ".status-right-blue",
+      "hash" : "ca1cae1d93486785ec50458ba3b19082"
+    },
+    "status-right-dark"     : {
+      "name" : "status-right-dark",
+      "rule" : ".status-right-dark",
+      "hash" : "fb6600fd1775a8a4fb85709dc4f6c28c"
+    },
+    "status-right-green"    : {
+      "name" : "status-right-green",
+      "rule" : ".status-right-green",
+      "hash" : "9a52218e6c6d3968a05eb51865ed3cba"
+    },
+    "status-right-red"      : {
+      "name" : "status-right-red",
+      "rule" : ".status-right-red",
+      "hash" : "06bd9747ce4cc87282b2fb207c525f0c"
+    },
+    "status-right-white"    : {
+      "name" : "status-right-white",
+      "rule" : ".status-right-white",
+      "hash" : "be2ffb65a7799cd9a5e00c2334e378b2"
+    },
+    "status-up-blue"        : {
+      "name" : "status-up-blue",
+      "rule" : ".status-up-blue",
+      "hash" : "44fc24b3646e29c949b639157c315140"
+    },
+    "status-up-dark"        : {
+      "name" : "status-up-dark",
+      "rule" : ".status-up-dark",
+      "hash" : "459ed916291bfa905676ae0818bb2e1b"
+    },
+    "status-up-green"       : {
+      "name" : "status-up-green",
+      "rule" : ".status-up-green",
+      "hash" : "6a682e48fc2f240b19bd175be52c9256"
+    },
+    "status-up-red"         : {
+      "name" : "status-up-red",
+      "rule" : ".status-up-red",
+      "hash" : "0e38f6282e542470ecb68e55fad7eb76"
+    },
+    "status-up-white"       : {
+      "name" : "status-up-white",
+      "rule" : ".status-up-white",
+      "hash" : "ce80e291bc905b2692ad9f3ece7cf206"
+    },
+    "status-warning-blue"   : {
+      "name" : "status-warning-blue",
+      "rule" : ".status-warning-blue",
+      "hash" : "93f5e066a01a874adc2c120cca4bd1fc"
+    },
+    "status-warning-dark"   : {
+      "name" : "status-warning-dark",
+      "rule" : ".status-warning-dark",
+      "hash" : "273a519299d7063710452d21c0bc6406"
+    },
+    "status-warning-green"  : {
+      "name" : "status-warning-green",
+      "rule" : ".status-warning-green",
+      "hash" : "991514e5b75509b27fd68d21755b9fa6"
+    },
+    "status-warning-red"    : {
+      "name" : "status-warning-red",
+      "rule" : ".status-warning-red",
+      "hash" : "b15f61f314cbda5486d3aa21990153ae"
+    },
+    "status-warning-white"  : {
+      "name" : "status-warning-white",
+      "rule" : ".status-warning-white",
+      "hash" : "62ff8f6bf696e58f71eb4e1c6fe9b2e1"
+    }
+  },
+  "scales"  : [
+    1,
+    2
+  ],
+  "header"  : "\/**\n * @provides sprite-status-css\n * @generated\n *\/\n\n.sprite-status {\n  background-image: url(\/rsrc\/image\/sprite-status.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-status {\n    background-image: url(\/rsrc\/image\/sprite-status-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type"    : "standard"
+}

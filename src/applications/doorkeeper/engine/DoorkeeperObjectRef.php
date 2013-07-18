@@ -9,6 +9,7 @@ final class DoorkeeperObjectRef extends Phobject {
   private $objectID;
   private $attributes = array();
   private $isVisible;
+  private $syncFailed;
   private $externalObject;
 
   public function newExternalObject() {
@@ -41,6 +42,15 @@ final class DoorkeeperObjectRef extends Phobject {
 
   public function getIsVisible() {
     return $this->isVisible;
+  }
+
+  public function setSyncFailed($sync_failed) {
+    $this->syncFailed = $sync_failed;
+    return $this;
+  }
+
+  public function getSyncFailed() {
+    return $this->syncFailed;
   }
 
   public function getAttribute($key, $default = null) {

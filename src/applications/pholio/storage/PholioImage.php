@@ -13,9 +13,20 @@ final class PholioImage extends PholioDAO
   protected $name = '';
   protected $description = '';
   protected $sequence;
+  protected $isObsolete = 0;
 
   private $inlineComments;
   private $file;
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID('PIMG');
+  }
 
   public function attachInlineComments(array $inline_comments) {
     assert_instances_of($inline_comments, 'PholioTransactionComment');

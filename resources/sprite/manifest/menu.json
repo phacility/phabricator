@@ -34,7 +34,7 @@
     "logo"             : {
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo-image",
-      "hash" : "6803a4d19da5223b72d9f8f1aa65a60c"
+      "hash" : "5fdebd09065245b4cc7becb61961cf0c"
     },
     "search"           : {
       "name" : "search",

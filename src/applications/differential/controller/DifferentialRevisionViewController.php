@@ -18,12 +18,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $user = $request->getUser();
     $viewer_is_anonymous = !$user->isLoggedIn();
 
-    $revision = id(new DifferentialRevision())->load($this->revisionID);
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($this->revisionID))
+      ->setViewer($request->getUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+
     if (!$revision) {
       return new Aphront404Response();
     }
-
-    $revision->loadRelationships();
 
     $diffs = $revision->loadDiffs();
 
