@@ -101,8 +101,8 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
           ->setName(pht('Upgrade MySQL Schema'))
           ->setMessage(pht(
             "Run the storage upgrade script to upgrade Phabricator's database ".
-              "schema. Missing patches: %s.",
-            implode(', ', array_keys($diff))))
+              "schema. Missing patches:<br />%s<br />",
+            phutil_implode_html(phutil_tag('br'), array_keys($diff))))
           ->addCommand(
             hsprintf('<tt>phabricator/ $</tt> ./bin/storage upgrade'));
       }

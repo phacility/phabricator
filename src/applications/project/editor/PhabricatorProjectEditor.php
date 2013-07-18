@@ -8,6 +8,16 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
   private $addEdges = array();
   private $remEdges = array();
 
+  private $shouldArchive = false;
+
+  private function setShouldArchive($should_archive) {
+    $this->shouldArchive = $should_archive;
+    return $this;
+  }
+  private function shouldArchive() {
+    return $this->shouldArchive;
+  }
+
   public static function applyJoinProject(
     PhabricatorProject $project,
     PhabricatorUser $user) {
@@ -120,6 +130,10 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
 
     try {
       $project->openTransaction();
+
+        if ($this->shouldArchive()) {
+          $project->setStatus(PhabricatorProjectStatus::STATUS_ARCHIVED);
+        }
         $project->save();
 
         $edge_type = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
@@ -151,9 +165,6 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
       $this->validateName($project);
       throw $ex;
     }
-
-    // TODO: If we rename a project, we should move its Phriction page. Do
-    // that once Phriction supports document moves.
 
     return $this;
   }
@@ -233,8 +244,37 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
     $type = $xaction->getTransactionType();
     switch ($type) {
       case PhabricatorProjectTransactionType::TYPE_NAME:
+        $old_slug = $project->getFullPhrictionSlug();
         $project->setName($xaction->getNewValue());
         $project->setPhrictionSlug($xaction->getNewValue());
+
+        if ($xaction->getOldValue()) {
+          $old_document = id(new PhrictionDocument())
+            ->loadOneWhere(
+              'slug = %s',
+              $old_slug);
+          if ($old_document && $old_document->getStatus() ==
+              PhrictionDocumentStatus::STATUS_EXISTS) {
+            $content = id(new PhrictionContent())
+              ->load($old_document->getContentID());
+            $from_editor = id(PhrictionDocumentEditor::newForSlug($old_slug))
+              ->setActor($this->getActor())
+              ->setTitle($content->getTitle())
+              ->setContent($content->getContent())
+              ->setDescription($content->getDescription());
+
+            $target_editor = id(PhrictionDocumentEditor::newForSlug(
+              $project->getFullPhrictionSlug()))
+              ->setActor($this->getActor())
+              ->setTitle($content->getTitle())
+              ->setContent($content->getContent())
+              ->setDescription($content->getDescription())
+              ->moveHere($old_document->getID(), $old_document->getPHID());
+
+            $target_document = $target_editor->getDocument();
+            $from_editor->moveAway($target_document->getID());
+          }
+        }
         $this->validateName($project);
         break;
       case PhabricatorProjectTransactionType::TYPE_STATUS:
@@ -245,6 +285,9 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
         $new = array_fill_keys($xaction->getNewValue(), true);
         $this->addEdges = array_keys(array_diff_key($new, $old));
         $this->remEdges = array_keys(array_diff_key($old, $new));
+        if ($new === array()) {
+          $this->setShouldArchive(true);
+        }
         break;
       case PhabricatorProjectTransactionType::TYPE_CAN_VIEW:
         $project->setViewPolicy($xaction->getNewValue());

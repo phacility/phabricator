@@ -248,8 +248,8 @@ final class CeleritySpriteGenerator {
         'css' => '.menu-icon-app-blue',
       ),
       'logo' => array(
-        'x' => 139,
-        'y' => 25,
+        'x' => 149,
+        'y' => 26,
         'css' => '.phabricator-main-menu-logo-image',
       ),
       'conf-off' => array(

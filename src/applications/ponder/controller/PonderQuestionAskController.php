@@ -52,8 +52,6 @@ final class PonderQuestionAskController extends PonderController {
         ->setErrors($errors);
     }
 
-    $header = id(new PhabricatorHeaderView())->setHeader(pht('Ask Question'));
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFlexible(true)
@@ -72,7 +70,8 @@ final class PonderQuestionAskController extends PonderController {
           ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue(pht('Ask Away!')));
+          ->addCancelButton($this->getApplicationURI())
+          ->setValue(pht('Ask Away!')));
 
     $preview = hsprintf(
       '<div class="aphront-panel-flush">'.
@@ -91,19 +90,18 @@ final class PonderQuestionAskController extends PonderController {
         'question_id' => null
       ));
 
-    $nav = $this->buildSideNavView($question);
-    $nav->selectFilter($question->getID() ? null : 'question/ask');
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Ask Question')));
 
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
-        $header,
+        $crumbs,
         $error_view,
         $form,
         $preview,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'device' => true,
         'dust' => true,

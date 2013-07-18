@@ -128,4 +128,9 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this;
   }
 
+  public function getFullPhrictionSlug() {
+    $slug = $this->getPhrictionSlug();
+    return 'projects/'.$slug;
+  }
+
 }

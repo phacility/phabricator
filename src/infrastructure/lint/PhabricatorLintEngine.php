@@ -14,14 +14,6 @@ class PhabricatorLintEngine extends PhutilLintEngine {
           'phutil_escape_html' =>
             'The phutil_escape_html() function is deprecated. Raw strings '.
             'passed to phutil_tag() or hsprintf() are escaped automatically.',
-
-          'javelin_render_tag' =>
-            'The javelin_render_tag() function is deprecated and unsafe. '.
-            'Use javelin_tag() instead.',
-
-          'phabricator_render_form' =>
-            'The phabricator_render_form() function is deprecated and unsafe. '.
-            'Use phabricator_form() instead.',
         ));
       }
     }
