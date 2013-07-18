@@ -92,6 +92,8 @@ final class PholioMockEditController extends PholioController {
           ->execute();
         $files = mpull($files, null, 'getPHID');
         $files = array_select_keys($files, $file_phids);
+      } else {
+        $files = array();
       }
 
       if (!$files) {
@@ -111,8 +113,8 @@ final class PholioMockEditController extends PholioController {
         $sequence = 0;
         foreach ($files as $file_phid => $file) {
           $mock_image = idx($mock_images, $file_phid);
-          $title = $request->getStr('title_'.$file_phid);
-          $description = $request->getStr('description_'.$file_phid);
+          $title = (string)$request->getStr('title_'.$file_phid);
+          $description = (string)$request->getStr('description_'.$file_phid);
           if (!$mock_image) {
             // this is an add
             $add_image = id(new PholioImage())
@@ -195,15 +197,44 @@ final class PholioMockEditController extends PholioController {
 
     $cc_tokens = mpull($handles, 'getFullName', 'getPHID');
 
-    $images_controller =
-      id(new PholioDragAndDropUploadControl($request))
-      ->setUploadURI($this->getApplicationURI('image/upload/'))
-      ->setValue($files)
-      ->setImages($mock_images)
-      ->setName('file_phids')
-      ->setLabel(pht('Images'))
-      ->setActivatedClass('aphront-textarea-drag-and-drop')
-      ->setError($e_images);
+    $image_elements = array();
+    foreach ($mock_images as $mock_image) {
+      $image_elements[] = id(new PholioUploadedImageView())
+        ->setUser($user)
+        ->setImage($mock_image);
+    }
+
+    $list_id = celerity_generate_unique_node_id();
+    $drop_id = celerity_generate_unique_node_id();
+
+    $list_control = phutil_tag(
+      'div',
+      array(
+        'id' => $list_id,
+        'class' => 'pholio-edit-list',
+      ),
+      $image_elements);
+
+    $drop_control = phutil_tag(
+      'div',
+      array(
+        'id' => $drop_id,
+        'class' => 'pholio-edit-drop',
+      ),
+      'Drag and drop images here to add them to the mock.');
+
+    Javelin::initBehavior(
+      'pholio-mock-edit',
+      array(
+        'listID' => $list_id,
+        'dropID' => $drop_id,
+        'uploadURI' => '/file/dropupload/',
+        'renderURI' => $this->getApplicationURI('image/upload/'),
+        'pht' => array(
+          'uploading' => pht('Uploading Image...'),
+          'uploaded' => pht('Upload Complete...'),
+        ),
+      ));
 
     require_celerity_resource('pholio-edit-css');
     $form = id(new AphrontFormView())
@@ -235,7 +266,13 @@ final class PholioMockEditController extends PholioController {
           ->setPolicyObject($mock)
           ->setPolicies($policies)
           ->setName('can_view'))
-      ->appendChild($images_controller)
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setValue($list_control))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setValue($drop_control)
+          ->setError($e_images))
       ->appendChild($submit);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());

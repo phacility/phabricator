@@ -3,8 +3,8 @@
  */
 
 .pholio-uploaded-image {
-  float: left;
-  margin: 0px 0px 12px 0px;
+  margin: 0 0 12px 0;
+  overflow: hidden;
 }
 
 .pholio-uploaded-image .thumb-box {
@@ -13,6 +13,7 @@
   min-width: 280px;
   width: 48%;
   float: left;
+  text-align: center;
 }
 
 .pholio-uploaded-image .image-data {
@@ -30,10 +31,13 @@
 }
 
 .pholio-uploaded-image .thumb-box .thumb {
-  float: left;
   background: white;
   padding: 12px 0px 0px 0px;
   width: 100%;
+}
+
+.pholio-uploaded-image .thumb-box .thumb img {
+  margin: 0 auto;
 }
 
 .pholio-uploaded-image .thumb-box .title .text {
@@ -78,4 +82,26 @@
 .drag-and-drop-file-target {
   padding: 20px;
   clear: both;
+}
+
+.pholio-edit-drop {
+  border-width: 1px;
+  border-style: dashed;
+  border-color: #999999;
+  text-align: center;
+  padding: 16px;
+  color: #666666;
+}
+
+.pholio-edit-drop.pholio-drop-active {
+  border-color: {$green};
+  background-color: {$lightgreen};
+}
+
+.pholio-drop-uploading {
+  padding: 24px;
+  text-align: center;
+  border: 1px solid #bbbbbb;
+  background: #fcfcfc;
+  color: #666666;
 }
