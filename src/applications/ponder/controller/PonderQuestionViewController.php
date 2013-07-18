@@ -36,10 +36,7 @@ final class PonderQuestionViewController extends PonderController {
       }
     }
 
-    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $question->getPHID());
-
-    $object_phids = array_merge($object_phids, $subscribers);
+    $object_phids = array_merge($object_phids);
 
     $this->loadHandles($object_phids);
     $handles = $this->getLoadedHandles();
@@ -67,7 +64,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setHeader($question->getTitle());
 
     $actions = $this->buildActionListView($question);
-    $properties = $this->buildPropertyListView($question, $subscribers);
+    $properties = $this->buildPropertyListView($question);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->setActionList($actions);
@@ -76,8 +73,7 @@ final class PonderQuestionViewController extends PonderController {
           ->setName('Q'.$this->questionID)
           ->setHref('/Q'.$this->questionID));
 
-    $nav = $this->buildSideNavView($question);
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $header,
@@ -86,12 +82,7 @@ final class PonderQuestionViewController extends PonderController {
         $detail_panel,
         $responses_panel,
         $answer_add_panel
-      ));
-    $nav->selectFilter(null);
-
-
-    return $this->buildApplicationPage(
-      $nav,
+      ),
       array(
         'device' => true,
         'title' => 'Q'.$question->getID().' '.$question->getTitle(),
@@ -108,8 +99,7 @@ final class PonderQuestionViewController extends PonderController {
   }
 
   private function buildPropertyListView(
-    PonderQuestion $question,
-    array $subscribers) {
+    PonderQuestion $question) {
 
     $viewer = $this->getRequest()->getUser();
     $view = id(new PhabricatorPropertyListView())
@@ -122,14 +112,6 @@ final class PonderQuestionViewController extends PonderController {
     $view->addProperty(
       pht('Created'),
       phabricator_datetime($question->getDateCreated(), $viewer));
-
-    if ($subscribers) {
-      $subscribers = $this->renderHandlesForPHIDs($subscribers);
-    }
-
-    $view->addProperty(
-      pht('Subscribers'),
-      nonempty($subscribers, phutil_tag('em', array(), pht('None'))));
 
     return $view;
   }

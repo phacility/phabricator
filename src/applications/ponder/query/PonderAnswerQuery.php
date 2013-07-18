@@ -27,39 +27,6 @@ final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public static function loadByAuthorWithQuestions(
-      $viewer,
-      $phid,
-      $offset,
-      $count) {
-
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadByAuthor...");
-    }
-
-    $answers = id(new PonderAnswerQuery())
-      ->withAuthorPHID($phid)
-      ->orderByNewest(true)
-      ->setOffset($offset)
-      ->setLimit($count)
-      ->execute();
-
-    $answerset = new LiskDAOSet();
-    foreach ($answers as $answer) {
-      $answerset->addToSet($answer);
-    }
-
-    foreach ($answers as $answer) {
-      $question = $answer->loadOneRelative(
-        new PonderQuestion(),
-        'id',
-        'getQuestionID');
-      $answer->setQuestion($question);
-    }
-
-    return $answers;
-  }
-
   public static function loadByAuthor($viewer, $author_phid, $offset, $count) {
     if (!$viewer) {
       throw new Exception("Must set viewer when calling loadByAuthor");
