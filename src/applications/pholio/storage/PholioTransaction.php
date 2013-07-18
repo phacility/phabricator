@@ -49,13 +49,11 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     $old = $this->getOldValue();
 
     switch ($this->getTransactionType()) {
-      case PholioTransactionType::TYPE_NAME:
       case PholioTransactionType::TYPE_DESCRIPTION:
         return ($old === null);
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
-        $old_value = reset($old);
-        return ($old_value === null);
+        return ($old === array(null => null));
     }
 
     return parent::shouldHide();
@@ -86,11 +84,18 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     $type = $this->getTransactionType();
     switch ($type) {
       case PholioTransactionType::TYPE_NAME:
-        return pht(
-          '%s renamed this mock from "%s" to "%s".',
-          $this->renderHandleLink($author_phid),
-          $old,
-          $new);
+        if ($old === null) {
+          return pht(
+            '%s created "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        } else {
+          return pht(
+            '%s renamed this mock from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
         break;
       case PholioTransactionType::TYPE_DESCRIPTION:
         return pht(
@@ -247,6 +252,9 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
     switch ($this->getTransactionType()) {
       case PholioTransactionType::TYPE_NAME:
+        if ($old === null) {
+          return PhabricatorTransactions::COLOR_GREEN;
+        }
       case PholioTransactionType::TYPE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:

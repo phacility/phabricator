@@ -81,6 +81,7 @@ final class PholioMockEditController extends PholioController {
 
       if (!strlen($request->getStr('name'))) {
         $e_name = 'Required';
+        $errors[] = pht('You must give the mock a name.');
       }
 
       $file_phids = $request->getArr('file_phids');

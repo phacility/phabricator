@@ -72,9 +72,8 @@ final class PholioMockImagesView extends AphrontView {
         'pageURI' => '/M'.$mock->getID().'/'.$image->getID().'/',
         'width'   => $x,
         'height'  => $y,
-        'title'   => $file->getName(),
-        'desc'    => 'Lorem ipsum dolor sit amet: there is no way to set any '.
-                     'descriptive text yet; were there, it would appear here.',
+        'title'   => $image->getName(),
+        'desc'    => $image->getDescription(),
       );
     }
 
