@@ -50,7 +50,7 @@
 }
 
 .device-desktop .phabricator-main-menu-logo:hover {
-  background-color: #1e2225;
+  background-color: rgba(0,0,0,.6);
 }
 
 .phabricator-main-menu-logo-image {
@@ -355,7 +355,7 @@
 
 .device-desktop .phabricator-application-menu
  .core-menu-item.phui-list-item-view:hover {
-  background-color: #1e2225;
+  background-color: rgba(0,0,0,.6);
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view {
