@@ -31,7 +31,11 @@ final class PhabricatorSearchSelectController
         break;
       case 'created';
         $query->setParameter('author', array($user->getPHID()));
-        $query->setParameter('open', 1);
+        // TODO - if / when we allow pholio mocks to be archived, etc
+        // update this
+        if ($this->type != PhabricatorPHIDConstants::PHID_TYPE_MOCK) {
+          $query->setParameter('open', 1);
+        }
         break;
       case 'open':
         $query->setParameter('open', 1);
@@ -69,6 +73,9 @@ final class PhabricatorSearchSelectController
       case PhabricatorPHIDConstants::PHID_TYPE_DREV:
         $pattern = '/\bD(\d+)\b/i';
         break;
+      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+        $pattern = '/\bM(\d+)\b/i';
+        break;
     }
 
     if (!$pattern) {
@@ -94,6 +101,11 @@ final class PhabricatorSearchSelectController
         break;
       case PhabricatorPHIDConstants::PHID_TYPE_TASK:
         $objects = id(new ManiphestTask())->loadAllWhere(
+          'id IN (%Ld)',
+          $object_ids);
+        break;
+      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+        $objects = id(new PholioMock())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);
         break;

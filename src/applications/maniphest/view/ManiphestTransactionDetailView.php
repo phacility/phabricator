@@ -674,6 +674,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         return pht('DEPENDENT %d TASK(s)', $count);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('ATTACHED %d COMMIT(S)', $count);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK:
+        return pht('ATTACHED %d MOCK(S)', $count);
       default:
         return pht('ATTACHED %d OBJECT(S)', $count);
     }
@@ -693,6 +695,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         return pht('Added Dependent Task');
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('Added Commit');
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK:
+        return pht('Added Mock');
       default:
         return pht('Added Object');
     }
@@ -712,6 +716,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         return pht('Removed Dependent Task');
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('Removed Commit');
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK:
+        return pht('Removed Mock');
       default:
         return pht('Removed Object');
     }
@@ -731,6 +737,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         return pht('Changed Dependent Tasks');
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('Changed Commits');
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK:
+        return pht('Changed Mocks');
       default:
         return pht('Changed Objects');
     }
@@ -753,6 +761,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         return pht('added %d dependent task(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('added %d commit(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK:
+        return pht('added %d mock(s): %s', $count, $list);
       default:
         return pht('added %d object(s): %s', $count, $list);
     }
@@ -775,6 +785,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         return pht('removed %d dependent task(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('removed %d commit(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK:
+        return pht('removed %d mock(s): %s', $count, $list);
       default:
         return pht('removed %d object(s): %s', $count, $list);
     }
@@ -818,6 +830,14 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht(
           'changed %d commit(s), added %d: %s; removed %d: %s',
+          $add_count + $rem_count,
+          $add_count,
+          $add_list,
+          $rem_count,
+          $rem_list);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK:
+        return pht(
+          'changed %d mock(s), added %d: %s; removed %d: %s',
           $add_count + $rem_count,
           $add_count,
           $add_list,
