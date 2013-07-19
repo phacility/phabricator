@@ -104,4 +104,18 @@
   border: 1px solid #bbbbbb;
   background: #fcfcfc;
   color: #666666;
+  margin-bottom: 12px;
+}
+
+.pholio-drop-undo {
+  padding: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+  color: #333333;
+  border: 1px solid {$yellow};
+  background-color: {$lightyellow};
+}
+
+.pholio-drop-undo a {
+  font-weight: bold;
 }

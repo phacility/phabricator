@@ -233,6 +233,8 @@ final class PholioMockEditController extends PholioController {
         'pht' => array(
           'uploading' => pht('Uploading Image...'),
           'uploaded' => pht('Upload Complete...'),
+          'undo' => pht('Undo'),
+          'removed' => pht('This image will be removed from the mock.'),
         ),
       ));
 

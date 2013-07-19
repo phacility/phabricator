@@ -29,10 +29,7 @@ JX.behavior('pholio-mock-edit', function(config) {
   });
 
   drop.listen('willUpload', function(file) {
-    var node = JX.$N(
-      'div',
-      {className: 'pholio-drop-uploading'},
-      pht('uploading'));
+    var node = render_uploading();
     uploading.push({node: node, file: file});
     nodes.list.appendChild(node);
   });
@@ -61,11 +58,46 @@ JX.behavior('pholio-mock-edit', function(config) {
 
 /* -(  Deleting Images  )---------------------------------------------------- */
 
-  // TODO: It would be nice to replace this with an "image will be removed,
-  // click to undo" kind of thing.
+
+  // When the user clicks the "X" on an image, we replace it with a "click to
+  // undo" element. If they click to undo, we put the original node back in the
+  // DOM.
   JX.Stratcom.listen('click', 'pholio-drop-remove', function(e) {
     e.kill();
-    JX.DOM.remove(e.getNode('pholio-drop-image'));
+
+    var node = e.getNode('pholio-drop-image');
+    var undo = render_undo();
+
+    JX.DOM.listen(undo, 'click', 'pholio-drop-undo', function(e) {
+      e.kill();
+      JX.DOM.replace(undo, node);
+    });
+
+    JX.DOM.replace(node, undo);
   });
+
+
+/* -(  Rendering  )---------------------------------------------------------- */
+
+
+  var render_uploading = function() {
+    return JX.$N(
+      'div',
+      {className: 'pholio-drop-uploading'},
+      pht('uploading'));
+  };
+
+  var render_undo = function() {
+    var link = JX.$N(
+      'a',
+      {href: '#', sigil: 'pholio-drop-undo'},
+      pht('undo'));
+
+    return JX.$N(
+      'div',
+      {className: 'pholio-drop-undo'},
+      [pht('removed'), ' ', link]);
+  };
+
 
 });
