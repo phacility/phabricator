@@ -26,14 +26,6 @@ final class PholioUploadedImageView extends AphrontView {
     $phid = $file->getPHID();
     $replaces_phid = $this->replacesPHID;
 
-    $thumb = phutil_tag(
-      'img',
-      array(
-        'src'     => $file->getThumb280x210URI(),
-        'width'   => 280,
-        'height'  => 210,
-      ));
-
     $remove = $this->renderRemoveElement();
 
     $title = id(new AphrontFormTextControl())
@@ -48,28 +40,27 @@ final class PholioUploadedImageView extends AphrontView {
       ->setSigil('image-description')
       ->setLabel(pht('Description'));
 
-    $thumb_frame = javelin_tag(
+    $thumb_frame = phutil_tag(
       'div',
       array(
         'class' => 'pholio-thumb-frame',
-        'sigil' => 'pholio-thumb-frame',
-      ),
-      $thumb);
+        'style' => 'background-image: url('.$file->getThumb280x210URI().');',
+      ));
 
     $content = hsprintf(
-      '<div class="thumb-box">
-        <div class="title">
-          <div class="text">%s</div>
-          <div class="remove">%s</div>
+      '<div class="pholio-thumb-box">
+        <div class="pholio-thumb-title">
+          %s
+          <div class="pholio-thumb-name">%s</div>
         </div>
-        <div class="thumb">%s</div>
+        %s
       </div>
-      <div class="image-data">
-        <div class="title">%s</div>
-        <div class="description">%s</div>
+      <div class="pholio-image-details">
+        %s
+        %s
       </div>',
-      $file->getName(),
       $remove,
+      $file->getName(),
       $thumb_frame,
       $title,
       $description);

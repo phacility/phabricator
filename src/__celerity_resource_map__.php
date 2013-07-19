@@ -3744,7 +3744,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-edit-css' =>
   array(
-    'uri' => '/res/01a56a3b/rsrc/css/application/pholio/pholio-edit.css',
+    'uri' => '/res/1d07a294/rsrc/css/application/pholio/pholio-edit.css',
     'type' => 'css',
     'requires' =>
     array(
