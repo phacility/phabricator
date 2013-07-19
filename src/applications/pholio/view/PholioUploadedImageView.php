@@ -3,29 +3,21 @@
 /**
  * @group pholio
  */
-final class PholioUploadedImageView extends AphrontAbstractAttachedFileView {
+final class PholioUploadedImageView extends AphrontView {
 
-  private $images = array();
+  private $image;
 
-  public function setImages(array $images) {
-    assert_instances_of($images, 'PholioImage');
-    $this->images = $images;
+  public function setImage(PholioImage $image) {
+    $this->image = $image;
     return $this;
-  }
-  public function getImages() {
-    return $this->images;
-  }
-  public function getImage($phid) {
-    $images = $this->getImages();
-    return idx($images, $phid, new PholioImage());
   }
 
   public function render() {
     require_celerity_resource('pholio-edit-css');
 
-    $file = $this->getFile();
+    $image = $this->image;
+    $file = $image->getFile();
     $phid = $file->getPHID();
-    $image = $this->getImage($phid);
 
     $thumb = phutil_tag(
       'img',
@@ -35,11 +27,7 @@ final class PholioUploadedImageView extends AphrontAbstractAttachedFileView {
         'height'  => 210,
       ));
 
-    $file_link = $this->getName();
-    if (!$image->getName()) {
-      $image->setName($this->getFile()->getName());
-    }
-    $remove = $this->getRemoveElement();
+    $remove = $this->renderRemoveElement();
 
     $title = id(new AphrontFormTextControl())
       ->setName('title_'.$phid)
@@ -51,25 +39,52 @@ final class PholioUploadedImageView extends AphrontAbstractAttachedFileView {
       ->setValue($image->getDescription())
       ->setLabel(pht('Description'));
 
-    return hsprintf(
-      '<div class="pholio-uploaded-image">
-        <div class="thumb-box">
-          <div class="title">
-            <div class="text">%s</div>
-            <div class="remove">%s</div>
-          </div>
-          <div class="thumb">%s</div>
+    $content = hsprintf(
+      '<div class="thumb-box">
+        <div class="title">
+          <div class="text">%s</div>
+          <div class="remove">%s</div>
         </div>
-        <div class="image-data">
-          <div class="title">%s</title>
-          <div class="description">%s</description>
-        </div>',
-      $file_link,
+        <div class="thumb">%s</div>
+      </div>
+      <div class="image-data">
+        <div class="title">%s</div>
+        <div class="description">%s</div>
+      </div>',
+      $file->getName(),
       $remove,
       $thumb,
       $title,
       $description);
 
+    $input = phutil_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => 'file_phids[]',
+        'value' => $phid,
+      ));
+
+    return javelin_tag(
+      'div',
+      array(
+        'class' => 'pholio-uploaded-image',
+        'sigil' => 'pholio-drop-image',
+      ),
+      array(
+        $content,
+        $input,
+      ));
+  }
+
+  private function renderRemoveElement() {
+    return javelin_tag(
+      'a',
+      array(
+        'class' => 'button grey',
+        'sigil' => 'pholio-drop-remove',
+      ),
+      'X');
   }
 
 }

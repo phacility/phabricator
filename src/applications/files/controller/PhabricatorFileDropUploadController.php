@@ -3,20 +3,6 @@
 final class PhabricatorFileDropUploadController
   extends PhabricatorFileController {
 
-  private $viewObject;
-
-  public function setViewObject(AphrontAbstractAttachedFileView $view) {
-    $this->viewObject = $view;
-    return $this;
-  }
-
-  public function getViewObject() {
-    if (!$this->viewObject) {
-      $this->viewObject = new AphrontAttachedFileView();
-    }
-    return $this->viewObject;
-  }
-
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */
@@ -38,14 +24,10 @@ final class PhabricatorFileDropUploadController
         'isExplicitUpload' => true,
       ));
 
-    $view = $this->getViewObject();
-    $view->setFile($file);
-
     return id(new AphrontAjaxResponse())->setContent(
       array(
         'id'   => $file->getID(),
         'phid' => $file->getPHID(),
-        'html' => $view->render(),
         'uri'  => $file->getBestURI(),
       ));
   }

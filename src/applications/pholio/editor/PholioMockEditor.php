@@ -49,7 +49,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         $name = null;
         $phid = null;
         $image = $this->getImageForXaction($object, $xaction);
-        if ($image && $image->getName()) {
+        if ($image) {
           $name = $image->getName();
           $phid = $image->getPHID();
         }
@@ -58,7 +58,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         $description = null;
         $phid = null;
         $image = $this->getImageForXaction($object, $xaction);
-        if ($image && $image->getDescription()) {
+        if ($image) {
           $description = $image->getDescription();
           $phid = $image->getPHID();
         }

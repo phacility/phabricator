@@ -22,7 +22,8 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
   }
 
   private function isPullDaemonRunning() {
-    $control = new PhabricatorDaemonControl();
+    // TODO: This is yuck, fix it.
+    $control = new PhabricatorDaemonManagementListWorkflow();
     $daemons = $control->loadRunningDaemons();
     foreach ($daemons as $daemon) {
       if ($daemon->isRunning() &&
