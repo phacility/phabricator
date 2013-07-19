@@ -3,6 +3,8 @@
  */
 
 .pholio-uploaded-image {
+  padding: 4px;
+  border: 1px solid transparent;
   margin: 0 0 12px 0;
   overflow: hidden;
 }
@@ -30,13 +32,13 @@
   border-bottom: 1px solid #D5D9DF;
 }
 
-.pholio-uploaded-image .thumb-box .thumb {
-  background: white;
+.pholio-thumb-frame {
+  background: #ffffff;
   padding: 12px 0px 0px 0px;
   width: 100%;
 }
 
-.pholio-uploaded-image .thumb-box .thumb img {
+.pholio-uploaded-image .thumb-box .pholio-thumb-frame img {
   margin: 0 auto;
 }
 
@@ -93,7 +95,15 @@
   color: #666666;
 }
 
+.pholio-uploaded-image.pholio-drop-active,
 .pholio-edit-drop.pholio-drop-active {
+  border-style: solid;
+  border-color: {$green};
+  background-color: {$lightgreen};
+}
+
+.pholio-replacing {
+  opacity: 0.5;
   border-color: {$green};
   background-color: {$lightgreen};
 }

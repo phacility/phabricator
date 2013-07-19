@@ -17,44 +17,6 @@ JX.behavior('pholio-mock-edit', function(config) {
 
   var uploading = [];
 
-  var drop = new JX.PhabricatorDragAndDropFileUpload(nodes.drop)
-    .setURI(config.uploadURI);
-
-  drop.listen('didBeginDrag', function(e) {
-    JX.DOM.alterClass(nodes.drop, 'pholio-drop-active', true);
-  });
-
-  drop.listen('didEndDrag', function(e) {
-    JX.DOM.alterClass(nodes.drop, 'pholio-drop-active', false);
-  });
-
-  drop.listen('willUpload', function(file) {
-    var node = render_uploading();
-    uploading.push({node: node, file: file});
-    nodes.list.appendChild(node);
-  });
-
-  drop.listen('didUpload', function(file) {
-    var node;
-    for (var ii = 0; ii < uploading.length; ii++) {
-      if (uploading[ii].file === file) {
-        node = uploading[ii].node;
-        uploading.splice(ii, 1);
-        break;
-      }
-    }
-
-    JX.DOM.setContent(node, pht('uploaded'));
-
-    new JX.Workflow(config.renderURI, {filePHID: file.getPHID()})
-      .setHandler(function(response) {
-        JX.DOM.replace(node, JX.$H(response.markup));
-      })
-      .start();
-  });
-
-  drop.start();
-
 
 /* -(  Deleting Images  )---------------------------------------------------- */
 
@@ -75,6 +37,97 @@ JX.behavior('pholio-mock-edit', function(config) {
 
     JX.DOM.replace(node, undo);
   });
+
+
+/* -(  Build  )-------------------------------------------------------------- */
+
+
+  var build_drop_upload = function(node) {
+    var drop = new JX.PhabricatorDragAndDropFileUpload(node)
+      .setURI(config.uploadURI);
+
+    drop.listen('didBeginDrag', function(e) {
+      JX.DOM.alterClass(node, 'pholio-drop-active', true);
+    });
+
+    drop.listen('didEndDrag', function(e) {
+      JX.DOM.alterClass(node, 'pholio-drop-active', false);
+    });
+
+    return drop;
+  };
+
+  var build_add_control = function(add_node) {
+    var drop = build_drop_upload(add_node);
+
+    drop.listen('willUpload', function(file) {
+      var node = render_uploading();
+      uploading.push({node: node, file: file});
+      nodes.list.appendChild(node);
+    });
+
+    drop.listen('didUpload', function(file) {
+      var node;
+      for (var ii = 0; ii < uploading.length; ii++) {
+        if (uploading[ii].file === file) {
+          node = uploading[ii].node;
+          uploading.splice(ii, 1);
+          break;
+        }
+      }
+
+      JX.DOM.setContent(node, pht('uploaded'));
+
+      new JX.Workflow(config.renderURI, {filePHID: file.getPHID()})
+        .setHandler(function(response) {
+          var new_node = JX.$H(response.markup).getFragment().firstChild;
+          build_update_control(new_node);
+
+          JX.DOM.replace(node, new_node);
+        })
+        .start();
+    });
+
+    drop.start();
+  };
+
+  var build_list_controls = function(list_node) {
+    var nodes = JX.DOM.scry(list_node, 'div', 'pholio-drop-image');
+    for (var ii = 0; ii < nodes.length; ii++) {
+      build_update_control(nodes[ii]);
+    }
+  };
+
+  var build_update_control = function(node) {
+    var drop = build_drop_upload(node);
+
+    drop.listen('willUpload', function(file) {
+      JX.DOM.alterClass(node, 'pholio-replacing', true);
+    });
+
+    drop.listen('didUpload', function(file) {
+      var node_data = JX.Stratcom.getData(node);
+
+      var data = {
+        filePHID: file.getPHID(),
+        replacesPHID: node_data.replacesPHID || node_data.filePHID || null,
+        title: JX.DOM.find(node, 'input', 'image-title').value,
+        description: JX.DOM.find(node, 'textarea', 'image-description').value
+      };
+
+      new JX.Workflow(config.renderURI, data)
+        .setHandler(function(response) {
+          var new_node = JX.$H(response.markup).getFragment().firstChild;
+          build_update_control(new_node);
+
+          JX.DOM.replace(node, new_node);
+          JX.DOM.alterClass(node, 'pholio-replacing', false);
+        })
+        .start();
+    });
+
+    drop.start();
+  };
 
 
 /* -(  Rendering  )---------------------------------------------------------- */
@@ -99,5 +152,10 @@ JX.behavior('pholio-mock-edit', function(config) {
       [pht('removed'), ' ', link]);
   };
 
+
+/* -(  Init  )--------------------------------------------------------------- */
+
+  build_add_control(nodes.drop);
+  build_list_controls(nodes.list);
 
 });

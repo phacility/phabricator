@@ -10,6 +10,10 @@ final class PholioImageUploadController extends PholioController {
     $viewer = $request->getUser();
 
     $phid = $request->getStr('filePHID');
+    $replaces_phid = $request->getStr('replacesPHID');
+    $title = $request->getStr('title');
+    $description = $request->getStr('description');
+
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($phid))
@@ -18,14 +22,20 @@ final class PholioImageUploadController extends PholioController {
       return new Aphront404Response();
     }
 
+    if (!strlen($title)) {
+      $title = $file->getName();
+    }
+
     $image = id(new PholioImage())
       ->attachFile($file)
-      ->setName($file->getName())
+      ->setName($title)
+      ->setDescription($description)
       ->makeEphemeral();
 
     $view = id(new PholioUploadedImageView())
       ->setUser($viewer)
-      ->setImage($image);
+      ->setImage($image)
+      ->setReplacesPHID($replaces_phid);
 
     $content = array(
       'markup' => $view,
