@@ -4172,7 +4172,7 @@ celerity_register_resource_map(array(
   ),
   'tokens-css' =>
   array(
-    'uri' => '/res/dae13a94/rsrc/css/application/tokens/tokens.css',
+    'uri' => '/res/bbddf548/rsrc/css/application/tokens/tokens.css',
     'type' => 'css',
     'requires' =>
     array(
