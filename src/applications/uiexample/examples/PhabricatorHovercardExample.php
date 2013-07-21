@@ -33,7 +33,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
 
     $task_handle = $this->createBasicDummyHandle(
       "T123",
-      PhabricatorPHIDConstants::PHID_TYPE_TASK,
+      ManiphestPHIDTypeTask::TYPECONST,
       "Improve Mobile Experience for Phabricator");
 
     $tag = id(new PhabricatorTagView())

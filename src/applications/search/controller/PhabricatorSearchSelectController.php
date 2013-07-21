@@ -67,7 +67,7 @@ final class PhabricatorSearchSelectController
 
     $pattern = null;
     switch ($this->type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+      case ManiphestPHIDTypeTask::TYPECONST:
         $pattern = '/\bT(\d+)\b/i';
         break;
       case DifferentialPHIDTypeRevision::TYPECONST:
@@ -99,7 +99,7 @@ final class PhabricatorSearchSelectController
           'id IN (%Ld)',
           $object_ids);
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+      case ManiphestPHIDTypeTask::TYPECONST:
         $objects = id(new ManiphestTask())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);

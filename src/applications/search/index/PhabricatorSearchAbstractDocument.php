@@ -17,7 +17,7 @@ final class PhabricatorSearchAbstractDocument {
     return array(
       DifferentialPHIDTypeRevision::TYPECONST => 'Differential Revisions',
       PhabricatorRepositoryPHIDTypeCommit::TYPECONST => 'Repository Commits',
-      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
+      ManiphestPHIDTypeTask::TYPECONST => 'Maniphest Tasks',
       PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
       PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Ponder Questions',

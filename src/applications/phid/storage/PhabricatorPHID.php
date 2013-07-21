@@ -44,9 +44,7 @@ final class PhabricatorPHID {
       return $name;
     }
 
-    if (preg_match('/^t(\d+)$/i', $name, $match)) {
-      $object = id(new ManiphestTask())->load($match[1]);
-    } else if (preg_match('/^m(\d+)$/i', $name, $match)) {
+    if (preg_match('/^m(\d+)$/i', $name, $match)) {
       $objects = id(new PholioMockQuery())
         ->setViewer($viewer)
         ->withIDs(array($match[1]))

@@ -109,7 +109,6 @@ final class PhabricatorObjectHandle
 
     static $map = array(
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
-      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Task',
       PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Document',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO => 'Image Macro',
       PhabricatorPHIDConstants::PHID_TYPE_MOCK => 'Pholio Mock',

@@ -15,7 +15,7 @@ final class ManiphestSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($task->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_TASK);
+    $doc->setDocumentType(ManiphestPHIDTypeTask::TYPECONST);
     $doc->setDocumentTitle($task->getTitle());
     $doc->setDocumentCreated($task->getDateCreated());
     $doc->setDocumentModified($task->getDateModified());
@@ -34,7 +34,7 @@ final class ManiphestSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $task->getPHID(),
-        PhabricatorPHIDConstants::PHID_TYPE_TASK,
+        ManiphestPHIDTypeTask::TYPECONST,
         time());
     }
 

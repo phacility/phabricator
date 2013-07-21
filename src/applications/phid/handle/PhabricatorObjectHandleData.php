@@ -56,15 +56,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($users, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        // TODO: Update this to ManiphestTaskQuery, //especially// after we have
-        // policy-awareness
-        $task_dao = new ManiphestTask();
-        $tasks = $task_dao->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
-        return mpull($tasks, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_CONF:
         $config_dao = new PhabricatorConfigEntry();
         $entries = $config_dao->loadAllWhere(
@@ -312,28 +303,6 @@ final class PhabricatorObjectHandleData {
               } else {
                 $handle->setImageURI(
                   PhabricatorUser::getDefaultProfileImageURI());
-              }
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Task');
-            } else {
-              $task = $objects[$phid];
-              $handle->setName('T'.$task->getID());
-              $handle->setURI('/T'.$task->getID());
-              $handle->setFullName('T'.$task->getID().': '.$task->getTitle());
-              $handle->setComplete(true);
-              if ($task->getStatus() != ManiphestTaskStatus::STATUS_OPEN) {
-                $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
-                $handle->setStatus($closed);
               }
             }
             $handles[$phid] = $handle;
