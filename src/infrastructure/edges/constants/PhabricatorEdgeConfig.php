@@ -144,6 +144,15 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   }
 
   public static function establishConnection($phid_type, $conn_type) {
+    $map = PhabricatorPHIDType::getAllTypes();
+    if (isset($map[$phid_type])) {
+      $type = $map[$phid_type];
+      $object = $type->newObject();
+      if ($object) {
+        return $object->establishConnection($conn_type);
+      }
+    }
+
     static $class_map = array(
       PhabricatorPHIDConstants::PHID_TYPE_TASK  => 'ManiphestTask',
       PhabricatorPHIDConstants::PHID_TYPE_CMIT  => 'PhabricatorRepository',
@@ -167,7 +176,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
       PhabricatorPHIDConstants::PHID_TYPE_XOBJ  => 'DoorkeeperExternalObject',
       PhabricatorPHIDConstants::PHID_TYPE_LEGD  => 'LegalpadDocument',
-      PhabricatorPHIDConstants::PHID_TYPE_POLL  => 'PhabricatorSlowvotePoll',
     );
 
     $class = idx($class_map, $phid_type);

@@ -99,6 +99,11 @@ final class PhabricatorObjectHandle {
   }
 
   public function getTypeName() {
+    $types = PhabricatorPHIDType::getAllTypes();
+    if (isset($types[$this->getType()])) {
+      return $types[$this->getType()]->getTypeName();
+    }
+
     static $map = array(
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
       PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Task',
@@ -116,7 +121,6 @@ final class PhabricatorObjectHandle {
       PhabricatorPHIDConstants::PHID_TYPE_PSTE => 'Paste',
       PhabricatorPHIDConstants::PHID_TYPE_PROJ => 'Project',
       PhabricatorPHIDConstants::PHID_TYPE_LEGD => 'Legalpad Document',
-      PhabricatorPHIDConstants::PHID_TYPE_POLL => 'Slowvote',
     );
 
     return idx($map, $this->getType(), $this->getType());

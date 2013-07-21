@@ -25,6 +25,18 @@ final class PhabricatorPHID {
   }
 
   public static function fromObjectName($name, PhabricatorUser $viewer) {
+    $query = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withNames(array($name));
+    $query->execute();
+
+    $objects = $query->getNamedResults();
+    if ($objects) {
+      return head($objects)->getPHID();
+    }
+
+    /// TODO: Destroy this legacy stuff.
+
     $object = null;
     $match = null;
     if (preg_match('/^PHID-[A-Z]+-.{20}$/', $name)) {

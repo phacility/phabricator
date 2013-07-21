@@ -22,9 +22,17 @@ final class PhabricatorObjectHandleData {
   }
 
   public function loadObjects() {
-    $types = phid_group_by_type($this->phids);
+    $phids = array_fuse($this->phids);
 
-    $objects = array();
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($this->viewer)
+      ->withPHIDs($phids)
+      ->execute();
+
+    // For objects which don't support PhabricatorPHIDType yet, load them the
+    // old way.
+    $phids = array_diff_key($phids, array_keys($objects));
+    $types = phid_group_by_type($phids);
     foreach ($types as $type => $phids) {
       $objects += $this->loadObjectsOfType($type, $phids);
     }
@@ -142,11 +150,6 @@ final class PhabricatorObjectHandleData {
           ->loadAllWhere('phid IN (%Ls)', $phids);
         return mpull($images, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_POLL:
-        $polls = id(new PhabricatorSlowvotePoll())
-          ->loadAllWhere('phid IN (%Ls)', $phids);
-        return mpull($polls, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_XACT:
         $subtypes = array();
         foreach ($phids as $phid) {
@@ -238,16 +241,13 @@ final class PhabricatorObjectHandleData {
   }
 
   public function loadHandles() {
+    $objects = $this->loadObjects();
 
     $types = phid_group_by_type($this->phids);
 
     $handles = array();
 
-    $external_loaders = PhabricatorEnv::getEnvConfig('phid.external-loaders');
-
     foreach ($types as $type => $phids) {
-      $objects = $this->loadObjectsOfType($type, $phids);
-
       switch ($type) {
 
         case PhabricatorPHIDConstants::PHID_TYPE_MAGIC:
@@ -674,7 +674,7 @@ final class PhabricatorObjectHandleData {
           break;
 
 
-        case PhabricatorPHIDConstants::PHID_TYPE_POLL:
+        case PhabricatorSlowvotePHIDTypePoll::TYPECONST:
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
@@ -807,20 +807,6 @@ final class PhabricatorObjectHandleData {
 
 
         default:
-          $loader = null;
-          if (isset($external_loaders[$type])) {
-            $loader = $external_loaders[$type];
-          } else if (isset($external_loaders['*'])) {
-            $loader = $external_loaders['*'];
-          }
-
-          if ($loader) {
-            $object = newv($loader, array());
-            assert_instances_of(array($type => $object), 'ObjectHandleLoader');
-            $handles += $object->loadHandles($phids);
-            break;
-          }
-
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setType($type);
