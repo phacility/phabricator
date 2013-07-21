@@ -1903,6 +1903,8 @@ phutil_register_library_map(array(
     'ReleephObjectHandleLoader' => 'applications/releeph/ReleephObjectHandleLoader.php',
     'ReleephOriginalCommitFieldSpecification' => 'applications/releeph/field/specification/ReleephOriginalCommitFieldSpecification.php',
     'ReleephPHIDConstants' => 'applications/releeph/ReleephPHIDConstants.php',
+    'ReleephPHIDTypeProject' => 'applications/releeph/phid/ReleephPHIDTypeProject.php',
+    'ReleephPHIDTypeRequest' => 'applications/releeph/phid/ReleephPHIDTypeRequest.php',
     'ReleephProject' => 'applications/releeph/storage/ReleephProject.php',
     'ReleephProjectActionController' => 'applications/releeph/controller/project/ReleephProjectActionController.php',
     'ReleephProjectController' => 'applications/releeph/controller/ReleephProjectController.php',
@@ -3943,6 +3945,8 @@ phutil_register_library_map(array(
     'ReleephLevelFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephObjectHandleLoader' => 'ObjectHandleLoader',
     'ReleephOriginalCommitFieldSpecification' => 'ReleephFieldSpecification',
+    'ReleephPHIDTypeProject' => 'PhabricatorPHIDType',
+    'ReleephPHIDTypeRequest' => 'PhabricatorPHIDType',
     'ReleephProject' =>
     array(
       0 => 'ReleephDAO',
