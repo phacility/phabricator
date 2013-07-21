@@ -24,30 +24,4 @@ final class PhabricatorPHID {
     return "PHID-{$type_str}-{$uniq}";
   }
 
-  public static function fromObjectName($name, PhabricatorUser $viewer) {
-    $query = id(new PhabricatorObjectQuery())
-      ->setViewer($viewer)
-      ->withNames(array($name));
-    $query->execute();
-
-    $objects = $query->getNamedResults();
-    if ($objects) {
-      return head($objects)->getPHID();
-    }
-
-    /// TODO: Destroy this legacy stuff.
-
-    $object = null;
-    $match = null;
-    if (preg_match('/^PHID-[A-Z]+-.{20}$/', $name)) {
-      // It's already a PHID! Yay.
-      return $name;
-    }
-
-    if ($object) {
-      return $object->getPHID();
-    }
-
-    return null;
-  }
 }

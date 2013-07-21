@@ -220,10 +220,16 @@ final class PhabricatorSearchController
       $results = $engine->executeSearch($query);
       $results = $pager->sliceResults($results);
 
+      // If there are any objects which match the query by name, and we're
+      // not paging through the results, prefix the results with the named
+      // objects.
       if (!$request->getInt('page')) {
-        $jump = PhabricatorPHID::fromObjectName($query->getQuery(), $user);
-        if ($jump) {
-          array_unshift($results, $jump);
+        $named = id(new PhabricatorObjectQuery())
+          ->setViewer($user)
+          ->withNames(array($query->getQuery()))
+          ->execute();
+        if ($named) {
+          $results = array_merge(array_keys($named), $results);
         }
       }
 

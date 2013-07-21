@@ -26,34 +26,22 @@ final class ConduitAPI_phid_lookup_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $names = $request->getValue('names');
-    $phids = array();
-    foreach ($names as $name) {
-      $phid = PhabricatorPHID::fromObjectName($name, $request->getUser());
-      if ($phid) {
-        $phids[$name] = $phid;
-      }
-    }
 
     $query = id(new PhabricatorObjectQuery())
       ->setViewer($request->getUser())
       ->withNames($names);
     $query->execute();
-    $objects = $query->getNamedResults();
+    $name_map = $query->getNamedResults();
 
-    foreach ($objects as $name => $object) {
-      $phids[$name] = $object->getPHID();
-    }
-
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorObjectHandleData(mpull($name_map, 'getPHID')))
       ->setViewer($request->getUser())
       ->loadHandles();
 
     $result = array();
-    foreach ($phids as $name => $phid) {
-      if (isset($handles[$phid]) && $handles[$phid]->isComplete()) {
-        $result[$name] = $this->buildHandleInformationDictionary(
-          $handles[$phid]);
-      }
+    foreach ($name_map as $name => $object) {
+      $phid = $object->getPHID();
+      $handle = $handles[$phid];
+      $result[$phid] = $this->buildHandleInformationDictionary($handle);
     }
 
     return $result;
