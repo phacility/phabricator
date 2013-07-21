@@ -9,6 +9,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   private $edges = array();
   private static $namespaceStack = array();
 
+  const ATTACHABLE = "<attachable>";
 
 /* -(  Managing Edges  )----------------------------------------------------- */
 
@@ -205,6 +206,14 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     }
 
     return $result;
+  }
+
+
+  protected function assertAttached($property) {
+    if ($property === self::ATTACHABLE) {
+      throw new PhabricatorDataNotAttachedException($this);
+    }
+    return $property;
   }
 
 }

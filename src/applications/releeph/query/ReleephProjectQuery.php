@@ -4,6 +4,7 @@ final class ReleephProjectQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $active;
+  private $ids;
   private $phids;
 
   private $order    = 'order-id';
@@ -17,6 +18,11 @@ final class ReleephProjectQuery
 
   public function setOrder($order) {
     $this->order = $order;
+    return $this;
+  }
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
@@ -48,6 +54,13 @@ final class ReleephProjectQuery
         $conn_r,
         'isActive = %d',
         $this->active);
+    }
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ls)',
+        $this->ids);
     }
 
     if ($this->phids) {

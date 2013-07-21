@@ -176,7 +176,12 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         $page = array();
       }
 
-      $visible = $this->willFilterPage($page);
+      if ($page) {
+        $visible = $this->willFilterPage($page);
+      } else {
+        $visible = array();
+      }
+
       $visible = $filter->apply($visible);
       foreach ($visible as $key => $result) {
         ++$count;
@@ -271,6 +276,9 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * Hook for applying a page filter prior to the privacy filter. This allows
    * you to drop some items from the result set without creating problems with
    * pagination or cursor updates.
+   *
+   * This method will only be called if data is available. Implementations
+   * do not need to handle the case of no results specially.
    *
    * @param   list<wild>  Results from `loadPage()`.
    * @return  list<PhabricatorPolicyInterface> Objects for policy filtering.
