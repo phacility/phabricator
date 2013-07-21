@@ -64,8 +64,6 @@ final class PhabricatorPHID {
           }
         }
       }
-    } else if (preg_match('/^d(\d+)$/i', $name, $match)) {
-      $object = id(new DifferentialRevision())->load($match[1]);
     } else if (preg_match('/^t(\d+)$/i', $name, $match)) {
       $object = id(new ManiphestTask())->load($match[1]);
     } else if (preg_match('/^m(\d+)$/i', $name, $match)) {

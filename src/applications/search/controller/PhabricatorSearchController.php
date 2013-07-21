@@ -47,7 +47,7 @@ final class PhabricatorSearchController
                 $query->setParameter('open', 1);
                 $query->setParameter(
                   'type',
-                  PhabricatorPHIDConstants::PHID_TYPE_DREV);
+                  DifferentialPHIDTypeRevision::TYPECONST);
                 break;
               case PhabricatorSearchScope::SCOPE_OPEN_TASKS:
                 $query->setParameter('open', 1);

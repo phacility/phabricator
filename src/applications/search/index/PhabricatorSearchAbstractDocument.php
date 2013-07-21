@@ -15,7 +15,7 @@ final class PhabricatorSearchAbstractDocument {
 
   public static function getSupportedTypes() {
     return array(
-      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
+      DifferentialPHIDTypeRevision::TYPECONST => 'Differential Revisions',
       PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
       PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
       PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',

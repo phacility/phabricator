@@ -4,7 +4,6 @@ final class PhabricatorPHIDConstants {
 
   const PHID_TYPE_USER    = 'USER';
   const PHID_TYPE_MLST    = 'MLST';
-  const PHID_TYPE_DREV    = 'DREV';
   const PHID_TYPE_TASK    = 'TASK';
   const PHID_TYPE_FILE    = 'FILE';
   const PHID_TYPE_PROJ    = 'PROJ';

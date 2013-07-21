@@ -19,7 +19,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
 
     $diff_handle = $this->createBasicDummyHandle(
       "D123",
-      PhabricatorPHIDConstants::PHID_TYPE_DREV,
+      DifferentialPHIDTypeRevision::TYPECONST,
       "Introduce cooler Differential Revisions");
 
     $panel = $this->createPanel("Differential Hovercard");

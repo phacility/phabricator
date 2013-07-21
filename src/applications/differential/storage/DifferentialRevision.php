@@ -138,7 +138,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_DREV);
+      DifferentialPHIDTypeRevision::TYPECONST);
   }
 
   public function loadDiffs() {

@@ -156,7 +156,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     static $class_map = array(
       PhabricatorPHIDConstants::PHID_TYPE_TASK  => 'ManiphestTask',
       PhabricatorPHIDConstants::PHID_TYPE_CMIT  => 'PhabricatorRepository',
-      PhabricatorPHIDConstants::PHID_TYPE_DREV  => 'DifferentialRevision',
       PhabricatorPHIDConstants::PHID_TYPE_FILE  => 'PhabricatorFile',
       PhabricatorPHIDConstants::PHID_TYPE_USER  => 'PhabricatorUser',
       PhabricatorPHIDConstants::PHID_TYPE_PROJ  => 'PhabricatorProject',

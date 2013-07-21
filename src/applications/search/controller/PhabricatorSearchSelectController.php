@@ -70,7 +70,7 @@ final class PhabricatorSearchSelectController
       case PhabricatorPHIDConstants::PHID_TYPE_TASK:
         $pattern = '/\bT(\d+)\b/i';
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+      case DifferentialPHIDTypeRevision::TYPECONST:
         $pattern = '/\bD(\d+)\b/i';
         break;
       case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
@@ -94,7 +94,7 @@ final class PhabricatorSearchSelectController
     }
 
     switch ($this->type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+      case DifferentialPHIDTypeRevision::TYPECONST:
         $objects = id(new DifferentialRevision())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);

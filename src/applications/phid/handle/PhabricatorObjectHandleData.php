@@ -115,13 +115,6 @@ final class PhabricatorObjectHandleData {
         $lists = $object->loadAllWhere('phid IN (%Ls)', $phids);
         return mpull($lists, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        $revisions = id(new DifferentialRevisionQuery())
-          ->setViewer($this->viewer)
-          ->withPHIDs($phids)
-          ->execute();
-        return mpull($revisions, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
         // TODO: Update this to PhrictionDocumentQuery, already pre-package
         // content DAO
@@ -350,32 +343,6 @@ final class PhabricatorObjectHandleData {
               $handle->setURI($list->getURI());
               $handle->setFullName($list->getName());
               $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Revision');
-            } else {
-              $rev = $objects[$phid];
-              $handle->setName('D'.$rev->getID());
-              $handle->setURI('/D'.$rev->getID());
-              $handle->setFullName('D'.$rev->getID().': '.$rev->getTitle());
-              $handle->setComplete(true);
-
-              $status = $rev->getStatus();
-              if (($status == ArcanistDifferentialRevisionStatus::CLOSED) ||
-                  ($status == ArcanistDifferentialRevisionStatus::ABANDONED)) {
-                $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
-                $handle->setStatus($closed);
-              }
-
             }
             $handles[$phid] = $handle;
           }

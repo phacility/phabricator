@@ -198,7 +198,7 @@ final class PhabricatorSearchAttachController
 
   private function getStrings() {
     switch ($this->type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+      case DifferentialPHIDTypeRevision::TYPECONST:
         $noun = 'Revisions';
         $selected = 'created';
         break;
@@ -271,7 +271,7 @@ final class PhabricatorSearchAttachController
   private function getEdgeType($src_type, $dst_type) {
     $t_cmit = PhabricatorPHIDConstants::PHID_TYPE_CMIT;
     $t_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
-    $t_drev = PhabricatorPHIDConstants::PHID_TYPE_DREV;
+    $t_drev = DifferentialPHIDTypeRevision::TYPECONST;
     $t_mock = PhabricatorPHIDConstants::PHID_TYPE_MOCK;
 
     $map = array(
