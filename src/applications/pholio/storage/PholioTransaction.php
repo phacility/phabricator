@@ -10,7 +10,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_MOCK;
+    return PholioPHIDTypeMock::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

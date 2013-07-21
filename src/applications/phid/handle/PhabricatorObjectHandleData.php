@@ -110,13 +110,6 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($questions, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
-        $mocks = id(new PholioMockQuery())
-          ->setViewer($this->viewer)
-          ->withPHIDs($phids)
-          ->execute();
-        return mpull($mocks, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_PIMG:
         $images = id(new PholioImage())
           ->loadAllWhere('phid IN (%Ls)', $phids);
@@ -131,7 +124,7 @@ final class PhabricatorObjectHandleData {
         foreach ($subtypes as $subtype => $subtype_phids) {
           // TODO: Do this magically.
           switch ($subtype) {
-            case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+            case PholioPHIDTypeMock::TYPECONST:
               $results = id(new PholioTransactionQuery())
                 ->setViewer($this->viewer)
                 ->withPHIDs($subtype_phids)
@@ -518,24 +511,6 @@ final class PhabricatorObjectHandleData {
               $handle->setName($post->getTitle());
               $handle->setFullName($post->getTitle());
               $handle->setURI('/phame/post/view/'.$post->getID().'/');
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Mock');
-            } else {
-              $mock = $objects[$phid];
-              $handle->setName('M'.$mock->getID());
-              $handle->setFullName('M'.$mock->getID().': '.$mock->getName());
-              $handle->setURI('/M'.$mock->getID());
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

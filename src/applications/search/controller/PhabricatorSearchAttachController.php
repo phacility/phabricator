@@ -210,7 +210,7 @@ final class PhabricatorSearchAttachController
         $noun = 'Commits';
         $selected = 'created';
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+      case PholioPHIDTypeMock::TYPECONST:
         $noun = 'Mocks';
         $selected = 'created';
         break;
@@ -251,7 +251,7 @@ final class PhabricatorSearchAttachController
   }
 
   private function getFilters(array $strings) {
-    if ($this->type == PhabricatorPHIDConstants::PHID_TYPE_MOCK) {
+    if ($this->type == PholioPHIDTypeMock::TYPECONST) {
       $filters = array(
         'created' => 'Created By Me',
         'all' => 'All '.$strings['target_plural_noun'],
@@ -272,7 +272,7 @@ final class PhabricatorSearchAttachController
     $t_cmit = PhabricatorRepositoryPHIDTypeCommit::TYPECONST;
     $t_task = ManiphestPHIDTypeTask::TYPECONST;
     $t_drev = DifferentialPHIDTypeRevision::TYPECONST;
-    $t_mock = PhabricatorPHIDConstants::PHID_TYPE_MOCK;
+    $t_mock = PholioPHIDTypeMock::TYPECONST;
 
     $map = array(
       $t_cmit => array(

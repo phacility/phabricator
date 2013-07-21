@@ -44,14 +44,6 @@ final class PhabricatorPHID {
       return $name;
     }
 
-    if (preg_match('/^m(\d+)$/i', $name, $match)) {
-      $objects = id(new PholioMockQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($match[1]))
-        ->execute();
-      $object = head($objects);
-    }
-
     if ($object) {
       return $object->getPHID();
     }

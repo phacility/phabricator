@@ -33,7 +33,7 @@ final class PhabricatorSearchSelectController
         $query->setParameter('author', array($user->getPHID()));
         // TODO - if / when we allow pholio mocks to be archived, etc
         // update this
-        if ($this->type != PhabricatorPHIDConstants::PHID_TYPE_MOCK) {
+        if ($this->type != PholioPHIDTypeMock::TYPECONST) {
           $query->setParameter('open', 1);
         }
         break;
@@ -73,7 +73,7 @@ final class PhabricatorSearchSelectController
       case DifferentialPHIDTypeRevision::TYPECONST:
         $pattern = '/\bD(\d+)\b/i';
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+      case PholioPHIDTypeMock::TYPECONST:
         $pattern = '/\bM(\d+)\b/i';
         break;
     }
@@ -104,7 +104,7 @@ final class PhabricatorSearchSelectController
           'id IN (%Ld)',
           $object_ids);
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+      case PholioPHIDTypeMock::TYPECONST:
         $objects = id(new PholioMock())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);

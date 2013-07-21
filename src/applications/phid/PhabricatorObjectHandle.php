@@ -111,7 +111,6 @@ final class PhabricatorObjectHandle
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
       PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Document',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO => 'Image Macro',
-      PhabricatorPHIDConstants::PHID_TYPE_MOCK => 'Pholio Mock',
       PhabricatorPHIDConstants::PHID_TYPE_PIMG => 'Pholio Image',
       PhabricatorPHIDConstants::PHID_TYPE_FILE => 'File',
       PhabricatorPHIDConstants::PHID_TYPE_BLOG => 'Blog',
