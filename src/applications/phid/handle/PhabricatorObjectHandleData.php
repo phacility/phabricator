@@ -56,13 +56,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($users, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_CONF:
-        $config_dao = new PhabricatorConfigEntry();
-        $entries = $config_dao->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
-        return mpull($entries, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_FILE:
         // TODO: Update this to PhabricatorFileQuery
         $object = new PhabricatorFile();
@@ -297,24 +290,6 @@ final class PhabricatorObjectHandleData {
                 $handle->setImageURI(
                   PhabricatorUser::getDefaultProfileImageURI());
               }
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_CONF:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Config Entry');
-            } else {
-              $entry = $objects[$phid];
-              $handle->setName($entry->getKey());
-              $handle->setURI('/config/edit/'.$entry->getKey());
-              $handle->setFullName($entry->getKey());
-              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
