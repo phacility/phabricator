@@ -241,13 +241,14 @@ final class PhabricatorObjectHandleData {
   }
 
   public function loadHandles() {
-    $objects = $this->loadObjects();
+    $all_objects = $this->loadObjects();
 
     $types = phid_group_by_type($this->phids);
 
     $handles = array();
 
     foreach ($types as $type => $phids) {
+      $objects = array_select_keys($all_objects, $phids);
       switch ($type) {
 
         case PhabricatorPHIDConstants::PHID_TYPE_MAGIC:
