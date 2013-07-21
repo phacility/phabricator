@@ -5,11 +5,6 @@
  */
 abstract class ConduitAPI_phid_Method extends ConduitAPIMethod {
 
-  public function getApplication() {
-    return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationPHID');
-  }
-
   protected function buildHandleInformationDictionary(
     PhabricatorObjectHandle $handle) {
 

@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephObjectHandleLoader extends ObjectHandleLoader {
+final class ReleephObjectHandleLoader {
 
   public function loadHandles(array $phids) {
     $types = array();
