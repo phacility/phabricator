@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectListController extends PhabricatorController {
+final class ReleephProjectListController extends ReleephController {
 
   private $filter;
 

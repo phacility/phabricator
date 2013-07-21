@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephRequestEditController extends ReleephController {
+final class ReleephRequestEditController extends ReleephProjectController {
 
   private $id;
 
