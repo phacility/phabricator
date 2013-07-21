@@ -241,9 +241,23 @@ final class PhabricatorObjectHandleData {
   }
 
   public function loadHandles() {
-    $all_objects = $this->loadObjects();
 
-    $types = phid_group_by_type($this->phids);
+    $application_handles = id(new PhabricatorHandleQuery())
+      ->setViewer($this->viewer)
+      ->withPHIDs($this->phids)
+      ->execute();
+
+    // TODO: Move the rest of this into Applications.
+
+    $phid_map = array_fuse($this->phids);
+    foreach ($application_handles as $handle) {
+      if ($handle->isComplete()) {
+        unset($phid_map[$handle->getPHID()]);
+      }
+    }
+
+    $all_objects = $this->loadObjects();
+    $types = phid_group_by_type($phid_map);
 
     $handles = array();
 
@@ -674,26 +688,6 @@ final class PhabricatorObjectHandleData {
           }
           break;
 
-
-        case PhabricatorSlowvotePHIDTypePoll::TYPECONST:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Slowvote');
-            } else {
-              $poll = $objects[$phid];
-              $handle->setName('V'.$poll->getID());
-              $handle->setFullName(
-                'V'.$poll->getID().': '.$poll->getQuestion());
-              $handle->setURI('/V'.$poll->getID());
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
         case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
@@ -821,6 +815,6 @@ final class PhabricatorObjectHandleData {
       }
     }
 
-    return $handles;
+    return $handles + $application_handles;
   }
 }

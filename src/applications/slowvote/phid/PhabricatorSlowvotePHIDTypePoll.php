@@ -26,8 +26,18 @@ final class PhabricatorSlowvotePHIDTypePoll extends PhabricatorPHIDType {
       ->execute();
   }
 
-  public function loadHandles(array $phids, array $objects) {
-    throw new Exception("TODO");
+  public function loadHandles(
+    PhabricatorHandleQuery $query,
+    array $handles,
+    array $objects) {
+
+    foreach ($handles as $phid => $handle) {
+      $poll = $objects[$phid];
+
+      $handle->setName('V'.$poll->getID());
+      $handle->setFullName('V'.$poll->getID().': '.$poll->getQuestion());
+      $handle->setURI('/V'.$poll->getID());
+    }
   }
 
   public function canLoadNamedObject($name) {

@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorObjectHandle {
+final class PhabricatorObjectHandle
+  implements PhabricatorPolicyInterface {
 
   private $uri;
   private $phid;
@@ -38,6 +39,9 @@ final class PhabricatorObjectHandle {
   }
 
   public function getName() {
+    if ($this->name === null) {
+      return pht('Unknown Object (%s)', $this->getTypeName());
+    }
     return $this->name;
   }
 
@@ -99,9 +103,8 @@ final class PhabricatorObjectHandle {
   }
 
   public function getTypeName() {
-    $types = PhabricatorPHIDType::getAllTypes();
-    if (isset($types[$this->getType()])) {
-      return $types[$this->getType()]->getTypeName();
+    if ($this->getPHIDType()) {
+      return $this->getPHIDType()->getTypeName();
     }
 
     static $map = array(
@@ -221,6 +224,29 @@ final class PhabricatorObjectHandle {
         break;
     }
     return $name;
+  }
+
+  protected function getPHIDType() {
+    $types = PhabricatorPHIDType::getAllTypes();
+    return idx($types, $this->getType());
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_PUBLIC;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }
