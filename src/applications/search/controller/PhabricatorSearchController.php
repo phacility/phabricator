@@ -63,7 +63,7 @@ final class PhabricatorSearchController
               case PhabricatorSearchScope::SCOPE_COMMITS:
                 $query->setParameter(
                   'type',
-                  PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+                  PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
                 break;
               default:
                 break;

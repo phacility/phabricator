@@ -206,7 +206,7 @@ final class PhabricatorSearchAttachController
         $noun = 'Tasks';
         $selected = 'assigned';
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
+      case PhabricatorRepositoryPHIDTypeCommit::TYPECONST:
         $noun = 'Commits';
         $selected = 'created';
         break;
@@ -269,7 +269,7 @@ final class PhabricatorSearchAttachController
   }
 
   private function getEdgeType($src_type, $dst_type) {
-    $t_cmit = PhabricatorPHIDConstants::PHID_TYPE_CMIT;
+    $t_cmit = PhabricatorRepositoryPHIDTypeCommit::TYPECONST;
     $t_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
     $t_drev = DifferentialPHIDTypeRevision::TYPECONST;
     $t_mock = PhabricatorPHIDConstants::PHID_TYPE_MOCK;

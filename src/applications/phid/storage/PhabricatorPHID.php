@@ -43,28 +43,8 @@ final class PhabricatorPHID {
       // It's already a PHID! Yay.
       return $name;
     }
-    if (preg_match('/^r([A-Z]+)(\S*)$/', $name, $match)) {
-      $repository = id(new PhabricatorRepository())
-        ->loadOneWhere('callsign = %s', $match[1]);
-      if ($match[2] == '') {
-        $object = $repository;
-      } else if ($repository) {
-        $object = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-          'repositoryID = %d AND commitIdentifier = %s',
-          $repository->getID(),
-          $match[2]);
-        if (!$object) {
-          try {
-            $object = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-              'repositoryID = %d AND commitIdentifier LIKE %>',
-              $repository->getID(),
-              $match[2]);
-          } catch (AphrontQueryCountException $ex) {
-            // Ambiguous; return nothing.
-          }
-        }
-      }
-    } else if (preg_match('/^t(\d+)$/i', $name, $match)) {
+
+    if (preg_match('/^t(\d+)$/i', $name, $match)) {
       $object = id(new ManiphestTask())->load($match[1]);
     } else if (preg_match('/^m(\d+)$/i', $name, $match)) {
       $objects = id(new PholioMockQuery())

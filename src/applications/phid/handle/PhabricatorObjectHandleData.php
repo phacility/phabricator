@@ -56,13 +56,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($users, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
-        $commits = id(new DiffusionCommitQuery())
-          ->setViewer($this->viewer)
-          ->withPHIDs($phids)
-          ->execute();
-        return mpull($commits, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_TASK:
         // TODO: Update this to ManiphestTaskQuery, //especially// after we have
         // policy-awareness
@@ -321,39 +314,6 @@ final class PhabricatorObjectHandleData {
                   PhabricatorUser::getDefaultProfileImageURI());
               }
             }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Commit');
-            } else {
-              $repository = $objects[$phid]->getRepository();
-              $commit = $objects[$phid];
-              $callsign = $repository->getCallsign();
-              $commit_identifier = $commit->getCommitIdentifier();
-
-              $name = $repository->formatCommitName($commit_identifier);
-              $handle->setName($name);
-
-              $summary = $commit->getSummary();
-              if (strlen($summary)) {
-                $handle->setFullName($name.': '.$summary);
-              } else {
-                $handle->setFullName($name);
-              }
-
-              $handle->setURI('/r'.$callsign.$commit_identifier);
-              $handle->setTimestamp($commit->getEpoch());
-              $handle->setComplete(true);
-            }
-
             $handles[$phid] = $handle;
           }
           break;

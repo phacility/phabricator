@@ -9,7 +9,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_UNKNOWN = '????';
   const PHID_TYPE_MAGIC   = '!!!!';
   const PHID_TYPE_REPO    = 'REPO';
-  const PHID_TYPE_CMIT    = 'CMIT';
   const PHID_TYPE_OPKG    = 'OPKG';
   const PHID_TYPE_PSTE    = 'PSTE';
   const PHID_TYPE_STRY    = 'STRY';
