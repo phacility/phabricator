@@ -110,11 +110,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($projects, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_MLST:
-        $object = new PhabricatorMetaMTAMailingList();
-        $lists = $object->loadAllWhere('phid IN (%Ls)', $phids);
-        return mpull($lists, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
         // TODO: Update this to PhrictionDocumentQuery, already pre-package
         // content DAO
@@ -325,24 +320,6 @@ final class PhabricatorObjectHandleData {
                 $handle->setImageURI(
                   PhabricatorUser::getDefaultProfileImageURI());
               }
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_MLST:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Mailing List');
-            } else {
-              $list = $objects[$phid];
-              $handle->setName($list->getName());
-              $handle->setURI($list->getURI());
-              $handle->setFullName($list->getName());
-              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }

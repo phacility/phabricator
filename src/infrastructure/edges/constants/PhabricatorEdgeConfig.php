@@ -159,8 +159,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_FILE  => 'PhabricatorFile',
       PhabricatorPHIDConstants::PHID_TYPE_USER  => 'PhabricatorUser',
       PhabricatorPHIDConstants::PHID_TYPE_PROJ  => 'PhabricatorProject',
-      PhabricatorPHIDConstants::PHID_TYPE_MLST  =>
-        'PhabricatorMetaMTAMailingList',
       PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
       PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
       PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
