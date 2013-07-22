@@ -56,12 +56,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($users, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_FILE:
-        // TODO: Update this to PhabricatorFileQuery
-        $object = new PhabricatorFile();
-        $files = $object->loadAllWhere('phid IN (%Ls)', $phids);
-        return mpull($files, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
         $projects = id(new PhabricatorProjectQuery())
           ->setViewer($this->viewer)
@@ -290,24 +284,6 @@ final class PhabricatorObjectHandleData {
                 $handle->setImageURI(
                   PhabricatorUser::getDefaultProfileImageURI());
               }
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_FILE:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown File');
-            } else {
-              $file = $objects[$phid];
-              $handle->setName('F'.$file->getID());
-              $handle->setFullName('F'.$file->getID().' '.$file->getName());
-              $handle->setURI($file->getBestURI());
-              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }

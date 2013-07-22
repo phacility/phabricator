@@ -54,10 +54,10 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $files = mpull($files, 'getPHID', 'getPHID');
       $new = $task->getAttached();
       foreach ($files as $phid) {
-        if (empty($new[PhabricatorPHIDConstants::PHID_TYPE_FILE])) {
-          $new[PhabricatorPHIDConstants::PHID_TYPE_FILE] = array();
+        if (empty($new[PhabricatorFilePHIDTypeFile::TYPECONST])) {
+          $new[PhabricatorFilePHIDTypeFile::TYPECONST] = array();
         }
-        $new[PhabricatorPHIDConstants::PHID_TYPE_FILE][$phid] = array();
+        $new[PhabricatorFilePHIDTypeFile::TYPECONST][$phid] = array();
       }
       $transaction = new ManiphestTransaction();
       $transaction

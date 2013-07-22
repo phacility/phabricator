@@ -41,7 +41,7 @@ final class ConduitAPI_phid_lookup_Method
     foreach ($name_map as $name => $object) {
       $phid = $object->getPHID();
       $handle = $handles[$phid];
-      $result[$phid] = $this->buildHandleInformationDictionary($handle);
+      $result[$name] = $this->buildHandleInformationDictionary($handle);
     }
 
     return $result;

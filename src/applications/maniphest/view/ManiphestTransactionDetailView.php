@@ -242,7 +242,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
         $attach_types = array(
           DifferentialPHIDTypeRevision::TYPECONST,
-          PhabricatorPHIDConstants::PHID_TYPE_FILE,
+          PhabricatorFilePHIDTypeFile::TYPECONST,
         );
 
         foreach ($attach_types as $attach_type) {
@@ -268,7 +268,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           case DifferentialPHIDTypeRevision::TYPECONST:
             $title = 'ATTACHED REVISIONS';
             break;
-          case PhabricatorPHIDConstants::PHID_TYPE_FILE:
+          case PhabricatorFilePHIDTypeFile::TYPECONST:
             $title = 'ATTACHED FILES';
             break;
         }
@@ -484,7 +484,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         foreach (array(
           DifferentialPHIDTypeRevision::TYPECONST,
           ManiphestPHIDTypeTask::TYPECONST,
-          PhabricatorPHIDConstants::PHID_TYPE_FILE) as $attach_type) {
+          PhabricatorFilePHIDTypeFile::TYPECONST) as $attach_type) {
           $old = array_keys(idx($old_raw, $attach_type, array()));
           $new = array_keys(idx($new_raw, $attach_type, array()));
           if ($old != $new) {
@@ -652,7 +652,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     switch ($attach_type) {
       case DifferentialPHIDTypeRevision::TYPECONST:
         return pht('Differential Revision(s)', $count);
-      case PhabricatorPHIDConstants::PHID_TYPE_FILE:
+      case PhabricatorFilePHIDTypeFile::TYPECONST:
         return pht('file(s)', $count);
       case ManiphestPHIDTypeTask::TYPECONST:
         return pht('Maniphest Task(s)', $count);

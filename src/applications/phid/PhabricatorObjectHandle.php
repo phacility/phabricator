@@ -112,7 +112,6 @@ final class PhabricatorObjectHandle
       PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Document',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO => 'Image Macro',
       PhabricatorPHIDConstants::PHID_TYPE_PIMG => 'Pholio Image',
-      PhabricatorPHIDConstants::PHID_TYPE_FILE => 'File',
       PhabricatorPHIDConstants::PHID_TYPE_BLOG => 'Blog',
       PhabricatorPHIDConstants::PHID_TYPE_POST => 'Post',
       PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Question',

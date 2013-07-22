@@ -35,7 +35,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_FILE);
+      PhabricatorFilePHIDTypeFile::TYPECONST);
   }
 
   public static function readUploadedFileData($spec) {
