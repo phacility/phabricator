@@ -177,12 +177,22 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       }
 
       if ($page) {
-        $visible = $this->willFilterPage($page);
+        $maybe_visible = $this->willFilterPage($page);
       } else {
-        $visible = array();
+        $maybe_visible = array();
       }
 
-      $visible = $filter->apply($visible);
+      $visible = $filter->apply($maybe_visible);
+
+      $removed = array();
+      foreach ($maybe_visible as $key => $object) {
+        if (empty($visible[$key])) {
+          $removed[$key] = $object;
+        }
+      }
+
+      $this->didFilterResults($removed);
+
       foreach ($visible as $key => $result) {
         ++$count;
 
@@ -286,6 +296,22 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   protected function willFilterPage(array $page) {
     return $page;
+  }
+
+
+  /**
+   * Hook for removing filtered results from alternate result sets. This
+   * hook will be called with any objects which were returned by the query but
+   * filtered for policy reasons. The query should remove them from any cached
+   * or partial result sets.
+   *
+   * @param list<wild>  List of objects that should not be returned by alternate
+   *                    result mechanisms.
+   * @return void
+   * @task policyimpl
+   */
+  protected function didFilterResults(array $results) {
+    return;
   }
 
 

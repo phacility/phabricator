@@ -110,4 +110,12 @@ final class PhabricatorObjectQuery
     return $results;
   }
 
+  protected function didFilterResults(array $filtered) {
+    foreach ($this->namedResults as $name => $result) {
+      if (isset($filtered[$result->getPHID()])) {
+        unset($this->namedResults[$name]);
+      }
+    }
+  }
+
 }
