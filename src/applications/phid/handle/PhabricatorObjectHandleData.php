@@ -492,24 +492,6 @@ final class PhabricatorObjectHandleData {
           }
           break;
 
-        case PhabricatorPHIDConstants::PHID_TYPE_CDWN:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Countdown');
-            } else {
-              $countdown = $objects[$phid];
-              $handle->setName($countdown->getTitle());
-              $handle->setFullName($countdown->getTitle());
-              $handle->setURI('/countdown/'.$countdown->getID().'/');
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
         case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();

@@ -17,7 +17,7 @@ final class PhabricatorCountdownDeleteController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $countdown = id(new CountdownQuery())
+    $countdown = id(new PhabricatorCountdownQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
       ->executeOne();

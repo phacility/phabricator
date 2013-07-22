@@ -18,7 +18,7 @@ final class PhabricatorCountdownEditController
     $action_label = pht('Create Countdown');
 
     if ($this->id) {
-      $countdown = id(new CountdownQuery())
+      $countdown = id(new PhabricatorCountdownQuery())
         ->setViewer($user)
         ->withIDs(array($this->id))
         ->executeOne();

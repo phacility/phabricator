@@ -14,7 +14,7 @@ final class PhabricatorCountdownListController
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
 
-    $query = id(new CountdownQuery())
+    $query = id(new PhabricatorCountdownQuery())
       ->setViewer($user);
 
     $countdowns = $query->executeWithCursorPager($pager);

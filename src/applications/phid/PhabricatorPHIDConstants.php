@@ -30,7 +30,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_PAYM    = 'PAYM';
   const PHID_TYPE_CHRG    = 'CHRG';
   const PHID_TYPE_CART    = 'CART';
-  const PHID_TYPE_CDWN    = 'CDWN';
   const PHID_TYPE_LEGD    = 'LEGD';
   const PHID_TYPE_LEGB    = 'LEGB';
 

@@ -12,7 +12,7 @@ final class PhabricatorCountdownRemarkupRule
 
   protected function loadObjects(array $ids) {
     $viewer = $this->getEngine()->getConfig('viewer');
-    return id(new CountdownQuery())
+    return id(new PhabricatorCountdownQuery())
       ->setViewer($viewer)
       ->withIDs($ids)
       ->execute();

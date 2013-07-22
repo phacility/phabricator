@@ -3,7 +3,7 @@
 /**
  * @group countdown
  */
-final class CountdownQuery
+final class PhabricatorCountdownQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
