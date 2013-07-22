@@ -1751,6 +1751,7 @@ phutil_register_library_map(array(
     'PholioMockListController' => 'applications/pholio/controller/PholioMockListController.php',
     'PholioMockMailReceiver' => 'applications/pholio/mail/PholioMockMailReceiver.php',
     'PholioMockQuery' => 'applications/pholio/query/PholioMockQuery.php',
+    'PholioMockSearchEngine' => 'applications/pholio/query/PholioMockSearchEngine.php',
     'PholioMockViewController' => 'applications/pholio/controller/PholioMockViewController.php',
     'PholioPHIDTypeMock' => 'applications/pholio/phid/PholioPHIDTypeMock.php',
     'PholioRemarkupRule' => 'applications/pholio/remarkup/PholioRemarkupRule.php',
@@ -3787,9 +3788,14 @@ phutil_register_library_map(array(
     'PholioMockEditor' => 'PhabricatorApplicationTransactionEditor',
     'PholioMockEmbedView' => 'AphrontView',
     'PholioMockImagesView' => 'AphrontView',
-    'PholioMockListController' => 'PholioController',
+    'PholioMockListController' =>
+    array(
+      0 => 'PholioController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'PholioMockMailReceiver' => 'PhabricatorObjectMailReceiver',
     'PholioMockQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PholioMockSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PholioMockViewController' => 'PholioController',
     'PholioPHIDTypeMock' => 'PhabricatorPHIDType',
     'PholioRemarkupRule' => 'PhabricatorRemarkupRuleObject',
