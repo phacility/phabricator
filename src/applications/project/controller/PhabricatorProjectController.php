@@ -2,22 +2,21 @@
 
 abstract class PhabricatorProjectController extends PhabricatorController {
 
-  public function buildSideNavView($filter = null, $for_app = false) {
+  public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
-    $nav
-      ->setBaseURI(new PhutilURI('/project/filter/'))
-      ->addLabel(pht('User'))
-      ->addFilter('active', pht('Active'))
-      ->addLabel(pht('All'))
-      ->addFilter('all', pht('All Projects'))
-      ->addFilter('allactive', pht('Active Projects'))
-      ->selectFilter($filter, 'active');
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $nav->addFilter('create/', pht('Create Project'));
+      $nav->addFilter('create', pht('Create Project'));
     }
+
+    id(new PhabricatorProjectSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
 
     return $nav;
   }
