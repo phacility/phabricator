@@ -16,14 +16,7 @@ function phid_get_type($phid) {
 }
 
 /**
- * Group a list of phids by type. Given:
- *
- *   phid_group_by_type([PHID-USER-1, PHID-USER-2, PHID-PROJ-3])
- *
- * phid_group_by_type would return:
- *
- *   [PhabricatorPHIDConstants::PHID_TYPE_USER => [PHID-USER-1, PHID-USER-2],
- *    PhabricatorPHIDConstants::PHID_TYPE_PROJ => [PHID-PROJ-3]]
+ * Group a list of phids by type.
  *
  * @param   phids array of phids
  * @return  map of phid type => list of phids

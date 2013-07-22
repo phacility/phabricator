@@ -56,13 +56,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($users, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
-        $projects = id(new PhabricatorProjectQuery())
-          ->setViewer($this->viewer)
-          ->withPHIDs($phids)
-          ->execute();
-        return mpull($projects, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_REPO:
         // TODO: Update this to PhabricatorRepositoryQuery
         $object = new PhabricatorRepository();
@@ -284,23 +277,6 @@ final class PhabricatorObjectHandleData {
                 $handle->setImageURI(
                   PhabricatorUser::getDefaultProfileImageURI());
               }
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Project');
-            } else {
-              $project = $objects[$phid];
-              $handle->setName($project->getName());
-              $handle->setURI('/project/view/'.$project->getID().'/');
-              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }

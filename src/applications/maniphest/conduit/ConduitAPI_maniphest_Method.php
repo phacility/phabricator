@@ -121,7 +121,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $project_phids = $request->getValue('projectPHIDs');
     if ($project_phids !== null) {
       $this->validatePHIDList($project_phids,
-                              PhabricatorPHIDConstants::PHID_TYPE_PROJ,
+                              PhabricatorProjectPHIDTypeProject::TYPECONST,
                               'projectPHIDS');
       $changes[ManiphestTransactionType::TYPE_PROJECTS] = $project_phids;
     }

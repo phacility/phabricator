@@ -55,7 +55,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
         $doc->addRelationship(
           PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
           $project_phid,
-          PhabricatorPHIDConstants::PHID_TYPE_PROJ,
+          PhabricatorProjectPHIDTypeProject::TYPECONST,
           $date_created);
       }
     }

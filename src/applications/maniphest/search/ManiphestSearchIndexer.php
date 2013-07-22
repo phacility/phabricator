@@ -80,7 +80,7 @@ final class ManiphestSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
         $phid,
-        PhabricatorPHIDConstants::PHID_TYPE_PROJ,
+        PhabricatorProjectPHIDTypeProject::TYPECONST,
         $task->getDateModified()); // Bogus.
     }
 
