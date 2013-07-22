@@ -6,10 +6,6 @@ final class PhabricatorApplicationTokens extends PhabricatorApplication {
     return pht('Tokens');
   }
 
-  public function isBeta() {
-    return true;
-  }
-
   public function getBaseURI() {
     return '/token/';
   }
