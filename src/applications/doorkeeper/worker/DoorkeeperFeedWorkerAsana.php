@@ -493,12 +493,18 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     // because everything else is idempotent, so this is the only effect we
     // can't safely run more than once.
 
+    if ($story instanceof PhabricatorFeedStoryDifferential) {
+      $text = $story->renderForAsanaBridge();
+    } else {
+      $text = $story->renderText();
+    }
+
     $this->makeAsanaAPICall(
       $oauth_token,
       'tasks/'.$parent_ref->getObjectID().'/stories',
       'POST',
       array(
-        'text' => $story->renderText(),
+        'text' => $text,
       ));
   }
 
