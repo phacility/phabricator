@@ -43,7 +43,7 @@ final class DifferentialPHIDTypeRevision extends PhabricatorPHIDType {
       $id = $revision->getID();
       $status = $revision->getStatus();
 
-      $handle->setName($title);
+      $handle->setName("D{$id}");
       $handle->setURI("/D{$id}");
       $handle->setFullName("D{$id}: {$title}");
 
