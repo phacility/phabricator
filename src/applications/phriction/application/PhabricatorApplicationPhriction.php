@@ -28,6 +28,12 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     );
   }
 
+  public function getEventListeners() {
+    return array(
+      new PhrictionActionMenuEventListener(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       // Match "/w/" with slug "/".

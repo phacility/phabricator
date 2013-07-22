@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
+final class PhrictionActionMenuEventListener extends PhutilEventListener {
 
   public function register() {
     $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
@@ -18,16 +18,14 @@ final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
     $actions = $event->getValue('actions');
 
     $action = id(new PhabricatorActionView())
-      ->setIcon('maniphest-dark')
+      ->setIcon('phriction-dark')
       ->setIconSheet(PHUIIconView::SPRITE_APPS)
-      ->setName(pht('View Tasks'));
+      ->setName(pht('View Wiki'));
 
     $object = $event->getValue('object');
-    if ($object instanceof PhabricatorUser) {
-      $href = '/maniphest/view/action/?users='.$object->getPHID();
-      $actions[] = $action->setHref($href);
-    } else if ($object instanceof PhabricatorProject) {
-      $href = '/maniphest/view/all/?projects='.$object->getPHID();
+    if ($object instanceof PhabricatorProject) {
+      $slug = PhabricatorSlug::normalize($object->getPhrictionSlug());
+      $href = '/w/projects/'.$slug;
       $actions[] = $action->setHref($href);
     }
 

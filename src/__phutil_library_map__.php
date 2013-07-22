@@ -1812,6 +1812,7 @@ phutil_register_library_map(array(
     'PhrequentUserTime' => 'applications/phrequent/storage/PhrequentUserTime.php',
     'PhrequentUserTimeQuery' => 'applications/phrequent/query/PhrequentUserTimeQuery.php',
     'PhrictionActionConstants' => 'applications/phriction/constants/PhrictionActionConstants.php',
+    'PhrictionActionMenuEventListener' => 'applications/phriction/event/PhrictionActionMenuEventListener.php',
     'PhrictionChangeType' => 'applications/phriction/constants/PhrictionChangeType.php',
     'PhrictionConstants' => 'applications/phriction/constants/PhrictionConstants.php',
     'PhrictionContent' => 'applications/phriction/storage/PhrictionContent.php',
@@ -3850,6 +3851,7 @@ phutil_register_library_map(array(
     'PhrequentUserTime' => 'PhrequentDAO',
     'PhrequentUserTimeQuery' => 'PhabricatorOffsetPagedQuery',
     'PhrictionActionConstants' => 'PhrictionConstants',
+    'PhrictionActionMenuEventListener' => 'PhutilEventListener',
     'PhrictionChangeType' => 'PhrictionConstants',
     'PhrictionContent' =>
     array(

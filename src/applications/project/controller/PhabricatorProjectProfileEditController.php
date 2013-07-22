@@ -220,13 +220,6 @@ final class PhabricatorProjectProfileEditController
           ->addCancelButton('/project/view/'.$project->getID().'/')
           ->setValue(pht('Save')));
 
-    $nav = $this->buildLocalNavigation($project);
-    $nav->selectFilter('edit');
-    $nav->appendChild(
-      array(
-        $error_view,
-        $form,
-      ));
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addCrumb(
@@ -237,10 +230,13 @@ final class PhabricatorProjectProfileEditController
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Project'))
         ->setHref($this->getApplicationURI()));
-    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $error_view,
+        $form,
+      ),
       array(
         'title' => $title,
         'device' => true,
