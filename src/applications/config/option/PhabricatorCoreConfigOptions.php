@@ -60,7 +60,7 @@ final class PhabricatorCoreConfigOptions
               "across domains."))
         ->addExample(
           '["http://phabricator2.example.com/", '.
-            '"http://phabricator3.example.com/]"',
+            '"http://phabricator3.example.com/"]',
           pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
