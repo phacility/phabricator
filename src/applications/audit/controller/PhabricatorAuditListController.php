@@ -235,7 +235,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
         }
         break;
       case 'repository':
-        if ($type !== PhabricatorPHIDConstants::PHID_TYPE_REPO) {
+        if ($type !== PhabricatorRepositoryPHIDTypeRepository::TYPECONST) {
           throw new Exception("PHID must be a repository PHID!");
         }
         break;

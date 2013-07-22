@@ -56,12 +56,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($users, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_REPO:
-        // TODO: Update this to PhabricatorRepositoryQuery
-        $object = new PhabricatorRepository();
-        $repositories = $object->loadAllWhere('phid in (%Ls)', $phids);
-        return mpull($repositories, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_OPKG:
         $object = new PhabricatorOwnersPackage();
         $packages = $object->loadAllWhere('phid in (%Ls)', $phids);
@@ -277,25 +271,6 @@ final class PhabricatorObjectHandleData {
                 $handle->setImageURI(
                   PhabricatorUser::getDefaultProfileImageURI());
               }
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_REPO:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Repository');
-            } else {
-              $repository = $objects[$phid];
-              $handle->setName('r'.$repository->getCallsign());
-              $handle->setFullName("r" . $repository->getCallsign() .
-                " (" . $repository->getName() . ")");
-              $handle->setURI('/diffusion/'.$repository->getCallsign().'/');
-              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }

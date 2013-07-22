@@ -63,7 +63,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
       $repository->getPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_REPO,
+      PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
       $date_created);
 
     $comments = id(new PhabricatorAuditComment())->loadAllWhere(
