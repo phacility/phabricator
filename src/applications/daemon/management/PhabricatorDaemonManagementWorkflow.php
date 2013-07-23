@@ -131,8 +131,6 @@ abstract class PhabricatorDaemonManagementWorkflow
       $flags[] = '--daemonize';
     }
 
-    $flags[] = csprintf('--conduit-uri=%s', PhabricatorEnv::getURI('/api/'));
-
     if (!$debug) {
       $log_file = $this->getLogDirectory().'/daemons.log';
       $flags[] = csprintf('--log=%s', $log_file);

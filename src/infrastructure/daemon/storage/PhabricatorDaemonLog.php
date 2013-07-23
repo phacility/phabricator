@@ -5,6 +5,7 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO {
   const STATUS_UNKNOWN = 'unknown';
   const STATUS_RUNNING = 'run';
   const STATUS_DEAD    = 'dead';
+  const STATUS_WAIT    = 'wait';
   const STATUS_EXITED  = 'exit';
 
   protected $daemon;

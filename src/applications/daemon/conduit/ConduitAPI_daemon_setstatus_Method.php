@@ -5,8 +5,11 @@
  */
 final class ConduitAPI_daemon_setstatus_Method extends ConduitAPIMethod {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
   public function shouldRequireAuthentication() {
-    // TODO: Lock this down once we build phantoms.
     return false;
   }
 
