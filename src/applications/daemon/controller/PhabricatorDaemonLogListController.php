@@ -5,20 +5,14 @@ final class PhabricatorDaemonLogListController
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('page'));
+    $pager = new AphrontCursorPagerView();
+    $pager->readFromRequest($request);
 
-    $clause = '1 = 1';
-
-    $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
-      '%Q ORDER BY id DESC LIMIT %d, %d',
-      $clause,
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
-
-    $logs = $pager->sliceResults($logs);
-    $pager->setURI($request->getRequestURI(), 'page');
+    $logs = id(new PhabricatorDaemonLogQuery())
+      ->setViewer($viewer)
+      ->executeWithCursorPager($pager);
 
     $daemon_table = new PhabricatorDaemonLogListView();
     $daemon_table->setUser($request->getUser());
@@ -33,6 +27,7 @@ final class PhabricatorDaemonLogListController
     $nav->selectFilter('log');
     $nav->setCrumbs($crumbs);
     $nav->appendChild($daemon_table);
+    $nav->appendChild($pager);
 
     return $this->buildApplicationPage(
       $nav,

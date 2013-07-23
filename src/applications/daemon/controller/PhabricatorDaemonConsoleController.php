@@ -57,13 +57,13 @@ final class PhabricatorDaemonConsoleController
     $completed_panel->appendChild($completed_table);
     $completed_panel->setNoBackground();
 
-    $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
-      '`status` = %s ORDER BY id DESC',
-      'run');
-
+    $logs = id(new PhabricatorDaemonLogQuery())
+      ->setViewer($user)
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->execute();
 
     $daemon_header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Recent Daemons'));
+      ->setHeader(pht('Active Daemons'));
 
     $daemon_table = new PhabricatorDaemonLogListView();
     $daemon_table->setUser($user);

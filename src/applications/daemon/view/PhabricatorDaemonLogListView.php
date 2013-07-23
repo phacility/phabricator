@@ -19,43 +19,6 @@ final class PhabricatorDaemonLogListView extends AphrontView {
 
     $list = id(new PhabricatorObjectItemListView());
     foreach ($this->daemonLogs as $log) {
-
-      // TODO: VVV Move this stuff to a Query class. VVV
-
-      $expect_heartbeat = PhabricatorDaemonLogQuery::getTimeUntilUnknown();
-      $assume_dead = PhabricatorDaemonLogQuery::getTimeUntilDead();
-
-      $status_running = PhabricatorDaemonLog::STATUS_RUNNING;
-      $status_unknown = PhabricatorDaemonLog::STATUS_UNKNOWN;
-      $status_wait = PhabricatorDaemonLog::STATUS_WAIT;
-      $status_exited = PhabricatorDaemonLog::STATUS_EXITED;
-      $status_dead = PhabricatorDaemonLog::STATUS_DEAD;
-
-      $status = $log->getStatus();
-      $heartbeat_timeout = $log->getDateModified() + $expect_heartbeat;
-      if ($status == $status_running && $heartbeat_timeout < time()) {
-        $status = $status_unknown;
-      }
-
-      if ($status == $status_unknown && $assume_dead < time()) {
-        $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $log->setStatus($status_dead)->save();
-        unset($guard);
-      }
-
-      if ($status != $status_running &&
-          $log->getDateModified() + (3 * 86400) < time()) {
-        // Don't show rows that haven't been running for more than
-        // three days.  We should probably prune these out of the
-        // DB similar to the code above, but we don't need to be
-        // conservative and do it only on the same host
-
-        // TODO: This should not apply to the "all daemons" view!
-        continue;
-      }
-
-      // TODO: ^^^^ ALL THAT STUFF ^^^
-
       $id = $log->getID();
       $epoch = $log->getDateCreated();
 
@@ -65,6 +28,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
         ->setHref("/daemon/log/{$id}/")
         ->addIcon('none', phabricator_datetime($epoch, $this->user));
 
+      $status = $log->getStatus();
       switch ($status) {
         case PhabricatorDaemonLog::STATUS_RUNNING:
           $item->setBarColor('green');
