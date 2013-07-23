@@ -91,6 +91,7 @@ final class PhabricatorDaemonLogViewController
     $view = id(new PhabricatorPropertyListView())
       ->setUser($viewer);
 
+    $id = $daemon->getID();
     $c_epoch = $daemon->getDateCreated();
     $u_epoch = $daemon->getDateModified();
 
@@ -164,6 +165,13 @@ final class PhabricatorDaemonLogViewController
           'style'   => 'width: 100%; height: 12em;',
         ),
         $argv));
+
+    $view->addProperty(
+      pht('View Full Logs'),
+      phutil_tag(
+        'tt',
+        array(),
+        "phabricator/ $ ./bin/phd log {$id}"));
 
 
     return $view;
