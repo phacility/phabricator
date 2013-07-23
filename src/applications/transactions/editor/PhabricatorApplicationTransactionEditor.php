@@ -116,7 +116,6 @@ abstract class PhabricatorApplicationTransactionEditor
           $edge_src = $object->getPHID();
 
           $old_edges = id(new PhabricatorEdgeQuery())
-            ->setViewer($this->getActor())
             ->withSourcePHIDs(array($edge_src))
             ->withEdgeTypes(array($edge_type))
             ->needEdgeData(true)

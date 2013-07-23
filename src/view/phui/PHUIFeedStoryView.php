@@ -234,7 +234,7 @@ final class PHUIFeedStoryView extends AphrontView {
 
   public function setAppIconFromPHID($phid) {
     switch (phid_get_type($phid)) {
-      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+      case PholioPHIDTypeMock::TYPECONST:
         $this->setAppIcon("pholio-dark");
         break;
       case PhabricatorPHIDConstants::PHID_TYPE_MCRO:

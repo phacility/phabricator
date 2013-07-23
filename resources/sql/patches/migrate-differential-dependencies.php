@@ -8,7 +8,7 @@ foreach (new LiskMigrationIterator($table) as $rev) {
   $id = $rev->getID();
   echo "Revision {$id}: ";
 
-  $deps = $rev->getAttachedPHIDs(PhabricatorPHIDConstants::PHID_TYPE_DREV);
+  $deps = $rev->getAttachedPHIDs(DifferentialPHIDTypeRevision::TYPECONST);
   if (!$deps) {
     echo "-\n";
     continue;

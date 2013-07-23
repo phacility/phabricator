@@ -58,13 +58,16 @@ final class PhabricatorStorageManagementAPI {
     return $this->namespace.'_'.$fragment;
   }
 
-  public function getDatabaseList(array $patches) {
+  public function getDatabaseList(array $patches, $only_living = false) {
     assert_instances_of($patches, 'PhabricatorStoragePatch');
 
     $list = array();
 
     foreach ($patches as $patch) {
       if ($patch->getType() == 'db') {
+        if ($only_living && $patch->isDead()) {
+          continue;
+        }
         $list[] = $this->getDatabaseName($patch->getName());
       }
     }

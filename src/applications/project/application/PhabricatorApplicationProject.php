@@ -35,7 +35,7 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/project/' => array(
-        '' => 'PhabricatorProjectListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorProjectListController',
         'filter/(?P<filter>[^/]+)/' => 'PhabricatorProjectListController',
         'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectProfileEditController',
         'members/(?P<id>[1-9]\d*)/'

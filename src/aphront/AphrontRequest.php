@@ -286,21 +286,49 @@ final class AphrontRequest {
     // domain. Also, use the URI protocol to control SSL-only cookies.
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
     if ($base_uri) {
-      $base_uri = new PhutilURI($base_uri);
-
-      $base_domain = $base_uri->getDomain();
-      $base_protocol = $base_uri->getProtocol();
+      $alternates = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
+      $allowed_uris = array_merge(
+        array($base_uri),
+        $alternates);
 
       $host = $this->getHost();
 
-      if ($base_domain != $host) {
-        throw new Exception(
-          "This install of Phabricator is configured as '{$base_domain}' but ".
-          "you are accessing it via '{$host}'. Access Phabricator via ".
-          "the primary configured domain.");
+      $match = null;
+      foreach ($allowed_uris as $allowed_uri) {
+        $uri = new PhutilURI($allowed_uri);
+        $domain = $uri->getDomain();
+        if ($host == $domain) {
+          $match = $uri;
+          break;
+        }
       }
 
-      $is_secure = ($base_protocol == 'https');
+      if ($match === null) {
+        if (count($allowed_uris) > 1) {
+          throw new Exception(
+            pht(
+              'This Phabricator install is configured as "%s", but you are '.
+              'accessing it via "%s". Access Phabricator via the primary '.
+              'configured domain, or one of the permitted alternate '.
+              'domains: %s. Phabricator will not set cookies on other domains '.
+              'for security reasons.',
+              $base_uri,
+              $host,
+              implode(', ', $alternates)));
+        } else {
+          throw new Exception(
+            pht(
+              'This Phabricator install is configured as "%s", but you are '.
+              'accessing it via "%s". Acccess Phabricator via the primary '.
+              'configured domain. Phabricator will not set cookies on other '.
+              'domains for security reasons.',
+              $base_uri,
+              $host));
+        }
+      }
+
+      $base_domain = $match->getDomain();
+      $is_secure = ($match->getProtocol() == 'https');
     } else {
       $base_uri = new PhutilURI(PhabricatorEnv::getRequestBaseURI());
       $base_domain = $base_uri->getDomain();

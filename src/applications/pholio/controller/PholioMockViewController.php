@@ -7,6 +7,15 @@ final class PholioMockViewController extends PholioController {
 
   private $id;
   private $imageID;
+  private $maniphestTaskPHIDs = array();
+
+  private function setManiphestTaskPHIDs($maniphest_task_phids) {
+    $this->maniphestTaskPHIDs = $maniphest_task_phids;
+    return $this;
+  }
+  private function getManiphestTaskPHIDs() {
+    return $this->maniphestTaskPHIDs;
+  }
 
   public function shouldAllowPublic() {
     return true;
@@ -37,7 +46,11 @@ final class PholioMockViewController extends PholioController {
       ->withObjectPHIDs(array($mock->getPHID()))
       ->execute();
 
-    $phids = array($mock->getAuthorPHID());
+    $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $mock->getPHID(),
+      PhabricatorEdgeConfig::TYPE_MOCK_HAS_TASK);
+    $this->setManiphestTaskPHIDs($phids);
+    $phids[] = $mock->getAuthorPHID();
     $this->loadHandles($phids);
 
     $engine = id(new PhabricatorMarkupEngine())
@@ -78,7 +91,7 @@ final class PholioMockViewController extends PholioController {
 
     $add_comment = $this->buildAddCommentView($mock, $comment_form_id);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -119,11 +132,19 @@ final class PholioMockViewController extends PholioController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
-        ->setName(pht('Edit Mock'))
-        ->setHref($this->getApplicationURI('/edit/'.$mock->getID().'/'))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
+      ->setIcon('edit')
+      ->setName(pht('Edit Mock'))
+      ->setHref($this->getApplicationURI('/edit/'.$mock->getID().'/'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+      ->setIcon('attach')
+      ->setName(pht('Edit Maniphest Tasks'))
+      ->setHref("/search/attach/{$mock->getPHID()}/TASK/edge/")
+      ->setDisabled(!$user->isLoggedIn())
+      ->setWorkflow(true));
 
     return $actions;
   }
@@ -153,6 +174,12 @@ final class PholioMockViewController extends PholioController {
     $properties->addProperty(
       pht('Visible To'),
       $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+
+    if ($this->getManiphestTaskPHIDs()) {
+      $properties->addProperty(
+        pht('Maniphest Tasks'),
+        $this->renderHandlesForPHIDs($this->getManiphestTaskPHIDs()));
+    }
 
     $properties->invokeWillRenderEvent();
 

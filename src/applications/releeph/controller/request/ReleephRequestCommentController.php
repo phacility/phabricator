@@ -1,7 +1,7 @@
 <?php
 
 final class ReleephRequestCommentController
-  extends ReleephController {
+  extends ReleephProjectController {
 
   public function processRequest() {
     $request = $this->getRequest();

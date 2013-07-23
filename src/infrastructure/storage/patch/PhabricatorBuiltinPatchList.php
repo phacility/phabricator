@@ -126,6 +126,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.timeline' => array(
         'type'  => 'db',
         'name'  => 'timeline',
+        'dead'  => true,
       ),
       'db.user' => array(
         'type'  => 'db',

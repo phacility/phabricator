@@ -85,8 +85,8 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
     foreach ($refs as $ref) {
       $ref->setAttribute('name', pht('Asana Task %s', $ref->getObjectID()));
 
-      $failed = idx($failed, $ref->getObjectKey());
-      if ($failed) {
+      $did_fail = idx($failed, $ref->getObjectKey());
+      if ($did_fail) {
         $ref->setSyncFailed(true);
         continue;
       }

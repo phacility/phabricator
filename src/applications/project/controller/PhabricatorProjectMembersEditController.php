@@ -113,11 +113,6 @@ final class PhabricatorProjectMembersEditController
     $box->addPadding(PHUI::PADDING_LARGE);
     $box->addMargin(PHUI::MARGIN_LARGE);
 
-    $nav = $this->buildLocalNavigation($project);
-    $nav->selectFilter('members');
-    $nav->appendChild($form);
-    $nav->appendChild($box);
-
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -127,10 +122,13 @@ final class PhabricatorProjectMembersEditController
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Members'))
         ->setHref($this->getApplicationURI()));
-    $nav->setCrumbs($crumbs);
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $form,
+        $box,
+      ),
       array(
         'title' => $title,
         'device' => true,

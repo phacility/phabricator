@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephBranchAccessController extends ReleephController {
+final class ReleephBranchAccessController extends ReleephProjectController {
 
   private $action;
 

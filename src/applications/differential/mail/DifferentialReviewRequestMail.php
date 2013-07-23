@@ -140,4 +140,14 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     }
   }
 
+  protected function getMailTags() {
+    $tags = array();
+    if ($this->isFirstMailToRecipients()) {
+      $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST;
+    } else {
+      $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED;
+    }
+    return $tags;
+  }
+
 }

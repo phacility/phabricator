@@ -116,7 +116,7 @@ final class PhabricatorConfigEditController
     } else if ($option->getLocked()) {
       $msg = pht(
         "This configuration is locked and can not be edited from the web ".
-        "interface.");
+        "interface. Use `./bin/config` in `phabricator/` to edit it.");
 
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Locked'))

@@ -8,6 +8,7 @@ final class PhabricatorStoragePatch {
   private $type;
   private $after;
   private $legacy;
+  private $dead;
 
   public function __construct(array $dict) {
     $this->key      = $dict['key'];
@@ -16,6 +17,7 @@ final class PhabricatorStoragePatch {
     $this->legacy   = $dict['legacy'];
     $this->name     = $dict['name'];
     $this->after    = $dict['after'];
+    $this->dead     = $dict['dead'];
   }
 
   public function getLegacy() {
@@ -40,6 +42,10 @@ final class PhabricatorStoragePatch {
 
   public function getKey() {
     return $this->key;
+  }
+
+  public function isDead() {
+    return $this->dead;
   }
 
 }

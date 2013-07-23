@@ -18,7 +18,7 @@ final class PhabricatorStorageManagementProbeWorkflow
 
     $api = $this->getAPI();
     $patches = $this->getPatches();
-    $databases = $api->getDatabaseList($patches);
+    $databases = $api->getDatabaseList($patches, $only_living = true);
 
     $conn_r = $api->getConn(null);
 

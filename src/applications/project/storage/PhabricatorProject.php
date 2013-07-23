@@ -84,7 +84,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PROJ);
+      PhabricatorProjectPHIDTypeProject::TYPECONST);
   }
 
   public function loadProfile() {

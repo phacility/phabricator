@@ -233,6 +233,8 @@ final class PholioMockEditController extends PholioController {
         'pht' => array(
           'uploading' => pht('Uploading Image...'),
           'uploaded' => pht('Upload Complete...'),
+          'undo' => pht('Undo'),
+          'removed' => pht('This image will be removed from the mock.'),
         ),
       ));
 
@@ -275,7 +277,7 @@ final class PholioMockEditController extends PholioController {
           ->setError($e_images))
       ->appendChild($submit);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($title)
@@ -287,12 +289,8 @@ final class PholioMockEditController extends PholioController {
       $form,
     );
 
-    $nav = $this->buildSideNav();
-    $nav->selectFilter(null);
-    $nav->appendChild($content);
-
     return $this->buildApplicationPage(
-      $nav,
+      $content,
       array(
         'title' => $title,
         'device' => true,

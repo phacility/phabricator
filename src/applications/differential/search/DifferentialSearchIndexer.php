@@ -15,7 +15,7 @@ final class DifferentialSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($rev->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_DREV);
+    $doc->setDocumentType(DifferentialPHIDTypeRevision::TYPECONST);
     $doc->setDocumentTitle($rev->getTitle());
     $doc->setDocumentCreated($rev->getDateCreated());
     $doc->setDocumentModified($rev->getDateModified());
@@ -49,7 +49,7 @@ final class DifferentialSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $rev->getPHID(),
-        PhabricatorPHIDConstants::PHID_TYPE_DREV,
+        DifferentialPHIDTypeRevision::TYPECONST,
         time());
     }
 

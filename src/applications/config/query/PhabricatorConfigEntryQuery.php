@@ -1,32 +1,23 @@
 <?php
 
-/**
- * @group countdown
- */
-final class CountdownQuery
+final class PhabricatorConfigEntryQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $ids;
   private $phids;
-  private $authorPHIDs;
+  private $ids;
 
-  public function withIDs(array $ids) {
+  public function withIDs($ids) {
     $this->ids = $ids;
     return $this;
   }
 
-  public function withPHIDs(array $phids) {
+  public function withPHIDs($phids) {
     $this->phids = $phids;
     return $this;
   }
 
-  public function withAuthorPHIDs(array $author_phids) {
-    $this->authorPHIDs = $author_phids;
-    return $this;
-  }
-
-  protected function loadPage() {
-    $table = new PhabricatorCountdown();
+  public function loadPage() {
+    $table = new PhabricatorConfigEntry();
     $conn_r = $table->establishConnection('r');
 
     $data = queryfx_all(
@@ -37,16 +28,11 @@ final class CountdownQuery
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    $countdowns = $table->loadAllFromArray($data);
-
-
-    return $countdowns;
+    return $table->loadAllFromArray($data);
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
-
-    $where[] = $this->buildPagingClause($conn_r);
 
     if ($this->ids) {
       $where[] = qsprintf(
@@ -62,12 +48,7 @@ final class CountdownQuery
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'authorPHID in (%Ls)',
-        $this->authorPHIDs);
-    }
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
