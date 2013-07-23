@@ -61,14 +61,13 @@ final class PhabricatorDaemonConsoleController
       '`status` = %s ORDER BY id DESC',
       'run');
 
+
+    $daemon_header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Recent Daemons'));
+
     $daemon_table = new PhabricatorDaemonLogListView();
     $daemon_table->setUser($user);
     $daemon_table->setDaemonLogs($logs);
-
-    $daemon_panel = new AphrontPanelView();
-    $daemon_panel->setHeader(pht('Active Daemons'));
-    $daemon_panel->appendChild($daemon_table);
-    $daemon_panel->setNoBackground();
 
     $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'leaseOwner IS NOT NULL');
@@ -155,7 +154,8 @@ final class PhabricatorDaemonConsoleController
     $nav->appendChild(
       array(
         $completed_panel,
-        $daemon_panel,
+        $daemon_header,
+        $daemon_table,
         $queued_panel,
         $leased_panel,
       ));

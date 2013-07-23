@@ -17,112 +17,95 @@ final class PhabricatorDaemonLogListView extends AphrontView {
       throw new Exception("Call setUser() before rendering!");
     }
 
+    $list = id(new PhabricatorObjectItemListView());
     foreach ($this->daemonLogs as $log) {
-      $epoch = $log->getDateCreated();
+
+      // TODO: VVV Move this stuff to a Query class. VVV
+
+      $expect_heartbeat = (3 * PhutilDaemonOverseer::HEARTBEAT_WAIT);
+      $assume_dead = (30 * PhutilDaemonOverseer::HEARTBEAT_WAIT);
+
+      $status_running = PhabricatorDaemonLog::STATUS_RUNNING;
+      $status_unknown = PhabricatorDaemonLog::STATUS_UNKNOWN;
+      $status_wait = PhabricatorDaemonLog::STATUS_WAIT;
+      $status_exited = PhabricatorDaemonLog::STATUS_EXITED;
+      $status_dead = PhabricatorDaemonLog::STATUS_DEAD;
 
       $status = $log->getStatus();
-      if ($log->getHost() == php_uname('n') &&
-          $status != PhabricatorDaemonLog::STATUS_EXITED &&
-          $status != PhabricatorDaemonLog::STATUS_DEAD) {
-
-        $pid = $log->getPID();
-        $is_running = PhabricatorDaemonReference::isProcessRunning($pid);
-        if (!$is_running) {
-          $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-          $log->setStatus(PhabricatorDaemonLog::STATUS_DEAD);
-          $log->save();
-          unset($guard);
-          $status = PhabricatorDaemonLog::STATUS_DEAD;
-        }
+      $heartbeat_timeout = $log->getDateModified() + $expect_heartbeat;
+      if ($status == $status_running && $heartbeat_timeout < time()) {
+        $status = $status_unknown;
       }
 
-      $heartbeat_timeout =
-        $log->getDateModified() + 3 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
-      if ($status == PhabricatorDaemonLog::STATUS_RUNNING &&
-          $heartbeat_timeout < time()) {
-        $status = PhabricatorDaemonLog::STATUS_UNKNOWN;
+      if ($status == $status_unknown && $assume_dead < time()) {
+        $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $log->setStatus($status_dead)->save();
+        unset($guard);
       }
 
-      switch ($status) {
-        case PhabricatorDaemonLog::STATUS_RUNNING:
-          $style = 'color: #00cc00';
-          $title = 'Running';
-          $symbol = "\xE2\x80\xA2";
-          break;
-        case PhabricatorDaemonLog::STATUS_DEAD:
-          $style = 'color: #cc0000';
-          $title = 'Died';
-          $symbol = "\xE2\x80\xA2";
-          break;
-        case PhabricatorDaemonLog::STATUS_EXITED:
-          $style = 'color: #000000';
-          $title = 'Exited';
-          $symbol = "\xE2\x80\xA2";
-          break;
-        case PhabricatorDaemonLog::STATUS_UNKNOWN:
-        default: // fallthrough
-          $style = 'color: #888888';
-          $title = 'Unknown';
-          $symbol = '?';
-      }
-
-      if ($status != PhabricatorDaemonLog::STATUS_RUNNING &&
+      if ($status != $status_running &&
           $log->getDateModified() + (3 * 86400) < time()) {
         // Don't show rows that haven't been running for more than
         // three days.  We should probably prune these out of the
         // DB similar to the code above, but we don't need to be
         // conservative and do it only on the same host
+
+        // TODO: This should not apply to the "all daemons" view!
         continue;
       }
 
-      $running = phutil_tag(
-        'span',
-        array(
-          'style' => $style,
-          'title' => $title,
-        ),
-        $symbol);
+      // TODO: ^^^^ ALL THAT STUFF ^^^
 
-      $rows[] = array(
-        $running,
-        $log->getDaemon(),
-        $log->getHost(),
-        $log->getPID(),
-        phabricator_date($epoch, $this->user),
-        phabricator_time($epoch, $this->user),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/daemon/log/'.$log->getID().'/',
-            'class' => 'button small grey',
-          ),
-          'View Log'),
-      );
+      $id = $log->getID();
+      $epoch = $log->getDateCreated();
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setObjectName(pht("Daemon %s", $id))
+        ->setHeader($log->getDaemon())
+        ->setHref("/daemon/log/{$id}/")
+        ->addIcon('none', phabricator_datetime($epoch, $this->user));
+
+      switch ($status) {
+        case PhabricatorDaemonLog::STATUS_RUNNING:
+          $item->setBarColor('green');
+          $item->addAttribute(pht('This daemon is running.'));
+          break;
+        case PhabricatorDaemonLog::STATUS_DEAD:
+          $item->setBarColor('red');
+          $item->addAttribute(
+            pht(
+              'This daemon is lost or exited uncleanly, and is presumed '.
+              'dead.'));
+          $item->addIcon('delete', pht('Dead'));
+          break;
+        case PhabricatorDaemonLog::STATUS_EXITED:
+          $item->setDisabled(true);
+          $item->addAttribute(pht('This daemon exited cleanly.'));
+          $item->addIcon('enable-grey', pht('Exited'));
+          break;
+        case PhabricatorDaemonLog::STATUS_WAIT:
+          $item->setBarColor('blue');
+          $item->addAttribute(
+            pht(
+              'This daemon encountered an error recently and is waiting a '.
+              'moment to restart.'));
+          $item->addIcon('perflab-grey', pht('Waiting'));
+          break;
+        case PhabricatorDaemonLog::STATUS_UNKNOWN:
+        default:
+          $item->setBarColor('orange');
+          $item->addAttribute(
+            pht(
+              'This daemon has not reported its status recently. It may '.
+              'have exited uncleanly.'));
+          $item->addIcon('warning', pht('Unknown'));
+          break;
+      }
+
+      $list->addItem($item);
     }
 
-    $daemon_table = new AphrontTableView($rows);
-    $daemon_table->setHeaders(
-      array(
-        '',
-        'Daemon',
-        'Host',
-        'PID',
-        'Date',
-        'Time',
-        'View',
-      ));
-    $daemon_table->setColumnClasses(
-      array(
-        '',
-        'wide wrap',
-        '',
-        '',
-        '',
-        'right',
-        'action',
-      ));
-
-    return $daemon_table->render();
+    return $list;
   }
 
 }

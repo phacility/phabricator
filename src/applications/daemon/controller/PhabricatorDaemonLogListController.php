@@ -24,20 +24,22 @@ final class PhabricatorDaemonLogListController
     $daemon_table->setUser($request->getUser());
     $daemon_table->setDaemonLogs($logs);
 
-    $daemon_panel = new AphrontPanelView();
-    $daemon_panel->setHeader(pht('All Daemons'));
-    $daemon_panel->appendChild($daemon_table);
-    $daemon_panel->appendChild($pager);
-    $daemon_panel->setNoBackground();
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('All Daemons')));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('log');
-    $nav->appendChild($daemon_panel);
+    $nav->setCrumbs($crumbs);
+    $nav->appendChild($daemon_table);
 
     return $this->buildApplicationPage(
       $nav,
       array(
         'title' => pht('All Daemons'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 
