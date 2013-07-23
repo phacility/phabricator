@@ -5,39 +5,36 @@ final class PhabricatorDaemonLogListController
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($request->getInt('page'));
+    $pager = new AphrontCursorPagerView();
+    $pager->readFromRequest($request);
 
-    $clause = '1 = 1';
-
-    $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
-      '%Q ORDER BY id DESC LIMIT %d, %d',
-      $clause,
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
-
-    $logs = $pager->sliceResults($logs);
-    $pager->setURI($request->getRequestURI(), 'page');
+    $logs = id(new PhabricatorDaemonLogQuery())
+      ->setViewer($viewer)
+      ->executeWithCursorPager($pager);
 
     $daemon_table = new PhabricatorDaemonLogListView();
     $daemon_table->setUser($request->getUser());
     $daemon_table->setDaemonLogs($logs);
 
-    $daemon_panel = new AphrontPanelView();
-    $daemon_panel->setHeader(pht('All Daemons'));
-    $daemon_panel->appendChild($daemon_table);
-    $daemon_panel->appendChild($pager);
-    $daemon_panel->setNoBackground();
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('All Daemons')));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('log');
-    $nav->appendChild($daemon_panel);
+    $nav->setCrumbs($crumbs);
+    $nav->appendChild($daemon_table);
+    $nav->appendChild($pager);
 
     return $this->buildApplicationPage(
       $nav,
       array(
         'title' => pht('All Daemons'),
+        'device' => true,
+        'dust' => true,
       ));
   }
 

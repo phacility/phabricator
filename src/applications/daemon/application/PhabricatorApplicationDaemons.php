@@ -30,6 +30,12 @@ final class PhabricatorApplicationDaemons extends PhabricatorApplication {
     return false;
   }
 
+  public function getEventListeners() {
+    return array(
+      new PhabricatorDaemonEventListener(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/daemon/' => array(
