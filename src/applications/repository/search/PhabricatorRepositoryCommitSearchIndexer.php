@@ -30,7 +30,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($commit->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+    $doc->setDocumentType(PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
     $doc->setDocumentCreated($date_created);
     $doc->setDocumentModified($date_created);
     $doc->setDocumentTitle($title);
