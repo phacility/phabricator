@@ -1471,6 +1471,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130716.archivememberlessprojects.php'),
       ),
+      '20130723.taskstarttime.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130723.taskstarttime.sql'),
+      ),
     );
   }
 }

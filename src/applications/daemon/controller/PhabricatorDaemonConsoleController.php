@@ -11,6 +11,10 @@ final class PhabricatorDaemonConsoleController
       'dateModified > %d',
       time() - (60 * 15));
 
+    $failed = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
+      'failureTime > %d',
+      time() - (60 * 15));
+
     $completed_info = array();
     foreach ($completed as $completed_task) {
       $class = $completed_task->getTaskClass();
@@ -36,6 +40,14 @@ final class PhabricatorDaemonConsoleController
       );
     }
 
+    if ($failed) {
+      $rows[] = array(
+        phutil_tag('em', array(), pht('Temporary Failures')),
+        count($failed),
+        null,
+      );
+    }
+
     $completed_table = new AphrontTableView($rows);
     $completed_table->setNoDataString(
       pht('No tasks have completed in the last 15 minutes.'));
@@ -52,8 +64,10 @@ final class PhabricatorDaemonConsoleController
         'n',
       ));
 
+    $completed_header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Recently Completed Tasks (Last 15m)'));
+
     $completed_panel = new AphrontPanelView();
-    $completed_panel->setHeader(pht('Recently Completed Tasks (15m)'));
     $completed_panel->appendChild($completed_table);
     $completed_panel->setNoBackground();
 
@@ -149,10 +163,17 @@ final class PhabricatorDaemonConsoleController
     $queued_panel->appendChild($queued_table);
     $queued_panel->setNoBackground();
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Console')));
+
     $nav = $this->buildSideNavView();
     $nav->selectFilter('/');
     $nav->appendChild(
       array(
+        $crumbs,
+        $completed_header,
         $completed_panel,
         $daemon_header,
         $daemon_table,
@@ -164,6 +185,7 @@ final class PhabricatorDaemonConsoleController
       $nav,
       array(
         'title' => pht('Console'),
+        'dust' => true,
       ));
   }
 
