@@ -131,18 +131,6 @@ abstract class PhabricatorDaemonManagementWorkflow
       $flags[] = '--daemonize';
     }
 
-    $bootloader = PhutilBootloader::getInstance();
-    foreach ($bootloader->getAllLibraries() as $library) {
-      if ($library == 'phutil') {
-        // No need to load libphutil, it's necessarily loaded implicitly by the
-        // daemon itself.
-        continue;
-      }
-      $flags[] = csprintf(
-        '--load-phutil-library=%s',
-        phutil_get_library_root($library));
-    }
-
     $flags[] = csprintf('--conduit-uri=%s', PhabricatorEnv::getURI('/api/'));
 
     if (!$debug) {
@@ -160,13 +148,13 @@ abstract class PhabricatorDaemonManagementWorkflow
     $flags[] = csprintf('--phd=%s', $pid_dir);
 
     $command = csprintf(
-      './launch_daemon.php %s %C %C',
+      './phd-daemon %s %C %C',
       $daemon,
       implode(' ', $flags),
       implode(' ', $argv));
 
-    $libphutil_root = dirname(phutil_get_library_root('phutil'));
-    $daemon_script_dir = $libphutil_root.'/scripts/daemon/';
+    $phabricator_root = dirname(phutil_get_library_root('phabricator'));
+    $daemon_script_dir = $phabricator_root.'/scripts/daemon/';
 
     if ($debug) {
       // Don't terminate when the user sends ^C; it will be sent to the
@@ -175,7 +163,7 @@ abstract class PhabricatorDaemonManagementWorkflow
         SIGINT,
         array(__CLASS__, 'ignoreSignal'));
 
-      echo "\n    libphutil/scripts/daemon/ \$ {$command}\n\n";
+      echo "\n    phabricator/scripts/daemon/ \$ {$command}\n\n";
 
       phutil_passthru('(cd %s && exec %C)', $daemon_script_dir, $command);
     } else {
