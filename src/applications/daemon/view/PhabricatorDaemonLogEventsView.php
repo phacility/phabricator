@@ -4,6 +4,13 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
 
   private $events;
   private $combinedLog;
+  private $showFullMessage;
+
+
+  public function setShowFullMessage($show_full_message) {
+    $this->showFullMessage = $show_full_message;
+    return $this;
+  }
 
   public function setEvents(array $events) {
     assert_instances_of($events, 'PhabricatorDaemonLogEvent');
@@ -31,39 +38,57 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
       // truncation if that doesn't get things short enough.
 
       $message = $event->getMessage();
-
-      $more_lines = null;
-      $more_chars = null;
-      $line_limit = 12;
-      if (substr_count($message, "\n") > $line_limit) {
-        $message = explode("\n", $message);
-        $more_lines = count($message) - $line_limit;
-        $message = array_slice($message, 0, $line_limit);
-        $message = implode("\n", $message);
-      }
-
-      $char_limit = 8192;
-      if (strlen($message) > $char_limit) {
-        $message = phutil_utf8v($message);
-        $more_chars = count($message) - $char_limit;
-        $message = array_slice($message, 0, $char_limit);
-        $message = implode('', $message);
-      }
-
       $more = null;
-      if ($more_chars) {
-        $more = number_format($more_chars);
-        $more = "\n<... {$more} more characters ...>";
-      } else if ($more_lines) {
-        $more = number_format($more_lines);
-        $more = "\n<... {$more} more lines ...>";
+
+      if (!$this->showFullMessage) {
+        $more_lines = null;
+        $more_chars = null;
+        $line_limit = 12;
+        if (substr_count($message, "\n") > $line_limit) {
+          $message = explode("\n", $message);
+          $more_lines = count($message) - $line_limit;
+          $message = array_slice($message, 0, $line_limit);
+          $message = implode("\n", $message);
+        }
+
+        $char_limit = 8192;
+        if (strlen($message) > $char_limit) {
+          $message = phutil_utf8v($message);
+          $more_chars = count($message) - $char_limit;
+          $message = array_slice($message, 0, $char_limit);
+          $message = implode('', $message);
+        }
+
+        if ($more_chars) {
+          $more = new PhutilNumber($more_chars);
+          $more = pht("Show %d more character(s)...", $more);
+        } else if ($more_lines) {
+          $more = new PhutilNumber($more_lines);
+          $more = pht("Show %d more line(s)...", $more);
+        }
+
+        if ($more) {
+          $id = $event->getID();
+          $more = array(
+            "\n...\n",
+            phutil_tag(
+              'a',
+              array(
+                'href' => "/daemon/event/{$id}/",
+              ),
+              $more),
+          );
+        }
       }
 
       $row = array(
         $event->getLogType(),
         phabricator_date($event->getEpoch(), $this->user),
         phabricator_time($event->getEpoch(), $this->user),
-        phutil_escape_html_newlines($message.$more),
+        array(
+          $message,
+          $more,
+        ),
       );
 
       if ($this->combinedLog) {
@@ -84,7 +109,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
       '',
       '',
       'right',
-      'wide wrap',
+      'wide prewrap',
     );
 
     $headers = array(

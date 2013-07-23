@@ -13,7 +13,10 @@ final class PhabricatorDaemonLogViewController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $log = id(new PhabricatorDaemonLog())->load($this->id);
+    $log = id(new PhabricatorDaemonLogQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$log) {
       return new Aphront404Response();
     }

@@ -6,6 +6,7 @@ final class PhabricatorDaemonLogQuery
   const STATUS_ALL = 'status-all';
   const STATUS_ALIVE = 'status-alive';
 
+  private $ids;
   private $status = self::STATUS_ALL;
 
   public static function getTimeUntilUnknown() {
@@ -14,6 +15,11 @@ final class PhabricatorDaemonLogQuery
 
   public static function getTimeUntilDead() {
     return 30 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
+  }
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
   }
 
   public function withStatus($status) {
@@ -88,6 +94,13 @@ final class PhabricatorDaemonLogQuery
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->getStatusConstants()) {
       $where[] = qsprintf(
