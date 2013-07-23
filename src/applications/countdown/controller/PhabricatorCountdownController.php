@@ -5,22 +5,27 @@
  */
 abstract class PhabricatorCountdownController extends PhabricatorController {
 
-  public function buildSideNavView() {
+  public function buildSideNavView($for_app = false) {
     $user = $this->getRequest()->getUser();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav->addFilter('', pht('All Countdowns'),
-      $this->getApplicationURI(''));
-    $nav->addFilter('', pht('Create Countdown'),
-      $this->getApplicationURI('edit/'));
+    if ($for_app) {
+      $nav->addFilter('create', pht('Create Countdown'));
+    }
+
+    id(new PhabricatorCountdownSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
 
     return $nav;
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView()->getMenu();
+    return $this->buildSideNavView($for_app = true)->getMenu();
   }
 
   public function buildApplicationCrumbs() {

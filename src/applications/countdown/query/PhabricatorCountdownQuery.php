@@ -9,6 +9,7 @@ final class PhabricatorCountdownQuery
   private $ids;
   private $phids;
   private $authorPHIDs;
+  private $upcoming;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -22,6 +23,11 @@ final class PhabricatorCountdownQuery
 
   public function withAuthorPHIDs(array $author_phids) {
     $this->authorPHIDs = $author_phids;
+    return $this;
+  }
+
+  public function withUpcoming($upcoming) {
+    $this->upcoming = true;
     return $this;
   }
 
@@ -67,6 +73,13 @@ final class PhabricatorCountdownQuery
         $conn_r,
         'authorPHID in (%Ls)',
         $this->authorPHIDs);
+    }
+
+    if ($this->upcoming) {
+      $where[] = qsprintf(
+        $conn_r,
+        'epoch >= %d',
+        time());
     }
 
     return $this->formatWhereClause($where);

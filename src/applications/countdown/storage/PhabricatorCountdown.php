@@ -29,11 +29,14 @@ final class PhabricatorCountdown
     return PhabricatorPolicies::POLICY_USER;
   }
 
-/* -(  PhabricatorPolicyInterface Implementation  )------------------------- */
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(
-      PhabricatorPolicyCapability::CAN_VIEW
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -41,6 +44,8 @@ final class PhabricatorCountdown
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
     }
   }
 

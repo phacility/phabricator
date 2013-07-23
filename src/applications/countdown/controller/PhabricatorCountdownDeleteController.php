@@ -20,6 +20,11 @@ final class PhabricatorCountdownDeleteController
     $countdown = id(new PhabricatorCountdownQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
       ->executeOne();
 
     if (!$countdown) {

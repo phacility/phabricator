@@ -1407,7 +1407,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-countdown-timer' =>
   array(
-    'uri' => '/res/3c52aac2/rsrc/js/application/countdown/timer.js',
+    'uri' => '/res/13d40efa/rsrc/js/application/countdown/timer.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3100,7 +3100,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-countdown-css' =>
   array(
-    'uri' => '/res/0f646281/rsrc/css/application/countdown/timer.css',
+    'uri' => '/res/c4a30296/rsrc/css/application/countdown/timer.css',
     'type' => 'css',
     'requires' =>
     array(
