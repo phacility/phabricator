@@ -22,8 +22,8 @@ final class PhabricatorDaemonLogListView extends AphrontView {
 
       // TODO: VVV Move this stuff to a Query class. VVV
 
-      $expect_heartbeat = (3 * PhutilDaemonOverseer::HEARTBEAT_WAIT);
-      $assume_dead = (30 * PhutilDaemonOverseer::HEARTBEAT_WAIT);
+      $expect_heartbeat = PhabricatorDaemonLogQuery::getTimeUntilUnknown();
+      $assume_dead = PhabricatorDaemonLogQuery::getTimeUntilDead();
 
       $status_running = PhabricatorDaemonLog::STATUS_RUNNING;
       $status_unknown = PhabricatorDaemonLog::STATUS_UNKNOWN;

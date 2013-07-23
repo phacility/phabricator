@@ -1026,6 +1026,7 @@ phutil_register_library_map(array(
     'PhabricatorDaemonLogEventsView' => 'applications/daemon/view/PhabricatorDaemonLogEventsView.php',
     'PhabricatorDaemonLogListController' => 'applications/daemon/controller/PhabricatorDaemonLogListController.php',
     'PhabricatorDaemonLogListView' => 'applications/daemon/view/PhabricatorDaemonLogListView.php',
+    'PhabricatorDaemonLogQuery' => 'applications/daemon/query/PhabricatorDaemonLogQuery.php',
     'PhabricatorDaemonLogViewController' => 'applications/daemon/controller/PhabricatorDaemonLogViewController.php',
     'PhabricatorDaemonManagementDebugWorkflow' => 'applications/daemon/management/PhabricatorDaemonManagementDebugWorkflow.php',
     'PhabricatorDaemonManagementLaunchWorkflow' => 'applications/daemon/management/PhabricatorDaemonManagementLaunchWorkflow.php',
