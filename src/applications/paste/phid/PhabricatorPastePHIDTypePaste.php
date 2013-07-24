@@ -1,26 +1,26 @@
 <?php
 
-final class PonderPHIDTypeQuestion extends PhabricatorPHIDType {
+final class PhabricatorPastePHIDTypePaste extends PhabricatorPHIDType {
 
-  const TYPECONST = 'QUES';
+  const TYPECONST = 'PSTE';
 
   public function getTypeConstant() {
     return self::TYPECONST;
   }
 
   public function getTypeName() {
-    return pht('Question');
+    return pht('Paste');
   }
 
   public function newObject() {
-    return new PonderQuestion();
+    return new PhabricatorPaste();
   }
 
   public function loadObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
-    return id(new PonderQuestionQuery())
+    return id(new PhabricatorPasteQuery())
       ->setViewer($query->getViewer())
       ->withPHIDs($phids)
       ->execute();
@@ -32,19 +32,19 @@ final class PonderPHIDTypeQuestion extends PhabricatorPHIDType {
     array $objects) {
 
     foreach ($handles as $phid => $handle) {
-      $question = $objects[$phid];
+      $paste = $objects[$phid];
 
-      $id = $question->getID();
-      $title = $question->getTitle();
+      $id = $paste->getID();
+      $name = $paste->getFullName();
 
-      $handle->setName("Q{$id}");
-      $handle->setURI("/Q{$id}");
-      $handle->setFullName("Q{$id}: {$title}");
+      $handle->setName("P{$id}");
+      $handle->setFullName("P{$id}: {$name}");
+      $handle->setURI("/P{$id}");
     }
   }
 
   public function canLoadNamedObject($name) {
-    return preg_match('/^Q\d*[1-9]\d*$/i', $name);
+    return preg_match('/^P\d*[1-9]\d*$/i', $name);
   }
 
   public function loadNamedObjects(
@@ -57,7 +57,7 @@ final class PonderPHIDTypeQuestion extends PhabricatorPHIDType {
       $id_map[$id][] = $name;
     }
 
-    $objects = id(new PonderQuestionQuery())
+    $objects = id(new PhabricatorPasteQuery())
       ->setViewer($query->getViewer())
       ->withIDs(array_keys($id_map))
       ->execute();

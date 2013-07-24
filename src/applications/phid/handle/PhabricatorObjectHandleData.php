@@ -107,13 +107,6 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($macros, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_PSTE:
-        $pastes = id(new PhabricatorPasteQuery())
-          ->withPHIDs($phids)
-          ->setViewer($this->viewer)
-          ->execute();
-        return mpull($pastes, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_BLOG:
         $blogs = id(new PhameBlogQuery())
           ->withPHIDs($phids)
@@ -287,24 +280,6 @@ final class PhabricatorObjectHandleData {
             } else {
               $project = $objects[$phid];
               $handle->setName($project->getName());
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_PSTE:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Paste');
-            } else {
-              $paste = $objects[$phid];
-              $handle->setName('P'.$paste->getID());
-              $handle->setFullName($paste->getFullName());
-              $handle->setURI('/P'.$paste->getID());
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
