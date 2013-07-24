@@ -114,13 +114,6 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($posts, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
-        $xusr_dao = new PhabricatorExternalAccount();
-        $xusrs = $xusr_dao->loadAllWhere(
-          'phid in (%Ls)',
-          $phids);
-        return mpull($xusrs, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
         $legds = id(new LegalpadDocumentQuery())
           ->needDocumentBodies(true)
@@ -322,23 +315,6 @@ final class PhabricatorObjectHandleData {
               $handle->setURI(
                 '/M'.$image->getMockID().'/'.$image->getID().'/');
               $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Display Name');
-            } else {
-              $xusr = $objects[$phid];
-              $display_name = $xusr->getDisplayName();
-              $handle->setName($display_name);
-              $handle->setFullName($display_name.' (External User)');
             }
             $handles[$phid] = $handle;
           }

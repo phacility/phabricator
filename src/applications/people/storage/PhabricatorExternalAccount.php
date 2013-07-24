@@ -33,7 +33,7 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_XUSR);
+      PhabricatorPeoplePHIDTypeExternal::TYPECONST);
   }
 
   public function getConfiguration() {

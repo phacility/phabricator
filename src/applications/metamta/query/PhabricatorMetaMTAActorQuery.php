@@ -28,14 +28,15 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
       $actors[$phid] = id(new PhabricatorMetaMTAActor())->setPHID($phid);
     }
 
-    // TODO: Move this to PhabricatorPHIDType.
+    // TODO: Move this to PhabricatorPHIDType, or the objects, or some
+    // interface.
 
     foreach ($type_map as $type => $phids) {
       switch ($type) {
         case PhabricatorPHIDConstants::PHID_TYPE_USER:
           $this->loadUserActors($actors, $phids);
           break;
-        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
+        case PhabricatorPeoplePHIDTypeExternal::TYPECONST:
           $this->loadExternalUserActors($actors, $phids);
           break;
         case PhabricatorMailingListPHIDTypeList::TYPECONST:
