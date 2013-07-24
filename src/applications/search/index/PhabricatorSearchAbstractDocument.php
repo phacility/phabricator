@@ -20,7 +20,7 @@ final class PhabricatorSearchAbstractDocument {
       ManiphestPHIDTypeTask::TYPECONST => 'Maniphest Tasks',
       PhrictionPHIDTypeDocument::TYPECONST => 'Phriction Documents',
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Ponder Questions',
+      PonderPHIDTypeQuestion::TYPECONST => 'Ponder Questions',
     );
   }
 

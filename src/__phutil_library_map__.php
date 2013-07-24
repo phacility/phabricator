@@ -1864,6 +1864,7 @@ phutil_register_library_map(array(
     'PonderDAO' => 'applications/ponder/storage/PonderDAO.php',
     'PonderMail' => 'applications/ponder/mail/PonderMail.php',
     'PonderMentionMail' => 'applications/ponder/mail/PonderMentionMail.php',
+    'PonderPHIDTypeQuestion' => 'applications/ponder/phid/PonderPHIDTypeQuestion.php',
     'PonderPostBodyView' => 'applications/ponder/view/PonderPostBodyView.php',
     'PonderQuestion' => 'applications/ponder/storage/PonderQuestion.php',
     'PonderQuestionAskController' => 'applications/ponder/controller/PonderQuestionAskController.php',
@@ -3945,6 +3946,7 @@ phutil_register_library_map(array(
     'PonderDAO' => 'PhabricatorLiskDAO',
     'PonderMail' => 'PhabricatorMail',
     'PonderMentionMail' => 'PonderMail',
+    'PonderPHIDTypeQuestion' => 'PhabricatorPHIDType',
     'PonderPostBodyView' => 'AphrontView',
     'PonderQuestion' =>
     array(

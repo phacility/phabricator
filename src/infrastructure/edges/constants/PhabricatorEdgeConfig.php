@@ -158,7 +158,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
       PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
       PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES  => 'PonderQuestion',
       PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO  => 'PhabricatorFileImageMacro',
       PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',

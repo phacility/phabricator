@@ -113,7 +113,6 @@ final class PhabricatorObjectHandle
       PhabricatorPHIDConstants::PHID_TYPE_PIMG => 'Pholio Image',
       PhabricatorPHIDConstants::PHID_TYPE_BLOG => 'Blog',
       PhabricatorPHIDConstants::PHID_TYPE_POST => 'Post',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Question',
       PhabricatorPHIDConstants::PHID_TYPE_PVAR => 'Variable',
       PhabricatorPHIDConstants::PHID_TYPE_PSTE => 'Paste',
       PhabricatorPHIDConstants::PHID_TYPE_LEGD => 'Legalpad Document',

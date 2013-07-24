@@ -68,13 +68,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($projects, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_QUES:
-        $questions = id(new PonderQuestionQuery())
-          ->setViewer($this->viewer)
-          ->withPHIDs($phids)
-          ->execute();
-        return mpull($questions, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_PIMG:
         $images = id(new PholioImage())
           ->loadAllWhere('phid IN (%Ls)', $phids);
@@ -294,25 +287,6 @@ final class PhabricatorObjectHandleData {
             } else {
               $project = $objects[$phid];
               $handle->setName($project->getName());
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_QUES:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Ponder Question');
-            } else {
-              $question = $objects[$phid];
-              $handle->setName('Q' . $question->getID());
-              $handle->setFullName(
-                phutil_utf8_shorten($question->getTitle(), 60));
-              $handle->setURI(new PhutilURI('/Q' . $question->getID()));
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
