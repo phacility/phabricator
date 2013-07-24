@@ -306,6 +306,12 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         'POST',
         array(
           'workspace' => $workspace_id,
+          // NOTE: We initially create parent tasks in the "Later" state but
+          // don't update it afterward, even if the corresponding object
+          // becomes actionable. The expectation is that users will prioritize
+          // tasks in responses to notifications of state changes, and that
+          // we should not overwrite their choices.
+          'assignee_status' => 'later',
         ) + $main_data);
       $parent_ref = $this->newRefFromResult(
         DoorkeeperBridgeAsana::OBJTYPE_TASK,
