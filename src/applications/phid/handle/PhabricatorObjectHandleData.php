@@ -68,15 +68,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($projects, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
-        // TODO: Update this to PhrictionDocumentQuery, already pre-package
-        // content DAO
-        $document_dao = new PhrictionDocument();
-        $documents = $document_dao->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
-        return mpull($documents, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_QUES:
         $questions = id(new PonderQuestionQuery())
           ->setViewer($this->viewer)
@@ -304,43 +295,6 @@ final class PhabricatorObjectHandleData {
               $project = $objects[$phid];
               $handle->setName($project->getName());
               $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
-          // TODO: Update this
-          $document_dao = new PhrictionDocument();
-          $content_dao  = new PhrictionContent();
-
-          $conn = $document_dao->establishConnection('r');
-          $documents = queryfx_all(
-            $conn,
-            'SELECT * FROM %T document JOIN %T content
-              ON document.contentID = content.id
-              WHERE document.phid IN (%Ls)',
-              $document_dao->getTableName(),
-              $content_dao->getTableName(),
-              $phids);
-          $documents = ipull($documents, null, 'phid');
-
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($documents[$phid])) {
-              $handle->setName('Unknown Document');
-            } else {
-              $info = $documents[$phid];
-              $handle->setName($info['title']);
-              $handle->setURI(PhrictionDocument::getSlugURI($info['slug']));
-              $handle->setFullName($info['title']);
-              $handle->setComplete(true);
-              if ($info['status'] != PhrictionDocumentStatus::STATUS_EXISTS) {
-                $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
-                $handle->setStatus($closed);
-              }
             }
             $handles[$phid] = $handle;
           }

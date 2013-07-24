@@ -162,7 +162,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
       PhabricatorPHIDConstants::PHID_TYPE_MCRO  => 'PhabricatorFileImageMacro',
       PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI  => 'PhrictionDocument',
       PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',

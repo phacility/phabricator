@@ -8,6 +8,7 @@ final class PhrictionDocumentQuery
 
   private $ids;
   private $phids;
+  private $slugs;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -25,6 +26,11 @@ final class PhrictionDocumentQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withSlugs(array $slugs) {
+    $this->slugs = $slugs;
     return $this;
   }
 
@@ -71,6 +77,10 @@ final class PhrictionDocumentQuery
       $document->attachContent($contents[$content_id]);
     }
 
+    foreach ($documents as $document) {
+      $document->attachProject(null);
+    }
+
     $project_slugs = array();
     foreach ($documents as $key => $document) {
       $slug = $document->getSlug();
@@ -115,8 +125,15 @@ final class PhrictionDocumentQuery
     if ($this->phids) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->slugs) {
+      $where[] = qsprintf(
+        $conn,
+        'slug IN (%Ls)',
+        $this->slugs);
     }
 
     switch ($this->status) {

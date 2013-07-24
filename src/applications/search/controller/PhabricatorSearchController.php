@@ -58,7 +58,7 @@ final class PhabricatorSearchController
               case PhabricatorSearchScope::SCOPE_WIKI:
                 $query->setParameter(
                   'type',
-                  PhabricatorPHIDConstants::PHID_TYPE_WIKI);
+                  PhrictionPHIDTypeDocument::TYPECONST);
                 break;
               case PhabricatorSearchScope::SCOPE_COMMITS:
                 $query->setParameter(
