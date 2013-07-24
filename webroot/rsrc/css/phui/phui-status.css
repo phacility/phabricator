@@ -10,19 +10,20 @@
   display: block;
   width: 14px;
   height: 14px;
-  margin: 4px 4px;
+  margin: 3px 4px;
 }
 
 .phui-status-item-target {
   padding: 0 12px 0 4px;
-  line-height: 22px;
+  line-height: 20px;
   white-space: nowrap;
 }
 
 .phui-status-item-note {
   width: 100%;
   color: #666666;
-  line-height: 22px;
+  line-height: 14px;
+  padding: 3px 0;
 }
 
 .phui-status-item-highlighted {
