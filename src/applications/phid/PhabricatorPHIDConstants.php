@@ -18,7 +18,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_BLOG    = 'BLOG';
   const PHID_TYPE_ANSW    = 'ANSW';
   const PHID_TYPE_PIMG    = 'PIMG';
-  const PHID_TYPE_MCRO    = 'MCRO';
   const PHID_TYPE_CONP    = 'CONP';
   const PHID_TYPE_PVAR    = 'PVAR';
   const PHID_TYPE_ACNT    = 'ACNT';

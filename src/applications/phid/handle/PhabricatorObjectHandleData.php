@@ -89,7 +89,7 @@ final class PhabricatorObjectHandleData {
                 ->execute();
               $xactions += mpull($results, null, 'getPHID');
               break;
-            case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+            case PhabricatorMacroPHIDTypeMacro::TYPECONST:
               $results = id(new PhabricatorMacroTransactionQuery())
                 ->setViewer($this->viewer)
                 ->withPHIDs($subtype_phids)
@@ -99,13 +99,6 @@ final class PhabricatorObjectHandleData {
           }
         }
         return mpull($xactions, null, 'getPHID');
-
-      case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
-        $macros = id(new PhabricatorMacroQuery())
-          ->setViewer($this->viewer)
-          ->withPHIDs($phids)
-          ->execute();
-        return mpull($macros, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_BLOG:
         $blogs = id(new PhameBlogQuery())
@@ -335,24 +328,6 @@ final class PhabricatorObjectHandleData {
               $handle->setFullName($image->getName());
               $handle->setURI(
                 '/M'.$image->getMockID().'/'.$image->getID().'/');
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Macro');
-            } else {
-              $macro = $objects[$phid];
-              $handle->setName($macro->getName());
-              $handle->setFullName('Image Macro "'.$macro->getName().'"');
-              $handle->setURI('/macro/view/'.$macro->getID().'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
