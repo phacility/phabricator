@@ -69,10 +69,6 @@ final class PhabricatorSlowvoteQuery
   public function willFilterPage(array $polls) {
     assert_instances_of($polls, 'PhabricatorSlowvotePoll');
 
-    if (!$polls) {
-      return array();
-    }
-
     $ids = mpull($polls, 'getID');
     $viewer = $this->getViewer();
 

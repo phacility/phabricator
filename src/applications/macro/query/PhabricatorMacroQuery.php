@@ -157,10 +157,6 @@ final class PhabricatorMacroQuery
   }
 
   protected function willFilterPage(array $macros) {
-    if (!$macros) {
-      return array();
-    }
-
     $file_phids = mpull($macros, 'getFilePHID');
     $files = id(new PhabricatorFileQuery())
       ->setViewer($this->getViewer())

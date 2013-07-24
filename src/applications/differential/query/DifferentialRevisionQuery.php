@@ -360,10 +360,6 @@ final class DifferentialRevisionQuery
   }
 
   public function willFilterPage(array $revisions) {
-    if (!$revisions) {
-      return $revisions;
-    }
-
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 

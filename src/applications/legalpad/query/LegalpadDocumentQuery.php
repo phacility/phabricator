@@ -75,10 +75,6 @@ final class LegalpadDocumentQuery
   }
 
   protected function willFilterPage(array $documents) {
-    if (!$documents) {
-      return $documents;
-    }
-
     if ($this->needDocumentBodies) {
       $documents = $this->loadDocumentBodies($documents);
     }
