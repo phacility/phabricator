@@ -168,6 +168,12 @@ th.aphront-table-view-sortable-selected {
   white-space:      normal;
 }
 
+.aphront-table-view td.prewrap {
+  font-family: "Monaco", monospace;
+  font-size: 11px;
+  white-space: pre-wrap;
+}
+
 .aphront-table-view td.narrow {
   width:            1px;
 }

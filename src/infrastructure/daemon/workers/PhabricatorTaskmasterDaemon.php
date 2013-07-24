@@ -23,7 +23,9 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
               $this->log("Task {$id} failed permanently.");
             } else {
               $this->log("Task {$id} failed!");
-              throw $ex;
+              throw new PhutilProxyException(
+                "Error while executing task ID {$id} from queue.",
+                $ex);
             }
           } else {
             $this->log("Task {$id} complete! Moved to archive.");

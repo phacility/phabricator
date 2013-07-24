@@ -2,6 +2,8 @@
 
 final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
 
+  protected $failureTime;
+
   private $serverTime;
   private $localTime;
 
@@ -132,6 +134,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     } catch (Exception $ex) {
       $this->setExecutionException($ex);
       $this->setFailureCount($this->getFailureCount() + 1);
+      $this->setFailureTime(time());
 
       $retry = $worker->getWaitBeforeRetry($this);
       $retry = coalesce(

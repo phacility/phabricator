@@ -23,6 +23,7 @@ $workflows = array(
   new PhabricatorDaemonManagementRestartWorkflow(),
   new PhabricatorDaemonManagementLaunchWorkflow(),
   new PhabricatorDaemonManagementDebugWorkflow(),
+  new PhabricatorDaemonManagementLogWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );
 
