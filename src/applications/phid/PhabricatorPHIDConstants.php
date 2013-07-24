@@ -6,9 +6,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_UNKNOWN = '????';
   const PHID_TYPE_MAGIC   = '!!!!';
   const PHID_TYPE_OPKG    = 'OPKG';
-  const PHID_TYPE_PSTE    = 'PSTE';
   const PHID_TYPE_STRY    = 'STRY';
-  const PHID_TYPE_WIKI    = 'WIKI';
   const PHID_TYPE_APRJ    = 'APRJ';
   const PHID_TYPE_ACMT    = 'ACMT';
   const PHID_TYPE_DRYR    = 'DRYR';
@@ -18,7 +16,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_POST    = 'POST';
   const PHID_TYPE_TOBJ    = 'TOBJ';
   const PHID_TYPE_BLOG    = 'BLOG';
-  const PHID_TYPE_QUES    = 'QUES';
   const PHID_TYPE_ANSW    = 'ANSW';
   const PHID_TYPE_PIMG    = 'PIMG';
   const PHID_TYPE_MCRO    = 'MCRO';
