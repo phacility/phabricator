@@ -3873,6 +3873,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/phui/phui-spacing.css',
   ),
+  'phui-status-list-view-css' =>
+  array(
+    'uri' => '/res/edd24959/rsrc/css/phui/phui-status.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-status.css',
+  ),
   'phui-text-css' =>
   array(
     'uri' => '/res/63e53cac/rsrc/css/phui/phui-text.css',

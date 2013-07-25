@@ -237,7 +237,7 @@ final class PHUIFeedStoryView extends AphrontView {
       case PholioPHIDTypeMock::TYPECONST:
         $this->setAppIcon("pholio-dark");
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+      case PhabricatorMacroPHIDTypeMacro::TYPECONST:
         $this->setAppIcon("macro-dark");
         break;
     }

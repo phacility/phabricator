@@ -75,10 +75,6 @@ final class DivinerAtomQuery
   }
 
   protected function willFilterPage(array $atoms) {
-    if (!$atoms) {
-      return $atoms;
-    }
-
     $books = array_unique(mpull($atoms, 'getBookPHID'));
 
     $books = id(new DivinerBookQuery())

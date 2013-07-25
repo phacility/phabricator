@@ -60,10 +60,6 @@ final class PhrictionDocumentQuery
   }
 
   protected function willFilterPage(array $documents) {
-    if (!$documents) {
-      return array();
-    }
-
     $contents = id(new PhrictionContent())->loadAllWhere(
       'id IN (%Ld)',
       mpull($documents, 'getContentID'));

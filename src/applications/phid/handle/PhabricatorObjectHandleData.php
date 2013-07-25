@@ -89,7 +89,7 @@ final class PhabricatorObjectHandleData {
                 ->execute();
               $xactions += mpull($results, null, 'getPHID');
               break;
-            case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+            case PhabricatorMacroPHIDTypeMacro::TYPECONST:
               $results = id(new PhabricatorMacroTransactionQuery())
                 ->setViewer($this->viewer)
                 ->withPHIDs($subtype_phids)
@@ -99,13 +99,6 @@ final class PhabricatorObjectHandleData {
           }
         }
         return mpull($xactions, null, 'getPHID');
-
-      case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
-        $macros = id(new PhabricatorMacroQuery())
-          ->setViewer($this->viewer)
-          ->withPHIDs($phids)
-          ->execute();
-        return mpull($macros, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_BLOG:
         $blogs = id(new PhameBlogQuery())
@@ -120,20 +113,6 @@ final class PhabricatorObjectHandleData {
           ->setViewer($this->viewer)
           ->execute();
         return mpull($posts, null, 'getPHID');
-
-      case PhabricatorPHIDConstants::PHID_TYPE_PVAR:
-        $vars = id(new PhluxVariableQuery())
-          ->withPHIDs($phids)
-          ->setViewer($this->viewer)
-          ->execute();
-        return mpull($vars, null, 'getPHID');
-
-      case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
-        $xusr_dao = new PhabricatorExternalAccount();
-        $xusrs = $xusr_dao->loadAllWhere(
-          'phid in (%Ls)',
-          $phids);
-        return mpull($xusrs, null, 'getPHID');
 
       case PhabricatorPHIDConstants::PHID_TYPE_LEGD:
         $legds = id(new LegalpadDocumentQuery())
@@ -336,60 +315,6 @@ final class PhabricatorObjectHandleData {
               $handle->setURI(
                 '/M'.$image->getMockID().'/'.$image->getID().'/');
               $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Macro');
-            } else {
-              $macro = $objects[$phid];
-              $handle->setName($macro->getName());
-              $handle->setFullName('Image Macro "'.$macro->getName().'"');
-              $handle->setURI('/macro/view/'.$macro->getID().'/');
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_PVAR:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Variable');
-            } else {
-              $var = $objects[$phid];
-              $key = $var->getVariableKey();
-              $handle->setName($key);
-              $handle->setFullName('Phlux Variable "'.$key.'"');
-              $handle->setURI('/phlux/view/'.$key.'/');
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Display Name');
-            } else {
-              $xusr = $objects[$phid];
-              $display_name = $xusr->getDisplayName();
-              $handle->setName($display_name);
-              $handle->setFullName($display_name.' (External User)');
             }
             $handles[$phid] = $handle;
           }
