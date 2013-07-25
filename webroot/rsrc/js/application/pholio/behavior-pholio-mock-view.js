@@ -728,6 +728,13 @@ JX.behavior('pholio-mock-view', function(config) {
       'View Full Image');
     info.push(full_link);
 
+    var history_link = JX.$N(
+      'a',
+      { href: image.historyURI },
+      'View Image History');
+    info.push(history_link);
+
+
     for (var ii = 0; ii < info.length; ii++) {
       info[ii] = JX.$N('div', {className: 'pholio-image-info-item'}, info[ii]);
     }

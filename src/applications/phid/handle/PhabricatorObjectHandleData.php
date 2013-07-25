@@ -68,11 +68,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($projects, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_PIMG:
-        $images = id(new PholioImage())
-          ->loadAllWhere('phid IN (%Ls)', $phids);
-        return mpull($images, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_XACT:
         $subtypes = array();
         foreach ($phids as $phid) {
@@ -295,25 +290,6 @@ final class PhabricatorObjectHandleData {
               $handle->setName($post->getTitle());
               $handle->setFullName($post->getTitle());
               $handle->setURI('/phame/post/view/'.$post->getID().'/');
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_PIMG:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Image');
-            } else {
-              $image = $objects[$phid];
-              $handle->setName($image->getName());
-              $handle->setFullName($image->getName());
-              $handle->setURI(
-                '/M'.$image->getMockID().'/'.$image->getID().'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

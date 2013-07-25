@@ -36,6 +36,10 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
       case PholioTransactionType::TYPE_IMAGE_FILE:
         $phids = array_merge($phids, $new, $old);
         break;
+      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+        $phids[] = $new;
+        $phids[] = $old;
+        break;
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_NAME:
         $phids[] = key($new);
@@ -69,6 +73,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
         return 'edit';
       case PholioTransactionType::TYPE_IMAGE_FILE:
+      case PholioTransactionType::TYPE_IMAGE_REPLACE:
         return 'attach';
     }
 
@@ -114,6 +119,13 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           '%s added %d inline comment(s).',
           $this->renderHandleLink($author_phid),
           $count);
+        break;
+      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+        return pht(
+          '%s replaced %s with %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($old),
+          $this->renderHandleLink($new));
         break;
       case PholioTransactionType::TYPE_IMAGE_FILE:
         $add = array_diff($new, $old);
@@ -197,6 +209,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
+      case PholioTransactionType::TYPE_IMAGE_REPLACE:
       case PholioTransactionType::TYPE_IMAGE_FILE:
         return pht(
           '%s updated images of %s.',
@@ -259,6 +272,8 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
         return PhabricatorTransactions::COLOR_BLUE;
+      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+        return PhabricatorTransactions::COLOR_YELLOW;
       case PholioTransactionType::TYPE_IMAGE_FILE:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);

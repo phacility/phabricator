@@ -1475,6 +1475,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130723.taskstarttime.sql'),
       ),
+      '20130722.pholioreplace.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130722.pholioreplace.sql'),
+      ),
     );
   }
 }
