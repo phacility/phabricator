@@ -44,6 +44,7 @@ class PhabricatorApplicationTransactionFeedStory
 
     $xaction->setHandles($this->getHandles());
     $view->setTitle($xaction->getTitleForFeed());
+    $view->appendChild($xaction->getBodyForFeed());
 
     $view->setImage(
       $this->getHandle(

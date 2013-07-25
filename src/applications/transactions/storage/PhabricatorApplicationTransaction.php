@@ -379,6 +379,22 @@ abstract class PhabricatorApplicationTransaction
     return $this->getTitle();
   }
 
+  public function getBodyForFeed() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $body = null;
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $text = $this->getComment()->getContent();
+        $body = phutil_escape_html_newlines(
+          phutil_utf8_shorten($text, 128));
+        break;
+    }
+    return $body;
+  }
+
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:

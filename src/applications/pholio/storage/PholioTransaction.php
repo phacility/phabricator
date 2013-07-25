@@ -233,6 +233,17 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitleForFeed();
   }
 
+  public function getBodyForFeed() {
+    switch ($this->getTransactionType()) {
+      case PholioTransactionType::TYPE_INLINE:
+        $text = $this->getComment()->getContent();
+        return phutil_escape_html_newlines(
+          phutil_utf8_shorten($text, 128));
+        break;
+    }
+    return parent::getBodyForFeed();
+  }
+
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
       case PholioTransactionType::TYPE_DESCRIPTION:
