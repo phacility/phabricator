@@ -76,7 +76,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
   }
 
   public function withIDs(array $ids) {
-    $this->ids = $ids;
+    $this->taskIDs = $ids;
     return $this;
   }
 
