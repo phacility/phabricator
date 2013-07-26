@@ -134,7 +134,7 @@ final class PholioMockViewController extends PholioController {
     $image = idx($images, $image_id);
 
     if ($image) {
-      $history = $mock->getImageUpdateSet($image_id);
+      $history = $mock->getImageHistorySet($image_id);
       $latest_image = last($history);
       $href = $this->getApplicationURI(
         'image/history/'.$latest_image->getID().'/');

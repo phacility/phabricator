@@ -122,7 +122,7 @@ final class PholioMockQuery
     $image_groups = mgroup($all_images, 'getMockID');
 
     foreach ($mocks as $mock) {
-      $mock_images = $image_groups[$mock->getID()];
+      $mock_images = idx($image_groups, $mock->getID(), array());
       $mock->attachAllImages($mock_images);
       $mock->attachImages(mfilter($mock_images, 'getIsObsolete', true));
     }
