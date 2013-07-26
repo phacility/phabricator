@@ -48,14 +48,6 @@ final class PhabricatorObjectHandleData {
 
     switch ($type) {
 
-      case PhabricatorPHIDConstants::PHID_TYPE_USER:
-        // TODO: Update query + Batch User Images
-        $user_dao = new PhabricatorUser();
-        $users = $user_dao->loadAllWhere(
-          'phid in (%Ls)',
-          $phids);
-        return mpull($users, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_APRJ:
         $project_dao = new PhabricatorRepositoryArcanistProject();
         $projects = $project_dao->loadAllWhere(
@@ -140,53 +132,6 @@ final class PhabricatorObjectHandleData {
               default:
                 $handle->setName('Foul Magicks');
                 break;
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_USER:
-          $image_phids = mpull($objects, 'getProfileImagePHID');
-          $image_phids = array_unique(array_filter($image_phids));
-
-          $images = array();
-          if ($image_phids) {
-            $images = id(new PhabricatorFile())->loadAllWhere(
-              'phid IN (%Ls)',
-              $image_phids);
-            $images = mpull($images, 'getBestURI', 'getPHID');
-          }
-
-          $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
-            $phids);
-
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown User');
-            } else {
-              $user = $objects[$phid];
-              $handle->setName($user->getUsername());
-              $handle->setURI('/p/'.$user->getUsername().'/');
-              $handle->setFullName(
-                $user->getUsername().' ('.$user->getRealName().')');
-              $handle->setComplete(true);
-              if (isset($statuses[$phid])) {
-                $handle->setStatus($statuses[$phid]->getTextStatus());
-                $handle->setTitle(
-                  $statuses[$phid]->getTerseSummary($this->viewer));
-              }
-              $handle->setDisabled($user->getIsDisabled());
-
-              $img_uri = idx($images, $user->getProfileImagePHID());
-              if ($img_uri) {
-                $handle->setImageURI($img_uri);
-              } else {
-                $handle->setImageURI(
-                  PhabricatorUser::getDefaultProfileImageURI());
-              }
             }
             $handles[$phid] = $handle;
           }

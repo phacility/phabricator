@@ -26,7 +26,7 @@ final class PonderSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $question->getAuthorPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_USER,
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $question->getDateCreated());
 
     $comments = $question->getComments();

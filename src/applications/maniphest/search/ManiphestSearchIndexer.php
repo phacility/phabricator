@@ -27,7 +27,7 @@ final class ManiphestSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $task->getAuthorPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_USER,
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $task->getDateCreated());
 
     if ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN) {
@@ -88,7 +88,7 @@ final class ManiphestSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $owner->getNewValue(),
-        PhabricatorPHIDConstants::PHID_TYPE_USER,
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
         $owner->getDateCreated());
     } else {
       $doc->addRelationship(
@@ -104,7 +104,7 @@ final class ManiphestSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_TOUCH,
         $touch,
-        PhabricatorPHIDConstants::PHID_TYPE_USER,
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
         $time);
     }
 

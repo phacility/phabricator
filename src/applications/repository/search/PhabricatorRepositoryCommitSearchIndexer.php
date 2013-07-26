@@ -43,7 +43,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
         $author_phid,
-        PhabricatorPHIDConstants::PHID_TYPE_USER,
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
         $date_created);
     }
 

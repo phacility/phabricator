@@ -107,11 +107,7 @@ final class PhabricatorObjectHandle
       return $this->getPHIDType()->getTypeName();
     }
 
-    static $map = array(
-      PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
-    );
-
-    return idx($map, $this->getType(), $this->getType());
+    return $this->getType();
   }
 
 
@@ -201,7 +197,7 @@ final class PhabricatorObjectHandle
 
   public function getLinkName() {
     switch ($this->getType()) {
-      case PhabricatorPHIDConstants::PHID_TYPE_USER:
+      case PhabricatorPeoplePHIDTypeUser::TYPECONST:
         $name = $this->getName();
         break;
       default:

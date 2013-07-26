@@ -219,7 +219,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       case 'active':
       case 'user':
       case 'author':
-        if ($type !== PhabricatorPHIDConstants::PHID_TYPE_USER) {
+        if ($type !== PhabricatorPeoplePHIDTypeUser::TYPECONST) {
           throw new Exception("PHID must be a user PHID!");
         }
         break;
