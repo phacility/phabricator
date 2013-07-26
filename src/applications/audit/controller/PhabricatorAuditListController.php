@@ -225,7 +225,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
         break;
       case 'package':
       case 'packagecommits':
-        if ($type !== PhabricatorPHIDConstants::PHID_TYPE_OPKG) {
+        if ($type !== PhabricatorOwnersPHIDTypePackage::TYPECONST) {
           throw new Exception("PHID must be a package PHID!");
         }
         break;

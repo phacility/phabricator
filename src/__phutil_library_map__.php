@@ -1342,6 +1342,7 @@ phutil_register_library_map(array(
     'PhabricatorOwnersEditController' => 'applications/owners/controller/PhabricatorOwnersEditController.php',
     'PhabricatorOwnersListController' => 'applications/owners/controller/PhabricatorOwnersListController.php',
     'PhabricatorOwnersOwner' => 'applications/owners/storage/PhabricatorOwnersOwner.php',
+    'PhabricatorOwnersPHIDTypePackage' => 'applications/owners/phid/PhabricatorOwnersPHIDTypePackage.php',
     'PhabricatorOwnersPackage' => 'applications/owners/storage/PhabricatorOwnersPackage.php',
     'PhabricatorOwnersPackagePathValidator' => 'applications/repository/worker/commitchangeparser/PhabricatorOwnersPackagePathValidator.php',
     'PhabricatorOwnersPackageQuery' => 'applications/owners/query/PhabricatorOwnersPackageQuery.php',
@@ -3358,6 +3359,7 @@ phutil_register_library_map(array(
     'PhabricatorOwnersEditController' => 'PhabricatorOwnersController',
     'PhabricatorOwnersListController' => 'PhabricatorOwnersController',
     'PhabricatorOwnersOwner' => 'PhabricatorOwnersDAO',
+    'PhabricatorOwnersPHIDTypePackage' => 'PhabricatorPHIDType',
     'PhabricatorOwnersPackage' =>
     array(
       0 => 'PhabricatorOwnersDAO',

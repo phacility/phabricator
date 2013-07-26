@@ -56,11 +56,6 @@ final class PhabricatorObjectHandleData {
           $phids);
         return mpull($users, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_OPKG:
-        $object = new PhabricatorOwnersPackage();
-        $packages = $object->loadAllWhere('phid in (%Ls)', $phids);
-        return mpull($packages, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_APRJ:
         $project_dao = new PhabricatorRepositoryArcanistProject();
         $projects = $project_dao->loadAllWhere(
@@ -222,23 +217,6 @@ final class PhabricatorObjectHandleData {
                 $handle->setImageURI(
                   PhabricatorUser::getDefaultProfileImageURI());
               }
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_OPKG:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Package');
-            } else {
-              $package = $objects[$phid];
-              $handle->setName($package->getName());
-              $handle->setURI('/owners/package/'.$package->getID().'/');
-              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
