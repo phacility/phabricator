@@ -112,7 +112,7 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
 
     $title = $object->getSummary();
 
-    return "{$prefix} {$name}: {$title}";
+    return ltrim("{$prefix} {$name}: {$title}");
   }
 
   public function getObjectURI($object) {

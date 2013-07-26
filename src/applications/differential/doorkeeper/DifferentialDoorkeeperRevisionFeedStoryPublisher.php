@@ -51,7 +51,7 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
 
     $title = $object->getTitle();
 
-    return "{$prefix} {$lines} D{$id}: {$title}";
+    return ltrim("{$prefix} {$lines} D{$id}: {$title}");
   }
 
   public function getObjectURI($object) {
