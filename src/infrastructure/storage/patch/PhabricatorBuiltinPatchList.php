@@ -1483,6 +1483,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130727.ponderquestionstatus.sql'),
       ),
+      '20130726.ponderxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130726.ponderxactions.sql'),
+      ),
     );
   }
 }
