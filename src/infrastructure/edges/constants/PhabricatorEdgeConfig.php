@@ -164,7 +164,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
       PhabricatorPHIDConstants::PHID_TYPE_XOBJ  => 'DoorkeeperExternalObject',
-      PhabricatorPHIDConstants::PHID_TYPE_LEGD  => 'LegalpadDocument',
     );
 
     $class = idx($class_map, $phid_type);

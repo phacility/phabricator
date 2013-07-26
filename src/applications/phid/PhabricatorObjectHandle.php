@@ -111,7 +111,6 @@ final class PhabricatorObjectHandle
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
       PhabricatorPHIDConstants::PHID_TYPE_BLOG => 'Blog',
       PhabricatorPHIDConstants::PHID_TYPE_POST => 'Post',
-      PhabricatorPHIDConstants::PHID_TYPE_LEGD => 'Legalpad Document',
     );
 
     return idx($map, $this->getType(), $this->getType());
