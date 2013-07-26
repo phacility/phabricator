@@ -159,7 +159,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
       PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
       PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
-      PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
       PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',

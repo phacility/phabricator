@@ -16,7 +16,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_TOBJ    = 'TOBJ';
   const PHID_TYPE_BLOG    = 'BLOG';
   const PHID_TYPE_ANSW    = 'ANSW';
-  const PHID_TYPE_CONP    = 'CONP';
   const PHID_TYPE_ACNT    = 'ACNT';
   const PHID_TYPE_PDCT    = 'PDCT';
   const PHID_TYPE_PRCH    = 'PRCH';

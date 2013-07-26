@@ -104,13 +104,6 @@ final class PhabricatorObjectHandleData {
           ->execute();
         return mpull($posts, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_CONP:
-        $confs = id(new ConpherenceThreadQuery())
-          ->withPHIDs($phids)
-          ->setViewer($this->viewer)
-          ->execute();
-        return mpull($confs, null, 'getPHID');
-
     }
 
     return array();
@@ -264,29 +257,6 @@ final class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_CONP:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName(pht('Unknown Conpherence Thread'));
-            } else {
-              $thread = $objects[$phid];
-              $name = $thread->getTitle();
-              if (!strlen($name)) {
-                $name = pht('[No Title]');
-              }
-              $handle->setName($name);
-              $handle->setFullName($name);
-              $handle->setURI('/conpherence/'.$thread->getID().'/');
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
 
         default:
           foreach ($phids as $phid) {
