@@ -1,11 +1,13 @@
 <?php
 
 final class PonderAnswer extends PonderDAO
-  implements PhabricatorMarkupInterface, PonderVotableInterface {
+  implements
+    PhabricatorMarkupInterface,
+    PonderVotableInterface,
+    PhabricatorPolicyInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
-  protected $phid;
   protected $authorPHID;
   protected $questionID;
 
@@ -60,7 +62,7 @@ final class PonderAnswer extends PonderDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_ANSW);
+      PonderPHIDTypeAnswer::TYPECONST);
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
@@ -111,4 +113,36 @@ final class PonderAnswer extends PonderDAO
   public function getVotablePHID() {
     return $this->getPHID();
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getQuestion()->getPolicy($capability);
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getQuestion()->hasAutomaticCapability(
+          $capability,
+          $viewer);
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return ($this->getAuthorPHID() == $viewer->getPHID());
+    }
+  }
+
 }

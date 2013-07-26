@@ -1,26 +1,12 @@
 <?php
 
-final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
+final class PonderAnswerQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
   private $authorPHIDs;
   private $questionIDs;
-
-  private $viewer;
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
-  }
-
-  public function executeOne() {
-    return head($this->execute());
-  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -66,14 +52,12 @@ final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
         $this->authorPHIDs);
     }
 
+    $where[] = $this->buildPagingClause($conn_r);
+
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderByClause($conn_r) {
-    return 'ORDER BY id ASC';
-  }
-
-  public function execute() {
+  public function loadPage() {
     $answer = new PonderAnswer();
     $conn_r = $answer->establishConnection('r');
 
@@ -82,23 +66,28 @@ final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
       'SELECT a.* FROM %T a %Q %Q %Q',
       $answer->getTableName(),
       $this->buildWhereClause($conn_r),
-      $this->buildOrderByClause($conn_r),
+      $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    $answers = $answer->loadAllFromArray($data);
+    return $answer->loadAllFromArray($data);
+  }
 
-    if ($answers) {
-      $questions = id(new PonderQuestionQuery())
-        ->setViewer($this->getViewer())
-        ->withIDs(mpull($answers, 'getQuestionID'))
-        ->execute();
+  public function willFilterPage(array $answers) {
+    $questions = id(new PonderQuestionQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs(mpull($answers, 'getQuestionID'))
+      ->execute();
 
-      foreach ($answers as $answer) {
-        $question = idx($questions, $answer->getQuestionID());
-        $answer->attachQuestion($question);
-      }
+    foreach ($answers as $answer) {
+      $question = idx($questions, $answer->getQuestionID());
+      $answer->attachQuestion($question);
     }
 
     return $answers;
   }
+
+  protected function getReversePaging() {
+    return true;
+  }
+
 }

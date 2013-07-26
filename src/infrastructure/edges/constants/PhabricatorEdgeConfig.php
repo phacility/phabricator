@@ -155,7 +155,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
     static $class_map = array(
       PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
-      PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
       PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',

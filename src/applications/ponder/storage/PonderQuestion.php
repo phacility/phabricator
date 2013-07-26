@@ -172,6 +172,7 @@ final class PonderQuestion extends PonderDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -188,7 +189,7 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */

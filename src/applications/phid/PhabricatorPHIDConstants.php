@@ -12,7 +12,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_OASC    = 'OASC';
   const PHID_TYPE_OASA    = 'OASA';
   const PHID_TYPE_TOBJ    = 'TOBJ';
-  const PHID_TYPE_ANSW    = 'ANSW';
   const PHID_TYPE_ACNT    = 'ACNT';
   const PHID_TYPE_PDCT    = 'PDCT';
   const PHID_TYPE_PRCH    = 'PRCH';
