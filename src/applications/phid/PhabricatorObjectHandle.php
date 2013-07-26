@@ -109,7 +109,6 @@ final class PhabricatorObjectHandle
 
     static $map = array(
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
-      PhabricatorPHIDConstants::PHID_TYPE_BLOG => 'Blog',
       PhabricatorPHIDConstants::PHID_TYPE_POST => 'Post',
     );
 

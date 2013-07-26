@@ -90,13 +90,6 @@ final class PhabricatorObjectHandleData {
         }
         return mpull($xactions, null, 'getPHID');
 
-      case PhabricatorPHIDConstants::PHID_TYPE_BLOG:
-        $blogs = id(new PhameBlogQuery())
-          ->withPHIDs($phids)
-          ->setViewer($this->viewer)
-          ->execute();
-        return mpull($blogs, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_POST:
         $posts = id(new PhamePostQuery())
           ->withPHIDs($phids)
@@ -216,24 +209,6 @@ final class PhabricatorObjectHandleData {
             } else {
               $project = $objects[$phid];
               $handle->setName($project->getName());
-              $handle->setComplete(true);
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_BLOG:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Blog');
-            } else {
-              $blog = $objects[$phid];
-              $handle->setName($blog->getName());
-              $handle->setFullName($blog->getName());
-              $handle->setURI('/phame/blog/view/'.$blog->getID().'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
