@@ -14,16 +14,21 @@ final class PonderAnswer extends PonderDAO
 
   protected $voteCount;
   private $vote;
-  private $question = null;
+  private $question = self::ATTACHABLE;
   private $comments;
 
+  // TODO: Get rid of this method.
   public function setQuestion($question) {
+    return $this->attachQuestion($question);
+  }
+
+  public function attachQuestion(PonderQuestion $question = null) {
     $this->question = $question;
     return $this;
   }
 
   public function getQuestion() {
-    return $this->question;
+    return $this->assertAttached($this->question);
   }
 
   public function setUserVote($vote) {

@@ -2,10 +2,10 @@
 
 final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
 
-  private $id;
-  private $phid;
-  private $authorPHID;
-  private $orderNewest;
+  private $ids;
+  private $phids;
+  private $authorPHIDs;
+  private $questionIDs;
 
   private $viewer;
 
@@ -22,74 +22,83 @@ final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
     return head($this->execute());
   }
 
-  public function withID($qid) {
-    $this->id = $qid;
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
-  public function withPHID($phid) {
-    $this->phid = $phid;
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
-  public function withAuthorPHID($phid) {
-    $this->authorPHID = $phid;
+  public function withAuthorPHIDs(array $phids) {
+    $this->authorPHIDs = $phids;
     return $this;
   }
 
-  public function orderByNewest($usethis) {
-    $this->orderNewest = $usethis;
+  public function withQuestionIDs(array $ids) {
+    $this->questionIDs = $ids;
     return $this;
   }
 
   private function buildWhereClause($conn_r) {
     $where = array();
-    if ($this->id) {
-      $where[] = qsprintf($conn_r, '(id = %d)', $this->id);
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
     }
-    if ($this->phid) {
-      $where[] = qsprintf($conn_r, '(phid = %s)', $this->phid);
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
-    if ($this->authorPHID) {
-      $where[] = qsprintf($conn_r, '(authorPHID = %s)', $this->authorPHID);
+
+    if ($this->authorPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'authorPHID IN (%Ls)',
+        $this->authorPHIDs);
     }
 
     return $this->formatWhereClause($where);
   }
 
   private function buildOrderByClause($conn_r) {
-    $order = array();
-    if ($this->orderNewest) {
-      $order[] = qsprintf($conn_r, 'id DESC');
-    }
-
-    if (count($order) == 0) {
-      $order[] = qsprintf($conn_r, 'id ASC');
-    }
-
-    return ($order ? 'ORDER BY ' . implode(', ', $order) : '');
+    return 'ORDER BY id ASC';
   }
 
   public function execute() {
     $answer = new PonderAnswer();
     $conn_r = $answer->establishConnection('r');
 
-    $select = qsprintf(
+    $data = queryfx_all(
       $conn_r,
-      'SELECT r.* FROM %T r',
-      $answer->getTableName());
+      'SELECT a.* FROM %T a %Q %Q %Q',
+      $answer->getTableName(),
+      $this->buildWhereClause($conn_r),
+      $this->buildOrderByClause($conn_r),
+      $this->buildLimitClause($conn_r));
 
-    $where = $this->buildWhereClause($conn_r);
-    $order_by = $this->buildOrderByClause($conn_r);
-    $limit = $this->buildLimitClause($conn_r);
+    $answers = $answer->loadAllFromArray($data);
 
-    return $answer->loadAllFromArray(
-      queryfx_all(
-        $conn_r,
-        '%Q %Q %Q %Q',
-        $select,
-        $where,
-        $order_by,
-        $limit));
+    if ($answers) {
+      $questions = id(new PonderQuestionQuery())
+        ->setViewer($this->getViewer())
+        ->withIDs(mpull($answers, 'getQuestionID'))
+        ->execute();
+
+      foreach ($answers as $answer) {
+        $question = idx($questions, $answer->getQuestionID());
+        $answer->attachQuestion($question);
+      }
+    }
+
+    return $answers;
   }
 }

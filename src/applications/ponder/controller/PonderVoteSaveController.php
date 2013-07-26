@@ -25,7 +25,7 @@ final class PonderVoteSaveController extends PonderController {
     } else if ($this->kind == "answer") {
       $target = id(new PonderAnswerQuery())
         ->setViewer($user)
-        ->withPHID($phid)
+        ->withPHIDs(array($phid))
         ->executeOne();
     }
 
