@@ -7,6 +7,21 @@ final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
   private $authorPHID;
   private $orderNewest;
 
+  private $viewer;
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
+
+  public function executeOne() {
+    return head($this->execute());
+  }
+
   public function withID($qid) {
     $this->id = $qid;
     return $this;
@@ -25,38 +40,6 @@ final class PonderAnswerQuery extends PhabricatorOffsetPagedQuery {
   public function orderByNewest($usethis) {
     $this->orderNewest = $usethis;
     return $this;
-  }
-
-  public static function loadByAuthor($viewer, $author_phid, $offset, $count) {
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadByAuthor");
-    }
-
-    return id(new PonderAnswerQuery())
-      ->withAuthorPHID($author_phid)
-      ->setOffset($offset)
-      ->setLimit($count)
-      ->orderByNewest(true)
-      ->execute();
-  }
-
-  public static function loadSingle($viewer, $id) {
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadSingle");
-    }
-    return idx(id(new PonderAnswerQuery())
-               ->withID($id)
-               ->execute(), $id);
-  }
-
-  public static function loadSingleByPHID($viewer, $phid) {
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadSingle");
-    }
-
-    return array_shift(id(new PonderAnswerQuery())
-      ->withPHID($phid)
-      ->execute());
   }
 
   private function buildWhereClause($conn_r) {

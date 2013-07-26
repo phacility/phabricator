@@ -53,14 +53,6 @@ final class PonderAnswer extends PonderDAO
     ) + parent::getConfiguration();
   }
 
-  public function setTitle($title) {
-    $this->title = $title;
-    if (!$this->getID()) {
-      $this->originalTitle = $title;
-    }
-    return $this;
-  }
-
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_ANSW);
@@ -73,10 +65,6 @@ final class PonderAnswer extends PonderDAO
 
   public function getContentSource() {
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
-  }
-
-  public function getAnswers() {
-    return $this->loadRelatives(new PonderAnswer(), "questionID");
   }
 
   public function getMarkupField() {
