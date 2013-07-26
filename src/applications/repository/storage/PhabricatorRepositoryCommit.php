@@ -2,7 +2,8 @@
 
 final class PhabricatorRepositoryCommit
   extends PhabricatorRepositoryDAO
-  implements PhabricatorPolicyInterface,
+  implements
+    PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface {
 
   protected $repositoryID;
