@@ -48,13 +48,6 @@ final class PhabricatorObjectHandleData {
 
     switch ($type) {
 
-      case PhabricatorPHIDConstants::PHID_TYPE_APRJ:
-        $project_dao = new PhabricatorRepositoryArcanistProject();
-        $projects = $project_dao->loadAllWhere(
-          'phid IN (%Ls)',
-          $phids);
-        return mpull($projects, null, 'getPHID');
-
       case PhabricatorPHIDConstants::PHID_TYPE_XACT:
         $subtypes = array();
         foreach ($phids as $phid) {
@@ -132,22 +125,6 @@ final class PhabricatorObjectHandleData {
               default:
                 $handle->setName('Foul Magicks');
                 break;
-            }
-            $handles[$phid] = $handle;
-          }
-          break;
-
-        case PhabricatorPHIDConstants::PHID_TYPE_APRJ:
-          foreach ($phids as $phid) {
-            $handle = new PhabricatorObjectHandle();
-            $handle->setPHID($phid);
-            $handle->setType($type);
-            if (empty($objects[$phid])) {
-              $handle->setName('Unknown Arcanist Project');
-            } else {
-              $project = $objects[$phid];
-              $handle->setName($project->getName());
-              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
