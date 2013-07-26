@@ -49,7 +49,7 @@ final class PhabricatorApplicationTransactionCommentEditController
 
       $editor = id(new PhabricatorApplicationTransactionCommentEditor())
         ->setActor($user)
-        ->setContentSourceFromRequest($request)
+        ->setContentSource(PhabricatorContentSource::newFromRequest($request))
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {
@@ -69,9 +69,12 @@ final class PhabricatorApplicationTransactionCommentEditController
     $dialog
       ->addHiddenInput('anchor', $request->getStr('anchor'))
       ->appendChild(
-        id(new PhabricatorRemarkupControl())
+        id(new AphrontFormLayoutView())
+        ->setFullWidth(true)
+        ->appendChild(
+          id(new PhabricatorRemarkupControl())
           ->setName('text')
-          ->setValue($xaction->getComment()->getContent()));
+          ->setValue($xaction->getComment()->getContent())));
 
     $dialog
       ->addSubmitButton(pht('Edit Comment'))
