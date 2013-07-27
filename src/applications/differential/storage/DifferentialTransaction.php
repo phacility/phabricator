@@ -7,7 +7,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_DREV;
+    return DifferentialPHIDTypeRevision::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

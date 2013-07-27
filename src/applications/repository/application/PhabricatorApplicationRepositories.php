@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group repository
+ */
 final class PhabricatorApplicationRepositories extends PhabricatorApplication {
 
   public function getBaseURI() {

@@ -18,8 +18,7 @@ final class PhluxVariable extends PhluxDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PVAR);
+    return PhabricatorPHID::generateNewPHID(PhluxPHIDTypeVariable::TYPECONST);
   }
 
 

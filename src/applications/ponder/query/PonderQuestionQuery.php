@@ -9,6 +9,7 @@ final class PonderQuestionQuery
   private $ids;
   private $phids;
   private $authorPHIDs;
+  private $answererPHIDs;
   private $order = self::ORDER_CREATED;
 
   public function withIDs(array $ids) {
@@ -23,6 +24,11 @@ final class PonderQuestionQuery
 
   public function withAuthorPHIDs(array $phids) {
     $this->authorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withAnswererPHIDs(array $phids) {
+    $this->answererPHIDs = $phids;
     return $this;
   }
 
@@ -57,15 +63,24 @@ final class PonderQuestionQuery
     $where = array();
 
     if ($this->ids) {
-      $where[] = qsprintf($conn_r, 'q.id IN (%Ld)', $this->ids);
+      $where[] = qsprintf(
+        $conn_r,
+        'q.id IN (%Ld)',
+        $this->ids);
     }
 
     if ($this->phids) {
-      $where[] = qsprintf($conn_r, 'q.phid IN (%Ls)', $this->phids);
+      $where[] = qsprintf(
+        $conn_r,
+        'q.phid IN (%Ls)',
+        $this->phids);
     }
 
     if ($this->authorPHIDs) {
-      $where[] = qsprintf($conn_r, 'q.authorPHID IN (%Ls)', $this->authorPHIDs);
+      $where[] = qsprintf(
+        $conn_r,
+        'q.authorPHID IN (%Ls)',
+        $this->authorPHIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
@@ -88,19 +103,31 @@ final class PonderQuestionQuery
     $question = new PonderQuestion();
     $conn_r = $question->establishConnection('r');
 
-    $where = $this->buildWhereClause($conn_r);
-    $order_by = $this->buildOrderByClause($conn_r);
-    $limit = $this->buildLimitClause($conn_r);
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT q.* FROM %T q %Q %Q %Q %Q',
+      $question->getTableName(),
+      $this->buildJoinsClause($conn_r),
+      $this->buildWhereClause($conn_r),
+      $this->buildOrderByClause($conn_r),
+      $this->buildLimitClause($conn_r));
 
-    return $question->loadAllFromArray(
-      queryfx_all(
-        $conn_r,
-        'SELECT q.* FROM %T q %Q %Q %Q',
-        $question->getTableName(),
-        $where,
-        $order_by,
-        $limit));
+    return $question->loadAllFromArray($data);
   }
 
+  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
+    $joins = array();
+
+    if ($this->answererPHIDs) {
+      $answer_table = new PonderAnswer();
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T a ON a.questionID = q.id AND a.authorPHID IN (%Ls)',
+        $answer_table->getTableName(),
+        $this->answererPHIDs);
+    }
+
+    return implode(' ', $joins);
+  }
 
 }

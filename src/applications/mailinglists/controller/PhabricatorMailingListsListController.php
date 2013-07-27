@@ -1,84 +1,51 @@
 <?php
 
 final class PhabricatorMailingListsListController
-  extends PhabricatorMailingListsController {
+  extends PhabricatorMailingListsController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
-    $offset = $request->getInt('offset', 0);
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorMailingListSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $pager = new AphrontPagerView();
-    $pager->setPageSize(250);
-    $pager->setOffset($offset);
-    $pager->setURI($request->getRequestURI(), 'offset');
+    return $this->delegateToController($controller);
+  }
 
-    $list = new PhabricatorMetaMTAMailingList();
-    $conn_r = $list->establishConnection('r');
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T
-        ORDER BY name ASC
-        LIMIT %d, %d',
-        $list->getTableName(),
-        $pager->getOffset(), $pager->getPageSize() + 1);
-    $data = $pager->sliceResults($data);
+  public function renderResultsList(
+    array $lists,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($lists, 'PhabricatorMetaMTAMailingList');
 
-    $nav = $this->buildSideNavView('all');
+    $view = id(new PhabricatorObjectItemListView());
 
-    $lists = $list->loadAllFromArray($data);
-
-    $rows = array();
     foreach ($lists as $list) {
-      $rows[] = array(
-        $list->getName(),
-        $list->getEmail(),
-        phutil_tag(
-          'a',
-          array(
-            'class' => 'button grey small',
-            'href'  => $this->getApplicationURI('/edit/'.$list->getID().'/'),
-          ),
-          pht('Edit')),
-      );
+      $item = new PhabricatorObjectItemView();
+
+      $item->setHeader($list->getName());
+      $item->setHref($list->getURI());
+      $item->addAttribute($list->getEmail());
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('edit')
+          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
+
+      $view->addItem($item);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Name'),
-        pht('Email'),
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        null,
-        'wide',
-        'action',
-      ));
-
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('All Lists'))
-        ->setHref($this->getApplicationURI()));
-    $nav->setCrumbs($crumbs);
-
-    $panel = new AphrontPanelView();
-    $panel->appendChild($table);
-    $panel->setHeader(pht('Mailing Lists'));
-    $panel->appendChild($pager);
-    $panel->setNoBackground();
-
-    $nav->appendChild($panel);
-
-    return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
-      array(
-        'title' => pht('Mailing Lists'),
-        'device' => true,
-      ));
+    return $view;
   }
+
 }

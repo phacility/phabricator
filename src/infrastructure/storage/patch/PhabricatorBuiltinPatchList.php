@@ -126,6 +126,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.timeline' => array(
         'type'  => 'db',
         'name'  => 'timeline',
+        'dead'  => true,
       ),
       'db.user' => array(
         'type'  => 'db',
@@ -1469,6 +1470,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130716.archivememberlessprojects.php' => array(
         'type' => 'php',
         'name' => $this->getPatchPath('20130716.archivememberlessprojects.php'),
+      ),
+      '20130723.taskstarttime.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130723.taskstarttime.sql'),
+      ),
+      '20130722.pholioreplace.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130722.pholioreplace.sql'),
       ),
     );
   }

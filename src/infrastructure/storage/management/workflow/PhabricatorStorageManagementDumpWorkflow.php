@@ -25,7 +25,7 @@ final class PhabricatorStorageManagementDumpWorkflow
       return 1;
     }
 
-    $databases = $api->getDatabaseList($patches);
+    $databases = $api->getDatabaseList($patches, $only_living = true);
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 

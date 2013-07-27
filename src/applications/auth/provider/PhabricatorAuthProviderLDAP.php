@@ -24,6 +24,12 @@ final class PhabricatorAuthProviderLDAP
   public function getAdapter() {
     if (!$this->adapter) {
       $conf = $this->getProviderConfig();
+
+      $realname_attributes = $conf->getProperty(self::KEY_REALNAME_ATTRIBUTES);
+      if (!is_array($realname_attributes)) {
+        $realname_attributes = array();
+      }
+
       $adapter = id(new PhutilAuthAdapterLDAP())
         ->setHostname(
           $conf->getProperty(self::KEY_HOSTNAME))
@@ -35,8 +41,7 @@ final class PhabricatorAuthProviderLDAP
           $conf->getProperty(self::KEY_SEARCH_ATTRIBUTE))
         ->setUsernameAttribute(
           $conf->getProperty(self::KEY_USERNAME_ATTRIBUTE))
-        ->setRealNameAttributes(
-          $conf->getProperty(self::KEY_REALNAME_ATTRIBUTES, array()))
+        ->setRealNameAttributes($realname_attributes)
         ->setLDAPVersion(
           $conf->getProperty(self::KEY_VERSION))
         ->setLDAPReferrals(

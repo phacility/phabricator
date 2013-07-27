@@ -42,6 +42,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
     $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
     $e_rev    = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
+    $e_mock   = PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK;
 
     $phid = $task->getPHID();
 
@@ -53,6 +54,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $e_dep_on,
           $e_dep_by,
           $e_rev,
+          $e_mock,
         ));
     $edges = idx($query->execute(), $phid);
     $phids = array_fill_keys($query->getDestinationPHIDs(), true);
@@ -438,6 +440,17 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->setWorkflow(true)
         ->setIcon('attach'));
 
+    $pholio_app =
+      PhabricatorApplication::getByClass('PhabricatorApplicationPholio');
+    if ($pholio_app->isInstalled()) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+        ->setName(pht('Edit Pholio Mocks'))
+        ->setHref("/search/attach/{$phid}/MOCK/edge/")
+        ->setWorkflow(true)
+        ->setIcon('attach'));
+    }
+
     return $view;
   }
 
@@ -456,8 +469,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view->addProperty(
       pht('Assigned To'),
       $task->getOwnerPHID()
-        ? $this->getHandle($task->getOwnerPHID())->renderLink()
-        : phutil_tag('em', array(), pht('None')));
+      ? $this->getHandle($task->getOwnerPHID())->renderLink()
+      : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Priority'),
@@ -466,8 +479,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view->addProperty(
       pht('Subscribers'),
       $task->getCCPHIDs()
-        ? $this->renderHandlesForPHIDs($task->getCCPHIDs(), ',')
-        : phutil_tag('em', array(), pht('None')));
+      ? $this->renderHandlesForPHIDs($task->getCCPHIDs(), ',')
+      : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Author'),
@@ -482,15 +495,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
           'a',
           array(
             'href' => 'mailto:'.$source.'?subject='.$subject
-            ),
+          ),
           $source));
     }
 
     $view->addProperty(
       pht('Projects'),
       $task->getProjectPHIDs()
-        ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
-        : phutil_tag('em', array(), pht('None')));
+      ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
+      : phutil_tag('em', array(), pht('None')));
 
     foreach ($aux_fields as $aux_field) {
       $value = $aux_field->renderForDetailView();
@@ -502,11 +515,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
-        => pht('Dependent Tasks'),
+      => pht('Dependent Tasks'),
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK
-        => pht('Depends On'),
+      => pht('Depends On'),
       PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV
-        => pht('Differential Revisions'),
+      => pht('Differential Revisions'),
+      PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK
+      => pht('Pholio Mocks'),
     );
 
     $revisions_commits = array();
@@ -551,7 +566,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $attached = $task->getAttached();
-    $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
+    $file_infos = idx($attached, PhabricatorFilePHIDTypeFile::TYPECONST);
     if ($file_infos) {
       $file_phids = array_keys($file_infos);
 
@@ -582,6 +597,5 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     return $view;
   }
-
 
 }

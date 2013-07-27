@@ -81,6 +81,7 @@ final class PholioMockEditController extends PholioController {
 
       if (!strlen($request->getStr('name'))) {
         $e_name = 'Required';
+        $errors[] = pht('You must give the mock a name.');
       }
 
       $file_phids = $request->getArr('file_phids');
@@ -91,6 +92,8 @@ final class PholioMockEditController extends PholioController {
           ->execute();
         $files = mpull($files, null, 'getPHID');
         $files = array_select_keys($files, $file_phids);
+      } else {
+        $files = array();
       }
 
       if (!$files) {
@@ -108,12 +111,41 @@ final class PholioMockEditController extends PholioController {
         }
 
         $sequence = 0;
+        $replaces = $request->getArr('replaces');
+        $replaces_map = array_flip($replaces);
+
+        /**
+         * Foreach file posted, check to see whether we are replacing an image,
+         * adding an image, or simply updating image metadata. Create
+         * transactions for these cases as appropos.
+         */
         foreach ($files as $file_phid => $file) {
-          $mock_image = idx($mock_images, $file_phid);
-          $title = $request->getStr('title_'.$file_phid);
-          $description = $request->getStr('description_'.$file_phid);
-          if (!$mock_image) {
-            // this is an add
+          $replaces_image_phid = null;
+          if (isset($replaces_map[$file_phid])) {
+            $old_file_phid = $replaces_map[$file_phid];
+            $old_image = idx($mock_images, $old_file_phid);
+            if ($old_image) {
+              $replaces_image_phid = $old_image->getPHID();
+            }
+          }
+
+          $existing_image = idx($mock_images, $file_phid);
+
+          $title = (string)$request->getStr('title_'.$file_phid);
+          $description = (string)$request->getStr('description_'.$file_phid);
+
+          if ($replaces_image_phid) {
+            $replace_image = id(new PholioImage())
+              ->setReplacesImagePHID($replaces_image_phid)
+              ->setFilePhid($file_phid)
+              ->setName(strlen($title) ? $title : $file->getName())
+              ->setDescription($description)
+              ->setSequence($sequence);
+            $xactions[] = id(new PholioTransaction())
+              ->setTransactionType(
+                PholioTransactionType::TYPE_IMAGE_REPLACE)
+              ->setNewValue($replace_image);
+         } else if (!$existing_image) { // this is an add
             $add_image = id(new PholioImage())
               ->setFilePhid($file_phid)
               ->setName(strlen($title) ? $title : $file->getName())
@@ -124,22 +156,22 @@ final class PholioMockEditController extends PholioController {
               ->setNewValue(
                 array('+' => array($add_image)));
           } else {
-            // update (maybe)
             $xactions[] = id(new PholioTransaction())
               ->setTransactionType(PholioTransactionType::TYPE_IMAGE_NAME)
               ->setNewValue(
-                array($mock_image->getPHID() => $title));
+                array($existing_image->getPHID() => $title));
             $xactions[] = id(new PholioTransaction())
               ->setTransactionType(
                 PholioTransactionType::TYPE_IMAGE_DESCRIPTION)
-              ->setNewValue(array($mock_image->getPHID() => $description));
-            $mock_image->setSequence($sequence);
+                ->setNewValue(
+                  array($existing_image->getPHID() => $description));
+            $existing_image->setSequence($sequence);
           }
           $sequence++;
         }
         foreach ($mock_images as $file_phid => $mock_image) {
-          if (!isset($files[$file_phid])) {
-            // this is a delete
+          if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {
+            // this is an outright delete
             $xactions[] = id(new PholioTransaction())
               ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
               ->setNewValue(
@@ -194,15 +226,46 @@ final class PholioMockEditController extends PholioController {
 
     $cc_tokens = mpull($handles, 'getFullName', 'getPHID');
 
-    $images_controller =
-      id(new PholioDragAndDropUploadControl($request))
-      ->setUploadURI($this->getApplicationURI('image/upload/'))
-      ->setValue($files)
-      ->setImages($mock_images)
-      ->setName('file_phids')
-      ->setLabel(pht('Images'))
-      ->setActivatedClass('aphront-textarea-drag-and-drop')
-      ->setError($e_images);
+    $image_elements = array();
+    foreach ($mock_images as $mock_image) {
+      $image_elements[] = id(new PholioUploadedImageView())
+        ->setUser($user)
+        ->setImage($mock_image);
+    }
+
+    $list_id = celerity_generate_unique_node_id();
+    $drop_id = celerity_generate_unique_node_id();
+
+    $list_control = phutil_tag(
+      'div',
+      array(
+        'id' => $list_id,
+        'class' => 'pholio-edit-list',
+      ),
+      $image_elements);
+
+    $drop_control = phutil_tag(
+      'div',
+      array(
+        'id' => $drop_id,
+        'class' => 'pholio-edit-drop',
+      ),
+      'Drag and drop images here to add them to the mock.');
+
+    Javelin::initBehavior(
+      'pholio-mock-edit',
+      array(
+        'listID' => $list_id,
+        'dropID' => $drop_id,
+        'uploadURI' => '/file/dropupload/',
+        'renderURI' => $this->getApplicationURI('image/upload/'),
+        'pht' => array(
+          'uploading' => pht('Uploading Image...'),
+          'uploaded' => pht('Upload Complete...'),
+          'undo' => pht('Undo'),
+          'removed' => pht('This image will be removed from the mock.'),
+        ),
+      ));
 
     require_celerity_resource('pholio-edit-css');
     $form = id(new AphrontFormView())
@@ -234,10 +297,16 @@ final class PholioMockEditController extends PholioController {
           ->setPolicyObject($mock)
           ->setPolicies($policies)
           ->setName('can_view'))
-      ->appendChild($images_controller)
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setValue($list_control))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setValue($drop_control)
+          ->setError($e_images))
       ->appendChild($submit);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
+    $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($title)
@@ -249,12 +318,8 @@ final class PholioMockEditController extends PholioController {
       $form,
     );
 
-    $nav = $this->buildSideNav();
-    $nav->selectFilter(null);
-    $nav->appendChild($content);
-
     return $this->buildApplicationPage(
-      $nav,
+      $content,
       array(
         'title' => $title,
         'device' => true,

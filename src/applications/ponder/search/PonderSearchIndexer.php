@@ -14,7 +14,7 @@ final class PonderSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($question->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_QUES);
+    $doc->setDocumentType(PonderPHIDTypeQuestion::TYPECONST);
     $doc->setDocumentTitle($question->getTitle());
     $doc->setDocumentCreated($question->getDateCreated());
     $doc->setDocumentModified($question->getDateModified());
@@ -26,7 +26,7 @@ final class PonderSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $question->getAuthorPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_USER,
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $question->getDateCreated());
 
     $comments = $question->getComments();

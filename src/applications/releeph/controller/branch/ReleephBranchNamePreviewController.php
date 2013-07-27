@@ -1,7 +1,7 @@
 <?php
 
 final class ReleephBranchNamePreviewController
-  extends PhabricatorController {
+  extends ReleephController {
 
   public function processRequest() {
     $request = $this->getRequest();

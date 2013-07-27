@@ -14,15 +14,6 @@ final class PhabricatorProjectStatus {
     return idx($map, coalesce($status, '?'), pht('Unknown'));
   }
 
-  public static function getIconForStatus($status) {
-    $map = array(
-      self::STATUS_ACTIVE     => 'check',
-      self::STATUS_ARCHIVED   => 'disable',
-    );
-
-    return idx($map, $status);
-  }
-
   public static function getStatusMap() {
     return array(
       self::STATUS_ACTIVE   => pht('Active'),

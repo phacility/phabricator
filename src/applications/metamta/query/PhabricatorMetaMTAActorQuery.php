@@ -28,15 +28,18 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
       $actors[$phid] = id(new PhabricatorMetaMTAActor())->setPHID($phid);
     }
 
+    // TODO: Move this to PhabricatorPHIDType, or the objects, or some
+    // interface.
+
     foreach ($type_map as $type => $phids) {
       switch ($type) {
-        case PhabricatorPHIDConstants::PHID_TYPE_USER:
+        case PhabricatorPeoplePHIDTypeUser::TYPECONST:
           $this->loadUserActors($actors, $phids);
           break;
-        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
+        case PhabricatorPeoplePHIDTypeExternal::TYPECONST:
           $this->loadExternalUserActors($actors, $phids);
           break;
-        case PhabricatorPHIDConstants::PHID_TYPE_MLST:
+        case PhabricatorMailingListPHIDTypeList::TYPECONST:
           $this->loadMailingListActors($actors, $phids);
           break;
         default:
@@ -127,9 +130,10 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
   private function loadMailingListActors(array $actors, array $phids) {
     assert_instances_of($actors, 'PhabricatorMetaMTAActor');
 
-    $lists = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
-      'phid IN (%Ls)',
-      $phids);
+    $lists = id(new PhabricatorMailingListQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($phids)
+      ->execute();
     $lists = mpull($lists, null, 'getPHID');
 
     foreach ($phids as $phid) {

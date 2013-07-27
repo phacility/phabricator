@@ -67,14 +67,14 @@ final class PholioMockImagesView extends AphrontView {
       $y = idx($metadata, PhabricatorFile::METADATA_IMAGE_HEIGHT);
 
       $images[] = array(
-        'id'      => $image->getID(),
+        'id' => $image->getID(),
         'fullURI' => $image->getFile()->getBestURI(),
         'pageURI' => '/M'.$mock->getID().'/'.$image->getID().'/',
-        'width'   => $x,
-        'height'  => $y,
-        'title'   => $file->getName(),
-        'desc'    => 'Lorem ipsum dolor sit amet: there is no way to set any '.
-                     'descriptive text yet; were there, it would appear here.',
+        'historyURI' => '/pholio/image/history/'.$image->getID().'/',
+        'width' => $x,
+        'height' => $y,
+        'title' => $image->getName(),
+        'desc' => $image->getDescription(),
       );
     }
 

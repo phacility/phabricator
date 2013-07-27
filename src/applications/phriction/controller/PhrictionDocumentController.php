@@ -25,9 +25,10 @@ final class PhrictionDocumentController
 
     require_celerity_resource('phriction-document-css');
 
-    $document = id(new PhrictionDocument())->loadOneWhere(
-      'slug = %s',
-      $slug);
+    $document = id(new PhrictionDocumentQuery())
+      ->setViewer($user)
+      ->withSlugs(array($slug))
+      ->executeOne();
 
     $version_note = null;
     $core_content = '';

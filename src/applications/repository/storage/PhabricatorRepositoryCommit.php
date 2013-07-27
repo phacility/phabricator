@@ -2,7 +2,8 @@
 
 final class PhabricatorRepositoryCommit
   extends PhabricatorRepositoryDAO
-  implements PhabricatorPolicyInterface,
+  implements
+    PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface {
 
   protected $repositoryID;
@@ -17,7 +18,7 @@ final class PhabricatorRepositoryCommit
   private $commitData;
   private $audits;
   private $isUnparsed;
-  private $repository;
+  private $repository = self::ATTACHABLE;
 
   public function attachRepository(PhabricatorRepository $repository) {
     $this->repository = $repository;
@@ -25,10 +26,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getRepository() {
-    if ($this->repository === null) {
-      throw new Exception("Call attachRepository() before getRepository()!");
-    }
-    return $this->repository;
+    return $this->assertAttached($this->repository);
   }
 
   public function setIsUnparsed($is_unparsed) {
@@ -49,7 +47,7 @@ final class PhabricatorRepositoryCommit
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+      PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
   }
 
   public function loadCommitData() {

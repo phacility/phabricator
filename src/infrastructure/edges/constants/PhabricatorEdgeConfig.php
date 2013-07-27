@@ -57,6 +57,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_DREV_HAS_REVIEWER          = 35;
   const TYPE_REVIEWER_FOR_DREV          = 36;
 
+  const TYPE_MOCK_HAS_TASK              = 37;
+  const TYPE_TASK_HAS_MOCK              = 38;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -115,6 +118,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_SUBSCRIBED_TO_OBJECT,
       self::TYPE_CONTRIBUTED_TO_OBJECT => self::TYPE_OBJECT_HAS_CONTRIBUTOR,
 
+      self::TYPE_TASK_HAS_MOCK => self::TYPE_MOCK_HAS_TASK,
+      self::TYPE_MOCK_HAS_TASK => self::TYPE_TASK_HAS_MOCK,
+
       self::TYPE_PHOB_HAS_ASANATASK => self::TYPE_ASANATASK_HAS_PHOB,
       self::TYPE_ASANATASK_HAS_PHOB => self::TYPE_PHOB_HAS_ASANATASK,
 
@@ -138,30 +144,22 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   }
 
   public static function establishConnection($phid_type, $conn_type) {
+    $map = PhabricatorPHIDType::getAllTypes();
+    if (isset($map[$phid_type])) {
+      $type = $map[$phid_type];
+      $object = $type->newObject();
+      if ($object) {
+        return $object->establishConnection($conn_type);
+      }
+    }
+
     static $class_map = array(
-      PhabricatorPHIDConstants::PHID_TYPE_TASK  => 'ManiphestTask',
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT  => 'PhabricatorRepository',
-      PhabricatorPHIDConstants::PHID_TYPE_DREV  => 'DifferentialRevision',
-      PhabricatorPHIDConstants::PHID_TYPE_FILE  => 'PhabricatorFile',
-      PhabricatorPHIDConstants::PHID_TYPE_USER  => 'PhabricatorUser',
-      PhabricatorPHIDConstants::PHID_TYPE_PROJ  => 'PhabricatorProject',
-      PhabricatorPHIDConstants::PHID_TYPE_MLST  =>
-        'PhabricatorMetaMTAMailingList',
       PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
-      PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
-      PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES  => 'PonderQuestion',
       PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
-      PhabricatorPHIDConstants::PHID_TYPE_MOCK  => 'PholioMock',
-      PhabricatorPHIDConstants::PHID_TYPE_MCRO  => 'PhabricatorFileImageMacro',
-      PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI  => 'PhrictionDocument',
       PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
       PhabricatorPHIDConstants::PHID_TYPE_XOBJ  => 'DoorkeeperExternalObject',
-      PhabricatorPHIDConstants::PHID_TYPE_LEGD  => 'LegalpadDocument',
-      PhabricatorPHIDConstants::PHID_TYPE_POLL  => 'PhabricatorSlowvotePoll',
     );
 
     $class = idx($class_map, $phid_type);
@@ -172,6 +170,279 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     }
 
     return newv($class, array())->establishConnection($conn_type);
+  }
+
+  public static function getEditStringForEdgeType($type) {
+    switch ($type) {
+      case self::TYPE_TASK_HAS_COMMIT:
+      case self::TYPE_PROJECT_HAS_COMMIT:
+      case self::TYPE_DREV_HAS_COMMIT:
+        return '%s edited commit(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_COMMIT_HAS_TASK:
+      case self::TYPE_TASK_DEPENDS_ON_TASK:
+      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
+      case self::TYPE_DREV_HAS_RELATED_TASK:
+      case self::TYPE_MOCK_HAS_TASK:
+        return '%s edited task(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_DREV_DEPENDS_ON_DREV:
+      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
+      case self::TYPE_TASK_HAS_RELATED_DREV:
+      case self::TYPE_COMMIT_HAS_DREV:
+      case self::TYPE_REVIEWER_FOR_DREV:
+        return '%s edited revision(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_BLOG_HAS_POST:
+        return '%s edited post(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_POST_HAS_BLOG:
+      case self::TYPE_BLOGGER_HAS_BLOG:
+        return '%s edited blog(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_BLOG_HAS_BLOGGER:
+        return '%s edited blogger(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_PROJ_MEMBER:
+        return '%s edited member(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_MEMBER_OF_PROJ:
+      case self::TYPE_COMMIT_HAS_PROJECT:
+        return '%s edited project(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_QUESTION_HAS_VOTING_USER:
+      case self::TYPE_ANSWER_HAS_VOTING_USER:
+        return '%s edited voting user(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_VOTING_USER_HAS_QUESTION:
+        return '%s edited question(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_VOTING_USER_HAS_ANSWER:
+        return '%s edited answer(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_OBJECT_HAS_SUBSCRIBER:
+        return '%s edited subscriber(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_SUBSCRIBED_TO_OBJECT:
+      case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
+      case self::TYPE_FILE_HAS_OBJECT:
+      case self::TYPE_CONTRIBUTED_TO_OBJECT:
+        return '%s edited object(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
+        return '%s edited unsubcriber(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_OBJECT_HAS_FILE:
+        return '%s edited file(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_ACCOUNT_HAS_MEMBER:
+        return '%s edited member(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_MEMBER_HAS_ACCOUNT:
+        return '%s edited account(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_PURCAHSE_HAS_CHARGE:
+        return '%s edited charge(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_CHARGE_HAS_PURCHASE:
+        return '%s edited purchase(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
+        return '%s edited contributor(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_DREV_HAS_REVIEWER:
+        return '%s edited reviewer(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_TASK_HAS_MOCK:
+        return '%s edited mock(s), added %d: %s; removed %d: %s.';
+      case self::TYPE_SUBSCRIBED_TO_OBJECT:
+      case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
+      case self::TYPE_FILE_HAS_OBJECT:
+      case self::TYPE_CONTRIBUTED_TO_OBJECT:
+      default:
+        return '%s edited object(s), added %d: %s; removed %d: %s.';
+
+    }
+  }
+
+  public static function getAddStringForEdgeType($type) {
+    switch ($type) {
+      case self::TYPE_TASK_HAS_COMMIT:
+      case self::TYPE_PROJECT_HAS_COMMIT:
+      case self::TYPE_DREV_HAS_COMMIT:
+        return '%s added %d commit(s): %s.';
+      case self::TYPE_COMMIT_HAS_TASK:
+      case self::TYPE_TASK_DEPENDS_ON_TASK:
+      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
+      case self::TYPE_DREV_HAS_RELATED_TASK:
+      case self::TYPE_MOCK_HAS_TASK:
+        return '%s added %d task(s): %s.';
+      case self::TYPE_DREV_DEPENDS_ON_DREV:
+      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
+      case self::TYPE_TASK_HAS_RELATED_DREV:
+      case self::TYPE_COMMIT_HAS_DREV:
+      case self::TYPE_REVIEWER_FOR_DREV:
+        return '%s added %d revision(s): %s.';
+      case self::TYPE_BLOG_HAS_POST:
+        return '%s added %d post(s): %s.';
+      case self::TYPE_POST_HAS_BLOG:
+      case self::TYPE_BLOGGER_HAS_BLOG:
+        return '%s added %d blog(s): %s.';
+      case self::TYPE_BLOG_HAS_BLOGGER:
+        return '%s added %d blogger(s): %s.';
+      case self::TYPE_PROJ_MEMBER:
+        return '%s added %d member(s): %s.';
+      case self::TYPE_MEMBER_OF_PROJ:
+      case self::TYPE_COMMIT_HAS_PROJECT:
+        return '%s added %d project(s): %s.';
+      case self::TYPE_QUESTION_HAS_VOTING_USER:
+      case self::TYPE_ANSWER_HAS_VOTING_USER:
+        return '%s added %d voting user(s): %s.';
+      case self::TYPE_VOTING_USER_HAS_QUESTION:
+        return '%s added %d question(s): %s.';
+      case self::TYPE_VOTING_USER_HAS_ANSWER:
+        return '%s added %d answer(s): %s.';
+      case self::TYPE_OBJECT_HAS_SUBSCRIBER:
+        return '%s added %d subscriber(s): %s.';
+      case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
+        return '%s added %d unsubcriber(s): %s.';
+      case self::TYPE_OBJECT_HAS_FILE:
+        return '%s added %d file(s): %s.';
+      case self::TYPE_ACCOUNT_HAS_MEMBER:
+        return '%s added %d member(s): %s.';
+      case self::TYPE_MEMBER_HAS_ACCOUNT:
+        return '%s added %d account(s): %s.';
+      case self::TYPE_PURCAHSE_HAS_CHARGE:
+        return '%s added %d charge(s): %s.';
+      case self::TYPE_CHARGE_HAS_PURCHASE:
+        return '%s added %d purchase(s): %s.';
+      case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
+        return '%s added %d contributor(s): %s.';
+      case self::TYPE_DREV_HAS_REVIEWER:
+        return '%s added %d reviewer(s): %s.';
+      case self::TYPE_TASK_HAS_MOCK:
+        return '%s added %d mock(s): %s.';
+      case self::TYPE_SUBSCRIBED_TO_OBJECT:
+      case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
+      case self::TYPE_FILE_HAS_OBJECT:
+      case self::TYPE_CONTRIBUTED_TO_OBJECT:
+      default:
+        return '%s added %d object(s): %s.';
+
+    }
+  }
+
+  public static function getRemoveStringForEdgeType($type) {
+    switch ($type) {
+      case self::TYPE_TASK_HAS_COMMIT:
+      case self::TYPE_PROJECT_HAS_COMMIT:
+      case self::TYPE_DREV_HAS_COMMIT:
+        return '%s removed %d commit(s): %s.';
+      case self::TYPE_COMMIT_HAS_TASK:
+      case self::TYPE_TASK_DEPENDS_ON_TASK:
+      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
+      case self::TYPE_DREV_HAS_RELATED_TASK:
+      case self::TYPE_MOCK_HAS_TASK:
+        return '%s removed %d task(s): %s.';
+      case self::TYPE_DREV_DEPENDS_ON_DREV:
+      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
+      case self::TYPE_TASK_HAS_RELATED_DREV:
+      case self::TYPE_COMMIT_HAS_DREV:
+      case self::TYPE_REVIEWER_FOR_DREV:
+        return '%s removed %d revision(s): %s.';
+      case self::TYPE_BLOG_HAS_POST:
+        return '%s removed %d post(s): %s.';
+      case self::TYPE_POST_HAS_BLOG:
+      case self::TYPE_BLOGGER_HAS_BLOG:
+        return '%s removed %d blog(s): %s.';
+      case self::TYPE_BLOG_HAS_BLOGGER:
+        return '%s removed %d blogger(s): %s.';
+      case self::TYPE_PROJ_MEMBER:
+        return '%s removed %d member(s): %s.';
+      case self::TYPE_MEMBER_OF_PROJ:
+      case self::TYPE_COMMIT_HAS_PROJECT:
+        return '%s removed %d project(s): %s.';
+      case self::TYPE_QUESTION_HAS_VOTING_USER:
+      case self::TYPE_ANSWER_HAS_VOTING_USER:
+        return '%s removed %d voting user(s): %s.';
+      case self::TYPE_VOTING_USER_HAS_QUESTION:
+        return '%s removed %d question(s): %s.';
+      case self::TYPE_VOTING_USER_HAS_ANSWER:
+        return '%s removed %d answer(s): %s.';
+      case self::TYPE_OBJECT_HAS_SUBSCRIBER:
+        return '%s removed %d subscriber(s): %s.';
+      case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
+        return '%s removed %d unsubcriber(s): %s.';
+      case self::TYPE_OBJECT_HAS_FILE:
+        return '%s removed %d file(s): %s.';
+      case self::TYPE_ACCOUNT_HAS_MEMBER:
+        return '%s removed %d member(s): %s.';
+      case self::TYPE_MEMBER_HAS_ACCOUNT:
+        return '%s removed %d account(s): %s.';
+      case self::TYPE_PURCAHSE_HAS_CHARGE:
+        return '%s removed %d charge(s): %s.';
+      case self::TYPE_CHARGE_HAS_PURCHASE:
+        return '%s removed %d purchase(s): %s.';
+      case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
+        return '%s removed %d contributor(s): %s.';
+      case self::TYPE_DREV_HAS_REVIEWER:
+        return '%s removed %d reviewer(s): %s.';
+      case self::TYPE_TASK_HAS_MOCK:
+        return '%s removed %d mock(s): %s.';
+      case self::TYPE_SUBSCRIBED_TO_OBJECT:
+      case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
+      case self::TYPE_FILE_HAS_OBJECT:
+      case self::TYPE_CONTRIBUTED_TO_OBJECT:
+      default:
+        return '%s removed %d object(s): %s.';
+
+    }
+  }
+
+  public static function getFeedStringForEdgeType($type) {
+    switch ($type) {
+      case self::TYPE_TASK_HAS_COMMIT:
+      case self::TYPE_PROJECT_HAS_COMMIT:
+      case self::TYPE_DREV_HAS_COMMIT:
+        return '%s updated commits of %s.';
+      case self::TYPE_COMMIT_HAS_TASK:
+      case self::TYPE_TASK_DEPENDS_ON_TASK:
+      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
+      case self::TYPE_DREV_HAS_RELATED_TASK:
+      case self::TYPE_MOCK_HAS_TASK:
+        return '%s updated tasks of %s.';
+      case self::TYPE_DREV_DEPENDS_ON_DREV:
+      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
+      case self::TYPE_TASK_HAS_RELATED_DREV:
+      case self::TYPE_COMMIT_HAS_DREV:
+      case self::TYPE_REVIEWER_FOR_DREV:
+        return '%s updated revisions of %s.';
+      case self::TYPE_BLOG_HAS_POST:
+        return '%s updated posts of %s.';
+      case self::TYPE_POST_HAS_BLOG:
+      case self::TYPE_BLOGGER_HAS_BLOG:
+        return '%s updated blogs of %s.';
+      case self::TYPE_BLOG_HAS_BLOGGER:
+        return '%s updated bloggers of %s.';
+      case self::TYPE_PROJ_MEMBER:
+        return '%s updated members of %s.';
+      case self::TYPE_MEMBER_OF_PROJ:
+      case self::TYPE_COMMIT_HAS_PROJECT:
+        return '%s updated projects of %s.';
+      case self::TYPE_QUESTION_HAS_VOTING_USER:
+      case self::TYPE_ANSWER_HAS_VOTING_USER:
+        return '%s updated voting users of %s.';
+      case self::TYPE_VOTING_USER_HAS_QUESTION:
+        return '%s updated questions of %s.';
+      case self::TYPE_VOTING_USER_HAS_ANSWER:
+        return '%s updated answers of %s.';
+      case self::TYPE_OBJECT_HAS_SUBSCRIBER:
+        return '%s updated subscribers of %s.';
+      case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
+        return '%s updated unsubcribers of %s.';
+      case self::TYPE_OBJECT_HAS_FILE:
+        return '%s updated files of %s.';
+      case self::TYPE_ACCOUNT_HAS_MEMBER:
+        return '%s updated members of %s.';
+      case self::TYPE_MEMBER_HAS_ACCOUNT:
+        return '%s updated accounts of %s.';
+      case self::TYPE_PURCAHSE_HAS_CHARGE:
+        return '%s updated charges of %s.';
+      case self::TYPE_CHARGE_HAS_PURCHASE:
+        return '%s updated purchases of %s.';
+      case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
+        return '%s updated contributors of %s.';
+      case self::TYPE_DREV_HAS_REVIEWER:
+        return '%s updated reviewers of %s.';
+      case self::TYPE_TASK_HAS_MOCK:
+        return '%s updated mocks of %s.';
+      case self::TYPE_SUBSCRIBED_TO_OBJECT:
+      case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
+      case self::TYPE_FILE_HAS_OBJECT:
+      case self::TYPE_CONTRIBUTED_TO_OBJECT:
+      default:
+        return '%s updated objects of %s.';
+
+    }
   }
 
 }

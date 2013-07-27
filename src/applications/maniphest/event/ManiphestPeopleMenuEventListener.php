@@ -15,20 +15,21 @@ final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
   }
 
   private function handleActionsEvent($event) {
-    $person = $event->getValue('object');
-    if (!($person instanceof PhabricatorUser)) {
-      return;
-    }
-
-    $href = '/maniphest/view/action/?users='.$person->getPHID();
-
     $actions = $event->getValue('actions');
 
-    $actions[] = id(new PhabricatorActionView())
+    $action = id(new PhabricatorActionView())
       ->setIcon('maniphest-dark')
       ->setIconSheet(PHUIIconView::SPRITE_APPS)
-      ->setName(pht('View Tasks'))
-      ->setHref($href);
+      ->setName(pht('View Tasks'));
+
+    $object = $event->getValue('object');
+    if ($object instanceof PhabricatorUser) {
+      $href = '/maniphest/view/action/?users='.$object->getPHID();
+      $actions[] = $action->setHref($href);
+    } else if ($object instanceof PhabricatorProject) {
+      $href = '/maniphest/view/all/?projects='.$object->getPHID();
+      $actions[] = $action->setHref($href);
+    }
 
     $event->setValue('actions', $actions);
   }

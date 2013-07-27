@@ -3,6 +3,7 @@
 final class PhabricatorOwnersPackageQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $phids;
   private $ownerPHIDs;
 
   /**
@@ -10,6 +11,11 @@ final class PhabricatorOwnersPackageQuery
    */
   public function withOwnerPHIDs(array $phids) {
     $this->ownerPHIDs = $phids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -39,11 +45,18 @@ final class PhabricatorOwnersPackageQuery
         id(new PhabricatorOwnersOwner())->getTableName());
     }
 
-    return implode('', $joins);
+    return implode(' ', $joins);
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'p.phid IN (%Ls)',
+        $this->phids);
+    }
 
     if ($this->ownerPHIDs) {
       $base_phids = $this->ownerPHIDs;

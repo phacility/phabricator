@@ -84,7 +84,7 @@ final class PhabricatorPolicyFilter {
 
         $policy = $object->getPolicy($capability);
         $type = phid_get_type($policy);
-        if ($type == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+        if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
           $need_projects[] = $policy;
         }
       }
@@ -203,13 +203,13 @@ final class PhabricatorPolicyFilter {
         break;
       default:
         $type = phid_get_type($policy);
-        if ($type == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+        if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
           if (isset($this->userProjects[$viewer->getPHID()][$policy])) {
             return true;
           } else {
             $this->rejectObject($object, $policy, $capability);
           }
-        } else if ($type == PhabricatorPHIDConstants::PHID_TYPE_USER) {
+        } else if ($type == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
           if ($viewer->getPHID() == $policy) {
             return true;
           } else {
@@ -268,10 +268,10 @@ final class PhabricatorPolicyFilter {
           $this->viewer);
 
         $type = phid_get_type($policy);
-        if ($type == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+        if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
           $who = "To {$verb} this object, you must be a member of project ".
                  "'".$handle->getFullName()."'.";
-        } else if ($type == PhabricatorPHIDConstants::PHID_TYPE_USER) {
+        } else if ($type == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
           $who = "Only '".$handle->getFullName()."' can {$verb} this object.";
         } else {
           $who = "It is unclear who can {$verb} this object.";

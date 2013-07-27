@@ -1,21 +1,5 @@
 <?php
 
-/**
- * @deprecated Use javelin_tag().
- */
-function javelin_render_tag(
-  $tag,
-  array $attributes = array(),
-  $content = null) {
-
-  if (is_array($content)) {
-    $content = implode('', $content);
-  }
-
-  $html = javelin_tag($tag, $attributes, phutil_safe_html($content));
-  return $html->getHTMLContent();
-}
-
 function javelin_tag(
   $tag,
   array $attributes = array(),
@@ -81,17 +65,3 @@ function phabricator_form(PhabricatorUser $user, $attributes, $content) {
 
   return javelin_tag('form', $attributes, $body);
 }
-
-
-/**
- * @deprecated
- */
-function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
-  if (is_array($content)) {
-    $content = implode('', $content);
-  }
-
-  $html = phabricator_form($user, $attributes, phutil_safe_html($content));
-  return $html->getHTMLContent();
-}
-

@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorObjectHandle {
+final class PhabricatorObjectHandle
+  implements PhabricatorPolicyInterface {
 
   private $uri;
   private $phid;
@@ -38,6 +39,9 @@ final class PhabricatorObjectHandle {
   }
 
   public function getName() {
+    if ($this->name === null) {
+      return pht('Unknown Object (%s)', $this->getTypeName());
+    }
     return $this->name;
   }
 
@@ -99,27 +103,11 @@ final class PhabricatorObjectHandle {
   }
 
   public function getTypeName() {
-    static $map = array(
-      PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
-      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Task',
-      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Revision',
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Commit',
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Document',
-      PhabricatorPHIDConstants::PHID_TYPE_MCRO => 'Image Macro',
-      PhabricatorPHIDConstants::PHID_TYPE_MOCK => 'Pholio Mock',
-      PhabricatorPHIDConstants::PHID_TYPE_PIMG => 'Pholio Image',
-      PhabricatorPHIDConstants::PHID_TYPE_FILE => 'File',
-      PhabricatorPHIDConstants::PHID_TYPE_BLOG => 'Blog',
-      PhabricatorPHIDConstants::PHID_TYPE_POST => 'Post',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Question',
-      PhabricatorPHIDConstants::PHID_TYPE_PVAR => 'Variable',
-      PhabricatorPHIDConstants::PHID_TYPE_PSTE => 'Paste',
-      PhabricatorPHIDConstants::PHID_TYPE_PROJ => 'Project',
-      PhabricatorPHIDConstants::PHID_TYPE_LEGD => 'Legalpad Document',
-      PhabricatorPHIDConstants::PHID_TYPE_POLL => 'Slowvote',
-    );
+    if ($this->getPHIDType()) {
+      return $this->getPHIDType()->getTypeName();
+    }
 
-    return idx($map, $this->getType(), $this->getType());
+    return $this->getType();
   }
 
 
@@ -209,7 +197,7 @@ final class PhabricatorObjectHandle {
 
   public function getLinkName() {
     switch ($this->getType()) {
-      case PhabricatorPHIDConstants::PHID_TYPE_USER:
+      case PhabricatorPeoplePHIDTypeUser::TYPECONST:
         $name = $this->getName();
         break;
       default:
@@ -217,6 +205,29 @@ final class PhabricatorObjectHandle {
         break;
     }
     return $name;
+  }
+
+  protected function getPHIDType() {
+    $types = PhabricatorPHIDType::getAllTypes();
+    return idx($types, $this->getType());
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_PUBLIC;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

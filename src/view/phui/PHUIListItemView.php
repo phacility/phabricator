@@ -17,10 +17,8 @@ final class PHUIListItemView extends AphrontTagView {
   private $key;
   private $icon;
   private $selected;
-  private $containerAttrs;
   private $disabled;
   private $renderNameAsTooltip;
-
 
   public function setRenderNameAsTooltip($render_name_as_tooltip) {
     $this->renderNameAsTooltip = $render_name_as_tooltip;

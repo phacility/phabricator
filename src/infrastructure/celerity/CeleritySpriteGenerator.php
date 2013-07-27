@@ -577,6 +577,7 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
+        'white' => 'white',
       );
     } else if ($variant == 2) {
       $scales = array(
@@ -592,6 +593,7 @@ final class CeleritySpriteGenerator {
         'light' => 'lb',
         'dark'  => 'dark',
         'blue'  => 'blue',
+        'white' => 'white',
       );
     } else {
       $scales = array(

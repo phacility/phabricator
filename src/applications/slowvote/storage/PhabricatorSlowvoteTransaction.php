@@ -13,7 +13,7 @@ final class PhabricatorSlowvoteTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_POLL;
+    return PhabricatorSlowvotePHIDTypePoll::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

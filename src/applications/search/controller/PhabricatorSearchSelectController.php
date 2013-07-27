@@ -31,7 +31,11 @@ final class PhabricatorSearchSelectController
         break;
       case 'created';
         $query->setParameter('author', array($user->getPHID()));
-        $query->setParameter('open', 1);
+        // TODO - if / when we allow pholio mocks to be archived, etc
+        // update this
+        if ($this->type != PholioPHIDTypeMock::TYPECONST) {
+          $query->setParameter('open', 1);
+        }
         break;
       case 'open':
         $query->setParameter('open', 1);
@@ -63,11 +67,14 @@ final class PhabricatorSearchSelectController
 
     $pattern = null;
     switch ($this->type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+      case ManiphestPHIDTypeTask::TYPECONST:
         $pattern = '/\bT(\d+)\b/i';
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+      case DifferentialPHIDTypeRevision::TYPECONST:
         $pattern = '/\bD(\d+)\b/i';
+        break;
+      case PholioPHIDTypeMock::TYPECONST:
+        $pattern = '/\bM(\d+)\b/i';
         break;
     }
 
@@ -87,13 +94,18 @@ final class PhabricatorSearchSelectController
     }
 
     switch ($this->type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+      case DifferentialPHIDTypeRevision::TYPECONST:
         $objects = id(new DifferentialRevision())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+      case ManiphestPHIDTypeTask::TYPECONST:
         $objects = id(new ManiphestTask())->loadAllWhere(
+          'id IN (%Ld)',
+          $object_ids);
+        break;
+      case PholioPHIDTypeMock::TYPECONST:
+        $objects = id(new PholioMock())->loadAllWhere(
           'id IN (%Ld)',
           $object_ids);
         break;

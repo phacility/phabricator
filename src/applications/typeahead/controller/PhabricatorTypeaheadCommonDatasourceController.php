@@ -198,7 +198,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
     }
 
     if ($need_lists) {
-      $lists = id(new PhabricatorMetaMTAMailingList())->loadAll();
+      $lists = id(new PhabricatorMailingListQuery())
+        ->setViewer($viewer)
+        ->execute();
       foreach ($lists as $list) {
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($list->getName())

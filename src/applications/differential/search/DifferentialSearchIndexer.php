@@ -15,7 +15,7 @@ final class DifferentialSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($rev->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_DREV);
+    $doc->setDocumentType(DifferentialPHIDTypeRevision::TYPECONST);
     $doc->setDocumentTitle($rev->getTitle());
     $doc->setDocumentCreated($rev->getDateCreated());
     $doc->setDocumentModified($rev->getDateModified());
@@ -41,7 +41,7 @@ final class DifferentialSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $rev->getAuthorPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_USER,
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $rev->getDateCreated());
 
     if ($rev->getStatus() != ArcanistDifferentialRevisionStatus::CLOSED &&
@@ -49,7 +49,7 @@ final class DifferentialSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $rev->getPHID(),
-        PhabricatorPHIDConstants::PHID_TYPE_DREV,
+        DifferentialPHIDTypeRevision::TYPECONST,
         time());
     }
 
@@ -79,7 +79,7 @@ final class DifferentialSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_TOUCH,
         $touch,
-        PhabricatorPHIDConstants::PHID_TYPE_USER,
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
         $time);
     }
 
@@ -92,14 +92,14 @@ final class DifferentialSearchIndexer
         $doc->addRelationship(
           PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
           $phid,
-          PhabricatorPHIDConstants::PHID_TYPE_USER,
+          PhabricatorPeoplePHIDTypeUser::TYPECONST,
           $rev->getDateModified()); // Bogus timestamp.
       }
     } else {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $rev->getAuthorPHID(),
-        PhabricatorPHIDConstants::PHID_TYPE_USER,
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
         $rev->getDateCreated());
     }
 

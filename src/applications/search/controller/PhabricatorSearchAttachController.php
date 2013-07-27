@@ -56,25 +56,42 @@ final class PhabricatorSearchAttachController
       $phids = array_values($phids);
 
       if ($edge_type) {
+        $do_txn = $object instanceof PhabricatorApplicationTransactionInterface;
         $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
           $this->phid,
           $edge_type);
         $add_phids = $phids;
         $rem_phids = array_diff($old_phids, $add_phids);
 
-        $editor = id(new PhabricatorEdgeEditor());
-        $editor->setActor($user);
-        foreach ($add_phids as $phid) {
-          $editor->addEdge($this->phid, $edge_type, $phid);
-        }
-        foreach ($rem_phids as $phid) {
-          $editor->removeEdge($this->phid, $edge_type, $phid);
-        }
+        if ($do_txn) {
 
-        try {
-          $editor->save();
-        } catch (PhabricatorEdgeCycleException $ex) {
-          $this->raiseGraphCycleException($ex);
+          $txn_editor = $object->getApplicationTransactionEditor()
+            ->setActor($user)
+            ->setContentSourceFromRequest($request);
+          $txn_template = $object->getApplicationTransactionObject()
+            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+            ->setMetadataValue('edge:type', $edge_type)
+            ->setNewValue(array(
+              '+' => array_fuse($add_phids),
+              '-' => array_fuse($rem_phids)));
+          $txn_editor->applyTransactions($object, array($txn_template));
+
+        } else {
+
+          $editor = id(new PhabricatorEdgeEditor());
+          $editor->setActor($user);
+          foreach ($add_phids as $phid) {
+            $editor->addEdge($this->phid, $edge_type, $phid);
+          }
+          foreach ($rem_phids as $phid) {
+            $editor->removeEdge($this->phid, $edge_type, $phid);
+          }
+
+          try {
+            $editor->save();
+          } catch (PhabricatorEdgeCycleException $ex) {
+            $this->raiseGraphCycleException($ex);
+          }
         }
 
         return id(new AphrontReloadResponse())->setURI($handle->getURI());
@@ -100,12 +117,7 @@ final class PhabricatorSearchAttachController
     $obj_dialog
       ->setUser($user)
       ->setHandles($handles)
-      ->setFilters(array(
-        'assigned' => 'Assigned to Me',
-        'created'  => 'Created By Me',
-        'open'     => 'All Open '.$strings['target_plural_noun'],
-        'all'      => 'All '.$strings['target_plural_noun'],
-      ))
+      ->setFilters($this->getFilters($strings))
       ->setSelectedFilter($strings['selected'])
       ->setExcluded($this->phid)
       ->setCancelURI($handle->getURI())
@@ -186,16 +198,20 @@ final class PhabricatorSearchAttachController
 
   private function getStrings() {
     switch ($this->type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+      case DifferentialPHIDTypeRevision::TYPECONST:
         $noun = 'Revisions';
         $selected = 'created';
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+      case ManiphestPHIDTypeTask::TYPECONST:
         $noun = 'Tasks';
         $selected = 'assigned';
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
+      case PhabricatorRepositoryPHIDTypeCommit::TYPECONST:
         $noun = 'Commits';
+        $selected = 'created';
+        break;
+      case PholioPHIDTypeMock::TYPECONST:
+        $noun = 'Mocks';
         $selected = 'created';
         break;
     }
@@ -234,10 +250,29 @@ final class PhabricatorSearchAttachController
     );
   }
 
+  private function getFilters(array $strings) {
+    if ($this->type == PholioPHIDTypeMock::TYPECONST) {
+      $filters = array(
+        'created' => 'Created By Me',
+        'all' => 'All '.$strings['target_plural_noun'],
+      );
+    } else {
+      $filters = array(
+        'assigned' => 'Assigned to Me',
+        'created' => 'Created By Me',
+        'open' => 'All Open '.$strings['target_plural_noun'],
+        'all' => 'All '.$strings['target_plural_noun'],
+      );
+    }
+
+    return $filters;
+  }
+
   private function getEdgeType($src_type, $dst_type) {
-    $t_cmit = PhabricatorPHIDConstants::PHID_TYPE_CMIT;
-    $t_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
-    $t_drev = PhabricatorPHIDConstants::PHID_TYPE_DREV;
+    $t_cmit = PhabricatorRepositoryPHIDTypeCommit::TYPECONST;
+    $t_task = ManiphestPHIDTypeTask::TYPECONST;
+    $t_drev = DifferentialPHIDTypeRevision::TYPECONST;
+    $t_mock = PholioPHIDTypeMock::TYPECONST;
 
     $map = array(
       $t_cmit => array(
@@ -247,10 +282,14 @@ final class PhabricatorSearchAttachController
         $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
         $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
         $t_drev => PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV,
+        $t_mock => PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK,
       ),
       $t_drev => array(
         $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
         $t_task => PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
+      ),
+      $t_mock => array(
+        $t_task => PhabricatorEdgeConfig::TYPE_MOCK_HAS_TASK,
       ),
     );
 

@@ -47,23 +47,23 @@ final class PhabricatorSearchController
                 $query->setParameter('open', 1);
                 $query->setParameter(
                   'type',
-                  PhabricatorPHIDConstants::PHID_TYPE_DREV);
+                  DifferentialPHIDTypeRevision::TYPECONST);
                 break;
               case PhabricatorSearchScope::SCOPE_OPEN_TASKS:
                 $query->setParameter('open', 1);
                 $query->setParameter(
                   'type',
-                  PhabricatorPHIDConstants::PHID_TYPE_TASK);
+                  ManiphestPHIDTypeTask::TYPECONST);
                 break;
               case PhabricatorSearchScope::SCOPE_WIKI:
                 $query->setParameter(
                   'type',
-                  PhabricatorPHIDConstants::PHID_TYPE_WIKI);
+                  PhrictionPHIDTypeDocument::TYPECONST);
                 break;
               case PhabricatorSearchScope::SCOPE_COMMITS:
                 $query->setParameter(
                   'type',
-                  PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+                  PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
                 break;
               default:
                 break;
@@ -220,10 +220,16 @@ final class PhabricatorSearchController
       $results = $engine->executeSearch($query);
       $results = $pager->sliceResults($results);
 
+      // If there are any objects which match the query by name, and we're
+      // not paging through the results, prefix the results with the named
+      // objects.
       if (!$request->getInt('page')) {
-        $jump = PhabricatorPHID::fromObjectName($query->getQuery(), $user);
-        if ($jump) {
-          array_unshift($results, $jump);
+        $named = id(new PhabricatorObjectQuery())
+          ->setViewer($user)
+          ->withNames(array($query->getQuery()))
+          ->execute();
+        if ($named) {
+          $results = array_merge(array_keys($named), $results);
         }
       }
 

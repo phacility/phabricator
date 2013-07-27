@@ -91,7 +91,7 @@ final class PholioMockEmbedView extends AphrontView {
         'span',
          array(
            'class' =>
-             'pholio-mock-embed-icon sprite-icons icons-'.$icon_name.'-grey',
+             'pholio-mock-embed-icon sprite-icons icons-'.$icon_name.'-white',
          ),
          ' ');
       $count = phutil_tag('span', array(), $icon_value);

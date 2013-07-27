@@ -30,7 +30,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($commit->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+    $doc->setDocumentType(PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
     $doc->setDocumentCreated($date_created);
     $doc->setDocumentModified($date_created);
     $doc->setDocumentTitle($title);
@@ -43,7 +43,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
         $author_phid,
-        PhabricatorPHIDConstants::PHID_TYPE_USER,
+        PhabricatorPeoplePHIDTypeUser::TYPECONST,
         $date_created);
     }
 
@@ -55,7 +55,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
         $doc->addRelationship(
           PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
           $project_phid,
-          PhabricatorPHIDConstants::PHID_TYPE_PROJ,
+          PhabricatorProjectPHIDTypeProject::TYPECONST,
           $date_created);
       }
     }
@@ -63,7 +63,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
       $repository->getPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_REPO,
+      PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
       $date_created);
 
     $comments = id(new PhabricatorAuditComment())->loadAllWhere(

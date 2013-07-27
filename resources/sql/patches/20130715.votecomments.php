@@ -44,7 +44,7 @@ foreach ($comments as $comment) {
     PhabricatorPHIDConstants::PHID_TYPE_XCMT);
   $xaction_phid = PhabricatorPHID::generateNewPHID(
     PhabricatorPHIDConstants::PHID_TYPE_XACT,
-    PhabricatorPHIDConstants::PHID_TYPE_POLL);
+    PhabricatorSlowvotePHIDTypePoll::TYPECONST);
 
   $source = PhabricatorContentSource::newForSource(
     PhabricatorContentSource::SOURCE_LEGACY,

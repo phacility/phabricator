@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group repository
+ */
 final class PhabricatorRepositoryConfigOptions
   extends PhabricatorApplicationConfigOptions {
 

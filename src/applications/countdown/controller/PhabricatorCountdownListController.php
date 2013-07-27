@@ -1,107 +1,69 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdownListController
-  extends PhabricatorCountdownController {
+  extends PhabricatorCountdownController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
-
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorCountdownSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
+    return $this->delegateToController($controller);
+  }
 
-    $query = id(new CountdownQuery())
-      ->setViewer($user);
+  public function renderResultsList(
+    array $countdowns,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($countdowns, 'PhabricatorCountdown');
 
-    $countdowns = $query->executeWithCursorPager($pager);
+    $viewer = $this->getRequest()->getUser();
 
-    $phids = mpull($countdowns, 'getAuthorPHID');
-    $handles = $this->loadViewerHandles($phids);
+    $this->loadHandles(mpull($countdowns, 'getAuthorPHID'));
 
-    $rows = array();
-    foreach ($countdowns as $timer) {
-      $edit_button = null;
-      $delete_button = null;
-      if ($user->getIsAdmin() ||
-          ($user->getPHID() == $timer->getAuthorPHID())) {
-        $edit_button = phutil_tag(
-          'a',
-          array(
-            'class' => 'small button grey',
-            'href' => '/countdown/edit/'.$timer->getID().'/'
-          ),
-          pht('Edit'));
 
-        $delete_button = javelin_tag(
-          'a',
-          array(
-            'class' => 'small button grey',
-            'href' => '/countdown/delete/'.$timer->getID().'/',
-            'sigil' => 'workflow'
-          ),
-          pht('Delete'));
+    $list = new PhabricatorObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($countdowns as $countdown) {
+      $id = $countdown->getID();
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setObjectName("C{$id}")
+        ->setHeader($countdown->getTitle())
+        ->setHref($this->getApplicationURI("{$id}/"))
+        ->addByline(
+          pht(
+            'Created by %s',
+            $this->getHandle($countdown->getAuthorPHID())->renderLink()));
+
+      $epoch = $countdown->getEpoch();
+      if ($epoch >= time()) {
+        $item->addIcon(
+          'none',
+          pht('Ends %s', phabricator_datetime($epoch, $viewer)));
+      } else {
+        $item->addIcon(
+          'delete',
+          pht('Ended %s', phabricator_datetime($epoch, $viewer)));
+        $item->setDisabled(true);
       }
-      $rows[] = array(
-        $timer->getID(),
-        $handles[$timer->getAuthorPHID()]->renderLink(),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/countdown/'.$timer->getID().'/',
-          ),
-          $timer->getTitle()),
-        phabricator_datetime($timer->getEpoch(), $user),
-        $edit_button,
-        $delete_button,
-      );
+
+      $list->addItem($item);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('ID'),
-        pht('Author'),
-        pht('Title'),
-        pht('End Date'),
-        '',
-        ''
-      ));
-
-    $table->setColumnClasses(
-      array(
-        null,
-        null,
-        'wide pri',
-        null,
-        'action',
-        'action',
-      ));
-
-    $panel = id(new AphrontPanelView())
-      ->appendChild($table)
-      ->setHeader(pht('Countdowns'))
-      ->setNoBackground()
-      ->appendChild($pager);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName(pht('All Countdowns'))
-          ->setHref($this->getApplicationURI()));
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $panel
-      ),
-      array(
-        'title' => pht('Countdown'),
-        'device' => true,
-      ));
+    return $list;
   }
+
 }

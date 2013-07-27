@@ -37,7 +37,7 @@ final class PhabricatorPolicy {
 
     $phid_type = phid_get_type($policy_identifier);
     switch ($phid_type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
+      case PhabricatorProjectPHIDTypeProject::TYPECONST:
         $policy->setType(PhabricatorPolicyType::TYPE_PROJECT);
         $policy->setName($handle->getName());
         break;

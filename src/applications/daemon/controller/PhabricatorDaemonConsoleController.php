@@ -11,6 +11,10 @@ final class PhabricatorDaemonConsoleController
       'dateModified > %d',
       time() - (60 * 15));
 
+    $failed = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
+      'failureTime > %d',
+      time() - (60 * 15));
+
     $completed_info = array();
     foreach ($completed as $completed_task) {
       $class = $completed_task->getTaskClass();
@@ -36,6 +40,14 @@ final class PhabricatorDaemonConsoleController
       );
     }
 
+    if ($failed) {
+      $rows[] = array(
+        phutil_tag('em', array(), pht('Temporary Failures')),
+        count($failed),
+        null,
+      );
+    }
+
     $completed_table = new AphrontTableView($rows);
     $completed_table->setNoDataString(
       pht('No tasks have completed in the last 15 minutes.'));
@@ -52,23 +64,24 @@ final class PhabricatorDaemonConsoleController
         'n',
       ));
 
+    $completed_header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Recently Completed Tasks (Last 15m)'));
+
     $completed_panel = new AphrontPanelView();
-    $completed_panel->setHeader(pht('Recently Completed Tasks (15m)'));
     $completed_panel->appendChild($completed_table);
     $completed_panel->setNoBackground();
 
-    $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
-      '`status` = %s ORDER BY id DESC',
-      'run');
+    $logs = id(new PhabricatorDaemonLogQuery())
+      ->setViewer($user)
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->execute();
+
+    $daemon_header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Active Daemons'));
 
     $daemon_table = new PhabricatorDaemonLogListView();
     $daemon_table->setUser($user);
     $daemon_table->setDaemonLogs($logs);
-
-    $daemon_panel = new AphrontPanelView();
-    $daemon_panel->setHeader(pht('Active Daemons'));
-    $daemon_panel->appendChild($daemon_table);
-    $daemon_panel->setNoBackground();
 
     $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'leaseOwner IS NOT NULL');
@@ -150,12 +163,20 @@ final class PhabricatorDaemonConsoleController
     $queued_panel->appendChild($queued_table);
     $queued_panel->setNoBackground();
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('Console')));
+
     $nav = $this->buildSideNavView();
     $nav->selectFilter('/');
     $nav->appendChild(
       array(
+        $crumbs,
+        $completed_header,
         $completed_panel,
-        $daemon_panel,
+        $daemon_header,
+        $daemon_table,
         $queued_panel,
         $leased_panel,
       ));
@@ -164,6 +185,7 @@ final class PhabricatorDaemonConsoleController
       $nav,
       array(
         'title' => pht('Console'),
+        'dust' => true,
       ));
   }
 

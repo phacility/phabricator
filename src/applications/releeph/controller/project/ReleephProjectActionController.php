@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectActionController extends ReleephController {
+final class ReleephProjectActionController extends ReleephProjectController {
 
   private $action;
 

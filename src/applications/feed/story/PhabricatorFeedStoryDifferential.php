@@ -74,4 +74,31 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
         => 'PhabricatorFeedStoryDifferentialAggregate',
     );
   }
+
+  // TODO: At some point, make feed rendering not terrible and remove this
+  // hacky mess.
+  public function renderForAsanaBridge() {
+    $data = $this->getStoryData();
+    $comment = $data->getValue('feedback_content');
+
+    $author_name = $this->getHandle($this->getAuthorPHID())->getName();
+    $action = $this->getValue('action');
+    $verb = DifferentialAction::getActionPastTenseVerb($action);
+
+    $title = "{$author_name} {$verb} this revision.";
+    if (strlen($comment)) {
+      $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
+        ->setConfig('viewer', new PhabricatorUser())
+        ->setMode(PhutilRemarkupEngine::MODE_TEXT);
+
+      $comment = $engine->markupText($comment);
+
+      $title .= "\n\n";
+      $title .= $comment;
+    }
+
+    return $title;
+  }
+
+
 }

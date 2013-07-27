@@ -139,7 +139,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     if ($this->ids) {
       $where[] = qsprintf(
         $conn_w,
-        'task.id IN (%Ld)',
+        'id IN (%Ld)',
         $this->ids);
     }
 

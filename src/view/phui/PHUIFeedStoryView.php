@@ -189,7 +189,13 @@ final class PHUIFeedStoryView extends AphrontView {
     }
 
     if ($this->epoch) {
-      $foot = phabricator_datetime($this->epoch, $this->user);
+      // TODO: This is really bad; when rendering through Conduit and via
+      // renderText() we don't have a user.
+      if ($this->user) {
+        $foot = phabricator_datetime($this->epoch, $this->user);
+      } else {
+        $foot = null;
+      }
     } else {
       $foot = pht('No time specified.');
     }
@@ -228,10 +234,10 @@ final class PHUIFeedStoryView extends AphrontView {
 
   public function setAppIconFromPHID($phid) {
     switch (phid_get_type($phid)) {
-      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+      case PholioPHIDTypeMock::TYPECONST:
         $this->setAppIcon("pholio-dark");
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+      case PhabricatorMacroPHIDTypeMacro::TYPECONST:
         $this->setAppIcon("macro-dark");
         break;
     }

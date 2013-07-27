@@ -3,7 +3,8 @@
 /**
  * @group countdown
  */
-final class PhabricatorCountdown extends PhabricatorCountdownDAO
+final class PhabricatorCountdown
+  extends PhabricatorCountdownDAO
   implements PhabricatorPolicyInterface {
 
   protected $id;
@@ -20,18 +21,22 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('CDWN');
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorCountdownPHIDTypeCountdown::TYPECONST);
   }
 
   public function getViewPolicy() {
-    return "users";
+    return PhabricatorPolicies::POLICY_USER;
   }
 
-/* -(  PhabricatorPolicyInterface Implementation  )------------------------- */
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(
-      PhabricatorPolicyCapability::CAN_VIEW
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -39,6 +44,8 @@ final class PhabricatorCountdown extends PhabricatorCountdownDAO
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
     }
   }
 

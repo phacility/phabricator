@@ -75,11 +75,23 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return $this;
   }
 
+  public function withIDs(array $ids) {
+    $this->taskIDs = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->taskPHIDs = $phids;
+    return $this;
+  }
+
+  // TODO: Deprecated in favor of `withIDs()`.
   public function withTaskIDs(array $ids) {
     $this->taskIDs = $ids;
     return $this;
   }
 
+  // TODO: Deprecated in favor of `withPHIDs()`.
   public function withTaskPHIDs(array $phids) {
     $this->taskPHIDs = $phids;
     return $this;

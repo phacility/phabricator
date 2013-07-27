@@ -68,10 +68,6 @@ final class PhabricatorExternalAccountQuery
   }
 
   public function willFilterPage(array $accounts) {
-    if (!$accounts) {
-      return $accounts;
-    }
-
     if ($this->needImages) {
       $file_phids = mpull($accounts, 'getProfileImagePHID');
       $file_phids = array_filter($file_phids);

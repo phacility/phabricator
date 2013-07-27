@@ -15,25 +15,22 @@ final class PhabricatorCountdownEditController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $action_label = pht('Create Countdown');
 
     if ($this->id) {
-      $countdown = id(new CountdownQuery())
+      $countdown = id(new PhabricatorCountdownQuery())
         ->setViewer($user)
         ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->executeOne();
 
       // If no countdown is found
       if (!$countdown) {
         return new Aphront404Response();
       }
-
-      if (($countdown->getAuthorPHID() != $user->getPHID())
-          && $user->getIsAdmin() == false) {
-        return new Aphront403Response();
-      }
-
-      $action_label = pht('Update Countdown');
     } else {
       $countdown = new PhabricatorCountdown();
       $countdown->setEpoch(time());
@@ -87,9 +84,31 @@ final class PhabricatorCountdownEditController
       $display_epoch = $request->getStr('epoch');
     }
 
+    $crumbs = $this->buildApplicationCrumbs();
+
+    $cancel_uri = '/countdown/';
+    if ($countdown->getID()) {
+      $cancel_uri = '/countdown/'.$countdown->getID().'/';
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName('C'.$countdown->getID())
+          ->setHref($cancel_uri));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Edit')));
+      $submit_label = pht('Save Changes');
+    } else {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Create Countdown')));
+      $submit_label = pht('Create Countdown');
+    }
+
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
@@ -97,7 +116,7 @@ final class PhabricatorCountdownEditController
           ->setName('title'))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('End date'))
+          ->setLabel(pht('End Date'))
           ->setValue($display_epoch)
           ->setName('epoch')
           ->setCaption(pht('Examples: '.
@@ -105,31 +124,20 @@ final class PhabricatorCountdownEditController
             'June 8 2011, 5 PM.')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/countdown/')
-          ->setValue($action_label));
+          ->addCancelButton($cancel_uri)
+          ->setValue($submit_label));
 
-    $panel = id(new AphrontPanelView())
-      ->setWidth(AphrontPanelView::WIDTH_FORM)
-      ->setHeader($action_label)
-      ->setNoBackground()
-      ->appendChild($form);
-
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($action_label)
-          ->setHref($this->getApplicationURI('edit/')));
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $error_view,
-        $panel,
+        $form,
       ),
       array(
         'title' => pht('Edit Countdown'),
         'device' => true,
+        'dust' => true,
       ));
   }
 }

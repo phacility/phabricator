@@ -13,6 +13,16 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
   private $readOnly;
   private $customClass;
   private $placeHolder;
+  private $sigil;
+
+  public function setSigil($sigil) {
+    $this->sigil = $sigil;
+    return $this;
+  }
+
+  public function getSigil() {
+    return $this->sigil;
+  }
 
   public function setPlaceHolder($place_holder) {
     $this->placeHolder = $place_holder;
@@ -61,7 +71,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
     $classes[] = $this->customClass;
     $classes = trim(implode(' ', $classes));
 
-    return phutil_tag(
+    return javelin_tag(
       'textarea',
       array(
         'name'        => $this->getName(),
@@ -70,6 +80,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
         'class'       => $classes,
         'style'       => $this->getControlStyle(),
         'id'          => $this->getID(),
+        'sigil'       => $this->sigil,
         'placeholder' => $this->getPlaceHolder(),
       ),
       // NOTE: This needs to be string cast, because if we pass `null` the

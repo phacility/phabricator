@@ -141,6 +141,13 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
 
     $ancient_config = array_fill_keys($auth_config, $reason_auth);
 
+    $ancient_config += array(
+      'phid.external-loaders' =>
+        pht(
+          'External loaders have been replaced. Extend `PhabricatorPHIDType` '.
+          'to implement new PHID and handle types.'),
+    );
+
     return $ancient_config;
   }
 }

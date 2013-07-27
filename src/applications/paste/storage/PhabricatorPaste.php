@@ -26,7 +26,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PSTE);
+      PhabricatorPastePHIDTypePaste::TYPECONST);
   }
 
   public function getCapabilities() {

@@ -1,7 +1,7 @@
 <?php
 
 final class ReleephRequestDifferentialCreateController
-  extends ReleephController {
+  extends ReleephProjectController {
 
   private $revision;
 

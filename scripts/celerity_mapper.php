@@ -141,7 +141,6 @@ $package_spec = array(
     'javelin-behavior-differential-comment-jump',
     'javelin-behavior-differential-add-reviewers-and-ccs',
     'javelin-behavior-differential-keyboard-navigation',
-    'javelin-behavior-aphront-drag-and-drop',
     'javelin-behavior-aphront-drag-and-drop-textarea',
     'javelin-behavior-phabricator-object-selector',
     'javelin-behavior-repository-crossreference',
@@ -164,7 +163,6 @@ $package_spec = array(
   'maniphest.pkg.css' => array(
     'maniphest-task-summary-css',
     'maniphest-transaction-detail-css',
-    'aphront-attached-file-view-css',
     'phabricator-project-tag-css',
   ),
   'maniphest.pkg.js' => array(

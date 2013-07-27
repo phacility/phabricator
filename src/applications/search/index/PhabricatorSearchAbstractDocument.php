@@ -15,12 +15,12 @@ final class PhabricatorSearchAbstractDocument {
 
   public static function getSupportedTypes() {
     return array(
-      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
-      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',
-      PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
-      PhabricatorPHIDConstants::PHID_TYPE_QUES => 'Ponder Questions',
+      DifferentialPHIDTypeRevision::TYPECONST => 'Differential Revisions',
+      PhabricatorRepositoryPHIDTypeCommit::TYPECONST => 'Repository Commits',
+      ManiphestPHIDTypeTask::TYPECONST => 'Maniphest Tasks',
+      PhrictionPHIDTypeDocument::TYPECONST => 'Phriction Documents',
+      PhabricatorPeoplePHIDTypeUser::TYPECONST => 'Phabricator Users',
+      PonderPHIDTypeQuestion::TYPECONST => 'Ponder Questions',
     );
   }
 
