@@ -13,7 +13,10 @@ final class PonderQuestionViewController extends PonderController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $question = PonderQuestionQuery::loadSingle($user, $this->questionID);
+    $question = id(new PonderQuestionQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->questionID))
+      ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }

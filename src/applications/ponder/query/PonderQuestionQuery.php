@@ -47,28 +47,6 @@ final class PonderQuestionQuery
     return $this;
   }
 
-  public static function loadSingle($viewer, $id) {
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadSingle");
-    }
-
-    return idx(id(new PonderQuestionQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($id))
-      ->execute(), $id);
-  }
-
-  public static function loadSingleByPHID($viewer, $phid) {
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadSingle");
-    }
-
-    return array_shift(id(new PonderQuestionQuery())
-      ->withPHIDs(array($phid))
-      ->setViewer($viewer)
-      ->execute());
-  }
-
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 

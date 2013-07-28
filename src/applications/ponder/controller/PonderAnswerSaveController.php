@@ -4,29 +4,31 @@ final class PonderAnswerSaveController extends PonderController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
+
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
-    $user = $request->getUser();
     $question_id = $request->getInt('question_id');
-    $question = PonderQuestionQuery::loadSingle($user, $question_id);
-
+    $question = id(new PonderQuestionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($question_id))
+      ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }
 
     $answer = $request->getStr('answer');
 
-    // Only want answers with some non whitespace content
     if (!strlen(trim($answer))) {
-      $dialog = new AphrontDialogView();
-      $dialog->setUser($request->getUser());
-      $dialog->setTitle(pht('Empty Answer'));
-      $dialog->appendChild(
-        phutil_tag('p', array(), pht(
-        'Your answer must not be empty.')));
-      $dialog->addCancelButton('/Q'.$question_id);
+      $dialog = id(new AphrontDialogView())
+        ->setUser($viewer)
+        ->setTitle(pht('Empty Answer'))
+        ->appendChild(
+          phutil_tag('p', array(), pht(
+          'Your answer must not be empty.')))
+        ->addCancelButton('/Q'.$question_id);
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
@@ -40,13 +42,13 @@ final class PonderAnswerSaveController extends PonderController {
     $res = new PonderAnswer();
     $res
       ->setContent($answer)
-      ->setAuthorPHID($user->getPHID())
+      ->setAuthorPHID($viewer->getPHID())
       ->setVoteCount(0)
       ->setQuestionID($question_id)
       ->setContentSource($content_source);
 
     id(new PonderAnswerEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setQuestion($question)
       ->setAnswer($res)
       ->saveAnswer();

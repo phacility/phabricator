@@ -10,8 +10,10 @@ final class PonderCommentSaveController extends PonderController {
 
     $user = $request->getUser();
     $question_id = $request->getInt('question_id');
-    $question = PonderQuestionQuery::loadSingle($user, $question_id);
-
+    $question = id(new PonderQuestionQuery())
+      ->setViewer($user)
+      ->withIDs(array($question_id))
+      ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }
