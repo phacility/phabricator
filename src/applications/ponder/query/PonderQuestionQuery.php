@@ -12,6 +12,11 @@ final class PonderQuestionQuery
   private $answererPHIDs;
   private $order = self::ORDER_CREATED;
 
+  private $status = 'status-any';
+  const STATUS_ANY      = 'status-any';
+  const STATUS_OPEN     = 'status-open';
+  const STATUS_CLOSED   = 'status-closed';
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -24,6 +29,11 @@ final class PonderQuestionQuery
 
   public function withAuthorPHIDs(array $phids) {
     $this->authorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withStatus($status) {
+    $this->status = $status;
     return $this;
   }
 
@@ -81,6 +91,27 @@ final class PonderQuestionQuery
         $conn_r,
         'q.authorPHID IN (%Ls)',
         $this->authorPHIDs);
+    }
+
+    if ($this->status) {
+      switch ($this->status) {
+        case self::STATUS_ANY:
+          break;
+        case self::STATUS_OPEN:
+          $where[] = qsprintf(
+            $conn_r,
+            'q.status = %d',
+            PonderQuestionStatus::STATUS_OPEN);
+          break;
+        case self::STATUS_CLOSED:
+          $where[] = qsprintf(
+            $conn_r,
+            'q.status = %d',
+            PonderQuestionStatus::STATUS_CLOSED);
+          break;
+        default:
+          throw new Exception("Unknown status query '{$this->status}'!");
+      }
     }
 
     $where[] = $this->buildPagingClause($conn_r);

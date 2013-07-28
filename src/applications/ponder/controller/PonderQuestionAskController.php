@@ -17,6 +17,7 @@ final class PonderQuestionAskController extends PonderController {
     if ($request->isFormPost()) {
       $question->setTitle($request->getStr('title'));
       $question->setContent($request->getStr('content'));
+      $question->setStatus(PonderQuestionStatus::STATUS_OPEN);
 
       $len = phutil_utf8_strlen($question->getTitle());
       if ($len < 1) {

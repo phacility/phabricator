@@ -55,7 +55,7 @@ final class PonderAnswerListView extends AphrontView {
       $view
         ->setQuestion($question)
         ->setTarget($cur_answer)
-        ->setAction(PonderConstants::ANSWERED_LITERAL)
+        ->setAction(PonderLiterals::LITERAL_ANSWERED)
         ->setHandles($handles)
         ->setUser($user);
 

@@ -92,10 +92,34 @@ final class PonderQuestionViewController extends PonderController {
 
   private function buildActionListView(PonderQuestion $question) {
     $request = $this->getRequest();
-    return id(new PhabricatorActionListView())
-      ->setUser($request->getUser())
+    $user = $request->getUser();
+
+    $action_list = id(new PhabricatorActionListView())
+      ->setUser($user)
       ->setObject($question)
       ->setObjectURI($request->getRequestURI());
+
+    if ($user->getPhid() === $question->getAuthorPhid()) {
+      if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
+        $name = pht("Close Question");
+        $icon = "delete";
+        $href = "close";
+      } else {
+        $name = pht("Open Question");
+        $icon = "enable";
+        $href = "open";
+      }
+      $action_list->addAction(
+        id(new PhabricatorActionView())
+          ->setName($name)
+          ->setIcon($icon)
+          ->setRenderAsForm(true)
+          ->setHref(
+            $this->getApplicationURI(
+              "/question/{$href}/{$this->questionID}/")));
+    }
+
+    return $action_list;
   }
 
   private function buildPropertyListView(
@@ -105,6 +129,11 @@ final class PonderQuestionViewController extends PonderController {
     $view = id(new PhabricatorPropertyListView())
       ->setUser($viewer)
       ->setObject($question);
+
+    $view->addProperty(
+      pht('Status'),
+      PonderQuestionStatus::getQuestionStatusFullName($question->getStatus()));
+
     $view->addProperty(
       pht('Author'),
       $this->getHandle($question->getAuthorPHID())->renderLink());

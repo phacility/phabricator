@@ -30,7 +30,7 @@ final class PonderQuestionDetailView extends AphrontView {
       ->setQuestion($question)
       ->setUser($user)
       ->setHandles($handles)
-      ->setAction(PonderConstants::ASKED_LITERAL);
+      ->setAction(PonderLiterals::LITERAL_ASKED);
 
     $commentview = new PonderCommentListView();
     $commentview

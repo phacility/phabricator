@@ -14,6 +14,7 @@ final class PonderQuestion extends PonderDAO
   protected $phid;
 
   protected $authorPHID;
+  protected $status;
   protected $content;
   protected $contentSource;
 
@@ -95,7 +96,7 @@ final class PonderQuestion extends PonderDAO
   public function setUserVote($vote) {
     $this->vote = $vote['data'];
     if (!$this->vote) {
-      $this->vote = PonderConstants::NONE_VOTE;
+      $this->vote = PonderVote::VOTE_NONE;
     }
     return $this;
   }

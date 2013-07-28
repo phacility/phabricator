@@ -45,6 +45,9 @@ final class PonderQuestionListController extends PonderController
       $item->setHeader($question->getTitle());
       $item->setHref('/Q'.$question->getID());
       $item->setObject($question);
+      $item->setBarColor(
+        PonderQuestionStatus::getQuestionStatusTagColor(
+          $question->getStatus()));
 
       $created_date = phabricator_date($question->getDateCreated(), $viewer);
       $item->addIcon('none', $created_date);

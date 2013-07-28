@@ -29,7 +29,7 @@ final class PonderAnswerPreviewController
       ->setPreview(true)
       ->setUser($user)
       ->setHandles($handles)
-      ->setAction(PonderConstants::ANSWERED_LITERAL);
+      ->setAction(PonderLiterals::LITERAL_ANSWERED);
 
     return id(new AphrontAjaxResponse())
       ->setContent($view->render());

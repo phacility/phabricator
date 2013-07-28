@@ -29,7 +29,7 @@ final class PonderAnswer extends PonderDAO
   public function setUserVote($vote) {
     $this->vote = $vote['data'];
     if (!$this->vote) {
-      $this->vote = PonderConstants::NONE_VOTE;
+      $this->vote = PonderVote::VOTE_NONE;
     }
     return $this;
   }
