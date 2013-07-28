@@ -3857,7 +3857,7 @@ celerity_register_resource_map(array(
   ),
   'phui-list-view-css' =>
   array(
-    'uri' => '/res/09f24365/rsrc/css/phui/phui-list.css',
+    'uri' => '/res/3235e888/rsrc/css/phui/phui-list.css',
     'type' => 'css',
     'requires' =>
     array(
