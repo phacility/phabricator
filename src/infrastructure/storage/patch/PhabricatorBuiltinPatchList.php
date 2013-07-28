@@ -1487,6 +1487,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130726.ponderxactions.sql'),
       ),
+      '20130728.ponderunique.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130728.ponderunique.php'),
+      ),
+      '20130728.ponderuniquekey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130728.ponderuniquekey.sql'),
+      ),
     );
   }
 }

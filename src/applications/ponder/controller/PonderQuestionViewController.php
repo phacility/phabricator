@@ -27,11 +27,18 @@ final class PonderQuestionViewController extends PonderController {
     $question_xactions = $this->buildQuestionTransactions($question);
     $answers = $this->buildAnswers($question->getAnswers());
 
-    $answer_add_panel = new PonderAddAnswerView();
-    $answer_add_panel
-      ->setQuestion($question)
-      ->setUser($user)
-      ->setActionURI("/ponder/answer/add/");
+    $authors = mpull($question->getAnswers(), null, 'getAuthorPHID');
+    if (isset($authors[$user->getPHID()])) {
+      // TODO: Make this pretty
+      $answer_add_panel = pht(
+        'You have already answered this question.');
+    } else {
+      $answer_add_panel = new PonderAddAnswerView();
+      $answer_add_panel
+        ->setQuestion($question)
+        ->setUser($user)
+        ->setActionURI("/ponder/answer/add/");
+    }
 
     $header = id(new PhabricatorHeaderView())
       ->setHeader($question->getTitle());
@@ -268,10 +275,15 @@ final class PonderQuestionViewController extends PonderController {
     $view->invokeWillRenderEvent();
 
     $view->addTextContent(
-      PhabricatorMarkupEngine::renderOneObject(
-        $answer,
-        $answer->getMarkupField(),
-        $viewer));
+      phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        PhabricatorMarkupEngine::renderOneObject(
+          $answer,
+          $answer->getMarkupField(),
+          $viewer)));
 
     return $view;
   }
