@@ -41,11 +41,7 @@ final class PonderQuestionViewController extends PonderController {
     $this->loadHandles($object_phids);
     $handles = $this->getLoadedHandles();
 
-    $detail_panel = new PonderQuestionDetailView();
-    $detail_panel
-      ->setQuestion($question)
-      ->setUser($user)
-      ->setHandles($handles);
+    $question_xactions = $this->buildQuestionTransactions($question);
 
     $responses_panel = new PonderAnswerListView();
     $responses_panel
@@ -79,7 +75,7 @@ final class PonderQuestionViewController extends PonderController {
         $header,
         $actions,
         $properties,
-        $detail_panel,
+        $question_xactions,
         $responses_panel,
         $answer_add_panel
       ),
@@ -92,34 +88,48 @@ final class PonderQuestionViewController extends PonderController {
 
   private function buildActionListView(PonderQuestion $question) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $action_list = id(new PhabricatorActionListView())
-      ->setUser($user)
+    $id = $question->getID();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $question,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($request->getUser())
       ->setObject($question)
       ->setObjectURI($request->getRequestURI());
 
-    if ($user->getPhid() === $question->getAuthorPhid()) {
-      if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
-        $name = pht("Close Question");
-        $icon = "delete";
-        $href = "close";
-      } else {
-        $name = pht("Open Question");
-        $icon = "enable";
-        $href = "open";
-      }
-      $action_list->addAction(
-        id(new PhabricatorActionView())
-          ->setName($name)
-          ->setIcon($icon)
-          ->setRenderAsForm(true)
-          ->setHref(
-            $this->getApplicationURI(
-              "/question/{$href}/{$this->questionID}/")));
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setName(pht('Edit Question'))
+        ->setHref($this->getApplicationURI("/question/edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
+      $name = pht("Close Question");
+      $icon = "delete";
+      $href = "close";
+    } else {
+      $name = pht("Reopen Question");
+      $icon = "enable";
+      $href = "open";
     }
 
-    return $action_list;
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName($name)
+        ->setIcon($icon)
+        ->setRenderAsForm($can_edit)
+        ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit)
+        ->setHref($this->getApplicationURI("/question/{$href}/{$id}/")));
+
+    return $view;
   }
 
   private function buildPropertyListView(
@@ -142,6 +152,45 @@ final class PonderQuestionViewController extends PonderController {
       pht('Created'),
       phabricator_datetime($question->getDateCreated(), $viewer));
 
+    $view->invokeWillRenderEvent();
+
+    $view->addTextContent(
+      PhabricatorMarkupEngine::renderOneObject(
+        $question,
+        $question->getMarkupField(),
+        $viewer));
+
+
     return $view;
   }
+
+  private function buildQuestionTransactions(PonderQuestion $question) {
+    $viewer = $this->getRequest()->getUser();
+
+    $xactions = id(new PonderQuestionTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($question->getPHID()))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
+    // TODO: Add comment form.
+
+    return $timeline;
+  }
+
 }

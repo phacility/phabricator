@@ -52,7 +52,7 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PonderQuestionListController',
         'answer/add/' => 'PonderAnswerSaveController',
         'answer/preview/' => 'PonderAnswerPreviewController',
-        'question/ask/' => 'PonderQuestionAskController',
+        'question/edit/(?:(?P<id>\d+)/)?' => 'PonderQuestionEditController',
         'question/preview/' => 'PonderQuestionPreviewController',
         'question/(?P<status>open|close)/(?P<id>[1-9]\d*)/' =>
           'PonderQuestionStatusController',

@@ -1,53 +1,76 @@
 <?php
 
-final class PonderQuestionEditor extends PhabricatorEditor {
+final class PonderQuestionEditor
+  extends PhabricatorApplicationTransactionEditor {
 
-  private $question;
-  private $shouldEmail = true;
+  public function getTransactionTypes() {
+    $types = parent::getTransactionTypes();
 
-  public function setQuestion(PonderQuestion $question) {
-    $this->question = $question;
-    return $this;
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PonderQuestionTransaction::TYPE_TITLE;
+    $types[] = PonderQuestionTransaction::TYPE_CONTENT;
+
+    return $types;
   }
+  protected function getCustomTransactionOldValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-  public function setShouldEmail($se) {
-    $this->shouldEmail = $se;
-    return $this;
-  }
-
-  public function save() {
-    $actor = $this->requireActor();
-    if (!$this->question) {
-      throw new Exception("Must set question before saving it");
-    }
-
-    $question = $this->question;
-    $question->save();
-
-    $question->attachRelated();
-    id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($question->getPHID());
-
-    // subscribe author and @mentions
-    $subeditor = id(new PhabricatorSubscriptionsEditor())
-      ->setObject($question)
-      ->setActor($actor);
-
-    $subeditor->subscribeExplicit(array($question->getAuthorPHID()));
-
-    $content = $question->getContent();
-    $at_mention_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      array($content));
-    $subeditor->subscribeImplicit($at_mention_phids);
-    $subeditor->save();
-
-    if ($this->shouldEmail && $at_mention_phids) {
-      id(new PonderMentionMail(
-         $question,
-         $question,
-         $actor))
-        ->setToPHIDs($at_mention_phids)
-        ->send();
+    switch ($xaction->getTransactionType()) {
+      case PonderQuestionTransaction::TYPE_TITLE:
+        return $object->getTitle();
+      case PonderQuestionTransaction::TYPE_CONTENT:
+        return $object->getContent();
     }
   }
+
+  protected function getCustomTransactionNewValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PonderQuestionTransaction::TYPE_TITLE:
+      case PonderQuestionTransaction::TYPE_CONTENT:
+        return $xaction->getNewValue();
+    }
+  }
+
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PonderQuestionTransaction::TYPE_TITLE:
+        $object->setTitle($xaction->getNewValue());
+        break;
+      case PonderQuestionTransaction::TYPE_CONTENT:
+        $object->setContent($xaction->getNewValue());
+        break;
+    }
+  }
+
+  protected function applyCustomExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return;
+  }
+
+  protected function mergeTransactions(
+    PhabricatorApplicationTransaction $u,
+    PhabricatorApplicationTransaction $v) {
+
+    $type = $u->getTransactionType();
+    switch ($type) {
+      case PonderQuestionTransaction::TYPE_TITLE:
+      case PonderQuestionTransaction::TYPE_CONTENT:
+        return $v;
+    }
+
+    return parent::mergeTransactions($u, $v);
+  }
+
+  // TODO: Feed support
+  // TODO: Mail support
+  // TODO: Add/remove answers
+
 }

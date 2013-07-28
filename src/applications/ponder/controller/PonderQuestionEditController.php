@@ -1,25 +1,49 @@
 <?php
 
-final class PonderQuestionAskController extends PonderController {
+final class PonderQuestionEditController extends PonderController {
+
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = idx($data, 'id');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $question = id(new PonderQuestion())
-      ->setAuthorPHID($user->getPHID())
-      ->setVoteCount(0)
-      ->setAnswerCount(0)
-      ->setHeat(0.0);
+    if ($this->id) {
+      $question = id(new PonderQuestionQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$question) {
+        return new Aphront404Response();
+      }
+    } else {
+      $question = id(new PonderQuestion())
+        ->setStatus(PonderQuestionStatus::STATUS_OPEN)
+        ->setAuthorPHID($user->getPHID())
+        ->setVoteCount(0)
+        ->setAnswerCount(0)
+        ->setHeat(0.0);
+    }
+
+    $v_title = $question->getTitle();
+    $v_content = $question->getContent();
 
     $errors = array();
     $e_title = true;
     if ($request->isFormPost()) {
-      $question->setTitle($request->getStr('title'));
-      $question->setContent($request->getStr('content'));
-      $question->setStatus(PonderQuestionStatus::STATUS_OPEN);
+      $v_title = $request->getStr('title');
+      $v_content = $request->getStr('content');
 
-      $len = phutil_utf8_strlen($question->getTitle());
+      $len = phutil_utf8_strlen($v_title);
       if ($len < 1) {
         $errors[] = pht('Title must not be empty.');
         $e_title = pht('Required');
@@ -29,17 +53,23 @@ final class PonderQuestionAskController extends PonderController {
       }
 
       if (!$errors) {
-        $content_source = PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_WEB,
-          array(
-            'ip' => $request->getRemoteAddr(),
-          ));
-        $question->setContentSource($content_source);
+        $template = id(new PonderQuestionTransaction());
+        $xactions = array();
 
-        id(new PonderQuestionEditor())
-          ->setQuestion($question)
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PonderQuestionTransaction::TYPE_TITLE)
+          ->setNewValue($v_title);
+
+        $xactions[] = id(clone $template)
+          ->setTransactionType(PonderQuestionTransaction::TYPE_CONTENT)
+          ->setNewValue($v_content);
+
+        $editor = id(new PonderQuestionEditor())
           ->setActor($user)
-          ->save();
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($question, $xactions);
 
         return id(new AphrontRedirectResponse())
           ->setURI('/Q'.$question->getID());
@@ -60,13 +90,13 @@ final class PonderQuestionAskController extends PonderController {
         id(new AphrontFormTextControl())
           ->setLabel(pht('Question'))
           ->setName('title')
-          ->setValue($question->getTitle())
+          ->setValue($v_title)
           ->setError($e_title))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('content')
           ->setID('content')
-          ->setValue($question->getContent())
+          ->setValue($v_content)
           ->setLabel(pht('Description'))
           ->setUser($user))
       ->appendChild(
@@ -92,9 +122,21 @@ final class PonderQuestionAskController extends PonderController {
       ));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('Ask Question')));
+
+    $id = $question->getID();
+    if ($id) {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName("Q{$id}")
+          ->setHref("/Q{$id}"));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Edit')));
+    } else {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Ask Question')));
+    }
 
     return $this->buildApplicationPage(
       array(
@@ -104,9 +146,9 @@ final class PonderQuestionAskController extends PonderController {
         $preview,
       ),
       array(
+        'title'  => pht('Ask a Question'),
         'device' => true,
         'dust' => true,
-        'title'  => pht('Ask a Question'),
       ));
   }
 

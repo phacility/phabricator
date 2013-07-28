@@ -3,6 +3,9 @@
 final class PonderQuestionTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_TITLE = 'ponder.question:question';
+  const TYPE_CONTENT = 'ponder.question:content';
+
   public function getApplicationName() {
     return 'ponder';
   }
