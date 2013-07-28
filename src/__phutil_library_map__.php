@@ -1877,6 +1877,7 @@ phutil_register_library_map(array(
     'PonderAnswerSaveController' => 'applications/ponder/controller/PonderAnswerSaveController.php',
     'PonderAnswerTransaction' => 'applications/ponder/storage/PonderAnswerTransaction.php',
     'PonderAnswerTransactionComment' => 'applications/ponder/storage/PonderAnswerTransactionComment.php',
+    'PonderAnswerTransactionQuery' => 'applications/ponder/query/PonderAnswerTransactionQuery.php',
     'PonderAnswerViewController' => 'applications/ponder/controller/PonderAnswerViewController.php',
     'PonderAnsweredMail' => 'applications/ponder/mail/PonderAnsweredMail.php',
     'PonderComment' => 'applications/ponder/storage/PonderComment.php',
@@ -3997,6 +3998,7 @@ phutil_register_library_map(array(
     'PonderAnswerSaveController' => 'PonderController',
     'PonderAnswerTransaction' => 'PhabricatorApplicationTransaction',
     'PonderAnswerTransactionComment' => 'PhabricatorApplicationTransactionComment',
+    'PonderAnswerTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PonderAnswerViewController' => 'PonderController',
     'PonderAnsweredMail' => 'PonderMail',
     'PonderComment' =>

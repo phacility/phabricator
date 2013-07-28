@@ -16,42 +16,16 @@ final class PonderQuestionViewController extends PonderController {
     $question = id(new PonderQuestionQuery())
       ->setViewer($user)
       ->withIDs(array($this->questionID))
+      ->needAnswers(true)
       ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }
-    $question->attachRelated();
+
     $question->attachVotes($user->getPHID());
-    $object_phids = array($user->getPHID(), $question->getAuthorPHID());
-
-    $answers = $question->getAnswers();
-    $comments = $question->getComments();
-    foreach ($comments as $comment) {
-      $object_phids[] = $comment->getAuthorPHID();
-    }
-
-    foreach ($answers as $answer) {
-      $object_phids[] = $answer->getAuthorPHID();
-
-      $comments = $answer->getComments();
-      foreach ($comments as $comment) {
-        $object_phids[] = $comment->getAuthorPHID();
-      }
-    }
-
-    $object_phids = array_merge($object_phids);
-
-    $this->loadHandles($object_phids);
-    $handles = $this->getLoadedHandles();
 
     $question_xactions = $this->buildQuestionTransactions($question);
-
-    $responses_panel = new PonderAnswerListView();
-    $responses_panel
-      ->setQuestion($question)
-      ->setHandles($handles)
-      ->setUser($user)
-      ->setAnswers($answers);
+    $answers = $this->buildAnswers($question->getAnswers());
 
     $answer_add_panel = new PonderAddAnswerView();
     $answer_add_panel
@@ -79,7 +53,7 @@ final class PonderQuestionViewController extends PonderController {
         $actions,
         $properties,
         $question_xactions,
-        $responses_panel,
+        $answers,
         $answer_add_panel
       ),
       array(
@@ -194,6 +168,112 @@ final class PonderQuestionViewController extends PonderController {
     // TODO: Add comment form.
 
     return $timeline;
+  }
+
+  private function buildAnswers(array $answers) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $out = array();
+
+    $phids = mpull($answers, 'getAuthorPHID');
+    $this->loadHandles($phids);
+
+    $xactions = id(new PonderAnswerTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(mpull($answers, 'getPHID'))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $xaction_groups = mgroup($xactions, 'getObjectPHID');
+
+    foreach ($answers as $answer) {
+      $author_phid = $answer->getAuthorPHID();
+      $xactions = idx($xaction_groups, $answer->getPHID(), array());
+
+      $out[] = phutil_tag('br');
+      $out[] = phutil_tag('br');
+      $out[] = id(new PhabricatorHeaderView())
+        ->setHeader($this->getHandle($author_phid)->getFullName())
+        ->setImage($this->getHandle($author_phid)->getImageURI());
+
+      $out[] = $this->buildAnswerActions($answer);
+      $out[] = $this->buildAnswerProperties($answer);
+      $out[] = id(new PhabricatorApplicationTransactionView())
+        ->setUser($viewer)
+        ->setTransactions($xactions)
+        ->setMarkupEngine($engine);
+
+      // TODO: Add comment form
+
+    }
+
+    $out[] = phutil_tag('br');
+    $out[] = phutil_tag('br');
+
+    return $out;
+  }
+
+  private function buildAnswerActions(PonderAnswer $answer) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $answer,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($request->getUser())
+      ->setObject($answer)
+      ->setObjectURI($request->getRequestURI());
+
+/*
+
+    TODO
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setName(pht('Edit Answer'))
+        ->setHref($this->getApplicationURI("/answer/edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+*/
+
+    return $view;
+  }
+
+  private function buildAnswerProperties(PonderAnswer $answer) {
+    $viewer = $this->getRequest()->getUser();
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($answer);
+
+    $view->addProperty(
+      pht('Created'),
+      phabricator_datetime($answer->getDateCreated(), $viewer));
+
+    $view->invokeWillRenderEvent();
+
+    $view->addTextContent(
+      PhabricatorMarkupEngine::renderOneObject(
+        $answer,
+        $answer->getMarkupField(),
+        $viewer));
+
+    return $view;
   }
 
 }
