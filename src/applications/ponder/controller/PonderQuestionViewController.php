@@ -124,6 +124,8 @@ final class PonderQuestionViewController extends PonderController {
       ->setUser($viewer)
       ->setObject($question);
 
+    $this->loadHandles(array($question->getAuthorPHID()));
+
     $view->addProperty(
       pht('Status'),
       PonderQuestionStatus::getQuestionStatusFullName($question->getStatus()));
