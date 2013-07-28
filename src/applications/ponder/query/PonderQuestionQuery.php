@@ -17,6 +17,8 @@ final class PonderQuestionQuery
   const STATUS_OPEN     = 'status-open';
   const STATUS_CLOSED   = 'status-closed';
 
+  private $needAnswers;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -39,6 +41,11 @@ final class PonderQuestionQuery
 
   public function withAnswererPHIDs(array $phids) {
     $this->answererPHIDs = $phids;
+    return $this;
+  }
+
+  public function needAnswers($need_answers) {
+    $this->needAnswers = $need_answers;
     return $this;
   }
 
@@ -122,6 +129,22 @@ final class PonderQuestionQuery
       $this->buildLimitClause($conn_r));
 
     return $question->loadAllFromArray($data);
+  }
+
+  public function willFilterPage(array $questions) {
+    if ($this->needAnswers) {
+      $answers = id(new PonderAnswerQuery())
+        ->setViewer($this->getViewer())
+        ->withQuestionIDs(mpull($questions, 'getID'))
+        ->execute();
+      $answers = mgroup($answers, 'getQuestionID');
+
+      foreach ($questions as $question) {
+        $question->attachAnswers(idx($answers, $question->getID(), array()));
+      }
+    }
+
+    return $questions;
   }
 
   private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {

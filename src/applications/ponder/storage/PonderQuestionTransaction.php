@@ -5,6 +5,7 @@ final class PonderQuestionTransaction
 
   const TYPE_TITLE = 'ponder.question:question';
   const TYPE_CONTENT = 'ponder.question:content';
+  const TYPE_ANSWERS = 'ponder.question:answer';
 
   public function getApplicationName() {
     return 'ponder';

@@ -114,6 +114,12 @@ final class PonderQuestion extends PonderDAO
     return $this->comments;
   }
 
+  public function attachAnswers(array $answers) {
+    assert_instances_of($answers, 'PonderAnswer');
+    $this->answers = $answers;
+    return $this;
+  }
+
   public function getAnswers() {
     return $this->answers;
   }

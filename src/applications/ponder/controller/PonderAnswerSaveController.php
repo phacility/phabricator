@@ -14,6 +14,7 @@ final class PonderAnswerSaveController extends PonderController {
     $question = id(new PonderQuestionQuery())
       ->setViewer($viewer)
       ->withIDs(array($question_id))
+      ->needAnswers(true)
       ->executeOne();
     if (!$question) {
       return new Aphront404Response();
@@ -39,21 +40,30 @@ final class PonderAnswerSaveController extends PonderController {
         'ip' => $request->getRemoteAddr(),
       ));
 
-    $res = new PonderAnswer();
-    $res
-      ->setContent($answer)
+    $res = id(new PonderAnswer())
       ->setAuthorPHID($viewer->getPHID())
+      ->setQuestionID($question->getID())
+      ->setContent($answer)
       ->setVoteCount(0)
-      ->setQuestionID($question_id)
       ->setContentSource($content_source);
 
-    id(new PonderAnswerEditor())
+    $xactions = array();
+    $xactions[] = id(new PonderQuestionTransaction())
+      ->setTransactionType(PonderQuestionTransaction::TYPE_ANSWERS)
+      ->setNewValue(
+        array(
+          '+' => array(
+            array('answer' => $res),
+          ),
+        ));
+
+    $editor = id(new PonderQuestionEditor())
       ->setActor($viewer)
-      ->setQuestion($question)
-      ->setAnswer($res)
-      ->saveAnswer();
+      ->setContentSourceFromRequest($request);
+
+    $editor->applyTransactions($question, $xactions);
 
     return id(new AphrontRedirectResponse())->setURI(
-      id(new PhutilURI('/Q'. $question->getID())));
+      id(new PhutilURI('/Q'.$question->getID())));
   }
 }
