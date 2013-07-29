@@ -79,8 +79,15 @@ JX.behavior('phabricator-transaction-list', function(config) {
     ['submit', 'didSyntheticSubmit'],
     'transaction-append',
     function(e) {
-      e.kill();
       var form = e.getTarget();
+      if (JX.Stratcom.getData(form).objectPHID != config.objectPHID) {
+        // This indicates there are several forms on the page, and the user
+        // submitted a different one than the one we're in control of.
+        return;
+      }
+
+      e.kill();
+
       JX.DOM.invoke(form, 'willSubmit');
 
       JX.Workflow.newFromForm(form, { anchor : next_anchor })

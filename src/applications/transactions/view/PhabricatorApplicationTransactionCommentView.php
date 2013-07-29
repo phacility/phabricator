@@ -17,6 +17,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $draft;
   private $requestURI;
   private $showPreview = true;
+  private $objectPHID;
+
+  public function setObjectPHID($object_phid) {
+    $this->objectPHID = $object_phid;
+    return $this;
+  }
+
+  public function getObjectPHID() {
+    return $this->objectPHID;
+  }
 
   public function setShowPreview($show_preview) {
     $this->showPreview = $show_preview;
@@ -130,11 +140,19 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $draft_comment = $this->getDraft()->getDraft();
     }
 
+    if (!$this->getObjectPHID()) {
+      throw new Exception("Call setObjectPHID() before render()!");
+    }
+
     return id(new AphrontFormView())
       ->setUser($this->getUser())
       ->setFlexible(true)
       ->addSigil('transaction-append')
       ->setWorkflow(true)
+      ->setMetadata(
+        array(
+          'objectPHID' => $this->getObjectPHID(),
+        ))
       ->setAction($this->getAction())
       ->setID($this->getFormID())
       ->appendChild(

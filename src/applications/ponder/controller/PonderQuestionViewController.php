@@ -172,11 +172,13 @@ final class PonderQuestionViewController extends PonderController {
 
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
+      ->setObjectPHID($question->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
     $add_comment = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
+      ->setObjectPHID($question->getPHID())
       ->setShowPreview(false)
       ->setAction($this->getApplicationURI("/question/comment/{$id}/"))
       ->setSubmitButtonName(pht('Comment'));
@@ -230,11 +232,13 @@ final class PonderQuestionViewController extends PonderController {
 
       $out[] = id(new PhabricatorApplicationTransactionView())
         ->setUser($viewer)
+        ->setObjectPHID($answer->getPHID())
         ->setTransactions($xactions)
         ->setMarkupEngine($engine);
 
       $out[] = id(new PhabricatorApplicationTransactionCommentView())
         ->setUser($viewer)
+        ->setObjectPHID($answer->getPHID())
         ->setShowPreview(false)
         ->setAction($this->getApplicationURI("/answer/comment/{$id}/"))
         ->setSubmitButtonName(pht('Comment'));

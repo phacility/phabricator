@@ -219,6 +219,7 @@ final class PhabricatorConfigEditController
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($config_entry->getPHID())
       ->setTransactions($xactions);
 
     return $this->buildApplicationPage(
