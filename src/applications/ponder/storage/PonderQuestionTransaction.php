@@ -134,7 +134,55 @@ final class PonderQuestionTransaction
     return $view->render();
   }
 
+  public function getTitleForFeed() {
+    $author_phid = $this->getAuthorPHID();
+    $object_phid = $this->getObjectPHID();
 
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        if ($old === null) {
+          return pht(
+            '%s asked a question: %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s edited the title of %s (was "%s")',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old);
+        }
+      case self::TYPE_CONTENT:
+        return pht(
+          '%s edited the description of %s',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case self::TYPE_ANSWERS:
+        // TODO: This could be richer, too.
+        return pht(
+          '%s answered %s',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+      case self::TYPE_STATUS:
+        switch ($new) {
+          case PonderQuestionStatus::STATUS_OPEN:
+            return pht(
+              '%s reopened %s',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+          case PonderQuestionStatus::STATUS_CLOSED:
+            return pht(
+              '%s closed %s',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid));
+        }
+    }
+
+    return $this->getTitle();
+  }
 
 }
 

@@ -56,7 +56,22 @@ final class PhabricatorObjectHandleData {
         $xactions = array();
         foreach ($subtypes as $subtype => $subtype_phids) {
           // TODO: Do this magically.
+          // TODO: ^^^ Really do that ^^^
           switch ($subtype) {
+            case PonderPHIDTypeQuestion::TYPECONST:
+              $results = id(new PonderQuestionTransactionQuery())
+                ->setViewer($this->viewer)
+                ->withPHIDs($subtype_phids)
+                ->execute();
+              $xactions += mpull($results, null, 'getPHID');
+              break;
+            case PonderPHIDTypeAnswer::TYPECONST:
+              $results = id(new PonderAnswerTransactionQuery())
+                ->setViewer($this->viewer)
+                ->withPHIDs($subtype_phids)
+                ->execute();
+              $xactions += mpull($results, null, 'getPHID');
+              break;
             case PholioPHIDTypeMock::TYPECONST:
               $results = id(new PholioTransactionQuery())
                 ->setViewer($this->viewer)

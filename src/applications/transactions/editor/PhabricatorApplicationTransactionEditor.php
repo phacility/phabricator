@@ -1307,7 +1307,7 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
 
-/* -( Custom Fields  )------------------------------------------------------- */
+/* -(  Custom Fields  )------------------------------------------------------ */
 
 
   /**

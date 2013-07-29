@@ -62,5 +62,13 @@ final class PonderAnswerEditor
     return parent::mergeTransactions($u, $v);
   }
 
+  protected function supportsFeed() {
+    return true;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array($object->getAuthorPHID());
+  }
+
 
 }

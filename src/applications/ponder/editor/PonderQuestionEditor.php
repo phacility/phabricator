@@ -145,7 +145,14 @@ final class PonderQuestionEditor
     return parent::mergeTransactions($u, $v);
   }
 
-  // TODO: Feed support
+  protected function supportsFeed() {
+    return true;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array($object->getAuthorPHID());
+  }
+
   // TODO: Mail support
 
 }
