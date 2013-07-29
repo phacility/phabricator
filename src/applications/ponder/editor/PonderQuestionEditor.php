@@ -153,6 +153,22 @@ final class PonderQuestionEditor
     return array($object->getAuthorPHID());
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
+  protected function shouldImplyCC(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PonderQuestionTransaction::TYPE_ANSWERS:
+        return true;
+    }
+
+    return parent::shouldImplyCC($object, $xaction);
+  }
+
   // TODO: Mail support
 
 }

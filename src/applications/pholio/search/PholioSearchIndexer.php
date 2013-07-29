@@ -12,12 +12,10 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
   protected function buildAbstractDocumentByPHID($phid) {
     $mock = $this->loadDocumentByPHID($phid);
 
-    $doc = new PhabricatorSearchAbstractDocument();
-    $doc->setPHID($mock->getPHID());
-    $doc->setDocumentType(phid_get_type($mock->getPHID()));
-    $doc->setDocumentTitle($mock->getName());
-    $doc->setDocumentCreated($mock->getDateCreated());
-    $doc->setDocumentModified($mock->getDateModified());
+    $doc = $this->newDocument($phid)
+      ->setDocumentTitle($mock->getName())
+      ->setDocumentCreated($mock->getDateCreated())
+      ->setDocumentModified($mock->getDateModified());
 
     $doc->addField(
       PhabricatorSearchField::FIELD_BODY,
@@ -28,6 +26,11 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
       $mock->getAuthorPHID(),
       PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $mock->getDateCreated());
+
+    $this->indexTransactions(
+      $doc,
+      new PholioTransactionQuery(),
+      array($phid));
 
     return $doc;
   }
