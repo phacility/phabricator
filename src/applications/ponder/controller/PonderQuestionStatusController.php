@@ -14,12 +14,22 @@ final class PonderQuestionStatusController
   public function processRequest() {
 
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    $question = id(new PonderQuestion())->load($this->id);
+    $question = id(new PonderQuestionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }
+
+    // TODO: Use transactions.
 
     switch ($this->status) {
       case 'open':

@@ -16,6 +16,16 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $commentID;
   private $draft;
   private $requestURI;
+  private $showPreview = true;
+
+  public function setShowPreview($show_preview) {
+    $this->showPreview = $show_preview;
+    return $this;
+  }
+
+  public function getShowPreview() {
+    return $this->showPreview;
+  }
 
   public function setRequestURI(PhutilURI $request_uri) {
     $this->requestURI = $request_uri;
@@ -77,7 +87,11 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
     $comment = $this->renderCommentPanel();
 
-    $preview = $this->renderPreviewPanel();
+    if ($this->getShowPreview()) {
+      $preview = $this->renderPreviewPanel();
+    } else {
+      $preview = null;
+    }
 
     Javelin::initBehavior(
       'phabricator-transaction-comment-form',
@@ -92,8 +106,12 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'savingString'  => pht('Saving Draft...'),
         'draftString'   => pht('Saved Draft'),
 
+        'showPreview'   => $this->getShowPreview(),
+
         'actionURI'     => $this->getAction(),
-        'draftKey'      => $this->getDraft()->getDraftKey(),
+        'draftKey'      => $this->getDraft()
+          ? $this->getDraft()->getDraftKey()
+          : null,
       ));
 
     return array($comment, $preview);

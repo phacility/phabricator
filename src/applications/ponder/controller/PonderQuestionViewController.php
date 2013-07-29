@@ -209,6 +209,7 @@ final class PonderQuestionViewController extends PonderController {
     foreach ($answers as $answer) {
       $author_phid = $answer->getAuthorPHID();
       $xactions = idx($xaction_groups, $answer->getPHID(), array());
+      $id = $answer->getID();
 
       $out[] = phutil_tag('br');
       $out[] = phutil_tag('br');
@@ -218,13 +219,17 @@ final class PonderQuestionViewController extends PonderController {
 
       $out[] = $this->buildAnswerActions($answer);
       $out[] = $this->buildAnswerProperties($answer);
+
       $out[] = id(new PhabricatorApplicationTransactionView())
         ->setUser($viewer)
         ->setTransactions($xactions)
         ->setMarkupEngine($engine);
 
-      // TODO: Add comment form
-
+      $out[] = id(new PhabricatorApplicationTransactionCommentView())
+        ->setUser($viewer)
+        ->setShowPreview(false)
+        ->setAction($this->getApplicationURI("/answer/comment/{$id}/"))
+        ->setSubmitButtonName(pht('Comment'));
     }
 
     $out[] = phutil_tag('br');

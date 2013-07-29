@@ -2179,7 +2179,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-transaction-comment-form' =>
   array(
-    'uri' => '/res/dddc07e9/rsrc/js/application/transactions/behavior-transaction-comment-form.js',
+    'uri' => '/res/3c8d3c10/rsrc/js/application/transactions/behavior-transaction-comment-form.js',
     'type' => 'js',
     'requires' =>
     array(
