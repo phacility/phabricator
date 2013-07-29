@@ -195,274 +195,290 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .apps-diffusion-light-large {
-  background-position: 0px -87px;
+  background-position: -406px -58px;
 }
 
 .apps-diffusion-dark-large {
-  background-position: -29px -87px;
+  background-position: 0px -87px;
 }
 
 .apps-diffusion-blue-large, .phabricator-crumb-view:hover .apps-diffusion-dark-large {
-  background-position: -58px -87px;
+  background-position: -29px -87px;
 }
 
 .apps-diffusion-white-large {
-  background-position: -87px -87px;
+  background-position: -58px -87px;
 }
 
 .apps-diviner-light-large {
-  background-position: -116px -87px;
+  background-position: -87px -87px;
 }
 
 .apps-diviner-dark-large {
-  background-position: -145px -87px;
+  background-position: -116px -87px;
 }
 
 .apps-diviner-blue-large, .phabricator-crumb-view:hover .apps-diviner-dark-large {
-  background-position: -174px -87px;
+  background-position: -145px -87px;
 }
 
 .apps-diviner-white-large {
-  background-position: -203px -87px;
+  background-position: -174px -87px;
 }
 
 .apps-drydock-light-large {
-  background-position: -232px -87px;
+  background-position: -203px -87px;
 }
 
 .apps-drydock-dark-large {
-  background-position: -261px -87px;
+  background-position: -232px -87px;
 }
 
 .apps-drydock-blue-large, .phabricator-crumb-view:hover .apps-drydock-dark-large {
-  background-position: -290px -87px;
+  background-position: -261px -87px;
 }
 
 .apps-drydock-white-large {
-  background-position: -319px -87px;
+  background-position: -290px -87px;
 }
 
 .apps-fact-light-large {
-  background-position: -348px -87px;
+  background-position: -319px -87px;
 }
 
 .apps-fact-dark-large {
-  background-position: -377px -87px;
+  background-position: -348px -87px;
 }
 
 .apps-fact-blue-large, .phabricator-crumb-view:hover .apps-fact-dark-large {
-  background-position: 0px -116px;
+  background-position: -377px -87px;
 }
 
 .apps-fact-white-large {
-  background-position: -29px -116px;
+  background-position: -406px -87px;
 }
 
 .apps-feed-light-large {
-  background-position: -58px -116px;
+  background-position: 0px -116px;
 }
 
 .apps-feed-dark-large {
-  background-position: -87px -116px;
+  background-position: -29px -116px;
 }
 
 .apps-feed-blue-large, .phabricator-crumb-view:hover .apps-feed-dark-large {
-  background-position: -116px -116px;
+  background-position: -58px -116px;
 }
 
 .apps-feed-white-large {
-  background-position: -145px -116px;
+  background-position: -87px -116px;
 }
 
 .apps-files-light-large {
-  background-position: -174px -116px;
+  background-position: -116px -116px;
 }
 
 .apps-files-dark-large {
-  background-position: -203px -116px;
+  background-position: -145px -116px;
 }
 
 .apps-files-blue-large, .phabricator-crumb-view:hover .apps-files-dark-large {
-  background-position: -232px -116px;
+  background-position: -174px -116px;
 }
 
 .apps-files-white-large {
-  background-position: -261px -116px;
+  background-position: -203px -116px;
 }
 
 .apps-flags-light-large {
-  background-position: -290px -116px;
+  background-position: -232px -116px;
 }
 
 .apps-flags-dark-large {
-  background-position: -319px -116px;
+  background-position: -261px -116px;
 }
 
 .apps-flags-blue-large, .phabricator-crumb-view:hover .apps-flags-dark-large {
-  background-position: -348px -116px;
+  background-position: -290px -116px;
 }
 
 .apps-flags-white-large {
-  background-position: -377px -116px;
+  background-position: -319px -116px;
 }
 
 .apps-harbormaster-light-large {
-  background-position: 0px -145px;
+  background-position: -348px -116px;
 }
 
 .apps-harbormaster-dark-large {
-  background-position: -29px -145px;
+  background-position: -377px -116px;
 }
 
 .apps-harbormaster-blue-large, .phabricator-crumb-view:hover .apps-harbormaster-dark-large {
-  background-position: -58px -145px;
+  background-position: -406px -116px;
 }
 
 .apps-harbormaster-white-large {
-  background-position: -87px -145px;
+  background-position: 0px -145px;
 }
 
 .apps-help-light-large {
-  background-position: -116px -145px;
+  background-position: -29px -145px;
 }
 
 .apps-help-dark-large {
-  background-position: -145px -145px;
+  background-position: -58px -145px;
 }
 
 .apps-help-blue-large, .phabricator-crumb-view:hover .apps-help-dark-large {
-  background-position: -174px -145px;
+  background-position: -87px -145px;
 }
 
 .apps-help-white-large {
-  background-position: -203px -145px;
+  background-position: -116px -145px;
 }
 
 .apps-herald-light-large {
-  background-position: -232px -145px;
+  background-position: -145px -145px;
 }
 
 .apps-herald-dark-large {
-  background-position: -261px -145px;
+  background-position: -174px -145px;
 }
 
 .apps-herald-blue-large, .phabricator-crumb-view:hover .apps-herald-dark-large {
-  background-position: -290px -145px;
+  background-position: -203px -145px;
 }
 
 .apps-herald-white-large {
-  background-position: -319px -145px;
+  background-position: -232px -145px;
 }
 
 .apps-home-light-large {
-  background-position: -348px -145px;
+  background-position: -261px -145px;
 }
 
 .apps-home-dark-large {
-  background-position: -377px -145px;
+  background-position: -290px -145px;
 }
 
 .apps-home-blue-large, .phabricator-crumb-view:hover .apps-home-dark-large {
-  background-position: 0px -174px;
+  background-position: -319px -145px;
 }
 
 .apps-home-white-large {
-  background-position: -29px -174px;
+  background-position: -348px -145px;
 }
 
 .apps-legalpad-light-large {
-  background-position: -58px -174px;
+  background-position: -377px -145px;
 }
 
 .apps-legalpad-dark-large {
-  background-position: -87px -174px;
+  background-position: -406px -145px;
 }
 
 .apps-legalpad-blue-large, .phabricator-crumb-view:hover .apps-legalpad-dark-large {
-  background-position: -116px -174px;
+  background-position: 0px -174px;
 }
 
 .apps-legalpad-white-large {
-  background-position: -145px -174px;
+  background-position: -29px -174px;
 }
 
 .apps-logo-light-large {
-  background-position: -174px -174px;
+  background-position: -58px -174px;
 }
 
 .apps-logo-dark-large {
-  background-position: -203px -174px;
+  background-position: -87px -174px;
 }
 
 .apps-logo-blue-large, .phabricator-crumb-view:hover .apps-logo-dark-large {
-  background-position: -232px -174px;
+  background-position: -116px -174px;
 }
 
 .apps-logo-white-large {
-  background-position: -261px -174px;
+  background-position: -145px -174px;
 }
 
 .apps-macro-light-large {
-  background-position: -290px -174px;
+  background-position: -174px -174px;
 }
 
 .apps-macro-dark-large {
-  background-position: -319px -174px;
+  background-position: -203px -174px;
 }
 
 .apps-macro-blue-large, .phabricator-crumb-view:hover .apps-macro-dark-large {
-  background-position: -348px -174px;
+  background-position: -232px -174px;
 }
 
 .apps-macro-white-large {
-  background-position: -377px -174px;
+  background-position: -261px -174px;
 }
 
 .apps-mail-light-large {
-  background-position: 0px -203px;
+  background-position: -290px -174px;
 }
 
 .apps-mail-dark-large {
-  background-position: -29px -203px;
+  background-position: -319px -174px;
 }
 
 .apps-mail-blue-large, .phabricator-crumb-view:hover .apps-mail-dark-large {
-  background-position: -58px -203px;
+  background-position: -348px -174px;
 }
 
 .apps-mail-white-large {
-  background-position: -87px -203px;
+  background-position: -377px -174px;
 }
 
 .apps-maniphest-light-large {
-  background-position: -116px -203px;
+  background-position: 0px -203px;
 }
 
 .apps-maniphest-dark-large {
-  background-position: -145px -203px;
+  background-position: -29px -203px;
 }
 
 .apps-maniphest-blue-large, .phabricator-crumb-view:hover .apps-maniphest-dark-large {
-  background-position: -174px -203px;
+  background-position: -58px -203px;
 }
 
 .apps-maniphest-white-large {
-  background-position: -203px -203px;
+  background-position: -87px -203px;
 }
 
 .apps-metamta-light-large {
-  background-position: -232px -203px;
+  background-position: -116px -203px;
 }
 
 .apps-metamta-dark-large {
-  background-position: -261px -203px;
+  background-position: -145px -203px;
 }
 
 .apps-metamta-blue-large, .phabricator-crumb-view:hover .apps-metamta-dark-large {
-  background-position: -290px -203px;
+  background-position: -174px -203px;
 }
 
 .apps-metamta-white-large {
+  background-position: -203px -203px;
+}
+
+.apps-new-light-large {
+  background-position: -232px -203px;
+}
+
+.apps-new-dark-large {
+  background-position: -261px -203px;
+}
+
+.apps-new-blue-large, .phabricator-crumb-view:hover .apps-new-dark-large {
+  background-position: -290px -203px;
+}
+
+.apps-new-white-large {
   background-position: -319px -203px;
 }
 
