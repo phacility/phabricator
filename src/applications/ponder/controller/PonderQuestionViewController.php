@@ -29,9 +29,12 @@ final class PonderQuestionViewController extends PonderController {
 
     $authors = mpull($question->getAnswers(), null, 'getAuthorPHID');
     if (isset($authors[$user->getPHID()])) {
-      // TODO: Make this pretty
-      $answer_add_panel = pht(
-        'You have already answered this question.');
+      $answer_add_panel = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+        ->appendChild(
+          pht(
+            'You have already answered this question. You can not answer '.
+            'twice, but you can edit your existing answer.'));
     } else {
       $answer_add_panel = new PonderAddAnswerView();
       $answer_add_panel
@@ -190,10 +193,12 @@ final class PonderQuestionViewController extends PonderController {
       ->setAction($this->getApplicationURI("/question/comment/{$id}/"))
       ->setSubmitButtonName(pht('Comment'));
 
-    return array(
-      $timeline,
-      $add_comment,
-    );
+    return $this->wrapComments(
+      count($xactions),
+      array(
+        $timeline,
+        $add_comment,
+      ));
   }
 
   private function buildAnswers(array $answers) {
@@ -238,18 +243,24 @@ final class PonderQuestionViewController extends PonderController {
       $out[] = $this->buildAnswerActions($answer);
       $out[] = $this->buildAnswerProperties($answer);
 
-      $out[] = id(new PhabricatorApplicationTransactionView())
+      $details = array();
+
+      $details[] = id(new PhabricatorApplicationTransactionView())
         ->setUser($viewer)
         ->setObjectPHID($answer->getPHID())
         ->setTransactions($xactions)
         ->setMarkupEngine($engine);
 
-      $out[] = id(new PhabricatorApplicationTransactionCommentView())
+      $details[] = id(new PhabricatorApplicationTransactionCommentView())
         ->setUser($viewer)
         ->setObjectPHID($answer->getPHID())
         ->setShowPreview(false)
         ->setAction($this->getApplicationURI("/answer/comment/{$id}/"))
         ->setSubmitButtonName(pht('Comment'));
+
+      $out[] = $this->wrapComments(
+        count($xactions),
+        $details);
     }
 
     $out[] = phutil_tag('br');
@@ -315,6 +326,48 @@ final class PonderQuestionViewController extends PonderController {
           $viewer)));
 
     return $view;
+  }
+
+  private function wrapComments($n, $stuff) {
+    if ($n == 0) {
+      $text = pht('Add a Comment');
+    } else {
+      $text = pht('Show %s Comments', new PhutilNumber($n));
+    }
+
+    $show_id = celerity_generate_unique_node_id();
+    $hide_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior('phabricator-reveal-content');
+    require_celerity_resource('ponder-comment-table-css');
+
+    $show = phutil_tag(
+      'div',
+      array(
+        'id' => $show_id,
+        'class' => 'ponder-show-comments',
+      ),
+      javelin_tag(
+        'a',
+        array(
+          'href' => '#',
+          'sigil' => 'reveal-content',
+          'meta' => array(
+            'showIDs' => array($hide_id),
+            'hideIDs' => array($show_id),
+          ),
+        ),
+        $text));
+
+    $hide = phutil_tag(
+      'div',
+      array(
+        'id' => $hide_id,
+        'style' => 'display: none',
+      ),
+      $stuff);
+
+    return array($show, $hide);
   }
 
 }

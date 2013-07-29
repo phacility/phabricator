@@ -3893,7 +3893,7 @@ celerity_register_resource_map(array(
   ),
   'ponder-comment-table-css' =>
   array(
-    'uri' => '/res/15cb54fb/rsrc/css/application/ponder/comments.css',
+    'uri' => '/res/2527ba37/rsrc/css/application/ponder/comments.css',
     'type' => 'css',
     'requires' =>
     array(
