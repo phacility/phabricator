@@ -152,6 +152,7 @@ final class PonderQuestionViewController extends PonderController {
 
   private function buildQuestionTransactions(PonderQuestion $question) {
     $viewer = $this->getRequest()->getUser();
+    $id = $question->getID();
 
     $xactions = id(new PonderQuestionTransactionQuery())
       ->setViewer($viewer)
@@ -174,9 +175,16 @@ final class PonderQuestionViewController extends PonderController {
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
-    // TODO: Add comment form.
+    $add_comment = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setShowPreview(false)
+      ->setAction($this->getApplicationURI("/question/comment/{$id}/"))
+      ->setSubmitButtonName(pht('Comment'));
 
-    return $timeline;
+    return array(
+      $timeline,
+      $add_comment,
+    );
   }
 
   private function buildAnswers(array $answers) {
