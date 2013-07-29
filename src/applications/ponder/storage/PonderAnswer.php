@@ -21,6 +21,8 @@ final class PonderAnswer extends PonderDAO
   private $question = self::ATTACHABLE;
   private $comments;
 
+  private $userVotes = array();
+
   // TODO: Get rid of this method.
   public function setQuestion($question) {
     return $this->attachQuestion($question);
@@ -40,6 +42,11 @@ final class PonderAnswer extends PonderDAO
     if (!$this->vote) {
       $this->vote = PonderVote::VOTE_NONE;
     }
+    return $this;
+  }
+
+  public function attachUserVote($user_phid, $vote) {
+    $this->vote = $vote;
     return $this;
   }
 

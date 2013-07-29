@@ -101,6 +101,11 @@ final class PonderQuestion extends PonderDAO
     return $this;
   }
 
+  public function attachUserVote($user_phid, $vote) {
+    $this->vote = $vote;
+    return $this;
+  }
+
   public function getUserVote() {
     return $this->vote;
   }

@@ -2,17 +2,11 @@
 
 final class PonderVoteSaveController extends PonderController {
 
-  private $kind;
-
-  public function willProcessRequest(array $data) {
-    $this->kind = $data['kind'];
-  }
-
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
-    $newvote = $request->getInt("vote");
-    $phid = $request->getStr("phid");
+    $viewer = $request->getUser();
+    $phid = $request->getStr('phid');
+    $newvote = $request->getInt('vote');
 
     if (1 < $newvote || $newvote < -1) {
       return new Aphront400Response();
@@ -20,28 +14,20 @@ final class PonderVoteSaveController extends PonderController {
 
     $target = null;
 
-    if ($this->kind == "question") {
-      $target = id(new PonderQuestionQuery())
-        ->setViewer($user)
-        ->withPHIDs(array($phid))
-        ->executeOne();
-    } else if ($this->kind == "answer") {
-      $target = id(new PonderAnswerQuery())
-        ->setViewer($user)
-        ->withPHIDs(array($phid))
-        ->executeOne();
-    }
-
-    if (!$target) {
+    $object = id(new PhabricatorObjectQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    if (!$object) {
       return new Aphront404Response();
     }
 
     $editor = id(new PonderVoteEditor())
-      ->setVotable($target)
-      ->setActor($user)
+      ->setVotable($object)
+      ->setActor($viewer)
       ->setVote($newvote)
       ->saveVote();
 
-    return id(new AphrontAjaxResponse())->setContent(".");
+    return id(new AphrontAjaxResponse())->setContent(array());
   }
 }

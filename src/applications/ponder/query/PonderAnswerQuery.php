@@ -8,6 +8,9 @@ final class PonderAnswerQuery
   private $authorPHIDs;
   private $questionIDs;
 
+  private $needViewerVotes;
+
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -25,6 +28,11 @@ final class PonderAnswerQuery
 
   public function withQuestionIDs(array $ids) {
     $this->questionIDs = $ids;
+    return $this;
+  }
+
+  public function needViewerVotes($need_viewer_votes) {
+    $this->needViewerVotes = $need_viewer_votes;
     return $this;
   }
 
@@ -78,10 +86,35 @@ final class PonderAnswerQuery
       ->withIDs(mpull($answers, 'getQuestionID'))
       ->execute();
 
-    foreach ($answers as $answer) {
+    foreach ($answers as $key => $answer) {
       $question = idx($questions, $answer->getQuestionID());
+      if (!$question) {
+        unset($answers[$key]);
+        continue;
+      }
       $answer->attachQuestion($question);
     }
+
+    if ($this->needViewerVotes) {
+      $viewer_phid = $this->getViewer()->getPHID();
+
+      $etype = PhabricatorEdgeConfig::TYPE_ANSWER_HAS_VOTING_USER;
+      $edges = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($answers, 'getPHID'))
+        ->withDestinationPHIDs(array($viewer_phid))
+        ->withEdgeTypes(array($etype))
+        ->needEdgeData(true)
+        ->execute();
+      foreach ($answers as $answer) {
+        $user_edge = idx(
+          $edges[$answer->getPHID()][$etype],
+          $viewer_phid,
+          array());
+
+        $answer->attachUserVote($viewer_phid, idx($user_edge, 'data', 0));
+      }
+    }
+
 
     return $answers;
   }

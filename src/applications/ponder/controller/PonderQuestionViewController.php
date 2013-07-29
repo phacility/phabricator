@@ -17,6 +17,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setViewer($user)
       ->withIDs(array($this->questionID))
       ->needAnswers(true)
+      ->needViewerVotes(true)
       ->executeOne();
     if (!$question) {
       return new Aphront404Response();
@@ -149,11 +150,20 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->invokeWillRenderEvent();
 
+    $votable = id(new PonderVotableView())
+      ->setPHID($question->getPHID())
+      ->setURI($this->getApplicationURI('vote/'))
+      ->setCount($question->getVoteCount())
+      ->setVote($question->getUserVote());
+
     $view->addTextContent(
-      PhabricatorMarkupEngine::renderOneObject(
-        $question,
-        $question->getMarkupField(),
-        $viewer));
+      array(
+        $votable,
+        PhabricatorMarkupEngine::renderOneObject(
+          $question,
+          $question->getMarkupField(),
+          $viewer),
+      ));
 
 
     return $view;
@@ -314,16 +324,25 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->invokeWillRenderEvent();
 
+    $votable = id(new PonderVotableView())
+      ->setPHID($answer->getPHID())
+      ->setURI($this->getApplicationURI('vote/'))
+      ->setCount($answer->getVoteCount())
+      ->setVote($answer->getUserVote());
+
     $view->addTextContent(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phabricator-remarkup',
-        ),
-        PhabricatorMarkupEngine::renderOneObject(
-          $answer,
-          $answer->getMarkupField(),
-          $viewer)));
+      array(
+        $votable,
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-remarkup',
+          ),
+          PhabricatorMarkupEngine::renderOneObject(
+            $answer,
+            $answer->getMarkupField(),
+            $viewer)),
+      ));
 
     return $view;
   }

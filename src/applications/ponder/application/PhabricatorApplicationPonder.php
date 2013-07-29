@@ -60,8 +60,7 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
         'question/preview/' => 'PonderQuestionPreviewController',
         'question/(?P<status>open|close)/(?P<id>[1-9]\d*)/' =>
           'PonderQuestionStatusController',
-        '(?P<kind>question)/vote/' => 'PonderVoteSaveController',
-        '(?P<kind>answer)/vote/' => 'PonderVoteSaveController'
+        'vote/' => 'PonderVoteSaveController',
       ),
     );
   }

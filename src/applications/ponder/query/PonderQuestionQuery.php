@@ -18,6 +18,7 @@ final class PonderQuestionQuery
   const STATUS_CLOSED   = 'status-closed';
 
   private $needAnswers;
+  private $needViewerVotes;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -46,6 +47,11 @@ final class PonderQuestionQuery
 
   public function needAnswers($need_answers) {
     $this->needAnswers = $need_answers;
+    return $this;
+  }
+
+  public function needViewerVotes($need_viewer_votes) {
+    $this->needViewerVotes = $need_viewer_votes;
     return $this;
   }
 
@@ -133,14 +139,39 @@ final class PonderQuestionQuery
 
   public function willFilterPage(array $questions) {
     if ($this->needAnswers) {
-      $answers = id(new PonderAnswerQuery())
+      $aquery = id(new PonderAnswerQuery())
         ->setViewer($this->getViewer())
-        ->withQuestionIDs(mpull($questions, 'getID'))
-        ->execute();
+        ->withQuestionIDs(mpull($questions, 'getID'));
+
+      if ($this->needViewerVotes) {
+        $aquery->needViewerVotes($this->needViewerVotes);
+      }
+
+      $answers = $aquery->execute();
       $answers = mgroup($answers, 'getQuestionID');
 
       foreach ($questions as $question) {
         $question->attachAnswers(idx($answers, $question->getID(), array()));
+      }
+    }
+
+    if ($this->needViewerVotes) {
+      $viewer_phid = $this->getViewer()->getPHID();
+
+      $etype = PhabricatorEdgeConfig::TYPE_QUESTION_HAS_VOTING_USER;
+      $edges = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($questions, 'getPHID'))
+        ->withDestinationPHIDs(array($viewer_phid))
+        ->withEdgeTypes(array($etype))
+        ->needEdgeData(true)
+        ->execute();
+      foreach ($questions as $question) {
+        $user_edge = idx(
+          $edges[$question->getPHID()][$etype],
+          $viewer_phid,
+          array());
+
+        $question->attachUserVote($viewer_phid, idx($user_edge, 'data', 0));
       }
     }
 
