@@ -45,6 +45,7 @@ final class PonderQuestionEditor
     $types[] = PonderQuestionTransaction::TYPE_TITLE;
     $types[] = PonderQuestionTransaction::TYPE_CONTENT;
     $types[] = PonderQuestionTransaction::TYPE_ANSWERS;
+    $types[] = PonderQuestionTransaction::TYPE_STATUS;
 
     return $types;
   }
@@ -60,6 +61,8 @@ final class PonderQuestionEditor
         return $object->getContent();
       case PonderQuestionTransaction::TYPE_ANSWERS:
         return mpull($object->getAnswers(), 'getPHID');
+      case PonderQuestionTransaction::TYPE_STATUS:
+        return $object->getStatus();
     }
   }
 
@@ -70,6 +73,7 @@ final class PonderQuestionEditor
     switch ($xaction->getTransactionType()) {
       case PonderQuestionTransaction::TYPE_TITLE:
       case PonderQuestionTransaction::TYPE_CONTENT:
+      case PonderQuestionTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
       case PonderQuestionTransaction::TYPE_ANSWERS:
         $raw_new_value = $xaction->getNewValue();
@@ -101,6 +105,9 @@ final class PonderQuestionEditor
       case PonderQuestionTransaction::TYPE_CONTENT:
         $object->setContent($xaction->getNewValue());
         break;
+      case PonderQuestionTransaction::TYPE_STATUS:
+        $object->setStatus($xaction->getNewValue());
+        break;
       case PonderQuestionTransaction::TYPE_ANSWERS:
         $old = $xaction->getOldValue();
         $new = $xaction->getNewValue();
@@ -131,6 +138,7 @@ final class PonderQuestionEditor
     switch ($type) {
       case PonderQuestionTransaction::TYPE_TITLE:
       case PonderQuestionTransaction::TYPE_CONTENT:
+      case PonderQuestionTransaction::TYPE_STATUS:
         return $v;
     }
 
@@ -139,6 +147,5 @@ final class PonderQuestionEditor
 
   // TODO: Feed support
   // TODO: Mail support
-  // TODO: Add/remove answers
 
 }

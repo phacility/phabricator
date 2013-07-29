@@ -12,7 +12,6 @@ final class PonderQuestionStatusController
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
@@ -29,20 +28,27 @@ final class PonderQuestionStatusController
       return new Aphront404Response();
     }
 
-    // TODO: Use transactions.
-
     switch ($this->status) {
       case 'open':
-        $question->setStatus(PonderQuestionStatus::STATUS_OPEN);
+        $status = PonderQuestionStatus::STATUS_OPEN;
         break;
       case 'close':
-        $question->setStatus(PonderQuestionStatus::STATUS_CLOSED);
+        $status = PonderQuestionStatus::STATUS_CLOSED;
         break;
       default:
         return new Aphront400Response();
     }
 
-    $question->save();
+    $xactions = array();
+    $xactions[] = id(new PonderQuestionTransaction())
+      ->setTransactionType(PonderQuestionTransaction::TYPE_STATUS)
+      ->setNewValue($status);
+
+    $editor = id(new PonderQuestionEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request);
+
+    $editor->applyTransactions($question, $xactions);
 
     return id(new AphrontRedirectResponse())->setURI('/Q'.$question->getID());
   }
