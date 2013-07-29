@@ -53,8 +53,10 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
         'answer/add/' => 'PonderAnswerSaveController',
         'answer/edit/(?P<id>\d+)/' => 'PonderAnswerEditController',
         'answer/comment/(?P<id>\d+)/' => 'PonderAnswerCommentController',
+        'answer/history/(?P<id>\d+)/' => 'PonderAnswerHistoryController',
         'question/edit/(?:(?P<id>\d+)/)?' => 'PonderQuestionEditController',
         'question/comment/(?P<id>\d+)/' => 'PonderQuestionCommentController',
+        'question/history/(?P<id>\d+)/' => 'PonderQuestionHistoryController',
         'question/preview/' => 'PonderQuestionPreviewController',
         'question/(?P<status>open|close)/(?P<id>[1-9]\d*)/' =>
           'PonderQuestionStatusController',

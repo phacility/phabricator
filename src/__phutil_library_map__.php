@@ -1873,6 +1873,7 @@ phutil_register_library_map(array(
     'PonderAnswerCommentController' => 'applications/ponder/controller/PonderAnswerCommentController.php',
     'PonderAnswerEditController' => 'applications/ponder/controller/PonderAnswerEditController.php',
     'PonderAnswerEditor' => 'applications/ponder/editor/PonderAnswerEditor.php',
+    'PonderAnswerHistoryController' => 'applications/ponder/controller/PonderAnswerHistoryController.php',
     'PonderAnswerListView' => 'applications/ponder/view/PonderAnswerListView.php',
     'PonderAnswerQuery' => 'applications/ponder/query/PonderAnswerQuery.php',
     'PonderAnswerSaveController' => 'applications/ponder/controller/PonderAnswerSaveController.php',
@@ -1900,6 +1901,7 @@ phutil_register_library_map(array(
     'PonderQuestionDetailView' => 'applications/ponder/view/PonderQuestionDetailView.php',
     'PonderQuestionEditController' => 'applications/ponder/controller/PonderQuestionEditController.php',
     'PonderQuestionEditor' => 'applications/ponder/editor/PonderQuestionEditor.php',
+    'PonderQuestionHistoryController' => 'applications/ponder/controller/PonderQuestionHistoryController.php',
     'PonderQuestionListController' => 'applications/ponder/controller/PonderQuestionListController.php',
     'PonderQuestionMailReceiver' => 'applications/ponder/mail/PonderQuestionMailReceiver.php',
     'PonderQuestionPreviewController' => 'applications/ponder/controller/PonderQuestionPreviewController.php',
@@ -3997,6 +3999,7 @@ phutil_register_library_map(array(
     'PonderAnswerCommentController' => 'PonderController',
     'PonderAnswerEditController' => 'PonderController',
     'PonderAnswerEditor' => 'PhabricatorApplicationTransactionEditor',
+    'PonderAnswerHistoryController' => 'PonderController',
     'PonderAnswerListView' => 'AphrontView',
     'PonderAnswerQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PonderAnswerSaveController' => 'PonderController',
@@ -4035,6 +4038,7 @@ phutil_register_library_map(array(
     'PonderQuestionDetailView' => 'AphrontView',
     'PonderQuestionEditController' => 'PonderController',
     'PonderQuestionEditor' => 'PhabricatorApplicationTransactionEditor',
+    'PonderQuestionHistoryController' => 'PonderController',
     'PonderQuestionListController' =>
     array(
       0 => 'PonderController',

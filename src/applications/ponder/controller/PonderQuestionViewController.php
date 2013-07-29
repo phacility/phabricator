@@ -113,6 +113,12 @@ final class PonderQuestionViewController extends PonderController {
         ->setDisabled(!$can_edit)
         ->setHref($this->getApplicationURI("/question/{$href}/{$id}/")));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('transcript')
+        ->setName(pht('View History'))
+        ->setHref($this->getApplicationURI("/question/history/{$id}/")));
+
     return $view;
   }
 
@@ -156,6 +162,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $xactions = id(new PonderQuestionTransactionQuery())
       ->setViewer($viewer)
+      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
       ->withObjectPHIDs(array($question->getPHID()))
       ->execute();
 
@@ -200,6 +207,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $xactions = id(new PonderAnswerTransactionQuery())
       ->setViewer($viewer)
+      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
       ->withObjectPHIDs(mpull($answers, 'getPHID'))
       ->execute();
 
@@ -273,6 +281,12 @@ final class PonderQuestionViewController extends PonderController {
         ->setHref($this->getApplicationURI("/answer/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('transcript')
+        ->setName(pht('View History'))
+        ->setHref($this->getApplicationURI("/answer/history/{$id}/")));
 
     return $view;
   }
