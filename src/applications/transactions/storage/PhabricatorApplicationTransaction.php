@@ -214,6 +214,10 @@ abstract class PhabricatorApplicationTransaction
     return false;
   }
 
+  public function shouldHideForMail() {
+    return $this->shouldHide();
+  }
+
   public function getNoEffectDescription() {
 
     switch ($this->getTransactionType()) {

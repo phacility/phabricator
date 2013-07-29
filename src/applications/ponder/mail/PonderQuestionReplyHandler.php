@@ -1,6 +1,6 @@
 <?php
 
-final class PonderReplyHandler extends PhabricatorMailReplyHandler {
+final class PonderQuestionReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PonderQuestion)) {

@@ -38,7 +38,7 @@ final class PonderQuestionTransaction
       case self::TYPE_TITLE:
         if ($old === null) {
           return pht(
-            '%s created this question.',
+            '%s asked this question.',
             $this->renderHandleLink($author_phid));
         } else {
           return pht(
@@ -132,6 +132,54 @@ final class PonderQuestionTransaction
       ->setNewText($new);
 
     return $view->render();
+  }
+
+  public function getActionStrength() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        if ($old === null) {
+          return 3;
+        }
+        break;
+      case self::TYPE_ANSWERS:
+        return 2;
+    }
+
+    return parent::getActionStrength();
+  }
+
+  public function getActionName() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+        if ($old === null) {
+          return pht('Asked');
+        }
+        break;
+      case self::TYPE_ANSWERS:
+        return pht('Answered');
+    }
+
+    return parent::getActionName();
+  }
+
+  public function shouldHide() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_CONTENT:
+        if ($this->getOldValue() === null) {
+          return true;
+        } else {
+          return false;
+        }
+        break;
+    }
+
+    return parent::shouldHide();
   }
 
   public function getTitleForFeed() {

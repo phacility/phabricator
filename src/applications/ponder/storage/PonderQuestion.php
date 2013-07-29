@@ -203,6 +203,11 @@ final class PonderQuestion extends PonderDAO
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+  public function getOriginalTitle() {
+    // TODO: Make this actually save/return the original title.
+    return $this->getTitle();
+  }
+
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

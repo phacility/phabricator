@@ -149,10 +149,6 @@ final class PonderQuestionEditor
     return true;
   }
 
-  protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array($object->getAuthorPHID());
-  }
-
   protected function supportsSearch() {
     return true;
   }
@@ -169,6 +165,59 @@ final class PonderQuestionEditor
     return parent::shouldImplyCC($object, $xaction);
   }
 
-  // TODO: Mail support
+  protected function supportsMail() {
+    return true;
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PonderQuestionReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $title = $object->getTitle();
+    $original_title = $object->getOriginalTitle();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("Q{$id}: {$title}")
+      ->addHeader('Thread-Topic', "Q{$id}: {$original_title}");
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array(
+      $object->getAuthorPHID(),
+      $this->requireActor()->getPHID(),
+    );
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    // If the user just asked the question, add the question text.
+    foreach ($xactions as $xaction) {
+      $type = $xaction->getTransactionType();
+      $old = $xaction->getOldValue();
+      $new = $xaction->getNewValue();
+      if ($type == PonderQuestionTransaction::TYPE_CONTENT) {
+        if ($old === null) {
+          $body->addRawSection($new);
+        }
+      }
+    }
+
+    $body->addTextSection(
+      pht('QUESTION DETAIL'),
+      PhabricatorEnv::getProductionURI('/Q'.$object->getID()));
+
+    return $body;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return '[Ponder]';
+  }
 
 }
