@@ -42,8 +42,7 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
       '/w/(?P<slug>.+/)' => 'PhrictionDocumentController',
 
       '/phriction/' => array(
-        ''                       => 'PhrictionListController',
-        'list/(?P<view>[^/]+)/'  => 'PhrictionListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhrictionListController',
 
         'history(?P<slug>/)'     => 'PhrictionHistoryController',
         'history/(?P<slug>.+/)'  => 'PhrictionHistoryController',

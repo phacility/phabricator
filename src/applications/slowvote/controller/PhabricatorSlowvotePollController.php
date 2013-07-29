@@ -155,6 +155,7 @@ final class PhabricatorSlowvotePollController
 
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
+      ->setObjectPHID($poll->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
@@ -180,6 +181,7 @@ final class PhabricatorSlowvotePollController
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
+      ->setObjectPHID($poll->getPHID())
       ->setDraft($draft)
       ->setAction($this->getApplicationURI('/comment/'.$poll->getID().'/'))
       ->setSubmitButtonName($submit_button_name);

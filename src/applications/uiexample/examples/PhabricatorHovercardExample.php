@@ -53,7 +53,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
 
     $user_handle = $this->createBasicDummyHandle(
       'gwashington',
-      PhabricatorPHIDConstants::PHID_TYPE_USER,
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
       'George Washington');
     $user_handle->setImageURI(
       celerity_get_resource_uri('/rsrc/image/people/washington.png'));

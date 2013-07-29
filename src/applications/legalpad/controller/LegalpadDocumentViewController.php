@@ -71,6 +71,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $xaction_view = id(new LegalpadTransactionView())
       ->setUser($this->getRequest()->getUser())
+      ->setObjectPHID($document->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
@@ -209,6 +210,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
+      ->setObjectPHID($document->getPHID())
       ->setFormID($comment_form_id)
       ->setDraft($draft)
       ->setSubmitButtonName($button_name)

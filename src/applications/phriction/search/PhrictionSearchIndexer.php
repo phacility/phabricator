@@ -34,7 +34,7 @@ final class PhrictionSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $content->getAuthorPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_USER,
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $content->getDateCreated());
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {

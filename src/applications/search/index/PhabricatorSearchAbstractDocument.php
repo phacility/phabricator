@@ -19,7 +19,7 @@ final class PhabricatorSearchAbstractDocument {
       PhabricatorRepositoryPHIDTypeCommit::TYPECONST => 'Repository Commits',
       ManiphestPHIDTypeTask::TYPECONST => 'Maniphest Tasks',
       PhrictionPHIDTypeDocument::TYPECONST => 'Phriction Documents',
-      PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
+      PhabricatorPeoplePHIDTypeUser::TYPECONST => 'Phabricator Users',
       PonderPHIDTypeQuestion::TYPECONST => 'Ponder Questions',
     );
   }

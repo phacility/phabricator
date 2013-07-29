@@ -1471,9 +1471,33 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130716.archivememberlessprojects.php'),
       ),
+      '20130722.pholioreplace.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130722.pholioreplace.sql'),
+      ),
       '20130723.taskstarttime.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20130723.taskstarttime.sql'),
+      ),
+      '20130727.ponderquestionstatus.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130727.ponderquestionstatus.sql'),
+      ),
+      '20130726.ponderxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130726.ponderxactions.sql'),
+      ),
+      '20130728.ponderunique.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130728.ponderunique.php'),
+      ),
+      '20130728.ponderuniquekey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130728.ponderuniquekey.sql'),
+      ),
+      '20130728.ponderxcomment.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130728.ponderxcomment.php'),
       ),
     );
   }

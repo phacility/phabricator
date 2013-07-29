@@ -79,3 +79,7 @@
   float: right;
   padding-left: 2px;
 }
+
+.phui-feed-story-action-list .phui-icon-view {
+  display: block;
+}

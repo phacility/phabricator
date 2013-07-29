@@ -2,60 +2,42 @@
  * @provides ponder-vote-css
  */
 
+.ponder-votable {
+  float: right;
+  margin: 4px 0 4px 24px;
+}
+
 .ponder-votebox {
+  border-radius: 4px;
+  background: #f3f3f3;
+  border: 1px solid #d7d7d7;
+  box-shadow: 1px 1px rgba(0, 0, 0, 0.05);
   text-align: center;
+  width: 24px;
 }
 
 .ponder-votebox a {
   font-size: 20px;
-  line-height: 20px;
+  line-height: 24px;
   display: block;
 
   text-decoration: none;
-  color: #a1a5a9;
+  color: #aaaaaa;
   font-weight: normal;
 }
 
-.ponder-votebox a:hover {
-  color: #606060;
-}
-
 .ponder-votebox a.ponder-vote-active {
-  color: #3b5998;
+  color: {$blue};
 }
 
-.ponder-votebox a.ponder-vote-active:hover {
-  color: #a1bbe5;
+.ponder-votebox a:hover {
+  color: #ffffff;
+  background: {$blue};
 }
 
 .ponder-vote-count {
-  color: #888888;
+  color: #333333;
   font-size: 14px;
-  line-height: 14px;
+  line-height: 20px;
   font-weight: bold;
-}
-
-.ponder-votebox {
-  float: left;
-  width: 32px;
-  height: 60px;
-  margin-top: 56px;
-  margin-left: 10px;
-}
-
-.device-phone .ponder-votebox {
-  margin: 0;
-}
-
-.device-phone .ponder-votebox-content {
-  margin-left: 35px;
-}
-
-.ponder-votable .phabricator-transaction-view {
-  margin: 0;
-  padding: 0;
-}
-
-.ponder-votable .phabricator-transaction-detail {
-  min-height : 90px;
 }

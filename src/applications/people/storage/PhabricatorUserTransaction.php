@@ -8,7 +8,7 @@ final class PhabricatorUserTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_USER;
+    return PhabricatorPeoplePHIDTypeUser::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

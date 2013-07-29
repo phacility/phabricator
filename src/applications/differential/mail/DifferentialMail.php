@@ -142,7 +142,7 @@ abstract class DifferentialMail extends PhabricatorMail {
             continue;
           }
           $type = $reason_handles[$relation['reasonPHID']]->getType();
-          if ($type == PhabricatorPHIDConstants::PHID_TYPE_USER) {
+          if ($type == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
             $explicit_cc[] = $relation['objectPHID'];
           }
         }

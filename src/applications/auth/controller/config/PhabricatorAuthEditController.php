@@ -266,6 +266,7 @@ final class PhabricatorAuthEditController
 
       $xaction_view = id(new PhabricatorApplicationTransactionView())
         ->setUser($viewer)
+        ->setObjectPHID($config->getPHID())
         ->setTransactions($xactions);
     }
 

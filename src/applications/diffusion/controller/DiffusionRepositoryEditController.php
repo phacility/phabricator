@@ -51,6 +51,7 @@ final class DiffusionRepositoryEditController extends DiffusionController {
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($repository->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 

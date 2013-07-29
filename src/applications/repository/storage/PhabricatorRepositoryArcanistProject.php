@@ -1,7 +1,11 @@
 <?php
 
+/**
+ * @group repository
+ */
 final class PhabricatorRepositoryArcanistProject
-  extends PhabricatorRepositoryDAO {
+  extends PhabricatorRepositoryDAO
+  implements PhabricatorPolicyInterface {
 
   protected $name;
   protected $phid;
@@ -22,7 +26,8 @@ final class PhabricatorRepositoryArcanistProject
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('APRJ');
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorRepositoryPHIDTypeArcanistProject::TYPECONST);
   }
 
   public function loadRepository() {
@@ -44,6 +49,30 @@ final class PhabricatorRepositoryArcanistProject
       $result = parent::delete();
     $this->saveTransaction();
     return $result;
+  }
+
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return PhabricatorPolicies::POLICY_USER;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_ADMIN;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

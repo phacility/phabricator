@@ -129,12 +129,10 @@ var send_server = net.createServer(function(socket) {
   var client_id = generate_id();
   var client_name = '[' + socket.remoteAddress + '] [#' + client_id + '] ';
 
-  socket.on('connect', function() {
-    clients[client_id] = socket;
-    current_connections++;
-    log(client_name + 'connected\t\t(' +
-      current_connections + ' current connections)');
-  });
+  clients[client_id] = socket;
+  current_connections++;
+  log(client_name + 'connected\t\t(' +
+    current_connections + ' current connections)');
 
   socket.on('close', function() {
     delete clients[client_id];

@@ -18,6 +18,7 @@ final class PhabricatorPeopleQuery
   private $needPrimaryEmail;
   private $needProfile;
   private $needProfileImage;
+  private $needStatus;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -89,6 +90,11 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
+  public function needStatus($need) {
+    $this->needStatus = $need;
+    return $this;
+  }
+
   public function loadPage() {
     $table  = new PhabricatorUser();
     $conn_r = $table->establishConnection('r');
@@ -140,6 +146,18 @@ final class PhabricatorPeopleQuery
           $profile_image_uri = PhabricatorUser::getDefaultProfileImageURI();
         }
         $user->attachProfileImageURI($profile_image_uri);
+      }
+    }
+
+    if ($this->needStatus) {
+      $user_list = mpull($users, null, 'getPHID');
+      $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+        array_keys($user_list));
+      foreach ($user_list as $phid => $user) {
+        $status = idx($statuses, $phid);
+        if ($status) {
+          $user->attachStatus($status);
+        }
       }
     }
 

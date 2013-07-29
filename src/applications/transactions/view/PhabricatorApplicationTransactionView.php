@@ -10,6 +10,16 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $anchorOffset = 1;
   private $showEditActions = true;
   private $isPreview;
+  private $objectPHID;
+
+  public function setObjectPHID($object_phid) {
+    $this->objectPHID = $object_phid;
+    return $this;
+  }
+
+  public function getObjectPHID() {
+    return $this->objectPHID;
+  }
 
   public function setIsPreview($is_preview) {
     $this->isPreview = $is_preview;
@@ -131,6 +141,10 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   }
 
   public function render() {
+    if (!$this->getObjectPHID()) {
+      throw new Exception("Call setObjectPHID() before render()!");
+    }
+
     $view = new PhabricatorTimelineView();
     $events = $this->buildEvents();
     foreach ($events as $event) {
@@ -146,6 +160,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         'phabricator-transaction-list',
         array(
           'listID'      => $list_id,
+          'objectPHID'  => $this->getObjectPHID(),
           'nextAnchor'  => $this->anchorOffset + count($events),
         ));
     }

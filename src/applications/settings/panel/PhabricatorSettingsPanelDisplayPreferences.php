@@ -20,7 +20,6 @@ final class PhabricatorSettingsPanelDisplayPreferences
     $preferences = $user->loadPreferences();
 
     $pref_monospaced   = PhabricatorUserPreferences::PREFERENCE_MONOSPACED;
-    $pref_dark_console = PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE;
     $pref_editor       = PhabricatorUserPreferences::PREFERENCE_EDITOR;
     $pref_multiedit    = PhabricatorUserPreferences::PREFERENCE_MULTIEDIT;
     $pref_titles       = PhabricatorUserPreferences::PREFERENCE_TITLES;
@@ -42,9 +41,6 @@ final class PhabricatorSettingsPanelDisplayPreferences
       $preferences->setPreference(
         $pref_monospaced_textareas,
         $request->getStr($pref_monospaced_textareas));
-      $preferences->setPreference(
-        $pref_dark_console,
-        $request->getBool($pref_dark_console));
 
       $preferences->save();
       return id(new AphrontRedirectResponse())
@@ -72,10 +68,6 @@ EXAMPLE;
       ->getPreference($pref_monospaced_textareas);
     if (!$pref_monospaced_textareas_value) {
       $pref_monospaced_textareas_value = 'disabled';
-    }
-    $pref_dark_console_value = $preferences->getPreference($pref_dark_console);
-    if (!$pref_dark_console_value) {
-        $pref_dark_console_value = 0;
     }
 
     $editor_instructions = pht('Link to edit files in external editor. '.
@@ -140,18 +132,6 @@ EXAMPLE;
         ->addButton('enabled', pht('Enabled'),
           pht('Show all textareas using the monospaced font defined above.'))
         ->addButton('disabled', pht('Disabled'), null));
-
-    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
-      $form->appendChild(
-        id(new AphrontFormRadioButtonControl())
-        ->setLabel(pht('Dark Console'))
-        ->setName($pref_dark_console)
-        ->setValue($pref_dark_console_value ?
-            $pref_dark_console_value : 0)
-        ->addButton(1, pht('Enabled'),
-          pht('Enabling and using the built-in debugging console.'))
-        ->addButton(0, pht('Disabled'), null));
-    }
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())

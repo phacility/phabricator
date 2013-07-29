@@ -237,6 +237,16 @@ final class CeleritySpriteGenerator {
         'y' => 24,
         'css' => '.menu-icon-search-blue',
       ),
+      'new' => array(
+        'x' => 24,
+        'y' => 24,
+        'css' => '.menu-icon-new',
+      ),
+      'new_blue' => array(
+        'x' => 24,
+        'y' => 24,
+        'css' => '.menu-icon-new-blue',
+      ),
       'app' => array(
         'x' => 24,
         'y' => 24,
@@ -577,6 +587,7 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
+        'white' => 'white',
       );
     } else if ($variant == 2) {
       $scales = array(
@@ -592,6 +603,7 @@ final class CeleritySpriteGenerator {
         'light' => 'lb',
         'dark'  => 'dark',
         'blue'  => 'blue',
+        'white' => 'white',
       );
     } else {
       $scales = array(

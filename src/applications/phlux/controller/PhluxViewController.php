@@ -79,6 +79,7 @@ final class PhluxViewController extends PhluxController {
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($var->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 

@@ -111,12 +111,41 @@ final class PholioMockEditController extends PholioController {
         }
 
         $sequence = 0;
+        $replaces = $request->getArr('replaces');
+        $replaces_map = array_flip($replaces);
+
+        /**
+         * Foreach file posted, check to see whether we are replacing an image,
+         * adding an image, or simply updating image metadata. Create
+         * transactions for these cases as appropos.
+         */
         foreach ($files as $file_phid => $file) {
-          $mock_image = idx($mock_images, $file_phid);
+          $replaces_image_phid = null;
+          if (isset($replaces_map[$file_phid])) {
+            $old_file_phid = $replaces_map[$file_phid];
+            $old_image = idx($mock_images, $old_file_phid);
+            if ($old_image) {
+              $replaces_image_phid = $old_image->getPHID();
+            }
+          }
+
+          $existing_image = idx($mock_images, $file_phid);
+
           $title = (string)$request->getStr('title_'.$file_phid);
           $description = (string)$request->getStr('description_'.$file_phid);
-          if (!$mock_image) {
-            // this is an add
+
+          if ($replaces_image_phid) {
+            $replace_image = id(new PholioImage())
+              ->setReplacesImagePHID($replaces_image_phid)
+              ->setFilePhid($file_phid)
+              ->setName(strlen($title) ? $title : $file->getName())
+              ->setDescription($description)
+              ->setSequence($sequence);
+            $xactions[] = id(new PholioTransaction())
+              ->setTransactionType(
+                PholioTransactionType::TYPE_IMAGE_REPLACE)
+              ->setNewValue($replace_image);
+         } else if (!$existing_image) { // this is an add
             $add_image = id(new PholioImage())
               ->setFilePhid($file_phid)
               ->setName(strlen($title) ? $title : $file->getName())
@@ -127,22 +156,22 @@ final class PholioMockEditController extends PholioController {
               ->setNewValue(
                 array('+' => array($add_image)));
           } else {
-            // update (maybe)
             $xactions[] = id(new PholioTransaction())
               ->setTransactionType(PholioTransactionType::TYPE_IMAGE_NAME)
               ->setNewValue(
-                array($mock_image->getPHID() => $title));
+                array($existing_image->getPHID() => $title));
             $xactions[] = id(new PholioTransaction())
               ->setTransactionType(
                 PholioTransactionType::TYPE_IMAGE_DESCRIPTION)
-              ->setNewValue(array($mock_image->getPHID() => $description));
-            $mock_image->setSequence($sequence);
+                ->setNewValue(
+                  array($existing_image->getPHID() => $description));
+            $existing_image->setSequence($sequence);
           }
           $sequence++;
         }
         foreach ($mock_images as $file_phid => $mock_image) {
-          if (!isset($files[$file_phid])) {
-            // this is a delete
+          if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {
+            // this is an outright delete
             $xactions[] = id(new PholioTransaction())
               ->setTransactionType(PholioTransactionType::TYPE_IMAGE_FILE)
               ->setNewValue(

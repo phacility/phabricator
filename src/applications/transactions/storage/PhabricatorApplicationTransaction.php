@@ -47,7 +47,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function generatePHID() {
-    $type = PhabricatorPHIDConstants::PHID_TYPE_XACT;
+    $type = PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST;
     $subtype = $this->getApplicationTransactionType();
 
     return PhabricatorPHID::generateNewPHID($type, $subtype);
@@ -214,6 +214,10 @@ abstract class PhabricatorApplicationTransaction
     return false;
   }
 
+  public function shouldHideForMail() {
+    return $this->shouldHide();
+  }
+
   public function getNoEffectDescription() {
 
     switch ($this->getTransactionType()) {
@@ -377,6 +381,22 @@ abstract class PhabricatorApplicationTransaction
     }
 
     return $this->getTitle();
+  }
+
+  public function getBodyForFeed() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $body = null;
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $text = $this->getComment()->getContent();
+        $body = phutil_escape_html_newlines(
+          phutil_utf8_shorten($text, 128));
+        break;
+    }
+    return $body;
   }
 
   public function getActionStrength() {

@@ -3,7 +3,7 @@
 final class PhabricatorAuthProviderConfigTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new PhabricatorAuthProviderConfigTransaction();
   }
 

@@ -58,11 +58,10 @@
 
 .phui-list-sidenav .phui-list-item-href {
   display: block;
-  padding: 2px 16px;
+  padding: 4px 16px;
   clear: both;
-  line-height: 20px;
   color: #333333;
-  white-space: nowrap;
+  line-height: 18px;
 }
 
 .phui-list-sidenav .phui-list-item-has-icon .phui-list-item-href {

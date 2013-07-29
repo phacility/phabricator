@@ -77,6 +77,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($product->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 

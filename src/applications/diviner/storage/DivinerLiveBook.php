@@ -42,7 +42,7 @@ final class DivinerLiveBook extends DivinerDAO
   public function getGroupName($group) {
     $groups = $this->getConfig('groups');
     $spec = idx($groups, $group, array());
-    return idx($spec, 'name', pht('Free Radicals'));
+    return idx($spec, 'name', $group);
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

@@ -3,7 +3,7 @@
 final class PhluxTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new PhluxTransaction();
   }
 

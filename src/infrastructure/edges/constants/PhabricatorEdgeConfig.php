@@ -154,17 +154,11 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     }
 
     static $class_map = array(
-      PhabricatorPHIDConstants::PHID_TYPE_USER  => 'PhabricatorUser',
       PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
-      PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
-      PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
-      PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
-      PhabricatorPHIDConstants::PHID_TYPE_CONP  => 'ConpherenceThread',
       PhabricatorPHIDConstants::PHID_TYPE_ACNT  => 'PhortuneAccount',
       PhabricatorPHIDConstants::PHID_TYPE_PRCH  => 'PhortunePurchase',
       PhabricatorPHIDConstants::PHID_TYPE_CHRG  => 'PhortuneCharge',
       PhabricatorPHIDConstants::PHID_TYPE_XOBJ  => 'DoorkeeperExternalObject',
-      PhabricatorPHIDConstants::PHID_TYPE_LEGD  => 'LegalpadDocument',
     );
 
     $class = idx($class_map, $phid_type);

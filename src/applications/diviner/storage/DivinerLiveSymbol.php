@@ -160,7 +160,7 @@ final class DivinerLiveSymbol extends DivinerDAO
 
 
   public function shouldUseMarkupCache($field) {
-    return true;
+    return false;
   }
 
 }

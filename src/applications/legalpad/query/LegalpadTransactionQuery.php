@@ -6,7 +6,7 @@
 final class LegalpadTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new LegalpadTransaction();
   }
 

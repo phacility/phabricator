@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-apps {
     background-image: url(/rsrc/image/sprite-apps-X2.png);
-    background-size: 105px 120px;
+    background-size: 150px 165px;
   }
 }
 
@@ -22,210 +22,430 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px 0px;
 }
 
-.apps-application-dark {
+.apps-adventure-white {
   background-position: -15px 0px;
 }
 
-.apps-audit-dark {
+.apps-application-dark {
   background-position: -30px 0px;
 }
 
-.apps-authentication-dark {
+.apps-application-white {
   background-position: -45px 0px;
 }
 
-.apps-calendar-dark {
+.apps-audit-dark {
   background-position: -60px 0px;
 }
 
-.apps-chatlog-dark {
+.apps-audit-white {
   background-position: -75px 0px;
 }
 
-.apps-conduit-dark {
+.apps-authentication-dark {
   background-position: -90px 0px;
 }
 
-.apps-conpherence-dark {
+.apps-authentication-white {
+  background-position: -105px 0px;
+}
+
+.apps-calendar-dark {
+  background-position: -120px 0px;
+}
+
+.apps-calendar-white {
+  background-position: -135px 0px;
+}
+
+.apps-chatlog-dark {
   background-position: 0px -15px;
 }
 
-.apps-countdown-dark {
+.apps-chatlog-white {
   background-position: -15px -15px;
 }
 
-.apps-daemon-dark {
+.apps-conduit-dark {
   background-position: -30px -15px;
 }
 
-.apps-differential-dark {
+.apps-conduit-white {
   background-position: -45px -15px;
 }
 
-.apps-diffusion-dark {
+.apps-conpherence-dark {
   background-position: -60px -15px;
 }
 
-.apps-diviner-dark {
+.apps-conpherence-white {
   background-position: -75px -15px;
 }
 
-.apps-drydock-dark {
+.apps-countdown-dark {
   background-position: -90px -15px;
 }
 
-.apps-fact-dark {
+.apps-countdown-white {
+  background-position: -105px -15px;
+}
+
+.apps-daemon-dark {
+  background-position: -120px -15px;
+}
+
+.apps-daemon-white {
+  background-position: -135px -15px;
+}
+
+.apps-differential-dark {
   background-position: 0px -30px;
 }
 
-.apps-feed-dark {
+.apps-differential-white {
   background-position: -15px -30px;
 }
 
-.apps-files-dark {
+.apps-diffusion-dark {
   background-position: -30px -30px;
 }
 
-.apps-flags-dark {
+.apps-diffusion-white {
   background-position: -45px -30px;
 }
 
-.apps-harbormaster-dark {
+.apps-diviner-dark {
   background-position: -60px -30px;
 }
 
-.apps-help-dark {
+.apps-diviner-white {
   background-position: -75px -30px;
 }
 
-.apps-herald-dark {
+.apps-drydock-dark {
   background-position: -90px -30px;
 }
 
-.apps-home-dark {
+.apps-drydock-white {
+  background-position: -105px -30px;
+}
+
+.apps-fact-dark {
+  background-position: -120px -30px;
+}
+
+.apps-fact-white {
+  background-position: -135px -30px;
+}
+
+.apps-feed-dark {
   background-position: 0px -45px;
 }
 
-.apps-legalpad-dark {
+.apps-feed-white {
   background-position: -15px -45px;
 }
 
-.apps-logo-dark {
+.apps-files-dark {
   background-position: -30px -45px;
 }
 
-.apps-macro-dark {
+.apps-files-white {
   background-position: -45px -45px;
 }
 
-.apps-mail-dark {
+.apps-flags-dark {
   background-position: -60px -45px;
 }
 
-.apps-maniphest-dark {
+.apps-flags-white {
   background-position: -75px -45px;
 }
 
-.apps-metamta-dark {
+.apps-harbormaster-dark {
   background-position: -90px -45px;
 }
 
-.apps-owners-dark {
+.apps-harbormaster-white {
+  background-position: -105px -45px;
+}
+
+.apps-help-dark {
+  background-position: -120px -45px;
+}
+
+.apps-help-white {
+  background-position: -135px -45px;
+}
+
+.apps-herald-dark {
   background-position: 0px -60px;
 }
 
-.apps-paste-dark {
+.apps-herald-white {
   background-position: -15px -60px;
 }
 
-.apps-people-dark {
+.apps-home-dark {
   background-position: -30px -60px;
 }
 
-.apps-phage-dark {
+.apps-home-white {
   background-position: -45px -60px;
 }
 
-.apps-phame-dark {
+.apps-legalpad-dark {
   background-position: -60px -60px;
 }
 
-.apps-phid-dark {
+.apps-legalpad-white {
   background-position: -75px -60px;
 }
 
-.apps-phlux-dark {
+.apps-logo-dark {
   background-position: -90px -60px;
 }
 
-.apps-pholio-dark {
+.apps-logo-white {
+  background-position: -105px -60px;
+}
+
+.apps-macro-dark {
+  background-position: -120px -60px;
+}
+
+.apps-macro-white {
+  background-position: -135px -60px;
+}
+
+.apps-mail-dark {
   background-position: 0px -75px;
 }
 
-.apps-phortune-dark {
+.apps-mail-white {
   background-position: -15px -75px;
 }
 
-.apps-phpast-dark {
+.apps-maniphest-dark {
   background-position: -30px -75px;
 }
 
-.apps-phrequent-dark {
+.apps-maniphest-white {
   background-position: -45px -75px;
 }
 
-.apps-phriction-dark {
+.apps-metamta-dark {
   background-position: -60px -75px;
 }
 
-.apps-policy-dark {
+.apps-metamta-white {
   background-position: -75px -75px;
 }
 
-.apps-ponder-dark {
+.apps-new-dark {
   background-position: -90px -75px;
 }
 
-.apps-power-dark {
+.apps-new-white {
+  background-position: -105px -75px;
+}
+
+.apps-owners-dark {
+  background-position: -120px -75px;
+}
+
+.apps-owners-white {
+  background-position: -135px -75px;
+}
+
+.apps-paste-dark {
   background-position: 0px -90px;
 }
 
-.apps-projects-dark {
+.apps-paste-white {
   background-position: -15px -90px;
 }
 
-.apps-releeph-dark {
+.apps-people-dark {
   background-position: -30px -90px;
 }
 
-.apps-repositories-dark {
+.apps-people-white {
   background-position: -45px -90px;
 }
 
-.apps-settings-dark {
+.apps-phage-dark {
   background-position: -60px -90px;
 }
 
-.apps-setup-dark {
+.apps-phage-white {
   background-position: -75px -90px;
 }
 
-.apps-slowvote-dark {
+.apps-phame-dark {
   background-position: -90px -90px;
 }
 
-.apps-token-dark {
+.apps-phame-white {
+  background-position: -105px -90px;
+}
+
+.apps-phid-dark {
+  background-position: -120px -90px;
+}
+
+.apps-phid-white {
+  background-position: -135px -90px;
+}
+
+.apps-phlux-dark {
   background-position: 0px -105px;
 }
 
-.apps-uiexamples-dark {
+.apps-phlux-white {
   background-position: -15px -105px;
 }
 
-.apps-workphlow-dark {
+.apps-pholio-dark {
   background-position: -30px -105px;
 }
 
-.apps-xhprof-dark {
+.apps-pholio-white {
   background-position: -45px -105px;
+}
+
+.apps-phortune-dark {
+  background-position: -60px -105px;
+}
+
+.apps-phortune-white {
+  background-position: -75px -105px;
+}
+
+.apps-phpast-dark {
+  background-position: -90px -105px;
+}
+
+.apps-phpast-white {
+  background-position: -105px -105px;
+}
+
+.apps-phrequent-dark {
+  background-position: -120px -105px;
+}
+
+.apps-phrequent-white {
+  background-position: -135px -105px;
+}
+
+.apps-phriction-dark {
+  background-position: 0px -120px;
+}
+
+.apps-phriction-white {
+  background-position: -15px -120px;
+}
+
+.apps-policy-dark {
+  background-position: -30px -120px;
+}
+
+.apps-policy-white {
+  background-position: -45px -120px;
+}
+
+.apps-ponder-dark {
+  background-position: -60px -120px;
+}
+
+.apps-ponder-white {
+  background-position: -75px -120px;
+}
+
+.apps-power-dark {
+  background-position: -90px -120px;
+}
+
+.apps-power-white {
+  background-position: -105px -120px;
+}
+
+.apps-projects-dark {
+  background-position: -120px -120px;
+}
+
+.apps-projects-white {
+  background-position: -135px -120px;
+}
+
+.apps-releeph-dark {
+  background-position: 0px -135px;
+}
+
+.apps-releeph-white {
+  background-position: -15px -135px;
+}
+
+.apps-repositories-dark {
+  background-position: -30px -135px;
+}
+
+.apps-repositories-white {
+  background-position: -45px -135px;
+}
+
+.apps-settings-dark {
+  background-position: -60px -135px;
+}
+
+.apps-settings-white {
+  background-position: -75px -135px;
+}
+
+.apps-setup-dark {
+  background-position: -90px -135px;
+}
+
+.apps-setup-white {
+  background-position: -105px -135px;
+}
+
+.apps-slowvote-dark {
+  background-position: -120px -135px;
+}
+
+.apps-slowvote-white {
+  background-position: -135px -135px;
+}
+
+.apps-token-dark {
+  background-position: 0px -150px;
+}
+
+.apps-token-white {
+  background-position: -15px -150px;
+}
+
+.apps-uiexamples-dark {
+  background-position: -30px -150px;
+}
+
+.apps-uiexamples-white {
+  background-position: -45px -150px;
+}
+
+.apps-workphlow-dark {
+  background-position: -60px -150px;
+}
+
+.apps-workphlow-white {
+  background-position: -75px -150px;
+}
+
+.apps-xhprof-dark {
+  background-position: -90px -150px;
+}
+
+.apps-xhprof-white {
+  background-position: -105px -150px;
 }
