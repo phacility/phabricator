@@ -41,22 +41,22 @@ JX.install('TypeaheadOnDemandSource', {
     lastChange : null,
     haveData : null,
 
-    didChange : function(value) {
+    didChange : function(raw_value) {
       this.lastChange = JX.now();
-      value = this.normalize(value);
+      var value = this.normalize(raw_value);
 
       if (this.haveData[value]) {
         this.matchResults(value);
       } else {
         this.waitForResults();
         setTimeout(
-          JX.bind(this, this.sendRequest, this.lastChange, value),
+          JX.bind(this, this.sendRequest, this.lastChange, value, raw_value),
           this.getQueryDelay()
         );
       }
     },
 
-    sendRequest : function(when, value) {
+    sendRequest : function(when, value, raw_value) {
       if (when != this.lastChange) {
         return;
       }
@@ -64,7 +64,7 @@ JX.install('TypeaheadOnDemandSource', {
         this.uri,
         JX.bind(this, this.ondata, this.lastChange, value));
       r.setMethod('GET');
-      r.setData(JX.copy(this.getAuxiliaryData(), {q : value}));
+      r.setData(JX.copy(this.getAuxiliaryData(), {q : value, raw: raw_value}));
       r.send();
     },
 

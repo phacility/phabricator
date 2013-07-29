@@ -89,19 +89,26 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     });
 
     // If we have more results than fit, limit each type of result to 3, so
-    // we show 3 applications, then 3 users, etc.
+    // we show 3 applications, then 3 users, etc. For jump items, we show only
+    // one result.
     var type_count = 0;
     var current_type = null;
     for (ii = 0; ii < list.length; ii++) {
-      if (list.length <= config.limit) {
-        break;
-      }
       if (list[ii].type != current_type) {
         current_type = list[ii].type;
         type_count = 1;
       } else {
         type_count++;
-        if (type_count > 3) {
+
+        // Skip this item if:
+        //   - it's a jump nav item, and we already have at least one jump
+        //     nav item; or
+        //   - we have more items than will fit in the typeahead, and this
+        //     is the 4..Nth result of its type.
+
+        var skip = ((current_type == 'jump') && (type_count > 1)) ||
+                   ((list.length > config.limit) && (type_count > 3));
+        if (skip) {
           list.splice(ii, 1);
           ii--;
         }
