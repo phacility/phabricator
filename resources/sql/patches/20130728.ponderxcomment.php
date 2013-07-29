@@ -27,11 +27,11 @@ foreach ($rows as $row) {
   }
 
   $comment_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorPHIDConstants::PHID_TYPE_XACT,
+    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
     $type);
 
   $xaction_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorPHIDConstants::PHID_TYPE_XACT,
+    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
     $type);
 
   queryfx(

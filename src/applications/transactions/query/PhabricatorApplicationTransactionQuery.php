@@ -11,7 +11,7 @@ abstract class PhabricatorApplicationTransactionQuery
   private $needComments = true;
   private $needHandles  = true;
 
-  abstract protected function getTemplateApplicationTransaction();
+  abstract public function getTemplateApplicationTransaction();
 
   protected function buildMoreWhereClauses(AphrontDatabaseConnection $conn_r) {
     return array();

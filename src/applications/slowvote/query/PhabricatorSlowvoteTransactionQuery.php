@@ -3,7 +3,7 @@
 final class PhabricatorSlowvoteTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new PhabricatorSlowvoteTransaction();
   }
 

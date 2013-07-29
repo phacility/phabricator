@@ -6,7 +6,7 @@
 final class ConpherenceTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new ConpherenceTransaction();
   }
 

@@ -47,7 +47,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function generatePHID() {
-    $type = PhabricatorPHIDConstants::PHID_TYPE_XACT;
+    $type = PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST;
     $subtype = $this->getApplicationTransactionType();
 
     return PhabricatorPHID::generateNewPHID($type, $subtype);
