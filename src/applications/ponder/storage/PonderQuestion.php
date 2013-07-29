@@ -165,7 +165,7 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function isAutomaticallySubscribed($phid) {
-    return false;
+    return ($phid == $this->getAuthorPHID());
   }
 
   public function save() {
@@ -198,7 +198,9 @@ final class PonderQuestion extends PonderDAO
     return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
 
   public function getUsersToNotifyOfTokenGiven() {
     return array(

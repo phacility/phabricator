@@ -237,6 +237,8 @@ final class PonderQuestionViewController extends PonderController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $id = $answer->getID();
+
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
       $answer,
@@ -247,10 +249,6 @@ final class PonderQuestionViewController extends PonderController {
       ->setObject($answer)
       ->setObjectURI($request->getRequestURI());
 
-/*
-
-    TODO
-
     $view->addAction(
       id(new PhabricatorActionView())
         ->setIcon('edit')
@@ -258,8 +256,6 @@ final class PonderQuestionViewController extends PonderController {
         ->setHref($this->getApplicationURI("/answer/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
-
-*/
 
     return $view;
   }

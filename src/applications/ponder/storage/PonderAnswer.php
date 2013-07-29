@@ -4,7 +4,9 @@ final class PonderAnswer extends PonderDAO
   implements
     PhabricatorMarkupInterface,
     PonderVotableInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -144,5 +146,24 @@ final class PonderAnswer extends PonderDAO
         return ($this->getAuthorPHID() == $viewer->getPHID());
     }
   }
+
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($phid == $this->getAuthorPHID());
+  }
+
 
 }

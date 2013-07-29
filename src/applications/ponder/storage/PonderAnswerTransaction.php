@@ -3,6 +3,8 @@
 final class PonderAnswerTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_CONTENT = 'ponder.answer:content';
+
   public function getApplicationName() {
     return 'ponder';
   }
