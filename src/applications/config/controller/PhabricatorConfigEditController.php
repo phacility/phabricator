@@ -64,6 +64,7 @@ final class PhabricatorConfigEditController
         ->setConfigKey($this->key)
         ->setNamespace('default')
         ->setIsDeleted(true);
+      $config_entry->setPHID($config_entry->generatePHID());
     }
 
     $e_value = null;

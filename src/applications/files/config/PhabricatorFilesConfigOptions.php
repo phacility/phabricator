@@ -154,6 +154,11 @@ final class PhabricatorFilesConfigOptions
             "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
             "suffix."))
         ->addExample('10M', pht("Allow Uploads 10MB or Smaller")),
+     $this->newOption(
+        'metamta.files.public-create-email',
+        'string',
+        null)
+       ->setDescription(pht('Allow uploaded files via email.')),
      $this->newOption('files.enable-imagemagick', 'bool', false)
        ->setBoolOptions(
          array(
