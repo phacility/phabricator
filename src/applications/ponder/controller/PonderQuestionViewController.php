@@ -159,10 +159,15 @@ final class PonderQuestionViewController extends PonderController {
     $view->addTextContent(
       array(
         $votable,
-        PhabricatorMarkupEngine::renderOneObject(
-          $question,
-          $question->getMarkupField(),
-          $viewer),
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-remarkup',
+          ),
+          PhabricatorMarkupEngine::renderOneObject(
+            $question,
+            $question->getMarkupField(),
+            $viewer)),
       ));
 
 
