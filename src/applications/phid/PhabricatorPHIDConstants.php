@@ -22,7 +22,6 @@ final class PhabricatorPHIDConstants {
 
   const PHID_TYPE_XCMT    = 'XCMT';
 
-  const PHID_TYPE_BOOK    = 'BOOK';
   const PHID_TYPE_ATOM    = 'ATOM';
   const PHID_TYPE_AUTH    = 'AUTH';
   const PHID_TYPE_XOBJ    = 'XOBJ';
