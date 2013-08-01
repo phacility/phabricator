@@ -160,7 +160,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     }
 
     foreach ($this->reviewers as $k => $phid) {
-      if (phid_get_type($phid) == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+      if (phid_get_type($phid) == PhabricatorProjectPHIDTypeProject::TYPECONST) {
         unset($this->reviewers[$k]);
         $new_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
             $phid,

@@ -677,7 +677,7 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
 
     // Allow projects to be added as reviewers by adding each member of the project
     foreach ($added_reviewers as $k => $user_phid) {
-      if (phid_get_type($user_phid) == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+      if (phid_get_type($user_phid) == PhabricatorProjectPHIDTypeProject::TYPECONST) {
         unset($added_reviewers[$k]);
         $new_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
           $user_phid,
