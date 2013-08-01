@@ -75,7 +75,9 @@ final class ConduitAPI_differential_query_Method
     $branches           = $request->getValue('branches');
     $arc_projects       = $request->getValue('arcanistProjects');
 
-    $query = new DifferentialRevisionQuery();
+    $query = id(new DifferentialRevisionQuery())
+      ->setViewer($request->getUser());
+
     if ($authors) {
       $query->withAuthors($authors);
     }

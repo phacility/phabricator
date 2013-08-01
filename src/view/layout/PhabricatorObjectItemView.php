@@ -16,6 +16,22 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $bylines = array();
   private $grippable;
   private $actions = array();
+  private $headIcons = array();
+  private $disabled;
+
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function getDisabled() {
+    return $this->disabled;
+  }
+
+  public function addHeadIcon($icon) {
+    $this->headIcons[] = $icon;
+    return $this;
+  }
 
   public function setObjectName($name) {
     $this->objectName = $name;
@@ -85,11 +101,11 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     return $this;
   }
 
-  public function addIcon($icon, $label = null, $href = null) {
+  public function addIcon($icon, $label = null, $attributes = array()) {
     $this->icons[] = array(
       'icon'  => $icon,
       'label' => $label,
-      'href' => $href,
+      'attributes' => $attributes,
     );
     return $this;
   }
@@ -166,6 +182,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $item_classes[] = 'phabricator-object-item-with-'.$n.'-actions';
     }
 
+    if ($this->disabled) {
+      $item_classes[] = 'phabricator-object-item-disabled';
+    }
+
     switch ($this->effect) {
       case 'highlighted':
         $item_classes[] = 'phabricator-object-item-highlighted';
@@ -220,6 +240,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         'sigil' => 'slippery',
       ),
       array(
+        $this->headIcons,
         $header_name,
         $header_link,
       ));
@@ -230,11 +251,23 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       foreach ($this->icons as $spec) {
         $icon = $spec['icon'];
 
-        $icon = phutil_tag(
+        $sigil = null;
+        $meta = null;
+        if (isset($spec['attributes']['tip'])) {
+          $sigil = 'has-tooltip';
+          $meta = array(
+            'tip' => $spec['attributes']['tip'],
+            'align' => 'W',
+          );
+        }
+
+        $icon = javelin_tag(
           'span',
           array(
             'class' => 'phabricator-object-item-icon-image '.
                        'sprite-icons icons-'.$icon,
+            'sigil' => $sigil,
+            'meta'  => $meta,
           ),
           '');
 
@@ -245,10 +278,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           ),
           $spec['label']);
 
-        if ($spec['href']) {
+        if (isset($spec['attributes']['href'])) {
           $icon_href = phutil_tag(
             'a',
-            array('href' => $spec['href']),
+            array('href' => $spec['attributes']['href']),
             array($label, $icon));
         } else {
           $icon_href = array($label, $icon);
@@ -260,7 +293,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           $classes[] = 'phabricator-object-item-icon-none';
         }
 
-        $icon_list[] = phutil_tag(
+        $icon_list[] = javelin_tag(
           'li',
           array(
             'class' => implode(' ', $classes),
@@ -408,7 +441,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
     $actions = array();
     if ($this->actions) {
+      Javelin::initBehavior('phabricator-tooltips');
+
       foreach (array_reverse($this->actions) as $action) {
+        $action->setRenderNameAsTooltip(true);
         $actions[] = $action;
       }
       $actions = phutil_tag(

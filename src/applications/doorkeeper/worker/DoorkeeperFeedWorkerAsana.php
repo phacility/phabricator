@@ -3,6 +3,7 @@
 final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
   private $provider;
+  private $publisher;
   private $workspaceID;
   private $feedStory;
   private $storyObject;
@@ -43,6 +44,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     return PhabricatorUser::getOmnipotentUser();
   }
 
+  private function getPublisher() {
+    return $this->publisher;
+  }
+
   private function getStoryObject() {
     if (!$this->storyObject) {
       $story = $this->getFeedStory();
@@ -57,75 +62,38 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     return $this->storyObject;
   }
 
-  private function isObjectSupported($object) {
-    return ($object instanceof DifferentialRevision);
-  }
-
-  private function getRelatedUserPHIDs($object) {
-    $revision = $object;
-    $revision->loadRelationships();
-
-    $author_phid = $revision->getAuthorPHID();
-    $reviewer_phids = $revision->getReviewers();
-    $cc_phids = $revision->getCCPHIDs();
-
-    switch ($revision->getStatus()) {
-      case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
-        $active_phids = $reviewer_phids;
-        $passive_phids = array();
-        break;
-      default:
-        $active_phids = array();
-        $passive_phids = $reviewer_phids;
-        break;
-    }
-
-    return array(
-      $author_phid,
-      $active_phids,
-      $passive_phids,
-      $cc_phids);
-  }
-
   private function getAsanaTaskData($object) {
-    $revision = $object;
+    $publisher = $this->getPublisher();
 
-    $name = '[Differential] D'.$revision->getID().': '.$revision->getTitle();
-    $uri = PhabricatorEnv::getProductionURI('/D'.$revision->getID());
+    $title = $publisher->getObjectTitle($object);
+    $uri = $publisher->getObjectURI($object);
+    $description = $publisher->getObjectDescription($object);
+    $is_completed = $publisher->isObjectClosed($object);
 
     $notes = array(
-      $revision->getSummary(),
+      $description,
       $uri,
       $this->getSynchronizationWarning(),
     );
 
     $notes = implode("\n\n", $notes);
 
-    switch ($revision->getStatus()) {
-      case ArcanistDifferentialRevisionStatus::CLOSED:
-      case ArcanistDifferentialRevisionStatus::ABANDONED:
-        $is_completed = true;
-        break;
-      default:
-        $is_completed = false;
-        break;
-    }
-
     return array(
-      'name' => $name,
+      'name' => $title,
       'notes' => $notes,
       'completed' => $is_completed,
     );
   }
 
   private function getAsanaSubtaskData($object) {
-    $revision = $object;
+    $publisher = $this->getPublisher();
 
-    $name = '[Differential] Review Request';
-    $uri = PhabricatorEnv::getProductionURI('/D'.$revision->getID());
+    $title = $publisher->getResponsibilityTitle($object);
+    $uri = $publisher->getObjectURI($object);
+    $description = $publisher->getObjectDescription($object);
 
     $notes = array(
-      $revision->getSummary(),
+      $description,
       $uri,
       $this->getSynchronizationWarning(),
     );
@@ -133,7 +101,7 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $notes = implode("\n\n", $notes);
 
     return array(
-      'name' => '[Differential] Review Request',
+      'name' => $title,
       'notes' => $notes,
     );
   }
@@ -157,7 +125,27 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $object = $this->getStoryObject();
     $src_phid = $object->getPHID();
 
-    if (!$this->isObjectSupported($object)) {
+    $chronological_key = $story->getChronologicalKey();
+
+    $publishers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('DoorkeeperFeedStoryPublisher')
+      ->loadObjects();
+    foreach ($publishers as $publisher) {
+      if ($publisher->canPublishStory($story, $object)) {
+        $publisher
+          ->setViewer($viewer)
+          ->setFeedStory($story);
+
+        $object = $publisher->willPublishStory($object);
+        $this->storyObject = $object;
+
+        $this->publisher = $publisher;
+        $this->log("Using publisher '%s'.\n", get_class($publisher));
+        break;
+      }
+    }
+
+    if (!$this->publisher) {
       $this->log("Story is about an unsupported object type.\n");
       return;
     }
@@ -174,29 +162,28 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     //     revision.
     //   - Follow: users who are following the object; generally CCs.
 
-    $phids = $this->getRelatedUserPHIDs($object);
-    list($owner_phid, $active_phids, $passive_phids, $follow_phids) = $phids;
+    $owner_phid = $publisher->getOwnerPHID($object);
+    $active_phids = $publisher->getActiveUserPHIDs($object);
+    $passive_phids = $publisher->getPassiveUserPHIDs($object);
+    $follow_phids = $publisher->getCCUserPHIDs($object);
 
-    $all_follow_phids = array_merge(
+    $all_phids = array();
+    $all_phids = array_merge(
+      array($owner_phid),
       $active_phids,
       $passive_phids,
       $follow_phids);
-    $all_follow_phids = array_unique(array_filter($all_follow_phids));
-
-    $all_phids = $all_follow_phids;
-    $all_phids[] = $owner_phid;
     $all_phids = array_unique(array_filter($all_phids));
 
     $phid_aid_map = $this->lookupAsanaUserIDs($all_phids);
-
     if (!$phid_aid_map) {
       throw new PhabricatorWorkerPermanentFailureException(
         'No related users have linked Asana accounts.');
     }
 
     $owner_asana_id = idx($phid_aid_map, $owner_phid);
-    $all_follow_asana_ids = array_select_keys($phid_aid_map, $all_follow_phids);
-    $all_follow_asana_ids = array_values($all_follow_asana_ids);
+    $all_asana_ids = array_select_keys($phid_aid_map, $all_phids);
+    $all_asana_ids = array_values($all_asana_ids);
 
     // Even if the actor isn't a reviewer, etc., try to use their account so
     // we can post in the correct voice. If we miss, we'll try all the other
@@ -233,11 +220,13 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $main_data = $this->getAsanaTaskData($object) + array(
       'assignee' => $owner_asana_id,
-      'followers' => $all_follow_asana_ids,
+      'followers' => $all_asana_ids,
     );
 
     $extra_data = array();
     if ($main_edge) {
+      $extra_data = $main_edge['data'];
+
       $refs = id(new DoorkeeperImportEngine())
         ->setViewer($possessed_user)
         ->withPHIDs(array($main_edge['dst']))
@@ -249,7 +238,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
           'DoorkeeperExternalObject could not be loaded.');
       }
 
-      if (!$parent_ref->getIsVisible()) {
+      if ($parent_ref->getSyncFailed()) {
+        throw new Exception(
+          'Synchronization of parent task from Asana failed!');
+      } else if (!$parent_ref->getIsVisible()) {
         $this->log("Skipping main task update, object is no longer visible.\n");
         $extra_data['gone'] = true;
       } else {
@@ -289,8 +281,6 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
             "Skipping main task update, cursor is ahead of the story.\n");
         }
       }
-
-      $extra_data = $main_edge['data'];
     } else {
       $parent = $this->makeAsanaAPICall(
         $oauth_token,
@@ -298,6 +288,12 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         'POST',
         array(
           'workspace' => $workspace_id,
+          // NOTE: We initially create parent tasks in the "Later" state but
+          // don't update it afterward, even if the corresponding object
+          // becomes actionable. The expectation is that users will prioritize
+          // tasks in responses to notifications of state changes, and that
+          // we should not overwrite their choices.
+          'assignee_status' => 'later',
         ) + $main_data);
       $parent_ref = $this->newRefFromResult(
         DoorkeeperBridgeAsana::OBJTYPE_TASK,
@@ -331,17 +327,6 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         'this likely indicates the Asana task has been deleted.');
     }
 
-    // Post the feed story itself to the main Asana task.
-
-    $this->makeAsanaAPICall(
-      $oauth_token,
-      'tasks/'.$parent_ref->getObjectID().'/stories',
-      'POST',
-      array(
-        'text' => $story->renderText(),
-      ));
-
-
     // Now, handle the subtasks.
 
     $sub_editor = id(new PhabricatorEdgeEditor())
@@ -361,6 +346,10 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         ->execute();
 
       foreach ($refs as $ref) {
+        if ($ref->getSyncFailed()) {
+          throw new Exception(
+            'Synchronization of child task from Asana failed!');
+        }
         if (!$ref->getIsVisible()) {
           $ref->getExternalObject()->delete();
           continue;
@@ -487,6 +476,20 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $sub_editor->save();
 
+
+    // Post the feed story itself to the main Asana task. We do this last
+    // because everything else is idempotent, so this is the only effect we
+    // can't safely run more than once.
+
+    $text = $publisher->getStoryText($object);
+
+    $this->makeAsanaAPICall(
+      $oauth_token,
+      'tasks/'.$parent_ref->getObjectID().'/stories',
+      'POST',
+      array(
+        'text' => $text,
+      ));
   }
 
   private function lookupAsanaUserIDs($all_phids) {
@@ -530,6 +533,12 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       ->withAccountTypes(array($provider->getProviderType()))
       ->withAccountDomains(array($provider->getProviderDomain()))
       ->execute();
+
+    // Reorder accounts in the original order.
+    // TODO: This needs to be adjusted if/when we allow you to link multiple
+    // accounts.
+    $accounts = mpull($accounts, null, 'getUserPHID');
+    $accounts = array_select_keys($accounts, $user_phids);
 
     $workspace_id = $this->getWorkspaceID();
 
@@ -602,5 +611,13 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     return $ref;
   }
 
+  public function getMaximumRetryCount() {
+    return 4;
+  }
+
+  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
+    $count = $task->getFailureCount();
+    return (5 * 60) * pow(8, $count);
+  }
 
 }

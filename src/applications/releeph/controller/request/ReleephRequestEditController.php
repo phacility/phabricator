@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephRequestEditController extends ReleephController {
+final class ReleephRequestEditController extends ReleephProjectController {
 
   private $id;
 
@@ -21,7 +21,15 @@ final class ReleephRequestEditController extends ReleephController {
 
     // Load the RQ we're editing, or create a new one
     if ($this->id) {
-      $rq = id(new ReleephRequest())->load($this->id);
+      $rq = id(new ReleephRequestQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       $is_edit = true;
     } else {
       $is_edit = false;
@@ -243,27 +251,42 @@ final class ReleephRequestEditController extends ReleephController {
       }
     }
 
+    $crumbs = $this->buildApplicationCrumbs();
+
     if ($is_edit) {
       $title = pht('Edit Releeph Request');
       $submit_name = pht('Save');
+
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName('RQ'.$rq->getID())
+          ->setHref('/RQ'.$rq->getID()));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Edit')));
+
     } else {
       $title = pht('Create Releeph Request');
       $submit_name = pht('Create');
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('New Request')));
     }
 
-    $form
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton($origin_uri, 'Cancel')
-          ->setValue($submit_name));
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->addCancelButton($origin_uri, 'Cancel')
+        ->setValue($submit_name));
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader($title)
-      ->setWidth(AphrontPanelView::WIDTH_FORM)
-      ->appendChild($form);
-
-    return $this->buildStandardPageResponse(
-      array($notice_view, $error_view, $panel),
-      array('title', $title));
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $notice_view,
+        $error_view,
+        $form,
+      ),
+      array(
+        'title' => $title,
+      ));
   }
 }

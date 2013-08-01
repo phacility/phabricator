@@ -29,7 +29,12 @@ final class ConduitAPI_differential_close_Method
   protected function execute(ConduitAPIRequest $request) {
     $id = $request->getValue('revisionID');
 
-    $revision = id(new DifferentialRevision())->load($id);
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($id))
+      ->setViewer($request->getUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
     if (!$revision) {
       throw new ConduitException('ERR_NOT_FOUND');
     }
@@ -42,8 +47,6 @@ final class ConduitAPI_differential_close_Method
       // message to the revision comments.
       return;
     }
-
-    $revision->loadRelationships();
 
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_CONDUIT,

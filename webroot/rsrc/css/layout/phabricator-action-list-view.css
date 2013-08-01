@@ -21,7 +21,12 @@
 }
 
 .device-desktop .phabricator-header-shell + .phabricator-action-list-view {
-  margin-top: -28px;
+  margin-top: -33px;
+}
+
+.device-desktop .phabricator-header-shell.phabricator-header-has-image +
+  .phabricator-action-list-view {
+  margin-top: -53px;
 }
 
 .device .phabricator-header-shell + .phabricator-action-list-view {
@@ -98,6 +103,10 @@
 .phabricator-action-view-disabled .phabricator-action-view-item,
 .phabricator-action-view-disabled button.phabricator-action-view-item {
   color: #888888;
+}
+
+.phabricator-action-view button[disabled] {
+  opacity: 1.0;
 }
 
 .device-desktop .phabricator-action-view-disabled:hover

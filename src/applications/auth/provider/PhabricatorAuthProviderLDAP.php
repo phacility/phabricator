@@ -24,6 +24,12 @@ final class PhabricatorAuthProviderLDAP
   public function getAdapter() {
     if (!$this->adapter) {
       $conf = $this->getProviderConfig();
+
+      $realname_attributes = $conf->getProperty(self::KEY_REALNAME_ATTRIBUTES);
+      if (!is_array($realname_attributes)) {
+        $realname_attributes = array();
+      }
+
       $adapter = id(new PhutilAuthAdapterLDAP())
         ->setHostname(
           $conf->getProperty(self::KEY_HOSTNAME))
@@ -35,8 +41,7 @@ final class PhabricatorAuthProviderLDAP
           $conf->getProperty(self::KEY_SEARCH_ATTRIBUTE))
         ->setUsernameAttribute(
           $conf->getProperty(self::KEY_USERNAME_ATTRIBUTE))
-        ->setRealNameAttributes(
-          $conf->getProperty(self::KEY_REALNAME_ATTRIBUTES, array()))
+        ->setRealNameAttributes($realname_attributes)
         ->setLDAPVersion(
           $conf->getProperty(self::KEY_VERSION))
         ->setLDAPReferrals(
@@ -185,20 +190,7 @@ final class PhabricatorAuthProviderLDAP
   const KEY_ACTIVEDIRECTORY_DOMAIN  = 'ldap:activedirectory-domain';
 
   private function getPropertyKeys() {
-    return array(
-      self::KEY_HOSTNAME,
-      self::KEY_PORT,
-      self::KEY_DISTINGUISHED_NAME,
-      self::KEY_SEARCH_ATTRIBUTE,
-      self::KEY_USERNAME_ATTRIBUTE,
-      self::KEY_VERSION,
-      self::KEY_REFERRALS,
-      self::KEY_START_TLS,
-      self::KEY_ANONYMOUS_USERNAME,
-      self::KEY_ANONYMOUS_PASSWORD,
-      self::KEY_SEARCH_FIRST,
-      self::KEY_ACTIVEDIRECTORY_DOMAIN,
-    );
+    return array_keys($this->getPropertyLabels());
   }
 
   private function getPropertyLabels() {
@@ -239,6 +231,7 @@ final class PhabricatorAuthProviderLDAP
           break;
       }
     }
+
     return $values;
   }
 

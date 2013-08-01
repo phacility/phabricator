@@ -7,6 +7,7 @@
   border-width: 1px 0;
   border-style: solid;
   border-color: #c0c5d1;
+  overflow: hidden;
 }
 
 .phabricator-header-shell + .phabricator-form-view {
@@ -30,4 +31,21 @@
 
 .phabricator-header-tags .phabricator-tag-view {
   margin-left: 4px;
+}
+
+.phabricator-header-image {
+  display: inline-block;
+  background-repeat: no-repeat;
+  border: 1px solid white;
+  width: 50px;
+  height: 50px;
+  margin: 12px;
+  float: left;
+}
+
+.phabricator-header-subheader {
+  color: #444444;
+  font-weight: normal;
+  font-size: 13px;
+  margin-top: 4px;
 }

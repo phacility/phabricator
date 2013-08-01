@@ -237,6 +237,16 @@ final class CeleritySpriteGenerator {
         'y' => 24,
         'css' => '.menu-icon-search-blue',
       ),
+      'new' => array(
+        'x' => 24,
+        'y' => 24,
+        'css' => '.menu-icon-new',
+      ),
+      'new_blue' => array(
+        'x' => 24,
+        'y' => 24,
+        'css' => '.menu-icon-new-blue',
+      ),
       'app' => array(
         'x' => 24,
         'y' => 24,
@@ -248,8 +258,8 @@ final class CeleritySpriteGenerator {
         'css' => '.menu-icon-app-blue',
       ),
       'logo' => array(
-        'x' => 139,
-        'y' => 25,
+        'x' => 149,
+        'y' => 26,
         'css' => '.phabricator-main-menu-logo-image',
       ),
       'conf-off' => array(
@@ -469,6 +479,38 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildStatusSheet() {
+    $icons = $this->getDirectoryList('status_1x');
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+    $template = id(new PhutilSprite())
+      ->setSourceSize(14, 14);
+
+    $sprites = array();
+    $prefix = 'status_';
+    foreach ($icons as $icon) {
+      $sprite = id(clone $template)
+        ->setName('status-'.$icon)
+        ->setTargetCSS('.status-'.$icon);
+
+      foreach ($scales as $scale_key => $scale) {
+        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('status', true);
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
   public function buildGradientSheet() {
     $gradients = $this->getDirectoryList('gradients');
 
@@ -545,6 +587,7 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
+        'white' => 'white',
       );
     } else if ($variant == 2) {
       $scales = array(
@@ -560,6 +603,7 @@ final class CeleritySpriteGenerator {
         'light' => 'lb',
         'dark'  => 'dark',
         'blue'  => 'blue',
+        'white' => 'white',
       );
     } else {
       $scales = array(

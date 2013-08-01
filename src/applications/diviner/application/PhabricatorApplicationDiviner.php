@@ -23,6 +23,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
       '/diviner/' => array(
         '' => 'DivinerLegacyController',
         'query/((?<key>[^/]+)/)?' => 'DivinerAtomListController',
+        'find/' => 'DivinerFindController',
       ),
       '/docs/(?P<keyword>[^/]+)/' => 'DivinerJumpController',
       '/book/(?P<book>[^/]+)/' => 'DivinerBookController',
@@ -37,6 +38,12 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
 
   public function getApplicationGroup() {
     return self::GROUP_COMMUNICATION;
+  }
+
+  public function getRemarkupRules() {
+    return array(
+      new DivinerRemarkupRuleSymbol(),
+    );
   }
 
   public function buildMainMenuItems(

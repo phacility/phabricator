@@ -23,8 +23,6 @@ from XSS and render correctly. Broadly:
   - @{class:AphrontView} subclasses act like tags when rendering.
   - @{function:pht} has some special rules.
   - There are some other things that you should be aware of.
-  - Do not use @{function:phutil_render_tag} or @{function:javelin_render_tag},
-    they are deprecated and unsafe.
 
 See below for discussion.
 
@@ -182,14 +180,3 @@ following examples are dangerous:
 
   // We have a lint rule disallowing this.
   hsprintf($evil);
-
-= Deprecated Functions =
-
-The functions @{function@libphutil:phutil_render_tag} and
-@{function:javelin_render_tag} are unsafe versions of
-@{function@libphutil:phutil_tag} and @{function:javelin_tag}, are deprecated,
-and will be removed in the future. You should avoid their use and convert code
-to use @{function@libphutil:phutil_tag} and @{function:javelin_tag}.
-
-The function @{function:phabricator_render_form} is also deprecated, in favor of
-@{function:phabricator_form}.

@@ -17,8 +17,17 @@ final class PHUIListItemView extends AphrontTagView {
   private $key;
   private $icon;
   private $selected;
-  private $containerAttrs;
   private $disabled;
+  private $renderNameAsTooltip;
+
+  public function setRenderNameAsTooltip($render_name_as_tooltip) {
+    $this->renderNameAsTooltip = $render_name_as_tooltip;
+    return $this;
+  }
+
+  public function getRenderNameAsTooltip() {
+    return $this->renderNameAsTooltip;
+  }
 
   public function setSelected($selected) {
     $this->selected = $selected;
@@ -117,22 +126,31 @@ final class PHUIListItemView extends AphrontTagView {
   protected function getTagContent() {
     $name = null;
     $icon = null;
+    $meta = null;
+    $sigil = null;
 
     if ($this->name) {
-      $external = null;
-      if ($this->isExternal) {
-        $external = " \xE2\x86\x97";
-      }
+      if ($this->getRenderNameAsTooltip()) {
+        $sigil = 'has-tooltip';
+        $meta = array(
+          'tip' => $this->name,
+        );
+      } else {
+        $external = null;
+        if ($this->isExternal) {
+          $external = " \xE2\x86\x97";
+        }
 
-      $name = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-list-item-name',
-        ),
-        array(
-          $this->name,
-          $external,
-        ));
+        $name = phutil_tag(
+          'span',
+          array(
+            'class' => 'phui-list-item-name',
+          ),
+          array(
+            $this->name,
+            $external,
+          ));
+      }
     }
 
     if ($this->icon) {
@@ -147,11 +165,13 @@ final class PHUIListItemView extends AphrontTagView {
         ->setSpriteIcon($icon_name);
     }
 
-    return phutil_tag(
+    return javelin_tag(
       $this->href ? 'a' : 'div',
       array(
         'href' => $this->href,
         'class' => $this->href ? 'phui-list-item-href' : null,
+        'meta' => $meta,
+        'sigil' => $sigil,
       ),
       array(
         $icon,

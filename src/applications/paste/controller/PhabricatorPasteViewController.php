@@ -94,6 +94,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     return id(new PhabricatorActionListView())
       ->setUser($user)
       ->setObject($paste)
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Fork This Paste'))

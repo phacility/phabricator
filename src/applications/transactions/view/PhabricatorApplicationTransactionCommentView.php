@@ -16,6 +16,26 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
   private $commentID;
   private $draft;
   private $requestURI;
+  private $showPreview = true;
+  private $objectPHID;
+
+  public function setObjectPHID($object_phid) {
+    $this->objectPHID = $object_phid;
+    return $this;
+  }
+
+  public function getObjectPHID() {
+    return $this->objectPHID;
+  }
+
+  public function setShowPreview($show_preview) {
+    $this->showPreview = $show_preview;
+    return $this;
+  }
+
+  public function getShowPreview() {
+    return $this->showPreview;
+  }
 
   public function setRequestURI(PhutilURI $request_uri) {
     $this->requestURI = $request_uri;
@@ -77,7 +97,11 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
     $comment = $this->renderCommentPanel();
 
-    $preview = $this->renderPreviewPanel();
+    if ($this->getShowPreview()) {
+      $preview = $this->renderPreviewPanel();
+    } else {
+      $preview = null;
+    }
 
     Javelin::initBehavior(
       'phabricator-transaction-comment-form',
@@ -92,8 +116,12 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'savingString'  => pht('Saving Draft...'),
         'draftString'   => pht('Saved Draft'),
 
+        'showPreview'   => $this->getShowPreview(),
+
         'actionURI'     => $this->getAction(),
-        'draftKey'      => $this->getDraft()->getDraftKey(),
+        'draftKey'      => $this->getDraft()
+          ? $this->getDraft()->getDraftKey()
+          : null,
       ));
 
     return array($comment, $preview);
@@ -112,11 +140,19 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       $draft_comment = $this->getDraft()->getDraft();
     }
 
+    if (!$this->getObjectPHID()) {
+      throw new Exception("Call setObjectPHID() before render()!");
+    }
+
     return id(new AphrontFormView())
       ->setUser($this->getUser())
       ->setFlexible(true)
       ->addSigil('transaction-append')
       ->setWorkflow(true)
+      ->setMetadata(
+        array(
+          'objectPHID' => $this->getObjectPHID(),
+        ))
       ->setAction($this->getAction())
       ->setID($this->getFormID())
       ->appendChild(

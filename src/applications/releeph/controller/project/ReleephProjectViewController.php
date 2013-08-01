@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectViewController extends ReleephController {
+final class ReleephProjectViewController extends ReleephProjectController {
 
   public function processRequest() {
     // Load all branches

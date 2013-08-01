@@ -119,6 +119,22 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
     return;
   }
 
+  /**
+   * Hook to render additional hints based on, e.g., the viewing user, request,
+   * or other context. For example, this is used to show workspace IDs when
+   * configuring `asana.workspace-id`.
+   *
+   * @param   PhabricatorConfigOption   Option being rendered.
+   * @param   AphrontRequest            Active request.
+   * @return  wild                      Additional contextual description
+   *                                    information.
+   */
+  public function renderContextualDescription(
+    PhabricatorConfigOption $option,
+    AphrontRequest $request) {
+    return null;
+  }
+
   public function getKey() {
     $class = get_class($this);
     $matches = null;

@@ -31,10 +31,6 @@ final class PhabricatorAuthManagementLDAPWorkflow
     }
 
     $adapter = $provider->getAdapter();
-    $adapter->setConsole($console);
-
-    $console->writeOut("%s\n", pht('LDAP CONFIGURATION'));
-    $adapter->printConfiguration();
 
     $console->writeOut("%s\n", pht('Enter LDAP Credentials'));
     $username = phutil_console_prompt("LDAP Username: ");

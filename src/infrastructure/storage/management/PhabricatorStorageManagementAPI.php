@@ -45,17 +45,29 @@ final class PhabricatorStorageManagementAPI {
     return $this->host;
   }
 
+  public function setPort($port) {
+    $this->port = $port;
+    return $this;
+  }
+
+  public function getPort() {
+    return $this->port;
+  }
+
   public function getDatabaseName($fragment) {
     return $this->namespace.'_'.$fragment;
   }
 
-  public function getDatabaseList(array $patches) {
+  public function getDatabaseList(array $patches, $only_living = false) {
     assert_instances_of($patches, 'PhabricatorStoragePatch');
 
     $list = array();
 
     foreach ($patches as $patch) {
       if ($patch->getType() == 'db') {
+        if ($only_living && $patch->isDead()) {
+          continue;
+        }
         $list[] = $this->getDatabaseName($patch->getName());
       }
     }
@@ -74,6 +86,7 @@ final class PhabricatorStorageManagementAPI {
           'user'      => $this->user,
           'pass'      => $this->password,
           'host'      => $this->host,
+          'port'      => $this->port,
           'database'  => $fragment
             ? $database
             : null,

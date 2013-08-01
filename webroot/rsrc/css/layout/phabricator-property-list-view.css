@@ -91,6 +91,7 @@
   padding: 12px 18px;
   background: #fdfdfd;
   border-bottom: 1px solid #dbdbdb;
+  overflow: hidden;
 }
 
 .phabricator-property-list-image-content {

@@ -58,23 +58,23 @@ final class PhabricatorConfigIssueListController
           ->setHref($href)
           ->addAttribute($issue->getSummary());
       if (!$issue->getIsIgnored()) {
-        $item->addIcon('warning', pht('Setup Warning'));
-        $link = javelin_tag(
-                 'a',
-                 array('href'  => '/config/ignore/'.$issue->getIssueKey().'/',
-                       'sigil' => 'workflow'),
-                 pht('Ignore'));
         $item->setBarColor('yellow');
-        $item->addAttribute($link);
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('unpublish')
+            ->setWorkflow(true)
+            ->setName(pht('Ignore'))
+            ->setHref('/config/ignore/'.$issue->getIssueKey().'/'));
         $list->addItem($item);
       } else {
         $item->addIcon('none', pht('Ignored'));
-        $link = javelin_tag(
-                 'a',
-                 array('href'  => '/config/unignore/'.$issue->getIssueKey().'/',
-                       'sigil' => 'workflow'),
-                 pht('Unignore'));
-        $item->addAttribute($link);
+        $item->setDisabled(true);
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('preview')
+            ->setWorkflow(true)
+            ->setName(pht('Unignore'))
+            ->setHref('/config/unignore/'.$issue->getIssueKey().'/'));
         $item->setBarColor('none');
         $ignored_items[] = $item;
       }

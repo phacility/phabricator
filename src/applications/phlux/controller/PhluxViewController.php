@@ -35,6 +35,7 @@ final class PhluxViewController extends PhluxController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($request->getRequestURI())
       ->setObject($var);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
@@ -78,6 +79,7 @@ final class PhluxViewController extends PhluxController {
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($var->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 

@@ -32,6 +32,7 @@ final class DifferentialRevision extends DifferentialDAO
   private $diffIDs;
   private $hashes;
 
+  private $reviewerStatus;
 
   const RELATIONSHIP_TABLE    = 'differential_relationship';
   const TABLE_COMMIT          = 'differential_commit';
@@ -137,7 +138,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_DREV);
+      DifferentialPHIDTypeRevision::TYPECONST);
   }
 
   public function loadDiffs() {
@@ -335,4 +336,19 @@ final class DifferentialRevision extends DifferentialDAO
     );
   }
 
+  public function getReviewerStatus() {
+    if ($this->reviewerStatus === null) {
+      throw new Exception(
+        "Call attachReviewerStatus() before getReviewerStatus()!"
+      );
+    }
+    return $this->reviewerStatus;
+  }
+
+  public function attachReviewerStatus(array $reviewers) {
+    assert_instances_of($reviewers, 'DifferentialReviewer');
+
+    $this->reviewerStatus = $reviewers;
+    return $this;
+  }
 }

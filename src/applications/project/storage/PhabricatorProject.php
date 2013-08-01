@@ -84,7 +84,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PROJ);
+      PhabricatorProjectPHIDTypeProject::TYPECONST);
   }
 
   public function loadProfile() {
@@ -126,6 +126,11 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     $slug = PhabricatorSlug::normalize($slug);
     $this->phrictionSlug = $slug;
     return $this;
+  }
+
+  public function getFullPhrictionSlug() {
+    $slug = $this->getPhrictionSlug();
+    return 'projects/'.$slug;
   }
 
 }

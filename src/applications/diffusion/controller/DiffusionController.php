@@ -111,6 +111,7 @@ abstract class DiffusionController extends PhabricatorController {
     }
 
     $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($user)
       ->withPath($repository->getID(), $path_id)
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
@@ -125,19 +126,20 @@ abstract class DiffusionController extends PhabricatorController {
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
       ->setFields(DifferentialRevisionListView::getDefaultFields($user))
-      ->setUser($this->getRequest()->getUser())
+      ->setUser($user)
       ->loadAssets();
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    $panel = new AphrontPanelView();
-    $panel->setId('pending-differential-revisions');
-    $panel->setHeader('Pending Differential Revisions');
-    $panel->appendChild($view);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Pending Differential Revisions'));
 
-    return $panel;
+    return array(
+      $header,
+      $view,
+    );
   }
 
   private function buildCrumbList(array $spec = array()) {

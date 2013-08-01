@@ -44,8 +44,8 @@ final class ConduitAPI_owners_query_Method
 
   protected static function queryByOwner($owner) {
     $is_valid_phid =
-      phid_get_type($owner) == PhabricatorPHIDConstants::PHID_TYPE_USER ||
-      phid_get_type($owner) == PhabricatorPHIDConstants::PHID_TYPE_PROJ;
+      phid_get_type($owner) == PhabricatorPeoplePHIDTypeUser::TYPECONST ||
+      phid_get_type($owner) == PhabricatorProjectPHIDTypeProject::TYPECONST;
 
     if (!$is_valid_phid) {
       throw id(new ConduitException('ERR-INVALID-PARAMETER'))

@@ -97,24 +97,7 @@ final class PonderPostBodyView extends AphrontView {
         ),
         $content));
 
-    $outerview = $xaction_view;
-    if (!$this->preview) {
-      $outerview =
-        id(new PonderVotableView())
-        ->setPHID($target->getPHID())
-        ->setCount($target->getVoteCount())
-        ->setVote($target->getUserVote());
-
-      if ($this->target instanceof PonderAnswer) {
-        $outerview->setURI('/ponder/answer/vote/');
-      } else {
-        $outerview->setURI('/ponder/question/vote/');
-      }
-
-      $outerview->appendChild($xaction_view);
-    }
-
-    return $outerview->render();
+    return $xaction_view;
   }
 
 }

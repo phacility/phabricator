@@ -44,8 +44,7 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
     return array(
       '/M(?P<id>[1-9]\d*)(?:/(?P<imageID>\d+)/)?' => 'PholioMockViewController',
       '/pholio/' => array(
-        '' => 'PholioMockListController',
-        'view/(?P<view>\w+)/'   => 'PholioMockListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PholioMockListController',
         'new/'                  => 'PholioMockEditController',
         'edit/(?P<id>\d+)/'     => 'PholioMockEditController',
         'comment/(?P<id>\d+)/'  => 'PholioMockCommentController',
@@ -56,6 +55,10 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
           'view/(?P<id>\d+)/' => 'PholioInlineViewController',
           'edit/(?P<id>\d+)/' => 'PholioInlineEditController',
           'thumb/(?P<imageid>\d+)/' => 'PholioInlineThumbController'
+        ),
+        'image/' => array(
+          'upload/' => 'PholioImageUploadController',
+          'history/(?P<id>\d+)/' => 'PholioImageHistoryController',
         ),
       ),
     );

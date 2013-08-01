@@ -40,6 +40,7 @@ abstract class PhabricatorSQLPatchList {
           'name'    => true,
           'after'   => true,
           'legacy'  => true,
+          'dead'    => true,
         );
 
         foreach ($patch as $pkey => $pval) {
@@ -73,6 +74,7 @@ abstract class PhabricatorSQLPatchList {
 
         $patch['key']     = $key;
         $patch['fullKey'] = $full_key;
+        $patch['dead']    = (bool)idx($patch, 'dead', false);
 
         if (isset($patch['legacy'])) {
           if ($namespace != 'phabricator') {

@@ -66,6 +66,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function getMailTags() {
+    return $this->getParam('mailtags', array());
+  }
+
   /**
    * In Gmail, conversations will be broken if you reply to a thread and the
    * server sends back a response without referencing your Message-ID, even if
@@ -242,6 +246,18 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function getToPHIDs() {
+    return $this->getParam('to', array());
+  }
+
+  public function getRawToAddresses() {
+    return $this->getParam('raw-to', array());
+  }
+
+  public function getCcPHIDs() {
+    return $this->getParam('cc', array());
+  }
+
   /**
    * Flag that this is an auto-generated bulk message and should have bulk
    * headers added to it if appropriate. Broadly, this means some flavor of
@@ -343,52 +359,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
     try {
       $params = $this->parameters;
-      $phids = array();
 
-      foreach ($params as $key => $value) {
-        switch ($key) {
-          case 'to':
-            $params[$key] = $this->buildToList();
-            break;
-          case 'cc':
-            $params[$key] = $this->buildCCList();
-            break;
-        }
-      }
+      $actors = $this->loadAllActors();
+      $deliverable_actors = $this->filterDeliverableActors($actors);
 
-      foreach ($params as $key => $value) {
-        switch ($key) {
-          case 'from':
-            $value = array($value);
-            /* fallthrough */
-          case 'to':
-          case 'cc':
-            foreach ($value as $phid) {
-              $type = phid_get_type($phid);
-              $phids[$phid] = $type;
-            }
-            break;
-        }
-      }
-
-      $this->loadEmailAndNameDataFromPHIDs($phids);
-
-      $default = PhabricatorEnv::getEnvConfig('metamta.default-address');
+      $default_from = PhabricatorEnv::getEnvConfig('metamta.default-address');
       if (empty($params['from'])) {
-        $mailer->setFrom($default);
-      } else {
-        $from = $params['from'];
-
-        if (!PhabricatorEnv::getEnvConfig('metamta.can-send-as-user')) {
-          if (empty($params['reply-to'])) {
-            $params['reply-to'] = $phids[$from]['email'];
-            $params['reply-to-name'] = $phids[$from]['name'];
-          }
-          $mailer->setFrom(
-            $default,
-            $phids[$from]['name']);
-          unset($params['from']);
-        }
+        $mailer->setFrom($default_from);
       }
 
       $is_first = idx($params, 'is-first-message');
@@ -405,25 +382,45 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       foreach ($params as $key => $value) {
         switch ($key) {
           case 'from':
-            $mailer->setFrom($phids[$from]['email']);
+            $from = $value;
+            $actor = $actors[$from];
+
+            $actor_email = $actor->getEmailAddress();
+            $actor_name = $actor->getName();
+            $can_send_as_user = $actor_email &&
+              PhabricatorEnv::getEnvConfig('metamta.can-send-as-user');
+
+            if ($can_send_as_user) {
+              $mailer->setFrom($actor_email);
+            } else {
+              $from_email = coalesce($actor_email, $default_from);
+              $from_name = coalesce($actor_name, pht('Phabricator'));
+
+              if (empty($params['reply-to'])) {
+                $params['reply-to'] = $from_email;
+                $params['reply-to-name'] = $from_name;
+              }
+
+              $mailer->setFrom($default_from, $from_name);
+            }
             break;
           case 'reply-to':
             $mailer->addReplyTo($value, $reply_to_name);
             break;
           case 'to':
-            $to_emails = $this->filterSendable($value, $phids);
-            if ($to_emails) {
-              $add_to = array_merge($add_to, $to_emails);
-            }
+            $to_actors = array_select_keys($deliverable_actors, $value);
+            $add_to = array_merge(
+              $add_to,
+              mpull($to_actors, 'getEmailAddress'));
             break;
           case 'raw-to':
             $add_to = array_merge($add_to, $value);
             break;
           case 'cc':
-            $cc_emails = $this->filterSendable($value, $phids);
-            if ($cc_emails) {
-              $add_cc = $cc_emails;
-            }
+            $cc_actors = array_select_keys($deliverable_actors, $value);
+            $add_cc = array_merge(
+              $add_cc,
+              mpull($cc_actors, 'getEmailAddress'));
             break;
           case 'headers':
             foreach ($value as $pair) {
@@ -573,8 +570,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       if (!$add_to && !$add_cc) {
         $this->setStatus(self::STATUS_VOID);
         $this->setMessage(
-          "Message has no valid recipients: all To/CC are disabled or ".
-          "configured not to receive this mail.");
+          "Message has no valid recipients: all To/Cc are disabled, invalid, ".
+          "or configured not to receive this mail.");
         return $this->save();
       }
 
@@ -609,6 +606,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           $add_cc = array();
         }
       }
+
+      $add_to = array_unique($add_to);
+      $add_cc = array_unique($add_cc);
 
       $mailer->addTos($add_to);
       if ($add_cc) {
@@ -691,126 +691,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return base64_encode($base);
   }
 
-  private function loadEmailAndNameDataFromPHIDs(array &$phids) {
-    $users = array();
-    $xusrs = array();
-    $mlsts = array();
-    // first iteration - group by types to do data fetches
-    foreach ($phids as $phid => $type) {
-      switch ($type) {
-        case PhabricatorPHIDConstants::PHID_TYPE_USER:
-          $users[] = $phid;
-          break;
-        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
-          $xusrs[] = $phid;
-          break;
-        case PhabricatorPHIDConstants::PHID_TYPE_MLST:
-          $mlsts[] = $phid;
-          break;
-      }
-    }
-
-    $user_emails = array();
-    if ($users) {
-      $user_emails = id(new PhabricatorUserEmail())->loadAllWhere(
-        'userPHID IN (%Ls) AND isPrimary = 1', $users);
-      $users = id(new PhabricatorUser())->loadAllWhere(
-        'phid IN (%Ls)', $users);
-      $user_emails = mpull($user_emails, null, 'getUserPHID');
-      $users = mpull($users, null, 'getPHID');
-    }
-
-    if ($xusrs) {
-      $xusrs = id(new PhabricatorExternalAccount())->loadAllWhere(
-        'phid IN (%Ls)', $xusrs);
-      $xusrs = mpull($xusrs, null, 'getPHID');
-    }
-
-    if ($mlsts) {
-      $mlsts = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
-        'phid IN (%Ls)', $mlsts);
-      $mlsts = mpull($mlsts, null, 'getPHID');
-    }
-
-    // second iteration - create entries for each phid
-    $default = PhabricatorEnv::getEnvConfig('metamta.default-address');
-    foreach ($phids as $phid => &$value) {
-      $name = '';
-      $email = $default;
-      $is_mailable = false;
-      switch ($value) {
-        case PhabricatorPHIDConstants::PHID_TYPE_USER:
-          $user = idx($users, $phid);
-          if ($user) {
-            $name = $this->getUserName($user);
-            $is_mailable = !$user->getIsDisabled()
-                        && !$user->getIsSystemAgent();
-          }
-          $email = isset($user_emails[$phid]) ?
-                   $user_emails[$phid]->getAddress() :
-                   $default;
-          break;
-        case PhabricatorPHIDConstants::PHID_TYPE_XUSR:
-          $xusr = $xusrs[$phid];
-          if ($xusr) {
-            $name = $xusr->getDisplayName();
-            $email = $xusr->getAccountID();
-            $accountType = $xusr->getAccountType();
-            if ($accountType == 'email') {
-              $is_mailable = true;
-            }
-          }
-          break;
-        case PhabricatorPHIDConstants::PHID_TYPE_MLST:
-          $mlst = $mlsts[$phid];
-          if ($mlst) {
-            $name = $mlst->getName();
-            $email = $mlst->getEmail();
-            $is_mailable = true;
-          }
-          break;
-      }
-      $value = array(
-        'name' => $name,
-        'email' => $email,
-        'mailable' => $is_mailable,
-      );
-    }
-  }
-
-  /**
-   * Small helper function to make sure we format the username properly as
-   * specified by the `metamta.user-address-format` configuration value.
-   */
-  private function getUserName($user) {
-    $format = PhabricatorEnv::getEnvConfig('metamta.user-address-format');
-
-    switch ($format) {
-      case 'short':
-        $name = $user->getUserName();
-        break;
-      case 'real':
-        $name = $user->getRealName();
-        break;
-      case 'full':
-      default:
-        $name = $user->getFullName();
-        break;
-    }
-
-    return $name;
-  }
-
-  private function filterSendable($value, $phids) {
-    $result = array();
-    foreach ($value as $phid) {
-      if (isset($phids[$phid]) && $phids[$phid]['mailable']) {
-        $result[$phid] = $phids[$phid]['email'];
-      }
-    }
-    return $result;
-  }
-
   public static function shouldMultiplexAllMail() {
     return PhabricatorEnv::getEnvConfig('metamta.one-mail-per-recipient');
   }
@@ -821,60 +701,90 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   /**
    * Get all of the recipients for this mail, after preference filters are
-   * applied. This list has all objects to whom delivery will be attempted, but
-   * does not exclude recipeints two whom delivery may be impossible.
+   * applied. This list has all objects to whom delivery will be attempted.
    *
    * @return  list<phid>  A list of all recipients to whom delivery will be
    *                      attempted.
    * @task recipients
    */
   public function buildRecipientList() {
-    return $this->resolveRecipients(
+    $actors = $this->loadActors(
       array_merge(
-        $this->getRawToPHIDs(),
-        $this->getRawCCPHIDs()));
+        $this->getToPHIDs(),
+        $this->getCcPHIDs()));
+    $actors = $this->filterDeliverableActors($actors);
+    return mpull($actors, 'getPHID');
   }
 
+  public function loadAllActors() {
+    $actor_phids = array_merge(
+      array($this->getParam('from')),
+      $this->getToPHIDs(),
+      $this->getCcPHIDs());
 
-  /**
-   * Filter out duplicate, invalid, or excluded recipients from a PHID list.
-   *
-   * @param   list<phid>  Unfiltered recipients.
-   * @return  list<phid>  Filtered recipients.
-   *
-   * @task recipients
-   */
-  private function resolveRecipients(array $phids) {
-    if (!$phids) {
+    return $this->loadActors($actor_phids);
+  }
+
+  private function filterDeliverableActors(array $actors) {
+    assert_instances_of($actors, 'PhabricatorMetaMTAActor');
+    $deliverable_actors = array();
+    foreach ($actors as $phid => $actor) {
+      if ($actor->isDeliverable()) {
+        $deliverable_actors[$phid] = $actor;
+      }
+    }
+    return $deliverable_actors;
+  }
+
+  private function loadActors(array $actor_phids) {
+    $actor_phids = array_filter($actor_phids);
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $actors = id(new PhabricatorMetaMTAActorQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($actor_phids)
+      ->execute();
+
+    if (!$actors) {
       return array();
     }
 
-    $phids = array_fuse($phids);
+    // Exclude explicit recipients.
+    foreach ($this->getExcludeMailRecipientPHIDs() as $phid) {
+      $actor = idx($actors, $phid);
+      if (!$actor) {
+        continue;
+      }
+      $actor->setUndeliverable(
+        pht(
+          'This message is a response to another email message, and this '.
+          'recipient received the original email message, so we are not '.
+          'sending them this substantially similar message (for example, '.
+          'the sender used "Reply All" instead of "Reply" in response to '.
+          'mail from Phabricator).'));
+    }
 
-
-    // Exclude PHIDs explicitly marked for exclusion. We use this to prevent
-    // recipients of an accidental "Reply All" from receiving the followup
-    // mail from Phabricator.
-    $exclude = $this->getExcludeMailRecipientPHIDs();
-    $exclude = array_fill_keys($exclude, true);
-    $phids = array_diff_key($phids, $exclude);
-
-
-    // If the actor is a recipient and has configured their preferences not to
-    // send them mail about their own actions, drop them from the recipient
-    // list.
-    $from = $this->getParam('from');
-    if (isset($phids[$from])) {
-      $from_user = id(new PhabricatorUser())->loadOneWhere(
-        'phid = %s',
-        $from);
+    // Exclude the actor if their preferences are set.
+    $from_phid = $this->getParam('from');
+    $from_actor = idx($actors, $from_phid);
+    if ($from_actor) {
+      $from_user = id(new PhabricatorPeopleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($from_phid))
+        ->execute();
+      $from_user = head($from_user);
       if ($from_user && !$this->getOverrideNoSelfMailPreference()) {
         $pref_key = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
         $exclude_self = $from_user
           ->loadPreferences()
           ->getPreference($pref_key);
         if ($exclude_self) {
-          unset($phids[$from]);
+          $from_actor->setUndeliverable(
+            pht(
+              'This recipient is the user whose actions caused delivery of '.
+              'this message, but they have set preferences so they do not '.
+              'receive mail about their own actions (Settings > Email '.
+              'Preferences > Self Actions).'));
         }
       }
     }
@@ -884,18 +794,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     // of email (for example, a user who says they don't want emails about task
     // CC changes).
     $tags = $this->getParam('mailtags');
-    if ($tags && $phids) {
+    if ($tags) {
       $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
         'userPHID in (%Ls)',
-        $phids);
+        $actor_phids);
       $all_prefs = mpull($all_prefs, null, 'getUserPHID');
 
-      foreach ($phids as $phid) {
-        $prefs = idx($all_prefs, $phid);
-        if (!$prefs) {
-          continue;
-        }
-
+      foreach ($all_prefs as $phid => $prefs) {
         $user_mailtags = $prefs->getPreference(
           PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
           array());
@@ -911,56 +816,17 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         }
 
         if (!$send) {
-          unset($phids[$phid]);
+          $actors[$phid]->setUndeliverable(
+            pht(
+              'This mail has tags which control which users receive it, and '.
+              'this recipient has not elected to receive mail with any of '.
+              'the tags on this message (Settings > Email Preferences).'));
         }
       }
     }
 
-    return array_keys($phids);
+    return $actors;
   }
 
-
-  /**
-   * @task recipients
-   */
-  private function buildToList() {
-    return $this->resolveRecipients($this->getRawToPHIDs());
-  }
-
-
-  /**
-   * @task recipients
-   */
-  private function buildCCList() {
-    return $this->resolveRecipients($this->getRawCCPHIDs());
-  }
-
-
-  /**
-   * @task recipients
-   */
-  private function getRawToPHIDs() {
-    $to = $this->getParam('to', array());
-    return $this->filterRawPHIDList($to);
-  }
-
-
-  /**
-   * @task recipients
-   */
-  private function getRawCCPHIDs() {
-    $cc = $this->getParam('cc', array());
-    return $this->filterRawPHIDList($cc);
-  }
-
-
-  /**
-   * @task recipients
-   */
-  private function filterRawPHIDList(array $list) {
-    $list = array_filter($list);
-    $list = array_unique($list);
-    return array_values($list);
-  }
 
 }

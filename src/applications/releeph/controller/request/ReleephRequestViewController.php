@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephRequestViewController extends ReleephController {
+final class ReleephRequestViewController extends ReleephProjectController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -50,6 +50,7 @@ final class ReleephRequestViewController extends ReleephController {
 
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($request->getUser())
+      ->setObjectPHID($releeph_request->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
@@ -62,6 +63,7 @@ final class ReleephRequestViewController extends ReleephController {
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
+      ->setObjectPHID($releeph_request->getPHID())
       ->setDraft($draft)
       ->setAction($this->getApplicationURI(
         '/request/comment/'.$releeph_request->getID().'/'))

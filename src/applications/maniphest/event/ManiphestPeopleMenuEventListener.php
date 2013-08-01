@@ -3,33 +3,35 @@
 final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
 
   public function register() {
-    $this->listen(PhabricatorEventType::TYPE_PEOPLE_DIDRENDERMENU);
+    $this->listen(PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS);
   }
 
   public function handleEvent(PhutilEvent $event) {
     switch ($event->getType()) {
-      case PhabricatorEventType::TYPE_PEOPLE_DIDRENDERMENU:
-        $this->handleMenuEvent($event);
+      case PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS:
+        $this->handleActionsEvent($event);
       break;
     }
   }
 
-  private function handleMenuEvent($event) {
-    $viewer = $event->getUser();
-    $menu = $event->getValue('menu');
-    $person_phid = $event->getValue('person')->getPHID();
+  private function handleActionsEvent($event) {
+    $actions = $event->getValue('actions');
 
-    $href = '/maniphest/view/action/?users='.$person_phid;
-    $name = pht('Tasks');
+    $action = id(new PhabricatorActionView())
+      ->setIcon('maniphest-dark')
+      ->setIconSheet(PHUIIconView::SPRITE_APPS)
+      ->setName(pht('View Tasks'));
 
-    $menu->addMenuItemToLabel('activity',
-      id(new PHUIListItemView())
-      ->setIsExternal(true)
-      ->setHref($href)
-      ->setName($name)
-      ->setKey($name));
+    $object = $event->getValue('object');
+    if ($object instanceof PhabricatorUser) {
+      $href = '/maniphest/view/action/?users='.$object->getPHID();
+      $actions[] = $action->setHref($href);
+    } else if ($object instanceof PhabricatorProject) {
+      $href = '/maniphest/view/all/?projects='.$object->getPHID();
+      $actions[] = $action->setHref($href);
+    }
 
-    $event->setValue('menu', $menu);
+    $event->setValue('actions', $actions);
   }
 
 }

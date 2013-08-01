@@ -63,6 +63,7 @@ final class DrydockLeaseViewController extends DrydockController {
   private function buildActionListView(DrydockLease $lease) {
     $view = id(new PhabricatorActionListView())
       ->setUser($this->getRequest()->getUser())
+      ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($lease);
 
     $id = $lease->getID();

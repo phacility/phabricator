@@ -970,10 +970,10 @@ final class DifferentialChangesetParser {
     //   1:   function f() {
     //   2:
     //   2:     return;
-    //   3:
-    //   3:   }
-    //   4:
-    //   4: }
+    //   1:
+    //   1:   }
+    //   0:
+    //   0: }
     //
     $depths = array();
     $last_depth = 0;

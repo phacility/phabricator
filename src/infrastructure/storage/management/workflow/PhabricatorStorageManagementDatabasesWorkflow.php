@@ -14,7 +14,7 @@ final class PhabricatorStorageManagementDatabasesWorkflow
     $api = $this->getAPI();
     $patches = $this->getPatches();
 
-    $databases = $api->getDatabaseList($patches);
+    $databases = $api->getDatabaseList($patches, $only_living = true);
     echo implode("\n", $databases)."\n";
 
     return 0;

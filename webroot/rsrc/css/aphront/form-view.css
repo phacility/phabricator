@@ -32,9 +32,10 @@
 
 .device-phone .aphront-form-view label.aphront-form-label,
 .aphront-form-full-width.aphront-form-view label.aphront-form-label {
-  float: left;
+  display: block;
+  float: none;
   text-align: left;
-  width: auto;
+  width: 100%;
   margin-bottom: 3px;
 }
 
@@ -65,8 +66,8 @@
 
 .device-phone .aphront-form-error,
 .aphront-form-full-width .aphront-form-error {
-  float: right;
-  width: auto;
+  float: none;
+  width: 100%;
 }
 
 .device-phone .aphront-form-drag-and-drop-upload {
@@ -264,8 +265,8 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .aphront-textarea-drag-and-drop {
-  background: #99ff99;
-  border-color: #669966;
+  background: {$lightgreen};
+  border-color: {$green};
 }
 
 .aphront-form-crop .crop-box {

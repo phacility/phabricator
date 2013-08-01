@@ -27,7 +27,10 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(array $users) {
+  public function renderResultsList(
+    array $users,
+    PhabricatorSavedQuery $query) {
+
     assert_instances_of($users, 'PhabricatorUser');
 
     $request = $this->getRequest();

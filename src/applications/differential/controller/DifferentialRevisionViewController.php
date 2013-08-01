@@ -18,12 +18,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $user = $request->getUser();
     $viewer_is_anonymous = !$user->isLoggedIn();
 
-    $revision = id(new DifferentialRevision())->load($this->revisionID);
+    $revision = id(new DifferentialRevisionQuery())
+      ->withIDs(array($this->revisionID))
+      ->setViewer($request->getUser())
+      ->needRelationships(true)
+      ->needReviewerStatus(true)
+      ->executeOne();
+
     if (!$revision) {
       return new Aphront404Response();
     }
-
-    $revision->loadRelationships();
 
     $diffs = $revision->loadDiffs();
 
@@ -223,10 +227,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $visible_changesets = $changesets;
     }
 
-    $revision_detail = new DifferentialRevisionDetailView();
-    $revision_detail->setRevision($revision);
-    $revision_detail->setDiff(end($diffs));
-    $revision_detail->setAuxiliaryFields($aux_fields);
+    $revision_detail = id(new DifferentialRevisionDetailView())
+      ->setRevision($revision)
+      ->setDiff(end($diffs))
+      ->setAuxiliaryFields($aux_fields)
+      ->setURI($request->getRequestURI());
 
     $actions = $this->getRevisionActions($revision);
 
@@ -803,6 +808,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $query = id(new DifferentialRevisionQuery())
+      ->setViewer($this->getRequest()->getUser())
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
       ->setLimit(10)
@@ -839,12 +845,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return hsprintf(
-      '%s<div class="differential-panel">%s</div>',
+    return array(
       id(new PhabricatorHeaderView())
-        ->setHeader(pht('Open Revisions Affecting These Files'))
-        ->render(),
-      $view->render());
+        ->setHeader(pht('Open Revisions Affecting These Files')),
+      $view,
+    );
   }
 
   /**

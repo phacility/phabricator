@@ -32,7 +32,7 @@ final class PhabricatorUser
 
   private $profileImage = null;
   private $profile = null;
-  private $status = null;
+  private $status = self::ATTACHABLE;
   private $preferences = null;
   private $omnipotent = false;
   private $customFields = array();
@@ -65,7 +65,7 @@ final class PhabricatorUser
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_USER);
+      PhabricatorPeoplePHIDTypeUser::TYPECONST);
   }
 
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
@@ -660,6 +660,20 @@ EOBODY;
 
   public static function getDefaultProfileImageURI() {
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
+  }
+
+  public function attachStatus(PhabricatorUserStatus $status) {
+    $this->status = $status;
+    return $this;
+  }
+
+  public function getStatus() {
+    $this->assertAttached($this->status);
+    return $this->status;
+  }
+
+  public function hasStatus() {
+    return $this->status !== self::ATTACHABLE;
   }
 
   public function attachProfileImageURI($uri) {

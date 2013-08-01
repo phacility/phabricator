@@ -34,10 +34,6 @@ final class PhabricatorProjectProfileController
 
     $picture = $profile->loadProfileImageURI();
 
-    $nav_view = $this->buildLocalNavigation($project);
-
-    $this->page = $nav_view->selectFilter($this->page, 'dashboard');
-
     require_celerity_resource('phabricator-profile-css');
 
     $tasks = $this->renderTasksPage($project, $profile);
@@ -51,12 +47,10 @@ final class PhabricatorProjectProfileController
     $query->setViewer($this->getRequest()->getUser());
     $stories = $query->execute();
     $feed = $this->renderStories($stories);
-    $about = $this->renderAboutPage($project, $profile);
     $people = $this->renderPeoplePage($project, $profile);
-    $col1 = hsprintf('%s%s', $about, $people);
 
     $content = id(new AphrontMultiColumnView())
-      ->addColumn($col1)
+      ->addColumn($people)
       ->addColumn($feed)
       ->setFluidLayout(true);
 
@@ -65,107 +59,32 @@ final class PhabricatorProjectProfileController
         $tasks,
         $content);
 
-    $header = new PhabricatorProfileHeaderView();
-    $header->setName($project->getName());
-    $header->setDescription(
-      phutil_utf8_shorten($profile->getBlurb(), 1024));
-    $header->setProfilePicture($picture);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($project->getName())
+      ->setSubheader(phutil_utf8_shorten($profile->getBlurb(), 1024))
+      ->setImage($picture);
 
-    $action = null;
-    if (!$project->isUserMember($user->getPHID())) {
-      $can_join = PhabricatorPolicyCapability::CAN_JOIN;
+    $actions = $this->buildActionListView($project);
+    $properties = $this->buildPropertyListView($project);
 
-      if (PhabricatorPolicyFilter::hasCapability($user, $project, $can_join)) {
-        $class = 'green';
-      } else {
-        $class = 'grey disabled';
-      }
-
-      $action = phabricator_form(
-        $user,
-        array(
-          'action' => '/project/update/'.$project->getID().'/join/',
-          'method' => 'post',
-        ),
-        phutil_tag(
-          'button',
-          array(
-            'class' => $class,
-          ),
-          pht('Join Project')));
-    } else {
-      $action = javelin_tag(
-        'a',
-        array(
-          'href'  => '/project/update/'.$project->getID().'/leave/',
-          'sigil' => 'workflow',
-          'class' => 'grey button',
-        ),
-        pht('Leave Project...'));
-    }
-
-    $header->addAction($action);
-    $nav_view->appendChild($header);
-    $header->appendChild($content);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($project->getName()));
 
     return $this->buildApplicationPage(
-      $nav_view,
       array(
-        'title' => pht('%s Project', $project->getName()),
+        $crumbs,
+        $header,
+        $actions,
+        $properties,
+        $content,
+      ),
+      array(
+        'title' => $project->getName(),
         'device' => true,
         'dust' => true,
       ));
-  }
-
-  private function renderAboutPage(
-    PhabricatorProject $project,
-    PhabricatorProjectProfile $profile) {
-
-    $viewer = $this->getRequest()->getUser();
-
-    $blurb = $profile->getBlurb();
-    $blurb = phutil_escape_html_newlines($blurb);
-
-    $phids = array($project->getAuthorPHID());
-    $phids = array_unique($phids);
-    $handles = $this->loadViewerHandles($phids);
-
-    $timestamp = phabricator_datetime($project->getDateCreated(), $viewer);
-
-    $about = hsprintf(
-      '<div class="phabricator-profile-info-group profile-wrap-responsive">
-        <h1 class="phabricator-profile-info-header">%s</h1>
-        <div class="phabricator-profile-info-pane">
-          <table class="phabricator-profile-info-table">
-            <tr>
-              <th>%s</th>
-              <td>%s</td>
-            </tr>
-            <tr>
-              <th>%s</th>
-              <td>%s</td>
-            </tr>
-            <tr>
-              <th>PHID</th>
-              <td>%s</td>
-            </tr>
-            <tr>
-              <th>%s</th>
-              <td>%s</td>
-            </tr>
-          </table>
-        </div>
-      </div>',
-      pht('About This Project'),
-      pht('Creator'),
-      $handles[$project->getAuthorPHID()]->renderLink(),
-      pht('Created'),
-      $timestamp,
-      $project->getPHID(),
-      pht('Blurb'),
-      $blurb);
-
-    return $about;
   }
 
   private function renderPeoplePage(
@@ -279,8 +198,79 @@ final class PhabricatorProjectProfileController
     return $content;
   }
 
-  public function buildApplicationMenu() {
-    return $this->buildLocalNavigation($this->project)->getMenu();
+  private function buildActionListView(PhabricatorProject $project) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $id = $project->getID();
+
+    $view = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($project)
+      ->setObjectURI($request->getRequestURI());
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Project'))
+        ->setIcon('edit')
+        ->setHref($this->getApplicationURI("edit/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Members'))
+        ->setIcon('edit')
+        ->setHref($this->getApplicationURI("members/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+
+    $action = null;
+    if (!$project->isUserMember($viewer->getPHID())) {
+      $can_join = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $project,
+        PhabricatorPolicyCapability::CAN_JOIN);
+
+      $action = id(new PhabricatorActionView())
+        ->setUser($viewer)
+        ->setRenderAsForm(true)
+        ->setHref('/project/update/'.$project->getID().'/join/')
+        ->setIcon('new')
+        ->setDisabled(!$can_join)
+        ->setName(pht('Join Project'));
+    } else {
+      $action = id(new PhabricatorActionView())
+        ->setWorkflow(true)
+        ->setHref('/project/update/'.$project->getID().'/leave/')
+        ->setIcon('delete')
+        ->setName(pht('Leave Project...'));
+    }
+    $view->addAction($action);
+
+    return $view;
   }
+
+  private function buildPropertyListView(PhabricatorProject $project) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $view = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($project);
+
+    $view->addProperty(
+      pht('Created'),
+      phabricator_datetime($project->getDateCreated(), $viewer));
+
+    return $view;
+  }
+
 
 }

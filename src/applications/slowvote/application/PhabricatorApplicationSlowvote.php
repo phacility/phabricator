@@ -40,9 +40,12 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     return array(
       '/V(?P<id>[1-9]\d*)' => 'PhabricatorSlowvotePollController',
       '/vote/' => array(
-        '(?:view/(?P<view>\w+)/)?' => 'PhabricatorSlowvoteListController',
-        'create/' => 'PhabricatorSlowvoteCreateController',
+        '(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'PhabricatorSlowvoteListController',
+        'create/' => 'PhabricatorSlowvoteEditController',
+        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteEditController',
         '(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteVoteController',
+        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorSlowvoteCommentController',
       ),
     );
   }

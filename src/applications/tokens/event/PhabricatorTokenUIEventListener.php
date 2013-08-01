@@ -41,18 +41,19 @@ final class PhabricatorTokenUIEventListener
 
     if (!$current) {
       $token_action = id(new PhabricatorActionView())
-        ->setUser($user)
         ->setWorkflow(true)
         ->setHref('/token/give/'.$object->getPHID().'/')
         ->setName(pht('Award Token'))
         ->setIcon('like');
     } else {
       $token_action = id(new PhabricatorActionView())
-        ->setUser($user)
         ->setWorkflow(true)
         ->setHref('/token/give/'.$object->getPHID().'/')
         ->setName(pht('Rescind Token'))
         ->setIcon('dislike');
+    }
+    if (!$user->isLoggedIn()) {
+      $token_action->setDisabled(true);
     }
 
     $actions = $event->getValue('actions');

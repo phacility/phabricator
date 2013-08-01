@@ -48,12 +48,6 @@ final class DifferentialCommentMail extends DifferentialMail {
       case DifferentialAction::ACTION_ADDREVIEWERS:
         $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
         break;
-      case DifferentialAction::ACTION_UPDATE:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED;
-        break;
-      case DifferentialAction::ACTION_REQUEST:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST;
-        break;
       case DifferentialAction::ACTION_COMMENT:
         // this is a comment which we will check separately below for content
         break;

@@ -34,7 +34,17 @@
     "logo"             : {
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo-image",
-      "hash" : "6803a4d19da5223b72d9f8f1aa65a60c"
+      "hash" : "b03901ae5dff3ec840b88f8335819598"
+    },
+    "new"              : {
+      "name" : "new",
+      "rule" : ".menu-icon-new",
+      "hash" : "84cf453396e9fdb82fb965ac74cd86cc"
+    },
+    "new_blue"         : {
+      "name" : "new_blue",
+      "rule" : ".menu-icon-new-blue",
+      "hash" : "3cb927000c2bb3a11002377fe5fab9ec"
     },
     "search"           : {
       "name" : "search",

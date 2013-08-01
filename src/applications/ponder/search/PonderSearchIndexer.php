@@ -10,14 +10,10 @@ final class PonderSearchIndexer
   protected function buildAbstractDocumentByPHID($phid) {
     $question = $this->loadDocumentByPHID($phid);
 
-    $question->attachRelated();
-
-    $doc = new PhabricatorSearchAbstractDocument();
-    $doc->setPHID($question->getPHID());
-    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_QUES);
-    $doc->setDocumentTitle($question->getTitle());
-    $doc->setDocumentCreated($question->getDateCreated());
-    $doc->setDocumentModified($question->getDateModified());
+    $doc = $this->newDocument($phid)
+      ->setDocumentTitle($question->getTitle())
+      ->setDocumentCreated($question->getDateCreated())
+      ->setDocumentModified($question->getDateModified());
 
     $doc->addField(
       PhabricatorSearchField::FIELD_BODY,
@@ -26,45 +22,31 @@ final class PonderSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $question->getAuthorPHID(),
-      PhabricatorPHIDConstants::PHID_TYPE_USER,
+      PhabricatorPeoplePHIDTypeUser::TYPECONST,
       $question->getDateCreated());
 
-    $comments = $question->getComments();
-    foreach ($comments as $curcomment) {
-      $doc->addField(
-        PhabricatorSearchField::FIELD_COMMENT,
-        $curcomment->getContent());
-    }
-
-    $answers = $question->getAnswers();
-    foreach ($answers as $curanswer) {
-      if (strlen($curanswer->getContent())) {
-          $doc->addField(
-          PhabricatorSearchField::FIELD_COMMENT,
-          $curanswer->getContent());
-      }
-
-      $answer_comments = $curanswer->getComments();
-      foreach ($answer_comments as $curcomment) {
+    $answers = id(new PonderAnswerQuery())
+      ->setViewer($this->getViewer())
+      ->withQuestionIDs(array($question->getID()))
+      ->execute();
+    foreach ($answers as $answer) {
+      if (strlen($answer->getContent())) {
         $doc->addField(
           PhabricatorSearchField::FIELD_COMMENT,
-          $curcomment->getContent());
+          $answer->getContent());
       }
     }
 
-    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $question->getPHID());
-    $handles = id(new PhabricatorObjectHandleData($subscribers))
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
+    $this->indexTransactions(
+      $doc,
+      new PonderQuestionTransactionQuery(),
+      array($phid));
+    $this->indexTransactions(
+      $doc,
+      new PonderAnswerTransactionQuery(),
+      mpull($answers, 'getPHID'));
 
-    foreach ($handles as $phid => $handle) {
-      $doc->addRelationship(
-        PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
-        $phid,
-        $handle->getType(),
-        $question->getDateModified()); // Bogus timestamp.
-    }
+    $this->indexSubscribers($doc);
 
     return $doc;
   }

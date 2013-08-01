@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group pholio
+ */
 final class PhabricatorPholioMockTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
@@ -39,6 +42,7 @@ final class PhabricatorPholioMockTestDataGenerator
       $image = new PholioImage();
       $image->setFilePHID($file->getPHID());
       $image->setSequence($sequence++);
+      $image->attachMock($mock);
       $images[] = $image;
     }
 

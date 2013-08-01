@@ -248,11 +248,26 @@ final class PhrictionEditController
         'uri'       => '/phriction/preview/?draftkey='.$draft_key,
       ));
 
+    $crumbs = $this->buildApplicationCrumbs();
+    if ($document->getID()) {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName($content->getTitle())
+          ->setHref(PhrictionDocument::getSlugURI($document->getSlug())));
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Edit')));
+    } else {
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setName(pht('Create')));
+    }
+
     return $this->buildApplicationPage(
       array(
+        $crumbs,
         $draft_note,
         $error_view,
-        $header,
         $form,
         $preview_panel,
       ),

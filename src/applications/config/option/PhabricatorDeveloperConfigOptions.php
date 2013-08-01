@@ -25,10 +25,9 @@ final class PhabricatorDeveloperConfigOptions
             "DarkConsole is a development and profiling tool built into ".
             "Phabricator's web interface. You should leave it disabled unless ".
             "you are developing or debugging Phabricator.\n\n".
-            "Set this option to enable DarkConsole, which will put a link ".
-            "in the page footer to actually activate it. Once activated, ".
-            "it will appear at the top of every page and can be toggled ".
-            "by pressing the '`' key.\n\n".
+            "Once you activate DarkConsole for the install, **you need to ".
+            "enable it for your account before it will actually appear on ".
+            "pages.** You can do this in Settings > Developer Settings.\n\n".
             "DarkConsole exposes potentially sensitive data (like queries, ".
             "stack traces, and configuration) so you generally should not ".
             "turn it on in production.")),

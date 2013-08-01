@@ -24,14 +24,10 @@ final class PhabricatorFileDropUploadController
         'isExplicitUpload' => true,
       ));
 
-    $view = new AphrontAttachedFileView();
-    $view->setFile($file);
-
     return id(new AphrontAjaxResponse())->setContent(
       array(
         'id'   => $file->getID(),
         'phid' => $file->getPHID(),
-        'html' => $view->render(),
         'uri'  => $file->getBestURI(),
       ));
   }

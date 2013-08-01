@@ -23,7 +23,9 @@ final class DivinerAtomListController extends DivinerController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(array $symbols) {
+  public function renderResultsList(
+    array $symbols,
+    PhabricatorSavedQuery $query) {
     return $this->renderAtomList($symbols);
   }
 

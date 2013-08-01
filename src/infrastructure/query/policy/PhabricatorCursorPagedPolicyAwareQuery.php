@@ -56,7 +56,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
   }
 
-  final protected function buildPagingClause(
+  protected function buildPagingClause(
     AphrontDatabaseConnection $conn_r) {
 
     if ($this->beforeID) {

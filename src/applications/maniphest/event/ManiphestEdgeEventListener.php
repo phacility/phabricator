@@ -101,7 +101,7 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
     $add_edges = $event->getValue('add');
     $rem_edges = $event->getValue('rem');
 
-    $type_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
+    $type_task = ManiphestPHIDTypeTask::TYPECONST;
 
     $all_edges = array_merge($add_edges, $rem_edges);
     $all_edges = $this->filterEdgesBySourceType($all_edges, $type_task);

@@ -22,6 +22,18 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return "\xE2\x9A\xA1";
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhrictionRemarkupRule(),
+    );
+  }
+
+  public function getEventListeners() {
+    return array(
+      new PhrictionActionMenuEventListener(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       // Match "/w/" with slug "/".
@@ -30,8 +42,7 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
       '/w/(?P<slug>.+/)' => 'PhrictionDocumentController',
 
       '/phriction/' => array(
-        ''                       => 'PhrictionListController',
-        'list/(?P<view>[^/]+)/'  => 'PhrictionListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhrictionListController',
 
         'history(?P<slug>/)'     => 'PhrictionHistoryController',
         'history/(?P<slug>.+/)'  => 'PhrictionHistoryController',

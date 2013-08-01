@@ -111,39 +111,20 @@ final class PholioMockQuery
   private function loadImages(array $mocks) {
     assert_instances_of($mocks, 'PholioMock');
 
-    $mock_ids = mpull($mocks, 'getID');
-    $all_images = id(new PholioImage())->loadAllWhere(
-      'mockID IN (%Ld)',
-      $mock_ids);
-
-    $file_phids = mpull($all_images, 'getFilePHID');
-    $all_files = mpull(id(new PhabricatorFile())->loadAllWhere(
-      'phid IN (%Ls)',
-      $file_phids), null, 'getPHID');
-
-    if ($this->needInlineComments) {
-      $all_inline_comments = id(new PholioTransactionComment())
-        ->loadAllWhere('imageid IN (%Ld)',
-          mpull($all_images, 'getID'));
-      $all_inline_comments = mgroup($all_inline_comments, 'getImageID');
-    }
-
-    foreach ($all_images as $image) {
-      $file = idx($all_files, $image->getFilePHID());
-      if (!$file) {
-        $file = PhabricatorFile::loadBuiltin($this->getViewer(), 'missing.png');
-      }
-      $image->attachFile($file);
-      if ($this->needInlineComments) {
-        $inlines = idx($all_images, $image->getID(), array());
-        $image->attachInlineComments($inlines);
-      }
-    }
+    $mock_map = mpull($mocks, null, 'getID');
+    $all_images = id(new PholioImageQuery())
+      ->setViewer($this->getViewer())
+      ->setMockCache($mock_map)
+      ->withMockIDs(array_keys($mock_map))
+      ->needInlineComments($this->needInlineComments)
+      ->execute();
 
     $image_groups = mgroup($all_images, 'getMockID');
 
     foreach ($mocks as $mock) {
-      $mock->attachImages($image_groups[$mock->getID()]);
+      $mock_images = idx($image_groups, $mock->getID(), array());
+      $mock->attachAllImages($mock_images);
+      $mock->attachImages(mfilter($mock_images, 'getIsObsolete', true));
     }
   }
 

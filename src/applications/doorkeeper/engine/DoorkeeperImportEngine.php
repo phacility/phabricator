@@ -5,6 +5,7 @@ final class DoorkeeperImportEngine extends Phobject {
   private $viewer;
   private $refs = array();
   private $phids = array();
+  private $localOnly;
 
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
@@ -27,6 +28,11 @@ final class DoorkeeperImportEngine extends Phobject {
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function needLocalOnly($local_only) {
+    $this->localOnly = $local_only;
     return $this;
   }
 
@@ -64,32 +70,38 @@ final class DoorkeeperImportEngine extends Phobject {
       }
     }
 
-    $bridges = id(new PhutilSymbolLoader())
-      ->setAncestorClass('DoorkeeperBridge')
-      ->loadObjects();
+    if (!$this->localOnly) {
+      $bridges = id(new PhutilSymbolLoader())
+        ->setAncestorClass('DoorkeeperBridge')
+        ->loadObjects();
 
-    foreach ($bridges as $key => $bridge) {
-      if (!$bridge->isEnabled()) {
-        unset($bridges[$key]);
-      }
-      $bridge->setViewer($viewer);
-    }
-
-    $working_set = $refs;
-    foreach ($bridges as $bridge) {
-      $bridge_refs = array();
-      foreach ($working_set as $key => $ref) {
-        if ($bridge->canPullRef($ref)) {
-          $bridge_refs[$key] = $ref;
-          unset($working_set[$key]);
+      foreach ($bridges as $key => $bridge) {
+        if (!$bridge->isEnabled()) {
+          unset($bridges[$key]);
         }
+        $bridge->setViewer($viewer);
       }
-      if ($bridge_refs) {
-        $bridge->pullRefs($bridge_refs);
+
+      $working_set = $refs;
+      foreach ($bridges as $bridge) {
+        $bridge_refs = array();
+        foreach ($working_set as $key => $ref) {
+          if ($bridge->canPullRef($ref)) {
+            $bridge_refs[$key] = $ref;
+            unset($working_set[$key]);
+          }
+        }
+        if ($bridge_refs) {
+          $bridge->pullRefs($bridge_refs);
+        }
       }
     }
 
     return $refs;
+  }
+
+  public function executeOne() {
+    return head($this->execute());
   }
 
 }

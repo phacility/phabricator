@@ -79,7 +79,8 @@ JX.behavior('differential-dropdown-menus', function(config) {
     if (data.editor) {
       menu.addItem(new JX.PhabricatorMenuItem(
         pht('Open in Editor'),
-        JX.bind(null, location.assign, data.editor), // Open in the same window.
+        // Open in the same window.
+        JX.bind(location, location.assign, data.editor),
         data.editor));
     }
 

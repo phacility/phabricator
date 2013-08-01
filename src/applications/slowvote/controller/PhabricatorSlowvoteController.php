@@ -5,46 +5,28 @@
  */
 abstract class PhabricatorSlowvoteController extends PhabricatorController {
 
-  const VIEW_ALL      = 'all';
-  const VIEW_CREATED  = 'created';
-  const VIEW_VOTED    = 'voted';
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
 
-  public function buildStandardPageResponse($view, array $data) {
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName(pht('Slowvote'));
-    $page->setBaseURI('/vote/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9C\x94");
-
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
-
-  public function buildSideNavView($filter = null, $for_app = false) {
-
-    $views = $this->getViews();
-    $side_nav = new AphrontSideNavFilterView();
-    $side_nav->setBaseURI(new PhutilURI('/vote/view/'));
-    foreach ($views as $key => $name) {
-      $side_nav->addFilter($key, $name);
-    }
-    if ($filter) {
-      $side_nav->selectFilter($filter, null);
-    }
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     if ($for_app) {
-      $side_nav->addFilter('', pht('Create Question'),
+      $nav->addFilter('', pht('Create Poll'),
         $this->getApplicationURI('create/'));
     }
 
-    return $side_nav;
+    id(new PhabricatorSlowvoteSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
+
+    return $nav;
   }
 
   public function buildApplicationMenu() {
-    return $this->buildSideNavView(null, true)->getMenu();
+    return $this->buildSideNavView(true)->getMenu();
   }
 
   public function buildApplicationCrumbs() {
@@ -52,19 +34,11 @@ abstract class PhabricatorSlowvoteController extends PhabricatorController {
 
     $crumbs->addAction(
       id(new PHUIListItemView())
-        ->setName(pht('Create Question'))
+        ->setName(pht('Create Poll'))
         ->setHref($this->getApplicationURI('create/'))
         ->setIcon('create'));
 
     return $crumbs;
-  }
-
-  public function getViews() {
-    return array(
-      self::VIEW_ALL      => pht('All Slowvotes'),
-      self::VIEW_CREATED  => pht('Created'),
-      self::VIEW_VOTED    => pht('Voted In'),
-    );
   }
 
 }

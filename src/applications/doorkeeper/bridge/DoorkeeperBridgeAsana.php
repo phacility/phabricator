@@ -64,16 +64,32 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
     }
 
     $results = array();
+    $failed = array();
     foreach (Futures($futures) as $key => $future) {
       try {
         $results[$key] = $future->resolve();
       } catch (Exception $ex) {
-        // TODO: For now, ignore this stuff.
+        if (($ex instanceof HTTPFutureResponseStatus) &&
+            ($ex->getStatusCode() == 404)) {
+          // This indicates that the object has been deleted (or never existed,
+          // or isn't visible to the current user) but it's a successful sync of
+          // an object which isn't visible.
+        } else {
+          // This is something else, so consider it a synchronization failure.
+          phlog($ex);
+          $failed[$key] = $ex;
+        }
       }
     }
 
     foreach ($refs as $ref) {
       $ref->setAttribute('name', pht('Asana Task %s', $ref->getObjectID()));
+
+      $did_fail = idx($failed, $ref->getObjectKey());
+      if ($did_fail) {
+        $ref->setSyncFailed(true);
+        continue;
+      }
 
       $result = idx($results, $ref->getObjectKey());
       if (!$result) {

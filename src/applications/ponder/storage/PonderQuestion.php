@@ -14,6 +14,7 @@ final class PonderQuestion extends PonderDAO
   protected $phid;
 
   protected $authorPHID;
+  protected $status;
   protected $content;
   protected $contentSource;
 
@@ -33,8 +34,7 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_QUES);
+    return PhabricatorPHID::generateNewPHID(PonderPHIDTypeQuestion::TYPECONST);
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
@@ -96,8 +96,13 @@ final class PonderQuestion extends PonderDAO
   public function setUserVote($vote) {
     $this->vote = $vote['data'];
     if (!$this->vote) {
-      $this->vote = PonderConstants::NONE_VOTE;
+      $this->vote = PonderVote::VOTE_NONE;
     }
+    return $this;
+  }
+
+  public function attachUserVote($user_phid, $vote) {
+    $this->vote = $vote;
     return $this;
   }
 
@@ -112,6 +117,12 @@ final class PonderQuestion extends PonderDAO
 
   public function getComments() {
     return $this->comments;
+  }
+
+  public function attachAnswers(array $answers) {
+    assert_instances_of($answers, 'PonderAnswer');
+    $this->answers = $answers;
+    return $this;
   }
 
   public function getAnswers() {
@@ -159,7 +170,7 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function isAutomaticallySubscribed($phid) {
-    return false;
+    return ($phid == $this->getAuthorPHID());
   }
 
   public function save() {
@@ -172,6 +183,7 @@ final class PonderQuestion extends PonderDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
@@ -188,10 +200,17 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return ($viewer->getPHID() == $this->getAuthorPHID());
   }
 
+  public function getOriginalTitle() {
+    // TODO: Make this actually save/return the original title.
+    return $this->getTitle();
+  }
+
+
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
 
   public function getUsersToNotifyOfTokenGiven() {
     return array(

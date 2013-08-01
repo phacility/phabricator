@@ -14,7 +14,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
     return '/releeph/';
   }
 
-  public function getAutospriteName() {
+  public function getIconName() {
     return 'releeph';
   }
 
@@ -35,7 +35,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
       '/releeph/' => array(
         '' => 'ReleephProjectListController',
         'project/' => array(
-          '(?:(?P<filter>active|inactive)/)?' => 'ReleephProjectListController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephProjectListController',
           'create/' => 'ReleephProjectCreateController',
           '(?P<projectID>[1-9]\d*)/' => array(
             '' => 'ReleephProjectViewController',

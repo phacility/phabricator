@@ -58,7 +58,7 @@ final class DarkConsoleCore {
         'name'  => $plugin->getName(),
         'color' => $plugin->getColor(),
       );
-      $data[$class] = $plugin->getData();
+      $data[$class] = $this->sanitizeForJSON($plugin->getData());
     }
 
     $storage = array(
@@ -105,6 +105,24 @@ final class DarkConsoleCore {
         'data-console-color' => $this->getColor(),
       ),
       '');
+  }
+
+  /**
+   * Sometimes, tab data includes binary information (like INSERT queries which
+   * write file data into the database). To successfully JSON encode it, we
+   * need to convert it to UTF-8.
+   */
+  private function sanitizeForJSON($data) {
+    if (is_object($data)) {
+      return '<object:'.get_class($data).'>';
+    } else if (is_array($data)) {
+      foreach ($data as $key => $value) {
+        $data[$key] = $this->sanitizeForJSON($value);
+      }
+      return $data;
+    } else {
+      return phutil_utf8ize($data);
+    }
   }
 
 }

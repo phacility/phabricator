@@ -10,7 +10,7 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $author_phid = $this->getAuthorPHID();
     $commit_phid = $this->getPrimaryObjectPHID();
 
-    $view = new PHUIFeedStoryView();
+    $view = $this->newStoryView();
     $view->setAppIcon('audit-dark');
 
     $action = $this->getValue('action');
@@ -21,8 +21,6 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
       $this->linkTo($author_phid),
       $verb,
       $this->linkTo($commit_phid)));
-
-    $view->setEpoch($this->getEpoch());
 
     $comments = $this->getValue('content');
 
@@ -46,4 +44,31 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
 
     return $text;
   }
+
+
+  // TODO: At some point, make feed rendering not terrible and remove this
+  // hacky mess.
+  public function renderForAsanaBridge() {
+    $data = $this->getStoryData();
+    $comment = $data->getValue('content');
+
+    $author_name = $this->getHandle($this->getAuthorPHID())->getName();
+    $action = $this->getValue('action');
+    $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
+
+    $title = "{$author_name} {$verb} this commit.";
+    if (strlen($comment)) {
+      $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
+        ->setConfig('viewer', new PhabricatorUser())
+        ->setMode(PhutilRemarkupEngine::MODE_TEXT);
+
+      $comment = $engine->markupText($comment);
+
+      $title .= "\n\n";
+      $title .= $comment;
+    }
+
+    return $title;
+  }
+
 }

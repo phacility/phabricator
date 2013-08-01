@@ -14,6 +14,16 @@ final class PHUIFeedStoryView extends AphrontView {
   private $tokenBar = array();
   private $projects = array();
   private $actions = array();
+  private $chronologicalKey;
+
+  public function setChronologicalKey($chronological_key) {
+    $this->chronologicalKey = $chronological_key;
+    return $this;
+  }
+
+  public function getChronologicalKey() {
+    return $this->chronologicalKey;
+  }
 
   public function setTitle($title) {
     $this->title = $title;
@@ -179,9 +189,24 @@ final class PHUIFeedStoryView extends AphrontView {
     }
 
     if ($this->epoch) {
-      $foot = phabricator_datetime($this->epoch, $this->user);
+      // TODO: This is really bad; when rendering through Conduit and via
+      // renderText() we don't have a user.
+      if ($this->user) {
+        $foot = phabricator_datetime($this->epoch, $this->user);
+      } else {
+        $foot = null;
+      }
     } else {
       $foot = pht('No time specified.');
+    }
+
+    if ($this->chronologicalKey) {
+      $foot = phutil_tag(
+        'a',
+        array(
+          'href' => '/feed/'.$this->chronologicalKey.'/',
+        ),
+        $foot);
     }
 
     $icon = null;
@@ -209,10 +234,10 @@ final class PHUIFeedStoryView extends AphrontView {
 
   public function setAppIconFromPHID($phid) {
     switch (phid_get_type($phid)) {
-      case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+      case PholioPHIDTypeMock::TYPECONST:
         $this->setAppIcon("pholio-dark");
         break;
-      case PhabricatorPHIDConstants::PHID_TYPE_MCRO:
+      case PhabricatorMacroPHIDTypeMacro::TYPECONST:
         $this->setAppIcon("macro-dark");
         break;
     }

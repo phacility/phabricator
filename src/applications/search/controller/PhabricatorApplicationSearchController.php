@@ -173,16 +173,17 @@ final class PhabricatorApplicationSearchController
 
       $pager = new AphrontCursorPagerView();
       $pager->readFromRequest($request);
+      $pager->setPageSize($engine->getPageSize($saved_query));
       $objects = $query->setViewer($request->getUser())
         ->executeWithCursorPager($pager);
 
-      $list = $parent->renderResultsList($objects);
-      $list->setNoDataString(pht("No results found for this query."));
+      $list = $parent->renderResultsList($objects, $saved_query);
 
       $nav->appendChild($list);
 
       // TODO: This is a bit hacky.
       if ($list instanceof PhabricatorObjectItemListView) {
+        $list->setNoDataString(pht("No results found for this query."));
         $list->setPager($pager);
       } else {
         $nav->appendChild($pager);
@@ -261,10 +262,10 @@ final class PhabricatorApplicationSearchController
       if ($named_query->getIsBuiltin()) {
         if ($named_query->getIsDisabled()) {
           $item->addIcon('delete-grey', pht('Disabled'));
+          $item->setDisabled(true);
         } else {
           $item->addIcon('lock-grey', pht('Builtin'));
         }
-        $item->setBarColor('grey');
       } else {
         $item->addAction(
           id(new PHUIListItemView())

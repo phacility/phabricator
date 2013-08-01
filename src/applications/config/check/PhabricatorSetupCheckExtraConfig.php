@@ -65,7 +65,7 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       }
 
       $message = $message."\n\n".pht(
-        "This configuration value is defined in in these %d ".
+        "This configuration value is defined in these %d ".
         "configuration source(s): %s.",
         count($found),
         implode(', ', $found));
@@ -140,6 +140,13 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
     );
 
     $ancient_config = array_fill_keys($auth_config, $reason_auth);
+
+    $ancient_config += array(
+      'phid.external-loaders' =>
+        pht(
+          'External loaders have been replaced. Extend `PhabricatorPHIDType` '.
+          'to implement new PHID and handle types.'),
+    );
 
     return $ancient_config;
   }

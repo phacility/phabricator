@@ -16,8 +16,11 @@ final class PhrictionDocument extends PhrictionDAO
   protected $contentID;
   protected $status;
 
-  private $contentObject;
-  private $project;
+  private $contentObject = self::ATTACHABLE;
+
+  // TODO: This should be `self::ATTACHABLE`, but there are still a lot of call
+  // sites which load PhrictionDocuments directly.
+  private $project = null;
 
   public function getConfiguration() {
     return array(
@@ -28,7 +31,7 @@ final class PhrictionDocument extends PhrictionDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI);
+      PhrictionPHIDTypeDocument::TYPECONST);
   }
 
   public static function getSlugURI($slug, $type = 'document') {
@@ -66,26 +69,20 @@ final class PhrictionDocument extends PhrictionDAO
   }
 
   public function getContent() {
-    if (!$this->contentObject) {
-      throw new Exception("Attach content with attachContent() first.");
-    }
-    return $this->contentObject;
+    return $this->assertAttached($this->contentObject);
   }
 
   public function getProject() {
-    if ($this->project === null) {
-      throw new Exception("Call attachProject() before getProject().");
-    }
-    return $this->project;
+    return $this->assertAttached($this->project);
   }
 
-  public function attachProject(PhabricatorProject $project) {
+  public function attachProject(PhabricatorProject $project = null) {
     $this->project = $project;
     return $this;
   }
 
   public function hasProject() {
-    return (bool)$this->project;
+    return (bool)$this->getProject();
   }
 
   public static function isProjectSlug($slug) {

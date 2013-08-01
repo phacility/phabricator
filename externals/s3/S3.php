@@ -2,7 +2,7 @@
 /**
 * $Id$
 *
-* Copyright (c) 2011, Donovan Schönknecht.  All rights reserved.
+* Copyright (c) 2013, Donovan Schönknecht.  All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are met:
@@ -45,24 +45,127 @@ class S3
 	const STORAGE_CLASS_STANDARD = 'STANDARD';
 	const STORAGE_CLASS_RRS = 'REDUCED_REDUNDANCY';
 
-	private static $__accessKey = null; // AWS Access key
-	private static $__secretKey = null; // AWS Secret key
+	const SSE_NONE = '';
+	const SSE_AES256 = 'AES256';
+
+	/**
+	 * The AWS Access key
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $__accessKey = null;
+	
+	/**
+	 * AWS Secret Key
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $__secretKey = null;
+	
+	/**
+	 * SSL Client key
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
 	private static $__sslKey = null;
-
+	
+	/**
+	 * AWS URI
+	 *
+	 * @var string
+	 * @acess public
+	 * @static
+	 */
 	public static $endpoint = 's3.amazonaws.com';
+	
+	/**
+	 * Proxy information
+	 *
+	 * @var null|array
+	 * @access public
+	 * @static
+	 */
 	public static $proxy = null;
-
+	
+	/**
+	 * Connect using SSL?
+	 *
+	 * @var bool
+	 * @access public
+	 * @static
+	 */
 	public static $useSSL = false;
+	
+	/**
+	 * Use SSL validation?
+	 *
+	 * @var bool
+	 * @access public
+	 * @static
+	 */
 	public static $useSSLValidation = true;
+	
+	/**
+	 * Use PHP exceptions?
+	 *
+	 * @var bool
+	 * @access public
+	 * @static
+	 */
 	public static $useExceptions = false;
 
 	// SSL CURL SSL options - only needed if you are experiencing problems with your OpenSSL configuration
+	
+	/**
+	 * SSL client key
+	 *
+	 * @var bool
+	 * @access public
+	 * @static
+	 */
 	public static $sslKey = null;
+	
+	/**
+	 * SSL client certfificate
+	 *
+	 * @var string
+	 * @acess public
+	 * @static
+	 */
 	public static $sslCert = null;
+	
+	/**
+	 * SSL CA cert (only required if you are having problems with your system CA cert)
+	 *
+	 * @var string
+	 * @access public
+	 * @static
+	 */
 	public static $sslCACert = null;
-
-	private static $__signingKeyPairId = null; // AWS Key Pair ID
-	private static $__signingKeyResource = false; // Key resource, freeSigningKey() must be called to clear it from memory
+	
+	/**
+	 * AWS Key Pair ID
+	 *
+	 * @var string
+	 * @access private
+	 * @static
+	 */
+	private static $__signingKeyPairId = null;
+	
+	/**
+	 * Key resource, freeSigningKey() must be called to clear it from memory
+	 *
+	 * @var bool
+	 * @access private
+	 * @static 
+	 */
+	private static $__signingKeyResource = false;
 
 
 	/**
@@ -71,6 +174,7 @@ class S3
 	* @param string $accessKey Access key
 	* @param string $secretKey Secret key
 	* @param boolean $useSSL Enable SSL
+	* @param string $endpoint Amazon URI
 	* @return void
 	*/
 	public function __construct($accessKey = null, $secretKey = null, $useSSL = false, $endpoint = 's3.amazonaws.com')
@@ -83,7 +187,7 @@ class S3
 
 
 	/**
-	* Set the sertvice endpoint
+	* Set the service endpoint
 	*
 	* @param string $host Hostname
 	* @return void
@@ -158,7 +262,7 @@ class S3
 	*/
 	public static function setProxy($host, $user = null, $pass = null, $type = CURLPROXY_SOCKS5)
 	{
-		self::$proxy = array('host' => $host, 'type' => $type, 'user' => null, 'pass' => 'null');
+		self::$proxy = array('host' => $host, 'type' => $type, 'user' => $user, 'pass' => $pass);
 	}
 
 
@@ -262,7 +366,7 @@ class S3
 	}
 
 
-	/*
+	/**
 	* Get contents for a bucket
 	*
 	* If maxKeys is null this method will loop through truncated result sets
@@ -327,7 +431,7 @@ class S3
 			$rest->setParameter('marker', $nextMarker);
 			if ($delimiter !== null && $delimiter !== '') $rest->setParameter('delimiter', $delimiter);
 
-			if (($response = $rest->getResponse(true)) == false || $response->code !== 200) break;
+			if (($response = $rest->getResponse()) == false || $response->code !== 200) break;
 
 			if (isset($response->body, $response->body->Contents))
 			foreach ($response->body->Contents as $c)
@@ -371,7 +475,7 @@ class S3
 		{
 			$dom = new DOMDocument;
 			$createBucketConfiguration = $dom->createElement('CreateBucketConfiguration');
-			$locationConstraint = $dom->createElement('LocationConstraint', strtoupper($location));
+			$locationConstraint = $dom->createElement('LocationConstraint', $location);
 			$createBucketConfiguration->appendChild($locationConstraint);
 			$dom->appendChild($createBucketConfiguration);
 			$rest->data = $dom->saveXML();
@@ -441,13 +545,25 @@ class S3
 	* @param string $md5sum MD5 hash to send (optional)
 	* @return array | false
 	*/
-	public static function inputResource(&$resource, $bufferSize, $md5sum = '')
+	public static function inputResource(&$resource, $bufferSize = false, $md5sum = '')
 	{
-		if (!is_resource($resource) || $bufferSize < 0)
+		if (!is_resource($resource) || (int)$bufferSize < 0)
 		{
 			self::__triggerError('S3::inputResource(): Invalid resource or buffer size', __FILE__, __LINE__);
 			return false;
 		}
+
+		// Try to figure out the bytesize
+		if ($bufferSize === false)
+		{
+			if (fseek($resource, 0, SEEK_END) < 0 || ($bufferSize = ftell($resource)) === false)
+			{
+				self::__triggerError('S3::inputResource(): Unable to obtain resource size', __FILE__, __LINE__);
+				return false;
+			}
+			fseek($resource, 0);
+		}
+
 		$input = array('size' => $bufferSize, 'md5sum' => $md5sum);
 		$input['fp'] =& $resource;
 		return $input;
@@ -464,14 +580,15 @@ class S3
 	* @param array $metaHeaders Array of x-amz-meta-* headers
 	* @param array $requestHeaders Array of request headers or content type as a string
 	* @param constant $storageClass Storage class constant
+	* @param constant $serverSideEncryption Server-side encryption
 	* @return boolean
 	*/
-	public static function putObject($input, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD)
+	public static function putObject($input, $bucket, $uri, $acl = self::ACL_PRIVATE, $metaHeaders = array(), $requestHeaders = array(), $storageClass = self::STORAGE_CLASS_STANDARD, $serverSideEncryption = self::SSE_NONE)
 	{
 		if ($input === false) return false;
 		$rest = new S3Request('PUT', $bucket, $uri, self::$endpoint);
 
-		if (is_string($input)) $input = array(
+		if (!is_array($input)) $input = array(
 			'data' => $input, 'size' => strlen($input),
 			'md5sum' => base64_encode(md5($input, true))
 		);
@@ -514,6 +631,9 @@ class S3
 		if ($storageClass !== self::STORAGE_CLASS_STANDARD) // Storage class
 			$rest->setAmzHeader('x-amz-storage-class', $storageClass);
 
+		if ($serverSideEncryption !== self::SSE_NONE) // Server-side encryption
+			$rest->setAmzHeader('x-amz-server-side-encryption', $serverSideEncryption);
+
 		// We need to post with Content-Length and Content-Type, MD5 is optional
 		if ($rest->size >= 0 && ($rest->fp !== false || $rest->data !== false))
 		{
@@ -528,7 +648,6 @@ class S3
 
 		if ($rest->response->error === false && $rest->response->code !== 200)
 			$rest->response->error = array('code' => $rest->response->code, 'message' => 'Unexpected HTTP status');
-
 		if ($rest->response->error !== false)
 		{
 			self::__triggerError(sprintf("S3::putObject(): [%s] %s",
@@ -635,8 +754,8 @@ class S3
 	/**
 	* Copy an object
 	*
-	* @param string $bucket Source bucket name
-	* @param string $uri Source object URI
+	* @param string $srcBucket Source bucket name
+	* @param string $srcUri Source object URI
 	* @param string $bucket Destination bucket name
 	* @param string $uri Destination object URI
 	* @param constant $acl ACL constant
@@ -653,7 +772,7 @@ class S3
 		foreach ($metaHeaders as $h => $v) $rest->setAmzHeader('x-amz-meta-'.$h, $v);
 		if ($storageClass !== self::STORAGE_CLASS_STANDARD) // Storage class
 			$rest->setAmzHeader('x-amz-storage-class', $storageClass);
-		$rest->setAmzHeader('x-amz-acl', $acl); // Added rawurlencode() for $srcUri (thanks a.yamanoi)
+		$rest->setAmzHeader('x-amz-acl', $acl);
 		$rest->setAmzHeader('x-amz-copy-source', sprintf('/%s/%s', $srcBucket, rawurlencode($srcUri)));
 		if (sizeof($requestHeaders) > 0 || sizeof($metaHeaders) > 0)
 			$rest->setAmzHeader('x-amz-metadata-directive', 'REPLACE');
@@ -671,6 +790,47 @@ class S3
 			'time' => strtotime((string)$rest->body->LastModified),
 			'hash' => substr((string)$rest->body->ETag, 1, -1)
 		) : false;
+	}
+
+
+	/**
+	* Set up a bucket redirection
+	*
+	* @param string $bucket Bucket name
+	* @param string $location Target host name
+	* @return boolean
+	*/
+	public static function setBucketRedirect($bucket = NULL, $location = NULL)
+	{
+		$rest = new S3Request('PUT', $bucket, '', self::$endpoint);
+
+		if( empty($bucket) || empty($location) ) {
+			self::__triggerError("S3::setBucketRedirect({$bucket}, {$location}): Empty parameter.", __FILE__, __LINE__);
+			return false;
+		}
+
+		$dom = new DOMDocument;
+		$websiteConfiguration = $dom->createElement('WebsiteConfiguration');
+		$redirectAllRequestsTo = $dom->createElement('RedirectAllRequestsTo');
+		$hostName = $dom->createElement('HostName', $location);
+		$redirectAllRequestsTo->appendChild($hostName);
+		$websiteConfiguration->appendChild($redirectAllRequestsTo);
+		$dom->appendChild($websiteConfiguration);
+		$rest->setParameter('website', null);
+		$rest->data = $dom->saveXML();
+		$rest->size = strlen($rest->data);
+		$rest->setHeader('Content-Type', 'application/xml');
+		$rest = $rest->getResponse();
+
+		if ($rest->error === false && $rest->code !== 200)
+			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+		if ($rest->error !== false)
+		{
+			self::__triggerError(sprintf("S3::setBucketRedirect({$bucket}, {$location}): [%s] %s",
+			$rest->error['code'], $rest->error['message']), __FILE__, __LINE__);
+			return false;
+		}
+		return true;
 	}
 
 
@@ -729,7 +889,7 @@ class S3
 			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 		if ($rest->error !== false)
 		{
-			self::__triggerError(sprintf("S3::setBucketLogging({$bucket}, {$uri}): [%s] %s",
+			self::__triggerError(sprintf("S3::setBucketLogging({$bucket}, {$targetBucket}): [%s] %s",
 			$rest->error['code'], $rest->error['message']), __FILE__, __LINE__);
 			return false;
 		}
@@ -966,9 +1126,10 @@ class S3
 	public static function getAuthenticatedURL($bucket, $uri, $lifetime, $hostBucket = false, $https = false)
 	{
 		$expires = time() + $lifetime;
-		$uri = str_replace('%2F', '/', rawurlencode($uri)); // URI should be encoded (thanks Sean O'Dea)
+		$uri = str_replace(array('%2F', '%2B'), array('/', '+'), rawurlencode($uri));
 		return sprintf(($https ? 'https' : 'http').'://%s/%s?AWSAccessKeyId=%s&Expires=%u&Signature=%s',
-		$hostBucket ? $bucket : $bucket.'.s3.amazonaws.com', $uri, self::$__accessKey, $expires,
+		// $hostBucket ? $bucket : $bucket.'.s3.amazonaws.com', $uri, self::$__accessKey, $expires,
+		$hostBucket ? $bucket : self::$endpoint.'/'.$bucket, $uri, self::$__accessKey, $expires,
 		urlencode(self::__getHash("GET\n\n\n{$expires}\n/{$bucket}/{$uri}")));
 	}
 
@@ -989,7 +1150,6 @@ class S3
 		$signature = str_replace(array('+', '='), array('-', '_', '~'), base64_encode($signature));
 
 		$url = $policy['Statement'][0]['Resource'] . '?';
-
 		foreach (array('Policy' => $encoded, 'Signature' => $signature, 'Key-Pair-Id' => self::$__signingKeyPairId) as $k => $v)
 			$url .= $k.'='.str_replace('%2F', '/', rawurlencode($v)).'&';
 		return substr($url, 0, -1);
@@ -999,7 +1159,7 @@ class S3
 	/**
 	* Get a CloudFront canned policy URL
 	*
-	* @param string $string URL to sign
+	* @param string $url URL to sign
 	* @param integer $lifetime URL lifetime
 	* @return string
 	*/
@@ -1390,9 +1550,11 @@ class S3
 	*
 	* @internal Used to create XML in invalidateDistribution()
 	* @param array $paths Paths to objects to invalidateDistribution
+	* @param int $callerReference
 	* @return string
 	*/
-	private static function __getCloudFrontInvalidationBatchXML($paths, $callerReference = '0') {
+	private static function __getCloudFrontInvalidationBatchXML($paths, $callerReference = '0')
+	{
 		$dom = new DOMDocument('1.0', 'UTF-8');
 		$dom->formatOutput = true;
 		$invalidationBatch = $dom->createElement('InvalidationBatch');
@@ -1402,6 +1564,57 @@ class S3
 		$invalidationBatch->appendChild($dom->createElement('CallerReference', $callerReference));
 		$dom->appendChild($invalidationBatch);
 		return $dom->saveXML();
+	}
+
+
+	/**
+	* List your invalidation batches for invalidateDistribution() in a CloudFront distribution
+	*
+	* http://docs.amazonwebservices.com/AmazonCloudFront/latest/APIReference/ListInvalidation.html
+	* returned array looks like this:
+	*	Array
+	*	(
+	*		[I31TWB0CN9V6XD] => InProgress
+	*		[IT3TFE31M0IHZ] => Completed
+	*		[I12HK7MPO1UQDA] => Completed
+	*		[I1IA7R6JKTC3L2] => Completed
+	*	)
+	*
+	* @param string $distributionId Distribution ID from listDistributions()
+	* @return array
+	*/
+	public static function getDistributionInvalidationList($distributionId)
+	{
+		if (!extension_loaded('openssl'))
+		{
+			self::__triggerError(sprintf("S3::getDistributionInvalidationList(): [%s] %s",
+			"CloudFront functionality requires SSL"), __FILE__, __LINE__);
+			return false;
+		}
+
+		$useSSL = self::$useSSL;
+		self::$useSSL = true; // CloudFront requires SSL
+		$rest = new S3Request('GET', '', '2010-11-01/distribution/'.$distributionId.'/invalidation', 'cloudfront.amazonaws.com');
+		$rest = self::__getCloudFrontResponse($rest);
+		self::$useSSL = $useSSL;
+
+		if ($rest->error === false && $rest->code !== 200)
+			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+		if ($rest->error !== false)
+		{
+			trigger_error(sprintf("S3::getDistributionInvalidationList('{$distributionId}'): [%s]",
+			$rest->error['code'], $rest->error['message']), E_USER_WARNING);
+			return false;
+		}
+		elseif ($rest->body instanceof SimpleXMLElement && isset($rest->body->InvalidationSummary))
+		{
+			$list = array();
+			foreach ($rest->body->InvalidationSummary as $summary)
+				$list[(string)$summary->Id] = (string)$summary->Status;
+
+			return $list;
+		}
+		return array();
 	}
 
 
@@ -1546,15 +1759,17 @@ class S3
 	/**
 	* Get MIME type for file
 	*
+	* To override the putObject() Content-Type, add it to $requestHeaders
+	*
+	* To use fileinfo, ensure the MAGIC environment variable is set
+	*
 	* @internal Used to get mime types
 	* @param string &$file File path
 	* @return string
 	*/
-	public static function __getMimeType(&$file)
+	private static function __getMimeType(&$file)
 	{
-		$type = false;
-		// Fileinfo documentation says fileinfo_open() will use the
-		// MAGIC env var for the magic file
+		// Use fileinfo if available
 		if (extension_loaded('fileinfo') && isset($_ENV['MAGIC']) &&
 		($finfo = finfo_open(FILEINFO_MIME, $_ENV['MAGIC'])) !== false)
 		{
@@ -1567,21 +1782,19 @@ class S3
 				$type = trim(array_shift($type));
 			}
 			finfo_close($finfo);
+			if ($type !== false && strlen($type) > 0) return $type;
+		}
 
-		// If anyone is still using mime_content_type()
-		} elseif (function_exists('mime_content_type'))
-			$type = trim(mime_content_type($file));
-
-		if ($type !== false && strlen($type) > 0) return $type;
-
-		// Otherwise do it the old fashioned way
 		static $exts = array(
-			'jpg' => 'image/jpeg', 'gif' => 'image/gif', 'png' => 'image/png',
-			'tif' => 'image/tiff', 'tiff' => 'image/tiff', 'ico' => 'image/x-icon',
-			'swf' => 'application/x-shockwave-flash', 'pdf' => 'application/pdf',
+			'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif',
+			'png' => 'image/png', 'ico' => 'image/x-icon', 'pdf' => 'application/pdf',
+			'tif' => 'image/tiff', 'tiff' => 'image/tiff', 'svg' => 'image/svg+xml',
+			'svgz' => 'image/svg+xml', 'swf' => 'application/x-shockwave-flash', 
 			'zip' => 'application/zip', 'gz' => 'application/x-gzip',
 			'tar' => 'application/x-tar', 'bz' => 'application/x-bzip',
-			'bz2' => 'application/x-bzip2', 'txt' => 'text/plain',
+			'bz2' => 'application/x-bzip2',  'rar' => 'application/x-rar-compressed',
+			'exe' => 'application/x-msdownload', 'msi' => 'application/x-msdownload',
+			'cab' => 'application/vnd.ms-cab-compressed', 'txt' => 'text/plain',
 			'asc' => 'text/plain', 'htm' => 'text/html', 'html' => 'text/html',
 			'css' => 'text/css', 'js' => 'text/javascript',
 			'xml' => 'text/xml', 'xsl' => 'application/xsl+xml',
@@ -1589,8 +1802,11 @@ class S3
 			'avi' => 'video/x-msvideo', 'mpg' => 'video/mpeg', 'mpeg' => 'video/mpeg',
 			'mov' => 'video/quicktime', 'flv' => 'video/x-flv', 'php' => 'text/x-php'
 		);
-		$ext = strtolower(pathInfo($file, PATHINFO_EXTENSION));
-		return isset($exts[$ext]) ? $exts[$ext] : 'application/octet-stream';
+		$ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+		// mime_content_type() is deprecated, fileinfo should be configured
+		$type = isset($exts[$ext]) ? $exts[$ext] : trim(mime_content_type($file));
+
+		return ($type !== false && strlen($type) > 0) ? $type : 'application/octet-stream';
 	}
 
 
@@ -1627,13 +1843,111 @@ class S3
 
 }
 
+/**
+ * S3 Request class 
+ *
+ * @link http://undesigned.org.za/2007/10/22/amazon-s3-php-class
+ * @version 0.5.0-dev
+ */
 final class S3Request
 {
-	private $endpoint, $verb, $bucket, $uri, $resource = '', $parameters = array(),
-	$amzHeaders = array(), $headers = array(
+	/**
+	 * AWS URI
+	 *
+	 * @var string
+	 * @access pricate
+	 */
+	private $endpoint;
+	
+	/**
+	 * Verb
+	 *
+	 * @var string
+	 * @access private
+	 */
+	private $verb;
+	
+	/**
+	 * S3 bucket name
+	 *
+	 * @var string
+	 * @access private
+	 */
+	private $bucket;
+	
+	/**
+	 * Object URI
+	 *
+	 * @var string
+	 * @access private
+	 */
+	private $uri;
+	
+	/**
+	 * Final object URI
+	 *
+	 * @var string
+	 * @access private
+	 */
+	private $resource = '';
+	
+	/**
+	 * Additional request parameters
+	 *
+	 * @var array
+	 * @access private
+	 */
+	private $parameters = array();
+	
+	/**
+	 * Amazon specific request headers
+	 *
+	 * @var array
+	 * @access private
+	 */
+	private $amzHeaders = array();
+
+	/**
+	 * HTTP request headers
+	 *
+	 * @var array
+	 * @access private
+	 */
+	private $headers = array(
 		'Host' => '', 'Date' => '', 'Content-MD5' => '', 'Content-Type' => ''
 	);
-	public $fp = false, $size = 0, $data = false, $response;
+
+	/**
+	 * Use HTTP PUT?
+	 *
+	 * @var bool
+	 * @access public
+	 */
+	public $fp = false;
+
+	/**
+	 * PUT file size
+	 *
+	 * @var int
+	 * @access public
+	 */
+	public $size = 0;
+
+	/**
+	 * PUT post fields
+	 *
+	 * @var array
+	 * @access public
+	 */
+	public $data = false;
+
+	/**
+	 * S3 request respone
+	 *
+	 * @var object
+	 * @access public
+	 */
+	public $response;
 
 
 	/**
@@ -1642,29 +1956,50 @@ final class S3Request
 	* @param string $verb Verb
 	* @param string $bucket Bucket name
 	* @param string $uri Object URI
+	* @param string $endpoint AWS endpoint URI
 	* @return mixed
 	*/
 	function __construct($verb, $bucket = '', $uri = '', $endpoint = 's3.amazonaws.com')
 	{
+		
 		$this->endpoint = $endpoint;
 		$this->verb = $verb;
 		$this->bucket = $bucket;
 		$this->uri = $uri !== '' ? '/'.str_replace('%2F', '/', rawurlencode($uri)) : '/';
 
+		//if ($this->bucket !== '')
+		//	$this->resource = '/'.$this->bucket.$this->uri;
+		//else
+		//	$this->resource = $this->uri;
+
 		if ($this->bucket !== '')
 		{
-			$this->headers['Host'] = $this->bucket.'.'.$this->endpoint;
-			$this->resource = '/'.$this->bucket.$this->uri;
+			if ($this->__dnsBucketName($this->bucket))
+			{
+				$this->headers['Host'] = $this->bucket.'.'.$this->endpoint;
+				$this->resource = '/'.$this->bucket.$this->uri;
+			}
+			else
+			{
+				$this->headers['Host'] = $this->endpoint;
+				$this->uri = $this->uri;
+				if ($this->bucket !== '') $this->uri = '/'.$this->bucket.$this->uri;
+				$this->bucket = '';
+				$this->resource = $this->uri;
+			}
 		}
 		else
 		{
 			$this->headers['Host'] = $this->endpoint;
 			$this->resource = $this->uri;
 		}
-		$this->headers['Date'] = gmdate('D, d M Y H:i:s T');
 
+
+		$this->headers['Date'] = gmdate('D, d M Y H:i:s T');
 		$this->response = new STDClass;
 		$this->response->error = false;
+		$this->response->body = null;
+		$this->response->headers = array();
 	}
 
 
@@ -1720,7 +2055,6 @@ final class S3Request
 			$query = substr($this->uri, -1) !== '?' ? '?' : '&';
 			foreach ($this->parameters as $var => $value)
 				if ($value == null || $value == '') $query .= $var.'&';
-				// Parameters should be encoded (thanks Sean O'Dea)
 				else $query .= $var.'='.rawurlencode($value).'&';
 			$query = substr($query, 0, -1);
 			$this->uri .= $query;
@@ -1728,11 +2062,13 @@ final class S3Request
 			if (array_key_exists('acl', $this->parameters) ||
 			array_key_exists('location', $this->parameters) ||
 			array_key_exists('torrent', $this->parameters) ||
+			array_key_exists('website', $this->parameters) ||
 			array_key_exists('logging', $this->parameters))
 				$this->resource .= $query;
 		}
-		$url = (S3::$useSSL ? 'https://' : 'http://') . $this->headers['Host'].$this->uri;
-		//var_dump($this->bucket, $this->uri, $this->resource, $url);
+		$url = (S3::$useSSL ? 'https://' : 'http://') . ($this->headers['Host'] !== '' ? $this->headers['Host'] : $this->endpoint) . $this->uri;
+
+		//var_dump('bucket: ' . $this->bucket, 'uri: ' . $this->uri, 'resource: ' . $this->resource, 'url: ' . $url);
 
 		// Basic setup
 		$curl = curl_init();
@@ -1741,7 +2077,7 @@ final class S3Request
 		if (S3::$useSSL)
 		{
 			// SSL Validation can now be optional for those with broken OpenSSL installations
-			curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, S3::$useSSLValidation ? 1 : 0);
+			curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, S3::$useSSLValidation ? 2 : 0);
 			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, S3::$useSSLValidation ? 1 : 0);
 
 			if (S3::$sslKey !== null) curl_setopt($curl, CURLOPT_SSLKEY, S3::$sslKey);
@@ -1755,7 +2091,7 @@ final class S3Request
 		{
 			curl_setopt($curl, CURLOPT_PROXY, S3::$proxy['host']);
 			curl_setopt($curl, CURLOPT_PROXYTYPE, S3::$proxy['type']);
-			if (isset(S3::$proxy['user'], S3::$proxy['pass']) && $proxy['user'] != null && $proxy['pass'] != null)
+			if (isset(S3::$proxy['user'], S3::$proxy['pass']) && S3::$proxy['user'] != null && S3::$proxy['pass'] != null)
 				curl_setopt($curl, CURLOPT_PROXYUSERPWD, sprintf('%s:%s', S3::$proxy['user'], S3::$proxy['pass']));
 		}
 
@@ -1773,19 +2109,27 @@ final class S3Request
 		// AMZ headers must be sorted
 		if (sizeof($amz) > 0)
 		{
-			sort($amz);
+			//sort($amz);
+			usort($amz, array(&$this, '__sortMetaHeadersCmp'));
 			$amz = "\n".implode("\n", $amz);
 		} else $amz = '';
 
 		if (S3::hasAuth())
 		{
 			// Authorization string (CloudFront stringToSign should only contain a date)
-			$headers[] = 'Authorization: ' . S3::__getSignature(
-				$this->headers['Host'] == 'cloudfront.amazonaws.com' ? $this->headers['Date'] :
-				$this->verb."\n".$this->headers['Content-MD5']."\n".
-				$this->headers['Content-Type']."\n".$this->headers['Date'].$amz."\n".$this->resource
-			);
-        }
+			if ($this->headers['Host'] == 'cloudfront.amazonaws.com')
+				$headers[] = 'Authorization: ' . S3::__getSignature($this->headers['Date']);
+			else
+			{
+				$headers[] = 'Authorization: ' . S3::__getSignature(
+					$this->verb."\n".
+					$this->headers['Content-MD5']."\n".
+					$this->headers['Content-Type']."\n".
+					$this->headers['Date'].$amz."\n".
+					$this->resource
+				);
+			}
+		}
 
 		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 		curl_setopt($curl, CURLOPT_HEADER, false);
@@ -1862,6 +2206,24 @@ final class S3Request
 		return $this->response;
 	}
 
+	/**
+	* Sort compare for meta headers
+	*
+	* @internal Used to sort x-amz meta headers
+	* @param string $a String A
+	* @param string $b String B
+	* @return integer
+	*/
+	private function __sortMetaHeadersCmp($a, $b)
+	{
+		$lenA = strpos($a, ':');
+		$lenB = strpos($b, ':');
+		$minLen = min($lenA, $lenB);
+		$ncmp = strncmp($a, $b, $minLen);
+		if ($lenA == $lenB) return $ncmp;
+		if (0 == $ncmp) return $lenA < $lenB ? -1 : 1;
+		return $ncmp;
+	}
 
 	/**
 	* CURL write callback
@@ -1877,6 +2239,23 @@ final class S3Request
 		else
 			$this->response->body .= $data;
 		return strlen($data);
+	}
+
+
+	/**
+	* Check DNS conformity
+	*
+	* @param string $bucket Bucket name
+	* @return boolean
+	*/
+	private function __dnsBucketName($bucket)
+	{
+		if (strlen($bucket) > 63 || preg_match("/[^a-z0-9\.-]/", $bucket) > 0) return false;
+		if (strstr($bucket, '-.') !== false) return false;
+		if (strstr($bucket, '..') !== false) return false;
+		if (!preg_match("/^[0-9a-z]/", $bucket)) return false;
+		if (!preg_match("/[0-9a-z]$/", $bucket)) return false;
+		return true;
 	}
 
 
@@ -1906,14 +2285,29 @@ final class S3Request
 			elseif ($header == 'ETag')
 				$this->response->headers['hash'] = $value{0} == '"' ? substr($value, 1, -1) : $value;
 			elseif (preg_match('/^x-amz-meta-.*$/', $header))
-				$this->response->headers[$header] = is_numeric($value) ? (int)$value : $value;
+				$this->response->headers[$header] = $value;
 		}
 		return $strlen;
 	}
 
 }
 
+/**
+ * S3 exception class
+ *
+ * @link http://undesigned.org.za/2007/10/22/amazon-s3-php-class
+ * @version 0.5.0-dev
+ */
+
 class S3Exception extends Exception {
+	/**
+	 * Class constructor
+	 *
+	 * @param string $message Exception message
+	 * @param string $file File in which exception was created
+	 * @param string $line Line number on which exception was created
+	 * @param int $code Exception code
+	 */
 	function __construct($message, $file, $line, $code = 0)
 	{
 		parent::__construct($message, $code);

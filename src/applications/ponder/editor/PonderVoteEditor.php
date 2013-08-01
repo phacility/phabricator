@@ -56,7 +56,7 @@ final class PonderVoteEditor extends PhabricatorEditor {
         $votable->getVotablePHID());
 
       if (!$curvote) {
-        $curvote = PonderConstants::NONE_VOTE;
+        $curvote = PonderVote::VOTE_NONE;
       }
 
       // adjust votable's score by this much

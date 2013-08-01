@@ -14,10 +14,12 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $query = $request->getStr('q');
+    $raw_query = $request->getStr('raw');
 
     $need_rich_data = false;
 
     $need_users = false;
+    $need_agents = false;
     $need_applications = false;
     $need_all_users = false;
     $need_lists = false;
@@ -28,6 +30,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_arcanist_projects = false;
     $need_noproject = false;
     $need_symbols = false;
+    $need_jump_objects = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
@@ -35,6 +38,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_rich_data = true;
         $need_symbols = true;
         $need_projs = true;
+        $need_jump_objects = true;
         break;
       case 'searchowner':
         $need_users = true;
@@ -46,6 +50,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'users':
         $need_users = true;
+        break;
+      case 'authors':
+        $need_users = true;
+        $need_agents = true;
         break;
       case 'mailable':
         $need_users = true;
@@ -163,7 +171,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
 
       foreach ($users as $user) {
         if (!$need_all_users) {
-          if ($user->getIsSystemAgent()) {
+          if (!$need_agents && $user->getIsSystemAgent()) {
             continue;
           }
           if ($user->getIsDisabled()) {
@@ -191,7 +199,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
     }
 
     if ($need_lists) {
-      $lists = id(new PhabricatorMetaMTAMailingList())->loadAll();
+      $lists = id(new PhabricatorMailingListQuery())
+        ->setViewer($viewer)
+        ->execute();
       foreach ($lists as $list) {
         $results[] = id(new PhabricatorTypeaheadResult())
           ->setName($list->getName())
@@ -291,6 +301,28 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setDisplayName($name)
           ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
           ->setPriorityType('symb');
+      }
+    }
+
+    if ($need_jump_objects) {
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withNames(array($raw_query))
+        ->execute();
+      if ($objects) {
+        $handles = id(new PhabricatorHandleQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(mpull($objects, 'getPHID'))
+          ->execute();
+        $handle = head($handles);
+        if ($handle) {
+          $results[] = id(new PhabricatorTypeaheadResult())
+            ->setName($handle->getFullName())
+            ->setDisplayType($handle->getTypeName())
+            ->setURI($handle->getURI())
+            ->setPHID($handle->getPHID())
+            ->setPriorityType('jump');
+        }
       }
     }
 

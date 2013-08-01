@@ -280,7 +280,7 @@ EOBODY;
     PhabricatorObjectHandle $handle,
     $prefix) {
 
-    if ($handle->getType() != PhabricatorPHIDConstants::PHID_TYPE_USER) {
+    if ($handle->getType() != PhabricatorPeoplePHIDTypeUser::TYPECONST) {
       // You must be a real user to get a private reply handler address.
       return null;
     }
@@ -289,6 +289,12 @@ EOBODY;
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs(array($handle->getPHID()))
       ->executeOne();
+
+    if (!$user) {
+      // This may happen if a user was subscribed to something, and was then
+      // deleted.
+      return null;
+    }
 
     $receiver = $this->getMailReceiver();
     $receiver_id = $receiver->getID();

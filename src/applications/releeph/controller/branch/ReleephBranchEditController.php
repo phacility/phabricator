@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephBranchEditController extends ReleephController {
+final class ReleephBranchEditController extends ReleephProjectController {
 
   public function processRequest() {
     $request = $this->getRequest();

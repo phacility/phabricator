@@ -12,7 +12,7 @@ final class PhabricatorMacroTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_MCRO;
+    return PhabricatorMacroPHIDTypeMacro::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

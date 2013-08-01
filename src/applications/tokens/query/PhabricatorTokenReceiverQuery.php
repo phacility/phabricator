@@ -19,10 +19,6 @@ final class PhabricatorTokenReceiverQuery
   }
 
   public function willFilterPage(array $phids) {
-    if (!$phids) {
-      return array();
-    }
-
     $objects = id(new PhabricatorObjectHandleData($phids))
       ->setViewer($this->getViewer())
       ->loadObjects();

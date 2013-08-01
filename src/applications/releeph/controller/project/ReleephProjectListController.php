@@ -1,95 +1,109 @@
 <?php
 
-final class ReleephProjectListController extends PhabricatorController {
+final class ReleephProjectListController extends ReleephController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
 
-  private $filter;
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter', 'active');
+    $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new ReleephProjectSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $query = id(new ReleephProjectQuery())
-      ->setViewer($user)
-      ->setOrder(ReleephProjectQuery::ORDER_NAME);
-
-    switch ($this->filter) {
-      case 'inactive':
-        $query->withActive(0);
-        $is_active = false;
-        break;
-      case 'active':
-        $query->withActive(1);
-        $is_active = true;
-        break;
-      default:
-        throw new Exception("Unknown filter '{$this->filter}'!");
-    }
-
-    $pager = new AphrontCursorPagerView();
-    $pager->readFromRequest($request);
-
-    $releeph_projects = $query->executeWithCursorPager($pager);
-
-    $releeph_projects_set = new LiskDAOSet();
-    foreach ($releeph_projects as $releeph_project) {
-      $releeph_projects_set->addToSet($releeph_project);
-    }
-
-    $panel = new AphrontPanelView();
-
-    if ($is_active) {
-      $view_inactive_link = phutil_tag(
-        'a',
-        array(
-          'href'  => '/releeph/project/inactive/',
-        ),
-        pht('View inactive projects'));
-      $panel
-        ->setHeader(hsprintf(
-          'Active Releeph Projects &middot; %s', $view_inactive_link))
-        ->appendChild(
-          id(new ReleephActiveProjectListView())
-            ->setUser($this->getRequest()->getUser())
-            ->setReleephProjects($releeph_projects));
-    } else {
-      $view_active_link = phutil_tag(
-        'a',
-        array(
-          'href' => '/releeph/project/'
-        ),
-        pht('View active projects'));
-      $panel
-        ->setHeader(hsprintf(
-          'Inactive Releeph Projects &middot; %s', $view_active_link))
-        ->appendChild(
-            id(new ReleephInactiveProjectListView())
-              ->setUser($this->getRequest()->getUser())
-              ->setReleephProjects($releeph_projects));
-    }
-
-    if ($is_active) {
-      $create_new_project_button = phutil_tag(
-        'a',
-        array(
-          'href'  => '/releeph/project/create/',
-          'class' => 'green button',
-        ),
-        pht('Create New Project'));
-      $panel->addButton($create_new_project_button);
-    }
-
-    return $this->buildApplicationPage(
-      array(
-        $panel,
-        $pager,
-      ),
-      array(
-        'title' => pht('All Releeph Projects'),
-      ));
+    return $this->delegateToController($controller);
   }
+
+  public function renderResultsList(
+    array $projects,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($projects, 'ReleephProject');
+    $viewer = $this->getRequest()->getUser();
+
+    $list = id(new PhabricatorObjectItemListView())
+      ->setUser($viewer);
+
+    foreach ($projects as $project) {
+      $id = $project->getID();
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($project->getName())
+        ->setHref($this->getApplicationURI("project/{$id}/"));
+
+      $edit_uri = $this->getApplicationURI("project/{$id}/edit/");
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('edit')
+          ->setHref($edit_uri));
+
+      if ($project->getIsActive()) {
+        $disable_uri = $this->getApplicationURI(
+          "project/{$id}/action/deactivate/");
+
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('delete')
+            ->setName(pht('Deactivate'))
+            ->setWorkflow(true)
+            ->setHref($disable_uri));
+      } else {
+        $enable_uri = $this->getApplicationURI(
+          "project/{$id}/action/activate/");
+
+        $item->setDisabled(true);
+        $item->addIcon('none', pht('Inactive'));
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('new')
+            ->setName(pht('Reactivate'))
+            ->setWorkflow(true)
+            ->setHref($enable_uri));
+      }
+
+      // TODO: See T3551.
+
+      $repo = $project->loadPhabricatorRepository();
+      if ($repo) {
+        $item->addAttribute(
+          phutil_tag(
+            'a',
+            array(
+              'href' => '/diffusion/'.$repo->getCallsign().'/',
+            ),
+            'r'.$repo->getCallsign()));
+      }
+
+      $arc = $project->loadArcanistProject();
+      if ($arc) {
+        $item->addAttribute($arc->getName());
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Create Project'))
+        ->setHref($this->getApplicationURI('project/create/'))
+        ->setIcon('create'));
+
+    return $crumbs;
+  }
+
 
 }

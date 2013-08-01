@@ -52,6 +52,13 @@ final class DiffusionCommitController extends DiffusionController {
       ->setAnchorName('top')
       ->setNavigationMarker(true);
 
+    $audit_requests = id(new PhabricatorAuditQuery())
+      ->withCommitPHIDs(array($commit->getPHID()))
+      ->execute();
+    $this->auditAuthorityPHIDs =
+      PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
+
+
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
     $changesets = null;
     if ($is_foreign) {
@@ -86,7 +93,8 @@ final class DiffusionCommitController extends DiffusionController {
       $commit_properties = $this->loadCommitProperties(
         $commit,
         $commit_data,
-        $parents);
+        $parents,
+        $audit_requests);
       $property_list = id(new PhabricatorPropertyListView())
         ->setHasKeyboardShortcuts(true)
         ->setUser($user)
@@ -116,14 +124,6 @@ final class DiffusionCommitController extends DiffusionController {
       $content[] = $property_list;
     }
 
-    $query = new PhabricatorAuditQuery();
-    $query->withCommitPHIDs(array($commit->getPHID()));
-    $audit_requests = $query->execute();
-
-    $this->auditAuthorityPHIDs =
-      PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
-
-    $content[] = $this->buildAuditTable($commit, $audit_requests);
     $content[] = $this->buildComments($commit);
 
     $hard_limit = 1000;
@@ -368,7 +368,8 @@ final class DiffusionCommitController extends DiffusionController {
   private function loadCommitProperties(
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $data,
-    array $parents) {
+    array $parents,
+    array $audit_requests) {
 
     assert_instances_of($parents, 'PhabricatorRepositoryCommit');
     $user = $this->getRequest()->getUser();
@@ -418,10 +419,30 @@ final class DiffusionCommitController extends DiffusionController {
     if ($commit->getAuditStatus()) {
       $status = PhabricatorAuditCommitStatusConstants::getStatusName(
         $commit->getAuditStatus());
-      $props['Status'] = phutil_tag(
-        'strong',
-        array(),
-        $status);
+      $tag = id(new PhabricatorTagView())
+        ->setType(PhabricatorTagView::TYPE_STATE)
+        ->setName($status);
+
+      switch ($commit->getAuditStatus()) {
+        case PhabricatorAuditCommitStatusConstants::NEEDS_AUDIT:
+          $tag->setBackgroundColor(PhabricatorTagView::COLOR_ORANGE);
+          break;
+        case PhabricatorAuditCommitStatusConstants::CONCERN_RAISED:
+          $tag->setBackgroundColor(PhabricatorTagView::COLOR_RED);
+          break;
+        case PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED:
+          $tag->setBackgroundColor(PhabricatorTagView::COLOR_BLUE);
+          break;
+        case PhabricatorAuditCommitStatusConstants::FULLY_AUDITED:
+          $tag->setBackgroundColor(PhabricatorTagView::COLOR_GREEN);
+          break;
+      }
+
+      $props['Status'] = $tag;
+    }
+
+    if ($audit_requests) {
+      $props['Auditors'] = $this->renderAuditStatusView($audit_requests);
     }
 
     $props['Committed'] = phabricator_datetime($commit->getEpoch(), $user);
@@ -508,33 +529,6 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     return $props;
-  }
-
-  private function buildAuditTable(
-    PhabricatorRepositoryCommit $commit,
-    array $audits) {
-    assert_instances_of($audits, 'PhabricatorRepositoryAuditRequest');
-    $user = $this->getRequest()->getUser();
-
-    $view = new PhabricatorAuditListView();
-    $view->setAudits($audits);
-    $view->setCommits(array($commit));
-    $view->setUser($user);
-    $view->setShowCommits(false);
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
-    $view->setAuthorityPHIDs($this->auditAuthorityPHIDs);
-    $this->highlightedAudits = $view->getHighlightedAudits();
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Audits'));
-    $panel->setCaption(pht('Audits you are responsible for are highlighted.'));
-    $panel->appendChild($view);
-    $panel->setNoBackground();
-
-    return $panel;
   }
 
   private function buildComments(PhabricatorRepositoryCommit $commit) {
@@ -860,7 +854,8 @@ final class DiffusionCommitController extends DiffusionController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($commit);
+      ->setObject($commit)
+      ->setObjectURI($request->getRequestURI());
 
     // TODO -- integrate permissions into whether or not this action is shown
     $uri = '/diffusion/'.$repository->getCallSign().'/commit/'.
@@ -884,21 +879,6 @@ final class DiffusionCommitController extends DiffusionController {
         ->setWorkflow(true);
       $actions->addAction($action);
     }
-
-    if ($user->getIsAdmin()) {
-      $action = id(new PhabricatorActionView())
-        ->setName(pht('MetaMTA Transcripts'))
-        ->setIcon('file')
-        ->setHref('/mail/?phid='.$commit->getPHID());
-      $actions->addAction($action);
-    }
-
-    $action = id(new PhabricatorActionView())
-      ->setName(pht('Herald Transcripts'))
-      ->setIcon('file')
-      ->setHref('/herald/transcript/?phid='.$commit->getPHID())
-      ->setWorkflow(true);
-    $actions->addAction($action);
 
     $action = id(new PhabricatorActionView())
       ->setName(pht('Download Raw Diff'))
@@ -944,6 +924,65 @@ final class DiffusionCommitController extends DiffusionController {
       ));
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
+  }
+
+  private function renderAuditStatusView(array $audit_requests) {
+    assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
+
+    $phids = mpull($audit_requests, 'getAuditorPHID');
+    $this->loadHandles($phids);
+
+    $authority_map = array_fill_keys($this->auditAuthorityPHIDs, true);
+
+    $view = new PHUIStatusListView();
+    foreach ($audit_requests as $request) {
+      $item = new PHUIStatusItemView();
+
+      switch ($request->getAuditStatus()) {
+        case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
+          $item->setIcon('open-blue', pht('Commented'));
+          break;
+        case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
+          $item->setIcon('warning-blue', pht('Audit Required'));
+          break;
+        case PhabricatorAuditStatusConstants::CONCERNED:
+          $item->setIcon('reject-red', pht('Concern Raised'));
+          break;
+        case PhabricatorAuditStatusConstants::ACCEPTED:
+          $item->setIcon('accept-green', pht('Accepted'));
+          break;
+        case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
+          $item->setIcon('warning-dark', pht('Audit Requested'));
+          break;
+        case PhabricatorAuditStatusConstants::RESIGNED:
+          $item->setIcon('open-dark', pht('Accepted'));
+          break;
+        case PhabricatorAuditStatusConstants::CLOSED:
+          $item->setIcon('accept-blue', pht('Accepted'));
+          break;
+        case PhabricatorAuditStatusConstants::CC:
+          $item->setIcon('info-dark', pht('Subscribed'));
+          break;
+      }
+
+      $note = array();
+      foreach ($request->getAuditReasons() as $reason) {
+        $note[] = phutil_tag('div', array(), $reason);
+      }
+      $item->setNote($note);
+
+      $auditor_phid = $request->getAuditorPHID();
+      $target = $this->getHandle($auditor_phid)->renderLink();
+      $item->setTarget($target);
+
+      if (isset($authority_map[$auditor_phid])) {
+        $item->setHighlighted(true);
+      }
+
+      $view->addItem($item);
+    }
+
+    return $view;
   }
 
 }

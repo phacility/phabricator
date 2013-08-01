@@ -181,7 +181,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           $file_map = mpull($files, 'getPHID');
           $file_map = array_fill_keys($file_map, array());
           $changes[ManiphestTransactionType::TYPE_ATTACH] = array(
-            PhabricatorPHIDConstants::PHID_TYPE_FILE => $file_map,
+            PhabricatorFilePHIDTypeFile::TYPECONST => $file_map,
           );
         }
 

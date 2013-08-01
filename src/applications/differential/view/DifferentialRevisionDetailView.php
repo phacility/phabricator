@@ -6,6 +6,15 @@ final class DifferentialRevisionDetailView extends AphrontView {
   private $actions;
   private $auxiliaryFields = array();
   private $diff;
+  private $uri;
+
+  public function setURI($uri) {
+    $this->uri = $uri;
+    return $this;
+  }
+  public function getURI() {
+    return $this->uri;
+  }
 
   public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
@@ -45,7 +54,8 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObject($revision);
+      ->setObject($revision)
+      ->setObjectURI($this->getURI());
     foreach ($this->getActions() as $action) {
       $obj = id(new PhabricatorActionView())
         ->setIcon(idx($action, 'icon', 'edit'))

@@ -3,7 +3,7 @@
 final class PhortuneProductTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new PhortuneProductTransaction();
   }
 

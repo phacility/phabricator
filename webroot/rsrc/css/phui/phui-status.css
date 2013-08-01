@@ -1,0 +1,31 @@
+/**
+ * @provides phui-status-list-view-css
+ */
+
+.phui-status-list-view {
+  width: 100%;
+}
+
+.phui-status-list-view .phui-icon-view {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: 3px 4px;
+}
+
+.phui-status-item-target {
+  padding: 0 12px 0 4px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.phui-status-item-note {
+  width: 100%;
+  color: #666666;
+  line-height: 14px;
+  padding: 3px 0;
+}
+
+.phui-status-item-highlighted {
+  background-color: {$lightyellow};
+}

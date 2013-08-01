@@ -5,6 +5,10 @@ final class DoorkeeperRemarkupRuleAsana
 
   const KEY_TAGS = 'doorkeeper.tags';
 
+  public function getPriority() {
+    return 350.0;
+  }
+
   public function apply($text) {
     return preg_replace_callback(
       '@https://app\\.asana\\.com/0/(\\d+)/(\\d+)@',

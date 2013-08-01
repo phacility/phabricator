@@ -33,7 +33,10 @@ final class ConduitAPI_differential_createrevision_Method
   protected function execute(ConduitAPIRequest $request) {
     $fields = $request->getValue('fields');
 
-    $diff = id(new DifferentialDiff())->load($request->getValue('diffid'));
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($request->getValue('diffid')))
+      ->executeOne();
     if (!$diff) {
       throw new ConduitException('ERR_BAD_DIFF');
     }

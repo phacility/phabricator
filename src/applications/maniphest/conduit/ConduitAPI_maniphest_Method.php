@@ -105,7 +105,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $owner_phid = $request->getValue('ownerPHID');
     if ($owner_phid !== null) {
       $this->validatePHIDList(array($owner_phid),
-                              PhabricatorPHIDConstants::PHID_TYPE_USER,
+                              PhabricatorPeoplePHIDTypeUser::TYPECONST,
                               'ownerPHID');
       $changes[ManiphestTransactionType::TYPE_OWNER] = $owner_phid;
     }
@@ -113,7 +113,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $ccs = $request->getValue('ccPHIDs');
     if ($ccs !== null) {
       $this->validatePHIDList($ccs,
-                              PhabricatorPHIDConstants::PHID_TYPE_USER,
+                              PhabricatorPeoplePHIDTypeUser::TYPECONST,
                               'ccPHIDS');
       $changes[ManiphestTransactionType::TYPE_CCS] = $ccs;
     }
@@ -121,7 +121,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $project_phids = $request->getValue('projectPHIDs');
     if ($project_phids !== null) {
       $this->validatePHIDList($project_phids,
-                              PhabricatorPHIDConstants::PHID_TYPE_PROJ,
+                              PhabricatorProjectPHIDTypeProject::TYPECONST,
                               'projectPHIDS');
       $changes[ManiphestTransactionType::TYPE_PROJECTS] = $project_phids;
     }
@@ -129,11 +129,11 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $file_phids = $request->getValue('filePHIDs');
     if ($file_phids !== null) {
       $this->validatePHIDList($file_phids,
-                              PhabricatorPHIDConstants::PHID_TYPE_FILE,
+                              PhabricatorFilePHIDTypeFile::TYPECONST,
                               'filePHIDS');
       $file_map = array_fill_keys($file_phids, true);
       $attached = $task->getAttached();
-      $attached[PhabricatorPHIDConstants::PHID_TYPE_FILE] = $file_map;
+      $attached[PhabricatorFilePHIDTypeFile::TYPECONST] = $file_map;
 
       $changes[ManiphestTransactionType::TYPE_ATTACH] = $attached;
     }

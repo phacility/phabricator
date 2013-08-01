@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group pholio
+ */
 final class PholioTransactionView
   extends PhabricatorApplicationTransactionView {
 

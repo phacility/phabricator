@@ -5,10 +5,6 @@
  */
 final class PhabricatorApplicationConpherence extends PhabricatorApplication {
 
-  public function isBeta() {
-    return true;
-  }
-
   public function getBaseURI() {
     return '/conpherence/';
   }

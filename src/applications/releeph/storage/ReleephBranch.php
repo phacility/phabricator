@@ -1,6 +1,7 @@
 <?php
 
-final class ReleephBranch extends ReleephDAO {
+final class ReleephBranch extends ReleephDAO
+  implements PhabricatorPolicyInterface {
 
   protected $phid;
   protected $releephProjectID;
@@ -21,6 +22,8 @@ final class ReleephBranch extends ReleephDAO {
 
   protected $details = array();
 
+  private $project = self::ATTACHABLE;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -31,8 +34,7 @@ final class ReleephBranch extends ReleephDAO {
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      ReleephPHIDConstants::PHID_TYPE_REBR);
+    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeBranch::TYPECONST);
   }
 
   public function getDetail($key, $default = null) {
@@ -149,6 +151,31 @@ final class ReleephBranch extends ReleephDAO {
 
   public function isActive() {
     return $this->getIsActive();
+  }
+
+  public function attachProject(ReleephProject $project) {
+    $this->project = $project;
+    return $this;
+  }
+
+  public function getProject() {
+    return $this->assertAttached($this->project);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return $this->getProject()->getCapabilities();
+  }
+
+  public function getPolicy($capability) {
+    return $this->getProject()->getPolicy($capability);
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getProject()->hasAutomaticCapability($capability, $viewer);
   }
 
 }

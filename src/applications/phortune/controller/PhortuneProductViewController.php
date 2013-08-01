@@ -34,6 +34,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
+      ->setObjectURI($request->getRequestURI())
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Product'))
@@ -76,6 +77,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($product->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 

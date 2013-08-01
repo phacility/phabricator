@@ -1,6 +1,6 @@
 <?php
 
-final class ReleephProjectCreateController extends ReleephController {
+final class ReleephProjectCreateController extends ReleephProjectController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -8,15 +8,7 @@ final class ReleephProjectCreateController extends ReleephController {
     $trunk_branch = trim($request->getStr('trunkBranch'));
     $arc_pr_id = $request->getInt('arcPrID');
 
-
-    // Only allow arc projects with repositories.  Sort and re-key by ID.
-    $arc_projects = id(new PhabricatorRepositoryArcanistProject())->loadAll();
-    $arc_projects = mpull(
-      msort(
-        mfilter($arc_projects, 'getRepositoryID'),
-        'getName'),
-      null,
-      'getID');
+    $arc_projects = $this->loadArcProjects();
 
     $e_name = true;
     $e_trunk_branch = true;
@@ -25,20 +17,14 @@ final class ReleephProjectCreateController extends ReleephController {
     if ($request->isFormPost()) {
       if (!$name) {
         $e_name = pht('Required');
-        $errors[] =
-          pht('Your Releeph project should have a simple descriptive name.');
+        $errors[] = pht(
+          'Your Releeph project should have a simple descriptive name.');
       }
 
       if (!$trunk_branch) {
         $e_trunk_branch = pht('Required');
-        $errors[] =
-          pht('You must specify which branch you will be picking from.');
-      }
-
-      $all_names = mpull(id(new ReleephProject())->loadAll(), 'getName');
-
-      if (in_array($name, $all_names)) {
-        $errors[] = pht('Releeph project name %s is already taken', $name);
+        $errors[] = pht(
+          'You must specify which branch you will be picking from.');
       }
 
       $arc_project = $arc_projects[$arc_pr_id];
@@ -52,10 +38,18 @@ final class ReleephProjectCreateController extends ReleephController {
           ->setRepositoryPHID($pr_repository->getPHID())
           ->setArcanistProjectID($arc_project->getID())
           ->setCreatedByUserPHID($request->getUser()->getPHID())
-          ->setIsActive(1)
-          ->save();
+          ->setIsActive(1);
 
-        return id(new AphrontRedirectResponse())->setURI('/releeph/');
+        try {
+          $releeph_project->save();
+
+          return id(new AphrontRedirectResponse())
+            ->setURI($releeph_project->getURI());
+        } catch (AphrontQueryDuplicateKeyException $ex) {
+          $e_name = pht('Not Unique');
+          $errors[] = pht(
+            'Another project already uses this name.');
+        }
       }
     }
 
@@ -63,29 +57,9 @@ final class ReleephProjectCreateController extends ReleephController {
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setErrors($errors);
-      $error_view->setTitle(pht('Form Errors'));
     }
 
-    // Make our own optgroup select control
-    $arc_project_choices = array();
-    $pr_repositories = mpull(
-      msort(
-        array_filter(
-          // Some arc-projects don't have repositories
-          mpull($arc_projects, 'loadRepository')),
-        'getName'),
-      null,
-      'getID');
-
-    foreach ($pr_repositories as $pr_repo_id => $pr_repository) {
-      $options = array();
-      foreach ($arc_projects as $arc_project) {
-        if ($arc_project->getRepositoryID() == $pr_repo_id) {
-          $options[$arc_project->getID()] = $arc_project->getName();
-        }
-      }
-      $arc_project_choices[$pr_repository->getName()] = $options;
-    }
+    $arc_project_options = $this->getArcProjectSelectOptions($arc_projects);
 
     $project_name_input = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
@@ -108,7 +82,7 @@ final class ReleephProjectCreateController extends ReleephController {
             'target' => '_blank',
           ),
           'here')))
-      ->setOptions($arc_project_choices);
+      ->setOptions($arc_project_options);
 
     $branch_name_preview = id(new ReleephBranchPreviewView())
       ->setLabel(pht('Example Branch'))
@@ -119,6 +93,7 @@ final class ReleephProjectCreateController extends ReleephController {
 
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())
+      ->setFlexible(true)
       ->appendChild($project_name_input)
       ->appendChild($arc_project_input)
       ->appendChild(
@@ -135,15 +110,62 @@ final class ReleephProjectCreateController extends ReleephController {
           ->addCancelButton('/releeph/project/')
           ->setValue(pht('Create')));
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Create Releeph Project'))
-      ->appendChild($form)
-      ->setWidth(AphrontPanelView::WIDTH_FORM);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('New Project')));
 
-    return $this->buildStandardPageResponse(
-      array($error_view, $panel),
+    return $this->buildApplicationPage(
       array(
-        'title' => pht('Create New Releeph Project')
+        $crumbs,
+        $error_view,
+        $form,
+      ),
+      array(
+        'title' => pht('Create New Project'),
+        'dust' => true,
+        'device' => true,
       ));
   }
+
+  private function loadArcProjects() {
+    $viewer = $this->getRequest()->getUser();
+
+    $projects = id(new PhabricatorRepositoryArcanistProjectQuery())
+      ->setViewer($viewer)
+      ->needRepositories(true)
+      ->execute();
+
+    $projects = mfilter($projects, 'getRepository');
+    $projects = msort($projects, 'getName');
+
+    return $projects;
+  }
+
+  private function getArcProjectSelectOptions(array $arc_projects) {
+    assert_instances_of($arc_projects, 'PhabricatorRepositoryArcanistProject');
+
+    $repos = mpull($arc_projects, 'getRepository');
+    $repos = mpull($repos, null, 'getID');
+
+    $groups = array();
+    foreach ($arc_projects as $arc_project) {
+      $id = $arc_project->getID();
+      $repo_id = $arc_project->getRepository()->getID();
+      $groups[$repo_id][$id] = $arc_project->getName();
+    }
+
+    $choices = array();
+    foreach ($groups as $repo_id => $group) {
+      $repo_name = $repos[$repo_id]->getName();
+      $callsign = $repos[$repo_id]->getCallsign();
+      $name = "r{$callsign} ({$repo_name})";
+      $choices[$name] = $group;
+    }
+
+    ksort($choices);
+
+    return $choices;
+  }
+
 }

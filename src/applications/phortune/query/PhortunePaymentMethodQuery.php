@@ -47,10 +47,6 @@ final class PhortunePaymentMethodQuery
   }
 
   protected function willFilterPage(array $methods) {
-    if (!$methods) {
-      return array();
-    }
-
     $accounts = id(new PhortuneAccountQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs(mpull($methods, 'getAccountPHID'))

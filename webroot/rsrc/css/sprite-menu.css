@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-menu {
     background-image: url(/rsrc/image/sprite-menu-X2.png);
-    background-size: 140px 121px;
+    background-size: 150px 147px;
   }
 }
 
@@ -31,7 +31,7 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .phabricator-crumb-divider {
-  background-position: 0px -89px;
+  background-position: 0px -115px;
 }
 
 .menu-icon-search {
@@ -42,16 +42,24 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -25px -38px;
 }
 
+.menu-icon-new {
+  background-position: -50px -38px;
+}
+
+.menu-icon-new-blue {
+  background-position: 0px -63px;
+}
+
 .menu-icon-app {
-  background-position: -10px -89px;
+  background-position: -10px -115px;
 }
 
 .menu-icon-app-blue {
-  background-position: -35px -89px;
+  background-position: -35px -115px;
 }
 
 .phabricator-main-menu-logo-image {
-  background-position: 0px -63px;
+  background-position: 0px -88px;
 }
 
 .alert-notifications .phabricator-main-menu-message-icon {

@@ -213,27 +213,29 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
   }
 
   private function validateHandle(PhabricatorObjectHandle $handle) {
+    $type = $handle->getType();
+
     switch ($this->filter) {
       case 'active':
       case 'user':
       case 'author':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_USER) {
+        if ($type !== PhabricatorPeoplePHIDTypeUser::TYPECONST) {
           throw new Exception("PHID must be a user PHID!");
         }
         break;
       case 'package':
       case 'packagecommits':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_OPKG) {
+        if ($type !== PhabricatorOwnersPHIDTypePackage::TYPECONST) {
           throw new Exception("PHID must be a package PHID!");
         }
         break;
       case 'project':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+        if ($type !== PhabricatorProjectPHIDTypeProject::TYPECONST) {
           throw new Exception("PHID must be a project PHID!");
         }
         break;
       case 'repository':
-        if ($handle->getType() !== PhabricatorPHIDConstants::PHID_TYPE_REPO) {
+        if ($type !== PhabricatorRepositoryPHIDTypeRepository::TYPECONST) {
           throw new Exception("PHID must be a repository PHID!");
         }
         break;

@@ -4,78 +4,80 @@
  * @group conduit
  */
 final class PhabricatorConduitListController
-  extends PhabricatorConduitController {
+  extends PhabricatorConduitController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
-    $method_groups = $this->getMethodFilters();
-    $rows = array();
-    foreach ($method_groups as $group => $methods) {
-      foreach ($methods as $info) {
-        switch ($info['status']) {
-          case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
-            $status = 'Deprecated';
-            break;
-          case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
-            $status = 'Unstable';
-            break;
-          default:
-            $status = null;
-            break;
-        }
+    $request = $this->getRequest();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorConduitSearchEngine())
+      ->setNavigation($this->buildSideNavView());
+    return $this->delegateToController($controller);
+  }
 
-        $rows[] = array(
-          $group,
-          phutil_tag(
-            'a',
-            array(
-              'href' => '/conduit/method/'.$info['full_name'],
-            ),
-            $info['full_name']),
-          $info['description'],
-          $status,
-        );
-        $group = null;
+  public function renderResultsList(
+    array $methods,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($methods, 'ConduitAPIMethod');
+
+    $viewer = $this->getRequest()->getUser();
+
+    $out = array();
+
+    $last = null;
+    $list = null;
+    foreach ($methods as $method) {
+      $app = $method->getApplicationName();
+      if ($app !== $last) {
+        $last = $app;
+        if ($list) {
+          $out[] = $list;
+        }
+        $list = id(new PhabricatorObjectItemListView());
+
+        $app_object = $method->getApplication();
+        if ($app_object) {
+          $app_name = $app_object->getName();
+        } else {
+          $app_name = $app;
+        }
       }
+
+      $method_name = $method->getAPIMethodName();
+
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($method_name)
+        ->setHref($this->getApplicationURI('method/'.$method_name.'/'))
+        ->addAttribute($method->getMethodDescription());
+
+      switch ($method->getMethodStatus()) {
+        case ConduitAPIMethod::METHOD_STATUS_STABLE:
+          break;
+        case ConduitAPIMethod::METHOD_STATUS_UNSTABLE:
+          $item->addIcon('warning-grey', pht('Unstable'));
+          $item->setBarColor('yellow');
+          break;
+        case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
+          $item->addIcon('warning', pht('Deprecated'));
+          $item->setBarColor('red');
+          break;
+      }
+
+      $list->addItem($item);
     }
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(array(
-      'Group',
-      'Name',
-      'Description',
-      'Status',
-    ));
-    $table->setColumnClasses(array(
-      'pri',
-      'pri',
-      'wide',
-      null,
-    ));
+    if ($list) {
+      $out[] = $list;
+    }
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Conduit Methods');
-    $panel->appendChild($table);
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-
-    $utils = new AphrontPanelView();
-    $utils->setHeader('Utilities');
-    $utils->appendChild(hsprintf(
-      '<ul>'.
-      '<li><a href="/conduit/log/">Log</a> - Conduit Method Calls</li>'.
-      '<li><a href="/conduit/token/">Token</a> - Certificate Install</li>'.
-      '</ul>'));
-    $utils->setWidth(AphrontPanelView::WIDTH_FULL);
-
-    $this->setShowSideNav(false);
-
-    return $this->buildStandardPageResponse(
-      array(
-        $panel,
-        $utils,
-      ),
-      array(
-        'title' => 'Conduit Console',
-      ));
+    return $out;
   }
 
 }

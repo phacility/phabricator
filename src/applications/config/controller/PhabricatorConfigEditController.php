@@ -64,6 +64,7 @@ final class PhabricatorConfigEditController
         ->setConfigKey($this->key)
         ->setNamespace('default')
         ->setIsDeleted(true);
+      $config_entry->setPHID($config_entry->generatePHID());
     }
 
     $e_value = null;
@@ -116,7 +117,7 @@ final class PhabricatorConfigEditController
     } else if ($option->getLocked()) {
       $msg = pht(
         "This configuration is locked and can not be edited from the web ".
-        "interface.");
+        "interface. Use `./bin/config` in `phabricator/` to edit it.");
 
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Locked'))
@@ -150,7 +151,20 @@ final class PhabricatorConfigEditController
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Description'))
-          ->setValue($description))
+          ->setValue($description));
+
+    if ($group) {
+      $extra = $group->renderContextualDescription(
+        $option,
+        $request);
+      if ($extra !== null) {
+        $form->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setValue($extra));
+      }
+    }
+
+    $form
       ->appendChild($control);
 
     $submit_control = id(new AphrontFormSubmitControl())
@@ -206,6 +220,7 @@ final class PhabricatorConfigEditController
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($config_entry->getPHID())
       ->setTransactions($xactions);
 
     return $this->buildApplicationPage(

@@ -81,7 +81,7 @@ final class PhamePost extends PhameDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_POST);
+      PhabricatorPhamePHIDTypePost::TYPECONST);
   }
 
   public static function getVisibilityOptionsForSelect() {

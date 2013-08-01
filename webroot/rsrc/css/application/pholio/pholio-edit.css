@@ -1,0 +1,131 @@
+/**
+ * @provides pholio-edit-css
+ */
+
+.pholio-uploaded-image {
+  overflow: hidden;
+
+  /* When we activate the image control to show that we're going to replace
+     it on drag-and-drop, this gives us a border which looks good without
+     crowding anything or leaving elements misaligned. */
+  border: 1px solid transparent;
+  margin: -4px -4px 12px;
+  padding: 4px;
+}
+
+.pholio-thumb-box {
+  margin: 2px 0;
+  float: left;
+  background: #f7f7f7;
+  border: 1px solid #D5D9DF;
+  border-radius: 3px;
+  width: 296px;
+  overflow: hidden;
+}
+
+.device .pholio-thumb-box {
+  float: none;
+  margin: 0 auto;
+}
+
+.pholio-thumb-frame {
+  background-color: #ffffff;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 280px 210px;
+  width: 280px;
+  height: 210px;
+  padding: 8px;
+}
+
+.pholio-thumb-title {
+  padding: 4px 8px;
+  font-weight: bold;
+  color: #444444;
+  overflow: hidden;
+  border-bottom: 1px solid #d7d7d7;
+}
+
+.pholio-thumb-name {
+  line-height: 24px;
+  margin-right: 48px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pholio-thumb-title .button {
+  float: right;
+}
+
+.pholio-image-details {
+  margin-left: 312px;
+}
+
+.device .pholio-image-details {
+  margin-left: 0;
+  clear: both;
+}
+
+.pholio-uploaded-image .pholio-image-details .aphront-form-control {
+  padding: 0;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+}
+
+.pholio-uploaded-image .pholio-image-details .aphront-form-label,
+.pholio-uploaded-image .pholio-image-details .aphront-form-input {
+  display: block;
+  width: auto;
+  text-align: left;
+  padding: 0;
+  margin: 0;
+}
+
+.pholio-uploaded-image .pholio-image-details .aphront-form-label {
+  margin: 0 0 4px 0;
+}
+
+.pholio-edit-drop {
+  border-width: 1px;
+  border-style: dashed;
+  border-color: #999999;
+  text-align: center;
+  padding: 16px;
+  color: #666666;
+}
+
+.pholio-uploaded-image.pholio-drop-active,
+.pholio-edit-drop.pholio-drop-active {
+  border-style: solid;
+  border-color: {$green};
+  background-color: {$lightgreen};
+}
+
+.pholio-replacing {
+  opacity: 0.5;
+  border-color: {$green};
+  background-color: {$lightgreen};
+}
+
+.pholio-drop-uploading {
+  padding: 24px;
+  text-align: center;
+  border: 1px solid #bbbbbb;
+  background: #fcfcfc;
+  color: #666666;
+  margin-bottom: 12px;
+}
+
+.pholio-drop-undo {
+  padding: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+  color: #333333;
+  border: 1px solid {$yellow};
+  background-color: {$lightyellow};
+}
+
+.pholio-drop-undo a {
+  font-weight: bold;
+}

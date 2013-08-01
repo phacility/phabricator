@@ -126,6 +126,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.timeline' => array(
         'type'  => 'db',
         'name'  => 'timeline',
+        'dead'  => true,
       ),
       'db.user' => array(
         'type'  => 'db',
@@ -198,6 +199,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.doorkeeper' => array(
         'type' => 'db',
         'name' => 'doorkeeper',
+      ),
+      'db.legalpad' => array(
+        'type' => 'db',
+        'name' => 'legalpad',
       ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
@@ -1401,6 +1406,98 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       '20130622.doorkeeper.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20130622.doorkeeper.sql'),
+      ),
+      '20130628.legalpadv0.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130628.legalpadv0.sql'),
+      ),
+      '20130701.conduitlog.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130701.conduitlog.sql'),
+      ),
+      'legalpad-mailkey.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('legalpad-mailkey.sql'),
+      ),
+      'legalpad-mailkey-populate.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('legalpad-mailkey-populate.php'),
+      ),
+      '20130703.legalpaddocdenorm.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.sql'),
+      ),
+      '20130703.legalpaddocdenorm.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('20130703.legalpaddocdenorm.php'),
+      ),
+      '20130709.legalpadsignature.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('20130709.legalpadsignature.sql'),
+      ),
+      '20130709.droptimeline.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130709.droptimeline.sql'),
+      ),
+      '20130711.trimrealnames.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130711.trimrealnames.php'),
+      ),
+      '20130714.votexactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130714.votexactions.sql'),
+      ),
+      '20130715.votecomments.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130715.votecomments.php'),
+      ),
+      '20130715.voteedges.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130715.voteedges.sql'),
+      ),
+      '20130711.pholioimageobsolete.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete.sql'),
+      ),
+      '20130711.pholioimageobsolete.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete.php'),
+      ),
+      '20130711.pholioimageobsolete2.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130711.pholioimageobsolete2.sql'),
+      ),
+      '20130716.archivememberlessprojects.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130716.archivememberlessprojects.php'),
+      ),
+      '20130722.pholioreplace.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130722.pholioreplace.sql'),
+      ),
+      '20130723.taskstarttime.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130723.taskstarttime.sql'),
+      ),
+      '20130727.ponderquestionstatus.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130727.ponderquestionstatus.sql'),
+      ),
+      '20130726.ponderxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130726.ponderxactions.sql'),
+      ),
+      '20130728.ponderunique.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130728.ponderunique.php'),
+      ),
+      '20130728.ponderuniquekey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130728.ponderuniquekey.sql'),
+      ),
+      '20130728.ponderxcomment.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130728.ponderxcomment.php'),
       ),
     );
   }

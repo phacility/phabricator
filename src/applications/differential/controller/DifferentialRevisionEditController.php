@@ -9,28 +9,36 @@ final class DifferentialRevisionEditController extends DifferentialController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     if (!$this->id) {
       $this->id = $request->getInt('revisionID');
     }
 
     if ($this->id) {
-      $revision = id(new DifferentialRevision())->load($this->id);
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($this->id))
+        ->needRelationships(true)
+        ->needReviewerStatus(true)
+        ->executeOne();
       if (!$revision) {
         return new Aphront404Response();
       }
     } else {
       $revision = new DifferentialRevision();
+      $revision->attachRelationships(array());
     }
 
-    $revision->loadRelationships();
     $aux_fields = $this->loadAuxiliaryFields($revision);
 
     $diff_id = $request->getInt('diffID');
     if ($diff_id) {
-      $diff = id(new DifferentialDiff())->load($diff_id);
+      $diff = id(new DifferentialDiffQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($diff_id))
+        ->executeOne();
       if (!$diff) {
         return new Aphront404Response();
       }
