@@ -15,6 +15,13 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
     return ($object instanceof PhabricatorRepositoryCommit);
   }
 
+  public function isStoryAboutObjectCreation($object) {
+    // TODO: Although creation stories exist, they currently don't have a
+    // primary object PHID set, so they'll never make it here because they
+    // won't pass `canPublishStory()`.
+    return false;
+  }
+
   public function willPublishStory($commit) {
     $requests = id(new PhabricatorAuditQuery())
       ->withCommitPHIDs(array($commit->getPHID()))

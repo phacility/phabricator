@@ -476,20 +476,24 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
     $sub_editor->save();
 
+    // Don't publish the "create" story, since pushing the object into Asana
+    // naturally generates a notification which effectively serves the same
+    // purpose as the "create" story.
+    if (!$publisher->isStoryAboutObjectCreation($object)) {
+      // Post the feed story itself to the main Asana task. We do this last
+      // because everything else is idempotent, so this is the only effect we
+      // can't safely run more than once.
 
-    // Post the feed story itself to the main Asana task. We do this last
-    // because everything else is idempotent, so this is the only effect we
-    // can't safely run more than once.
+      $text = $publisher->getStoryText($object);
 
-    $text = $publisher->getStoryText($object);
-
-    $this->makeAsanaAPICall(
-      $oauth_token,
-      'tasks/'.$parent_ref->getObjectID().'/stories',
-      'POST',
-      array(
-        'text' => $text,
-      ));
+      $this->makeAsanaAPICall(
+        $oauth_token,
+        'tasks/'.$parent_ref->getObjectID().'/stories',
+        'POST',
+        array(
+          'text' => $text,
+        ));
+    }
   }
 
   private function lookupAsanaUserIDs($all_phids) {
