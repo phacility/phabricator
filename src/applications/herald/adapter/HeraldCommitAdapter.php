@@ -63,6 +63,29 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     );
   }
 
+  public function getConditionsForField($field) {
+    switch ($field) {
+      case self::FIELD_DIFFERENTIAL_REVIEWERS:
+      case self::FIELD_DIFFERENTIAL_CCS:
+        return array(
+          self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_DIFFERENTIAL_REVISION:
+        return array(
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
+        );
+      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
+        return array(
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+    }
+    return parent::getConditionsForField($field);
+  }
+
   public static function newLegacyAdapter(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
@@ -182,17 +205,17 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   public function getHeraldField($field) {
     $data = $this->commitData;
     switch ($field) {
-      case HeraldFieldConfig::FIELD_BODY:
+      case self::FIELD_BODY:
         return $data->getCommitMessage();
-      case HeraldFieldConfig::FIELD_AUTHOR:
+      case self::FIELD_AUTHOR:
         return $data->getCommitDetail('authorPHID');
-      case HeraldFieldConfig::FIELD_REVIEWER:
+      case self::FIELD_REVIEWER:
         return $data->getCommitDetail('reviewerPHID');
-      case HeraldFieldConfig::FIELD_DIFF_FILE:
+      case self::FIELD_DIFF_FILE:
         return $this->loadAffectedPaths();
-      case HeraldFieldConfig::FIELD_REPOSITORY:
+      case self::FIELD_REPOSITORY:
         return $this->repository->getPHID();
-      case HeraldFieldConfig::FIELD_DIFF_CONTENT:
+      case self::FIELD_DIFF_CONTENT:
         try {
           $diff = $this->loadCommitDiff();
         } catch (Exception $ex) {
@@ -211,28 +234,28 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           $dict[$change->getFilename()] = implode("\n", $lines);
         }
         return $dict;
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
+      case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
+      case self::FIELD_AFFECTED_PACKAGE_OWNER:
         $packages = $this->loadAffectedPackages();
         $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
         return mpull($owners, 'getUserPHID');
-      case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
+      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
         return $this->loadAuditNeededPackage();
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVISION:
+      case self::FIELD_DIFFERENTIAL_REVISION:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
           return null;
         }
         return $revision->getID();
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVIEWERS:
+      case self::FIELD_DIFFERENTIAL_REVIEWERS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
           return array();
         }
         return $revision->getReviewers();
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_CCS:
+      case self::FIELD_DIFFERENTIAL_CCS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
           return array();

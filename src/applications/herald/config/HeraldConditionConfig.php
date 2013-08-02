@@ -2,6 +2,7 @@
 
 final class HeraldConditionConfig {
 
+  // TODO: Remove; still used by Engine/etc.
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
   const CONDITION_IS              = 'is';
@@ -20,6 +21,7 @@ final class HeraldConditionConfig {
   const CONDITION_NOT_EXISTS      = '!exists';
   const CONDITION_REGEXP_PAIR     = 'regexp-pair';
 
+  // TODO: Remove; still used by Transcripts.
   public static function getConditionMap() {
     $map = array(
       self::CONDITION_CONTAINS        => pht('contains'),
@@ -42,84 +44,6 @@ final class HeraldConditionConfig {
     );
 
     return $map;
-  }
-
-  public static function getConditionMapForField($field) {
-    $map = self::getConditionMap();
-    switch ($field) {
-      case HeraldFieldConfig::FIELD_TITLE:
-      case HeraldFieldConfig::FIELD_BODY:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_CONTAINS,
-            self::CONDITION_NOT_CONTAINS,
-            self::CONDITION_IS,
-            self::CONDITION_IS_NOT,
-            self::CONDITION_REGEXP,
-          ));
-      case HeraldFieldConfig::FIELD_AUTHOR:
-      case HeraldFieldConfig::FIELD_REPOSITORY:
-      case HeraldFieldConfig::FIELD_REVIEWER:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_IS_ANY,
-            self::CONDITION_IS_NOT_ANY,
-          ));
-      case HeraldFieldConfig::FIELD_TAGS:
-      case HeraldFieldConfig::FIELD_REVIEWERS:
-      case HeraldFieldConfig::FIELD_CC:
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVIEWERS:
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_CCS:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_INCLUDE_ALL,
-            self::CONDITION_INCLUDE_ANY,
-            self::CONDITION_INCLUDE_NONE,
-          ));
-      case HeraldFieldConfig::FIELD_DIFF_FILE:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_CONTAINS,
-            self::CONDITION_REGEXP,
-          ));
-      case HeraldFieldConfig::FIELD_DIFF_CONTENT:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_CONTAINS,
-            self::CONDITION_REGEXP,
-            self::CONDITION_REGEXP_PAIR,
-          ));
-      case HeraldFieldConfig::FIELD_RULE:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_RULE,
-            self::CONDITION_NOT_RULE,
-          ));
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
-      case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_INCLUDE_ANY,
-            self::CONDITION_INCLUDE_NONE,
-          ));
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVISION:
-        return array_select_keys(
-          $map,
-          array(
-            self::CONDITION_EXISTS,
-            self::CONDITION_NOT_EXISTS,
-          ));
-      default:
-        throw new Exception("Unknown field type '{$field}'.");
-    }
   }
 
 }

@@ -198,42 +198,42 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   public function getHeraldField($field) {
     switch ($field) {
-      case HeraldFieldConfig::FIELD_TITLE:
+      case self::FIELD_TITLE:
         return $this->revision->getTitle();
         break;
-      case HeraldFieldConfig::FIELD_BODY:
+      case self::FIELD_BODY:
         return $this->revision->getSummary()."\n".
                $this->revision->getTestPlan();
         break;
-      case HeraldFieldConfig::FIELD_AUTHOR:
+      case self::FIELD_AUTHOR:
         return $this->revision->getAuthorPHID();
         break;
-      case HeraldFieldConfig::FIELD_DIFF_FILE:
+      case self::FIELD_DIFF_FILE:
         return $this->loadAffectedPaths();
-      case HeraldFieldConfig::FIELD_CC:
+      case self::FIELD_CC:
         if (isset($this->explicitCCs)) {
           return array_keys($this->explicitCCs);
         } else {
           return $this->revision->getCCPHIDs();
         }
-      case HeraldFieldConfig::FIELD_REVIEWERS:
+      case self::FIELD_REVIEWERS:
         if (isset($this->explicitReviewers)) {
           return array_keys($this->explicitReviewers);
         } else {
           return $this->revision->getReviewers();
         }
-      case HeraldFieldConfig::FIELD_REPOSITORY:
+      case self::FIELD_REPOSITORY:
         $repository = $this->loadRepository();
         if (!$repository) {
           return null;
         }
         return $repository->getPHID();
-      case HeraldFieldConfig::FIELD_DIFF_CONTENT:
+      case self::FIELD_DIFF_CONTENT:
         return $this->loadContentDictionary();
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
+      case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
+      case self::FIELD_AFFECTED_PACKAGE_OWNER:
         $packages = $this->loadAffectedPackages();
         return PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
           mpull($packages, 'getID'));

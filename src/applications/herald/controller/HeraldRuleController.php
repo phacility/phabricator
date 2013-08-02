@@ -387,18 +387,22 @@ final class HeraldRuleController extends HeraldController {
     $all_rules = mpull($all_rules, 'getName', 'getID');
     asort($all_rules);
 
+    $all_fields = $adapter->getFieldNameMap();
+    $all_conditions = $adapter->getConditionNameMap();
+
     $fields = $adapter->getFields();
-    $field_map = array_select_keys($adapter->getFieldNameMap(), $fields);
+    $field_map = array_select_keys($all_fields, $fields);
 
     $config_info = array();
     $config_info['fields'] = $field_map;
-    $config_info['conditions'] = HeraldConditionConfig::getConditionMap();
+    $config_info['conditions'] = $all_conditions;
     foreach ($config_info['fields'] as $field => $name) {
-      $config_info['conditionMap'][$field] = array_keys(
-        HeraldConditionConfig::getConditionMapForField($field));
+      $field_conditions = $adapter->getConditionsForField($field);
+      $config_info['conditionMap'][$field] = $field_conditions;
     }
+
     foreach ($config_info['fields'] as $field => $fname) {
-      foreach ($config_info['conditions'] as $condition => $cname) {
+      foreach ($config_info['conditionMap'][$field] as $condition) {
         $config_info['values'][$field][$condition] =
           HeraldValueTypeConfig::getValueTypeForFieldAndCondition(
             $field,
