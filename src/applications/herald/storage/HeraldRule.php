@@ -19,6 +19,16 @@ final class HeraldRule extends HeraldDAO {
   private $conditions;
   private $actions;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(HeraldPHIDTypeRule::TYPECONST);
+  }
+
   public static function loadAllByContentTypeWithFullData(
     $content_type,
     $object_phid) {

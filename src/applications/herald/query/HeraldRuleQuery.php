@@ -2,9 +2,33 @@
 
 final class HeraldRuleQuery extends PhabricatorOffsetPagedQuery {
 
+  private $ids;
+  private $phids;
   private $authorPHIDs;
   private $ruleTypes;
   private $contentTypes;
+
+  // TODO: Remove when this becomes policy-aware.
+  private $viewer;
+
+  public function setViewer($viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
 
   public function withAuthorPHIDs(array $author_phids) {
     $this->authorPHIDs = $author_phids;
@@ -42,6 +66,20 @@ final class HeraldRuleQuery extends PhabricatorOffsetPagedQuery {
 
   private function buildWhereClause($conn_r) {
     $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'rule.id IN (%Ld)',
+        $this->ids);
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'rule.phid IN (%Ls)',
+        $this->phids);
+    }
 
     if ($this->authorPHIDs) {
       $where[] = qsprintf(

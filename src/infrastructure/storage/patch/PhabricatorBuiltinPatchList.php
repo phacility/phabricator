@@ -1519,6 +1519,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130805.pastemailkeypop.php'),
       ),
+      '20130802.heraldphid.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130802.heraldphid.sql'),
+      ),
+      '20130802.heraldphids.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130802.heraldphids.php'),
+      ),
+      '20130802.heraldphidukey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130802.heraldphidukey.sql'),
+      ),
     );
   }
 }
