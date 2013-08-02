@@ -69,7 +69,7 @@ final class HeraldTestConsoleController extends HeraldController {
           }
 
           $rules = HeraldRule::loadAllByContentTypeWithFullData(
-            $adapter->getHeraldTypeName(),
+            $adapter->getAdapterContentType(),
             $object->getPHID());
 
           $engine = new HeraldEngine();

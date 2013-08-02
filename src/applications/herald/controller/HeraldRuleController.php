@@ -14,7 +14,7 @@ final class HeraldRuleController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap();
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
     if ($this->id) {

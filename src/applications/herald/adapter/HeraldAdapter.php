@@ -54,7 +54,6 @@ abstract class HeraldAdapter {
 
   abstract public function getPHID();
   abstract public function getHeraldName();
-  abstract public function getHeraldTypeName();
   abstract public function getHeraldField($field_name);
   abstract public function applyHeraldEffects(array $effects);
 
@@ -365,6 +364,20 @@ abstract class HeraldAdapter {
       pht(
         'No adapter exists for Herald content type "%s".',
         $content_type));
+  }
+
+  public static function getEnabledAdapterMap() {
+    $map = array();
+
+    $adapters = HeraldAdapter::getAllEnabledAdapters();
+    foreach ($adapters as $adapter) {
+      $type = $adapter->getAdapterContentType();
+      $name = $adapter->getAdapterContentName();
+      $map[$type] = $name;
+    }
+
+    asort($map);
+    return $map;
   }
 
 

@@ -95,10 +95,6 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return $this->revision->getTitle();
   }
 
-  public function getHeraldTypeName() {
-    return HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL;
-  }
-
   public function loadRepository() {
     if ($this->repository === null) {
       $diff = $this->diff;

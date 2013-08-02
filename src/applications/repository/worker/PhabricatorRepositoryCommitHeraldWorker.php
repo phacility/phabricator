@@ -22,7 +22,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
     }
 
     $rules = HeraldRule::loadAllByContentTypeWithFullData(
-      HeraldContentTypeConfig::CONTENT_TYPE_COMMIT,
+      id(new HeraldCommitAdapter())->getAdapterContentType(),
       $commit->getPHID());
 
     $adapter = HeraldCommitAdapter::newLegacyAdapter(

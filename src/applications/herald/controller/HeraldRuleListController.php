@@ -33,7 +33,7 @@ final class HeraldRuleListController extends HeraldController
     $phids = mpull($rules, 'getAuthorPHID');
     $this->loadHandles($phids);
 
-    $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap();
 
     $list = id(new PhabricatorObjectItemListView())
       ->setUser($viewer);

@@ -149,10 +149,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       $this->commit->getCommitIdentifier();
   }
 
-  public function getHeraldTypeName() {
-    return HeraldContentTypeConfig::CONTENT_TYPE_COMMIT;
-  }
-
   public function loadAffectedPaths() {
     if ($this->affectedPaths === null) {
       $result = PhabricatorOwnerPathQuery::loadAffectedPaths(

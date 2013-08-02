@@ -18,10 +18,6 @@ final class HeraldDryRunAdapter extends HeraldAdapter {
     return 'Dry Run';
   }
 
-  public function getHeraldTypeName() {
-    return null;
-  }
-
   public function getHeraldField($field) {
     return null;
   }

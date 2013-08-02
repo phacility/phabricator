@@ -11,7 +11,7 @@ final class HeraldEngine {
   protected $object = null;
 
   public static function loadAndApplyRules(HeraldAdapter $object) {
-    $content_type = $object->getHeraldTypeName();
+    $content_type = $object->getAdapterContentType();
     $rules = HeraldRule::loadAllByContentTypeWithFullData(
       $content_type,
       $object->getPHID());
@@ -90,7 +90,7 @@ final class HeraldEngine {
     $object_transcript = new HeraldObjectTranscript();
     $object_transcript->setPHID($object->getPHID());
     $object_transcript->setName($object->getHeraldName());
-    $object_transcript->setType($object->getHeraldTypeName());
+    $object_transcript->setType($object->getAdapterContentType());
     $object_transcript->setFields($this->fieldCache);
 
     $this->transcript->setObjectTranscript($object_transcript);
