@@ -60,7 +60,7 @@ final class HeraldNewController extends HeraldController {
       ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel(pht('New rule for'))
+          ->setLabel(pht('New Rule for'))
           ->setName('content_type')
           ->setValue($this->contentType)
           ->setOptions($content_type_map))
@@ -78,13 +78,11 @@ final class HeraldNewController extends HeraldController {
           ->setHref($this->getApplicationURI(
             'view/'.$this->contentType.'/'.$this->ruleType)));
 
-    $nav = $this->renderNav();
-    $nav->selectFilter('new');
-    $nav->appendChild($form);
-    $nav->setCrumbs($crumbs);
-
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $form,
+      ),
       array(
         'title' => pht('Create Herald Rule'),
         'device' => true,

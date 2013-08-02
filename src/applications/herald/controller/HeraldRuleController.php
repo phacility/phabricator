@@ -179,21 +179,14 @@ final class HeraldRuleController extends HeraldController {
       ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref('#'));
-
-    $nav = $this->renderNav();
-    $nav->setCrumbs($crumbs);
-    $nav->selectFilter(
-      'view/'.$rule->getContentType().'/'.$rule->getRuleType());
-    $nav->appendChild(
-      array(
-        $error_view,
-        $form,
-      ));
+          ->setName($title));
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $error_view,
+        $form,
+      ),
       array(
         'title' => pht('Edit Rule'),
         'dust' => true,
