@@ -138,8 +138,14 @@ final class PholioImageQuery
         ->execute();
       $mocks = mpull($mocks, null, 'getID');
     }
-    foreach ($images as $image) {
-      $image->attachMock($mocks[$image->getMockID()]);
+    foreach ($images as $index => $image) {
+      $mock = idx($mocks, $image->getMockID());
+      if ($mock) {
+        $image->attachMock($mock);
+      } else {
+        // mock is missing or we can't see it
+        unset($images[$index]);
+      }
     }
 
     return $images;

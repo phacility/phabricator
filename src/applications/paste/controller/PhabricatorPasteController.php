@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group paste
+ */
 abstract class PhabricatorPasteController extends PhabricatorController {
 
   public function buildSideNavView($for_app = false) {

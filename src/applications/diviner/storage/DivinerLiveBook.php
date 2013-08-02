@@ -28,7 +28,7 @@ final class DivinerLiveBook extends DivinerDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_BOOK);
+      DivinerPHIDTypeBook::TYPECONST);
   }
 
   public function getTitle() {

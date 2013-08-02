@@ -4,23 +4,19 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
   extends DoorkeeperFeedStoryPublisher {
 
   public function canPublishStory(PhabricatorFeedStory $story, $object) {
-    if (!($object instanceof DifferentialRevision)) {
-      return false;
-    }
+    return ($object instanceof DifferentialRevision);
+  }
 
-    // Don't publish the "create" story, since pushing the object into Asana
-    // naturally generates a notification which effectively serves the same
-    // purpose as the "create" story.
+  public function isStoryAboutObjectCreation($object) {
+    $story = $this->getFeedStory();
 
     $action = $story->getStoryData()->getValue('action');
     switch ($action) {
       case DifferentialAction::ACTION_CREATE:
-        return false;
+        return true;
       default:
-        break;
+        return false;
     }
-
-    return true;
   }
 
   public function willPublishStory($object) {

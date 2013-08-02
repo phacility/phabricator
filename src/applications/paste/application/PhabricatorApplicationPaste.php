@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * group paste
+ */
 final class PhabricatorApplicationPaste extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -35,6 +38,7 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
         '(query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorPasteListController',
         'create/'                       => 'PhabricatorPasteEditController',
         'edit/(?P<id>[1-9]\d*)/'        => 'PhabricatorPasteEditController',
+        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorPasteCommentController',
       ),
     );
   }

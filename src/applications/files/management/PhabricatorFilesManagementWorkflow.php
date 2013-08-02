@@ -33,7 +33,7 @@ abstract class PhabricatorFilesManagementWorkflow
           }
         } else {
           $file = id(new PhabricatorFile())->loadOneWhere(
-            'phid = %d',
+            'phid = %s',
             $name);
           if (!$file) {
             throw new PhutilArgumentUsageException(

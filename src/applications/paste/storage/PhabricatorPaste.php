@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group paste
+ */
 final class PhabricatorPaste extends PhabricatorPasteDAO
   implements PhabricatorTokenReceiverInterface, PhabricatorPolicyInterface {
 

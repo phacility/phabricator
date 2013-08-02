@@ -35,6 +35,7 @@ abstract class DoorkeeperFeedStoryPublisher {
     return $object;
   }
 
+  abstract public function isStoryAboutObjectCreation($object);
   abstract public function getOwnerPHID($object);
   abstract public function getActiveUserPHIDs($object);
   abstract public function getPassiveUserPHIDs($object);

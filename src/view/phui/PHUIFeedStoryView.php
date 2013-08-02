@@ -10,6 +10,7 @@ final class PHUIFeedStoryView extends AphrontView {
   private $epoch;
   private $viewed;
   private $href;
+  private $oneline = false;
   private $pontification = null;
   private $tokenBar = array();
   private $projects = array();
@@ -32,6 +33,11 @@ final class PHUIFeedStoryView extends AphrontView {
 
   public function setEpoch($epoch) {
     $this->epoch = $epoch;
+    return $this;
+  }
+
+  public function setOneLine($oneline) {
+    $this->oneline = $oneline;
     return $this;
   }
 
@@ -80,6 +86,7 @@ final class PHUIFeedStoryView extends AphrontView {
   }
 
   public function setPontification($text, $title = null) {
+    $this->setOneLine(false);
     if ($title) {
       $title = phutil_tag('h3', array(), $title);
     }
@@ -124,7 +131,11 @@ final class PHUIFeedStoryView extends AphrontView {
 
     require_celerity_resource('phui-feed-story-css');
 
+    $body = null;
+    $foot = null;
+    $image_style = null;
     $actor = '';
+
     if ($this->image) {
       $actor = new PHUIIconView();
       $actor->setImage($this->image);
@@ -132,60 +143,6 @@ final class PHUIFeedStoryView extends AphrontView {
       if ($this->imageHref) {
         $actor->setHref($this->imageHref);
       }
-    }
-
-    $action_list = array();
-    $icons = null;
-    foreach ($this->actions as $action) {
-      $action_list[] = phutil_tag(
-        'li',
-          array(
-          'class' => 'phui-feed-story-action-item'
-        ),
-        $action);
-    }
-    if (!empty($action_list)) {
-      $icons = phutil_tag(
-        'ul',
-          array(
-            'class' => 'phui-feed-story-action-list'
-          ),
-          $action_list);
-    }
-
-    $head = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-feed-story-head',
-      ),
-      array(
-        $actor,
-        nonempty($this->title, pht('Untitled Story')),
-        $icons
-      ));
-
-    $body = null;
-    $foot = null;
-    $image_style = null;
-
-    if (!empty($this->tokenBar)) {
-      $tokenview = phutil_tag(
-        'div',
-          array(
-            'class' => 'phui-feed-token-bar'
-          ),
-        $this->tokenBar);
-      $this->appendChild($tokenview);
-    }
-
-    $body_content = $this->renderChildren();
-    if ($body_content) {
-      $body = phutil_tag(
-        'div',
-        array(
-          'class' => 'phui-feed-story-body',
-        ),
-        $body_content);
     }
 
     if ($this->epoch) {
@@ -216,17 +173,89 @@ final class PHUIFeedStoryView extends AphrontView {
       $icon->setSpriteSheet(PHUIIconView::SPRITE_APPS);
     }
 
-    $foot = phutil_tag(
+    $ol_foot = null;
+    if ($this->oneline) {
+      $ol_foot = phutil_tag(
+        'div',
+          array(
+            'class' => 'phui-feed-story-oneline-foot'
+          ),
+          array(
+            $icon,
+            $foot));
+    }
+
+    $action_list = array();
+    $icons = null;
+    foreach ($this->actions as $action) {
+      $action_list[] = phutil_tag(
+        'li',
+          array(
+          'class' => 'phui-feed-story-action-item'
+        ),
+        $action);
+    }
+    if (!empty($action_list)) {
+      $icons = phutil_tag(
+        'ul',
+          array(
+            'class' => 'phui-feed-story-action-list'
+          ),
+          $action_list);
+    }
+
+    $head = phutil_tag(
       'div',
       array(
-        'class' => 'phui-feed-story-foot',
+        'class' => 'phui-feed-story-head',
       ),
       array(
-        $icon,
-        $foot));
+        $actor,
+        nonempty($this->title, pht('Untitled Story')),
+        $icons,
+        $ol_foot
+      ));
+
+    if (!empty($this->tokenBar)) {
+      $tokenview = phutil_tag(
+        'div',
+          array(
+            'class' => 'phui-feed-token-bar'
+          ),
+        $this->tokenBar);
+      $this->appendChild($tokenview);
+    }
+
+    $body_content = $this->renderChildren();
+    if ($body_content) {
+      $body = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-feed-story-body',
+        ),
+        $body_content);
+    }
+
+    if ($this->oneline) {
+      $foot = null;
+    } else {
+      $foot = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-feed-story-foot',
+        ),
+        array(
+          $icon,
+          $foot));
+    }
+
+    $classes = array('phui-feed-story');
+    if ($this->oneline) {
+      $classes[] = 'phui-feed-story-oneline';
+    }
 
     return id(new PHUIBoxView())
-      ->addClass('phui-feed-story')
+      ->addClass(implode(' ', $classes))
       ->setShadow(true)
       ->addMargin(PHUI::MARGIN_MEDIUM_BOTTOM)
       ->appendChild(array($head, $body, $foot));
