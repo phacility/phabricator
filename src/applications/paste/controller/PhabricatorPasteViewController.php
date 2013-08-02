@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * group paste
+ */
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private $id;
@@ -58,6 +61,49 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           ->setName('P'.$paste->getID())
           ->setHref('/P'.$paste->getID()));
 
+    $xactions = id(new PhabricatorPasteTransactionQuery())
+      ->setViewer($request->getUser())
+      ->withObjectPHIDs(array($paste->getPHID()))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setObjectPHID($paste->getPHID())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = id(new PhabricatorHeaderView())
+      ->setHeader(
+        $is_serious
+          ? pht('Add Comment')
+          : pht('Debate Paste Accuracy'));
+
+    $submit_button_name = $is_serious
+      ? pht('Add Comment')
+      : pht('Pity the Fool');
+
+    $draft = PhabricatorDraft::newFromUserAndKey($user, $paste->getPHID());
+
+    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($user)
+      ->setObjectPHID($paste->getPHID())
+      ->setDraft($draft)
+      ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
+      ->setSubmitButtonName($submit_button_name);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
@@ -65,6 +111,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         $actions,
         $properties,
         $source_code,
+        $timeline,
+        $add_comment_header,
+        $add_comment_form
       ),
       array(
         'title' => $paste->getFullName(),

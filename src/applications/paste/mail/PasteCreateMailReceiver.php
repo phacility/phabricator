@@ -35,21 +35,34 @@ final class PasteCreateMailReceiver
     if (!$title) {
       $title = pht('Pasted via email.');
     }
-    $paste_file = PhabricatorFile::newFromFileData(
-      $mail->getCleanTextBody(),
-      array(
-        'name' => $title,
-        'mime-type' => 'text/plain; charset=utf-8',
-        'authorPHID' => $sender->getPHID(),
-      ));
+    $xactions = array();
+    $xactions[] = id(new PhabricatorPasteTransaction())
+      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CREATE)
+      ->setNewValue(array(
+        'title' => $title,
+        'text' => $mail->getCleanTextBody()));
+    $xactions[] = id(new PhabricatorPasteTransaction())
+      ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
+      ->setNewValue($title);
+    $xactions[] = id(new PhabricatorPasteTransaction())
+      ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
+      ->setNewValue(''); // auto-detect
+    $xactions[] = id(new PhabricatorPasteTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+      ->setNewValue(PhabricatorPolicies::POLICY_USER);
 
     $paste = id(new PhabricatorPaste())
-      ->setAuthorPHID($sender->getPHID())
-      ->setTitle($title)
-      ->setFilePHID($paste_file->getPHID())
-      ->setLanguage('') // auto-detect
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->save();
+      ->setAuthorPHID($sender->getPHID());
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_EMAIL,
+      array(
+        'id' => $mail->getID(),
+      ));
+    $editor = id(new PhabricatorPasteEditor())
+      ->setActor($sender)
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true);
+    $xactions = $editor->applyTransactions($paste, $xactions);
 
     $mail->setRelatedPHID($paste->getPHID());
 

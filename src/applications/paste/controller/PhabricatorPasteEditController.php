@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group paste
+ */
 final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
   private $id;
@@ -59,44 +62,64 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     $text = null;
     $e_text = true;
     $errors = array();
+    if ($is_create && $parent) {
+      $v_title = pht('Fork of %s', $parent->getFullName());
+      $v_language = $parent->getLanguage();
+      $v_text = $parent->getRawContent();
+    } else {
+      $v_title = $paste->getTitle();
+      $v_language = $paste->getLanguage();
+      $v_text = '';
+    }
+    $v_policy = $paste->getViewPolicy();
+
     if ($request->isFormPost()) {
+      $xactions = array();
 
       if ($is_create) {
-        $text = $request->getStr('text');
-        if (!strlen($text)) {
+        $v_text = $request->getStr('text');
+        if (!strlen($v_text)) {
           $e_text = pht('Required');
           $errors[] = pht('The paste may not be blank.');
         } else {
           $e_text = null;
         }
-      }
+     }
 
-      $paste->setTitle($request->getStr('title'));
-      $paste->setLanguage($request->getStr('language'));
-      $paste->setViewPolicy($request->getStr('can_view'));
+      $v_title = $request->getStr('title');
+      $v_language = $request->getStr('language');
+      $v_policy = $request->getStr('can_view');
 
       // NOTE: The author is the only editor and can always view the paste,
       // so it's impossible for them to choose an invalid policy.
 
       if (!$errors) {
         if ($is_create) {
-          $paste_file = PhabricatorFile::newFromFileData(
-            $text,
-            array(
-              'name' => $paste->getTitle(),
-              'mime-type' => 'text/plain; charset=utf-8',
-              'authorPHID' => $user->getPHID(),
-            ));
-          $paste->setFilePHID($paste_file->getPHID());
+          $xactions[] = id(new PhabricatorPasteTransaction())
+            ->setTransactionType(PhabricatorPasteTransaction::TYPE_CREATE)
+            ->setNewValue(array(
+              'title' => $v_title,
+              'text' => $v_text));
         }
-        $paste->save();
+        $xactions[] = id(new PhabricatorPasteTransaction())
+          ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
+          ->setNewValue($v_title);
+        $xactions[] = id(new PhabricatorPasteTransaction())
+          ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
+          ->setNewValue($v_language);
+        $xactions[] = id(new PhabricatorPasteTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($v_policy);
+        $editor = id(new PhabricatorPasteEditor())
+          ->setActor($user)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true);
+        $xactions = $editor->applyTransactions($paste, $xactions);
         return id(new AphrontRedirectResponse())->setURI($paste->getURI());
-      }
-    } else {
-      if ($is_create && $parent) {
-        $paste->setTitle(pht('Fork of %s', $parent->getFullName()));
-        $paste->setLanguage($parent->getLanguage());
-        $text = $parent->getRawContent();
+      } else {
+        // make sure we update policy so its correctly populated to what
+        // the user chose
+        $paste->setViewPolicy($v_policy);
       }
     }
 
@@ -120,13 +143,13 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
-          ->setValue($paste->getTitle())
+          ->setValue($v_title)
           ->setName('title'))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Language'))
           ->setName('language')
-          ->setValue($paste->getLanguage())
+          ->setValue($v_language)
           ->setOptions($langs));
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -148,7 +171,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           id(new AphrontFormTextAreaControl())
             ->setLabel(pht('Text'))
             ->setError($e_text)
-            ->setValue($text)
+            ->setValue($v_text)
             ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
             ->setCustomClass('PhabricatorMonospaced')
             ->setName('text'));
