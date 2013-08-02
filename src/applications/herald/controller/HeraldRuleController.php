@@ -86,7 +86,7 @@ final class HeraldRuleController extends HeraldController {
     }
 
     $must_match_selector = $this->renderMustMatchSelector($rule);
-    $repetition_selector = $this->renderRepetitionSelector($rule);
+    $repetition_selector = $this->renderRepetitionSelector($rule, $adapter);
 
     $handles = $this->loadHandlesForRule($rule);
 
@@ -492,27 +492,20 @@ final class HeraldRuleController extends HeraldController {
    * Render the selector for "Take these actions (every time | only the first
    * time) this rule matches..." element.
    */
-  private function renderRepetitionSelector($rule) {
-    // Make the selector for choosing how often this rule should be repeated
+  private function renderRepetitionSelector($rule, HeraldAdapter $adapter) {
     $repetition_policy = HeraldRepetitionPolicyConfig::toString(
       $rule->getRepetitionPolicy());
-    $repetition_options = HeraldRepetitionPolicyConfig::getMapForContentType(
-      $rule->getContentType());
 
-    if (empty($repetition_options)) {
-      // default option is 'every time'
-      $repetition_selector = idx(
-        HeraldRepetitionPolicyConfig::getMap(),
-        HeraldRepetitionPolicyConfig::EVERY);
-      return $repetition_selector;
-    } else if (count($repetition_options) == 1) {
-      // if there's only 1 option, just pick it for the user
-      $repetition_selector = reset($repetition_options);
-      return $repetition_selector;
+    $repetition_options = $adapter->getRepetitionOptions();
+    $repetition_names = HeraldRepetitionPolicyConfig::getMap();
+    $repetition_map = array_select_keys($repetition_names, $repetition_options);
+
+    if (count($repetition_map) < 2) {
+      return head($repetition_names);
     } else {
       return AphrontFormSelectControl::renderSelectTag(
         $repetition_policy,
-        $repetition_options,
+        $repetition_map,
         array(
           'name' => 'repetition_policy',
         ));

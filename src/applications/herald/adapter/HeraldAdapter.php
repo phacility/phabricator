@@ -292,6 +292,16 @@ abstract class HeraldAdapter {
   }
 
 
+/* -(  Repetition  )--------------------------------------------------------- */
+
+
+  public function getRepetitionOptions() {
+    return array(
+      HeraldRepetitionPolicyConfig::EVERY,
+    );
+  }
+
+
   public static function applyFlagEffect(HeraldEffect $effect, $phid) {
     $color = $effect->getTarget();
 
