@@ -1,6 +1,7 @@
 <?php
 
-final class HeraldRule extends HeraldDAO {
+final class HeraldRule extends HeraldDAO
+  implements PhabricatorPolicyInterface {
 
   const TABLE_RULE_APPLIED = 'herald_ruleapplied';
 
@@ -230,6 +231,41 @@ final class HeraldRule extends HeraldDAO {
 
   public function hasInvalidOwner() {
     return $this->invalidOwner;
+  }
+
+  public function isGlobalRule() {
+    return ($this->getRuleType() === HeraldRuleTypeConfig::RULE_TYPE_GLOBAL);
+  }
+
+  public function isPersonalRule() {
+    return ($this->getRuleType() === HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    if ($this->isGlobalRule()) {
+      return PhabricatorPolicies::POLICY_USER;
+    } else {
+      return PhabricatorPolicies::POLICY_NOONE;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($this->isPersonalRule()) {
+      return ($viewer->getPHID() == $this->getAuthorPHID());
+    } else {
+      return false;
+    }
   }
 
 }

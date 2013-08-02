@@ -2624,7 +2624,11 @@ phutil_register_library_map(array(
     'HeraldNewController' => 'HeraldController',
     'HeraldPHIDTypeRule' => 'PhabricatorPHIDType',
     'HeraldRecursiveConditionsException' => 'Exception',
-    'HeraldRule' => 'HeraldDAO',
+    'HeraldRule' =>
+    array(
+      0 => 'HeraldDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'HeraldRuleController' => 'HeraldController',
     'HeraldRuleEdit' => 'HeraldDAO',
     'HeraldRuleEditHistoryController' => 'HeraldController',
