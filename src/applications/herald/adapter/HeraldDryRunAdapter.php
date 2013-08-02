@@ -30,6 +30,10 @@ final class HeraldDryRunAdapter extends HeraldAdapter {
     return array();
   }
 
+  public function getActions($rule_type) {
+    return array();
+  }
+
   public function applyHeraldEffects(array $effects) {
     assert_instances_of($effects, 'HeraldEffect');
     $results = array();

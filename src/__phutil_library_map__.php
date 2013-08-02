@@ -635,7 +635,6 @@ phutil_register_library_map(array(
     'HeraldTranscript' => 'applications/herald/storage/transcript/HeraldTranscript.php',
     'HeraldTranscriptController' => 'applications/herald/controller/HeraldTranscriptController.php',
     'HeraldTranscriptListController' => 'applications/herald/controller/HeraldTranscriptListController.php',
-    'HeraldValueTypeConfig' => 'applications/herald/config/HeraldValueTypeConfig.php',
     'Javelin' => 'infrastructure/javelin/Javelin.php',
     'JavelinReactorExample' => 'applications/uiexample/examples/JavelinReactorExample.php',
     'JavelinUIExample' => 'applications/uiexample/examples/JavelinUIExample.php',

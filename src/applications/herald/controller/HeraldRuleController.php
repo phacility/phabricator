@@ -389,13 +389,19 @@ final class HeraldRuleController extends HeraldController {
 
     $all_fields = $adapter->getFieldNameMap();
     $all_conditions = $adapter->getConditionNameMap();
+    $all_actions = $adapter->getActionNameMap($rule->getRuleType());
 
     $fields = $adapter->getFields();
     $field_map = array_select_keys($all_fields, $fields);
 
+    $actions = $adapter->getActions($rule->getRuleType());
+    $action_map = array_select_keys($all_actions, $actions);
+
     $config_info = array();
     $config_info['fields'] = $field_map;
     $config_info['conditions'] = $all_conditions;
+    $config_info['actions'] = $action_map;
+
     foreach ($config_info['fields'] as $field => $name) {
       $field_conditions = $adapter->getConditionsForField($field);
       $config_info['conditionMap'][$field] = $field_conditions;
@@ -403,23 +409,19 @@ final class HeraldRuleController extends HeraldController {
 
     foreach ($config_info['fields'] as $field => $fname) {
       foreach ($config_info['conditionMap'][$field] as $condition) {
-        $config_info['values'][$field][$condition] =
-          HeraldValueTypeConfig::getValueTypeForFieldAndCondition(
-            $field,
-            $condition);
+        $value_type = $adapter->getValueTypeForFieldAndCondition(
+          $field,
+          $condition);
+        $config_info['values'][$field][$condition] = $value_type;
       }
     }
-
-    $config_info['actions'] =
-      HeraldActionConfig::getActionMessageMap($rule->getContentType(),
-                                              $rule->getRuleType());
 
     $config_info['rule_type'] = $rule->getRuleType();
 
     foreach ($config_info['actions'] as $action => $name) {
-      $config_info['targets'][$action] =
-        HeraldValueTypeConfig::getValueTypeForAction($action,
-                                                     $rule->getRuleType());
+      $config_info['targets'][$action] = $adapter->getValueTypeForAction(
+        $action,
+       $rule->getRuleType());
     }
 
     Javelin::initBehavior(

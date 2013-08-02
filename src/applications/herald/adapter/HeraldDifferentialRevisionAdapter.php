@@ -242,6 +242,25 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     }
   }
 
+  public function getActions($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_NOTHING,
+        );
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_NOTHING,
+        );
+    }
+  }
+
   public function applyHeraldEffects(array $effects) {
     assert_instances_of($effects, 'HeraldEffect');
 

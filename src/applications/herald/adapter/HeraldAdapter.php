@@ -16,23 +16,41 @@ abstract class HeraldAdapter {
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
 
-  const CONDITION_CONTAINS        = 'contains';
-  const CONDITION_NOT_CONTAINS    = '!contains';
-  const CONDITION_IS              = 'is';
-  const CONDITION_IS_NOT          = '!is';
-  const CONDITION_IS_ANY          = 'isany';
-  const CONDITION_IS_NOT_ANY      = '!isany';
-  const CONDITION_INCLUDE_ALL     = 'all';
-  const CONDITION_INCLUDE_ANY     = 'any';
-  const CONDITION_INCLUDE_NONE    = 'none';
-  const CONDITION_IS_ME           = 'me';
-  const CONDITION_IS_NOT_ME       = '!me';
-  const CONDITION_REGEXP          = 'regexp';
-  const CONDITION_RULE            = 'conditions';
-  const CONDITION_NOT_RULE        = '!conditions';
-  const CONDITION_EXISTS          = 'exists';
-  const CONDITION_NOT_EXISTS      = '!exists';
-  const CONDITION_REGEXP_PAIR     = 'regexp-pair';
+  const CONDITION_CONTAINS      = 'contains';
+  const CONDITION_NOT_CONTAINS  = '!contains';
+  const CONDITION_IS            = 'is';
+  const CONDITION_IS_NOT        = '!is';
+  const CONDITION_IS_ANY        = 'isany';
+  const CONDITION_IS_NOT_ANY    = '!isany';
+  const CONDITION_INCLUDE_ALL   = 'all';
+  const CONDITION_INCLUDE_ANY   = 'any';
+  const CONDITION_INCLUDE_NONE  = 'none';
+  const CONDITION_IS_ME         = 'me';
+  const CONDITION_IS_NOT_ME     = '!me';
+  const CONDITION_REGEXP        = 'regexp';
+  const CONDITION_RULE          = 'conditions';
+  const CONDITION_NOT_RULE      = '!conditions';
+  const CONDITION_EXISTS        = 'exists';
+  const CONDITION_NOT_EXISTS    = '!exists';
+  const CONDITION_REGEXP_PAIR   = 'regexp-pair';
+
+  const ACTION_ADD_CC     = 'addcc';
+  const ACTION_REMOVE_CC  = 'remcc';
+  const ACTION_EMAIL      = 'email';
+  const ACTION_NOTHING    = 'nothing';
+  const ACTION_AUDIT      = 'audit';
+  const ACTION_FLAG       = 'flag';
+
+  const VALUE_TEXT            = 'text';
+  const VALUE_NONE            = 'none';
+  const VALUE_EMAIL           = 'email';
+  const VALUE_USER            = 'user';
+  const VALUE_TAG             = 'tag';
+  const VALUE_RULE            = 'rule';
+  const VALUE_REPOSITORY      = 'repository';
+  const VALUE_OWNERS_PACKAGE  = 'package';
+  const VALUE_PROJECT         = 'project';
+  const VALUE_FLAG_COLOR      = 'flagcolor';
 
   abstract public function getPHID();
   abstract public function getHeraldName();
@@ -53,6 +71,11 @@ abstract class HeraldAdapter {
   }
 
   abstract public function getAdapterContentName();
+
+
+/* -(  Fields  )------------------------------------------------------------- */
+
+
   abstract public function getFields();
 
   public function getFieldNameMap() {
@@ -73,6 +96,10 @@ abstract class HeraldAdapter {
         pht("Any affected package's owner"),
     );
   }
+
+
+/* -(  Conditions  )--------------------------------------------------------- */
+
 
   public function getConditionNameMap() {
     return array(
@@ -147,6 +174,120 @@ abstract class HeraldAdapter {
       default:
         throw new Exception(
           "This adapter does not define conditions for field '{$field}'!");
+    }
+  }
+
+
+/* -(  Actions  )------------------------------------------------------------ */
+
+  abstract public function getActions($rule_type);
+
+  public function getActionNameMap($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        return array(
+          self::ACTION_NOTHING    => pht('Do nothing'),
+          self::ACTION_ADD_CC     => pht('Add emails to CC'),
+          self::ACTION_REMOVE_CC  => pht('Remove emails from CC'),
+          self::ACTION_EMAIL      => pht('Send an email to'),
+          self::ACTION_AUDIT      => pht('Trigger an Audit by'),
+        );
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return array(
+          self::ACTION_NOTHING    => pht('Do nothing'),
+          self::ACTION_ADD_CC     => pht('Add me to CC'),
+          self::ACTION_REMOVE_CC  => pht('Remove me from CC'),
+          self::ACTION_EMAIL      => pht('Send me an email'),
+          self::ACTION_AUDIT      => pht('Trigger an Audit by me'),
+          self::ACTION_FLAG       => pht('Mark with flag'),
+        );
+      default:
+        throw new Exception("Unknown rule type '{$rule_type}'!");
+    }
+  }
+
+
+/* -(  Values  )------------------------------------------------------------- */
+
+
+  public function getValueTypeForFieldAndCondition($field, $condition) {
+    switch ($condition) {
+      case self::CONDITION_CONTAINS:
+      case self::CONDITION_NOT_CONTAINS:
+      case self::CONDITION_IS:
+      case self::CONDITION_IS_NOT:
+      case self::CONDITION_REGEXP:
+      case self::CONDITION_REGEXP_PAIR:
+        return self::VALUE_TEXT;
+      case self::CONDITION_IS_ANY:
+      case self::CONDITION_IS_NOT_ANY:
+        switch ($field) {
+          case self::FIELD_REPOSITORY:
+            return self::VALUE_REPOSITORY;
+          default:
+            return self::VALUE_USER;
+        }
+        break;
+      case self::CONDITION_INCLUDE_ALL:
+      case self::CONDITION_INCLUDE_ANY:
+      case self::CONDITION_INCLUDE_NONE:
+        switch ($field) {
+          case self::FIELD_REPOSITORY:
+            return self::VALUE_REPOSITORY;
+          case self::FIELD_CC:
+            return self::VALUE_EMAIL;
+          case self::FIELD_TAGS:
+            return self::VALUE_TAG;
+          case self::FIELD_AFFECTED_PACKAGE:
+            return self::VALUE_OWNERS_PACKAGE;
+          default:
+            return self::VALUE_USER;
+        }
+        break;
+      case self::CONDITION_IS_ME:
+      case self::CONDITION_IS_NOT_ME:
+      case self::CONDITION_EXISTS:
+      case self::CONDITION_NOT_EXISTS:
+        return self::VALUE_NONE;
+      case self::CONDITION_RULE:
+      case self::CONDITION_NOT_RULE:
+        return self::VALUE_RULE;
+      default:
+        throw new Exception("Unknown condition '{$condition}'.");
+    }
+  }
+
+  public static function getValueTypeForAction($action, $rule_type) {
+    $is_personal = ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
+
+    if ($is_personal) {
+      switch ($action) {
+        case self::ACTION_ADD_CC:
+        case self::ACTION_REMOVE_CC:
+        case self::ACTION_EMAIL:
+        case self::ACTION_NOTHING:
+        case self::ACTION_AUDIT:
+          return self::VALUE_NONE;
+        case self::ACTION_FLAG:
+          return self::VALUE_FLAG_COLOR;
+        default:
+          throw new Exception("Unknown or invalid action '{$action}'.");
+      }
+    } else {
+      switch ($action) {
+        case self::ACTION_ADD_CC:
+        case self::ACTION_REMOVE_CC:
+        case self::ACTION_EMAIL:
+          return self::VALUE_EMAIL;
+        case self::ACTION_NOTHING:
+          return self::VALUE_NONE;
+        case self::ACTION_AUDIT:
+          return self::VALUE_PROJECT;
+        case self::ACTION_FLAG:
+          return self::VALUE_FLAG_COLOR;
+        default:
+          throw new Exception("Unknown or invalid action '{$action}'.");
+      }
     }
   }
 

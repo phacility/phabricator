@@ -9,6 +9,7 @@ final class HeraldActionConfig {
   const ACTION_AUDIT        = 'audit';
   const ACTION_FLAG         = 'flag';
 
+  // TODO: Remove; still used by transcripts.
   public static function getActionMessageMapForRuleType($rule_type) {
     $generic_mappings = array(
       self::ACTION_NOTHING      => pht('Do nothing'),
@@ -43,6 +44,7 @@ final class HeraldActionConfig {
     return $specific_mappings + $generic_mappings;
   }
 
+  // TODO: Remove; still used by transcripts.
   public static function getActionMessageMap($content_type,
                                              $rule_type) {
     $map = self::getActionMessageMapForRuleType($rule_type);

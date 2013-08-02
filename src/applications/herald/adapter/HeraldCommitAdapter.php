@@ -86,6 +86,36 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return parent::getConditionsForField($field);
   }
 
+  public function getActions($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_NOTHING,
+        );
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_NOTHING,
+        );
+    }
+  }
+
+  public function getValueTypeForFieldAndCondition($field, $condition) {
+    switch ($field) {
+      case self::FIELD_DIFFERENTIAL_CCS:
+        return self::VALUE_EMAIL;
+      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
+        return self::VALUE_OWNERS_PACKAGE;
+    }
+
+    return parent::getValueTypeForFieldAndCondition($field, $condition);
+  }
+
   public static function newLegacyAdapter(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
