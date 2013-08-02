@@ -113,7 +113,7 @@ final class HeraldTestConsoleController extends HeraldController {
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Test Rules')));
 
-    $nav = $this->renderNav();
+    $nav = $this->buildSideNavView();
     $nav->selectFilter('test');
     $nav->appendChild(
       array(

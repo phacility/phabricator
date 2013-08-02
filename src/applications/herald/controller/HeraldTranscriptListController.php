@@ -95,7 +95,7 @@ final class HeraldTranscriptListController extends HeraldController {
     $panel->appendChild($pager);
     $panel->setNoBackground();
 
-    $nav = $this->renderNav();
+    $nav = $this->buildSideNavView();
     $nav->selectFilter('transcript');
     $nav->appendChild($panel);
 

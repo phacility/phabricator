@@ -33,9 +33,7 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/herald/' => array(
-        '' => 'HeraldHomeController',
-        'view/(?P<content_type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?'
-          => 'HeraldHomeController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'HeraldRuleListController',
         'new/(?:(?P<type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?)?'
           => 'HeraldNewController',
         'rule/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleController',
