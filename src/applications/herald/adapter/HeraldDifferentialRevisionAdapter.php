@@ -17,13 +17,30 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $affectedPackages;
   protected $changesets;
 
-  public function __construct(
+  public function isEnabled() {
+    $app = 'PhabricatorApplicationDifferential';
+    return PhabricatorApplication::isClassInstalled($app);
+  }
+
+  public function getAdapterContentType() {
+    return 'differential';
+  }
+
+  public function getAdapterContentName() {
+    return pht('Differential Revisions');
+  }
+
+  public static function newLegacyAdapter(
     DifferentialRevision $revision,
     DifferentialDiff $diff) {
 
+    $object = new HeraldDifferentialRevisionAdapter();
+
     $revision->loadRelationships();
-    $this->revision = $revision;
-    $this->diff = $diff;
+    $object->revision = $revision;
+    $object->diff = $diff;
+
+    return $object;
   }
 
   public function setExplicitCCs($explicit_ccs) {

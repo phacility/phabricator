@@ -17,14 +17,31 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $affectedPackages;
   protected $auditNeededPackages;
 
-  public function __construct(
+  public function isEnabled() {
+    $app = 'PhabricatorApplicationDiffusion';
+    return PhabricatorApplication::isClassInstalled($app);
+  }
+
+  public function getAdapterContentType() {
+    return 'commit';
+  }
+
+  public function getAdapterContentName() {
+    return pht('Commits');
+  }
+
+  public static function newLegacyAdapter(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $commit_data) {
 
-    $this->repository = $repository;
-    $this->commit = $commit;
-    $this->commitData = $commit_data;
+    $object = new HeraldCommitAdapter();
+
+    $object->repository = $repository;
+    $object->commit = $commit;
+    $object->commitData = $commit_data;
+
+    return $object;
   }
 
   public function getPHID() {

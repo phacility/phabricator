@@ -66,20 +66,6 @@ final class HeraldActionConfig {
             self::ACTION_FLAG,
             self::ACTION_NOTHING,
           ));
-      case HeraldContentTypeConfig::CONTENT_TYPE_MERGE:
-        return array_select_keys(
-          $map,
-          array(
-            self::ACTION_EMAIL,
-            self::ACTION_NOTHING,
-          ));
-      case HeraldContentTypeConfig::CONTENT_TYPE_OWNERS:
-        return array_select_keys(
-          $map,
-          array(
-            self::ACTION_EMAIL,
-            self::ACTION_NOTHING,
-          ));
       default:
         throw new Exception("Unknown content type '{$content_type}'.");
     }

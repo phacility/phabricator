@@ -86,31 +86,6 @@ final class HeraldFieldConfig {
             self::FIELD_DIFFERENTIAL_REVIEWERS,
             self::FIELD_DIFFERENTIAL_CCS,
           ));
-      case HeraldContentTypeConfig::CONTENT_TYPE_MERGE:
-        return array_select_keys(
-          $map,
-          array(
-            self::FIELD_BODY,
-            self::FIELD_AUTHOR,
-            self::FIELD_REVIEWER,
-            self::FIELD_REPOSITORY,
-            self::FIELD_DIFF_FILE,
-            self::FIELD_DIFF_CONTENT,
-            self::FIELD_RULE,
-            self::FIELD_AFFECTED_PACKAGE,
-            self::FIELD_AFFECTED_PACKAGE_OWNER,
-            self::FIELD_DIFFERENTIAL_REVISION,
-            self::FIELD_DIFFERENTIAL_REVIEWERS,
-            self::FIELD_DIFFERENTIAL_CCS,
-            self::FIELD_MERGE_REQUESTER,
-          ));
-      case HeraldContentTypeConfig::CONTENT_TYPE_OWNERS:
-        return array_select_keys(
-          $map,
-          array(
-            self::FIELD_AFFECTED_PACKAGE,
-            self::FIELD_AFFECTED_PACKAGE_OWNER,
-          ));
       default:
         throw new Exception("Unknown content type.");
     }

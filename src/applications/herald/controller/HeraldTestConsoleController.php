@@ -53,14 +53,14 @@ final class HeraldTestConsoleController extends HeraldController {
 
         if (!$errors) {
           if ($object instanceof DifferentialRevision) {
-            $adapter = new HeraldDifferentialRevisionAdapter(
+            $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
               $object,
               $object->loadActiveDiff());
           } else if ($object instanceof PhabricatorRepositoryCommit) {
             $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
               'commitID = %d',
               $object->getID());
-            $adapter = new HeraldCommitAdapter(
+            $adapter = HeraldCommitAdapter::newLegacyAdapter(
               $repo,
               $object,
               $data);

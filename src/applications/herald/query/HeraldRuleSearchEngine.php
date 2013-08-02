@@ -113,7 +113,7 @@ final class HeraldRuleSearchEngine
   }
 
   private function getContentTypeValues() {
-    return HeraldContentTypeConfig::getContentTypeMap();
+    return array_fuse(array_keys(HeraldContentTypeConfig::getContentTypeMap()));
   }
 
   private function getRuleTypeOptions() {
@@ -123,7 +123,7 @@ final class HeraldRuleSearchEngine
   }
 
   private function getRuleTypeValues() {
-    return HeraldRuleTypeConfig::getRuleTypeMap();
+    return array_fuse(array_keys(HeraldRuleTypeConfig::getRuleTypeMap()));
   }
 
 }

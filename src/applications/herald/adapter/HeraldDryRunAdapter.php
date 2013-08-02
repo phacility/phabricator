@@ -6,6 +6,14 @@ final class HeraldDryRunAdapter extends HeraldAdapter {
     return 0;
   }
 
+  public function isEnabled() {
+    return false;
+  }
+
+  public function getAdapterContentName() {
+    return null;
+  }
+
   public function getHeraldName() {
     return 'Dry Run';
   }

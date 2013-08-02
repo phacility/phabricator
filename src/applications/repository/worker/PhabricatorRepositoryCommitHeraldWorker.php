@@ -25,7 +25,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
       HeraldContentTypeConfig::CONTENT_TYPE_COMMIT,
       $commit->getPHID());
 
-    $adapter = new HeraldCommitAdapter(
+    $adapter = HeraldCommitAdapter::newLegacyAdapter(
       $repository,
       $commit,
       $data);

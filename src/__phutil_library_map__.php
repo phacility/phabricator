@@ -596,7 +596,7 @@ phutil_register_library_map(array(
     'HarbormasterScratchTable' => 'applications/harbormaster/storage/HarbormasterScratchTable.php',
     'HeraldAction' => 'applications/herald/storage/HeraldAction.php',
     'HeraldActionConfig' => 'applications/herald/config/HeraldActionConfig.php',
-    'HeraldAdapter' => 'applications/herald/adapter/HeraldObjectAdapter.php',
+    'HeraldAdapter' => 'applications/herald/adapter/HeraldAdapter.php',
     'HeraldApplyTranscript' => 'applications/herald/storage/transcript/HeraldApplyTranscript.php',
     'HeraldCommitAdapter' => 'applications/herald/adapter/HeraldCommitAdapter.php',
     'HeraldCondition' => 'applications/herald/storage/HeraldCondition.php',

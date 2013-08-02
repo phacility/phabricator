@@ -8,6 +8,20 @@ abstract class HeraldAdapter {
   abstract public function getHeraldField($field_name);
   abstract public function applyHeraldEffects(array $effects);
 
+  public function isEnabled() {
+    return true;
+  }
+
+  /**
+   * NOTE: You generally should not override this; it exists to support legacy
+   * adapters which had hard-coded content types.
+   */
+  public function getAdapterContentType() {
+    return get_class($this);
+  }
+
+  abstract public function getAdapterContentName();
+
   public static function applyFlagEffect(HeraldEffect $effect, $phid) {
     $color = $effect->getTarget();
 
@@ -47,6 +61,27 @@ abstract class HeraldAdapter {
       true,
       pht('Added flag.'));
   }
+
+  public static function getAllAdapters() {
+    static $adapters;
+    if (!$adapters) {
+      $adapters = id(new PhutilSymbolLoader())
+        ->setAncestorClass(__CLASS__)
+        ->loadObjects();
+    }
+    return $adapters;
+  }
+
+  public static function getAllEnabledAdapters() {
+    $adapters = self::getAllAdapters();
+    foreach ($adapters as $key => $adapter) {
+      if (!$adapter->isEnabled()) {
+        unset($adapters[$key]);
+      }
+    }
+    return $adapters;
+  }
+
 
 }
 

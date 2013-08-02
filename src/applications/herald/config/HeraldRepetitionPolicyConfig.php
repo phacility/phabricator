@@ -29,8 +29,6 @@ final class HeraldRepetitionPolicyConfig {
         ));
 
       case HeraldContentTypeConfig::CONTENT_TYPE_COMMIT:
-      case HeraldContentTypeConfig::CONTENT_TYPE_MERGE:
-      case HeraldContentTypeConfig::CONTENT_TYPE_OWNERS:
         return array();
 
       default:
