@@ -1,24 +1,13 @@
 <?php
 
-final class HeraldRuleQuery extends PhabricatorOffsetPagedQuery {
+final class HeraldRuleQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
   private $authorPHIDs;
   private $ruleTypes;
   private $contentTypes;
-
-  // TODO: Remove when this becomes policy-aware.
-  private $viewer;
-
-  public function setViewer($viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
-  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -45,21 +34,17 @@ final class HeraldRuleQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public function execute() {
+  public function loadPage() {
     $table = new HeraldRule();
     $conn_r = $table->establishConnection('r');
-
-    $where = $this->buildWhereClause($conn_r);
-    $order = $this->buildOrderClause($conn_r);
-    $limit = $this->buildLimitClause($conn_r);
 
     $data = queryfx_all(
       $conn_r,
       'SELECT rule.* FROM %T rule %Q %Q %Q',
       $table->getTableName(),
-      $where,
-      $order,
-      $limit);
+      $this->buildWhereClause($conn_r),
+      $this->buildOrderClause($conn_r),
+      $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
   }
@@ -102,11 +87,9 @@ final class HeraldRuleQuery extends PhabricatorOffsetPagedQuery {
         $this->contentTypes);
     }
 
-    return $this->formatWhereClause($where);
-  }
+    $where[] = $this->buildPagingClause($conn_r);
 
-  private function buildOrderClause($conn_r) {
-    return 'ORDER BY id DESC';
+    return $this->formatWhereClause($where);
   }
 
 }

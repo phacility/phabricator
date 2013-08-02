@@ -2634,7 +2634,7 @@ phutil_register_library_map(array(
     'HeraldRuleEditHistoryController' => 'HeraldController',
     'HeraldRuleEditHistoryView' => 'AphrontView',
     'HeraldRuleListView' => 'AphrontView',
-    'HeraldRuleQuery' => 'PhabricatorOffsetPagedQuery',
+    'HeraldRuleQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HeraldTestConsoleController' => 'HeraldController',
     'HeraldTranscript' => 'HeraldDAO',
     'HeraldTranscriptController' => 'HeraldController',

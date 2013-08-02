@@ -540,8 +540,11 @@ final class HeraldRuleController extends HeraldController {
    * allows one rule to depend upon the success or failure of another rule.
    */
   private function loadRulesThisRuleMayDependUpon(HeraldRule $rule) {
+    $viewer = $this->getRequest()->getUser();
+
     // Any rule can depend on a global rule.
     $all_rules = id(new HeraldRuleQuery())
+      ->setViewer($viewer)
       ->withRuleTypes(array(HeraldRuleTypeConfig::RULE_TYPE_GLOBAL))
       ->withContentTypes(array($rule->getContentType()))
       ->execute();
@@ -549,6 +552,7 @@ final class HeraldRuleController extends HeraldController {
     if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
       // Personal rules may depend upon your other personal rules.
       $all_rules += id(new HeraldRuleQuery())
+        ->setViewer($viewer)
         ->withRuleTypes(array(HeraldRuleTypeConfig::RULE_TYPE_PERSONAL))
         ->withContentTypes(array($rule->getContentType()))
         ->withAuthorPHIDs(array($rule->getAuthorPHID()))

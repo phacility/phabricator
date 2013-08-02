@@ -26,7 +26,8 @@ final class HeraldHomeController extends HeraldController {
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    $query = new HeraldRuleQuery();
+    $query = id(new HeraldRuleQuery())
+      ->setViewer($user);
 
     $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
     if (empty($content_type_map[$this->contentType])) {
