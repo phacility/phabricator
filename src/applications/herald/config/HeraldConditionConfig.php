@@ -61,7 +61,6 @@ final class HeraldConditionConfig {
       case HeraldFieldConfig::FIELD_AUTHOR:
       case HeraldFieldConfig::FIELD_REPOSITORY:
       case HeraldFieldConfig::FIELD_REVIEWER:
-      case HeraldFieldConfig::FIELD_MERGE_REQUESTER:
         return array_select_keys(
           $map,
           array(

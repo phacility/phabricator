@@ -2,6 +2,7 @@
 
 final class HeraldFieldConfig {
 
+  // TODO: Remove; still required by conditions, etc.
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';
   const FIELD_AUTHOR                 = 'author';
@@ -19,8 +20,8 @@ final class HeraldFieldConfig {
   const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
   const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
   const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
-  const FIELD_MERGE_REQUESTER        = 'merge-requester';
 
+  // TODO: Remove; still required by transcripts.
   public static function getFieldMap() {
     $map = array(
       self::FIELD_TITLE                  => pht('Title'),
@@ -42,53 +43,9 @@ final class HeraldFieldConfig {
       self::FIELD_DIFFERENTIAL_REVISION  => pht('Differential revision'),
       self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
       self::FIELD_DIFFERENTIAL_CCS       => pht('Differential CCs'),
-      self::FIELD_MERGE_REQUESTER        => pht('Merge requester')
     );
 
     return $map;
-  }
-
-  public static function getFieldMapForContentType($type) {
-    $map = self::getFieldMap();
-
-    switch ($type) {
-      case HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL:
-        return array_select_keys(
-          $map,
-          array(
-            self::FIELD_TITLE,
-            self::FIELD_BODY,
-            self::FIELD_AUTHOR,
-            self::FIELD_REVIEWERS,
-            self::FIELD_CC,
-            self::FIELD_REPOSITORY,
-            self::FIELD_DIFF_FILE,
-            self::FIELD_DIFF_CONTENT,
-            self::FIELD_RULE,
-            self::FIELD_AFFECTED_PACKAGE,
-            self::FIELD_AFFECTED_PACKAGE_OWNER,
-          ));
-      case HeraldContentTypeConfig::CONTENT_TYPE_COMMIT:
-        return array_select_keys(
-          $map,
-          array(
-            self::FIELD_BODY,
-            self::FIELD_AUTHOR,
-            self::FIELD_REVIEWER,
-            self::FIELD_REPOSITORY,
-            self::FIELD_DIFF_FILE,
-            self::FIELD_DIFF_CONTENT,
-            self::FIELD_RULE,
-            self::FIELD_AFFECTED_PACKAGE,
-            self::FIELD_AFFECTED_PACKAGE_OWNER,
-            self::FIELD_NEED_AUDIT_FOR_PACKAGE,
-            self::FIELD_DIFFERENTIAL_REVISION,
-            self::FIELD_DIFFERENTIAL_REVIEWERS,
-            self::FIELD_DIFFERENTIAL_CCS,
-          ));
-      default:
-        throw new Exception("Unknown content type.");
-    }
   }
 
 }

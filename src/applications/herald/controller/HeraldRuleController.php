@@ -18,12 +18,17 @@ final class HeraldRuleController extends HeraldController {
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
     if ($this->id) {
-      $rule = id(new HeraldRule())->load($this->id);
+      $rule = id(new HeraldRuleQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$rule) {
         return new Aphront404Response();
-      }
-      if (!$this->canEditRule($rule, $user)) {
-        throw new Exception("You don't own this rule and can't edit it.");
       }
     } else {
       $rule = new HeraldRule();
@@ -31,9 +36,6 @@ final class HeraldRuleController extends HeraldController {
       $rule->setMustMatchAll(true);
 
       $content_type = $request->getStr('content_type');
-      if (!isset($content_type_map[$content_type])) {
-        $content_type = HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL;
-      }
       $rule->setContentType($content_type);
 
       $rule_type = $request->getStr('rule_type');
@@ -42,6 +44,8 @@ final class HeraldRuleController extends HeraldController {
       }
       $rule->setRuleType($rule_type);
     }
+
+    $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
 
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {
@@ -169,7 +173,7 @@ final class HeraldRuleController extends HeraldController {
           ->setValue(pht('Save Rule'))
           ->addCancelButton('/herald/view/'.$rule->getContentType().'/'));
 
-    $this->setupEditorBehavior($rule, $handles);
+    $this->setupEditorBehavior($rule, $handles, $adapter);
 
     $title = $rule->getID()
         ? pht('Edit Herald Rule')
@@ -192,13 +196,6 @@ final class HeraldRuleController extends HeraldController {
         'dust' => true,
         'device' => true,
       ));
-  }
-
-  private function canEditRule($rule, $user) {
-    return
-      ($user->getIsAdmin()) ||
-      ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) ||
-      ($rule->getAuthorPHID() == $user->getPHID());
   }
 
   private function saveRule($rule, $request) {
@@ -329,7 +326,11 @@ final class HeraldRuleController extends HeraldController {
     return array($e_name, $errors);
   }
 
-  private function setupEditorBehavior($rule, $handles) {
+  private function setupEditorBehavior(
+    HeraldRule $rule,
+    array $handles,
+    HeraldAdapter $adapter) {
+
     $serial_conditions = array(
       array('default', 'default', ''),
     );
@@ -386,9 +387,11 @@ final class HeraldRuleController extends HeraldController {
     $all_rules = mpull($all_rules, 'getName', 'getID');
     asort($all_rules);
 
+    $fields = $adapter->getFields();
+    $field_map = array_select_keys($adapter->getFieldNameMap(), $fields);
+
     $config_info = array();
-    $config_info['fields']
-      = HeraldFieldConfig::getFieldMapForContentType($rule->getContentType());
+    $config_info['fields'] = $field_map;
     $config_info['conditions'] = HeraldConditionConfig::getConditionMap();
     foreach ($config_info['fields'] as $field => $name) {
       $config_info['conditionMap'][$field] = array_keys(

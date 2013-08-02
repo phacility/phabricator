@@ -26,6 +26,10 @@ final class HeraldDryRunAdapter extends HeraldAdapter {
     return null;
   }
 
+  public function getFields() {
+    return array();
+  }
+
   public function applyHeraldEffects(array $effects) {
     assert_instances_of($effects, 'HeraldEffect');
     $results = array();

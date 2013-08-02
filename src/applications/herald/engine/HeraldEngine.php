@@ -446,7 +446,6 @@ final class HeraldEngine {
         break;
       case HeraldFieldConfig::FIELD_AUTHOR:
       case HeraldFieldConfig::FIELD_REPOSITORY:
-      case HeraldFieldConfig::FIELD_MERGE_REQUESTER:
         // TODO: Type should be PHID.
         $result = $this->object->getHeraldField($field);
         break;

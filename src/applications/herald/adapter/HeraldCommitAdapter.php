@@ -2,6 +2,11 @@
 
 final class HeraldCommitAdapter extends HeraldAdapter {
 
+  const FIELD_NEED_AUDIT_FOR_PACKAGE = 'need-audit-for-package';
+  const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
+  const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
+  const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
+
   protected $diff;
   protected $revision;
 
@@ -28,6 +33,34 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
   public function getAdapterContentName() {
     return pht('Commits');
+  }
+
+  public function getFieldNameMap() {
+    return array(
+      self::FIELD_NEED_AUDIT_FOR_PACKAGE =>
+        pht('Affected packages that need audit'),
+      self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
+      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
+      self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
+    ) + parent::getFieldNameMap();
+  }
+
+  public function getFields() {
+    return array(
+      self::FIELD_BODY,
+      self::FIELD_AUTHOR,
+      self::FIELD_REVIEWER,
+      self::FIELD_REPOSITORY,
+      self::FIELD_DIFF_FILE,
+      self::FIELD_DIFF_CONTENT,
+      self::FIELD_RULE,
+      self::FIELD_AFFECTED_PACKAGE,
+      self::FIELD_AFFECTED_PACKAGE_OWNER,
+      self::FIELD_NEED_AUDIT_FOR_PACKAGE,
+      self::FIELD_DIFFERENTIAL_REVISION,
+      self::FIELD_DIFFERENTIAL_REVIEWERS,
+      self::FIELD_DIFFERENTIAL_CCS,
+    );
   }
 
   public static function newLegacyAdapter(
