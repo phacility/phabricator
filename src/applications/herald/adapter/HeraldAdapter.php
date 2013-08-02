@@ -190,6 +190,7 @@ abstract class HeraldAdapter {
           self::ACTION_REMOVE_CC  => pht('Remove emails from CC'),
           self::ACTION_EMAIL      => pht('Send an email to'),
           self::ACTION_AUDIT      => pht('Trigger an Audit by'),
+          self::ACTION_FLAG       => pht('Mark with flag'),
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
