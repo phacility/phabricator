@@ -10,7 +10,7 @@ final class HeraldEngine {
   protected $fieldCache = array();
   protected $object = null;
 
-  public static function loadAndApplyRules(HeraldObjectAdapter $object) {
+  public static function loadAndApplyRules(HeraldAdapter $object) {
     $content_type = $object->getHeraldTypeName();
     $rules = HeraldRule::loadAllByContentTypeWithFullData(
       $content_type,
@@ -23,7 +23,7 @@ final class HeraldEngine {
     return $engine->getTranscript();
   }
 
-  public function applyRules(array $rules, HeraldObjectAdapter $object) {
+  public function applyRules(array $rules, HeraldAdapter $object) {
     assert_instances_of($rules, 'HeraldRule');
     $t_start = microtime(true);
 
@@ -104,7 +104,7 @@ final class HeraldEngine {
 
   public function applyEffects(
     array $effects,
-    HeraldObjectAdapter $object,
+    HeraldAdapter $object,
     array $rules) {
     assert_instances_of($effects, 'HeraldEffect');
     assert_instances_of($rules, 'HeraldRule');
@@ -175,7 +175,7 @@ final class HeraldEngine {
 
   protected function doesRuleMatch(
     HeraldRule $rule,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $id = $rule->getID();
 
@@ -258,7 +258,7 @@ final class HeraldEngine {
   protected function doesConditionMatch(
     HeraldRule $rule,
     HeraldCondition $condition,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $object_value = $this->getConditionObjectValue($condition, $object);
     $test_value   = $condition->getValue();
@@ -420,7 +420,7 @@ final class HeraldEngine {
 
   protected function getConditionObjectValue(
     HeraldCondition $condition,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $field = $condition->getFieldName();
 
@@ -483,7 +483,7 @@ final class HeraldEngine {
 
   protected function getRuleEffects(
     HeraldRule $rule,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $effects = array();
     foreach ($rule->getActions() as $action) {

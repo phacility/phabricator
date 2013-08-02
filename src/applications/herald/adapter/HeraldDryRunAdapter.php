@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldDryRunAdapter extends HeraldObjectAdapter {
+final class HeraldDryRunAdapter extends HeraldAdapter {
 
   public function getPHID() {
     return 0;

@@ -1,6 +1,6 @@
 <?php
 
-abstract class HeraldObjectAdapter {
+abstract class HeraldAdapter {
 
   abstract public function getPHID();
   abstract public function getHeraldName();

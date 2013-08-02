@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
+final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   protected $revision;
   protected $diff;
