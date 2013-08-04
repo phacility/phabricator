@@ -21,8 +21,9 @@ foreach ($rows as $row) {
     $conn_w,
     'INSERT INTO %T (phid, authorPHID, objectPHID, viewPolicy, editPolicy,
         transactionType, oldValue, newValue,
-        contentSource, metadata, dateCreated, dateModified)
-      VALUES (%s, %s, %s, %s, %s, %s, %ns, %ns, %s, %s, %d, %d)',
+        contentSource, metadata, dateCreated, dateModified,
+        commentVersion)
+      VALUES (%s, %s, %s, %s, %s, %s, %ns, %ns, %s, %s, %d, %d, %d)',
     $x_table->getTableName(),
     $xaction_phid,
     $row['authorPHID'],
@@ -37,7 +38,8 @@ foreach ($rows as $row) {
       array())->serialize(),
     '[]',
     $row['dateCreated'],
-    $row['dateCreated']);
+    $row['dateCreated'],
+    0);
 
 }
 
