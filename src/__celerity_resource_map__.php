@@ -1140,7 +1140,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-source-css' =>
   array(
-    'uri' => '/res/e76bcd50/rsrc/css/application/diffusion/diffusion-source.css',
+    'uri' => '/res/162c8794/rsrc/css/application/diffusion/diffusion-source.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1667,19 +1667,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/diffusion/behavior-jump-to.js',
   ),
-  'javelin-behavior-diffusion-line-linker' =>
-  array(
-    'uri' => '/res/12866f13/rsrc/js/application/diffusion/behavior-line-linker.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-dom',
-      3 => 'javelin-history',
-    ),
-    'disk' => '/rsrc/js/application/diffusion/behavior-line-linker.js',
-  ),
   'javelin-behavior-diffusion-pull-lastmodified' =>
   array(
     'uri' => '/res/29fe2790/rsrc/js/application/diffusion/behavior-pull-lastmodified.js',
@@ -2067,6 +2054,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/core/behavior-keyboard-shortcuts.js',
   ),
+  'javelin-behavior-phabricator-line-linker' =>
+  array(
+    'uri' => '/res/1cefdb6a/rsrc/js/core/behavior-line-linker.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'javelin-history',
+    ),
+    'disk' => '/rsrc/js/core/behavior-line-linker.js',
+  ),
   'javelin-behavior-phabricator-nav' =>
   array(
     'uri' => '/res/afabcf16/rsrc/js/core/behavior-phabricator-nav.js',
@@ -2249,7 +2249,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-view' =>
   array(
-    'uri' => '/res/3ff82e28/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
+    'uri' => '/res/f9588dcf/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3498,7 +3498,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-source-code-view-css' =>
   array(
-    'uri' => '/res/979d5280/rsrc/css/layout/phabricator-source-code-view.css',
+    'uri' => '/res/70bcbea4/rsrc/css/layout/phabricator-source-code-view.css',
     'type' => 'css',
     'requires' =>
     array(
