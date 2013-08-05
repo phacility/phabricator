@@ -239,9 +239,9 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
         $packages = $this->loadAffectedPackages();
         return PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
           mpull($packages, 'getID'));
-      default:
-        throw new Exception("Invalid field '{$field}'.");
     }
+
+    return parent::getHeraldField($field);
   }
 
   public function getActions($rule_type) {

@@ -10,6 +10,10 @@ final class HeraldEngine {
   protected $fieldCache = array();
   protected $object = null;
 
+  public function getRule($id) {
+    return idx($this->rules, $id);
+  }
+
   public static function loadAndApplyRules(HeraldAdapter $object) {
     $content_type = $object->getAdapterContentType();
     $rules = HeraldRule::loadAllByContentTypeWithFullData(
@@ -173,7 +177,7 @@ final class HeraldEngine {
     return $this->transcript;
   }
 
-  protected function doesRuleMatch(
+  public function doesRuleMatch(
     HeraldRule $rule,
     HeraldAdapter $object) {
 
@@ -272,143 +276,15 @@ final class HeraldEngine {
     $transcript->setCondition($cond);
     $transcript->setTestValue($test_value);
 
-    $result = null;
-    switch ($cond) {
-      case HeraldConditionConfig::CONDITION_CONTAINS:
-        // "Contains" can take an array of strings, as in "Any changed
-        // filename" for diffs.
-        foreach ((array)$object_value as $value) {
-          $result = (stripos($value, $test_value) !== false);
-          if ($result) {
-            break;
-          }
-        }
-        break;
-      case HeraldConditionConfig::CONDITION_NOT_CONTAINS:
-        $result = (stripos($object_value, $test_value) === false);
-        break;
-      case HeraldConditionConfig::CONDITION_IS:
-        $result = ($object_value == $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_IS_NOT:
-        $result = ($object_value != $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_IS_ME:
-        $result = ($object_value == $rule->getAuthorPHID());
-        break;
-      case HeraldConditionConfig::CONDITION_IS_NOT_ME:
-        $result = ($object_value != $rule->getAuthorPHID());
-        break;
-      case HeraldConditionConfig::CONDITION_IS_ANY:
-        $test_value = array_flip($test_value);
-        $result = isset($test_value[$object_value]);
-        break;
-      case HeraldConditionConfig::CONDITION_IS_NOT_ANY:
-        $test_value = array_flip($test_value);
-        $result = !isset($test_value[$object_value]);
-        break;
-      case HeraldConditionConfig::CONDITION_INCLUDE_ALL:
-        if (!is_array($object_value)) {
-          $transcript->setNote('Object produced bad value!');
-          $result = false;
-        } else {
-          $have = array_select_keys(array_flip($object_value),
-                                    $test_value);
-          $result = (count($have) == count($test_value));
-        }
-        break;
-      case HeraldConditionConfig::CONDITION_INCLUDE_ANY:
-        $result = (bool)array_select_keys(array_flip($object_value),
-                                          $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_INCLUDE_NONE:
-        $result = !array_select_keys(array_flip($object_value),
-                                     $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_EXISTS:
-        $result = (bool)$object_value;
-        break;
-      case HeraldConditionConfig::CONDITION_NOT_EXISTS:
-        $result = !$object_value;
-        break;
-      case HeraldConditionConfig::CONDITION_REGEXP:
-        foreach ((array)$object_value as $value) {
-          // We add the 'S' flag because we use the regexp multiple times.
-          // It shouldn't cause any troubles if the flag is already there
-          // - /.*/S is evaluated same as /.*/SS.
-          $result = @preg_match($test_value . 'S', $value);
-          if ($result === false) {
-            $transcript->setNote(
-              "Regular expression is not valid!");
-            break;
-          }
-          if ($result) {
-            break;
-          }
-        }
-        $result = (bool)$result;
-        break;
-      case HeraldConditionConfig::CONDITION_REGEXP_PAIR:
-        // Match a JSON-encoded pair of regular expressions against a
-        // dictionary. The first regexp must match the dictionary key, and the
-        // second regexp must match the dictionary value. If any key/value pair
-        // in the dictionary matches both regexps, the condition is satisfied.
-        $regexp_pair = json_decode($test_value, true);
-        if (!is_array($regexp_pair)) {
-          $result = false;
-          $transcript->setNote("Regular expression pair is not valid JSON!");
-          break;
-        }
-        if (count($regexp_pair) != 2) {
-          $result = false;
-          $transcript->setNote("Regular expression pair is not a pair!");
-          break;
-        }
-
-        $key_regexp   = array_shift($regexp_pair);
-        $value_regexp = array_shift($regexp_pair);
-
-        foreach ((array)$object_value as $key => $value) {
-          $key_matches = @preg_match($key_regexp, $key);
-          if ($key_matches === false) {
-            $result = false;
-            $transcript->setNote("First regular expression is invalid!");
-            break 2;
-          }
-          if ($key_matches) {
-            $value_matches = @preg_match($value_regexp, $value);
-            if ($value_matches === false) {
-              $result = false;
-              $transcript->setNote("Second regular expression is invalid!");
-              break 2;
-            }
-            if ($value_matches) {
-              $result = true;
-              break 2;
-            }
-          }
-        }
-        $result = false;
-        break;
-      case HeraldConditionConfig::CONDITION_RULE:
-      case HeraldConditionConfig::CONDITION_NOT_RULE:
-
-        $rule = idx($this->rules, $test_value);
-        if (!$rule) {
-          $transcript->setNote(
-            "Condition references a rule which does not exist!");
-          $result = false;
-        } else {
-          $is_not = ($cond == HeraldConditionConfig::CONDITION_NOT_RULE);
-          $result = $this->doesRuleMatch($rule, $object);
-          if ($is_not) {
-            $result = !$result;
-          }
-        }
-        break;
-      default:
-        throw new HeraldInvalidConditionException(
-          "Unknown condition '{$cond}'.");
+    try {
+      $result = $object->doesConditionMatch(
+        $this,
+        $rule,
+        $condition,
+        $object_value);
+    } catch (HeraldInvalidConditionException $ex) {
+      $result = false;
+      $transcript->setNote($ex->getMessage());
     }
 
     $transcript->setResult($result);
@@ -432,49 +308,7 @@ final class HeraldEngine {
       return $this->fieldCache[$field];
     }
 
-    $result = null;
-    switch ($field) {
-      case HeraldFieldConfig::FIELD_RULE:
-        $result = null;
-        break;
-      case HeraldFieldConfig::FIELD_TITLE:
-      case HeraldFieldConfig::FIELD_BODY:
-      case HeraldFieldConfig::FIELD_DIFF_FILE:
-      case HeraldFieldConfig::FIELD_DIFF_CONTENT:
-        // TODO: Type should be string.
-        $result = $this->object->getHeraldField($field);
-        break;
-      case HeraldFieldConfig::FIELD_AUTHOR:
-      case HeraldFieldConfig::FIELD_REPOSITORY:
-        // TODO: Type should be PHID.
-        $result = $this->object->getHeraldField($field);
-        break;
-      case HeraldFieldConfig::FIELD_TAGS:
-      case HeraldFieldConfig::FIELD_REVIEWER:
-      case HeraldFieldConfig::FIELD_REVIEWERS:
-      case HeraldFieldConfig::FIELD_CC:
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVIEWERS:
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_CCS:
-        // TODO: Type should be list.
-        $result = $this->object->getHeraldField($field);
-        break;
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
-      case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
-        $result = $this->object->getHeraldField($field);
-        if (!is_array($result)) {
-          throw new HeraldInvalidFieldException(
-            "Value of field type {$field} is not an array!");
-        }
-        break;
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVISION:
-        // TODO: Type should be boolean I guess.
-        $result = $this->object->getHeraldField($field);
-        break;
-      default:
-        throw new HeraldInvalidConditionException(
-          "Unknown field type '{$field}'!");
-    }
+    $result = $this->object->getHeraldField($field);
 
     $this->fieldCache[$field] = $result;
     return $result;

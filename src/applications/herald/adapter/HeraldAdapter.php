@@ -54,7 +54,17 @@ abstract class HeraldAdapter {
 
   abstract public function getPHID();
   abstract public function getHeraldName();
-  abstract public function getHeraldField($field_name);
+
+  public function getHeraldField($field_name) {
+    switch ($field_name) {
+      case self::FIELD_RULE:
+        return null;
+      default:
+        throw new Exception(
+          "Unknown field '{$field_name}'!");
+    }
+  }
+
   abstract public function applyHeraldEffects(array $effects);
 
   public function isEnabled() {
@@ -173,6 +183,225 @@ abstract class HeraldAdapter {
       default:
         throw new Exception(
           "This adapter does not define conditions for field '{$field}'!");
+    }
+  }
+
+  public function doesConditionMatch(
+    HeraldEngine $engine,
+    HeraldRule $rule,
+    HeraldCondition $condition,
+    $field_value) {
+
+    $condition_type = $condition->getFieldCondition();
+    $condition_value = $condition->getValue();
+
+    switch ($condition_type) {
+      case self::CONDITION_CONTAINS:
+        // "Contains" can take an array of strings, as in "Any changed
+        // filename" for diffs.
+        foreach ((array)$field_value as $value) {
+          if (stripos($value, $condition_value) !== false) {
+            return true;
+          }
+        }
+        return false;
+      case self::CONDITION_NOT_CONTAINS:
+        return (stripos($field_value, $condition_value) === false);
+      case self::CONDITION_IS:
+        return ($field_value == $condition_value);
+      case self::CONDITION_IS_NOT:
+        return ($field_value != $condition_value);
+      case self::CONDITION_IS_ME:
+        return ($field_value == $rule->getAuthorPHID());
+      case self::CONDITION_IS_NOT_ME:
+        return ($field_value != $rule->getAuthorPHID());
+      case self::CONDITION_IS_ANY:
+        if (!is_array($condition_value)) {
+          throw new HeraldInvalidConditionException(
+            "Expected condition value to be an array.");
+        }
+        $condition_value = array_fuse($condition_value);
+        return isset($condition_value[$field_value]);
+      case self::CONDITION_IS_NOT_ANY:
+        if (!is_array($condition_value)) {
+          throw new HeraldInvalidConditionException(
+            "Expected condition value to be an array.");
+        }
+        $condition_value = array_fuse($condition_value);
+        return !isset($condition_value[$field_value]);
+      case self::CONDITION_INCLUDE_ALL:
+        if (!is_array($field_value)) {
+          throw new HeraldInvalidConditionException(
+            "Object produced non-array value!");
+        }
+        if (!is_array($condition_value)) {
+          throw new HeraldInvalidConditionException(
+            "Expected conditionv value to be an array.");
+        }
+
+        $have = array_select_keys(array_fuse($field_value), $condition_value);
+        return (count($have) == count($condition_value));
+      case self::CONDITION_INCLUDE_ANY:
+        return (bool)array_select_keys(
+          array_fuse($field_value),
+          $condition_value);
+      case self::CONDITION_INCLUDE_NONE:
+        return !array_select_keys(
+          array_fuse($field_value),
+          $condition_value);
+      case self::CONDITION_EXISTS:
+        return (bool)$field_value;
+      case self::CONDITION_NOT_EXISTS:
+        return !$field_value;
+      case self::CONDITION_REGEXP:
+        foreach ((array)$field_value as $value) {
+          // We add the 'S' flag because we use the regexp multiple times.
+          // It shouldn't cause any troubles if the flag is already there
+          // - /.*/S is evaluated same as /.*/SS.
+          $result = @preg_match($condition_value . 'S', $value);
+          if ($result === false) {
+            throw new HeraldInvalidConditionException(
+              "Regular expression is not valid!");
+          }
+          if ($result) {
+            return true;
+          }
+        }
+        return false;
+      case self::CONDITION_REGEXP_PAIR:
+        // Match a JSON-encoded pair of regular expressions against a
+        // dictionary. The first regexp must match the dictionary key, and the
+        // second regexp must match the dictionary value. If any key/value pair
+        // in the dictionary matches both regexps, the condition is satisfied.
+        $regexp_pair = json_decode($condition_value, true);
+        if (!is_array($regexp_pair)) {
+          throw new HeraldInvalidConditionException(
+            "Regular expression pair is not valid JSON!");
+        }
+        if (count($regexp_pair) != 2) {
+          throw new HeraldInvalidConditionException(
+            "Regular expression pair is not a pair!");
+        }
+
+        $key_regexp   = array_shift($regexp_pair);
+        $value_regexp = array_shift($regexp_pair);
+
+        foreach ((array)$field_value as $key => $value) {
+          $key_matches = @preg_match($key_regexp, $key);
+          if ($key_matches === false) {
+            throw new HeraldInvalidConditionException(
+              "First regular expression is invalid!");
+          }
+          if ($key_matches) {
+            $value_matches = @preg_match($value_regexp, $value);
+            if ($value_matches === false) {
+              throw new HeraldInvalidConditionException(
+                "Second regular expression is invalid!");
+            }
+            if ($value_matches) {
+              return true;
+            }
+          }
+        }
+        return false;
+      case self::CONDITION_RULE:
+      case self::CONDITION_NOT_RULE:
+        $rule = $engine->getRule($condition_value);
+        if (!$rule) {
+          throw new HeraldInvalidConditionException(
+            "Condition references a rule which does not exist!");
+        }
+
+        $is_not = ($condition_type == self::CONDITION_NOT_RULE);
+        $result = $engine->doesRuleMatch($rule, $this);
+        if ($is_not) {
+          $result = !$result;
+        }
+        return $result;
+      default:
+        throw new HeraldInvalidConditionException(
+          "Unknown condition '{$condition_type}'.");
+    }
+  }
+
+  public function willSaveCondition(HeraldCondition $condition) {
+    $condition_type = $condition->getFieldCondition();
+    $condition_value = $condition->getValue();
+
+    switch ($condition_type) {
+      case self::CONDITION_REGEXP:
+        $ok = @preg_match($condition_value, '');
+        if ($ok === false) {
+          throw new HeraldInvalidConditionException(
+            pht(
+              'The regular expression "%s" is not valid. Regular expressions '.
+              'must have enclosing characters (e.g. "@/path/to/file@", not '.
+              '"/path/to/file") and be syntactically correct.',
+              $condition_value));
+        }
+        break;
+      case self::CONDITION_REGEXP_PAIR:
+        $json = json_decode($condition_value, true);
+        if (!is_array($json)) {
+          throw new HeraldInvalidConditionException(
+            pht(
+              'The regular expression pair "%s" is not valid JSON. Enter a '.
+              'valid JSON array with two elements.',
+              $condition_value));
+        }
+
+        if (count($json) != 2) {
+          throw new HeraldInvalidConditionException(
+            pht(
+              'The regular expression pair "%s" must have exactly two '.
+              'elements.',
+              $condition_value));
+        }
+
+        $key_regexp = array_shift($json);
+        $val_regexp = array_shift($json);
+
+        $key_ok = @preg_match($key_regexp, '');
+        if ($key_ok === false) {
+          throw new HeraldInvalidConditionException(
+            pht(
+              'The first regexp in the regexp pair, "%s", is not a valid '.
+              'regexp.',
+              $key_regexp));
+        }
+
+        $val_ok = @preg_match($val_regexp, '');
+        if ($val_ok === false) {
+          throw new HeraldInvalidConditionException(
+            pht(
+              'The second regexp in the regexp pair, "%s", is not a valid '.
+              'regexp.',
+              $val_regexp));
+        }
+        break;
+      case self::CONDITION_CONTAINS:
+      case self::CONDITION_NOT_CONTAINS:
+      case self::CONDITION_IS:
+      case self::CONDITION_IS_NOT:
+      case self::CONDITION_IS_ANY:
+      case self::CONDITION_IS_NOT_ANY:
+      case self::CONDITION_INCLUDE_ALL:
+      case self::CONDITION_INCLUDE_ANY:
+      case self::CONDITION_INCLUDE_NONE:
+      case self::CONDITION_IS_ME:
+      case self::CONDITION_IS_NOT_ME:
+      case self::CONDITION_RULE:
+      case self::CONDITION_NOT_RULE:
+      case self::CONDITION_EXISTS:
+      case self::CONDITION_NOT_EXISTS:
+        // No explicit validation for these types, although there probably
+        // should be in some cases.
+        break;
+      default:
+        throw new HeraldInvalidConditionException(
+          pht(
+            'Unknown condition "%s"!',
+            $condition_type));
     }
   }
 

@@ -600,7 +600,6 @@ phutil_register_library_map(array(
     'HeraldApplyTranscript' => 'applications/herald/storage/transcript/HeraldApplyTranscript.php',
     'HeraldCommitAdapter' => 'applications/herald/adapter/HeraldCommitAdapter.php',
     'HeraldCondition' => 'applications/herald/storage/HeraldCondition.php',
-    'HeraldConditionConfig' => 'applications/herald/config/HeraldConditionConfig.php',
     'HeraldConditionTranscript' => 'applications/herald/storage/transcript/HeraldConditionTranscript.php',
     'HeraldController' => 'applications/herald/controller/HeraldController.php',
     'HeraldDAO' => 'applications/herald/storage/HeraldDAO.php',

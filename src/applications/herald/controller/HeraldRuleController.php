@@ -68,7 +68,7 @@ final class HeraldRuleController extends HeraldController {
     $e_name = true;
     $errors = array();
     if ($request->isFormPost() && $request->getStr('save')) {
-      list($e_name, $errors) = $this->saveRule($rule, $request);
+      list($e_name, $errors) = $this->saveRule($adapter, $rule, $request);
       if (!$errors) {
         $uri = '/herald/view/'.
           $rule->getContentType().'/'.
@@ -198,7 +198,7 @@ final class HeraldRuleController extends HeraldController {
       ));
   }
 
-  private function saveRule($rule, $request) {
+  private function saveRule(HeraldAdapter $adapter, $rule, $request) {
     $rule->setName($request->getStr('name'));
     $rule->setMustMatchAll(($request->getStr('must_match') == 'all'));
 
@@ -239,46 +239,10 @@ final class HeraldRuleController extends HeraldController {
         $obj->setValue($condition[2]);
       }
 
-      $cond_type = $obj->getFieldCondition();
-
-      if ($cond_type == HeraldConditionConfig::CONDITION_REGEXP) {
-        if (@preg_match($obj->getValue(), '') === false) {
-          $errors[] =
-            pht('The regular expression "%s" is not valid. '.
-            'Regular expressions must have enclosing characters (e.g. '.
-            '"@/path/to/file@", not "/path/to/file") and be syntactically '.
-            'correct.', $obj->getValue());
-        }
-      }
-
-      if ($cond_type == HeraldConditionConfig::CONDITION_REGEXP_PAIR) {
-        $json = json_decode($obj->getValue(), true);
-        if (!is_array($json)) {
-          $errors[] =
-            pht('The regular expression pair "%s" is not '.
-            'valid JSON. Enter a valid JSON array with two elements.',
-            $obj->getValue());
-        } else {
-          if (count($json) != 2) {
-            $errors[] =
-              pht('The regular expression pair "%s" must have '.
-              'exactly two elements.', $obj->getValue());
-          } else {
-            $key_regexp = array_shift($json);
-            $val_regexp = array_shift($json);
-
-            if (@preg_match($key_regexp, '') === false) {
-              $errors[] =
-                pht('The first regexp, "%s" in the regexp pair '.
-                'is not a valid regexp.', $key_regexp);
-            }
-            if (@preg_match($val_regexp, '') === false) {
-              $errors[] =
-                pht('The second regexp, "%s" in the regexp pair '.
-                'is not a valid regexp.', $val_regexp);
-            }
-          }
-        }
+      try {
+        $adapter->willSaveCondition($obj);
+      } catch (HeraldInvalidConditionException $ex) {
+        $errors[] = $ex->getMessage();
       }
 
       $conditions[] = $obj;

@@ -287,9 +287,9 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           return array();
         }
         return $revision->getCCPHIDs();
-      default:
-        throw new Exception("Invalid field '{$field}'.");
     }
+
+    return parent::getHeraldField($field);
   }
 
   public function applyHeraldEffects(array $effects) {
