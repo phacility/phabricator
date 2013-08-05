@@ -2268,19 +2268,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/phriction/phriction-document-preview.js',
   ),
-  'javelin-behavior-ponder-feedback-preview' =>
-  array(
-    'uri' => '/res/2e802dd9/rsrc/js/application/ponder/behavior-comment-preview.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'phabricator-shaped-request',
-    ),
-    'disk' => '/rsrc/js/application/ponder/behavior-comment-preview.js',
-  ),
   'javelin-behavior-ponder-votebox' =>
   array(
     'uri' => '/res/c28daa12/rsrc/js/application/ponder/behavior-votebox.js',
@@ -3866,7 +3853,7 @@ celerity_register_resource_map(array(
   ),
   'phui-remarkup-preview-css' =>
   array(
-    'uri' => '/res/702b30c4/rsrc/css/phui/phui-remarkup-preview.css',
+    'uri' => '/res/80d54c8c/rsrc/css/phui/phui-remarkup-preview.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -41,8 +41,8 @@ final class PonderAddAnswerView extends AphrontView {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ?
-            pht('Submit') :
-            pht('Make it so')));
+            pht('Add Answer') :
+            pht('Bequeath Wisdom')));
 
     return id(new AphrontNullView())
       ->appendChild(

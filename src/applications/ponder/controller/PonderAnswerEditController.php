@@ -66,6 +66,8 @@ final class PonderAnswerEditController extends PonderController {
       $errors = id(new AphrontErrorView())->setErrors($errors);
     }
 
+    $answer_content_id = celerity_generate_unique_node_id();
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -76,6 +78,7 @@ final class PonderAnswerEditController extends PonderController {
         id(new PhabricatorRemarkupControl())
           ->setLabel(pht('Answer'))
           ->setName('content')
+          ->setID($answer_content_id)
           ->setValue($v_content)
           ->setError($e_content))
       ->appendChild(
@@ -92,11 +95,17 @@ final class PonderAnswerEditController extends PonderController {
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Answer')));
 
+    $preview = id(new PHUIRemarkupPreviewPanel())
+      ->setHeader(pht('Answer Preview'))
+      ->setControlID($answer_content_id)
+      ->setPreviewURI($this->getApplicationURI('preview/'));
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $errors,
         $form,
+        $preview,
       ),
       array(
         'title' => pht('Edit Answer'),
