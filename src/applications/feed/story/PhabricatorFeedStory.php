@@ -17,7 +17,6 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $handles  = array();
   private $objects  = array();
 
-
 /* -(  Loading Stories  )---------------------------------------------------- */
 
 

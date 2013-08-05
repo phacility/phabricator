@@ -3830,7 +3830,7 @@ celerity_register_resource_map(array(
   ),
   'phui-feed-story-css' =>
   array(
-    'uri' => '/res/e5d6825b/rsrc/css/phui/phui-feed-story.css',
+    'uri' => '/res/5d7ab26c/rsrc/css/phui/phui-feed-story.css',
     'type' => 'css',
     'requires' =>
     array(

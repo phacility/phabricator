@@ -65,8 +65,12 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     }
 
     $view->setImage($this->getHandle($author_phid)->getImageURI());
-    $content = $this->renderSummary($data->getValue('content'));
-    $view->appendChild($content);
+    switch ($action) {
+      case PhrictionActionConstants::ACTION_CREATE:
+        $content = $this->renderSummary($data->getValue('content'));
+        $view->appendChild($content);
+        break;
+      }
 
     return $view;
   }

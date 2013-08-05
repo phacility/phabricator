@@ -10,7 +10,6 @@ final class PHUIFeedStoryView extends AphrontView {
   private $epoch;
   private $viewed;
   private $href;
-  private $oneline = false;
   private $pontification = null;
   private $tokenBar = array();
   private $projects = array();
@@ -33,11 +32,6 @@ final class PHUIFeedStoryView extends AphrontView {
 
   public function setEpoch($epoch) {
     $this->epoch = $epoch;
-    return $this;
-  }
-
-  public function setOneLine($oneline) {
-    $this->oneline = $oneline;
     return $this;
   }
 
@@ -86,7 +80,6 @@ final class PHUIFeedStoryView extends AphrontView {
   }
 
   public function setPontification($text, $title = null) {
-    $this->setOneLine(false);
     if ($title) {
       $title = phutil_tag('h3', array(), $title);
     }
@@ -130,6 +123,7 @@ final class PHUIFeedStoryView extends AphrontView {
   public function render() {
 
     require_celerity_resource('phui-feed-story-css');
+    $oneline = $this->isEmptyContent($this->renderChildren());
 
     $body = null;
     $foot = null;
@@ -174,7 +168,7 @@ final class PHUIFeedStoryView extends AphrontView {
     }
 
     $ol_foot = null;
-    if ($this->oneline) {
+    if ($oneline) {
       $ol_foot = phutil_tag(
         'div',
           array(
@@ -236,7 +230,7 @@ final class PHUIFeedStoryView extends AphrontView {
         $body_content);
     }
 
-    if ($this->oneline) {
+    if ($oneline) {
       $foot = null;
     } else {
       $foot = phutil_tag(
@@ -250,7 +244,7 @@ final class PHUIFeedStoryView extends AphrontView {
     }
 
     $classes = array('phui-feed-story');
-    if ($this->oneline) {
+    if ($oneline) {
       $classes[] = 'phui-feed-story-oneline';
     }
 

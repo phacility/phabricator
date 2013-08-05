@@ -23,10 +23,12 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
       $this->linkTo($commit_phid)));
 
     $comments = $this->getValue('content');
-
     $view->setImage($this->getHandle($author_phid)->getImageURI());
-    $content = $this->renderSummary($this->getValue('content'));
-    $view->appendChild($content);
+
+    if ($comments) {
+      $content = $this->renderSummary($this->getValue('content'));
+      $view->appendChild($content);
+    }
 
     return $view;
   }
