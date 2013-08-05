@@ -9,6 +9,7 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
   private $loadingText;
   private $controlID;
   private $previewURI;
+  private $skin = 'default';
 
   protected function canAppendChild() {
     return false;
@@ -34,13 +35,35 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
     return $this;
   }
 
+  public function setSkin($skin) {
+    static $skins = array(
+      'default' => true,
+      'document' => true,
+    );
+
+    if (empty($skins[$skin])) {
+      $valid = implode(', ', array_keys($skins));
+      throw new Exception("Invalid skin '{$skin}'. Valid skins are: {$valid}.");
+    }
+
+    $this->skin = $skin;
+    return $this;
+  }
+
   public function getTagName() {
     return 'div';
   }
 
   public function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'phui-remarkup-preview';
+
+    if ($this->skin) {
+      $classes[] = 'phui-remarkup-preview-skin-'.$this->skin;
+    }
+
     return array(
-      'class' => 'phui-remarkup-preview',
+      'class' => $classes,
     );
   }
 
@@ -88,7 +111,17 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
       ),
       $loading);
 
-    return array($header, $preview);
+    $content = array($header, $preview);
+
+    switch ($this->skin) {
+      case 'document':
+        $content = id(new PHUIDocumentView())->appendChild($content);
+        break;
+      default:
+        break;
+    }
+
+    return $content;
   }
 
 }

@@ -146,7 +146,7 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newPonderMarkupEngine();
+    return PhabricatorMarkupEngine::getEngine();
   }
 
   public function didMarkupText(

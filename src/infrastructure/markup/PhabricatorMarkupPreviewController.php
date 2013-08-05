@@ -10,7 +10,9 @@ final class PhabricatorMarkupPreviewController
     $text = $request->getStr('text');
 
     $output = PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($text),
+      id(new PhabricatorMarkupOneOff())
+        ->setPreserveLinebreaks(true)
+        ->setContent($text),
       'default',
       $viewer);
 

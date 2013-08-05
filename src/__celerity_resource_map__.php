@@ -1765,19 +1765,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/core/behavior-konami.js',
   ),
-  'javelin-behavior-legalpad-document-preview' =>
-  array(
-    'uri' => '/res/d0ce5a8c/rsrc/js/application/legalpad/legalpad-document-preview.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'phabricator-shaped-request',
-    ),
-    'disk' => '/rsrc/js/application/legalpad/legalpad-document-preview.js',
-  ),
   'javelin-behavior-lightbox-attachments' =>
   array(
     'uri' => '/res/72b4d3a8/rsrc/js/core/behavior-lightbox-attachments.js',
@@ -2254,19 +2241,6 @@ celerity_register_resource_map(array(
       11 => 'phabricator-keyboard-shortcut',
     ),
     'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-view.js',
-  ),
-  'javelin-behavior-phriction-document-preview' =>
-  array(
-    'uri' => '/res/e2fe02de/rsrc/js/application/phriction/phriction-document-preview.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'phabricator-shaped-request',
-    ),
-    'disk' => '/rsrc/js/application/phriction/phriction-document-preview.js',
   ),
   'javelin-behavior-ponder-votebox' =>
   array(
@@ -3781,7 +3755,7 @@ celerity_register_resource_map(array(
   ),
   'phriction-document-css' =>
   array(
-    'uri' => '/res/97a9ef40/rsrc/css/application/phriction/phriction-document-css.css',
+    'uri' => '/res/754f6b37/rsrc/css/application/phriction/phriction-document-css.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3853,7 +3827,7 @@ celerity_register_resource_map(array(
   ),
   'phui-remarkup-preview-css' =>
   array(
-    'uri' => '/res/80d54c8c/rsrc/css/phui/phui-remarkup-preview.css',
+    'uri' => '/res/6c886e63/rsrc/css/phui/phui-remarkup-preview.css',
     'type' => 'css',
     'requires' =>
     array(

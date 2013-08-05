@@ -345,20 +345,6 @@ final class PhabricatorMarkupEngine {
     ));
   }
 
-
-  /**
-   * @task engine
-   */
-  public static function newSlowvoteMarkupEngine() {
-    return self::newMarkupEngine(array(
-    ));
-  }
-
-
-  public static function newPonderMarkupEngine(array $options = array()) {
-    return self::newMarkupEngine($options);
-  }
-
   /**
    * @task engine
    */

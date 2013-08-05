@@ -52,7 +52,7 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
         'new/'                        => 'PhrictionNewController',
         'move/(?:(?P<id>[1-9]\d*)/)?'      => 'PhrictionMoveController',
 
-        'preview/' => 'PhrictionDocumentPreviewController',
+        'preview/' => 'PhabricatorMarkupPreviewController',
         'diff/(?P<id>[1-9]\d*)/' => 'PhrictionDiffController',
       ),
     );
