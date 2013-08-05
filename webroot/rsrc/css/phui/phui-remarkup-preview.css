@@ -1,0 +1,23 @@
+/**
+ * @provides phui-remarkup-preview-css
+ */
+
+.phui-preview-header {
+  color: #666666;
+  margin-bottom: 12px;
+  font-size: 11px;
+}
+
+.phui-remarkup-preview {
+  background: #fbfbfb;
+  border-bottom: 1px solid #aaaaaa;
+  padding: 12px;
+}
+
+.device-phone .aphront-panel-preview {
+  display: none;
+}
+
+.phui-preview-loading-text {
+  color: #666666;
+}

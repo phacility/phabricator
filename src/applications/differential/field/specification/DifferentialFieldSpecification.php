@@ -149,6 +149,19 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
+   * Optionally, build a preview panel for the field which will appear on the
+   * edit interface. This is used for the "Summary" field, but custom fields
+   * generally need not implement it.
+   *
+   * @return AphrontView|string Something renderable.
+   * @task edit
+   */
+  public function renderEditPreview() {
+    return null;
+  }
+
+
+  /**
    * This method will be called after @{method:setValueFromRequest} but before
    * the field is saved. It gives you an opportunity to inspect the field value
    * and throw a @{class:DifferentialFieldValidationException} if there is a

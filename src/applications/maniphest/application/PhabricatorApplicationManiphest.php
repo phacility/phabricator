@@ -59,7 +59,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
           'descriptionchange/(?:(?P<id>[1-9]\d*)/)?' =>
             'ManiphestTaskDescriptionChangeController',
           'descriptionpreview/' =>
-            'ManiphestTaskDescriptionPreviewController',
+            'PhabricatorMarkupPreviewController',
         ),
         'transaction/' => array(
           'save/' => 'ManiphestTransactionSaveController',

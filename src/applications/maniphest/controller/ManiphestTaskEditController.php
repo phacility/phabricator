@@ -536,30 +536,10 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->addCancelButton($cancel_uri)
           ->setValue($button_name));
 
-    $inst1 = pht('Description Preview');
-    $inst2 = pht('Loading preview...');
-
-    $description_preview_panel = hsprintf(
-      '<div class="aphront-panel-preview aphront-panel-preview-full">
-        <div class="maniphest-description-preview-header">
-          %s
-        </div>
-        <div id="description-preview">
-          <div class="aphront-panel-preview-loading-text">
-            %s
-          </div>
-        </div>
-      </div>',
-      $inst1,
-      $inst2);
-
-    Javelin::initBehavior(
-      'maniphest-description-preview',
-      array(
-        'preview'   => 'description-preview',
-        'textarea'  => 'description-textarea',
-        'uri'       => '/maniphest/task/descriptionpreview/',
-      ));
+    $preview = id(new PHUIRemarkupPreviewPanel())
+      ->setHeader(pht('Description Preview'))
+      ->setControlID('description-textarea')
+      ->setPreviewURI($this->getApplicationURI('task/descriptionpreview/'));
 
     if ($task->getID()) {
       $page_objects = array( $task->getPHID() );
@@ -583,7 +563,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         $crumbs,
         $error_view,
         $form,
-        $description_preview_panel,
+        $preview,
       ),
       array(
         'title' => $header_name,
