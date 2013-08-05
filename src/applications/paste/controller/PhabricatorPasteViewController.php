@@ -6,6 +6,7 @@
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private $id;
+  private $highlightMap;
 
   public function shouldAllowPublic() {
     return true;
@@ -13,6 +14,21 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
+    $raw_lines = idx($data, 'lines');
+    $map = array();
+    if ($raw_lines) {
+      $lines = explode('-', $raw_lines);
+      $first = idx($lines, 0, 0);
+      $last = idx($lines, 1);
+      if ($last) {
+        $min = min($first, $last);
+        $max = max($first, $last);
+        $map = array_fuse(range($min, $max));
+      } else {
+        $map[$first] = $first;
+      }
+    }
+    $this->highlightMap = $map;
   }
 
   public function processRequest() {
@@ -52,7 +68,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($user, $paste, $file);
     $properties = $this->buildPropertyView($paste, $fork_phids);
-    $source_code = $this->buildSourceCodeView($paste);
+    $source_code = $this->buildSourceCodeView(
+      $paste,
+      null,
+      $this->highlightMap);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
       ->setActionList($actions)

@@ -2,6 +2,7 @@
 
 final class PhabricatorAuditQuery {
 
+  private $ids;
   private $offset;
   private $limit;
 
@@ -21,6 +22,11 @@ final class PhabricatorAuditQuery {
   const STATUS_CONCERN = 'status-concern';
 
   private $commits;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withCommitPHIDs(array $commit_phids) {
     $this->commitPHIDs = $commit_phids;
@@ -156,6 +162,13 @@ final class PhabricatorAuditQuery {
   private function buildWhereClause($conn_r) {
     $where = array();
 
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'req.id IN (%Ld)',
+        $this->ids);
+    }
+
     if ($this->commitPHIDs) {
       $where[] = qsprintf(
         $conn_r,
@@ -212,7 +225,14 @@ final class PhabricatorAuditQuery {
       case self::STATUS_ANY:
         break;
       default:
-        throw new Exception("Unknown status '{$status}'!");
+        $valid = array(
+          self::STATUS_ANY,
+          self::STATUS_OPEN,
+          self::STATUS_CONCERN,
+        );
+        throw new Exception(
+          "Unknown audit status '{$status}'! Valid statuses are: ".
+          implode(', ', $valid));
     }
 
     if ($where) {

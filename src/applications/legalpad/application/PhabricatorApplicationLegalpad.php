@@ -49,7 +49,7 @@ final class PhabricatorApplicationLegalpad extends PhabricatorApplication {
         'comment/(?P<id>\d+)/' => 'LegalpadDocumentCommentController',
         'view/(?P<id>\d+)/' => 'LegalpadDocumentViewController',
         'document/' => array(
-          'preview/' => 'LegalpadDocumentPreviewController'),
+          'preview/' => 'PhabricatorMarkupPreviewController'),
       ));
   }
 

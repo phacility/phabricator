@@ -31,7 +31,7 @@ final class DifferentialTestPlanFieldSpecification
       }
     }
 
-    return id(new AphrontFormTextAreaControl())
+    return id(new PhabricatorRemarkupControl())
       ->setLabel('Test Plan')
       ->setName('testplan')
       ->setValue($this->plan)

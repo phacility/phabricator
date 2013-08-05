@@ -566,6 +566,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $attached = $task->getAttached();
+    if (!is_array($attached)) {
+      $attached = array();
+    }
+
     $file_infos = idx($attached, PhabricatorFilePHIDTypeFile::TYPECONST);
     if ($file_infos) {
       $file_phids = array_keys($file_infos);

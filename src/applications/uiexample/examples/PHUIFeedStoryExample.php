@@ -128,7 +128,6 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
       ->setEpoch(1)
-      ->setOneLine(true)
       ->setAppIcon('differential-dark')
       ->setUser($user);
 

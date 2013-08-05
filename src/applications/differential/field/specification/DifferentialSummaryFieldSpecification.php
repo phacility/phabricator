@@ -4,6 +4,7 @@ final class DifferentialSummaryFieldSpecification
   extends DifferentialFreeformFieldSpecification {
 
   private $summary = '';
+  private $controlID;
 
   public function shouldAppearOnEdit() {
     return true;
@@ -19,10 +20,18 @@ final class DifferentialSummaryFieldSpecification
   }
 
   public function renderEditControl() {
-    return id(new AphrontFormTextAreaControl())
+    return id(new PhabricatorRemarkupControl())
       ->setLabel('Summary')
       ->setName('summary')
+      ->setID($this->getControlID())
       ->setValue($this->summary);
+  }
+
+  public function renderEditPreview() {
+    return id(new PHUIRemarkupPreviewPanel())
+      ->setHeader(pht('Summary Preview'))
+      ->setControlID($this->getControlID())
+      ->setPreviewURI('/differential/preview/');
   }
 
   public function shouldExtractMentions() {
@@ -84,6 +93,13 @@ final class DifferentialSummaryFieldSpecification
 
   public function getKeyForSearchIndex() {
     return PhabricatorSearchField::FIELD_BODY;
+  }
+
+  private function getControlID() {
+    if (!$this->controlID) {
+      $this->controlID = celerity_generate_unique_node_id();
+    }
+    return $this->controlID;
   }
 
 }

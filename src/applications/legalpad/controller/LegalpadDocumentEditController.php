@@ -172,34 +172,19 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())->setName($short));
 
-    $preview_header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Document Preview'));
-    $preview_view = phutil_tag(
-      'div',
-      array(
-        'id' => 'document-preview'),
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'aphront-panel-preview-loading-text'),
-        pht('Loading preview...')));
-    $preview_panel = id(new PHUIDocumentView())
-      ->appendChild($preview_header)
-      ->appendChild($preview_view);
-    Javelin::initBehavior(
-      'legalpad-document-preview',
-      array(
-        'preview' => 'document-preview',
-        'title' => 'document-title',
-        'text' => 'document-text',
-        'uri' => $this->getApplicationURI('document/preview/')));
+
+    $preview = id(new PHUIRemarkupPreviewPanel())
+      ->setHeader(pht('Document Preview'))
+      ->setPreviewURI($this->getApplicationURI('document/preview/'))
+      ->setControlID('document-text')
+      ->setSkin('document');
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $error_view,
         $form,
-        $preview_panel
+        $preview
       ),
       array(
         'title' => $title,

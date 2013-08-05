@@ -158,6 +158,7 @@
   background: #dddddd;
 }
 
+.phui-remarkup-preview .phabricator-remarkup-mention-unknown,
 .aphront-panel-preview .phabricator-remarkup-mention-unknown {
   font-weight: bold;
   background: #ffaaaa;

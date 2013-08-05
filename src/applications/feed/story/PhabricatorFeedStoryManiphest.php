@@ -32,14 +32,13 @@ final class PhabricatorFeedStoryManiphest
         // Don't repeat this at home!
         $comments = $data->getValue('comments');
         $content = $this->renderSummary($comments);
+        $view->appendChild($content);
         break;
-      default:
-        // I think this is just for create
+      case ManiphestAction::ACTION_CREATE:
         $content = $this->renderSummary($data->getValue('description'));
+        $view->appendChild($content);
         break;
     }
-
-    $view->appendChild($content);
 
     $href = $this->getHandle($data->getValue('taskPHID'))->getURI();
     $view->setHref($href);

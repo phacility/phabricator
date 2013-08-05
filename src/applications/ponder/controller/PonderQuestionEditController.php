@@ -104,22 +104,10 @@ final class PonderQuestionEditController extends PonderController {
           ->addCancelButton($this->getApplicationURI())
           ->setValue(pht('Ask Away!')));
 
-    $preview = hsprintf(
-      '<div class="aphront-panel-flush">'.
-        '<div id="question-preview">'.
-          '<span class="aphront-panel-preview-loading-text">%s</span>'.
-        '</div>'.
-      '</div>',
-      pht('Loading question preview...'));
-
-    Javelin::initBehavior(
-      'ponder-feedback-preview',
-      array(
-        'uri'         => '/ponder/question/preview/',
-        'content'     => 'content',
-        'preview'     => 'question-preview',
-        'question_id' => null
-      ));
+    $preview = id(new PHUIRemarkupPreviewPanel())
+      ->setHeader(pht('Question Preview'))
+      ->setControlID('content')
+      ->setPreviewURI($this->getApplicationURI('preview/'));
 
     $crumbs = $this->buildApplicationCrumbs();
 

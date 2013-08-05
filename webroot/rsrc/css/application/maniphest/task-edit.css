@@ -2,12 +2,6 @@
  * @provides maniphest-task-edit-css
  */
 
-.maniphest-description-preview-header {
-  color: #666;
-  margin-bottom: 1em;
-  font-size: 11px;
-}
-
 .maniphest-auxiliary-header {
   font-weight: bold;
   font-size: 14px;

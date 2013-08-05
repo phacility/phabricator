@@ -4,6 +4,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
 
   private $lines;
   private $limit;
+  private $uri;
   private $highlights = array();
 
   public function setLimit($limit) {
@@ -16,8 +17,13 @@ final class PhabricatorSourceCodeView extends AphrontView {
     return $this;
   }
 
-  public function setHighlights(array $highlights) {
-    $this->highlights = array_fuse($highlights);
+  public function setURI(PhutilURI $uri) {
+    $this->uri = $uri;
+    return $this;
+  }
+
+  public function setHighlights(array $array) {
+    $this->highlights = array_fuse($array);
     return $this;
   }
 
@@ -26,10 +32,12 @@ final class PhabricatorSourceCodeView extends AphrontView {
     require_celerity_resource('syntax-highlighting-css');
 
     Javelin::initBehavior('phabricator-oncopy', array());
+    Javelin::initBehavior('phabricator-line-linker');
 
     $line_number = 1;
 
     $rows = array();
+
     foreach ($this->lines as $line) {
       $hit_limit = $this->limit &&
                    ($line_number == $this->limit) &&
@@ -53,16 +61,33 @@ final class PhabricatorSourceCodeView extends AphrontView {
         $row_attributes['class'] = 'phabricator-source-highlight';
       }
 
-      // TODO: Provide nice links.
+      $line_uri = $this->uri . "$" . $line_number;
+      $line_href = (string) new PhutilURI($line_uri);
+
+      $tag_number = javelin_tag(
+        'a',
+        array(
+          'href' => $line_href
+        ),
+        $line_number);
 
       $rows[] = phutil_tag(
         'tr',
         $row_attributes,
-        hsprintf(
-          '<th class="phabricator-source-line">%s</th>'.
-          '<td class="phabricator-source-code">%s</td>',
-          $content_number,
-          $content_line));
+        array(
+          javelin_tag(
+            'th',
+            array(
+              'class' => 'phabricator-source-line',
+              'sigil' => 'phabricator-source-line'
+            ),
+            $tag_number),
+          phutil_tag(
+            'td',
+            array(
+              'class' => 'phabricator-source-code'
+            ),
+            $content_line)));
 
       if ($hit_limit) {
         break;
@@ -81,10 +106,11 @@ final class PhabricatorSourceCodeView extends AphrontView {
       array(
         'class' => 'phabricator-source-code-container',
       ),
-      phutil_tag(
+      javelin_tag(
         'table',
         array(
           'class' => implode(' ', $classes),
+          'sigil' => 'phabricator-source'
         ),
         phutil_implode_html('', $rows)));
   }
