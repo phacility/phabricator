@@ -92,6 +92,8 @@ final class PhabricatorStartup {
     self::setupPHP();
     self::verifyPHP();
 
+    self::normalizeInput();
+
     self::verifyRewriteRules();
 
     self::detectPostMaxSizeTriggered();
@@ -227,16 +229,70 @@ final class PhabricatorStartup {
 
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function setupPHP() {
     error_reporting(E_ALL | E_STRICT);
     ini_set('memory_limit', -1);
   }
 
+  /**
+   * @task validation
+   */
+  private static function normalizeInput() {
+    // Replace superglobals with unfiltered versions, disrespect php.ini (we
+    // filter ourselves)
+    $_GET = filter_input_array(INPUT_GET, FILTER_UNSAFE_RAW);
+    $_POST = filter_input_array(INPUT_POST, FILTER_UNSAFE_RAW);
+    $_SERVER = filter_input_array(INPUT_SERVER, FILTER_UNSAFE_RAW);
+    $_COOKIE = filter_input_array(INPUT_COOKIE, FILTER_UNSAFE_RAW);
+    $_ENV = filter_input_array(INPUT_ENV, FILTER_UNSAFE_RAW);
+    if (!is_array($_GET)) {
+      $_GET = array();
+    }
+    if (!is_array($_POST)) {
+      $_POST = array();
+    }
+    if (!is_array($_SERVER)) {
+      $_SERVER = array();
+    }
+    if (!is_array($_COOKIE)) {
+      $_COOKIE = array();
+    }
+    if (!is_array($_ENV)) {
+      $_ENV = array();
+    }
+
+    // rebuild $_REQUEST, respecting order declared in ini files
+    $order = ini_get('request_order');
+    if (!$order) {
+      $order = ini_get('variables_order');
+    }
+    if (!$order) {
+      // $_REQUEST will be empty, leave it alone
+      return;
+    }
+    $_REQUEST = array();
+    for ($i = 0; $i < strlen($order); $i++) {
+      switch ($order[$i]) {
+        case 'G':
+          $_REQUEST = array_merge($_REQUEST, $_GET);
+          break;
+        case 'P':
+          $_REQUEST = array_merge($_REQUEST, $_POST);
+          break;
+        case 'C':
+          $_REQUEST = array_merge($_REQUEST, $_COOKIE);
+          break;
+        default:
+          // $_ENV and $_SERVER never go into $_REQUEST
+          break;
+      }
+    }
+  }
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function verifyPHP() {
     $required_version = '5.2.3';
@@ -274,7 +330,7 @@ final class PhabricatorStartup {
 
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function verifyRewriteRules() {
     if (isset($_REQUEST['__path__']) && strlen($_REQUEST['__path__'])) {
@@ -304,7 +360,7 @@ final class PhabricatorStartup {
 
 
   /**
-   * @task valiation
+   * @task validation
    */
   private static function validateGlobal($key) {
     static $globals = array(
