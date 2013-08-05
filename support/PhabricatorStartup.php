@@ -242,25 +242,30 @@ final class PhabricatorStartup {
   private static function normalizeInput() {
     // Replace superglobals with unfiltered versions, disrespect php.ini (we
     // filter ourselves)
-    $_GET = filter_input_array(INPUT_GET, FILTER_UNSAFE_RAW);
-    $_POST = filter_input_array(INPUT_POST, FILTER_UNSAFE_RAW);
-    $_SERVER = filter_input_array(INPUT_SERVER, FILTER_UNSAFE_RAW);
-    $_COOKIE = filter_input_array(INPUT_COOKIE, FILTER_UNSAFE_RAW);
-    $_ENV = filter_input_array(INPUT_ENV, FILTER_UNSAFE_RAW);
-    if (!is_array($_GET)) {
-      $_GET = array();
-    }
-    if (!is_array($_POST)) {
-      $_POST = array();
-    }
-    if (!is_array($_SERVER)) {
-      $_SERVER = array();
-    }
-    if (!is_array($_COOKIE)) {
-      $_COOKIE = array();
-    }
-    if (!is_array($_ENV)) {
-      $_ENV = array();
+    $filter = array(INPUT_GET, INPUT_POST,
+      INPUT_SERVER, INPUT_ENV, INPUT_COOKIE);
+    foreach ($filter as $type) {
+      $filtered = filter_input_array($type, FILTER_UNSAFE_RAW);
+      if (!is_array($filtered)) {
+        continue;
+      }
+      switch ($type) {
+        case INPUT_SERVER:
+          $_SERVER = array_merge($_SERVER, $filtered);
+          break;
+        case INPUT_GET:
+          $_GET = array_merge($_GET, $filtered);
+          break;
+        case INPUT_COOKIE:
+          $_COOKIE = array_merge($_COOKIE, $filtered);
+          break;
+        case INPUT_POST:
+          $_POST = array_merge($_POST, $filtered);
+          break;
+        case INPUT_ENV;
+          $_ENV = array_merge($_ENV, $filtered);
+          break;
+      }
     }
 
     // rebuild $_REQUEST, respecting order declared in ini files
