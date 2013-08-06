@@ -20,7 +20,12 @@ final class PhabricatorPasteConfigOptions
         'metamta.paste.public-create-email',
         'string',
         null)
-        ->setDescription(pht('Allow creating pastes via email.'))
+        ->setDescription(pht('Allow creating pastes via email.')),
+      $this->newOption(
+        'metamta.paste.subject-prefix',
+        'string',
+        '[Paste]')
+        ->setDescription(pht('Subject prefix for paste email.'))
     );
   }
 

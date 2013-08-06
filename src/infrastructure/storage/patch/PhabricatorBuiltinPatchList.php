@@ -1507,6 +1507,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130801.pastexactions.php'),
       ),
+      '20130805.pastemailkey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130805.pastemailkey.sql'),
+      ),
+      '20130805.pasteedges.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130805.pasteedges.sql'),
+      ),
+      '20130805.pastemailkeypop.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130805.pastemailkeypop.php'),
+      ),
     );
   }
 }

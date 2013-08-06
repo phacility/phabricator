@@ -123,6 +123,7 @@ final class PHUIFeedStoryView extends AphrontView {
   public function render() {
 
     require_celerity_resource('phui-feed-story-css');
+    Javelin::initBehavior('phabricator-hovercards');
     $oneline = $this->isEmptyContent($this->renderChildren());
 
     $body = null;
@@ -204,7 +205,7 @@ final class PHUIFeedStoryView extends AphrontView {
         'class' => 'phui-feed-story-head',
       ),
       array(
-        $actor,
+        (!$oneline ? $actor : null),
         nonempty($this->title, pht('Untitled Story')),
         $icons,
         $ol_foot

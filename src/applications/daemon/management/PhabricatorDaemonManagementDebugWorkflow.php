@@ -10,7 +10,11 @@ final class PhabricatorDaemonManagementDebugWorkflow
   public function didConstruct() {
     $this
       ->setName('debug')
-      ->setSynopsis(pht('Show a list of available daemons.'))
+      ->setExamples('**debug** __daemon__')
+      ->setSynopsis(
+        pht(
+          'Start __daemon__ in the foreground and print large volumes of '.
+          'diagnostic information to the console.'))
       ->setArguments(
         array(
           array(

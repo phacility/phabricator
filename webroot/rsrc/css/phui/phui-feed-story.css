@@ -19,7 +19,12 @@
 .phui-feed-story-head {
  padding: 8px;
  overflow: hidden;
+ color: #555;
+}
+
+.phui-feed-story-head .phui-link-person {
  color: #333;
+ font-weight: bold;
 }
 
 .phui-feed-story-body {
@@ -99,5 +104,6 @@
   color: #777;
   margin-top: 2px;
   line-height: 14px;
+  font-weight: normal;
 }
 

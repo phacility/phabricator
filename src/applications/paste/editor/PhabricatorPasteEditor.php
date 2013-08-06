@@ -101,7 +101,11 @@ final class PhabricatorPasteEditor
   }
 
   protected function supportsMail() {
-    return false;
+    return true;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.paste.subject-prefix');
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
@@ -111,8 +115,18 @@ final class PhabricatorPasteEditor
     );
   }
 
-  protected function getMailCC(PhabricatorLiskDAO $object) {
-    return array();
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PasteReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $name = $object->getTitle();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("P{$id}: {$name}")
+      ->addHeader('Thread-Topic', "P{$id}");
   }
 
   protected function supportsFeed() {

@@ -28,7 +28,7 @@ final class PhabricatorFeedStoryStatus extends PhabricatorFeedStory {
     $author_name = $author_handle->getLinkName();
     $author_uri = PhabricatorEnv::getURI($author_handle->getURI());
 
-    $text = pht('% supdated their status %s', $author_name, $author_uri);
+    $text = pht('% updated their status %s', $author_name, $author_uri);
 
     return $text;
   }
