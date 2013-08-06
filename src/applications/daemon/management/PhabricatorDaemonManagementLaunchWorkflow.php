@@ -10,7 +10,10 @@ final class PhabricatorDaemonManagementLaunchWorkflow
   public function didConstruct() {
     $this
       ->setName('launch')
-      ->setSynopsis(pht('Show a list of available daemons.'))
+      ->setExamples('**launch** [n] __daemon__ [options]')
+      ->setSynopsis(pht(
+        'Start a specific __daemon__, or __n__ copies of a specific '.
+        '__daemon__.'))
       ->setArguments(
         array(
           array(
