@@ -56,7 +56,7 @@ final class HeraldNewController extends HeraldController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setAction('/herald/rule/')
+      ->setAction('/herald/edit/')
       ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -68,15 +68,13 @@ final class HeraldNewController extends HeraldController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Create Rule'))
-          ->addCancelButton('/herald/view/'.$this->contentType.'/'));
+          ->addCancelButton($this->getApplicationURI()));
 
     $crumbs = $this
       ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName(pht('Create Herald Rule'))
-          ->setHref($this->getApplicationURI(
-            'view/'.$this->contentType.'/'.$this->ruleType)));
+          ->setName(pht('Create Rule')));
 
     return $this->buildApplicationPage(
       array(

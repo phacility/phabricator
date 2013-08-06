@@ -18,9 +18,10 @@ final class HeraldRuleController extends HeraldController {
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
     if ($this->id) {
+      $id = $this->id;
       $rule = id(new HeraldRuleQuery())
         ->setViewer($user)
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -30,6 +31,7 @@ final class HeraldRuleController extends HeraldController {
       if (!$rule) {
         return new Aphront404Response();
       }
+      $cancel_uri = $this->getApplicationURI("rule/{$id}/");
     } else {
       $rule = new HeraldRule();
       $rule->setAuthorPHID($user->getPHID());
@@ -43,6 +45,8 @@ final class HeraldRuleController extends HeraldController {
         $rule_type = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
       }
       $rule->setRuleType($rule_type);
+
+      $cancel_uri = $this->getApplicationURI();
     }
 
     $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
@@ -70,9 +74,8 @@ final class HeraldRuleController extends HeraldController {
     if ($request->isFormPost() && $request->getStr('save')) {
       list($e_name, $errors) = $this->saveRule($adapter, $rule, $request);
       if (!$errors) {
-        $uri = '/herald/view/'.
-          $rule->getContentType().'/'.
-          $rule->getRuleType().'/';
+        $id = $rule->getID();
+        $uri = $this->getApplicationURI("rule/{$id}/");
         return id(new AphrontRedirectResponse())->setURI($uri);
       }
     }
@@ -171,7 +174,7 @@ final class HeraldRuleController extends HeraldController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Rule'))
-          ->addCancelButton('/herald/view/'.$rule->getContentType().'/'));
+          ->addCancelButton($cancel_uri));
 
     $this->setupEditorBehavior($rule, $handles, $adapter);
 

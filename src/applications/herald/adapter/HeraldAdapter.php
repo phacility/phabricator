@@ -663,6 +663,76 @@ abstract class HeraldAdapter {
   }
 
 
+  public function renderRuleAsText(HeraldRule $rule) {
+    $out = array();
+
+    if ($rule->getMustMatchAll()) {
+      $out[] = pht('When all of these conditions are met:');
+    } else {
+      $out[] = pht('When any of these conditions are met:');
+    }
+
+    $out[] = null;
+    foreach ($rule->getConditions() as $condition) {
+      $out[] = "    ".$this->renderConditionAsText($condition);
+    }
+    $out[] = null;
+
+    if ($rule->getRepetitionPolicy() == HeraldRepetitionPolicyConfig::EVERY) {
+      $out[] = pht('Take these actions every time this rule matches:');
+    } else {
+      $out[] = pht('Take these actions the first time this rule matches:');
+    }
+
+    $out[] = null;
+    foreach ($rule->getActions() as $action) {
+      $out[] = "    ".$this->renderActionAsText($action);
+    }
+
+    return implode("\n", $out);
+  }
+
+  private function renderConditionAsText(HeraldCondition $condition) {
+    $field_type = $condition->getFieldName();
+    $field_name = idx($this->getFieldNameMap(), $field_type);
+
+    $condition_type = $condition->getFieldCondition();
+    $condition_name = idx($this->getConditionNameMap(), $condition_type);
+
+    $value = $this->renderConditionValueAsText($condition);
+
+    return "{$field_name} {$condition_name} {$value}";
+  }
+
+  private function renderActionAsText(HeraldAction $action) {
+    $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
+
+    $action_type = $action->getAction();
+    $action_name = idx($this->getActionNameMap($rule_global), $action_type);
+
+    $target = $this->renderActionTargetAsText($action);
+
+    return "{$action_name} {$target}";
+  }
+
+  private function renderConditionValueAsText(HeraldCondition $condition) {
+    // TODO: This produces sketchy results for many conditions.
+    $value = $condition->getValue();
+    if (is_array($value)) {
+      $value = implode(', ', $value);
+    }
+    return $value;
+  }
+
+  private function renderActionTargetAsText(HeraldAction $action) {
+    // TODO: This produces sketchy results for Flags and PHIDs.
+    $target = $action->getTarget();
+    if (is_array($target)) {
+      $target = implode(', ', $target);
+    }
+
+    return $target;
+  }
 
 }
 
