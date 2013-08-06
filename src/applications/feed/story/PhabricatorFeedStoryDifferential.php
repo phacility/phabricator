@@ -23,6 +23,7 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     switch ($action) {
       case DifferentialAction::ACTION_CREATE:
       case DifferentialAction::ACTION_CLOSE:
+      case DifferentialAction::ACTION_COMMENT:
         $full_size = true;
         break;
       default:
