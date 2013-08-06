@@ -68,9 +68,13 @@ final class HeraldTestConsoleController extends HeraldController {
             throw new Exception("Can not build adapter for object!");
           }
 
-          $rules = HeraldRule::loadAllByContentTypeWithFullData(
-            $adapter->getAdapterContentType(),
-            $object->getPHID());
+          $rules = id(new HeraldRuleQuery())
+            ->setViewer($user)
+            ->withContentTypes(array($adapter->getAdapterContentType()))
+            ->needConditionsAndActions(true)
+            ->needAppliedToPHIDs(array($object->getPHID()))
+            ->needValidateAuthors(true)
+            ->execute();
 
           $engine = new HeraldEngine();
           $effects = $engine->applyRules($rules, $adapter);

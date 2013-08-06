@@ -14,15 +14,18 @@ final class HeraldEngine {
     return idx($this->rules, $id);
   }
 
-  public static function loadAndApplyRules(HeraldAdapter $object) {
-    $content_type = $object->getAdapterContentType();
-    $rules = HeraldRule::loadAllByContentTypeWithFullData(
-      $content_type,
-      $object->getPHID());
+  public static function loadAndApplyRules(HeraldAdapter $adapter) {
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withContentTypes(array($adapter->getAdapterContentType()))
+      ->needConditionsAndActions(true)
+      ->needAppliedToPHIDs(array($adapter->getPHID()))
+      ->needValidateAuthors(true)
+      ->execute();
 
     $engine = new HeraldEngine();
-    $effects = $engine->applyRules($rules, $object);
-    $engine->applyEffects($effects, $object, $rules);
+    $effects = $engine->applyRules($rules, $adapter);
+    $engine->applyEffects($effects, $adapter, $rules);
 
     return $engine->getTranscript();
   }
@@ -215,7 +218,7 @@ final class HeraldEngine {
     } else if (!$conditions) {
       $reason = "Rule failed automatically because it has no conditions.";
       $result = false;
-    } else if ($rule->hasInvalidOwner()) {
+    } else if (!$rule->hasValidAuthor()) {
       $reason = "Rule failed automatically because its owner is invalid ".
                 "or disabled.";
       $result = false;

@@ -21,14 +21,19 @@ final class PhabricatorRepositoryCommitHeraldWorker
       return;
     }
 
-    $rules = HeraldRule::loadAllByContentTypeWithFullData(
-      id(new HeraldCommitAdapter())->getAdapterContentType(),
-      $commit->getPHID());
-
     $adapter = HeraldCommitAdapter::newLegacyAdapter(
       $repository,
       $commit,
       $data);
+
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withContentTypes(array($adapter->getAdapterContentType()))
+      ->needConditionsAndActions(true)
+      ->needAppliedToPHIDs(array($adapter->getPHID()))
+      ->needValidateAuthors(true)
+      ->execute();
+
     $engine = new HeraldEngine();
 
     $effects = $engine->applyRules($rules, $adapter);

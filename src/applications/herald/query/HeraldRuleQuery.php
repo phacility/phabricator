@@ -9,6 +9,10 @@ final class HeraldRuleQuery
   private $ruleTypes;
   private $contentTypes;
 
+  private $needConditionsAndActions;
+  private $needAppliedToPHIDs;
+  private $needValidateAuthors;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -34,6 +38,26 @@ final class HeraldRuleQuery
     return $this;
   }
 
+  public function withExecutableRules($executable) {
+    $this->executable = $executable;
+    return $this;
+  }
+
+  public function needConditionsAndActions($need) {
+    $this->needConditionsAndActions = $need;
+    return $this;
+  }
+
+  public function needAppliedToPHIDs(array $phids) {
+    $this->needAppliedToPHIDs = $phids;
+    return $this;
+  }
+
+  public function needValidateAuthors($need) {
+    $this->needValidateAuthors = $need;
+    return $this;
+  }
+
   public function loadPage() {
     $table = new HeraldRule();
     $conn_r = $table->establishConnection('r');
@@ -47,6 +71,56 @@ final class HeraldRuleQuery
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  public function willFilterPage(array $rules) {
+    $rule_ids = mpull($rules, 'getID');
+
+    if ($this->needValidateAuthors) {
+      $this->validateRuleAuthors($rules);
+    }
+
+    if ($this->needConditionsAndActions) {
+      $conditions = id(new HeraldCondition())->loadAllWhere(
+        'ruleID IN (%Ld)',
+        $rule_ids);
+      $conditions = mgroup($conditions, 'getRuleID');
+
+      $actions = id(new HeraldAction())->loadAllWhere(
+        'ruleID IN (%Ld)',
+        $rule_ids);
+      $actions = mgroup($actions, 'getRuleID');
+
+      foreach ($rules as $rule) {
+        $rule->attachActions(idx($actions, $rule->getID(), array()));
+        $rule->attachConditions(idx($conditions, $rule->getID(), array()));
+      }
+    }
+
+    if ($this->needAppliedToPHIDs) {
+      $conn_r = id(new HeraldRule())->establishConnection('r');
+      $applied = queryfx_all(
+        $conn_r,
+        'SELECT * FROM %T WHERE ruleID IN (%Ld) AND phid IN (%Ls)',
+        HeraldRule::TABLE_RULE_APPLIED,
+        $rule_ids,
+        $this->needAppliedToPHIDs);
+
+      $map = array();
+      foreach ($applied as $row) {
+        $map[$row['ruleID']][$row['phid']] = true;
+      }
+
+      foreach ($rules as $rule) {
+        foreach ($this->needAppliedToPHIDs as $phid) {
+          $rule->setRuleApplied(
+            $phid,
+            isset($map[$rule->getID()][$phid]));
+        }
+      }
+    }
+
+    return $rules;
   }
 
   private function buildWhereClause($conn_r) {
@@ -90,6 +164,44 @@ final class HeraldRuleQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  private function validateRuleAuthors(array $rules) {
+
+    // "Global" rules always have valid authors.
+    foreach ($rules as $key => $rule) {
+      if ($rule->isGlobalRule()) {
+        $rule->attachValidAuthor(true);
+        unset($rules[$key]);
+        continue;
+      }
+    }
+
+    if (!$rules) {
+      return;
+    }
+
+    // For personal rules, the author needs to exist and not be disabled.
+    $user_phids = mpull($rules, 'getAuthorPHID');
+    $users = id(new PhabricatorPeopleQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($user_phids)
+      ->execute();
+    $users = mpull($users, null, 'getPHID');
+
+    foreach ($rules as $key => $rule) {
+      $author_phid = $rule->getAuthorPHID();
+      if (empty($users[$author_phid])) {
+        $rule->attachValidAuthor(false);
+        continue;
+      }
+      if ($users[$author_phid]->getIsDisabled()) {
+        $rule->attachValidAuthor(false);
+        continue;
+      }
+
+      $rule->attachValidAuthor(true);
+    }
   }
 
 }
