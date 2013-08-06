@@ -25,6 +25,7 @@
   padding: .25em 1em;
   background: #edead7;
   color: #444444;
+  overflow: hidden;
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
