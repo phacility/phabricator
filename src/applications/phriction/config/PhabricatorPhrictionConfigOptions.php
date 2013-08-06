@@ -16,6 +16,9 @@ final class PhabricatorPhrictionConfigOptions
       $this->newOption(
         'metamta.phriction.subject-prefix', 'string', '[Phriction]')
         ->setDescription(pht("Subject prefix for Phriction email.")),
+      $this->newOption(
+        'phriction.hierarchy-display-levels', 'int', 2)
+        ->setDescription(pht("Number of levels to display in Document Hierarchy - '-1' means no limit.")),
     );
   }
 

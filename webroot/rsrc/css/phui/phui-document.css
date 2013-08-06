@@ -127,7 +127,7 @@
 }
 
 .phui-document-content .phabricator-remarkup .remarkup-code-block {
-  clear: both;
+  clear: left;
   margin: 16px 0;
 }
 
