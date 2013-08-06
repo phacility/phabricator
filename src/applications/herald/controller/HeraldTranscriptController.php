@@ -273,10 +273,10 @@ final class HeraldTranscriptController extends HeraldController {
 
       $target = $apply_xscript->getTarget();
       switch ($apply_xscript->getAction()) {
-        case HeraldActionConfig::ACTION_NOTHING:
+        case HeraldAdapter::ACTION_NOTHING:
           $target = '';
           break;
-        case HeraldActionConfig::ACTION_FLAG:
+        case HeraldAdapter::ACTION_FLAG:
           $target = PhabricatorFlagColor::getColorName($target);
           break;
         default:

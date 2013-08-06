@@ -435,6 +435,48 @@ abstract class HeraldAdapter {
     }
   }
 
+  public function willSaveAction(
+    HeraldRule $rule,
+    HeraldAction $action) {
+
+    $target = $action->getTarget();
+    if (is_array($target)) {
+      $target = array_keys($target);
+    }
+
+    $author_phid = $rule->getAuthorPHID();
+
+    $rule_type = $rule->getRuleType();
+    if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+      switch ($action->getAction()) {
+        case self::ACTION_EMAIL:
+        case self::ACTION_ADD_CC:
+        case self::ACTION_REMOVE_CC:
+        case self::ACTION_AUDIT:
+          // For personal rules, force these actions to target the rule owner.
+          $target = array($author_phid);
+          break;
+        case self::ACTION_FLAG:
+          // Make sure flag color is valid; set to blue if not.
+          $color_map = PhabricatorFlagColor::getColorNameMap();
+          if (empty($color_map[$target])) {
+            $target = PhabricatorFlagColor::COLOR_BLUE;
+          }
+          break;
+        case self::ACTION_NOTHING:
+          break;
+        default:
+          throw new HeraldInvalidActionException(
+            pht(
+              'Unrecognized action type "%s"!',
+              $action->getAction()));
+      }
+    }
+
+    $action->setTarget($target);
+  }
+
+
 
 /* -(  Values  )------------------------------------------------------------- */
 

@@ -299,13 +299,13 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case HeraldActionConfig::ACTION_NOTHING:
+        case self::ACTION_NOTHING:
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
             pht('Great success at doing nothing.'));
           break;
-        case HeraldActionConfig::ACTION_EMAIL:
+        case self::ACTION_EMAIL:
           foreach ($effect->getTarget() as $phid) {
             $this->emailPHIDs[$phid] = true;
           }
@@ -314,7 +314,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             true,
             pht('Added address to email targets.'));
           break;
-        case HeraldActionConfig::ACTION_AUDIT:
+        case self::ACTION_AUDIT:
           foreach ($effect->getTarget() as $phid) {
             if (empty($this->auditMap[$phid])) {
               $this->auditMap[$phid] = array();
@@ -326,7 +326,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             true,
             pht('Triggered an audit.'));
           break;
-        case HeraldActionConfig::ACTION_FLAG:
+        case self::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
             $effect,
             $this->commit->getPHID());

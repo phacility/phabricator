@@ -269,7 +269,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     $result = array();
     if ($this->explicitCCs) {
       $effect = new HeraldEffect();
-      $effect->setAction(HeraldActionConfig::ACTION_ADD_CC);
+      $effect->setAction(self::ACTION_ADD_CC);
       $effect->setTarget(array_keys($this->explicitCCs));
       $effect->setReason(
         pht('CCs provided explicitly by revision author or carried over '.
@@ -287,20 +287,20 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case HeraldActionConfig::ACTION_NOTHING:
+        case self::ACTION_NOTHING:
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
             pht('OK, did nothing.'));
           break;
-        case HeraldActionConfig::ACTION_FLAG:
+        case self::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
             $effect,
             $this->revision->getPHID());
           break;
-        case HeraldActionConfig::ACTION_EMAIL:
-        case HeraldActionConfig::ACTION_ADD_CC:
-          $op = ($action == HeraldActionConfig::ACTION_EMAIL) ? 'email' : 'CC';
+        case self::ACTION_EMAIL:
+        case self::ACTION_ADD_CC:
+          $op = ($action == self::ACTION_EMAIL) ? 'email' : 'CC';
           $base_target = $effect->getTarget();
           $forbidden = array();
           foreach ($base_target as $key => $fbid) {
@@ -308,7 +308,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
               $forbidden[] = $fbid;
               unset($base_target[$key]);
             } else {
-              if ($action == HeraldActionConfig::ACTION_EMAIL) {
+              if ($action == self::ACTION_EMAIL) {
                 $this->emailPHIDs[$fbid] = true;
               } else {
                 $this->newCCs[$fbid] = true;
@@ -338,7 +338,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
               pht('Added addresses to %s list.', $op));
           }
           break;
-        case HeraldActionConfig::ACTION_REMOVE_CC:
+        case self::ACTION_REMOVE_CC:
           foreach ($effect->getTarget() as $fbid) {
             $this->remCCs[$fbid] = true;
           }

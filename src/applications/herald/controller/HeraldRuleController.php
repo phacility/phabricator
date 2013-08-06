@@ -261,9 +261,17 @@ final class HeraldRuleController extends HeraldController {
         $action[1] = null;
       }
 
-      $actions[] = HeraldActionConfig::willSaveAction($rule->getRuleType(),
-                                                      $rule->getAuthorPHID(),
-                                                      $action);
+      $obj = new HeraldAction();
+      $obj->setAction($action[0]);
+      $obj->setTarget($action[1]);
+
+      try {
+        $adapter->willSaveAction($rule, $obj);
+      } catch (HeraldInvalidActionException $ex) {
+        $errors[] = $ex;
+      }
+
+      $actions[] = $obj;
     }
 
     $rule->attachConditions($conditions);
@@ -328,7 +336,7 @@ final class HeraldRuleController extends HeraldController {
       foreach ($rule->getActions() as $action) {
 
         switch ($action->getAction()) {
-          case HeraldActionConfig::ACTION_FLAG:
+          case HeraldAdapter::ACTION_FLAG:
             $current_value = $action->getTarget();
             break;
           default:
