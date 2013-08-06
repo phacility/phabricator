@@ -3791,7 +3791,7 @@ celerity_register_resource_map(array(
   ),
   'phui-feed-story-css' =>
   array(
-    'uri' => '/res/5d7ab26c/rsrc/css/phui/phui-feed-story.css',
+    'uri' => '/res/68a0ce41/rsrc/css/phui/phui-feed-story.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3827,7 +3827,7 @@ celerity_register_resource_map(array(
   ),
   'phui-remarkup-preview-css' =>
   array(
-    'uri' => '/res/6c886e63/rsrc/css/phui/phui-remarkup-preview.css',
+    'uri' => '/res/4535e062/rsrc/css/phui/phui-remarkup-preview.css',
     'type' => 'css',
     'requires' =>
     array(
