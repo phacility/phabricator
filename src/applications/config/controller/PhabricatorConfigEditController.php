@@ -466,6 +466,9 @@ final class PhabricatorConfigEditController
       if ($value === null) {
         $value = phutil_tag('em', array(), pht('(empty)'));
       } else {
+        if (is_array($value)) {
+          $value = implode("\n", $value);
+        }
         $value = phutil_escape_html_newlines($value);
       }
 

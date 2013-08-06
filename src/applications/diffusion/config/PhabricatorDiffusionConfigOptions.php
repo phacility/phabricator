@@ -75,6 +75,9 @@ final class PhabricatorDiffusionConfigOptions
           '%BUGID%')),
       $this->newOption('bugtraq.logregex', 'list<string>', array())
         ->addExample(array('\B#([1-9]\d*)\b'), pht('Issue #123'))
+        ->addExample(
+          array('[Ii]ssues?:?(\s*,?\s*#\d+)+', '(\d+)'),
+          pht('Issue #123, #456'))
         ->addExample(array('(?<!#)\b(T[1-9]\d*)\b'), pht('Task T123'))
         ->setDescription(pht(
           'Regular expression to link external bug tracker. See '.
