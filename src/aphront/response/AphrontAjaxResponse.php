@@ -37,10 +37,17 @@ final class AphrontAjaxResponse extends AphrontResponse {
   public function buildResponseString() {
     $console = $this->getConsole();
     if ($console) {
+      // NOTE: We're stripping query parameters here both for readability and
+      // to mitigate BREACH and similar attacks. The parameters are available
+      // in the "Request" tab, so this should not impact usability. See T3684.
+      $uri = $this->getRequest()->getRequestURI();
+      $uri = new PhutilURI($uri);
+      $uri->setQueryParams(array());
+
       Javelin::initBehavior(
         'dark-console',
         array(
-          'uri'     => (string)$this->getRequest()->getRequestURI(),
+          'uri'     => (string)$uri,
           'key'     => $console->getKey($this->getRequest()),
           'color'   => $console->getColor(),
         ));
