@@ -231,7 +231,9 @@ final class PhabricatorObjectHandle
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    // NOTE: Handles are always visible, they just don't get populated with
+    // data if the user can't see the underlying object.
+    return true;
   }
 
 }

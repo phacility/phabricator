@@ -61,12 +61,16 @@ final class DoorkeeperRemarkupRuleAsana
         'id' => $tag_id,
       ) + $spec['tag'];
 
-      $view = id(new PhabricatorTagView())
-        ->setID($tag_id)
-        ->setName($spec['href'])
-        ->setHref($spec['href'])
-        ->setType(PhabricatorTagView::TYPE_OBJECT)
-        ->setExternal(true);
+      if ($this->getEngine()->isTextMode()) {
+        $view = $spec['href'];
+      } else {
+        $view = id(new PhabricatorTagView())
+          ->setID($tag_id)
+          ->setName($spec['href'])
+          ->setHref($spec['href'])
+          ->setType(PhabricatorTagView::TYPE_OBJECT)
+          ->setExternal(true);
+      }
 
       $engine->overwriteStoredText($spec['token'], $view);
     }
