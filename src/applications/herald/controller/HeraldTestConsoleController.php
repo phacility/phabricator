@@ -76,11 +76,11 @@ final class HeraldTestConsoleController extends HeraldController {
             ->needValidateAuthors(true)
             ->execute();
 
-          $engine = new HeraldEngine();
-          $effects = $engine->applyRules($rules, $adapter);
+          $engine = id(new HeraldEngine())
+            ->setDryRun(true);
 
-          $dry_run = new HeraldDryRunAdapter();
-          $engine->applyEffects($effects, $dry_run, $rules);
+          $effects = $engine->applyRules($rules, $adapter);
+          $engine->applyEffects($effects, $adapter, $rules);
 
           $xscript = $engine->getTranscript();
 

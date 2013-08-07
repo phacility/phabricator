@@ -38,6 +38,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $effects = $engine->applyRules($rules, $adapter);
     $engine->applyEffects($effects, $adapter, $rules);
+    $xscript = $engine->getTranscript();
 
     $audit_phids = $adapter->getAuditMap();
     if ($audit_phids) {
@@ -62,8 +63,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
     if (!$email_phids) {
       return;
     }
-
-    $xscript = $engine->getTranscript();
 
     $revision = $adapter->loadDifferentialRevision();
     if ($revision) {

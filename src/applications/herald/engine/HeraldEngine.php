@@ -9,6 +9,16 @@ final class HeraldEngine {
 
   protected $fieldCache = array();
   protected $object = null;
+  private $dryRun;
+
+  public function setDryRun($dry_run) {
+    $this->dryRun = $dry_run;
+    return $this;
+  }
+
+  public function getDryRun() {
+    return $this->dryRun;
+  }
 
   public function getRule($id) {
     return idx($this->rules, $id);
@@ -111,67 +121,76 @@ final class HeraldEngine {
 
   public function applyEffects(
     array $effects,
-    HeraldAdapter $object,
+    HeraldAdapter $adapter,
     array $rules) {
     assert_instances_of($effects, 'HeraldEffect');
     assert_instances_of($rules, 'HeraldRule');
 
-    $this->transcript->setDryRun((int)($object instanceof HeraldDryRunAdapter));
+    $this->transcript->setDryRun((int)$this->getDryRun());
 
-    $xscripts = $object->applyHeraldEffects($effects);
-    foreach ($xscripts as $apply_xscript) {
-      if (!($apply_xscript instanceof HeraldApplyTranscript)) {
-        throw new Exception(
-          "Heraldable must return HeraldApplyTranscripts from ".
-          "applyHeraldEffect().");
+    if ($this->getDryRun()) {
+      $xscripts = array();
+      foreach ($effects as $effect) {
+        $xscripts[] = new HeraldApplyTranscript(
+          $effect,
+          false,
+          pht('This was a dry run, so no actions were actually taken.'));
       }
+    } else {
+      $xscripts = $adapter->applyHeraldEffects($effects);
+    }
+
+    assert_instances_of($xscripts, 'HeraldApplyTranscript');
+    foreach ($xscripts as $apply_xscript) {
       $this->transcript->addApplyTranscript($apply_xscript);
     }
 
-    if (!$this->transcript->getDryRun()) {
+    // For dry runs, don't mark the rule as having applied to the object.
+    if ($this->getDryRun()) {
+      return;
+    }
 
-      $rules = mpull($rules, null, 'getID');
-      $applied_ids = array();
-      $first_policy = HeraldRepetitionPolicyConfig::toInt(
-        HeraldRepetitionPolicyConfig::FIRST);
+    $rules = mpull($rules, null, 'getID');
+    $applied_ids = array();
+    $first_policy = HeraldRepetitionPolicyConfig::toInt(
+      HeraldRepetitionPolicyConfig::FIRST);
 
-      // Mark all the rules that have had their effects applied as having been
-      // executed for the current object.
-      $rule_ids = mpull($xscripts, 'getRuleID');
+    // Mark all the rules that have had their effects applied as having been
+    // executed for the current object.
+    $rule_ids = mpull($xscripts, 'getRuleID');
 
-      foreach ($rule_ids as $rule_id) {
-        if (!$rule_id) {
-          // Some apply transcripts are purely informational and not associated
-          // with a rule, e.g. carryover emails from earlier revisions.
-          continue;
-        }
-
-        $rule = idx($rules, $rule_id);
-        if (!$rule) {
-          continue;
-        }
-
-        if ($rule->getRepetitionPolicy() == $first_policy) {
-          $applied_ids[] = $rule_id;
-        }
+    foreach ($rule_ids as $rule_id) {
+      if (!$rule_id) {
+        // Some apply transcripts are purely informational and not associated
+        // with a rule, e.g. carryover emails from earlier revisions.
+        continue;
       }
 
-      if ($applied_ids) {
-        $conn_w = id(new HeraldRule())->establishConnection('w');
-        $sql = array();
-        foreach ($applied_ids as $id) {
-          $sql[] = qsprintf(
-            $conn_w,
-            '(%s, %d)',
-            $object->getPHID(),
-            $id);
-        }
-        queryfx(
+      $rule = idx($rules, $rule_id);
+      if (!$rule) {
+        continue;
+      }
+
+      if ($rule->getRepetitionPolicy() == $first_policy) {
+        $applied_ids[] = $rule_id;
+      }
+    }
+
+    if ($applied_ids) {
+      $conn_w = id(new HeraldRule())->establishConnection('w');
+      $sql = array();
+      foreach ($applied_ids as $id) {
+        $sql[] = qsprintf(
           $conn_w,
-          'INSERT IGNORE INTO %T (phid, ruleID) VALUES %Q',
-          HeraldRule::TABLE_RULE_APPLIED,
-          implode(', ', $sql));
+          '(%s, %d)',
+          $adapter->getPHID(),
+          $id);
       }
+      queryfx(
+        $conn_w,
+        'INSERT IGNORE INTO %T (phid, ruleID) VALUES %Q',
+        HeraldRule::TABLE_RULE_APPLIED,
+        implode(', ', $sql));
     }
   }
 
