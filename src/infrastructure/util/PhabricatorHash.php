@@ -9,8 +9,11 @@ final class PhabricatorHash {
    * @param   string  Input string.
    * @return  string  32-byte hexidecimal SHA1+HMAC hash.
    */
-  public static function digest($string) {
-    $key = PhabricatorEnv::getEnvConfig('security.hmac-key');
+  public static function digest($string, $key = null) {
+    if ($key === null) {
+      $key = PhabricatorEnv::getEnvConfig('security.hmac-key');
+    }
+
     if (!$key) {
       throw new Exception(
         "Set a 'security.hmac-key' in your Phabricator configuration!");

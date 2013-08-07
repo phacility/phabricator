@@ -59,6 +59,7 @@ final class PhabricatorStartup {
     if (!array_key_exists($key, self::$globals)) {
       return $default;
     }
+
     return self::$globals[$key];
   }
 
@@ -370,6 +371,7 @@ final class PhabricatorStartup {
   private static function validateGlobal($key) {
     static $globals = array(
       'log.access' => true,
+      'csrf.salt'  => true,
     );
 
     if (empty($globals[$key])) {
