@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPinboardView extends AphrontView {
+final class PHUIPinboardView extends AphrontView {
 
   private $items = array();
   private $noDataString;
@@ -10,13 +10,13 @@ final class PhabricatorPinboardView extends AphrontView {
     return $this;
   }
 
-  public function addItem(PhabricatorPinboardItemView $item) {
+  public function addItem(PHUIPinboardItemView $item) {
     $this->items[] = $item;
     return $this;
   }
 
   public function render() {
-    require_celerity_resource('phabricator-pinboard-view-css');
+    require_celerity_resource('phui-pinboard-view-css');
 
     if (!$this->items) {
       $string = nonempty($this->noDataString, pht('No data.'));
@@ -29,7 +29,7 @@ final class PhabricatorPinboardView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-pinboard-view',
+        'class' => 'phui-pinboard-view',
       ),
       $this->items);
   }

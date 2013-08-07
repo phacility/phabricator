@@ -16,8 +16,8 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-.device-phone .aphront-list-filter-view {
-  margin: 0;
+.device-phone .aphront-list-filter-wrap {
+  margin: 0 -2px;
 }
 
 .aphront-list-filter-view-content .aphront-form-view {
@@ -58,7 +58,7 @@
 .device .aphront-list-filter-reveal {
   width: 98%;
   margin: auto;
-  padding: 4px 0;
+  padding: 8px;
 }
 
 .aphront-list-filter-reveal a {
@@ -67,9 +67,8 @@
 }
 
 .device .aphront-list-filter-reveal a {
-  margin: 4px auto 0;
-  float: none;
-  display: block;
+  margin: 4px 0;
+  float: left;
 }
 
 .aphront-list-filter-description {

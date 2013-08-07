@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPinboardItemView extends AphrontView {
+final class PHUIPinboardItemView extends AphrontView {
 
   private $imageURI;
   private $uri;
@@ -42,7 +42,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
       $header = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-pinboard-item-header',
+          'class' => 'phui-pinboard-item-header',
         ),
         phutil_tag('a', array('href' => $this->uri), $this->header));
     }
@@ -51,7 +51,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
       'a',
       array(
         'href' => $this->uri,
-        'class' => 'phabricator-pinboard-item-image-link',
+        'class' => 'phui-pinboard-item-image-link',
       ),
       phutil_tag(
         'img',
@@ -69,21 +69,21 @@ final class PhabricatorPinboardItemView extends AphrontView {
           'span',
           array(
             'class' =>
-              'phabricator-pinboard-icon sprite-icons icons-'.$block[0].'-grey',
+              'phui-pinboard-icon sprite-icons icons-'.$block[0].'-grey',
           ),
           '');
         $count = phutil_tag('span', array(), $block[1]);
         $icon_list[] = phutil_tag(
           'span',
           array(
-            'class' => 'phabricator-pinboard-item-count',
+            'class' => 'phui-pinboard-item-count',
           ),
           array($icon, $count));
       }
       $icons = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-pinboard-icons',
+          'class' => 'phui-pinboard-icons',
         ),
         $icon_list);
     }
@@ -93,7 +93,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
       $content = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-pinboard-item-content',
+          'class' => 'phui-pinboard-item-content',
         ),
         $content);
     }
@@ -101,7 +101,7 @@ final class PhabricatorPinboardItemView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-pinboard-item-view',
+        'class' => 'phui-pinboard-item-view',
       ),
       array(
         $header,

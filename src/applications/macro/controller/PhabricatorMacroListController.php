@@ -36,11 +36,11 @@ final class PhabricatorMacroListController extends PhabricatorMacroController
       $this->getLoadedHandles(),
       $author_phids);
 
-    $pinboard = new PhabricatorPinboardView();
+    $pinboard = new PHUIPinboardView();
     foreach ($macros as $macro) {
       $file = $macro->getFile();
 
-      $item = new PhabricatorPinboardItemView();
+      $item = new PHUIPinboardItemView();
       if ($file) {
         $item->setImageURI($file->getThumb280x210URI());
         $item->setImageSize(280, 210);

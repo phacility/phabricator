@@ -37,9 +37,9 @@ final class PholioMockListController
     }
     $this->loadHandles($author_phids);
 
-    $board = new PhabricatorPinboardView();
+    $board = new PHUIPinboardView();
     foreach ($mocks as $mock) {
-      $item = id(new PhabricatorPinboardItemView())
+      $item = id(new PHUIPinboardItemView())
         ->setHeader('M'.$mock->getID().' '.$mock->getName())
         ->setURI('/M'.$mock->getID())
         ->setImageURI($mock->getCoverFile()->getThumb280x210URI())
