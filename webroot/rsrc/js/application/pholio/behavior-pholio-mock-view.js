@@ -264,6 +264,10 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
 
+    if (config.viewMode == 'history') {
+      return;
+    }
+
     if (drag_begin) {
       return;
     }
@@ -631,7 +635,7 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   load_inline_comments();
-  if (config.loggedIn) {
+  if (config.loggedIn && config.commentFormID) {
     JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
   }
 
@@ -683,12 +687,14 @@ JX.behavior('pholio-mock-view', function(config) {
       image.desc);
     info.push(desc);
 
-    var embed = JX.$N(
-      'div',
-      {className: 'pholio-image-embedding'},
-      JX.$H('Embed this image:<br />{M' + config.mockID +
+    if (!image.isObsolete) {
+      var embed = JX.$N(
+        'div',
+        {className: 'pholio-image-embedding'},
+        JX.$H('Embed this image:<br />{M' + config.mockID +
         ', image=' + image.id + '}'));
-    info.push(embed);
+      info.push(embed);
+    }
 
     // Render image dimensions and visible size. If we have this infomation
     // from the server we can display some of it immediately; otherwise, we need
@@ -728,11 +734,13 @@ JX.behavior('pholio-mock-view', function(config) {
       'View Full Image');
     info.push(full_link);
 
-    var history_link = JX.$N(
-      'a',
-      { href: image.historyURI },
-      'View Image History');
-    info.push(history_link);
+    if (config.viewMode != 'history') {
+      var history_link = JX.$N(
+        'a',
+        { href: image.historyURI },
+        'View Image History');
+      info.push(history_link);
+    }
 
 
     for (var ii = 0; ii < info.length; ii++) {

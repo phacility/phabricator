@@ -60,6 +60,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
         ),
         'subscribe/(?P<action>add|rem)/(?P<id>[1-9]\d*)/'
           => 'DifferentialSubscribeController',
+        'preview/' => 'PhabricatorMarkupPreviewController',
       ),
     );
   }

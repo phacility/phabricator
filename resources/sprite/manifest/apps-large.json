@@ -561,6 +561,26 @@
       "rule" : ".apps-metamta-white-large",
       "hash" : "076be59cc84b57c12e9f8b8542d103c3"
     },
+    "apps-new-blue-large"             : {
+      "name" : "apps-new-blue-large",
+      "rule" : ".apps-new-blue-large, .phabricator-crumb-view:hover .apps-new-dark-large",
+      "hash" : "90656ea1eb5379434b77579df47318f3"
+    },
+    "apps-new-dark-large"             : {
+      "name" : "apps-new-dark-large",
+      "rule" : ".apps-new-dark-large",
+      "hash" : "2412643dfde502a297d2c35eb9ba4f93"
+    },
+    "apps-new-light-large"            : {
+      "name" : "apps-new-light-large",
+      "rule" : ".apps-new-light-large",
+      "hash" : "c93739e145aec183aaa1fea4e37aa3aa"
+    },
+    "apps-new-white-large"            : {
+      "name" : "apps-new-white-large",
+      "rule" : ".apps-new-white-large",
+      "hash" : "be597ce11c4d1630f67282cd7b81cc85"
+    },
     "apps-owners-blue-large"          : {
       "name" : "apps-owners-blue-large",
       "rule" : ".apps-owners-blue-large, .phabricator-crumb-view:hover .apps-owners-dark-large",

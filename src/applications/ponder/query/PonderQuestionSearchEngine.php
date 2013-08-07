@@ -14,6 +14,8 @@ final class PonderQuestionSearchEngine
       'answererPHIDs',
       array_values($request->getArr('answerers')));
 
+    $saved->setParameter('status', $request->getStr('status'));
+
     return $saved;
   }
 
@@ -30,6 +32,18 @@ final class PonderQuestionSearchEngine
       $query->withAnswererPHIDs($answerer_phids);
     }
 
+    $status = $saved->getParameter('status');
+    if ($status != null) {
+      switch ($status) {
+        case 0:
+          $query->withStatus(PonderQuestionQuery::STATUS_OPEN);
+          break;
+        case 1:
+          $query->withStatus(PonderQuestionQuery::STATUS_CLOSED);
+          break;
+      }
+    }
+
     return $query;
   }
 
@@ -39,6 +53,8 @@ final class PonderQuestionSearchEngine
 
     $author_phids = $saved_query->getParameter('authorPHIDs', array());
     $answerer_phids = $saved_query->getParameter('answererPHIDs', array());
+    $status = $saved_query->getParameter(
+      'status', PonderQuestionStatus::STATUS_OPEN);
 
     $phids = array_merge($author_phids, $answerer_phids);
     $handles = id(new PhabricatorObjectHandleData($phids))
@@ -61,7 +77,13 @@ final class PonderQuestionSearchEngine
           ->setDatasource('/typeahead/common/users/')
           ->setName('answerers')
           ->setLabel(pht('Answered By'))
-          ->setValue($answerer_tokens));
+          ->setValue($answerer_tokens))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Status'))
+          ->setName('status')
+          ->setValue($status)
+          ->setOptions(PonderQuestionStatus::getQuestionStatusMap()));
   }
 
   protected function getURI($path) {
@@ -70,6 +92,7 @@ final class PonderQuestionSearchEngine
 
   public function getBuiltinQueryNames() {
     $names = array(
+      'open' => pht('Open Questions'),
       'all' => pht('All Questions'),
     );
 
@@ -89,6 +112,8 @@ final class PonderQuestionSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'open':
+        return $query->setParameter('status', PonderQuestionQuery::STATUS_OPEN);
       case 'authored':
         return $query->setParameter(
           'authorPHIDs',

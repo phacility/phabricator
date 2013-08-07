@@ -27,7 +27,7 @@ final class PholioImageHistoryController extends PholioController {
     // note while we have a mock object, its missing images we need to show
     // the history of what's happened here.
     // fetch the real deal
-    //
+
     $mock = id(new PholioMockQuery())
       ->setViewer($user)
       ->needImages(true)
@@ -44,7 +44,6 @@ final class PholioImageHistoryController extends PholioController {
 
 
     $images = $mock->getImageHistorySet($this->imageID);
-    // TODO - this is a hack until we specialize the view object
     $mock->attachImages($images);
     $latest_image = last($images);
 
@@ -59,13 +58,14 @@ final class PholioImageHistoryController extends PholioController {
     require_celerity_resource('pholio-css');
     require_celerity_resource('pholio-inline-comments-css');
 
-    $comment_form_id = celerity_generate_unique_node_id();
+    $comment_form_id = null;
     $output = id(new PholioMockImagesView())
       ->setRequestURI($request->getRequestURI())
       ->setCommentFormID($comment_form_id)
       ->setUser($user)
       ->setMock($mock)
-      ->setImageID($this->imageID);
+      ->setImageID($this->imageID)
+      ->setViewMode('history');
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs

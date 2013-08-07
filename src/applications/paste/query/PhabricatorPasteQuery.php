@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group paste
+ */
 final class PhabricatorPasteQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 

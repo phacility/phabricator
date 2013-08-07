@@ -8,6 +8,10 @@ abstract class PhabricatorSearchDocumentIndexer {
   abstract public function getIndexableObject();
   abstract protected function buildAbstractDocumentByPHID($phid);
 
+  protected function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function shouldIndexDocumentByPHID($phid) {
     $object = $this->getIndexableObject();
     return (phid_get_type($phid) == phid_get_type($object->generatePHID()));
@@ -19,12 +23,14 @@ abstract class PhabricatorSearchDocumentIndexer {
   }
 
   protected function loadDocumentByPHID($phid) {
-    $object = $this->getIndexableObject();
-    $document = $object->loadOneWhere('phid = %s', $phid);
-    if (!$document) {
-      throw new Exception("Unable to load document by phid '{$phid}'!");
+    $object = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    if (!$object) {
+      throw new Exception("Unable to load object by phid '{$phid}'!");
     }
-    return $document;
+    return $object;
   }
 
   public function indexDocumentByPHID($phid) {
@@ -49,6 +55,54 @@ abstract class PhabricatorSearchDocumentIndexer {
     }
 
     return $this;
+  }
+
+  protected function newDocument($phid) {
+    return id(new PhabricatorSearchAbstractDocument())
+      ->setPHID($phid)
+      ->setDocumentType(phid_get_type($phid));
+  }
+
+  protected function indexSubscribers(
+    PhabricatorSearchAbstractDocument $doc) {
+
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $doc->getPHID());
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($subscribers)
+      ->execute();
+
+    foreach ($handles as $phid => $handle) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
+        $phid,
+        $handle->getType(),
+        $doc->getDocumentModified()); // Bogus timestamp.
+    }
+  }
+
+  protected function indexTransactions(
+    PhabricatorSearchAbstractDocument $doc,
+    PhabricatorApplicationTransactionQuery $query,
+    array $phids) {
+
+    $xactions = id(clone $query)
+      ->setViewer($this->getViewer())
+      ->withObjectPHIDs($phids)
+      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
+      ->execute();
+
+    foreach ($xactions as $xaction) {
+      if (!$xaction->hasComment()) {
+        continue;
+      }
+
+      $comment = $xaction->getComment();
+      $doc->addField(
+        PhabricatorSearchField::FIELD_COMMENT,
+        $comment->getContent());
+    }
   }
 
 }

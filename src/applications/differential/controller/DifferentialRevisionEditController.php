@@ -147,11 +147,13 @@ final class DifferentialRevisionEditController extends DifferentialController {
           id(new AphrontFormDividerControl()));
     }
 
+    $preview = array();
     foreach ($aux_fields as $aux_field) {
       $control = $aux_field->renderEditControl();
       if ($control) {
         $form->appendChild($control);
       }
+      $preview[] = $aux_field->renderEditPreview();
     }
 
     $submit = id(new AphrontFormSubmitControl())
@@ -185,14 +187,14 @@ final class DifferentialRevisionEditController extends DifferentialController {
 
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
-        ->setName($title)
-        ->setHref(''));
+        ->setName($title));
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $error_view,
-        $form),
+        $form,
+        $preview),
       array(
         'title' => $title,
         'device' => true,

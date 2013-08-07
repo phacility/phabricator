@@ -1471,13 +1471,53 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130716.archivememberlessprojects.php'),
       ),
+      '20130722.pholioreplace.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130722.pholioreplace.sql'),
+      ),
       '20130723.taskstarttime.sql' => array(
         'type' => 'sql',
         'name' => $this->getPatchPath('20130723.taskstarttime.sql'),
       ),
-      '20130722.pholioreplace.sql' => array(
+      '20130727.ponderquestionstatus.sql' => array(
         'type' => 'sql',
-        'name' => $this->getPatchPath('20130722.pholioreplace.sql'),
+        'name' => $this->getPatchPath('20130727.ponderquestionstatus.sql'),
+      ),
+      '20130726.ponderxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130726.ponderxactions.sql'),
+      ),
+      '20130728.ponderunique.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130728.ponderunique.php'),
+      ),
+      '20130728.ponderuniquekey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130728.ponderuniquekey.sql'),
+      ),
+      '20130728.ponderxcomment.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130728.ponderxcomment.php'),
+      ),
+      '20130801.pastexactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130801.pastexactions.sql'),
+      ),
+      '20130801.pastexactions.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130801.pastexactions.php'),
+      ),
+      '20130805.pastemailkey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130805.pastemailkey.sql'),
+      ),
+      '20130805.pasteedges.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130805.pasteedges.sql'),
+      ),
+      '20130805.pastemailkeypop.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130805.pastemailkeypop.php'),
       ),
     );
   }

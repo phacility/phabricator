@@ -6,7 +6,11 @@ final class PhabricatorDaemonManagementLogWorkflow
   public function didConstruct() {
     $this
       ->setName('log')
-      ->setSynopsis(pht('Print the log for a daemon.'))
+      ->setExamples('**log** __id__')
+      ->setSynopsis(
+        pht(
+          'Print the log for a daemon, identified by ID. You can get the '.
+          'ID for a daemon from the Daemon Console in the web interface.'))
       ->setArguments(
         array(
           array(

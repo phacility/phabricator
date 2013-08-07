@@ -17,7 +17,6 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $handles  = array();
   private $objects  = array();
 
-
 /* -(  Loading Stories  )---------------------------------------------------- */
 
 
@@ -233,11 +232,19 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     // NOTE: We render our own link here to customize the styling and add
     // the '_top' target for framed feeds.
 
-    return phutil_tag(
+    $class = null;
+    if ($handle->getType() == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+      $class = 'phui-link-person';
+    }
+
+    return javelin_tag(
       'a',
       array(
         'href'    => $handle->getURI(),
         'target'  => $this->framed ? '_top' : null,
+        'sigil'   => 'hovercard',
+        'meta'    => array('hoverPHID' => $phid),
+        'class'   => $class,
       ),
       $handle->getLinkName());
   }

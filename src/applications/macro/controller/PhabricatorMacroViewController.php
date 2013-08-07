@@ -55,6 +55,7 @@ final class PhabricatorMacroViewController
 
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($macro->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
@@ -85,6 +86,7 @@ final class PhabricatorMacroViewController
 
     $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
+      ->setObjectPHID($macro->getPHID())
       ->setDraft($draft)
       ->setAction($this->getApplicationURI('/comment/'.$macro->getID().'/'))
       ->setSubmitButtonName($submit_button_name);

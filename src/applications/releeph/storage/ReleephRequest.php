@@ -125,7 +125,7 @@ final class ReleephRequest extends ReleephDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      ReleephPHIDConstants::PHID_TYPE_RERQ);
+      ReleephPHIDTypeRequest::TYPECONST);
   }
 
   public function save() {
@@ -297,6 +297,7 @@ final class ReleephRequest extends ReleephDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 

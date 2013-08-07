@@ -281,6 +281,16 @@
       "rule" : ".apps-metamta-white",
       "hash" : "1664f51de85251cf358b9fad3623d1d5"
     },
+    "apps-new-dark"             : {
+      "name" : "apps-new-dark",
+      "rule" : ".apps-new-dark",
+      "hash" : "39f2b8d62c4595dc653badf9f11a08d7"
+    },
+    "apps-new-white"            : {
+      "name" : "apps-new-white",
+      "rule" : ".apps-new-white",
+      "hash" : "dc5ce42c7d60e6ba37b07631b3c3280a"
+    },
     "apps-owners-dark"          : {
       "name" : "apps-owners-dark",
       "rule" : ".apps-owners-dark",

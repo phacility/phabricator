@@ -28,7 +28,7 @@ final class DivinerLiveBook extends DivinerDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_BOOK);
+      DivinerPHIDTypeBook::TYPECONST);
   }
 
   public function getTitle() {
@@ -42,7 +42,7 @@ final class DivinerLiveBook extends DivinerDAO
   public function getGroupName($group) {
     $groups = $this->getConfig('groups');
     $spec = idx($groups, $group, array());
-    return idx($spec, 'name', pht('Free Radicals'));
+    return idx($spec, 'name', $group);
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

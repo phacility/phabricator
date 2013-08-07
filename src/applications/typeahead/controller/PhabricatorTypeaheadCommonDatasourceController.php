@@ -14,6 +14,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $query = $request->getStr('q');
+    $raw_query = $request->getStr('raw');
 
     $need_rich_data = false;
 
@@ -304,55 +305,23 @@ final class PhabricatorTypeaheadCommonDatasourceController
     }
 
     if ($need_jump_objects) {
-      $response = PhabricatorJumpNavHandler::jumpPostResponse($query);
-
-      if ($response) {
-        $is_task = array();
-        $is_revision = array();
-
-        preg_match('/T[0-9]+/', $response->getURI(), $is_task);
-        preg_match('/D[0-9]+/', $response->getURI(), $is_revision);
-
-        if ($is_task) {
-          for ($i = 0; $i < count($is_task); $i++) {
-            $is_task[$i] = substr($is_task[$i], 1); // Remove leading 'T'.
-          }
-          $tasks = id(new ManiphestTaskQuery())
-            ->setViewer($viewer)
-            ->withTaskIDs($is_task)
-            ->execute();
-
-          if ($tasks) {
-            foreach ($tasks as $task) {
-              $results[] = id(new PhabricatorTypeaheadResult())
-                ->setName('T'.$task->getID())
-                ->setDisplayType("Task")
-                ->setURI('/T'.$task->getID())
-                ->setPHID($task->getPHID())
-                ->setPriorityType('jump');
-            }
-          }
-        }
-
-        if ($is_revision) {
-          for ($i = 0; $i < count($is_revision); $i++) {
-            $is_revision[$i] = substr($is_revision[$i], 1);
-          }
-          $revisions = id(new DifferentialRevisionQuery())
-            ->setViewer($viewer)
-            ->withIDs($is_revision)
-            ->execute();
-
-          if ($revisions) {
-            foreach ($revisions as $revision) {
-              $results[] = id(new PhabricatorTypeaheadResult())
-                ->setName('D'.$revision->getID())
-                ->setDisplayType("Revision")
-                ->setURI('/D'.$revision->getID())
-                ->setPHID($revision->getPHID())
-                ->setPriorityType('jump');
-            }
-          }
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($viewer)
+        ->withNames(array($raw_query))
+        ->execute();
+      if ($objects) {
+        $handles = id(new PhabricatorHandleQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(mpull($objects, 'getPHID'))
+          ->execute();
+        $handle = head($handles);
+        if ($handle) {
+          $results[] = id(new PhabricatorTypeaheadResult())
+            ->setName($handle->getFullName())
+            ->setDisplayType($handle->getTypeName())
+            ->setURI($handle->getURI())
+            ->setPHID($handle->getPHID())
+            ->setPriorityType('jump');
         }
       }
     }

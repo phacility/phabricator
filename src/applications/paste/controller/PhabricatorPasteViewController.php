@@ -1,8 +1,12 @@
 <?php
 
+/**
+ * group paste
+ */
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private $id;
+  private $highlightMap;
 
   public function shouldAllowPublic() {
     return true;
@@ -10,6 +14,21 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
+    $raw_lines = idx($data, 'lines');
+    $map = array();
+    if ($raw_lines) {
+      $lines = explode('-', $raw_lines);
+      $first = idx($lines, 0, 0);
+      $last = idx($lines, 1);
+      if ($last) {
+        $min = min($first, $last);
+        $max = max($first, $last);
+        $map = array_fuse(range($min, $max));
+      } else {
+        $map[$first] = $first;
+      }
+    }
+    $this->highlightMap = $map;
   }
 
   public function processRequest() {
@@ -49,7 +68,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($user, $paste, $file);
     $properties = $this->buildPropertyView($paste, $fork_phids);
-    $source_code = $this->buildSourceCodeView($paste);
+    $source_code = $this->buildSourceCodeView(
+      $paste,
+      null,
+      $this->highlightMap);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
       ->setActionList($actions)
@@ -58,6 +80,49 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           ->setName('P'.$paste->getID())
           ->setHref('/P'.$paste->getID()));
 
+    $xactions = id(new PhabricatorPasteTransactionQuery())
+      ->setViewer($request->getUser())
+      ->withObjectPHIDs(array($paste->getPHID()))
+      ->execute();
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setObjectPHID($paste->getPHID())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = id(new PhabricatorHeaderView())
+      ->setHeader(
+        $is_serious
+          ? pht('Add Comment')
+          : pht('Debate Paste Accuracy'));
+
+    $submit_button_name = $is_serious
+      ? pht('Add Comment')
+      : pht('Pity the Fool');
+
+    $draft = PhabricatorDraft::newFromUserAndKey($user, $paste->getPHID());
+
+    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($user)
+      ->setObjectPHID($paste->getPHID())
+      ->setDraft($draft)
+      ->setAction($this->getApplicationURI('/comment/'.$paste->getID().'/'))
+      ->setSubmitButtonName($submit_button_name);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
@@ -65,6 +130,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         $actions,
         $properties,
         $source_code,
+        $timeline,
+        $add_comment_header,
+        $add_comment_form
       ),
       array(
         'title' => $paste->getFullName(),

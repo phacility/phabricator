@@ -19,6 +19,7 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $data = $this->getStoryData();
 
     $author_phid = $data->getAuthorPHID();
+    $author_link = $this->linkTo($author_phid);
     $document_phid = $data->getValue('phid');
 
     $view = $this->newStoryView();
@@ -38,7 +39,7 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
           $from_handle = $this->getHandle($from_phid);
           $view->setTitle(pht(
             '%s moved the document %s from %s to %s.',
-            $this->linkTo($author_phid),
+            $author_link,
             $document_handle->renderLink(),
             phutil_tag(
               'a',
@@ -58,21 +59,26 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
       default:
         $view->setTitle(pht(
           '%s %s the document %s.',
-          $this->linkTo($author_phid),
+          $author_link,
           $verb,
           $this->linkTo($document_phid)));
         break;
     }
 
     $view->setImage($this->getHandle($author_phid)->getImageURI());
-    $content = $this->renderSummary($data->getValue('content'));
-    $view->appendChild($content);
+    switch ($action) {
+      case PhrictionActionConstants::ACTION_CREATE:
+        $content = $this->renderSummary($data->getValue('content'));
+        $view->appendChild($content);
+        break;
+      }
 
     return $view;
   }
 
   public function renderText() {
-    $author_name = $this->getHandle($this->getAuthorPHID())->getLinkName();
+    $author_phid = $this->getHandle($this->getAuthorPHID());
+    $author_link = $this->linkTo($author_phid);
 
     $document_handle = $this->getHandle($this->getPrimaryObjectPHID());
     $document_title = $document_handle->getLinkName();
@@ -81,7 +87,7 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $action = $this->getValue('action');
     $verb = PhrictionActionConstants::getActionPastTenseVerb($action);
 
-    $text = "{$author_name} {$verb} the document".
+    $text = "{$author_link} {$verb} the document".
             " {$document_title} {$document_uri}";
 
     return $text;

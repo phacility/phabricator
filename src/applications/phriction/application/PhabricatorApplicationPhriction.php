@@ -42,8 +42,7 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
       '/w/(?P<slug>.+/)' => 'PhrictionDocumentController',
 
       '/phriction/' => array(
-        ''                       => 'PhrictionListController',
-        'list/(?P<view>[^/]+)/'  => 'PhrictionListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhrictionListController',
 
         'history(?P<slug>/)'     => 'PhrictionHistoryController',
         'history/(?P<slug>.+/)'  => 'PhrictionHistoryController',
@@ -53,7 +52,7 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
         'new/'                        => 'PhrictionNewController',
         'move/(?:(?P<id>[1-9]\d*)/)?'      => 'PhrictionMoveController',
 
-        'preview/' => 'PhrictionDocumentPreviewController',
+        'preview/' => 'PhabricatorMarkupPreviewController',
         'diff/(?P<id>[1-9]\d*)/' => 'PhrictionDiffController',
       ),
     );

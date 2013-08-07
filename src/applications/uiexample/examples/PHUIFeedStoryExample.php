@@ -15,8 +15,9 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    /* Basic "One Line" Story */
-    $text = hsprintf('<strong><a>harding (Tom Harding)</a></strong> closed <a>'.
+    /* Basic Story */
+    $text = hsprintf(
+      '<strong><a>harding (Tom Harding)</a></strong> closed <a>'.
       'D12: New spacer classes for blog views</a>.');
     $story1 = id(new PHUIFeedStoryView())
       ->setTitle($text)
@@ -118,11 +119,21 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setPontification('If we ever create a lightweight status app '.
       'this story would be how that would be displayed.');
 
-
+    /* Basic "One Line" Story */
+    $text = hsprintf(
+      '<strong><a>harding (Tom Harding)</a></strong> updated <a>'.
+      'D12: New spacer classes for blog views</a>.');
+    $story6 = id(new PHUIFeedStoryView())
+      ->setTitle($text)
+      ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
+      ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
+      ->setEpoch(1)
+      ->setAppIcon('differential-dark')
+      ->setUser($user);
 
 
     $head1 = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Basic "one-line" Story'));
+      ->setHeader(pht('Basic Story'));
 
     $head2 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Title / Text Story'));
@@ -135,6 +146,9 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
 
     $head5 = id(new PhabricatorHeaderView())
       ->setHeader(pht('Status Story'));
+
+    $head6 = id(new PhabricatorHeaderView())
+      ->setHeader(pht('One Line Story'));
 
     $wrap1 =
       array(
@@ -171,6 +185,13 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->addPadding(PHUI::PADDING_SMALL));
 
+    $wrap6 =
+      array(
+        id(new PHUIBoxView())
+          ->appendChild($story6)
+          ->addMargin(PHUI::MARGIN_MEDIUM)
+          ->addPadding(PHUI::PADDING_SMALL));
+
     return phutil_tag(
       'div',
         array(),
@@ -184,7 +205,9 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
           $head4,
           $wrap4,
           $head5,
-          $wrap5
+          $wrap5,
+          $head6,
+          $wrap6
         ));
   }
 }

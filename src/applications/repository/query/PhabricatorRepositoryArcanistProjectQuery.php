@@ -9,6 +9,8 @@ final class PhabricatorRepositoryArcanistProjectQuery
   private $ids;
   private $phids;
 
+  private $needRepositories;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -16,6 +18,11 @@ final class PhabricatorRepositoryArcanistProjectQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function needRepositories($need_repositories) {
+    $this->needRepositories = $need_repositories;
     return $this;
   }
 
@@ -32,6 +39,24 @@ final class PhabricatorRepositoryArcanistProjectQuery
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  public function willFilterPage(array $projects) {
+    assert_instances_of($projects, 'PhabricatorRepositoryArcanistProject');
+
+    if ($this->needRepositories) {
+      $repository_ids = mpull($projects, 'getRepositoryID');
+      $repositories = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withIDs($repository_ids)
+        ->execute();
+      foreach ($projects as $project) {
+        $repo = idx($repositories, $project->getRepositoryID());
+        $project->attachRepository($repo);
+      }
+    }
+
+    return $projects;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {

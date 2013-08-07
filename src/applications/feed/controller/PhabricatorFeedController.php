@@ -23,12 +23,16 @@ abstract class PhabricatorFeedController extends PhabricatorController {
   }
 
   protected function buildSideNavView() {
+    $user = $this->getRequest()->getUser();
+
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $nav->addLabel(pht('Feed'));
-    $nav->addFilter('all', pht('All Activity'));
-    $nav->addFilter('projects', pht('My Projects'));
+    id(new PhabricatorFeedSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
 
     return $nav;
   }

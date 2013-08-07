@@ -9,7 +9,7 @@
   font-size: 10px;
 }
 
-.diffusion-source tr.highlighted {
+.diffusion-source tr.phabricator-source-highlight {
   background: #ffff00;
 }
 

@@ -7,6 +7,18 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
     return ($object instanceof DifferentialRevision);
   }
 
+  public function isStoryAboutObjectCreation($object) {
+    $story = $this->getFeedStory();
+
+    $action = $story->getStoryData()->getValue('action');
+    switch ($action) {
+      case DifferentialAction::ACTION_CREATE:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   public function willPublishStory($object) {
     return id(new DifferentialRevisionQuery())
       ->setViewer($this->getViewer())

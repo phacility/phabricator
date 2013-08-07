@@ -17,9 +17,7 @@ final class PhabricatorSearchSelectController
     $user = $request->getUser();
 
     $query = new PhabricatorSearchQuery();
-
     $query_str = $request->getStr('query');
-    $matches = array();
 
     $query->setQuery($query_str);
     $query->setParameter('type', $this->type);

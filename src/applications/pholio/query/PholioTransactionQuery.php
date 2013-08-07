@@ -6,7 +6,7 @@
 final class PholioTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
-  protected function getTemplateApplicationTransaction() {
+  public function getTemplateApplicationTransaction() {
     return new PholioTransaction();
   }
 

@@ -1,99 +1,74 @@
 <?php
 
-final class PonderAnswerEditor extends PhabricatorEditor {
+final class PonderAnswerEditor
+  extends PhabricatorApplicationTransactionEditor {
 
-  private $question;
-  private $answer;
-  private $shouldEmail = true;
+  public function getTransactionTypes() {
+    $types = parent::getTransactionTypes();
 
-  public function setQuestion($question) {
-    $this->question = $question;
-    return $this;
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PonderAnswerTransaction::TYPE_CONTENT;
+
+    return $types;
   }
 
-  public function setAnswer($answer) {
-    $this->answer = $answer;
-    return $this;
-  }
+  protected function getCustomTransactionOldValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
 
-  public function saveAnswer() {
-    $actor = $this->requireActor();
-    if (!$this->question) {
-      throw new Exception("Must set question before saving answer");
-    }
-    if (!$this->answer) {
-      throw new Exception("Must set answer before saving it");
-    }
-
-    $question = $this->question;
-    $answer = $this->answer;
-    $conn = $answer->establishConnection('w');
-    $trans = $conn->openTransaction();
-    $trans->beginReadLocking();
-
-      $question->reload();
-
-      queryfx($conn,
-        'UPDATE %T as t
-        SET t.`answerCount` = t.`answerCount` + 1
-        WHERE t.`PHID` = %s',
-        $question->getTableName(),
-        $question->getPHID());
-
-      $answer->setQuestionID($question->getID());
-      $answer->save();
-
-    $trans->endReadLocking();
-    $trans->saveTransaction();
-
-    $question->attachRelated();
-    id(new PhabricatorSearchIndexer())
-      ->indexDocumentByPHID($question->getPHID());
-
-    // subscribe author and @mentions
-    $subeditor = id(new PhabricatorSubscriptionsEditor())
-      ->setObject($question)
-      ->setActor($actor);
-
-    $subeditor->subscribeExplicit(array($answer->getAuthorPHID()));
-
-    $content = $answer->getContent();
-    $at_mention_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      array($content));
-    $subeditor->subscribeImplicit($at_mention_phids);
-    $subeditor->save();
-
-    if ($this->shouldEmail) {
-      // now load subscribers, including implicitly-added @mention victims
-      $subscribers = PhabricatorSubscribersQuery
-        ::loadSubscribersForPHID($question->getPHID());
-
-
-      // @mention emails (but not for anyone who has explicitly unsubscribed)
-      if (array_intersect($at_mention_phids, $subscribers)) {
-        id(new PonderMentionMail(
-          $question,
-          $answer,
-          $actor))
-          ->setToPHIDs($at_mention_phids)
-          ->send();
-      }
-
-      $other_subs =
-        array_diff(
-          $subscribers,
-          $at_mention_phids);
-
-      // 'Answered' emails for subscribers who are not @mentiond (and excluding
-      // author depending on their MetaMTA settings).
-      if ($other_subs) {
-        id(new PonderAnsweredMail(
-          $question,
-          $answer,
-          $actor))
-          ->setToPHIDs($other_subs)
-          ->send();
-      }
+    switch ($xaction->getTransactionType()) {
+      case PonderAnswerTransaction::TYPE_CONTENT:
+        return $object->getContent();
     }
   }
+
+  protected function getCustomTransactionNewValue(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PonderAnswerTransaction::TYPE_CONTENT:
+        return $xaction->getNewValue();
+    }
+  }
+
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PonderAnswerTransaction::TYPE_CONTENT:
+        $object->setContent($xaction->getNewValue());
+        break;
+    }
+  }
+
+  protected function applyCustomExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return;
+  }
+
+  protected function mergeTransactions(
+    PhabricatorApplicationTransaction $u,
+    PhabricatorApplicationTransaction $v) {
+
+    $type = $u->getTransactionType();
+    switch ($type) {
+      case PonderAnswerTransaction::TYPE_CONTENT:
+        return $v;
+    }
+
+    return parent::mergeTransactions($u, $v);
+  }
+
+  protected function supportsFeed() {
+    return true;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array($object->getAuthorPHID());
+  }
+
+
 }

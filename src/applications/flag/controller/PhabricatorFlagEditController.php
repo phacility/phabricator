@@ -82,7 +82,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
 
     $dialog->addCancelButton($handle->getURI());
     $dialog->addSubmitButton(
-      $is_new ? pht("Flag %s") : pht('Save'));
+      $is_new ? pht("Create Flag") : pht('Save'));
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

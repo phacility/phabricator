@@ -1,11 +1,15 @@
 <?php
 
 final class PonderAnswer extends PonderDAO
-  implements PhabricatorMarkupInterface, PonderVotableInterface {
+  implements
+    PhabricatorMarkupInterface,
+    PonderVotableInterface,
+    PhabricatorPolicyInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
-  protected $phid;
   protected $authorPHID;
   protected $questionID;
 
@@ -14,23 +18,35 @@ final class PonderAnswer extends PonderDAO
 
   protected $voteCount;
   private $vote;
-  private $question = null;
+  private $question = self::ATTACHABLE;
   private $comments;
 
+  private $userVotes = array();
+
+  // TODO: Get rid of this method.
   public function setQuestion($question) {
+    return $this->attachQuestion($question);
+  }
+
+  public function attachQuestion(PonderQuestion $question = null) {
     $this->question = $question;
     return $this;
   }
 
   public function getQuestion() {
-    return $this->question;
+    return $this->assertAttached($this->question);
   }
 
   public function setUserVote($vote) {
     $this->vote = $vote['data'];
     if (!$this->vote) {
-      $this->vote = PonderConstants::NONE_VOTE;
+      $this->vote = PonderVote::VOTE_NONE;
     }
+    return $this;
+  }
+
+  public function attachUserVote($user_phid, $vote) {
+    $this->vote = $vote;
     return $this;
   }
 
@@ -53,17 +69,9 @@ final class PonderAnswer extends PonderDAO
     ) + parent::getConfiguration();
   }
 
-  public function setTitle($title) {
-    $this->title = $title;
-    if (!$this->getID()) {
-      $this->originalTitle = $title;
-    }
-    return $this;
-  }
-
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_ANSW);
+      PonderPHIDTypeAnswer::TYPECONST);
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
@@ -73,10 +81,6 @@ final class PonderAnswer extends PonderDAO
 
   public function getContentSource() {
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
-  }
-
-  public function getAnswers() {
-    return $this->loadRelatives(new PonderAnswer(), "questionID");
   }
 
   public function getMarkupField() {
@@ -96,7 +100,7 @@ final class PonderAnswer extends PonderDAO
   }
 
   public function newMarkupEngine($field) {
-    return PhabricatorMarkupEngine::newPonderMarkupEngine();
+    return PhabricatorMarkupEngine::getEngine();
   }
 
   public function didMarkupText(
@@ -118,4 +122,55 @@ final class PonderAnswer extends PonderDAO
   public function getVotablePHID() {
     return $this->getPHID();
   }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getQuestion()->getPolicy($capability);
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return PhabricatorPolicies::POLICY_NOONE;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getQuestion()->hasAutomaticCapability(
+          $capability,
+          $viewer);
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return ($this->getAuthorPHID() == $viewer->getPHID());
+    }
+  }
+
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($phid == $this->getAuthorPHID());
+  }
+
+
 }

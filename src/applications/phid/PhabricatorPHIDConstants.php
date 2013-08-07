@@ -12,7 +12,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_OASC    = 'OASC';
   const PHID_TYPE_OASA    = 'OASA';
   const PHID_TYPE_TOBJ    = 'TOBJ';
-  const PHID_TYPE_ANSW    = 'ANSW';
   const PHID_TYPE_ACNT    = 'ACNT';
   const PHID_TYPE_PDCT    = 'PDCT';
   const PHID_TYPE_PRCH    = 'PRCH';
@@ -21,11 +20,8 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_CART    = 'CART';
   const PHID_TYPE_LEGB    = 'LEGB';
 
-  const PHID_TYPE_XACT    = 'XACT';
   const PHID_TYPE_XCMT    = 'XCMT';
 
-  const PHID_TYPE_BOOK    = 'BOOK';
-  const PHID_TYPE_ATOM    = 'ATOM';
   const PHID_TYPE_AUTH    = 'AUTH';
   const PHID_TYPE_XOBJ    = 'XOBJ';
 

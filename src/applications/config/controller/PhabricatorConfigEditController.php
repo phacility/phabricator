@@ -64,6 +64,7 @@ final class PhabricatorConfigEditController
         ->setConfigKey($this->key)
         ->setNamespace('default')
         ->setIsDeleted(true);
+      $config_entry->setPHID($config_entry->generatePHID());
     }
 
     $e_value = null;
@@ -219,6 +220,7 @@ final class PhabricatorConfigEditController
 
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
+      ->setObjectPHID($config_entry->getPHID())
       ->setTransactions($xactions);
 
     return $this->buildApplicationPage(
@@ -464,6 +466,9 @@ final class PhabricatorConfigEditController
       if ($value === null) {
         $value = phutil_tag('em', array(), pht('(empty)'));
       } else {
+        if (is_array($value)) {
+          $value = implode("\n", $value);
+        }
         $value = phutil_escape_html_newlines($value);
       }
 

@@ -4,29 +4,32 @@ final class PonderAnswerSaveController extends PonderController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $request->getUser();
+
     if (!$request->isFormPost()) {
       return new Aphront400Response();
     }
 
-    $user = $request->getUser();
     $question_id = $request->getInt('question_id');
-    $question = PonderQuestionQuery::loadSingle($user, $question_id);
-
+    $question = id(new PonderQuestionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($question_id))
+      ->needAnswers(true)
+      ->executeOne();
     if (!$question) {
       return new Aphront404Response();
     }
 
     $answer = $request->getStr('answer');
 
-    // Only want answers with some non whitespace content
     if (!strlen(trim($answer))) {
-      $dialog = new AphrontDialogView();
-      $dialog->setUser($request->getUser());
-      $dialog->setTitle(pht('Empty Answer'));
-      $dialog->appendChild(
-        phutil_tag('p', array(), pht(
-        'Your answer must not be empty.')));
-      $dialog->addCancelButton('/Q'.$question_id);
+      $dialog = id(new AphrontDialogView())
+        ->setUser($viewer)
+        ->setTitle(pht('Empty Answer'))
+        ->appendChild(
+          phutil_tag('p', array(), pht(
+          'Your answer must not be empty.')))
+        ->addCancelButton('/Q'.$question_id);
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
@@ -37,21 +40,30 @@ final class PonderAnswerSaveController extends PonderController {
         'ip' => $request->getRemoteAddr(),
       ));
 
-    $res = new PonderAnswer();
-    $res
+    $res = id(new PonderAnswer())
+      ->setAuthorPHID($viewer->getPHID())
+      ->setQuestionID($question->getID())
       ->setContent($answer)
-      ->setAuthorPHID($user->getPHID())
       ->setVoteCount(0)
-      ->setQuestionID($question_id)
       ->setContentSource($content_source);
 
-    id(new PonderAnswerEditor())
-      ->setActor($user)
-      ->setQuestion($question)
-      ->setAnswer($res)
-      ->saveAnswer();
+    $xactions = array();
+    $xactions[] = id(new PonderQuestionTransaction())
+      ->setTransactionType(PonderQuestionTransaction::TYPE_ANSWERS)
+      ->setNewValue(
+        array(
+          '+' => array(
+            array('answer' => $res),
+          ),
+        ));
+
+    $editor = id(new PonderQuestionEditor())
+      ->setActor($viewer)
+      ->setContentSourceFromRequest($request);
+
+    $editor->applyTransactions($question, $xactions);
 
     return id(new AphrontRedirectResponse())->setURI(
-      id(new PhutilURI('/Q'. $question->getID())));
+      id(new PhutilURI('/Q'.$question->getID())));
   }
 }

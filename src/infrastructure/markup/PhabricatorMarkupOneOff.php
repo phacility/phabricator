@@ -15,6 +15,12 @@
 final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
 
   private $content;
+  private $preserveLinebreaks;
+
+  public function setPreserveLinebreaks($preserve_linebreaks) {
+    $this->preserveLinebreaks = $preserve_linebreaks;
+    return $this;
+  }
 
   public function setContent($content) {
     $this->content = $content;
@@ -32,7 +38,7 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
   public function newMarkupEngine($field) {
     return PhabricatorMarkupEngine::newMarkupEngine(
       array(
-        'preserve-linebreaks' => false,
+        'preserve-linebreaks' => $this->preserveLinebreaks,
       ));
   }
 

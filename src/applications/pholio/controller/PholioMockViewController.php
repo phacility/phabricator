@@ -88,6 +88,7 @@ final class PholioMockViewController extends PholioController {
 
     $xaction_view = id(new PholioTransactionView())
       ->setUser($this->getRequest()->getUser())
+      ->setObjectPHID($mock->getPHID())
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
@@ -249,6 +250,7 @@ final class PholioMockViewController extends PholioController {
 
     $form = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($user)
+      ->setObjectPHID($mock->getPHID())
       ->setFormID($comment_form_id)
       ->setDraft($draft)
       ->setSubmitButtonName($button_name)

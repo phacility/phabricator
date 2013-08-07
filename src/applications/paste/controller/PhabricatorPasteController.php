@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group paste
+ */
 abstract class PhabricatorPasteController extends PhabricatorController {
 
   public function buildSideNavView($for_app = false) {
@@ -39,13 +42,16 @@ abstract class PhabricatorPasteController extends PhabricatorController {
 
   public function buildSourceCodeView(
     PhabricatorPaste $paste,
-    $max_lines = null) {
+    $max_lines = null,
+    $highlights = array()) {
 
     $lines = phutil_split_lines($paste->getContent());
 
     return id(new PhabricatorSourceCodeView())
       ->setLimit($max_lines)
-      ->setLines($lines);
+      ->setLines($lines)
+      ->setHighlights($highlights)
+      ->setURI(new PhutilURI($paste->getURI()));
   }
 
 }

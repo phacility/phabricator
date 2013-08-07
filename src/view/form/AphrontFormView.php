@@ -12,6 +12,17 @@ final class AphrontFormView extends AphrontView {
   private $flexible;
   private $noShading;
   private $sigils = array();
+  private $metadata;
+
+
+  public function setMetadata($metadata) {
+    $this->metadata = $metadata;
+    return $this;
+  }
+
+  public function getMetadata() {
+    return $this->metadata;
+  }
 
   public function setFlexible($flexible) {
     $this->flexible = $flexible;
@@ -111,6 +122,7 @@ final class AphrontFormView extends AphrontView {
         'method'  => $this->method,
         'enctype' => $this->encType,
         'sigil'   => $sigils ? implode(' ', $sigils) : null,
+        'meta'    => $this->metadata,
         'id'      => $this->id,
       ),
       $layout->render());

@@ -20,9 +20,22 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
 
     $action = $data->getValue('action');
 
+    switch ($action) {
+      case DifferentialAction::ACTION_CREATE:
+      case DifferentialAction::ACTION_CLOSE:
+      case DifferentialAction::ACTION_COMMENT:
+        $full_size = true;
+        break;
+      default:
+        $full_size = false;
+        break;
+    }
+
     $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
-    $content = $this->renderSummary($data->getValue('feedback_content'));
-    $view->appendChild($content);
+    if ($full_size) {
+      $content = $this->renderSummary($data->getValue('feedback_content'));
+      $view->appendChild($content);
+    }
 
     return $view;
   }

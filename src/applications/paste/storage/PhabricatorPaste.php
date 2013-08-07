@@ -1,7 +1,13 @@
 <?php
 
+/**
+ * @group paste
+ */
 final class PhabricatorPaste extends PhabricatorPasteDAO
-  implements PhabricatorTokenReceiverInterface, PhabricatorPolicyInterface {
+  implements
+    PhabricatorSubscribableInterface,
+    PhabricatorTokenReceiverInterface,
+    PhabricatorPolicyInterface {
 
   protected $phid;
   protected $title;
@@ -10,6 +16,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $language;
   protected $parentPHID;
   protected $viewPolicy;
+  protected $mailKey;
 
   private $content;
   private $rawContent;
@@ -27,6 +34,13 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPastePHIDTypePaste::TYPECONST);
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public function getCapabilities() {
@@ -78,6 +92,14 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     $this->rawContent = $raw_content;
     return $this;
   }
+
+/* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($this->authorPHID == $phid);
+  }
+
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

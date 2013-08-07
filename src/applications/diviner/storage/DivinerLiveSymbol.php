@@ -29,7 +29,7 @@ final class DivinerLiveSymbol extends DivinerDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_ATOM);
+      DivinerPHIDTypeAtom::TYPECONST);
   }
 
   public function getBook() {
@@ -160,7 +160,7 @@ final class DivinerLiveSymbol extends DivinerDAO
 
 
   public function shouldUseMarkupCache($field) {
-    return true;
+    return false;
   }
 
 }

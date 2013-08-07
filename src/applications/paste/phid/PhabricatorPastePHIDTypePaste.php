@@ -38,7 +38,7 @@ final class PhabricatorPastePHIDTypePaste extends PhabricatorPHIDType {
       $name = $paste->getFullName();
 
       $handle->setName("P{$id}");
-      $handle->setFullName("P{$id}: {$name}");
+      $handle->setFullName($name);
       $handle->setURI("/P{$id}");
     }
   }
