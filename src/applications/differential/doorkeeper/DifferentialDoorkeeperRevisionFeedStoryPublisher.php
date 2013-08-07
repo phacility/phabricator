@@ -9,14 +9,17 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
 
   public function isStoryAboutObjectCreation($object) {
     $story = $this->getFeedStory();
-
     $action = $story->getStoryData()->getValue('action');
-    switch ($action) {
-      case DifferentialAction::ACTION_CREATE:
-        return true;
-      default:
-        return false;
-    }
+
+    return ($action == DifferentialAction::ACTION_CREATE);
+  }
+
+  public function isStoryAboutObjectClosure($object) {
+    $story = $this->getFeedStory();
+    $action = $story->getStoryData()->getValue('action');
+
+    return ($action == DifferentialAction::ACTION_CLOSE) ||
+           ($action == DifferentialAction::ACTION_ABANDON);
   }
 
   public function willPublishStory($object) {
