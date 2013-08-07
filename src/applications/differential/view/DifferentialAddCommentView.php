@@ -119,7 +119,7 @@ final class DifferentialAddCommentView extends AphrontView {
               'add_reviewers' => 1,
               'resign' => 1,
             ),
-            'src' => '/typeahead/common/users/',
+            'src' => '/typeahead/common/usersorprojects/',
             'value' => $this->reviewers,
             'row' => 'add-reviewers',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),

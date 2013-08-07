@@ -14,6 +14,11 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
       if ($request->getFileExists('diff-file')) {
         $diff = PhabricatorFile::readUploadedFileData($_FILES['diff-file']);
+      } elseif ($request->getFileExists('whole-file')) {
+        $file = PhabricatorFile::readUploadedFileData($_FILES['whole-file']);
+        $context_lines = "-L '".$_FILES['whole-file']['name']." ".date("Y-m-d")."'";
+        $context_lines = $context_lines." -L '".$_FILES['whole-file']['name']." ".date("Y-m-d")."'";
+        $diff = ArcanistDiffUtils::renderDifferences("", $file, 3, $context_lines);
       } else {
         $diff = $request->getStr('diff');
       }
@@ -78,6 +83,14 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->setLabel(pht('Raw Diff From File'))
           ->setName('diff-file')
           ->setError($e_file))
+      ->appendChild(
+        id(new AphrontFormFileControl())
+          ->setLabel(pht('Whole File'))
+          ->setName('whole-file'))
+      ->appendChild(
+        id(new AphrontFormFileControl())
+          ->setLabel(pht('Whole File'))
+          ->setName('whole-file'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)

@@ -18,6 +18,22 @@ final class DifferentialCommentSaveController extends DifferentialController {
     $action     = $request->getStr('action');
     $reviewers  = $request->getArr('reviewers');
     $ccs        = $request->getArr('ccs');
+    
+    // Allow projects to be added as a reviewer by adding each current member
+    // of the porject.
+    foreach ($reviewers as $key => $phid) {
+    	if (phid_get_type($phid) == "PROJ") {
+    		unset($reviewers[$key]);
+    		$project = new PhabricatorProject($phid);
+		    $new_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+		    	$phid,
+		    	PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
+    		
+    		foreach ($new_phids as $new_phid) {
+    			array_push($reviewers, $new_phid);
+    		}
+    	}
+    }
 
     $editor = new DifferentialCommentEditor(
       $revision,

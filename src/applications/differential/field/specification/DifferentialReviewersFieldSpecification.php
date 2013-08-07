@@ -73,7 +73,7 @@ final class DifferentialReviewersFieldSpecification
       ->setLabel('Reviewers')
       ->setName('reviewers')
       ->setUser($this->getUser())
-      ->setDatasource('/typeahead/common/users/')
+      ->setDatasource('/typeahead/common/usersorprojects/')
       ->setValue($reviewer_map)
       ->setError($this->error);
   }

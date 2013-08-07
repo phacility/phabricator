@@ -143,6 +143,8 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
   public function save() {
     $revision = $this->getRevision();
+    $allow_self_accept = PhabricatorEnv::getEnvConfig(
+      'differential.allow-self-accept');
 
     $is_new = $this->isNewRevision();
     if ($is_new) {
@@ -155,6 +157,23 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     if ($this->reviewers === null) {
       $this->reviewers = $revision->getReviewers();
+    }
+
+    foreach ($this->reviewers as $k => $phid) {
+      if (phid_get_type($phid) == PhabricatorProjectPHIDTypeProject::TYPECONST) {
+        unset($this->reviewers[$k]);
+        $new_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+            $phid,
+            PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
+
+        foreach ($new_phids as $new_phid) {
+          if (!$allow_self_accept && $new_phid == $revision->getAuthorPHID()) {
+            continue;
+          } else {
+            array_push($this->reviewers, $new_phid);
+          }
+        }
+      }
     }
 
     if ($this->cc === null) {
