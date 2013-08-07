@@ -39,14 +39,14 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
       case PhabricatorProjectTransactionType::TYPE_NAME:
         if (strlen($old)) {
           $action = pht(
-            '% renamed project %s from %s to %s.',
+            '%s renamed project %s from %s to %s.',
             $author_link,
             $this->linkTo($proj_phid),
             $this->renderString($old),
             $this->renderString($new));
         } else {
           $action = pht(
-            '% created project %s (as %s).',
+            '%s created project %s (as %s).',
             $author_link,
             $this->linkTo($proj_phid),
             $this->renderString($new));
@@ -69,7 +69,7 @@ final class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
         if ((count($add) == 1) && (count($rem) == 0) &&
             (head($add) == $author_phid)) {
           $action = pht(
-            '% joined project %s.',
+            '%s joined project %s.',
             $author_link,
             $this->linkTo($proj_phid));
         } else if ((count($add) == 0) && (count($rem) == 1) &&
