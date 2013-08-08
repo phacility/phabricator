@@ -78,7 +78,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $user = $this->getUser();
 
     $uri = $this->baseURI.$thread->getID().'/';
-    $data = $thread->getDisplayData($user, null);
+    $data = $thread->getDisplayData($user);
     $title = $data['title'];
     $subtitle = $data['subtitle'];
     $unread_count = $data['unread_count'];

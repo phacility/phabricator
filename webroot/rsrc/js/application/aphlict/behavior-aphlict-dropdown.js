@@ -28,7 +28,7 @@ JX.behavior('aphlict-dropdown', function(config) {
     if (request) { //already fetching
       return;
     }
-    request = new JX.Request('/notification/panel/', function(response) {
+    request = new JX.Request(config.uri, function(response) {
       var display = (response.number > 999) ? "\u221E" : response.number;
 
       JX.DOM.setContent(count, display);

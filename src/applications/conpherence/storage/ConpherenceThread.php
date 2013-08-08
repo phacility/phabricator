@@ -133,7 +133,7 @@ final class ConpherenceThread extends ConpherenceDAO
     return $this->widgetData;
   }
 
-  public function getDisplayData(PhabricatorUser $user, $size) {
+  public function getDisplayData(PhabricatorUser $user) {
     $recent_phids = $this->getRecentParticipantPHIDs();
     $handles = $this->getHandles();
 

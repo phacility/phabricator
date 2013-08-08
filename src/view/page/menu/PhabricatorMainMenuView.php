@@ -45,9 +45,9 @@ final class PhabricatorMainMenuView extends AphrontView {
     $app_button = '';
 
     if ($user->isLoggedIn()) {
-      list($menu, $dropdown) = $this->renderNotificationMenu();
+      list($menu, $dropdowns) = $this->renderNotificationMenu();
       $alerts[] = $menu;
-      $menus[] = $dropdown;
+      $menus = array_merge($menus, $dropdowns);
       $app_button = $this->renderApplicationMenuButton($header_id);
       $search_button = $this->renderSearchMenuButton($header_id);
     }
@@ -248,10 +248,12 @@ final class PhabricatorMainMenuView extends AphrontView {
     );
 
     $message_tag = '';
+    $message_notification_dropdown = '';
     $conpherence = 'PhabricatorApplicationConpherence';
     if (PhabricatorApplication::isClassInstalled($conpherence)) {
       $message_id = celerity_generate_unique_node_id();
       $message_count_id = celerity_generate_unique_node_id();
+      $message_dropdown_id = celerity_generate_unique_node_id();
 
       $unread_status = ConpherenceParticipationStatus::BEHIND;
       $unread = id(new ConpherenceParticipantCountQuery())
@@ -293,6 +295,26 @@ final class PhabricatorMainMenuView extends AphrontView {
           $message_icon_tag,
           $message_count_tag,
         ));
+
+      Javelin::initBehavior(
+        'aphlict-dropdown',
+        array(
+          'bubbleID'    => $message_id,
+          'countID'     => $message_count_id,
+          'dropdownID'  => $message_dropdown_id,
+          'loadingText' => pht('Loading...'),
+          'uri'         => '/conpherence/panel/',
+        ));
+
+      $message_notification_dropdown = javelin_tag(
+        'div',
+        array(
+          'id'    => $message_dropdown_id,
+          'class' => 'phabricator-notification-menu',
+          'sigil' => 'phabricator-notification-menu',
+          'style' => 'display: none;',
+        ),
+        '');
     }
 
     $count_id = celerity_generate_unique_node_id();
@@ -341,6 +363,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'countID'     => $count_id,
         'dropdownID'  => $dropdown_id,
         'loadingText' => pht('Loading...'),
+        'uri'         => '/notification/panel/',
       ));
 
     $notification_dropdown = javelin_tag(
@@ -353,9 +376,13 @@ final class PhabricatorMainMenuView extends AphrontView {
       ),
       '');
 
+    $dropdowns = array(
+      $notification_dropdown,
+      $message_notification_dropdown);
+
     return array(
       hsprintf('%s%s', $bubble_tag, $message_tag),
-      $notification_dropdown,
+      $dropdowns
     );
   }
 
