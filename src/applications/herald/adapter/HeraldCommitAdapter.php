@@ -93,6 +93,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           self::ACTION_ADD_CC,
           self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
+          self::ACTION_AUDIT,
           self::ACTION_NOTHING,
         );
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -101,6 +102,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
           self::ACTION_FLAG,
+          self::ACTION_AUDIT,
           self::ACTION_NOTHING,
         );
     }
