@@ -28,6 +28,9 @@ final class ConpherenceNotificationPanelController
 
     if ($conpherences) {
       require_celerity_resource('conpherence-notification-css');
+      // re-order the conpherences based on participation data
+      $conpherences = array_select_keys(
+        $conpherences, array_keys($participant_data));
       $view = new AphrontNullView();
       foreach ($conpherences as $conpherence) {
         $p_data = $participant_data[$conpherence->getPHID()];
