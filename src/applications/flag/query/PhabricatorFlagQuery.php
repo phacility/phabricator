@@ -5,6 +5,7 @@ final class PhabricatorFlagQuery {
   private $ownerPHIDs;
   private $types;
   private $objectPHIDs;
+  private $color;
 
   private $limit;
   private $offset;
@@ -36,6 +37,11 @@ final class PhabricatorFlagQuery {
 
   public function withObjectPHIDs(array $object_phids) {
     $this->objectPHIDs = $object_phids;
+    return $this;
+  }
+
+  public function withColor($color) {
+    $this->color = $color;
     return $this;
   }
 
@@ -144,6 +150,13 @@ final class PhabricatorFlagQuery {
         $conn_r,
         'flag.objectPHID IN (%Ls)',
         $this->objectPHIDs);
+    }
+
+    if (strlen($this->color)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'flag.color = %d',
+        $this->color);
     }
 
     if ($where) {
