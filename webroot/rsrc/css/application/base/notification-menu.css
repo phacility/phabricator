@@ -59,7 +59,7 @@
 
 .phabricator-notification-list .phabricator-notification-unread,
 .phabricator-notification-menu .phabricator-notification-unread {
-  background: #aacfef;
+  background: {$lightblue};
 }
 
 .phabricator-notification-header {

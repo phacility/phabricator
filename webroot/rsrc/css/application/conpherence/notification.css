@@ -10,13 +10,12 @@
 .phabricator-notification .conpherence-menu-item-view {
   display: block;
   height: 55px;
-  width: 100%;
   overflow: hidden;
   position: relative;
   text-decoration: none;
-  border-bottom: solid 1px #E9E9E9;
+  border-bottom: none;
   border-right: 0;
-  border-left: 2px solid transparent;
+  border-left: 0;
 }
 
 .phabricator-notification .conpherence-menu-item-view
@@ -28,7 +27,7 @@
   width: 35px;
   height: 35px;
   background-size: 35px;
-  border: 4px solid #DEDEDE;
+  border: 4px solid #e7e7e7;
   border-radius: 3px;
 }
 
@@ -61,13 +60,13 @@
   position: absolute;
   left: 35px;
   top: 3px;
-  background: #f00;
+  background: {$red};
   border-radius: 10px;
-  color: white;
+  color: #FFF;
   font-weight: bold;
-  padding: 1px 6px 2px;
-  border: 1px solid #a00;
-  font-size: 12px;
+  padding: 1px 5px 2px;
+  border: 1px solid #333;
+  font-size: 11px;
 }
 
 .phabricator-notification .conpherence-menu-item-view
