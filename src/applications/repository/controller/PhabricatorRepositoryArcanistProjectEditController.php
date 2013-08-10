@@ -28,6 +28,8 @@ final class PhabricatorRepositoryArcanistProjectEditController
       $name = $repository->getname();
       $repos[$repository->getID()] = "r{$callsign} ({$name})";
     }
+    // note "None" will still be first thanks to 'r' prefix
+    asort($repos);
 
     if ($request->isFormPost()) {
 
