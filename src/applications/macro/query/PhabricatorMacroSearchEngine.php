@@ -14,7 +14,7 @@ final class PhabricatorMacroSearchEngine
     $saved->setParameter('nameLike', $request->getStr('nameLike'));
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
-    $saved->setParameter('flagColor', $request->getStr('flagColor'));
+    $saved->setParameter('flagColor', $request->getStr('flagColor', '-1'));
 
     return $saved;
   }
