@@ -170,6 +170,7 @@ final class PhabricatorMacroQuery
 
     if ($this->flagColor != '-1' && $this->flagColor !== null) {
       $flags = id(new PhabricatorFlagQuery())
+        ->withOwnerPHIDs(array($this->getViewer()->getPHID()))
         ->withTypes(array(PhabricatorMacroPHIDTypeMacro::TYPECONST))
         ->withColor($this->flagColor)
         ->setViewer($this->getViewer())
