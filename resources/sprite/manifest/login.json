@@ -46,6 +46,11 @@
       "rule" : ".login-HTTP",
       "hash" : "6fcf0f666c0f6f1e1cd8f397b41ed176"
     },
+    "login-Jira"        : {
+      "name" : "login-Jira",
+      "rule" : ".login-Jira",
+      "hash" : "0ddadec77a95c1efc398886252ebeda9"
+    },
     "login-LDAP"        : {
       "name" : "login-LDAP",
       "rule" : ".login-LDAP",
@@ -65,6 +70,11 @@
       "name" : "login-Phabricator",
       "rule" : ".login-Phabricator",
       "hash" : "fad258eb347a1ccf5800b0ee2d8e6e49"
+    },
+    "login-TwitchTV"    : {
+      "name" : "login-TwitchTV",
+      "rule" : ".login-TwitchTV",
+      "hash" : "dbaa3f5e58fceb86598b2951fc5f9508"
     },
     "login-Twitter"     : {
       "name" : "login-Twitter",

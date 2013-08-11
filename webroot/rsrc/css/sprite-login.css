@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-login {
     background-image: url(/rsrc/image/sprite-login-X2.png);
-    background-size: 140px 140px;
+    background-size: 140px 175px;
   }
 }
 
@@ -54,26 +54,34 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: 0px -70px;
 }
 
-.login-LDAP {
+.login-Jira {
   background-position: -35px -70px;
 }
 
-.login-Linkedin {
+.login-LDAP {
   background-position: -70px -70px;
 }
 
-.login-Openid {
+.login-Linkedin {
   background-position: -105px -70px;
 }
 
-.login-Phabricator {
+.login-Openid {
   background-position: 0px -105px;
 }
 
-.login-Twitter {
+.login-Phabricator {
   background-position: -35px -105px;
 }
 
-.login-Yahoo {
+.login-TwitchTV {
   background-position: -70px -105px;
+}
+
+.login-Twitter {
+  background-position: -105px -105px;
+}
+
+.login-Yahoo {
+  background-position: 0px -140px;
 }
