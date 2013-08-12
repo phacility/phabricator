@@ -71,6 +71,7 @@ final class PonderQuestionViewController extends PonderController {
         'device' => true,
         'title' => 'Q'.$question->getID().' '.$question->getTitle(),
         'dust' => true,
+        'pageObjects' => array($question->getPHID()),
       ));
   }
 
