@@ -22,15 +22,14 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
   }
 
   private function isPullDaemonRunning() {
-    // TODO: This is yuck, fix it.
-    $control = new PhabricatorDaemonManagementListWorkflow();
-    $daemons = $control->loadRunningDaemons();
-    foreach ($daemons as $daemon) {
-      if ($daemon->isRunning() &&
-          $daemon->getName() == 'PhabricatorRepositoryPullLocalDaemon')
-        return true;
-    }
-    return false;
+    $daemons = id(new PhabricatorDaemonLogQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->withDaemonClasses(array('PhabricatorRepositoryPullLocalDaemon'))
+      ->setLimit(1)
+      ->execute();
+
+    return (bool)$daemons;
   }
 
   protected function renderDaemonNotice() {
@@ -47,24 +46,14 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
       "repositories. For instructions on starting the daemon, see %s.",
       phutil_tag('strong', array(), $documentation));
 
-    try {
-      $daemon_running = $this->isPullDaemonRunning();
-      if ($daemon_running) {
-        return null;
-      }
-      $title = "Repository Daemon Not Running";
-      $message = hsprintf(
-        "<p>The repository daemon is not running on this machine. %s</p>",
-        $common);
-    } catch (Exception $ex) {
-      $title = "Unable To Verify Repository Daemon";
-      $message = hsprintf(
-        "<p>Unable to determine if the repository daemon is running on this ".
-        "machine. %s</p>".
-        "<p><strong>Exception:</strong> %s</p>",
-        $common,
-        $ex->getMessage());
+    $daemon_running = $this->isPullDaemonRunning();
+    if ($daemon_running) {
+      return null;
     }
+    $title = "Repository Daemon Not Running";
+    $message = hsprintf(
+      "<p>The repository daemon is not running. %s</p>",
+      $common);
 
     $view = new AphrontErrorView();
     $view->setSeverity(AphrontErrorView::SEVERITY_WARNING);
