@@ -30,7 +30,7 @@ final class PhabricatorAuthProviderOAuthTwitch
   }
 
   protected function getLoginIcon() {
-    return 'Twitch';
+    return 'TwitchTV';
   }
 
 }
