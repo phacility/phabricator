@@ -110,7 +110,8 @@ final class PholioMockEditController extends PholioController {
             ->setNewValue($value);
         }
 
-        $sequence = 0;
+        $order = $request->getStrList('imageOrder');
+        $sequence_map = array_flip($order);
         $replaces = $request->getArr('replaces');
         $replaces_map = array_flip($replaces);
 
@@ -133,6 +134,7 @@ final class PholioMockEditController extends PholioController {
 
           $title = (string)$request->getStr('title_'.$file_phid);
           $description = (string)$request->getStr('description_'.$file_phid);
+          $sequence = $sequence_map[$file_phid];
 
           if ($replaces_image_phid) {
             $replace_image = id(new PholioImage())
@@ -165,9 +167,12 @@ final class PholioMockEditController extends PholioController {
                 PholioTransactionType::TYPE_IMAGE_DESCRIPTION)
                 ->setNewValue(
                   array($existing_image->getPHID() => $description));
-            $existing_image->setSequence($sequence);
+            $xactions[] = id(new PholioTransaction())
+              ->setTransactionType(
+                PholioTransactionType::TYPE_IMAGE_SEQUENCE)
+                ->setNewValue(
+                  array($existing_image->getPHID() => $sequence));
           }
-          $sequence++;
         }
         foreach ($mock_images as $file_phid => $mock_image) {
           if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {

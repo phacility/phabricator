@@ -35,9 +35,11 @@ JX.behavior('pholio-mock-edit', function(config) {
     JX.DOM.listen(undo, 'click', 'pholio-drop-undo', function(e) {
       e.kill();
       JX.DOM.replace(undo, node);
+      synchronize_order();
     });
 
     JX.DOM.replace(node, undo);
+    synchronize_order();
   });
 
 
@@ -116,6 +118,7 @@ JX.behavior('pholio-mock-edit', function(config) {
           build_update_control(new_node);
 
           JX.DOM.replace(node, new_node);
+          synchronize_order();
         })
         .start();
     });
@@ -154,6 +157,7 @@ JX.behavior('pholio-mock-edit', function(config) {
 
           JX.DOM.replace(node, new_node);
           JX.DOM.alterClass(node, 'pholio-replacing', false);
+          synchronize_order();
         })
         .start();
     });
