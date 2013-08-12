@@ -15,7 +15,7 @@ final class HeraldNewController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap();
     if (empty($content_type_map[$this->contentType])) {
       $this->contentType = head_key($content_type_map);
     }
@@ -56,11 +56,11 @@ final class HeraldNewController extends HeraldController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setAction('/herald/rule/')
+      ->setAction('/herald/edit/')
       ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel(pht('New rule for'))
+          ->setLabel(pht('New Rule for'))
           ->setName('content_type')
           ->setValue($this->contentType)
           ->setOptions($content_type_map))
@@ -68,23 +68,19 @@ final class HeraldNewController extends HeraldController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Create Rule'))
-          ->addCancelButton('/herald/view/'.$this->contentType.'/'));
+          ->addCancelButton($this->getApplicationURI()));
 
     $crumbs = $this
       ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName(pht('Create Herald Rule'))
-          ->setHref($this->getApplicationURI(
-            'view/'.$this->contentType.'/'.$this->ruleType)));
-
-    $nav = $this->renderNav();
-    $nav->selectFilter('new');
-    $nav->appendChild($form);
-    $nav->setCrumbs($crumbs);
+          ->setName(pht('Create Rule')));
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $form,
+      ),
       array(
         'title' => pht('Create Herald Rule'),
         'device' => true,

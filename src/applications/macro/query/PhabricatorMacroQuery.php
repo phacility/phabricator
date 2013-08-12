@@ -13,6 +13,7 @@ final class PhabricatorMacroQuery
   private $nameLike;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
+  private $flagColor;
 
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
@@ -25,6 +26,17 @@ final class PhabricatorMacroQuery
       self::STATUS_DISABLED => pht('Disabled Macros'),
       self::STATUS_ANY      => pht('Active and Disabled Macros'),
     );
+  }
+
+  public static function getFlagColorsOptions() {
+
+    $options = array('-1' => pht('(No Filtering)'));
+
+    foreach (PhabricatorFlagColor::getColorNameMap() as $color => $name) {
+      $options[$color] = $name;
+    }
+
+    return $options;
   }
 
   public function withIDs(array $ids) {
@@ -64,6 +76,11 @@ final class PhabricatorMacroQuery
 
   public function withDateCreatedAfter($date_created_after) {
     $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
+  public function withFlagColor($flag_color) {
+    $this->flagColor = $flag_color;
     return $this;
   }
 
@@ -149,6 +166,24 @@ final class PhabricatorMacroQuery
         $conn,
         'm.dateCreated <= %d',
         $this->dateCreatedBefore);
+    }
+
+    if ($this->flagColor != '-1' && $this->flagColor !== null) {
+      $flags = id(new PhabricatorFlagQuery())
+        ->withOwnerPHIDs(array($this->getViewer()->getPHID()))
+        ->withTypes(array(PhabricatorMacroPHIDTypeMacro::TYPECONST))
+        ->withColor($this->flagColor)
+        ->setViewer($this->getViewer())
+        ->execute();
+
+      if (empty($flags)) {
+        throw new PhabricatorEmptyQueryException('No matching flags.');
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'm.phid IN (%Ls)',
+          mpull($flags, 'getObjectPHID'));
+      }
     }
 
     $where[] = $this->buildPagingClause($conn);

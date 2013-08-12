@@ -232,7 +232,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     $rem_ccs = array();
     $xscript_phid = null;
     if ($diff) {
-      $adapter = new HeraldDifferentialRevisionAdapter(
+      $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
         $revision,
         $diff);
       $adapter->setExplicitCCs($new['ccs']);

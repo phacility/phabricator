@@ -17,7 +17,7 @@ abstract class HeraldController extends PhabricatorController {
   }
 
   public function buildApplicationMenu() {
-    return $this->renderNav()->getMenu();
+    return $this->buildSideNavView(true)->getMenu();
   }
 
   public function buildApplicationCrumbs() {
@@ -32,22 +32,19 @@ abstract class HeraldController extends PhabricatorController {
     return $crumbs;
   }
 
-  protected function renderNav() {
-    $nav = id(new AphrontSideNavFilterView())
-      ->setBaseURI(new PhutilURI('/herald/'))
-      ->addLabel(pht('My Rules'))
-      ->addFilter('new', pht('Create Rule'));
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
 
-    $rules_map = HeraldContentTypeConfig::getContentTypeMap();
-    foreach ($rules_map as $key => $value) {
-      $nav->addFilter("view/{$key}/personal", $value);
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+    if ($for_app) {
+      $nav->addFilter('create', pht('Create Rule'));
     }
 
-    $nav->addLabel(pht('Global Rules'));
-
-    foreach ($rules_map as $key => $value) {
-      $nav->addFilter("view/{$key}/global", $value);
-    }
+    id(new HeraldRuleSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
 
     $nav
       ->addLabel(pht('Utilities'))
@@ -55,12 +52,7 @@ abstract class HeraldController extends PhabricatorController {
       ->addFilter('transcript', pht('Transcripts'))
       ->addFilter('history',    pht('Edit Log'));
 
-    if ($this->getRequest()->getUser()->getIsAdmin()) {
-      $nav->addLabel(pht('Admin'));
-      foreach ($rules_map as $key => $value) {
-        $nav->addFilter("view/{$key}/all", $value);
-      }
-    }
+    $nav->selectFilter(null);
 
     return $nav;
   }

@@ -67,7 +67,7 @@ a.handle-status-closed:hover {
 a.handle-disabled,
 a.handle-status-away,
 a.handle-status-sporadic {
-  padding-left: 12px;
+  padding-left: 11px;
   background-repeat: no-repeat;
   background-position: -4px center;
 }

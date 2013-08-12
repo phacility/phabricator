@@ -17,9 +17,6 @@ debug and configure Phabricator. For example, they have access to:
   - **Account Management**: The primary function of administrators is adding,
     disabling, and managing user accounts. Administrators can create and edit
     accounts and view access logs.
-  - **MetaMTA**: Administrators can send test email via MetaMTA. This isn't
-    available to normal users to prevent Phabricator from serving as a partially
-    open relay if used by open source projects.
   - **Repositories**: Administrators can configure repositories. This isn't
     normally available because it is specialized and complicated to configure.
 

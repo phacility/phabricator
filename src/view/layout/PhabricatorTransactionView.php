@@ -136,14 +136,13 @@ final class PhabricatorTransactionView extends AphrontView {
   }
 
   private function renderTransactionContent() {
-    $content = $this->renderChildren();
-    if ($this->isEmptyContent($content)) {
+    if (!$this->hasChildren()) {
       return null;
     }
     return phutil_tag(
       'div',
       array('class' => 'phabricator-transaction-content'),
-      $content);
+      $this->renderChildren());
   }
 
 }

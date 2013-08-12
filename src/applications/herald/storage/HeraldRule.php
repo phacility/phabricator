@@ -1,6 +1,7 @@
 <?php
 
-final class HeraldRule extends HeraldDAO {
+final class HeraldRule extends HeraldDAO
+  implements PhabricatorPolicyInterface {
 
   const TABLE_RULE_APPLIED = 'herald_ruleapplied';
 
@@ -15,79 +16,18 @@ final class HeraldRule extends HeraldDAO {
   protected $configVersion = 9;
 
   private $ruleApplied = array(); // phids for which this rule has been applied
-  private $invalidOwner = false;
+  private $validAuthor = self::ATTACHABLE;
   private $conditions;
   private $actions;
 
-  public static function loadAllByContentTypeWithFullData(
-    $content_type,
-    $object_phid) {
-
-    $rules = id(new HeraldRule())->loadAllWhere(
-      'contentType = %s',
-      $content_type);
-
-    if (!$rules) {
-      return array();
-    }
-
-    self::flagDisabledUserRules($rules);
-
-    $rule_ids = mpull($rules, 'getID');
-
-    $conditions = id(new HeraldCondition())->loadAllWhere(
-      'ruleID in (%Ld)',
-      $rule_ids);
-
-    $actions = id(new HeraldAction())->loadAllWhere(
-      'ruleID in (%Ld)',
-      $rule_ids);
-
-    $applied = queryfx_all(
-      id(new HeraldRule())->establishConnection('r'),
-      'SELECT * FROM %T WHERE phid = %s',
-      self::TABLE_RULE_APPLIED,
-      $object_phid);
-    $applied = ipull($applied, null, 'ruleID');
-
-    $conditions = mgroup($conditions, 'getRuleID');
-    $actions = mgroup($actions, 'getRuleID');
-    $applied = igroup($applied, 'ruleID');
-
-    foreach ($rules as $rule) {
-      $rule->setRuleApplied($object_phid, isset($applied[$rule->getID()]));
-
-      $rule->attachConditions(idx($conditions, $rule->getID(), array()));
-      $rule->attachActions(idx($actions, $rule->getID(), array()));
-    }
-
-    return $rules;
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
   }
 
-  private static function flagDisabledUserRules(array $rules) {
-    assert_instances_of($rules, 'HeraldRule');
-
-    $users = array();
-    foreach ($rules as $rule) {
-      if ($rule->getRuleType() != HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
-        continue;
-      }
-      $users[$rule->getAuthorPHID()] = true;
-    }
-
-    $handles = id(new PhabricatorObjectHandleData(array_keys($users)))
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
-
-    foreach ($rules as $key => $rule) {
-      if ($rule->getRuleType() != HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
-        continue;
-      }
-      $handle = $handles[$rule->getAuthorPHID()];
-      if (!$handle->isComplete() || $handle->isDisabled()) {
-        $rule->invalidOwner = true;
-      }
-    }
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(HeraldPHIDTypeRule::TYPECONST);
   }
 
   public function getRuleApplied($phid) {
@@ -218,8 +158,48 @@ final class HeraldRule extends HeraldDAO {
 //    $this->saveTransaction();
   }
 
-  public function hasInvalidOwner() {
-    return $this->invalidOwner;
+  public function hasValidAuthor() {
+    return $this->assertAttached($this->validAuthor);
+  }
+
+  public function attachValidAuthor($valid) {
+    $this->validAuthor = $valid;
+    return $this;
+  }
+
+  public function isGlobalRule() {
+    return ($this->getRuleType() === HeraldRuleTypeConfig::RULE_TYPE_GLOBAL);
+  }
+
+  public function isPersonalRule() {
+    return ($this->getRuleType() === HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    if ($this->isGlobalRule()) {
+      return PhabricatorPolicies::POLICY_USER;
+    } else {
+      return PhabricatorPolicies::POLICY_NOONE;
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    if ($this->isPersonalRule()) {
+      return ($viewer->getPHID() == $this->getAuthorPHID());
+    } else {
+      return false;
+    }
   }
 
 }

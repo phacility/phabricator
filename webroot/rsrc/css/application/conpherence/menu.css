@@ -149,13 +149,13 @@
   position: absolute;
   left: 35px;
   top: 3px;
-  background: #f00;
+  background: {$red};
   border-radius: 10px;
-  color: white;
+  color: #FFF;
   font-weight: bold;
-  padding: 1px 6px 2px;
-  border: 1px solid #a00;
-  font-size: 12px;
+  padding: 1px 5px 2px;
+  border: 1px solid #333;
+  font-size: 11px;
 }
 
 .conpherence-menu .hide-unread-count .conpherence-menu-item-unread-count,

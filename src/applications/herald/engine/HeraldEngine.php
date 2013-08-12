@@ -9,21 +9,38 @@ final class HeraldEngine {
 
   protected $fieldCache = array();
   protected $object = null;
+  private $dryRun;
 
-  public static function loadAndApplyRules(HeraldObjectAdapter $object) {
-    $content_type = $object->getHeraldTypeName();
-    $rules = HeraldRule::loadAllByContentTypeWithFullData(
-      $content_type,
-      $object->getPHID());
+  public function setDryRun($dry_run) {
+    $this->dryRun = $dry_run;
+    return $this;
+  }
+
+  public function getDryRun() {
+    return $this->dryRun;
+  }
+
+  public function getRule($id) {
+    return idx($this->rules, $id);
+  }
+
+  public static function loadAndApplyRules(HeraldAdapter $adapter) {
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withContentTypes(array($adapter->getAdapterContentType()))
+      ->needConditionsAndActions(true)
+      ->needAppliedToPHIDs(array($adapter->getPHID()))
+      ->needValidateAuthors(true)
+      ->execute();
 
     $engine = new HeraldEngine();
-    $effects = $engine->applyRules($rules, $object);
-    $engine->applyEffects($effects, $object, $rules);
+    $effects = $engine->applyRules($rules, $adapter);
+    $engine->applyEffects($effects, $adapter, $rules);
 
     return $engine->getTranscript();
   }
 
-  public function applyRules(array $rules, HeraldObjectAdapter $object) {
+  public function applyRules(array $rules, HeraldAdapter $object) {
     assert_instances_of($rules, 'HeraldRule');
     $t_start = microtime(true);
 
@@ -90,7 +107,7 @@ final class HeraldEngine {
     $object_transcript = new HeraldObjectTranscript();
     $object_transcript->setPHID($object->getPHID());
     $object_transcript->setName($object->getHeraldName());
-    $object_transcript->setType($object->getHeraldTypeName());
+    $object_transcript->setType($object->getAdapterContentType());
     $object_transcript->setFields($this->fieldCache);
 
     $this->transcript->setObjectTranscript($object_transcript);
@@ -104,67 +121,76 @@ final class HeraldEngine {
 
   public function applyEffects(
     array $effects,
-    HeraldObjectAdapter $object,
+    HeraldAdapter $adapter,
     array $rules) {
     assert_instances_of($effects, 'HeraldEffect');
     assert_instances_of($rules, 'HeraldRule');
 
-    $this->transcript->setDryRun((int)($object instanceof HeraldDryRunAdapter));
+    $this->transcript->setDryRun((int)$this->getDryRun());
 
-    $xscripts = $object->applyHeraldEffects($effects);
-    foreach ($xscripts as $apply_xscript) {
-      if (!($apply_xscript instanceof HeraldApplyTranscript)) {
-        throw new Exception(
-          "Heraldable must return HeraldApplyTranscripts from ".
-          "applyHeraldEffect().");
+    if ($this->getDryRun()) {
+      $xscripts = array();
+      foreach ($effects as $effect) {
+        $xscripts[] = new HeraldApplyTranscript(
+          $effect,
+          false,
+          pht('This was a dry run, so no actions were actually taken.'));
       }
+    } else {
+      $xscripts = $adapter->applyHeraldEffects($effects);
+    }
+
+    assert_instances_of($xscripts, 'HeraldApplyTranscript');
+    foreach ($xscripts as $apply_xscript) {
       $this->transcript->addApplyTranscript($apply_xscript);
     }
 
-    if (!$this->transcript->getDryRun()) {
+    // For dry runs, don't mark the rule as having applied to the object.
+    if ($this->getDryRun()) {
+      return;
+    }
 
-      $rules = mpull($rules, null, 'getID');
-      $applied_ids = array();
-      $first_policy = HeraldRepetitionPolicyConfig::toInt(
-        HeraldRepetitionPolicyConfig::FIRST);
+    $rules = mpull($rules, null, 'getID');
+    $applied_ids = array();
+    $first_policy = HeraldRepetitionPolicyConfig::toInt(
+      HeraldRepetitionPolicyConfig::FIRST);
 
-      // Mark all the rules that have had their effects applied as having been
-      // executed for the current object.
-      $rule_ids = mpull($xscripts, 'getRuleID');
+    // Mark all the rules that have had their effects applied as having been
+    // executed for the current object.
+    $rule_ids = mpull($xscripts, 'getRuleID');
 
-      foreach ($rule_ids as $rule_id) {
-        if (!$rule_id) {
-          // Some apply transcripts are purely informational and not associated
-          // with a rule, e.g. carryover emails from earlier revisions.
-          continue;
-        }
-
-        $rule = idx($rules, $rule_id);
-        if (!$rule) {
-          continue;
-        }
-
-        if ($rule->getRepetitionPolicy() == $first_policy) {
-          $applied_ids[] = $rule_id;
-        }
+    foreach ($rule_ids as $rule_id) {
+      if (!$rule_id) {
+        // Some apply transcripts are purely informational and not associated
+        // with a rule, e.g. carryover emails from earlier revisions.
+        continue;
       }
 
-      if ($applied_ids) {
-        $conn_w = id(new HeraldRule())->establishConnection('w');
-        $sql = array();
-        foreach ($applied_ids as $id) {
-          $sql[] = qsprintf(
-            $conn_w,
-            '(%s, %d)',
-            $object->getPHID(),
-            $id);
-        }
-        queryfx(
+      $rule = idx($rules, $rule_id);
+      if (!$rule) {
+        continue;
+      }
+
+      if ($rule->getRepetitionPolicy() == $first_policy) {
+        $applied_ids[] = $rule_id;
+      }
+    }
+
+    if ($applied_ids) {
+      $conn_w = id(new HeraldRule())->establishConnection('w');
+      $sql = array();
+      foreach ($applied_ids as $id) {
+        $sql[] = qsprintf(
           $conn_w,
-          'INSERT IGNORE INTO %T (phid, ruleID) VALUES %Q',
-          HeraldRule::TABLE_RULE_APPLIED,
-          implode(', ', $sql));
+          '(%s, %d)',
+          $adapter->getPHID(),
+          $id);
       }
+      queryfx(
+        $conn_w,
+        'INSERT IGNORE INTO %T (phid, ruleID) VALUES %Q',
+        HeraldRule::TABLE_RULE_APPLIED,
+        implode(', ', $sql));
     }
   }
 
@@ -173,9 +199,9 @@ final class HeraldEngine {
     return $this->transcript;
   }
 
-  protected function doesRuleMatch(
+  public function doesRuleMatch(
     HeraldRule $rule,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $id = $rule->getID();
 
@@ -211,7 +237,7 @@ final class HeraldEngine {
     } else if (!$conditions) {
       $reason = "Rule failed automatically because it has no conditions.";
       $result = false;
-    } else if ($rule->hasInvalidOwner()) {
+    } else if (!$rule->hasValidAuthor()) {
       $reason = "Rule failed automatically because its owner is invalid ".
                 "or disabled.";
       $result = false;
@@ -258,7 +284,7 @@ final class HeraldEngine {
   protected function doesConditionMatch(
     HeraldRule $rule,
     HeraldCondition $condition,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $object_value = $this->getConditionObjectValue($condition, $object);
     $test_value   = $condition->getValue();
@@ -272,143 +298,15 @@ final class HeraldEngine {
     $transcript->setCondition($cond);
     $transcript->setTestValue($test_value);
 
-    $result = null;
-    switch ($cond) {
-      case HeraldConditionConfig::CONDITION_CONTAINS:
-        // "Contains" can take an array of strings, as in "Any changed
-        // filename" for diffs.
-        foreach ((array)$object_value as $value) {
-          $result = (stripos($value, $test_value) !== false);
-          if ($result) {
-            break;
-          }
-        }
-        break;
-      case HeraldConditionConfig::CONDITION_NOT_CONTAINS:
-        $result = (stripos($object_value, $test_value) === false);
-        break;
-      case HeraldConditionConfig::CONDITION_IS:
-        $result = ($object_value == $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_IS_NOT:
-        $result = ($object_value != $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_IS_ME:
-        $result = ($object_value == $rule->getAuthorPHID());
-        break;
-      case HeraldConditionConfig::CONDITION_IS_NOT_ME:
-        $result = ($object_value != $rule->getAuthorPHID());
-        break;
-      case HeraldConditionConfig::CONDITION_IS_ANY:
-        $test_value = array_flip($test_value);
-        $result = isset($test_value[$object_value]);
-        break;
-      case HeraldConditionConfig::CONDITION_IS_NOT_ANY:
-        $test_value = array_flip($test_value);
-        $result = !isset($test_value[$object_value]);
-        break;
-      case HeraldConditionConfig::CONDITION_INCLUDE_ALL:
-        if (!is_array($object_value)) {
-          $transcript->setNote('Object produced bad value!');
-          $result = false;
-        } else {
-          $have = array_select_keys(array_flip($object_value),
-                                    $test_value);
-          $result = (count($have) == count($test_value));
-        }
-        break;
-      case HeraldConditionConfig::CONDITION_INCLUDE_ANY:
-        $result = (bool)array_select_keys(array_flip($object_value),
-                                          $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_INCLUDE_NONE:
-        $result = !array_select_keys(array_flip($object_value),
-                                     $test_value);
-        break;
-      case HeraldConditionConfig::CONDITION_EXISTS:
-        $result = (bool)$object_value;
-        break;
-      case HeraldConditionConfig::CONDITION_NOT_EXISTS:
-        $result = !$object_value;
-        break;
-      case HeraldConditionConfig::CONDITION_REGEXP:
-        foreach ((array)$object_value as $value) {
-          // We add the 'S' flag because we use the regexp multiple times.
-          // It shouldn't cause any troubles if the flag is already there
-          // - /.*/S is evaluated same as /.*/SS.
-          $result = @preg_match($test_value . 'S', $value);
-          if ($result === false) {
-            $transcript->setNote(
-              "Regular expression is not valid!");
-            break;
-          }
-          if ($result) {
-            break;
-          }
-        }
-        $result = (bool)$result;
-        break;
-      case HeraldConditionConfig::CONDITION_REGEXP_PAIR:
-        // Match a JSON-encoded pair of regular expressions against a
-        // dictionary. The first regexp must match the dictionary key, and the
-        // second regexp must match the dictionary value. If any key/value pair
-        // in the dictionary matches both regexps, the condition is satisfied.
-        $regexp_pair = json_decode($test_value, true);
-        if (!is_array($regexp_pair)) {
-          $result = false;
-          $transcript->setNote("Regular expression pair is not valid JSON!");
-          break;
-        }
-        if (count($regexp_pair) != 2) {
-          $result = false;
-          $transcript->setNote("Regular expression pair is not a pair!");
-          break;
-        }
-
-        $key_regexp   = array_shift($regexp_pair);
-        $value_regexp = array_shift($regexp_pair);
-
-        foreach ((array)$object_value as $key => $value) {
-          $key_matches = @preg_match($key_regexp, $key);
-          if ($key_matches === false) {
-            $result = false;
-            $transcript->setNote("First regular expression is invalid!");
-            break 2;
-          }
-          if ($key_matches) {
-            $value_matches = @preg_match($value_regexp, $value);
-            if ($value_matches === false) {
-              $result = false;
-              $transcript->setNote("Second regular expression is invalid!");
-              break 2;
-            }
-            if ($value_matches) {
-              $result = true;
-              break 2;
-            }
-          }
-        }
-        $result = false;
-        break;
-      case HeraldConditionConfig::CONDITION_RULE:
-      case HeraldConditionConfig::CONDITION_NOT_RULE:
-
-        $rule = idx($this->rules, $test_value);
-        if (!$rule) {
-          $transcript->setNote(
-            "Condition references a rule which does not exist!");
-          $result = false;
-        } else {
-          $is_not = ($cond == HeraldConditionConfig::CONDITION_NOT_RULE);
-          $result = $this->doesRuleMatch($rule, $object);
-          if ($is_not) {
-            $result = !$result;
-          }
-        }
-        break;
-      default:
-        throw new HeraldInvalidConditionException(
-          "Unknown condition '{$cond}'.");
+    try {
+      $result = $object->doesConditionMatch(
+        $this,
+        $rule,
+        $condition,
+        $object_value);
+    } catch (HeraldInvalidConditionException $ex) {
+      $result = false;
+      $transcript->setNote($ex->getMessage());
     }
 
     $transcript->setResult($result);
@@ -420,7 +318,7 @@ final class HeraldEngine {
 
   protected function getConditionObjectValue(
     HeraldCondition $condition,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $field = $condition->getFieldName();
 
@@ -432,50 +330,7 @@ final class HeraldEngine {
       return $this->fieldCache[$field];
     }
 
-    $result = null;
-    switch ($field) {
-      case HeraldFieldConfig::FIELD_RULE:
-        $result = null;
-        break;
-      case HeraldFieldConfig::FIELD_TITLE:
-      case HeraldFieldConfig::FIELD_BODY:
-      case HeraldFieldConfig::FIELD_DIFF_FILE:
-      case HeraldFieldConfig::FIELD_DIFF_CONTENT:
-        // TODO: Type should be string.
-        $result = $this->object->getHeraldField($field);
-        break;
-      case HeraldFieldConfig::FIELD_AUTHOR:
-      case HeraldFieldConfig::FIELD_REPOSITORY:
-      case HeraldFieldConfig::FIELD_MERGE_REQUESTER:
-        // TODO: Type should be PHID.
-        $result = $this->object->getHeraldField($field);
-        break;
-      case HeraldFieldConfig::FIELD_TAGS:
-      case HeraldFieldConfig::FIELD_REVIEWER:
-      case HeraldFieldConfig::FIELD_REVIEWERS:
-      case HeraldFieldConfig::FIELD_CC:
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVIEWERS:
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_CCS:
-        // TODO: Type should be list.
-        $result = $this->object->getHeraldField($field);
-        break;
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
-      case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
-        $result = $this->object->getHeraldField($field);
-        if (!is_array($result)) {
-          throw new HeraldInvalidFieldException(
-            "Value of field type {$field} is not an array!");
-        }
-        break;
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVISION:
-        // TODO: Type should be boolean I guess.
-        $result = $this->object->getHeraldField($field);
-        break;
-      default:
-        throw new HeraldInvalidConditionException(
-          "Unknown field type '{$field}'!");
-    }
+    $result = $this->object->getHeraldField($field);
 
     $this->fieldCache[$field] = $result;
     return $result;
@@ -483,7 +338,7 @@ final class HeraldEngine {
 
   protected function getRuleEffects(
     HeraldRule $rule,
-    HeraldObjectAdapter $object) {
+    HeraldAdapter $object) {
 
     $effects = array();
     foreach ($rule->getActions() as $action) {

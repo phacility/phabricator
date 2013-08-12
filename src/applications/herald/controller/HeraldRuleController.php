@@ -14,26 +14,30 @@ final class HeraldRuleController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
+    $content_type_map = HeraldAdapter::getEnabledAdapterMap();
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
     if ($this->id) {
-      $rule = id(new HeraldRule())->load($this->id);
+      $id = $this->id;
+      $rule = id(new HeraldRuleQuery())
+        ->setViewer($user)
+        ->withIDs(array($id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
       if (!$rule) {
         return new Aphront404Response();
       }
-      if (!$this->canEditRule($rule, $user)) {
-        throw new Exception("You don't own this rule and can't edit it.");
-      }
+      $cancel_uri = $this->getApplicationURI("rule/{$id}/");
     } else {
       $rule = new HeraldRule();
       $rule->setAuthorPHID($user->getPHID());
       $rule->setMustMatchAll(true);
 
       $content_type = $request->getStr('content_type');
-      if (!isset($content_type_map[$content_type])) {
-        $content_type = HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL;
-      }
       $rule->setContentType($content_type);
 
       $rule_type = $request->getStr('rule_type');
@@ -41,7 +45,11 @@ final class HeraldRuleController extends HeraldController {
         $rule_type = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
       }
       $rule->setRuleType($rule_type);
+
+      $cancel_uri = $this->getApplicationURI();
     }
+
+    $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
 
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {
@@ -64,11 +72,10 @@ final class HeraldRuleController extends HeraldController {
     $e_name = true;
     $errors = array();
     if ($request->isFormPost() && $request->getStr('save')) {
-      list($e_name, $errors) = $this->saveRule($rule, $request);
+      list($e_name, $errors) = $this->saveRule($adapter, $rule, $request);
       if (!$errors) {
-        $uri = '/herald/view/'.
-          $rule->getContentType().'/'.
-          $rule->getRuleType().'/';
+        $id = $rule->getID();
+        $uri = $this->getApplicationURI("rule/{$id}/");
         return id(new AphrontRedirectResponse())->setURI($uri);
       }
     }
@@ -82,7 +89,7 @@ final class HeraldRuleController extends HeraldController {
     }
 
     $must_match_selector = $this->renderMustMatchSelector($rule);
-    $repetition_selector = $this->renderRepetitionSelector($rule);
+    $repetition_selector = $this->renderRepetitionSelector($rule, $adapter);
 
     $handles = $this->loadHandlesForRule($rule);
 
@@ -167,9 +174,9 @@ final class HeraldRuleController extends HeraldController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Rule'))
-          ->addCancelButton('/herald/view/'.$rule->getContentType().'/'));
+          ->addCancelButton($cancel_uri));
 
-    $this->setupEditorBehavior($rule, $handles);
+    $this->setupEditorBehavior($rule, $handles, $adapter);
 
     $title = $rule->getID()
         ? pht('Edit Herald Rule')
@@ -179,21 +186,14 @@ final class HeraldRuleController extends HeraldController {
       ->buildApplicationCrumbs()
       ->addCrumb(
         id(new PhabricatorCrumbView())
-          ->setName($title)
-          ->setHref('#'));
-
-    $nav = $this->renderNav();
-    $nav->setCrumbs($crumbs);
-    $nav->selectFilter(
-      'view/'.$rule->getContentType().'/'.$rule->getRuleType());
-    $nav->appendChild(
-      array(
-        $error_view,
-        $form,
-      ));
+          ->setName($title));
 
     return $this->buildApplicationPage(
-      $nav,
+      array(
+        $crumbs,
+        $error_view,
+        $form,
+      ),
       array(
         'title' => pht('Edit Rule'),
         'dust' => true,
@@ -201,14 +201,7 @@ final class HeraldRuleController extends HeraldController {
       ));
   }
 
-  private function canEditRule($rule, $user) {
-    return
-      ($user->getIsAdmin()) ||
-      ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) ||
-      ($rule->getAuthorPHID() == $user->getPHID());
-  }
-
-  private function saveRule($rule, $request) {
+  private function saveRule(HeraldAdapter $adapter, $rule, $request) {
     $rule->setName($request->getStr('name'));
     $rule->setMustMatchAll(($request->getStr('must_match') == 'all'));
 
@@ -249,46 +242,10 @@ final class HeraldRuleController extends HeraldController {
         $obj->setValue($condition[2]);
       }
 
-      $cond_type = $obj->getFieldCondition();
-
-      if ($cond_type == HeraldConditionConfig::CONDITION_REGEXP) {
-        if (@preg_match($obj->getValue(), '') === false) {
-          $errors[] =
-            pht('The regular expression "%s" is not valid. '.
-            'Regular expressions must have enclosing characters (e.g. '.
-            '"@/path/to/file@", not "/path/to/file") and be syntactically '.
-            'correct.', $obj->getValue());
-        }
-      }
-
-      if ($cond_type == HeraldConditionConfig::CONDITION_REGEXP_PAIR) {
-        $json = json_decode($obj->getValue(), true);
-        if (!is_array($json)) {
-          $errors[] =
-            pht('The regular expression pair "%s" is not '.
-            'valid JSON. Enter a valid JSON array with two elements.',
-            $obj->getValue());
-        } else {
-          if (count($json) != 2) {
-            $errors[] =
-              pht('The regular expression pair "%s" must have '.
-              'exactly two elements.', $obj->getValue());
-          } else {
-            $key_regexp = array_shift($json);
-            $val_regexp = array_shift($json);
-
-            if (@preg_match($key_regexp, '') === false) {
-              $errors[] =
-                pht('The first regexp, "%s" in the regexp pair '.
-                'is not a valid regexp.', $key_regexp);
-            }
-            if (@preg_match($val_regexp, '') === false) {
-              $errors[] =
-                pht('The second regexp, "%s" in the regexp pair '.
-                'is not a valid regexp.', $val_regexp);
-            }
-          }
-        }
+      try {
+        $adapter->willSaveCondition($obj);
+      } catch (HeraldInvalidConditionException $ex) {
+        $errors[] = $ex->getMessage();
       }
 
       $conditions[] = $obj;
@@ -307,9 +264,17 @@ final class HeraldRuleController extends HeraldController {
         $action[1] = null;
       }
 
-      $actions[] = HeraldActionConfig::willSaveAction($rule->getRuleType(),
-                                                      $rule->getAuthorPHID(),
-                                                      $action);
+      $obj = new HeraldAction();
+      $obj->setAction($action[0]);
+      $obj->setTarget($action[1]);
+
+      try {
+        $adapter->willSaveAction($rule, $obj);
+      } catch (HeraldInvalidActionException $ex) {
+        $errors[] = $ex;
+      }
+
+      $actions[] = $obj;
     }
 
     $rule->attachConditions($conditions);
@@ -336,7 +301,11 @@ final class HeraldRuleController extends HeraldController {
     return array($e_name, $errors);
   }
 
-  private function setupEditorBehavior($rule, $handles) {
+  private function setupEditorBehavior(
+    HeraldRule $rule,
+    array $handles,
+    HeraldAdapter $adapter) {
+
     $serial_conditions = array(
       array('default', 'default', ''),
     );
@@ -370,7 +339,7 @@ final class HeraldRuleController extends HeraldController {
       foreach ($rule->getActions() as $action) {
 
         switch ($action->getAction()) {
-          case HeraldActionConfig::ACTION_FLAG:
+          case HeraldAdapter::ACTION_FLAG:
             $current_value = $action->getTarget();
             break;
           default:
@@ -393,33 +362,41 @@ final class HeraldRuleController extends HeraldController {
     $all_rules = mpull($all_rules, 'getName', 'getID');
     asort($all_rules);
 
+    $all_fields = $adapter->getFieldNameMap();
+    $all_conditions = $adapter->getConditionNameMap();
+    $all_actions = $adapter->getActionNameMap($rule->getRuleType());
+
+    $fields = $adapter->getFields();
+    $field_map = array_select_keys($all_fields, $fields);
+
+    $actions = $adapter->getActions($rule->getRuleType());
+    $action_map = array_select_keys($all_actions, $actions);
+
     $config_info = array();
-    $config_info['fields']
-      = HeraldFieldConfig::getFieldMapForContentType($rule->getContentType());
-    $config_info['conditions'] = HeraldConditionConfig::getConditionMap();
+    $config_info['fields'] = $field_map;
+    $config_info['conditions'] = $all_conditions;
+    $config_info['actions'] = $action_map;
+
     foreach ($config_info['fields'] as $field => $name) {
-      $config_info['conditionMap'][$field] = array_keys(
-        HeraldConditionConfig::getConditionMapForField($field));
-    }
-    foreach ($config_info['fields'] as $field => $fname) {
-      foreach ($config_info['conditions'] as $condition => $cname) {
-        $config_info['values'][$field][$condition] =
-          HeraldValueTypeConfig::getValueTypeForFieldAndCondition(
-            $field,
-            $condition);
-      }
+      $field_conditions = $adapter->getConditionsForField($field);
+      $config_info['conditionMap'][$field] = $field_conditions;
     }
 
-    $config_info['actions'] =
-      HeraldActionConfig::getActionMessageMap($rule->getContentType(),
-                                              $rule->getRuleType());
+    foreach ($config_info['fields'] as $field => $fname) {
+      foreach ($config_info['conditionMap'][$field] as $condition) {
+        $value_type = $adapter->getValueTypeForFieldAndCondition(
+          $field,
+          $condition);
+        $config_info['values'][$field][$condition] = $value_type;
+      }
+    }
 
     $config_info['rule_type'] = $rule->getRuleType();
 
     foreach ($config_info['actions'] as $action => $name) {
-      $config_info['targets'][$action] =
-        HeraldValueTypeConfig::getValueTypeForAction($action,
-                                                     $rule->getRuleType());
+      $config_info['targets'][$action] = $adapter->getValueTypeForAction(
+        $action,
+       $rule->getRuleType());
     }
 
     Javelin::initBehavior(
@@ -490,27 +467,20 @@ final class HeraldRuleController extends HeraldController {
    * Render the selector for "Take these actions (every time | only the first
    * time) this rule matches..." element.
    */
-  private function renderRepetitionSelector($rule) {
-    // Make the selector for choosing how often this rule should be repeated
+  private function renderRepetitionSelector($rule, HeraldAdapter $adapter) {
     $repetition_policy = HeraldRepetitionPolicyConfig::toString(
       $rule->getRepetitionPolicy());
-    $repetition_options = HeraldRepetitionPolicyConfig::getMapForContentType(
-      $rule->getContentType());
 
-    if (empty($repetition_options)) {
-      // default option is 'every time'
-      $repetition_selector = idx(
-        HeraldRepetitionPolicyConfig::getMap(),
-        HeraldRepetitionPolicyConfig::EVERY);
-      return $repetition_selector;
-    } else if (count($repetition_options) == 1) {
-      // if there's only 1 option, just pick it for the user
-      $repetition_selector = reset($repetition_options);
-      return $repetition_selector;
+    $repetition_options = $adapter->getRepetitionOptions();
+    $repetition_names = HeraldRepetitionPolicyConfig::getMap();
+    $repetition_map = array_select_keys($repetition_names, $repetition_options);
+
+    if (count($repetition_map) < 2) {
+      return head($repetition_names);
     } else {
       return AphrontFormSelectControl::renderSelectTag(
         $repetition_policy,
-        $repetition_options,
+        $repetition_map,
         array(
           'name' => 'repetition_policy',
         ));
@@ -540,8 +510,11 @@ final class HeraldRuleController extends HeraldController {
    * allows one rule to depend upon the success or failure of another rule.
    */
   private function loadRulesThisRuleMayDependUpon(HeraldRule $rule) {
+    $viewer = $this->getRequest()->getUser();
+
     // Any rule can depend on a global rule.
     $all_rules = id(new HeraldRuleQuery())
+      ->setViewer($viewer)
       ->withRuleTypes(array(HeraldRuleTypeConfig::RULE_TYPE_GLOBAL))
       ->withContentTypes(array($rule->getContentType()))
       ->execute();
@@ -549,6 +522,7 @@ final class HeraldRuleController extends HeraldController {
     if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
       // Personal rules may depend upon your other personal rules.
       $all_rules += id(new HeraldRuleQuery())
+        ->setViewer($viewer)
         ->withRuleTypes(array(HeraldRuleTypeConfig::RULE_TYPE_PERSONAL))
         ->withContentTypes(array($rule->getContentType()))
         ->withAuthorPHIDs(array($rule->getAuthorPHID()))

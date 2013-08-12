@@ -152,12 +152,14 @@ final class PhabricatorUser
   }
 
   const CSRF_CYCLE_FREQUENCY  = 3600;
+  const CSRF_SALT_LENGTH      = 8;
   const CSRF_TOKEN_LENGTH     = 16;
+  const CSRF_BREACH_PREFIX    = 'B@';
 
   const EMAIL_CYCLE_FREQUENCY = 86400;
   const EMAIL_TOKEN_LENGTH    = 24;
 
-  public function getCSRFToken($offset = 0) {
+  private function getRawCSRFToken($offset = 0) {
     return $this->generateToken(
       time() + (self::CSRF_CYCLE_FREQUENCY * $offset),
       self::CSRF_CYCLE_FREQUENCY,
@@ -165,10 +167,40 @@ final class PhabricatorUser
       self::CSRF_TOKEN_LENGTH);
   }
 
-  public function validateCSRFToken($token) {
+  /**
+   * @phutil-external-symbol class PhabricatorStartup
+   */
+  public function getCSRFToken() {
+    $salt = PhabricatorStartup::getGlobal('csrf.salt');
+    if (!$salt) {
+      $salt = Filesystem::readRandomCharacters(self::CSRF_SALT_LENGTH);
+      PhabricatorStartup::setGlobal('csrf.salt', $salt);
+    }
 
+    // Generate a token hash to mitigate BREACH attacks against SSL. See
+    // discussion in T3684.
+    $token = $this->getRawCSRFToken();
+    $hash = PhabricatorHash::digest($token, $salt);
+    return 'B@'.$salt.substr($hash, 0, self::CSRF_TOKEN_LENGTH);
+  }
+
+  public function validateCSRFToken($token) {
     if (!$this->getPHID()) {
       return true;
+    }
+
+    $salt = null;
+
+    $version = 'plain';
+
+    // This is a BREACH-mitigating token. See T3684.
+    $breach_prefix = self::CSRF_BREACH_PREFIX;
+    $breach_prelen = strlen($breach_prefix);
+
+    if (!strncmp($token, $breach_prefix, $breach_prelen)) {
+      $version = 'breach';
+      $salt = substr($token, $breach_prelen, self::CSRF_SALT_LENGTH);
+      $token = substr($token, $breach_prelen + self::CSRF_SALT_LENGTH);
     }
 
     // When the user posts a form, we check that it contains a valid CSRF token.
@@ -199,9 +231,23 @@ final class PhabricatorUser
     $csrf_window = 6;
 
     for ($ii = -$csrf_window; $ii <= 1; $ii++) {
-      $valid = $this->getCSRFToken($ii);
-      if ($token == $valid) {
-        return true;
+      $valid = $this->getRawCSRFToken($ii);
+      switch ($version) {
+        // TODO: We can remove this after the BREACH version has been in the
+        // wild for a while.
+        case 'plain':
+          if ($token == $valid) {
+            return true;
+          }
+          break;
+        case 'breach':
+          $digest = PhabricatorHash::digest($valid, $salt);
+          if (substr($digest, 0, self::CSRF_TOKEN_LENGTH) == $token) {
+            return true;
+          }
+          break;
+        default:
+          throw new Exception("Unknown CSRF token format!");
       }
     }
 

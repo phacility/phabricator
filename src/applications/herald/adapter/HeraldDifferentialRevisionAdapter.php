@@ -1,6 +1,6 @@
 <?php
 
-final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
+final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   protected $revision;
   protected $diff;
@@ -17,13 +17,53 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
   protected $affectedPackages;
   protected $changesets;
 
-  public function __construct(
+  public function isEnabled() {
+    $app = 'PhabricatorApplicationDifferential';
+    return PhabricatorApplication::isClassInstalled($app);
+  }
+
+  public function getAdapterContentType() {
+    return 'differential';
+  }
+
+  public function getAdapterContentName() {
+    return pht('Differential Revisions');
+  }
+
+  public function getFields() {
+    return array(
+      self::FIELD_TITLE,
+      self::FIELD_BODY,
+      self::FIELD_AUTHOR,
+      self::FIELD_REVIEWERS,
+      self::FIELD_CC,
+      self::FIELD_REPOSITORY,
+      self::FIELD_DIFF_FILE,
+      self::FIELD_DIFF_CONTENT,
+      self::FIELD_RULE,
+      self::FIELD_AFFECTED_PACKAGE,
+      self::FIELD_AFFECTED_PACKAGE_OWNER,
+    );
+  }
+
+  public function getRepetitionOptions() {
+    return array(
+      HeraldRepetitionPolicyConfig::EVERY,
+      HeraldRepetitionPolicyConfig::FIRST,
+    );
+  }
+
+  public static function newLegacyAdapter(
     DifferentialRevision $revision,
     DifferentialDiff $diff) {
 
+    $object = new HeraldDifferentialRevisionAdapter();
+
     $revision->loadRelationships();
-    $this->revision = $revision;
-    $this->diff = $diff;
+    $object->revision = $revision;
+    $object->diff = $diff;
+
+    return $object;
   }
 
   public function setExplicitCCs($explicit_ccs) {
@@ -59,10 +99,6 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
 
   public function getHeraldName() {
     return $this->revision->getTitle();
-  }
-
-  public function getHeraldTypeName() {
-    return HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL;
   }
 
   public function loadRepository() {
@@ -164,47 +200,67 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
 
   public function getHeraldField($field) {
     switch ($field) {
-      case HeraldFieldConfig::FIELD_TITLE:
+      case self::FIELD_TITLE:
         return $this->revision->getTitle();
         break;
-      case HeraldFieldConfig::FIELD_BODY:
+      case self::FIELD_BODY:
         return $this->revision->getSummary()."\n".
                $this->revision->getTestPlan();
         break;
-      case HeraldFieldConfig::FIELD_AUTHOR:
+      case self::FIELD_AUTHOR:
         return $this->revision->getAuthorPHID();
         break;
-      case HeraldFieldConfig::FIELD_DIFF_FILE:
+      case self::FIELD_DIFF_FILE:
         return $this->loadAffectedPaths();
-      case HeraldFieldConfig::FIELD_CC:
+      case self::FIELD_CC:
         if (isset($this->explicitCCs)) {
           return array_keys($this->explicitCCs);
         } else {
           return $this->revision->getCCPHIDs();
         }
-      case HeraldFieldConfig::FIELD_REVIEWERS:
+      case self::FIELD_REVIEWERS:
         if (isset($this->explicitReviewers)) {
           return array_keys($this->explicitReviewers);
         } else {
           return $this->revision->getReviewers();
         }
-      case HeraldFieldConfig::FIELD_REPOSITORY:
+      case self::FIELD_REPOSITORY:
         $repository = $this->loadRepository();
         if (!$repository) {
           return null;
         }
         return $repository->getPHID();
-      case HeraldFieldConfig::FIELD_DIFF_CONTENT:
+      case self::FIELD_DIFF_CONTENT:
         return $this->loadContentDictionary();
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
+      case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
+      case self::FIELD_AFFECTED_PACKAGE_OWNER:
         $packages = $this->loadAffectedPackages();
         return PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
           mpull($packages, 'getID'));
-      default:
-        throw new Exception("Invalid field '{$field}'.");
+    }
+
+    return parent::getHeraldField($field);
+  }
+
+  public function getActions($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_NOTHING,
+        );
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_FLAG,
+          self::ACTION_NOTHING,
+        );
     }
   }
 
@@ -214,7 +270,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
     $result = array();
     if ($this->explicitCCs) {
       $effect = new HeraldEffect();
-      $effect->setAction(HeraldActionConfig::ACTION_ADD_CC);
+      $effect->setAction(self::ACTION_ADD_CC);
       $effect->setTarget(array_keys($this->explicitCCs));
       $effect->setReason(
         pht('CCs provided explicitly by revision author or carried over '.
@@ -232,20 +288,20 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case HeraldActionConfig::ACTION_NOTHING:
+        case self::ACTION_NOTHING:
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
             pht('OK, did nothing.'));
           break;
-        case HeraldActionConfig::ACTION_FLAG:
+        case self::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
             $effect,
             $this->revision->getPHID());
           break;
-        case HeraldActionConfig::ACTION_EMAIL:
-        case HeraldActionConfig::ACTION_ADD_CC:
-          $op = ($action == HeraldActionConfig::ACTION_EMAIL) ? 'email' : 'CC';
+        case self::ACTION_EMAIL:
+        case self::ACTION_ADD_CC:
+          $op = ($action == self::ACTION_EMAIL) ? 'email' : 'CC';
           $base_target = $effect->getTarget();
           $forbidden = array();
           foreach ($base_target as $key => $fbid) {
@@ -253,7 +309,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
               $forbidden[] = $fbid;
               unset($base_target[$key]);
             } else {
-              if ($action == HeraldActionConfig::ACTION_EMAIL) {
+              if ($action == self::ACTION_EMAIL) {
                 $this->emailPHIDs[$fbid] = true;
               } else {
                 $this->newCCs[$fbid] = true;
@@ -283,7 +339,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
               pht('Added addresses to %s list.', $op));
           }
           break;
-        case HeraldActionConfig::ACTION_REMOVE_CC:
+        case self::ACTION_REMOVE_CC:
           foreach ($effect->getTarget() as $fbid) {
             $this->remCCs[$fbid] = true;
           }

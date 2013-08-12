@@ -21,18 +21,24 @@ final class PhabricatorRepositoryCommitHeraldWorker
       return;
     }
 
-    $rules = HeraldRule::loadAllByContentTypeWithFullData(
-      HeraldContentTypeConfig::CONTENT_TYPE_COMMIT,
-      $commit->getPHID());
-
-    $adapter = new HeraldCommitAdapter(
+    $adapter = HeraldCommitAdapter::newLegacyAdapter(
       $repository,
       $commit,
       $data);
+
+    $rules = id(new HeraldRuleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withContentTypes(array($adapter->getAdapterContentType()))
+      ->needConditionsAndActions(true)
+      ->needAppliedToPHIDs(array($adapter->getPHID()))
+      ->needValidateAuthors(true)
+      ->execute();
+
     $engine = new HeraldEngine();
 
     $effects = $engine->applyRules($rules, $adapter);
     $engine->applyEffects($effects, $adapter, $rules);
+    $xscript = $engine->getTranscript();
 
     $audit_phids = $adapter->getAuditMap();
     if ($audit_phids) {
@@ -57,8 +63,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
     if (!$email_phids) {
       return;
     }
-
-    $xscript = $engine->getTranscript();
 
     $revision = $adapter->loadDifferentialRevision();
     if ($revision) {

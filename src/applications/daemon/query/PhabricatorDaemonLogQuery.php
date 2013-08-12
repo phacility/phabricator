@@ -8,6 +8,7 @@ final class PhabricatorDaemonLogQuery
 
   private $ids;
   private $status = self::STATUS_ALL;
+  private $daemonClasses;
 
   public static function getTimeUntilUnknown() {
     return 3 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
@@ -24,6 +25,11 @@ final class PhabricatorDaemonLogQuery
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withDaemonClasses(array $classes) {
+    $this->daemonClasses = $classes;
     return $this;
   }
 
@@ -107,6 +113,13 @@ final class PhabricatorDaemonLogQuery
         $conn_r,
         'status IN (%Ls)',
         $this->getStatusConstants());
+    }
+
+    if ($this->daemonClasses) {
+      $where[] = qsprintf(
+        $conn_r,
+        'daemon IN (%Ls)',
+        $this->daemonClasses);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

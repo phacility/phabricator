@@ -14,6 +14,7 @@ final class PhabricatorMacroSearchEngine
     $saved->setParameter('nameLike', $request->getStr('nameLike'));
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
+    $saved->setParameter('flagColor', $request->getStr('flagColor', '-1'));
 
     return $saved;
   }
@@ -52,6 +53,11 @@ final class PhabricatorMacroSearchEngine
       $query->withDateCreatedBefore($end);
     }
 
+    $color = $saved->getParameter('flagColor');
+    if (strlen($color)) {
+      $query->withFlagColor($color);
+    }
+
     return $query;
   }
 
@@ -68,6 +74,7 @@ final class PhabricatorMacroSearchEngine
     $status = $saved_query->getParameter('status');
     $names = implode(', ', $saved_query->getParameter('names', array()));
     $like = $saved_query->getParameter('nameLike');
+    $color = $saved_query->getParameter('flagColor', "-1");
 
     $form
       ->appendChild(
@@ -91,7 +98,13 @@ final class PhabricatorMacroSearchEngine
         id(new AphrontFormTextControl())
           ->setName('names')
           ->setLabel(pht('Exact Names'))
-          ->setValue($names));
+          ->setValue($names))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('flagColor')
+          ->setLabel(pht('Marked with Flag'))
+          ->setOptions(PhabricatorMacroQuery::getFlagColorsOptions())
+          ->setValue($color));
 
     $this->buildDateRange(
       $form,

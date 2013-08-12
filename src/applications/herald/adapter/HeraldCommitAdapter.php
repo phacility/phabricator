@@ -1,6 +1,11 @@
 <?php
 
-final class HeraldCommitAdapter extends HeraldObjectAdapter {
+final class HeraldCommitAdapter extends HeraldAdapter {
+
+  const FIELD_NEED_AUDIT_FOR_PACKAGE = 'need-audit-for-package';
+  const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
+  const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
+  const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
 
   protected $diff;
   protected $revision;
@@ -17,14 +22,115 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
   protected $affectedPackages;
   protected $auditNeededPackages;
 
-  public function __construct(
+  public function isEnabled() {
+    $app = 'PhabricatorApplicationDiffusion';
+    return PhabricatorApplication::isClassInstalled($app);
+  }
+
+  public function getAdapterContentType() {
+    return 'commit';
+  }
+
+  public function getAdapterContentName() {
+    return pht('Commits');
+  }
+
+  public function getFieldNameMap() {
+    return array(
+      self::FIELD_NEED_AUDIT_FOR_PACKAGE =>
+        pht('Affected packages that need audit'),
+      self::FIELD_DIFFERENTIAL_REVISION => pht('Differential revision'),
+      self::FIELD_DIFFERENTIAL_REVIEWERS => pht('Differential reviewers'),
+      self::FIELD_DIFFERENTIAL_CCS => pht('Differential CCs'),
+    ) + parent::getFieldNameMap();
+  }
+
+  public function getFields() {
+    return array(
+      self::FIELD_BODY,
+      self::FIELD_AUTHOR,
+      self::FIELD_REVIEWER,
+      self::FIELD_REPOSITORY,
+      self::FIELD_DIFF_FILE,
+      self::FIELD_DIFF_CONTENT,
+      self::FIELD_RULE,
+      self::FIELD_AFFECTED_PACKAGE,
+      self::FIELD_AFFECTED_PACKAGE_OWNER,
+      self::FIELD_NEED_AUDIT_FOR_PACKAGE,
+      self::FIELD_DIFFERENTIAL_REVISION,
+      self::FIELD_DIFFERENTIAL_REVIEWERS,
+      self::FIELD_DIFFERENTIAL_CCS,
+    );
+  }
+
+  public function getConditionsForField($field) {
+    switch ($field) {
+      case self::FIELD_DIFFERENTIAL_REVIEWERS:
+      case self::FIELD_DIFFERENTIAL_CCS:
+        return array(
+          self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+      case self::FIELD_DIFFERENTIAL_REVISION:
+        return array(
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
+        );
+      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
+        return array(
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
+    }
+    return parent::getConditionsForField($field);
+  }
+
+  public function getActions($rule_type) {
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_AUDIT,
+          self::ACTION_NOTHING,
+        );
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        return array(
+          self::ACTION_ADD_CC,
+          self::ACTION_REMOVE_CC,
+          self::ACTION_EMAIL,
+          self::ACTION_FLAG,
+          self::ACTION_AUDIT,
+          self::ACTION_NOTHING,
+        );
+    }
+  }
+
+  public function getValueTypeForFieldAndCondition($field, $condition) {
+    switch ($field) {
+      case self::FIELD_DIFFERENTIAL_CCS:
+        return self::VALUE_EMAIL;
+      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
+        return self::VALUE_OWNERS_PACKAGE;
+    }
+
+    return parent::getValueTypeForFieldAndCondition($field, $condition);
+  }
+
+  public static function newLegacyAdapter(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $commit_data) {
 
-    $this->repository = $repository;
-    $this->commit = $commit;
-    $this->commitData = $commit_data;
+    $object = new HeraldCommitAdapter();
+
+    $object->repository = $repository;
+    $object->commit = $commit;
+    $object->commitData = $commit_data;
+
+    return $object;
   }
 
   public function getPHID() {
@@ -44,10 +150,6 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
       'r'.
       $this->repository->getCallsign().
       $this->commit->getCommitIdentifier();
-  }
-
-  public function getHeraldTypeName() {
-    return HeraldContentTypeConfig::CONTENT_TYPE_COMMIT;
   }
 
   public function loadAffectedPaths() {
@@ -132,17 +234,17 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
   public function getHeraldField($field) {
     $data = $this->commitData;
     switch ($field) {
-      case HeraldFieldConfig::FIELD_BODY:
+      case self::FIELD_BODY:
         return $data->getCommitMessage();
-      case HeraldFieldConfig::FIELD_AUTHOR:
+      case self::FIELD_AUTHOR:
         return $data->getCommitDetail('authorPHID');
-      case HeraldFieldConfig::FIELD_REVIEWER:
+      case self::FIELD_REVIEWER:
         return $data->getCommitDetail('reviewerPHID');
-      case HeraldFieldConfig::FIELD_DIFF_FILE:
+      case self::FIELD_DIFF_FILE:
         return $this->loadAffectedPaths();
-      case HeraldFieldConfig::FIELD_REPOSITORY:
+      case self::FIELD_REPOSITORY:
         return $this->repository->getPHID();
-      case HeraldFieldConfig::FIELD_DIFF_CONTENT:
+      case self::FIELD_DIFF_CONTENT:
         try {
           $diff = $this->loadCommitDiff();
         } catch (Exception $ex) {
@@ -161,36 +263,36 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
           $dict[$change->getFilename()] = implode("\n", $lines);
         }
         return $dict;
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
+      case self::FIELD_AFFECTED_PACKAGE:
         $packages = $this->loadAffectedPackages();
         return mpull($packages, 'getPHID');
-      case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
+      case self::FIELD_AFFECTED_PACKAGE_OWNER:
         $packages = $this->loadAffectedPackages();
         $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
         return mpull($owners, 'getUserPHID');
-      case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
+      case self::FIELD_NEED_AUDIT_FOR_PACKAGE:
         return $this->loadAuditNeededPackage();
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVISION:
+      case self::FIELD_DIFFERENTIAL_REVISION:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
           return null;
         }
         return $revision->getID();
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVIEWERS:
+      case self::FIELD_DIFFERENTIAL_REVIEWERS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
           return array();
         }
         return $revision->getReviewers();
-      case HeraldFieldConfig::FIELD_DIFFERENTIAL_CCS:
+      case self::FIELD_DIFFERENTIAL_CCS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
           return array();
         }
         return $revision->getCCPHIDs();
-      default:
-        throw new Exception("Invalid field '{$field}'.");
     }
+
+    return parent::getHeraldField($field);
   }
 
   public function applyHeraldEffects(array $effects) {
@@ -200,13 +302,13 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
     foreach ($effects as $effect) {
       $action = $effect->getAction();
       switch ($action) {
-        case HeraldActionConfig::ACTION_NOTHING:
+        case self::ACTION_NOTHING:
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
             pht('Great success at doing nothing.'));
           break;
-        case HeraldActionConfig::ACTION_EMAIL:
+        case self::ACTION_EMAIL:
           foreach ($effect->getTarget() as $phid) {
             $this->emailPHIDs[$phid] = true;
           }
@@ -215,7 +317,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
             true,
             pht('Added address to email targets.'));
           break;
-        case HeraldActionConfig::ACTION_AUDIT:
+        case self::ACTION_AUDIT:
           foreach ($effect->getTarget() as $phid) {
             if (empty($this->auditMap[$phid])) {
               $this->auditMap[$phid] = array();
@@ -227,7 +329,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
             true,
             pht('Triggered an audit.'));
           break;
-        case HeraldActionConfig::ACTION_FLAG:
+        case self::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
             $effect,
             $this->commit->getPHID());

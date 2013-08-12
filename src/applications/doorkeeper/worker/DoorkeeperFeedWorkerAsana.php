@@ -194,8 +194,9 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       array_keys($phid_aid_map));
     $try_users = array_filter($try_users);
 
-    list($possessed_user, $oauth_token) = $this->findAnyValidAsanaAccessToken(
-      $try_users);
+    $access_info = $this->findAnyValidAsanaAccessToken($try_users);
+    list($possessed_user, $possessed_asana_id, $oauth_token) = $access_info;
+
     if (!$oauth_token) {
       throw new PhabricatorWorkerPermanentFailureException(
         'Unable to find any Asana user with valid credentials to '.
@@ -282,6 +283,14 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         }
       }
     } else {
+      // If there are no followers (CCs), and no active or passive users
+      // (reviewers or auditors), and we haven't synchronized the object before,
+      // don't synchronize the object.
+      if (!$active_phids && !$passive_phids && !$follow_phids) {
+        $this->log("Object has no followers or active/passive users.\n");
+        return;
+      }
+
       $parent = $this->makeAsanaAPICall(
         $oauth_token,
         'tasks',
@@ -425,7 +434,6 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     }
 
     // For each user that we don't have a subtask for, create a new subtask.
-
     foreach ($need_subtasks as $user_phid => $is_completed) {
       $subtask = $this->makeAsanaAPICall(
         $oauth_token,
@@ -472,14 +480,37 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         ));
     }
 
+    foreach ($user_to_ref_map as $user_phid => $ref) {
+      // For each subtask, if the acting user isn't the same user as the subtask
+      // owner, remove the acting user as a follower. Currently, the acting user
+      // will be added as a follower only when they create the task, but this
+      // may change in the future (e.g., closing the task may also mark them
+      // as a follower). Wipe every subtask to be sure. The intent here is to
+      // leave only the owner as a follower so that the acting user doesn't
+      // receive notifications about changes to subtask state. Note that
+      // removing followers is silent in all cases in Asana and never produces
+      // any kind of notification, so this isn't self-defeating.
+      if ($user_phid != $possessed_user->getPHID()) {
+        $this->makeAsanaAPICall(
+          $oauth_token,
+          'tasks/'.$ref->getObjectID().'/removeFollowers',
+          'POST',
+          array(
+            'followers' => array($possessed_asana_id),
+          ));
+      }
+    }
+
     // Update edges on our side.
 
     $sub_editor->save();
 
     // Don't publish the "create" story, since pushing the object into Asana
     // naturally generates a notification which effectively serves the same
-    // purpose as the "create" story.
-    if (!$publisher->isStoryAboutObjectCreation($object)) {
+    // purpose as the "create" story. Similarly, "close" stories generate a
+    // close notification.
+    if (!$publisher->isStoryAboutObjectCreation($object) &&
+        !$publisher->isStoryAboutObjectClosure($object)) {
       // Post the feed story itself to the main Asana task. We do this last
       // because everything else is idempotent, so this is the only effect we
       // can't safely run more than once.
@@ -525,7 +556,7 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
 
   private function findAnyValidAsanaAccessToken(array $user_phids) {
     if (!$user_phids) {
-      return array(null, null);
+      return array(null, null, null);
     }
 
     $provider = $this->getProvider();
@@ -570,11 +601,11 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         ->withPHIDs(array($account->getUserPHID()))
         ->executeOne();
       if ($user) {
-        return array($user, $token);
+        return array($user, $account->getAccountID(), $token);
       }
     }
 
-    return array(null, null);
+    return array(null, null, null);
   }
 
   private function makeAsanaAPICall($token, $action, $method, array $params) {

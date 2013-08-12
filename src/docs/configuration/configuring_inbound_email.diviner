@@ -139,8 +139,8 @@ inbound email. Provided you have such an account, configure it like this:
     Differential, or both.
 
 That's it! If everything is working properly you should be able to send email
-to ##anything@phabricator.example.com## and it should appear in the "Received"
-tab of MetaMTA within a few seconds.
+to ##anything@phabricator.example.com## and it should appear in
+`bin/mail list-inbound` within a few seconds.
 
 = Installing Mailparse =
 

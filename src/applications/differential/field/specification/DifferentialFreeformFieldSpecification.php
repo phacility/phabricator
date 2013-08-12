@@ -85,7 +85,7 @@ abstract class DifferentialFreeformFieldSpecification
 
     $matches = null;
     preg_match_all(
-      '/\b(?i:depends\s+on)\s+D(\d+(,\s+D\d++)*)\b/',
+      '/\b(?i:depends\s+on):?\s+D(\d+(,\s+D\d++)*)\b/',
       $message,
       $matches);
 

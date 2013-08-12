@@ -53,14 +53,14 @@ final class HeraldTestConsoleController extends HeraldController {
 
         if (!$errors) {
           if ($object instanceof DifferentialRevision) {
-            $adapter = new HeraldDifferentialRevisionAdapter(
+            $adapter = HeraldDifferentialRevisionAdapter::newLegacyAdapter(
               $object,
               $object->loadActiveDiff());
           } else if ($object instanceof PhabricatorRepositoryCommit) {
             $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
               'commitID = %d',
               $object->getID());
-            $adapter = new HeraldCommitAdapter(
+            $adapter = HeraldCommitAdapter::newLegacyAdapter(
               $repo,
               $object,
               $data);
@@ -68,15 +68,19 @@ final class HeraldTestConsoleController extends HeraldController {
             throw new Exception("Can not build adapter for object!");
           }
 
-          $rules = HeraldRule::loadAllByContentTypeWithFullData(
-            $adapter->getHeraldTypeName(),
-            $object->getPHID());
+          $rules = id(new HeraldRuleQuery())
+            ->setViewer($user)
+            ->withContentTypes(array($adapter->getAdapterContentType()))
+            ->needConditionsAndActions(true)
+            ->needAppliedToPHIDs(array($object->getPHID()))
+            ->needValidateAuthors(true)
+            ->execute();
 
-          $engine = new HeraldEngine();
+          $engine = id(new HeraldEngine())
+            ->setDryRun(true);
+
           $effects = $engine->applyRules($rules, $adapter);
-
-          $dry_run = new HeraldDryRunAdapter();
-          $engine->applyEffects($effects, $dry_run, $rules);
+          $engine->applyEffects($effects, $adapter, $rules);
 
           $xscript = $engine->getTranscript();
 
@@ -113,7 +117,7 @@ final class HeraldTestConsoleController extends HeraldController {
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Test Rules')));
 
-    $nav = $this->renderNav();
+    $nav = $this->buildSideNavView();
     $nav->selectFilter('test');
     $nav->appendChild(
       array(

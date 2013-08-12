@@ -199,7 +199,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       Javelin::initBehavior(
         'dark-console',
         array(
-          'uri' => $request ? (string)$request->getRequestURI() : '?',
+          // NOTE: We use a generic label here to prevent input reflection
+          // and mitigate compression attacks like BREACH. See discussion in
+          // T3684.
+          'uri' => pht('Main Request'),
           'selected' => $user ? $user->getConsoleTab() : null,
           'visible'  => $user ? (int)$user->getConsoleVisible() : true,
           'headers' => $headers,

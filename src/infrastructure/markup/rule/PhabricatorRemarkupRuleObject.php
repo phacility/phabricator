@@ -26,11 +26,11 @@ abstract class PhabricatorRemarkupRuleObject
 
   protected function loadHandles(array $objects) {
     $phids = mpull($objects, 'getPHID');
-    $query = new PhabricatorObjectHandleData($phids);
 
-    $viewer = $this->getEngine()->getConfig('viewer');
-    $query->setViewer($viewer);
-    $handles = $query->loadHandles();
+    $handles = id(new PhabricatorHandleQuery($phids))
+      ->withPHIDs($phids)
+      ->setViewer($this->getEngine()->getConfig('viewer'))
+      ->execute();
 
     $result = array();
     foreach ($objects as $id => $object) {
