@@ -2217,7 +2217,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-pholio-mock-edit' =>
   array(
-    'uri' => '/res/e537a994/rsrc/js/application/pholio/behavior-pholio-mock-edit.js',
+    'uri' => '/res/d5f4b705/rsrc/js/application/pholio/behavior-pholio-mock-edit.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2227,6 +2227,7 @@ celerity_register_resource_map(array(
       3 => 'javelin-workflow',
       4 => 'phabricator-phtize',
       5 => 'phabricator-drag-and-drop-file-upload',
+      6 => 'phabricator-draggable-list',
     ),
     'disk' => '/rsrc/js/application/pholio/behavior-pholio-mock-edit.js',
   ),
@@ -3103,7 +3104,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-draggable-list' =>
   array(
-    'uri' => '/res/76ddce56/rsrc/js/core/DraggableList.js',
+    'uri' => '/res/7292a1c4/rsrc/js/core/DraggableList.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -3705,7 +3706,7 @@ celerity_register_resource_map(array(
   ),
   'pholio-edit-css' =>
   array(
-    'uri' => '/res/1d07a294/rsrc/css/application/pholio/pholio-edit.css',
+    'uri' => '/res/00e3a3a8/rsrc/css/application/pholio/pholio-edit.css',
     'type' => 'css',
     'requires' =>
     array(

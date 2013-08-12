@@ -3,6 +3,7 @@
  */
 
 .pholio-uploaded-image {
+  position: relative;
   overflow: hidden;
 
   /* When we activate the image control to show that we're going to replace
@@ -21,6 +22,11 @@
   border-radius: 3px;
   width: 296px;
   overflow: hidden;
+}
+
+.device-desktop .pholio-thumb-box {
+  /* Provide room for the draggable grip. */
+  margin-left: 12px;
 }
 
 .device .pholio-thumb-box {
@@ -59,7 +65,7 @@
 }
 
 .pholio-image-details {
-  margin-left: 312px;
+  margin-left: 324px;
 }
 
 .device .pholio-image-details {
@@ -128,4 +134,18 @@
 
 .pholio-drop-undo a {
   font-weight: bold;
+}
+
+.pholio-drag-handle {
+  position: absolute;
+  height: 100%;
+  width: 12px;
+  cursor: move;
+  background-image: url(/rsrc/image/texture/grip.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.device .pholio-drag-handle {
+  display: none;
 }

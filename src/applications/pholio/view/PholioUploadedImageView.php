@@ -47,6 +47,13 @@ final class PholioUploadedImageView extends AphrontView {
         'style' => 'background-image: url('.$file->getThumb280x210URI().');',
       ));
 
+    $handle = javelin_tag(
+      'div',
+      array(
+        'class' => 'pholio-drag-handle',
+        'sigil' => 'pholio-drag-handle',
+      ));
+
     $content = hsprintf(
       '<div class="pholio-thumb-box">
         <div class="pholio-thumb-title">
@@ -92,6 +99,7 @@ final class PholioUploadedImageView extends AphrontView {
         ),
       ),
       array(
+        $handle,
         $content,
         $input,
         $replaces_input,

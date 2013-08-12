@@ -235,6 +235,7 @@ final class PholioMockEditController extends PholioController {
 
     $list_id = celerity_generate_unique_node_id();
     $drop_id = celerity_generate_unique_node_id();
+    $order_id = celerity_generate_unique_node_id();
 
     $list_control = phutil_tag(
       'div',
@@ -252,11 +253,20 @@ final class PholioMockEditController extends PholioController {
       ),
       'Drag and drop images here to add them to the mock.');
 
+    $order_control = phutil_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => 'imageOrder',
+        'id' => $order_id,
+      ));
+
     Javelin::initBehavior(
       'pholio-mock-edit',
       array(
         'listID' => $list_id,
         'dropID' => $drop_id,
+        'orderID' => $order_id,
         'uploadURI' => '/file/dropupload/',
         'renderURI' => $this->getApplicationURI('image/upload/'),
         'pht' => array(
@@ -271,6 +281,7 @@ final class PholioMockEditController extends PholioController {
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFlexible(true)
+      ->appendChild($order_control)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
