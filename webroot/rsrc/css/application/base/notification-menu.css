@@ -42,7 +42,7 @@
 }
 
 .device-desktop .phabricator-notification-menu .phabricator-notification:hover {
-  background: #f4f6f9;
+  background: #e6ebf5;
 }
 
 .phabricator-notification + .phabricator-notification {
@@ -59,7 +59,8 @@
 
 .phabricator-notification-list .phabricator-notification-unread,
 .phabricator-notification-menu .phabricator-notification-unread {
-  background: {$lightblue};
+  background: #eceff5;
+  border-color: #e3e8f0;
 }
 
 .phabricator-notification-header {
