@@ -283,6 +283,14 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
         }
       }
     } else {
+      // If there are no followers (CCs), and no active or passive users
+      // (reviewers or auditors), and we haven't synchronized the object before,
+      // don't synchronize the object.
+      if (!$active_phids && !$passive_phids && !$follow_phids) {
+        $this->log("Object has no followers or active/passive users.\n");
+        return;
+      }
+
       $parent = $this->makeAsanaAPICall(
         $oauth_token,
         'tasks',
