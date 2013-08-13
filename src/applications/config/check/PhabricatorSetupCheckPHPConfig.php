@@ -34,19 +34,44 @@ final class PhabricatorSetupCheckPHPConfig extends PhabricatorSetupCheck {
 
     $disable_options = array('disable_functions', 'disable_classes');
     foreach ($disable_options as $disable_option) {
-      if (ini_get($disable_option)) {
-        $message = pht(
-          "You have '%s' enabled in your PHP configuration.\n\n".
-          "This option is not compatible with Phabricator. Remove ".
-          "'%s' from your configuration to continue.",
-          $disable_option,
-          $disable_option);
+      $disable_value = ini_get($disable_option);
+      if ($disable_value) {
 
-        $this->newIssue('php.'.$disable_option)
-          ->setIsFatal(true)
-          ->setName(pht('Remove PHP %s', $disable_option))
-          ->setMessage($message)
-          ->addPHPConfig($disable_option);
+        // By default Debian installs the pcntl extension but disables all of
+        // its functions using configuration. Whitelist disabling these
+        // functions so that Debian PHP works out of the box (we do not need to
+        // call these functions from the web UI). This is pretty ridiculous but
+        // it's not the users' fault and they haven't done anything crazy to
+        // get here, so don't make them pay for Debian's unusual choices.
+        // See: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=605571
+        $fatal = true;
+        if ($disable_option == 'disable_functions') {
+          $functions = preg_split('/[, ]+/', $disable_value);
+          $functions = array_filter($functions);
+          foreach ($functions as $k => $function) {
+            if (preg_match('/^pcntl_/', $function)) {
+              unset($functions[$k]);
+            }
+          }
+          if (!$functions) {
+            $fatal = false;
+          }
+        }
+
+        if ($fatal) {
+          $message = pht(
+            "You have '%s' enabled in your PHP configuration.\n\n".
+            "This option is not compatible with Phabricator. Remove ".
+            "'%s' from your configuration to continue.",
+            $disable_option,
+            $disable_option);
+
+          $this->newIssue('php.'.$disable_option)
+            ->setIsFatal(true)
+            ->setName(pht('Remove PHP %s', $disable_option))
+            ->setMessage($message)
+            ->addPHPConfig($disable_option);
+        }
       }
     }
 
