@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorFlag extends PhabricatorFlagDAO {
+final class PhabricatorFlag extends PhabricatorFlagDAO
+  implements PhabricatorPolicyInterface {
 
   protected $ownerPHID;
   protected $type;
@@ -9,14 +10,11 @@ final class PhabricatorFlag extends PhabricatorFlagDAO {
   protected $color = PhabricatorFlagColor::COLOR_BLUE;
   protected $note;
 
-  private $handle = false;
-  private $object = false;
+  private $handle = self::ATTACHABLE;
+  private $object = self::ATTACHABLE;
 
   public function getObject() {
-    if ($this->object === false) {
-      throw new Exception('Call attachObject() before getObject()!');
-    }
-    return $this->object;
+    return $this->assertAttached($this->object);
   }
 
   public function attachObject($object) {
@@ -25,15 +23,31 @@ final class PhabricatorFlag extends PhabricatorFlagDAO {
   }
 
   public function getHandle() {
-    if ($this->handle === false) {
-      throw new Exception('Call attachHandle() before getHandle()!');
-    }
-    return $this->handle;
+    return $this->assertAttached($this->handle);
   }
 
   public function attachHandle(PhabricatorObjectHandle $handle) {
     $this->handle = $handle;
     return $this;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_NOONE;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return ($viewer->getPHID() == $this->getOwnerPHID());
   }
 
 }

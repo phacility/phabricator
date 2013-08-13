@@ -3251,7 +3251,11 @@ phutil_register_library_map(array(
     'PhabricatorFilesManagementPurgeWorkflow' => 'PhabricatorFilesManagementWorkflow',
     'PhabricatorFilesManagementRebuildWorkflow' => 'PhabricatorFilesManagementWorkflow',
     'PhabricatorFilesManagementWorkflow' => 'PhutilArgumentWorkflow',
-    'PhabricatorFlag' => 'PhabricatorFlagDAO',
+    'PhabricatorFlag' =>
+    array(
+      0 => 'PhabricatorFlagDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorFlagColor' => 'PhabricatorFlagConstants',
     'PhabricatorFlagController' => 'PhabricatorController',
     'PhabricatorFlagDAO' => 'PhabricatorLiskDAO',
@@ -3259,6 +3263,7 @@ phutil_register_library_map(array(
     'PhabricatorFlagEditController' => 'PhabricatorFlagController',
     'PhabricatorFlagListController' => 'PhabricatorFlagController',
     'PhabricatorFlagListView' => 'AphrontView',
+    'PhabricatorFlagQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFlagsUIEventListener' => 'PhutilEventListener',
     'PhabricatorFormExample' => 'PhabricatorUIExample',
     'PhabricatorGarbageCollectorConfigOptions' => 'PhabricatorApplicationConfigOptions',
