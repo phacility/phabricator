@@ -18,26 +18,28 @@ JX.behavior('differential-toggle-files', function(config) {
       }
 
       var diff = e.getData().diff[0],
-          data = JX.Stratcom.getData(diff),
-          undo;
+          data = JX.Stratcom.getData(diff);
       if (data.hidden) {
         data.hidden = false;
         JX.DOM.show(diff);
-        undo = JX.DOM.find(diff.parentNode,
-                           'div',
-                           'differential-collapse-undo-div');
-        JX.DOM.remove(undo);
+        JX.DOM.remove(data.undo);
+        data.undo = null;
       } else {
         data.hidden = true;
+        data.undo = render_collapse_undo();
         JX.DOM.hide(diff);
-        undo = render_collapse_undo();
-        JX.DOM.listen(undo, 'click', 'differential-collapse-undo', function(e) {
-          e.kill();
-          data.hidden = false;
-          JX.DOM.show(diff);
-          JX.DOM.remove(undo);
-        });
-        JX.DOM.appendContent(diff.parentNode, undo);
+        JX.DOM.listen(
+          data.undo,
+          'click',
+          'differential-collapse-undo',
+          function(e) {
+            e.kill();
+            data.hidden = false;
+            JX.DOM.show(diff);
+            JX.DOM.remove(data.undo);
+            data.undo = null;
+          });
+        JX.DOM.appendContent(diff.parentNode, data.undo);
       }
       JX.Stratcom.invoke('differential-toggle-file-toggled');
     });
