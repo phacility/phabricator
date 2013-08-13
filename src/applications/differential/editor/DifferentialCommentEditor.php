@@ -612,6 +612,10 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       'action'               => $comment->getAction(),
       'feedback_content'     => $comment->getContent(),
       'actor_phid'           => $actor_phid,
+
+      // NOTE: Don't use this, it will be removed after ApplicationTransactions.
+      // For now, it powers inline comment rendering over the Asana brdige.
+      'temporaryCommentID'   => $comment->getID(),
     );
 
     id(new PhabricatorFeedStoryPublisher())
