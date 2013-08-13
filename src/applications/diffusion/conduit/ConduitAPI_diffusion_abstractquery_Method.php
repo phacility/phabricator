@@ -90,7 +90,9 @@ abstract class ConduitAPI_diffusion_abstractquery_Method
   final public function defineParamTypes() {
     return $this->defineCustomParamTypes() +
       array(
-      'callsign' => 'required string');
+        'callsign' => 'required string',
+        'branch' => 'optional string',
+      );
   }
   /**
    * Subclasses should override this to specify custom param types.
@@ -139,6 +141,7 @@ abstract class ConduitAPI_diffusion_abstractquery_Method
         array(
           'user' => $request->getUser(),
           'callsign' => $request->getValue('callsign'),
+          'branch' => $request->getValue('branch'),
           'path' => $request->getValue('path'),
           'commit' => $request->getValue('commit'),
         ));

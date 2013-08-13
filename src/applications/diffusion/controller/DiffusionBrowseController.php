@@ -86,7 +86,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $readme = $this->callConduitWithDiffusionRequest(
         'diffusion.readmequery',
         array(
-          'paths' => $results->getPathDicts()
+          'paths' => $results->getPathDicts(),
         ));
       if ($readme) {
         $box = new PHUIBoxView();
