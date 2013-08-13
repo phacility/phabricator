@@ -248,16 +248,16 @@ EODOC
             pht("Show Reply Handler Hints"),
             pht("No Reply Handler Hints"),
           ))
-        ->setSummary(pht('Show hints about Herald rules in email.'))
-        ->setDescription($herald_hints_description),
+        ->setSummary(pht('Show hints about reply handler actions in email.'))
+        ->setDescription($reply_hints_description),
       $this->newOption('metamta.herald.show-hints', 'bool', true)
         ->setBoolOptions(
           array(
             pht("Show Herald Hints"),
             pht("No Herald Hints"),
           ))
-        ->setSummary(pht('Show hints about reply handler actions in email.'))
-        ->setDescription($reply_hints_description),
+        ->setSummary(pht('Show hints about Herald rules in email.'))
+        ->setDescription($herald_hints_description),
       $this->newOption('metamta.recipients.show-hints', 'bool', true)
         ->setBoolOptions(
           array(
