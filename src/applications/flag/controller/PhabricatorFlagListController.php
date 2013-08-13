@@ -1,59 +1,78 @@
 <?php
 
-final class PhabricatorFlagListController extends PhabricatorFlagController {
+final class PhabricatorFlagListController extends PhabricatorFlagController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
-    $flag_order = $request->getStr('o', 'n');
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine(new PhabricatorFlagSearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/flag/view/'));
-    $nav->addLabel(pht('Flags'));
-    $nav->addFilter('all', pht('Your Flags'));
-    $nav->selectFilter('all', 'all');
+    return $this->delegateToController($controller);
+  }
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addCrumb(id(new PhabricatorCrumbView)
-      ->setName(pht('Flags'))
-      ->setHref($request->getRequestURI()));
-    $nav->setCrumbs($crumbs);
+  public function renderResultsList(
+    array $flags,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($flags, 'PhabricatorFlag');
 
-    $query = new PhabricatorFlagQuery();
-    $query->withOwnerPHIDs(array($user->getPHID()));
-    $query->setViewer($user);
-    $query->needHandles(true);
+    $viewer = $this->getRequest()->getUser();
 
-    $flags = $query->execute();
+    $list = id(new PhabricatorObjectItemListView())
+      ->setUser($viewer);
+    foreach ($flags as $flag) {
+      $id = $flag->getID();
+      $phid = $flag->getObjectPHID();
 
-    $views = array();
-    $view = new PhabricatorFlagListView();
-    $view->setFlags($flags);
-    $view->setUser($user);
-    $view->setFlush(true);
-    $views[] = array(
-      'view'  => $view,
-    );
+      $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
 
-    foreach ($views as $view) {
-      $panel = new AphrontPanelView();
-      $panel->setNoBackground();
+      $flag_icon = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-flag-icon '.$class,
+        ),
+        '');
 
-      $title = idx($view, 'title');
-      if ($title) {
-        $panel->setHeader($title);
+      $item = id(new PhabricatorObjectItemView())
+        ->addHeadIcon($flag_icon)
+        ->setHeader($flag->getHandle()->renderLink());
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('edit')
+          ->setHref($this->getApplicationURI("edit/{$phid}/"))
+          ->setWorkflow(true));
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('delete')
+          ->setHref($this->getApplicationURI("delete/{$id}/"))
+          ->setWorkflow(true));
+
+      if ($flag->getNote()) {
+        $item->addAttribute($flag->getNote());
       }
-      $panel->appendChild($view['view']);
-      $nav->appendChild($panel);
+
+      $item->addIcon(
+        'none',
+        phabricator_datetime($flag->getDateCreated(), $viewer));
+
+      $list->addItem($item);
     }
 
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => pht('Flags'),
-        'device' => true,
-        'dust'  => true,
-      ));
+    return $list;
   }
 
 }

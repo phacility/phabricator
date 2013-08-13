@@ -2,18 +2,19 @@
 
 abstract class PhabricatorFlagController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
+  public function buildSideNavView() {
+    $user = $this->getRequest()->getUser();
 
-    $page = $this->buildStandardPageView();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $page->setApplicationName(pht('Flag'));
-    $page->setBaseURI('/flag/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9A\x90"); // Subtle!
-    $page->appendChild($view);
+    id(new PhabricatorFlagSearchEngine())
+      ->setViewer($user)
+      ->addNavigationItems($nav->getMenu());
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    $nav->selectFilter(null);
 
+    return $nav;
   }
+
 }
