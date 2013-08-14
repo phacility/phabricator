@@ -100,12 +100,8 @@ final class PhabricatorPeopleProfileController
     $fields = PhabricatorCustomField::getObjectFields(
       $user,
       PhabricatorCustomField::ROLE_VIEW);
-
-    foreach ($fields as $field) {
-      $field->setViewer($viewer);
-    }
-
-    $view->applyCustomFields($fields);
+    $field_list = new PhabricatorCustomFieldList($fields);
+    $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
     return $view;
   }

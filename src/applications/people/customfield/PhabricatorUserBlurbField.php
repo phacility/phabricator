@@ -46,7 +46,7 @@ final class PhabricatorUserBlurbField
     $this->getObject()->loadUserProfile()->setBlurb($xaction->getNewValue());
   }
 
-  public function setValueFromRequest(AphrontRequest $request) {
+  public function readValueFromRequest(AphrontRequest $request) {
     $this->value = $request->getStr($this->getFieldKey());
   }
 

@@ -3,6 +3,7 @@
 /**
  * @task apps       Building Applications with Custom Fields
  * @task core       Core Properties and Field Identity
+ * @task proxy      Field Proxies
  * @task context    Contextual Data
  * @task storage    Field Storage
  * @task appsearch  Integration with ApplicationSearch
@@ -15,6 +16,7 @@ abstract class PhabricatorCustomField {
 
   private $viewer;
   private $object;
+  private $proxy;
 
   const ROLE_APPLICATIONTRANSACTIONS  = 'ApplicationTransactions';
   const ROLE_APPLICATIONSEARCH        = 'ApplicationSearch';
@@ -148,7 +150,12 @@ abstract class PhabricatorCustomField {
    * @return string String which uniquely identifies this field.
    * @task core
    */
-  abstract public function getFieldKey();
+  public function getFieldKey() {
+    if ($this->proxy) {
+      return $this->proxy->getFieldKey();
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
 
 
   /**
@@ -158,6 +165,9 @@ abstract class PhabricatorCustomField {
    * @task core
    */
   public function getFieldName() {
+    if ($this->proxy) {
+      return $this->proxy->getFieldName();
+    }
     return $this->getFieldKey();
   }
 
@@ -170,6 +180,9 @@ abstract class PhabricatorCustomField {
    * @task core
    */
   public function getFieldDescription() {
+    if ($this->proxy) {
+      return $this->proxy->getFieldDescription();
+    }
     return null;
   }
 
@@ -200,6 +213,9 @@ abstract class PhabricatorCustomField {
    * @task core
    */
   public function isFieldEnabled() {
+    if ($this->proxy) {
+      return $this->proxy->isFieldEnabled();
+    }
     return true;
   }
 
@@ -212,19 +228,23 @@ abstract class PhabricatorCustomField {
    *
    * Normally, you do not need to override this method. Instead, override the
    * methods specific to roles you want to enable. For example, implement
-   * @{method:getStorageKey()} to activate the `'storage'` role.
+   * @{method:shouldUseStorage()} to activate the `'storage'` role.
    *
    * @return bool True to enable the field for the given role.
    * @task core
    */
   public function shouldEnableForRole($role) {
+    if ($this->proxy) {
+      return $this->proxy->shouldEnableForRole($role);
+    }
+
     switch ($role) {
       case self::ROLE_APPLICATIONTRANSACTIONS:
         return $this->shouldAppearInApplicationTransactions();
       case self::ROLE_APPLICATIONSEARCH:
         return $this->shouldAppearInApplicationSearch();
       case self::ROLE_STORAGE:
-        return ($this->getStorageKey() !== null);
+        return $this->shouldUseStorage();
       case self::ROLE_EDIT:
         return $this->shouldAppearInEditView();
       case self::ROLE_VIEW:
@@ -264,6 +284,60 @@ abstract class PhabricatorCustomField {
   }
 
 
+/* -(  Field Proxies  )------------------------------------------------------ */
+
+
+  /**
+   * Proxies allow a field to use some other field's implementation for most
+   * of their behavior while still subclassing an application field. When a
+   * proxy is set for a field with @{method:setProxy}, all of its methods will
+   * call through to the proxy by default.
+   *
+   * This is most commonly used to implement configuration-driven custom fields
+   * using @{class:PhabricatorStandardCustomField}.
+   *
+   * This method must be overridden to return `true` before a field can accept
+   * proxies.
+   *
+   * @return bool True if you can @{method:setProxy} this field.
+   * @task proxy
+   */
+  public function canSetProxy() {
+    if ($this instanceof PhabricatorStandardCustomFieldInterface) {
+      return true;
+    }
+    return false;
+  }
+
+
+  /**
+   * Set the proxy implementation for this field. See @{method:canSetProxy} for
+   * discussion of field proxies.
+   *
+   * @param PhabricatorCustomField Field implementation.
+   * @return this
+   */
+  final public function setProxy(PhabricatorCustomField $proxy) {
+    if (!$this->canSetProxy()) {
+      throw new PhabricatorCustomFieldNotProxyException($this);
+    }
+
+    $this->proxy = $proxy;
+    return $this;
+  }
+
+
+  /**
+   * Get the field's proxy implementation, if any. For discussion, see
+   * @{method:canSetProxy}.
+   *
+   * @return PhabricatorCustomField|null  Proxy field, if one is set.
+   */
+  final public function getProxy() {
+    return $this->proxy;
+  }
+
+
 /* -(  Contextual Data  )---------------------------------------------------- */
 
 
@@ -274,6 +348,11 @@ abstract class PhabricatorCustomField {
    * @task context
    */
   final public function setObject(PhabricatorCustomFieldInterface $object) {
+    if ($this->proxy) {
+      $this->proxy->setObject($object);
+      return $this;
+    }
+
     $this->object = $object;
     $this->didSetObject($object);
     return $this;
@@ -287,6 +366,10 @@ abstract class PhabricatorCustomField {
    * @task context
    */
   final public function getObject() {
+    if ($this->proxy) {
+      return $this->proxy->getObject();
+    }
+
     return $this->object;
   }
 
@@ -306,6 +389,11 @@ abstract class PhabricatorCustomField {
    * @task context
    */
   final public function setViewer(PhabricatorUser $viewer) {
+    if ($this->proxy) {
+      $this->proxy->setViewer($viewer);
+      return $this;
+    }
+
     $this->viewer = $viewer;
     return $this;
   }
@@ -315,6 +403,10 @@ abstract class PhabricatorCustomField {
    * @task context
    */
   final public function getViewer() {
+    if ($this->proxy) {
+      return $this->proxy->getViewer();
+    }
+
     return $this->viewer;
   }
 
@@ -323,6 +415,10 @@ abstract class PhabricatorCustomField {
    * @task context
    */
   final protected function requireViewer() {
+    if ($this->proxy) {
+      return $this->proxy->requireViewer();
+    }
+
     if (!$this->viewer) {
       throw new PhabricatorCustomFieldDataNotAvailableException($this);
     }
@@ -334,9 +430,7 @@ abstract class PhabricatorCustomField {
 
 
   /**
-   * Return a unique string used to key storage of this field's value, like
-   * "mycompany.fieldname" or similar. You can return null (the default) to
-   * indicate that this field does not use any storage.
+   * Return true to use field storage.
    *
    * Fields which can be edited by the user will most commonly use storage,
    * while some other types of fields (for instance, those which just display
@@ -346,18 +440,14 @@ abstract class PhabricatorCustomField {
    * If you implement this, you must also implement @{method:getValueForStorage}
    * and @{method:setValueFromStorage}.
    *
-   * In most cases, a reasonable implementation is to simply reuse the field
-   * key:
-   *
-   *   return $this->getFieldKey();
-   *
-   * @return string|null  Unique key which identifies this field in auxiliary
-   *                      field storage. Alternatively, return null (default)
-   *                      to indicate that this field does not use storage.
+   * @return bool True to use storage.
    * @task storage
    */
-  public function getStorageKey() {
-    return null;
+  public function shouldUseStorage() {
+    if ($this->proxy) {
+      return $this->proxy->shouldUseStorage();
+    }
+    return false;
   }
 
 
@@ -369,7 +459,10 @@ abstract class PhabricatorCustomField {
    * @return PhabricatorCustomFieldStorage New empty storage object.
    * @task storage
    */
-  public function getStorageObject() {
+  public function newStorageObject() {
+    if ($this->proxy) {
+      return $this->proxy->newStorageObject();
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -377,7 +470,7 @@ abstract class PhabricatorCustomField {
   /**
    * Return a serialized representation of the field value, appropriate for
    * storing in auxiliary field storage. You must implement this method if
-   * you implement @{method:getStorageKey}.
+   * you implement @{method:shouldUseStorage}.
    *
    * If the field value is a scalar, it can be returned unmodiifed. If not,
    * it should be serialized (for example, using JSON).
@@ -386,6 +479,9 @@ abstract class PhabricatorCustomField {
    * @task storage
    */
   public function getValueForStorage() {
+    if ($this->proxy) {
+      return $this->proxy->getValueForStorage();
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -394,7 +490,7 @@ abstract class PhabricatorCustomField {
    * Set the field's value given a serialized storage value. This is called
    * when the field is loaded; if no data is available, the value will be
    * null. You must implement this method if you implement
-   * @{method:getStorageKey}.
+   * @{method:shouldUseStorage}.
    *
    * Usually, the value can be loaded directly. If it isn't a scalar, you'll
    * need to undo whatever serialization you applied in
@@ -407,6 +503,9 @@ abstract class PhabricatorCustomField {
    * @task storage
    */
   public function setValueFromStorage($value) {
+    if ($this->proxy) {
+      return $this->proxy->setValueFromStorage($value);
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -422,6 +521,9 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   public function shouldAppearInApplicationSearch() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInApplicationSearch();
+    }
     return false;
   }
 
@@ -449,6 +551,9 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   public function buildFieldIndexes() {
+    if ($this->proxy) {
+      return $this->proxy->buildFieldIndexes();
+    }
     return array();
   }
 
@@ -462,6 +567,9 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   protected function newStringIndexStorage() {
+    if ($this->proxy) {
+      return $this->proxy->newStringIndexStorage();
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -475,6 +583,9 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   protected function newNumericIndexStorage() {
+    if ($this->proxy) {
+      return $this->proxy->newStringIndexStorage();
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -487,6 +598,10 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   protected function newStringIndex($value) {
+    if ($this->proxy) {
+      return $this->proxy->newStringIndex();
+    }
+
     $key = $this->getFieldIndexKey();
     return $this->newStringIndexStorage()
       ->setIndexKey($key)
@@ -502,6 +617,9 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   protected function newNumericIndex($value) {
+    if ($this->proxy) {
+      return $this->proxy->newNumericIndex();
+    }
     $key = $this->getFieldIndexKey();
     return $this->newNumericIndexStorage()
       ->setIndexKey($key)
@@ -520,6 +638,9 @@ abstract class PhabricatorCustomField {
    * @task appxaction
    */
   public function shouldAppearInApplicationTransactions() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInApplicationTransactions();
+    }
     return false;
   }
 
@@ -528,6 +649,9 @@ abstract class PhabricatorCustomField {
    * @task appxaction
    */
   public function getOldValueForApplicationTransactions() {
+    if ($this->proxy) {
+      return $this->proxy->getOldValueForApplicationTransactions();
+    }
     return $this->getValueForStorage();
   }
 
@@ -536,6 +660,9 @@ abstract class PhabricatorCustomField {
    * @task appxaction
    */
   public function getNewValueForApplicationTransactions() {
+    if ($this->proxy) {
+      return $this->proxy->getNewValueForApplicationTransactions();
+    }
     return $this->getValueForStorage();
   }
 
@@ -544,6 +671,9 @@ abstract class PhabricatorCustomField {
    * @task appxaction
    */
   public function setValueFromApplicationTransactions($value) {
+    if ($this->proxy) {
+      return $this->proxy->setValueFromApplicationTransactions($value);
+    }
     return $this->setValueFromStorage($value);
   }
 
@@ -553,6 +683,9 @@ abstract class PhabricatorCustomField {
    */
   public function getNewValueFromApplicationTransactions(
     PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getNewValueFromApplicationTransactions($xaction);
+    }
     return $xaction->getNewValue();
   }
 
@@ -562,6 +695,9 @@ abstract class PhabricatorCustomField {
    */
   public function getApplicationTransactionHasEffect(
     PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->getApplicationTransactionHasEffect($xaction);
+    }
     return ($xaction->getOldValue() !== $xaction->getNewValue());
   }
 
@@ -571,6 +707,9 @@ abstract class PhabricatorCustomField {
    */
   public function applyApplicationTransactionInternalEffects(
     PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->applyApplicationTransactionInternalEffects($xaction);
+    }
     return;
   }
 
@@ -580,11 +719,15 @@ abstract class PhabricatorCustomField {
    */
   public function applyApplicationTransactionExternalEffects(
     PhabricatorApplicationTransaction $xaction) {
+    if ($this->proxy) {
+      return $this->proxy->applyApplicationTransactionExternalEffects($xaction);
+    }
+
     if (!$this->shouldEnableForRole(self::ROLE_STORAGE)) {
       return;
     }
 
-    $this->setValueFromApplicationTransaction($xaction->getNewValue());
+    $this->setValueFromApplicationTransactions($xaction->getNewValue());
     $value = $this->getValueForStorage();
 
     $table = $this->newStorageObject();
@@ -594,6 +737,7 @@ abstract class PhabricatorCustomField {
       queryfx(
         $conn_w,
         'DELETE FROM %T WHERE objectPHID = %s AND fieldIndex = %s',
+        $table->getTableName(),
         $this->getObject()->getPHID(),
         $this->getFieldIndex());
     } else {
@@ -602,6 +746,7 @@ abstract class PhabricatorCustomField {
         'INSERT INTO %T (objectPHID, fieldIndex, fieldValue)
           VALUES (%s, %s, %s)
           ON DUPLICATE KEY UPDATE fieldValue = VALUES(fieldValue)',
+        $table->getTableName(),
         $this->getObject()->getPHID(),
         $this->getFieldIndex(),
         $value);
@@ -618,6 +763,9 @@ abstract class PhabricatorCustomField {
    * @task edit
    */
   public function shouldAppearInEditView() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInEditView();
+    }
     return false;
   }
 
@@ -626,6 +774,9 @@ abstract class PhabricatorCustomField {
    * @task edit
    */
   public function readValueFromRequest(AphrontRequest $request) {
+    if ($this->proxy) {
+      return $this->proxy->readValueFromRequest($request);
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -634,6 +785,9 @@ abstract class PhabricatorCustomField {
    * @task edit
    */
   public function renderEditControl() {
+    if ($this->proxy) {
+      return $this->proxy->renderEditControl();
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -645,6 +799,9 @@ abstract class PhabricatorCustomField {
    * @task view
    */
   public function shouldAppearInPropertyView() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInPropertyView();
+    }
     return false;
   }
 
@@ -653,6 +810,9 @@ abstract class PhabricatorCustomField {
    * @task view
    */
   public function renderPropertyViewLabel() {
+    if ($this->proxy) {
+      return $this->proxy->renderPropertyViewLabel();
+    }
     return $this->getFieldName();
   }
 
@@ -661,6 +821,9 @@ abstract class PhabricatorCustomField {
    * @task view
    */
   public function renderPropertyViewValue() {
+    if ($this->proxy) {
+      return $this->proxy->renderPropertyViewValue();
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -669,6 +832,9 @@ abstract class PhabricatorCustomField {
    * @task view
    */
   public function getStyleForPropertyView() {
+    if ($this->proxy) {
+      return $this->proxy->getStyleForPropertyView();
+    }
     return 'property';
   }
 
@@ -680,6 +846,9 @@ abstract class PhabricatorCustomField {
    * @task list
    */
   public function shouldAppearInListView() {
+    if ($this->proxy) {
+      return $this->proxy->shouldAppearInListView();
+    }
     return false;
   }
 
@@ -688,9 +857,11 @@ abstract class PhabricatorCustomField {
    * @task list
    */
   public function renderOnListItem(PhabricatorObjectItemView $view) {
+    if ($this->proxy) {
+      return $this->proxy->renderOnListItem($view);
+    }
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
-
 
 
 }

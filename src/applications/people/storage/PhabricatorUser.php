@@ -840,7 +840,7 @@ EOBODY;
   }
 
   public function getCustomFieldBaseClass() {
-    return 'PhabricatorUserCustomFieldInterface';
+    return 'PhabricatorUserCustomField';
   }
 
   public function getCustomFields($role) {

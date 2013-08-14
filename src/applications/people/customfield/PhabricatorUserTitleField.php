@@ -46,7 +46,7 @@ final class PhabricatorUserTitleField
     $this->getObject()->loadUserProfile()->setTitle($xaction->getNewValue());
   }
 
-  public function setValueFromRequest(AphrontRequest $request) {
+  public function readValueFromRequest(AphrontRequest $request) {
     $this->value = $request->getStr($this->getFieldKey());
   }
 

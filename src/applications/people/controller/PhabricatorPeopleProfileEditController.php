@@ -35,11 +35,12 @@ final class PhabricatorPeopleProfileEditController
     $fields = PhabricatorCustomField::getObjectFields(
       $user,
       PhabricatorCustomField::ROLE_EDIT);
+    $field_list = new PhabricatorCustomFieldList($fields);
 
     if ($request->isFormPost()) {
       $xactions = array();
       foreach ($fields as $field) {
-        $field->setValueFromRequest($request);
+        $field->readValueFromRequest($request);
         $xactions[] = id(new PhabricatorUserTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
           ->setMetadataValue('customfield:key', $field->getFieldKey())
@@ -55,6 +56,8 @@ final class PhabricatorPeopleProfileEditController
       $editor->applyTransactions($user, $xactions);
 
       return id(new AphrontRedirectResponse())->setURI($profile_uri);
+    } else {
+      $field_list->readFieldsFromStorage($user);
     }
 
     $title = pht('Edit Profile');
@@ -70,9 +73,7 @@ final class PhabricatorPeopleProfileEditController
     $form = id(new AphrontFormView())
       ->setUser($viewer);
 
-    foreach ($fields as $field) {
-      $form->appendChild($field->renderEditControl());
-    }
+    $field_list->appendFieldsToForm($form);
 
     $form
       ->appendChild(
