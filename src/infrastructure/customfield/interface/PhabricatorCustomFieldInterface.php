@@ -4,8 +4,8 @@ interface PhabricatorCustomFieldInterface {
 
   public function getCustomFieldBaseClass();
   public function getCustomFieldSpecificationForRole($role);
-  public function getCustomFields($role);
-  public function attachCustomFields($role, PhabricatorCustomFieldList $list);
+  public function getCustomFields();
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields);
 
 }
 
@@ -16,7 +16,7 @@ interface PhabricatorCustomFieldInterface {
 /* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
 /*
 
-  private $customFields = array();
+  private $customFields = self::ATTACHABLE;
 
   public function getCustomFieldSpecificationForRole($role) {
     return PhabricatorEnv::getEnvConfig(<<<'application.fields'>>>);
@@ -26,15 +26,12 @@ interface PhabricatorCustomFieldInterface {
     return <<<<'YourApplicationHereCustomField'>>>>;
   }
 
-  public function getCustomFields($role) {
-    if (idx($this->customFields, $role) === null) {
-      PhabricatorCustomField::raiseUnattachedException($this, $role);
-    }
-    return $this->customFields[$role];
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
   }
 
-  public function attachCustomFields($role, PhabricatorCustomFieldList $list) {
-    $this->customFields[$role] = $list;
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
     return $this;
   }
 

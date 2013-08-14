@@ -33,23 +33,19 @@ abstract class PhabricatorCustomField {
   /**
    * @task apps
    */
-  public static function raiseUnattachedException(
-    PhabricatorCustomFieldInterface $object,
-    $role) {
-    throw new PhabricatorCustomFieldNotAttachedException(
-      "Call attachCustomFields() before getCustomFields()!");
-  }
-
-
-  /**
-   * @task apps
-   */
   public static function getObjectFields(
     PhabricatorCustomFieldInterface $object,
     $role) {
 
     try {
-      $field_list = $object->getCustomFields($role);
+      $attachment = $object->getCustomFields();
+    } catch (PhabricatorDataNotAttachedException $ex) {
+      $attachment = new PhabricatorCustomFieldAttachment();
+      $object->attachCustomFields($attachment);
+    }
+
+    try {
+      $field_list = $attachment->getCustomFieldList($role);
     } catch (PhabricatorCustomFieldNotAttachedException $ex) {
       $base_class = $object->getCustomFieldBaseClass();
 
@@ -74,7 +70,7 @@ abstract class PhabricatorCustomField {
       }
 
       $field_list = new PhabricatorCustomFieldList($fields);
-      $object->attachCustomFields($role, $field_list);
+      $attachment->addCustomFieldList($role, $field_list);
     }
 
     return $field_list;
@@ -88,7 +84,10 @@ abstract class PhabricatorCustomField {
     PhabricatorCustomFieldInterface $object,
     $role,
     $field_key) {
-    return idx(self::getObjectFields($object, $role)->getFields(), $field_key);
+
+    $fields = self::getObjectFields($object, $role)->getFields();
+
+    return idx($fields, $field_key);
   }
 
 

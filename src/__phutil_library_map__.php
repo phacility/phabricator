@@ -1025,6 +1025,7 @@ phutil_register_library_map(array(
     'PhabricatorCrumbsView' => 'view/layout/PhabricatorCrumbsView.php',
     'PhabricatorCursorPagedPolicyAwareQuery' => 'infrastructure/query/policy/PhabricatorCursorPagedPolicyAwareQuery.php',
     'PhabricatorCustomField' => 'infrastructure/customfield/field/PhabricatorCustomField.php',
+    'PhabricatorCustomFieldAttachment' => 'infrastructure/customfield/field/PhabricatorCustomFieldAttachment.php',
     'PhabricatorCustomFieldConfigOptionType' => 'infrastructure/customfield/config/PhabricatorCustomFieldConfigOptionType.php',
     'PhabricatorCustomFieldDataNotAvailableException' => 'infrastructure/customfield/exception/PhabricatorCustomFieldDataNotAvailableException.php',
     'PhabricatorCustomFieldImplementationIncompleteException' => 'infrastructure/customfield/exception/PhabricatorCustomFieldImplementationIncompleteException.php',
