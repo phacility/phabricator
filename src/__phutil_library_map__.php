@@ -4177,6 +4177,7 @@ phutil_register_library_map(array(
     array(
       0 => 'ReleephDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorCustomFieldInterface',
     ),
     'ReleephRequestActionController' => 'ReleephProjectController',
     'ReleephRequestCommentController' => 'ReleephProjectController',
