@@ -7,6 +7,8 @@ final class ReleephProjectQuery
   private $ids;
   private $phids;
 
+  private $needRepositories;
+
   private $order    = 'order-id';
   const ORDER_ID    = 'order-id';
   const ORDER_NAME  = 'order-name';
@@ -46,6 +48,29 @@ final class ReleephProjectQuery
     return $table->loadAllFromArray($rows);
   }
 
+  public function willFilterPage(array $projects) {
+    assert_instances_of($projects, 'ReleephProject');
+
+    $repository_phids = mpull($projects, 'getRepositoryPHID');
+
+    $repositories = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($repository_phids)
+      ->execute();
+    $repositories = mpull($repositories, null, 'getPHID');
+
+    foreach ($projects as $key => $project) {
+      $repo = idx($repositories, $project->getRepositoryPHID());
+      if (!$repo) {
+        unset($projects[$key]);
+        continue;
+      }
+      $project->attachRepository($repo);
+    }
+
+    return $projects;
+  }
+
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
@@ -53,7 +78,7 @@ final class ReleephProjectQuery
       $where[] = qsprintf(
         $conn_r,
         'isActive = %d',
-        $this->active);
+        (int)$this->active);
     }
 
     if ($this->ids) {

@@ -69,18 +69,14 @@ final class ReleephProjectListController extends ReleephController
             ->setHref($enable_uri));
       }
 
-      // TODO: See T3551.
-
-      $repo = $project->loadPhabricatorRepository();
-      if ($repo) {
-        $item->addAttribute(
-          phutil_tag(
-            'a',
-            array(
-              'href' => '/diffusion/'.$repo->getCallsign().'/',
-            ),
-            'r'.$repo->getCallsign()));
-      }
+      $repo = $project->getRepository();
+      $item->addAttribute(
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/diffusion/'.$repo->getCallsign().'/',
+          ),
+          'r'.$repo->getCallsign()));
 
       $arc = $project->loadArcanistProject();
       if ($arc) {

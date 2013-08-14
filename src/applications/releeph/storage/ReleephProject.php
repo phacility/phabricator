@@ -27,6 +27,8 @@ final class ReleephProject extends ReleephDAO
 
   protected $details = array();
 
+  private $repository = self::ATTACHABLE;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -111,11 +113,21 @@ final class ReleephProject extends ReleephDAO
     }
   }
 
+  public function attachRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
+  // TODO: Remove once everything uses ProjectQuery.
   public function loadPhabricatorRepository() {
     return $this->loadOneRelative(
       new PhabricatorRepository(),
-      'id',
-      'getRepositoryID');
+      'phid',
+      'getRepositoryPHID');
   }
 
   public function getCurrentReleaseNumber() {
