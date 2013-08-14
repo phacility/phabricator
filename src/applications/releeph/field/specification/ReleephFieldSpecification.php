@@ -4,6 +4,15 @@ abstract class ReleephFieldSpecification
   extends PhabricatorCustomField
   implements PhabricatorMarkupInterface {
 
+  // TODO: This is temporary, until ReleephFieldSpecification is more conformant
+  // to PhabricatorCustomField.
+  private $requestValue;
+
+  public function readValueFromRequest(AphrontRequest $request) {
+    $this->requestValue = $request->getStr($this->getRequiredStorageKey());
+    return $this;
+  }
+
   abstract public function getName();
 
 /* -(  Storage  )------------------------------------------------------------ */
@@ -28,6 +37,10 @@ abstract class ReleephFieldSpecification
     return $key;
   }
 
+  public function shouldAppearInEditView() {
+    return $this->isEditable();
+  }
+
   final public function isEditable() {
     return $this->getStorageKey() !== null;
   }
@@ -38,6 +51,10 @@ abstract class ReleephFieldSpecification
    * N-squared times, each time for R ReleephRequests.
    */
   final public function getValue() {
+    if ($this->requestValue !== null) {
+      return $this->requestValue;
+    }
+
     $key = $this->getRequiredStorageKey();
     return $this->getReleephRequest()->getDetail($key);
   }
@@ -79,13 +96,6 @@ abstract class ReleephFieldSpecification
   public function renderValueForHeaderView() {
     $key = $this->getRequiredStorageKey();
     return $this->getReleephRequest()->getDetail($key);
-  }
-
-
-/* -(  Edit View  )---------------------------------------------------------- */
-
-  public function renderReleephEditControl(AphrontRequest $request) {
-    throw new ReleephFieldSpecificationIncompleteException($this);
   }
 
 

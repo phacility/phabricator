@@ -39,16 +39,11 @@ abstract class ReleephLevelFieldSpecification
     return $this->getNameForLevel($level);
   }
 
-  public function renderReleephEditControl(AphrontRequest $request) {
+  public function renderEditControl() {
     $control_name = $this->getRequiredStorageKey();
     $all_levels = $this->getLevels();
 
-    $level = $request->getStr($control_name);
-
-    if (!$level) {
-      $level = $this->getCanonicalLevel($this->getValue());
-    }
-
+    $level = $this->getCanonicalLevel($this->getValue());
     if (!$level) {
       $level = $this->getDefaultLevel();
     }

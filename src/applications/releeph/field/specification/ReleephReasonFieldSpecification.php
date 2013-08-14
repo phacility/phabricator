@@ -35,13 +35,12 @@ final class ReleephReasonFieldSpecification
 
   private $error = true;
 
-  public function renderReleephEditControl(AphrontRequest $request) {
-    $reason = $request->getStr('reason', $this->getValue());
+  public function renderEditControl() {
     return id(new AphrontFormTextAreaControl())
       ->setLabel('Reason')
       ->setName('reason')
       ->setError($this->error)
-      ->setValue($reason);
+      ->setValue($this->getValue());
   }
 
   public function validate($reason) {
