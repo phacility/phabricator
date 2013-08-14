@@ -22,7 +22,6 @@ final class ReleephProject extends ReleephDAO
   protected $isActive;
   protected $createdByUserPHID;
   protected $arcanistProjectID;
-  protected $projectID;
 
   protected $details = array();
 
@@ -74,13 +73,6 @@ final class ReleephProject extends ReleephDAO
     if (!$this->getDetail('releaseCounter')) {
       $this->setDetail('releaseCounter', 0);
     }
-  }
-
-  public function loadPhabricatorProject() {
-    if ($id = $this->getProjectID()) {
-      return id(new PhabricatorProject())->load($id);
-    }
-    return id(new PhabricatorProject())->makeEphemeral(); // dummy
   }
 
   public function loadArcanistProject() {

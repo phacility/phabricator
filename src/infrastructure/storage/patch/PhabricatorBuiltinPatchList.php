@@ -1539,6 +1539,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130731.releephrepoid.sql'),
       ),
+      '20130731.releephproject.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130731.releephproject.sql'),
+      ),
     );
   }
 }

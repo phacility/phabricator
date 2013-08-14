@@ -13,8 +13,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
     $project_name = $request->getStr('name',
       $this->getReleephProject()->getName());
 
-    $phabricator_project_id = $request->getInt('projectID',
-      $this->getReleephProject()->getProjectID());
     $trunk_branch = $request->getStr('trunkBranch',
       $this->getReleephProject()->getTrunkBranch());
     $branch_template = $request->getStr('branchTemplate');
@@ -81,7 +79,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
       }
 
       $project = $this->getReleephProject()
-        ->setProjectID($phabricator_project_id)
         ->setTrunkBranch($trunk_branch)
         ->setDetail('pushers', $pusher_phids)
         ->setDetail('pick_failure_instructions', $pick_failure_instructions)
@@ -173,12 +170,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
           ->setLabel(pht('Releeph Project PHID'))
           ->setValue(
               $this->getReleephProject()->getPHID()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Phabricator Project'))
-          ->setValue($phabricator_project_id)
-          ->setName('projectID')
-          ->setOptions($projects))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Trunk'))
