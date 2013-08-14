@@ -607,13 +607,22 @@ abstract class PhabricatorApplicationTransactionEditor
 
     PhabricatorPolicyFilter::requireCapability(
       $actor,
-      $xaction,
+      $object,
       PhabricatorPolicyCapability::CAN_VIEW);
+
+    // TODO: This should be "$object", not "$xaction", but probably breaks a
+    // lot of stuff if fixed -- you don't need to be able to edit in order to
+    // comment. Instead, transactions should specify the capabilities they
+    // require.
+
+    /*
 
     PhabricatorPolicyFilter::requireCapability(
       $actor,
       $xaction,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    */
   }
 
   private function buildMentionTransaction(
