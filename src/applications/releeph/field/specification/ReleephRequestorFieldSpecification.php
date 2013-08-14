@@ -26,20 +26,6 @@ final class ReleephRequestorFieldSpecification
       ->render();
   }
 
-  public function hasSelectablePHIDs() {
-    return true;
-  }
-
-  public function getSelectTokenizerDatasource() {
-    return '/typeahead/common/users/';
-  }
-
-  public function getSelectablePHIDs() {
-    return array(
-      $this->getReleephRequest()->getRequestUserPHID(),
-    );
-  }
-
   public function shouldAppearOnCommitMessage() {
     return true;
   }

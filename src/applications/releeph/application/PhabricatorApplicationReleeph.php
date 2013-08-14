@@ -75,7 +75,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
 
         // Branch navigation made pretty, as it's the most common:
         '(?P<projectName>[^/]+)/(?P<branchName>[^/]+)/' => array(
-          ''              => 'ReleephBranchViewController',
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephBranchViewController',
           'edit/'         => 'ReleephBranchEditController',
           'request/'      => 'ReleephRequestEditController',
           '(?P<action>close|re-open)/' => 'ReleephBranchAccessController',
