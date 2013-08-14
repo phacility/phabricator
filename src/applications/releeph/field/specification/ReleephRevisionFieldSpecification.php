@@ -3,6 +3,10 @@
 final class ReleephRevisionFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'revision';
+  }
+
   public function getName() {
     return 'Revision';
   }

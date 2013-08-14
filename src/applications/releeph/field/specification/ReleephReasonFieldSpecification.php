@@ -3,6 +3,10 @@
 final class ReleephReasonFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'reason';
+  }
+
   public function getName() {
     return 'Reason';
   }
@@ -31,7 +35,7 @@ final class ReleephReasonFieldSpecification
 
   private $error = true;
 
-  public function renderEditControl(AphrontRequest $request) {
+  public function renderReleephEditControl(AphrontRequest $request) {
     $reason = $request->getStr('reason', $this->getValue());
     return id(new AphrontFormTextAreaControl())
       ->setLabel('Reason')

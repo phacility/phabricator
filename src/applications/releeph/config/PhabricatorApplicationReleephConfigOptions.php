@@ -12,6 +12,37 @@ final class PhabricatorApplicationReleephConfigOptions
   }
 
   public function getOptions() {
+
+    $default_fields = array(
+      new ReleephCommitMessageFieldSpecification(),
+      new ReleephSummaryFieldSpecification(),
+      new ReleephReasonFieldSpecification(),
+      new ReleephAuthorFieldSpecification(),
+      new ReleephRevisionFieldSpecification(),
+      new ReleephRequestorFieldSpecification(),
+      new ReleephSeverityFieldSpecification(),
+      new ReleephOriginalCommitFieldSpecification(),
+      new ReleephDiffMessageFieldSpecification(),
+      new ReleephStatusFieldSpecification(),
+      new ReleephIntentFieldSpecification(),
+      new ReleephBranchCommitFieldSpecification(),
+      new ReleephDiffSizeFieldSpecification(),
+      new ReleephDiffChurnFieldSpecification(),
+    );
+
+    $default = array();
+    foreach ($default_fields as $default_field) {
+      $default[$default_field->getFieldKey()] = true;
+    }
+
+    foreach ($default as $key => $enabled) {
+      $default[$key] = array(
+        'disabled' => !$enabled,
+      );
+    }
+
+    $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
+
     return array(
       $this->newOption('releeph.installed', 'bool', false)
         ->setSummary(pht('Enable the Releeph application.'))
@@ -26,16 +57,8 @@ final class PhabricatorApplicationReleephConfigOptions
             "set of alpha testers at Facebook.  For the time being you are ".
             "strongly discouraged from relying on Releeph being at all ".
             "stable.")),
-      $this->newOption(
-        'releeph.field-selector',
-        'class',
-        'ReleephDefaultFieldSelector')
-        ->setBaseClass('ReleephFieldSelector')
-        ->setSummary(pht('Field selector class'))
-        ->setDescription(
-          pht(
-            "Control which fields are available when making a new Releeph ".
-            "request, and which are then shown in the Releeph UI.")),
+      $this->newOption('releeph.fields', $custom_field_type, $default)
+        ->setCustomData('ReleephFieldSpecification'),
       $this->newOption(
         'releeph.user-view',
         'class',

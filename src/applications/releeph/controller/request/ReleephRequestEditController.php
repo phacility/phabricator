@@ -246,7 +246,7 @@ final class ReleephRequestEditController extends ReleephProjectController {
     // Fields
     foreach ($fields as $field) {
       if ($field->isEditable()) {
-        $control = $field->renderEditControl($request);
+        $control = $field->renderReleephEditControl($request);
         $form->appendChild($control);
       }
     }

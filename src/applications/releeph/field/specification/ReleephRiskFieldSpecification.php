@@ -9,6 +9,10 @@ final class ReleephRiskFieldSpecification
     'HIGH'  => 'This is pretty risky, but is also very important.',
   );
 
+  public function getFieldKey() {
+    return 'risk';
+  }
+
   public function getName() {
     return 'Riskiness';
   }
@@ -23,7 +27,7 @@ final class ReleephRiskFieldSpecification
 
   private $error = true;
 
-  public function renderEditControl(AphrontRequest $request) {
+  public function renderReleephEditControl(AphrontRequest $request) {
     $value = $request->getStr('risk', $this->getValue());
     $buttons = id(new AphrontFormRadioButtonControl())
       ->setLabel('Riskiness')

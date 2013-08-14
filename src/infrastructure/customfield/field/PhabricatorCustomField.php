@@ -154,7 +154,9 @@ abstract class PhabricatorCustomField {
     if ($this->proxy) {
       return $this->proxy->getFieldKey();
     }
-    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+    throw new PhabricatorCustomFieldImplementationIncompleteException(
+      $this,
+      $field_key_is_incomplete = true);
   }
 
 

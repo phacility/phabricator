@@ -3,6 +3,10 @@
 final class ReleephRequestorFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'requestor';
+  }
+
   public function bulkLoad(array $releeph_requests) {
     $phids = mpull($releeph_requests, 'getRequestUserPHID');
     ReleephUserView::getNewInstance()

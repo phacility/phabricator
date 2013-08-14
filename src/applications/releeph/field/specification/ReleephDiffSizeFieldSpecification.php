@@ -11,6 +11,10 @@ final class ReleephDiffSizeFieldSpecification
   const PATHS_WEIGHT = 30;
   const MAX_POINTS = 1000;
 
+  public function getFieldKey() {
+    return 'commit:size';
+  }
+
   public function getName() {
     return 'Size';
   }

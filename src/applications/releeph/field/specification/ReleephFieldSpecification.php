@@ -1,6 +1,7 @@
 <?php
 
 abstract class ReleephFieldSpecification
+  extends PhabricatorCustomField
   implements PhabricatorMarkupInterface {
 
   abstract public function getName();
@@ -83,7 +84,7 @@ abstract class ReleephFieldSpecification
 
 /* -(  Edit View  )---------------------------------------------------------- */
 
-  public function renderEditControl(AphrontRequest $request) {
+  public function renderReleephEditControl(AphrontRequest $request) {
     throw new ReleephFieldSpecificationIncompleteException($this);
   }
 

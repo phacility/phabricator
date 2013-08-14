@@ -3,6 +3,10 @@
 final class ReleephBranchCommitFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'commit';
+  }
+
   public function getName() {
     return 'Commit';
   }

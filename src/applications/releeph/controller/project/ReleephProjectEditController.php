@@ -31,9 +31,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
       $test_paths = $this->getReleephProject()->getDetail('testPaths', array());
     }
 
-    $field_selector = $request->getStr('fieldSelector',
-      get_class($this->getReleephProject()->getReleephFieldSelector()));
-
     $release_counter = $request->getInt(
       'releaseCounter',
       $this->getReleephProject()->getCurrentReleaseNumber());
@@ -82,7 +79,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
         ->setTrunkBranch($trunk_branch)
         ->setDetail('pushers', $pusher_phids)
         ->setDetail('pick_failure_instructions', $pick_failure_instructions)
-        ->setDetail('field_selector', $field_selector)
         ->setDetail('branchTemplate', $branch_template)
         ->setDetail('commitWithAuthor', $commit_author)
         ->setDetail('testPaths', $test_paths);
@@ -214,32 +210,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
           ->setDatasource('/typeahead/common/users/')
           ->setValue($pusher_tokens));
 
-    $field_selector_options = array();
-    $field_selector_symbols = id(new PhutilSymbolLoader())
-      ->setType('class')
-      ->setConcreteOnly(true)
-      ->setAncestorClass('ReleephFieldSelector')
-      ->selectAndLoadSymbols();
-    foreach ($field_selector_symbols as $symbol) {
-      $selector_name = $symbol['name'];
-      $field_selector_options[$selector_name] = $selector_name;
-    }
-
-    $field_selector_blurb = pht(
-        "If you you have additional information to render about Releeph ".
-        "requests, or want to re-arrange the UI, implement a ".
-        "<tt>ReleephFieldSelector</tt> and select it here.");
-
-    $fields_inset = id(new AphrontFormInsetView())
-      ->setTitle(pht('Fields'))
-      ->appendChild($field_selector_blurb)
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Selector'))
-          ->setName('fieldSelector')
-          ->setValue($field_selector)
-          ->setOptions($field_selector_options));
-
     $commit_author_inset = $this->buildCommitAuthorInset($commit_author);
 
     // Build the Template inset
@@ -276,7 +246,6 @@ final class ReleephProjectEditController extends ReleephProjectController {
       ->setUser($request->getUser())
       ->appendChild($basic_inset)
       ->appendChild($pushers_inset)
-      ->appendChild($fields_inset)
       ->appendChild($commit_author_inset)
       ->appendChild($template_inset);
 

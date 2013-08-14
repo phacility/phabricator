@@ -4141,7 +4141,11 @@ phutil_register_library_map(array(
     'ReleephDiffSizeFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephEvent' => 'ReleephDAO',
     'ReleephFieldParseException' => 'Exception',
-    'ReleephFieldSpecification' => 'PhabricatorMarkupInterface',
+    'ReleephFieldSpecification' =>
+    array(
+      0 => 'PhabricatorCustomField',
+      1 => 'PhabricatorMarkupInterface',
+    ),
     'ReleephFieldSpecificationIncompleteException' => 'Exception',
     'ReleephIntentFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephLevelFieldSpecification' => 'ReleephFieldSpecification',

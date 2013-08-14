@@ -3,9 +3,18 @@
 final class PhabricatorCustomFieldImplementationIncompleteException
   extends Exception {
 
-  public function __construct(PhabricatorCustomField $field) {
-    $key = $field->getFieldKey();
-    $name = $field->getFieldName();
+  public function __construct(
+    PhabricatorCustomField $field,
+    $field_key_is_incomplete = false) {
+
+    if ($field_key_is_incomplete) {
+      $key = pht('<incomplete key>');
+      $name = pht('<incomplete name>');
+    } else {
+      $key = $field->getFieldKey();
+      $name = $field->getFieldName();
+    }
+
     $class = get_class($field);
 
     parent::__construct(

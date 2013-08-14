@@ -141,17 +141,7 @@ final class ReleephProject extends ReleephDAO
   }
 
   public function getReleephFieldSelector() {
-    $class = $this->getDetail('field_selector');
-    if (!$class) {
-      $key = 'releeph.field-selector';
-      $class = PhabricatorEnv::getEnvConfig($key);
-    }
-
-    if ($class) {
-      return newv($class, array());
-    } else {
-      return new ReleephDefaultFieldSelector();
-    }
+    return new ReleephDefaultFieldSelector();
   }
 
   /**
