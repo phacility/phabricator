@@ -5,7 +5,7 @@ interface PhabricatorCustomFieldInterface {
   public function getCustomFieldBaseClass();
   public function getCustomFieldSpecificationForRole($role);
   public function getCustomFields($role);
-  public function attachCustomFields($role, array $fields);
+  public function attachCustomFields($role, PhabricatorCustomFieldList $list);
 
 }
 
@@ -33,8 +33,8 @@ interface PhabricatorCustomFieldInterface {
     return $this->customFields[$role];
   }
 
-  public function attachCustomFields($role, array $fields) {
-    $this->customFields[$role] = $fields;
+  public function attachCustomFields($role, PhabricatorCustomFieldList $list) {
+    $this->customFields[$role] = $list;
     return $this;
   }
 

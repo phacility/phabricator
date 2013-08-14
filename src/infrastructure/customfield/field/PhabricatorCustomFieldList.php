@@ -16,6 +16,9 @@ final class PhabricatorCustomFieldList extends Phobject {
     $this->fields = $fields;
   }
 
+  public function getFields() {
+    return $this->fields;
+  }
 
   /**
    * Read stored values for all fields which support storage.
@@ -118,6 +121,34 @@ final class PhabricatorCustomFieldList extends Phobject {
         }
       }
     }
+  }
+
+  public function buildFieldTransactionsFromRequest(
+    PhabricatorApplicationTransaction $template,
+    AphrontRequest $request) {
+
+    $xactions = array();
+
+    $role = PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS;
+    foreach ($this->fields as $field) {
+      if (!$field->shouldEnableForRole($role)) {
+        continue;
+      }
+
+      $old_value = $field->getOldValueForApplicationTransactions();
+
+      $field->readValueFromRequest($request);
+
+      $xaction = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_CUSTOMFIELD)
+        ->setMetadataValue('customfield:key', $field->getFieldKey())
+        ->setOldValue($old_value)
+        ->setNewValue($field->getNewValueForApplicationTransactions());
+
+      $xactions[] = $xaction;
+    }
+
+    return $xactions;
   }
 
 }

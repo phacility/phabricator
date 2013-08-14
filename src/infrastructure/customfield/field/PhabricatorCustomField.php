@@ -49,7 +49,7 @@ abstract class PhabricatorCustomField {
     $role) {
 
     try {
-      $fields = $object->getCustomFields($role);
+      $field_list = $object->getCustomFields($role);
     } catch (PhabricatorCustomFieldNotAttachedException $ex) {
       $base_class = $object->getCustomFieldBaseClass();
 
@@ -73,10 +73,11 @@ abstract class PhabricatorCustomField {
         $field->setObject($object);
       }
 
-      $object->attachCustomFields($role, $fields);
+      $field_list = new PhabricatorCustomFieldList($fields);
+      $object->attachCustomFields($role, $field_list);
     }
 
-    return $fields;
+    return $field_list;
   }
 
 
@@ -87,7 +88,7 @@ abstract class PhabricatorCustomField {
     PhabricatorCustomFieldInterface $object,
     $role,
     $field_key) {
-    return idx(self::getObjectFields($object, $role), $field_key);
+    return idx(self::getObjectFields($object, $role)->getFields(), $field_key);
   }
 
 

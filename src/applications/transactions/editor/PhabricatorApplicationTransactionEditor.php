@@ -125,8 +125,9 @@ abstract class PhabricatorApplicationTransactionEditor
         }
         return $old_edges;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
-        $field = $this->getCustomFieldForTransaction($object, $xaction);
-        return $field->getOldValueForApplicationTransactions();
+        // NOTE: Custom fields have their old value pre-populated when they are
+        // built by PhabricatorCustomFieldList.
+        return $xaction->getOldValue();
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -585,9 +586,13 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new Exception(
           "You can not apply transactions which already have commentVersions!");
       }
-      if ($xaction->getOldValue() !== null) {
-        throw new Exception(
-          "You can not apply transactions which already have oldValue!");
+
+      $custom_field_type = PhabricatorTransactions::TYPE_CUSTOMFIELD;
+      if ($xaction->getTransactionType() != $custom_field_type) {
+        if ($xaction->getOldValue() !== null) {
+          throw new Exception(
+            "You can not apply transactions which already have oldValue!");
+        }
       }
 
       $type = $xaction->getTransactionType();

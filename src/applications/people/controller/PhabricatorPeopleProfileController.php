@@ -97,10 +97,9 @@ final class PhabricatorPeopleProfileController
       ->setUser($viewer)
       ->setObject($user);
 
-    $fields = PhabricatorCustomField::getObjectFields(
+    $field_list = PhabricatorCustomField::getObjectFields(
       $user,
       PhabricatorCustomField::ROLE_VIEW);
-    $field_list = new PhabricatorCustomFieldList($fields);
     $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
     return $view;
