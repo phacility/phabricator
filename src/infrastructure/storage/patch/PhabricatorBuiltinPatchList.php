@@ -1535,6 +1535,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130802.heraldxactions.sql'),
       ),
+      '20130731.releephrepoid.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130731.releephrepoid.sql'),
+      ),
     );
   }
 }

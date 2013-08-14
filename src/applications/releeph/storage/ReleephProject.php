@@ -18,7 +18,6 @@ final class ReleephProject extends ReleephDAO
   // been picked and which haven't.
   protected $trunkBranch;
 
-  protected $repositoryID;
   protected $repositoryPHID;
   protected $isActive;
   protected $createdByUserPHID;
