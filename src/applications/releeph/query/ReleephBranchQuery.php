@@ -6,6 +6,8 @@ final class ReleephBranchQuery
   private $ids;
   private $phids;
 
+  private $needCutPointCommits;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -13,6 +15,11 @@ final class ReleephBranchQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function needCutPointCommits($need_commits) {
+    $this->needCutPointCommits = $need_commits;
     return $this;
   }
 
@@ -45,6 +52,20 @@ final class ReleephBranchQuery
         $branch->attachProject($projects[$project_id]);
       } else {
         unset($branches[$key]);
+      }
+    }
+
+    if ($this->needCutPointCommits) {
+      $commit_phids = mpull($branches, 'getCutPointCommitPHID');
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($commit_phids)
+        ->execute();
+      $commits = mpull($commits, null, 'getPHID');
+
+      foreach ($branches as $branch) {
+        $commit = idx($commits, $branch->getCutPointCommitPHID());
+        $branch->attachCutPointCommit($commit);
       }
     }
 

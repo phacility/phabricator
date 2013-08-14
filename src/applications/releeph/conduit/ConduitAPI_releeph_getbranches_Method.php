@@ -52,7 +52,7 @@ final class ConduitAPI_releeph_getbranches_Method
           'branch'          => $branch->getBasename(),
           'fullBranchName'  => $full_branch_name,
           'symbolicName'    => $branch->getSymbolicName(),
-          'cutPoint'        => $branch->getCutPointCommitIdentifier(),
+          'cutPoint'        => $cut_point_commit->getCommitIdentifier(),
         );
       }
     }

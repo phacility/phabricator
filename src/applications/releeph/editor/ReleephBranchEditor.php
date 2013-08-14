@@ -46,7 +46,6 @@ final class ReleephBranchEditor extends PhabricatorEditor {
       ->setBasename($basename)
       ->setReleephProjectID($this->releephProject->getID())
       ->setCreatedByUserPHID($this->requireActor()->getPHID())
-      ->setCutPointCommitIdentifier($cut_point->getCommitIdentifier())
       ->setCutPointCommitPHID($cut_point->getPHID())
       ->setIsActive(1)
       ->setDetail('branchDate', $branch_date)
