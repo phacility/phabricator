@@ -119,6 +119,7 @@ final class PhabricatorPeopleProfileController
 
     $builder = new PhabricatorFeedBuilder($stories);
     $builder->setUser($viewer);
+    $builder->setShowHovercards(true);
     $view = $builder->buildView();
 
     return hsprintf(
