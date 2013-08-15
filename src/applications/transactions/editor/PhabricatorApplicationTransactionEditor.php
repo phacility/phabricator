@@ -16,6 +16,8 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mentionedPHIDs;
   private $continueOnNoEffect;
   private $parentMessageID;
+  private $heraldAdapter;
+  private $heraldTranscript;
   private $subscribers;
 
   private $isPreview;
@@ -437,6 +439,10 @@ abstract class PhabricatorApplicationTransactionEditor
 
       foreach ($xactions as $xaction) {
         $this->applyExternalEffects($object, $xaction);
+      }
+
+      if ($this->supportsHerald()) {
+        $this->applyHeraldRules($object, $xactions);
       }
 
       $this->applyFinalEffects($object, $xactions);
@@ -1321,6 +1327,58 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function supportsSearch() {
     return false;
+  }
+
+
+/* -(  Herald Integration )-------------------------------------------------- */
+
+
+  protected function supportsHerald() {
+    return false;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    throw new Exception('No herald adapter specified.');
+  }
+
+  private function setHeraldAdapter(HeraldAdapter $adapter) {
+    $this->heraldAdapter = $adapter;
+    return $this;
+  }
+
+  protected function getHeraldAdapter() {
+    return $this->heraldAdapter;
+  }
+
+  private function setHeraldTranscript(HeraldTranscript $transcript) {
+    $this->heraldTranscript = $transcript;
+    return $this;
+  }
+
+  protected function getHeraldTranscript() {
+    return $this->heraldTranscript;
+  }
+
+  private function applyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $adapter = $this->buildHeraldAdapter($object, $xactions);
+    $xscript = HeraldEngine::loadAndApplyRules($adapter);
+
+    $this->setHeraldAdapter($adapter);
+    $this->setHeraldTranscript($xscript);
+
+    $this->didApplyHeraldRules($object, $adapter, $xscript);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
   }
 
 

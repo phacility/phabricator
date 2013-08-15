@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group herald
+ */
 final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
 
   protected $revision;

@@ -383,6 +383,33 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     return true;
   }
 
+  protected function supportsHerald() {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldPholioMockAdapter())
+      ->setMock($object);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $cc_phids = $adapter->getCcPHIDs();
+    if ($cc_phids) {
+      id(new PhabricatorSubscriptionsEditor())
+        ->setObject($object)
+        ->setActor($this->requireActor())
+        ->subscribeImplicit($cc_phids)
+        ->save();
+    }
+  }
+
   protected function sortTransactions(array $xactions) {
     $head = array();
     $tail = array();

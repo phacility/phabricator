@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group herald
+ */
 abstract class HeraldAdapter {
 
   const FIELD_TITLE                  = 'title';
