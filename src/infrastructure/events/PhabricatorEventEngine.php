@@ -8,7 +8,14 @@ final class PhabricatorEventEngine {
   public static function initialize() {
     $listeners = PhabricatorEnv::getEnvConfig('events.listeners');
     foreach ($listeners as $listener) {
-      id(new $listener())->register();
+      try {
+        id(new $listener())->register();
+      } catch (Exception $ex) {
+        // If the listener does not exist, or throws when registering, just
+        // log it and continue. In particular, this is important to let you
+        // run `bin/config` in order to remove an invalid listener.
+        phlog($ex);
+      }
     }
 
     // Register the DarkConosole event logger.
