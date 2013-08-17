@@ -156,10 +156,6 @@ final class ReleephProjectViewController extends ReleephProjectController
 
     $project = $this->getReleephProject();
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName($project->getName()));
-
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setHref($project->getURI('cutbranch'))

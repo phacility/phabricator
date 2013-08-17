@@ -76,17 +76,8 @@ final class ReleephBranchViewController extends ReleephProjectController
 
   public function buildApplicationCrumbs() {
     $releeph_branch = $this->getReleephBranch();
-    $releeph_project = $this->getReleephProject();
 
-    $crumbs = parent::buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($releeph_project->getName())
-          ->setHref($releeph_project->getURI()))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($releeph_branch->getDisplayNameWithDetail())
-          ->setHref($releeph_branch->getURI()));
+    $crumbs = parent::buildApplicationCrumbs();
 
     if ($releeph_branch->isActive()) {
       $create_uri = $releeph_branch->getURI('request/');

@@ -71,6 +71,9 @@ final class ReleephBranchCreateController extends ReleephProjectController {
       $error_view->setTitle(pht('Form Errors'));
     }
 
+    $project_id = $releeph_project->getID();
+    $project_uri = $this->getApplicationURI("project/{$project_id}/");
+
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())
       ->appendChild(
@@ -93,15 +96,23 @@ final class ReleephBranchCreateController extends ReleephProjectController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Cut Branch'))
-          ->addCancelButton($releeph_project->getURI()));
+          ->addCancelButton($project_uri));
 
-    $panel = id(new AphrontPanelView())
-      ->appendChild($form)
-      ->setHeader(pht('Cut Branch'))
-      ->setWidth(AphrontPanelView::WIDTH_FORM);
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName(pht('New Branch')));
 
-    return $this->buildStandardPageResponse(
-      array($error_view, $panel),
-      array('title' => pht('Cut new branch')));
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $error_view,
+        $form,
+      ),
+      array(
+        'title' => pht('New Branch'),
+        'device' => true,
+        'dust' => true,
+      ));
   }
 }
