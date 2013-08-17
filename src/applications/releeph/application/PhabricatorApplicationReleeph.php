@@ -38,8 +38,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephProjectListController',
           'create/' => 'ReleephProjectCreateController',
           '(?P<projectID>[1-9]\d*)/' => array(
-            '' => 'ReleephProjectViewController',
-            'closedbranches/' => 'ReleephProjectViewController',
+            '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephProjectViewController',
             'edit/' => 'ReleephProjectEditController',
             'cutbranch/' => 'ReleephBranchCreateController',
             'action/(?P<action>.+)/' => 'ReleephProjectActionController',

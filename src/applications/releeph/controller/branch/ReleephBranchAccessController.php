@@ -10,23 +10,28 @@ final class ReleephBranchAccessController extends ReleephProjectController {
   }
 
   public function processRequest() {
-    $rph_branch = $this->getReleephBranch();
+    $branch = $this->getReleephBranch();
     $request = $this->getRequest();
 
-    $active_uri = '/releeph/project/'.$rph_branch->getReleephProjectID().'/';
-    $inactive_uri = $active_uri.'inactive/';
+    $done_uri = '/releeph/project/'.$branch->getReleephProjectID().'/';
 
     switch ($this->action) {
       case 'close':
         $is_active = false;
-        $origin_uri = $active_uri;
+        $title_text = pht('Close Branch');
+        $body_text = pht(
+          'Really close the branch "%s"?',
+          $branch->getBasename());
+        $button_text = pht('Close Branch');
         break;
-
       case 're-open':
         $is_active = true;
-        $origin_uri = $inactive_uri;
+        $title_text = pht('Reopen Branch');
+        $body_text = pht(
+          'Really reopen the branch "%s"?',
+          $branch->getBasename());
+        $button_text = pht('Reopen Branch');
         break;
-
       default:
         throw new Exception("Unknown action '{$this->action}'!");
         break;
@@ -35,26 +40,19 @@ final class ReleephBranchAccessController extends ReleephProjectController {
     if ($request->isDialogFormPost()) {
       id(new ReleephBranchEditor())
         ->setActor($request->getUser())
-        ->setReleephBranch($rph_branch)
+        ->setReleephBranch($branch)
         ->changeBranchAccess($is_active ? 1 : 0);
-      return id(new AphrontRedirectResponse())
-        ->setURI($origin_uri);
+
+      return id(new AphrontReloadResponse())->setURI($done_uri);
     }
-
-    $button_text = pht('%s Branch', $this->action);
-    $text = pht('Really %s the branch: %s?',
-      $this->action,
-      $rph_branch->getBasename());
-    $message = phutil_tag('p', array(), $text);
-
 
     $dialog = new AphrontDialogView();
     $dialog
       ->setUser($request->getUser())
-      ->setTitle(pht('Confirm'))
-      ->appendChild($message)
+      ->setTitle($title_text)
+      ->appendChild($body_text)
       ->addSubmitButton($button_text)
-      ->addCancelButton($origin_uri);
+      ->addCancelButton($done_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

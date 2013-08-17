@@ -1946,6 +1946,7 @@ phutil_register_library_map(array(
     'ReleephBranchNamePreviewController' => 'applications/releeph/controller/branch/ReleephBranchNamePreviewController.php',
     'ReleephBranchPreviewView' => 'applications/releeph/view/branch/ReleephBranchPreviewView.php',
     'ReleephBranchQuery' => 'applications/releeph/query/ReleephBranchQuery.php',
+    'ReleephBranchSearchEngine' => 'applications/releeph/query/ReleephBranchSearchEngine.php',
     'ReleephBranchTemplate' => 'applications/releeph/view/branch/ReleephBranchTemplate.php',
     'ReleephBranchViewController' => 'applications/releeph/controller/branch/ReleephBranchViewController.php',
     'ReleephCommitFinder' => 'applications/releeph/commitfinder/ReleephCommitFinder.php',
@@ -1979,7 +1980,6 @@ phutil_register_library_map(array(
     'ReleephProjectListController' => 'applications/releeph/controller/project/ReleephProjectListController.php',
     'ReleephProjectQuery' => 'applications/releeph/query/ReleephProjectQuery.php',
     'ReleephProjectSearchEngine' => 'applications/releeph/query/ReleephProjectSearchEngine.php',
-    'ReleephProjectView' => 'applications/releeph/view/ReleephProjectView.php',
     'ReleephProjectViewController' => 'applications/releeph/controller/project/ReleephProjectViewController.php',
     'ReleephReasonFieldSpecification' => 'applications/releeph/field/specification/ReleephReasonFieldSpecification.php',
     'ReleephRequest' => 'applications/releeph/storage/ReleephRequest.php',
@@ -4128,6 +4128,7 @@ phutil_register_library_map(array(
     'ReleephBranchNamePreviewController' => 'ReleephController',
     'ReleephBranchPreviewView' => 'AphrontFormControl',
     'ReleephBranchQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'ReleephBranchSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'ReleephBranchViewController' =>
     array(
       0 => 'ReleephProjectController',
@@ -4172,8 +4173,11 @@ phutil_register_library_map(array(
     ),
     'ReleephProjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ReleephProjectSearchEngine' => 'PhabricatorApplicationSearchEngine',
-    'ReleephProjectView' => 'AphrontView',
-    'ReleephProjectViewController' => 'ReleephProjectController',
+    'ReleephProjectViewController' =>
+    array(
+      0 => 'ReleephProjectController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'ReleephReasonFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephRequest' =>
     array(
