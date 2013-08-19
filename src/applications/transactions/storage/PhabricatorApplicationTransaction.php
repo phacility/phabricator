@@ -383,7 +383,7 @@ abstract class PhabricatorApplicationTransaction
     return $this->getTitle();
   }
 
-  public function getBodyForFeed() {
+  public function getBodyForFeed(PhabricatorFeedStory $story) {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 

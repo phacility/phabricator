@@ -250,15 +250,26 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitleForFeed();
   }
 
-  public function getBodyForFeed() {
+  public function getBodyForFeed(PhabricatorFeedStory $story) {
+    $text = null;
     switch ($this->getTransactionType()) {
+      case PholioTransactionType::TYPE_NAME:
+        if ($this->getOldValue() === null) {
+          $mock = $story->getPrimaryObject();
+          $text = $mock->getDescription();
+        }
+        break;
       case PholioTransactionType::TYPE_INLINE:
         $text = $this->getComment()->getContent();
-        return phutil_escape_html_newlines(
-          phutil_utf8_shorten($text, 128));
         break;
     }
-    return parent::getBodyForFeed();
+
+    if ($text) {
+      return phutil_escape_html_newlines(
+        phutil_utf8_shorten($text, 128));
+    }
+
+    return parent::getBodyForFeed($story);
   }
 
   public function hasChangeDetails() {
