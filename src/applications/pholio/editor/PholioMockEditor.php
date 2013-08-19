@@ -31,6 +31,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = PholioTransactionType::TYPE_IMAGE_NAME;
     $types[] = PholioTransactionType::TYPE_IMAGE_DESCRIPTION;
     $types[] = PholioTransactionType::TYPE_IMAGE_REPLACE;
+    $types[] = PholioTransactionType::TYPE_IMAGE_SEQUENCE;
 
     return $types;
   }
@@ -55,7 +56,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
           $name = $image->getName();
           $phid = $image->getPHID();
         }
-        return array ($phid => $name);
+        return array($phid => $name);
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
         $description = null;
         $phid = null;
@@ -68,6 +69,15 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       case PholioTransactionType::TYPE_IMAGE_REPLACE:
         $raw = $xaction->getNewValue();
         return $raw->getReplacesImagePHID();
+      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+        $sequence = null;
+        $phid = null;
+        $image = $this->getImageForXaction($object, $xaction);
+        if ($image) {
+          $sequence = $image->getSequence();
+          $phid = $image->getPHID();
+        }
+        return array($phid => $sequence);
     }
   }
 
@@ -80,6 +90,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       case PholioTransactionType::TYPE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
         return $xaction->getNewValue();
       case PholioTransactionType::TYPE_IMAGE_REPLACE:
         $raw = $xaction->getNewValue();
@@ -214,9 +225,9 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         }
         $object->attachImages($images);
         break;
-    case PholioTransactionType::TYPE_IMAGE_NAME:
-      $image = $this->getImageForXaction($object, $xaction);
-      $value = (string) head($xaction->getNewValue());
+      case PholioTransactionType::TYPE_IMAGE_NAME:
+        $image = $this->getImageForXaction($object, $xaction);
+        $value = (string) head($xaction->getNewValue());
         $image->setName($value);
         $image->save();
         break;
@@ -224,6 +235,12 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         $image = $this->getImageForXaction($object, $xaction);
         $value = (string) head($xaction->getNewValue());
         $image->setDescription($value);
+        $image->save();
+        break;
+      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+        $image = $this->getImageForXaction($object, $xaction);
+        $value = (int) head($xaction->getNewValue());
+        $image->setSequence($value);
         $image->save();
         break;
     }
@@ -257,6 +274,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         return $this->mergePHIDOrEdgeTransactions($u, $v);
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
         $raw_new_value_u = $u->getNewValue();
         $raw_new_value_v = $v->getNewValue();
         $phid_u = key($raw_new_value_u);
@@ -363,6 +381,33 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
   protected function supportsSearch() {
     return true;
+  }
+
+  protected function supportsHerald() {
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new HeraldPholioMockAdapter())
+      ->setMock($object);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $cc_phids = $adapter->getCcPHIDs();
+    if ($cc_phids) {
+      id(new PhabricatorSubscriptionsEditor())
+        ->setObject($object)
+        ->setActor($this->requireActor())
+        ->subscribeImplicit($cc_phids)
+        ->save();
+    }
   }
 
   protected function sortTransactions(array $xactions) {

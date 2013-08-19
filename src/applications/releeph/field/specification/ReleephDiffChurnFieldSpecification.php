@@ -8,6 +8,10 @@ final class ReleephDiffChurnFieldSpecification
   const UPDATES_WEIGHT    =  10;
   const MAX_POINTS        = 100;
 
+  public function getFieldKey() {
+    return 'churn';
+  }
+
   public function getName() {
     return 'Churn';
   }

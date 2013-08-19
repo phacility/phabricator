@@ -5,6 +5,10 @@ final class ReleephAuthorFieldSpecification
 
   private static $authorMap = array();
 
+  public function getFieldKey() {
+    return 'author';
+  }
+
   public function bulkLoad(array $releeph_requests) {
     foreach ($releeph_requests as $releeph_request) {
       $commit = $releeph_request->loadPhabricatorRepositoryCommit();

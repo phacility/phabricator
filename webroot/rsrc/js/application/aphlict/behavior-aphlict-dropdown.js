@@ -8,11 +8,13 @@
  *           javelin-uri
  */
 
-JX.behavior('aphlict-dropdown', function(config) {
+JX.behavior('aphlict-dropdown', function(config, statics) {
+  // Track the current globally visible menu.
+  statics.visible = statics.visible || null;
+
   var dropdown = JX.$(config.dropdownID);
   var count = JX.$(config.countID);
   var bubble = JX.$(config.bubbleID);
-  var visible = false;
   var request = null;
   var dirty = true;
 
@@ -28,6 +30,7 @@ JX.behavior('aphlict-dropdown', function(config) {
     if (request) { //already fetching
       return;
     }
+
     request = new JX.Request(config.uri, function(response) {
       var display = (response.number > 999) ? "\u221E" : response.number;
 
@@ -55,7 +58,7 @@ JX.behavior('aphlict-dropdown', function(config) {
       if (!e.getNode('phabricator-notification-menu')) {
         // Click outside the dropdown; hide it.
         JX.DOM.hide(dropdown);
-        visible = false;
+        statics.visible = null;
         return;
       }
 
@@ -83,22 +86,34 @@ JX.behavior('aphlict-dropdown', function(config) {
         return;
       }
 
-      if (visible) {
-        JX.DOM.hide(dropdown);
-      } else {
-        if (dirty) {
-          refresh();
-        }
-
-        var p = JX.$V(bubble);
-        p.y = null;
-        p.x -= 6;
-        p.setPos(dropdown);
-
-        JX.DOM.show(dropdown);
-      }
-      visible = !visible;
       e.kill();
+
+      // If a menu is currently open, close it.
+      if (statics.visible) {
+        var previously_visible = statics.visible;
+        JX.DOM.hide(statics.visible);
+        statics.visible = null;
+
+        // If the menu we just closed was the menu attached to the clicked
+        // icon, we're all done -- clicking the icon for an open menu just
+        // closes it. Otherwise, we closed some other menu and still need to
+        // open the one the user just clicked.
+        if (previously_visible === dropdown) {
+          return;
+        }
+      }
+
+      if (dirty) {
+        refresh();
+      }
+
+      var p = JX.$V(bubble);
+      p.y = null;
+      p.x -= 6;
+      p.setPos(dropdown);
+
+      JX.DOM.show(dropdown);
+      statics.visible = dropdown;
     }
   );
 

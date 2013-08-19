@@ -34,7 +34,6 @@ final class ReleephProjectCreateController extends ReleephProjectController {
         $releeph_project = id(new ReleephProject())
           ->setName($name)
           ->setTrunkBranch($trunk_branch)
-          ->setRepositoryID($pr_repository->getID())
           ->setRepositoryPHID($pr_repository->getPHID())
           ->setArcanistProjectID($arc_project->getID())
           ->setCreatedByUserPHID($request->getUser()->getPHID())

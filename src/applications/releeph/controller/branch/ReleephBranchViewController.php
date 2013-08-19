@@ -1,72 +1,84 @@
 <?php
 
-final class ReleephBranchViewController extends ReleephProjectController {
+final class ReleephBranchViewController extends ReleephProjectController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    parent::willProcessRequest($data);
+    $this->queryKey = idx($data, 'queryKey');
+  }
+
 
   public function processRequest() {
     $request = $this->getRequest();
 
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine($this->getSearchEngine())
+      ->setNavigation($this->buildSideNavView());
+
+    return $this->delegateToController($controller);
+  }
+
+  public function renderResultsList(
+    array $requests,
+    PhabricatorSavedQuery $query) {
+
+    assert_instances_of($requests, 'ReleephRequest');
+    $viewer = $this->getRequest()->getUser();
+
     $releeph_branch = $this->getReleephBranch();
     $releeph_project = $this->getReleephProject();
-    $all_releeph_requests = $releeph_branch->loadReleephRequests(
-      $request->getUser());
 
-    $selector = $releeph_project->getReleephFieldSelector();
-    $fields = $selector->arrangeFieldsForSelectForm(
-      $selector->getFieldSpecifications());
-
-    $form = id(new AphrontFormView())
-      ->setMethod('GET')
-      ->setUser($request->getUser());
-
-    $filtered_releeph_requests = $all_releeph_requests;
-    foreach ($fields as $field) {
-      $all_releeph_requests_without_this_field = $all_releeph_requests;
-      foreach ($fields as $other_field) {
-        if ($other_field != $field) {
-          $other_field->selectReleephRequestsHook(
-            $request,
-            $all_releeph_requests_without_this_field);
-
-        }
-      }
-
-      $field->appendSelectControlsHook(
-        $form,
-        $request,
-        $all_releeph_requests,
-        $all_releeph_requests_without_this_field);
-
-      $field->selectReleephRequestsHook(
-        $request,
-        $filtered_releeph_requests);
-    }
-
-    $form->appendChild(
-      id(new AphrontFormSubmitControl())
-        ->setValue(pht('Filter')));
+    // TODO: Really gross.
+    $releeph_branch->populateReleephRequestHandles(
+      $viewer,
+      $requests);
 
     $list = id(new ReleephRequestHeaderListView())
       ->setOriginType('branch')
-      ->setUser($request->getUser())
+      ->setUser($viewer)
       ->setAphrontRequest($this->getRequest())
       ->setReleephProject($releeph_project)
       ->setReleephBranch($releeph_branch)
-      ->setReleephRequests($filtered_releeph_requests);
+      ->setReleephRequests($requests);
 
-    $filter = id(new AphrontListFilterView())
-      ->appendChild($form);
+    return $list;
+  }
 
-    $crumbs = $this->buildApplicationCrumbs()
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($releeph_project->getName())
-          ->setHref($releeph_project->getURI()))
-      ->addCrumb(
-        id(new PhabricatorCrumbView())
-          ->setName($releeph_branch->getDisplayNameWithDetail())
-          ->setHref($releeph_branch->getURI()));
+  public function buildSideNavView($for_app = false) {
+    $user = $this->getRequest()->getUser();
 
-    // Don't show the request button for inactive (closed) branches
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+
+
+    $this->getSearchEngine()->addNavigationItems($nav->getMenu());
+
+    $nav->selectFilter(null);
+
+    return $nav;
+  }
+
+  private function getSearchEngine() {
+    $branch = $this->getReleephBranch();
+    return id(new ReleephRequestSearchEngine())
+      ->setBranch($branch)
+      ->setBaseURI($branch->getURI())
+      ->setViewer($this->getRequest()->getUser());
+  }
+
+  public function buildApplicationCrumbs() {
+    $releeph_branch = $this->getReleephBranch();
+
+    $crumbs = parent::buildApplicationCrumbs();
+
     if ($releeph_branch->isActive()) {
       $create_uri = $releeph_branch->getURI('request/');
       $crumbs->addAction(
@@ -76,19 +88,8 @@ final class ReleephBranchViewController extends ReleephProjectController {
           ->setIcon('create'));
     }
 
-    return $this->buildStandardPageResponse(
-      array(
-        $crumbs,
-        $filter,
-        $list
-      ),
-      array(
-        'title' =>
-          $releeph_project->getName().
-          ' - '.
-          $releeph_branch->getDisplayName().
-          ' requests'
-      ));
+    return $crumbs;
   }
+
 
 }

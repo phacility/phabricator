@@ -65,9 +65,27 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         reset($field_values['reviewedByPHIDs']));
     }
 
+    $revision_id = idx($field_values, 'revisionID');
+    if (!$revision_id) {
+      $hashes = $this->getCommitHashes(
+        $repository,
+        $commit);
+      if ($hashes) {
+        $revisions = id(new DifferentialRevisionQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withCommitHashes($hashes)
+          ->execute();
+
+        if (!empty($revisions)) {
+          $revision = $this->identifyBestRevision($revisions);
+          $revision_id = $revision->getID();
+        }
+      }
+    }
+
     $data->setCommitDetail(
       'differential.revisionID',
-      idx($field_values, 'revisionID'));
+      $revision_id);
 
     $committer_phid = $this->lookupUser(
       $commit,
@@ -94,23 +112,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $revision = null;
     $should_autoclose = $repository->shouldAutocloseCommit($commit, $data);
-    $revision_id = $data->getCommitDetail('differential.revisionID');
-    if (!$revision_id) {
-      $hashes = $this->getCommitHashes(
-        $this->repository,
-        $this->commit);
-      if ($hashes) {
-        $revisions = id(new DifferentialRevisionQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withCommitHashes($hashes)
-          ->execute();
-
-        if (!empty($revisions)) {
-          $revision = $this->identifyBestRevision($revisions);
-          $revision_id = $revision->getID();
-        }
-      }
-    }
 
     if ($revision_id) {
       $lock = PhabricatorGlobalLock::newLock(get_class($this).':'.$revision_id);

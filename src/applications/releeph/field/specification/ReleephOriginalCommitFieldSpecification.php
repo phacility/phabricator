@@ -3,6 +3,10 @@
 final class ReleephOriginalCommitFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'commit:name';
+  }
+
   public function getName() {
     return 'Commit';
   }

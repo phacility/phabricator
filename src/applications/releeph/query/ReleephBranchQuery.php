@@ -5,6 +5,13 @@ final class ReleephBranchQuery
 
   private $ids;
   private $phids;
+  private $projectIDs;
+
+  const STATUS_ALL = 'status-all';
+  const STATUS_OPEN = 'status-open';
+  private $status = self::STATUS_ALL;
+
+  private $needCutPointCommits;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +20,21 @@ final class ReleephBranchQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function needCutPointCommits($need_commits) {
+    $this->needCutPointCommits = $need_commits;
+    return $this;
+  }
+
+  public function withStatus($status) {
+    $this->status = $status;
+    return $this;
+  }
+
+  public function withProjectIDs(array $ids) {
+    $this->projectIDs = $ids;
     return $this;
   }
 
@@ -48,6 +70,20 @@ final class ReleephBranchQuery
       }
     }
 
+    if ($this->needCutPointCommits) {
+      $commit_phids = mpull($branches, 'getCutPointCommitPHID');
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($commit_phids)
+        ->execute();
+      $commits = mpull($commits, null, 'getPHID');
+
+      foreach ($branches as $branch) {
+        $commit = idx($commits, $branch->getCutPointCommitPHID());
+        $branch->attachCutPointCommit($commit);
+      }
+    }
+
     return $branches;
   }
 
@@ -66,6 +102,26 @@ final class ReleephBranchQuery
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->projectIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'releephProjectID IN (%Ld)',
+        $this->projectIDs);
+    }
+
+    $status = $this->status;
+    switch ($status) {
+      case self::STATUS_ALL:
+        break;
+      case self::STATUS_OPEN:
+        $where[] = qsprintf(
+          $conn_r,
+          'isActive = 1');
+        break;
+      default:
+        throw new Exception("Unknown status constant '{$status}'!");
     }
 
     $where[] = $this->buildPagingClause($conn_r);

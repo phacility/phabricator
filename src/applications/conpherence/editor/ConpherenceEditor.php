@@ -45,8 +45,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     }
 
     if (!$errors) {
-      $conpherence->openTransaction();
-      $conpherence->save();
       $xactions = array();
       $xactions[] = id(new ConpherenceTransaction())
         ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
@@ -74,7 +72,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         ->setActor($creator)
         ->applyTransactions($conpherence, $xactions);
 
-      $conpherence->saveTransaction();
     }
 
     return array($errors, $conpherence);
@@ -170,6 +167,24 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     }
 
     return $lock;
+  }
+
+  /**
+   * We need to apply initial effects IFF the conpherence is new. We must
+   * save the conpherence first thing to make sure we have an id and a phid.
+   */
+  protected function shouldApplyInitialEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return !$object->getID();
+  }
+
+  protected function applyInitialEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $object->save();
   }
 
   protected function applyCustomInternalTransaction(

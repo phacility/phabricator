@@ -44,8 +44,9 @@ class PhabricatorApplicationTransactionFeedStory
 
     $xaction->setHandles($this->getHandles());
     $view->setTitle($xaction->getTitleForFeed());
-    if (nonempty($xaction->getBodyForFeed())) {
-      $view->appendChild($xaction->getBodyForFeed());
+    $body = $xaction->getBodyForFeed($this);
+    if (nonempty($body)) {
+      $view->appendChild($body);
     }
 
     $view->setImage(
@@ -57,7 +58,7 @@ class PhabricatorApplicationTransactionFeedStory
 
   public function renderText() {
     // TODO: This is grotesque; the feed notification handler relies on it.
-    return strip_tags($this->renderView()->render());
+    return strip_tags(hsprintf('%s', $this->renderView()->render()));
   }
 
 }

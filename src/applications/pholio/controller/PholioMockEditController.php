@@ -110,7 +110,8 @@ final class PholioMockEditController extends PholioController {
             ->setNewValue($value);
         }
 
-        $sequence = 0;
+        $order = $request->getStrList('imageOrder');
+        $sequence_map = array_flip($order);
         $replaces = $request->getArr('replaces');
         $replaces_map = array_flip($replaces);
 
@@ -133,6 +134,7 @@ final class PholioMockEditController extends PholioController {
 
           $title = (string)$request->getStr('title_'.$file_phid);
           $description = (string)$request->getStr('description_'.$file_phid);
+          $sequence = $sequence_map[$file_phid];
 
           if ($replaces_image_phid) {
             $replace_image = id(new PholioImage())
@@ -165,9 +167,12 @@ final class PholioMockEditController extends PholioController {
                 PholioTransactionType::TYPE_IMAGE_DESCRIPTION)
                 ->setNewValue(
                   array($existing_image->getPHID() => $description));
-            $existing_image->setSequence($sequence);
+            $xactions[] = id(new PholioTransaction())
+              ->setTransactionType(
+                PholioTransactionType::TYPE_IMAGE_SEQUENCE)
+                ->setNewValue(
+                  array($existing_image->getPHID() => $sequence));
           }
-          $sequence++;
         }
         foreach ($mock_images as $file_phid => $mock_image) {
           if (!isset($files[$file_phid]) && !isset($replaces[$file_phid])) {
@@ -235,6 +240,7 @@ final class PholioMockEditController extends PholioController {
 
     $list_id = celerity_generate_unique_node_id();
     $drop_id = celerity_generate_unique_node_id();
+    $order_id = celerity_generate_unique_node_id();
 
     $list_control = phutil_tag(
       'div',
@@ -252,11 +258,20 @@ final class PholioMockEditController extends PholioController {
       ),
       'Drag and drop images here to add them to the mock.');
 
+    $order_control = phutil_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => 'imageOrder',
+        'id' => $order_id,
+      ));
+
     Javelin::initBehavior(
       'pholio-mock-edit',
       array(
         'listID' => $list_id,
         'dropID' => $drop_id,
+        'orderID' => $order_id,
         'uploadURI' => '/file/dropupload/',
         'renderURI' => $this->getApplicationURI('image/upload/'),
         'pht' => array(
@@ -271,6 +286,7 @@ final class PholioMockEditController extends PholioController {
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFlexible(true)
+      ->appendChild($order_control)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')

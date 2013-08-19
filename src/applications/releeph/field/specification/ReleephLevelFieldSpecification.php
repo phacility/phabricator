@@ -19,13 +19,6 @@ abstract class ReleephLevelFieldSpecification
   abstract public function getNameForLevel($level);
   abstract public function getDescriptionForLevel($level);
 
-  /**
-   * Use getCanonicalLevel() to convert old, unsupported levels to new ones.
-   */
-  protected function getCanonicalLevel($misc_level) {
-    return $misc_level;
-  }
-
   public function getStorageKey() {
     $class = get_class($this);
     throw new ReleephFieldSpecificationIncompleteException(
@@ -34,19 +27,16 @@ abstract class ReleephLevelFieldSpecification
   }
 
   public function renderValueForHeaderView() {
-    $raw_level = $this->getValue();
-    $level = $this->getCanonicalLevel($raw_level);
-    return $this->getNameForLevel($level);
+    return $this->getNameForLevel($this->getValue());
   }
 
-  public function renderEditControl(AphrontRequest $request) {
+  public function renderEditControl() {
     $control_name = $this->getRequiredStorageKey();
     $all_levels = $this->getLevels();
 
     $level = $request->getStr($control_name);
-
     if (!$level) {
-      $level = $this->getCanonicalLevel($this->getValue());
+      $level = $this->getValue();
     }
 
     if (!$level) {
@@ -144,85 +134,6 @@ abstract class ReleephLevelFieldSpecification
       }
     }
     return idx($this->nameMap, $name);
-  }
-
-  protected function appendSelectControls(
-    AphrontFormView $form,
-    AphrontRequest $request,
-    array $all_releeph_requests,
-    array $all_releeph_requests_without_this_field) {
-
-    $buttons = array(null => 'All');
-
-    // Add in known level/names
-    foreach ($this->getLevels() as $level) {
-      $name = $this->getNameForLevel($level);
-      $buttons[$name] = $name;
-    }
-
-    // Add in any names we've seen in the wild, as well.
-    foreach ($all_releeph_requests as $releeph_request) {
-      $raw_level = $this->setReleephRequest($releeph_request)->getValue();
-      if (!$raw_level) {
-        // The ReleephRequest might not have a level set
-        continue;
-      }
-      $level = $this->getCanonicalLevel($raw_level);
-      $name = $this->getNameForLevel($level);
-      $buttons[$name] = $name;
-    }
-
-    $key = $this->getRequiredStorageKey();
-    $current = $request->getStr($key);
-
-    $counters = array(null => count($all_releeph_requests_without_this_field));
-    foreach ($all_releeph_requests_without_this_field as $releeph_request) {
-      $raw_level = $this->setReleephRequest($releeph_request)->getValue();
-      if (!$raw_level) {
-        // The ReleephRequest might not have a level set
-        continue;
-      }
-      $level = $this->getCanonicalLevel($raw_level);
-      $name = $this->getNameForLevel($level);
-
-      if (!isset($counters[$name])) {
-        $counters[$name] = 0;
-      }
-      $counters[$name]++;
-    }
-
-    $control = id(new AphrontFormCountedToggleButtonsControl())
-      ->setLabel($this->getName())
-      ->setValue($current)
-      ->setBaseURI($request->getRequestURI(), $key)
-      ->setButtons($buttons)
-      ->setCounters($counters);
-
-    $form
-      ->appendChild($control)
-      ->addHiddenInput($key, $current);
-  }
-
-  protected function selectReleephRequests(AphrontRequest $request,
-                                           array &$releeph_requests) {
-    $key = $this->getRequiredStorageKey();
-    $current = $request->getStr($key);
-
-    if (!$current) {
-      return;
-    }
-
-    $filtered = array();
-    foreach ($releeph_requests as $releeph_request) {
-      $raw_level = $this->setReleephRequest($releeph_request)->getValue();
-      $level = $this->getCanonicalLevel($raw_level);
-      $name = $this->getNameForLevel($level);
-      if ($name == $current) {
-        $filtered[] = $releeph_request;
-      }
-    }
-
-    $releeph_requests = $filtered;
   }
 
 }

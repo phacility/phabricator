@@ -13,6 +13,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $data;
   private $hasViewed;
   private $framed;
+  private $hovercard = false;
 
   private $handles  = array();
   private $objects  = array();
@@ -114,6 +115,11 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     }
 
     return $stories;
+  }
+
+  public function setHovercard($hover) {
+    $this->hovercard = $hover;
+    return $this;
   }
 
   public function setObjects(array $objects) {
@@ -242,8 +248,8 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       array(
         'href'    => $handle->getURI(),
         'target'  => $this->framed ? '_top' : null,
-        'sigil'   => 'hovercard',
-        'meta'    => array('hoverPHID' => $phid),
+        'sigil'   => $this->hovercard ? 'hovercard' : null,
+        'meta'    => $this->hovercard ? array('hoverPHID' => $phid) : null,
         'class'   => $class,
       ),
       $handle->getLinkName());

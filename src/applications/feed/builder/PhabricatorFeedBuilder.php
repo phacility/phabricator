@@ -4,6 +4,7 @@ final class PhabricatorFeedBuilder {
 
   private $stories;
   private $framed;
+  private $hovercards = false;
 
   public function __construct(array $stories) {
     assert_instances_of($stories, 'PhabricatorFeedStory');
@@ -17,6 +18,11 @@ final class PhabricatorFeedBuilder {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
+  }
+
+  public function setShowHovercards($hover) {
+    $this->hovercards = $hover;
     return $this;
   }
 
@@ -35,6 +41,7 @@ final class PhabricatorFeedBuilder {
     $last_date = null;
     foreach ($stories as $story) {
       $story->setFramed($this->framed);
+      $story->setHovercard($this->hovercards);
 
       $date = ucfirst(phabricator_relative_date($story->getEpoch(), $user));
 

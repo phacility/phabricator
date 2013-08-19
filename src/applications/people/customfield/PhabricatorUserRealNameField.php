@@ -49,7 +49,7 @@ final class PhabricatorUserRealNameField
     $this->getObject()->setRealName($xaction->getNewValue());
   }
 
-  public function setValueFromRequest(AphrontRequest $request) {
+  public function readValueFromRequest(AphrontRequest $request) {
     $this->value = $request->getStr($this->getFieldKey());
   }
 

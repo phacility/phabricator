@@ -17,12 +17,12 @@ final class ReleephBranch extends ReleephDAO
   protected $symbolicName;
 
   // Where to cut the branch
-  protected $cutPointCommitIdentifier;
   protected $cutPointCommitPHID;
 
   protected $details = array();
 
   private $project = self::ATTACHABLE;
+  private $cutPointCommit = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -160,6 +160,16 @@ final class ReleephBranch extends ReleephDAO
 
   public function getProject() {
     return $this->assertAttached($this->project);
+  }
+
+  public function attachCutPointCommit(
+    PhabricatorRepositoryCommit $commit = null) {
+    $this->cutPointCommit = $commit;
+    return $this;
+  }
+
+  public function getCutPointCommit() {
+    return $this->assertAttached($this->cutPointCommit);
   }
 
 

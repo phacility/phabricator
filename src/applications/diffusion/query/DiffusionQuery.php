@@ -53,8 +53,13 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $repository = $drequest->getRepository();
 
     $core_params = array(
-      'callsign' => $repository->getCallsign()
+      'callsign' => $repository->getCallsign(),
     );
+
+    if ($drequest->getBranch() !== null) {
+      $core_params['branch'] = $drequest->getBranch();
+    }
+
     $params = $params + $core_params;
 
     return id(new ConduitCall(

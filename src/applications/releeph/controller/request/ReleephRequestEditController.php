@@ -49,6 +49,18 @@ final class ReleephRequestEditController extends ReleephProjectController {
         ->setReleephRequest($rq);
     }
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $rq,
+      PhabricatorCustomField::ROLE_EDIT);
+    foreach ($field_list->getFields() as $field) {
+      $field
+        ->setReleephProject($releeph_project)
+        ->setReleephBranch($releeph_branch)
+        ->setReleephRequest($rq);
+    }
+    $field_list->readFieldsFromStorage($rq);
+
+
     // <aidehua> epriestley: Is it common to pass around a referer URL to
     // return from whence one came? [...]
     // <epriestley> If you only have two places, maybe consider some parameter
@@ -124,6 +136,12 @@ final class ReleephRequestEditController extends ReleephProjectController {
               $releeph_project->isAuthoritative($user))
             ->setNewValue(ReleephRequest::INTENT_WANT);
         }
+      }
+
+      // TODO: This should happen implicitly while building transactions
+      // instead.
+      foreach ($field_list->getFields() as $field) {
+        $field->readValueFromRequest($request);
       }
 
       if (!$errors) {
@@ -243,13 +261,7 @@ final class ReleephRequestEditController extends ReleephProjectController {
       }
     }
 
-    // Fields
-    foreach ($fields as $field) {
-      if ($field->isEditable()) {
-        $control = $field->renderEditControl($request);
-        $form->appendChild($control);
-      }
-    }
+    $field_list->appendFieldsToForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
 

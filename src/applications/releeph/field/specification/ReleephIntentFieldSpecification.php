@@ -3,6 +3,10 @@
 final class ReleephIntentFieldSpecification
   extends ReleephFieldSpecification {
 
+  public function getFieldKey() {
+    return 'intent';
+  }
+
   public function getName() {
     return 'Intent';
   }

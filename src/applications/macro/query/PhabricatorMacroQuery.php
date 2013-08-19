@@ -172,7 +172,7 @@ final class PhabricatorMacroQuery
       $flags = id(new PhabricatorFlagQuery())
         ->withOwnerPHIDs(array($this->getViewer()->getPHID()))
         ->withTypes(array(PhabricatorMacroPHIDTypeMacro::TYPECONST))
-        ->withColor($this->flagColor)
+        ->withColors(array($this->flagColor))
         ->setViewer($this->getViewer())
         ->execute();
 

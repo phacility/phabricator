@@ -9,6 +9,7 @@ final class PhabricatorUser
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
+  const MAXIMUM_USERNAME_LENGTH = 64;
 
   protected $phid;
   protected $userName;
@@ -35,7 +36,7 @@ final class PhabricatorUser
   private $status = self::ATTACHABLE;
   private $preferences = null;
   private $omnipotent = false;
-  private $customFields = array();
+  private $customFields = self::ATTACHABLE;
 
   protected function readField($field) {
     switch ($field) {
@@ -689,8 +690,11 @@ EOBODY;
   }
 
   public static function describeValidUsername() {
-    return 'Usernames must contain only numbers, letters, period, underscore '.
-           'and hyphen, and can not end with a period.';
+    return pht(
+      'Usernames must contain only numbers, letters, period, underscore and '.
+      'hyphen, and can not end with a period. They must have no more than %d '.
+      'characters.',
+      new PhutilNumber(self::MAXIMUM_USERNAME_LENGTH));
   }
 
   public static function validateUsername($username) {
@@ -700,6 +704,10 @@ EOBODY;
     //  - Routing rule for "/p/username/".
     //  - Unit tests, obviously.
     //  - describeValidUsername() method, above.
+
+    if (strlen($username) > self::MAXIMUM_USERNAME_LENGTH) {
+      return false;
+    }
 
     return (bool)preg_match('/^[a-zA-Z0-9._-]*[a-zA-Z0-9_-]$/', $username);
   }
@@ -832,18 +840,15 @@ EOBODY;
   }
 
   public function getCustomFieldBaseClass() {
-    return 'PhabricatorUserCustomFieldInterface';
+    return 'PhabricatorUserCustomField';
   }
 
-  public function getCustomFields($role) {
-    if (idx($this->customFields, $role) === null) {
-      PhabricatorCustomField::raiseUnattachedException($this, $role);
-    }
-    return $this->customFields[$role];
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
   }
 
-  public function attachCustomFields($role, array $fields) {
-    $this->customFields[$role] = $fields;
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
     return $this;
   }
 

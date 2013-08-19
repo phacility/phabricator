@@ -3,9 +3,11 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
+ *           phabricator-phtize
  */
 
 JX.behavior('differential-toggle-files', function(config) {
+  var pht = JX.phtize(config.pht);
 
   JX.Stratcom.listen(
     'differential-toggle-file',
@@ -14,14 +16,30 @@ JX.behavior('differential-toggle-files', function(config) {
       if (e.getData().diff.length != 1) {
         return;
       }
+
       var diff = e.getData().diff[0],
           data = JX.Stratcom.getData(diff);
-      if(data.hidden) {
+      if (data.hidden) {
         data.hidden = false;
         JX.DOM.show(diff);
+        JX.DOM.remove(data.undo);
+        data.undo = null;
       } else {
         data.hidden = true;
+        data.undo = render_collapse_undo();
         JX.DOM.hide(diff);
+        JX.DOM.listen(
+          data.undo,
+          'click',
+          'differential-collapse-undo',
+          function(e) {
+            e.kill();
+            data.hidden = false;
+            JX.DOM.show(diff);
+            JX.DOM.remove(data.undo);
+            data.undo = null;
+          });
+        JX.DOM.appendContent(diff.parentNode, data.undo);
       }
       JX.Stratcom.invoke('differential-toggle-file-toggled');
     });
@@ -92,5 +110,19 @@ JX.behavior('differential-toggle-files', function(config) {
         // automatically jump there like we want.
         JX.DOM.scrollTo(target);
       }
-    });
+  });
+
+  var render_collapse_undo = function() {
+    var link = JX.$N(
+      'a',
+      {href: '#', sigil: 'differential-collapse-undo'},
+      pht('undo'));
+
+    return JX.$N(
+      'div',
+      {className: 'differential-collapse-undo',
+       sigil: 'differential-collapse-undo-div'},
+      [pht('collapsed'), ' ', link]);
+  };
+
 });

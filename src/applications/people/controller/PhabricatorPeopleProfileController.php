@@ -97,15 +97,10 @@ final class PhabricatorPeopleProfileController
       ->setUser($viewer)
       ->setObject($user);
 
-    $fields = PhabricatorCustomField::getObjectFields(
+    $field_list = PhabricatorCustomField::getObjectFields(
       $user,
       PhabricatorCustomField::ROLE_VIEW);
-
-    foreach ($fields as $field) {
-      $field->setViewer($viewer);
-    }
-
-    $view->applyCustomFields($fields);
+    $field_list->appendFieldsToPropertyList($user, $viewer, $view);
 
     return $view;
   }
@@ -124,6 +119,7 @@ final class PhabricatorPeopleProfileController
 
     $builder = new PhabricatorFeedBuilder($stories);
     $builder->setUser($viewer);
+    $builder->setShowHovercards(true);
     $view = $builder->buildView();
 
     return hsprintf(

@@ -439,3 +439,16 @@ tr.differential-inline-loading {
   text-align: center;
   font-size: 11px;
 }
+
+.differential-collapse-undo {
+  background: #FFE;
+  color: #000;
+  padding: 1em 0em;
+  border: 1px solid #CCA;
+  text-align: center;
+  background-color: #FFE;
+}
+
+.differential-collapse-undo a {
+  font-weight: bold;
+}

@@ -16,6 +16,8 @@ abstract class PhabricatorApplicationTransactionEditor
   private $mentionedPHIDs;
   private $continueOnNoEffect;
   private $parentMessageID;
+  private $heraldAdapter;
+  private $heraldTranscript;
   private $subscribers;
 
   private $isPreview;
@@ -125,8 +127,9 @@ abstract class PhabricatorApplicationTransactionEditor
         }
         return $old_edges;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
-        $field = $this->getCustomFieldForTransaction($object, $xaction);
-        return $field->getOldValueForApplicationTransactions();
+        // NOTE: Custom fields have their old value pre-populated when they are
+        // built by PhabricatorCustomFieldList.
+        return $xaction->getOldValue();
       default:
         return $this->getCustomTransactionOldValue($object, $xaction);
     }
@@ -438,6 +441,10 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->applyExternalEffects($object, $xaction);
       }
 
+      if ($this->supportsHerald()) {
+        $this->applyHeraldRules($object, $xactions);
+      }
+
       $this->applyFinalEffects($object, $xactions);
 
       if ($read_locking) {
@@ -585,9 +592,13 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new Exception(
           "You can not apply transactions which already have commentVersions!");
       }
-      if ($xaction->getOldValue() !== null) {
-        throw new Exception(
-          "You can not apply transactions which already have oldValue!");
+
+      $custom_field_type = PhabricatorTransactions::TYPE_CUSTOMFIELD;
+      if ($xaction->getTransactionType() != $custom_field_type) {
+        if ($xaction->getOldValue() !== null) {
+          throw new Exception(
+            "You can not apply transactions which already have oldValue!");
+        }
       }
 
       $type = $xaction->getTransactionType();
@@ -602,13 +613,22 @@ abstract class PhabricatorApplicationTransactionEditor
 
     PhabricatorPolicyFilter::requireCapability(
       $actor,
-      $xaction,
+      $object,
       PhabricatorPolicyCapability::CAN_VIEW);
+
+    // TODO: This should be "$object", not "$xaction", but probably breaks a
+    // lot of stuff if fixed -- you don't need to be able to edit in order to
+    // comment. Instead, transactions should specify the capabilities they
+    // require.
+
+    /*
 
     PhabricatorPolicyFilter::requireCapability(
       $actor,
       $xaction,
       PhabricatorPolicyCapability::CAN_EDIT);
+
+    */
   }
 
   private function buildMentionTransaction(
@@ -1307,6 +1327,58 @@ abstract class PhabricatorApplicationTransactionEditor
    */
   protected function supportsSearch() {
     return false;
+  }
+
+
+/* -(  Herald Integration )-------------------------------------------------- */
+
+
+  protected function supportsHerald() {
+    return false;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    throw new Exception('No herald adapter specified.');
+  }
+
+  private function setHeraldAdapter(HeraldAdapter $adapter) {
+    $this->heraldAdapter = $adapter;
+    return $this;
+  }
+
+  protected function getHeraldAdapter() {
+    return $this->heraldAdapter;
+  }
+
+  private function setHeraldTranscript(HeraldTranscript $transcript) {
+    $this->heraldTranscript = $transcript;
+    return $this;
+  }
+
+  protected function getHeraldTranscript() {
+    return $this->heraldTranscript;
+  }
+
+  private function applyHeraldRules(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $adapter = $this->buildHeraldAdapter($object, $xactions);
+    $xscript = HeraldEngine::loadAndApplyRules($adapter);
+
+    $this->setHeraldAdapter($adapter);
+    $this->setHeraldTranscript($xscript);
+
+    $this->didApplyHeraldRules($object, $adapter, $xscript);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
   }
 
 

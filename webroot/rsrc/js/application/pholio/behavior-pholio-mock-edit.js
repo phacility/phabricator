@@ -6,13 +6,15 @@
  *           javelin-workflow
  *           phabricator-phtize
  *           phabricator-drag-and-drop-file-upload
+ *           phabricator-draggable-list
  */
 JX.behavior('pholio-mock-edit', function(config) {
   var pht = JX.phtize(config.pht);
 
   var nodes = {
     list: JX.$(config.listID),
-    drop: JX.$(config.dropID)
+    drop: JX.$(config.dropID),
+    order: JX.$(config.orderID)
   };
 
   var uploading = [];
@@ -33,10 +35,42 @@ JX.behavior('pholio-mock-edit', function(config) {
     JX.DOM.listen(undo, 'click', 'pholio-drop-undo', function(e) {
       e.kill();
       JX.DOM.replace(undo, node);
+      synchronize_order();
     });
 
     JX.DOM.replace(node, undo);
+    synchronize_order();
   });
+
+
+/* -(  Reordering Images  )-------------------------------------------------- */
+
+
+  var draglist = new JX.DraggableList('pholio-drop-image', nodes.list)
+    .setGhostNode(JX.$N('div', {className: 'drag-ghost'}))
+    .setFindItemsHandler(function() {
+      return JX.DOM.scry(nodes.list, 'div', 'pholio-drop-image');
+    });
+
+  // Only let the user drag images by the handle, not the whole entry.
+  draglist.listen('shouldBeginDrag', function(e) {
+    if (!e.getNode('pholio-drag-handle')) {
+      JX.Stratcom.context().prevent();
+    }
+  });
+
+  // Reflect the display order in a hidden input.
+  var synchronize_order = function() {
+    var items = draglist.findItems();
+    var order = [];
+    for (var ii = 0; ii < items.length; ii++) {
+      order.push(JX.Stratcom.getData(items[ii]).filePHID);
+    }
+    nodes.order.value = order.join(',');
+  };
+
+  draglist.listen('didDrop', synchronize_order);
+  synchronize_order();
 
 
 /* -(  Build  )-------------------------------------------------------------- */
@@ -84,6 +118,7 @@ JX.behavior('pholio-mock-edit', function(config) {
           build_update_control(new_node);
 
           JX.DOM.replace(node, new_node);
+          synchronize_order();
         })
         .start();
     });
@@ -122,6 +157,7 @@ JX.behavior('pholio-mock-edit', function(config) {
 
           JX.DOM.replace(node, new_node);
           JX.DOM.alterClass(node, 'pholio-replacing', false);
+          synchronize_order();
         })
         .start();
     });

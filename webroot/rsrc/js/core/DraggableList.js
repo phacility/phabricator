@@ -63,6 +63,11 @@ JX.install('DraggableList', {
       return this._ghostNode;
     },
 
+    setGhostNode : function(node) {
+      this._ghostNode = node;
+      return this;
+    },
+
     _defaultGhostHandler : function(ghost, target) {
       var parent = this._dragging.parentNode;
       if (target && target.nextSibling) {
@@ -124,7 +129,7 @@ JX.install('DraggableList', {
       this._target = null;
 
       if (!this.invoke('didBeginDrag', this._dragging).getPrevented()) {
-        var ghost =  this.getGhostNode();
+        var ghost = this.getGhostNode();
         ghost.style.height = JX.Vector.getDim(this._dragging).y + 'px';
         JX.DOM.alterClass(this._dragging, 'drag-dragging', true);
       }

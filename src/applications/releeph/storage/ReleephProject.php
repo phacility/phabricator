@@ -18,14 +18,14 @@ final class ReleephProject extends ReleephDAO
   // been picked and which haven't.
   protected $trunkBranch;
 
-  protected $repositoryID;
   protected $repositoryPHID;
   protected $isActive;
   protected $createdByUserPHID;
   protected $arcanistProjectID;
-  protected $projectID;
 
   protected $details = array();
+
+  private $repository = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -75,13 +75,6 @@ final class ReleephProject extends ReleephDAO
     }
   }
 
-  public function loadPhabricatorProject() {
-    if ($id = $this->getProjectID()) {
-      return id(new PhabricatorProject())->load($id);
-    }
-    return id(new PhabricatorProject())->makeEphemeral(); // dummy
-  }
-
   public function loadArcanistProject() {
     return $this->loadOneRelative(
       new PhabricatorRepositoryArcanistProject(),
@@ -111,11 +104,21 @@ final class ReleephProject extends ReleephDAO
     }
   }
 
+  public function attachRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getRepository() {
+    return $this->assertAttached($this->repository);
+  }
+
+  // TODO: Remove once everything uses ProjectQuery.
   public function loadPhabricatorRepository() {
     return $this->loadOneRelative(
       new PhabricatorRepository(),
-      'id',
-      'getRepositoryID');
+      'phid',
+      'getRepositoryPHID');
   }
 
   public function getCurrentReleaseNumber() {
@@ -138,17 +141,7 @@ final class ReleephProject extends ReleephDAO
   }
 
   public function getReleephFieldSelector() {
-    $class = $this->getDetail('field_selector');
-    if (!$class) {
-      $key = 'releeph.field-selector';
-      $class = PhabricatorEnv::getEnvConfig($key);
-    }
-
-    if ($class) {
-      return newv($class, array());
-    } else {
-      return new ReleephDefaultFieldSelector();
-    }
+    return new ReleephDefaultFieldSelector();
   }
 
   /**

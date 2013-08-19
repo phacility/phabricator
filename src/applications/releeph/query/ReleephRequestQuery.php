@@ -7,6 +7,21 @@ final class ReleephRequestQuery
   private $commitToRevMap;
   private $ids;
   private $phids;
+  private $severities;
+  private $requestorPHIDs;
+  private $branchIDs;
+
+  const STATUS_ALL          = 'status-all';
+  const STATUS_OPEN         = 'status-open';
+  const STATUS_REQUESTED    = 'status-requested';
+  const STATUS_NEEDS_PULL   = 'status-needs-pull';
+  const STATUS_REJECTED     = 'status-rejected';
+  const STATUS_ABANDONED    = 'status-abandoned';
+  const STATUS_PULLED       = 'status-pulled';
+  const STATUS_NEEDS_REVERT = 'status-needs-revert';
+  const STATUS_REVERTED     = 'status-reverted';
+
+  private $status = self::STATUS_ALL;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -18,6 +33,11 @@ final class ReleephRequestQuery
     return $this;
   }
 
+  public function withBranchIDs(array $branch_ids) {
+    $this->branchIDs = $branch_ids;
+    return $this;
+  }
+
   public function getRevisionPHID($commit_phid) {
     if ($this->commitToRevMap) {
       return idx($this->commitToRevMap, $commit_phid, null);
@@ -26,8 +46,23 @@ final class ReleephRequestQuery
     return null;
   }
 
+  public function withStatus($status) {
+    $this->status = $status;
+    return $this;
+  }
+
   public function withRequestedCommitPHIDs(array $requested_commit_phids) {
     $this->requestedCommitPHIDs = $requested_commit_phids;
+    return $this;
+  }
+
+  public function withRequestorPHIDs(array $phids) {
+    $this->requestorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withSeverities(array $severities) {
+    $this->severities = $severities;
     return $this;
   }
 
@@ -65,6 +100,32 @@ final class ReleephRequestQuery
     return $table->loadAllFromArray($data);
   }
 
+  public function willFilterPage(array $requests) {
+
+    // TODO: These should be serviced by the query, but are not currently
+    // denormalized anywhere. For now, filter them here instead.
+
+    $keep_status = array_fuse($this->getKeepStatusConstants());
+    if ($keep_status) {
+      foreach ($requests as $key => $request) {
+        if (empty($keep_status[$request->getStatus()])) {
+          unset($requests[$key]);
+        }
+      }
+    }
+
+    if ($this->severities) {
+      $severities = array_fuse($this->severities);
+      foreach ($requests as $key => $request) {
+        if (empty($severities[$request->getDetail('releeph:severity')])) {
+          unset($requests[$key]);
+        }
+      }
+    }
+
+    return $requests;
+  }
+
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
@@ -82,6 +143,13 @@ final class ReleephRequestQuery
         $this->phids);
     }
 
+    if ($this->branchIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'branchID IN (%Ld)',
+        $this->branchIDs);
+    }
+
     if ($this->requestedCommitPHIDs) {
       $where[] = qsprintf(
         $conn_r,
@@ -89,9 +157,59 @@ final class ReleephRequestQuery
         $this->requestedCommitPHIDs);
     }
 
+    if ($this->requestorPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'requestUserPHID IN (%Ls)',
+        $this->requestorPHIDs);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  private function getKeepStatusConstants() {
+    switch ($this->status) {
+      case self::STATUS_ALL:
+        return array();
+      case self::STATUS_OPEN:
+        return array(
+          ReleephRequestStatus::STATUS_REQUESTED,
+          ReleephRequestStatus::STATUS_NEEDS_PICK,
+          ReleephRequestStatus::STATUS_NEEDS_REVERT,
+        );
+      case self::STATUS_REQUESTED:
+        return array(
+          ReleephRequestStatus::STATUS_REQUESTED,
+        );
+      case self::STATUS_NEEDS_PULL:
+        return array(
+          ReleephRequestStatus::STATUS_NEEDS_PICK,
+        );
+      case self::STATUS_REJECTED:
+        return array(
+          ReleephRequestStatus::STATUS_REJECTED,
+        );
+      case self::STATUS_ABANDONED:
+        return array(
+          ReleephRequestStatus::STATUS_ABANDONED,
+        );
+      case self::STATUS_PULLED:
+        return array(
+          ReleephRequestStatus::STATUS_PICKED,
+        );
+      case self::STATUS_NEEDS_REVERT:
+        return array(
+          ReleephRequestStatus::NEEDS_REVERT,
+        );
+      case self::STATUS_REVERTED:
+        return array(
+          ReleephRequestStatus::REVERTED,
+        );
+      default:
+        throw new Exception("Unknown status '{$this->status}'!");
+    }
   }
 
 }

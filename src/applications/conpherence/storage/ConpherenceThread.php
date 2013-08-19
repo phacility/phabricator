@@ -213,6 +213,10 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+    // this bad boy isn't even created yet so go nuts $user
+    if (!$this->getID()) {
+      return true;
+    }
     $participants = $this->getParticipants();
     return isset($participants[$user->getPHID()]);
   }

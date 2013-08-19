@@ -106,4 +106,31 @@ abstract class ReleephProjectController extends ReleephController {
     return $this->releephRequest;
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $project = $this->getReleephProject();
+    $project_id = $project->getID();
+    $project_uri = $this->getApplicationURI("project/{$project_id}/");
+
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setHref($project_uri)
+        ->setName($project->getName()));
+
+    try {
+      $branch = $this->getReleephBranch();
+      $branch_uri = $branch->getURI();
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setHref($branch_uri)
+          ->setName($branch->getDisplayNameWithDetail()));
+    } catch (Exception $ex) {
+      // TODO: This is kind of derps.
+    }
+
+    return $crumbs;
+  }
+
+
 }

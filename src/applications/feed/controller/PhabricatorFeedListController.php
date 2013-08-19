@@ -28,6 +28,7 @@ final class PhabricatorFeedListController extends PhabricatorFeedController
     PhabricatorSavedQuery $query) {
 
     $builder = new PhabricatorFeedBuilder($feed);
+    $builder->setShowHovercards(true);
     $builder->setUser($this->getRequest()->getUser());
     $view = $builder->buildView();
 

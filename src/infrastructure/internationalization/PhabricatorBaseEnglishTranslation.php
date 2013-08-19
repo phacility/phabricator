@@ -662,6 +662,11 @@ abstract class PhabricatorBaseEnglishTranslation
         'configuration sources: %s.',
       ),
 
+      '%d Open Pull Request(s)' => array(
+        '%d Open Pull Request',
+        '%d Open Pull Requests',
+      ),
+
     );
   }
 

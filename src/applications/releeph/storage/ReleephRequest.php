@@ -1,7 +1,9 @@
 <?php
 
 final class ReleephRequest extends ReleephDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $phid;
   protected $branchID;
@@ -21,6 +23,8 @@ final class ReleephRequest extends ReleephDAO
 
   // Pre-populated handles that we'll bulk load in ReleephBranch
   private $handles;
+  private $customFields = self::ATTACHABLE;
+
 
 
 /* -(  Constants and helper methods  )--------------------------------------- */
@@ -292,7 +296,9 @@ final class ReleephRequest extends ReleephDAO
     return parent::setUserIntents($ar);
   }
 
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
 
   public function getCapabilities() {
     return array(
@@ -308,5 +314,27 @@ final class ReleephRequest extends ReleephDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
   }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('releeph.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'ReleephFieldSpecification';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
 
 }
