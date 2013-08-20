@@ -11,9 +11,5 @@ final class ReleephBranchTransaction
     return ReleephPHIDTypeBranch::TYPECONST;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('branch');
-  }
-
 }
 

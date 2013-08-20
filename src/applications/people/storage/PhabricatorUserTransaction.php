@@ -15,9 +15,5 @@ final class PhabricatorUserTransaction
     return null;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('user');
-  }
-
 }
 

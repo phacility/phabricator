@@ -14,8 +14,4 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return new DifferentialTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('revision');
-  }
-
 }

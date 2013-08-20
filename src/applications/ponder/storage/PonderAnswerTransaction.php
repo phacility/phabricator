@@ -21,10 +21,6 @@ final class PonderAnswerTransaction
     return new PonderAnswerTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('answer');
-  }
-
   public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();

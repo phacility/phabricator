@@ -21,10 +21,6 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     return new PholioTransactionView();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('mock');
-  }
-
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
     $phids[] = $this->getObjectPHID();

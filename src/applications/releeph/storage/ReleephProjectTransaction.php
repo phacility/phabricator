@@ -11,9 +11,5 @@ final class ReleephProjectTransaction
     return ReleephPHIDTypeProject::TYPECONST;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('project');
-  }
-
 }
 

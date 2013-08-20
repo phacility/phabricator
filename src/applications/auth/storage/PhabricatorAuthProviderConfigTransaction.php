@@ -34,10 +34,6 @@ final class PhabricatorAuthProviderConfigTransaction
     return null;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('authentication provider');
-  }
-
   public function getIcon() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

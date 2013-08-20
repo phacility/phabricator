@@ -19,10 +19,6 @@ final class PhabricatorMacroTransaction
     return new PhabricatorMacroTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('macro');
-  }
-
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 

@@ -17,11 +17,6 @@ final class PhabricatorConfigTransaction
     return null;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('config');
-  }
-
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

@@ -21,10 +21,6 @@ final class LegalpadTransaction extends PhabricatorApplicationTransaction {
     return new LegalpadTransactionView();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('document');
-  }
-
   public function shouldHide() {
     $old = $this->getOldValue();
 
