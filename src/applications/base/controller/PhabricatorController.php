@@ -188,7 +188,6 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     $page->setShowChrome(idx($options, 'chrome', true));
-    $page->setDust(idx($options, 'dust', false));
 
     $application_menu = $this->buildApplicationMenu();
     if ($application_menu) {
@@ -226,7 +225,6 @@ abstract class PhabricatorController extends AphrontController {
         $view->appendChild(hsprintf(
           '<div style="padding: 2em 0;">%s</div>',
           $response->buildResponseString()));
-        $view->setDust(true);
         $response = new AphrontWebpageResponse();
         $response->setContent($view->render());
         return $response;

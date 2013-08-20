@@ -29,14 +29,6 @@ p, blockquote, th, td, button {
   border: 0;
 }
 
-body.make-me-sneeze {
-  background: #e9eaed url('/rsrc/image/texture/dust_background.jpeg');
-}
-
-.make-me-sneeze .phabricator-standard-page {
-  background: transparent;
-}
-
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -73,10 +65,7 @@ body {
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
-}
-
-body.phabricator-chromeless-page {
-  background: #ffffff;
+  background: #EBECEE;
 }
 
 textarea {
