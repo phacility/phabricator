@@ -34,7 +34,7 @@ final class ReleephBranchEditController extends ReleephProjectController {
       $releeph_branch->saveTransaction();
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/releeph/project/'.$releeph_branch->getReleephProjectID());
+        ->setURI($releeph_branch->getURI());
     }
 
     $phids = array();

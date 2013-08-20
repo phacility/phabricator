@@ -11,13 +11,15 @@ abstract class ReleephProjectController extends ReleephController {
    * referenced in the URL.
    */
   public function willProcessRequest(array $data) {
+    $viewer = $this->getRequest()->getUser();
+
     // Project
     $project = null;
     $project_id = idx($data, 'projectID');
     $project_name = idx($data, 'projectName');
     if ($project_id) {
       $project = id(new ReleephProjectQuery())
-        ->setViewer($this->getRequest()->getUser())
+        ->setViewer($viewer)
         ->withIDs(array($project_id))
         ->executeOne();
       if (!$project) {
@@ -38,7 +40,10 @@ abstract class ReleephProjectController extends ReleephController {
     $branch_id = idx($data, 'branchID');
     $branch_name = idx($data, 'branchName');
     if ($branch_id) {
-      $branch = id(new ReleephBranch())->load($branch_id);
+      $branch = id(new ReleephBranchQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($branch_id))
+        ->executeOne();
       if (!$branch) {
         throw new Exception("Branch with id '{$branch_id}' not found!");
       }
@@ -56,6 +61,16 @@ abstract class ReleephProjectController extends ReleephController {
         throw new Exception(
           "ReleephBranch with basename '{$branch_name}' not found ".
           "in project '{$project->getName()}'!");
+      }
+      // Do the branch query again, properly, to hit policies and load attached
+      // data.
+      // TODO: Clean this up with T3657.
+      $branch = id(new ReleephBranchQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($branch->getID()))
+        ->executeOne();
+      if (!$branch) {
+        throw new Exception('404!');
       }
     }
 

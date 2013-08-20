@@ -13,7 +13,7 @@ final class ReleephBranchAccessController extends ReleephProjectController {
     $branch = $this->getReleephBranch();
     $request = $this->getRequest();
 
-    $done_uri = '/releeph/project/'.$branch->getReleephProjectID().'/';
+    $done_uri = $branch->getURI();
 
     switch ($this->action) {
       case 'close':

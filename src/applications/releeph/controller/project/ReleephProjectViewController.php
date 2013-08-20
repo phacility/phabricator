@@ -90,25 +90,8 @@ final class ReleephProjectViewController extends ReleephProjectController
         ->setHref($branch->getURI())
         ->addAttribute($branch_link);
 
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon('edit')
-          ->setHref($branch->getURI('edit/')));
-
-      if ($branch->getIsActive()) {
-        $item->setBarColor('blue');
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('delete')
-            ->setWorkflow(true)
-            ->setHref($branch->getURI('close/')));
-      } else {
+      if (!$branch->getIsActive()) {
         $item->setDisabled(true);
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('enable')
-            ->setWorkflow(true)
-            ->setHref($branch->getURI('re-open/')));
       }
 
       $commit = $branch->getCutPointCommit();
