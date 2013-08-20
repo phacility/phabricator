@@ -1551,6 +1551,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130814.usercustom.sql'),
       ),
+      '20130820.releephxactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130820.releephxactions.sql'),
+      ),
     );
   }
 }
