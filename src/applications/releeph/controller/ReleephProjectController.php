@@ -16,7 +16,10 @@ abstract class ReleephProjectController extends ReleephController {
     $project_id = idx($data, 'projectID');
     $project_name = idx($data, 'projectName');
     if ($project_id) {
-      $project = id(new ReleephProject())->load($project_id);
+      $project = id(new ReleephProjectQuery())
+        ->setViewer($this->getRequest()->getUser())
+        ->withIDs(array($project_id))
+        ->executeOne();
       if (!$project) {
         throw new Exception(
           "ReleephProject with id '{$project_id}' not found!");
