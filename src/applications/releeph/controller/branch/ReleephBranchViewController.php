@@ -123,6 +123,9 @@ final class ReleephBranchViewController extends ReleephProjectController
     $close_uri = $branch->getURI('close/');
     $reopen_uri = $branch->getURI('re-open/');
 
+    $id = $branch->getID();
+    $history_uri = $this->getApplicationURI("branch/{$id}/history/");
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Branch'))
@@ -151,6 +154,11 @@ final class ReleephBranchViewController extends ReleephProjectController
           ->setWorkflow(true));
     }
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($history_uri)
+        ->setIcon('transcript'));
 
     $properties = id(new PhabricatorPropertyListView())
       ->setUser($viewer)
