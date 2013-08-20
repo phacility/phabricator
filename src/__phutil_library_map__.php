@@ -1938,7 +1938,6 @@ phutil_register_library_map(array(
     'ReleephAuthorFieldSpecification' => 'applications/releeph/field/specification/ReleephAuthorFieldSpecification.php',
     'ReleephBranch' => 'applications/releeph/storage/ReleephBranch.php',
     'ReleephBranchAccessController' => 'applications/releeph/controller/branch/ReleephBranchAccessController.php',
-    'ReleephBranchBoxView' => 'applications/releeph/view/branch/ReleephBranchBoxView.php',
     'ReleephBranchCommitFieldSpecification' => 'applications/releeph/field/specification/ReleephBranchCommitFieldSpecification.php',
     'ReleephBranchCreateController' => 'applications/releeph/controller/branch/ReleephBranchCreateController.php',
     'ReleephBranchEditController' => 'applications/releeph/controller/branch/ReleephBranchEditController.php',
@@ -1948,6 +1947,7 @@ phutil_register_library_map(array(
     'ReleephBranchQuery' => 'applications/releeph/query/ReleephBranchQuery.php',
     'ReleephBranchSearchEngine' => 'applications/releeph/query/ReleephBranchSearchEngine.php',
     'ReleephBranchTemplate' => 'applications/releeph/view/branch/ReleephBranchTemplate.php',
+    'ReleephBranchTransaction' => 'applications/releeph/storage/ReleephBranchTransaction.php',
     'ReleephBranchViewController' => 'applications/releeph/controller/branch/ReleephBranchViewController.php',
     'ReleephCommitFinder' => 'applications/releeph/commitfinder/ReleephCommitFinder.php',
     'ReleephCommitFinderException' => 'applications/releeph/commitfinder/ReleephCommitFinderException.php',
@@ -1980,6 +1980,7 @@ phutil_register_library_map(array(
     'ReleephProjectListController' => 'applications/releeph/controller/project/ReleephProjectListController.php',
     'ReleephProjectQuery' => 'applications/releeph/query/ReleephProjectQuery.php',
     'ReleephProjectSearchEngine' => 'applications/releeph/query/ReleephProjectSearchEngine.php',
+    'ReleephProjectTransaction' => 'applications/releeph/storage/ReleephProjectTransaction.php',
     'ReleephProjectViewController' => 'applications/releeph/controller/project/ReleephProjectViewController.php',
     'ReleephReasonFieldSpecification' => 'applications/releeph/field/specification/ReleephReasonFieldSpecification.php',
     'ReleephRequest' => 'applications/releeph/storage/ReleephRequest.php',
@@ -4119,7 +4120,6 @@ phutil_register_library_map(array(
       1 => 'PhabricatorPolicyInterface',
     ),
     'ReleephBranchAccessController' => 'ReleephProjectController',
-    'ReleephBranchBoxView' => 'AphrontView',
     'ReleephBranchCommitFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephBranchCreateController' => 'ReleephProjectController',
     'ReleephBranchEditController' => 'ReleephProjectController',
@@ -4128,6 +4128,7 @@ phutil_register_library_map(array(
     'ReleephBranchPreviewView' => 'AphrontFormControl',
     'ReleephBranchQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ReleephBranchSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'ReleephBranchTransaction' => 'PhabricatorApplicationTransaction',
     'ReleephBranchViewController' =>
     array(
       0 => 'ReleephProjectController',
@@ -4172,6 +4173,7 @@ phutil_register_library_map(array(
     ),
     'ReleephProjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ReleephProjectSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'ReleephProjectTransaction' => 'PhabricatorApplicationTransaction',
     'ReleephProjectViewController' =>
     array(
       0 => 'ReleephProjectController',
