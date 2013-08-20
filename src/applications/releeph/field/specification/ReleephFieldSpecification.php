@@ -24,7 +24,7 @@ abstract class ReleephFieldSpecification
   public function getRequiredStorageKey() {
     $key = $this->getStorageKey();
     if ($key === null) {
-      throw new ReleephFieldSpecificationIncompleteException($this);
+      throw new PhabricatorCustomFieldImplementationIncompleteException($this);
     }
     if (strpos($key, '.') !== false) {
       /**
@@ -176,11 +176,11 @@ abstract class ReleephFieldSpecification
   }
 
   public function renderLabelForCommitMessage() {
-    throw new ReleephFieldSpecificationIncompleteException($this);
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
   public function renderValueForCommitMessage() {
-    throw new ReleephFieldSpecificationIncompleteException($this);
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
   public function shouldAppearOnRevertMessage() {
@@ -215,7 +215,7 @@ abstract class ReleephFieldSpecification
   }
 
   public function getMarkupText($field) {
-    throw new ReleephFieldSpecificationIncompleteException($this);
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
   final public function getMarkupEngineOutput() {

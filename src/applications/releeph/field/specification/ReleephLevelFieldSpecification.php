@@ -20,10 +20,7 @@ abstract class ReleephLevelFieldSpecification
   abstract public function getDescriptionForLevel($level);
 
   public function getStorageKey() {
-    $class = get_class($this);
-    throw new ReleephFieldSpecificationIncompleteException(
-      $this,
-      "You must implement getStorageKey() for children of {$class}!");
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
   public function renderValueForHeaderView() {
@@ -34,11 +31,7 @@ abstract class ReleephLevelFieldSpecification
     $control_name = $this->getRequiredStorageKey();
     $all_levels = $this->getLevels();
 
-    $level = $request->getStr($control_name);
-    if (!$level) {
-      $level = $this->getValue();
-    }
-
+    $level = $this->getValue();
     if (!$level) {
       $level = $this->getDefaultLevel();
     }
