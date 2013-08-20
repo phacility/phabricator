@@ -194,7 +194,6 @@ final class PhabricatorChatLogChannelLogController
       array(
         'title' => pht('Channel Log'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

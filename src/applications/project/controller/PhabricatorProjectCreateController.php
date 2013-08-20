@@ -122,7 +122,6 @@ final class PhabricatorProjectCreateController
         array(
           'title' => pht('Create New Project'),
           'device' => true,
-          'dust' => true,
         ));
     }
   }

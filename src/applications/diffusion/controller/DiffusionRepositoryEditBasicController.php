@@ -108,7 +108,6 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
       $content,
       array(
         'title' => $title,
-        'dust' => true,
         'device' => true,
       ));
   }

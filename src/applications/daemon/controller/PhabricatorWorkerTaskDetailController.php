@@ -67,7 +67,6 @@ final class PhabricatorWorkerTaskDetailController
       ),
       array(
         'title' => $title,
-        'dust' => true,
         'device' => true,
       ));
   }

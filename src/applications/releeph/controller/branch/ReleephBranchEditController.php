@@ -98,7 +98,6 @@ final class ReleephBranchEditController extends ReleephProjectController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

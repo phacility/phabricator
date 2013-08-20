@@ -96,7 +96,6 @@ final class HeraldTranscriptController extends HeraldController {
       array(
         'title' => pht('Transcript'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

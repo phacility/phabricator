@@ -106,7 +106,6 @@ final class PhabricatorSearchEditController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

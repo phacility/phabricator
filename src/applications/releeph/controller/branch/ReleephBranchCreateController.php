@@ -112,7 +112,6 @@ final class ReleephBranchCreateController extends ReleephProjectController {
       array(
         'title' => pht('New Branch'),
         'device' => true,
-        'dust' => true,
       ));
   }
 }

@@ -279,7 +279,6 @@ final class PhabricatorAuthEditController
       ),
       array(
         'title' => $title,
-        'dust' => true,
         'device' => true,
       ));
   }

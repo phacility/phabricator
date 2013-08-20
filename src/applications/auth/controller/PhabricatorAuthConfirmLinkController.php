@@ -85,7 +85,6 @@ final class PhabricatorAuthConfirmLinkController
       ),
       array(
         'title' => pht('Confirm External Account Link'),
-        'dust' => true,
         'device' => true,
       ));
   }

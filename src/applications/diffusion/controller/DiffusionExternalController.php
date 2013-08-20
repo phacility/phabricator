@@ -131,7 +131,6 @@ final class DiffusionExternalController extends DiffusionController {
       array(
         'title' => pht('Unresolvable External'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

@@ -122,7 +122,6 @@ final class ReleephProjectCreateController extends ReleephProjectController {
       ),
       array(
         'title' => pht('Create New Project'),
-        'dust' => true,
         'device' => true,
       ));
   }

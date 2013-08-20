@@ -64,7 +64,6 @@ final class PhameBlogListController extends PhameController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

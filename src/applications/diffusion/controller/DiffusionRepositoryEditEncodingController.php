@@ -93,7 +93,6 @@ final class DiffusionRepositoryEditEncodingController
       $content,
       array(
         'title' => $title,
-        'dust' => true,
         'device' => true,
       ));
   }

@@ -194,7 +194,6 @@ final class PhamePostEditController
       array(
         'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

@@ -115,7 +115,6 @@ final class PhabricatorPeopleEditController
       array(
         'title' => pht('Edit User'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

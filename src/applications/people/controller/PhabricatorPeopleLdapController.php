@@ -63,7 +63,6 @@ final class PhabricatorPeopleLdapController
       array(
         'title'  => pht('Import Ldap Users'),
         'device' => true,
-        'dust'   => true,
       ));
   }
 

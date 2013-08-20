@@ -115,7 +115,6 @@ final class PhabricatorRepositoryCreateController
       array(
         'title' => pht('Create Repository'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

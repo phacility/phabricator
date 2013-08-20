@@ -167,7 +167,6 @@ final class PhabricatorRepositoryEditController
       array(
         'title' => pht('Edit Repository'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

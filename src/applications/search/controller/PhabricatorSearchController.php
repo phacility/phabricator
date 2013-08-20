@@ -280,7 +280,6 @@ final class PhabricatorSearchController
       array(
         'title' => pht('Search Results'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

@@ -136,7 +136,6 @@ final class PonderQuestionEditController extends PonderController {
       array(
         'title'  => pht('Ask a Question'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

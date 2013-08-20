@@ -191,7 +191,6 @@ final class PhameBlogEditController
       array(
         'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

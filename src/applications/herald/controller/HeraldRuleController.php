@@ -196,7 +196,6 @@ final class HeraldRuleController extends HeraldController {
       ),
       array(
         'title' => pht('Edit Rule'),
-        'dust' => true,
         'device' => true,
       ));
   }

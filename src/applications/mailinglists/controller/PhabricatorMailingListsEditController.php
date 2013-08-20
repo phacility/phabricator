@@ -133,7 +133,6 @@ final class PhabricatorMailingListsEditController
       array(
         'title' => pht('Edit Mailing List'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

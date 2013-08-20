@@ -132,7 +132,6 @@ final class PhabricatorProjectMembersEditController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

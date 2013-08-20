@@ -83,7 +83,6 @@ final class PhabricatorProjectProfileController
       array(
         'title' => $project->getName(),
         'device' => true,
-        'dust' => true,
       ));
   }
 

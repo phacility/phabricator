@@ -137,7 +137,6 @@ final class PhabricatorCountdownEditController
       array(
         'title' => pht('Edit Countdown'),
         'device' => true,
-        'dust' => true,
       ));
   }
 }

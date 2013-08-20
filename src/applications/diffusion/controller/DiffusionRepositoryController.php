@@ -129,7 +129,6 @@ final class DiffusionRepositoryController extends DiffusionController {
       $content,
       array(
         'title' => $drequest->getRepository()->getName(),
-        'dust' => true,
         'device' => true,
       ));
   }

@@ -125,7 +125,6 @@ final class PhamePostNewController extends PhameController {
       array(
         'title'   => $title,
         'device'  => true,
-        'dust' => true,
       ));
   }
 }

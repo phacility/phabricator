@@ -78,7 +78,6 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       array(
         'title' => pht('Audits'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

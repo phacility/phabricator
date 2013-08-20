@@ -147,7 +147,6 @@ final class DiffusionLintController extends DiffusionController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
         ));
   }
 

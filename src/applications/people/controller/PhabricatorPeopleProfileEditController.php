@@ -82,7 +82,6 @@ final class PhabricatorPeopleProfileEditController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

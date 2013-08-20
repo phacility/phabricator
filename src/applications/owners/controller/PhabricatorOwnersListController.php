@@ -208,7 +208,6 @@ final class PhabricatorOwnersListController
       ),
       array(
         'title' => pht('Package Index'),
-        'dust' => true,
         'device' => true,
       ));
   }

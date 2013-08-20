@@ -294,7 +294,6 @@ final class PhabricatorPeopleProfilePictureController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

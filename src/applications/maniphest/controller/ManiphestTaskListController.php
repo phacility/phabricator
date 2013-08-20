@@ -428,7 +428,6 @@ final class ManiphestTaskListController extends ManiphestController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

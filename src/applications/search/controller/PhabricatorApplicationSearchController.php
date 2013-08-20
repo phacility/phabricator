@@ -213,7 +213,6 @@ final class PhabricatorApplicationSearchController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 
@@ -301,7 +300,6 @@ final class PhabricatorApplicationSearchController
       array(
         'title' => pht("Saved Queries"),
         'device' => true,
-        'dust' => true,
       ));
   }
 

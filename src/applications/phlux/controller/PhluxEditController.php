@@ -189,7 +189,6 @@ final class PhluxEditController extends PhluxController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

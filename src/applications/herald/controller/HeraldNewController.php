@@ -84,7 +84,6 @@ final class HeraldNewController extends HeraldController {
       array(
         'title' => pht('Create Herald Rule'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

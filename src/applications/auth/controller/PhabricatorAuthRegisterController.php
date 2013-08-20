@@ -381,7 +381,6 @@ final class PhabricatorAuthRegisterController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

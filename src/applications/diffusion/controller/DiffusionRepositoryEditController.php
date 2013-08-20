@@ -63,7 +63,6 @@ final class DiffusionRepositoryEditController extends DiffusionController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

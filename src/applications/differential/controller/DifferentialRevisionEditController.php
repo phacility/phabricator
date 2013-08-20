@@ -198,7 +198,6 @@ final class DifferentialRevisionEditController extends DifferentialController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 
