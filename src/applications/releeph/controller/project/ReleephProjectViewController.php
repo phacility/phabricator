@@ -184,6 +184,8 @@ final class ReleephProjectViewController extends ReleephProjectController
     $reactivate_uri = "project/{$id}/action/activate/";
     $reactivate_uri = $this->getApplicationURI($reactivate_uri);
 
+    $history_uri = $this->getApplicationURI("project/{$id}/history/");
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Project'))
@@ -212,6 +214,11 @@ final class ReleephProjectViewController extends ReleephProjectController
           ->setWorkflow(true));
     }
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($history_uri)
+        ->setIcon('transcript'));
 
     $properties = id(new PhabricatorPropertyListView())
       ->setUser($viewer)

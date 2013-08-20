@@ -30,8 +30,11 @@ abstract class PhabricatorApplicationTransaction
   private $transactionGroup = array();
 
   abstract public function getApplicationTransactionType();
-  abstract public function getApplicationTransactionCommentObject();
   abstract public function getApplicationObjectTypeName();
+
+  public function getApplicationTransactionCommentObject() {
+    throw new Exception("Not implemented!");
+  }
 
   public function getApplicationTransactionViewObject() {
     return new PhabricatorApplicationTransactionView();

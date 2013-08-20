@@ -1974,10 +1974,12 @@ phutil_register_library_map(array(
     'ReleephProjectController' => 'applications/releeph/controller/ReleephProjectController.php',
     'ReleephProjectCreateController' => 'applications/releeph/controller/project/ReleephProjectCreateController.php',
     'ReleephProjectEditController' => 'applications/releeph/controller/project/ReleephProjectEditController.php',
+    'ReleephProjectHistoryController' => 'applications/releeph/controller/project/ReleephProjectHistoryController.php',
     'ReleephProjectListController' => 'applications/releeph/controller/project/ReleephProjectListController.php',
     'ReleephProjectQuery' => 'applications/releeph/query/ReleephProjectQuery.php',
     'ReleephProjectSearchEngine' => 'applications/releeph/query/ReleephProjectSearchEngine.php',
     'ReleephProjectTransaction' => 'applications/releeph/storage/ReleephProjectTransaction.php',
+    'ReleephProjectTransactionQuery' => 'applications/releeph/query/ReleephProjectTransactionQuery.php',
     'ReleephProjectViewController' => 'applications/releeph/controller/project/ReleephProjectViewController.php',
     'ReleephReasonFieldSpecification' => 'applications/releeph/field/specification/ReleephReasonFieldSpecification.php',
     'ReleephRequest' => 'applications/releeph/storage/ReleephRequest.php',
@@ -4160,6 +4162,7 @@ phutil_register_library_map(array(
     'ReleephProjectController' => 'ReleephController',
     'ReleephProjectCreateController' => 'ReleephProjectController',
     'ReleephProjectEditController' => 'ReleephProjectController',
+    'ReleephProjectHistoryController' => 'ReleephProjectController',
     'ReleephProjectListController' =>
     array(
       0 => 'ReleephController',
@@ -4168,6 +4171,7 @@ phutil_register_library_map(array(
     'ReleephProjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ReleephProjectSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'ReleephProjectTransaction' => 'PhabricatorApplicationTransaction',
+    'ReleephProjectTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'ReleephProjectViewController' =>
     array(
       0 => 'ReleephProjectController',
