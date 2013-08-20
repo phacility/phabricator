@@ -1968,7 +1968,6 @@ phutil_register_library_map(array(
     'ReleephIntentFieldSpecification' => 'applications/releeph/field/specification/ReleephIntentFieldSpecification.php',
     'ReleephLevelFieldSpecification' => 'applications/releeph/field/specification/ReleephLevelFieldSpecification.php',
     'ReleephOriginalCommitFieldSpecification' => 'applications/releeph/field/specification/ReleephOriginalCommitFieldSpecification.php',
-    'ReleephPHIDConstants' => 'applications/releeph/ReleephPHIDConstants.php',
     'ReleephPHIDTypeBranch' => 'applications/releeph/phid/ReleephPHIDTypeBranch.php',
     'ReleephPHIDTypeProject' => 'applications/releeph/phid/ReleephPHIDTypeProject.php',
     'ReleephPHIDTypeRequest' => 'applications/releeph/phid/ReleephPHIDTypeRequest.php',
