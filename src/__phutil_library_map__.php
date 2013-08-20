@@ -1960,7 +1960,6 @@ phutil_register_library_map(array(
     'ReleephDiffMessageFieldSpecification' => 'applications/releeph/field/specification/ReleephDiffMessageFieldSpecification.php',
     'ReleephDiffSizeFieldSpecification' => 'applications/releeph/field/specification/ReleephDiffSizeFieldSpecification.php',
     'ReleephDifferentialRevisionDetailRenderer' => 'applications/releeph/differential/ReleephDifferentialRevisionDetailRenderer.php',
-    'ReleephEvent' => 'applications/releeph/storage/event/ReleephEvent.php',
     'ReleephFieldParseException' => 'applications/releeph/field/exception/ReleephFieldParseException.php',
     'ReleephFieldSelector' => 'applications/releeph/field/selector/ReleephFieldSelector.php',
     'ReleephFieldSpecification' => 'applications/releeph/field/specification/ReleephFieldSpecification.php',
@@ -4140,7 +4139,6 @@ phutil_register_library_map(array(
     'ReleephDiffChurnFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephDiffMessageFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephDiffSizeFieldSpecification' => 'ReleephFieldSpecification',
-    'ReleephEvent' => 'ReleephDAO',
     'ReleephFieldParseException' => 'Exception',
     'ReleephFieldSpecification' =>
     array(
