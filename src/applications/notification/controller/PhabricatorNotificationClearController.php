@@ -24,8 +24,19 @@ final class PhabricatorNotificationClearController
     $dialog = new AphrontDialogView();
     $dialog->setUser($user);
     $dialog->setTitle('Really mark all notifications as read?');
-    $dialog->appendChild(
-      "You can't ignore your problems forever, you know.");
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    if ($is_serious) {
+      $dialog->appendChild(
+        pht(
+          "All unread notifications will be marked as read. You can not ".
+          "undo this action."));
+    } else {
+      $dialog->appendChild(
+        pht(
+          "You can't ignore your problems forever, you know."));
+    }
+
     $dialog->addCancelButton('/notification/');
     $dialog->addSubmitButton('Mark All Read');
 
