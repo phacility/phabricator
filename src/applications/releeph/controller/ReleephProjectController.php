@@ -127,14 +127,21 @@ abstract class ReleephProjectController extends ReleephController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $project = $this->getReleephProject();
-    $project_id = $project->getID();
-    $project_uri = $this->getApplicationURI("project/{$project_id}/");
+    // TODO: The massive amount of derps here should be fixed once URIs get
+    // sorted out; see T3657.
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($project_uri)
-        ->setName($project->getName()));
+    try {
+      $project = $this->getReleephProject();
+      $project_id = $project->getID();
+      $project_uri = $this->getApplicationURI("project/{$project_id}/");
+
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setHref($project_uri)
+          ->setName($project->getName()));
+    } catch (Exception $ex) {
+      // TODO: This is derps.
+    }
 
     try {
       $branch = $this->getReleephBranch();
@@ -144,7 +151,7 @@ abstract class ReleephProjectController extends ReleephController {
           ->setHref($branch_uri)
           ->setName($branch->getDisplayNameWithDetail()));
     } catch (Exception $ex) {
-      // TODO: This is kind of derps.
+      // TODO: This is also derps.
     }
 
     return $crumbs;
