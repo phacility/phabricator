@@ -11,6 +11,12 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $showEditActions = true;
   private $isPreview;
   private $objectPHID;
+  private $isDetailView;
+
+  public function setIsDetailView($is_detail_view) {
+    $this->isDetailView = $is_detail_view;
+    return $this;
+  }
 
   public function setObjectPHID($object_phid) {
     $this->objectPHID = $object_phid;
@@ -89,10 +95,15 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
       $title = $xaction->getTitle();
       if ($xaction->hasChangeDetails()) {
+        if ($this->isPreview || $this->isDetailView) {
+          $details = $this->buildChangeDetails($xaction);
+        } else {
+          $details = $this->buildChangeDetailsLink($xaction);
+        }
         $title = array(
           $title,
           ' ',
-          $this->buildChangeDetails($xaction),
+          $details,
         );
       }
       $event->setTitle($title);
@@ -168,7 +179,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $view->render();
   }
 
-
   protected function getOrBuildEngine() {
     if ($this->engine) {
       return $this->engine;
@@ -205,6 +215,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         'sigil' => 'reveal-content',
         'mustcapture' => true,
         'id' => $show_id,
+        'style' => 'display: none',
         'meta' => array(
           'hideIDs' => array($show_id),
           'showIDs' => array($hide_id, $content_id),
@@ -219,7 +230,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         'sigil' => 'reveal-content',
         'mustcapture' => true,
         'id' => $hide_id,
-        'style' => 'display: none',
         'meta' => array(
           'hideIDs' => array($hide_id, $content_id),
           'showIDs' => array($show_id),
@@ -231,7 +241,6 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       'div',
       array(
         'id'    => $content_id,
-        'style' => 'display: none',
         'class' => 'phabricator-timeline-change-details',
       ),
       $xaction->renderChangeDetails($this->getUser()));
@@ -241,6 +250,22 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       $hide_more,
       $content,
     );
+  }
+
+  private function buildChangeDetailsLink(
+    PhabricatorApplicationTransaction $xaction) {
+
+    return javelin_tag(
+      'a',
+      array(
+        'href' => '/transactions/detail/'.$xaction->getPHID().'/',
+        'sigil' => 'transaction-detail',
+        'mustcapture' => true,
+        'meta' => array(
+          'anchor' => $this->anchorOffset,
+        ),
+      ),
+      pht('(Show Details)'));
   }
 
   protected function shouldGroupTransactions(

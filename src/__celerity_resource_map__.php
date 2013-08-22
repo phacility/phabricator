@@ -2178,7 +2178,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-transaction-list' =>
   array(
-    'uri' => '/res/8d602093/rsrc/js/application/transactions/behavior-transaction-list.js',
+    'uri' => '/res/db441ac4/rsrc/js/application/transactions/behavior-transaction-list.js',
     'type' => 'js',
     'requires' =>
     array(
