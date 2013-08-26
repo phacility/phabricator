@@ -29,14 +29,6 @@ p, blockquote, th, td, button {
   border: 0;
 }
 
-body.make-me-sneeze {
-  background: #e9eaed url('/rsrc/image/texture/dust_background.jpeg');
-}
-
-.make-me-sneeze .phabricator-standard-page {
-  background: transparent;
-}
-
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -69,14 +61,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  font: 13px/1.231 'Helvetica Neue', Arial, sans-serif;
+  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
-}
-
-body.phabricator-chromeless-page {
-  background: #ffffff;
+  background: #ebecee;
+  text-rendering: optimizeLegibility;
 }
 
 textarea {

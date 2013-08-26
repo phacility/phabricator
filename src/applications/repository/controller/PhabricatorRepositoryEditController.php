@@ -155,19 +155,18 @@ final class PhabricatorRepositoryEditController
 
     $nav = $this->sideNav;
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Edit Repository'));
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Edit Repository'))
+      ->setFormError($error_view)
+      ->setForm($form);
 
-    $nav->appendChild($error_view);
-    $nav->appendChild($header);
-    $nav->appendChild($form);
+    $nav->appendChild($form_box);
 
     return $this->buildApplicationPage(
       $nav,
       array(
         'title' => pht('Edit Repository'),
         'device' => true,
-        'dust' => true,
       ));
   }
 
@@ -359,7 +358,6 @@ final class PhabricatorRepositoryEditController
     $form
       ->setUser($user)
       ->setAction('/repository/edit/'.$repository->getID().'/tracking/')
-      ->setFlexible(true)
       ->appendChild(hsprintf(
         '<p class="aphront-form-instructions">Phabricator can track '.
         'repositories, importing commits as they happen and notifying '.

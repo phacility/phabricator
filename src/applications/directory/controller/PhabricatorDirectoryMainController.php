@@ -71,7 +71,6 @@ final class PhabricatorDirectoryMainController
       array(
         'title' => 'Phabricator',
         'device' => true,
-        'dust' => true,
       ));
   }
 

@@ -83,7 +83,6 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
@@ -108,7 +107,6 @@ final class DiffusionRepositoryEditBasicController extends DiffusionController {
       $content,
       array(
         'title' => $title,
-        'dust' => true,
         'device' => true,
       ));
   }

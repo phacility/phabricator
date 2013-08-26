@@ -234,14 +234,6 @@ final class ReleephRequest extends ReleephDAO
     return $this->loadReleephBranch()->loadReleephProject();
   }
 
-  public function loadEvents() {
-    return $this->loadRelatives(
-      new ReleephRequestEvent(),
-      'releephRequestID',
-      'getID',
-      '(1 = 1) ORDER BY dateCreated, id');
-  }
-
   public function loadPhabricatorRepositoryCommit() {
     return $this->loadOneRelative(
       new PhabricatorRepositoryCommit(),

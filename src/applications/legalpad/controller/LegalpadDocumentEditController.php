@@ -113,7 +113,6 @@ final class LegalpadDocumentEditController extends LegalpadController {
     }
 
     $form = id(new AphrontFormView())
-      ->setFlexible(true)
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -168,6 +167,11 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $form
       ->appendChild($submit);
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())->setName($short));
@@ -182,14 +186,12 @@ final class LegalpadDocumentEditController extends LegalpadController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
         $preview
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

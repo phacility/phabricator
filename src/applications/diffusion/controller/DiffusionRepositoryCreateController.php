@@ -39,7 +39,6 @@ final class DiffusionRepositoryCreateController extends DiffusionController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

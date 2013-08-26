@@ -68,7 +68,7 @@ final class PhabricatorProjectCreateController
     }
 
     if ($request->isAjax()) {
-      $form = new AphrontFormLayoutView();
+      $form = new PHUIFormLayoutView();
     } else {
       $form = new AphrontFormView();
       $form->setUser($user);
@@ -113,16 +113,19 @@ final class PhabricatorProjectCreateController
           ->setName(pht('Create Project'))
           ->setHref($this->getApplicationURI().'create/'));
 
+      $form_box = id(new PHUIFormBoxView())
+        ->setHeaderText(pht('Create New Project'))
+        ->setFormError($error_view)
+        ->setForm($form);
+
       return $this->buildApplicationPage(
         array(
           $crumbs,
-          $error_view,
-          $form,
+          $form_box,
         ),
         array(
           'title' => pht('Create New Project'),
           'device' => true,
-          'dust' => true,
         ));
     }
   }

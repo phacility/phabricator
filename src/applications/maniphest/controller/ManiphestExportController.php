@@ -76,7 +76,7 @@ final class ManiphestExportController extends ManiphestController {
       $dialog->appendChild(phutil_tag('p', array(), pht(
         'Do you want to export the query results to Excel?')));
 
-      $form = id(new AphrontFormLayoutView())
+      $form = id(new PHUIFormLayoutView())
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel(pht('Format:'))

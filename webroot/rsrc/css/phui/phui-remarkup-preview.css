@@ -3,15 +3,16 @@
  */
 
 .phui-preview-header {
-  color: #666666;
-  margin-bottom: 12px;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #9ca5b5;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+  display: block;
 }
 
-.phui-remarkup-preview {
-  background: #fbfbfb;
-  border-bottom: 1px solid #aaaaaa;
-  padding: 12px;
+.phui-document-inner .phui-preview-header {
+  padding: 16px 0 0 16px;
 }
 
 .phui-remarkup-preview-skin-document {
@@ -19,17 +20,12 @@
   border: none;
 }
 
-.phui-remarkup-preview-skin-document .phui-preview-header {
-  padding: 8px;
-  background: #f3f3f3;
-}
-
-.device-phone .aphront-panel-preview {
+.device-phone .phui-panel-preview {
   display: none;
 }
 
 .phui-preview-loading-text {
-  color: #666666;
+  color: #999;
 }
 
 /**

@@ -107,7 +107,6 @@ final class PhameBlogEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Name'))
@@ -171,6 +170,11 @@ final class PhameBlogEditController
       $error_view = null;
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($page_title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -182,8 +186,7 @@ final class PhameBlogEditController
     $nav->appendChild(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ));
 
     return $this->buildApplicationPage(
@@ -191,7 +194,6 @@ final class PhameBlogEditController
       array(
         'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

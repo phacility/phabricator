@@ -255,12 +255,11 @@
   padding: 3px 6px;
 }
 
-
 .remarkup-assist-textarea {
-  border-left-color: #96A6C5;
-  border-right-color: #96A6C5;
-  border-bottom-color: #96A6C5;
-  border-top-color: #c9d4e9;
+  border-left-color: #95a6c5;
+  border-right-color: #95a6c5;
+  border-bottom-color: #95a6c5;
+  border-top-color: #bfcfda;
   border-radius: 0;
 
   /* Prevent Safari and Chrome users from dragging the textarea any wider,
@@ -278,11 +277,11 @@
 
   border-width: 1px 1px 0;
   border-style: solid;
-  border-top-color: #96A6C5;
-  border-left-color: #96A6C5;
-  border-right-color: #96A6C5;
+  border-top-color: #95a6c5;
+  border-left-color: #95a6c5;
+  border-right-color: #95a6c5;
 
-  background: #f5f5f5;
+  background: #F8F9FC;
   overflow: hidden;
 }
 
@@ -337,6 +336,11 @@
 .jx-order-mask {
   background: #ffffff;
   opacity: 1.0;
+}
+
+.remarkup-assist-textarea {
+  box-shadow: none;
+  -webkit-box-shadow: none;
 }
 
 .remarkup-control-order-mode {

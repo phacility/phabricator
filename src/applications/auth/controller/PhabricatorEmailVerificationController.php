@@ -24,8 +24,6 @@ final class PhabricatorEmailVerificationController
       $user->getPHID(),
       $this->code);
 
-    $color = PhabricatorActionHeaderView::HEADER_DARK_GREY;
-
     if (!$email) {
       $title = pht('Unable to Verify Email');
       $content = pht(
@@ -33,7 +31,6 @@ final class PhabricatorEmailVerificationController
         'address has been removed, or the email address is owned by another '.
         'user. Make sure you followed the link in the email correctly and are '.
         'logged in with the user account associated with the email address.');
-      $color = PhabricatorActionHeaderView::HEADER_RED;
       $continue = pht('Rats!');
     } else if ($email->getIsVerified()) {
       $title = pht('Address Already Verified');
@@ -56,7 +53,6 @@ final class PhabricatorEmailVerificationController
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle($title)
-      ->setHeaderColor($color)
       ->setMethod('GET')
       ->addCancelButton('/', $continue)
       ->appendChild($content);
@@ -74,7 +70,6 @@ final class PhabricatorEmailVerificationController
       array(
         'title' => pht('Verify Email'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

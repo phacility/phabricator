@@ -124,7 +124,6 @@ final class ManiphestTaskListController extends ManiphestController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setNoShading(true)
       ->setAction(
           $request->getRequestURI()
             ->alter('key', null)
@@ -428,7 +427,6 @@ final class ManiphestTaskListController extends ManiphestController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

@@ -98,7 +98,7 @@ final class PhabricatorPeopleProfilePictureController
       id(new PhabricatorCrumbView())
         ->setName($title));
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
 
     $default_image = PhabricatorFile::loadBuiltin($viewer, 'profile.png');
@@ -265,7 +265,6 @@ final class PhabricatorPeopleProfilePictureController
 
     $upload_form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormFileControl())
@@ -294,7 +293,6 @@ final class PhabricatorPeopleProfilePictureController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

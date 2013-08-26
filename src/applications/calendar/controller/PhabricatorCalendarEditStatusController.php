@@ -126,14 +126,13 @@ final class PhabricatorCalendarEditStatusController
         $dialog->setSubmitURI(
           $this->getApplicationURI('status/edit/'.$status->getID().'/'));
       }
-      $form = new AphrontFormLayoutView();
+      $form = new PHUIFormLayoutView();
       if ($error_view) {
         $form->appendChild($error_view);
       }
     } else {
       $form = id(new AphrontFormView())
-        ->setUser($user)
-        ->setFlexible(true);
+        ->setUser($user);
     }
 
     $form
@@ -164,14 +163,17 @@ final class PhabricatorCalendarEditStatusController
     }
     $form->appendChild($submit);
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($page_title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $nav = $this->buildSideNavView($status);
     $nav->selectFilter($filter);
 
     $nav->appendChild(
       array(
-        id(new PhabricatorHeaderView())->setHeader($page_title),
-        $error_view,
-        $form,
+        $form_box,
       ));
 
     return $this->buildApplicationPage(

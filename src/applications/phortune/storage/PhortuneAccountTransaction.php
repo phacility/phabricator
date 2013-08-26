@@ -17,10 +17,6 @@ final class PhortuneAccountTransaction
     return null;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('account');
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

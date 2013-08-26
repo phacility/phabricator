@@ -143,7 +143,6 @@ final class PhabricatorSearchController
     $search_form
       ->setUser($user)
       ->setAction('/search/')
-      ->setNoShading(true)
       ->appendChild(
         phutil_tag(
           'input',
@@ -280,7 +279,6 @@ final class PhabricatorSearchController
       array(
         'title' => pht('Search Results'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

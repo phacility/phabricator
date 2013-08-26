@@ -1,37 +1,35 @@
 /**
- * @provides aphront-form-view-css
+ * @provides phui-form-view-css
  */
 
-/**
- * These styles are overrides for .aphront-form-view
- */
-.aphront-form-view-shaded {
-  border-top: 1px solid #d4dae0;
-  border-bottom: 1px solid #d4dae0;
-  background: #f4f5f8;
+.phui-form-view {
+  padding: 16px;
+  background: #fff;
 }
 
-.aphront-panel-width-form .aphront-form-view-shaded {
-  border: 1px solid #d4dae0;
+.phui-form-view.phui-form-full-width {
+  padding: 0;
 }
 
-.aphront-form-view-padded {
-  padding: 1em;
+/* only used in transaction comments */
+.phui-form-shaded .phui-form-view {
+  border-bottom: 1px solid #D4DAE0;
+  background: #F4F5F8;
 }
 
-.aphront-form-view label.aphront-form-label {
+.phui-form-view label.aphront-form-label {
   padding-top: 5px;
   width: 19%;
   float: left;
   text-align: right;
   font-weight: bold;
   font-size: 13px;
-  color: #757c88;
-  text-shadow: 0 1px rgba(255,255,255,1);
+  color: #6b748c;
+  -webkit-font-smoothing: antialiased;
 }
 
-.device-phone .aphront-form-view label.aphront-form-label,
-.aphront-form-full-width.aphront-form-view label.aphront-form-label {
+.device-phone .phui-form-view label.aphront-form-label,
+.phui-form-full-width.phui-form-view label.aphront-form-label {
   display: block;
   float: none;
   text-align: left;
@@ -46,7 +44,7 @@
 }
 
 .device-phone .aphront-form-input,
-.aphront-form-full-width .aphront-form-input {
+.phui-form-full-width .aphront-form-input {
   margin-left: 0%;
   margin-right: 0%;
   width: 100%;
@@ -60,12 +58,16 @@
   padding-top: 5px;
 }
 
-.aphront-dialog-body .aphront-form-full-width {
+.aphront-dialog-body .phui-form-full-width {
   margin-top: -10px;
 }
 
+.aphront-dialog-body .phui-form-view {
+  padding: 0;
+}
+
 .device-phone .aphront-form-error,
-.aphront-form-full-width .aphront-form-error {
+.phui-form-full-width .aphront-form-error {
   float: none;
   width: 100%;
 }
@@ -76,8 +78,9 @@
 
 .aphront-form-required {
   font-weight: normal;
-  color: #888888;
+  color: #6b748c;
   font-size: 11px;
+  -webkit-font-smoothing: antialiased;
 }
 
 .aphront-form-input input {
@@ -95,14 +98,14 @@
   padding: 4px;
 }
 
-.aphront-form-full-width .aphront-form-control {
+.phui-form-full-width .aphront-form-control {
   padding: 4px 0;
 }
 
 .aphront-form-control-submit button,
 .aphront-form-control-submit a.button {
   float: right;
-  margin: 0.5em 0 0 2%;
+  margin: 4px 0 0 8px;
 }
 
 .phui-form-control-multi-submit input {
@@ -123,22 +126,24 @@
   padding-top: 2px;
 }
 
-.aphront-form-view .aphront-form-caption {
+.phui-form-view .aphront-form-caption {
   font-size: 12px;
-  color: #888;
-  padding: 2px;
+  color: #6b748c;
+  padding: 8px 4px;
   text-align: right;
   margin-right: 20%;
   margin-left: 20%;
+  -webkit-font-smoothing: antialiased;
+  line-height: 15px;
 }
 
-.device-phone .aphront-form-view .aphront-form-caption,
-.aphront-form-full-width .aphront-form-view .aphront-form-caption {
+.device-phone .phui-form-view .aphront-form-caption,
+.phui-form-full-width .phui-form-view .aphront-form-caption {
   margin-right: 0%;
 }
 
 /* override for when inside an aphront-panel-view */
-.aphront-panel-view .aphront-form-view h1 {
+.aphront-panel-view .phui-form-view h1 {
   padding: 0em 0em .8em 0em;
 }
 
@@ -148,10 +153,8 @@
   padding: 10px 4px;
 }
 
-
-
 .device .aphront-form-instructions,
-.aphront-form-full-width .aphront-form-instructions {
+.phui-form-full-width .aphront-form-instructions {
   width: 100%;
   margin: 0;
 }
@@ -199,13 +202,11 @@ table.aphront-form-control-checkbox-layout th {
   color: #222222;
 }
 
-
 .aphront-form-control-radio-layout td input,
 .aphront-form-control-checkbox-layout td input {
   margin-top: 4px;
   width: auto;
 }
-
 
 .aphront-form-control-radio-layout label.disabled,
 .aphront-form-control-checkbox-layout label.disabled {
@@ -236,8 +237,8 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .aphront-form-inset {
-  margin: 0 0 10px;
-  padding: 10px;
+  margin: 0 0 8px;
+  padding: 8px;
   background: #fff;
   border: 1px solid #d4dae0;
 }
@@ -245,7 +246,7 @@ table.aphront-form-control-checkbox-layout th {
 .aphront-form-inset h1 {
   color: #777;
   font-weight: normal;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
 }
 
 .aphront-form-drag-and-drop-file-list {
@@ -260,8 +261,8 @@ table.aphront-form-control-checkbox-layout th {
 
 .drag-and-drop-file-target {
   border: 1px dashed #bfbfbf;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .aphront-textarea-drag-and-drop {
@@ -423,4 +424,18 @@ table.aphront-form-control-checkbox-layout th {
 
 .recaptcha_only_if_privacy {
   display: none;
+}
+
+.phui-form-box .phabricator-action-header {
+  padding: 4px 5px 4px 12px;
+  border-bottom: 1px solid #bfcfda;
+}
+
+.phui-form-box .phabricator-action-header h3 {
+  color: #6b748c;
+  text-shadow: 0 1px 2px #fff;
+}
+
+.phui-form-box .aphront-error-view {
+  margin-bottom: 0;
 }

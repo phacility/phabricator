@@ -42,7 +42,6 @@ final class HeraldRuleViewController extends HeraldController {
       array(
         'title' => $rule->getName(),
         'device' => true,
-        'dust' => true,
       ));
   }
 

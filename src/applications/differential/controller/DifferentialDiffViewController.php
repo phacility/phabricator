@@ -72,7 +72,6 @@ final class DifferentialDiffViewController extends DifferentialController {
         ->setAction('/differential/revision/edit/')
         ->addHiddenInput('diffID', $diff->getID())
         ->addHiddenInput('viaDiffView', 1)
-        ->setFlexible(true)
         ->appendRemarkupInstructions(
           pht(
             'Review the diff for correctness. When you are satisfied, either '.
@@ -161,7 +160,6 @@ final class DifferentialDiffViewController extends DifferentialController {
       ),
       array(
         'title' => pht('Diff View'),
-        'dust' => true,
       ));
   }
 

@@ -104,7 +104,7 @@ final class PhabricatorAuthProviderLDAP
       $errors[] = pht('Username or password are incorrect.');
     }
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setUser($viewer)
       ->setFullWidth(true)
       ->appendChild(

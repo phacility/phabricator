@@ -17,10 +17,6 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     return new ConpherenceTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('conpherence');
-  }
-
   public function getNoEffectDescription() {
     switch ($this->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:

@@ -181,7 +181,6 @@ final class PhabricatorOwnersEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -252,13 +251,13 @@ final class PhabricatorOwnersEditController
           ->addCancelButton($cancel_uri)
           ->setValue(pht('Save Package')));
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
 
     $nav = $this->buildSideNavView();
-    $nav->appendChild($error_view);
-    $nav->appendChild($header);
-    $nav->appendChild($form);
+    $nav->appendChild($form_box);
 
     return $this->buildApplicationPage(
       array(
@@ -267,7 +266,6 @@ final class PhabricatorOwnersEditController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

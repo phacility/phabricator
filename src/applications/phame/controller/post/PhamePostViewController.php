@@ -77,7 +77,6 @@ final class PhamePostViewController extends PhameController {
       array(
         'title' => $post->getTitle(),
         'device' => true,
-        'dust' => true,
       ));
   }
 

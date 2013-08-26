@@ -6,6 +6,16 @@ final class PhabricatorApplicationSearchController
   private $searchEngine;
   private $navigation;
   private $queryKey;
+  private $preface;
+
+  public function setPreface($preface) {
+    $this->preface = $preface;
+    return $this;
+  }
+
+  public function getPreface() {
+    return $this->preface;
+  }
 
   public function setQueryKey($query_key) {
     $this->queryKey = $query_key;
@@ -123,7 +133,6 @@ final class PhabricatorApplicationSearchController
       'query/advanced');
 
     $form = id(new AphrontFormView())
-      ->setNoShading(true)
       ->setUser($user);
 
     $engine->buildSearchForm($form, $saved_query);
@@ -164,6 +173,10 @@ final class PhabricatorApplicationSearchController
         pht('Hide Query'),
         $description,
         $this->getApplicationURI('query/advanced/?query='.$query_key));
+    }
+
+    if ($this->getPreface()) {
+      $nav->appendChild($this->getPreface());
     }
 
     $nav->appendChild($filter_view);
@@ -213,7 +226,6 @@ final class PhabricatorApplicationSearchController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 
@@ -301,7 +313,6 @@ final class PhabricatorApplicationSearchController
       array(
         'title' => pht("Saved Queries"),
         'device' => true,
-        'dust' => true,
       ));
   }
 

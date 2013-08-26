@@ -185,7 +185,6 @@ final class PhabricatorDaemonConsoleController
       $nav,
       array(
         'title' => pht('Console'),
-        'dust' => true,
       ));
   }
 

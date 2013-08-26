@@ -11,7 +11,7 @@ final class AphrontDialogView extends AphrontView {
   private $class;
   private $renderAsForm = true;
   private $formID;
-  private $headerColor = PhabricatorActionHeaderView::HEADER_DARK_GREY;
+  private $headerColor = PhabricatorActionHeaderView::HEADER_LIGHTBLUE;
   private $footers = array();
   private $isStandalone;
   private $method = 'POST';

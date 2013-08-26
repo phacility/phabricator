@@ -17,10 +17,6 @@ final class PhluxTransaction extends PhabricatorApplicationTransaction {
     return null;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('variable');
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

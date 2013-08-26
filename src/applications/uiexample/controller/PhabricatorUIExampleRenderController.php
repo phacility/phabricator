@@ -59,7 +59,6 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
       array(
         'title'   => 'UI Example',
         'device'  => true,
-        'dust'    => true,
       ));
   }
 

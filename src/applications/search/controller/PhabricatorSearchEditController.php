@@ -92,6 +92,11 @@ final class PhabricatorSearchEditController
       $title = pht('Save Query');
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($errors)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -100,13 +105,11 @@ final class PhabricatorSearchEditController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $errors,
-        $form,
+        $form_box,
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

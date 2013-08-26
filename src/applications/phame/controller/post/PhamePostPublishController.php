@@ -42,7 +42,6 @@ final class PhamePostPublishController extends PhameController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Publish Post'))

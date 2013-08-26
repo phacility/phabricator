@@ -25,7 +25,7 @@ final class ReleephRequestDifferentialCreateController
       'arcanistProjectID = %d AND isActive = 1',
       $arc_project->getID());
     if (!$projects) {
-      throw new ReleephRequestException(sprintf(
+      throw new Exception(sprintf(
         "D%d belongs to the '%s' Arcanist project, ".
         "which is not part of any Releeph project!",
         $this->revision->getID(),
@@ -36,7 +36,7 @@ final class ReleephRequestDifferentialCreateController
       'releephProjectID IN (%Ld) AND isActive = 1',
       mpull($projects, 'getID'));
     if (!$branches) {
-      throw new ReleephRequestException(sprintf(
+      throw new Exception(sprintf(
         "D%d could be in the Releeph project(s) %s, ".
         "but this project / none of these projects have open branches.",
         $this->revision->getID(),

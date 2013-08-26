@@ -13,10 +13,10 @@ final class PhabricatorApplicationTransactionCommentEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $xactions = id(new PhabricatorObjectHandleData(array($this->phid)))
+    $xaction = id(new PhabricatorObjectQuery())
+      ->withPHIDs(array($this->phid))
       ->setViewer($user)
-      ->loadObjects();
-    $xaction = idx($xactions, $this->phid);
+      ->executeOne();
 
     if (!$xaction) {
       // TODO: This may also mean you don't have permission to edit the object,
@@ -33,10 +33,6 @@ final class PhabricatorApplicationTransactionCommentEditController
 
     $obj_phid = $xaction->getObjectPHID();
     $obj_handle = PhabricatorObjectHandleData::loadOneHandle($obj_phid, $user);
-    if (!$obj_handle) {
-      // Require the corresponding object exist and be visible to the user.
-      return new Aphront404Response();
-    }
 
     if ($request->isDialogFormPost()) {
       $text = $request->getStr('text');
@@ -69,7 +65,7 @@ final class PhabricatorApplicationTransactionCommentEditController
     $dialog
       ->addHiddenInput('anchor', $request->getStr('anchor'))
       ->appendChild(
-        id(new AphrontFormLayoutView())
+        id(new PHUIFormLayoutView())
         ->setFullWidth(true)
         ->appendChild(
           id(new PhabricatorRemarkupControl())

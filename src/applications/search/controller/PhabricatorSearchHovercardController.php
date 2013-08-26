@@ -52,7 +52,6 @@ final class PhabricatorSearchHovercardController
       return $this->buildApplicationPage(
         $cards,
         array(
-          'dust' => true,
         ));
     } else {
       return id(new AphrontAjaxResponse())->setContent(

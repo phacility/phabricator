@@ -75,7 +75,6 @@ final class PhameBlogViewController extends PhameController {
       array(
         'device' => true,
         'title' => $blog->getName(),
-        'dust' => true,
       ));
   }
 

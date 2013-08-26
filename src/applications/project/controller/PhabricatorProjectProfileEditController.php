@@ -151,7 +151,6 @@ final class PhabricatorProjectProfileEditController
       ->setUser($user)
       ->setAction($action)
       ->setEncType('multipart/form-data')
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -220,6 +219,10 @@ final class PhabricatorProjectProfileEditController
           ->addCancelButton('/project/view/'.$project->getID().'/')
           ->setValue(pht('Save')));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     $crumbs->addCrumb(
@@ -234,13 +237,11 @@ final class PhabricatorProjectProfileEditController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

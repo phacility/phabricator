@@ -19,10 +19,6 @@ final class PhabricatorRepositoryTransaction
     return null;
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('repository');
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

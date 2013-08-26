@@ -34,7 +34,6 @@ final class PhabricatorDaemonLogListController
       array(
         'title' => pht('All Daemons'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

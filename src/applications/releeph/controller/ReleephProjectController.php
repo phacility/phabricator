@@ -11,12 +11,17 @@ abstract class ReleephProjectController extends ReleephController {
    * referenced in the URL.
    */
   public function willProcessRequest(array $data) {
+    $viewer = $this->getRequest()->getUser();
+
     // Project
     $project = null;
     $project_id = idx($data, 'projectID');
     $project_name = idx($data, 'projectName');
     if ($project_id) {
-      $project = id(new ReleephProject())->load($project_id);
+      $project = id(new ReleephProjectQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($project_id))
+        ->executeOne();
       if (!$project) {
         throw new Exception(
           "ReleephProject with id '{$project_id}' not found!");
@@ -35,7 +40,10 @@ abstract class ReleephProjectController extends ReleephController {
     $branch_id = idx($data, 'branchID');
     $branch_name = idx($data, 'branchName');
     if ($branch_id) {
-      $branch = id(new ReleephBranch())->load($branch_id);
+      $branch = id(new ReleephBranchQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($branch_id))
+        ->executeOne();
       if (!$branch) {
         throw new Exception("Branch with id '{$branch_id}' not found!");
       }
@@ -53,6 +61,16 @@ abstract class ReleephProjectController extends ReleephController {
         throw new Exception(
           "ReleephBranch with basename '{$branch_name}' not found ".
           "in project '{$project->getName()}'!");
+      }
+      // Do the branch query again, properly, to hit policies and load attached
+      // data.
+      // TODO: Clean this up with T3657.
+      $branch = id(new ReleephBranchQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($branch->getID()))
+        ->executeOne();
+      if (!$branch) {
+        throw new Exception('404!');
       }
     }
 
@@ -109,14 +127,21 @@ abstract class ReleephProjectController extends ReleephController {
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $project = $this->getReleephProject();
-    $project_id = $project->getID();
-    $project_uri = $this->getApplicationURI("project/{$project_id}/");
+    // TODO: The massive amount of derps here should be fixed once URIs get
+    // sorted out; see T3657.
 
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setHref($project_uri)
-        ->setName($project->getName()));
+    try {
+      $project = $this->getReleephProject();
+      $project_id = $project->getID();
+      $project_uri = $this->getApplicationURI("project/{$project_id}/");
+
+      $crumbs->addCrumb(
+        id(new PhabricatorCrumbView())
+          ->setHref($project_uri)
+          ->setName($project->getName()));
+    } catch (Exception $ex) {
+      // TODO: This is derps.
+    }
 
     try {
       $branch = $this->getReleephBranch();
@@ -126,7 +151,7 @@ abstract class ReleephProjectController extends ReleephController {
           ->setHref($branch_uri)
           ->setName($branch->getDisplayNameWithDetail()));
     } catch (Exception $ex) {
-      // TODO: This is kind of derps.
+      // TODO: This is also derps.
     }
 
     return $crumbs;

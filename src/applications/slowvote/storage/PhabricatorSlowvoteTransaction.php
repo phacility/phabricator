@@ -20,10 +20,6 @@ final class PhabricatorSlowvoteTransaction
     return new PhabricatorSlowvoteTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('vote');
-  }
-
   public function shouldHide() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

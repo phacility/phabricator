@@ -39,34 +39,9 @@ final class ReleephProjectListController extends ReleephController
         ->setHeader($project->getName())
         ->setHref($this->getApplicationURI("project/{$id}/"));
 
-      $edit_uri = $this->getApplicationURI("project/{$id}/edit/");
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon('edit')
-          ->setHref($edit_uri));
-
-      if ($project->getIsActive()) {
-        $disable_uri = $this->getApplicationURI(
-          "project/{$id}/action/deactivate/");
-
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('delete')
-            ->setName(pht('Deactivate'))
-            ->setWorkflow(true)
-            ->setHref($disable_uri));
-      } else {
-        $enable_uri = $this->getApplicationURI(
-          "project/{$id}/action/activate/");
-
+      if (!$project->getIsActive()) {
         $item->setDisabled(true);
         $item->addIcon('none', pht('Inactive'));
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('new')
-            ->setName(pht('Reactivate'))
-            ->setWorkflow(true)
-            ->setHref($enable_uri));
       }
 
       $repo = $project->getRepository();

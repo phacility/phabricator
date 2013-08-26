@@ -224,7 +224,6 @@ final class PhabricatorOwnersDetailController
       ),
       array(
         'title' => pht("Package %s", $package->getName()),
-        'dust' => true,
         'device' => true,
       ));
   }

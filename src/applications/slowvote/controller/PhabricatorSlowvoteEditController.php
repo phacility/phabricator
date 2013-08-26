@@ -136,7 +136,6 @@ final class PhabricatorSlowvoteEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild($instructions)
       ->appendChild(
         id(new AphrontFormTextAreaControl())
@@ -232,16 +231,19 @@ final class PhabricatorSlowvoteEditController
       id(new PhabricatorCrumbView())
         ->setName($title));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

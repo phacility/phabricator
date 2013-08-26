@@ -22,10 +22,6 @@ final class PhabricatorPasteTransaction
     return new PhabricatorPasteTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('paste');
-  }
-
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 

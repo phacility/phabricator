@@ -64,7 +64,6 @@ final class DivinerFindController extends DivinerController {
       $list,
       array(
         'title' => 'derp',
-        'dust' => true,
         'device' => true,
       ));
   }

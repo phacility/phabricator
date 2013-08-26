@@ -53,7 +53,6 @@ final class DivinerLegacyController extends DivinerController {
       ),
       array(
         'title' => pht('Documentation'),
-        'dust' => true,
         'device' => true,
       ));
   }

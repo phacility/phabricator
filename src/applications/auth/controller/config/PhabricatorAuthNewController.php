@@ -81,6 +81,10 @@ final class PhabricatorAuthNewController
           ->addCancelButton($this->getApplicationURI())
           ->setValue(pht('Continue')));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Add Authentication Provider'))
+      ->setFormError($errors)
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
@@ -90,12 +94,10 @@ final class PhabricatorAuthNewController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $errors,
-        $form,
+        $form_box,
       ),
       array(
         'title' => pht('Add Authentication Provider'),
-        'dust' => true,
         'device' => true,
       ));
   }

@@ -88,7 +88,6 @@ final class PhabricatorSettingsPanelAccount
     $form = new AphrontFormView();
     $form
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Timezone'))
@@ -111,13 +110,13 @@ final class PhabricatorSettingsPanelAccount
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Account Settings')));
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Account Settings'));
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Account Settings'))
+      ->setForm($form);
 
     return array(
       $notice,
-      $header,
-      $form,
+      $form_box,
     );
   }
 }

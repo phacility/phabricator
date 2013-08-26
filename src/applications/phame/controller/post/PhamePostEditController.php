@@ -100,7 +100,6 @@ final class PhamePostEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->addHiddenInput('blog', $request->getInt('blog'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
@@ -174,6 +173,11 @@ final class PhamePostEditController
       $error_view = null;
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($page_title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -184,8 +188,7 @@ final class PhamePostEditController
     $nav->appendChild(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
         $preview_panel,
       ));
 
@@ -194,7 +197,6 @@ final class PhamePostEditController
       array(
         'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

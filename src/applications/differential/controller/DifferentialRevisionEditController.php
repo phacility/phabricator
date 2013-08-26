@@ -114,7 +114,6 @@ final class DifferentialRevisionEditController extends DifferentialController {
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
-    $form->setFlexible(true);
     if ($diff) {
       $form->addHiddenInput('diffID', $diff->getID());
     }
@@ -198,7 +197,6 @@ final class DifferentialRevisionEditController extends DifferentialController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

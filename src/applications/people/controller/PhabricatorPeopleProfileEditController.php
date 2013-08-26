@@ -74,15 +74,18 @@ final class PhabricatorPeopleProfileEditController
           ->addCancelButton($profile_uri)
           ->setValue(pht('Save Profile')));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Edit Your Profile'))
+      ->setForm($form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $form,
+        $form_box,
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

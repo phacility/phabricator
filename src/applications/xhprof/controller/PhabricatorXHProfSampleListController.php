@@ -86,7 +86,6 @@ final class PhabricatorXHProfSampleListController
       array(
         'title' => pht('XHProf Samples'),
         'device' => true,
-        'dust' => true,
       ));
 
   }

@@ -57,7 +57,6 @@ final class HeraldNewController extends HeraldController {
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/herald/edit/')
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('New Rule for'))
@@ -70,6 +69,10 @@ final class HeraldNewController extends HeraldController {
           ->setValue(pht('Create Rule'))
           ->addCancelButton($this->getApplicationURI()));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Create Herald Rule'))
+      ->setForm($form);
+
     $crumbs = $this
       ->buildApplicationCrumbs()
       ->addCrumb(
@@ -79,12 +82,11 @@ final class HeraldNewController extends HeraldController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $form,
+        $form_box,
       ),
       array(
         'title' => pht('Create Herald Rule'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

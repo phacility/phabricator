@@ -361,7 +361,6 @@ final class DiffusionCommitController extends DiffusionController {
       array(
         'title' => $commit_id,
         'pageObjects' => array($commit->getPHID()),
-        'dust' => true,
       ));
   }
 

@@ -23,10 +23,6 @@ final class ReleephRequestTransaction
     return new ReleephRequestTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('releeph request');
-  }
-
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
       default;

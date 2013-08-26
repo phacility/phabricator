@@ -177,7 +177,6 @@ final class PhortunePaymentMethodEditController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

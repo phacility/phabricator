@@ -50,9 +50,6 @@ final class PhabricatorSettingsPanelSearchPreferences
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save')));
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Search Preferences'));
-
     $error_view = null;
     if ($request->getStr('saved') === 'true') {
       $error_view = id(new AphrontErrorView())
@@ -61,10 +58,13 @@ final class PhabricatorSettingsPanelSearchPreferences
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Search Preferences'))
+      ->setFormError($error_view)
+      ->setForm($form);
+
     return array(
-      $error_view,
-      $header,
-      $form,
+      $form_box,
     );
   }
 }

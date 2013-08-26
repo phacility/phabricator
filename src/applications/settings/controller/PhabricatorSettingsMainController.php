@@ -31,7 +31,6 @@ final class PhabricatorSettingsMainController
       array(
         'title' => $panel->getPanelName(),
         'device' => true,
-        'dust' => true,
       ));
   }
 

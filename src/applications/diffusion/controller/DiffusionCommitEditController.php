@@ -55,7 +55,6 @@ final class DiffusionCommitEditController extends DiffusionController {
     $form         = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
         ->setLabel(pht('Projects'))
@@ -93,7 +92,6 @@ final class DiffusionCommitEditController extends DiffusionController {
       array(
         'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

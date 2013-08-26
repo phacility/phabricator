@@ -40,7 +40,6 @@ final class PhabricatorFormExample extends PhabricatorUIExample {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild($start_time)
       ->appendChild($end_time)
       ->appendChild($null_time)

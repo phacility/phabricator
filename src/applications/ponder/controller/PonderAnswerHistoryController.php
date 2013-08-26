@@ -65,7 +65,6 @@ final class PonderAnswerHistoryController extends PonderController {
       ),
       array(
         'title' => pht('Answer History'),
-        'dust' => true,
         'device' => true,
       ));
   }

@@ -17,9 +17,5 @@ final class HeraldRuleTransaction
     return new HeraldRuleTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('rule');
-  }
-
 }
 

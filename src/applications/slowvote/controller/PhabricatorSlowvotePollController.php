@@ -77,7 +77,6 @@ final class PhabricatorSlowvotePollController
       array(
         'title' => 'V'.$poll->getID().' '.$poll->getQuestion(),
         'device' => true,
-        'dust' => true,
         'pageObjects' => array($poll->getPHID()),
       ));
   }

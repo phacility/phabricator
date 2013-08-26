@@ -85,7 +85,6 @@ final class PonderQuestionEditController extends PonderController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Question'))
@@ -109,6 +108,11 @@ final class PonderQuestionEditController extends PonderController {
       ->setControlID('content')
       ->setPreviewURI($this->getApplicationURI('preview/'));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Ask New Question'))
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
 
     $id = $question->getID();
@@ -129,14 +133,12 @@ final class PonderQuestionEditController extends PonderController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
         $preview,
       ),
       array(
-        'title'  => pht('Ask a Question'),
+        'title'  => pht('Ask New Question'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

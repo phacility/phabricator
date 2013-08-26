@@ -7,6 +7,7 @@ final class PhabricatorApplicationTransactionResponse
   private $transactions;
   private $anchorOffset;
   private $isPreview;
+  private $isDetailView;
 
   protected function buildProxy() {
     return new AphrontAjaxResponse();
@@ -46,6 +47,11 @@ final class PhabricatorApplicationTransactionResponse
     return $this;
   }
 
+  public function setIsDetailView($is_detail_view) {
+    $this->isDetailView = $is_detail_view;
+    return $this;
+  }
+
   public function reduceProxyResponse() {
     if ($this->getTransactions()) {
       $view = head($this->getTransactions())
@@ -57,7 +63,8 @@ final class PhabricatorApplicationTransactionResponse
     $view
       ->setUser($this->getViewer())
       ->setTransactions($this->getTransactions())
-      ->setIsPreview($this->isPreview);
+      ->setIsPreview($this->isPreview)
+      ->setIsDetailView($this->isDetailView);
 
     if ($this->getAnchorOffset()) {
       $view->setAnchorOffset($this->getAnchorOffset());

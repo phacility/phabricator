@@ -52,7 +52,6 @@ final class HeraldRuleEditHistoryController extends HeraldController {
       array(
         'title' => pht('Rule Edit History'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

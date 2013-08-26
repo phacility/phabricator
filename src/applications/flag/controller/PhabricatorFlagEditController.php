@@ -46,7 +46,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
 
     require_celerity_resource('phabricator-flag-css');
 
-    $form = new AphrontFormLayoutView();
+    $form = new PHUIFormLayoutView();
 
     $is_new = !$flag->getID();
 

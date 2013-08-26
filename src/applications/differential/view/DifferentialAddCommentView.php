@@ -70,8 +70,8 @@ final class DifferentialAddCommentView extends AphrontView {
     $form = new AphrontFormView();
     $form
       ->setWorkflow(true)
-      ->setFlexible(true)
       ->setUser($this->user)
+      ->setShaded(true)
       ->setAction($this->actionURI)
       ->addHiddenInput('revision_id', $revision->getID())
       ->appendChild(

@@ -17,6 +17,7 @@ final class PhabricatorCountdownEditController
     $user = $request->getUser();
 
     if ($this->id) {
+      $page_title = pht('Edit Countdown');
       $countdown = id(new PhabricatorCountdownQuery())
         ->setViewer($user)
         ->withIDs(array($this->id))
@@ -32,6 +33,7 @@ final class PhabricatorCountdownEditController
         return new Aphront404Response();
       }
     } else {
+      $page_title = pht('Create Countdown');
       $countdown = new PhabricatorCountdown();
       $countdown->setEpoch(time());
     }
@@ -108,7 +110,6 @@ final class PhabricatorCountdownEditController
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
@@ -127,17 +128,19 @@ final class PhabricatorCountdownEditController
           ->addCancelButton($cancel_uri)
           ->setValue($submit_label));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($page_title)
+      ->setFormError($error_view)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
-        'title' => pht('Edit Countdown'),
+        'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 }

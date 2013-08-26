@@ -150,7 +150,6 @@ final class PhabricatorChatLogChannelLogController
       ->setUser($user)
       ->setMethod('GET')
       ->setAction($uri)
-      ->setNoShading(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Date'))
@@ -194,7 +193,6 @@ final class PhabricatorChatLogChannelLogController
       array(
         'title' => pht('Channel Log'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

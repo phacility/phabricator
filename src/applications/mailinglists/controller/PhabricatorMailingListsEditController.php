@@ -14,6 +14,7 @@ final class PhabricatorMailingListsEditController
     $viewer = $request->getUser();
 
     if ($this->id) {
+      $page_title = pht('Edit Mailing List');
       $list = id(new PhabricatorMailingListQuery())
         ->setViewer($viewer)
         ->withIDs(array($this->id))
@@ -22,6 +23,7 @@ final class PhabricatorMailingListsEditController
         return new Aphront404Response();
       }
     } else {
+      $page_title = pht('Create Mailing List');
       $list = new PhabricatorMetaMTAMailingList();
     }
 
@@ -124,16 +126,19 @@ final class PhabricatorMailingListsEditController
           ->setName(pht('Create Mailing List')));
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($page_title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
-        'title' => pht('Edit Mailing List'),
+        'title' => $page_title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

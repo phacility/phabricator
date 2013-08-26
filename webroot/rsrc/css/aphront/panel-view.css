@@ -70,7 +70,7 @@
   border-radius: 3px;
 }
 
-.aphront-panel-accent .aphront-form-view {
+.aphront-panel-accent .phui-form-view {
   background: #f7f7f7;
   border: 1px solid #c4c4c0;
   border-radius: 3px;
@@ -107,7 +107,7 @@
   border-color: #669966;
 }
 
-.aphront-panel-view-drag-and-drop .aphront-form-view {
+.aphront-panel-view-drag-and-drop .phui-form-view {
   background: #ccffcc;
   border-color: #669966;
 }

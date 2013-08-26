@@ -168,7 +168,6 @@ final class PhabricatorOwnersListController
       ->setUser($user)
       ->setAction('/owners/view/search/')
       ->setMethod('GET')
-      ->setNoShading(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
@@ -208,7 +207,6 @@ final class PhabricatorOwnersListController
       ),
       array(
         'title' => pht('Package Index'),
-        'dust' => true,
         'device' => true,
       ));
   }

@@ -226,8 +226,10 @@ final class PhrictionEditController
           ->addCancelButton($cancel_uri)
           ->setValue($submit_button));
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($panel_header);
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Edit Document'))
+      ->setFormError($error_view)
+      ->setForm($form);
 
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Document Preview'))
@@ -254,14 +256,12 @@ final class PhrictionEditController
       array(
         $crumbs,
         $draft_note,
-        $error_view,
-        $form,
+        $form_box,
         $preview,
       ),
       array(
         'title'   => pht('Edit Document'),
         'device'  => true,
-        'dust'    => true,
       ));
   }
 

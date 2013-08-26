@@ -42,6 +42,7 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
             'edit/' => 'ReleephProjectEditController',
             'cutbranch/' => 'ReleephBranchCreateController',
             'action/(?P<action>.+)/' => 'ReleephProjectActionController',
+            'history/' => 'ReleephProjectHistoryController',
           ),
         ),
         'branch/' => array(
@@ -50,10 +51,10 @@ final class PhabricatorApplicationReleeph extends PhabricatorApplication {
           '(?P<action>close|re-open)/(?P<branchID>[1-9]\d*)/' =>
             'ReleephBranchAccessController',
           'preview/' => 'ReleephBranchNamePreviewController',
-
-          // Left in, just in case the by-name stuff fails!
-          '(?P<branchID>[^/]+)/' =>
-            'ReleephBranchViewController',
+          '(?P<branchID>[^/]+)/' => array(
+            'history/' => 'ReleephBranchHistoryController',
+            '(?:query/(?P<queryKey>[^/]+)/)?' => 'ReleephBranchViewController',
+          ),
         ),
         'request/' => array(
           '(?P<requestID>[1-9]\d*)/' => 'ReleephRequestViewController',

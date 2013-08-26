@@ -200,7 +200,6 @@ final class DiffusionHomeController extends DiffusionController {
       array(
         'title' => pht('Diffusion'),
         'device' => true,
-        'dust' => true,
       ));
   }
 

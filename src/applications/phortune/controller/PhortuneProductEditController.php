@@ -157,7 +157,6 @@ final class PhortuneProductEditController extends PhabricatorController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

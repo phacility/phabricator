@@ -94,7 +94,6 @@ final class PhamePostNewController extends PhameController {
 
       $form = id(new AphrontFormView())
         ->setUser($user)
-        ->setFlexible(true)
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel(pht('Blog'))
@@ -117,7 +116,12 @@ final class PhamePostNewController extends PhameController {
               ->setValue(pht('Continue')));
       }
 
-      $nav->appendChild($form);
+
+      $form_box = id(new PHUIFormBoxView())
+        ->setHeaderText($title)
+        ->setForm($form);
+
+      $nav->appendChild($form_box);
     }
 
     return $this->buildApplicationPage(
@@ -125,7 +129,6 @@ final class PhamePostNewController extends PhameController {
       array(
         'title'   => $title,
         'device'  => true,
-        'dust' => true,
       ));
   }
 }

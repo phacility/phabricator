@@ -61,7 +61,6 @@ final class PhabricatorConduitTokenController
       array(
         'title' => pht('Certificate Install Token'),
         'device' => true,
-        'dust' => true,
       ));
   }
 }

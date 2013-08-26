@@ -24,10 +24,6 @@ final class PonderQuestionTransaction
     return new PonderQuestionTransactionComment();
   }
 
-  public function getApplicationObjectTypeName() {
-    return pht('question');
-  }
-
   public function getTitle() {
     $author_phid = $this->getAuthorPHID();
 

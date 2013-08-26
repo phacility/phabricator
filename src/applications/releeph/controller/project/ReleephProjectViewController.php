@@ -18,6 +18,7 @@ final class ReleephProjectViewController extends ReleephProjectController
     $request = $this->getRequest();
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
+      ->setPreface($this->renderPreface())
       ->setSearchEngine(
         id(new ReleephBranchSearchEngine())
           ->setProjectID($this->getReleephProject()->getID()))
@@ -89,25 +90,8 @@ final class ReleephProjectViewController extends ReleephProjectController
         ->setHref($branch->getURI())
         ->addAttribute($branch_link);
 
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon('edit')
-          ->setHref($branch->getURI('edit/')));
-
-      if ($branch->getIsActive()) {
-        $item->setBarColor('blue');
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('delete')
-            ->setWorkflow(true)
-            ->setHref($branch->getURI('close/')));
-      } else {
+      if (!$branch->getIsActive()) {
         $item->setDisabled(true);
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('enable')
-            ->setWorkflow(true)
-            ->setHref($branch->getURI('re-open/')));
       }
 
       $commit = $branch->getCutPointCommit();
@@ -163,6 +147,101 @@ final class ReleephProjectViewController extends ReleephProjectController
         ->setIcon('create'));
 
     return $crumbs;
+  }
+
+  private function renderPreface() {
+    $project = $this->getReleephProject();
+    $viewer = $this->getRequest()->getUser();
+
+    $id = $project->getID();
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($project->getName());
+
+    if (!$project->getIsActive()) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
+          ->setName(pht('Deactivated')));
+    }
+
+    $actions = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($project)
+      ->setObjectURI($this->getRequest()->getRequestURI());
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit_uri = $this->getApplicationURI("project/{$id}/edit/");
+
+    $deactivate_uri = "project/{$id}/action/deactivate/";
+    $deactivate_uri = $this->getApplicationURI($deactivate_uri);
+
+    $reactivate_uri = "project/{$id}/action/activate/";
+    $reactivate_uri = $this->getApplicationURI($reactivate_uri);
+
+    $history_uri = $this->getApplicationURI("project/{$id}/history/");
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Project'))
+        ->setHref($edit_uri)
+        ->setIcon('edit')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    if ($project->getIsActive()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Deactivate Project'))
+          ->setHref($deactivate_uri)
+          ->setIcon('delete')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Reactivate Project'))
+          ->setHref($reactivate_uri)
+          ->setIcon('new')
+          ->setUser($viewer)
+          ->setRenderAsForm(true)
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($history_uri)
+        ->setIcon('transcript'));
+
+    $properties = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($project);
+
+    $properties->addProperty(
+      pht('Repository'),
+      $project->getRepository()->getName());
+
+    $pushers = $project->getPushers();
+    if ($pushers) {
+      $this->loadHandles($pushers);
+      $properties->addProperty(
+        pht('Pushers'),
+        $this->renderHandlesForPHIDs($pushers));
+    }
+
+    return array(
+      $header,
+      $actions,
+      $properties,
+    );
+
   }
 
 }

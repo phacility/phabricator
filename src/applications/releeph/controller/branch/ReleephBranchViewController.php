@@ -19,6 +19,7 @@ final class ReleephBranchViewController extends ReleephProjectController
     $request = $this->getRequest();
 
     $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setPreface($this->renderPreface())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine($this->getSearchEngine())
       ->setNavigation($this->buildSideNavView());
@@ -91,5 +92,87 @@ final class ReleephBranchViewController extends ReleephProjectController
     return $crumbs;
   }
 
+  private function renderPreface() {
+    $branch = $this->getReleephBranch();
+    $viewer = $this->getRequest()->getUser();
+
+    $id = $branch->getID();
+
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($branch->getDisplayName());
+
+    if (!$branch->getIsActive()) {
+      $header->addTag(
+        id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_STATE)
+          ->setBackgroundColor(PhabricatorTagView::COLOR_BLACK)
+          ->setName(pht('Closed')));
+    }
+
+    $actions = id(new PhabricatorActionListView())
+      ->setUser($viewer)
+      ->setObject($branch)
+      ->setObjectURI($this->getRequest()->getRequestURI());
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $branch,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $edit_uri = $branch->getURI('edit/');
+    $close_uri = $branch->getURI('close/');
+    $reopen_uri = $branch->getURI('re-open/');
+
+    $id = $branch->getID();
+    $history_uri = $this->getApplicationURI("branch/{$id}/history/");
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Branch'))
+        ->setHref($edit_uri)
+        ->setIcon('edit')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    if ($branch->getIsActive()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Close Branch'))
+          ->setHref($close_uri)
+          ->setIcon('delete')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Reopen Branch'))
+          ->setHref($reopen_uri)
+          ->setIcon('new')
+          ->setUser($viewer)
+          ->setRenderAsForm(true)
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View History'))
+        ->setHref($history_uri)
+        ->setIcon('transcript'));
+
+    $properties = id(new PhabricatorPropertyListView())
+      ->setUser($viewer)
+      ->setObject($branch);
+
+    $properties->addProperty(
+      pht('Branch'),
+      $branch->getName());
+
+    return array(
+      $header,
+      $actions,
+      $properties,
+    );
+  }
 
 }

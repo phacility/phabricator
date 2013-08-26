@@ -38,7 +38,6 @@ final class PhabricatorConfigListController
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

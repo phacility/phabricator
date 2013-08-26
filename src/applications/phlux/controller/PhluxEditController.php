@@ -176,20 +176,19 @@ final class PhluxEditController extends PhluxController {
           ->setHref($request->getRequestURI()));
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $header,
-        $errors,
-        $form,
+        $form_box,
       ),
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

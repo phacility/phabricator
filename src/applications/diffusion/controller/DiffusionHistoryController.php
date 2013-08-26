@@ -96,7 +96,6 @@ final class DiffusionHistoryController extends DiffusionController {
       $nav,
       array(
         'device' => true,
-        'dust' => true,
         'title' => array(
           pht('History'),
           pht('%s Repository', $drequest->getRepository()->getCallsign()),

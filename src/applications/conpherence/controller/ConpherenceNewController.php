@@ -74,7 +74,7 @@ final class ConpherenceNewController extends ConpherenceController {
       ->addCancelButton($cancel_uri)
       ->addSubmitButton(pht('Send Message'));
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setUser($user)
       ->setFullWidth(true)
       ->appendChild(

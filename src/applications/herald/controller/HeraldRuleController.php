@@ -182,6 +182,11 @@ final class HeraldRuleController extends HeraldController {
         ? pht('Edit Herald Rule')
         : pht('Create Herald Rule');
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this
       ->buildApplicationCrumbs()
       ->addCrumb(
@@ -191,12 +196,10 @@ final class HeraldRuleController extends HeraldController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
         'title' => pht('Edit Rule'),
-        'dust' => true,
         'device' => true,
       ));
   }

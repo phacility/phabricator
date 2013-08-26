@@ -16,7 +16,6 @@ final class PhortunePaymentMethodListController extends PhabricatorController {
       array(
         'title' => $title,
         'device' => true,
-        'dust' => true,
       ));
   }
 

@@ -49,7 +49,7 @@ final class PhabricatorAuthConfirmLinkController
       ->addCancelButton($panel_uri)
       ->addSubmitButton(pht('Confirm Account Link'));
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setFullWidth(true)
       ->appendChild(
         phutil_tag(
@@ -85,7 +85,6 @@ final class PhabricatorAuthConfirmLinkController
       ),
       array(
         'title' => pht('Confirm External Account Link'),
-        'dust' => true,
         'device' => true,
       ));
   }
