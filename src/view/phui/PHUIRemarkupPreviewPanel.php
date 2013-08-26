@@ -115,9 +115,16 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
 
     switch ($this->skin) {
       case 'document':
-        $content = id(new PHUIDocumentView())->appendChild($content);
+        $content = id(new PHUIDocumentView())
+          ->appendChild($content);
         break;
       default:
+        $content = id(new PHUIBoxView())
+          ->appendChild($content)
+          ->setBorder(true)
+          ->addMargin(PHUI::MARGIN_LARGE)
+          ->addPadding(PHUI::PADDING_LARGE)
+          ->addClass('phui-panel-preview');
         break;
     }
 

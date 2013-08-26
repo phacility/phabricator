@@ -29,7 +29,6 @@ final class PhabricatorOwnersDeleteController
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setTitle('Really delete this package?')
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
       ->appendChild(hsprintf(
         '<p>%s</p>',
         $text))

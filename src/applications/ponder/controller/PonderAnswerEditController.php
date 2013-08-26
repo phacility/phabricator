@@ -95,6 +95,11 @@ final class PonderAnswerEditController extends PonderController {
       id(new PhabricatorCrumbView())
         ->setName(pht('Edit Answer')));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Edit Answer'))
+      ->setFormError($errors)
+      ->setForm($form);
+
     $preview = id(new PHUIRemarkupPreviewPanel())
       ->setHeader(pht('Answer Preview'))
       ->setControlID($answer_content_id)
@@ -103,8 +108,7 @@ final class PonderAnswerEditController extends PonderController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $errors,
-        $form,
+        $form_box,
         $preview,
       ),
       array(

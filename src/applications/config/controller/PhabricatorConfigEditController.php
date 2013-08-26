@@ -98,7 +98,6 @@ final class PhabricatorConfigEditController
     }
 
     $form = new AphrontFormView();
-    $form->setFlexible(true);
 
     $error_view = null;
     if ($errors) {
@@ -194,6 +193,11 @@ final class PhabricatorConfigEditController
     $title = pht('Edit %s', $this->key);
     $short = pht('Edit');
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -212,7 +216,6 @@ final class PhabricatorConfigEditController
         ->setName($this->key)
         ->setHref('/config/edit/'.$this->key));
 
-
     $xactions = id(new PhabricatorConfigTransactionQuery())
       ->withObjectPHIDs(array($config_entry->getPHID()))
       ->setViewer($user)
@@ -226,9 +229,7 @@ final class PhabricatorConfigEditController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        id(new PhabricatorHeaderView())->setHeader($title),
-        $error_view,
-        $form,
+        $form_box,
         $xaction_view,
       ),
       array(

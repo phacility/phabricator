@@ -115,7 +115,7 @@ final class PhabricatorAuthProviderPassword
       $errors = id(new AphrontErrorView())->setErrors($errors);
     }
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setFullWidth(true)
       ->appendChild($errors)
       ->appendChild(

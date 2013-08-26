@@ -146,9 +146,9 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
 
     return id(new AphrontFormView())
       ->setUser($this->getUser())
-      ->setFlexible(true)
       ->addSigil('transaction-append')
       ->setWorkflow(true)
+      ->setShaded(true)
       ->setMetadata(
         array(
           'objectPHID' => $this->getObjectPHID(),

@@ -137,7 +137,6 @@ final class ConpherenceViewController extends
     $form =
       id(new AphrontFormView())
       ->setAction($update_uri)
-      ->setFlexible(true)
       ->addSigil('conpherence-pontificate')
       ->setWorkflow(true)
       ->setUser($user)

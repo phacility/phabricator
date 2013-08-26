@@ -44,7 +44,7 @@ final class PhabricatorMacroMemeDialogController
       }
     }
 
-    $view = id(new AphrontFormLayoutView())
+    $view = id(new PHUIFormLayoutView())
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Macro'))

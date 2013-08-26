@@ -181,7 +181,7 @@ final class ConpherenceUpdateController
     $user = $request->getUser();
     $add_person = $request->getStr('add_person');
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setUser($user)
       ->setFullWidth(true)
       ->appendChild(
@@ -222,7 +222,6 @@ final class ConpherenceUpdateController
     require_celerity_resource('conpherence-update-css');
     return id(new AphrontDialogView())
       ->setTitle(pht('Remove Participants'))
-      ->setHeaderColor(PhabricatorActionHeaderView::HEADER_RED)
       ->addHiddenInput('action', 'remove_person')
       ->addHiddenInput('__continue__', true)
       ->addHiddenInput('remove_person', $remove_person)
@@ -233,7 +232,7 @@ final class ConpherenceUpdateController
     ConpherenceThread $conpherence,
     $error_view) {
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->appendChild($error_view)
       ->appendChild(
         id(new AphrontFormTextControl())

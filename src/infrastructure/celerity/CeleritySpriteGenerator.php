@@ -526,6 +526,7 @@ final class CeleritySpriteGenerator {
       'yellow-header'   => 70,
       'grey-header'     => 70,
       'dark-grey-header' => 70,
+      'lightblue-header' => 70,
     );
 
     $extra_css = array(

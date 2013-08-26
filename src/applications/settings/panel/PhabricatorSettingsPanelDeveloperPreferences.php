@@ -69,7 +69,6 @@ final class PhabricatorSettingsPanelDeveloperPreferences
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendRemarkupInstructions($instructions)
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -86,9 +85,6 @@ final class PhabricatorSettingsPanelDeveloperPreferences
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Developer Settings'));
-
     $error_view = null;
     if ($request->getBool('saved')) {
       $error_view = id(new AphrontErrorView())
@@ -97,10 +93,13 @@ final class PhabricatorSettingsPanelDeveloperPreferences
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Developer Settings'))
+      ->setFormError($error_view)
+      ->setForm($form);
+
     return array(
-      $error_view,
-      $header,
-      $form,
+      $form_box,
     );
   }
 }

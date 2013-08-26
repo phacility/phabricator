@@ -168,7 +168,6 @@ final class PhabricatorOwnersListController
       ->setUser($user)
       ->setAction('/owners/view/search/')
       ->setMethod('GET')
-      ->setNoShading(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')

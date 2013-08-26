@@ -202,7 +202,6 @@ final class PhabricatorAuthEditController
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Provider'))
@@ -270,11 +269,15 @@ final class PhabricatorAuthEditController
         ->setTransactions($xactions);
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($errors)
+      ->setForm($form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $errors,
-        $form,
+        $form_box,
         $xaction_view,
       ),
       array(

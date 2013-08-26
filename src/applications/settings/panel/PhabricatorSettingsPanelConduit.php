@@ -78,8 +78,9 @@ final class PhabricatorSettingsPanelConduit
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
           ->setValue($user->getConduitCertificate()));
 
-    $header1 = new PhabricatorHeaderView();
-    $header1->setHeader(pht('Arcanist Certificate'));
+    $cert_form = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Arcanist Certificate'))
+      ->setForm($cert_form);
 
     $regen_instruction = pht('You can regenerate this certificate, which '.
       'will invalidate the old certificate and create a new one.');
@@ -95,14 +96,13 @@ final class PhabricatorSettingsPanelConduit
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Regenerate Certificate')));
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Regenerate Certificate'));
+    $regen_form = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Regenerate Certificate'))
+      ->setForm($regen_form);
 
     return array(
       $notice,
-      $header1,
       $cert_form,
-      $header,
       $regen_form,
     );
   }

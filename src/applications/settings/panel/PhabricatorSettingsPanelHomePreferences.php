@@ -48,11 +48,7 @@ final class PhabricatorSettingsPanelHomePreferences
         ->setURI($this->getPanelURI('?saved=true'));
     }
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Home Page Preferences'));
-
     $form = id(new AphrontFormView())
-      ->setFlexible(true)
       ->setUser($user);
 
     $group_map = PhabricatorApplication::getApplicationGroups();
@@ -204,10 +200,13 @@ final class PhabricatorSettingsPanelHomePreferences
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Home Page Preferences'))
+      ->setFormError($error_view)
+      ->setForm($form);
+
     return array(
-      $header,
-      $error_view,
-      $form,
+      $form_box,
     );
   }
 }

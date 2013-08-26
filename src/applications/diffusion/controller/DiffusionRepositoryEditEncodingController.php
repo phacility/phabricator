@@ -74,7 +74,6 @@ final class DiffusionRepositoryEditEncodingController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendRemarkupInstructions($this->getEncodingInstructions())
       ->appendChild(
         id(new AphrontFormTextControl())

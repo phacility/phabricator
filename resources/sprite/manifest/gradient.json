@@ -31,6 +31,11 @@
       "rule" : ".gradient-grey-header",
       "hash" : "1c8f8d61984e3fc5a7e528b9bd4d484a"
     },
+    "gradient-lightblue-header" : {
+      "name" : "gradient-lightblue-header",
+      "rule" : ".gradient-lightblue-header",
+      "hash" : "b838d2eb15f9b620e82b4da240bf464a"
+    },
     "gradient-menu-label"       : {
       "name" : "gradient-menu-label",
       "rule" : ".gradient-menu-label, .phabricator-side-menu .phui-list-item-type-label",

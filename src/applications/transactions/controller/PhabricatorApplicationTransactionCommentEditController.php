@@ -65,7 +65,7 @@ final class PhabricatorApplicationTransactionCommentEditController
     $dialog
       ->addHiddenInput('anchor', $request->getStr('anchor'))
       ->appendChild(
-        id(new AphrontFormLayoutView())
+        id(new PHUIFormLayoutView())
         ->setFullWidth(true)
         ->appendChild(
           id(new PhabricatorRemarkupControl())

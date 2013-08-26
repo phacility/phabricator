@@ -92,7 +92,6 @@ final class ReleephProjectCreateController extends ReleephProjectController {
 
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())
-      ->setFlexible(true)
       ->appendChild($project_name_input)
       ->appendChild($arc_project_input)
       ->appendChild(

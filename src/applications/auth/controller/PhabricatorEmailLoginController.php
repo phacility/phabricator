@@ -116,7 +116,7 @@ EOBODY;
       $error_view->setErrors($errors);
     }
 
-    $email_auth = new AphrontFormLayoutView();
+    $email_auth = new PHUIFormLayoutView();
     $email_auth->appendChild($error_view);
     $email_auth
       ->setUser($request->getUser())

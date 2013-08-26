@@ -137,9 +137,6 @@ EXAMPLE;
       id(new AphrontFormSubmitControl())
         ->setValue(pht('Save Preferences')));
 
-    $header = new PhabricatorHeaderView();
-    $header->setHeader(pht('Display Preferences'));
-
     $error_view = null;
     if ($request->getStr('saved') === 'true') {
       $error_view = id(new AphrontErrorView())
@@ -148,10 +145,13 @@ EXAMPLE;
         ->setErrors(array(pht('Your preferences have been saved.')));
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Display Preferences'))
+      ->setFormError($error_view)
+      ->setForm($form);
+
     return array(
-      $error_view,
-      $header,
-      $form,
+      $form_box,
     );
   }
 }

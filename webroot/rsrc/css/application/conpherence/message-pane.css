@@ -74,7 +74,7 @@
   display: block;
 }
 
-.conpherence-message-pane .phabricator-form-view {
+.conpherence-message-pane .phui-form-view {
   border-width: 0;
   background: none;
   height: 190px;
@@ -89,7 +89,7 @@
   height: 0px;
 }
 
-.device .conpherence-message-pane .phabricator-form-view {
+.device .conpherence-message-pane .phui-form-view {
   left: 0;
   right: 0;
   background-color: #d8dce2;
@@ -97,7 +97,7 @@
   width: 100%;
 }
 
-.conpherence-layout .conpherence-message-pane .phabricator-form-view
+.conpherence-layout .conpherence-message-pane .phui-form-view
   div.aphront-form-input {
   margin: 0;
   width: 100%;
@@ -188,8 +188,8 @@
 .conpherence-message-pane .remarkup-assist-textarea {
   height: 124px;
   padding: 6px;
-  border-width: 0 0 1px 0;
-  border-color: #e7e7e7;
+  border-width: 1px 0;
+  border-color: #BFCFDA;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;

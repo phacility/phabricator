@@ -99,7 +99,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       ->setFluidLayout(true)
       ->setShadow(true);
 
-    $shipping = id(new AphrontFormLayoutView())
+    $shipping = id(new PHUIFormLayoutView())
       ->setUser($user)
       ->setFullWidth(true)
       ->appendChild(
@@ -128,7 +128,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
         ->setDisableAutocomplete(true)
         ->setSigil('postal-input'));
 
-    $cc = id(new AphrontFormLayoutView())
+    $cc = id(new PHUIFormLayoutView())
       ->setUser($user)
       ->setFullWidth(true)
       ->appendChild(

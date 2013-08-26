@@ -69,7 +69,6 @@ final class PhabricatorConduitConsoleController
       ->setUser($request->getUser())
       ->setAction('/api/'.$this->method)
       ->addHiddenInput('allowEmptyParams', 1)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Description')

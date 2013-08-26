@@ -153,7 +153,6 @@ final class PhabricatorMacroEditController
 
     $form
       ->setEncType('multipart/form-data')
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
@@ -239,7 +238,6 @@ final class PhabricatorMacroEditController
         ->setHeader(pht('Upload New File'));
 
       $upload_form = id(new AphrontFormView())
-        ->setFlexible(true)
         ->setEncType('multipart/form-data')
         ->setUser($request->getUser());
 
@@ -263,11 +261,15 @@ final class PhabricatorMacroEditController
       $upload = array($upload_header, $upload_form);
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
         $upload,
       ),
       array(

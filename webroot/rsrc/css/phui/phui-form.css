@@ -24,7 +24,8 @@ div.jx-tokenizer-container {
   line-height: 18px;
   color: #333;
   vertical-align: middle;
-  font: 13px 'Helvetica Neue', Arial, sans-serif;
+  font: 13px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 textarea,
@@ -45,7 +46,7 @@ input[type="color"],
 div.jx-tokenizer-container {
   padding: 4px 6px;
   background-color: #ffffff;
-  border: 1px solid #96A6C5;
+  border: 1px solid #95a6c5;
 
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);

@@ -210,7 +210,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         ->setErrors($errors);
     }
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Email'))

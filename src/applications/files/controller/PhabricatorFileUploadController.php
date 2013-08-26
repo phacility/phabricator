@@ -76,17 +76,15 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     $global_upload = id(new PhabricatorGlobalUploadTargetView())
       ->setShowIfSupportedID($support_id);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('New File Upload'));
-    $panel->setNoBackground();
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($errors)
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $errors,
-        $panel,
+        $form_box,
         $global_upload,
       ),
       array(

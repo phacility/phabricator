@@ -26,7 +26,6 @@ final class PonderAddAnswerView extends AphrontView {
 
     $form = new AphrontFormView();
     $form
-      ->setFlexible(true)
       ->setUser($this->user)
       ->setAction($this->actionURI)
       ->setWorkflow(true)

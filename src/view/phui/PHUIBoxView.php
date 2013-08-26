@@ -5,6 +5,7 @@ final class PHUIBoxView extends AphrontTagView {
   private $margin = array();
   private $padding = array();
   private $shadow = false;
+  private $border = false;
 
   public function addMargin($margin) {
     $this->margin[] = $margin;
@@ -21,6 +22,11 @@ final class PHUIBoxView extends AphrontTagView {
     return $this;
   }
 
+  public function setBorder($border) {
+    $this->border = $border;
+    return $this;
+  }
+
   public function getTagContent() {
 
     require_celerity_resource('phui-box-css');
@@ -29,6 +35,9 @@ final class PHUIBoxView extends AphrontTagView {
     $outer_classes[] = 'phui-box';
     if ($this->shadow) {
       $outer_classes[] = 'phui-box-shadow';
+    }
+    if ($this->border) {
+      $outer_classes[] = 'phui-box-border';
     }
     foreach ($this->margin as $margin) {
       $outer_classes[] = $margin;

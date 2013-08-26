@@ -61,11 +61,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  font: 13px/1.231 'Helvetica Neue', Arial, sans-serif;
+  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
-  background: #EBECEE;
+  background: #ebecee;
+  text-rendering: optimizeLegibility;
 }
 
 textarea {

@@ -144,7 +144,6 @@ final class PhrequentListController extends PhrequentController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setNoShading(true)
       ->setAction($this->getApplicationURI("/view/custom/"));
 
     $user_handles = id(new PhabricatorObjectHandleData($user_phids))

@@ -133,7 +133,6 @@ final class PhabricatorApplicationSearchController
       'query/advanced');
 
     $form = id(new AphrontFormView())
-      ->setNoShading(true)
       ->setUser($user);
 
     $engine->buildSearchForm($form, $saved_query);

@@ -44,7 +44,7 @@ final class PhrictionNewController extends PhrictionController {
       $slug = '';
     }
 
-    $view = id(new AphrontFormLayoutView())
+    $view = id(new PHUIFormLayoutView())
       ->appendChild(id(new AphrontFormTextControl())
                        ->setLabel('/w/')
                        ->setValue($slug)

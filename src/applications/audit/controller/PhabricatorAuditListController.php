@@ -87,7 +87,6 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     $form = new AphrontFormView();
     $form->setUser($user);
-    $form->setNoShading(true);
 
     $show_status  = false;
     $show_user    = false;

@@ -131,7 +131,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     }
 
     $form = new AphrontFormView();
-    $form->setFlexible(true);
 
     $langs = array(
       '' => pht('(Detect From Filename in Title)'),
@@ -200,12 +199,16 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       $short = pht('Edit');
     } else {
       $submit->setValue(pht('Create Paste'));
-      $title = pht('Create Paste');
+      $title = pht('Create New Paste');
       $short = pht('Create');
     }
 
-    $form
-      ->appendChild($submit);
+    $form->appendChild($submit);
+
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
     if (!$is_create) {
@@ -220,9 +223,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        id(new PhabricatorHeaderView())->setHeader($title),
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
         'title' => $title,

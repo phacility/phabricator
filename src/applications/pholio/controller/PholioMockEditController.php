@@ -285,7 +285,6 @@ final class PholioMockEditController extends PholioController {
     require_celerity_resource('pholio-edit-css');
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild($order_control)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -322,6 +321,11 @@ final class PholioMockEditController extends PholioController {
           ->setError($e_images))
       ->appendChild($submit);
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -330,8 +334,7 @@ final class PholioMockEditController extends PholioController {
 
     $content = array(
       $crumbs,
-      $error_view,
-      $form,
+      $form_box,
     );
 
     return $this->buildApplicationPage(

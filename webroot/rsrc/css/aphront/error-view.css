@@ -13,19 +13,18 @@ form.aphront-dialog-view .aphront-error-view {
 }
 
 .aphront-error-view {
-  margin: 20px;
+  margin: 16px;
 }
 .aphront-error-view-dialogue {
   margin: 0px 0px 16px 0px;
 }
 
 .device-phone .aphront-error-view {
-  margin: 10px;
+  margin: 8px;
 }
 
 .aphront-error-view-body {
-  padding: 10px;
-  line-height: 1.6em;
+  padding: 12px;
 }
 
 .aphront-error-view-head {
@@ -35,7 +34,7 @@ form.aphront-dialog-view .aphront-error-view {
 }
 
 .aphront-error-view-list {
-  margin: 0 0 0 20px;
+  margin: 0 0 0 16px;
   list-style: disc;
 }
 
@@ -70,12 +69,7 @@ form.aphront-dialog-view .aphront-error-view {
 }
 
 .aphront-error-severity-nodata {
-  border-color: #dfdfdf;
-  background: #f3f3f3;
-  color: #666;
-}
-
-.make-me-sneeze .aphront-error-severity-nodata {
-  background: #fff;
-  border-color: #e6e6e6;
+  border-color: #ccc;
+  color: #6b748c;
+  background-color: #fff;
 }

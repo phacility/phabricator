@@ -55,7 +55,6 @@ final class DiffusionCommitEditController extends DiffusionController {
     $form         = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
         ->setLabel(pht('Projects'))

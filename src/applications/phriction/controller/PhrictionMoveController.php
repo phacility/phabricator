@@ -118,7 +118,7 @@ final class PhrictionMoveController
     $descr_caption = $is_serious ? pht('A reason for the move.') :
       pht('You better give a good reason for this.');
 
-    $form = id(new AphrontFormLayoutView())
+    $form = id(new PHUIFormLayoutView())
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormStaticControl())

@@ -177,7 +177,6 @@ final class LegalpadDocumentSignController extends LegalpadController {
     $data = $signature->getSignatureData();
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormInsetView())
         ->setTitle(pht('Sign and Agree'))
