@@ -108,6 +108,11 @@ final class ReleephProjectCreateController extends ReleephProjectController {
           ->addCancelButton('/releeph/project/')
           ->setValue(pht('Create')));
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Create New Project'))
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
@@ -116,8 +121,7 @@ final class ReleephProjectCreateController extends ReleephProjectController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
       ),
       array(
         'title' => pht('Create New Project'),

@@ -610,6 +610,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setShaded(true)
       ->setAction('/audit/addcomment/')
       ->addHiddenInput('commit', $commit->getPHID())
       ->appendChild(

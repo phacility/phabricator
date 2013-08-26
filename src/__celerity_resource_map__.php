@@ -1140,7 +1140,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-source-css' =>
   array(
-    'uri' => '/res/162c8794/rsrc/css/application/diffusion/diffusion-source.css',
+    'uri' => '/res/dcf60c4f/rsrc/css/application/diffusion/diffusion-source.css',
     'type' => 'css',
     'requires' =>
     array(
