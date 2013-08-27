@@ -43,15 +43,15 @@ final class PhabricatorXHPASTViewRunController
         id(new AphrontFormSubmitControl())
           ->setValue('Parse'));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Generate XHP AST');
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->appendChild($form);
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Generate XHP AST'))
+      ->setForm($form);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    return $this->buildApplicationPage(
+      $form_box,
       array(
-        'title' => 'XHPAST View',
+        'title' => pht('XHPAST View'),
+        'device' => true,
       ));
   }
 
