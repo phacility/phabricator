@@ -33,6 +33,11 @@ final class DivinerAtomController extends DivinerController {
       return new Aphront404Response();
     }
 
+    // TODO: This query won't load ghosts, because they'll fail `needAtoms()`.
+    // Instead, we might want to load ghosts and render a message like
+    // "this thing existed in an older version, but no longer does", especially
+    // if we add content like comments.
+
     $symbol = id(new DivinerAtomQuery())
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
@@ -85,6 +90,14 @@ final class DivinerAtomController extends DivinerController {
       pht('Defined'),
       $atom->getFile().':'.$atom->getLine());
 
+    $warnings = $atom->getWarnings();
+    if ($warnings) {
+      $warnings = id(new AphrontErrorView())
+        ->setErrors($warnings)
+        ->setTitle(pht('Documentation Warnings'))
+        ->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+    }
+
     $field = 'default';
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($viewer)
@@ -92,6 +105,23 @@ final class DivinerAtomController extends DivinerController {
       ->process();
 
     $content = $engine->getOutput($symbol, $field);
+
+    if (strlen(trim($symbol->getMarkupText($field)))) {
+      $content = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        array(
+          $content,
+        ));
+    } else {
+      $undoc = DivinerAtom::getThisAtomIsNotDocumentedString($atom->getType());
+      $content = id(new AphrontErrorView())
+        ->appendChild($undoc)
+        ->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+    }
+
 
     $toc = $engine->getEngineMetadata(
       $symbol,
@@ -103,15 +133,29 @@ final class DivinerAtomController extends DivinerController {
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
       ->appendChild($properties)
-      ->appendChild(
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'phabricator-remarkup',
-          ),
-          array(
-            $content,
-          )));
+      ->appendChild($warnings)
+      ->appendChild($content);
+
+    $parameters = $atom->getProperty('parameters');
+    if ($parameters !== null) {
+      $document->appendChild(
+        id(new PhabricatorHeaderView())
+          ->setHeader(pht('Parameters')));
+
+      $document->appendChild(
+        id(new DivinerParameterTableView())
+          ->setParameters($parameters));
+    }
+
+    $return = $atom->getProperty('return');
+    if ($return !== null) {
+      $document->appendChild(
+        id(new PhabricatorHeaderView())
+          ->setHeader(pht('Return')));
+      $document->appendChild(
+        id(new DivinerReturnTableView())
+          ->setReturn($return));
+    }
 
     if ($toc) {
       $side = new PHUIListView();

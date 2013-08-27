@@ -1147,6 +1147,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/diffusion/diffusion-source.css',
   ),
+  'diviner-shared-css' =>
+  array(
+    'uri' => '/res/f462d51d/rsrc/css/diviner/diviner-shared.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/diviner/diviner-shared.css',
+  ),
   'global-drag-and-drop-css' =>
   array(
     'uri' => '/res/4e24cb65/rsrc/css/application/files/global-drag-and-drop.css',

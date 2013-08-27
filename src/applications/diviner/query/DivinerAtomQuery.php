@@ -11,6 +11,7 @@ final class DivinerAtomQuery
   private $contexts;
   private $indexes;
   private $includeUndocumentable;
+  private $includeGhosts;
 
   private $needAtoms;
 
@@ -51,6 +52,29 @@ final class DivinerAtomQuery
 
   public function needAtoms($need) {
     $this->needAtoms = $need;
+    return $this;
+  }
+
+  /**
+   * Include "ghosts", which are symbols which used to exist but do not exist
+   * currently (for example, a function which existed in an older version of
+   * the codebase but was deleted).
+   *
+   * These symbols had PHIDs assigned to them, and may have other sorts of
+   * metadata that we don't want to lose (like comments or flags), so we don't
+   * delete them outright. They might also come back in the future: the change
+   * which deleted the symbol might be reverted, or the documentation might
+   * have been generated incorrectly by accident. In these cases, we can
+   * restore the original data.
+   *
+   * However, most callers are not interested in these symbols, so they are
+   * excluded by default. You can use this method to include them in results.
+   *
+   * @param bool  True to include ghosts.
+   * @return this
+   */
+  public function withIncludeGhosts($include) {
+    $this->includeGhosts = $include;
     return $this;
   }
 
@@ -188,6 +212,12 @@ final class DivinerAtomQuery
       $where[] = qsprintf(
         $conn_r,
         'isDocumentable = 1');
+    }
+
+    if (!$this->includeGhosts) {
+      $where[] = qsprintf(
+        $conn_r,
+        'graphHash IS NOT NULL');
     }
 
     $where[] = $this->buildPagingClause($conn_r);

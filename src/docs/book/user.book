@@ -3,6 +3,14 @@
   "title" : "Phabricator User Documentation",
   "short" : "Phabricator User Docs",
   "root" : "../../../",
+  "rules" : {
+    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  },
+  "exclude" : [
+    "(^externals/)",
+    "(^scripts/)",
+    "(^support/)"
+  ],
   "groups" : {
     "intro" : {
       "name" : "Introduction"

@@ -1,0 +1,17 @@
+{
+  "name" : "phabdev",
+  "title" : "Phabricator Technical Documentation",
+  "short" : "Phabricator Tech Docs",
+  "root" : "../../../",
+  "rules" : {
+    "(\\.php$)" : "DivinerPHPAtomizer"
+  },
+  "exclude" : [
+    "(^externals/)",
+    "(^scripts/)",
+    "(^support/)",
+    "(^resources/)"
+  ],
+  "groups" : {
+  }
+}

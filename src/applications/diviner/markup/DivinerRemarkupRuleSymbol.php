@@ -114,6 +114,17 @@ final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
             ));
       }
 
+      // TODO: This probably is not the best place to do this. Move it somewhere
+      // better when it becomes more clear where it should actually go.
+      if ($ref) {
+        switch ($ref->getType()) {
+          case 'function':
+          case 'method':
+            $title = $title.'()';
+            break;
+        }
+      }
+
       if ($this->getEngine()->isTextMode()) {
         if ($href) {
           $link = $title.' <'.PhabricatorEnv::getProductionURI($href).'>';

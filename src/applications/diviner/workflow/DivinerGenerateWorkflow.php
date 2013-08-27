@@ -170,10 +170,17 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
   private function getAtomizersForFiles(array $files) {
     $rules = $this->getRules();
+    $exclude = $this->getExclude();
 
     $atomizers = array();
 
     foreach ($files as $file) {
+      foreach ($exclude as $pattern) {
+        if (preg_match($pattern, $file)) {
+          continue 2;
+        }
+      }
+
       foreach ($rules as $rule => $atomizer) {
         $ok = preg_match($rule, $file);
         if ($ok === false) {
@@ -191,9 +198,32 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
   }
 
   private function getRules() {
-    return $this->getConfig('rules', array()) + array(
+    $rules = $this->getConfig('rules', array(
       '/\\.diviner$/' => 'DivinerArticleAtomizer',
-    );
+      '/\\.php$/' => 'DivinerPHPAtomizer',
+    ));
+
+    foreach ($rules as $rule => $atomizer) {
+      if (@preg_match($rule, '') === false) {
+        throw new Exception(
+          "Rule '{$rule}' is not a valid regular expression!");
+      }
+    }
+
+    return $rules;
+  }
+
+  private function getExclude() {
+    $exclude = $this->getConfig('exclude', array());
+
+    foreach ($exclude as $rule) {
+      if (@preg_match($rule, '') === false) {
+        throw new Exception(
+          "Exclude rule '{$rule}' is not a valid regular expression!");
+      }
+    }
+
+    return $exclude;
   }
 
 
