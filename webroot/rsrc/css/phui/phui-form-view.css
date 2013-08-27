@@ -189,17 +189,17 @@ table.aphront-form-control-checkbox-layout {
 table.aphront-form-control-radio-layout th {
   padding-top: 3px;
   padding-left: 8px;
-  padding-bottom: 12px;
+  padding-bottom: 4px;
   font-weight: bold;
-  color: #222222;
+  color: #333;
 }
 
 
 table.aphront-form-control-checkbox-layout th {
   padding-top: 2px;
   padding-left: 8px;
-  padding-bottom: 12px;
-  color: #222222;
+  padding-bottom: 4px;
+  color: #333;
 }
 
 .aphront-form-control-radio-layout td input,
@@ -217,11 +217,11 @@ table.aphront-form-control-checkbox-layout th {
   margin-top: 4px;
   font-size: 12px;
   font-weight: normal;
-  color: #444444;
+  color: #555;
 }
 
 .aphront-form-control-image span {
-  margin: 0px 4px 0px 2px;
+  margin: 0 4px 0 2px;
 }
 
 .aphront-form-control-image .default-image {
