@@ -4,6 +4,7 @@ final class PhabricatorStorageManagementAPI {
 
   private $host;
   private $user;
+  private $port;
   private $password;
   private $namespace;
   private $conns = array();
