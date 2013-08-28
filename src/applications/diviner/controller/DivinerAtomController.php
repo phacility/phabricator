@@ -89,7 +89,7 @@ final class DivinerAtomController extends DivinerController {
         id(new PhabricatorTagView())
           ->setType(PhabricatorTagView::TYPE_STATE)
           ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
-          ->setName($this->renderAtomTypeName($atom->getType())));
+          ->setName(DivinerAtom::getAtomTypeNameString($atom->getType())));
 
     $properties = id(new PhabricatorPropertyListView());
 
@@ -206,10 +206,6 @@ final class DivinerAtomController extends DivinerController {
         'title' => $symbol->getTitle(),
         'device' => true,
       ));
-  }
-
-  private function renderAtomTypeName($name) {
-    return phutil_utf8_ucwords($name);
   }
 
   private function buildExtendsAndImplements(

@@ -5,6 +5,9 @@ final class DivinerAtom {
   const TYPE_FILE      = 'file';
   const TYPE_ARTICLE   = 'article';
   const TYPE_METHOD    = 'method';
+  const TYPE_CLASS     = 'class';
+  const TYPE_FUNCTION  = 'function';
+  const TYPE_INTERFACE = 'interface';
 
   private $type;
   private $name;
@@ -357,17 +360,41 @@ final class DivinerAtom {
 
   public static function getThisAtomIsNotDocumentedString($type) {
     switch ($type) {
-      case 'function':
+      case self::TYPE_FILE:
+        return pht('This file is not documented.');
+      case self::TYPE_FUNCTION:
         return pht('This function is not documented.');
-      case 'class':
+      case self::TYPE_CLASS:
         return pht('This class is not documented.');
-      case 'article':
+      case self::TYPE_ARTICLE:
         return pht('This article is not documented.');
-      case 'method':
+      case self::TYPE_METHOD:
         return pht('This method is not documented.');
+      case self::TYPE_INTERFACE:
+        return pht('This interface is not documented.');
       default:
         phlog("Need translation for '{$type}'.");
         return pht('This %s is not documented.', $type);
+    }
+  }
+
+  public static function getAtomTypeNameString($type) {
+    switch ($type) {
+      case self::TYPE_FILE:
+        return pht('File');
+      case self::TYPE_FUNCTION:
+        return pht('Function');
+      case self::TYPE_CLASS:
+        return pht('Class');
+      case self::TYPE_ARTICLE:
+        return pht('Article');
+      case self::TYPE_METHOD:
+        return pht('Method');
+      case self::TYPE_INTERFACE:
+        return pht('Interface');
+      default:
+        phlog("Need translation for '{$type}'.");
+        return ucwords($type);
     }
   }
 
