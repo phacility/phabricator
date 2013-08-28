@@ -6,13 +6,15 @@
   "uri.source" :
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
   "rules" : {
-    "(\\.php$)" : "DivinerPHPAtomizer"
+    "(\\.php$)" : "DivinerPHPAtomizer",
+    "(\\.diviner$)" : "DivinerArticleAtomizer"
   },
   "exclude" : [
     "(^externals/)",
     "(^scripts/)",
     "(^support/)",
-    "(^resources/)"
+    "(^resources/)",
+    "(^src/docs/user/)"
   ],
   "groups" : {
   }

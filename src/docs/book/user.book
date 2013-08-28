@@ -10,8 +10,11 @@
   },
   "exclude" : [
     "(^externals/)",
+    "(^webroot/rsrc/externals/)",
     "(^scripts/)",
-    "(^support/)"
+    "(^support/)",
+    "(^resources/)",
+    "(^src/docs/tech/)"
   ],
   "groups" : {
     "intro" : {
