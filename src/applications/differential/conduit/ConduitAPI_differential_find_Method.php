@@ -69,6 +69,9 @@ final class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
         $query
           ->withIDs($guids);
         break;
+      case 'owned':
+        $query->withAuthors($guids);
+        break;
       case 'phids':
         $query
           ->withPHIDs($guids);
