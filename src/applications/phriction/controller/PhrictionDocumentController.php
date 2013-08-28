@@ -164,9 +164,9 @@ final class PhrictionDocumentController
 
     $page_content = id(new PHUIDocumentView())
       ->setOffset(true)
+      ->setHeader($header)
       ->appendChild(
         array(
-          $header,
           $actions,
           $properties,
           $move_notice,
@@ -412,7 +412,8 @@ final class PhrictionDocumentController
       phutil_tag(
         'div',
         array(
-          'class' => 'phriction-children-header',
+          'class' => 'phriction-children-header '.
+            'sprite-gradient gradient-lightblue-header',
         ),
         pht('Document Hierarchy')),
       phutil_tag(
