@@ -25,12 +25,10 @@
 .phabricator-object-item {
   background: #ffffff;
   border-style: solid;
-  border-color: #c0c5d1;
+  border-color: #BBC0CC;
   border-width: 0 0 0 4px;
   margin: 5px 0;
-
   overflow: hidden;
-  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.10);
 }
 
 .phabricator-object-item .phui-icon-view {
@@ -39,7 +37,8 @@
 
 .phabricator-object-item-frame {
   border-style: solid;
-  border-color: #c0c5d1;
+  border-color: #BBC0CC;
+  border-bottom-color: #A2A6B0;
   border-width: 1px 1px 1px 0;
   overflow: hidden;
   position: relative;
@@ -111,8 +110,7 @@
   bottom: 0;
   vertical-align: middle;
   text-align: right;
-  border-left: 1px solid #c0c5d1;
-  box-shadow: inset 1px 0 1px 0px rgba(0, 0, 0, 0.07);
+  border-left: 1px solid #BBC0CC;
 }
 
 .phabricator-object-item-actions .phui-list-item-view {
