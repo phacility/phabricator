@@ -3,6 +3,8 @@
   "title" : "Phabricator Technical Documentation",
   "short" : "Phabricator Tech Docs",
   "root" : "../../../",
+  "uri.source" :
+    "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
   "rules" : {
     "(\\.php$)" : "DivinerPHPAtomizer"
   },

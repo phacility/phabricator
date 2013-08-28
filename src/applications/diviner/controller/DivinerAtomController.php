@@ -100,11 +100,7 @@ final class DivinerAtomController extends DivinerController {
       $group_name = null;
     }
 
-    $properties->addProperty(
-      pht('Defined'),
-      $atom->getFile().':'.$atom->getLine());
-
-
+    $this->buildDefined($properties, $symbol);
     $this->buildExtendsAndImplements($properties, $symbol);
 
     $warnings = $atom->getWarnings();
@@ -279,6 +275,34 @@ final class DivinerAtomController extends DivinerController {
     }
 
     return $implements;
+  }
+
+  private function buildDefined(
+    PhabricatorPropertyListView $view,
+    DivinerLiveSymbol $symbol) {
+
+    $atom = $symbol->getAtom();
+    $defined = $atom->getFile().':'.$atom->getLine();
+
+    $link = $symbol->getBook()->getConfig('uri.source');
+    if ($link) {
+      $link = strtr(
+        $link,
+        array(
+          '%%' => '%',
+          '%f' => phutil_escape_uri($atom->getFile()),
+          '%l' => phutil_escape_uri($atom->getLine()),
+        ));
+      $defined = phutil_tag(
+        'a',
+        array(
+          'href' => $link,
+          'target' => '_blank',
+        ),
+        $defined);
+    }
+
+    $view->addProperty(pht('Defined'), $defined);
   }
 
 }
