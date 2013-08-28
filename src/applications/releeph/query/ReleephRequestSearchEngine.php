@@ -148,11 +148,22 @@ final class ReleephRequestSearchEngine
   }
 
   private function getSeverityOptions() {
-    return array(
-      '' => pht('(All Severities)'),
-      ReleephSeverityFieldSpecification::HOTFIX => pht('Hotfix'),
-      ReleephSeverityFieldSpecification::RELEASE => pht('Release'),
-    );
+    if (ReleephDefaultFieldSelector::isFacebook()) {
+      return array(
+        '' => pht('(All Severities)'),
+        11 => 'HOTFIX',
+        12 => 'PIGGYBACK',
+        13 => 'RELEASE',
+        14 => 'DAILY',
+        15 => 'PARKING',
+      );
+    } else {
+      return array(
+        '' => pht('(All Severities)'),
+        ReleephSeverityFieldSpecification::HOTFIX => pht('Hotfix'),
+        ReleephSeverityFieldSpecification::RELEASE => pht('Release'),
+      );
+    }
   }
 
 }

@@ -117,7 +117,15 @@ final class ReleephRequestQuery
     if ($this->severities) {
       $severities = array_fuse($this->severities);
       foreach ($requests as $key => $request) {
-        if (empty($severities[$request->getDetail('releeph:severity')])) {
+
+        // NOTE: Facebook uses a custom field here.
+        if (ReleephDefaultFieldSelector::isFacebook()) {
+          $severity = $request->getDetail('severity');
+        } else {
+          $severity = $request->getDetail('releeph:severity');
+        }
+
+        if (empty($severities[$severity])) {
           unset($requests[$key]);
         }
       }
