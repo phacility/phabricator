@@ -42,7 +42,8 @@ final class PHUIPinboardItemView extends AphrontView {
       $header = phutil_tag(
         'div',
         array(
-          'class' => 'phui-pinboard-item-header',
+          'class' => 'phui-pinboard-item-header '.
+            'sprite-gradient gradient-lightblue-header',
         ),
         phutil_tag('a', array('href' => $this->uri), $this->header));
     }

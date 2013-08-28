@@ -3829,7 +3829,7 @@ celerity_register_resource_map(array(
   ),
   'phui-pinboard-view-css' =>
   array(
-    'uri' => '/res/3b961aa1/rsrc/css/phui/phui-pinboard-view.css',
+    'uri' => '/res/c1972bac/rsrc/css/phui/phui-pinboard-view.css',
     'type' => 'css',
     'requires' =>
     array(
