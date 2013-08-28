@@ -21,6 +21,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   private $book = self::ATTACHABLE;
   private $atom = self::ATTACHABLE;
   private $extends = self::ATTACHABLE;
+  private $children = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -113,6 +114,16 @@ final class DivinerLiveSymbol extends DivinerDAO
 
   public function getExtends() {
     return $this->assertAttached($this->extends);
+  }
+
+  public function attachChildren(array $children) {
+    assert_instances_of($children, 'DivinerLiveSymbol');
+    $this->children = $children;
+    return $this;
+  }
+
+  public function getChildren() {
+    return $this->assertAttached($this->children);
   }
 
 

@@ -16,6 +16,7 @@ final class DivinerAtomQuery
 
   private $needAtoms;
   private $needExtends;
+  private $needChildren;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -59,6 +60,11 @@ final class DivinerAtomQuery
 
   public function needAtoms($need) {
     $this->needAtoms = $need;
+    return $this;
+  }
+
+  public function needChildren($need) {
+    $this->needChildren = $need;
     return $this;
   }
 
@@ -130,8 +136,6 @@ final class DivinerAtomQuery
       $atom->attachBook($book);
     }
 
-    $need_atoms = $this->needAtoms;
-
     if ($this->needAtoms) {
       $atom_data = id(new DivinerLiveAtom())->loadAllWhere(
         'symbolPHID IN (%Ls)',
@@ -170,6 +174,7 @@ final class DivinerAtomQuery
           ->withNames($names)
           ->needExtends(true)
           ->needAtoms(true)
+          ->needChildren($this->needChildren)
           ->execute();
         $xatoms = mgroup($xatoms, 'getName', 'getType', 'getBookPHID');
       } else {
@@ -220,6 +225,25 @@ final class DivinerAtomQuery
 
         $atom->attachExtends($extends);
       }
+    }
+
+    if ($this->needChildren) {
+      $child_hashes = $this->getAllChildHashes($atoms, $this->needExtends);
+
+      if ($child_hashes) {
+        $children = id(new DivinerAtomQuery())
+          ->setViewer($this->getViewer())
+          ->withIncludeUndocumentable(true)
+          ->withNodeHashes($child_hashes)
+          ->needAtoms($this->needAtoms)
+          ->execute();
+
+        $children = mpull($children, null, 'getNodeHash');
+      } else {
+        $children = array();
+      }
+
+      $this->attachAllChildren($atoms, $children, $this->needExtends);
     }
 
     return $atoms;
@@ -320,6 +344,65 @@ final class DivinerAtomQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+
+  /**
+   * Walk a list of atoms and collect all the node hashes of the atoms'
+   * children. When recursing, also walk up the tree and collect children of
+   * atoms they extend.
+   *
+   * @param list<DivinerLiveSymbol> List of symbols to collect child hashes of.
+   * @param bool                    True to collect children of extended atoms,
+   *                                as well.
+   * @return map<string, string>    Hashes of atoms' children.
+   */
+  private function getAllChildHashes(array $symbols, $recurse_up) {
+    assert_instances_of($symbols, 'DivinerLiveSymbol');
+
+    $hashes = array();
+    foreach ($symbols as $symbol) {
+      foreach ($symbol->getAtom()->getChildHashes() as $hash) {
+        $hashes[$hash] = $hash;
+      }
+      if ($recurse_up) {
+        $hashes += $this->getAllChildHashes($symbol->getExtends(), true);
+      }
+    }
+
+    return $hashes;
+  }
+
+
+  /**
+   * Attach child atoms to existing atoms. In recursive mode, also attach child
+   * atoms to atoms that these atoms extend.
+   *
+   * @param list<DivinerLiveSymbol> List of symbols to attach childeren to.
+   * @param map<string, DivinerLiveSymbol> Map of symbols, keyed by node hash.
+   * @param bool True to attach children to extended atoms, as well.
+   * @return void
+   */
+  private function attachAllChildren(
+    array $symbols,
+    array $children,
+    $recurse_up) {
+
+    assert_instances_of($symbols, 'DivinerLiveSymbol');
+    assert_instances_of($children, 'DivinerLiveSymbol');
+
+    foreach ($symbols as $symbol) {
+      $symbol_children = array();
+      foreach ($symbol->getAtom()->getChildHashes() as $hash) {
+        if (isset($children[$hash])) {
+          $symbol_children[] = $children[$hash];
+        }
+      }
+      $symbol->attachChildren($symbol_children);
+      if ($recurse_up) {
+        $this->attachAllChildren($symbol->getExtends(), $children, true);
+      }
+    }
   }
 
 }

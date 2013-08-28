@@ -47,6 +47,7 @@ final class DivinerAtomController extends DivinerController {
       ->withIndexes(array($this->atomIndex))
       ->needAtoms(true)
       ->needExtends(true)
+      ->needChildren(true)
       ->executeOne();
 
     if (!$symbol) {
@@ -54,20 +55,6 @@ final class DivinerAtomController extends DivinerController {
     }
 
     $atom = $symbol->getAtom();
-
-    $extends = $atom->getExtends();
-
-    $child_hashes = $atom->getChildHashes();
-    if ($child_hashes) {
-      $children = id(new DivinerAtomQuery())
-        ->setViewer($viewer)
-        ->withIncludeUndocumentable(true)
-        ->withNodeHashes($child_hashes)
-        ->execute();
-    } else {
-      $children = array();
-    }
-
     $crumbs = $this->buildApplicationCrumbs();
 
     $crumbs->addCrumb(
@@ -170,14 +157,63 @@ final class DivinerAtomController extends DivinerController {
           ->setReturn($return));
     }
 
-    if ($children) {
+    $methods = $this->composeMethods($symbol);
+    if ($methods) {
+
+      $tasks = $this->composeTasks($symbol);
+
+      if ($tasks) {
+        $methods_by_task = igroup($methods, 'task');
+
+        $document->appendChild(
+          id(new PhabricatorHeaderView())
+            ->setHeader(pht('Tasks')));
+
+        if (isset($methods_by_task[''])) {
+          $tasks[''] = array(
+            'name' => '',
+            'title' => pht('Other Methods'),
+            'defined' => $symbol,
+          );
+        }
+
+        foreach ($tasks as $spec) {
+          $document->appendChild(
+            id(new PhabricatorHeaderView())
+              ->setHeader($spec['title']));
+
+          $task_methods = idx($methods_by_task, $spec['name'], array());
+          if ($task_methods) {
+            $document->appendChild(hsprintf('<ul>'));
+            foreach ($task_methods as $task_method) {
+              $atom = last($task_method['atoms']);
+              $document->appendChild(
+                hsprintf('<li>%s()</li>', $atom->getName()));
+            }
+            $document->appendChild(hsprintf('</ul>'));
+          } else {
+            $document->appendChild("No methods for this task.");
+          }
+        }
+      }
+
       $document->appendChild(
         id(new PhabricatorHeaderView())
           ->setHeader(pht('Methods')));
-      foreach ($children as $child) {
-        $document->appendChild(
-          id(new PhabricatorHeaderView())
-            ->setHeader($child->getName()));
+      foreach ($methods as $spec) {
+        $method_header = id(new PhabricatorHeaderView())
+          ->setHeader(last($spec['atoms'])->getName());
+
+        $inherited = $spec['inherited'];
+        if ($inherited) {
+          $method_header->addTag(
+            id(new PhabricatorTagView())
+              ->setType(PhabricatorTagView::TYPE_STATE)
+              ->setBackgroundColor(PhabricatorTagView::COLOR_GREY)
+              ->setName(pht('Inherited')));
+        }
+
+        $document->appendChild($method_header);
       }
     }
 
@@ -299,6 +335,90 @@ final class DivinerAtomController extends DivinerController {
     }
 
     $view->addProperty(pht('Defined'), $defined);
+  }
+
+  private function composeMethods(DivinerLiveSymbol $symbol) {
+    $methods = $this->findMethods($symbol);
+    if (!$methods) {
+      return $methods;
+    }
+
+    foreach ($methods as $name => $method) {
+      // Check for "@task" on each parent, to find the most recently declared
+      // "@task".
+      $task = null;
+      foreach ($method['atoms'] as $key => $method_symbol) {
+        $atom = $method_symbol->getAtom();
+        if ($atom->getDocblockMetaValue('task')) {
+          $task = $atom->getDocblockMetaValue('task');
+        }
+      }
+      $methods[$name]['task'] = $task;
+
+      // Set 'inherited' if this atom has no implementation of the method.
+      if (last($method['implementations']) !== $symbol) {
+        $methods[$name]['inherited'] = true;
+      } else {
+        $methods[$name]['inherited'] = false;
+      }
+    }
+
+    return $methods;
+  }
+
+  private function findMethods(DivinerLiveSymbol $symbol) {
+    $child_specs = array();
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == DivinerAtom::TYPE_CLASS) {
+        $child_specs = $this->findMethods($extends);
+      }
+    }
+
+    foreach ($symbol->getChildren() as $child) {
+      if ($child->getType() == DivinerAtom::TYPE_METHOD) {
+        $name = $child->getName();
+        if (isset($child_specs[$name])) {
+          $child_specs[$name]['atoms'][] = $child;
+          $child_specs[$name]['implementations'][] = $symbol;
+        } else {
+          $child_specs[$name] = array(
+            'atoms' => array($child),
+            'defined' => $symbol,
+            'implementations' => array($symbol),
+          );
+        }
+      }
+    }
+
+    return $child_specs;
+  }
+
+  private function composeTasks(DivinerLiveSymbol $symbol) {
+    $extends_task_specs = array();
+    foreach ($symbol->getExtends() as $extends) {
+      $extends_task_specs += $this->composeTasks($extends);
+    }
+
+    $task_specs = array();
+
+    $tasks = $symbol->getAtom()->getDocblockMetaValue('task');
+    if (strlen($tasks)) {
+      $tasks = phutil_split_lines($tasks, $retain_endings = false);
+
+      foreach ($tasks as $task) {
+        list($name, $title) = explode(' ', $task, 2);
+        $name = trim($name);
+        $title = trim($title);
+
+        $task_specs[$name] = array(
+          'name'        => $name,
+          'title'       => $title,
+          'defined'     => $symbol,
+        );
+      }
+    }
+
+    return $task_specs + $extends_task_specs;
   }
 
 }

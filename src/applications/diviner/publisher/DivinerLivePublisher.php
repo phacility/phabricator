@@ -126,12 +126,19 @@ final class DivinerLivePublisher extends DivinerPublisher {
 
       $symbol->save();
 
-      if ($is_documentable) {
-        $storage = $this->loadAtomStorageForSymbol($symbol)
-          ->setAtomData($atom->toDictionary())
-          ->setContent(null)
-          ->save();
-      }
+      // TODO: We probably need a finer-grained sense of what "documentable"
+      // atoms are. Neither files nor methods are currently considered
+      // documentable, but for different reasons: files appear nowhere, while
+      // methods just don't appear at the top level. These are probably
+      // separate concepts. Since we need atoms in order to build method
+      // documentation, we insert them here. This also means we insert files,
+      // which are unnecessary and unused. Make sure this makes sense, but then
+      // probably introduce separate "isTopLevel" and "isDocumentable" flags?
+
+      $storage = $this->loadAtomStorageForSymbol($symbol)
+        ->setAtomData($atom->toDictionary())
+        ->setContent(null)
+        ->save();
     }
   }
 
