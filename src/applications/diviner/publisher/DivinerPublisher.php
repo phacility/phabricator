@@ -142,6 +142,7 @@ abstract class DivinerPublisher {
 
   protected function shouldGenerateDocumentForAtom(DivinerAtom $atom) {
     switch ($atom->getType()) {
+      case DivinerAtom::TYPE_METHOD:
       case DivinerAtom::TYPE_FILE:
         return false;
       case DivinerAtom::TYPE_ARTICLE:

@@ -4,6 +4,7 @@ final class DivinerAtom {
 
   const TYPE_FILE      = 'file';
   const TYPE_ARTICLE   = 'article';
+  const TYPE_METHOD    = 'method';
 
   private $type;
   private $name;
@@ -181,6 +182,10 @@ final class DivinerAtom {
     return mpull($this->extends, 'toDictionary');
   }
 
+  public function getExtends() {
+    return $this->extends;
+  }
+
   public function getHash() {
     if ($this->hash) {
       return $this->hash;
@@ -324,6 +329,10 @@ final class DivinerAtom {
 
     foreach (idx($dictionary, 'childHashes', array()) as $child) {
       $atom->addChildHash($child);
+    }
+
+    foreach (idx($dictionary, 'extends', array()) as $extends) {
+      $atom->addExtends(DivinerAtomRef::newFromDictionary($extends));
     }
 
     return $atom;

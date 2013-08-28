@@ -63,9 +63,11 @@ final class DivinerLivePublisher extends DivinerPublisher {
   }
 
   protected function loadAllPublishedHashes() {
-    $symbols = id(new DivinerLiveSymbol())->loadAllWhere(
-      'bookPHID = %s AND graphHash IS NOT NULL',
-      $this->loadBook()->getPHID());
+    $symbols = id(new DivinerAtomQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBookPHIDs(array($this->loadBook()->getPHID()))
+      ->withIncludeUndocumentable(true)
+      ->execute();
 
     return mpull($symbols, 'getGraphHash');
   }
@@ -84,7 +86,8 @@ final class DivinerLivePublisher extends DivinerPublisher {
     foreach (PhabricatorLiskDAO::chunkSQL($strings, ', ') as $chunk) {
       queryfx(
         $conn_w,
-        'UPDATE %T SET graphHash = NULL WHERE graphHash IN (%Q)',
+        'UPDATE %T SET graphHash = NULL, nodeHash = NULL
+          WHERE graphHash IN (%Q)',
         $symbol_table->getTableName(),
         $chunk);
     }
@@ -111,7 +114,8 @@ final class DivinerLivePublisher extends DivinerPublisher {
         ->setGraphHash($hash)
         ->setIsDocumentable((int)$is_documentable)
         ->setTitle($ref->getTitle())
-        ->setGroupName($ref->getGroup());
+        ->setGroupName($ref->getGroup())
+        ->setNodeHash($atom->getHash());
 
       if ($is_documentable) {
         $renderer = $this->getRenderer();

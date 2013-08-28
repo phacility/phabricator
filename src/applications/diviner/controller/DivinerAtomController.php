@@ -46,6 +46,7 @@ final class DivinerAtomController extends DivinerController {
       ->withContexts(array($this->atomContext))
       ->withIndexes(array($this->atomIndex))
       ->needAtoms(true)
+      ->needExtends(true)
       ->executeOne();
 
     if (!$symbol) {
@@ -53,6 +54,19 @@ final class DivinerAtomController extends DivinerController {
     }
 
     $atom = $symbol->getAtom();
+
+    $extends = $atom->getExtends();
+
+    $child_hashes = $atom->getChildHashes();
+    if ($child_hashes) {
+      $children = id(new DivinerAtomQuery())
+        ->setViewer($viewer)
+        ->withIncludeUndocumentable(true)
+        ->withNodeHashes($child_hashes)
+        ->execute();
+    } else {
+      $children = array();
+    }
 
     $crumbs = $this->buildApplicationCrumbs();
 
@@ -89,6 +103,9 @@ final class DivinerAtomController extends DivinerController {
     $properties->addProperty(
       pht('Defined'),
       $atom->getFile().':'.$atom->getLine());
+
+
+    $this->buildExtendsAndImplements($properties, $symbol);
 
     $warnings = $atom->getWarnings();
     if ($warnings) {
@@ -157,6 +174,17 @@ final class DivinerAtomController extends DivinerController {
           ->setReturn($return));
     }
 
+    if ($children) {
+      $document->appendChild(
+        id(new PhabricatorHeaderView())
+          ->setHeader(pht('Methods')));
+      foreach ($children as $child) {
+        $document->appendChild(
+          id(new PhabricatorHeaderView())
+            ->setHeader($child->getName()));
+      }
+    }
+
     if ($toc) {
       $side = new PHUIListView();
       $side->addMenuItem(
@@ -186,6 +214,71 @@ final class DivinerAtomController extends DivinerController {
 
   private function renderAtomTypeName($name) {
     return phutil_utf8_ucwords($name);
+  }
+
+  private function buildExtendsAndImplements(
+    PhabricatorPropertyListView $view,
+    DivinerLiveSymbol $symbol) {
+
+    $lineage = $this->getExtendsLineage($symbol);
+    if ($lineage) {
+      $lineage = mpull($lineage, 'getName');
+      $lineage = implode(' > ', $lineage);
+      $view->addProperty(pht('Extends'), $lineage);
+    }
+
+    $implements = $this->getImplementsLineage($symbol);
+    if ($implements) {
+      $items = array();
+      foreach ($implements as $spec) {
+        $via = $spec['via'];
+        $iface = $spec['interface'];
+        if ($via == $symbol) {
+          $items[] = $iface->getName();
+        } else {
+          $items[] = $iface->getName().' (via '.$via->getName().')';
+        }
+      }
+
+      $view->addProperty(
+        pht('Implements'),
+        phutil_implode_html(phutil_tag('br'), $items));
+    }
+
+  }
+
+  private function getExtendsLineage(DivinerLiveSymbol $symbol) {
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == 'class') {
+        $lineage = $this->getExtendsLineage($extends);
+        $lineage[] = $extends;
+        return $lineage;
+      }
+    }
+    return array();
+  }
+
+  private function getImplementsLineage(DivinerLiveSymbol $symbol) {
+    $implements = array();
+
+    // Do these first so we get interfaces ordered from most to least specific.
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == 'interface') {
+        $implements[$extends->getName()] = array(
+          'interface' => $extends,
+          'via' => $symbol,
+        );
+      }
+    }
+
+    // Now do parent interfaces.
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == 'class') {
+        $implements += $this->getImplementsLineage($extends);
+      }
+    }
+
+    return $implements;
   }
 
 }

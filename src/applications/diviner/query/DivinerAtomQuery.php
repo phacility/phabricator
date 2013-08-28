@@ -12,8 +12,10 @@ final class DivinerAtomQuery
   private $indexes;
   private $includeUndocumentable;
   private $includeGhosts;
+  private $nodeHashes;
 
   private $needAtoms;
+  private $needExtends;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -50,10 +52,16 @@ final class DivinerAtomQuery
     return $this;
   }
 
+  public function withNodeHashes(array $hashes) {
+    $this->nodeHashes = $hashes;
+    return $this;
+  }
+
   public function needAtoms($need) {
     $this->needAtoms = $need;
     return $this;
   }
+
 
   /**
    * Include "ghosts", which are symbols which used to exist but do not exist
@@ -75,6 +83,12 @@ final class DivinerAtomQuery
    */
   public function withIncludeGhosts($include) {
     $this->includeGhosts = $include;
+    return $this;
+  }
+
+
+  public function needExtends($need) {
+    $this->needExtends = $need;
     return $this;
   }
 
@@ -116,6 +130,8 @@ final class DivinerAtomQuery
       $atom->attachBook($book);
     }
 
+    $need_atoms = $this->needAtoms;
+
     if ($this->needAtoms) {
       $atom_data = id(new DivinerLiveAtom())->loadAllWhere(
         'symbolPHID IN (%Ls)',
@@ -129,6 +145,80 @@ final class DivinerAtomQuery
           continue;
         }
         $atom->attachAtom($data);
+      }
+    }
+
+    // Load all of the symbols this symbol extends, recursively. Commonly,
+    // this means all the ancestor classes and interfaces it extends and
+    // implements.
+
+    if ($this->needExtends) {
+
+      // First, load all the matching symbols by name. This does 99% of the
+      // work in most cases, assuming things are named at all reasonably.
+
+      $names = array();
+      foreach ($atoms as $atom) {
+        foreach ($atom->getAtom()->getExtends() as $xref) {
+          $names[] = $xref->getName();
+        }
+      }
+
+      if ($names) {
+        $xatoms = id(new DivinerAtomQuery())
+          ->setViewer($this->getViewer())
+          ->withNames($names)
+          ->needExtends(true)
+          ->needAtoms(true)
+          ->execute();
+        $xatoms = mgroup($xatoms, 'getName', 'getType', 'getBookPHID');
+      } else {
+        $xatoms = array();
+      }
+
+      foreach ($atoms as $atom) {
+        $alang = $atom->getAtom()->getLanguage();
+        $extends = array();
+        foreach ($atom->getAtom()->getExtends() as $xref) {
+
+          // If there are no symbols of the matching name and type, we can't
+          // resolve this.
+          if (empty($xatoms[$xref->getName()][$xref->getType()])) {
+            continue;
+          }
+
+          // If we found matches in the same documentation book, prefer them
+          // over other matches. Otherwise, look at all the the matches.
+          $matches = $xatoms[$xref->getName()][$xref->getType()];
+          if (isset($matches[$atom->getBookPHID()])) {
+            $maybe = $matches[$atom->getBookPHID()];
+          } else {
+            $maybe = array_mergev($matches);
+          }
+
+          if (!$maybe) {
+            continue;
+          }
+
+          // Filter out matches in a different language, since, e.g., PHP
+          // classes can not implement JS classes.
+          $same_lang = array();
+          foreach ($maybe as $xatom) {
+            if ($xatom->getAtom()->getLanguage() == $alang) {
+              $same_lang[] = $xatom;
+            }
+          }
+
+          if (!$same_lang) {
+            continue;
+          }
+
+          // If we have duplicates remaining, just pick the first one. There's
+          // nothing more we can do to figure out which is the real one.
+          $extends[] = head($same_lang);
+        }
+
+        $atom->attachExtends($extends);
       }
     }
 
@@ -218,6 +308,13 @@ final class DivinerAtomQuery
       $where[] = qsprintf(
         $conn_r,
         'graphHash IS NOT NULL');
+    }
+
+    if ($this->nodeHashes) {
+      $where[] = qsprintf(
+        $conn_r,
+        'nodeHash IN (%Ls)',
+        $this->nodeHashes);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

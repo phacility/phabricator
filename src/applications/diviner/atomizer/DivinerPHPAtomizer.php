@@ -31,6 +31,90 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
       $atoms[] = $atom;
     }
 
+    $class_types = array(
+      'class' => 'n_CLASS_DECLARATION',
+      'interface' => 'n_INTERFACE_DECLARATION',
+    );
+    foreach ($class_types as $atom_type => $node_type) {
+      $class_decls = $root->selectDescendantsOfType($node_type);
+      foreach ($class_decls as $class) {
+        $name = $class->getChildByIndex(1, 'n_CLASS_NAME');
+
+        $atom = id(new DivinerAtom())
+          ->setType($atom_type)
+          ->setName($name->getConcreteString())
+          ->setFile($file_name)
+          ->setLine($class->getLineNumber());
+
+        // If this exists, it is n_EXTENDS_LIST.
+        $extends = $class->getChildByIndex(2);
+        $extends_class = $extends->selectDescendantsOfType('n_CLASS_NAME');
+        foreach ($extends_class as $parent_class) {
+          $atom->addExtends(
+            DivinerAtomRef::newFromDictionary(
+              array(
+                'type' => 'class',
+                'name' => $parent_class->getConcreteString(),
+              )));
+        }
+
+        // If this exists, it is n_IMPLEMENTS_LIST.
+        $implements = $class->getChildByIndex(3);
+        $iface_names = $implements->selectDescendantsOfType('n_CLASS_NAME');
+        foreach ($iface_names as $iface_name) {
+          $atom->addExtends(
+            DivinerAtomRef::newFromDictionary(
+              array(
+                'type' => 'interface',
+                'name' => $iface_name->getConcreteString(),
+              )));
+        }
+
+        $this->findAtomDocblock($atom, $class);
+
+        $methods = $class->selectDescendantsOfType('n_METHOD_DECLARATION');
+        foreach ($methods as $method) {
+          $matom = id(new DivinerAtom())
+            ->setType('method');
+
+          $this->findAtomDocblock($matom, $method);
+
+          $attribute_list = $method->getChildByIndex(0);
+          $attributes = $attribute_list->selectDescendantsOfType('n_STRING');
+          if ($attributes) {
+            foreach ($attributes as $attribute) {
+              $attr = strtolower($attribute->getConcreteString());
+              switch ($attr) {
+                case 'static':
+                  $matom->setProperty($attr, true);
+                  break;
+                case 'public':
+                case 'protected':
+                case 'private':
+                  $matom->setProperty('access', $attr);
+                  break;
+              }
+            }
+          } else {
+            $matom->setProperty('access', 'public');
+          }
+
+          $this->parseParams($matom, $method);
+
+          $matom->setName($method->getChildByIndex(2)->getConcreteString());
+          $matom->setLine($method->getLineNumber());
+          $matom->setFile($file_name);
+
+          $this->parseReturnType($matom, $method);
+          $atom->addChild($matom);
+
+          $atoms[] = $matom;
+        }
+
+        $atoms[] = $atom;
+      }
+    }
+
     return $atoms;
   }
 
