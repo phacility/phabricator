@@ -702,15 +702,15 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/sprite-status-X2.png' =>
   array(
-    'hash' => '6b9a56e989052bfb7139d637918cd227',
-    'uri' => '/res/6b9a56e9/rsrc/image/sprite-status-X2.png',
+    'hash' => '3c57299b04fc21bee8a20d2d019bf6b6',
+    'uri' => '/res/3c57299b/rsrc/image/sprite-status-X2.png',
     'disk' => '/rsrc/image/sprite-status-X2.png',
     'type' => 'png',
   ),
   '/rsrc/image/sprite-status.png' =>
   array(
-    'hash' => 'b0a100328351732903d86185b001f057',
-    'uri' => '/res/b0a10032/rsrc/image/sprite-status.png',
+    'hash' => 'b76029c6bac69fd5bd9ab82d254f2ef1',
+    'uri' => '/res/b76029c6/rsrc/image/sprite-status.png',
     'disk' => '/rsrc/image/sprite-status.png',
     'type' => 'png',
   ),
@@ -4135,7 +4135,7 @@ celerity_register_resource_map(array(
   ),
   'sprite-status-css' =>
   array(
-    'uri' => '/res/5c735469/rsrc/css/sprite-status.css',
+    'uri' => '/res/72b39c66/rsrc/css/sprite-status.css',
     'type' => 'css',
     'requires' =>
     array(

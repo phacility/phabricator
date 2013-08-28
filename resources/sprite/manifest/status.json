@@ -251,6 +251,26 @@
       "rule" : ".status-right-white",
       "hash" : "be2ffb65a7799cd9a5e00c2334e378b2"
     },
+    "status-time-green"     : {
+      "name" : "status-time-green",
+      "rule" : ".status-time-green",
+      "hash" : "5cb4771e10aaf79ac490bc93bd029d8f"
+    },
+    "status-time-orange"    : {
+      "name" : "status-time-orange",
+      "rule" : ".status-time-orange",
+      "hash" : "aa48043beff2c8576402dbccbe4ad3e2"
+    },
+    "status-time-red"       : {
+      "name" : "status-time-red",
+      "rule" : ".status-time-red",
+      "hash" : "e4dbf14f1ac16338b5e01aa04f2e267e"
+    },
+    "status-time-yellow"    : {
+      "name" : "status-time-yellow",
+      "rule" : ".status-time-yellow",
+      "hash" : "79756bcf7f2401d7e3a97ff03b981dcb"
+    },
     "status-up-blue"        : {
       "name" : "status-up-blue",
       "rule" : ".status-up-blue",
