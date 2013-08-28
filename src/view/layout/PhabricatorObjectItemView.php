@@ -19,6 +19,10 @@ final class PhabricatorObjectItemView extends AphrontTagView {
   private $headIcons = array();
   private $disabled;
 
+  const AGE_FRESH = 'fresh';
+  const AGE_STALE = 'stale';
+  const AGE_OLD   = 'old';
+
   public function setDisabled($disabled) {
     $this->disabled = $disabled;
     return $this;
@@ -90,6 +94,40 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   public function addByline($byline) {
     $this->bylines[] = $byline;
+    return $this;
+  }
+
+  public function setEpoch($epoch, $age = self::AGE_FRESH) {
+    $date = phabricator_datetime($epoch, $this->getUser());
+
+    $days = floor((time() - $epoch) / 60 / 60 / 24);
+
+    switch ($age) {
+      case self::AGE_FRESH:
+        $this->addIcon('none', $date);
+        break;
+      case self::AGE_STALE:
+        require_celerity_resource('sprite-status-css');
+        $attr = array(
+          'tip' => pht('Stale (%s day(s))', new PhutilNumber($days)),
+          'class' => 'icon-age-stale',
+          'sheet' => PHUIIconView::SPRITE_STATUS,
+        );
+        $this->addIcon('time-yellow', $date, $attr);
+        break;
+      case self::AGE_OLD:
+        require_celerity_resource('sprite-status-css');
+        $attr = array(
+          'tip' =>  pht('Old (%s day(s))', new PhutilNumber($days)),
+          'class' => 'icon-age-old',
+          'sheet' => PHUIIconView::SPRITE_STATUS,
+        );
+        $this->addIcon('time-red', $date, $attr);
+        break;
+      default:
+        throw new Exception("Unknown age '{$age}'!");
+    }
+
     return $this;
   }
 
@@ -261,11 +299,13 @@ final class PhabricatorObjectItemView extends AphrontTagView {
           );
         }
 
+        $sheet = idx($spec['attributes'], 'sheet', 'icons');
+
         $icon = javelin_tag(
           'span',
           array(
             'class' => 'phabricator-object-item-icon-image '.
-                       'sprite-icons icons-'.$icon,
+                       'sprite-'.$sheet.' '.$sheet.'-'.$icon,
             'sigil' => $sigil,
             'meta'  => $meta,
           ),
@@ -291,6 +331,9 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $classes[] = 'phabricator-object-item-icon';
         if ($spec['icon'] == 'none') {
           $classes[] = 'phabricator-object-item-icon-none';
+        }
+        if (isset($spec['attributes']['class'])) {
+          $classes[] = $spec['attributes']['class'];
         }
 
         $icon_list[] = javelin_tag(
