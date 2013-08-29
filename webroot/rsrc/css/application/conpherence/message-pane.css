@@ -92,7 +92,8 @@
  */
 .remarkup-fullscreen-mode .conpherence-message-pane,
 .remarkup-fullscreen-mode .conpherence-message-pane .conpherence-messages,
-.remarkup-fullscreen-mode .conpherence-message-pane .phui-form-view {
+.remarkup-fullscreen-mode .conpherence-message-pane .phui-form-view,
+.remarkup-fullscreen-mode .conpherence-layout {
   position: static;
 }
 
