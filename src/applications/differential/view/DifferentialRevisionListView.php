@@ -211,6 +211,23 @@ final class DifferentialRevisionListView extends AphrontView {
         $item->addAttribute(pht('%s: %s', $header, $field));
       }
 
+      switch ($status) {
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+          break;
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          $item->setBarColor('red');
+          break;
+        case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          $item->setBarColor('green');
+          break;
+        case ArcanistDifferentialRevisionStatus::CLOSED:
+          $item->setDisabled(true);
+          break;
+        case ArcanistDifferentialRevisionStatus::ABANDONED:
+          $item->setBarColor('black');
+          break;
+      }
+
       $list->addItem($item);
     }
 
