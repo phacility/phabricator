@@ -82,6 +82,8 @@ final class DifferentialRevisionSearchEngine
     $order = $saved->getParameter('order');
     if (idx($this->getOrderOptions(), $order)) {
       $query->setOrder($order);
+    } else {
+      $query->setOrder(DifferentialRevisionQuery::ORDER_CREATED);
     }
 
     return $query;
