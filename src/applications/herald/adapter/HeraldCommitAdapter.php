@@ -52,6 +52,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return array(
       self::FIELD_BODY,
       self::FIELD_AUTHOR,
+      self::FIELD_COMMITTER,
       self::FIELD_REVIEWER,
       self::FIELD_REPOSITORY,
       self::FIELD_DIFF_FILE,
@@ -241,6 +242,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return $data->getCommitMessage();
       case self::FIELD_AUTHOR:
         return $data->getCommitDetail('authorPHID');
+      case self::FIELD_COMMITTER:
+        return $data->getCommitDetail('committerPHID');
       case self::FIELD_REVIEWER:
         return $data->getCommitDetail('reviewerPHID');
       case self::FIELD_DIFF_FILE:
