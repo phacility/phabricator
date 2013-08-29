@@ -10,7 +10,7 @@ final class PhabricatorPasteSearchEngine
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
       'authorPHIDs',
-      array_values($request->getArr('authors')));
+      $this->readUsersFromRequest($request, 'authors'));
 
     $languages = $request->getStrList('languages');
     if ($request->getBool('noLanguage')) {

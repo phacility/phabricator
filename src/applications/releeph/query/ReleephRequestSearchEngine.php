@@ -25,7 +25,9 @@ final class ReleephRequestSearchEngine
 
     $saved->setParameter('status', $request->getStr('status'));
     $saved->setParameter('severity', $request->getStr('severity'));
-    $saved->setParameter('requestorPHIDs', $request->getArr('requestorPHIDs'));
+    $saved->setParameter(
+      'requestorPHIDs',
+      $this->readUsersFromRequest($request, 'requestors'));
 
     return $saved;
   }
@@ -79,7 +81,7 @@ final class ReleephRequestSearchEngine
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
-          ->setName('requestorPHIDs')
+          ->setName('requestors')
           ->setLabel(pht('Requestors'))
           ->setValue($requestor_tokens));
   }

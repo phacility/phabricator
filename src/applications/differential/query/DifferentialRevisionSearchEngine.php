@@ -15,19 +15,19 @@ final class DifferentialRevisionSearchEngine
 
     $saved->setParameter(
       'responsiblePHIDs',
-      $request->getArr('responsiblePHIDs'));
+      $this->readUsersFromRequest($request, 'responsibles'));
 
     $saved->setParameter(
       'authorPHIDs',
-      $request->getArr('authorPHIDs'));
+      $this->readUsersFromRequest($request, 'authors'));
 
     $saved->setParameter(
       'reviewerPHIDs',
-      $request->getArr('reviewerPHIDs'));
+      $this->readUsersFromRequest($request, 'reviewers'));
 
     $saved->setParameter(
       'subscriberPHIDs',
-      $request->getArr('subscriberPHIDs'));
+      $this->readUsersFromRequest($request, 'subscribers'));
 
     $saved->setParameter(
       'draft',
@@ -115,25 +115,25 @@ final class DifferentialRevisionSearchEngine
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Responsible Users'))
-          ->setName('responsiblePHIDs')
+          ->setName('responsibles')
           ->setDatasource('/typeahead/common/accounts/')
           ->setValue(array_select_keys($tokens, $responsible_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Authors'))
-          ->setName('authorPHIDs')
+          ->setName('authors')
           ->setDatasource('/typeahead/common/accounts/')
           ->setValue(array_select_keys($tokens, $author_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Reviewers'))
-          ->setName('reviewerPHIDs')
+          ->setName('reviewers')
           ->setDatasource('/typeahead/common/accounts/')
           ->setValue(array_select_keys($tokens, $reviewer_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Subscribers'))
-          ->setName('subscriberPHIDs')
+          ->setName('subscribers')
           ->setDatasource('/typeahead/common/allmailable/')
           ->setValue(array_select_keys($tokens, $subscriber_phids)))
       ->appendChild(

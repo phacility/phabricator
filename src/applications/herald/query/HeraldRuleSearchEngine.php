@@ -8,7 +8,7 @@ final class HeraldRuleSearchEngine
 
     $saved->setParameter(
       'authorPHIDs',
-      array_values($request->getArr('authors')));
+      $this->readUsersFromRequest($request, 'authors'));
 
     $saved->setParameter('contentType', $request->getStr('contentType'));
     $saved->setParameter('ruleType', $request->getStr('ruleType'));
