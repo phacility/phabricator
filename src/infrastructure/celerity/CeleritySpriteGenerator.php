@@ -61,10 +61,8 @@ final class CeleritySpriteGenerator {
       // Strip 'text_' from these file names.
       $class_name = substr($icon, 5);
 
-      if ($class_name == 'order_off') {
-        $tcss = '.remarkup-control-order-mode .remarkup-assist-order';
-      } else if ($class_name == 'chaos_off') {
-        $tcss = '.remarkup-control-chaos-mode .remarkup-assist-chaos';
+      if ($class_name == 'fullscreen_off') {
+        $tcss = '.remarkup-control-fullscreen-mode .remarkup-assist-fullscreen';
       } else {
         $tcss = '.remarkup-assist-'.$class_name;
       }

@@ -766,15 +766,15 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -60px -195px;
 }
 
-.remarkup-assist-chaos {
+.remarkup-assist-code {
   background-position: -75px -195px;
 }
 
-.remarkup-control-chaos-mode .remarkup-assist-chaos {
+.remarkup-assist-fullscreen {
   background-position: -90px -195px;
 }
 
-.remarkup-assist-code {
+.remarkup-control-fullscreen-mode .remarkup-assist-fullscreen {
   background-position: -105px -195px;
 }
 
@@ -802,26 +802,18 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -195px -195px;
 }
 
-.remarkup-assist-order {
+.remarkup-assist-table {
   background-position: 0px -210px;
 }
 
-.remarkup-control-order-mode .remarkup-assist-order {
+.remarkup-assist-tag {
   background-position: -15px -210px;
 }
 
-.remarkup-assist-table {
+.remarkup-assist-tt {
   background-position: -30px -210px;
 }
 
-.remarkup-assist-tag {
-  background-position: -45px -210px;
-}
-
-.remarkup-assist-tt {
-  background-position: -60px -210px;
-}
-
 .remarkup-assist-ul {
-  background-position: -75px -210px;
+  background-position: -45px -210px;
 }

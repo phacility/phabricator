@@ -81,22 +81,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       'align' => 'right',
     );
 
-    $is_serious = PhabricatorEnv::getEnvConfig(
-      'phabricator.serious-business');
-
-    $actions['order'] = array(
-      'tip' => $is_serious
-        ? pht('Fullscreen Mode')
-        : pht('Order Mode'),
+    $actions['fullscreen'] = array(
+      'tip' => pht('Fullscreen Mode'),
       'align' => 'right',
     );
-
-    if (!$is_serious) {
-      $actions['chaos'] = array(
-        'tip' => pht('Chaos Mode'),
-        'align' => 'right',
-      );
-    }
 
     $buttons = array();
     foreach ($actions as $action => $spec) {
