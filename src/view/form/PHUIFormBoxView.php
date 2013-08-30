@@ -16,7 +16,7 @@ final class PHUIFormBoxView extends AphrontView {
     return $this;
   }
 
-  public function setForm(AphrontFormView $form) {
+  public function setForm($form) {
     $this->form = $form;
     return $this;
   }

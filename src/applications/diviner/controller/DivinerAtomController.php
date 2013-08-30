@@ -33,6 +33,11 @@ final class DivinerAtomController extends DivinerController {
       return new Aphront404Response();
     }
 
+    // TODO: This query won't load ghosts, because they'll fail `needAtoms()`.
+    // Instead, we might want to load ghosts and render a message like
+    // "this thing existed in an older version, but no longer does", especially
+    // if we add content like comments.
+
     $symbol = id(new DivinerAtomQuery())
       ->setViewer($viewer)
       ->withBookPHIDs(array($book->getPHID()))
@@ -41,6 +46,8 @@ final class DivinerAtomController extends DivinerController {
       ->withContexts(array($this->atomContext))
       ->withIndexes(array($this->atomIndex))
       ->needAtoms(true)
+      ->needExtends(true)
+      ->needChildren(true)
       ->executeOne();
 
     if (!$symbol) {
@@ -48,7 +55,6 @@ final class DivinerAtomController extends DivinerController {
     }
 
     $atom = $symbol->getAtom();
-
     $crumbs = $this->buildApplicationCrumbs();
 
     $crumbs->addCrumb(
@@ -70,7 +76,8 @@ final class DivinerAtomController extends DivinerController {
         id(new PhabricatorTagView())
           ->setType(PhabricatorTagView::TYPE_STATE)
           ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
-          ->setName($this->renderAtomTypeName($atom->getType())));
+          ->setName(DivinerAtom::getAtomTypeNameString($atom->getType())))
+      ->setSubheader($this->renderFullSignature($symbol));
 
     $properties = id(new PhabricatorPropertyListView());
 
@@ -81,17 +88,31 @@ final class DivinerAtomController extends DivinerController {
       $group_name = null;
     }
 
-    $properties->addProperty(
-      pht('Defined'),
-      $atom->getFile().':'.$atom->getLine());
+    $this->buildDefined($properties, $symbol);
+    $this->buildExtendsAndImplements($properties, $symbol);
+
+    $warnings = $atom->getWarnings();
+    if ($warnings) {
+      $warnings = id(new AphrontErrorView())
+        ->setErrors($warnings)
+        ->setTitle(pht('Documentation Warnings'))
+        ->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+    }
+
+    $methods = $this->composeMethods($symbol);
 
     $field = 'default';
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($viewer)
-      ->addObject($symbol, $field)
-      ->process();
+      ->addObject($symbol, $field);
+    foreach ($methods as $method) {
+      foreach ($method['atoms'] as $matom) {
+        $engine->addObject($matom, $field);
+      }
+    }
+    $engine->process();
 
-    $content = $engine->getOutput($symbol, $field);
+    $content = $this->renderDocumentationText($symbol, $engine);
 
     $toc = $engine->getEngineMetadata(
       $symbol,
@@ -103,15 +124,77 @@ final class DivinerAtomController extends DivinerController {
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
       ->appendChild($properties)
-      ->appendChild(
-        phutil_tag(
-          'div',
+      ->appendChild($warnings)
+      ->appendChild($content);
+
+    $document->appendChild($this->buildParametersAndReturn(array($symbol)));
+
+    if ($methods) {
+      $tasks = $this->composeTasks($symbol);
+
+      if ($tasks) {
+        $methods_by_task = igroup($methods, 'task');
+
+        $document->appendChild(
+          id(new PhabricatorHeaderView())
+            ->setHeader(pht('Tasks')));
+
+        if (isset($methods_by_task[''])) {
+          $tasks[''] = array(
+            'name' => '',
+            'title' => pht('Other Methods'),
+            'defined' => $symbol,
+          );
+        }
+
+        foreach ($tasks as $spec) {
+          $document->appendChild(
+            id(new PhabricatorHeaderView())
+              ->setHeader($spec['title']));
+
+          $task_methods = idx($methods_by_task, $spec['name'], array());
+          if ($task_methods) {
+            $document->appendChild(hsprintf('<ul>'));
+            foreach ($task_methods as $task_method) {
+              $atom = last($task_method['atoms']);
+              $document->appendChild(
+                hsprintf('<li>%s()</li>', $atom->getName()));
+            }
+            $document->appendChild(hsprintf('</ul>'));
+          } else {
+            $document->appendChild("No methods for this task.");
+          }
+        }
+      }
+
+      $document->appendChild(
+        id(new PhabricatorHeaderView())
+          ->setHeader(pht('Methods')));
+      foreach ($methods as $spec) {
+        $matom = last($spec['atoms']);
+        $method_header = id(new PhabricatorHeaderView())
+          ->setHeader($matom->getName());
+
+        $inherited = $spec['inherited'];
+        if ($inherited) {
+          $method_header->addTag(
+            id(new PhabricatorTagView())
+              ->setType(PhabricatorTagView::TYPE_STATE)
+              ->setBackgroundColor(PhabricatorTagView::COLOR_GREY)
+              ->setName(pht('Inherited')));
+        }
+
+        $method_header->setSubheader(
+          $this->renderFullSignature($matom));
+
+        $document->appendChild(
           array(
-            'class' => 'phabricator-remarkup',
-          ),
-          array(
-            $content,
-          )));
+            $method_header,
+            $this->renderMethodDocumentationText($symbol, $spec, $engine),
+            $this->buildParametersAndReturn($spec['atoms']),
+          ));
+      }
+    }
 
     if ($toc) {
       $side = new PHUIListView();
@@ -140,8 +223,365 @@ final class DivinerAtomController extends DivinerController {
       ));
   }
 
-  private function renderAtomTypeName($name) {
-    return phutil_utf8_ucwords($name);
+  private function buildExtendsAndImplements(
+    PhabricatorPropertyListView $view,
+    DivinerLiveSymbol $symbol) {
+
+    $lineage = $this->getExtendsLineage($symbol);
+    if ($lineage) {
+      $lineage = mpull($lineage, 'getName');
+      $lineage = implode(' > ', $lineage);
+      $view->addProperty(pht('Extends'), $lineage);
+    }
+
+    $implements = $this->getImplementsLineage($symbol);
+    if ($implements) {
+      $items = array();
+      foreach ($implements as $spec) {
+        $via = $spec['via'];
+        $iface = $spec['interface'];
+        if ($via == $symbol) {
+          $items[] = $iface->getName();
+        } else {
+          $items[] = $iface->getName().' (via '.$via->getName().')';
+        }
+      }
+
+      $view->addProperty(
+        pht('Implements'),
+        phutil_implode_html(phutil_tag('br'), $items));
+    }
+
+  }
+
+  private function getExtendsLineage(DivinerLiveSymbol $symbol) {
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == 'class') {
+        $lineage = $this->getExtendsLineage($extends);
+        $lineage[] = $extends;
+        return $lineage;
+      }
+    }
+    return array();
+  }
+
+  private function getImplementsLineage(DivinerLiveSymbol $symbol) {
+    $implements = array();
+
+    // Do these first so we get interfaces ordered from most to least specific.
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == 'interface') {
+        $implements[$extends->getName()] = array(
+          'interface' => $extends,
+          'via' => $symbol,
+        );
+      }
+    }
+
+    // Now do parent interfaces.
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == 'class') {
+        $implements += $this->getImplementsLineage($extends);
+      }
+    }
+
+    return $implements;
+  }
+
+  private function buildDefined(
+    PhabricatorPropertyListView $view,
+    DivinerLiveSymbol $symbol) {
+
+    $atom = $symbol->getAtom();
+    $defined = $atom->getFile().':'.$atom->getLine();
+
+    $link = $symbol->getBook()->getConfig('uri.source');
+    if ($link) {
+      $link = strtr(
+        $link,
+        array(
+          '%%' => '%',
+          '%f' => phutil_escape_uri($atom->getFile()),
+          '%l' => phutil_escape_uri($atom->getLine()),
+        ));
+      $defined = phutil_tag(
+        'a',
+        array(
+          'href' => $link,
+          'target' => '_blank',
+        ),
+        $defined);
+    }
+
+    $view->addProperty(pht('Defined'), $defined);
+  }
+
+  private function composeMethods(DivinerLiveSymbol $symbol) {
+    $methods = $this->findMethods($symbol);
+    if (!$methods) {
+      return $methods;
+    }
+
+    foreach ($methods as $name => $method) {
+      // Check for "@task" on each parent, to find the most recently declared
+      // "@task".
+      $task = null;
+      foreach ($method['atoms'] as $key => $method_symbol) {
+        $atom = $method_symbol->getAtom();
+        if ($atom->getDocblockMetaValue('task')) {
+          $task = $atom->getDocblockMetaValue('task');
+        }
+      }
+      $methods[$name]['task'] = $task;
+
+      // Set 'inherited' if this atom has no implementation of the method.
+      if (last($method['implementations']) !== $symbol) {
+        $methods[$name]['inherited'] = true;
+      } else {
+        $methods[$name]['inherited'] = false;
+      }
+    }
+
+    return $methods;
+  }
+
+  private function findMethods(DivinerLiveSymbol $symbol) {
+    $child_specs = array();
+    foreach ($symbol->getExtends() as $extends) {
+      if ($extends->getType() == DivinerAtom::TYPE_CLASS) {
+        $child_specs = $this->findMethods($extends);
+      }
+    }
+
+    foreach ($symbol->getChildren() as $child) {
+      if ($child->getType() == DivinerAtom::TYPE_METHOD) {
+        $name = $child->getName();
+        if (isset($child_specs[$name])) {
+          $child_specs[$name]['atoms'][] = $child;
+          $child_specs[$name]['implementations'][] = $symbol;
+        } else {
+          $child_specs[$name] = array(
+            'atoms' => array($child),
+            'defined' => $symbol,
+            'implementations' => array($symbol),
+          );
+        }
+      }
+    }
+
+    return $child_specs;
+  }
+
+  private function composeTasks(DivinerLiveSymbol $symbol) {
+    $extends_task_specs = array();
+    foreach ($symbol->getExtends() as $extends) {
+      $extends_task_specs += $this->composeTasks($extends);
+    }
+
+    $task_specs = array();
+
+    $tasks = $symbol->getAtom()->getDocblockMetaValue('task');
+    if (strlen($tasks)) {
+      $tasks = phutil_split_lines($tasks, $retain_endings = false);
+
+      foreach ($tasks as $task) {
+        list($name, $title) = explode(' ', $task, 2);
+        $name = trim($name);
+        $title = trim($title);
+
+        $task_specs[$name] = array(
+          'name'        => $name,
+          'title'       => $title,
+          'defined'     => $symbol,
+        );
+      }
+    }
+
+    return $task_specs + $extends_task_specs;
+  }
+
+  private function renderFullSignature(DivinerLiveSymbol $symbol) {
+    switch ($symbol->getType()) {
+      case DivinerAtom::TYPE_CLASS:
+      case DivinerAtom::TYPE_INTERFACE:
+      case DivinerAtom::TYPE_METHOD:
+      case DivinerAtom::TYPE_FUNCTION:
+        break;
+      default:
+        return null;
+    }
+
+    $atom = $symbol->getAtom();
+
+    $out = array();
+    if ($atom->getProperty('final')) {
+      $out[] = 'final';
+    }
+
+    if ($atom->getProperty('abstract')) {
+      $out[] = 'abstract';
+    }
+
+    if ($atom->getProperty('access')) {
+      $out[] = $atom->getProperty('access');
+    }
+
+    if ($atom->getProperty('static')) {
+      $out[] = 'static';
+    }
+
+    switch ($symbol->getType()) {
+      case DivinerAtom::TYPE_CLASS:
+      case DivinerAtom::TYPE_INTERFACE:
+        $out[] = $symbol->getType();
+        break;
+      case DivinerAtom::TYPE_FUNCTION:
+        switch ($atom->getLanguage()) {
+          case 'php':
+            $out[] = $symbol->getType();
+            break;
+        }
+        break;
+      case DivinerAtom::TYPE_METHOD:
+        switch ($atom->getLanguage()) {
+          case 'php':
+            $out[] = DivinerAtom::TYPE_FUNCTION;
+            break;
+        }
+        break;
+    }
+
+    $out[] = $symbol->getName();
+
+    $out = implode(' ', $out);
+
+    $parameters = $atom->getProperty('parameters');
+    if ($parameters !== null) {
+      $pout = array();
+      foreach ($parameters as $parameter) {
+        $pout[] = $parameter['name'];
+      }
+      $out .= '('.implode(', ', $pout).')';
+    }
+
+    return $out;
+  }
+
+  private function buildParametersAndReturn(array $symbols) {
+    assert_instances_of($symbols, 'DivinerLiveSymbol');
+
+    $symbols = array_reverse($symbols);
+    $out = array();
+
+    $collected_parameters = null;
+    foreach ($symbols as $symbol) {
+      $parameters = $symbol->getAtom()->getProperty('parameters');
+      if ($parameters !== null) {
+        if ($collected_parameters === null) {
+          $collected_parameters = array();
+        }
+        foreach ($parameters as $key => $parameter) {
+          if (isset($collected_parameters[$key])) {
+            $collected_parameters[$key] += $parameter;
+          } else {
+            $collected_parameters[$key] = $parameter;
+          }
+        }
+      }
+    }
+
+    if ($parameters !== null) {
+      $out[] = id(new PhabricatorHeaderView())
+        ->setHeader(pht('Parameters'));
+      $out[] = id(new DivinerParameterTableView())
+        ->setParameters($parameters);
+    }
+
+    $collected_return = null;
+    foreach ($symbols as $symbol) {
+      $return = $symbol->getAtom()->getProperty('return');
+      if ($return) {
+        if ($collected_return) {
+          $collected_return += $return;
+        } else {
+          $collected_return = $return;
+        }
+      }
+    }
+
+    if ($return !== null) {
+      $out[] = id(new PhabricatorHeaderView())
+        ->setHeader(pht('Return'));
+      $out[] = id(new DivinerReturnTableView())
+        ->setReturn($collected_return);
+    }
+
+    return $out;
+  }
+
+  private function renderDocumentationText(
+    DivinerLiveSymbol $symbol,
+    PhabricatorMarkupEngine $engine) {
+
+    $field = 'default';
+    $content = $engine->getOutput($symbol, $field);
+
+    if (strlen(trim($symbol->getMarkupText($field)))) {
+      $content = phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        $content);
+    } else {
+      $atom = $symbol->getAtom();
+      $undoc = DivinerAtom::getThisAtomIsNotDocumentedString($atom->getType());
+      $content = id(new AphrontErrorView())
+        ->appendChild($undoc)
+        ->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+    }
+
+    return $content;
+  }
+
+  private function renderMethodDocumentationText(
+    DivinerLiveSymbol $parent,
+    array $spec,
+    PhabricatorMarkupEngine $engine) {
+
+    $symbols = array_values($spec['atoms']);
+    $implementations = array_values($spec['implementations']);
+
+    $field = 'default';
+
+    $out = array();
+    foreach ($symbols as $key => $symbol) {
+      $impl = $implementations[$key];
+      if ($impl !== $parent) {
+        if (!strlen(trim($symbol->getMarkupText($field)))) {
+          continue;
+        }
+        $out[] = phutil_tag(
+          'div',
+          array(),
+          pht('From parent implementation in %s:', $impl->getName()));
+      } else if ($out) {
+        $out[] = phutil_tag(
+          'div',
+          array(),
+          pht('From this implementation:'));
+      }
+      $out[] = $this->renderDocumentationText($symbol, $engine);
+    }
+
+    // If we only have inherited implementations but none have documentation,
+    // render the last one here so we get the "this thing has no documentation"
+    // element.
+    if (!$out) {
+      $out[] = $this->renderDocumentationText($symbol, $engine);
+    }
+
+    return $out;
   }
 
 }

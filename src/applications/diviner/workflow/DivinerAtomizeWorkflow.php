@@ -86,7 +86,9 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       $atoms = $atomizer->atomize($file, $data);
 
       foreach ($atoms as $atom) {
-        $file_atom->addChild($atom);
+        if (!$atom->getParentHash()) {
+          $file_atom->addChild($atom);
+        }
       }
 
       $all_atoms[] = $atoms;

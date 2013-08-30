@@ -34,7 +34,9 @@ abstract class DivinerController extends PhabricatorController {
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($symbol->getTitle())
         ->setHref($symbol->getURI())
-        ->addIcon('none', $symbol->getType());
+        ->addIcon('none',
+          DivinerAtom::getAtomTypeNameString(
+            $symbol->getType()));
 
       $item->addAttribute(phutil_safe_html($symbol->getSummary()));
 

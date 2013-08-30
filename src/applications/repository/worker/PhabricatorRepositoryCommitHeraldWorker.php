@@ -41,8 +41,9 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $xscript = $engine->getTranscript();
 
     $audit_phids = $adapter->getAuditMap();
-    if ($audit_phids) {
-      $this->createAudits($commit, $audit_phids, $rules);
+    $cc_phids = $adapter->getAddCCMap();
+    if ($audit_phids || $cc_phids) {
+      $this->createAudits($commit, $audit_phids, $cc_phids, $rules);
     }
 
     $explicit_auditors = $this->createAuditsFromCommitMessage($commit, $data);
@@ -59,6 +60,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $email_phids = array_unique(
       array_merge(
         $explicit_auditors,
+        array_keys($cc_phids),
         $herald_targets));
     if (!$email_phids) {
       return;
@@ -174,6 +176,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
   private function createAudits(
     PhabricatorRepositoryCommit $commit,
     array $map,
+    array $ccmap,
     array $rules) {
     assert_instances_of($rules, 'HeraldRule');
 
@@ -183,26 +186,44 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $requests = mpull($requests, null, 'getAuditorPHID');
 
     $rules = mpull($rules, null, 'getID');
-    foreach ($map as $phid => $rule_ids) {
-      $request = idx($requests, $phid);
-      if ($request) {
-        continue;
-      }
-      $reasons = array();
-      foreach ($rule_ids as $id) {
-        $rule_name = '?';
-        if ($rules[$id]) {
-          $rule_name = $rules[$id]->getName();
-        }
-        $reasons[] = 'Herald Rule #'.$id.' "'.$rule_name.'" Triggered Audit';
-      }
 
-      $request = new PhabricatorRepositoryAuditRequest();
-      $request->setCommitPHID($commit->getPHID());
-      $request->setAuditorPHID($phid);
-      $request->setAuditStatus(PhabricatorAuditStatusConstants::AUDIT_REQUIRED);
-      $request->setAuditReasons($reasons);
-      $request->save();
+    $maps = array(
+      PhabricatorAuditStatusConstants::AUDIT_REQUIRED => $map,
+      PhabricatorAuditStatusConstants::CC => $ccmap,
+    );
+
+    foreach ($maps as $status => $map) {
+      foreach ($map as $phid => $rule_ids) {
+        $request = idx($requests, $phid);
+        if ($request) {
+          continue;
+        }
+        $reasons = array();
+        foreach ($rule_ids as $id) {
+          $rule_name = '?';
+          if ($rules[$id]) {
+            $rule_name = $rules[$id]->getName();
+          }
+          if ($status == PhabricatorAuditStatusConstants::AUDIT_REQUIRED) {
+            $reasons[] = pht(
+              'Herald Rule #%d "%s" Triggered Audit',
+              $id,
+              $rule_name);
+          } else {
+            $reasons[] = pht(
+              'Herald Rule #%d "%s" Triggered CC',
+              $id,
+              $rule_name);
+          }
+        }
+
+        $request = new PhabricatorRepositoryAuditRequest();
+        $request->setCommitPHID($commit->getPHID());
+        $request->setAuditorPHID($phid);
+        $request->setAuditStatus($status);
+        $request->setAuditReasons($reasons);
+        $request->save();
+      }
     }
 
     $commit->updateAuditStatus($requests);

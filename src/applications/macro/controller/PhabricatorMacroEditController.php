@@ -234,9 +234,6 @@ final class PhabricatorMacroEditController
 
     $upload = null;
     if ($macro->getID()) {
-      $upload_header = id(new PhabricatorHeaderView())
-        ->setHeader(pht('Upload New File'));
-
       $upload_form = id(new AphrontFormView())
         ->setEncType('multipart/form-data')
         ->setUser($request->getUser());
@@ -258,7 +255,9 @@ final class PhabricatorMacroEditController
           id(new AphrontFormSubmitControl())
             ->setValue(pht('Upload File')));
 
-      $upload = array($upload_header, $upload_form);
+      $upload = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Upload New File'))
+      ->setForm($upload_form);
     }
 
     $form_box = id(new PHUIFormBoxView())

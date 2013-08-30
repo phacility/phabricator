@@ -5,7 +5,6 @@
  *           javelin-dom
  *           phabricator-textareautils
  *           javelin-workflow
- *           phabricator-notification
  *           javelin-vector
  */
 
@@ -21,11 +20,9 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
     // First, disable any active mode.
     if (edit_root) {
-      if (edit_mode == 'order') {
-        JX.DOM.alterClass(edit_root, 'remarkup-control-order-mode', false);
-      }
-      if (edit_mode == 'chaos') {
-        JX.DOM.alterClass(edit_root, 'remarkup-control-chaos-mode', false);
+      if (edit_mode == 'fullscreen') {
+        JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', false);
+        JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', false);
       }
       JX.DOM.find(edit_root, 'textarea').style.height = '';
     }
@@ -34,13 +31,10 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     edit_mode = mode;
 
     // Now, apply the new mode.
-    if (mode == 'order') {
-      JX.DOM.alterClass(edit_root, 'remarkup-control-order-mode', true);
+    if (mode == 'fullscreen') {
+      JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', true);
+      JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', true);
       resizearea();
-    }
-
-    if (mode == 'chaos') {
-      JX.DOM.alterClass(edit_root, 'remarkup-control-chaos-mode', true);
     }
 
     JX.DOM.focus(JX.DOM.find(edit_root, 'textarea'));
@@ -50,7 +44,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     if (!edit_root) {
       return;
     }
-    if (edit_mode != 'order') {
+    if (edit_mode != 'fullscreen') {
       return;
     }
 
@@ -71,46 +65,17 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
 
   JX.Stratcom.listen('keydown', null, function(e) {
-    if (edit_mode == 'chaos') {
-      cause_chaos();
-    }
-
     if (e.getSpecialKey() != 'esc') {
       return;
     }
 
-    if (edit_mode != 'order') {
+    if (edit_mode != 'fullscreen') {
       return;
     }
 
     e.kill();
     set_edit_mode(edit_root, 'normal');
   });
-
-  var chaos_states = [];
-  function cause_chaos() {
-    for (var ii = 0; ii <= 13; ii++) {
-      if (Math.random() > 0.98) {
-        chaos_states[ii] = !chaos_states[ii];
-      }
-      JX.DOM.alterClass(
-        edit_root,
-        'remarkup-control-chaos-mode-' + ii,
-        !!chaos_states[ii]);
-    }
-
-    if (Math.random() > 0.98) {
-      var n = new JX.Notification()
-        .setContent("Hey, listen!")
-        .setDuration(1000 + Math.random() * 6000);
-
-      if (Math.random() > 0.75) {
-        n.alterClassName('jx-notification-alert', true);
-      }
-
-      n.show();
-    }
-  }
 
   function update(area, l, m, r) {
     // Replace the selection with the entire assisted text.
@@ -177,18 +142,11 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       case 'image':
         new JX.Workflow('/file/uploaddialog/').start();
         break;
-      case 'chaos':
-        if (edit_mode == 'chaos') {
+      case 'fullscreen':
+        if (edit_mode == 'fullscreen') {
           set_edit_mode(root, 'normal');
         } else {
-          set_edit_mode(root, 'chaos');
-        }
-        break;
-      case 'order':
-        if (edit_mode == 'order') {
-          set_edit_mode(root, 'normal');
-        } else {
-          set_edit_mode(root, 'order');
+          set_edit_mode(root, 'fullscreen');
         }
         break;
     }

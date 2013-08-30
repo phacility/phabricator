@@ -4,6 +4,10 @@ final class DivinerAtom {
 
   const TYPE_FILE      = 'file';
   const TYPE_ARTICLE   = 'article';
+  const TYPE_METHOD    = 'method';
+  const TYPE_CLASS     = 'class';
+  const TYPE_FUNCTION  = 'function';
+  const TYPE_INTERFACE = 'interface';
 
   private $type;
   private $name;
@@ -23,6 +27,7 @@ final class DivinerAtom {
   private $extends = array();
   private $links = array();
   private $book;
+  private $properties = array();
 
   /**
    * Returns a sorting key which imposes an unambiguous, stable order on atoms.
@@ -59,7 +64,7 @@ final class DivinerAtom {
   }
 
   public static function getAtomSerializationVersion() {
-    return 1;
+    return 2;
   }
 
   public function addWarning($warning) {
@@ -180,6 +185,10 @@ final class DivinerAtom {
     return mpull($this->extends, 'toDictionary');
   }
 
+  public function getExtends() {
+    return $this->extends;
+  }
+
   public function getHash() {
     if ($this->hash) {
       return $this->hash;
@@ -194,6 +203,7 @@ final class DivinerAtom {
       $this->getLanguage(),
       $this->getContentRaw(),
       $this->getDocblockRaw(),
+      $this->getProperties(),
       mpull($this->extends, 'toHash'),
       mpull($this->links, 'toHash'),
     );
@@ -280,6 +290,7 @@ final class DivinerAtom {
       'extends'     => $this->getExtendsDictionaries(),
       'links'       => $this->getLinkDictionaries(),
       'ref'         => $this->getRef()->toDictionary(),
+      'properties'  => $this->getProperties(),
     );
   }
 
@@ -312,7 +323,8 @@ final class DivinerAtom {
       ->setContext(idx($dictionary, 'context'))
       ->setLanguage(idx($dictionary, 'language'))
       ->setParentHash(idx($dictionary, 'parentHash'))
-      ->setDocblockRaw(idx($dictionary, 'docblockRaw'));
+      ->setDocblockRaw(idx($dictionary, 'docblockRaw'))
+      ->setProperties(idx($dictionary, 'properties'));
 
     foreach (idx($dictionary, 'warnings', array()) as $warning) {
       $atom->addWarning($warning);
@@ -322,7 +334,68 @@ final class DivinerAtom {
       $atom->addChildHash($child);
     }
 
+    foreach (idx($dictionary, 'extends', array()) as $extends) {
+      $atom->addExtends(DivinerAtomRef::newFromDictionary($extends));
+    }
+
     return $atom;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+  }
+
+  public function getProperties() {
+    return $this->properties;
+  }
+
+  public function setProperties(array $properties) {
+    $this->properties = $properties;
+    return $this;
+  }
+
+  public static function getThisAtomIsNotDocumentedString($type) {
+    switch ($type) {
+      case self::TYPE_FILE:
+        return pht('This file is not documented.');
+      case self::TYPE_FUNCTION:
+        return pht('This function is not documented.');
+      case self::TYPE_CLASS:
+        return pht('This class is not documented.');
+      case self::TYPE_ARTICLE:
+        return pht('This article is not documented.');
+      case self::TYPE_METHOD:
+        return pht('This method is not documented.');
+      case self::TYPE_INTERFACE:
+        return pht('This interface is not documented.');
+      default:
+        phlog("Need translation for '{$type}'.");
+        return pht('This %s is not documented.', $type);
+    }
+  }
+
+  public static function getAtomTypeNameString($type) {
+    switch ($type) {
+      case self::TYPE_FILE:
+        return pht('File');
+      case self::TYPE_FUNCTION:
+        return pht('Function');
+      case self::TYPE_CLASS:
+        return pht('Class');
+      case self::TYPE_ARTICLE:
+        return pht('Article');
+      case self::TYPE_METHOD:
+        return pht('Method');
+      case self::TYPE_INTERFACE:
+        return pht('Interface');
+      default:
+        phlog("Need translation for '{$type}'.");
+        return ucwords($type);
+    }
   }
 
 }

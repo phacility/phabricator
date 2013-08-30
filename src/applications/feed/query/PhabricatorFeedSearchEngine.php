@@ -8,7 +8,7 @@ final class PhabricatorFeedSearchEngine
 
     $saved->setParameter(
       'userPHIDs',
-      array_values($request->getArr('userPHIDs')));
+      $this->readUsersFromRequest($request, 'users'));
 
     $saved->setParameter(
       'projectPHIDs',
@@ -76,7 +76,7 @@ final class PhabricatorFeedSearchEngine
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
-          ->setName('userPHIDs')
+          ->setName('users')
           ->setLabel(pht('Include Users'))
           ->setValue($user_tokens))
       ->appendChild(

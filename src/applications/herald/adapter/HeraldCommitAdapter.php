@@ -18,6 +18,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $commitData;
 
   protected $emailPHIDs = array();
+  protected $addCCPHIDs = array();
   protected $auditMap = array();
 
   protected $affectedPaths;
@@ -52,6 +53,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return array(
       self::FIELD_BODY,
       self::FIELD_AUTHOR,
+      self::FIELD_COMMITTER,
       self::FIELD_REVIEWER,
       self::FIELD_REPOSITORY,
       self::FIELD_DIFF_FILE,
@@ -94,7 +96,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
         return array(
           self::ACTION_ADD_CC,
-          self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
           self::ACTION_AUDIT,
           self::ACTION_NOTHING,
@@ -102,7 +103,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
         return array(
           self::ACTION_ADD_CC,
-          self::ACTION_REMOVE_CC,
           self::ACTION_EMAIL,
           self::ACTION_FLAG,
           self::ACTION_AUDIT,
@@ -142,6 +142,10 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
   public function getEmailPHIDs() {
     return array_keys($this->emailPHIDs);
+  }
+
+  public function getAddCCMap() {
+    return $this->addCCPHIDs;
   }
 
   public function getAuditMap() {
@@ -241,6 +245,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         return $data->getCommitMessage();
       case self::FIELD_AUTHOR:
         return $data->getCommitDetail('authorPHID');
+      case self::FIELD_COMMITTER:
+        return $data->getCommitDetail('committerPHID');
       case self::FIELD_REVIEWER:
         return $data->getCommitDetail('reviewerPHID');
       case self::FIELD_DIFF_FILE:
@@ -319,6 +325,18 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             $effect,
             true,
             pht('Added address to email targets.'));
+          break;
+        case self::ACTION_ADD_CC:
+          foreach ($effect->getTarget() as $phid) {
+            if (empty($this->addCCPHIDs[$phid])) {
+              $this->addCCPHIDs[$phid] = array();
+            }
+            $this->addCCPHIDs[$phid][] = $effect->getRuleID();
+          }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Added address to CC.'));
           break;
         case self::ACTION_AUDIT:
           foreach ($effect->getTarget() as $phid) {

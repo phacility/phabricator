@@ -1,0 +1,38 @@
+/**
+ * @provides diviner-shared-css
+ */
+
+.diviner-monospace {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.diviner-return-table-view,
+.diviner-parameter-table-view {
+  width: 100%;
+  margin: 0 0 16px;
+  background: #f6f6f6;
+  border-bottom: 1px solid #c0c5d1;
+  width: 100%;
+}
+
+.diviner-return-table-type,
+.diviner-parameter-table-type {
+  padding: 4px 8px 4px 12px;
+  white-space: nowrap;
+  text-align: right;
+  color: #666666;
+  width: 20%;
+}
+
+.diviner-parameter-table-name {
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.diviner-return-table-docs,
+.diviner-parameter-table-docs {
+  padding: 4px 12px 4px 8px;
+  width: 80%;
+}

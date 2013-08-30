@@ -7,6 +7,7 @@
   width: 100%;
   font-family: "Monaco", Consolas, monospace;
   font-size: 10px;
+  background: #fff;
 }
 
 .diffusion-source tr.phabricator-source-highlight {

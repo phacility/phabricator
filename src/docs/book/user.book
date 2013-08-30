@@ -3,6 +3,19 @@
   "title" : "Phabricator User Documentation",
   "short" : "Phabricator User Docs",
   "root" : "../../../",
+  "uri.source" :
+    "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
+  "rules" : {
+    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  },
+  "exclude" : [
+    "(^externals/)",
+    "(^webroot/rsrc/externals/)",
+    "(^scripts/)",
+    "(^support/)",
+    "(^resources/)",
+    "(^src/docs/tech/)"
+  ],
   "groups" : {
     "intro" : {
       "name" : "Introduction"

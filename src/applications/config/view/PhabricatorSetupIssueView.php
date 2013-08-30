@@ -116,7 +116,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       $issue->getName());
 
-    return phutil_tag(
+    $issue = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue',
@@ -125,6 +125,23 @@ final class PhabricatorSetupIssueView extends AphrontView {
         $name,
         $description,
         $next,
+      ));
+
+    $debug_info = phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-debug',
+      ),
+      pht('Host: %s', php_uname('n')));
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-shell',
+      ),
+      array(
+        $issue,
+        $debug_info,
       ));
   }
 

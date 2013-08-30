@@ -35,9 +35,12 @@
 
 .phriction-children-header {
   background: #f7f7f7;
-  padding: 10px 0 10px 20px;
+  padding: 8px 0 8px 16px;
   font-weight: bold;
   margin-bottom: 15px;
+  border-bottom: 1px solid #BFCFDA;
+  color: #6b748c;
+  text-shadow: 0 1px 2px #fff;
 }
 
 .phriction-document-history-diff {

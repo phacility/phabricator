@@ -90,7 +90,7 @@ final class PhabricatorMailManagementShowOutboundWorkflow
         $info[] = null;
         $info[] = pht('ATTACHMENTS');
         foreach ($attachments as $attachment) {
-          $info[] = $attachment['filename'];
+          $info[] = idx($attachment, 'filename', pht('Unnamed File'));
         }
       }
 

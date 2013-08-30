@@ -168,6 +168,10 @@ final class AphrontRequest {
            (idx($_FILES[$name], 'error') !== UPLOAD_ERR_NO_FILE);
   }
 
+  final public function isHTTPGet() {
+    return ($_SERVER['REQUEST_METHOD'] == 'GET');
+  }
+
   final public function isHTTPPost() {
     return ($_SERVER['REQUEST_METHOD'] == 'POST');
   }
@@ -416,7 +420,7 @@ final class AphrontRequest {
 
     // Remove magic parameters like __dialog__ and __ajax__.
     foreach ($data as $key => $value) {
-      if (strncmp($key, '__', 2)) {
+      if (!strncmp($key, '__', 2)) {
         unset($data[$key]);
       }
     }

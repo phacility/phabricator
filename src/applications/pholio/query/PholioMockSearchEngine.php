@@ -7,7 +7,7 @@ final class PholioMockSearchEngine
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
       'authorPHIDs',
-      array_values($request->getArr('authors')));
+      $this->readUsersFromRequest($request, 'authors'));
 
     return $saved;
   }

@@ -175,85 +175,101 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .status-question-white {
-  background-position: 0px -75px;
+  background-position: -105px -60px;
 }
 
 .status-reject-blue {
-  background-position: -15px -75px;
+  background-position: 0px -75px;
 }
 
 .status-reject-dark {
-  background-position: -30px -75px;
+  background-position: -15px -75px;
 }
 
 .status-reject-green {
-  background-position: -45px -75px;
+  background-position: -30px -75px;
 }
 
 .status-reject-red {
-  background-position: -60px -75px;
+  background-position: -45px -75px;
 }
 
 .status-reject-white {
-  background-position: -75px -75px;
+  background-position: -60px -75px;
 }
 
 .status-right-blue {
-  background-position: -90px -75px;
+  background-position: -75px -75px;
 }
 
 .status-right-dark {
-  background-position: 0px -90px;
+  background-position: -90px -75px;
 }
 
 .status-right-green {
-  background-position: -15px -90px;
+  background-position: -105px -75px;
 }
 
 .status-right-red {
-  background-position: -30px -90px;
+  background-position: 0px -90px;
 }
 
 .status-right-white {
+  background-position: -15px -90px;
+}
+
+.status-time-green {
+  background-position: -30px -90px;
+}
+
+.status-time-orange {
   background-position: -45px -90px;
 }
 
-.status-up-blue {
+.status-time-red {
   background-position: -60px -90px;
 }
 
-.status-up-dark {
+.status-time-yellow {
   background-position: -75px -90px;
 }
 
-.status-up-green {
+.status-up-blue {
   background-position: -90px -90px;
 }
 
-.status-up-red {
+.status-up-dark {
+  background-position: -105px -90px;
+}
+
+.status-up-green {
   background-position: 0px -105px;
 }
 
-.status-up-white {
+.status-up-red {
   background-position: -15px -105px;
 }
 
-.status-warning-blue {
+.status-up-white {
   background-position: -30px -105px;
 }
 
-.status-warning-dark {
+.status-warning-blue {
   background-position: -45px -105px;
 }
 
-.status-warning-green {
+.status-warning-dark {
   background-position: -60px -105px;
 }
 
-.status-warning-red {
+.status-warning-green {
   background-position: -75px -105px;
 }
 
-.status-warning-white {
+.status-warning-red {
   background-position: -90px -105px;
+}
+
+.status-warning-white {
+  background-position: -105px -105px;
 }

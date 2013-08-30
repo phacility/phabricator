@@ -6,7 +6,9 @@ final class PhabricatorProjectSearchEngine
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
-    $saved->setParameter('memberPHIDs', $request->getArr('memberPHIDs'));
+    $saved->setParameter(
+      'memberPHIDs',
+      $this->readUsersFromRequest($request, 'members'));
     $saved->setParameter('status', $request->getStr('status'));
 
     return $saved;
@@ -45,7 +47,7 @@ final class PhabricatorProjectSearchEngine
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
-          ->setName('memberPHIDs')
+          ->setName('members')
           ->setLabel(pht('Members'))
           ->setValue($member_tokens))
       ->appendChild(

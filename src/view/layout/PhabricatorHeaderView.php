@@ -7,6 +7,7 @@ final class PhabricatorHeaderView extends AphrontView {
   private $tags = array();
   private $image;
   private $subheader;
+  private $gradient;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -33,11 +34,21 @@ final class PhabricatorHeaderView extends AphrontView {
     return $this;
   }
 
+  public function setGradient($gradient) {
+    $this->gradient = $gradient;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('phabricator-header-view-css');
 
     $classes = array();
     $classes[] = 'phabricator-header-shell';
+
+    if ($this->gradient) {
+      $classes[] = 'sprite-gradient';
+      $classes[] = 'gradient-'.$this->gradient.'-header';
+    }
 
     $image = null;
     if ($this->image) {

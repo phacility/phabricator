@@ -11,14 +11,17 @@ final class DivinerLiveSymbol extends DivinerDAO
   protected $atomIndex;
   protected $graphHash;
   protected $identityHash;
+  protected $nodeHash;
 
   protected $title;
   protected $groupName;
   protected $summary;
   protected $isDocumentable = 0;
 
-  private $book;
-  private $atom;
+  private $book = self::ATTACHABLE;
+  private $atom = self::ATTACHABLE;
+  private $extends = self::ATTACHABLE;
+  private $children = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -33,10 +36,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   }
 
   public function getBook() {
-    if ($this->book === null) {
-      throw new Exception("Call attachBook() before getBook()!");
-    }
-    return $this->book;
+    return $this->assertAttached($this->book);
   }
 
   public function attachBook(DivinerLiveBook $book) {
@@ -45,10 +45,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   }
 
   public function getAtom() {
-    if ($this->atom === null) {
-      throw new Exception("Call attachAtom() before getAtom()!");
-    }
-    return $this->atom;
+    return $this->assertAttached($this->atom);
   }
 
   public function attachAtom(DivinerLiveAtom $atom) {
@@ -107,6 +104,26 @@ final class DivinerLiveSymbol extends DivinerDAO
       $title = $this->getName();
     }
     return $title;
+  }
+
+  public function attachExtends(array $extends) {
+    assert_instances_of($extends, 'DivinerLiveSymbol');
+    $this->extends = $extends;
+    return $this;
+  }
+
+  public function getExtends() {
+    return $this->assertAttached($this->extends);
+  }
+
+  public function attachChildren(array $children) {
+    assert_instances_of($children, 'DivinerLiveSymbol');
+    $this->children = $children;
+    return $this;
+  }
+
+  public function getChildren() {
+    return $this->assertAttached($this->children);
   }
 
 

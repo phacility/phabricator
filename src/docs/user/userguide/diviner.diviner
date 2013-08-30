@@ -1,0 +1,84 @@
+@title Diviner User Guide
+@group userguide
+
+Using Diviner, a documentation generator.
+
+= Overview =
+
+NOTE: Diviner is new and not yet generally useful.
+
+= Generating Documentation =
+
+To generate documentation, run:
+
+  phabricator/ $ ./bin/diviner generate --book <book>
+
+= .book Files =
+
+Diviner documentation books are configured using JSON `.book` files, which
+look like this:
+
+  name=example.book
+  {
+    "name" : "example",
+    "title" : "Example Documentation",
+    "short" : "Example Docs",
+    "root" : ".",
+    "uri.source" : "http://example.com/diffusion/X/browse/master/%f$%l",
+    "rules" : {
+      "(\\.diviner$)" : "DivinerArticleAtomizer"
+    },
+    "exclude" : [
+      "(^externals/)",
+      "(^scripts/)",
+      "(^support/)"
+    ],
+    "groups" : {
+      "forward" : {
+        "name" : "Doing Stuff"
+      },
+      "reverse" : {
+        "name" : "Undoing Stuff"
+      }
+    }
+  }
+
+The properties in this file are:
+
+  - `name`: Required. Short, unique name to identify the documentation book. This
+    will be used in URIs, so it should not have special characters. Good names
+    are things like `"example"` or `"libcabin"`.
+  - `root`: Required. The root directory (relative to the `.book` file) which
+    documentation should be generated from. Often this will be a value like
+    `"../../"`, to specify the project root (for example, if the `.book` file
+    is in `project/src/docs/example.book`, the value `"../../"` would generate
+    documentation from the `project/` directory.
+  - `title`: Optional. Full human-readable title of the documentation book. This
+    is used when there's plenty of display space and should completely describe
+    the book. Good titles are things like `"Example Documentation"`, or
+    `"libcabin Developer Documentation"`.
+  - `short`: Optional. Shorter version of the title for use when display space
+    is limited (for example, in navigation breadcrumbs). If omitted, the full
+    title is used. Good short titles are things like `"Example Docs"` or
+    `"libcabin Dev Docs"`.
+  - `uri.source`: Optional. Diviner can link from the documentation to a
+    repository browser so that you can quickly jump to the definition of a class
+    or function. To do this, it uses a URI pattern which you specify here.
+    Normally, this URI should point at a repository browser like Diffusion.
+    For example, `"http://repobrowser.yourcompany.com/%f#%l"`. You can use these
+    conversions in the URI, which will be replaced at runtime:
+      - `%f`: Replaced with the name of the file.
+      - `%l`: Replaced with the line number.
+      - `%%`: Replaced with a literal `%` symbol.
+  - `rules`: Optional. A map of regular expressions to Atomizer classes which
+    controls which documentation generator runs on each file. If omitted,
+    Diviner will use its default ruleset. For example, adding the key
+    `"(\\.diviner$)"` to the map with value `"DivinerArticleAtomizer"` tells
+    Diviner to analyze any file with a name ending in `.diviner` using the
+    "article" atomizer.
+  - `exclude`: Optional. A list of regular expressions matching paths which
+    will be excluded from documentation generation for this book. For example,
+    adding a pattern like `"(^externals/)"` or `"(^vendor/)"` will make Diviner
+    ignore those directories.
+  - `groups`: Optional. Describes top level organizational groups which atoms
+    should be placed into.

@@ -25,7 +25,9 @@ final class ReleephRequestSearchEngine
 
     $saved->setParameter('status', $request->getStr('status'));
     $saved->setParameter('severity', $request->getStr('severity'));
-    $saved->setParameter('requestorPHIDs', $request->getArr('requestorPHIDs'));
+    $saved->setParameter(
+      'requestorPHIDs',
+      $this->readUsersFromRequest($request, 'requestors'));
 
     return $saved;
   }
@@ -79,7 +81,7 @@ final class ReleephRequestSearchEngine
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/users/')
-          ->setName('requestorPHIDs')
+          ->setName('requestors')
           ->setLabel(pht('Requestors'))
           ->setValue($requestor_tokens));
   }
@@ -148,11 +150,22 @@ final class ReleephRequestSearchEngine
   }
 
   private function getSeverityOptions() {
-    return array(
-      '' => pht('(All Severities)'),
-      ReleephSeverityFieldSpecification::HOTFIX => pht('Hotfix'),
-      ReleephSeverityFieldSpecification::RELEASE => pht('Release'),
-    );
+    if (ReleephDefaultFieldSelector::isFacebook()) {
+      return array(
+        '' => pht('(All Severities)'),
+        11 => 'HOTFIX',
+        12 => 'PIGGYBACK',
+        13 => 'RELEASE',
+        14 => 'DAILY',
+        15 => 'PARKING',
+      );
+    } else {
+      return array(
+        '' => pht('(All Severities)'),
+        ReleephSeverityFieldSpecification::HOTFIX => pht('Hotfix'),
+        ReleephSeverityFieldSpecification::RELEASE => pht('Release'),
+      );
+    }
   }
 
 }

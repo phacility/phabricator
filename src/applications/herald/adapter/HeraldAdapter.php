@@ -10,6 +10,7 @@ abstract class HeraldAdapter {
   const FIELD_AUTHOR                 = 'author';
   const FIELD_REVIEWER               = 'reviewer';
   const FIELD_REVIEWERS              = 'reviewers';
+  const FIELD_COMMITTER              = 'committer';
   const FIELD_CC                     = 'cc';
   const FIELD_TAGS                   = 'tags';
   const FIELD_DIFF_FILE              = 'diff-file';
@@ -95,6 +96,7 @@ abstract class HeraldAdapter {
       self::FIELD_TITLE => pht('Title'),
       self::FIELD_BODY => pht('Body'),
       self::FIELD_AUTHOR => pht('Author'),
+      self::FIELD_COMMITTER => pht('Committer'),
       self::FIELD_REVIEWER => pht('Reviewer'),
       self::FIELD_REVIEWERS => pht('Reviewers'),
       self::FIELD_CC => pht('CCs'),
@@ -147,6 +149,7 @@ abstract class HeraldAdapter {
           self::CONDITION_REGEXP,
         );
       case self::FIELD_AUTHOR:
+      case self::FIELD_COMMITTER:
       case self::FIELD_REPOSITORY:
       case self::FIELD_REVIEWER:
         return array(

@@ -10,11 +10,11 @@ final class LegalpadDocumentSearchEngine
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
       'creatorPHIDs',
-      array_values($request->getArr('creators')));
+      $this->readUsersFromRequest($request, 'creators'));
 
     $saved->setParameter(
       'contributorPHIDs',
-      array_values($request->getArr('contributors')));
+      $this->readUsersFromRequest($request, 'contributors'));
 
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));

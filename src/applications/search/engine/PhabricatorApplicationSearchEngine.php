@@ -7,6 +7,7 @@
  * @task builtin  Builtin Queries
  * @task uri      Query URIs
  * @task dates    Date Filters
+ * @task read     Reading Utilities
  *
  * @group search
  */
@@ -231,6 +232,60 @@ abstract class PhabricatorApplicationSearchEngine {
    */
   public function buildSavedQueryFromBuiltin($query_key) {
     throw new Exception("Builtin '{$query_key}' is not supported!");
+  }
+
+
+/* -(  Reading Utilities )--------------------------------------------------- */
+
+
+  /**
+   * Read a list of user PHIDs from a request in a flexible way. This method
+   * supports either of these forms:
+   *
+   *   users[]=alincoln&users[]=htaft
+   *   users=alincoln,htaft
+   *
+   * Additionally, users can be specified either by PHID or by name.
+   *
+   * The main goal of this flexibility is to allow external programs to generate
+   * links to pages (like "alincoln's open revisions") without needing to make
+   * API calls.
+   *
+   * @param AphrontRequest  Request to read user PHIDs from.
+   * @param string          Key to read in the request.
+   * @return list<phid>     List of user PHIDs.
+   *
+   * @task read
+   */
+  protected function readUsersFromRequest(AphrontRequest $request, $key) {
+    $list = $request->getArr($key, null);
+    if ($list === null) {
+      $list = $request->getStrList($key);
+    }
+
+    $phids = array();
+    $names = array();
+    $user_type = PhabricatorPHIDConstants::PHID_TYPE_USER;
+    foreach ($list as $item) {
+      if (phid_get_type($item) == $user_type) {
+        $phids[] = $item;
+      } else {
+        $names[] = $item;
+      }
+    }
+
+    if ($names) {
+      $users = id(new PhabricatorPeopleQuery())
+        ->setViewer($this->requireViewer())
+        ->withUsernames($names)
+        ->execute();
+      foreach ($users as $user) {
+        $phids[] = $user->getPHID();
+      }
+      $phids = array_unique($phids);
+    }
+
+    return $phids;
   }
 
 

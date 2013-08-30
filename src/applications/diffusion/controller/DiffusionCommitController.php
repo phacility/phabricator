@@ -140,11 +140,21 @@ final class DiffusionCommitController extends DiffusionController {
 
     $content[] = $this->buildMergesTable($commit);
 
+    // TODO: This is silly, but the logic to figure out which audits are
+    // highlighted currently lives in PhabricatorAuditListView. Refactor this
+    // to be less goofy.
+    $highlighted_audits = id(new PhabricatorAuditListView())
+      ->setAudits($audit_requests)
+      ->setAuthorityPHIDs($this->auditAuthorityPHIDs)
+      ->setUser($user)
+      ->setCommits(array($commit->getPHID() => $commit))
+      ->getHighlightedAudits();
+
     $owners_paths = array();
-    if ($this->highlightedAudits) {
+    if ($highlighted_audits) {
       $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
         'phid IN (%Ls)',
-        mpull($this->highlightedAudits, 'getAuditorPHID'));
+        mpull($highlighted_audits, 'getAuditorPHID'));
       if ($packages) {
         $owners_paths = id(new PhabricatorOwnersPath())->loadAllWhere(
           'repositoryPHID = %s AND packageID IN (%Ld)',
@@ -610,6 +620,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setShaded(true)
       ->setAction('/audit/addcomment/')
       ->addHiddenInput('commit', $commit->getPHID())
       ->appendChild(

@@ -114,8 +114,15 @@ final class DifferentialRevisionListView extends AphrontView {
     $list = new PhabricatorObjectItemListView();
     $list->setCards(true);
 
+    $do_not_display_age = array(
+      ArcanistDifferentialRevisionStatus::CLOSED => true,
+      ArcanistDifferentialRevisionStatus::ABANDONED => true,
+    );
+
     foreach ($this->revisions as $revision) {
-      $item = new PhabricatorObjectItemView();
+      $item = id(new PhabricatorObjectItemView())
+        ->setUser($user);
+
       $rev_fields = array();
       $icons = array();
 
@@ -136,23 +143,21 @@ final class DifferentialRevisionListView extends AphrontView {
 
       $modified = $revision->getDateModified();
 
+      $status = $revision->getStatus();
+      $show_age = ($fresh || $stale) &&
+                  $this->highlightAge &&
+                  empty($do_not_display_age[$status]);
+
+
+      $object_age = PhabricatorObjectItemView::AGE_FRESH;
       foreach ($this->fields as $field) {
-        if (($fresh || $stale) &&
-            $field instanceof DifferentialDateModifiedFieldSpecification) {
-          if ($stale && $modified < $stale) {
-            $days = floor((time() - $modified) / 60 / 60 / 24);
-            $icons['age'] = array(
-              'icon' => 'warning-grey',
-              'label' => pht('Old (%d days)', $days),
-            );
-          } else if ($fresh && $modified < $fresh) {
-            $days = floor((time() - $modified) / 60 / 60 / 24);
-            $icons['age'] = array(
-              'icon' => 'perflab-grey',
-              'label' => pht('Stale (%d days)', $days),
-            );
-          } else {
-            // Fresh, noOp();
+        if ($show_age) {
+          if ($field instanceof DifferentialDateModifiedFieldSpecification) {
+            if ($stale && $modified < $stale) {
+              $object_age = PhabricatorObjectItemView::AGE_OLD;
+            } else if ($fresh && $modified < $fresh) {
+              $object_age = PhabricatorObjectItemView::AGE_STALE;
+            }
           }
         }
 
@@ -161,7 +166,6 @@ final class DifferentialRevisionListView extends AphrontView {
           ->renderValueForRevisionList($revision);
       }
 
-      $status = $revision->getStatus();
       $status_name =
         ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
@@ -195,22 +199,7 @@ final class DifferentialRevisionListView extends AphrontView {
       // Reviewers
       $item->addAttribute(pht('Reviewers: %s', $rev_fields['Reviewers']));
 
-      $time_icon = 'none';
-      $time_attr = array();
-      if ($this->highlightAge) {
-        $do_not_display_age = array(
-          ArcanistDifferentialRevisionStatus::CLOSED => true,
-          ArcanistDifferentialRevisionStatus::ABANDONED => true,
-        );
-        if (isset($icons['age']) && !isset($do_not_display_age[$status])) {
-          $time_icon = $icons['age']['icon'];
-          $time_attr = array(
-            'tip' => $icons['age']['label'],
-          );
-        }
-      }
-
-      $item->addIcon($time_icon, $rev_fields['Updated'], $time_attr);
+      $item->setEpoch($revision->getDateModified(), $object_age);
 
       // First remove the fields we already have
       $count = 7;
@@ -220,6 +209,23 @@ final class DifferentialRevisionListView extends AphrontView {
       // TODO: Add render-to-foot-icon support
       foreach ($rev_fields as $header => $field) {
         $item->addAttribute(pht('%s: %s', $header, $field));
+      }
+
+      switch ($status) {
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+          break;
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          $item->setBarColor('red');
+          break;
+        case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          $item->setBarColor('green');
+          break;
+        case ArcanistDifferentialRevisionStatus::CLOSED:
+          $item->setDisabled(true);
+          break;
+        case ArcanistDifferentialRevisionStatus::ABANDONED:
+          $item->setBarColor('black');
+          break;
       }
 
       $list->addItem($item);

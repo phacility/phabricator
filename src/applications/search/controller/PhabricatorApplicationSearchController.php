@@ -107,7 +107,15 @@ final class PhabricatorApplicationSearchController
       $run_query = false;
       $query_key = $request->getStr('query');
     } else if (!strlen($this->queryKey)) {
-      $query_key = head_key($engine->loadEnabledNamedQueries());
+      if ($request->isHTTPGet() && $request->getPassthroughRequestData()) {
+        // If this is a GET request and it has some query data, don't
+        // do anything. We'll build and execute a query from it below.
+        // This allows external tools to build URIs like "/query/?users=a,b".
+      } else {
+        // Otherwise, there's no query data so just run the user's default
+        // query for this application.
+        $query_key = head_key($engine->loadEnabledNamedQueries());
+      }
     }
 
     if ($engine->isBuiltinQuery($query_key)) {

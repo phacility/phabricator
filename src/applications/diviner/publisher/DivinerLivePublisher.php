@@ -34,6 +34,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
       ->withContexts(array($atom->getContext()))
       ->withIndexes(array($this->getAtomSimilarIndex($atom)))
       ->withIncludeUndocumentable(true)
+      ->withIncludeGhosts(true)
       ->executeOne();
 
     if ($symbol) {
@@ -62,9 +63,11 @@ final class DivinerLivePublisher extends DivinerPublisher {
   }
 
   protected function loadAllPublishedHashes() {
-    $symbols = id(new DivinerLiveSymbol())->loadAllWhere(
-      'bookPHID = %s AND graphHash IS NOT NULL',
-      $this->loadBook()->getPHID());
+    $symbols = id(new DivinerAtomQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBookPHIDs(array($this->loadBook()->getPHID()))
+      ->withIncludeUndocumentable(true)
+      ->execute();
 
     return mpull($symbols, 'getGraphHash');
   }
@@ -83,7 +86,8 @@ final class DivinerLivePublisher extends DivinerPublisher {
     foreach (PhabricatorLiskDAO::chunkSQL($strings, ', ') as $chunk) {
       queryfx(
         $conn_w,
-        'UPDATE %T SET graphHash = NULL WHERE graphHash IN (%Q)',
+        'UPDATE %T SET graphHash = NULL, nodeHash = NULL
+          WHERE graphHash IN (%Q)',
         $symbol_table->getTableName(),
         $chunk);
     }
@@ -110,7 +114,8 @@ final class DivinerLivePublisher extends DivinerPublisher {
         ->setGraphHash($hash)
         ->setIsDocumentable((int)$is_documentable)
         ->setTitle($ref->getTitle())
-        ->setGroupName($ref->getGroup());
+        ->setGroupName($ref->getGroup())
+        ->setNodeHash($atom->getHash());
 
       if ($is_documentable) {
         $renderer = $this->getRenderer();
@@ -121,12 +126,19 @@ final class DivinerLivePublisher extends DivinerPublisher {
 
       $symbol->save();
 
-      if ($is_documentable) {
-        $storage = $this->loadAtomStorageForSymbol($symbol)
-          ->setAtomData($atom->toDictionary())
-          ->setContent(null)
-          ->save();
-      }
+      // TODO: We probably need a finer-grained sense of what "documentable"
+      // atoms are. Neither files nor methods are currently considered
+      // documentable, but for different reasons: files appear nowhere, while
+      // methods just don't appear at the top level. These are probably
+      // separate concepts. Since we need atoms in order to build method
+      // documentation, we insert them here. This also means we insert files,
+      // which are unnecessary and unused. Make sure this makes sense, but then
+      // probably introduce separate "isTopLevel" and "isDocumentable" flags?
+
+      $storage = $this->loadAtomStorageForSymbol($symbol)
+        ->setAtomData($atom->toDictionary())
+        ->setContent(null)
+        ->save();
     }
   }
 

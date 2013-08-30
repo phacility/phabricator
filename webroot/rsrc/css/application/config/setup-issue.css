@@ -8,10 +8,14 @@
   padding: 1em 0;
 }
 
+.setup-issue-shell {
+  max-width: 760px;
+  margin: 15px auto;
+}
+
+
 .setup-issue {
   border: 1px solid #35393d;
-  margin: 15px auto;
-  max-width: 760px;
   background: #ffffff;
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
 }
@@ -94,4 +98,11 @@
   width: 90%;
   margin: 1em auto;
   list-style: circle;
+}
+
+.setup-issue-debug {
+  margin-top: 8px;
+  padding: 4px;
+  text-align: right;
+  color: #666666;
 }

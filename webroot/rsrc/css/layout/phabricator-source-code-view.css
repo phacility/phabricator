@@ -3,6 +3,7 @@
  */
 
 .phabricator-source-code-container {
+  background: #ffffff;
   overflow-x: auto;
   overflow-y: hidden;
 }

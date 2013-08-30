@@ -4,6 +4,11 @@
 
 
 button,
+a.button {
+  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+button,
 a.button,
 a.button:visited,
 input[type="submit"] {
@@ -59,9 +64,9 @@ a.grey:visited {
   background-color: #f7f7f7;
   background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
   background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
-  border-color: #aaa;
-  color: #333;
-  border-bottom-color: #999;
+  border-color: #BBC0CC;
+  color: #4B4D51;
+  border-bottom-color: #A2A6B0;
   text-shadow: none;
 }
 

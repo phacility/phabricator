@@ -34,8 +34,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
   protected function log($message) {
     $console = PhutilConsole::getConsole();
-    $console->getServer()->setEnableLog(true);
-    $console->writeLog($message."\n");
+    $console->writeErr($message."\n");
   }
 
   public function execute(PhutilArgumentParser $args) {
@@ -154,6 +153,9 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $this->log(pht('Found %d file(s) to atomize.', count($file_atomizers)));
 
     $futures = $this->buildAtomizerFutures($file_atomizers);
+
+    $this->log(pht('Atomizing %d file(s).', count($file_atomizers)));
+
     if ($futures) {
       $this->resolveAtomizerFutures($futures, $file_hashes);
       $this->log(pht("Atomization complete."));
@@ -170,10 +172,17 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
   private function getAtomizersForFiles(array $files) {
     $rules = $this->getRules();
+    $exclude = $this->getExclude();
 
     $atomizers = array();
 
     foreach ($files as $file) {
+      foreach ($exclude as $pattern) {
+        if (preg_match($pattern, $file)) {
+          continue 2;
+        }
+      }
+
       foreach ($rules as $rule => $atomizer) {
         $ok = preg_match($rule, $file);
         if ($ok === false) {
@@ -191,9 +200,32 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
   }
 
   private function getRules() {
-    return $this->getConfig('rules', array()) + array(
+    $rules = $this->getConfig('rules', array(
       '/\\.diviner$/' => 'DivinerArticleAtomizer',
-    );
+      '/\\.php$/' => 'DivinerPHPAtomizer',
+    ));
+
+    foreach ($rules as $rule => $atomizer) {
+      if (@preg_match($rule, '') === false) {
+        throw new Exception(
+          "Rule '{$rule}' is not a valid regular expression!");
+      }
+    }
+
+    return $rules;
+  }
+
+  private function getExclude() {
+    $exclude = $this->getConfig('exclude', array());
+
+    foreach ($exclude as $rule) {
+      if (@preg_match($rule, '') === false) {
+        throw new Exception(
+          "Exclude rule '{$rule}' is not a valid regular expression!");
+      }
+    }
+
+    return $exclude;
   }
 
 
@@ -248,20 +280,30 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
       $atomizers[$atomizer][] = $file;
     }
 
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $config_root = $this->getConfig('root');
+
+    $bar = id(new PhutilConsoleProgressBar())
+      ->setTotal(count($file_atomizers));
+
     $futures = array();
     foreach ($atomizers as $class => $files) {
       foreach (array_chunk($files, 32) as $chunk) {
         $future = new ExecFuture(
           '%s atomize --ugly --book %s --atomizer %s -- %Ls',
-          dirname(phutil_get_library_root('phabricator')).'/bin/diviner',
+          $root.'/bin/diviner',
           $this->getBookConfigPath(),
           $class,
           $chunk);
-        $future->setCWD($this->getConfig('root'));
+        $future->setCWD($config_root);
 
         $futures[] = $future;
+
+        $bar->update(count($chunk));
       }
     }
+
+    $bar->done();
 
     return $futures;
   }
@@ -270,6 +312,8 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     assert_instances_of($futures, 'Future');
 
     $atom_cache = $this->getAtomCache();
+    $bar = id(new PhutilConsoleProgressBar())
+      ->setTotal(count($futures));
     foreach (Futures($futures)->limit(4) as $key => $future) {
       $atoms = $future->resolveJSON();
 
@@ -280,7 +324,10 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
         }
         $atom_cache->addAtom($atom);
       }
+
+      $bar->update(1);
     }
+    $bar->done();
   }
 
 

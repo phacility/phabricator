@@ -184,6 +184,11 @@ final class DifferentialRevisionEditController extends DifferentialController {
       $title = pht('Create New Differential Revision');
     }
 
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText($title)
+      ->setFormError($error_view)
+      ->setForm($form);
+
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
         ->setName($title));
@@ -191,8 +196,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $error_view,
-        $form,
+        $form_box,
         $preview),
       array(
         'title' => $title,

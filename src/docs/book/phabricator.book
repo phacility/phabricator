@@ -1,0 +1,21 @@
+{
+  "name" : "phabdev",
+  "title" : "Phabricator Technical Documentation",
+  "short" : "Phabricator Tech Docs",
+  "root" : "../../../",
+  "uri.source" :
+    "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
+  "rules" : {
+    "(\\.php$)" : "DivinerPHPAtomizer",
+    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  },
+  "exclude" : [
+    "(^externals/)",
+    "(^scripts/)",
+    "(^support/)",
+    "(^resources/)",
+    "(^src/docs/user/)"
+  ],
+  "groups" : {
+  }
+}

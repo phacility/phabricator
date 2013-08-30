@@ -85,6 +85,18 @@
   right: 241px;
 }
 
+/**
+ * When entering "Fullscreen Mode" in the remarkup control, we need to drop
+ * all of the "position: fixed" on parent elements or Chrome doesn't put the
+ * textarea on top.
+ */
+.remarkup-fullscreen-mode .conpherence-message-pane,
+.remarkup-fullscreen-mode .conpherence-message-pane .conpherence-messages,
+.remarkup-fullscreen-mode .conpherence-message-pane .phui-form-view,
+.remarkup-fullscreen-mode .conpherence-layout {
+  position: static;
+}
+
 .device .conpherence-message-pane .remarkup-assist-bar {
   height: 0px;
 }

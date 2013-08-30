@@ -674,13 +674,13 @@ final class PhabricatorRepositoryEditController
         id(new AphrontFormSubmitControl())
           ->setValue('Save Configuration'));
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Edit Repository Tracking'));
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Edit Repository Tracking'))
+      ->setFormError($error_view)
+      ->setForm($form);
 
     $nav = $this->sideNav;
-    $nav->appendChild($error_view);
-    $nav->appendChild($header);
-    $nav->appendChild($form);
+    $nav->appendChild($form_box);
 
     return $this->buildApplicationPage(
       $nav,

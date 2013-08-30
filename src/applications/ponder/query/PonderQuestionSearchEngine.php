@@ -8,11 +8,11 @@ final class PonderQuestionSearchEngine
 
     $saved->setParameter(
       'authorPHIDs',
-      array_values($request->getArr('authors')));
+      $this->readUsersFromRequest($request, 'authors'));
 
     $saved->setParameter(
       'answererPHIDs',
-      array_values($request->getArr('answerers')));
+      $this->readUsersFromRequest($request, 'answerers'));
 
     $saved->setParameter('status', $request->getStr('status'));
 
