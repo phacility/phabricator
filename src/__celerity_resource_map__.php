@@ -3451,7 +3451,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-source-code-view-css' =>
   array(
-    'uri' => '/res/70bcbea4/rsrc/css/layout/phabricator-source-code-view.css',
+    'uri' => '/res/aee63670/rsrc/css/layout/phabricator-source-code-view.css',
     'type' => 'css',
     'requires' =>
     array(
