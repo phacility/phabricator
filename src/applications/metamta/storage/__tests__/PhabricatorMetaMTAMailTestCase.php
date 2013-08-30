@@ -8,6 +8,46 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
     );
   }
 
+  public function testMailSendFailures() {
+    $user = $this->generateNewTestUser();
+    $phid = $user->getPHID();
+
+
+    // Normally, the send should succeed.
+    $mail = new PhabricatorMetaMTAMail();
+    $mail->addTos(array($phid));
+
+    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mail->sendNow($force = true, $mailer);
+    $this->assertEqual(
+      PhabricatorMetaMTAMail::STATUS_SENT,
+      $mail->getStatus());
+
+
+    // When the mailer fails temporarily, the mail should remain queued.
+    $mail = new PhabricatorMetaMTAMail();
+    $mail->addTos(array($phid));
+
+    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer->setFailTemporarily(true);
+    $mail->sendNow($force = true, $mailer);
+    $this->assertEqual(
+      PhabricatorMetaMTAMail::STATUS_QUEUE,
+      $mail->getStatus());
+
+
+    // When the mailer fails permanently, the mail should be failed.
+    $mail = new PhabricatorMetaMTAMail();
+    $mail->addTos(array($phid));
+
+    $mailer = new PhabricatorMailImplementationTestAdapter();
+    $mailer->setFailPermanently(true);
+    $mail->sendNow($force = true, $mailer);
+    $this->assertEqual(
+      PhabricatorMetaMTAMail::STATUS_FAIL,
+      $mail->getStatus());
+  }
+
   public function testRecipients() {
     $user = $this->generateNewTestUser();
     $phid = $user->getPHID();

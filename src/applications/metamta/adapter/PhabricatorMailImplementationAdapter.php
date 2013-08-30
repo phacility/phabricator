@@ -18,6 +18,18 @@ abstract class PhabricatorMailImplementationAdapter {
    */
   abstract public function supportsMessageIDHeader();
 
+
+  /**
+   * Send the message. Generally, this means connecting to some service and
+   * handing data to it.
+   *
+   * If the adapter determines that the mail will never be deliverable, it
+   * should throw a @{class:PhabricatorMetaMTAPermanentFailureException}.
+   *
+   * For temporary failures, throw some other exception or return `false`.
+   *
+   * @return bool True on success.
+   */
   abstract public function send();
 
 }

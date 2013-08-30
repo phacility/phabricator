@@ -79,12 +79,32 @@ final class PhabricatorMailImplementationTestAdapter
   }
 
   public function send() {
+    if (!empty($this->guts['fail-permanently'])) {
+      throw new PhabricatorMetaMTAPermanentFailureException(
+        'Unit Test (Permanent)');
+    }
+
+    if (!empty($this->guts['fail-temporarily'])) {
+      throw new Exception(
+        'Unit Test (Temporary)');
+    }
+
     $this->guts['did-send'] = true;
     return true;
   }
 
   public function getGuts() {
     return $this->guts;
+  }
+
+  public function setFailPermanently($fail) {
+    $this->guts['fail-permanently'] = $fail;
+    return $this;
+  }
+
+  public function setFailTemporarily($fail) {
+    $this->guts['fail-temporarily'] = $fail;
+    return $this;
   }
 
 }

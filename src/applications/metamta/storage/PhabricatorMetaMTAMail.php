@@ -627,6 +627,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       try {
         $ok = $mailer->send();
         $error = null;
+      } catch (PhabricatorMetaMTAPermanentFailureException $ex) {
+        $this->setStatus(self::STATUS_FAIL);
+        $this->setMessage($ex->getMessage());
+        return $this->save();
       } catch (Exception $ex) {
         $ok = false;
         $error = $ex->getMessage()."\n".$ex->getTraceAsString();
