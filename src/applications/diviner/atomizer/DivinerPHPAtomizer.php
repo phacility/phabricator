@@ -2,6 +2,11 @@
 
 final class DivinerPHPAtomizer extends DivinerAtomizer {
 
+  protected function newAtom($type) {
+    return parent::newAtom($type)->setLanguage('php');
+  }
+
+
   protected function executeAtomize($file_name, $file_data) {
     $future = xhpast_get_parser_future($file_data);
     $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
@@ -17,8 +22,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
 
       $name = $func->getChildByIndex(2);
 
-      $atom = id(new DivinerAtom())
-        ->setType('function')
+      $atom = $this->newAtom(DivinerAtom::TYPE_FUNCTION)
         ->setName($name->getConcreteString())
         ->setLine($func->getLineNumber())
         ->setFile($file_name);
@@ -32,30 +36,29 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
     }
 
     $class_types = array(
-      'class' => 'n_CLASS_DECLARATION',
-      'interface' => 'n_INTERFACE_DECLARATION',
+      DivinerAtom::TYPE_CLASS => 'n_CLASS_DECLARATION',
+      DivinerAtom::TYPE_INTERFACE => 'n_INTERFACE_DECLARATION',
     );
     foreach ($class_types as $atom_type => $node_type) {
       $class_decls = $root->selectDescendantsOfType($node_type);
       foreach ($class_decls as $class) {
         $name = $class->getChildByIndex(1, 'n_CLASS_NAME');
 
-        $atom = id(new DivinerAtom())
-          ->setType($atom_type)
+        $atom = $this->newAtom($atom_type)
           ->setName($name->getConcreteString())
           ->setFile($file_name)
           ->setLine($class->getLineNumber());
+
+        // TODO: Parse "abstract" and "final".
 
         // If this exists, it is n_EXTENDS_LIST.
         $extends = $class->getChildByIndex(2);
         $extends_class = $extends->selectDescendantsOfType('n_CLASS_NAME');
         foreach ($extends_class as $parent_class) {
           $atom->addExtends(
-            DivinerAtomRef::newFromDictionary(
-              array(
-                'type' => 'class',
-                'name' => $parent_class->getConcreteString(),
-              )));
+            $this->newRef(
+              DivinerAtom::TYPE_CLASS,
+              $parent_class->getConcreteString()));
         }
 
         // If this exists, it is n_IMPLEMENTS_LIST.
@@ -63,19 +66,16 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
         $iface_names = $implements->selectDescendantsOfType('n_CLASS_NAME');
         foreach ($iface_names as $iface_name) {
           $atom->addExtends(
-            DivinerAtomRef::newFromDictionary(
-              array(
-                'type' => 'interface',
-                'name' => $iface_name->getConcreteString(),
-              )));
+            $this->newRef(
+              DivinerAtom::TYPE_INTERFACE,
+              $iface_name->getConcreteString()));
         }
 
         $this->findAtomDocblock($atom, $class);
 
         $methods = $class->selectDescendantsOfType('n_METHOD_DECLARATION');
         foreach ($methods as $method) {
-          $matom = id(new DivinerAtom())
-            ->setType('method');
+          $matom = $this->newAtom(DivinerAtom::TYPE_METHOD);
 
           $this->findAtomDocblock($matom, $method);
 
