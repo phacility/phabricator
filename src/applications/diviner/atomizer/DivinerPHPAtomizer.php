@@ -49,7 +49,11 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
           ->setFile($file_name)
           ->setLine($class->getLineNumber());
 
-        // TODO: Parse "abstract" and "final".
+        // This parses "final" and "abstract".
+        $attributes = $class->getChildByIndex(0, 'n_CLASS_ATTRIBUTES');
+        foreach ($attributes->selectDescendantsOfType('n_STRING') as $attr) {
+          $atom->setProperty($attr->getConcreteString(), true);
+        }
 
         // If this exists, it is n_EXTENDS_LIST.
         $extends = $class->getChildByIndex(2);
