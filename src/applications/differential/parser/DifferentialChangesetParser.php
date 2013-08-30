@@ -825,12 +825,20 @@ final class DifferentialChangesetParser {
           $new_phid = idx($metadata, 'new:binary-phid');
         } else {
           $vs_changeset = id(new DifferentialChangeset())->load($vs);
-          $vs_metadata = $vs_changeset->getMetadata();
-          $old_phid = idx($vs_metadata, 'new:binary-phid');
+          $old_phid = null;
+          $new_phid = null;
+
+          // TODO: This is spooky, see D6851
+          if ($vs_changeset) {
+            $vs_metadata = $vs_changeset->getMetadata();
+            $old_phid = idx($vs_metadata, 'new:binary-phid');
+          }
 
           $changeset = id(new DifferentialChangeset())->load($id);
-          $metadata = $changeset->getMetadata();
-          $new_phid = idx($metadata, 'new:binary-phid');
+          if ($changeset) {
+            $metadata = $changeset->getMetadata();
+            $new_phid = idx($metadata, 'new:binary-phid');
+          }
         }
 
         if ($old_phid || $new_phid) {
