@@ -154,10 +154,17 @@ final class CelerityResourceTransformer {
       'greyborder'          => '#A2A6B0',
       'darkgreyborder'      => '#676A70',
       'lightgreytext'       => '#92969D',
-      'greytext'            => '#57595E',
+      'greytext'            => '#74777D',
       'darkgreytext'        => '#4B4D51',
       'lightgreybackground' => '#F7F7F7',
       'greybackground'      => '#EBECEE',
+
+      // Base Blues
+      'lightblueborder'     => '#BFCFDA',
+      'blueborder'          => '#8C98B8',
+      'darkblueborder'      => '#626E82',
+      'lightbluebackground' => '#F8F9FC',
+      'bluebackground'      => '#DAE7FF',
     );
 
     $var_name = $matches[1];

@@ -44,5 +44,5 @@
 }
 
 .config-options-current-value span {
-  color: #777;
+  color: {$greytext};
 }

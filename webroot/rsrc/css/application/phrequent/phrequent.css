@@ -15,6 +15,6 @@
 }
 
 .phrequent-on-stack {
-  color: #777777;
+  color: {$greytext};
   background-image: url(/rsrc/image/phrequent_inactive.png);
 }

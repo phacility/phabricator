@@ -64,9 +64,9 @@ a.grey:visited {
   background-color: #f7f7f7;
   background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
   background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
-  border-color: #BBC0CC;
+  border-color: {$lightgreyborder};
   color: #4B4D51;
-  border-bottom-color: #A2A6B0;
+  border-bottom-color: {$greyborder};
   text-shadow: none;
 }
 
@@ -93,7 +93,7 @@ a.button.dropdown-open {
 }
 
 a.dropdown-open {
-  color: #777;
+  color: {$greytext};
 }
 
 a.button:hover,

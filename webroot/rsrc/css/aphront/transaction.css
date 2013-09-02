@@ -36,7 +36,7 @@
 }
 
 .phabricator-transaction-info {
-  color: #777;
+  color: {$greytext};
   float: right;
   font-size: 11px;
 }

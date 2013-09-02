@@ -67,14 +67,14 @@
 
 .pholio-inline-comment-draft {
   border-style: dashed;
-  border-color: #777777;
+  border-color: {$greytext};
   background: #464646;
 }
 
 .pholio-inline-head-links {
   float: right;
   font-weight: normal;
-  color: #777777;
+  color: {$greytext};
 }
 
 .pholio-mock-inline-comments a {

@@ -42,7 +42,7 @@
 
 .phui-feed-story-foot,
 .phui-feed-story-foot a {
-  color: #777;
+  color: {$greytext};
 }
 
 .phui-feed-story-foot .phui-icon-view,
@@ -101,7 +101,7 @@
 .phui-feed-story-oneline-foot,
 .phui-feed-story-oneline-foot a {
   font-size: 11px;
-  color: #777;
+  color: {$greytext};
   margin-top: 2px;
   line-height: 14px;
   font-weight: normal;
