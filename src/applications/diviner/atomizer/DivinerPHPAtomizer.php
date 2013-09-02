@@ -89,6 +89,8 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
             foreach ($attributes as $attribute) {
               $attr = strtolower($attribute->getConcreteString());
               switch ($attr) {
+                case 'final':
+                case 'abstract':
                 case 'static':
                   $matom->setProperty($attr, true);
                   break;

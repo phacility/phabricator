@@ -35,6 +35,19 @@ abstract class DivinerWorkflow extends PhutilArgumentWorkflow {
         "Book configuration '{$book_path}' is not in JSON format.");
     }
 
+    PhutilTypeSpec::checkMap(
+      $book,
+      array(
+        'name' => 'string',
+        'title' => 'optional string',
+        'short' => 'optional string',
+        'root' => 'optional string',
+        'uri.source' => 'optional string',
+        'rules' => 'optional map<regex, string>',
+        'exclude' => 'optional regex|list<regex>',
+        'groups' => 'optional map<string, map<string, wild>>',
+      ));
+
     // If the book specifies a "root", resolve it; otherwise, use the directory
     // the book configuration file lives in.
     $full_path = dirname(Filesystem::resolvePath($book_path));
@@ -43,18 +56,21 @@ abstract class DivinerWorkflow extends PhutilArgumentWorkflow {
     }
     $book['root'] = Filesystem::resolvePath($book['root'], $full_path);
 
-    // Make sure we have a valid book name.
-    if (!isset($book['name'])) {
-      throw new PhutilArgumentUsageException(
-        "Book configuration '{$book_path}' is missing required ".
-        "property 'name'.");
-    }
-
     if (!preg_match('/^[a-z][a-z-]*$/', $book['name'])) {
       $name = $book['name'];
       throw new PhutilArgumentUsageException(
         "Book configuration '{$book_path}' has name '{$name}', but book names ".
         "must include only lowercase letters and hyphens.");
+    }
+
+    foreach (idx($book, 'groups', array()) as $group) {
+      PhutilTypeSpec::checkmap(
+        $group,
+        array(
+          'name' => 'string',
+          'include' => 'optional regex|list<regex>',
+        ));
+
     }
 
     $this->bookConfigPath = $book_path;

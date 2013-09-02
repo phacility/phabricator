@@ -81,7 +81,7 @@ final class DivinerAtomController extends DivinerController {
 
     $properties = id(new PhabricatorPropertyListView());
 
-    $group = $atom->getDocblockMetaValue('group');
+    $group = $atom->getProperty('group');
     if ($group) {
       $group_name = $book->getGroupName($group);
     } else {

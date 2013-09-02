@@ -205,26 +205,11 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
       '/\\.php$/' => 'DivinerPHPAtomizer',
     ));
 
-    foreach ($rules as $rule => $atomizer) {
-      if (@preg_match($rule, '') === false) {
-        throw new Exception(
-          "Rule '{$rule}' is not a valid regular expression!");
-      }
-    }
-
     return $rules;
   }
 
   private function getExclude() {
-    $exclude = $this->getConfig('exclude', array());
-
-    foreach ($exclude as $rule) {
-      if (@preg_match($rule, '') === false) {
-        throw new Exception(
-          "Exclude rule '{$rule}' is not a valid regular expression!");
-      }
-    }
-
+    $exclude = (array)$this->getConfig('exclude', array());
     return $exclude;
   }
 
