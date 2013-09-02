@@ -30,7 +30,7 @@ form.aphront-dialog-view .aphront-error-view {
 .aphront-error-view-head {
   padding: 10px 10px 0 10px;
   font-weight: bold;
-  color: #333333;
+  color: {$darkgreytext};
 }
 
 .aphront-error-view-list {
@@ -69,7 +69,8 @@ form.aphront-dialog-view .aphront-error-view {
 }
 
 .aphront-error-severity-nodata {
-  border-color: #ccc;
-  color: #6b748c;
+  border-color: {$lightgreyborder};
+  border-bottom: 1px solid {$greyborder};
+  color: {$greytext};
   background-color: #fff;
 }

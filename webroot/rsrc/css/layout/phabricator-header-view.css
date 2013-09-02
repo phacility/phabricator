@@ -44,7 +44,7 @@
 }
 
 .phabricator-header-subheader {
-  color: #444444;
+  color: {$darkgreytext};
   font-weight: normal;
   font-size: 13px;
   margin-top: 4px;

@@ -15,7 +15,7 @@
 
 .phabricator-inline-summary-table th {
   padding: 6px 0px;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phabricator-inline-summary-table td  {

@@ -191,7 +191,7 @@ table.aphront-form-control-radio-layout th {
   padding-left: 8px;
   padding-bottom: 4px;
   font-weight: bold;
-  color: #333;
+  color: {$darkgreytext};
 }
 
 
@@ -199,7 +199,7 @@ table.aphront-form-control-checkbox-layout th {
   padding-top: 2px;
   padding-left: 8px;
   padding-bottom: 4px;
-  color: #333;
+  color: {$darkgreytext};
 }
 
 .aphront-form-control-radio-layout td input,
@@ -254,7 +254,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .drag-and-drop-instructions {
-  color: #333333;
+  color: {$darkgreytext};
   font-size: 11px;
   padding: 6px 8px;
 }
@@ -344,7 +344,7 @@ table.aphront-form-control-checkbox-layout th {
 .fancy-datepicker-core .month-table td {
   padding: 4px;
   font-weight: bold;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .fancy-datepicker-core .month-table td.lrbutton {

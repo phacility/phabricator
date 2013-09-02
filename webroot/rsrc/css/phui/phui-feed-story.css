@@ -19,23 +19,23 @@
 .phui-feed-story-head {
  padding: 8px;
  overflow: hidden;
- color: #555;
+ color: {$greytext};
 }
 
 .phui-feed-story-head .phui-link-person {
- color: #333;
+ color: {$darkgreytext};
  font-weight: bold;
 }
 
 .phui-feed-story-body {
   padding: 0 8px 8px;
-  color: #444444;
+  color: {$darkgreytext};
   word-break: break-word;
 }
 
 .phui-feed-story-foot {
   font-size: 11px;
-  background: #f7f7f7;
+  background: {$lightgreybackground};
   padding: 8px;
   line-height: 14px;
 }
@@ -54,7 +54,7 @@
 
 .phui-feed-story-bigtext-post {
   line-height: 18px;
-  color: #444;
+  color: {$darkgreytext};
 }
 
 .phui-feed-story-bigtext-post h3 {
@@ -106,4 +106,3 @@
   line-height: 14px;
   font-weight: normal;
 }
-

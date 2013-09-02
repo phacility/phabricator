@@ -21,7 +21,7 @@
 }
 
 .differential-toc-file {
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .differential-toc-reveal-all,

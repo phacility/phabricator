@@ -17,7 +17,7 @@
   overflow: hidden;
 
   background: {$lightsky};
-  color: #444444;
+  color: {$darkgreytext};
   border: 1px solid {$sky};
 
   cursor: pointer;

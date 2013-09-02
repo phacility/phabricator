@@ -47,7 +47,7 @@
 .pholio-thumb-title {
   padding: 4px 8px;
   font-weight: bold;
-  color: #444444;
+  color: {$darkgreytext};
   overflow: hidden;
   border-bottom: 1px solid #d7d7d7;
 }

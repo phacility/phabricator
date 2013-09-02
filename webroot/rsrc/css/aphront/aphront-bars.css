@@ -27,7 +27,7 @@ div.aphront-bar.progress div div {
 }
 
 div.aphront-bar.progress span {
-  color: #555;
+  color: {$darkgreytext};
 }
 
 

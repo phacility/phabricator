@@ -63,7 +63,7 @@
 
 .phriction-history-nav-table td {
   width: 50%;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phriction-history-nav-table td.nav-next {

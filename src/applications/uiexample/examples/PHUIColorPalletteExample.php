@@ -37,7 +37,7 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       '676A70' => 'Dark Grey Border {$darkgreyborder}',
       '92969D' => 'Light Grey Text {$lightgreytext}',
       '74777D' => 'Grey Text {$greytext}',
-      '4B4D51' => 'Dark Grey Text [$darkgreytext}',
+      '4B4D51' => 'Dark Grey Text {$darkgreytext}',
       'F7F7F7' => 'Light Grey Background {$lightgreybackground}',
       'EBECEE' => 'Grey Background {$greybackground}',
     );
@@ -46,7 +46,7 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       'BFCFDA' => 'Light Blue Border {$lightblueborder}',
       '95A6C5' => 'Blue Border {$blueborder}',
       '626E82' => 'Dark Blue Border {$darkblueborder}',
-      'F8F9FC' => 'Light Blue Background {$lightbluebackground',
+      'F8F9FC' => 'Light Blue Background {$lightbluebackground}',
       'DFE0E2' => 'Blue Background {$bluebackground}',
       '8C98B8' => 'Light Blue Text {$lightbluetext}',
       '6B748C' => 'Blue Text {$bluetext}',

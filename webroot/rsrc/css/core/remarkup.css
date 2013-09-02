@@ -24,7 +24,7 @@
 .phabricator-remarkup .remarkup-code-header {
   padding: .25em 1em;
   background: #edead7;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
@@ -377,7 +377,7 @@ div.phabricator-remarkup-dark blockquote {
 
 div.phabricator-remarkup-dark tt {
   color: #EEE;
-  background: #444;
+  background: {$darkgreytext};
 }
 
 div.phabricator-remarkup-dark .remarkup-note,

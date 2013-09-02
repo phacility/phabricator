@@ -246,7 +246,7 @@
 
 .phabricator-timeline-preview-header {
   background: #e0e3ec;
-  color: #444444;
+  color: {$darkgreytext};
   padding: 4px 1.25%;
   border: solid #c0c5d1 1px 0;
 }

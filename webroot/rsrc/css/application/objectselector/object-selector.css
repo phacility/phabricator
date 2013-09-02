@@ -64,7 +64,7 @@ td.phabricator-object-selector-search-text {
   padding: 2px;
   border-bottom: 1px solid #d0d0d0;
   margin-bottom: 16px;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phabricator-object-selector-attach-explicit {
