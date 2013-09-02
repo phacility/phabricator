@@ -21,7 +21,7 @@
 
 .phui-status-item-note {
   width: 100%;
-  color: #666666;
+  color: {$greytext};
   line-height: 14px;
   padding: 3px 0;
 }

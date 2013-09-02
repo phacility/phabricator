@@ -76,7 +76,7 @@
   float: left;
   text-align: left;
   line-height: 25px;
-  color: #666666;
+  color: {$greytext};
 }
 
 .device .aphront-list-filter-description {

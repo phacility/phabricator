@@ -19,7 +19,7 @@
 
 .phriction-breadcrumbs {
   font-size: 12px;
-  color: #666666;
+  color: {$greytext};
 }
 
 .phriction-document-crumbs a {

@@ -21,7 +21,7 @@
   padding: 4px 8px 4px 12px;
   white-space: nowrap;
   text-align: right;
-  color: #666666;
+  color: {$greytext};
   width: 20%;
 }
 

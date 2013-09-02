@@ -20,7 +20,7 @@
 }
 
 .slowvote-description {
-  color: #666666;
+  color: {$greytext};
   padding: 8px;
   border-bottom: 1px solid #bbbbbb;
 }
@@ -37,7 +37,7 @@
 }
 
 .slowvote-option-label {
-  border: 1px solid #666666;
+  border: 1px solid {$greytext};
   display: block;
   position: relative;
   padding: 8px 4px;

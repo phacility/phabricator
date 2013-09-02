@@ -69,7 +69,7 @@
 
 #batch-select-status-cell {
   text-align: right;
-  color: #666666;
+  color: {$greytext};
   font-size: 11px;
   vertical-align: middle;
   width: 100%;

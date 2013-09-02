@@ -102,7 +102,7 @@
 
 .aphront-exception-dialog .exception-trace-header {
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   border-bottom: 1px solid #aaaaaa;
   padding-bottom: .5em;
   margin-bottom: .5em;

@@ -94,6 +94,6 @@ td.phabricator-object-selector-search-text {
 
 .phabricator-object-selector-instructions {
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   margin-top: 1.25em;
 }

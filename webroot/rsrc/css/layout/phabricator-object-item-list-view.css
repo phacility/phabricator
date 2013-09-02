@@ -275,7 +275,7 @@
   vertical-align: middle;
   position: relative;
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -475,7 +475,7 @@
   padding: 0 10px;
   margin: 5px 0;
   font-size: 11px;
-  color: #666;
+  color: {$greytext};
   white-space: nowrap;
   overflow: hidden;
   text-align: right;

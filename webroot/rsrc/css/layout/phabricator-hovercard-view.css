@@ -18,7 +18,7 @@
 }
 
 .phabricator-hovercard-container {
-  border: 1px solid #666666;
+  border: 1px solid {$greytext};
 }
 
 .phabricator-hovercard-tags {

@@ -368,7 +368,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .fancy-datepicker-core .day-table td.weekend {
-  color: #666666;
+  color: {$greytext};
   border-color: #e6e6e6;
 }
 

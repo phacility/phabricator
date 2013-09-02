@@ -24,7 +24,7 @@
 }
 
 .owners-path-editor-table div.validating {
-  color: #666666;
+  color: {$greytext};
 }
 
 .owners-path-editor-table div.invalid {

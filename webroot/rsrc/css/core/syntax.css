@@ -26,7 +26,7 @@
 .remarkup-code .cm, /* Comment.Multiline */
 .remarkup-code .c1, /* Comment.Single */
 .remarkup-code .cs { /* Comment.Special */
-  color: #666666;
+  color: {$greytext};
 }
 
 .remarkup-code .sd, /* Literal.String.Doc */

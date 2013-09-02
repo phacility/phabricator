@@ -43,7 +43,7 @@
 
 .aphront-panel-view-caption {
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   margin-top: -0.1em;
   margin-bottom: 0.75em;
 }
@@ -95,7 +95,7 @@
 }
 
 .aphront-panel-preview-loading-text {
-  color: #666666;
+  color: {$greytext};
 }
 
 .aphront-panel-flush {
@@ -121,6 +121,6 @@
 
 .aphront-mini-panel-view p {
   font-size: 12px;
-  color: #666666;
+  color: {$greytext};
 }
 

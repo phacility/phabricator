@@ -54,7 +54,7 @@
 }
 
 .setup-issue tt {
-  color: #666666;
+  color: {$greytext};
 }
 
 .setup-issue em {
@@ -104,5 +104,5 @@
   margin-top: 8px;
   padding: 4px;
   text-align: right;
-  color: #666666;
+  color: {$greytext};
 }
