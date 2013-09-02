@@ -38,14 +38,16 @@ function phabricator_time($epoch, $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,
-    pht('g:i A'));
+    _phabricator_time_format($user));
 }
 
 function phabricator_datetime($epoch, $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,
-    pht('%s, g:i A', _phabricator_date_format($epoch)));
+    pht('%s, %s',
+      _phabricator_date_format($epoch),
+      _phabricator_time_format($user)));
 }
 
 function _phabricator_date_format($epoch) {
@@ -57,6 +59,19 @@ function _phabricator_date_format($epoch) {
     $format = pht('M j Y');
   }
   return $format;
+}
+
+function _phabricator_time_format($user) {
+  $prefs = $user->loadPreferences();
+
+  $pref = $prefs->getPreference(
+    PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT);
+
+  if (strlen($pref)) {
+    return $pref;
+  }
+
+  return pht('g:i A');
 }
 
 /**
