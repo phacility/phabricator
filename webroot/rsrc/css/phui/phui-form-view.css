@@ -376,7 +376,7 @@ table.aphront-form-control-checkbox-layout th {
   background: transparent;
   border: 1px transparent;
   vertical-align: bottom;
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .fancy-datepicker-core .day-table td.today {

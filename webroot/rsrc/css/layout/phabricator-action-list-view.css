@@ -102,7 +102,7 @@
 
 .phabricator-action-view-disabled .phabricator-action-view-item,
 .phabricator-action-view-disabled button.phabricator-action-view-item {
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .phabricator-action-view button[disabled] {
@@ -114,5 +114,5 @@
 .device-desktop .phabricator-action-view-disabled:hover
   button.phabricator-action-view-item {
   background-color: #dfdfdf;
-  color: #888888;
+  color: {$lightgreytext};
 }

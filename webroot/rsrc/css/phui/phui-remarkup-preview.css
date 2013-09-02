@@ -25,7 +25,7 @@
 }
 
 .phui-preview-loading-text {
-  color: #999;
+  color: {$lightgreytext};
 }
 
 /**

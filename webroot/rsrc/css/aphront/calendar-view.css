@@ -58,7 +58,7 @@ table.aphront-calendar-view td div.aphront-calendar-day {
 
 .aphront-calendar-date-number {
   font-weight: normal;
-  color: #999;
+  color: {$lightgreytext};
   padding: 4px;
   border-color: #dfdfdf;
   border-style: solid;

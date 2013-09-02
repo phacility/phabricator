@@ -46,7 +46,7 @@
   max-width:          4%;
   vertical-align:     top;
   background:         #eeeeee;
-  color:              #888888;
+  color:              {$lightgreytext};
   cursor:             pointer;
   border-style:       solid;
   border-width:       0px 1px;
@@ -324,7 +324,7 @@ td.cov-X {
 }
 
 .differential-property-table td em {
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .differential-property-table tr.property-table-header th,
@@ -393,7 +393,7 @@ td.cov-X {
 .inline-editor-active .differential-inline-comment-links a,
 .inline-editor-active .differential-inline-comment-links a:hover,
 .inline-editor-active .differential-inline-comment-links a:active {
-  color: #888888;
+  color: {$lightgreytext};
   cursor: normal;
   text-decoration: none;
 }

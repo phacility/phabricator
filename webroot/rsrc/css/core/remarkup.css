@@ -372,7 +372,7 @@
    so here are custom rules to override remarkup defaults. */
 
 div.phabricator-remarkup-dark blockquote {
-  color: #999;
+  color: {$lightgreytext};
 }
 
 div.phabricator-remarkup-dark tt {

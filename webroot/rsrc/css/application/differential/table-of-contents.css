@@ -84,5 +84,5 @@
 }
 
 .differential-mcoverage-loading {
-  color: #888888;
+  color: {$lightgreytext};
 }

@@ -47,5 +47,5 @@
 }
 
 .phabricator-timer-table small {
-  color: #999999;
+  color: {$lightgreytext};
 }

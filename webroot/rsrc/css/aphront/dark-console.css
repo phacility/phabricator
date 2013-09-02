@@ -90,7 +90,7 @@
 
 .dark-console .aphront-table-view {
   font-size: 11px;
-  background: #888888;
+  background: {$lightgreytext};
   color: #eeeeee;
   width: 100%;
   border-color: #333333;

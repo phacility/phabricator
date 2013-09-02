@@ -18,11 +18,10 @@
   text-align:         right;
   vertical-align:     top;
   background:         #eeeeee;
-  color:              #888888;
+  color:              {$lightgreytext};
   border-style:       solid;
   border-width:       0px 1px;
   border-color:       #eeeeee #999999 #eeeeee #dddddd;
-  font-family:        "Verdana";
   font-size:          11px;
 }
 

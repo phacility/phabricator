@@ -38,5 +38,5 @@
 }
 
 .auth-account-view-provider-name {
-  color: #888888;
+  color: {$lightgreytext};
 }

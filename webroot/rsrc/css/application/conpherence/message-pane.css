@@ -149,12 +149,12 @@
 }
 
 .conpherence-message-pane .conpherence-edited {
-  color: #888;
+  color: {$lightgreytext};
   margin: 0;
 }
 
 .device-phone .conpherence-message-pane .conpherence-edited {
-  color: #888;
+  color: {$lightgreytext};
   margin: 0 10px;
 }
 

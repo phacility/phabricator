@@ -168,7 +168,7 @@
 }
 
 .conpherence-widget-pane .no-events {
-  color: #999;
+  color: {$lightgreytext};
 }
 
 .conpherence-widget-pane #widgets-calendar .aphront-multi-column-view
@@ -289,7 +289,7 @@
 
 .conpherence-widget-pane #widgets-calendar .user-status .participant {
   font-size: 11px;
-  color: #888;
+  color: {$lightgreytext};
   padding-top: 2px;
 }
 

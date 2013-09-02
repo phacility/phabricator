@@ -139,7 +139,7 @@
   box-shadow: none;
   transition: none;
 
-  color: #999;
+  color: {$lightgreytext};
   width: 100%;
   right: 0;
   position: absolute;
@@ -169,7 +169,7 @@
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
-  color: #999;
+  color: {$lightgreytext};
 }
 
 .phabricator-main-menu-search button {
@@ -218,7 +218,7 @@
 }
 
 .phabricator-main-search-typeahead-result .result-type {
-  color: #888;
+  color: {$lightgreytext};
   font-size: 11px;
   font-weight: normal;
 }
