@@ -175,6 +175,7 @@ final class DifferentialRevisionSearchEngine
 
     if ($this->requireViewer()->isLoggedIn()) {
       $names['active'] = pht('Active Revisions');
+      $names['authored'] = pht('Authored');
     }
 
     $names['all'] = pht('All Revisions');
@@ -193,6 +194,9 @@ final class DifferentialRevisionSearchEngine
         return $query
           ->setParameter('responsiblePHIDs', array($viewer->getPHID()))
           ->setParameter('status', DifferentialRevisionQuery::STATUS_OPEN);
+      case 'authored':
+        return $query
+          ->setParameter('authorPHIDs', array($viewer->getPHID()));
       case 'all':
         return $query;
     }
