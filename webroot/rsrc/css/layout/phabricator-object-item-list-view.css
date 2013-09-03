@@ -25,7 +25,7 @@
 .phabricator-object-item {
   background: #ffffff;
   border-style: solid;
-  border-color: #BBC0CC;
+  border-color: {$lightgreyborder};
   border-width: 0 0 0 4px;
   margin: 5px 0;
   overflow: hidden;
@@ -37,8 +37,8 @@
 
 .phabricator-object-item-frame {
   border-style: solid;
-  border-color: #BBC0CC;
-  border-bottom-color: #A2A6B0;
+  border-color: {$lightgreyborder};
+  border-bottom-color: {$greyborder};
   border-width: 1px 1px 1px 0;
   overflow: hidden;
   position: relative;
@@ -66,7 +66,7 @@
 }
 
 .phabricator-object-item-objname {
-  color: #222222;
+  color: {$darkgreytext};
   cursor: text;
 }
 
@@ -110,7 +110,7 @@
   bottom: 0;
   vertical-align: middle;
   text-align: right;
-  border-left: 1px solid #BBC0CC;
+  border-left: 1px solid {$lightgreyborder};
 }
 
 .phabricator-object-item-actions .phui-list-item-view {
@@ -191,7 +191,7 @@
 */
 
 .phabricator-object-item-subhead {
-  color: #777;
+  color: {$greytext};
   padding: 0 8px 6px;
 }
 
@@ -208,7 +208,7 @@
 
 .phabricator-object-item-attribute {
   display: inline;
-  color: #777;
+  color: {$greytext};
 }
 
 .phabricator-object-item-attribute-spacer {
@@ -275,7 +275,7 @@
   vertical-align: middle;
   position: relative;
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -293,7 +293,7 @@
 }
 
 .device-desktop .phabricator-object-item-icon {
-  padding-right: 22px;
+  padding-right: 18px;
 }
 
 .device-desktop .phabricator-object-item-icon-none {
@@ -302,7 +302,7 @@
 
 .phabricator-object-item-icon-image {
   position: absolute;
-  right: 2px;
+  right: 0;
   top: 2px;
   width: 14px;
   height: 14px;
@@ -371,7 +371,7 @@
 }
 
 .phabricator-object-item-disabled .phabricator-object-item-objname {
-  color: #777777;
+  color: {$greytext};
 }
 
 
@@ -475,7 +475,7 @@
   padding: 0 10px;
   margin: 5px 0;
   font-size: 11px;
-  color: #666;
+  color: {$greytext};
   white-space: nowrap;
   overflow: hidden;
   text-align: right;

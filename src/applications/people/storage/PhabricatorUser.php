@@ -512,9 +512,12 @@ final class PhabricatorUser
       return $this->preferences;
     }
 
-    $preferences = id(new PhabricatorUserPreferences())->loadOneWhere(
-      'userPHID = %s',
-      $this->getPHID());
+    $preferences = null;
+    if ($this->getPHID()) {
+      $preferences = id(new PhabricatorUserPreferences())->loadOneWhere(
+        'userPHID = %s',
+        $this->getPHID());
+    }
 
     if (!$preferences) {
       $preferences = new PhabricatorUserPreferences();

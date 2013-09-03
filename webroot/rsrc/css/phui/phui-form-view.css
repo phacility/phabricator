@@ -78,7 +78,7 @@
 
 .aphront-form-required {
   font-weight: normal;
-  color: #6b748c;
+  color: {$lightgreytext};
   font-size: 11px;
   -webkit-font-smoothing: antialiased;
 }
@@ -191,7 +191,7 @@ table.aphront-form-control-radio-layout th {
   padding-left: 8px;
   padding-bottom: 4px;
   font-weight: bold;
-  color: #333;
+  color: {$darkgreytext};
 }
 
 
@@ -199,7 +199,7 @@ table.aphront-form-control-checkbox-layout th {
   padding-top: 2px;
   padding-left: 8px;
   padding-bottom: 4px;
-  color: #333;
+  color: {$darkgreytext};
 }
 
 .aphront-form-control-radio-layout td input,
@@ -210,7 +210,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .aphront-form-control-radio-layout label.disabled,
 .aphront-form-control-checkbox-layout label.disabled {
-  color: #777777;
+  color: {$greytext};
 }
 
 .aphront-form-radio-caption {
@@ -244,7 +244,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .aphront-form-inset h1 {
-  color: #777;
+  color: {$greytext};
   font-weight: normal;
   padding-bottom: 8px;
 }
@@ -254,7 +254,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .drag-and-drop-instructions {
-  color: #333333;
+  color: {$darkgreytext};
   font-size: 11px;
   padding: 6px 8px;
 }
@@ -344,7 +344,7 @@ table.aphront-form-control-checkbox-layout th {
 .fancy-datepicker-core .month-table td {
   padding: 4px;
   font-weight: bold;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .fancy-datepicker-core .month-table td.lrbutton {
@@ -368,7 +368,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .fancy-datepicker-core .day-table td.weekend {
-  color: #666666;
+  color: {$greytext};
   border-color: #e6e6e6;
 }
 
@@ -376,7 +376,7 @@ table.aphront-form-control-checkbox-layout th {
   background: transparent;
   border: 1px transparent;
   vertical-align: bottom;
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .fancy-datepicker-core .day-table td.today {
@@ -400,7 +400,7 @@ table.aphront-form-control-checkbox-layout th {
 .picker-open .calendar-button,
 .fancy-datepicker-core {
   background-color: white;
-  border: 1px solid #777777;
+  border: 1px solid {$greytext};
 
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
 }
@@ -428,7 +428,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .phui-form-box .phabricator-action-header {
   padding: 4px 5px 4px 12px;
-  border-bottom: 1px solid #bfcfda;
+  border-bottom: 1px solid {$lightblueborder};
 }
 
 .phui-form-box .phabricator-action-header h3 {

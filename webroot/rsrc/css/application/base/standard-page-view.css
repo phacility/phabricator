@@ -21,7 +21,7 @@
 
 .keyboard-shortcut-help th {
   white-space: nowrap;
-  color: #666666;
+  color: {$greytext};
 }
 
 .keyboard-shortcut-help kbd {

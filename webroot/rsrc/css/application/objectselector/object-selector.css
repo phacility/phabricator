@@ -64,7 +64,7 @@ td.phabricator-object-selector-search-text {
   padding: 2px;
   border-bottom: 1px solid #d0d0d0;
   margin-bottom: 16px;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phabricator-object-selector-attach-explicit {
@@ -88,12 +88,12 @@ td.phabricator-object-selector-search-text {
 
 .object-selector-nothing {
   padding: 1em;
-  color: #888888;
+  color: {$lightgreytext};
   text-align: center;
 }
 
 .phabricator-object-selector-instructions {
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   margin-top: 1.25em;
 }

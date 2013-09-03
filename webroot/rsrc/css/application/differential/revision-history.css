@@ -9,7 +9,7 @@
 }
 
 .differential-revision-history-table th {
-  color: #666;
+  color: {$greytext};
   padding: 4px 6px;
 }
 
@@ -81,5 +81,5 @@
 .differential-revision-history-table td.diff-differ-submit label {
   font-weight: bold;
   padding-right: .25em;
-  color: #444444;
+  color: {$darkgreytext};
 }

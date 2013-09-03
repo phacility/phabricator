@@ -36,7 +36,7 @@
 }
 
 .phabricator-transaction-info {
-  color: #777;
+  color: {$greytext};
   float: right;
   font-size: 11px;
 }
@@ -53,7 +53,7 @@
 }
 
 .phabricator-transaction-subheader {
-  color: #888888;
+  color: {$lightgreytext};
   border-bottom: 1px solid #e0e0e0;
   padding-bottom: 4px;
   margin-bottom: 4px;

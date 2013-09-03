@@ -131,6 +131,7 @@ final class CelerityResourceTransformer {
 
   public function replaceCSSVariable($matches) {
     static $map = array(
+      // Base Colors
       'red'           => '#c0392b',
       'lightred'      => '#f4dddb',
       'orange'        => '#e67e22',
@@ -147,6 +148,26 @@ final class CelerityResourceTransformer {
       'lightindigo'   => '#f5e2ef',
       'violet'        => '#8e44ad',
       'lightviolet'   => '#ecdff1',
+
+      // Base Greys
+      'lightgreyborder'     => '#C7CCD9',
+      'greyborder'          => '#A1A6B0',
+      'darkgreyborder'      => '#676A70',
+      'lightgreytext'       => '#92969D',
+      'greytext'            => '#74777D',
+      'darkgreytext'        => '#4B4D51',
+      'lightgreybackground' => '#F7F7F7',
+      'greybackground'      => '#EBECEE',
+
+      // Base Blues
+      'lightblueborder'     => '#BFCFDA',
+      'blueborder'          => '#8C98B8',
+      'darkblueborder'      => '#626E82',
+      'lightbluebackground' => '#F8F9FC',
+      'bluebackground'      => '#DAE7FF',
+      'lightbluetext'       => '#8C98B8',
+      'bluetext'            => '#6B748C',
+      'darkbluetext'        => '#464C5C',
     );
 
     $var_name = $matches[1];

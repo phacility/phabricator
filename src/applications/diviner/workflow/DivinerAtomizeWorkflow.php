@@ -63,7 +63,18 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       $configure->setBook($this->getConfig('name'));
     }
 
+    $group_rules = array();
+    foreach ($this->getConfig('groups', array()) as $group => $spec) {
+      $include = (array)idx($spec, 'include', array());
+      foreach ($include as $pattern) {
+        $group_rules[$pattern] = $group;
+      }
+    }
+
     $all_atoms = array();
+    $context = array(
+      'group' => null,
+    );
     foreach ($files as $file) {
       $abs_path = Filesystem::resolvePath($file, $this->getConfig('root'));
       $data = Filesystem::readFile($abs_path);
@@ -75,7 +86,15 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
         $console->writeLog("Atomizing %s...\n", $file);
       }
 
-      $file_atoms = $file_atomizer->atomize($file, $data);
+      $context['group'] = null;
+      foreach ($group_rules as $rule => $group) {
+        if (preg_match($rule, $file)) {
+          $context['group'] = $group;
+          break;
+        }
+      }
+
+      $file_atoms = $file_atomizer->atomize($file, $data, $context);
       $all_atoms[] = $file_atoms;
 
       if (count($file_atoms) !== 1) {
@@ -83,7 +102,7 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       }
       $file_atom = head($file_atoms);
 
-      $atoms = $atomizer->atomize($file, $data);
+      $atoms = $atomizer->atomize($file, $data, $context);
 
       foreach ($atoms as $atom) {
         if (!$atom->getParentHash()) {

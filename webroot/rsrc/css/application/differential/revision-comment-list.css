@@ -7,5 +7,5 @@
   border: 1px solid #d6d6d6;
   text-align: center;
   padding: 1em;
-  color: #666666;
+  color: {$greytext};
 }

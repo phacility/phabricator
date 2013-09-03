@@ -6,7 +6,7 @@
  */
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
-  private $edges = array();
+  private $edges = self::ATTACHABLE;
   private static $namespaceStack = array();
 
   const ATTACHABLE = "<attachable>";
@@ -29,11 +29,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
    * @task edges
    */
   public function getEdges($type) {
-    $edges = idx($this->edges, $type);
-    if ($edges === null) {
-      throw new Exception("Call attachEdges() before getEdges()!");
-    }
-    return $edges;
+    return $this->assertAttachedKey($this->edges, $type);
   }
 
 
@@ -208,12 +204,19 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     return $result;
   }
 
-
   protected function assertAttached($property) {
     if ($property === self::ATTACHABLE) {
       throw new PhabricatorDataNotAttachedException($this);
     }
     return $property;
+  }
+
+  protected function assertAttachedKey($value, $key) {
+    $this->assertAttached($value);
+    if (!array_key_exists($key, $value)) {
+      throw new PhabricatorDataNotAttachedException($this);
+    }
+    return $value[$key];
   }
 
 }

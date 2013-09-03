@@ -97,8 +97,8 @@ a.phabricator-tag-type-object:link {
 }
 
 .phabricator-tag-color-grey {
-  background-color: #888888;
-  border-color: #888888;
+  background-color: {$lightgreytext};
+  border-color: {$lightgreytext};
 }
 
 .phabricator-tag-color-white {

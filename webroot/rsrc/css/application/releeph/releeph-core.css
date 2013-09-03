@@ -12,7 +12,7 @@
    * (As is the <h1> code below)
    */
   max-width:    1120px;
-  border:       1px solid #666622;
+  border:       1px solid {$greytext}622;
   background:   #efefdf;
   padding:      15px 20px;
   font-size:    13px;

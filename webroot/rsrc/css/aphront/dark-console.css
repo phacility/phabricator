@@ -61,7 +61,7 @@
   overflow: hidden;
   background: #444444;
   margin: 3px 0;
-  border-color: #666666;
+  border-color: {$greytext};
   border-width: 1px 0;
   border-style: solid;
 }
@@ -90,7 +90,7 @@
 
 .dark-console .aphront-table-view {
   font-size: 11px;
-  background: #888888;
+  background: {$lightgreytext};
   color: #eeeeee;
   width: 100%;
   border-color: #333333;
@@ -116,7 +116,7 @@
 }
 
 .dark-console .aphront-table-view tr.alt {
-  background: #666666;
+  background: {$greytext};
 }
 
 .dark-console .aphront-table-view tr.highlight {

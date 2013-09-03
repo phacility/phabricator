@@ -4,7 +4,7 @@
 
 
 .aphront-panel-view {
-  background: #f3f3f3;
+  background: {$lightgreybackground};
   border: 1px solid #c0c0c0;
   border-width: 1px 0 0;
   padding: 1em 2em;
@@ -32,7 +32,7 @@
 .aphront-panel-view h1 {
   font-size: 16px;
   font-weight: bold;
-  color: #555;
+  color: {$darkgreytext};
   text-shadow: 0 1px 1px #fff;
   padding: 4px 0 0 0;
 }
@@ -43,7 +43,7 @@
 
 .aphront-panel-view-caption {
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   margin-top: -0.1em;
   margin-bottom: 0.75em;
 }
@@ -71,14 +71,14 @@
 }
 
 .aphront-panel-accent .phui-form-view {
-  background: #f7f7f7;
+  background: {$lightgreybackground};
   border: 1px solid #c4c4c0;
   border-radius: 3px;
 }
 
 .aphront-panel-preview {
   background: #fbfbfb;
-  border-bottom: 1px solid #aaaaaa;
+  border-bottom: 1px solid {$greyborder};
   padding: 15px 20px;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .aphront-panel-preview-loading-text {
-  color: #666666;
+  color: {$greytext};
 }
 
 .aphront-panel-flush {
@@ -116,11 +116,12 @@
   background: #fff;
   padding: 10px;
   margin: 5px 20px;
-  border: 1px solid #e6e6e6;
+  border: 1px solid {$lightgreyborder};
+  border-bottom: 1px solid {$greyborder};
 }
 
 .aphront-mini-panel-view p {
   font-size: 12px;
-  color: #666666;
+  color: {$greytext};
 }
 

@@ -201,7 +201,25 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return $this;
   }
 
+  /**
+   * This is a wrapper until we finish T603. The newer query class this class
+   * will inherit from handles catching this exception already.
+   */
   public function execute() {
+
+    try {
+      $result = $this->executeManiphestQuery();
+    } catch (PhabricatorEmptyQueryException $ex) {
+      $result = array();
+      if ($this->calculateRows) {
+        $this->rowCount = 0;
+      }
+    }
+
+    return $result;
+  }
+
+  private function executeManiphestQuery() {
 
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');
@@ -505,6 +523,9 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       ->withMemberPHIDs($this->anyUserProjectPHIDs)
       ->execute();
     $any_user_project_phids = mpull($projects, 'getPHID');
+    if (!$any_user_project_phids) {
+      throw new PhabricatorEmptyQueryException();
+    }
 
     return qsprintf(
       $conn,

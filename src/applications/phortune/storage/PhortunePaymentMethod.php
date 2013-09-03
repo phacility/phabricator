@@ -22,7 +22,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
   protected $providerType;
   protected $providerDomain;
 
-  private $account;
+  private $account = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -44,10 +44,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function getAccount() {
-    if (!$this->account) {
-      throw new Exception("Call attachAccount() before getAccount()!");
-    }
-    return $this->account;
+    return $this->assertAttached($this->account);
   }
 
   public function getDescription() {

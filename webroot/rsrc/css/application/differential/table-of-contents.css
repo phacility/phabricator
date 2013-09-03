@@ -3,7 +3,7 @@
  */
 
 .differential-toc-meta {
-  color:        #666666;
+  color:        {$greytext};
   padding-left: 1em;
 }
 
@@ -17,11 +17,11 @@
 .differential-toc-ftype {
   padding: 0 .5em;
   text-align: center;
-  color: #666666;
+  color: {$greytext};
 }
 
 .differential-toc-file {
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .differential-toc-reveal-all,
@@ -31,7 +31,7 @@
 }
 
 .diff-star-none {
-  color: #666666;
+  color: {$greytext};
 }
 
 .diff-star-okay {
@@ -64,7 +64,7 @@
 }
 
 .differential-toc table th {
-  color: #666666;
+  color: {$greytext};
   font-size: 11px;
   padding: 0 4px 4px;
   white-space: nowrap;
@@ -76,7 +76,7 @@
 }
 
 .differential-toc table td em {
-  color: #666666;
+  color: {$greytext};
 }
 
 .differential-toc .button {
@@ -84,5 +84,5 @@
 }
 
 .differential-mcoverage-loading {
-  color: #888888;
+  color: {$lightgreytext};
 }

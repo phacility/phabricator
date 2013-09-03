@@ -19,7 +19,7 @@
 
 .phriction-breadcrumbs {
   font-size: 12px;
-  color: #666666;
+  color: {$greytext};
 }
 
 .phriction-document-crumbs a {
@@ -30,7 +30,7 @@
   margin-left: 30px;
   padding-bottom: 10px;
   list-style: circle;
-  color: #999999;
+  color: {$lightgreytext};
 }
 
 .phriction-children-header {
@@ -63,7 +63,7 @@
 
 .phriction-history-nav-table td {
   width: 50%;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phriction-history-nav-table td.nav-next {

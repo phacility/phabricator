@@ -16,7 +16,7 @@
 .phabricator-notification-menu-loading {
   text-align: center;
   padding: 10px 0;
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .device-desktop .phabricator-notification-menu,
@@ -50,7 +50,7 @@
 }
 
 .no-notifications {
-  color: #999999;
+  color: {$lightgreytext};
 }
 
 .phabricator-notification-list {

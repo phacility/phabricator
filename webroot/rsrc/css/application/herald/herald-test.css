@@ -96,5 +96,5 @@ textarea.herald-field-value-transcript {
 
 
 .condition-test-value {
-  color: #666666;
+  color: {$greytext};
 }

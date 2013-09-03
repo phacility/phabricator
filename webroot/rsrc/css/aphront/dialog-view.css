@@ -5,8 +5,8 @@
 .aphront-dialog-view {
   width: 540px;
   margin: 32px auto 16px;
-    border: 1px solid #bfcfda;
-  border-bottom: 1px solid #95a6c5;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25),
               inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
@@ -49,7 +49,7 @@
 
 .aphront-dialog-tail {
   border: none;
-  background: #f7f7f7;
+  background: {$lightgreybackground};
   padding: 8px 16px;
   border-top: 1px solid #d4dadf;
 }
@@ -102,7 +102,7 @@
 
 .aphront-exception-dialog .exception-trace-header {
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   border-bottom: 1px solid #aaaaaa;
   padding-bottom: .5em;
   margin-bottom: .5em;

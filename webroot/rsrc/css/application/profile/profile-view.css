@@ -58,7 +58,7 @@ td.phabricator-profile-content {
 .phabricator-profile-info-table th {
   font-weight: bold;
   text-align: right;
-  color: #666666;
+  color: {$greytext};
   width: 10%;
   padding: 4px;
 }
@@ -88,7 +88,7 @@ td.phabricator-profile-content {
 }
 
 h2.phabricator-profile-realname {
-  color: #666666;
+  color: {$greytext};
 }
 
 img.phabricator-profile-image {

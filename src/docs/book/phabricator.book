@@ -17,5 +17,9 @@
     "(^src/docs/user/)"
   ],
   "groups" : {
+    "paste" : {
+      "name" : "Paste",
+      "include" : "(^src/applications/paste/)"
+    }
   }
 }

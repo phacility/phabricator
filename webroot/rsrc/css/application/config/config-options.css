@@ -5,37 +5,39 @@
 .config-option-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #cccccc;
+  border: 1px solid {$lightgreyborder};
   background: #fff;
 }
 
 .config-option-table th,
 .config-option-table td {
   padding: 4px 12px;
-  border: 1px solid #cccccc;
+  border: 1px solid {$lightgreyborder};
 }
 
 .config-option-table th {
-  background: #e9e9e9;
+  background: {$lightgreybackground};
+  color: {$bluetext};
   text-align: right;
   white-space: nowrap;
 }
 
-.config-option-table th em {
+.config-option-table th em,
+.config-option-table td em {
   font-weight: normal;
-  color: #666666;
+  color: {$greytext};
 }
 
 .config-option-table td {
-  color: #333333;
+  color: {$darkgreytext};
   width: 100%;
 }
 
 .config-option-table .column-labels th {
   font-weight: bold;
-  color: #333333;
+  color: {$bluetext};
   text-align: center;
-  background: #e0e0e0;
+  background: {$greybackground};
 }
 
 .config-options-current-value {
@@ -44,5 +46,5 @@
 }
 
 .config-options-current-value span {
-  color: #777;
+  color: {$greytext};
 }

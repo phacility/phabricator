@@ -17,7 +17,7 @@ input.phabricator-jump-nav[type='text'] {
   margin-top: 4px;
   padding-bottom: 4px;
   font-size: 11px;
-  color: #666666;
+  color: {$greytext};
   text-align: left;
 }
 

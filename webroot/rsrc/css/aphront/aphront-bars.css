@@ -27,7 +27,7 @@ div.aphront-bar.progress div div {
 }
 
 div.aphront-bar.progress span {
-  color: #555;
+  color: {$darkgreytext};
 }
 
 
@@ -68,7 +68,7 @@ div.aphront-bar.glyph div.caption {
   margin: 0;
   float: left;
   margin-left: 1.5em;
-  color: #666;
+  color: {$greytext};
 }
 
 

@@ -18,8 +18,8 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $viewPolicy;
   protected $mailKey;
 
-  private $content;
-  private $rawContent;
+  private $content = self::ATTACHABLE;
+  private $rawContent = self::ATTACHABLE;
 
   public function getURI() {
     return '/P'.$this->getID();
@@ -70,10 +70,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   }
 
   public function getContent() {
-    if ($this->content === null) {
-      throw new Exception("Call attachContent() before getContent()!");
-    }
-    return $this->content;
+    return $this->assertAttached($this->content);
   }
 
   public function attachContent($content) {
@@ -82,10 +79,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   }
 
   public function getRawContent() {
-    if ($this->rawContent === null) {
-      throw new Exception("Call attachRawContent() before getRawContent()!");
-    }
-    return $this->rawContent;
+    return $this->assertAttached($this->rawContent);
   }
 
   public function attachRawContent($raw_content) {

@@ -92,7 +92,7 @@
 }
 
 .blog-post .header .last-updated {
-  color: #666;
+  color: {$greytext};
   clear: none;
   font-size: 11px;
 }

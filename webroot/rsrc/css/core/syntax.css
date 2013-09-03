@@ -26,7 +26,7 @@
 .remarkup-code .cm, /* Comment.Multiline */
 .remarkup-code .c1, /* Comment.Single */
 .remarkup-code .cs { /* Comment.Special */
-  color: #666666;
+  color: {$greytext};
 }
 
 .remarkup-code .sd, /* Literal.String.Doc */
@@ -113,7 +113,7 @@
 .remarkup-code .gu { color: #800080 } /* Generic.Subheading */
 .remarkup-code .gt { color: #0040D0 } /* Generic.Traceback */
 .remarkup-code .nd { color: #AA22FF } /* Name.Decorator */
-.remarkup-code .ni { color: #999999 } /* Name.Entity */
+.remarkup-code .ni { color: {$lightgreytext} } /* Name.Entity */
 .remarkup-code .ne { color: #D2413A } /* Name.Exception */
 .remarkup-code .nl { color: #A0A000 } /* Name.Label */
 .remarkup-code .nn { color: #0000FF } /* Name.Namespace */

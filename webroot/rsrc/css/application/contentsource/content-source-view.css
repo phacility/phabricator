@@ -3,5 +3,5 @@
  */
 
 .phabricator-content-source-view {
-  color: #888888;
+  color: {$lightgreytext};
 }

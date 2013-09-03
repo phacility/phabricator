@@ -14,7 +14,7 @@
 .aphront-contextbar-content {
   padding-top: 5px;
   font-size: 13px;
-  color: #666666;
+  color: {$greytext};
 }
 
 .aphront-contextbar-buttons {
@@ -23,7 +23,7 @@
 
 .aphront-contextbar-buttons label {
   font-weight: bold;
-  color: #666666;
+  color: {$greytext};
 }
 
 .aphront-contextbar-buttons a {

@@ -46,7 +46,7 @@ body input.jx-tokenizer-input:focus {
 
 body input.jx-typeahead-placeholder {
   margin-left: 4px;
-  color: #777
+  color: {$greytext};
 }
 
 a.jx-tokenizer-x {

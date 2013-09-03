@@ -7,17 +7,14 @@
 }
 
 .device-desktop .phabricator-action-list-view {
-  border: 1px solid #c0c5d1;
-  padding: .5em 0;
-
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  padding: 4px 0;
   float: right;
   margin-top: 0px;
   margin-right: 1%;
   width: 20%;
-  border-radius: 3px;
   font-size: 12px;
-
-  box-shadow: 0 0 1px 1px rgba(192, 197, 209, 0.5);
 }
 
 .device-desktop .phabricator-header-shell + .phabricator-action-list-view {
@@ -35,7 +32,7 @@
 
 .device .phabricator-action-list-view {
   border-top: 1px solid #dcdcdc;
-  padding: .5em 0;
+  padding: 4px 0;
 }
 
 .device .phabricator-action-list-view {
@@ -84,6 +81,7 @@
   display: block;
   font-size: 12px;
   text-decoration: none;
+  color: {$darkgreytext};
 }
 
 .phabricator-action-view-icon {
@@ -102,7 +100,7 @@
 
 .phabricator-action-view-disabled .phabricator-action-view-item,
 .phabricator-action-view-disabled button.phabricator-action-view-item {
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .phabricator-action-view button[disabled] {
@@ -114,5 +112,5 @@
 .device-desktop .phabricator-action-view-disabled:hover
   button.phabricator-action-view-item {
   background-color: #dfdfdf;
-  color: #888888;
+  color: {$lightgreytext};
 }

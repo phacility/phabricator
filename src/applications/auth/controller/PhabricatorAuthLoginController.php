@@ -25,7 +25,28 @@ final class PhabricatorAuthLoginController
 
     $provider = $this->provider;
 
-    list($account, $response) = $provider->processLoginRequest($this);
+    try {
+      list($account, $response) = $provider->processLoginRequest($this);
+    } catch (PhutilAuthUserAbortedException $ex) {
+      if ($viewer->isLoggedIn()) {
+        // If a logged-in user cancels, take them back to the external accounts
+        // panel.
+        $next_uri = '/settings/panel/external/';
+      } else {
+        // If a logged-out user cancels, take them back to the auth start page.
+        $next_uri = '/';
+      }
+
+      // User explicitly hit "Cancel".
+      $dialog = id(new AphrontDialogView())
+        ->setUser($viewer)
+        ->setTitle(pht('Authentication Canceled'))
+        ->appendChild(
+          pht('You canceled authentication.'))
+        ->addCancelButton($next_uri, pht('Continue'));
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
+
     if ($response) {
       return $response;
     }

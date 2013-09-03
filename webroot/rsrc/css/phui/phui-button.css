@@ -64,9 +64,9 @@ a.grey:visited {
   background-color: #f7f7f7;
   background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
   background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
-  border-color: #BBC0CC;
+  border-color: {$lightgreyborder};
   color: #4B4D51;
-  border-bottom-color: #A2A6B0;
+  border-bottom-color: {$greyborder};
   text-shadow: none;
 }
 
@@ -93,7 +93,7 @@ a.button.dropdown-open {
 }
 
 a.dropdown-open {
-  color: #777;
+  color: {$greytext};
 }
 
 a.button:hover,
@@ -149,10 +149,8 @@ button.link:hover {
   position: absolute;
   width: 240px;
   background: #fff;
-  border: 1px solid #999;
   margin-top: -1px;
   padding: 5px 0;
-
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
   border: 1px solid #d7d7d7;
   border-radius: 3px;
@@ -169,7 +167,7 @@ button.link:hover {
 }
 
 .dropdown-menu-frame span {
-  color: #999;
+  color: {$lightgreytext};
 }
 
 .dropdown-menu-frame a:hover {
@@ -261,7 +259,7 @@ a.toggle-fixed {
 }
 
 .button.big.has-icon .phui-button-subtext {
-  color: #888;
+  color: {$lightgreytext};
   font-size: 12px;
   line-height: 15px;
   font-weight: normal;

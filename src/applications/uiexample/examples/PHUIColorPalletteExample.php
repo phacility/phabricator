@@ -13,41 +13,66 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
   public function renderExample() {
 
     $colors = array(
-      'c0392b' => 'Base Red',
-      'f4dddb' => '83% Red',
-      'e67e22' => 'Base Orange',
-      'f7e2d4' => '83% Orange',
-      'f1c40f' => 'Base Yellow',
-      'fdf5d4' => '83% Yellow',
-      '139543' => 'Base Green',
-      'd7eddf' => '83% Green',
-      '2980b9' => 'Base Blue',
-      'daeaf3' => '83% Blue',
-      '3498db' => 'Sky Base',
-      'ddeef9' => '83% Sky',
-      'c6539d' => 'Base Indigo',
-      'f5e2ef' => '83% Indigo',
-      '8e44ad' => 'Base Violet',
-      'ecdff1' => '83% Violet'
+      'c0392b' => 'Base Red {$red}',
+      'f4dddb' => '83% Red {$lightred}',
+      'e67e22' => 'Base Orange {$orange}',
+      'f7e2d4' => '83% Orange {$lightorange}',
+      'f1c40f' => 'Base Yellow {$yellow}',
+      'fdf5d4' => '83% Yellow {$lightyellow}',
+      '139543' => 'Base Green {$green}',
+      'd7eddf' => '83% Green {$lightgreen}',
+      '2980b9' => 'Base Blue {$blue}',
+      'daeaf3' => '83% Blue {$lightblue}',
+      '3498db' => 'Sky Base {$sky}',
+      'ddeef9' => '83% Sky {$lightsky}',
+      'c6539d' => 'Base Indigo {$indigo}',
+      'f5e2ef' => '83% Indigo {$lightindigo}',
+      '8e44ad' => 'Base Violet {$violet}',
+      'ecdff1' => '83% Violet {$lightviolet}'
     );
 
-    $darks = array(
-      'ecf0f1',
-      'bdc3c7',
-      '95a5a6',
-      '7f8c8d',
-      '34495e',
-      '2c3e50');
+    $greys = array(
+      'C7CCD9' => 'Light Grey Border {$lightgreyborder}',
+      'A1A6B0' => 'Grey Border {$greyborder}',
+      '676A70' => 'Dark Grey Border {$darkgreyborder}',
+      '92969D' => 'Light Grey Text {$lightgreytext}',
+      '74777D' => 'Grey Text {$greytext}',
+      '4B4D51' => 'Dark Grey Text {$darkgreytext}',
+      'F7F7F7' => 'Light Grey Background {$lightgreybackground}',
+      'EBECEE' => 'Grey Background {$greybackground}',
+    );
+
+    $blues = array(
+      'BFCFDA' => 'Light Blue Border {$lightblueborder}',
+      '95A6C5' => 'Blue Border {$blueborder}',
+      '626E82' => 'Dark Blue Border {$darkblueborder}',
+      'F8F9FC' => 'Light Blue Background {$lightbluebackground}',
+      'DFE0E2' => 'Blue Background {$bluebackground}',
+      '8C98B8' => 'Light Blue Text {$lightbluetext}',
+      '6B748C' => 'Blue Text {$bluetext}',
+      '464C5C' => 'Dark Blue Text {$darkbluetext}',
+    );
 
     $d_column = array();
-    foreach ($darks as $dark) {
+    foreach ($greys as $color => $name) {
       $d_column[] = phutil_tag(
         'div',
         array(
-          'style' => 'background-color: #'.$dark.';',
+          'style' => 'background-color: #'.$color.';',
           'class' => 'pl'),
-        '#'.$dark);
+        $name.' #'.$color);
     }
+
+    $b_column = array();
+    foreach ($blues as $color => $name) {
+      $b_column[] = phutil_tag(
+        'div',
+        array(
+          'style' => 'background-color: #'.$color.';',
+          'class' => 'pl'),
+        $name.' #'.$color);
+    }
+
 
     $c_column = array();
     $url = array();
@@ -73,6 +98,11 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       ->setShadow(true)
       ->addPadding(PHUI::PADDING_LARGE);
 
+    $layout1b = id(new PHUIBoxView())
+      ->appendChild($b_column)
+      ->setShadow(true)
+      ->addPadding(PHUI::PADDING_LARGE);
+
     $layout2 = id(new PHUIBoxView())
       ->appendChild($color_url)
       ->appendChild($c_column)
@@ -80,14 +110,21 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       ->addPadding(PHUI::PADDING_LARGE);
 
     $head1 = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Darks'));
+      ->setHeader(pht('Greys'));
+
+    $head1b = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Blues'));
+
+    $head2 = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Colors'));
 
     $wrap1 = id(new PHUIBoxView())
       ->appendChild($layout1)
       ->addMargin(PHUI::MARGIN_LARGE);
 
-    $head2 = id(new PhabricatorHeaderView())
-      ->setHeader(pht('Colors'));
+    $wrap1b = id(new PHUIBoxView())
+      ->appendChild($layout1b)
+      ->addMargin(PHUI::MARGIN_LARGE);
 
     $wrap2 = id(new PHUIBoxView())
       ->appendChild($layout2)
@@ -99,6 +136,8 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
         array(
           $head1,
           $wrap1,
+          $head1b,
+          $wrap1b,
           $head2,
           $wrap2
         ));

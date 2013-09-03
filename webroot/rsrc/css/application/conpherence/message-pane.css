@@ -76,7 +76,7 @@
 
 .conpherence-message-pane .phui-form-view {
   border-width: 0;
-  background: none;
+  background-color: {$lightgreybackground};
   height: 190px;
   padding: 0;
   position: fixed;
@@ -149,12 +149,12 @@
 }
 
 .conpherence-message-pane .conpherence-edited {
-  color: #888;
+  color: {$lightgreytext};
   margin: 0;
 }
 
 .device-phone .conpherence-message-pane .conpherence-edited {
-  color: #888;
+  color: {$lightgreytext};
   margin: 0 10px;
 }
 
@@ -189,7 +189,7 @@
 }
 
 .conpherence-message-pane .aphront-form-control-submit {
-  margin-right: 8px;
+  margin: 3px 8px 0 0;
 }
 .conpherence-message-pane .remarkup-assist-bar {
   border-width: 1px 0 0;

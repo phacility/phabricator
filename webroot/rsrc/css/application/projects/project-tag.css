@@ -26,7 +26,7 @@
 .phabricator-project-tag.phabricator-project-tag-grey {
   border: 1px solid #ccc;
   background: #f7f7f7;
-  color: #888;
+  color: {$lightgreytext};
 }
 
 .phabricator-project-tag.phabricator-project-tag-grey:hover {

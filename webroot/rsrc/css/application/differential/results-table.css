@@ -67,12 +67,12 @@ table.differential-results-table {
 
 
 .differential-results-table tr.differential-results-row-details td {
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .differential-results-table tr.differential-results-row-show th {
   padding: 4px;
-  color: #888888;
+  color: {$lightgreytext};
   font-weight: bold;
   background: #dfe3ec;
 }

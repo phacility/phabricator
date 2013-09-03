@@ -15,7 +15,7 @@ final class DifferentialChangeset extends DifferentialDAO {
   protected $delLines;
 
   private $unsavedHunks = array();
-  private $hunks;
+  private $hunks = self::ATTACHABLE;
 
   const TABLE_CACHE = 'differential_changeset_parse_cache';
 
@@ -40,10 +40,7 @@ final class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function getHunks() {
-    if ($this->hunks === null) {
-      throw new Exception("Must load and attach hunks first!");
-    }
-    return $this->hunks;
+    return $this->assertAttached($this->hunks);
   }
 
   public function getDisplayFilename() {
@@ -55,7 +52,7 @@ final class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function addUnsavedHunk(DifferentialHunk $hunk) {
-    if ($this->hunks === null) {
+    if ($this->hunks === self::ATTACHABLE) {
       $this->hunks = array();
     }
     $this->hunks[] = $hunk;

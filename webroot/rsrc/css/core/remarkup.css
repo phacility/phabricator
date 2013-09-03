@@ -24,7 +24,7 @@
 .phabricator-remarkup .remarkup-code-header {
   padding: .25em 1em;
   background: #edead7;
-  color: #444444;
+  color: {$darkgreytext};
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
@@ -182,7 +182,7 @@
 
 .phabricator-remarkup-toc-header {
   font-size: 11px;
-  color: #777;
+  color: {$greytext};
   border-bottom: 1px solid #d7d7d7;
   margin-bottom: 4px;
 }
@@ -256,10 +256,10 @@
 }
 
 .remarkup-assist-textarea {
-  border-left-color: #95a6c5;
-  border-right-color: #95a6c5;
-  border-bottom-color: #95a6c5;
-  border-top-color: #bfcfda;
+  border-left-color: {$blueborder};
+  border-right-color: {$blueborder};
+  border-bottom-color: {$blueborder};
+  border-top-color: {$lightblueborder};
   border-radius: 0;
 
   /* Prevent Safari and Chrome users from dragging the textarea any wider,
@@ -277,11 +277,11 @@
 
   border-width: 1px 1px 0;
   border-style: solid;
-  border-top-color: #95a6c5;
-  border-left-color: #95a6c5;
-  border-right-color: #95a6c5;
+  border-top-color: {$blueborder};
+  border-left-color: {$blueborder};
+  border-right-color: {$blueborder};
 
-  background: #F8F9FC;
+  background: {$lightbluebackground};
   overflow: hidden;
 }
 
@@ -372,12 +372,12 @@
    so here are custom rules to override remarkup defaults. */
 
 div.phabricator-remarkup-dark blockquote {
-  color: #999;
+  color: {$lightgreytext};
 }
 
 div.phabricator-remarkup-dark tt {
   color: #EEE;
-  background: #444;
+  background: {$darkgreytext};
 }
 
 div.phabricator-remarkup-dark .remarkup-note,

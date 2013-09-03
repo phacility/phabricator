@@ -12,7 +12,7 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   protected $name;
   protected $isDisabled = 0;
 
-  private $file;
+  private $file = self::ATTACHABLE;
 
   public function attachFile(PhabricatorFile $file) {
     $this->file = $file;
@@ -20,11 +20,7 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   }
 
   public function getFile() {
-    if (!$this->file) {
-      throw new Exception("Attach a file with attachFile() first!");
-    }
-
-    return $this->file;
+    return $this->assertAttached($this->file);
   }
 
   public function getConfiguration() {

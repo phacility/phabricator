@@ -32,6 +32,6 @@
 }
 
 .phabricator-search-no-results {
-  color: #888888;
+  color: {$lightgreytext};
   font-size: 18px;
 }

@@ -46,5 +46,5 @@ table.jx-typeahead input {
 }
 
 input.jx-typeahead-placeholder {
-  color: #888888;
+  color: {$lightgreytext};
 }

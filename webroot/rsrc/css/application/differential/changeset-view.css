@@ -46,7 +46,7 @@
   max-width:          4%;
   vertical-align:     top;
   background:         #eeeeee;
-  color:              #888888;
+  color:              {$lightgreytext};
   cursor:             pointer;
   border-style:       solid;
   border-width:       0px 1px;
@@ -249,7 +249,7 @@ td.cov-X {
 
 .differential-inline-comment-unsaved-draft {
   background: #f1f1f1;
-  border: 1px dashed #666666;
+  border: 1px dashed {$greytext};
 }
 
 .differential-inline-comment-head {
@@ -278,7 +278,7 @@ td.cov-X {
 .differential-inline-comment-line {
   font-weight:  normal;
   font-style:   italic;
-  color:        #666666;
+  color:        {$greytext};
   float:        right;
   white-space:  nowrap;
 }
@@ -312,10 +312,10 @@ td.cov-X {
   text-align: right;
   width: 10em;
   font-weight: bold;
-  color: #666666;
+  color: {$greytext};
   white-space: nowrap;
   padding: 4px 8px;
-  border-right: 1px solid #666666;
+  border-right: 1px solid {$greytext};
 }
 
 .differential-property-table td {
@@ -324,14 +324,14 @@ td.cov-X {
 }
 
 .differential-property-table td em {
-  color: #888888;
+  color: {$lightgreytext};
 }
 
 .differential-property-table tr.property-table-header th,
 .differential-property-table tr.property-table-header td {
   text-align: center;
   font-weight: bold;
-  border-bottom: 1px solid #666666;
+  border-bottom: 1px solid {$greytext};
 }
 
 .differential-property-table td.oval {
@@ -393,7 +393,7 @@ td.cov-X {
 .inline-editor-active .differential-inline-comment-links a,
 .inline-editor-active .differential-inline-comment-links a:hover,
 .inline-editor-active .differential-inline-comment-links a:active {
-  color: #888888;
+  color: {$lightgreytext};
   cursor: normal;
   text-decoration: none;
 }

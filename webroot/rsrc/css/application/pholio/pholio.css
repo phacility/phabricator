@@ -124,7 +124,7 @@
 }
 
 .pholio-image-description {
-  color: #777777;
+  color: {$greytext};
 }
 
 .pholio-image-title {
