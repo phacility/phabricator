@@ -360,4 +360,80 @@ abstract class PhabricatorAuthProvider {
     return false;
   }
 
+
+  /**
+   * Render a standard login/register button element.
+   *
+   * The `$attributes` parameter takes these keys:
+   *
+   *   - `uri`: URI the button should take the user to when clicked.
+   *   - `method`: Optional HTTP method the button should use, defaults to GET.
+   *
+   * @param   AphrontRequest  HTTP request.
+   * @param   string          Request mode string.
+   * @param   map             Additional parameters, see above.
+   * @return  wild            Login button.
+   */
+  protected function renderStandardLoginButton(
+    AphrontRequest $request,
+    $mode,
+    array $attributes = array()) {
+
+    PhutilTypeSpec::checkMap(
+      $attributes,
+      array(
+        'method' => 'optional string',
+        'uri' => 'string',
+      ));
+
+    $viewer = $request->getUser();
+    $adapter = $this->getAdapter();
+
+    if ($mode == 'link') {
+      $button_text = pht('Link External Account');
+    } else if ($mode == 'refresh') {
+      $button_text = pht('Refresh Account Link');
+    } else if ($this->shouldAllowRegistration()) {
+      $button_text = pht('Login or Register');
+    } else {
+      $button_text = pht('Login');
+    }
+
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+      ->setSpriteIcon($this->getLoginIcon());
+
+    $button = id(new PHUIButtonView())
+        ->setSize(PHUIButtonView::BIG)
+        ->setColor(PHUIButtonView::GREY)
+        ->setIcon($icon)
+        ->setText($button_text)
+        ->setSubtext($this->getProviderName());
+
+    $uri = $attributes['uri'];
+    $uri = new PhutilURI($uri);
+    $params = $uri->getQueryParams();
+    $uri->setQueryParams(array());
+
+    $content = array($button);
+
+    foreach ($params as $key => $value) {
+      $content[] = phutil_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => $key,
+          'value' => $value,
+        ));
+    }
+
+    return phabricator_form(
+      $viewer,
+      array(
+        'method' => idx($attributes, 'method', 'GET'),
+        'action' => (string)$uri,
+      ),
+      $content);
+  }
+
 }
