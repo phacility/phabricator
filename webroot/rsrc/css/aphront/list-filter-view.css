@@ -3,7 +3,8 @@
  */
 
 .aphront-list-filter-wrap {
-  border: 1px solid {$lightgreyborder};
+  border-left: 1px solid {$lightgreyborder};
+  border-right: 1px solid {$lightgreyborder};
   border-bottom: 1px solid {$greyborder};
   margin: 0 20px;
 }

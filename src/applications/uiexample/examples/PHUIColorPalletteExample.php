@@ -32,8 +32,8 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
     );
 
     $greys = array(
-      'BBC0CC' => 'Light Grey Border {$lightgreyborder}',
-      'A2A6B0' => 'Grey Border {$greyborder}',
+      'C7CCD9' => 'Light Grey Border {$lightgreyborder}',
+      'A1A6B0' => 'Grey Border {$greyborder}',
       '676A70' => 'Dark Grey Border {$darkgreyborder}',
       '92969D' => 'Light Grey Text {$lightgreytext}',
       '74777D' => 'Grey Text {$greytext}',
@@ -50,7 +50,7 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       'DFE0E2' => 'Blue Background {$bluebackground}',
       '8C98B8' => 'Light Blue Text {$lightbluetext}',
       '6B748C' => 'Blue Text {$bluetext}',
-      '585F72' => 'Dark Blue Text {$darkbluetext}',
+      '464C5C' => 'Dark Blue Text {$darkbluetext}',
     );
 
     $d_column = array();

@@ -15,9 +15,9 @@
 }
 
 .phabricator-header-view {
-  padding: 1.25em 2%;
+  padding: 16px;
   font-size: 15px;
-  color: #111111;
+  color: {$darkbluetext};
 }
 
 .device-desktop .phabricator-header-view {
