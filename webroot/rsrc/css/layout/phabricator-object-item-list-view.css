@@ -293,7 +293,7 @@
 }
 
 .device-desktop .phabricator-object-item-icon {
-  padding-right: 22px;
+  padding-right: 18px;
 }
 
 .device-desktop .phabricator-object-item-icon-none {
@@ -302,7 +302,7 @@
 
 .phabricator-object-item-icon-image {
   position: absolute;
-  right: 2px;
+  right: 0;
   top: 2px;
   width: 14px;
   height: 14px;
