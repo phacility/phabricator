@@ -15,7 +15,7 @@ final class PhabricatorRepositoryCommit
   protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
   protected $summary = '';
 
-  private $commitData;
+  private $commitData = self::ATTACHABLE;
   private $audits;
   private $isUnparsed;
   private $repository = self::ATTACHABLE;
@@ -65,10 +65,7 @@ final class PhabricatorRepositoryCommit
   }
 
   public function getCommitData() {
-    if (!$this->commitData) {
-      throw new Exception("Attach commit data with attachCommitData() first!");
-    }
-    return $this->commitData;
+    return $this->assertAttached($this->commitData);
   }
 
   public function attachAudits(array $audits) {

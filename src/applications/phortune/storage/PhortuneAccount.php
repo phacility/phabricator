@@ -12,7 +12,7 @@ final class PhortuneAccount extends PhortuneDAO
   protected $name;
   protected $balanceInCents = 0;
 
-  private $memberPHIDs;
+  private $memberPHIDs = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -26,10 +26,7 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getMemberPHIDs() {
-    if ($this->memberPHIDs === null) {
-      throw new Exception("Call attachMemberPHIDs() before getMemberPHIDs()!");
-    }
-    return $this->memberPHIDs;
+    return $this->assertAttached($this->memberPHIDs);
   }
 
   public function attachMemberPHIDs(array $phids) {

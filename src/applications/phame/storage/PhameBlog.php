@@ -21,8 +21,8 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  private $bloggerPHIDs;
-  private $bloggers;
+  private $bloggerPHIDs = self::ATTACHABLE;
+  private $bloggers = self::ATTACHABLE;
 
   static private $requestBlog;
 
@@ -110,13 +110,7 @@ final class PhameBlog extends PhameDAO
   }
 
   public function getBloggerPHIDs() {
-    if ($this->bloggerPHIDs === null) {
-      throw new Exception(
-        'You must loadBloggerPHIDs before you can getBloggerPHIDs!'
-      );
-    }
-
-    return $this->bloggerPHIDs;
+    return $this->assertAttached($this->bloggerPHIDs);
   }
 
   public function loadBloggers() {
@@ -149,13 +143,7 @@ final class PhameBlog extends PhameDAO
   }
 
   public function getBloggers() {
-    if ($this->bloggers === null) {
-      throw new Exception(
-        'You must loadBloggers or attachBloggers before you can getBloggers!'
-      );
-    }
-
-    return $this->bloggers;
+    return $this->assertAttached($this->bloggers);
   }
 
   public function getSkin() {

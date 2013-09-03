@@ -17,13 +17,10 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
   protected $profileImagePHID;
   protected $properties = array();
 
-  private $profileImageFile;
+  private $profileImageFile = self::ATTACHABLE;
 
   public function getProfileImageFile() {
-    if ($this->profileImageFile === null) {
-      throw new Exception("Call attachProfileImageFile() first!");
-    }
-    return $this->profileImageFile;
+    return $this->assertAttached($this->profileImageFile);
   }
 
   public function attachProfileImageFile(PhabricatorFile $file) {

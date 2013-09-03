@@ -34,7 +34,7 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $ownerOrdering;
 
-  private $auxiliaryAttributes;
+  private $auxiliaryAttributes = self::ATTACHABLE;
   private $auxiliaryDirty = array();
 
   public function getConfiguration() {
@@ -95,16 +95,13 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function getAuxiliaryAttribute($key, $default = null) {
-    if ($this->auxiliaryAttributes === null) {
-      throw new Exception("Attach auxiliary attributes before getting them!");
-    }
+    $this->assertAttached($this->auxiliaryAttributes);
     return idx($this->auxiliaryAttributes, $key, $default);
   }
 
   public function setAuxiliaryAttribute($key, $val) {
-    if ($this->auxiliaryAttributes === null) {
-      throw new Exception("Attach auxiliary attributes before setting them!");
-    }
+    $this->assertAttached($this->auxiliaryAttributes);
+
     $this->auxiliaryAttributes[$key] = $val;
     $this->auxiliaryDirty[$key] = true;
     return $this;

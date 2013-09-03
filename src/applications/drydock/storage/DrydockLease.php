@@ -10,7 +10,7 @@ final class DrydockLease extends DrydockDAO {
   protected $status = DrydockLeaseStatus::STATUS_PENDING;
   protected $taskID;
 
-  private $resource;
+  private $resource = self::ATTACHABLE;
   private $releaseOnDestruction;
 
   /**
@@ -64,10 +64,7 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function getResource() {
-    if ($this->resource === null) {
-      throw new Exception("Resource is not yet loaded.");
-    }
-    return $this->resource;
+    return $this->assertAttached($this->resource);
   }
 
   public function attachResource(DrydockResource $resource) {

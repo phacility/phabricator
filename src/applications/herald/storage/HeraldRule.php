@@ -15,7 +15,7 @@ final class HeraldRule extends HeraldDAO
 
   protected $configVersion = 9;
 
-  private $ruleApplied = array(); // phids for which this rule has been applied
+  private $ruleApplied = self::ATTACHABLE; // phids for which this rule has been applied
   private $validAuthor = self::ATTACHABLE;
   private $conditions;
   private $actions;
@@ -31,13 +31,13 @@ final class HeraldRule extends HeraldDAO
   }
 
   public function getRuleApplied($phid) {
-    if (idx($this->ruleApplied, $phid) === null) {
-      throw new Exception("Call setRuleApplied() before getRuleApplied()!");
-    }
-    return $this->ruleApplied[$phid];
+    return $this->assertAttachedKey($this->ruleApplied, $phid);
   }
 
   public function setRuleApplied($phid, $applied) {
+    if ($this->ruleApplied === self::ATTACHABLE) {
+      $this->ruleApplied = array();
+    }
     $this->ruleApplied[$phid] = $applied;
     return $this;
   }

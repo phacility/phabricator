@@ -15,8 +15,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $joinPolicy;
 
   private $subprojectsNeedUpdate;
-  private $memberPHIDs;
-  private $sparseMembers = array();
+  private $memberPHIDs = self::ATTACHABLE;
+  private $sparseMembers = self::ATTACHABLE;
 
   public function getCapabilities() {
     return array(
@@ -61,14 +61,13 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function isUserMember($user_phid) {
-    if (!isset($this->sparseMembers[$user_phid])) {
-      throw new Exception(
-        "Call setIsUserMember() before isUserMember()!");
-    }
-    return $this->sparseMembers[$user_phid];
+    return $this->assertAttachedKey($this->sparseMembers, $user_phid);
   }
 
   public function setIsUserMember($user_phid, $is_member) {
+    if ($this->sparseMembers === self::ATTACHABLE) {
+      $this->sparseMembers = array();
+    }
     $this->sparseMembers[$user_phid] = $is_member;
     return $this;
   }
@@ -100,10 +99,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function getMemberPHIDs() {
-    if ($this->memberPHIDs === null) {
-      throw new Exception("Call attachMemberPHIDs() first!");
-    }
-    return $this->memberPHIDs;
+    return $this->assertAttached($this->memberPHIDs);
   }
 
   public function loadMemberPHIDs() {

@@ -30,7 +30,7 @@ final class DifferentialDiff
   protected $description;
 
   private $unsavedChangesets = array();
-  private $changesets;
+  private $changesets = self::ATTACHABLE;
 
   public function addUnsavedChangeset(DifferentialChangeset $changeset) {
     if ($this->changesets === null) {
@@ -48,10 +48,7 @@ final class DifferentialDiff
   }
 
   public function getChangesets() {
-    if ($this->changesets === null) {
-      throw new Exception("Must load and attach changesets first!");
-    }
-    return $this->changesets;
+    return $this->assertAttached($this->changesets);
   }
 
   public function loadChangesets() {

@@ -7,7 +7,7 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
   protected $objectPHID;
   protected $tokenPHID;
 
-  private $object;
+  private $object = self::ATTACHABLE;
 
   public function attachObject(PhabricatorTokenReceiverInterface $object) {
     $this->object = $object;
@@ -15,10 +15,7 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
   }
 
   public function getObject() {
-    if ($this->object === null) {
-      throw new Exception("Call attachObject() before getObject()!");
-    }
-    return $this->object;
+    return $this->assertAttached($this->object);
   }
 
   public function getCapabilities() {

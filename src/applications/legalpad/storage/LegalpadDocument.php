@@ -20,8 +20,8 @@ final class LegalpadDocument extends LegalpadDAO
   protected $editPolicy;
   protected $mailKey;
 
-  private $documentBody;
-  private $contributors;
+  private $documentBody = self::ATTACHABLE;
+  private $contributors = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -38,12 +38,7 @@ final class LegalpadDocument extends LegalpadDAO
   }
 
   public function getDocumentBody() {
-    if ($this->documentBody === null) {
-      throw new Exception(
-        'You must attachDocumentBody before you can getDocumentBody.');
-    }
-
-    return $this->documentBody;
+    return $this->assertAttached($this->documentBody);
   }
 
   public function attachDocumentBody(LegalpadDocumentBody $body) {
@@ -52,12 +47,7 @@ final class LegalpadDocument extends LegalpadDAO
   }
 
   public function getContributors() {
-    if ($this->contributors === null) {
-      throw new Exception(
-        'You must attachContributors before you can getContributors.');
-    }
-
-    return $this->contributors;
+    return $this->assertAttached($this->contributors);
   }
 
   public function attachContributors(array $contributors) {

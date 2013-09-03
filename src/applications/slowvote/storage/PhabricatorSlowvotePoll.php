@@ -24,9 +24,9 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   protected $method;
   protected $viewPolicy;
 
-  private $options;
-  private $choices;
-  private $viewerChoices = array();
+  private $options = self::ATTACHABLE;
+  private $choices = self::ATTACHABLE;
+  private $viewerChoices = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -40,10 +40,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   }
 
   public function getOptions() {
-    if ($this->options === null) {
-      throw new Exception("Call attachOptions() before getOptions()!");
-    }
-    return $this->options;
+    return $this->assertAttached($this->options);
   }
 
   public function attachOptions(array $options) {
@@ -53,10 +50,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   }
 
   public function getChoices() {
-    if ($this->choices === null) {
-      throw new Exception("Call attachChoices() before getChoices()!");
-    }
-    return $this->choices;
+    return $this->assertAttached($this->choices);
   }
 
   public function attachChoices(array $choices) {
@@ -66,14 +60,13 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   }
 
   public function getViewerChoices(PhabricatorUser $viewer) {
-    if (idx($this->viewerChoices, $viewer->getPHID()) === null) {
-      throw new Exception(
-        "Call attachViewerChoices() before getViewerChoices()!");
-    }
-    return idx($this->viewerChoices, $viewer->getPHID());
+    return $this->assertAttachedKey($this->viewerChoices, $viewer->getPHID());
   }
 
   public function attachViewerChoices(PhabricatorUser $viewer, array $choices) {
+    if ($this->viewerChoices === self::ATTACHABLE) {
+      $this->viewerChoices = array();
+    }
     assert_instances_of($choices, 'PhabricatorSlowvoteChoice');
     $this->viewerChoices[$viewer->getPHID()] = $choices;
     return $this;
