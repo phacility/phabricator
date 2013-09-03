@@ -103,6 +103,13 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
       return array($account, $response);
     }
 
+    $denied = $request->getStr('denied');
+    if (strlen($denied)) {
+      // Twitter indicates that the user cancelled the login attempt by
+      // returning "denied" as a parameter.
+      throw new PhutilAuthUserAbortedException();
+    }
+
     // NOTE: You can get here via GET, this should probably be a bit more
     // user friendly.
 
