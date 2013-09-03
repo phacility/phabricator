@@ -26,9 +26,10 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
   protected function configureAdapter(PhutilAuthAdapterOAuth1 $adapter) {
     $config = $this->getProviderConfig();
     $adapter->setConsumerKey($config->getProperty(self::PROPERTY_CONSUMER_KEY));
-    $adapter->setConsumerSecret(
-      new PhutilOpaqueEnvelope(
-        $config->getProperty(self::PROPERTY_CONSUMER_SECRET)));
+    $secret = $config->getProperty(self::PROPERTY_CONSUMER_SECRET);
+    if (strlen($secret)) {
+      $adapter->setConsumerSecret(new PhutilOpaqueEnvelope($secret));
+    }
     $adapter->setCallbackURI($this->getLoginURI());
     return $adapter;
   }

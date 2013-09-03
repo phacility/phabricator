@@ -347,4 +347,17 @@ abstract class PhabricatorAuthProvider {
         $account_view));
   }
 
+
+  /**
+   * Return true to use a two-step configuration (setup, configure) instead of
+   * the default single-step configuration. In practice, this means that
+   * creating a new provider instance will redirect back to the edit page
+   * instead of the provider list.
+   *
+   * @return bool True if this provider uses two-step configuration.
+   */
+  public function hasSetupStep() {
+    return false;
+  }
+
 }
