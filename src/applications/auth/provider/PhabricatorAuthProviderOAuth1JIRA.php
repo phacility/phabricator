@@ -3,6 +3,10 @@
 final class PhabricatorAuthProviderOAuth1JIRA
   extends PhabricatorAuthProviderOAuth1 {
 
+  public function getJIRABaseURI() {
+    return $this->getProviderConfig()->getProperty(self::PROPERTY_JIRA_URI);
+  }
+
   public function getProviderName() {
     return pht('JIRA');
   }
@@ -243,6 +247,31 @@ final class PhabricatorAuthProviderOAuth1JIRA
    */
   public function hasSetupStep() {
     return true;
+  }
+
+  public static function getJIRAProvider() {
+    $providers = self::getAllEnabledProviders();
+
+    foreach ($providers as $provider) {
+      if ($provider instanceof PhabricatorAuthProviderOAuth1JIRA) {
+        return $provider;
+      }
+    }
+
+    return null;
+  }
+
+  public function newJIRAFuture(
+    PhabricatorExternalAccount $account,
+    $path,
+    $method,
+    $params = array()) {
+
+    $adapter = clone $this->getAdapter();
+    $adapter->setToken($account->getProperty('oauth1.token'));
+    $adapter->setTokenSecret($account->getProperty('oauth1.token.secret'));
+
+    return $adapter->newJIRAFuture($path, $method, $params);
   }
 
 }

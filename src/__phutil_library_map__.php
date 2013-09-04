@@ -545,6 +545,7 @@ phutil_register_library_map(array(
     'DivinerWorkflow' => 'applications/diviner/workflow/DivinerWorkflow.php',
     'DoorkeeperBridge' => 'applications/doorkeeper/bridge/DoorkeeperBridge.php',
     'DoorkeeperBridgeAsana' => 'applications/doorkeeper/bridge/DoorkeeperBridgeAsana.php',
+    'DoorkeeperBridgeJIRA' => 'applications/doorkeeper/bridge/DoorkeeperBridgeJIRA.php',
     'DoorkeeperDAO' => 'applications/doorkeeper/storage/DoorkeeperDAO.php',
     'DoorkeeperExternalObject' => 'applications/doorkeeper/storage/DoorkeeperExternalObject.php',
     'DoorkeeperExternalObjectQuery' => 'applications/doorkeeper/query/DoorkeeperExternalObjectQuery.php',
@@ -552,7 +553,9 @@ phutil_register_library_map(array(
     'DoorkeeperFeedWorkerAsana' => 'applications/doorkeeper/worker/DoorkeeperFeedWorkerAsana.php',
     'DoorkeeperImportEngine' => 'applications/doorkeeper/engine/DoorkeeperImportEngine.php',
     'DoorkeeperObjectRef' => 'applications/doorkeeper/engine/DoorkeeperObjectRef.php',
+    'DoorkeeperRemarkupRule' => 'applications/doorkeeper/remarkup/DoorkeeperRemarkupRule.php',
     'DoorkeeperRemarkupRuleAsana' => 'applications/doorkeeper/remarkup/DoorkeeperRemarkupRuleAsana.php',
+    'DoorkeeperRemarkupRuleJIRA' => 'applications/doorkeeper/remarkup/DoorkeeperRemarkupRuleJIRA.php',
     'DoorkeeperTagsController' => 'applications/doorkeeper/controller/DoorkeeperTagsController.php',
     'DrydockAllocatorWorker' => 'applications/drydock/worker/DrydockAllocatorWorker.php',
     'DrydockApacheWebrootInterface' => 'applications/drydock/interface/webroot/DrydockApacheWebrootInterface.php',
@@ -2026,6 +2029,7 @@ phutil_register_library_map(array(
   'function' =>
   array(
     '_phabricator_date_format' => 'view/viewutils.php',
+    '_phabricator_time_format' => 'view/viewutils.php',
     'celerity_generate_unique_node_id' => 'infrastructure/celerity/api.php',
     'celerity_get_resource_uri' => 'infrastructure/celerity/api.php',
     'celerity_register_resource_map' => 'infrastructure/celerity/map.php',
@@ -2575,6 +2579,7 @@ phutil_register_library_map(array(
     'DivinerWorkflow' => 'PhutilArgumentWorkflow',
     'DoorkeeperBridge' => 'Phobject',
     'DoorkeeperBridgeAsana' => 'DoorkeeperBridge',
+    'DoorkeeperBridgeJIRA' => 'DoorkeeperBridge',
     'DoorkeeperDAO' => 'PhabricatorLiskDAO',
     'DoorkeeperExternalObject' =>
     array(
@@ -2585,7 +2590,9 @@ phutil_register_library_map(array(
     'DoorkeeperFeedWorkerAsana' => 'FeedPushWorker',
     'DoorkeeperImportEngine' => 'Phobject',
     'DoorkeeperObjectRef' => 'Phobject',
-    'DoorkeeperRemarkupRuleAsana' => 'PhutilRemarkupRule',
+    'DoorkeeperRemarkupRule' => 'PhutilRemarkupRule',
+    'DoorkeeperRemarkupRuleAsana' => 'DoorkeeperRemarkupRule',
+    'DoorkeeperRemarkupRuleJIRA' => 'DoorkeeperRemarkupRule',
     'DoorkeeperTagsController' => 'PhabricatorController',
     'DrydockAllocatorWorker' => 'PhabricatorWorker',
     'DrydockApacheWebrootInterface' => 'DrydockWebrootInterface',
