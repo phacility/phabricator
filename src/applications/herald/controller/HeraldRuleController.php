@@ -35,7 +35,7 @@ final class HeraldRuleController extends HeraldController {
     } else {
       $rule = new HeraldRule();
       $rule->setAuthorPHID($user->getPHID());
-      $rule->setMustMatchAll(true);
+      $rule->setMustMatchAll(1);
 
       $content_type = $request->getStr('content_type');
       $rule->setContentType($content_type);
@@ -206,7 +206,8 @@ final class HeraldRuleController extends HeraldController {
 
   private function saveRule(HeraldAdapter $adapter, $rule, $request) {
     $rule->setName($request->getStr('name'));
-    $rule->setMustMatchAll(($request->getStr('must_match') == 'all'));
+    $match_all = ($request->getStr('must_match') == 'all');
+    $rule->setMustMatchAll((int)$match_all);
 
     $repetition_policy_param = $request->getStr('repetition_policy');
     $rule->setRepetitionPolicy(
