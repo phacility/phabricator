@@ -3,19 +3,25 @@
 final class DivinerParameterTableView extends AphrontTagView {
 
   private $parameters;
+  private $header;
 
   public function setParameters(array $parameters) {
     $this->parameters = $parameters;
     return $this;
   }
 
+  public function setHeader($text) {
+    $this->header = $text;
+    return $this;
+  }
+
   public function getTagName() {
-    return 'table';
+    return 'div';
   }
 
   public function getTagAttributes() {
     return array(
-      'class' => 'diviner-parameter-table-view',
+      'class' => 'diviner-table-view',
     );
   }
 
@@ -58,7 +64,20 @@ final class DivinerParameterTableView extends AphrontTagView {
       $rows[] = phutil_tag('tr', array(), $cells);
     }
 
-    return $rows;
+    $table = phutil_tag(
+      'table',
+      array(
+        'class' => 'diviner-parameter-table-view'),
+      $rows);
+
+    $header = phutil_tag(
+      'span',
+      array(
+        'class' => 'diviner-table-header'
+      ),
+      $this->header);
+
+    return array($header, $table);
   }
 
 }

@@ -3,19 +3,25 @@
 final class DivinerReturnTableView extends AphrontTagView {
 
   private $return;
+  private $header;
 
   public function setReturn(array $return) {
     $this->return = $return;
     return $this;
   }
 
+  public function setHeader($text) {
+    $this->header = $text;
+    return $this;
+  }
+
   public function getTagName() {
-    return 'table';
+    return 'div';
   }
 
   public function getTagAttributes() {
     return array(
-      'class' => 'diviner-return-table-view',
+      'class' => 'diviner-table-view',
     );
   }
 
@@ -47,7 +53,25 @@ final class DivinerReturnTableView extends AphrontTagView {
       ),
       $docs);
 
-    return phutil_tag('tr', array(), $cells);
+    $rows = phutil_tag(
+      'tr',
+      array(),
+      $cells);
+
+    $table = phutil_tag(
+      'table',
+      array(
+        'class' => 'diviner-return-table-view'),
+      $rows);
+
+    $header = phutil_tag(
+      'span',
+      array(
+        'class' => 'diviner-table-header'
+      ),
+      $this->header);
+
+    return array($header, $table);
   }
 
 }

@@ -490,10 +490,9 @@ final class DivinerAtomController extends DivinerController {
       }
     }
 
-    if ($parameters !== null) {
-      $out[] = id(new PhabricatorHeaderView())
-        ->setHeader(pht('Parameters'));
+    if (nonempty($parameters)) {
       $out[] = id(new DivinerParameterTableView())
+        ->setHeader(pht('Parameters'))
         ->setParameters($parameters);
     }
 
@@ -509,10 +508,9 @@ final class DivinerAtomController extends DivinerController {
       }
     }
 
-    if ($return !== null) {
-      $out[] = id(new PhabricatorHeaderView())
-        ->setHeader(pht('Return'));
+    if (nonempty($return)) {
       $out[] = id(new DivinerReturnTableView())
+        ->setHeader(pht('Return'))
         ->setReturn($collected_return);
     }
 

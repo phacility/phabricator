@@ -50,6 +50,10 @@
   border-bottom: 1px solid #BFCFDA;
 }
 
+.device-phone .phui-document-bookname {
+  padding: 8px;
+}
+
 .phui-document-bookname .bookname {
   float: left;
 }
@@ -70,7 +74,7 @@
 }
 
 .phui-document-content .phabricator-property-list-container {
-  border-color: #BFCFDA;
+  border-color: #dde8ef;
 }
 
 .phui-document-content .phabricator-property-list-view {

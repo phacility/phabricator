@@ -20,6 +20,10 @@
   color: {$darkbluetext};
 }
 
+body.device-phone .phabricator-header-view {
+  padding: 12px 8px;
+}
+
 .device-desktop .phabricator-header-view {
   width: 66%;
 }
@@ -44,7 +48,7 @@
 }
 
 .phabricator-header-subheader {
-  color: {$darkgreytext};
+  color: {$lightbluetext};
   font-weight: normal;
   font-size: 13px;
   margin-top: 4px;

@@ -34,7 +34,7 @@
 }
 
 .phabricator-property-list-key {
-  color: {$darkbluetext};
+  color: {$bluetext};
   font-weight: bold;
   overflow: hidden;
   white-space: nowrap;
@@ -50,19 +50,20 @@
 }
 
 .device .phabricator-property-list-key {
-  padding-left: 16px;
+  padding-left: 8px;
 }
 
 .phabricator-property-list-value {
   color: {$darkgreytext};
   overflow: hidden;
+  line-height: 17px;
 }
 
 .device-desktop .phabricator-property-list-value {
   width: 50%;
   margin-left: 1%;
   float: left;
-  margin-bottom: .5em;
+  margin-bottom: 4px;
 }
 
 .device .phabricator-property-list-value {
