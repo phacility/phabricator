@@ -145,12 +145,14 @@ final class DifferentialJIRAIssuesFieldSpecification
     $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
 
     $refs = array();
-    foreach ($this->value as $jira_key) {
-      $refs[] = id(new DoorkeeperObjectRef())
-        ->setApplicationType(DoorkeeperBridgeJIRA::APPTYPE_JIRA)
-        ->setApplicationDomain($provider->getProviderDomain())
-        ->setObjectType(DoorkeeperBridgeJIRA::OBJTYPE_ISSUE)
-        ->setObjectID($jira_key);
+    if ($this->value) {
+      foreach ($this->value as $jira_key) {
+        $refs[] = id(new DoorkeeperObjectRef())
+          ->setApplicationType(DoorkeeperBridgeJIRA::APPTYPE_JIRA)
+          ->setApplicationDomain($provider->getProviderDomain())
+          ->setObjectType(DoorkeeperBridgeJIRA::OBJTYPE_ISSUE)
+          ->setObjectID($jira_key);
+      }
     }
 
     return $refs;
