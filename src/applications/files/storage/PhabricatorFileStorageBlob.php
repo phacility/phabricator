@@ -3,7 +3,7 @@
 /**
  * Simple blob store DAO for @{class:PhabricatorMySQLFileStorageEngine}.
  *
- * @group filestorage
+ * @group file
  */
 final class PhabricatorFileStorageBlob extends PhabricatorFileDAO {
   // max_allowed_packet defaults to 1 MiB, escaping can make the data twice

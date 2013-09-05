@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorFileSearchEngine
   extends PhabricatorApplicationSearchEngine {
 

@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorApplicationFiles extends PhabricatorApplication {
 
   public function getBaseURI() {
@@ -48,6 +51,7 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
         '(query/(?P<key>[^/]+)/)?' => 'PhabricatorFileListController',
         'upload/' => 'PhabricatorFileUploadController',
         'dropupload/' => 'PhabricatorFileDropUploadController',
+        'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorFileCommentController',
         'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFileDeleteController',
         'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
         'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/.*'

@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorFilesConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
@@ -158,7 +161,12 @@ final class PhabricatorFilesConfigOptions
         'metamta.files.public-create-email',
         'string',
         null)
-       ->setDescription(pht('Allow uploaded files via email.')),
+        ->setDescription(pht('Allow uploaded files via email.')),
+     $this->newOption(
+        'metamta.files.subject-prefix',
+        'string',
+        '[File]')
+        ->setDescription(pht('Subject prefix for paste email.')),
      $this->newOption('files.enable-imagemagick', 'bool', false)
        ->setBoolOptions(
          array(
