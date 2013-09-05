@@ -8,22 +8,31 @@ final class DarkConsoleController extends PhabricatorController {
   protected $op;
   protected $data;
 
+  public function shouldRequireLogin() {
+    return !PhabricatorEnv::getEnvConfig('darkconsole.always-on');
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+    $response = id(new AphrontAjaxResponse())->setDisableConsole(true);
+
+    if (!$user->isLoggedIn()) {
+      return $response;
+    }
 
     $visible = $request->getStr('visible');
     if (strlen($visible)) {
       $user->setConsoleVisible((int)$visible);
       $user->save();
-      return id(new AphrontAjaxResponse())->setDisableConsole(true);
+      return $response;
     }
 
     $tab = $request->getStr('tab');
     if (strlen($tab)) {
       $user->setConsoleTab($tab);
       $user->save();
-      return id(new AphrontAjaxResponse())->setDisableConsole(true);
+      return $response;
     }
 
     return new Aphront404Response();
