@@ -56,3 +56,20 @@
   width: 80%;
   background-color: #fff;
 }
+
+.diviner-document-section {
+  padding: 0 0 16px 0;
+}
+
+.device-phone .diviner-document-section {
+  padding: 0 8px 16px 0;
+}
+
+.diviner-document-section em {
+  color: {$lightgreytext};
+  text-decoration: italic;
+}
+
+.diviner-method-implementation-header {
+  color: {$lightgreytext};
+}

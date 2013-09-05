@@ -10,6 +10,25 @@
   overflow: hidden;
 }
 
+body .phabricator-header-shell.phabricator-header-no-backgound {
+  background-color: transparent;
+  border: none;
+}
+
+body .phabricator-header-shell.phabricator-bleed-header {
+  background-color: {$lightgreybackground};
+  border-top: 1px solid {$thinblueborder};
+  border-bottom: none;
+  width: auto;
+  margin-bottom: 16px;
+}
+
+body .phabricator-header-shell.phabricator-bleed-header
+  .phabricator-header-view {
+  padding: 8px 24px 8px 16px;
+  font-size: 18px;
+}
+
 .phabricator-header-shell + .phabricator-form-view {
   border-top-width: 0;
 }
