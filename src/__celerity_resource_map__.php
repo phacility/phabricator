@@ -3650,24 +3650,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/uiexample/ReactorSendPropertiesExample.js',
   ),
-  'phabricator-workboard-view-css' =>
-  array(
-    'uri' => '/res/f598d215/rsrc/css/layout/phabricator-workboard-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/layout/phabricator-workboard-view.css',
-  ),
-  'phabricator-workpanel-view-css' =>
-  array(
-    'uri' => '/res/d0cdb62e/rsrc/css/layout/phabricator-workpanel-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/layout/phabricator-workpanel-view.css',
-  ),
   'phabricator-zindex-css' =>
   array(
     'uri' => '/res/b443d508/rsrc/css/core/z-index.css',
@@ -3870,6 +3852,24 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/phui/phui-text.css',
+  ),
+  'phui-workboard-view-css' =>
+  array(
+    'uri' => '/res/628679e5/rsrc/css/phui/phui-workboard-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-workboard-view.css',
+  ),
+  'phui-workpanel-view-css' =>
+  array(
+    'uri' => '/res/a81825b2/rsrc/css/phui/phui-workpanel-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/phui/phui-workpanel-view.css',
   ),
   'ponder-comment-table-css' =>
   array(

@@ -1,12 +1,12 @@
 <?php
 
-final class PhabricatorWorkboardView extends AphrontView {
+final class PHUIWorkboardView extends AphrontView {
 
   private $panels = array();
   private $fluidLayout = false;
   private $actions = array();
 
-  public function addPanel(PhabricatorWorkpanelView $panel) {
+  public function addPanel(PHUIWorkpanelView $panel) {
     $this->panels[] = $panel;
     return $this;
   }
@@ -22,7 +22,7 @@ final class PhabricatorWorkboardView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('phabricator-workboard-view-css');
+    require_celerity_resource('phui-workboard-view-css');
 
     $action_list = null;
     if (!empty($this->actions)) {
@@ -31,14 +31,14 @@ final class PhabricatorWorkboardView extends AphrontView {
         $items[] = phutil_tag(
           'li',
             array(
-              'class' => 'phabricator-workboard-action-item'
+              'class' => 'phui-workboard-action-item'
             ),
             $action);
       }
       $action_list = phutil_tag(
         'ul',
           array(
-            'class' => 'phabricator-workboard-action-list'
+            'class' => 'phui-workboard-action-list'
           ),
           $items);
     }
@@ -53,14 +53,14 @@ final class PhabricatorWorkboardView extends AphrontView {
     $board = phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-workboard-view-shadow'
+          'class' => 'phui-workboard-view-shadow'
         ),
         $view);
 
     return phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-workboard-view'
+          'class' => 'phui-workboard-view'
         ),
         array(
           $action_list,
