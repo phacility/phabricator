@@ -212,10 +212,14 @@ final class DiffusionCommitController extends DiffusionController {
           $hard_limit));
       $content[] = $huge_commit;
     } else {
+      // The user has clicked "Show All Changes", and we should show all the
+      // changes inline even if there are more than the soft limit.
+      $show_all_details = $request->getBool('show_all');
+
       $change_panel = new AphrontPanelView();
       $change_panel->setHeader("Changes (".number_format($count).")");
       $change_panel->setID('toc');
-      if ($count > self::CHANGES_LIMIT) {
+      if ($count > self::CHANGES_LIMIT && !$show_all_details) {
         $show_all_button = phutil_tag(
           'a',
           array(
@@ -283,7 +287,7 @@ final class DiffusionCommitController extends DiffusionController {
         $changeset->setID($path_ids[$changeset->getFilename()]);
       }
 
-      if ($count <= self::CHANGES_LIMIT) {
+      if ($count <= self::CHANGES_LIMIT || $show_all_details) {
         $visible_changesets = $changesets;
       } else {
         $visible_changesets = array();
