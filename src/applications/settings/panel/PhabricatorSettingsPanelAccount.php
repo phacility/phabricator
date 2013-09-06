@@ -91,19 +91,6 @@ final class PhabricatorSettingsPanelAccount
       '' => pht('Server Default (%s)', $default->getName()),
     ) + $translations;
 
-/*
-    $time_format_instructions = pht(
-      '
-      'PHP format string to use for time. for full referance, see %s. '.
-      'For quick start, try `g:i A` or `H:i`',
-      phutil_tag(
-        'a',
-        array(
-          'href' => 'http://www.php.net/manual/en/function.date.php'
-        ),
-        pht('Date formats documentation')));
-*/
-
     $form = new AphrontFormView();
     $form
       ->setUser($user)

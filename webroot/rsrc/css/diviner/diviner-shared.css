@@ -7,32 +7,69 @@
   font-size: 13px;
 }
 
+.diviner-table-view {
+  margin: 0 16px 24px;
+}
+
+.device-phone .diviner-table-view {
+  margin: 0 8px 16px;
+}
+
+.diviner-table-header {
+  padding: 4px 16px;
+  background-color: {$greybackground};
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-top: 1px solid {$lightblueborder};
+  display: inline-block;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  font-weight: bold;
+  color: {$bluetext};
+}
+
 .diviner-return-table-view,
 .diviner-parameter-table-view {
   width: 100%;
-  margin: 0 0 16px;
-  background: #f6f6f6;
-  border-bottom: 1px solid #c0c5d1;
-  width: 100%;
+  background: {$lightgreybackground};
+  border: 1px solid {$lightblueborder};
 }
 
 .diviner-return-table-type,
 .diviner-parameter-table-type {
-  padding: 4px 8px 4px 12px;
+  padding: 6px 8px 6px 12px;
   white-space: nowrap;
   text-align: right;
-  color: {$greytext};
+  color: {$bluetext};
   width: 20%;
 }
 
 .diviner-parameter-table-name {
-  padding: 4px 8px;
+  padding: 6px 8px;
   white-space: nowrap;
   font-weight: bold;
 }
 
 .diviner-return-table-docs,
 .diviner-parameter-table-docs {
-  padding: 4px 12px 4px 8px;
+  padding: 6px 12px 6px 8px;
   width: 80%;
+  background-color: #fff;
+}
+
+.diviner-document-section {
+  padding: 0 0 16px 0;
+}
+
+.device-phone .diviner-document-section {
+  padding: 0 8px 16px 0;
+}
+
+.diviner-document-section em {
+  color: {$lightgreytext};
+  text-decoration: italic;
+}
+
+.diviner-method-implementation-header {
+  color: {$lightgreytext};
 }

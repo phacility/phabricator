@@ -43,6 +43,7 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
     );
 
     $blues = array(
+      'DDE8EF' => 'Thin Blue Border {$thinblueborder}',
       'BFCFDA' => 'Light Blue Border {$lightblueborder}',
       '95A6C5' => 'Blue Border {$blueborder}',
       '626E82' => 'Dark Blue Border {$darkblueborder}',

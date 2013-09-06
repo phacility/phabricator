@@ -135,9 +135,8 @@ final class DivinerAtomController extends DivinerController {
       if ($tasks) {
         $methods_by_task = igroup($methods, 'task');
 
-        $document->appendChild(
-          id(new PhabricatorHeaderView())
-            ->setHeader(pht('Tasks')));
+        $section = id(new DivinerSectionView())
+          ->setHeader(pht('Tasks'));
 
         if (isset($methods_by_task[''])) {
           $tasks[''] = array(
@@ -148,31 +147,40 @@ final class DivinerAtomController extends DivinerController {
         }
 
         foreach ($tasks as $spec) {
-          $document->appendChild(
+          $section->addContent(
             id(new PhabricatorHeaderView())
+              ->setNoBackground(true)
               ->setHeader($spec['title']));
 
           $task_methods = idx($methods_by_task, $spec['name'], array());
-          if ($task_methods) {
-            $document->appendChild(hsprintf('<ul>'));
+            $inner_box = id(new PHUIBoxView())
+              ->addPadding(PHUI::PADDING_LARGE_LEFT)
+              ->addPadding(PHUI::PADDING_LARGE_RIGHT)
+              ->addPadding(PHUI::PADDING_LARGE_BOTTOM);
+            if ($task_methods) {
+            $inner_box->appendChild(hsprintf('<ul class="diviner-list">'));
             foreach ($task_methods as $task_method) {
               $atom = last($task_method['atoms']);
-              $document->appendChild(
+              $inner_box->appendChild(
                 hsprintf('<li>%s()</li>', $atom->getName()));
             }
-            $document->appendChild(hsprintf('</ul>'));
+            $inner_box->appendChild(hsprintf('</ul>'));
           } else {
-            $document->appendChild("No methods for this task.");
+            $no_methods = pht('No methods for this task.');
+            $inner_box->appendChild(hsprintf('<em>%s</em>', $no_methods));
           }
+          $section->addContent($inner_box);
         }
+        $document->appendChild($section);
       }
 
-      $document->appendChild(
-        id(new PhabricatorHeaderView())
-          ->setHeader(pht('Methods')));
+      $section = id(new DivinerSectionView())
+          ->setHeader(pht('Methods'));
+
       foreach ($methods as $spec) {
         $matom = last($spec['atoms']);
         $method_header = id(new PhabricatorHeaderView())
+          ->setNoBackground(true)
           ->setHeader($matom->getName());
 
         $inherited = $spec['inherited'];
@@ -187,13 +195,14 @@ final class DivinerAtomController extends DivinerController {
         $method_header->setSubheader(
           $this->renderFullSignature($matom));
 
-        $document->appendChild(
+        $section->addContent(
           array(
             $method_header,
             $this->renderMethodDocumentationText($symbol, $spec, $engine),
             $this->buildParametersAndReturn($spec['atoms']),
           ));
       }
+      $document->appendChild($section);
     }
 
     if ($toc) {
@@ -490,10 +499,9 @@ final class DivinerAtomController extends DivinerController {
       }
     }
 
-    if ($parameters !== null) {
-      $out[] = id(new PhabricatorHeaderView())
-        ->setHeader(pht('Parameters'));
+    if (nonempty($parameters)) {
       $out[] = id(new DivinerParameterTableView())
+        ->setHeader(pht('Parameters'))
         ->setParameters($parameters);
     }
 
@@ -509,10 +517,9 @@ final class DivinerAtomController extends DivinerController {
       }
     }
 
-    if ($return !== null) {
-      $out[] = id(new PhabricatorHeaderView())
-        ->setHeader(pht('Return'));
+    if (nonempty($return)) {
       $out[] = id(new DivinerReturnTableView())
+        ->setHeader(pht('Return'))
         ->setReturn($collected_return);
     }
 
@@ -536,9 +543,11 @@ final class DivinerAtomController extends DivinerController {
     } else {
       $atom = $symbol->getAtom();
       $undoc = DivinerAtom::getThisAtomIsNotDocumentedString($atom->getType());
-      $content = id(new AphrontErrorView())
-        ->appendChild($undoc)
-        ->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+      $content = id(new PHUIBoxView())
+        ->addPadding(PHUI::PADDING_LARGE_LEFT)
+        ->addPadding(PHUI::PADDING_LARGE_BOTTOM)
+        ->addPadding(PHUI::PADDING_LARGE_RIGHT)
+        ->appendChild(hsprintf('<em>%s</em>', $undoc));
     }
 
     return $content;
@@ -561,15 +570,19 @@ final class DivinerAtomController extends DivinerController {
         if (!strlen(trim($symbol->getMarkupText($field)))) {
           continue;
         }
-        $out[] = phutil_tag(
-          'div',
-          array(),
-          pht('From parent implementation in %s:', $impl->getName()));
+        $out[] = id(new PHUIBoxView())
+          ->addPadding(PHUI::PADDING_LARGE_LEFT)
+          ->addPadding(PHUI::PADDING_LARGE_RIGHT)
+          ->addClass('diviner-method-implementation-header')
+          ->appendChild(
+            pht('From parent implementation in %s:', $impl->getName()));
       } else if ($out) {
-        $out[] = phutil_tag(
-          'div',
-          array(),
-          pht('From this implementation:'));
+        $out[] = id(new PHUIBoxView())
+          ->addPadding(PHUI::PADDING_LARGE_LEFT)
+          ->addPadding(PHUI::PADDING_LARGE_RIGHT)
+          ->addClass('diviner-method-implementation-header')
+          ->appendChild(
+            pht('From this implementation:'));
       }
       $out[] = $this->renderDocumentationText($symbol, $engine);
     }

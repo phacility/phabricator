@@ -21,8 +21,13 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       return new Aphront404Response();
     }
 
-    $this->loadHandles(array($file->getAuthorPHID()));
     $phid = $file->getPHID();
+    $xactions = id(new PhabricatorFileTransactionQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($phid))
+      ->execute();
+
+    $this->loadHandles(array($file->getAuthorPHID()));
     $header = id(new PhabricatorHeaderView())
       ->setHeader($file->getName());
 
@@ -36,7 +41,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $actions = $this->buildActionView($file);
     $properties = $this->buildPropertyView($file);
-
+    $timeline = $this->buildTransactionView($file, $xactions);
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
     $crumbs->addCrumb(
@@ -50,11 +55,62 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         $header,
         $actions,
         $properties,
+        $timeline
       ),
       array(
         'title' => $file->getName(),
         'device'  => true,
+        'pageObjects' => array($file->getPHID()),
       ));
+  }
+
+  private function buildTransactionView(
+    PhabricatorFile $file,
+    array $xactions) {
+
+    $user = $this->getRequest()->getUser();
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user);
+    foreach ($xactions as $xaction) {
+      if ($xaction->getComment()) {
+        $engine->addObject(
+          $xaction->getComment(),
+          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+      }
+    }
+    $engine->process();
+
+    $timeline = id(new PhabricatorApplicationTransactionView())
+      ->setUser($user)
+      ->setObjectPHID($file->getPHID())
+      ->setTransactions($xactions)
+      ->setMarkupEngine($engine);
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $add_comment_header = id(new PhabricatorHeaderView())
+      ->setHeader(
+        $is_serious
+          ? pht('Add Comment')
+          : pht('Question File Integrity'));
+
+    $submit_button_name = $is_serious
+      ? pht('Add Comment')
+      : pht('Debate the Bits');
+
+    $draft = PhabricatorDraft::newFromUserAndKey($user, $file->getPHID());
+
+    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($user)
+      ->setObjectPHID($file->getPHID())
+      ->setDraft($draft)
+      ->setAction($this->getApplicationURI('/comment/'.$file->getID().'/'))
+      ->setSubmitButtonName($submit_button_name);
+
+    return array(
+      $timeline,
+      $add_comment_header,
+      $add_comment_form);
   }
 
   private function buildActionView(PhabricatorFile $file) {

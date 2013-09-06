@@ -3,7 +3,7 @@
 /**
  * @group files
  */
-final class FilesCreateMailReceiver
+final class FileCreateMailReceiver
   extends PhabricatorMailReceiver {
 
   public function isEnabled() {
@@ -48,6 +48,8 @@ final class FilesCreateMailReceiver
     } else {
       $subject = pht('You successfully uploaded a file.');
     }
+    $subject_prefix =
+      PhabricatorEnv::getEnvConfig('metamta.files.subject-prefix');
 
     $file_uris = array();
     foreach ($attachment_phids as $phid) {
@@ -61,7 +63,8 @@ final class FilesCreateMailReceiver
 
     id(new PhabricatorMetaMTAMail())
       ->addTos(array($sender->getPHID()))
-      ->setSubject('[Files] '.$subject)
+      ->setSubject($subject)
+      ->setSubjectPrefix($subject_prefix)
       ->setFrom($sender->getPHID())
       ->setRelatedPHID($first_phid)
       ->setBody($body->render())

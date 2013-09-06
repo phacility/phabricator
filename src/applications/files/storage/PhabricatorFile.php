@@ -1,7 +1,13 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorFile extends PhabricatorFileDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorTokenReceiverInterface,
+    PhabricatorSubscribableInterface,
+    PhabricatorPolicyInterface {
 
   const STORAGE_FORMAT_RAW  = 'raw';
 
@@ -16,6 +22,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $secretKey;
   protected $contentHash;
   protected $metadata = array();
+  protected $mailKey;
 
   protected $storageEngine;
   protected $storageFormat;
@@ -36,6 +43,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorFilePHIDTypeFile::TYPECONST);
+  }
+
+  public function save() {
+    if (!$this->getSecretKey()) {
+      $this->setSecretKey($this->generateSecretKey());
+    }
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public static function readUploadedFileData($spec) {
@@ -648,13 +665,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return ($key == $this->getSecretKey());
   }
 
-  public function save() {
-    if (!$this->getSecretKey()) {
-      $this->setSecretKey($this->generateSecretKey());
-    }
-    return parent::save();
-  }
-
   public function generateSecretKey() {
     return Filesystem::readRandomCharacters(20);
   }
@@ -819,5 +829,24 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     return false;
   }
+
+
+/* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($this->authorPHID == $phid);
+  }
+
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array(
+      $this->getAuthorPHID(),
+    );
+  }
+
 
 }

@@ -47,6 +47,11 @@ final class DifferentialBranchFieldSpecification
   }
 
   public function didWriteRevision(DifferentialRevisionEditor $editor) {
+    $maniphest = 'PhabricatorApplicationManiphest';
+    if (!PhabricatorApplication::isClassInstalled($maniphest)) {
+      return;
+    }
+
     $branch = $this->getDiff()->getBranch();
     $match = null;
     if (preg_match('/^T(\d+)/i', $branch, $match)) { // No $ to allow T123_demo.

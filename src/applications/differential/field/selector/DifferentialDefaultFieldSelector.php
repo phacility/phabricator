@@ -35,6 +35,10 @@ final class DifferentialDefaultFieldSelector
       new DifferentialAsanaRepresentationFieldSpecification(),
     );
 
+    if (PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider()) {
+      $fields[] = new DifferentialJIRAIssuesFieldSpecification();
+    }
+
     return $fields;
   }
 

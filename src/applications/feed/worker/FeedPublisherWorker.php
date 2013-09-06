@@ -23,6 +23,14 @@ final class FeedPublisherWorker extends FeedPushWorker {
         ));
     }
 
+    if (PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider()) {
+      PhabricatorWorker::scheduleTask(
+        'DoorkeeperFeedWorkerJIRA',
+        array(
+          'key' => $story->getChronologicalKey(),
+        ));
+    }
+
   }
 
 

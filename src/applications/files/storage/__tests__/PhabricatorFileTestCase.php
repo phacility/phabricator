@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @group file
+ */
 final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
   public function getPhabricatorTestCaseConfiguration() {

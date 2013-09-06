@@ -68,6 +68,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_PHOB_HAS_ASANASUBTASK      = 80003;
   const TYPE_ASANASUBTASK_HAS_PHOB      = 80002;
 
+  const TYPE_PHOB_HAS_JIRAISSUE         = 80004;
+  const TYPE_JIRAISSUE_HAS_PHOB         = 80005;
+
   public static function getInverse($edge_type) {
     static $map = array(
       self::TYPE_TASK_HAS_COMMIT => self::TYPE_COMMIT_HAS_TASK,
@@ -129,6 +132,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_DREV_HAS_REVIEWER => self::TYPE_REVIEWER_FOR_DREV,
       self::TYPE_REVIEWER_FOR_DREV => self::TYPE_DREV_HAS_REVIEWER,
+
+      self::TYPE_PHOB_HAS_JIRAISSUE => self::TYPE_JIRAISSUE_HAS_PHOB,
+      self:: TYPE_JIRAISSUE_HAS_PHOB => self::TYPE_PHOB_HAS_JIRAISSUE
     );
 
     return idx($map, $edge_type);

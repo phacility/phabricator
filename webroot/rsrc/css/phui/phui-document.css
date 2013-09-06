@@ -50,6 +50,10 @@
   border-bottom: 1px solid #BFCFDA;
 }
 
+.device-phone .phui-document-bookname {
+  padding: 8px;
+}
+
 .phui-document-bookname .bookname {
   float: left;
 }
@@ -63,6 +67,19 @@
   border-bottom: 1px solid #BFCFDA;
 }
 
+.phui-document-content
+  .phabricator-header-shell.phabricator-header-no-backgound {
+  border-bottom: 1px solid {$thinblueborder};
+  margin: 0 0 16px 0;
+}
+
+.phui-document-content
+  .phabricator-header-shell.phabricator-header-no-backgound
+  .phabricator-header-view {
+ padding: 8px 0 4px;
+ font-size: 14px;
+}
+
 .phui-document-content .phabricator-header-view {
   padding: 16px;
   color: #6b748c;
@@ -70,7 +87,7 @@
 }
 
 .phui-document-content .phabricator-property-list-container {
-  border-color: #BFCFDA;
+  border-color: #dde8ef;
 }
 
 .phui-document-content .phabricator-property-list-view {

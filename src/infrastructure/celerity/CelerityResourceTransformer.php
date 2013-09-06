@@ -160,6 +160,7 @@ final class CelerityResourceTransformer {
       'greybackground'      => '#EBECEE',
 
       // Base Blues
+      'thinblueborder'      => '#DDE8EF',
       'lightblueborder'     => '#BFCFDA',
       'blueborder'          => '#8C98B8',
       'darkblueborder'      => '#626E82',

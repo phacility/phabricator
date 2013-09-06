@@ -1559,6 +1559,19 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130826.divinernode.sql'),
       ),
+      '20130820.filexactions.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130820.filexactions.sql'),
+      ),
+      '20130820.filemailkey.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130820.filemailkey.sql'),
+      ),
+      '20130820.file-mailkey-populate.php' => array(
+        'type' => 'php',
+        'name' =>
+          $this->getPatchPath('20130820.file-mailkey-populate.php'),
+      ),
     );
   }
 }
