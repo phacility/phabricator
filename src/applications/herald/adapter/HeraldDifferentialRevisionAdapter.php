@@ -238,6 +238,21 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
             true,
             pht('OK, did nothing.'));
           break;
+        case HeraldActionConfig::ACTION_MARK_SECURITY:
+          $field = id(new DifferentialAuxiliaryField())->loadOneWhere('revisionPHID = %s AND name = %s', $this->revision->getPHID(), 'dropbox.security-review');
+          if (!$field) {
+            $field = new DifferentialAuxiliaryField();
+          }
+          $field->setRevisionPHID($this->revision->getPHID());
+          $field->setName('dropbox.security-review');
+          $field->setValue('1');
+          $field->save();
+
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            pht('Marked for security review.'));
+          break;
         case HeraldActionConfig::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
             $effect,

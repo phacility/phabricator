@@ -33,6 +33,7 @@ final class DifferentialDefaultFieldSelector
       new DifferentialAuditorsFieldSpecification(),
       new DifferentialDiffViewPolicyFieldSpecification(),
       new DifferentialAsanaRepresentationFieldSpecification(),
+      new DropboxDifferentialSecurityReviewFieldSpecification(),
     );
 
     return $fields;

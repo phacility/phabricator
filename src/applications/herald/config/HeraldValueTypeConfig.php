@@ -84,6 +84,8 @@ final class HeraldValueTypeConfig {
         case HeraldActionConfig::ACTION_REMOVE_CC:
         case HeraldActionConfig::ACTION_EMAIL:
           return self::VALUE_EMAIL;
+        case HeraldActionConfig::ACTION_MARK_SECURITY:
+          return self::VALUE_NONE;
         case HeraldActionConfig::ACTION_NOTHING:
           return self::VALUE_NONE;
         case HeraldActionConfig::ACTION_AUDIT:

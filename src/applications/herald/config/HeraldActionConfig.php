@@ -8,6 +8,7 @@ final class HeraldActionConfig {
   const ACTION_NOTHING      = 'nothing';
   const ACTION_AUDIT        = 'audit';
   const ACTION_FLAG         = 'flag';
+  const ACTION_MARK_SECURITY= 'mark-security';
 
   public static function getActionMessageMapForRuleType($rule_type) {
     $generic_mappings = array(
@@ -17,6 +18,7 @@ final class HeraldActionConfig {
       self::ACTION_EMAIL        => pht('Send an email to'),
       self::ACTION_AUDIT        => pht('Trigger an Audit'),
       self::ACTION_FLAG         => pht('Mark with flag'),
+      self::ACTION_MARK_SECURITY=> pht('Mark for security review'),
     );
 
     switch ($rule_type) {
@@ -55,6 +57,7 @@ final class HeraldActionConfig {
             self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
             self::ACTION_FLAG,
+            self::ACTION_MARK_SECURITY,
             self::ACTION_NOTHING,
           ));
       case HeraldContentTypeConfig::CONTENT_TYPE_COMMIT:
@@ -116,6 +119,7 @@ final class HeraldActionConfig {
             $data[1] = PhabricatorFlagColor::COLOR_BLUE;
           }
           break;
+        case HeraldActionConfig::ACTION_MARK_SECURITY:
         case HeraldActionConfig::ACTION_NOTHING:
           break;
         default:
