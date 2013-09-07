@@ -94,7 +94,7 @@
 
 .phabricator-object-item-list-header {
   padding: 0 0 8px 0;
-  color: #555555;
+  color: {$darkgreytext};
 }
 
 /* - Item Actions --------------------------------------------------------------

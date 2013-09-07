@@ -61,7 +61,7 @@
   font-size: 18px;
   font-weight: 200;
   line-height: 18px;
-  color: #39444f;
+  color: {$darkgreytext};
   margin: 0 0 5px 0;
 }
 

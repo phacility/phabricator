@@ -14,7 +14,7 @@
 }
 
 .phriction-header h1 {
-  margin: .25em 0;
+  margin: 4px 0;
 }
 
 .phriction-breadcrumbs {
@@ -34,12 +34,12 @@
 }
 
 .phriction-children-header {
-  background: #f7f7f7;
+  background: {$lightgreybackground};
   padding: 8px 0 8px 16px;
   font-weight: bold;
   margin-bottom: 15px;
-  border-bottom: 1px solid #BFCFDA;
-  color: #6b748c;
+  border-bottom: 1px solid {$lightblueborder};
+  color: {$bluetext};
   text-shadow: 0 1px 2px #fff;
 }
 

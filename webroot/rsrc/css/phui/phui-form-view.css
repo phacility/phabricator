@@ -24,7 +24,7 @@
   text-align: right;
   font-weight: bold;
   font-size: 13px;
-  color: #6b748c;
+  color: {$bluetext};
   -webkit-font-smoothing: antialiased;
 }
 
@@ -128,7 +128,7 @@
 
 .phui-form-view .aphront-form-caption {
   font-size: 12px;
-  color: #6b748c;
+  color: {$bluetext};
   padding: 8px 4px;
   text-align: right;
   margin-right: 20%;
@@ -432,7 +432,7 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .phui-form-box .phabricator-action-header h3 {
-  color: #6b748c;
+  color: {$bluetext};
   text-shadow: 0 1px 2px #fff;
 }
 
