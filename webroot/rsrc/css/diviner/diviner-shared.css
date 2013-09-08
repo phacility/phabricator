@@ -65,9 +65,10 @@
   padding: 0 8px 16px 0;
 }
 
-.diviner-document-section em {
+.diviner-message-not-documented {
   color: {$lightgreytext};
-  text-decoration: italic;
+  font-style: italic;
+  margin: 16px;
 }
 
 .diviner-method-implementation-header {

@@ -254,9 +254,16 @@ final class DivinerAtomController extends DivinerController {
 
     $lineage = $this->getExtendsLineage($symbol);
     if ($lineage) {
-      $lineage = mpull($lineage, 'getName');
-      $lineage = implode(' > ', $lineage);
-      $view->addProperty(pht('Extends'), $lineage);
+      $tags = array();
+      foreach ($lineage as $item) {
+        $tags[] = id(new PhabricatorTagView())
+          ->setType(PhabricatorTagView::TYPE_OBJECT)
+          ->setName($item->getName())
+          ->setHref($item->getURI());
+      }
+
+      $tags = phutil_implode_html(" \xE2\x96\xB6 ", $tags);
+      $view->addProperty(pht('Extends'), $tags);
     }
 
     $implements = $this->getImplementsLineage($symbol);
@@ -581,12 +588,12 @@ final class DivinerAtomController extends DivinerController {
         $content);
     } else {
       $atom = $symbol->getAtom();
-      $undoc = DivinerAtom::getThisAtomIsNotDocumentedString($atom->getType());
-      $content = id(new PHUIBoxView())
-        ->addPadding(PHUI::PADDING_LARGE_LEFT)
-        ->addPadding(PHUI::PADDING_LARGE_BOTTOM)
-        ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-        ->appendChild(hsprintf('<em>%s</em>', $undoc));
+      $content = phutil_tag(
+        'div',
+        array(
+          'class' => 'diviner-message-not-documented',
+        ),
+        DivinerAtom::getThisAtomIsNotDocumentedString($atom->getType()));
     }
 
     return $content;
