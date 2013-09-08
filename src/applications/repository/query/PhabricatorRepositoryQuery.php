@@ -7,10 +7,16 @@ final class PhabricatorRepositoryQuery
   private $phids;
   private $callsigns;
 
-  const STATUS_OPEN   = 'status-open';
+  const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
-  const STATUS_ALL    = 'status-all';
+  const STATUS_ALL = 'status-all';
   private $status = self::STATUS_ALL;
+
+  const ORDER_CREATED = 'order-created';
+  const ORDER_COMMITTED = 'order-committed';
+  const ORDER_CALLSIGN = 'order-callsign';
+  const ORDER_NAME = 'order-name';
+  private $order = self::ORDER_CREATED;
 
   private $needMostRecentCommits;
   private $needCommitCounts;
@@ -30,10 +36,6 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  protected function getReversePaging() {
-    return true;
-  }
-
   public function withStatus($status) {
     $this->status = $status;
     return $this;
@@ -49,6 +51,10 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
+  public function setOrder($order) {
+    $this->order = $order;
+    return $this;
+  }
 
   protected function loadPage() {
     $table = new PhabricatorRepository();
@@ -124,16 +130,144 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
+  public function getReversePaging() {
+    switch ($this->order) {
+      case self::ORDER_CALLSIGN:
+      case self::ORDER_NAME:
+        return true;
+    }
+    return false;
+  }
+
+  protected function getPagingColumn() {
+
+    // TODO: Add a key for ORDER_NAME.
+    // TODO: Add a key for ORDER_COMMITTED.
+
+    $order = $this->order;
+    switch ($order) {
+      case self::ORDER_CREATED:
+        return 'r.id';
+      case self::ORDER_COMMITTED:
+        return 's.epoch';
+      case self::ORDER_CALLSIGN:
+        return 'r.callsign';
+      case self::ORDER_NAME:
+        return 'r.name';
+      default:
+        throw new Exception("Unknown order '{$order}!'");
+    }
+  }
+
+  private function loadCursorObject($id) {
+    $results = id(new PhabricatorRepositoryQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs(array($id))
+      ->execute();
+    return head($results);
+  }
+
+  protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
+    $default = parent::buildPagingClause($conn_r);
+
+    $before_id = $this->getBeforeID();
+    $after_id = $this->getAfterID();
+
+    if (!$before_id && !$after_id) {
+      return $default;
+    }
+
+    $order = $this->order;
+    if ($order == self::ORDER_CREATED) {
+      return $default;
+    }
+
+    if ($before_id) {
+      $cursor = $this->loadCursorObject($before_id);
+    } else {
+      $cursor = $this->loadCursorObject($after_id);
+    }
+
+    if (!$cursor) {
+      return null;
+    }
+
+    switch ($order) {
+      case self::ORDER_COMMITTED:
+        $commit = $cursor->getMostRecentCommit();
+        if (!$commit) {
+          return null;
+        }
+        $epoch = $commit->getEpoch();
+        if ($before_id) {
+          return qsprintf(
+            $conn_r,
+            '(s.epoch %Q %d OR (s.epoch = %d AND r.id %Q %d))',
+            $this->getReversePaging() ? '<' : '>',
+            $epoch,
+            $epoch,
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getID());
+        } else {
+          return qsprintf(
+            $conn_r,
+            '(s.epoch %Q %d OR (s.epoch = %d AND r.id %Q %d))',
+            $this->getReversePaging() ? '>' : '<',
+            $epoch,
+            $epoch,
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getID());
+        }
+      case self::ORDER_CALLSIGN:
+        if ($before_id) {
+          return qsprintf(
+            $conn_r,
+            '(r.callsign %Q %s)',
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getCallsign());
+        } else {
+          return qsprintf(
+            $conn_r,
+            '(r.callsign %Q %s)',
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getCallsign());
+        }
+      case self::ORDER_NAME:
+        if ($before_id) {
+          return qsprintf(
+            $conn_r,
+            '(r.name %Q %s OR (r.name = %s AND r.id %Q %d))',
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getName(),
+            $cursor->getName(),
+            $this->getReversePaging() ? '<' : '>',
+            $cursor->getID());
+        } else {
+          return qsprintf(
+            $conn_r,
+            '(r.name %Q %s OR (r.name = %s AND r.id %Q %d))',
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getName(),
+            $cursor->getName(),
+            $this->getReversePaging() ? '>' : '<',
+            $cursor->getID());
+        }
+      default:
+        throw new Exception("Unknown order '{$order}'!");
+    }
+  }
+
   private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     $join_summary_table = $this->needCommitCounts ||
-                          $this->needMostRecentCommits;
+                          $this->needMostRecentCommits ||
+                          ($this->order == self::ORDER_COMMITTED);
 
     if ($join_summary_table) {
       $joins[] = qsprintf(
         $conn_r,
-        'LEFT JOIN %T summary ON r.id = summary.repositoryID',
+        'LEFT JOIN %T s ON r.id = s.repositoryID',
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
