@@ -19,6 +19,7 @@ final class PhabricatorPeopleProfileController
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
       ->withUsernames(array($this->username))
+      ->needProfileImage(true)
       ->executeOne();
     if (!$user) {
       return new Aphront404Response();

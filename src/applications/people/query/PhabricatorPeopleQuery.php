@@ -133,11 +133,17 @@ final class PhabricatorPeopleQuery
     }
 
     if ($this->needProfileImage) {
-      $files = id(new PhabricatorFileQuery())
-        ->setViewer($this->getViewer())
-        ->withPHIDs(mpull($users, 'getProfileImagePHID'))
-        ->execute();
-      $files = mpull($files, null, 'getPHID');
+      $user_profile_file_phids = mpull($users, 'getProfileImagePHID');
+      $user_profile_file_phids = array_filter($user_profile_file_phids);
+      if ($user_profile_file_phids) {
+        $files = id(new PhabricatorFileQuery())
+          ->setViewer($this->getViewer())
+          ->withPHIDs($user_profile_file_phids)
+          ->execute();
+        $files = mpull($files, null, 'getPHID');
+      } else {
+        $files = array();
+      }
       foreach ($users as $user) {
         $image_phid = $user->getProfileImagePHID();
         if (isset($files[$image_phid])) {
