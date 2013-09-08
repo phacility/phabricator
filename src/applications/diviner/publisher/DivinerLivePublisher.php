@@ -117,11 +117,12 @@ final class DivinerLivePublisher extends DivinerPublisher {
         ->setGroupName($ref->getGroup())
         ->setNodeHash($atom->getHash());
 
-      if ($is_documentable) {
+      if ($atom->getType() !== DivinerAtom::TYPE_FILE) {
         $renderer = $this->getRenderer();
-        $summary = $renderer->renderAtomSummary($atom);
-        $summary = (string)phutil_safe_html($summary);
+        $summary = $renderer->getAtomSummary($atom);
         $symbol->setSummary($summary);
+      } else {
+        $symbol->setSummary('');
       }
 
       $symbol->save();
@@ -134,11 +135,15 @@ final class DivinerLivePublisher extends DivinerPublisher {
       // documentation, we insert them here. This also means we insert files,
       // which are unnecessary and unused. Make sure this makes sense, but then
       // probably introduce separate "isTopLevel" and "isDocumentable" flags?
+      // TODO: Yeah do that soon ^^^
 
-      $storage = $this->loadAtomStorageForSymbol($symbol)
-        ->setAtomData($atom->toDictionary())
-        ->setContent(null)
-        ->save();
+      if ($atom->getType() !== DivinerAtom::TYPE_FILE) {
+        $storage = $this->loadAtomStorageForSymbol($symbol)
+          ->setAtomData($atom->toDictionary())
+          ->setContent(null)
+          ->save();
+      }
+
     }
   }
 

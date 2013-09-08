@@ -81,3 +81,11 @@
 .diviner-atom-signature-name {
   font-weight: bold;
 }
+
+.diviner-list .diviner-atom-signature {
+  color: {$greytext};
+}
+
+.diviner-list a {
+  font-weight: bold;
+}

@@ -152,22 +152,41 @@ final class DivinerAtomController extends DivinerController {
               ->setHeader($spec['title']));
 
           $task_methods = idx($methods_by_task, $spec['name'], array());
-            $inner_box = id(new PHUIBoxView())
-              ->addPadding(PHUI::PADDING_LARGE_LEFT)
-              ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-              ->addPadding(PHUI::PADDING_LARGE_BOTTOM);
-            if ($task_methods) {
-            $inner_box->appendChild(hsprintf('<ul class="diviner-list">'));
+          $inner_box = id(new PHUIBoxView())
+            ->addPadding(PHUI::PADDING_LARGE_LEFT)
+            ->addPadding(PHUI::PADDING_LARGE_RIGHT)
+            ->addPadding(PHUI::PADDING_LARGE_BOTTOM);
+
+          $box_content = array();
+          if ($task_methods) {
+            $list_items = array();
             foreach ($task_methods as $task_method) {
               $atom = last($task_method['atoms']);
-              $inner_box->appendChild(
-                hsprintf('<li>%s()</li>', $atom->getName()));
+
+              $item = $this->renderFullSignature($atom, true);
+
+              if (strlen($atom->getSummary())) {
+                $item = array(
+                  $item,
+                  " \xE2\x80\x94 ",
+                  phutil_safe_html($atom->getSummary()));
+              }
+
+              $list_items[] = phutil_tag('li', array(), $item);
             }
-            $inner_box->appendChild(hsprintf('</ul>'));
+
+            $box_content[] = phutil_tag(
+              'ul',
+              array(
+                'class' => 'diviner-list',
+              ),
+              $list_items);
           } else {
             $no_methods = pht('No methods for this task.');
-            $inner_box->appendChild(hsprintf('<em>%s</em>', $no_methods));
+            $box_content = phutil_tag('em', array(), $no_methods);
           }
+
+          $inner_box->appendChild($box_content);
           $section->addContent($inner_box);
         }
         $document->appendChild($section);
@@ -406,7 +425,9 @@ final class DivinerAtomController extends DivinerController {
     return $task_specs + $extends_task_specs;
   }
 
-  private function renderFullSignature(DivinerLiveSymbol $symbol) {
+  private function renderFullSignature(
+    DivinerLiveSymbol $symbol,
+    $is_link = false) {
     switch ($symbol->getType()) {
       case DivinerAtom::TYPE_CLASS:
       case DivinerAtom::TYPE_INTERFACE:
@@ -471,7 +492,7 @@ final class DivinerAtomController extends DivinerController {
       array(
         'class' => 'diviner-atom-signature-name',
         'href' => $anchor ? '#'.$anchor : null,
-        'name' => $anchor,
+        'name' => $is_link ? null : $anchor,
       ),
       $symbol->getName());
 

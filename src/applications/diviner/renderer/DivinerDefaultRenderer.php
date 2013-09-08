@@ -124,7 +124,7 @@ final class DivinerDefaultRenderer extends DivinerRenderer {
       $summary);
   }
 
-  protected function getAtomSummary(DivinerAtom $atom) {
+  public function getAtomSummary(DivinerAtom $atom) {
     if ($atom->getDocblockMetaValue('summary')) {
       return $atom->getDocblockMetaValue('summary');
     }

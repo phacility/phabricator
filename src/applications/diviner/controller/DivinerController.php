@@ -38,7 +38,7 @@ abstract class DivinerController extends PhabricatorController {
           DivinerAtom::getAtomTypeNameString(
             $symbol->getType()));
 
-      $item->addAttribute(phutil_safe_html($symbol->getSummary()));
+      $item->addAttribute($symbol->getSummary());
 
       $list->addItem($item);
     }

@@ -204,6 +204,7 @@ final class DivinerAtom {
       $this->getContentRaw(),
       $this->getDocblockRaw(),
       $this->getProperties(),
+      $this->getChildHashes(),
       mpull($this->extends, 'toHash'),
       mpull($this->links, 'toHash'),
     );
