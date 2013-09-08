@@ -134,16 +134,20 @@ final class DivinerAtomController extends DivinerController {
       if ($tasks) {
         $methods_by_task = igroup($methods, 'task');
 
+        // Add phantom tasks for methods which have a "@task" name that isn't
+        // documented anywhere, or methods that have no "@task" name.
+        foreach ($methods_by_task as $task => $ignored) {
+          if (empty($tasks[$task])) {
+            $tasks[$task] = array(
+              'name' => $task,
+              'title' => $task ? $task : pht('Other Methods'),
+              'defined' => $symbol,
+            );
+          }
+        }
+
         $section = id(new DivinerSectionView())
           ->setHeader(pht('Tasks'));
-
-        if (isset($methods_by_task[''])) {
-          $tasks[''] = array(
-            'name' => '',
-            'title' => pht('Other Methods'),
-            'defined' => $symbol,
-          );
-        }
 
         foreach ($tasks as $spec) {
           $section->addContent(
@@ -169,7 +173,7 @@ final class DivinerAtomController extends DivinerController {
                 $item = array(
                   $item,
                   " \xE2\x80\x94 ",
-                  phutil_safe_html($atom->getSummary()));
+                  $atom->getSummary());
               }
 
               $list_items[] = phutil_tag('li', array(), $item);
@@ -429,7 +433,15 @@ final class DivinerAtomController extends DivinerController {
       }
     }
 
-    return $task_specs + $extends_task_specs;
+    $specs = $task_specs + $extends_task_specs;
+
+    // Reorder "@tasks" in original declaration order. Basically, we want to
+    // use the documentation of the closest subclass, but put tasks which
+    // were declared by parents first.
+    $keys = array_keys($extends_task_specs);
+    $specs = array_select_keys($specs, $keys) + $specs;
+
+    return $specs;
   }
 
   private function renderFullSignature(
@@ -616,21 +628,29 @@ final class DivinerAtomController extends DivinerController {
         if (!strlen(trim($symbol->getMarkupText($field)))) {
           continue;
         }
-        $out[] = id(new PHUIBoxView())
-          ->addPadding(PHUI::PADDING_LARGE_LEFT)
-          ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-          ->addClass('diviner-method-implementation-header')
-          ->appendChild(
-            pht('From parent implementation in %s:', $impl->getName()));
-      } else if ($out) {
-        $out[] = id(new PHUIBoxView())
-          ->addPadding(PHUI::PADDING_LARGE_LEFT)
-          ->addPadding(PHUI::PADDING_LARGE_RIGHT)
-          ->addClass('diviner-method-implementation-header')
-          ->appendChild(
-            pht('From this implementation:'));
       }
-      $out[] = $this->renderDocumentationText($symbol, $engine);
+
+      $doc = $this->renderDocumentationText($symbol, $engine);
+
+      if (($impl !== $parent) || $out) {
+        $where = id(new PHUIBoxView())
+          ->addPadding(PHUI::PADDING_MEDIUM_LEFT)
+          ->addPadding(PHUI::PADDING_MEDIUM_RIGHT)
+          ->addClass('diviner-method-implementation-header')
+          ->appendChild($impl->getName());
+        $doc = array($where, $doc);
+
+        if ($impl !== $parent) {
+          $doc = phutil_tag(
+            'div',
+            array(
+              'class' => 'diviner-method-implementation-inherited',
+            ),
+            $doc);
+        }
+      }
+
+      $out[] = $doc;
     }
 
     // If we only have inherited implementations but none have documentation,

@@ -9,12 +9,18 @@
  *
  * For more information, see @{article:File Storage Technical Documentation}.
  *
+ * @task construct Constructing an Engine
  * @task meta Engine Metadata
  * @task file Managing File Data
  * @group filestorage
  */
 abstract class PhabricatorFileStorageEngine {
 
+  /**
+   * Construct a new storage engine.
+   *
+   * @task construct
+   */
   final public function __construct() {
     // <empty>
   }
