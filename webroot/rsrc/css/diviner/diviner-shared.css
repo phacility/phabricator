@@ -73,3 +73,11 @@
 .diviner-method-implementation-header {
   color: {$lightgreytext};
 }
+
+.diviner-atom-signature {
+  font-weight: normal;
+}
+
+.diviner-atom-signature-name {
+  font-weight: bold;
+}

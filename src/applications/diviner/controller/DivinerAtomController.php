@@ -71,13 +71,12 @@ final class DivinerAtomController extends DivinerController {
         ->setName($atom_short_title));
 
     $header = id(new PhabricatorHeaderView())
-      ->setHeader($symbol->getTitle())
+      ->setHeader($this->renderFullSignature($symbol))
       ->addTag(
         id(new PhabricatorTagView())
           ->setType(PhabricatorTagView::TYPE_STATE)
           ->setBackgroundColor(PhabricatorTagView::COLOR_BLUE)
-          ->setName(DivinerAtom::getAtomTypeNameString($atom->getType())))
-      ->setSubheader($this->renderFullSignature($symbol));
+          ->setName(DivinerAtom::getAtomTypeNameString($atom->getType())));
 
     $properties = id(new PhabricatorPropertyListView());
 
@@ -180,8 +179,7 @@ final class DivinerAtomController extends DivinerController {
       foreach ($methods as $spec) {
         $matom = last($spec['atoms']);
         $method_header = id(new PhabricatorHeaderView())
-          ->setNoBackground(true)
-          ->setHeader($matom->getName());
+          ->setNoBackground(true);
 
         $inherited = $spec['inherited'];
         if ($inherited) {
@@ -192,8 +190,7 @@ final class DivinerAtomController extends DivinerController {
               ->setName(pht('Inherited')));
         }
 
-        $method_header->setSubheader(
-          $this->renderFullSignature($matom));
+        $method_header->setHeader($this->renderFullSignature($matom));
 
         $section->addContent(
           array(
@@ -460,9 +457,25 @@ final class DivinerAtomController extends DivinerController {
         break;
     }
 
-    $out[] = $symbol->getName();
+    $anchor = null;
+    switch ($symbol->getType()) {
+      case DivinerAtom::TYPE_METHOD:
+        $anchor = $symbol->getType().'/'.$symbol->getName();
+        break;
+      default:
+        break;
+    }
 
-    $out = implode(' ', $out);
+    $out[] = phutil_tag(
+      $anchor ? 'a' : 'span',
+      array(
+        'class' => 'diviner-atom-signature-name',
+        'href' => $anchor ? '#'.$anchor : null,
+        'name' => $anchor,
+      ),
+      $symbol->getName());
+
+    $out = phutil_implode_html(' ', $out);
 
     $parameters = $atom->getProperty('parameters');
     if ($parameters !== null) {
@@ -470,10 +483,15 @@ final class DivinerAtomController extends DivinerController {
       foreach ($parameters as $parameter) {
         $pout[] = $parameter['name'];
       }
-      $out .= '('.implode(', ', $pout).')';
+      $out = array($out, '('.implode(', ', $pout).')');
     }
 
-    return $out;
+    return phutil_tag(
+      'span',
+      array(
+        'class' => 'diviner-atom-signature',
+      ),
+      $out);
   }
 
   private function buildParametersAndReturn(array $symbols) {
