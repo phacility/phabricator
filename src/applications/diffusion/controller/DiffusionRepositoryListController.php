@@ -31,79 +31,53 @@ final class DiffusionRepositoryListController extends DiffusionController
 
     $viewer = $this->getRequest()->getUser();
 
-    $rows = array();
+    $list = new PhabricatorObjectItemListView();
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
+      $item = id(new PhabricatorObjectItemView())
+        ->setUser($viewer)
+        ->setHeader($repository->getName())
+        ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
+
+      $commit = $repository->getMostRecentCommit();
+      if ($commit) {
+        $commit_link = DiffusionView::linkCommit(
+            $repository,
+            $commit->getCommitIdentifier(),
+            $commit->getSummary());
+        $item->setSubhead($commit_link);
+        $item->setEpoch($commit->getEpoch());
+      }
+
+      $item->addAttribute(
+        PhabricatorRepositoryType::getNameForRepositoryType(
+          $repository->getVersionControlSystem()));
+
       $size = $repository->getCommitCount();
       if ($size) {
-        $size = hsprintf(
-          '<a href="%s">%s</a>',
-          DiffusionRequest::generateDiffusionURI(array(
+        $history_uri = DiffusionRequest::generateDiffusionURI(
+          array(
             'callsign' => $repository->getCallsign(),
             'action' => 'history',
-          )),
-          pht('%s Commits', new PhutilNumber($size)));
+          ));
+
+        $item->addAttribute(
+          phutil_tag(
+            'a',
+            array(
+              'href' => $history_uri,
+            ),
+            pht('%s Commit(s)', new PhutilNumber($size))));
+      } else {
+        $item->addAttribute(pht('No Commits'));
       }
 
-      $datetime = '';
-      $most_recent_commit = $repository->getMostRecentCommit();
-      if ($most_recent_commit) {
-        $date = phabricator_date($most_recent_commit->getEpoch(), $viewer);
-        $time = phabricator_time($most_recent_commit->getEpoch(), $viewer);
-        $datetime = $date.' '.$time;
+      if (!$repository->isTracked()) {
+        $item->setDisabled(true);
+        $item->addIcon('disable-grey', pht('Inactive'));
       }
 
-      $rows[] = array(
-        $repository->getName(),
-        ('/diffusion/'.$repository->getCallsign().'/'),
-        PhabricatorRepositoryType::getNameForRepositoryType(
-          $repository->getVersionControlSystem()),
-        $size ? $size : null,
-        $most_recent_commit
-          ? DiffusionView::linkCommit(
-              $repository,
-              $most_recent_commit->getCommitIdentifier(),
-              $most_recent_commit->getSummary())
-          : pht('No Commits'),
-        $datetime
-      );
-    }
-
-    $repository_tool_uri = PhabricatorEnv::getProductionURI('/repository/');
-    $repository_tool     = phutil_tag('a',
-      array(
-       'href' => $repository_tool_uri,
-      ),
-      'repository tool');
-    $preface = pht('This instance of Phabricator does not have any '.
-                   'configured repositories.');
-    if ($viewer->getIsAdmin()) {
-      $no_repositories_txt = hsprintf(
-        '%s %s',
-        $preface,
-        pht(
-          'To setup one or more repositories, visit the %s.',
-          $repository_tool));
-    } else {
-      $no_repositories_txt = hsprintf(
-        '%s %s',
-        $preface,
-        pht(
-          'Ask an administrator to setup one or more repositories '.
-          'via the %s.',
-          $repository_tool));
-    }
-
-    $list = new PHUIObjectItemListView();
-    foreach ($rows as $row) {
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($row[0])
-        ->setSubHead($row[4])
-        ->setHref($row[1])
-        ->addAttribute(($row[2] ? $row[2] : pht('No Information')))
-        ->addAttribute(($row[3] ? $row[3] : pht('0 Commits')))
-        ->addIcon('none', $row[5]);
       $list->addItem($item);
     }
 
