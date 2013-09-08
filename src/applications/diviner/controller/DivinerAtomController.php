@@ -24,6 +24,8 @@ final class DivinerAtomController extends DivinerController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    require_celerity_resource('diviner-shared-css');
+
     $book = id(new DivinerBookQuery())
       ->setViewer($viewer)
       ->withNames(array($this->bookName))
@@ -260,10 +262,7 @@ final class DivinerAtomController extends DivinerController {
     if ($lineage) {
       $tags = array();
       foreach ($lineage as $item) {
-        $tags[] = id(new PhabricatorTagView())
-          ->setType(PhabricatorTagView::TYPE_OBJECT)
-          ->setName($item->getName())
-          ->setHref($item->getURI());
+        $tags[] = $this->renderAtomTag($item);
       }
 
       $tags = phutil_implode_html(" \xE2\x96\xB6 ", $tags);
@@ -277,9 +276,12 @@ final class DivinerAtomController extends DivinerController {
         $via = $spec['via'];
         $iface = $spec['interface'];
         if ($via == $symbol) {
-          $items[] = $iface->getName();
+          $items[] = $this->renderAtomTag($iface);
         } else {
-          $items[] = $iface->getName().' (via '.$via->getName().')';
+          $items[] = array(
+            $this->renderAtomTag($iface),
+            "  \xE2\x97\x80  ",
+            $this->renderAtomTag($via));
         }
       }
 
@@ -288,6 +290,13 @@ final class DivinerAtomController extends DivinerController {
         phutil_implode_html(phutil_tag('br'), $items));
     }
 
+  }
+
+  private function renderAtomTag(DivinerLiveSymbol $symbol) {
+    return id(new PhabricatorTagView())
+      ->setType(PhabricatorTagView::TYPE_OBJECT)
+      ->setName($symbol->getName())
+      ->setHref($symbol->getURI());
   }
 
   private function getExtendsLineage(DivinerLiveSymbol $symbol) {
@@ -521,7 +530,7 @@ final class DivinerAtomController extends DivinerController {
     if ($parameters !== null) {
       $pout = array();
       foreach ($parameters as $parameter) {
-        $pout[] = $parameter['name'];
+        $pout[] = idx($parameter, 'name', '...');
       }
       $out = array($out, '('.implode(', ', $pout).')');
     }

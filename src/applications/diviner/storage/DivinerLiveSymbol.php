@@ -153,13 +153,7 @@ final class DivinerLiveSymbol extends DivinerDAO
 
 
   public function newMarkupEngine($field) {
-    $engine = PhabricatorMarkupEngine::newMarkupEngine(array());
-
-    $engine->setConfig('preserve-linebreaks', false);
-//    $engine->setConfig('diviner.renderer', new DivinerDefaultRenderer());
-    $engine->setConfig('header.generate-toc', true);
-
-    return $engine;
+    return PhabricatorMarkupEngine::getEngine('diviner');
   }
 
 
