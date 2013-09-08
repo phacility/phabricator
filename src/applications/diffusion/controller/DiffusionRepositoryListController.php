@@ -17,7 +17,7 @@ final class DiffusionRepositoryListController extends DiffusionController
     $request = $this->getRequest();
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->queryKey)
-//      ->setPreamble($this->buildShortcuts())
+      ->setPreface($this->buildShortcuts())
       ->setSearchEngine(new PhabricatorRepositorySearchEngine())
       ->setNavigation($this->buildSideNavView());
 
@@ -141,8 +141,6 @@ final class DiffusionRepositoryListController extends DiffusionController
       }
 
       $list = new PHUIObjectItemListView();
-      $list->setCards(true);
-      $list->setFlush(true);
       foreach ($rows as $row) {
         $item = id(new PHUIObjectItemView())
           ->setHeader($row[0])
@@ -150,12 +148,7 @@ final class DiffusionRepositoryListController extends DiffusionController
           ->setSubhead(($row[2] ? $row[2] : pht('No Description')));
         $list->addItem($item);
       }
-
-      $shortcut_panel = id(new AphrontPanelView())
-        ->setNoBackground(true)
-        ->setHeader(pht('Shortcuts'))
-        ->appendChild($list);
-
+      $shortcut_panel = array($list, phutil_tag('hr'));
     } else {
       $shortcut_panel = null;
     }
