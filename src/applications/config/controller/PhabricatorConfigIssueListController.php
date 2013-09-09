@@ -47,13 +47,13 @@ final class PhabricatorConfigIssueListController
 
   private function buildIssueList(array $issues) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
     $ignored_items = array();
 
     foreach ($issues as $issue) {
         $href = $this->getApplicationURI('/issue/'.$issue->getIssueKey().'/');
-        $item = id(new PhabricatorObjectItemView())
+        $item = id(new PHUIObjectItemView())
           ->setHeader($issue->getName())
           ->setHref($href)
           ->addAttribute($issue->getSummary());

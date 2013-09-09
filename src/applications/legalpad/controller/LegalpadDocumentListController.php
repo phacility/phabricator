@@ -33,7 +33,7 @@ final class LegalpadDocumentListController extends LegalpadController
       mpull($documents, 'getRecentContributorPHIDs'));
     $this->loadHandles($contributors);
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setUser($user);
     foreach ($documents as $document) {
       $last_updated = phabricator_date($document->getDateModified(), $user);
@@ -42,7 +42,7 @@ final class LegalpadDocumentListController extends LegalpadController
 
       $title = $document->getTitle();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName('L'.$document->getID())
         ->setHeader($title)
         ->setHref($this->getApplicationURI('view/'.$document->getID()))

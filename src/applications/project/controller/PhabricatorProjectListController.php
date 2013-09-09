@@ -30,12 +30,12 @@ final class PhabricatorProjectListController
     assert_instances_of($projects, 'PhabricatorProject');
     $viewer = $this->getRequest()->getUser();
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
     foreach ($projects as $project) {
       $id = $project->getID();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($project->getName())
         ->setHref($this->getApplicationURI("view/{$id}/"));
 

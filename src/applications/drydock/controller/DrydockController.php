@@ -80,10 +80,10 @@ abstract class DrydockController extends PhabricatorController {
     assert_instances_of($leases, 'DrydockLease');
 
     $user = $this->getRequest()->getUser();
-    $view = new PhabricatorObjectItemListView();
+    $view = new PHUIObjectItemListView();
 
     foreach ($leases as $lease) {
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($lease->getLeaseName())
         ->setHref($this->getApplicationURI('/lease/'.$lease->getID().'/'));
 
@@ -126,12 +126,12 @@ abstract class DrydockController extends PhabricatorController {
     assert_instances_of($resources, 'DrydockResource');
 
     $user = $this->getRequest()->getUser();
-    $view = new PhabricatorObjectItemListView();
+    $view = new PHUIObjectItemListView();
 
     foreach ($resources as $resource) {
       $name = pht('Resource %d', $resource->getID()).': '.$resource->getName();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHref($this->getApplicationURI('/resource/'.$resource->getID().'/'))
         ->setHeader($name);
 

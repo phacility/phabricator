@@ -30,7 +30,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController
 
     $viewer = $this->getRequest()->getUser();
 
-    $list = id(new PhabricatorObjectItemListView())
+    $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($flags as $flag) {
       $id = $flag->getID();
@@ -45,7 +45,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController
         ),
         '');
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->addHeadIcon($flag_icon)
         ->setHeader($flag->getHandle()->renderLink());
 

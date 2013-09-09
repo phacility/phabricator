@@ -27,11 +27,11 @@ abstract class DivinerController extends PhabricatorController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $list = id(new PhabricatorObjectItemListView())
+    $list = id(new PHUIObjectItemListView())
       ->setUser($user);
 
     foreach ($symbols as $symbol) {
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($symbol->getTitle())
         ->setHref($symbol->getURI())
         ->addIcon('none',

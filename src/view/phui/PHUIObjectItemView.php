@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorObjectItemView extends AphrontTagView {
+final class PHUIObjectItemView extends AphrontTagView {
 
   private $objectName;
   private $header;
@@ -188,48 +188,48 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   protected function getTagAttributes() {
     $item_classes = array();
-    $item_classes[] = 'phabricator-object-item';
+    $item_classes[] = 'phui-object-item';
 
     if ($this->icons) {
-      $item_classes[] = 'phabricator-object-item-with-icons';
+      $item_classes[] = 'phui-object-item-with-icons';
     }
 
     if ($this->attributes) {
-      $item_classes[] = 'phabricator-object-item-with-attrs';
+      $item_classes[] = 'phui-object-item-with-attrs';
     }
 
     if ($this->handleIcons) {
-      $item_classes[] = 'phabricator-object-item-with-handle-icons';
+      $item_classes[] = 'phui-object-item-with-handle-icons';
     }
 
     if ($this->barColor) {
-      $item_classes[] = 'phabricator-object-item-bar-color-'.$this->barColor;
+      $item_classes[] = 'phui-object-item-bar-color-'.$this->barColor;
     }
 
     if ($this->footIcons) {
-      $item_classes[] = 'phabricator-object-item-with-foot-icons';
+      $item_classes[] = 'phui-object-item-with-foot-icons';
     }
 
     if ($this->bylines) {
-      $item_classes[] = 'phabricator-object-item-with-bylines';
+      $item_classes[] = 'phui-object-item-with-bylines';
     }
 
     if ($this->actions) {
       $n = count($this->actions);
-      $item_classes[] = 'phabricator-object-item-with-actions';
-      $item_classes[] = 'phabricator-object-item-with-'.$n.'-actions';
+      $item_classes[] = 'phui-object-item-with-actions';
+      $item_classes[] = 'phui-object-item-with-'.$n.'-actions';
     }
 
     if ($this->disabled) {
-      $item_classes[] = 'phabricator-object-item-disabled';
+      $item_classes[] = 'phui-object-item-disabled';
     }
 
     switch ($this->effect) {
       case 'highlighted':
-        $item_classes[] = 'phabricator-object-item-highlighted';
+        $item_classes[] = 'phui-object-item-highlighted';
         break;
       case 'selected':
-        $item_classes[] = 'phabricator-object-item-selected';
+        $item_classes[] = 'phui-object-item-selected';
         break;
       case null:
         break;
@@ -238,7 +238,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     }
 
     if ($this->getGrippable()) {
-      $item_classes[] = 'phabricator-object-item-grippable';
+      $item_classes[] = 'phui-object-item-grippable';
     }
 
     return array(
@@ -248,7 +248,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
 
   public function getTagContent() {
     $content_classes = array();
-    $content_classes[] = 'phabricator-object-item-content';
+    $content_classes[] = 'phui-object-item-content';
 
     $header_name = null;
     if ($this->objectName) {
@@ -256,7 +256,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         phutil_tag(
           'span',
           array(
-            'class' => 'phabricator-object-item-objname',
+            'class' => 'phui-object-item-objname',
           ),
           $this->objectName),
         ' ',
@@ -267,14 +267,14 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $this->href ? 'a' : 'div',
       array(
         'href' => $this->href,
-        'class' => 'phabricator-object-item-link',
+        'class' => 'phui-object-item-link',
       ),
       $this->header);
 
     $header = javelin_tag(
       'div',
       array(
-        'class' => 'phabricator-object-item-name',
+        'class' => 'phui-object-item-name',
         'sigil' => 'slippery',
       ),
       array(
@@ -304,7 +304,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $icon = javelin_tag(
           'span',
           array(
-            'class' => 'phabricator-object-item-icon-image '.
+            'class' => 'phui-object-item-icon-image '.
                        'sprite-'.$sheet.' '.$sheet.'-'.$icon,
             'sigil' => $sigil,
             'meta'  => $meta,
@@ -314,7 +314,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $label = phutil_tag(
           'span',
           array(
-            'class' => 'phabricator-object-item-icon-label',
+            'class' => 'phui-object-item-icon-label',
           ),
           $spec['label']);
 
@@ -328,9 +328,9 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         }
 
         $classes = array();
-        $classes[] = 'phabricator-object-item-icon';
+        $classes[] = 'phui-object-item-icon';
         if ($spec['icon'] == 'none') {
-          $classes[] = 'phabricator-object-item-icon-none';
+          $classes[] = 'phui-object-item-icon-none';
         }
         if (isset($spec['attributes']['class'])) {
           $classes[] = $spec['attributes']['class'];
@@ -347,7 +347,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $icons[] = phutil_tag(
         'ul',
         array(
-          'class' => 'phabricator-object-item-icons',
+          'class' => 'phui-object-item-icons',
         ),
         $icon_list);
     }
@@ -360,7 +360,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $icons[] = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-object-item-handle-icons',
+          'class' => 'phui-object-item-handle-icons',
         ),
         $handle_bar);
     }
@@ -371,14 +371,14 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $bylines[] = phutil_tag(
           'div',
           array(
-            'class' => 'phabricator-object-item-byline',
+            'class' => 'phui-object-item-byline',
           ),
           $byline);
       }
       $bylines = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-object-item-bylines',
+          'class' => 'phui-object-item-bylines',
         ),
         $bylines);
     }
@@ -388,7 +388,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $subhead = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-object-item-subhead',
+          'class' => 'phui-object-item-subhead',
         ),
         $this->subhead);
     }
@@ -397,7 +397,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $icons = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-object-icon-pane',
+          'class' => 'phui-object-icon-pane',
         ),
         $icons);
     }
@@ -408,7 +408,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $spacer = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-object-item-attribute-spacer',
+          'class' => 'phui-object-item-attribute-spacer',
         ),
         "\xC2\xB7");
       $first = true;
@@ -416,7 +416,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
         $attrs[] = phutil_tag(
           'li',
           array(
-            'class' => 'phabricator-object-item-attribute',
+            'class' => 'phui-object-item-attribute',
           ),
           array(
             ($first ? null : $spacer),
@@ -428,7 +428,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $attrs = phutil_tag(
         'ul',
         array(
-          'class' => 'phabricator-object-item-attributes',
+          'class' => 'phui-object-item-attributes',
         ),
         $attrs);
     }
@@ -442,7 +442,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $foot = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-object-item-foot-icons',
+          'class' => 'phui-object-item-foot-icons',
         ),
         $foot_bar);
     }
@@ -452,7 +452,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $grippable = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-object-item-grip',
+          'class' => 'phui-object-item-grip',
         ),
         '');
     }
@@ -472,7 +472,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     $box = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-object-item-content-box',
+        'class' => 'phui-object-item-content-box',
       ),
       array(
         $grippable,
@@ -493,7 +493,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
       $actions = phutil_tag(
         'ul',
         array(
-          'class' => 'phabricator-object-item-actions',
+          'class' => 'phui-object-item-actions',
         ),
         $actions);
     }
@@ -501,7 +501,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-object-item-frame',
+        'class' => 'phui-object-item-frame',
       ),
       array(
         $actions,
@@ -528,7 +528,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     return phutil_tag(
       'span',
       array(
-        'class' => 'phabricator-object-item-foot-icon',
+        'class' => 'phui-object-item-foot-icon',
       ),
       array($icon, $label));
   }
@@ -538,7 +538,7 @@ final class PhabricatorObjectItemView extends AphrontTagView {
     Javelin::initBehavior('phabricator-tooltips');
 
     $options = array(
-      'class' => 'phabricator-object-item-handle-icon',
+      'class' => 'phui-object-item-handle-icon',
       'style' => 'background-image: url('.$handle->getImageURI().')',
     );
 

@@ -331,7 +331,7 @@ abstract class PhabricatorAuthProvider {
 
   public function willRenderLinkedAccount(
     PhabricatorUser $viewer,
-    PhabricatorObjectItemView $item,
+    PHUIObjectItemView $item,
     PhabricatorExternalAccount $account) {
 
     $account_view = id(new PhabricatorAuthAccountView())

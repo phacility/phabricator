@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
+final class PHUIObjectItemListExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Object Item List';
@@ -8,7 +8,7 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
   public function getDescription() {
     return hsprintf(
-      'Use <tt>PhabricatorObjectItemListView</tt> to render lists of objects.');
+      'Use <tt>PHUIObjectItemListView</tt> to render lists of objects.');
   }
 
   public function renderExample() {
@@ -24,22 +24,22 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Basic List'));
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setObjectName('FRUIT1')
         ->setHeader(pht('Apple'))
         ->setHref('#'));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setObjectName('FRUIT2')
         ->setHeader(pht('Banana'))
         ->setHref('#'));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setObjectName('FRUIT3')
         ->setHeader(pht('Cherry'))
         ->setHref('#'));
@@ -49,7 +49,7 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Empty List'));
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     $list->setNoDataString(pht('This list is empty.'));
 
@@ -58,24 +58,52 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Stacked List'));
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setStackable(true);
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Monday'))
         ->setHref('#'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Tuesday'))
         ->setHref('#'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Wednesday'))
         ->setHref('#'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Thursday'))
+        ->setHref('#'));
+
+    $out[] = array($head, $list);
+
+    $head = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Plain List'));
+    $list = new PHUIObjectItemListView();
+    $list->setPlain(true);
+
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Monday'))
+        ->setSubHead('I love cats')
+        ->setHref('#'));
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Tuesday'))
+        ->setSubHead('Cat, cats, cats')
+        ->setHref('#'));
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Wednesday'))
+        ->setSubHead('Meow, meow, meow')
+        ->setHref('#'));
+    $list->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Thursday'))
+        ->setSubHead('Every single day')
         ->setHref('#'));
 
     $out[] = array($head, $list);
@@ -83,40 +111,40 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Card List'));
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Business Card'))
         ->setBarColor('red'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange')
         ->addIcon('comment', pht('Royal Flush!')));
 
     $owner = phutil_tag('a', array('href' => '#'), pht('jackofclubs'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('House of Cards'))
         ->setBarColor('yellow')
         ->addByline(pht('Owner: %s', $owner)));
 
     $author = phutil_tag('a', array('href' => '#'), pht('agoat'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Cardigan'))
         ->setBarColor('green')
         ->addIcon('highlight', pht('Warm!'))
         ->addByline(pht('Author: %s', $author)));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Cardamom'))
         ->addFootIcon('highlight-white', 'Spice')
         ->setBarColor('blue'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht(
           'The human cardiovascular system includes the heart, lungs, and '.
           'some other parts; most of these parts are pretty squishy'))
@@ -130,25 +158,25 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Grippable List'));
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Grab ahold!'))
         ->setHref('#')
         ->setGrippable(true)
         ->setBarColor('red'));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Hold on tight!'))
         ->setHref('#')
         ->setGrippable(true)
         ->setBarColor('yellow'));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht("Don't let go!"))
         ->setHref('#')
         ->setGrippable(true)
@@ -162,10 +190,10 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('List With Actions'));
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('You Have The Power'))
         ->setHref('#')
         ->setBarColor('blue')
@@ -176,7 +204,7 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
             ->setIcon('edit')));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Believe In Yourself'))
         ->setHref('#')
         ->setBarColor('violet')
@@ -197,10 +225,10 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Extras'));
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Ace of Hearts'))
         ->setSubHead(
           pht('This is the most powerful card in the game "Hearts".'))
@@ -215,20 +243,20 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
         ->addHandleIcon($handle, pht('You make all the rules.')));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Just A Handle'))
         ->setHref('#')
         ->addHandleIcon($handle, pht('Handle Here')));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Poor Use of Space'))
         ->setHref('#')
         ->addAttribute('North West')
         ->addHandleIcon($handle, pht('South East')));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Crowded Eastern Edge'))
         ->setHref('#')
         ->addIcon('computer', pht('Stuff'))
@@ -242,30 +270,30 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Effects'));
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setObjectName('X1')
         ->setHeader(pht('Normal'))
         ->setHref('#'));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setObjectName('X2')
         ->setHeader(pht('Highlighted'))
         ->setEffect('highlighted')
         ->setHref('#'));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setObjectName('X3')
         ->setHeader(pht('Selected'))
         ->setEffect('selected')
         ->setHref('#'));
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setObjectName('X4')
         ->setHeader(pht('Disabled'))
         ->setDisabled(true)
@@ -277,7 +305,7 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
     $head = id(new PhabricatorHeaderView())
       ->setHeader(pht('Colors'));
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     $bar_colors = array(
       null      => pht('None'),
@@ -295,7 +323,7 @@ final class PhabricatorObjectItemListExample extends PhabricatorUIExample {
 
     foreach ($bar_colors as $bar_color => $bar_label) {
       $list->addItem(
-        id(new PhabricatorObjectItemView())
+        id(new PHUIObjectItemView())
           ->setHeader($bar_label)
           ->setBarColor($bar_color));
     }

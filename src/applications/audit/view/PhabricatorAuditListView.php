@@ -110,7 +110,7 @@ final class PhabricatorAuditListView extends AphrontView {
   public function render() {
     $rowc = array();
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
     $list->setFlush(true);
     foreach ($this->audits as $audit) {
@@ -135,7 +135,7 @@ final class PhabricatorAuditListView extends AphrontView {
         PhabricatorAuditStatusConstants::getStatusColor($status_code);
 
       $auditor_handle = $this->getHandle($audit->getAuditorPHID());
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
           ->setObjectName($commit_name)
           ->setHeader($commit_desc)
           ->setHref($commit_link)

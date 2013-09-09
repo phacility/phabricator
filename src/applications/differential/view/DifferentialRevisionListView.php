@@ -111,7 +111,7 @@ final class DifferentialRevisionListView extends AphrontView {
       $field->setHandles($this->handles);
     }
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
 
     $do_not_display_age = array(
@@ -120,7 +120,7 @@ final class DifferentialRevisionListView extends AphrontView {
     );
 
     foreach ($this->revisions as $revision) {
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setUser($user);
 
       $rev_fields = array();
@@ -149,14 +149,14 @@ final class DifferentialRevisionListView extends AphrontView {
                   empty($do_not_display_age[$status]);
 
 
-      $object_age = PhabricatorObjectItemView::AGE_FRESH;
+      $object_age = PHUIObjectItemView::AGE_FRESH;
       foreach ($this->fields as $field) {
         if ($show_age) {
           if ($field instanceof DifferentialDateModifiedFieldSpecification) {
             if ($stale && $modified < $stale) {
-              $object_age = PhabricatorObjectItemView::AGE_OLD;
+              $object_age = PHUIObjectItemView::AGE_OLD;
             } else if ($fresh && $modified < $fresh) {
-              $object_age = PhabricatorObjectItemView::AGE_STALE;
+              $object_age = PHUIObjectItemView::AGE_STALE;
             }
           }
         }

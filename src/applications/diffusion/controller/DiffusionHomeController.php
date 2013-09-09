@@ -19,11 +19,11 @@ final class DiffusionHomeController extends DiffusionController {
         );
       }
 
-      $list = new PhabricatorObjectItemListView();
+      $list = new PHUIObjectItemListView();
       $list->setCards(true);
       $list->setFlush(true);
       foreach ($rows as $row) {
-        $item = id(new PhabricatorObjectItemView())
+        $item = id(new PHUIObjectItemView())
             ->setHeader($row[0])
             ->setHref($row[1])
             ->setSubhead(($row[2] ? $row[2] : pht('No Description')));
@@ -162,11 +162,11 @@ final class DiffusionHomeController extends DiffusionController {
           $repository_tool));
     }
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
     $list->setFlush(true);
     foreach ($rows as $row) {
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
           ->setHeader($row[0])
           ->setSubHead($row[5])
           ->setHref($row[1])

@@ -36,11 +36,11 @@ final class PonderQuestionListController extends PonderController
     $handles = $this->loadViewerHandles($phids);
 
 
-    $view = id(new PhabricatorObjectItemListView())
+    $view = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
     foreach ($questions as $question) {
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
       $item->setObjectName('Q'.$question->getID());
       $item->setHeader($question->getTitle());
       $item->setHref('/Q'.$question->getID());

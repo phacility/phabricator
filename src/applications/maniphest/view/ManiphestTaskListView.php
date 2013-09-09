@@ -35,7 +35,7 @@ final class ManiphestTaskListView extends ManiphestView {
   public function render() {
     $handles = $this->handles;
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
     $list->setFlush(true);
 
@@ -54,7 +54,7 @@ final class ManiphestTaskListView extends ManiphestView {
     }
 
     foreach ($this->tasks as $task) {
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
       $item->setObjectName('T'.$task->getID());
       $item->setHeader($task->getTitle());
       $item->setHref('/T'.$task->getID());

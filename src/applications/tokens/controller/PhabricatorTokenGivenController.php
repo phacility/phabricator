@@ -33,12 +33,12 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
       $tokens = mpull($tokens, null, 'getPHID');
     }
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     foreach ($tokens_given as $token_given) {
       $handle = $handles[$token_given->getObjectPHID()];
       $token = idx($tokens, $token_given->getTokenPHID());
 
-      $item = id(new PhabricatorObjectItemView());
+      $item = id(new PHUIObjectItemView());
       $item->setHeader($handle->getFullName());
       $item->setHref($handle->getURI());
 

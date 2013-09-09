@@ -11,9 +11,9 @@ final class PhabricatorAuthListController
       ->setViewer($viewer)
       ->execute();
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     foreach ($configs as $config) {
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
 
       $id = $config->getID();
 

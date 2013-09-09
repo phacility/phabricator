@@ -44,11 +44,11 @@ final class PhabricatorConfigListController
   private function buildConfigOptionsList(array $groups) {
     assert_instances_of($groups, 'PhabricatorApplicationConfigOptions');
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setStackable(true);
     $groups = msort($groups, 'getName');
     foreach ($groups as $group) {
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($group->getName())
         ->setHref('/config/group/'.$group->getKey().'/')
         ->addAttribute($group->getDescription());

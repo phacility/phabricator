@@ -7,7 +7,7 @@ final class PHUIWorkpanelView extends AphrontView {
   private $headerAction;
   private $footerAction;
 
-  public function setCards(PhabricatorObjectItemListView $cards) {
+  public function setCards(PHUIObjectItemListView $cards) {
     $this->cards[] = $cards;
     return $this;
   }

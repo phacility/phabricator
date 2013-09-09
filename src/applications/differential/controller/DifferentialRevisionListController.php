@@ -84,7 +84,7 @@ final class DifferentialRevisionListController extends DifferentialController
     }
 
     if (count($views) == 1) {
-      // Reduce this to a PhabricatorObjectItemListView so we can get the free
+      // Reduce this to a PHUIObjectItemListView so we can get the free
       // support from ApplicationSearch.
       return head($views)->render();
     } else {

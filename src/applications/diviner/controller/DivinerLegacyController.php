@@ -29,11 +29,11 @@ final class DivinerLegacyController extends DivinerController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $list = id(new PhabricatorObjectItemListView())
+    $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
     foreach ($links as $href => $link) {
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHref($href)
         ->setHeader($link['name'])
         ->addAttribute($link['flavor']);

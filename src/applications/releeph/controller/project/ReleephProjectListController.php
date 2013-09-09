@@ -29,13 +29,13 @@ final class ReleephProjectListController extends ReleephController
     assert_instances_of($projects, 'ReleephProject');
     $viewer = $this->getRequest()->getUser();
 
-    $list = id(new PhabricatorObjectItemListView())
+    $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
     foreach ($projects as $project) {
       $id = $project->getID();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($project->getName())
         ->setHref($this->getApplicationURI("project/{$id}/"));
 

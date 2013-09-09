@@ -36,7 +36,7 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     foreach ($users as $user) {
       $primary_email = $user->loadPrimaryEmail();
@@ -49,7 +49,7 @@ final class PhabricatorPeopleListController extends PhabricatorPeopleController
       $user_handle = new PhabricatorObjectHandle();
       $user_handle->setImageURI($user->loadProfileImageURI());
 
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
       $item->setHeader($user->getFullName())
         ->setHref('/p/'.$user->getUsername().'/')
         ->addAttribute(hsprintf('%s %s',
