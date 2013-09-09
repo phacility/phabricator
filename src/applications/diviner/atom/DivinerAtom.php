@@ -21,7 +21,9 @@ final class DivinerAtom {
   private $docblockText;
   private $docblockMeta;
   private $warnings = array();
+  private $parent;
   private $parentHash;
+  private $children = array();
   private $childHashes = array();
   private $context;
   private $extends = array();
@@ -204,11 +206,13 @@ final class DivinerAtom {
       $this->getContentRaw(),
       $this->getDocblockRaw(),
       $this->getProperties(),
+      $this->getChildHashes(),
       mpull($this->extends, 'toHash'),
       mpull($this->links, 'toHash'),
     );
 
-    return md5(serialize($parts)).'N';
+    $this->hash = md5(serialize($parts)).'N';
+    return $this->hash;
   }
 
   public function setLength($length) {
@@ -235,6 +239,9 @@ final class DivinerAtom {
   }
 
   public function getChildHashes() {
+    if (!$this->childHashes && $this->children) {
+      $this->childHashes = mpull($this->children, 'getHash');
+    }
     return $this->childHashes;
   }
 
@@ -246,13 +253,32 @@ final class DivinerAtom {
     return $this;
   }
 
+  public function hasParent() {
+    return $this->parent || $this->parentHash;
+  }
+
+  public function setParent(DivinerAtom $atom) {
+    if ($this->parentHash) {
+      throw new Exception("Parent hash has already been computed!");
+    }
+    $this->parent = $atom;
+    return $this;
+  }
+
   public function getParentHash() {
+    if ($this->parent && !$this->parentHash) {
+      $this->parentHash = $this->parent->getHash();
+    }
     return $this->parentHash;
   }
 
   public function addChild(DivinerAtom $atom) {
-    $atom->setParentHash($this->getHash());
-    $this->addChildHash($atom->getHash());
+    if ($this->childHashes) {
+      throw new Exception("Child hashes have already been computed!");
+    }
+
+    $atom->setParent($this);
+    $this->children[] = $atom;
     return $this;
   }
 

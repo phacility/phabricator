@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorWorkboardExample extends PhabricatorUIExample {
+final class PHUIWorkboardExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Workboard';
@@ -99,7 +99,7 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange'));
 
-    $panel = id(new PhabricatorWorkpanelView())
+    $panel = id(new PHUIWorkpanelView())
           ->setCards($list)
           ->setHeader('Business Stuff')
           ->setFooterAction(
@@ -108,21 +108,21 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
               ->setIcon('new')
               ->setHref('/maniphest/task/create/'));
 
-    $panel2 = id(new PhabricatorWorkpanelView())
+    $panel2 = id(new PHUIWorkpanelView())
           ->setCards($list2)
           ->setHeader('Under Duress');
 
-    $panel3 = id(new PhabricatorWorkpanelView())
+    $panel3 = id(new PHUIWorkpanelView())
           ->setCards($list3)
           ->setHeader('Spicy Thai Chicken');
 
-    $board = id(new PhabricatorWorkboardView())
+    $board = id(new PHUIWorkboardView())
           ->addPanel($panel)
           ->addPanel($panel2)
           ->addPanel($panel2)
           ->addPanel($panel3);
 
-    $board2 = id(new PhabricatorWorkboardView())
+    $board2 = id(new PHUIWorkboardView())
           ->setFluidLayout(true)
           ->addPanel($panel)
           ->addPanel($panel2)
@@ -150,7 +150,7 @@ final class PhabricatorWorkboardExample extends PhabricatorUIExample {
     $person3->setImage(
       celerity_get_resource_uri('/rsrc/image/people/taft.png'));
 
-    $board3 = id(new PhabricatorWorkboardView())
+    $board3 = id(new PHUIWorkboardView())
           ->setFluidLayout(true)
           ->addPanel($panel)
           ->addPanel($panel)

@@ -359,6 +359,12 @@ final class PhabricatorMarkupEngine {
       case 'default':
         $engine = self::newMarkupEngine(array());
         break;
+      case 'diviner':
+        $engine = self::newMarkupEngine(array());
+        $engine->setConfig('preserve-linebreaks', false);
+  //    $engine->setConfig('diviner.renderer', new DivinerDefaultRenderer());
+        $engine->setConfig('header.generate-toc', true);
+        break;
       default:
         throw new Exception("Unknown engine ruleset: {$ruleset}!");
     }

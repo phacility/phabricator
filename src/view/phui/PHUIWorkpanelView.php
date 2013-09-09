@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorWorkpanelView extends AphrontView {
+final class PHUIWorkpanelView extends AphrontView {
 
   private $cards = array();
   private $header;
@@ -28,7 +28,7 @@ final class PhabricatorWorkpanelView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('phabricator-workpanel-view-css');
+    require_celerity_resource('phui-workpanel-view-css');
 
     $footer = '';
     if ($this->footerAction) {
@@ -36,7 +36,7 @@ final class PhabricatorWorkpanelView extends AphrontView {
       $footer = phutil_tag(
         'ul',
           array(
-            'class' => 'phabricator-workpanel-footer-action mst ps'
+            'class' => 'phui-workpanel-footer-action mst ps'
           ),
           $footer_tag);
     }
@@ -48,14 +48,14 @@ final class PhabricatorWorkpanelView extends AphrontView {
     $body = phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-workpanel-body'
+          'class' => 'phui-workpanel-body'
         ),
       $this->cards);
 
     $view = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-workpanel-view-inner',
+        'class' => 'phui-workpanel-view-inner',
       ),
       array(
         $header,
@@ -66,7 +66,7 @@ final class PhabricatorWorkpanelView extends AphrontView {
     return phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-workpanel-view'
+          'class' => 'phui-workpanel-view'
         ),
         $view);
   }

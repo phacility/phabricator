@@ -29,13 +29,13 @@
 .phabricator-hovercard-body {
   padding: 8px;
   background-color: white;
-  color: #333;
+  color: {$darkgreytext};
 }
 
 .phabricator-hovercard-body-header {
-  font-size: 14px;
+  font-size: 13px;
   padding-bottom: 2px;
-  color: #000;
+  color: {$darkgreytext};
 }
 
 .phabricator-hovercard-body .profile-header-picture-frame {

@@ -33,6 +33,18 @@ final class PhrictionNewController extends PhrictionController {
           ->addSubmitButton(pht('Edit Document'));
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
+      } elseif (substr($slug, 0, 9) == 'projects/') {
+          $dialog = new AphrontDialogView();
+          $dialog->setSubmitURI('/w/')
+              ->setTitle(pht('Oops!'))
+              ->setUser($user)
+              ->appendChild(pht(
+                  'You cannot create wiki pages under "projects/",
+                  because they are reserved as project pages.
+                  Create a new project with this name first.'))
+              ->addCancelButton('/w/', 'Okay');
+          return id(new AphrontDialogResponse())->setDialog($dialog);
+
       } else {
         $uri  = '/phriction/edit/?slug='.$slug;
         return id(new AphrontRedirectResponse())

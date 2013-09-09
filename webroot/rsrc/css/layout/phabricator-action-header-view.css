@@ -8,7 +8,7 @@
 }
 
 .phabricator-action-header-title {
-  color: #333;
+  color: {$darkgreytext};
   float: left;
   font-size: 14px;
   font-weight: bold;
@@ -37,9 +37,8 @@
 }
 
 .phabricator-action-header-link {
-  color: #333;
+  color: {$darkgreytext};
 }
-
 
 .gradient-green-header .phabricator-action-header-title,
 .gradient-red-header .phabricator-action-header-title,
@@ -59,5 +58,4 @@
   width: 16px;
   margin-right: 4px;
 }
-
 

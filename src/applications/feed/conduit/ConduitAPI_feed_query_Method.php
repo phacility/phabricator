@@ -23,16 +23,17 @@ final class ConduitAPI_feed_query_Method
       'filterPHIDs' => 'optional list <phid>',
       'limit' => 'optional int (default '.$this->getDefaultLimit().')',
       'after' => 'optional int',
+      'before' => 'optional int',
       'view' => 'optional string (data, html, html-summary, text)',
     );
   }
 
   private function getSupportedViewTypes() {
     return array(
-        'html' => 'Full HTML presentation of story',
-        'data' => 'Dictionary with various data of the story',
-        'html-summary' => 'Story contains only the title of the story',
-        'text' => 'Simple one-line plain text representation of story',
+      'html' => 'Full HTML presentation of story',
+      'data' => 'Dictionary with various data of the story',
+      'html-summary' => 'Story contains only the title of the story',
+      'text' => 'Simple one-line plain text representation of story',
     );
   }
 
@@ -69,13 +70,22 @@ final class ConduitAPI_feed_query_Method
     if (!$filter_phids) {
       $filter_phids = array();
     }
-    $after = $request->getValue('after');
 
     $query = id(new PhabricatorFeedQuery())
       ->setLimit($limit)
       ->setFilterPHIDs($filter_phids)
-      ->setViewer($user)
-      ->setAfterID($after);
+      ->setViewer($user);
+
+    $after = $request->getValue('after');
+    if (strlen($after)) {
+      $query->setAfterID($after);
+    }
+
+    $before = $request->getValue('before');
+    if (strlen($before)) {
+      $query->setBeforeID($before);
+    }
+
     $stories = $query->execute();
 
     if ($stories) {

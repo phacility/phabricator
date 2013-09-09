@@ -65,11 +65,46 @@
   padding: 0 8px 16px 0;
 }
 
-.diviner-document-section em {
+.diviner-message-not-documented {
   color: {$lightgreytext};
-  text-decoration: italic;
+  font-style: italic;
+  margin: 16px;
+}
+
+.diviner-atom-signature {
+  font-weight: normal;
+}
+
+.diviner-atom-signature-name {
+  font-weight: bold;
+}
+
+.diviner-list .diviner-atom-signature {
+  color: {$greytext};
+}
+
+.diviner-list a {
+  font-weight: bold;
 }
 
 .diviner-method-implementation-header {
+  color: {$greytext};
+  margin-bottom: -8px;
+}
+
+.diviner-method-implementation-inherited {
+  color: {$darkgreytext};
+}
+
+.diviner-method-implementation-inherited .diviner-method-implementation-header {
   color: {$lightgreytext};
 }
+
+/**
+ * Fix excessive padding between method headers and method documentation for
+ * methods with no inherited context.
+ */
+.diviner-document-section .phabricator-header-shell + .phabricator-remarkup {
+  padding-top: 0;
+}
+

@@ -84,7 +84,7 @@
 }
 
 .phabricator-timeline-major-event .phabricator-timeline-title {
-  background: #f7f7f7;
+  background: {$lightgreybackground};
   min-height: 29px;
 }
 

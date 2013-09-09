@@ -38,7 +38,7 @@
   margin: 10px;
   text-align: center;
   padding: 10px;
-  color: #18559D;
+  color: {$bluetext};
 }
 
 .conpherence-show-older-messages-loading {
@@ -201,7 +201,7 @@
   height: 124px;
   padding: 6px;
   border-width: 1px 0;
-  border-color: #BFCFDA;
+  border-color: {$lightblueborder};
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
