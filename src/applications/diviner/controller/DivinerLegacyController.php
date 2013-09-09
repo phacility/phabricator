@@ -30,7 +30,8 @@ final class DivinerLegacyController extends DivinerController {
     $viewer = $request->getUser();
 
     $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setPlain(true);
 
     foreach ($links as $href => $link) {
       $item = id(new PHUIObjectItemView())
@@ -46,10 +47,17 @@ final class DivinerLegacyController extends DivinerController {
       id(new PhabricatorCrumbView())
         ->setName(pht('Documentation')));
 
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader(pht('Documentation'));
+
+    $document = new PHUIDocumentView();
+    $document->setHeader($header);
+    $document->appendChild($list);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $list,
+        $document,
       ),
       array(
         'title' => pht('Documentation'),
