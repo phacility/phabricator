@@ -15,7 +15,7 @@ final class ManiphestRemarkupRule
 
     return id(new ManiphestTaskQuery())
       ->setViewer($viewer)
-      ->withTaskIDs($ids)
+      ->withIDs($ids)
       ->execute();
   }
 

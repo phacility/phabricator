@@ -460,7 +460,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
     $query = new ManiphestTaskQuery();
     $query->setViewer($viewer);
-    $query->withTaskIDs($task_ids);
+    $query->withIDs($task_ids);
 
     if ($project_phids) {
       $query->withAllProjects($project_phids);

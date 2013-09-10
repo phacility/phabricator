@@ -228,7 +228,7 @@ abstract class DifferentialFreeformFieldSpecification
 
     $tasks = id(new ManiphestTaskQuery())
       ->setViewer($user)
-      ->withTaskIDs(array_keys($tasks_statuses))
+      ->withIDs(array_keys($tasks_statuses))
       ->execute();
 
     foreach ($tasks as $task_id => $task) {

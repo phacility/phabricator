@@ -16,7 +16,7 @@ final class ManiphestTaskMailReceiver extends PhabricatorObjectMailReceiver {
 
     $results = id(new ManiphestTaskQuery())
       ->setViewer($viewer)
-      ->withTaskIDs(array($id))
+      ->withIDs(array($id))
       ->execute();
 
     return head($results);
