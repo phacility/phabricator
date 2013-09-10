@@ -28,7 +28,9 @@ abstract class DivinerController extends PhabricatorController {
     $user = $request->getUser();
 
     $list = id(new PHUIObjectItemListView())
-      ->setUser($user);
+      ->setUser($user)
+      ->setPlain(true)
+      ->setFlush(true);
 
     foreach ($symbols as $symbol) {
       $item = id(new PHUIObjectItemView())

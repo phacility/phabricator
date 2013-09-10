@@ -68,10 +68,7 @@ final class PHUIObjectItemListView extends AphrontTagView {
     if ($this->flush) {
       $classes[] = 'phui-object-list-flush';
     }
-    // If plain, drop all styles
     if ($this->plain) {
-      $classes = array();
-      $classes[] = 'phui-object-item-list-view';
       $classes[] = 'phui-object-list-plain';
     }
 

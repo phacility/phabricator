@@ -65,6 +65,10 @@
   padding: 0 8px 16px 0;
 }
 
+body .diviner-document-section .phabricator-header-view {
+  width: 100%;
+}
+
 .diviner-message-not-documented {
   color: {$lightgreytext};
   font-style: italic;
@@ -106,5 +110,10 @@
  */
 .diviner-document-section .phabricator-header-shell + .phabricator-remarkup {
   padding-top: 0;
+}
+
+.diviner-list li {
+  line-height: 18px;
+  padding-bottom: 4px;
 }
 
