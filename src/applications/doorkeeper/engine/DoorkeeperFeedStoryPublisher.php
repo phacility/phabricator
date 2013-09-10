@@ -1,9 +1,55 @@
 <?php
 
+/**
+ * @task config Configuration
+ */
 abstract class DoorkeeperFeedStoryPublisher {
 
   private $feedStory;
   private $viewer;
+  private $renderWithImpliedContext;
+
+
+/* -(  Configuration  )------------------------------------------------------ */
+
+
+  /**
+   * Render story text using contextual langauge to identify the object the
+   * story is about, instead of the full object name. For example, without
+   * contextual language a story might render like this:
+   *
+   *   alincoln created D123: Chop Wood for Log Cabin v2.0
+   *
+   * With contextual langauge, it will render like this instead:
+   *
+   *   alincoln created this revision.
+   *
+   * If the interface where the text will be displayed is specific to an
+   * individual object (like Asana tasks that represent one review or commit
+   * are), it's generally more natural to use language that assumes context.
+   * If the target context may show information about several objects (like
+   * JIRA issues which can have several linked revisions), it's generally
+   * more useful not to assume context.
+   *
+   * @param bool  True to assume object context when rendering.
+   * @return this
+   * @task config
+   */
+  public function setRenderWithImpliedContext($render_with_implied_context) {
+    $this->renderWithImpliedContext = $render_with_implied_context;
+    return $this;
+  }
+
+  /**
+   * Determine if rendering should assume object context. For discussion, see
+   * @{method:setRenderWithImpliedContext}.
+   *
+   * @return bool True if rendering should assume object context is implied.
+   * @task config
+   */
+  public function getRenderWithImpliedContext() {
+    return $this->renderWithImpliedContext;
+  }
 
   public function setFeedStory(PhabricatorFeedStory $feed_story) {
     $this->feedStory = $feed_story;

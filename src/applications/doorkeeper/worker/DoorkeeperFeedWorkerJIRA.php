@@ -54,7 +54,7 @@ final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
       return;
     }
 
-    $story_text = $publisher->getStoryText($object);
+    $story_text = $this->renderStoryText();
 
     $xobjs = mgroup($xobjs, 'getApplicationDomain');
     foreach ($xobjs as $domain => $xobj_list) {
@@ -154,6 +154,16 @@ final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
     $try_users = array_filter($try_users);
 
     return $try_users;
+  }
+
+  private function renderStoryText() {
+    $object = $this->getStoryObject();
+    $publisher = $this->getPublisher();
+
+    $text = $publisher->getStoryText($object);
+    $uri = $publisher->getObjectURI($object);
+
+    return $text."\n\n".$uri;
   }
 
 }

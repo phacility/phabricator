@@ -50,7 +50,7 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
 
   // TODO: At some point, make feed rendering not terrible and remove this
   // hacky mess.
-  public function renderForAsanaBridge() {
+  public function renderForAsanaBridge($implied_context = false) {
     $data = $this->getStoryData();
     $comment = $data->getValue('content');
 
@@ -58,7 +58,15 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $action = $this->getValue('action');
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
 
-    $title = "{$author_name} {$verb} this commit.";
+    $commit_phid = $this->getPrimaryObjectPHID();
+    $commit_name = $this->getHandle($commit_phid)->getFullName();
+
+    if ($implied_context) {
+      $title = "{$author_name} {$verb} this commit.";
+    } else {
+      $title = "{$author_name} {$verb} commit {$commit_name}.";
+    }
+
     if (strlen($comment)) {
       $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
         ->setConfig('viewer', new PhabricatorUser())

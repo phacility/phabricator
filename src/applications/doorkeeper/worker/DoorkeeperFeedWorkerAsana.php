@@ -414,7 +414,9 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
       // because everything else is idempotent, so this is the only effect we
       // can't safely run more than once.
 
-      $text = $publisher->getStoryText($object);
+      $text = $publisher
+        ->setRenderWithImpliedContext(true)
+        ->getStoryText($object);
 
       $this->makeAsanaAPICall(
         $oauth_token,

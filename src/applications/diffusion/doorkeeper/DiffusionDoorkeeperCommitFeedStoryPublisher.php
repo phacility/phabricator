@@ -176,9 +176,11 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
   }
 
   public function getStoryText($object) {
+    $implied_context = $this->getRenderWithImpliedContext();
+
     $story = $this->getFeedStory();
     if ($story instanceof PhabricatorFeedStoryAudit) {
-      $text = $story->renderForAsanaBridge();
+      $text = $story->renderForAsanaBridge($implied_context);
     } else {
       $text = $story->renderText();
     }
