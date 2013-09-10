@@ -35,6 +35,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private $sshKeyfile;
 
+  private $commitCount = self::ATTACHABLE;
+  private $mostRecentCommit = self::ATTACHABLE;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -69,6 +72,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;
+  }
+
+  public function attachCommitCount($count) {
+    $this->commitCount = $count;
+    return $this;
+  }
+
+  public function getCommitCount() {
+    return $this->assertAttached($this->commitCount);
+  }
+
+  public function attachMostRecentCommit(
+    PhabricatorRepositoryCommit $commit = null) {
+    $this->mostRecentCommit = $commit;
+    return $this;
+  }
+
+  public function getMostRecentCommit() {
+    return $this->assertAttached($this->mostRecentCommit);
   }
 
   public function getDiffusionBrowseURIForPath(

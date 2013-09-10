@@ -41,6 +41,8 @@ final class DiffusionHomeController extends DiffusionController {
 
     $repositories = id(new PhabricatorRepositoryQuery())
       ->setViewer($user)
+      ->needCommitCounts(true)
+      ->needMostRecentCommits(true)
       ->execute();
 
     foreach ($repositories as $key => $repo) {
@@ -49,25 +51,6 @@ final class DiffusionHomeController extends DiffusionController {
       }
     }
     $repositories = msort($repositories, 'getName');
-
-    $repository_ids = mpull($repositories, 'getID');
-    $summaries = array();
-    $commits = array();
-    if ($repository_ids) {
-      $summaries = queryfx_all(
-        id(new PhabricatorRepository())->establishConnection('r'),
-        'SELECT * FROM %T WHERE repositoryID IN (%Ld)',
-        PhabricatorRepository::TABLE_SUMMARY,
-        $repository_ids);
-        $summaries = ipull($summaries, null, 'repositoryID');
-
-      $commit_ids = array_filter(ipull($summaries, 'lastCommitID'));
-      if ($commit_ids) {
-        $commit = new PhabricatorRepositoryCommit();
-        $commits = $commit->loadAllWhere('id IN (%Ld)', $commit_ids);
-        $commits = mpull($commits, null, 'getRepositoryID');
-      }
-    }
 
     $branch = new PhabricatorRepositoryBranch();
     $lint_messages = queryfx_all(
@@ -84,10 +67,9 @@ final class DiffusionHomeController extends DiffusionController {
     $show_lint = false;
     foreach ($repositories as $repository) {
       $id = $repository->getID();
-      $commit = idx($commits, $id);
 
-      $size = idx(idx($summaries, $id, array()), 'size', '-');
-      if ($size != '-') {
+      $size = $repository->getCommitCount();
+      if ($size) {
         $size = hsprintf(
           '<a href="%s">%s</a>',
           DiffusionRequest::generateDiffusionURI(array(
@@ -114,9 +96,10 @@ final class DiffusionHomeController extends DiffusionController {
       }
 
       $datetime = '';
-      if ($commit) {
-        $date = phabricator_date($commit->getEpoch(), $user);
-        $time = phabricator_time($commit->getEpoch(), $user);
+      $most_recent_commit = $repository->getMostRecentCommit();
+      if ($most_recent_commit) {
+        $date = phabricator_date($most_recent_commit->getEpoch(), $user);
+        $time = phabricator_time($most_recent_commit->getEpoch(), $user);
         $datetime = $date.' '.$time;
       }
 
@@ -125,13 +108,13 @@ final class DiffusionHomeController extends DiffusionController {
         ('/diffusion/'.$repository->getCallsign().'/'),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
-        $size,
+        $size ? $size : null,
         $lint_count,
-        $commit
+        $most_recent_commit
           ? DiffusionView::linkCommit(
               $repository,
-              $commit->getCommitIdentifier(),
-              $commit->getSummary())
+              $most_recent_commit->getCommitIdentifier(),
+              $most_recent_commit->getSummary())
           : pht('No Commits'),
         $datetime
       );
