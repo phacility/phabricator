@@ -36,6 +36,7 @@ final class ManiphestTaskQuery
   private $statuses;
 
   private $priority         = null;
+  private $priorities;
 
   private $minPriority      = null;
   private $maxPriority      = null;
@@ -123,6 +124,11 @@ final class ManiphestTaskQuery
     return $this;
   }
 
+  public function withPriorities(array $priorities) {
+    $this->priorities = $priorities;
+    return $this;
+  }
+
   public function withPrioritiesBetween($min, $max) {
     $this->minPriority = $min;
     $this->maxPriority = $max;
@@ -197,6 +203,7 @@ final class ManiphestTaskQuery
     $where[] = $this->buildStatusWhereClause($conn);
     $where[] = $this->buildStatusesWhereClause($conn);
     $where[] = $this->buildPriorityWhereClause($conn);
+    $where[] = $this->buildPrioritiesWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
     $where[] = $this->buildSubscriberWhereClause($conn);
@@ -365,6 +372,18 @@ final class ManiphestTaskQuery
 
     return null;
   }
+
+  private function buildPrioritiesWhereClause(AphrontDatabaseConnection $conn) {
+    if ($this->priorities) {
+      return qsprintf(
+        $conn,
+        'priority IN (%Ld)',
+        $this->priorities);
+    }
+
+    return null;
+  }
+
 
   private function buildAuthorWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->authorPHIDs) {

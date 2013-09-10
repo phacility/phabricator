@@ -17,7 +17,19 @@ final class ManiphestTaskSearchEngine
       $this->readUsersFromRequest($request, 'authors'));
 
     $saved->setParameter('statuses', $request->getArr('statuses'));
+    $saved->setParameter('priorities', $request->getArr('priorities'));
     $saved->setParameter('order', $request->getStr('order'));
+
+    $ids = $request->getStrList('ids');
+    foreach ($ids as $key => $id) {
+      $id = trim($id, ' Tt');
+      if (!$id || !is_numeric($id)) {
+        unset($ids[$key]);
+      } else {
+        $ids[$key] = $id;
+      }
+    }
+    $saved->setParameter('ids', $ids);
 
     return $saved;
   }
@@ -45,12 +57,22 @@ final class ManiphestTaskSearchEngine
       $query->withStatuses($statuses);
     }
 
+    $priorities = $saved->getParameter('priorities');
+    if ($priorities) {
+      $query->withPriorities($priorities);
+    }
+
     $order = $saved->getParameter('order');
     $order = idx($this->getOrderValues(), $order);
     if ($order) {
       $query->setOrderBy($order);
     } else {
       $query->setOrderBy(head($this->getOrderValues()));
+    }
+
+    $ids = $saved->getParameter('ids');
+    if ($ids) {
+      $query->withIDs($ids);
     }
 
     return $query;
@@ -94,6 +116,20 @@ final class ManiphestTaskSearchEngine
         isset($statuses[$status]));
     }
 
+    $priorities = $saved->getParameter('priorities', array());
+    $priorities = array_fuse($priorities);
+    $priority_control = id(new AphrontFormCheckboxControl())
+      ->setLabel(pht('Priority'));
+    foreach (ManiphestTaskPriority::getTaskPriorityMap() as $pri => $name) {
+      $priority_control->addCheckbox(
+        'priorities[]',
+        $pri,
+        $name,
+        isset($priorities[$pri]));
+    }
+
+    $ids = $saved->getParameter('ids', array());
+
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -115,12 +151,18 @@ final class ManiphestTaskSearchEngine
           ->setLabel(pht('Authors'))
           ->setValue($author_tokens))
       ->appendChild($status_control)
+      ->appendChild($priority_control)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('order')
           ->setLabel(pht('Order'))
           ->setValue($saved->getParameter('order'))
-          ->setOptions($this->getOrderOptions()));
+          ->setOptions($this->getOrderOptions()))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('ids')
+          ->setLabel(pht('Task IDs'))
+          ->setValue(implode(', ', $ids)));
   }
 
   protected function getURI($path) {
