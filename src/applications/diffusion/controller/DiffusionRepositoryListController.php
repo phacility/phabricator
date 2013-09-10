@@ -31,7 +31,7 @@ final class DiffusionRepositoryListController extends DiffusionController
 
     $viewer = $this->getRequest()->getUser();
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
