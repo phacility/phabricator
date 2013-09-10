@@ -15,6 +15,10 @@
   margin: 0 8px 16px;
 }
 
+a.diviner-atom-signature-name {
+  color: {$violet};
+}
+
 .diviner-table-header {
   padding: 4px 16px;
   background-color: {$greybackground};

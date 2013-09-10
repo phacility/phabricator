@@ -1149,7 +1149,7 @@ celerity_register_resource_map(array(
   ),
   'diviner-shared-css' =>
   array(
-    'uri' => '/res/bee7ddb9/rsrc/css/diviner/diviner-shared.css',
+    'uri' => '/res/ef49b30b/rsrc/css/diviner/diviner-shared.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3747,7 +3747,7 @@ celerity_register_resource_map(array(
   ),
   'phui-document-view-css' =>
   array(
-    'uri' => '/res/cef28ad9/rsrc/css/phui/phui-document.css',
+    'uri' => '/res/c95d4bdf/rsrc/css/phui/phui-document.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -97,6 +97,10 @@
   background-color: #f6f7f8;
 }
 
+.phui-document-content .phabricator-property-list-value {
+  width: auto;
+}
+
 .phui-document-content {
   min-height: 240px;
   background: #fff;
