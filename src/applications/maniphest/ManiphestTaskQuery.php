@@ -33,6 +33,8 @@ final class ManiphestTaskQuery
   const STATUS_SPITE        = 'status-spite';
   const STATUS_DUPLICATE    = 'status-duplicate';
 
+  private $statuses;
+
   private $priority         = null;
 
   private $minPriority      = null;
@@ -108,6 +110,11 @@ final class ManiphestTaskQuery
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -188,6 +195,7 @@ final class ManiphestTaskQuery
     $where[] = $this->buildTaskIDsWhereClause($conn);
     $where[] = $this->buildTaskPHIDsWhereClause($conn);
     $where[] = $this->buildStatusWhereClause($conn);
+    $where[] = $this->buildStatusesWhereClause($conn);
     $where[] = $this->buildPriorityWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
@@ -329,6 +337,16 @@ final class ManiphestTaskQuery
           'status = %d',
           $constant);
     }
+  }
+
+  private function buildStatusesWhereClause(AphrontDatabaseConnection $conn) {
+    if ($this->statuses) {
+      return qsprintf(
+        $conn,
+        'status IN (%Ld)',
+        $this->statuses);
+    }
+    return null;
   }
 
   private function buildPriorityWhereClause(AphrontDatabaseConnection $conn) {

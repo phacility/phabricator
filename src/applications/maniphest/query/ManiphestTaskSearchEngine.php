@@ -16,6 +16,9 @@ final class ManiphestTaskSearchEngine
       'authorPHIDs',
       $this->readUsersFromRequest($request, 'authors'));
 
+    $saved->setParameter('statuses', $request->getArr('statuses'));
+    $saved->setParameter('order', $request->getStr('order'));
+
     return $saved;
   }
 
@@ -35,6 +38,19 @@ final class ManiphestTaskSearchEngine
       if ($assigned_phids) {
         $query->withOwners($assigned_phids);
       }
+    }
+
+    $statuses = $saved->getParameter('statuses');
+    if ($statuses) {
+      $query->withStatuses($statuses);
+    }
+
+    $order = $saved->getParameter('order');
+    $order = idx($this->getOrderValues(), $order);
+    if ($order) {
+      $query->setOrderBy($order);
+    } else {
+      $query->setOrderBy(head($this->getOrderValues()));
     }
 
     return $query;
@@ -66,6 +82,18 @@ final class ManiphestTaskSearchEngine
 
     $with_unassigned = $saved->getParameter('withUnassigned');
 
+    $statuses = $saved->getParameter('statuses', array());
+    $statuses = array_fuse($statuses);
+    $status_control = id(new AphrontFormCheckboxControl())
+      ->setLabel(pht('Status'));
+    foreach (ManiphestTaskStatus::getTaskStatusMap() as $status => $name) {
+      $status_control->addCheckbox(
+        'statuses[]',
+        $status,
+        $name,
+        isset($statuses[$status]));
+    }
+
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -85,7 +113,14 @@ final class ManiphestTaskSearchEngine
           ->setDatasource('/typeahead/common/accounts/')
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_tokens));
+          ->setValue($author_tokens))
+      ->appendChild($status_control)
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('order')
+          ->setLabel(pht('Order'))
+          ->setValue($saved->getParameter('order'))
+          ->setOptions($this->getOrderOptions()));
   }
 
   protected function getURI($path) {
@@ -100,6 +135,7 @@ final class ManiphestTaskSearchEngine
       $names['authored'] = pht('Authored');
     }
 
+    $names['open'] = pht('Open Tasks');
     $names['all'] = pht('All Tasks');
 
     return $names;
@@ -116,12 +152,37 @@ final class ManiphestTaskSearchEngine
       case 'all':
         return $query;
       case 'assigned':
-        return $query->setParameter('assignedPHIDs', array($viewer_phid));
+        return $query
+          ->setParameter('assignedPHIDs', array($viewer_phid))
+          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
+      case 'open':
+        return $query
+          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
       case 'authored':
-        return $query->setParameter('authorPHIDs', array($viewer_phid));
+        return $query
+          ->setParameter('authorPHIDs', array($viewer_phid))
+          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  private function getOrderOptions() {
+    return array(
+      'priority' => pht('Priority'),
+      'updated' => pht('Date Updated'),
+      'created' => pht('Date Created'),
+      'title' => pht('Title'),
+    );
+  }
+
+  private function getOrderValues() {
+    return array(
+      'priority' => ManiphestTaskQuery::ORDER_PRIORITY,
+      'updated' => ManiphestTaskQuery::ORDER_MODIFIED,
+      'created' => ManiphestTaskQuery::ORDER_CREATED,
+      'title' => ManiphestTaskQuery::ORDER_TITLE,
+    );
   }
 
 }
