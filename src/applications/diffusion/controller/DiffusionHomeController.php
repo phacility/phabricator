@@ -52,19 +52,7 @@ final class DiffusionHomeController extends DiffusionController {
     }
     $repositories = msort($repositories, 'getName');
 
-    $branch = new PhabricatorRepositoryBranch();
-    $lint_messages = queryfx_all(
-      $branch->establishConnection('r'),
-      'SELECT b.repositoryID, b.name, COUNT(lm.id) AS n
-        FROM %T b
-        LEFT JOIN %T lm ON b.id = lm.branchID
-        GROUP BY b.id',
-      $branch->getTableName(),
-      PhabricatorRepository::TABLE_LINTMESSAGE);
-    $lint_messages = igroup($lint_messages, 'repositoryID');
-
     $rows = array();
-    $show_lint = false;
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
@@ -77,22 +65,6 @@ final class DiffusionHomeController extends DiffusionController {
             'action' => 'history',
           )),
           pht('%s Commits', new PhutilNumber($size)));
-      }
-
-      $lint_count = '';
-      $lint_branches = ipull(idx($lint_messages, $id, array()), 'n', 'name');
-      $branch = $repository->getDefaultArcanistBranch();
-      if (isset($lint_branches[$branch])) {
-        $show_lint = true;
-        $lint_count = phutil_tag(
-          'a',
-          array(
-            'href' => DiffusionRequest::generateDiffusionURI(array(
-              'callsign' => $repository->getCallsign(),
-              'action' => 'lint',
-            )),
-          ),
-          pht('%s Lint Messages', new PhutilNumber($lint_branches[$branch])));
       }
 
       $datetime = '';
@@ -109,7 +81,6 @@ final class DiffusionHomeController extends DiffusionController {
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
         $size ? $size : null,
-        $lint_count,
         $most_recent_commit
           ? DiffusionView::linkCommit(
               $repository,
@@ -151,14 +122,11 @@ final class DiffusionHomeController extends DiffusionController {
     foreach ($rows as $row) {
       $item = id(new PHUIObjectItemView())
           ->setHeader($row[0])
-          ->setSubHead($row[5])
+          ->setSubHead($row[4])
           ->setHref($row[1])
           ->addAttribute(($row[2] ? $row[2] : pht('No Information')))
           ->addAttribute(($row[3] ? $row[3] : pht('0 Commits')))
-          ->addIcon('none', $row[6]);
-      if ($show_lint) {
-        $item->addAttribute($row[4]);
-      }
+          ->addIcon('none', $row[5]);
       $list->addItem($item);
     }
 
