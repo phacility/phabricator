@@ -1,56 +1,35 @@
 <?php
 
-final class DiffusionRepositoryListController extends DiffusionController {
+final class DiffusionRepositoryListController extends DiffusionController
+  implements PhabricatorApplicationSearchResultsControllerInterface {
+
+  private $queryKey;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
+
+  public function willProcessRequest(array $data) {
+    $this->queryKey = idx($data, 'queryKey');
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+//      ->setPreamble($this->buildShortcuts())
+      ->setSearchEngine(new PhabricatorRepositorySearchEngine())
+      ->setNavigation($this->buildSideNavView());
 
-    $shortcuts = id(new PhabricatorRepositoryShortcut())->loadAll();
-    if ($shortcuts) {
-      $shortcuts = msort($shortcuts, 'getSequence');
+    return $this->delegateToController($controller);
+  }
 
-      $rows = array();
-      foreach ($shortcuts as $shortcut) {
-        $rows[] = array(
-          $shortcut->getName(),
-          $shortcut->getHref(),
-          $shortcut->getDescription(),
-        );
-      }
+  public function renderResultsList(
+    array $repositories,
+    PhabricatorSavedQuery $query) {
+    assert_instances_of($repositories, 'PhabricatorRepository');
 
-      $list = new PHUIObjectItemListView();
-      $list->setCards(true);
-      $list->setFlush(true);
-      foreach ($rows as $row) {
-        $item = id(new PHUIObjectItemView())
-            ->setHeader($row[0])
-            ->setHref($row[1])
-            ->setSubhead(($row[2] ? $row[2] : pht('No Description')));
-        $list->addItem($item);
-      }
-
-      $shortcut_panel = id(new AphrontPanelView())
-        ->setNoBackground(true)
-        ->setHeader(pht('Shortcuts'))
-        ->appendChild($list);
-
-    } else {
-      $shortcut_panel = null;
-    }
-
-    $repositories = id(new PhabricatorRepositoryQuery())
-      ->setViewer($user)
-      ->needCommitCounts(true)
-      ->needMostRecentCommits(true)
-      ->execute();
-
-    foreach ($repositories as $key => $repo) {
-      if (!$repo->isTracked()) {
-        unset($repositories[$key]);
-      }
-    }
-    $repositories = msort($repositories, 'getName');
+    $viewer = $this->getRequest()->getUser();
 
     $rows = array();
     foreach ($repositories as $repository) {
@@ -70,8 +49,8 @@ final class DiffusionRepositoryListController extends DiffusionController {
       $datetime = '';
       $most_recent_commit = $repository->getMostRecentCommit();
       if ($most_recent_commit) {
-        $date = phabricator_date($most_recent_commit->getEpoch(), $user);
-        $time = phabricator_time($most_recent_commit->getEpoch(), $user);
+        $date = phabricator_date($most_recent_commit->getEpoch(), $viewer);
+        $time = phabricator_time($most_recent_commit->getEpoch(), $viewer);
         $datetime = $date.' '.$time;
       }
 
@@ -99,7 +78,7 @@ final class DiffusionRepositoryListController extends DiffusionController {
       'repository tool');
     $preface = pht('This instance of Phabricator does not have any '.
                    'configured repositories.');
-    if ($user->getIsAdmin()) {
+    if ($viewer->getIsAdmin()) {
       $no_repositories_txt = hsprintf(
         '%s %s',
         $preface,
@@ -117,41 +96,70 @@ final class DiffusionRepositoryListController extends DiffusionController {
     }
 
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
-    $list->setFlush(true);
     foreach ($rows as $row) {
       $item = id(new PHUIObjectItemView())
-          ->setHeader($row[0])
-          ->setSubHead($row[4])
-          ->setHref($row[1])
-          ->addAttribute(($row[2] ? $row[2] : pht('No Information')))
-          ->addAttribute(($row[3] ? $row[3] : pht('0 Commits')))
-          ->addIcon('none', $row[5]);
+        ->setHeader($row[0])
+        ->setSubHead($row[4])
+        ->setHref($row[1])
+        ->addAttribute(($row[2] ? $row[2] : pht('No Information')))
+        ->addAttribute(($row[3] ? $row[3] : pht('0 Commits')))
+        ->addIcon('none', $row[5]);
       $list->addItem($item);
     }
 
-    $list = id(new AphrontPanelView())
-      ->setNoBackground(true)
-      ->setHeader(pht('Repositories'))
-      ->appendChild($list);
+    return $list;
+  }
+
+  public function buildSideNavView($for_app = false) {
+    $viewer = $this->getRequest()->getUser();
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
 
-    $crumbs = $this->buildCrumbs();
-    $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
-        ->setName(pht('All Repositories'))
-        ->setHref($this->getApplicationURI()));
+    id(new PhabricatorRepositorySearchEngine())
+      ->setViewer($viewer)
+      ->addNavigationItems($nav->getMenu());
 
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $shortcut_panel,
-        $list,
-      ),
-      array(
-        'title' => pht('Diffusion'),
-        'device' => true,
-      ));
+    $nav->selectFilter(null);
+
+    return $nav;
+  }
+
+  private function buildShortcuts() {
+    $shortcuts = id(new PhabricatorRepositoryShortcut())->loadAll();
+    if ($shortcuts) {
+      $shortcuts = msort($shortcuts, 'getSequence');
+
+      $rows = array();
+      foreach ($shortcuts as $shortcut) {
+        $rows[] = array(
+          $shortcut->getName(),
+          $shortcut->getHref(),
+          $shortcut->getDescription(),
+        );
+      }
+
+      $list = new PHUIObjectItemListView();
+      $list->setCards(true);
+      $list->setFlush(true);
+      foreach ($rows as $row) {
+        $item = id(new PHUIObjectItemView())
+          ->setHeader($row[0])
+          ->setHref($row[1])
+          ->setSubhead(($row[2] ? $row[2] : pht('No Description')));
+        $list->addItem($item);
+      }
+
+      $shortcut_panel = id(new AphrontPanelView())
+        ->setNoBackground(true)
+        ->setHeader(pht('Shortcuts'))
+        ->appendChild($list);
+
+    } else {
+      $shortcut_panel = null;
+    }
+    return $shortcut_panel;
   }
 
 }

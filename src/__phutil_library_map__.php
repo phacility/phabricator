@@ -1533,6 +1533,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPullEngine' => 'applications/repository/engine/PhabricatorRepositoryPullEngine.php',
     'PhabricatorRepositoryPullLocalDaemon' => 'applications/repository/daemon/PhabricatorRepositoryPullLocalDaemon.php',
     'PhabricatorRepositoryQuery' => 'applications/repository/query/PhabricatorRepositoryQuery.php',
+    'PhabricatorRepositorySearchEngine' => 'applications/repository/query/PhabricatorRepositorySearchEngine.php',
     'PhabricatorRepositoryShortcut' => 'applications/repository/storage/PhabricatorRepositoryShortcut.php',
     'PhabricatorRepositorySvnCommitChangeParserWorker' => 'applications/repository/worker/commitchangeparser/PhabricatorRepositorySvnCommitChangeParserWorker.php',
     'PhabricatorRepositorySvnCommitMessageParserWorker' => 'applications/repository/worker/commitmessageparser/PhabricatorRepositorySvnCommitMessageParserWorker.php',
@@ -2536,7 +2537,11 @@ phutil_register_library_map(array(
     'DiffusionRepositoryEditBasicController' => 'DiffusionController',
     'DiffusionRepositoryEditController' => 'DiffusionController',
     'DiffusionRepositoryEditEncodingController' => 'DiffusionController',
-    'DiffusionRepositoryListController' => 'DiffusionController',
+    'DiffusionRepositoryListController' =>
+    array(
+      0 => 'DiffusionController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'DiffusionSetupException' => 'AphrontUsageException',
     'DiffusionStableCommitNameQuery' => 'DiffusionQuery',
     'DiffusionSvnCommitParentsQuery' => 'DiffusionCommitParentsQuery',
@@ -3665,6 +3670,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryPullEngine' => 'PhabricatorRepositoryEngine',
     'PhabricatorRepositoryPullLocalDaemon' => 'PhabricatorDaemon',
     'PhabricatorRepositoryQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorRepositorySearchEngine' => 'PhabricatorApplicationSearchEngine',
     'PhabricatorRepositoryShortcut' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositorySvnCommitChangeParserWorker' => 'PhabricatorRepositoryCommitChangeParserWorker',
     'PhabricatorRepositorySvnCommitMessageParserWorker' => 'PhabricatorRepositoryCommitMessageParserWorker',
