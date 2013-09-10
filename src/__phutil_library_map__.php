@@ -718,6 +718,7 @@ phutil_register_library_map(array(
     'ManiphestTaskEditController' => 'applications/maniphest/controller/ManiphestTaskEditController.php',
     'ManiphestTaskExtensions' => 'applications/maniphest/extensions/ManiphestTaskExtensions.php',
     'ManiphestTaskListController' => 'applications/maniphest/controller/ManiphestTaskListController.php',
+    'ManiphestTaskListControllerPro' => 'applications/maniphest/controller/ManiphestTaskListControllerPro.php',
     'ManiphestTaskListView' => 'applications/maniphest/view/ManiphestTaskListView.php',
     'ManiphestTaskMailReceiver' => 'applications/maniphest/mail/ManiphestTaskMailReceiver.php',
     'ManiphestTaskOwner' => 'applications/maniphest/constants/ManiphestTaskOwner.php',
@@ -725,6 +726,7 @@ phutil_register_library_map(array(
     'ManiphestTaskProject' => 'applications/maniphest/storage/ManiphestTaskProject.php',
     'ManiphestTaskProjectsView' => 'applications/maniphest/view/ManiphestTaskProjectsView.php',
     'ManiphestTaskQuery' => 'applications/maniphest/ManiphestTaskQuery.php',
+    'ManiphestTaskSearchEngine' => 'applications/maniphest/query/ManiphestTaskSearchEngine.php',
     'ManiphestTaskStatus' => 'applications/maniphest/constants/ManiphestTaskStatus.php',
     'ManiphestTaskSubscriber' => 'applications/maniphest/storage/ManiphestTaskSubscriber.php',
     'ManiphestTransaction' => 'applications/maniphest/storage/ManiphestTransaction.php',
@@ -2786,6 +2788,11 @@ phutil_register_library_map(array(
     'ManiphestTaskDetailController' => 'ManiphestController',
     'ManiphestTaskEditController' => 'ManiphestController',
     'ManiphestTaskListController' => 'ManiphestController',
+    'ManiphestTaskListControllerPro' =>
+    array(
+      0 => 'ManiphestController',
+      1 => 'PhabricatorApplicationSearchResultsControllerInterface',
+    ),
     'ManiphestTaskListView' => 'ManiphestView',
     'ManiphestTaskMailReceiver' => 'PhabricatorObjectMailReceiver',
     'ManiphestTaskOwner' => 'ManiphestConstants',
@@ -2793,6 +2800,7 @@ phutil_register_library_map(array(
     'ManiphestTaskProject' => 'ManiphestDAO',
     'ManiphestTaskProjectsView' => 'ManiphestView',
     'ManiphestTaskQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'ManiphestTaskSearchEngine' => 'PhabricatorApplicationSearchEngine',
     'ManiphestTaskStatus' => 'ManiphestConstants',
     'ManiphestTaskSubscriber' => 'ManiphestDAO',
     'ManiphestTransaction' =>

@@ -50,6 +50,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
       '/T(?P<id>[1-9]\d*)' => 'ManiphestTaskDetailController',
       '/maniphest/' => array(
         '' => 'ManiphestTaskListController',
+        'query/(?:(?P<queryKey>[^/]+)/)?' => 'ManiphestTaskListControllerPro',
         'view/(?P<view>\w+)/' => 'ManiphestTaskListController',
         'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
         'batch/' => 'ManiphestBatchEditController',
