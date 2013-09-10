@@ -15,22 +15,24 @@ final class FeedPublisherWorker extends FeedPushWorker {
         ));
     }
 
-    if (PhabricatorEnv::getEnvConfig('asana.workspace-id')) {
+    $argv = array(
+      array(),
+    );
+
+    // Find and schedule all the enabled Doorkeeper publishers.
+    $doorkeeper_workers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('DoorkeeperFeedWorker')
+      ->loadObjects($argv);
+    foreach ($doorkeeper_workers as $worker) {
+      if (!$worker->isEnabled()) {
+        continue;
+      }
       PhabricatorWorker::scheduleTask(
-        'DoorkeeperFeedWorkerAsana',
+        get_class($worker),
         array(
           'key' => $story->getChronologicalKey(),
         ));
     }
-
-    if (PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider()) {
-      PhabricatorWorker::scheduleTask(
-        'DoorkeeperFeedWorkerJIRA',
-        array(
-          'key' => $story->getChronologicalKey(),
-        ));
-    }
-
   }
 
 
