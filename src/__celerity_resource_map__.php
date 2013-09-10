@@ -1149,7 +1149,7 @@ celerity_register_resource_map(array(
   ),
   'diviner-shared-css' =>
   array(
-    'uri' => '/res/7c3cca5f/rsrc/css/diviner/diviner-shared.css',
+    'uri' => '/res/bee7ddb9/rsrc/css/diviner/diviner-shared.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -27,22 +27,16 @@ abstract class DivinerController extends PhabricatorController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $list = id(new PHUIObjectItemListView())
-      ->setUser($user)
-      ->setPlain(true)
-      ->setFlush(true);
-
+    $list = array();
     foreach ($symbols as $symbol) {
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($symbol->getTitle())
+      $item = id(new DivinerBookItemView())
+        ->setTitle($symbol->getTitle())
         ->setHref($symbol->getURI())
-        ->addIcon('none',
-          DivinerAtom::getAtomTypeNameString(
+        ->setSubtitle($symbol->getSummary())
+        ->setType(DivinerAtom::getAtomTypeNameString(
             $symbol->getType()));
 
-      $item->addAttribute($symbol->getSummary());
-
-      $list->addItem($item);
+      $list[] = $item;
     }
 
     return $list;
