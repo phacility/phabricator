@@ -83,6 +83,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     $status = array();
 
     $query = id(new ManiphestTaskQuery())
+      ->setViewer($user)
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
       ->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW)
       ->setLimit(1)
@@ -97,6 +98,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
       ->setCount($count);
 
     $query = id(new ManiphestTaskQuery())
+      ->setViewer($user)
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
       ->withOwners(array($user->getPHID()))
       ->setLimit(1)

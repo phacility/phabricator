@@ -154,6 +154,7 @@ final class PhabricatorProjectProfileController
     $user = $this->getRequest()->getUser();
 
     $query = id(new ManiphestTaskQuery())
+      ->setViewer($user)
       ->withAnyProjects(array($project->getPHID()))
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)

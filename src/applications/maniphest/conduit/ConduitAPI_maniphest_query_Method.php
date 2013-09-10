@@ -65,6 +65,8 @@ class ConduitAPI_maniphest_query_Method
   protected function execute(ConduitAPIRequest $request) {
     $query = new ManiphestTaskQuery();
 
+    $query->setViewer($request->getUser());
+
     $task_ids = $request->getValue('ids');
     if ($task_ids) {
       $query->withTaskIDs($task_ids);

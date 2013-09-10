@@ -459,6 +459,7 @@ final class ManiphestTaskListController extends ManiphestController {
       ManiphestTaskPriority::getHighestPriority());
 
     $query = new ManiphestTaskQuery();
+    $query->setViewer($viewer);
     $query->withTaskIDs($task_ids);
 
     if ($project_phids) {

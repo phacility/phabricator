@@ -98,12 +98,12 @@ final class PhabricatorDirectoryMainController
 
   private function buildUnbreakNowPanel() {
     $user = $this->getRequest()->getUser();
-    $user_phid = $user->getPHID();
 
-    $task_query = new ManiphestTaskQuery();
-    $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
-    $task_query->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW);
-    $task_query->setLimit(10);
+    $task_query = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW)
+      ->setLimit(10);
 
     $tasks = $task_query->execute();
 
@@ -135,14 +135,14 @@ final class PhabricatorDirectoryMainController
     assert_instances_of($projects, 'PhabricatorProject');
 
     $user = $this->getRequest()->getUser();
-    $user_phid = $user->getPHID();
 
     if ($projects) {
-      $task_query = new ManiphestTaskQuery();
-      $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
-      $task_query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
-      $task_query->withAnyProjects(mpull($projects, 'getPHID'));
-      $task_query->setLimit(10);
+      $task_query = id(new ManiphestTaskQuery())
+        ->setViewer($user)
+        ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+        ->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE)
+        ->withAnyProjects(mpull($projects, 'getPHID'))
+        ->setLimit(10);
       $tasks = $task_query->execute();
     } else {
       $tasks = array();
@@ -249,11 +249,12 @@ final class PhabricatorDirectoryMainController
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
 
-    $task_query = new ManiphestTaskQuery();
-    $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
-    $task_query->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY);
-    $task_query->withOwners(array($user_phid));
-    $task_query->setLimit(10);
+    $task_query = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY)
+      ->withOwners(array($user_phid))
+      ->setLimit(10);
 
     $tasks = $task_query->execute();
 
