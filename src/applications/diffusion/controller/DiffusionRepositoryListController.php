@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionHomeController extends DiffusionController {
+final class DiffusionRepositoryListController extends DiffusionController {
 
   public function processRequest() {
     $request = $this->getRequest();
