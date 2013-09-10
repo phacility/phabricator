@@ -35,7 +35,7 @@ final class DiffusionRepositoryListController extends DiffusionController
     foreach ($repositories as $repository) {
       $id = $repository->getID();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setUser($viewer)
         ->setHeader($repository->getName())
         ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
