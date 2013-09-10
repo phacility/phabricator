@@ -2792,7 +2792,7 @@ phutil_register_library_map(array(
     'ManiphestTaskPriority' => 'ManiphestConstants',
     'ManiphestTaskProject' => 'ManiphestDAO',
     'ManiphestTaskProjectsView' => 'ManiphestView',
-    'ManiphestTaskQuery' => 'PhabricatorQuery',
+    'ManiphestTaskQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'ManiphestTaskStatus' => 'ManiphestConstants',
     'ManiphestTaskSubscriber' => 'ManiphestDAO',
     'ManiphestTransaction' =>

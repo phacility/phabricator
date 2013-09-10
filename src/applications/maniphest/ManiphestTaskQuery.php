@@ -6,7 +6,8 @@
  *
  * @group maniphest
  */
-final class ManiphestTaskQuery extends PhabricatorQuery {
+final class ManiphestTaskQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $taskIDs             = array();
   private $taskPHIDs           = array();
@@ -59,16 +60,6 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
   private $rowCount         = null;
 
   private $groupByProjectResults = null; // See comment at bottom for details
-  private $viewer;
-
-  public function setViewer(PhabricatorUser $viewer) {
-    $this->viewer = $viewer;
-    return $this;
-  }
-
-  public function getViewer() {
-    return $this->viewer;
-  }
 
   public function withAuthors(array $authors) {
     $this->authorPHIDs = $authors;
@@ -151,16 +142,6 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return $this;
   }
 
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
-
-  public function setOffset($offset) {
-    $this->offset = $offset;
-    return $this;
-  }
-
   public function setCalculateRows($calculate_rows) {
     $this->calculateRows = $calculate_rows;
     return $this;
@@ -189,31 +170,16 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return $this;
   }
 
-  /**
-   * This is a wrapper until we finish T603. The newer query class this class
-   * will inherit from handles catching this exception already.
-   */
-  public function execute() {
-
-    try {
-      $result = $this->executeManiphestQuery();
-    } catch (PhabricatorEmptyQueryException $ex) {
-      $result = array();
-      if ($this->calculateRows) {
-        $this->rowCount = 0;
-      }
-    }
-
-    return $result;
-  }
-
-  private function executeManiphestQuery() {
-
+  public function loadPage() {
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');
 
     if ($this->calculateRows) {
       $calc = 'SQL_CALC_FOUND_ROWS';
+
+      // Make sure we end up in the right state if we throw a
+      // PhabricatorEmptyQueryException.
+      $this->rowCount = 0;
     } else {
       $calc = '';
     }
@@ -271,19 +237,21 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
         count($this->projectPHIDs));
     }
 
-    $order = $this->buildOrderClause($conn);
+    $order = $this->buildCustomOrderClause($conn);
 
-    $offset = (int)nonempty($this->offset, 0);
-    $limit  = (int)nonempty($this->limit, self::DEFAULT_PAGE_SIZE);
+    // TODO: Clean up this nonstandardness.
+    if (!$this->getLimit()) {
+      $this->setLimit(self::DEFAULT_PAGE_SIZE);
+    }
 
     if ($this->groupBy == self::GROUP_PROJECT) {
-      $limit  = PHP_INT_MAX;
-      $offset = 0;
+      $this->setLimit(PHP_INT_MAX);
+      $this->setOffset(0);
     }
 
     $data = queryfx_all(
       $conn,
-      'SELECT %Q * %Q FROM %T task %Q %Q %Q %Q %Q LIMIT %d, %d',
+      'SELECT %Q * %Q FROM %T task %Q %Q %Q %Q %Q %Q',
       $calc,
       $count,
       $task_dao->getTableName(),
@@ -292,8 +260,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $group,
       $having,
       $order,
-      $offset,
-      $limit);
+      $this->buildLimitClause($conn));
 
     if ($this->calculateRows) {
       $count = queryfx_one(
@@ -569,7 +536,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $subscriber_dao->getTableName());
   }
 
-  private function buildOrderClause(AphrontDatabaseConnection $conn) {
+  private function buildCustomOrderClause(AphrontDatabaseConnection $conn) {
     $order = array();
 
     switch ($this->groupBy) {
@@ -704,8 +671,8 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     $items = isort($items, 'seq');
     $items = array_slice(
       $items,
-      nonempty($this->offset),
-      nonempty($this->limit, self::DEFAULT_PAGE_SIZE));
+      nonempty($this->getOffset()),
+      nonempty($this->getLimit(), self::DEFAULT_PAGE_SIZE));
 
     $result = array();
     $projects = array();
