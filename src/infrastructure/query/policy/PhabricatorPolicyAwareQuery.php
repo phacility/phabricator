@@ -182,7 +182,11 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         $maybe_visible = array();
       }
 
-      $visible = $filter->apply($maybe_visible);
+      if ($this->shouldDisablePolicyFiltering()) {
+        $visible = $maybe_visible;
+      } else {
+        $visible = $filter->apply($maybe_visible);
+      }
 
       $removed = array();
       foreach ($maybe_visible as $key => $object) {
@@ -326,6 +330,20 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   protected function didLoadResults(array $results) {
     return $results;
+  }
+
+
+  /**
+   * Allows a subclass to disable policy filtering. This method is dangerous.
+   * It should be used only if the query loads data which has already been
+   * filtered (for example, because it wraps some other query which uses
+   * normal policy filtering).
+   *
+   * @return bool True to disable all policy filtering.
+   * @task policyimpl
+   */
+  protected function shouldDisablePolicyFiltering() {
+    return false;
   }
 
 }

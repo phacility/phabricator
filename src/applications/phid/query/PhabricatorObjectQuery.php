@@ -118,4 +118,13 @@ final class PhabricatorObjectQuery
     }
   }
 
+  /**
+   * This query disables policy filtering because it is performed in the
+   * subqueries which actually load objects. We don't need to re-filter
+   * results, since policies have already been applied.
+   */
+  protected function shouldDisablePolicyFiltering() {
+    return true;
+  }
+
 }
