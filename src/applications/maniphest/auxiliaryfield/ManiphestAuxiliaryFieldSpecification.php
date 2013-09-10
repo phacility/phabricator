@@ -4,6 +4,7 @@
  * @group maniphest
  */
 abstract class ManiphestAuxiliaryFieldSpecification
+  extends ManiphestCustomField
   implements PhabricatorMarkupInterface {
 
   const RENDER_TARGET_HTML  = 'html';
