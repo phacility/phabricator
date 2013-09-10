@@ -7,6 +7,11 @@ final class PhabricatorRepositoryQuery
   private $phids;
   private $callsigns;
 
+  const STATUS_OPEN   = 'status-open';
+  const STATUS_CLOSED = 'status-closed';
+  const STATUS_ALL    = 'status-all';
+  private $status = self::STATUS_ALL;
+
   private $needMostRecentCommits;
   private $needCommitCounts;
 
@@ -29,6 +34,11 @@ final class PhabricatorRepositoryQuery
     return true;
   }
 
+  public function withStatus($status) {
+    $this->status = $status;
+    return $this;
+  }
+
   public function needCommitCounts($need_counts) {
     $this->needCommitCounts = $need_counts;
     return $this;
@@ -38,6 +48,7 @@ final class PhabricatorRepositoryQuery
     $this->needMostRecentCommits = $need_commits;
     return $this;
   }
+
 
   protected function loadPage() {
     $table = new PhabricatorRepository();
@@ -81,6 +92,34 @@ final class PhabricatorRepositoryQuery
       }
     }
 
+
+    return $repositories;
+  }
+
+  public function willFilterPage(array $repositories) {
+    assert_instances_of($repositories, 'PhabricatorRepository');
+
+    // TODO: Denormalize repository status into the PhabricatorRepository
+    // table so we can do this filtering in the database.
+    foreach ($repositories as $key => $repo) {
+      $status = $this->status;
+      switch ($status) {
+        case self::STATUS_OPEN:
+          if (!$repo->isTracked()) {
+            unset($repositories[$key]);
+          }
+          break;
+        case self::STATUS_CLOSED:
+          if ($repo->isTracked()) {
+            unset($repositories[$key]);
+          }
+          break;
+        case self::STATUS_ALL:
+          break;
+        default:
+          throw new Exception("Unknown status '{$status}'!");
+      }
+    }
 
     return $repositories;
   }
