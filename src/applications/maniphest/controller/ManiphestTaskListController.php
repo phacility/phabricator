@@ -633,7 +633,10 @@ final class ManiphestTaskListController extends ManiphestController {
         $grouped = array();
         foreach ($query->getGroupByProjectResults() as $project => $tasks) {
           foreach ($tasks as $task) {
-            $group = $project ? $handles[$project]->getName() : 'No Project';
+            $group = 'No Project';
+            if ($project && isset($handles[$project])) {
+              $group = $handles[$project]->getName();
+            }
             $grouped[$group][$task->getID()] = $task;
           }
         }
