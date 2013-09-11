@@ -60,8 +60,11 @@ final class ManiphestTaskListView extends ManiphestView {
       $item->setHref('/T'.$task->getID());
 
       if ($task->getOwnerPHID()) {
-        $owner = $handles[$task->getOwnerPHID()];
-        $item->addByline(pht('Assigned: %s', $owner->renderLink()));
+        $owner = idx($handles, $task->getOwnerPHID());
+        // TODO: This should be guaranteed, see T3817.
+        if ($owner) {
+          $item->addByline(pht('Assigned: %s', $owner->renderLink()));
+        }
       }
 
       $status = $task->getStatus();
