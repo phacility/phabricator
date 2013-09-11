@@ -22,6 +22,7 @@ final class ManiphestPHIDTypeTask extends PhabricatorPHIDType {
 
     return id(new ManiphestTaskQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

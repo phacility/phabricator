@@ -22,6 +22,7 @@ final class PhabricatorFilePHIDTypeFile extends PhabricatorPHIDType {
 
     return id(new PhabricatorFileQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

@@ -25,6 +25,7 @@ final class PhabricatorPhamePHIDTypePost extends PhabricatorPHIDType {
 
     return id(new PhamePostQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

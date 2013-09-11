@@ -22,6 +22,7 @@ final class DifferentialPHIDTypeRevision extends PhabricatorPHIDType {
 
     return id(new DifferentialRevisionQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

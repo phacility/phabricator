@@ -22,6 +22,7 @@ final class PholioPHIDTypeMock extends PhabricatorPHIDType {
 
     return id(new PholioMockQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

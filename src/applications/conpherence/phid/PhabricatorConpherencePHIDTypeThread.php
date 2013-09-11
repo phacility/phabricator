@@ -24,8 +24,9 @@ final class PhabricatorConpherencePHIDTypeThread extends PhabricatorPHIDType {
     array $phids) {
 
     return id(new ConpherenceThreadQuery())
-      ->withPHIDs($phids)
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
+      ->withPHIDs($phids)
       ->execute();
   }
 

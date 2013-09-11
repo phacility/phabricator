@@ -22,6 +22,7 @@ final class PhabricatorMailingListPHIDTypeList extends PhabricatorPHIDType {
 
     return id(new PhabricatorMailingListQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

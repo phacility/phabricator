@@ -22,6 +22,7 @@ final class PhabricatorSlowvotePHIDTypePoll extends PhabricatorPHIDType {
 
     return id(new PhabricatorSlowvoteQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

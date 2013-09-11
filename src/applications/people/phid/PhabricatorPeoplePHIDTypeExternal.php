@@ -22,6 +22,7 @@ final class PhabricatorPeoplePHIDTypeExternal extends PhabricatorPHIDType {
 
     return id(new PhabricatorExternalAccountQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

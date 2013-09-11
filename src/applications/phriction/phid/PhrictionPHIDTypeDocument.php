@@ -22,6 +22,7 @@ final class PhrictionPHIDTypeDocument extends PhabricatorPHIDType {
 
     return id(new PhrictionDocumentQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

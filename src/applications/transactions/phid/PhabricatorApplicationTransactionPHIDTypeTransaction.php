@@ -57,6 +57,7 @@ final class PhabricatorApplicationTransactionPHIDTypeTransaction
 
       $xactions = id(clone $query)
         ->setViewer($object_query->getViewer())
+        ->setParentQuery($object_query)
         ->withPHIDs($subtype_phids)
         ->execute();
 

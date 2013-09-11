@@ -22,6 +22,7 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
 
     return id(new DiffusionCommitQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

@@ -22,6 +22,7 @@ final class PhabricatorOwnersPHIDTypePackage extends PhabricatorPHIDType {
 
     return id(new PhabricatorOwnersPackageQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

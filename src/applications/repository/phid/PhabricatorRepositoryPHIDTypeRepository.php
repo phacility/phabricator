@@ -23,6 +23,7 @@ final class PhabricatorRepositoryPHIDTypeRepository
 
     return id(new PhabricatorRepositoryQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

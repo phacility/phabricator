@@ -22,6 +22,7 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
 
     return id(new PhabricatorProjectQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }
