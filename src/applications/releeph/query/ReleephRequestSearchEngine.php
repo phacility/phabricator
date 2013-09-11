@@ -60,9 +60,10 @@ final class ReleephRequestSearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $phids = $saved_query->getParameter('requestorPHIDs', array());
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     $requestor_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form

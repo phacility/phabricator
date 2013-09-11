@@ -19,9 +19,10 @@ final class PhabricatorTokenReceiverQuery
   }
 
   public function willFilterPage(array $phids) {
-    $objects = id(new PhabricatorObjectHandleData($phids))
+    $objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->getViewer())
-      ->loadObjects();
+      ->withPHIDs($phids)
+      ->execute();
 
     // Reorder the objects in the input order.
     $objects = array_select_keys($objects, $phids);

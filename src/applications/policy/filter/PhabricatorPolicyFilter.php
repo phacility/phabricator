@@ -272,9 +272,10 @@ final class PhabricatorPolicyFilter {
         $who = "No one can {$verb} this object.";
         break;
       default:
-        $handle = PhabricatorObjectHandleData::loadOneHandle(
-          $policy,
-          $this->viewer);
+        $handle = id(new PhabricatorHandleQuery())
+          ->setViewer($this->viewer)
+          ->withPHIDs(array($policy))
+          ->executeOne();
 
         $type = phid_get_type($policy);
         if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {

@@ -129,10 +129,11 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
             break;
           case ManiphestTransactionType::TYPE_OWNER:
             if ($new) {
-              $handles = id(new PhabricatorObjectHandleData(array($new)))
+              $handle = id(new PhabricatorHandleQuery())
                 ->setViewer($this->getActor())
-                ->loadHandles();
-              $task->setOwnerOrdering($handles[$new]->getName());
+                ->withPHIDs(array($new))
+                ->executeOne();
+              $task->setOwnerOrdering($handle->getName());
             } else {
               $task->setOwnerOrdering(null);
             }
@@ -226,9 +227,10 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     }
     $phids = array_keys($phids);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getActor())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $view = new ManiphestTransactionDetailView();
     $view->setTransactionGroup($transactions);

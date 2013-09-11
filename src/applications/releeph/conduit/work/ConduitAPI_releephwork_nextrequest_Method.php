@@ -117,9 +117,10 @@ final class ConduitAPI_releephwork_nextrequest_Method
     }
 
     $phids[] = $releeph_request->getPHID();
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $diff_name = null;
     if ($diff_rev) {

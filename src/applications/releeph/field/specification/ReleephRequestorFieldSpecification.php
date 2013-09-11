@@ -40,10 +40,11 @@ final class ReleephRequestorFieldSpecification
 
   public function renderValueForCommitMessage() {
     $phid = $this->getReleephRequest()->getRequestUserPHID();
-    $handles = id(new PhabricatorObjectHandleData(array($phid)))
+    $handle = id(new PhabricatorHandleQuery())
       ->setViewer($this->getUser())
-      ->loadHandles();
-    return $handles[$phid]->getName();
+      ->withPHIDs(array($phid))
+      ->executeOne();
+    return $handle->getName();
   }
 
 }

@@ -62,10 +62,11 @@ final class PhameBlogFeedController extends PhameController {
     }
     $engine->process();
 
-    $bloggers = mpull($posts, 'getBloggerPHID');
-    $bloggers = id(new PhabricatorObjectHandleData($bloggers))
+    $blogger_phids = mpull($posts, 'getBloggerPHID');
+    $bloggers = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadHandles();
+      ->withPHIDs($blogger_phids)
+      ->execute();
 
     foreach ($posts as $post) {
       $content[] = hsprintf('<entry>');

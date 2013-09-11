@@ -18,9 +18,10 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
       $object_phids = mpull($tokens_given, 'getObjectPHID');
       $user_phids = mpull($tokens_given, 'getAuthorPHID');
       $handle_phids = array_merge($object_phids, $user_phids);
-      $handles = id(new PhabricatorObjectHandleData($handle_phids))
+      $handles = id(new PhabricatorHandleQuery())
         ->setViewer($user)
-        ->loadHandles();
+        ->withPHIDs($handle_phids)
+        ->execute();
     }
 
     $tokens = array();

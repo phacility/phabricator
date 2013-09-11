@@ -39,9 +39,10 @@ abstract class ReleephUserView extends AphrontView {
     if ($todo) {
       self::$handles = array_merge(
         self::$handles,
-        id(new PhabricatorObjectHandleData($todo))
-          ->setViewer($this->getUser())
-          ->loadHandles());
+        id(new PhabricatorHandleQuery())
+        ->setViewer($this->getUser())
+        ->withPHIDs($todo)
+        ->execute());
       $this->loadInner($todo);
     }
   }

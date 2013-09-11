@@ -34,9 +34,10 @@ final class ConduitAPI_releephwork_getbranch_Method
 
     $cut_phid = $branch->getCutPointCommitPHID();
     $phids = array($cut_phid);
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $project = $branch->getProject();
     $repo = $project->getRepository();

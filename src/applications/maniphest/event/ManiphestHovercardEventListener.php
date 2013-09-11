@@ -97,9 +97,10 @@ final class ManiphestHovercardEventListener extends PhutilEventListener {
   }
 
   protected function loadHandles(array $phids, $viewer) {
-    return id(new PhabricatorObjectHandleData($phids))
+    return id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
   }
 
 }

@@ -19,9 +19,10 @@ final class PhabricatorTokenLeaderController
     $phids = array();
     if ($counts) {
       $phids = mpull($objects, 'getPHID');
-      $handles = id(new PhabricatorObjectHandleData($phids))
+      $handles = id(new PhabricatorHandleQuery())
         ->setViewer($user)
-        ->loadHandles();
+        ->withPHIDs($phids)
+        ->execute();
     }
 
     $list = new PHUIObjectItemListView();

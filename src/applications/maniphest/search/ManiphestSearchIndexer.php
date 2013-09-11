@@ -110,9 +110,10 @@ final class ManiphestSearchIndexer
 
     // We need to load handles here since non-users may subscribe (mailing
     // lists, e.g.)
-    $handles = id(new PhabricatorObjectHandleData(array_keys($ccs)))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
+      ->withPHIDs(array_keys($ccs))
+      ->execute();
     foreach ($ccs as $cc => $time) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,

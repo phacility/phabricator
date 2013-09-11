@@ -225,9 +225,10 @@ final class PholioMockEditController extends PholioController {
     // NOTE: Make this show up correctly on the rendered form.
     $mock->setViewPolicy($v_view);
 
-    $handles = id(new PhabricatorObjectHandleData($v_cc))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadHandles();
+      ->withPHIDs($v_cc)
+      ->execute();
 
     $cc_tokens = mpull($handles, 'getFullName', 'getPHID');
 

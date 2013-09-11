@@ -72,9 +72,10 @@ final class PhabricatorTokenGivenQuery
       return array();
     }
 
-    $objects = id(new PhabricatorObjectHandleData($object_phids))
+    $objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->getViewer())
-      ->loadObjects();
+      ->withPHIDs($object_phids)
+      ->execute();
 
     foreach ($results as $key => $result) {
       $phid = $result->getObjectPHID();

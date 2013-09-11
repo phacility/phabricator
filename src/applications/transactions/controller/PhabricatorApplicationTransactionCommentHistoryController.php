@@ -19,9 +19,6 @@ final class PhabricatorApplicationTransactionCommentHistoryController
       ->executeOne();
 
     if (!$xaction) {
-      // TODO: This may also mean you don't have permission to edit the object,
-      // but we can't make that distinction via PhabricatorObjectHandleData
-      // at the moment.
       return new Aphront404Response();
     }
 
@@ -53,7 +50,10 @@ final class PhabricatorApplicationTransactionCommentHistoryController
     }
 
     $obj_phid = $xaction->getObjectPHID();
-    $obj_handle = PhabricatorObjectHandleData::loadOneHandle($obj_phid, $user);
+    $obj_handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($obj_phid))
+      ->executeOne();
 
     $view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)

@@ -511,7 +511,7 @@ final class ManiphestTaskQuery
     }
 
     $projects = id(new PhabricatorProjectQuery())
-      ->setViewer($this->viewer)
+      ->setViewer($this->getViewer())
       ->withMemberPHIDs($this->anyUserProjectPHIDs)
       ->execute();
     $any_user_project_phids = mpull($projects, 'getPHID');
@@ -661,12 +661,10 @@ final class ManiphestTaskQuery
       }
     }
 
-    // TODO: This should use the query's viewer once this class extends
-    // PhabricatorPolicyQuery (T603).
-
-    $handles = id(new PhabricatorObjectHandleData(array_keys($project_phids)))
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(array_keys($project_phids))
+      ->execute();
 
     $max = 1;
     foreach ($handles as $handle) {

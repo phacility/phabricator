@@ -104,9 +104,10 @@ final class DifferentialSearchIndexer
     }
 
     $ccphids = $rev->getCCPHIDs();
-    $handles = id(new PhabricatorObjectHandleData($ccphids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
+      ->withPHIDs($ccphids)
+      ->execute();
 
     foreach ($handles as $phid => $handle) {
       $doc->addRelationship(

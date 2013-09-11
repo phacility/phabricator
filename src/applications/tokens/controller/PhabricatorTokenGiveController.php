@@ -12,7 +12,10 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $handle = PhabricatorObjectHandleData::loadOneHandle($this->phid, $user);
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
     if (!$handle->isComplete()) {
       return new Aphront404Response();
     }

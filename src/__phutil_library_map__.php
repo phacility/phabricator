@@ -1376,7 +1376,6 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerTokenController' => 'applications/oauthserver/controller/PhabricatorOAuthServerTokenController.php',
     'PhabricatorObjectHandle' => 'applications/phid/PhabricatorObjectHandle.php',
     'PhabricatorObjectHandleConstants' => 'applications/phid/handle/const/PhabricatorObjectHandleConstants.php',
-    'PhabricatorObjectHandleData' => 'applications/phid/handle/PhabricatorObjectHandleData.php',
     'PhabricatorObjectHandleStatus' => 'applications/phid/handle/const/PhabricatorObjectHandleStatus.php',
     'PhabricatorObjectListView' => 'view/control/PhabricatorObjectListView.php',
     'PhabricatorObjectMailReceiver' => 'applications/metamta/receiver/PhabricatorObjectMailReceiver.php',

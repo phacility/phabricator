@@ -36,9 +36,10 @@ final class PhabricatorMailManagementListInboundWorkflow
     $phids = array_merge(
       mpull($mails, 'getRelatedPHID'),
       mpull($mails, 'getAuthorPHID'));
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     foreach (array_reverse($mails) as $mail) {
       $console->writeOut(

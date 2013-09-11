@@ -51,9 +51,10 @@ final class ConpherenceNewController extends ConpherenceController {
 
     $participant_handles = array();
     if ($participants) {
-      $handles = id(new PhabricatorObjectHandleData($participants))
+      $handles = id(new PhabricatorHandleQuery())
         ->setViewer($user)
-        ->loadHandles();
+        ->withPHIDs($participants)
+        ->execute();
       $participant_handles = mpull($handles, 'getFullName', 'getPHID');
     }
 

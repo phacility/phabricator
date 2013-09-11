@@ -100,9 +100,10 @@ abstract class PhabricatorApplicationTransactionQuery
       $handles = array();
       $merged = array_mergev($phids);
       if ($merged) {
-        $handles = id(new PhabricatorObjectHandleData($merged))
+        $handles = id(new PhabricatorHandleQuery())
           ->setViewer($this->getViewer())
-          ->loadHandles();
+          ->withPHIDs($merged)
+          ->execute();
       }
       foreach ($xactions as $xaction) {
         $xaction->setHandles(

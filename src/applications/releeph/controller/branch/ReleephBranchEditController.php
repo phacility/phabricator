@@ -42,9 +42,10 @@ final class ReleephBranchEditController extends ReleephProjectController {
     $phids[] = $creator_phid = $releeph_branch->getCreatedByUserPHID();
     $phids[] = $cut_commit_phid = $releeph_branch->getCutPointCommitPHID();
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())

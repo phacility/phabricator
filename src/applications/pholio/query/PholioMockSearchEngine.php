@@ -27,9 +27,10 @@ final class PholioMockSearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $phids = $saved_query->getParameter('authorPHIDs', array());
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     $author_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form

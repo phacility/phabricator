@@ -65,8 +65,10 @@ final class PhabricatorLipsumGenerateWorkflow
       try {
         $taskgen = newv($type, array());
         $object = $taskgen->generate();
-        $handle = PhabricatorObjectHandleData::loadOneHandle($object->getPHID(),
-          $admin);
+        $handle = id(new PhabricatorHandleQuery())
+          ->setViewer($admin)
+          ->withPHIDs(array($object->getPHID()))
+          ->executeOne();
         echo "Generated ".$handle->getTypeName().": ".
           $handle->getFullName()."\n";
       } catch (PhutilMissingSymbolException $ex) {

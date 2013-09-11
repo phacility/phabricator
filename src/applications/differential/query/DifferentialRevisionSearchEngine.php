@@ -107,9 +107,10 @@ final class DifferentialRevisionSearchEngine
         $subscriber_phids,
       ));
 
-    $handles = id(new PhabricatorObjectHandleData($all_phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
-      ->loadHandles();
+      ->withPHIDs($all_phids)
+      ->execute();
 
     $tokens = mpull($handles, 'getFullName', 'getPHID');
 

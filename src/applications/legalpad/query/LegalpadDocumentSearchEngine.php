@@ -49,9 +49,10 @@ final class LegalpadDocumentSearchEngine
     $contributor_phids = $saved_query->getParameter(
       'contributorPHIDs', array());
     $phids = array_merge($creator_phids, $contributor_phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     $tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $form

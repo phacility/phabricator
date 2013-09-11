@@ -573,9 +573,10 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $revision->saveTransaction();
 
     $phids = array($actor_phid);
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getActor())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     $actor_handle = $handles[$actor_phid];
 
     $xherald_header = HeraldTranscript::loadXHeraldRulesHeader(

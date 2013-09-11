@@ -57,9 +57,10 @@ final class PonderQuestionSearchEngine
       'status', PonderQuestionStatus::STATUS_OPEN);
 
     $phids = array_merge($author_phids, $answerer_phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     $tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $author_tokens = array_select_keys($tokens, $author_phids);

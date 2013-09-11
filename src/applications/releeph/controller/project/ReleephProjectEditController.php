@@ -130,9 +130,10 @@ final class ReleephProjectEditController extends ReleephProjectController {
       'pushers',
       $this->getReleephProject()->getDetail('pushers', array()));
 
-    $handles = id(new PhabricatorObjectHandleData($pusher_phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs($pusher_phids)
+      ->execute();
 
     $pusher_tokens = array();
     foreach ($pusher_phids as $phid) {

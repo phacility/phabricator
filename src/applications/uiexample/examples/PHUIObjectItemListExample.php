@@ -15,9 +15,10 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $handle = PhabricatorObjectHandleData::loadOneHandle(
-      $user->getPHID(),
-      $user);
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($user->getPHID()))
+      ->executeOne();
 
     $out = array();
 
@@ -231,7 +232,7 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
       id(new PHUIObjectItemView())
         ->setHeader(pht('Ace of Hearts'))
         ->setSubHead(
-          pht('This is the most powerful card in the game "Hearts".'))
+          pht('This is a powerful card in the game "Hearts".'))
         ->setHref('#')
         ->addAttribute(pht('Suit: Hearts'))
         ->addAttribute(pht('Rank: Ace'))

@@ -92,9 +92,10 @@ abstract class ManiphestController extends PhabricatorController {
       $phids[] = $task->getOwnerPHID();
     }
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $view = id(new ManiphestTaskListView())
       ->setUser($user)

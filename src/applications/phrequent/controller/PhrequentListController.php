@@ -146,9 +146,10 @@ final class PhrequentListController extends PhrequentController {
       ->setUser($user)
       ->setAction($this->getApplicationURI("/view/custom/"));
 
-    $user_handles = id(new PhabricatorObjectHandleData($user_phids))
+    $user_handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadHandles();
+      ->withPHIDs($user_phids)
+      ->execute();
     $tokens = array();
     foreach ($user_phids as $phid) {
       $tokens[$phid] = $user_handles[$phid]->getFullName();

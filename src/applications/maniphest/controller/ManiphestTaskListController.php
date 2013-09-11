@@ -578,9 +578,10 @@ final class ManiphestTaskListController extends ManiphestController {
       $any_project_phids,
       $any_user_project_phids,
       array_mergev(mpull($data, 'getProjectPHIDs')));
-    $handles = id(new PhabricatorObjectHandleData($handle_phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
-      ->loadHandles();
+      ->withPHIDs($handle_phids)
+      ->execute();
 
     switch ($search_query->getParameter('group')) {
       case 'priority':

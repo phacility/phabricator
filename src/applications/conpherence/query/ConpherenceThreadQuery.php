@@ -152,9 +152,10 @@ final class ConpherenceThreadQuery
         $conpherence->$method();
     }
     $flat_phids = array_mergev($handle_phids);
-    $handles = id(new PhabricatorObjectHandleData($flat_phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getViewer())
-      ->loadHandles();
+      ->withPHIDs($flat_phids)
+      ->execute();
     foreach ($handle_phids as $conpherence_phid => $phids) {
       $conpherence = $conpherences[$conpherence_phid];
       $conpherence->attachHandles(array_select_keys($handles, $phids));
@@ -239,9 +240,10 @@ final class ConpherenceThreadQuery
         ->execute();
       $files = mpull($files, null, 'getPHID');
       $file_author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
-      $authors = id(new PhabricatorObjectHandleData($file_author_phids))
+      $authors = id(new PhabricatorHandleQuery())
         ->setViewer($this->getViewer())
-        ->loadHandles();
+        ->withPHIDs($file_author_phids)
+        ->execute();
       $authors = mpull($authors, null, 'getPHID');
     }
 

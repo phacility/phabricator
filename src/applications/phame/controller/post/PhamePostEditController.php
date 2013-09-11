@@ -94,9 +94,10 @@ final class PhamePostEditController
       }
     }
 
-    $handle = PhabricatorObjectHandleData::loadOneHandle(
-      $post->getBlogPHID(),
-      $user);
+    $handle = id(new PhabricatorHandleQuery())
+      ->withViewer($user)
+      ->withPHIDs(array($post->getBlogPHID()))
+      ->executeOne();
 
     $form = id(new AphrontFormView())
       ->setUser($user)

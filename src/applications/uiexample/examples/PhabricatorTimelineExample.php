@@ -15,9 +15,10 @@ final class PhabricatorTimelineExample extends PhabricatorUIExample {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $handle = PhabricatorObjectHandleData::loadOneHandle(
-      $user->getPHID(),
-      $user);
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($user->getPHID()))
+      ->executeOne();
 
     $events = array();
 

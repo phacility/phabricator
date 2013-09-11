@@ -98,9 +98,10 @@ final class PhabricatorSubscriptionsUIEventListener
     $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $object->getPHID());
     if ($subscribers) {
-      $handles = id(new PhabricatorObjectHandleData($subscribers))
+      $handles = id(new PhabricatorHandleQuery())
         ->setViewer($user)
-        ->loadHandles();
+        ->withPHIDs($subscribers)
+        ->execute();
       $sub_view = array();
       foreach ($subscribers as $subscriber) {
         $sub_view[] = $handles[$subscriber]->renderLink();
