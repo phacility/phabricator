@@ -62,25 +62,12 @@ final class DifferentialSearchIndexer
       ->withNotDraft(true)
       ->execute();
 
-    $touches = array();
-
     foreach (array_merge($comments, $inlines) as $comment) {
       if (strlen($comment->getContent())) {
         $doc->addField(
           PhabricatorSearchField::FIELD_COMMENT,
           $comment->getContent());
       }
-
-      $author = $comment->getAuthorPHID();
-      $touches[$author] = $comment->getDateCreated();
-    }
-
-    foreach ($touches as $touch => $time) {
-      $doc->addRelationship(
-        PhabricatorSearchRelationship::RELATIONSHIP_TOUCH,
-        $touch,
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
-        $time);
     }
 
     $rev->loadRelationships();

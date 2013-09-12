@@ -43,7 +43,6 @@ final class ManiphestSearchIndexer
       $task->getID());
 
     $current_ccs = $task->getCCPHIDs();
-    $touches = array();
     $owner = null;
     $ccs = array();
     foreach ($transactions as $transaction) {
@@ -54,9 +53,6 @@ final class ManiphestSearchIndexer
       }
 
       $author = $transaction->getAuthorPHID();
-
-      // Record the most recent time they touched this object.
-      $touches[$author] = $transaction->getDateCreated();
 
       switch ($transaction->getTransactionType()) {
         case ManiphestTransactionType::TYPE_OWNER:
@@ -98,14 +94,6 @@ final class ManiphestSearchIndexer
         $owner
           ? $owner->getDateCreated()
           : $task->getDateCreated());
-    }
-
-    foreach ($touches as $touch => $time) {
-      $doc->addRelationship(
-        PhabricatorSearchRelationship::RELATIONSHIP_TOUCH,
-        $touch,
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
-        $time);
     }
 
     // We need to load handles here since non-users may subscribe (mailing

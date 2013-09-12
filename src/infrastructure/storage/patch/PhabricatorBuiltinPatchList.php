@@ -1572,6 +1572,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'name' =>
           $this->getPatchPath('20130820.file-mailkey-populate.php'),
       ),
+      '20130912.maniphest.1.touch.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130912.maniphest.1.touch.sql'),
+      ),
     );
   }
 }
