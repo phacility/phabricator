@@ -349,7 +349,9 @@ final class ManiphestTaskSearchEngine
           ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
       case 'authored':
         return $query
-          ->setParameter('authorPHIDs', array($viewer_phid));
+          ->setParameter('authorPHIDs', array($viewer_phid))
+          ->setParameter('order', 'created')
+          ->setParameter('group', 'none');
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);

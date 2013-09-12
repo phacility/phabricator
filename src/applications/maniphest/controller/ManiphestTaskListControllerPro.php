@@ -31,19 +31,154 @@ final class ManiphestTaskListControllerPro
 
     $viewer = $this->getRequest()->getUser();
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($viewer);
-    foreach ($tasks as $task) {
-      $item = id(new PHUIObjectItemView())
-        ->setObjectName('T'.$task->getID())
-        ->setHeader($task->getTitle())
-        ->setHref('/T'.$task->getID())
-        ->setObject($task);
-
-      $list->addItem($item);
+    // If we didn't match anything, just pick up the default empty state.
+    if (!$tasks) {
+      return id(new PHUIObjectItemListView())
+        ->setUser($viewer);
     }
 
-    return $list;
+    $group_parameter = $query->getParameter('group', 'priority');
+    $order_parameter = $query->getParameter('order', 'priority');
+
+    $handles = $this->loadTaskHandles($tasks);
+    $groups = $this->groupTasks(
+      $tasks,
+      $group_parameter,
+      $handles);
+
+    $can_drag = ($order_parameter == 'priority') &&
+                ($group_parameter == 'none' || $group_parameter == 'priority');
+
+    $result = array();
+
+    $lists = array();
+    foreach ($groups as $group => $list) {
+      $task_list = new ManiphestTaskListView();
+      $task_list->setShowBatchControls(true);
+      if ($can_drag) {
+        $task_list->setShowSubpriorityControls(true);
+      }
+      $task_list->setUser($viewer);
+      $task_list->setTasks($list);
+      $task_list->setHandles($handles);
+
+      $header = javelin_tag(
+        'h1',
+        array(
+          'class' => 'maniphest-task-group-header',
+          'sigil' => 'task-group',
+          'meta'  => array(
+            'priority' => head($list)->getPriority(),
+          ),
+        ),
+        pht('%s (%s)', $group, new PhutilNumber(count($list))));
+
+      $lists[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'maniphest-task-group'
+        ),
+        array(
+          $header,
+          $task_list,
+        ));
+    }
+
+    Javelin::initBehavior(
+      'maniphest-subpriority-editor',
+      array(
+        'uri'   =>  '/maniphest/subpriority/',
+      ));
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'maniphest-list-container',
+      ),
+      array(
+        $lists,
+        $this->renderBatchEditor($query),
+      ));
+  }
+
+  private function loadTaskHandles(array $tasks) {
+    assert_instances_of($tasks, 'ManiphestTask');
+
+    $phids = array();
+    foreach ($tasks as $task) {
+      $assigned_phid = $task->getOwnerPHID();
+      if ($assigned_phid) {
+        $phids[] = $assigned_phid;
+      }
+      foreach ($task->getProjectPHIDs() as $project_phid) {
+        $phids[] = $project_phid;
+      }
+    }
+
+    if (!$phids) {
+      return array();
+    }
+
+    return id(new PhabricatorHandleQuery())
+      ->setViewer($this->getRequest()->getUser())
+      ->withPHIDs($phids)
+      ->execute();
+  }
+
+  private function groupTasks(array $tasks, $group, array $handles) {
+    assert_instances_of($tasks, 'ManiphestTask');
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
+
+    $groups = $this->getTaskGrouping($tasks, $group);
+
+    $results = array();
+    foreach ($groups as $label_key => $tasks) {
+      $label = $this->getTaskLabelName($group, $label_key, $handles);
+      $results[$label][] = $tasks;
+    }
+    foreach ($results as $label => $task_groups) {
+      $results[$label] = array_mergev($task_groups);
+    }
+
+    return $results;
+  }
+
+  private function getTaskGrouping(array $tasks, $group) {
+    switch ($group) {
+      case 'priority':
+        return mgroup($tasks, 'getPriority');
+      case 'status':
+        return mgroup($tasks, 'getStatus');
+      case 'assigned':
+        return mgroup($tasks, 'getOwnerPHID');
+      case 'project':
+        return mgroup($tasks, 'getGroupByProjectPHID');
+      default:
+        return array(pht('Tasks') => $tasks);
+    }
+  }
+
+  private function getTaskLabelName($group, $label_key, array $handles) {
+    switch ($group) {
+      case 'priority':
+        return ManiphestTaskPriority::getTaskPriorityName($label_key);
+      case 'status':
+        return ManiphestTaskStatus::getTaskStatusFullName($label_key);
+      case 'assigned':
+        if ($label_key) {
+          return $handles[$label_key]->getFullName();
+        } else {
+          return pht('(Not Assigned)');
+        }
+      case 'project':
+        if ($label_key) {
+          return $handles[$label_key]->getFullName();
+        } else {
+          return pht('(No Project)');
+        }
+      default:
+        return pht('Tasks');
+    }
   }
 
   public function buildSideNavView($for_app = false) {
@@ -63,6 +198,96 @@ final class ManiphestTaskListControllerPro
     $nav->selectFilter(null);
 
     return $nav;
+  }
+
+  private function renderBatchEditor(PhabricatorSavedQuery $saved_query) {
+    $user = $this->getRequest()->getUser();
+
+    Javelin::initBehavior(
+      'maniphest-batch-selector',
+      array(
+        'selectAll'   => 'batch-select-all',
+        'selectNone'  => 'batch-select-none',
+        'submit'      => 'batch-select-submit',
+        'status'      => 'batch-select-status-cell',
+        'idContainer' => 'batch-select-id-container',
+        'formID'      => 'batch-select-form',
+      ));
+
+    $select_all = javelin_tag(
+      'a',
+      array(
+        'href'        => '#',
+        'mustcapture' => true,
+        'class'       => 'grey button',
+        'id'          => 'batch-select-all',
+      ),
+      pht('Select All'));
+
+    $select_none = javelin_tag(
+      'a',
+      array(
+        'href'        => '#',
+        'mustcapture' => true,
+        'class'       => 'grey button',
+        'id'          => 'batch-select-none',
+      ),
+      pht('Clear Selection'));
+
+    $submit = phutil_tag(
+      'button',
+      array(
+        'id'          => 'batch-select-submit',
+        'disabled'    => 'disabled',
+        'class'       => 'disabled',
+      ),
+      pht("Batch Edit Selected \xC2\xBB"));
+
+    $export = javelin_tag(
+      'a',
+      array(
+        'href' => '/maniphest/export/'.$saved_query->getQueryKey().'/',
+        'class' => 'grey button',
+      ),
+      pht('Export to Excel'));
+
+    $hidden = phutil_tag(
+      'div',
+      array(
+        'id' => 'batch-select-id-container',
+      ),
+      '');
+
+    $editor = hsprintf(
+      '<div class="maniphest-batch-editor">'.
+        '<div class="batch-editor-header">%s</div>'.
+        '<table class="maniphest-batch-editor-layout">'.
+          '<tr>'.
+            '<td>%s%s</td>'.
+            '<td>%s</td>'.
+            '<td id="batch-select-status-cell">%s</td>'.
+            '<td class="batch-select-submit-cell">%s%s</td>'.
+          '</tr>'.
+        '</table>'.
+      '</div>',
+      pht('Batch Task Editor'),
+      $select_all,
+      $select_none,
+      $export,
+      '',
+      $submit,
+      $hidden);
+
+    $editor = phabricator_form(
+      $user,
+      array(
+        'method' => 'POST',
+        'action' => '/maniphest/batch/',
+        'id'     => 'batch-select-form',
+      ),
+      $editor);
+
+    return $editor;
   }
 
 }
