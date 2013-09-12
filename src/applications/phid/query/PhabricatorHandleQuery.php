@@ -3,7 +3,7 @@
 final class PhabricatorHandleQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $phids;
+  private $phids = array();
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
@@ -13,7 +13,7 @@ final class PhabricatorHandleQuery
   public function loadPage() {
     $types = PhabricatorPHIDType::getAllTypes();
 
-    $phids = $this->phids;
+    $phids = array_unique($this->phids);
     if (!$phids) {
       return array();
     }

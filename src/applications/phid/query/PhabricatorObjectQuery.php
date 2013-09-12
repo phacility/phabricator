@@ -3,8 +3,8 @@
 final class PhabricatorObjectQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $phids;
-  private $names;
+  private $phids = array();
+  private $names = array();
 
   private $namedResults;
 
@@ -25,7 +25,7 @@ final class PhabricatorObjectQuery
 
     $types = PhabricatorPHIDType::getAllTypes();
 
-    $names = $this->names;
+    $names = array_unique($this->names);
     $phids = $this->phids;
 
     // We allow objects to be named by their PHID in addition to their normal
@@ -41,6 +41,8 @@ final class PhabricatorObjectQuery
         }
       }
     }
+
+    $phids = array_unique($phids);
 
     if ($names) {
       $name_results = $this->loadObjectsByName($types, $names);
