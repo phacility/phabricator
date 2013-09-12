@@ -265,7 +265,8 @@ final class DivinerAtomController extends DivinerController {
         $tags[] = $this->renderAtomTag($item);
       }
 
-      $tags = phutil_implode_html(" \xE2\x96\xB6 ", $tags);
+      $caret = phutil_tag('span', array('class' => 'caret-right msl msr'));
+      $tags = phutil_implode_html($caret, $tags);
       $view->addProperty(pht('Extends'), $tags);
     }
 

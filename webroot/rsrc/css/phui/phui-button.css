@@ -219,6 +219,30 @@ a.toggle-fixed {
   content: "";
 }
 
+.caret-right {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-left: 7px solid #74777D;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
+.caret-left {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-right: 7px solid {$greytext};
+  border-bottom: 5px solid transparent;
+  border-top: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
 .dropdown .caret {
   margin-top: 7px;
   margin-left: 4px;
