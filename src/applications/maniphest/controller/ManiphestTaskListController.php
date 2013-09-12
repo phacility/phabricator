@@ -631,25 +631,20 @@ final class ManiphestTaskListController extends ManiphestController {
         }
         break;
       case 'project':
-        $grouped = array();
-        foreach ($query->getGroupByProjectResults() as $project => $tasks) {
-          foreach ($tasks as $task) {
-            $group = 'No Project';
-            if ($project && isset($handles[$project])) {
-              $group = $handles[$project]->getName();
-            }
-            $grouped[$group][$task->getID()] = $task;
-          }
-        }
-        $data = $grouped;
-        ksort($data);
+        $data = mgroup($data, 'getGroupByProjectPHID');
 
-        // Move "No Project" to the end of the list.
-        if (isset($data['No Project'])) {
-          $noproject = $data['No Project'];
-          unset($data['No Project']);
-          $data += array('No Project' => $noproject);
+        $out = array();
+        foreach ($data as $phid => $tasks) {
+          $name = pht('No Project');
+          if ($phid) {
+            $handle = idx($handles, $phid);
+            if ($handle) {
+              $name = $handles[$phid]->getFullName();
+            }
+          }
+          $out[$name] = $tasks;
         }
+        $data = $out;
         break;
       default:
         $data = array(

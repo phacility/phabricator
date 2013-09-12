@@ -36,6 +36,7 @@ final class ManiphestTask extends ManiphestDAO
 
   private $auxiliaryAttributes = self::ATTACHABLE;
   private $auxiliaryDirty = array();
+  private $groupByProjectPHID = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -113,6 +114,15 @@ final class ManiphestTask extends ManiphestDAO
       $this->originalTitle = $title;
     }
     return $this;
+  }
+
+  public function attachGroupByProjectPHID($phid) {
+    $this->groupByProjectPHID = $phid;
+    return $this;
+  }
+
+  public function getGroupByProjectPHID() {
+    return $this->assertAttached($this->groupByProjectPHID);
   }
 
   public function attachAuxiliaryAttributes(array $attrs) {

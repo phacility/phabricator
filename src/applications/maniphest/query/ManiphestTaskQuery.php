@@ -64,8 +64,6 @@ final class ManiphestTaskQuery
 
   private $rowCount         = null;
 
-  private $groupByProjectResults = null; // See comment at bottom for details
-
   public function withAuthors(array $authors) {
     $this->authorPHIDs = $authors;
     return $this;
@@ -171,10 +169,6 @@ final class ManiphestTaskQuery
     return $this->rowCount;
   }
 
-  public function getGroupByProjectResults() {
-    return $this->groupByProjectResults;
-  }
-
   public function withAnyProjects(array $projects) {
     $this->anyProjectPHIDs = $projects;
     return $this;
@@ -248,30 +242,8 @@ final class ManiphestTaskQuery
 
     $where = $this->formatWhereClause($where);
 
-    $join = array();
-    $join[] = $this->buildProjectJoinClause($conn);
-    $join[] = $this->buildAnyProjectJoinClause($conn);
-    $join[] = $this->buildXProjectJoinClause($conn);
-    $join[] = $this->buildSubscriberJoinClause($conn);
-
-    $join = array_filter($join);
-    if ($join) {
-      $join = implode(' ', $join);
-    } else {
-      $join = '';
-    }
-
     $having = '';
     $count = '';
-    $group = '';
-
-    if (count($this->projectPHIDs) > 1 || count($this->anyProjectPHIDs) > 1) {
-      // If we're joining multiple rows, we need to group the results by the
-      // task IDs.
-      $group = 'GROUP BY task.id';
-    } else {
-      $group = '';
-    }
 
     if (count($this->projectPHIDs) > 1) {
       // We want to treat the query as an intersection query, not a union
@@ -292,20 +264,25 @@ final class ManiphestTaskQuery
       $this->setLimit(self::DEFAULT_PAGE_SIZE);
     }
 
-    if ($this->groupBy == self::GROUP_PROJECT) {
-      $this->setLimit(PHP_INT_MAX);
-      $this->setOffset(0);
+    $group_column = '';
+    switch ($this->groupBy) {
+      case self::GROUP_PROJECT:
+        $group_column = qsprintf(
+          $conn,
+          ', projectGroupName.indexedObjectPHID projectGroupPHID');
+        break;
     }
 
-    $data = queryfx_all(
+    $rows = queryfx_all(
       $conn,
-      'SELECT %Q * %Q FROM %T task %Q %Q %Q %Q %Q %Q',
+      'SELECT %Q task.* %Q %Q FROM %T task %Q %Q %Q %Q %Q %Q',
       $calc,
       $count,
+      $group_column,
       $task_dao->getTableName(),
-      $join,
+      $this->buildJoinsClause($conn),
       $where,
-      $group,
+      $this->buildGroupClause($conn),
       $having,
       $order,
       $this->buildLimitClause($conn));
@@ -319,10 +296,27 @@ final class ManiphestTaskQuery
       $this->rowCount = null;
     }
 
+    switch ($this->groupBy) {
+      case self::GROUP_PROJECT:
+        $data = ipull($rows, null, 'id');
+        break;
+      default:
+        $data = $rows;
+        break;
+    }
+
     $tasks = $task_dao->loadAllFromArray($data);
 
-    if ($this->groupBy == self::GROUP_PROJECT) {
-      $tasks = $this->applyGroupByProject($tasks);
+    switch ($this->groupBy) {
+      case self::GROUP_PROJECT:
+        $results = array();
+        foreach ($rows as $row) {
+          $task = clone $tasks[$row['id']];
+          $task->attachGroupByProjectPHID($row['projectGroupPHID']);
+          $results[] = $task;
+        }
+        $tasks = $results;
+        break;
     }
 
     return $tasks;
@@ -514,19 +508,6 @@ final class ManiphestTaskQuery
     return '('.implode(') OR (', $parts).')';
   }
 
-  private function buildProjectJoinClause(AphrontDatabaseConnection $conn) {
-    if (!$this->projectPHIDs && !$this->includeNoProject) {
-      return null;
-    }
-
-    $project_dao = new ManiphestTaskProject();
-    return qsprintf(
-      $conn,
-      '%Q JOIN %T project ON project.taskPHID = task.phid',
-      ($this->includeNoProject ? 'LEFT' : ''),
-      $project_dao->getTableName());
-  }
-
   private function buildAnyProjectWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->anyProjectPHIDs) {
       return null;
@@ -559,18 +540,6 @@ final class ManiphestTaskQuery
       $any_user_project_phids);
   }
 
-  private function buildAnyProjectJoinClause(AphrontDatabaseConnection $conn) {
-    if (!$this->anyProjectPHIDs && !$this->anyUserProjectPHIDs) {
-      return null;
-    }
-
-    $project_dao = new ManiphestTaskProject();
-    return qsprintf(
-      $conn,
-      'JOIN %T anyproject ON anyproject.taskPHID = task.phid',
-      $project_dao->getTableName());
-  }
-
   private function buildXProjectWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->xprojectPHIDs) {
       return null;
@@ -579,32 +548,6 @@ final class ManiphestTaskQuery
     return qsprintf(
       $conn,
       'xproject.projectPHID IS NULL');
-  }
-
-  private function buildXProjectJoinClause(AphrontDatabaseConnection $conn) {
-    if (!$this->xprojectPHIDs) {
-      return null;
-    }
-
-    $project_dao = new ManiphestTaskProject();
-    return qsprintf(
-      $conn,
-      'LEFT JOIN %T xproject ON xproject.taskPHID = task.phid
-        AND xproject.projectPHID IN (%Ls)',
-      $project_dao->getTableName(),
-      $this->xprojectPHIDs);
-  }
-
-  private function buildSubscriberJoinClause(AphrontDatabaseConnection $conn) {
-    if (!$this->subscriberPHIDs) {
-      return null;
-    }
-
-    $subscriber_dao = new ManiphestTaskSubscriber();
-    return qsprintf(
-      $conn,
-      'JOIN %T subscriber ON subscriber.taskPHID = task.phid',
-      $subscriber_dao->getTableName());
   }
 
   private function buildCustomOrderClause(AphrontDatabaseConnection $conn) {
@@ -623,8 +566,7 @@ final class ManiphestTaskQuery
         $order[] = 'status';
         break;
       case self::GROUP_PROJECT:
-        // NOTE: We have to load the entire result set and apply this grouping
-        // in the PHP process for now.
+        $order[] = '<group.project>';
         break;
       default:
         throw new Exception("Unknown group query '{$this->groupBy}'!");
@@ -662,6 +604,12 @@ final class ManiphestTaskQuery
         case 'title':
           $order[$k] = "task.{$column} ASC";
           break;
+        case '<group.project>':
+          // Put "No Project" at the end of the list.
+          $order[$k] =
+            'projectGroupName.indexedObjectName IS NULL ASC, '.
+            'projectGroupName.indexedObjectName ASC';
+          break;
         default:
           $order[$k] = "task.{$column} DESC";
           break;
@@ -671,86 +619,125 @@ final class ManiphestTaskQuery
     return 'ORDER BY '.implode(', ', $order);
   }
 
+  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
+    $project_dao = new ManiphestTaskProject();
+
+    $joins = array();
+
+    if ($this->projectPHIDs || $this->includeNoProject) {
+      $joins[] = qsprintf(
+        $conn_r,
+        '%Q JOIN %T project ON project.taskPHID = task.phid',
+        ($this->includeNoProject ? 'LEFT' : ''),
+        $project_dao->getTableName());
+    }
+
+    if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T anyproject ON anyproject.taskPHID = task.phid',
+        $project_dao->getTableName());
+    }
+
+    if ($this->xprojectPHIDs) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T xproject ON xproject.taskPHID = task.phid
+          AND xproject.projectPHID IN (%Ls)',
+        $project_dao->getTableName(),
+        $this->xprojectPHIDs);
+    }
+
+    if ($this->subscriberPHIDs) {
+      $subscriber_dao = new ManiphestTaskSubscriber();
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T subscriber ON subscriber.taskPHID = task.phid',
+        $subscriber_dao->getTableName());
+    }
+
+    switch ($this->groupBy) {
+      case self::GROUP_PROJECT:
+        $ignore_group_phids = $this->getIgnoreGroupedProjectPHIDs();
+        if ($ignore_group_phids) {
+          $joins[] = qsprintf(
+            $conn_r,
+            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.taskPHID
+              AND projectGroup.projectPHID NOT IN (%Ls)',
+            $project_dao->getTableName(),
+            $ignore_group_phids);
+        } else {
+          $joins[] = qsprintf(
+            $conn_r,
+            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.taskPHID',
+            $project_dao->getTableName());
+        }
+        $joins[] = qsprintf(
+          $conn_r,
+          'LEFT JOIN %T projectGroupName
+            ON projectGroup.projectPHID = projectGroupName.indexedObjectPHID',
+          id(new ManiphestNameIndex())->getTableName());
+        break;
+    }
+
+    return implode(' ', $joins);
+  }
+
+  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+    $joined_multiple_project_rows = (count($this->projectPHIDs) > 1) ||
+                                    (count($this->anyProjectPHIDs) > 1);
+
+    $joined_project_name = ($this->groupBy == self::GROUP_PROJECT);
+
+    // If we're joining multiple rows, we need to group the results by the
+    // task IDs.
+    if ($joined_multiple_project_rows) {
+      if ($joined_project_name) {
+        return 'GROUP BY task.id, projectGroup.projectPHID';
+      } else {
+        return 'GROUP BY task.id';
+      }
+    } else {
+      return '';
+    }
+  }
 
   /**
-   * To get paging to work for "group by project", we need to do a bunch of
-   * server-side magic since there's currently no way to sort by project name on
-   * the database.
+   * Return project PHIDs which we should ignore when grouping tasks by
+   * project. For example, if a user issues a query like:
    *
-   * As a consequence of this, moreover, because the list we return from here
-   * may include a single task multiple times (once for each project it's in),
-   * sorting gets screwed up in the controller unless we tell it which project
-   * to put the task in each time it appears. Hence the magic field
-   * groupByProjectResults.
+   *   Tasks in all projects: Frontend, Bugs
    *
-   * TODO: Move this all to the database.
+   * ...then we don't show "Frontend" or "Bugs" groups in the result set, since
+   * they're meaningless as all results are in both groups.
+   *
+   * Similarly, for queries like:
+   *
+   *   Tasks in any projects: Public Relations
+   *
+   * ...we ignore the single project, as every result is in that project. (In
+   * the case that there are several "any" projects, we do not ignore them.)
+   *
+   * @return list<phid> Project PHIDs which should be ignored in query
+   *                    construction.
    */
-  private function applyGroupByProject(array $tasks) {
-    assert_instances_of($tasks, 'ManiphestTask');
+  private function getIgnoreGroupedProjectPHIDs() {
+    $phids = array();
 
-    $project_phids = array();
-    foreach ($tasks as $task) {
-      foreach ($task->getProjectPHIDs() as $phid) {
-        $project_phids[$phid] = true;
-      }
+    if ($this->projectPHIDs) {
+      $phids[] = $this->projectPHIDs;
     }
 
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs(array_keys($project_phids))
-      ->execute();
-
-    $max = 1;
-    foreach ($handles as $handle) {
-      $max = max($max, strlen($handle->getName()));
+    if (count($this->anyProjectPHIDs) == 1) {
+      $phids[] = $this->anyProjectPHIDs;
     }
 
-    $items = array();
-    $ii = 0;
-    foreach ($tasks as $key => $task) {
-      $phids = $task->getProjectPHIDs();
-      if ($this->projectPHIDs) {
-        $phids = array_diff($phids, $this->projectPHIDs);
-      }
-      if ($phids) {
-        foreach ($phids as $phid) {
-          $items[] = array(
-            'key'  => $key,
-            'proj' => $phid,
-            'seq'  => sprintf(
-              '%'.$max.'s%09d',
-              $handles[$phid]->getName(),
-              $ii),
-          );
-        }
-      } else {
-        // Sort "no project" tasks first.
-        $items[] = array(
-          'key'  => $key,
-          'proj' => null,
-          'seq'  => sprintf(
-            '%'.$max.'s%09d',
-            '',
-            $ii),
-        );
-      }
-      ++$ii;
-    }
+    // Maybe we should also exclude the "excludeProjectPHIDs"? It won't
+    // impact the results, but we might end up with a better query plan.
+    // Investigate this on real data? This is likely very rare.
 
-    $items = isort($items, 'seq');
-    $items = array_slice(
-      $items,
-      nonempty($this->getOffset()),
-      nonempty($this->getLimit(), self::DEFAULT_PAGE_SIZE));
-
-    $result = array();
-    $projects = array();
-    foreach ($items as $item) {
-      $result[] = $projects[$item['proj']][] = $tasks[$item['key']];
-    }
-    $this->groupByProjectResults = $projects;
-
-    return $result;
+    return array_mergev($phids);
   }
+
 
 }
