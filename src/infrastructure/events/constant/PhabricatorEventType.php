@@ -39,4 +39,6 @@ final class PhabricatorEventType extends PhutilEventType {
   const TYPE_AUTH_WILLREGISTERUSER          = 'auth.willRegisterUser';
   const TYPE_AUTH_WILLLOGINUSER             = 'auth.willLoginUser';
 
+  const TYPE_SEARCH_DIDUPDATEINDEX          = 'search.didUpdateIndex';
+
 }

@@ -44,13 +44,14 @@ abstract class PhabricatorSearchDocumentIndexer {
         $phid = $document->getPHID();
         $class = get_class($engine);
 
-        phlog("Unable to index document {$phid} by engine {$class}.");
+        phlog("Unable to index document {$phid} with engine {$class}.");
         phlog($ex);
       }
 
+      $this->dispatchDidUpdateIndexEvent($phid, $document);
     } catch (Exception $ex) {
       $class = get_class($this);
-      phlog("Unable to build document {$phid} by indexer {$class}.");
+      phlog("Unable to build document {$phid} with indexer {$class}.");
       phlog($ex);
     }
 
@@ -103,6 +104,21 @@ abstract class PhabricatorSearchDocumentIndexer {
         PhabricatorSearchField::FIELD_COMMENT,
         $comment->getContent());
     }
+  }
+
+  private function dispatchDidUpdateIndexEvent(
+    $phid,
+    PhabricatorSearchAbstractDocument $document) {
+
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_SEARCH_DIDUPDATEINDEX,
+      array(
+        'phid'      => $phid,
+        'object'    => $this->loadDocumentByPHID($phid),
+        'document'  => $document,
+      ));
+    $event->setUser($this->getViewer());
+    PhutilEventEngine::dispatchEvent($event);
   }
 
 }
