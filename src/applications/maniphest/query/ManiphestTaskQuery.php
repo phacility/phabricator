@@ -425,7 +425,7 @@ final class ManiphestTaskQuery
   }
 
   private function buildFullTextWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->fullTextSearch) {
+    if (!strlen($this->fullTextSearch)) {
       return null;
     }
 
@@ -434,6 +434,7 @@ final class ManiphestTaskQuery
     $fulltext_query = new PhabricatorSearchQuery();
     $fulltext_query->setQuery($this->fullTextSearch);
     $fulltext_query->setParameter('limit', PHP_INT_MAX);
+    $fulltext_query->setParameter('type', ManiphestPHIDTypeTask::TYPECONST);
 
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
     $fulltext_results = $engine->executeSearch($fulltext_query);

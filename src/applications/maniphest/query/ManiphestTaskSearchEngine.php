@@ -31,6 +31,8 @@ final class ManiphestTaskSearchEngine
     }
     $saved->setParameter('ids', $ids);
 
+    $saved->setParameter('fulltext', $request->getStr('fulltext'));
+
     return $saved;
   }
 
@@ -73,6 +75,11 @@ final class ManiphestTaskSearchEngine
     $ids = $saved->getParameter('ids');
     if ($ids) {
       $query->withIDs($ids);
+    }
+
+    $fulltext = $saved->getParameter('fulltext');
+    if (strlen($fulltext)) {
+      $query->withFullTextSearch($fulltext);
     }
 
     return $query;
@@ -158,6 +165,11 @@ final class ManiphestTaskSearchEngine
           ->setLabel(pht('Order'))
           ->setValue($saved->getParameter('order'))
           ->setOptions($this->getOrderOptions()))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('fulltext')
+          ->setLabel(pht('Contains Text'))
+          ->setValue($saved->getParameter('fulltext')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('ids')
