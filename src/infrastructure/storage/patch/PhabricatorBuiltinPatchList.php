@@ -1580,6 +1580,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130912.maniphest.2.created.sql'),
       ),
+      '20130912.maniphest.3.nameindex.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130912.maniphest.3.nameindex.sql'),
+      ),
+      '20130912.maniphest.4.fillindex.php' => array(
+        'type' => 'php',
+        'name' => $this->getPatchPath('20130912.maniphest.4.fillindex.php'),
+      ),
     );
   }
 }

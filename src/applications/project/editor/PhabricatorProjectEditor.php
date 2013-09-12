@@ -166,6 +166,9 @@ final class PhabricatorProjectEditor extends PhabricatorEditor {
       throw $ex;
     }
 
+    id(new PhabricatorSearchIndexer())
+      ->indexDocumentByPHID($project->getPHID());
+
     return $this;
   }
 
