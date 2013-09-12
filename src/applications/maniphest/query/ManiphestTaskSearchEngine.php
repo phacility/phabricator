@@ -33,6 +33,26 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter('fulltext', $request->getStr('fulltext'));
 
+    $saved->setParameter(
+      'allProjectPHIDs',
+      $request->getArr('allProjects'));
+
+    $saved->setParameter(
+      'withNoProject',
+      $request->getBool('withNoProject'));
+
+    $saved->setParameter(
+      'anyProjectPHIDs',
+      $request->getArr('anyProjects'));
+
+    $saved->setParameter(
+      'excludeProjectPHIDs',
+      $request->getArr('excludeProjects'));
+
+    $saved->setParameter(
+      'userProjectPHIDs',
+      $this->readUsersFromRequest($request, 'userProjects'));
+
     return $saved;
   }
 
@@ -82,6 +102,31 @@ final class ManiphestTaskSearchEngine
       $query->withFullTextSearch($fulltext);
     }
 
+    $with_no_project = $saved->getParameter('withNoProject');
+    if ($with_no_project) {
+      $query->withAllProjects(array(ManiphestTaskOwner::PROJECT_NO_PROJECT));
+    } else {
+      $project_phids = $saved->getParameter('allProjectPHIDs');
+      if ($project_phids) {
+        $query->withAllProjects($project_phids);
+      }
+    }
+
+    $any_project_phids = $saved->getParameter('anyProjectPHIDs');
+    if ($any_project_phids) {
+      $query->withAnyProjects($any_project_phids);
+    }
+
+    $exclude_project_phids = $saved->getParameter('excludeProjectPHIDs');
+    if ($exclude_project_phids) {
+      $query->withoutProjects($exclude_project_phids);
+    }
+
+    $user_project_phids = $saved->getParameter('userProjectPHIDs');
+    if ($user_project_phids) {
+      $query->withAnyUserProjects($user_project_phids);
+    }
+
     return $query;
   }
 
@@ -91,8 +136,26 @@ final class ManiphestTaskSearchEngine
 
     $assigned_phids = $saved->getParameter('assignedPHIDs', array());
     $author_phids = $saved->getParameter('authorPHIDs', array());
+    $all_project_phids = $saved->getParameter(
+      'allProjectPHIDs',
+      array());
+    $any_project_phids = $saved->getParameter(
+      'anyProjectPHIDs',
+      array());
+    $exclude_project_phids = $saved->getParameter(
+      'excludeProjectPHIDs',
+      array());
+    $user_project_phids = $saved->getParameter(
+      'userProjectPHIDs',
+      array());
 
-    $all_phids = array_merge($assigned_phids, $author_phids);
+    $all_phids = array_merge(
+      $assigned_phids,
+      $author_phids,
+      $all_project_phids,
+      $any_project_phids,
+      $exclude_project_phids,
+      $user_project_phids);
 
     if ($all_phids) {
       $handles = id(new PhabricatorHandleQuery())
@@ -103,13 +166,17 @@ final class ManiphestTaskSearchEngine
       $handles = array();
     }
 
-    $assigned_tokens = array_select_keys($handles, $assigned_phids);
-    $assigned_tokens = mpull($assigned_tokens, 'getFullName', 'getPHID');
-
-    $author_tokens = array_select_keys($handles, $author_phids);
-    $author_tokens = mpull($author_tokens, 'getFullName', 'getPHID');
+    $assigned_handles = array_select_keys($handles, $assigned_phids);
+    $author_handles = array_select_keys($handles, $author_phids);
+    $all_project_handles = array_select_keys($handles, $all_project_phids);
+    $any_project_handles = array_select_keys($handles, $any_project_phids);
+    $exclude_project_handles = array_select_keys(
+      $handles,
+      $exclude_project_phids);
+    $user_project_handles = array_select_keys($handles, $user_project_phids);
 
     $with_unassigned = $saved->getParameter('withUnassigned');
+    $with_no_projects = $saved->getParameter('withNoProject');
 
     $statuses = $saved->getParameter('statuses', array());
     $statuses = array_fuse($statuses);
@@ -143,7 +210,7 @@ final class ManiphestTaskSearchEngine
           ->setDatasource('/typeahead/common/accounts/')
           ->setName('assigned')
           ->setLabel(pht('Assigned To'))
-          ->setValue($assigned_tokens))
+          ->setValue($assigned_handles))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(
@@ -153,10 +220,41 @@ final class ManiphestTaskSearchEngine
             $with_unassigned))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('allProjects')
+          ->setLabel(pht('In All Projects'))
+          ->setValue($all_project_handles))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'withNoProject',
+            1,
+            pht('Show only tasks with no projects.'),
+            $with_no_projects))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('anyProjects')
+          ->setLabel(pht('In Any Project'))
+          ->setValue($any_project_handles))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('excludeProjects')
+          ->setLabel(pht('Not In Projects'))
+          ->setValue($exclude_project_handles))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/accounts/')
+          ->setName('userProjects')
+          ->setLabel(pht('In Users\' Projects'))
+          ->setValue($user_project_handles))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/accounts/')
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_tokens))
+          ->setValue($author_handles))
       ->appendChild($status_control)
       ->appendChild($priority_control)
       ->appendChild(
@@ -214,8 +312,7 @@ final class ManiphestTaskSearchEngine
           ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
       case 'authored':
         return $query
-          ->setParameter('authorPHIDs', array($viewer_phid))
-          ->setParameter('statuses', array(ManiphestTaskStatus::STATUS_OPEN));
+          ->setParameter('authorPHIDs', array($viewer_phid));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
