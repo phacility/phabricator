@@ -6,7 +6,7 @@
  */
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
-  private $edges = self::ATTACHABLE;
+  private $edges = array();
   private static $namespaceStack = array();
 
   const ATTACHABLE = "<attachable>";
