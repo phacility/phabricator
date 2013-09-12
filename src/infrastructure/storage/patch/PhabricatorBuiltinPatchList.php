@@ -1576,6 +1576,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'sql',
         'name' => $this->getPatchPath('20130912.maniphest.1.touch.sql'),
       ),
+      '20130912.maniphest.2.created.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130912.maniphest.2.created.sql'),
+      ),
     );
   }
 }

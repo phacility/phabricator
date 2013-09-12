@@ -232,8 +232,6 @@ final class ManiphestTaskQuery
     $where[] = $this->buildXProjectWhereClause($conn);
     $where[] = $this->buildFullTextWhereClause($conn);
 
-    // TODO: Add a key for this the next time we hit this table.
-
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
         $conn,
