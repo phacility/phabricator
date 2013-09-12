@@ -18,6 +18,7 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter('statuses', $request->getArr('statuses'));
     $saved->setParameter('priorities', $request->getArr('priorities'));
+    $saved->setParameter('group', $request->getStr('group'));
     $saved->setParameter('order', $request->getStr('order'));
 
     $ids = $request->getStrList('ids');
@@ -93,6 +94,14 @@ final class ManiphestTaskSearchEngine
       $query->setOrderBy($order);
     } else {
       $query->setOrderBy(head($this->getOrderValues()));
+    }
+
+    $group = $saved->getParameter('group');
+    $group = idx($this->getGroupValues(), $group);
+    if ($group) {
+      $query->setGroupBy($group);
+    } else {
+      $query->setGroupBy(head($this->getGroupValues()));
     }
 
     $ids = $saved->getParameter('ids');
@@ -273,8 +282,14 @@ final class ManiphestTaskSearchEngine
       ->appendChild($priority_control)
       ->appendChild(
         id(new AphrontFormSelectControl())
+          ->setName('group')
+          ->setLabel(pht('Group By'))
+          ->setValue($saved->getParameter('group'))
+          ->setOptions($this->getGroupOptions()))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
           ->setName('order')
-          ->setLabel(pht('Order'))
+          ->setLabel(pht('Order By'))
           ->setValue($saved->getParameter('order'))
           ->setOptions($this->getOrderOptions()))
       ->appendChild(
@@ -355,6 +370,26 @@ final class ManiphestTaskSearchEngine
       'updated' => ManiphestTaskQuery::ORDER_MODIFIED,
       'created' => ManiphestTaskQuery::ORDER_CREATED,
       'title' => ManiphestTaskQuery::ORDER_TITLE,
+    );
+  }
+
+  private function getGroupOptions() {
+    return array(
+      'priority' => pht('Priority'),
+      'assigned' => pht('Assigned'),
+      'status' => pht('Status'),
+      'project' => pht('Project'),
+      'none' => pht('None'),
+    );
+  }
+
+  private function getGroupValues() {
+    return array(
+      'priority' => ManiphestTaskQuery::GROUP_PRIORITY,
+      'assigned' => ManiphestTaskQuery::GROUP_OWNER,
+      'status' => ManiphestTaskQuery::GROUP_STATUS,
+      'project' => ManiphestTaskQuery::GROUP_PROJECT,
+      'none' => ManiphestTaskQuery::GROUP_NONE,
     );
   }
 
