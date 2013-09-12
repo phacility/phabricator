@@ -20,6 +20,8 @@ final class ManiphestTaskQuery
   private $anyProjectPHIDs     = array();
   private $anyUserProjectPHIDs = array();
   private $includeNoProject    = null;
+  private $dateCreatedAfter;
+  private $dateCreatedBefore;
 
   private $fullTextSearch   = '';
 
@@ -183,6 +185,16 @@ final class ManiphestTaskQuery
     return $this;
   }
 
+  public function withDateCreatedBefore($date_created_before) {
+    $this->dateCreatedBefore = $date_created_before;
+    return $this;
+  }
+
+  public function withDateCreatedAfter($date_created_after) {
+    $this->dateCreatedAfter = $date_created_after;
+    return $this;
+  }
+
   public function loadPage() {
 
     // TODO: (T603) It is possible for a user to find the PHID of a project
@@ -219,6 +231,22 @@ final class ManiphestTaskQuery
     $where[] = $this->buildAnyUserProjectWhereClause($conn);
     $where[] = $this->buildXProjectWhereClause($conn);
     $where[] = $this->buildFullTextWhereClause($conn);
+
+    // TODO: Add a key for this the next time we hit this table.
+
+    if ($this->dateCreatedAfter) {
+      $where[] = qsprintf(
+        $conn,
+        'dateCreated >= %d',
+        $this->dateCreatedAfter);
+    }
+
+    if ($this->dateCreatedBefore) {
+      $where[] = qsprintf(
+        $conn,
+        'dateCreated <= %d',
+        $this->dateCreatedBefore);
+    }
 
     $where = $this->formatWhereClause($where);
 

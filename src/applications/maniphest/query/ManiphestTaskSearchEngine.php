@@ -53,6 +53,9 @@ final class ManiphestTaskSearchEngine
       'userProjectPHIDs',
       $this->readUsersFromRequest($request, 'userProjects'));
 
+    $saved->setParameter('createdStart', $request->getStr('createdStart'));
+    $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
+
     return $saved;
   }
 
@@ -125,6 +128,17 @@ final class ManiphestTaskSearchEngine
     $user_project_phids = $saved->getParameter('userProjectPHIDs');
     if ($user_project_phids) {
       $query->withAnyUserProjects($user_project_phids);
+    }
+
+    $start = $this->parseDateTime($saved->getParameter('createdStart'));
+    $end = $this->parseDateTime($saved->getParameter('createdEnd'));
+
+    if ($start) {
+      $query->withDateCreatedAfter($start);
+    }
+
+    if ($end) {
+      $query->withDateCreatedBefore($end);
     }
 
     return $query;
@@ -273,6 +287,14 @@ final class ManiphestTaskSearchEngine
           ->setName('ids')
           ->setLabel(pht('Task IDs'))
           ->setValue(implode(', ', $ids)));
+
+    $this->buildDateRange(
+      $form,
+      $saved,
+      'createdStart',
+      pht('Created After'),
+      'createdEnd',
+      pht('Created Before'));
   }
 
   protected function getURI($path) {
