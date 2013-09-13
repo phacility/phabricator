@@ -32,11 +32,9 @@ final class ManiphestTaskProjectsView extends ManiphestView {
       }
     } else {
       $tags[] = phutil_tag(
-        'a',
+        'span',
         array(
           'class' => 'phabricator-project-tag phabricator-project-tag-grey',
-          'href' => '/maniphest/view/all/?s&projects='.
-            ManiphestTaskOwner::PROJECT_NO_PROJECT
         ),
         pht('No Project'));
     }

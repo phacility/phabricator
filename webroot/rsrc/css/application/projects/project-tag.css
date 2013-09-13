@@ -27,6 +27,7 @@
   border: 1px solid #ccc;
   background: #f7f7f7;
   color: {$lightgreytext};
+  cursor: default;
 }
 
 .phabricator-project-tag.phabricator-project-tag-grey:hover {

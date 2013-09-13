@@ -24,10 +24,10 @@ final class ManiphestPeopleMenuEventListener extends PhutilEventListener {
 
     $object = $event->getValue('object');
     if ($object instanceof PhabricatorUser) {
-      $href = '/maniphest/view/action/?users='.$object->getPHID();
+      $href = '/maniphest/?assigned='.$object->getPHID();
       $actions[] = $action->setHref($href);
     } else if ($object instanceof PhabricatorProject) {
-      $href = '/maniphest/view/all/?projects='.$object->getPHID();
+      $href = '/maniphest/?allProjects[]='.$object->getPHID();
       $actions[] = $action->setHref($href);
 
       $actions[] = id(new PhabricatorActionView())

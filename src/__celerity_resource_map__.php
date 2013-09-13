@@ -3367,7 +3367,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-project-tag-css' =>
   array(
-    'uri' => '/res/ebe357eb/rsrc/css/application/projects/project-tag.css',
+    'uri' => '/res/535b8b7a/rsrc/css/application/projects/project-tag.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -4380,7 +4380,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/f32597c9/javelin.pkg.js',
       'type' => 'js',
     ),
-    'ad2ed1da' =>
+    '36d5d071' =>
     array(
       'name' => 'maniphest.pkg.css',
       'symbols' =>
@@ -4389,7 +4389,7 @@ celerity_register_resource_map(array(
         1 => 'maniphest-transaction-detail-css',
         2 => 'phabricator-project-tag-css',
       ),
-      'uri' => '/res/pkg/ad2ed1da/maniphest.pkg.css',
+      'uri' => '/res/pkg/36d5d071/maniphest.pkg.css',
       'type' => 'css',
     ),
     '83a3853e' =>
@@ -4505,8 +4505,8 @@ celerity_register_resource_map(array(
     'javelin-vector' => 'f32597c9',
     'javelin-workflow' => 'f32597c9',
     'lightbox-attachment-css' => '606d1ed1',
-    'maniphest-task-summary-css' => 'ad2ed1da',
-    'maniphest-transaction-detail-css' => 'ad2ed1da',
+    'maniphest-task-summary-css' => '36d5d071',
+    'maniphest-transaction-detail-css' => '36d5d071',
     'phabricator-action-list-view-css' => '606d1ed1',
     'phabricator-application-launch-view-css' => '606d1ed1',
     'phabricator-busy' => '8977e356',
@@ -4532,7 +4532,7 @@ celerity_register_resource_map(array(
     'phabricator-object-selector-css' => '44bfe40c',
     'phabricator-phtize' => '8977e356',
     'phabricator-prefab' => '8977e356',
-    'phabricator-project-tag-css' => 'ad2ed1da',
+    'phabricator-project-tag-css' => '36d5d071',
     'phabricator-property-list-view-css' => '606d1ed1',
     'phabricator-remarkup-css' => '606d1ed1',
     'phabricator-shaped-request' => '5e9e5c4e',
