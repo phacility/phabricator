@@ -57,6 +57,11 @@ final class ManiphestTaskSearchEngine
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
+    $limit = $request->getInt('limit');
+    if ($limit > 0) {
+      $saved->setParameter('limit', $limit);
+    }
+
     return $saved;
   }
 
@@ -310,6 +315,13 @@ final class ManiphestTaskSearchEngine
       pht('Created After'),
       'createdEnd',
       pht('Created Before'));
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('limit')
+          ->setLabel(pht('Page Size'))
+          ->setValue($saved->getParameter('limit', 100)));
   }
 
   protected function getURI($path) {
