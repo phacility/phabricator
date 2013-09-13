@@ -717,13 +717,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $matches = null;
     $flags = PREG_SET_ORDER | PREG_OFFSET_CAPTURE;
-    preg_match_all('('.$bugtraq_re.')', $message, $matches, $flags);
+    preg_match_all($bugtraq_re, $message, $matches, $flags);
     foreach ($matches as $match) {
       list($all, $all_offset) = array_shift($match);
 
       if ($id_re != '') {
         // Match substrings with bug IDs
-        preg_match_all('('.$id_re.')', $all, $match, PREG_OFFSET_CAPTURE);
+        preg_match_all($id_re, $all, $match, PREG_OFFSET_CAPTURE);
         list(, $match) = $match;
       } else {
         $all_offset = 0;
