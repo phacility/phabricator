@@ -33,7 +33,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       $task_ids = implode(',', mpull($tasks, 'getID'));
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/maniphest/view/custom/?s=oc&tasks='.$task_ids);
+        ->setURI('/maniphest/query/?ids='.$task_ids);
     }
 
     $panel = new AphrontPanelView();
