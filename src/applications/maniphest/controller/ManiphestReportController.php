@@ -28,10 +28,6 @@ final class ManiphestReportController extends ManiphestController {
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-
-    $base_nav = $this->buildBaseSideNav();
-    $base_nav->selectFilter('report', 'report');
-
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/maniphest/report/'));
     $nav->addLabel(pht('Open Tasks'));
@@ -63,7 +59,7 @@ final class ManiphestReportController extends ManiphestController {
           id(new PhabricatorCrumbView())
             ->setName(pht('Reports'))));
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
         'title' => pht('Maniphest Reports'),

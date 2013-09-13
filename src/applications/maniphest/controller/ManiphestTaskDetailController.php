@@ -337,12 +337,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       id(new PhabricatorCrumbView())
         ->setName($object_name)
         ->setHref('/'.$object_name))
-      ->setActionList($actions)
-      ->addAction(
-        id(new PHUIListItemView())
-          ->setHref($this->getApplicationURI('/task/create/'))
-          ->setName(pht('Create Task'))
-          ->setIcon('create'));
+      ->setActionList($actions);
 
     $header = $this->buildHeaderView($task);
     $properties = $this->buildPropertyView($task, $aux_fields, $edges, $engine);

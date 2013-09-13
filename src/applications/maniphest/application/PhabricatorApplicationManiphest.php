@@ -68,11 +68,6 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
-        'custom/' => array(
-          '' => 'ManiphestSavedQueryListController',
-          'edit/(?:(?P<id>[1-9]\d*)/)?' => 'ManiphestSavedQueryEditController',
-          'delete/(?P<id>[1-9]\d*)/'   => 'ManiphestSavedQueryDeleteController',
-        ),
         'subscribe/(?P<action>add|rem)/(?P<id>[1-9]\d*)/'
         => 'ManiphestSubscribeController',
       ),

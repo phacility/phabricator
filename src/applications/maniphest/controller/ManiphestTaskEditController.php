@@ -554,13 +554,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addCrumb(
       id(new PhabricatorCrumbView())
-        ->setName($header_name)
-        ->setHref($this->getApplicationURI('/task/create/')))
-      ->addAction(
-        id(new PHUIListItemView())
-          ->setHref($this->getApplicationURI('/task/create/'))
-          ->setName(pht('Create Task'))
-          ->setIcon('create'));
+        ->setName($header_name));
 
     return $this->buildApplicationPage(
       array(

@@ -181,28 +181,6 @@ final class ManiphestTaskListController
     }
   }
 
-  public function buildSideNavView($for_app = false) {
-    $user = $this->getRequest()->getUser();
-
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    if ($for_app) {
-      $nav->addFilter('create', pht('Create Task'));
-    }
-
-    id(new ManiphestTaskSearchEngine())
-      ->setViewer($user)
-      ->addNavigationItems($nav->getMenu());
-
-    $nav->addLabel(pht('Reports'));
-    $nav->addFilter('reports', pht('Reports'), 'report/');
-
-    $nav->selectFilter(null);
-
-    return $nav;
-  }
-
   private function renderBatchEditor(PhabricatorSavedQuery $saved_query) {
     $user = $this->getRequest()->getUser();
 
