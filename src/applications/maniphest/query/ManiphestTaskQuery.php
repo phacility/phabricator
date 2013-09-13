@@ -324,6 +324,26 @@ final class ManiphestTaskQuery
     return $tasks;
   }
 
+  protected function willFilterPage(array $tasks) {
+    if ($this->groupBy == self::GROUP_PROJECT) {
+      // We should only return project groups which the user can actually see.
+      $project_phids = mpull($tasks, 'getGroupByProjectPHID');
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($project_phids)
+        ->execute();
+      $projects = mpull($projects, null, 'getPHID');
+
+      foreach ($tasks as $key => $task) {
+        if (empty($projects[$task->getGroupByProjectPHID()])) {
+          unset($tasks[$key]);
+        }
+      }
+    }
+
+    return $tasks;
+  }
+
   private function buildTaskIDsWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->taskIDs) {
       return null;
@@ -774,13 +794,11 @@ final class ManiphestTaskQuery
       case self::GROUP_PRIORITY:
         return $id.'.'.$result->getPriority();
       case self::GROUP_OWNER:
-        // TODO: Make this actually work.
-        return $id.'.AUTHORNAME';
+        return rtrim($id.'.'.$result->getOwnerPHID(), '.');
       case self::GROUP_STATUS:
         return $id.'.'.$result->getStatus();
       case self::GROUP_PROJECT:
-        // TODO: Make this actually work.
-        return $id.'.PROJNAME';
+        return rtrim($id.'.'.$result->getGroupByProjectPHID(), '.');
       default:
         throw new Exception("Unknown group query '{$this->groupBy}'!");
     }
@@ -820,11 +838,25 @@ final class ManiphestTaskQuery
         break;
       case self::GROUP_OWNER:
         $columns[] = array(
-          'name' => 'task.ownerOrdering',
-          'value' => $group_id,
-          'type' => 'string',
-          'reverse' => true,
+          'name' => '(task.ownerOrdering IS NULL)',
+          'value' => (int)(strlen($group_id) ? 0 : 1),
+          'type' => 'int',
         );
+        if ($group_id) {
+          $paging_users = id(new PhabricatorPeopleQuery())
+            ->setViewer($this->getViewer())
+            ->withPHIDs(array($group_id))
+            ->execute();
+          if (!$paging_users) {
+            return null;
+          }
+          $columns[] = array(
+            'name' => 'task.ownerOrdering',
+            'value' => head($paging_users)->getUsername(),
+            'type' => 'string',
+            'reverse' => true,
+          );
+        }
         break;
       case self::GROUP_STATUS:
         $columns[] = array(
@@ -839,10 +871,17 @@ final class ManiphestTaskQuery
           'value' => (int)(strlen($group_id) ? 0 : 1),
           'type' => 'int',
         );
-        if (strlen($group_id)) {
+        if ($group_id) {
+          $paging_projects = id(new PhabricatorProjectQuery())
+            ->setViewer($this->getViewer())
+            ->withPHIDs(array($group_id))
+            ->execute();
+          if (!$paging_projects) {
+            return null;
+          }
           $columns[] = array(
             'name' => 'projectGroupName.indexedObjectName',
-            'value' => $group_id,
+            'value' => head($paging_projects)->getName(),
             'type' => 'string',
             'reverse' => true,
           );
