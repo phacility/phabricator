@@ -240,6 +240,8 @@ final class ManiphestTaskQuery
         $this->dateCreatedBefore);
     }
 
+    $where[] = $this->buildPagingClause($conn);
+
     $where = $this->formatWhereClause($where);
 
     $having = '';
@@ -597,21 +599,37 @@ final class ManiphestTaskQuery
       return null;
     }
 
+    $reverse = ($this->getBeforeID() xor $this->getReversePaging());
+
     foreach ($order as $k => $column) {
       switch ($column) {
         case 'subpriority':
         case 'ownerOrdering':
         case 'title':
-          $order[$k] = "task.{$column} ASC";
+          if ($reverse) {
+            $order[$k] = "task.{$column} DESC";
+          } else {
+            $order[$k] = "task.{$column} ASC";
+          }
           break;
         case '<group.project>':
           // Put "No Project" at the end of the list.
-          $order[$k] =
-            'projectGroupName.indexedObjectName IS NULL ASC, '.
-            'projectGroupName.indexedObjectName ASC';
+          if ($reverse) {
+            $order[$k] =
+              'projectGroupName.indexedObjectName IS NULL DESC, '.
+              'projectGroupName.indexedObjectName DESC';
+          } else {
+            $order[$k] =
+              'projectGroupName.indexedObjectName IS NULL ASC, '.
+              'projectGroupName.indexedObjectName ASC';
+          }
           break;
         default:
-          $order[$k] = "task.{$column} DESC";
+          if ($reverse) {
+            $order[$k] = "task.{$column} ASC";
+          } else {
+            $order[$k] = "task.{$column} DESC";
+          }
           break;
       }
     }
@@ -739,5 +757,158 @@ final class ManiphestTaskQuery
     return array_mergev($phids);
   }
 
+  private function loadCursorObject($id) {
+    $results = id(new ManiphestTaskQuery())
+      ->setViewer($this->getViewer())
+      ->withIDs(array((int)$id))
+      ->execute();
+    return head($results);
+  }
+
+  protected function getPagingValue($result) {
+    $id = $result->getID();
+
+    switch ($this->groupBy) {
+      case self::GROUP_NONE:
+        return $id;
+      case self::GROUP_PRIORITY:
+        return $id.'.'.$result->getPriority();
+      case self::GROUP_OWNER:
+        // TODO: Make this actually work.
+        return $id.'.AUTHORNAME';
+      case self::GROUP_STATUS:
+        return $id.'.'.$result->getStatus();
+      case self::GROUP_PROJECT:
+        // TODO: Make this actually work.
+        return $id.'.PROJNAME';
+      default:
+        throw new Exception("Unknown group query '{$this->groupBy}'!");
+    }
+  }
+
+  protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
+    $default = parent::buildPagingClause($conn_r);
+
+    $before_id = $this->getBeforeID();
+    $after_id = $this->getAfterID();
+
+    if (!$before_id && !$after_id) {
+      return $default;
+    }
+
+    $cursor_id = nonempty($before_id, $after_id);
+    $cursor_parts = explode('.', $cursor_id, 2);
+    $task_id = $cursor_parts[0];
+    $group_id = idx($cursor_parts, 1);
+
+    $cursor = $this->loadCursorObject($task_id);
+    if (!$cursor) {
+      return null;
+    }
+
+    $columns = array();
+
+    switch ($this->groupBy) {
+      case self::GROUP_NONE:
+        break;
+      case self::GROUP_PRIORITY:
+        $columns[] = array(
+          'name' => 'task.priority',
+          'value' => (int)$group_id,
+          'type' => 'int',
+        );
+        break;
+      case self::GROUP_OWNER:
+        $columns[] = array(
+          'name' => 'task.ownerOrdering',
+          'value' => $group_id,
+          'type' => 'string',
+          'reverse' => true,
+        );
+        break;
+      case self::GROUP_STATUS:
+        $columns[] = array(
+          'name' => 'task.status',
+          'value' => (int)$group_id,
+          'type' => 'int',
+        );
+        break;
+      case self::GROUP_PROJECT:
+        $columns[] = array(
+          'name' => '(projectGroupName.indexedObjectName IS NULL)',
+          'value' => (int)(strlen($group_id) ? 0 : 1),
+          'type' => 'int',
+        );
+        if (strlen($group_id)) {
+          $columns[] = array(
+            'name' => 'projectGroupName.indexedObjectName',
+            'value' => $group_id,
+            'type' => 'string',
+            'reverse' => true,
+          );
+        }
+        break;
+      default:
+        throw new Exception("Unknown group query '{$this->groupBy}'!");
+    }
+
+    switch ($this->orderBy) {
+      case self::ORDER_PRIORITY:
+        if ($this->groupBy != self::GROUP_PRIORITY) {
+          $columns[] = array(
+            'name' => 'task.priority',
+            'value' => (int)$cursor->getPriority(),
+            'type' => 'int',
+          );
+        }
+        $columns[] = array(
+          'name' => 'task.subpriority',
+          'value' => (int)$cursor->getSubpriority(),
+          'type' => 'int',
+          'reverse' => true,
+        );
+        $columns[] = array(
+          'name' => 'task.dateModified',
+          'value' => (int)$cursor->getDateModified(),
+          'type' => 'int',
+        );
+        break;
+      case self::ORDER_CREATED:
+        $columns[] = array(
+          'name' => 'task.id',
+          'value' => (int)$cursor->getID(),
+          'type' => 'int',
+        );
+        break;
+      case self::ORDER_MODIFIED:
+        $columns[] = array(
+          'name' => 'task.dateModified',
+          'value' => (int)$cursor->getDateModified(),
+          'type' => 'int',
+        );
+        break;
+      case self::ORDER_TITLE:
+        $columns[] = array(
+          'name' => 'task.title',
+          'value' => $cursor->getTitle(),
+          'type' => 'string',
+        );
+        $columns[] = array(
+          'name' => 'task.id',
+          'value' => $cursor->getID(),
+          'type' => 'int',
+        );
+        break;
+      default:
+        throw new Exception("Unknown order query '{$this->orderBy}'!");
+    }
+
+    return $this->buildPagingClauseFromMultipleColumns(
+      $conn_r,
+      $columns,
+      array(
+        'reversed' => (bool)($before_id xor $this->getReversePaging()),
+      ));
+  }
 
 }

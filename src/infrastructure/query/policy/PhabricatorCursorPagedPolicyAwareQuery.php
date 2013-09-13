@@ -114,13 +114,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $sliced_results = $pager->sliceResults($results);
 
-    if ($pager->getBeforeID() || (count($results) > $pager->getPageSize())) {
-      $pager->setNextPageID($this->getPagingValue(last($sliced_results)));
-    }
+    if ($sliced_results) {
+      if ($pager->getBeforeID() || (count($results) > $pager->getPageSize())) {
+        $pager->setNextPageID($this->getPagingValue(last($sliced_results)));
+      }
 
-    if ($pager->getAfterID() ||
-       ($pager->getBeforeID() && (count($results) > $pager->getPageSize()))) {
-      $pager->setPrevPageID($this->getPagingValue(head($sliced_results)));
+      if ($pager->getAfterID() ||
+         ($pager->getBeforeID() && (count($results) > $pager->getPageSize()))) {
+        $pager->setPrevPageID($this->getPagingValue(head($sliced_results)));
+      }
     }
 
     return $sliced_results;

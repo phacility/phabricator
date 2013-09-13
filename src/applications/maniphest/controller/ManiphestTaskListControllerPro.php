@@ -37,8 +37,8 @@ final class ManiphestTaskListControllerPro
         ->setUser($viewer);
     }
 
-    $group_parameter = $query->getParameter('group', 'priority');
-    $order_parameter = $query->getParameter('order', 'priority');
+    $group_parameter = nonempty($query->getParameter('group'), 'priority');
+    $order_parameter = nonempty($query->getParameter('order'), 'priority');
 
     $handles = $this->loadTaskHandles($tasks);
     $groups = $this->groupTasks(
