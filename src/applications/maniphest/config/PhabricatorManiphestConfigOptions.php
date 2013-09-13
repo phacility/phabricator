@@ -12,6 +12,40 @@ final class PhabricatorManiphestConfigOptions
   }
 
   public function getOptions() {
+
+    $priority_defaults = array(
+      100 => array(
+        'name'  => pht('Unbreak Now!'),
+        'short' => pht('Unbreak!'),
+        'color' => 'indigo',
+      ),
+      90 => array(
+        'name' => pht('Needs Triage'),
+        'short' => pht('Triage'),
+        'color' => 'violet',
+      ),
+      80 => array(
+        'name' => pht('High'),
+        'short' => pht('High'),
+        'color' => 'red',
+      ),
+      50 => array(
+        'name' => pht('Normal'),
+        'short' => pht('Normal'),
+        'color' => 'orange',
+      ),
+      25 => array(
+        'name' => pht('Low'),
+        'short' => pht('Low'),
+        'color' => 'yellow',
+      ),
+      0 => array(
+        'name' => pht('Wishlist'),
+        'short' => pht('Wish'),
+        'color' => 'sky',
+      ),
+    );
+
     return array(
       $this->newOption('maniphest.custom-fields', 'wild', array())
         ->setSummary(pht("Custom Maniphest fields."))
@@ -36,6 +70,24 @@ final class PhabricatorManiphestConfigOptions
             "Class which drives custom field construction. See 'Maniphest ".
             "User Guide: Adding Custom Fields' in the documentation for more ".
             "information.")),
+      $this->newOption('maniphest.priorities', 'wild', $priority_defaults)
+        ->setSummary(pht("Configure Maniphest priority names."))
+        ->setDescription(
+          pht(
+            'Allows you to edit or override the default priorities available '.
+            'in Maniphest, like "High", "Normal" and "Low". The configuration '.
+            'should contain a map of priority constants to priority '.
+            'specifications (see defaults below for examples).'.
+            "\n\n".
+            'The keys you can define for a priority are:'.
+            "\n\n".
+            '  - `name` Name of the priority.'."\n".
+            '  - `short` Alternate shorter name, used in UIs where there is '.
+            '    not much space available.'."\n".
+            '  - `color` A color for this priority, like "red" or "blue".'.
+            "\n\n".
+            'You can choose which priority is the default for newly created '.
+            'tasks with `maniphest.default-priority`.')),
       $this->newOption('maniphest.default-priority', 'int', 90)
         ->setSummary(pht("Default task priority for create flows."))
         ->setDescription(

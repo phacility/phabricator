@@ -963,7 +963,7 @@ celerity_register_resource_map(array(
   ),
   'config-options-css' =>
   array(
-    'uri' => '/res/cbef6aae/rsrc/css/application/config/config-options.css',
+    'uri' => '/res/4b5b6779/rsrc/css/application/config/config-options.css',
     'type' => 'css',
     'requires' =>
     array(

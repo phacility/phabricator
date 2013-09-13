@@ -31,6 +31,7 @@
 .config-option-table td {
   color: {$darkgreytext};
   width: 100%;
+  white-space: pre-wrap;
 }
 
 .config-option-table .column-labels th {
