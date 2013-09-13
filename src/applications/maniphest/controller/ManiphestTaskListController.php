@@ -195,6 +195,9 @@ final class ManiphestTaskListController
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
 
+    $nav->addLabel(pht('Reports'));
+    $nav->addFilter('reports', pht('Reports'), 'report/');
+
     $nav->selectFilter(null);
 
     return $nav;
