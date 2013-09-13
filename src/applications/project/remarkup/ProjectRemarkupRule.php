@@ -25,7 +25,7 @@ final class ProjectRemarkupRule
 
     $map = array();
     foreach ($ids as $key => $slug) {
-      $map[PhabricatorSlug::normalize($slug)][] = $slug;
+      $map[$this->normalizeSlug($slug)][] = $slug;
     }
 
     $projects = id(new PhabricatorProjectQuery())
@@ -45,6 +45,16 @@ final class ProjectRemarkupRule
 
 
     return $result;
+  }
+
+  private function normalizeSlug($slug) {
+    // NOTE: We're using phutil_utf8_strtolower() (and not PhabricatorSlug's
+    // normalize() method) because this normalization should be only somewhat
+    // liberal. We want "#YOLO" to match against "#yolo", but "#\\yo!!lo"
+    // should not. normalize() strips out most punctuation and leads to
+    // excessively aggressive matches.
+
+    return phutil_utf8_strtolower($slug).'/';
   }
 
 }
