@@ -162,7 +162,7 @@ final class PhabricatorRepositoryQuery
   private function loadCursorObject($id) {
     $results = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
-      ->withIDs(array($id))
+      ->withIDs(array((int)$id))
       ->execute();
     return head($results);
   }
@@ -192,69 +192,55 @@ final class PhabricatorRepositoryQuery
       return null;
     }
 
+    $id_column = array(
+      'name' => 'r.id',
+      'type' => 'int',
+      'value' => $cursor->getID(),
+    );
+
+    $columns = array();
     switch ($order) {
       case self::ORDER_COMMITTED:
         $commit = $cursor->getMostRecentCommit();
         if (!$commit) {
           return null;
         }
-        $epoch = $commit->getEpoch();
-        if ($before_id) {
-          return qsprintf(
-            $conn_r,
-            '(s.epoch %Q %d OR (s.epoch = %d AND r.id %Q %d))',
-            $this->getReversePaging() ? '<' : '>',
-            $epoch,
-            $epoch,
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getID());
-        } else {
-          return qsprintf(
-            $conn_r,
-            '(s.epoch %Q %d OR (s.epoch = %d AND r.id %Q %d))',
-            $this->getReversePaging() ? '>' : '<',
-            $epoch,
-            $epoch,
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getID());
-        }
+        $columns[] = array(
+          'name' => 's.epoch',
+          'type' => 'int',
+          'value' => $commit->getEpoch(),
+        );
+        $columns[] = $id_column;
+        break;
       case self::ORDER_CALLSIGN:
-        if ($before_id) {
-          return qsprintf(
-            $conn_r,
-            '(r.callsign %Q %s)',
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getCallsign());
-        } else {
-          return qsprintf(
-            $conn_r,
-            '(r.callsign %Q %s)',
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getCallsign());
-        }
+        $columns[] = array(
+          'name' => 'r.callsign',
+          'type' => 'string',
+          'value' => $cursor->getCallsign(),
+          'reverse' => true,
+        );
+        break;
       case self::ORDER_NAME:
-        if ($before_id) {
-          return qsprintf(
-            $conn_r,
-            '(r.name %Q %s OR (r.name = %s AND r.id %Q %d))',
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getName(),
-            $cursor->getName(),
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getID());
-        } else {
-          return qsprintf(
-            $conn_r,
-            '(r.name %Q %s OR (r.name = %s AND r.id %Q %d))',
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getName(),
-            $cursor->getName(),
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getID());
-        }
+        $columns[] = array(
+          'name' => 'r.name',
+          'type' => 'string',
+          'value' => $cursor->getName(),
+          'reverse' => true,
+        );
+        $columns[] = $id_column;
+        break;
       default:
         throw new Exception("Unknown order '{$order}'!");
     }
+
+    return $this->buildPagingClauseFromMultipleColumns(
+      $conn_r,
+      $columns,
+      array(
+        // TODO: Clean up the column ordering stuff and then make this
+        // depend on getReversePaging().
+        'reversed' => (bool)($before_id),
+      ));
   }
 
   private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {

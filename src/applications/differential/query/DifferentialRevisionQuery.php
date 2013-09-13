@@ -731,7 +731,7 @@ final class DifferentialRevisionQuery
   private function loadCursorObject($id) {
     $results = id(new DifferentialRevisionQuery())
       ->setViewer($this->getViewer())
-      ->withIDs(array($id))
+      ->withIDs(array((int)$id))
       ->execute();
     return head($results);
   }
@@ -756,50 +756,39 @@ final class DifferentialRevisionQuery
       return null;
     }
 
+    $columns = array();
+
     switch ($this->order) {
       case self::ORDER_CREATED:
         return $default;
       case self::ORDER_MODIFIED:
-        if ($before_id) {
-          return qsprintf(
-            $conn_r,
-            '(r.dateModified %Q %d OR (r.dateModified = %d AND r.id %Q %d))',
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getDateModified(),
-            $cursor->getDateModified(),
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getID());
-        } else {
-          return qsprintf(
-            $conn_r,
-            '(r.dateModified %Q %d OR (r.dateModified = %d AND r.id %Q %d))',
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getDateModified(),
-            $cursor->getDateModified(),
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getID());
-        }
+        $columns[] = array(
+          'name' => 'r.dateModified',
+          'value' => $cursor->getDateModified(),
+          'type' => 'int',
+        );
+        break;
       case self::ORDER_PATH_MODIFIED:
-        if ($before_id) {
-          return qsprintf(
-            $conn_r,
-            '(p.epoch %Q %d OR (p.epoch = %d AND r.id %Q %d))',
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getDateCreated(),
-            $cursor->getDateCreated(),
-            $this->getReversePaging() ? '<' : '>',
-            $cursor->getID());
-        } else {
-          return qsprintf(
-            $conn_r,
-            '(p.epoch %Q %d OR (p.epoch = %d AND r.id %Q %d))',
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getDateCreated(),
-            $cursor->getDateCreated(),
-            $this->getReversePaging() ? '>' : '<',
-            $cursor->getID());
-        }
+        $columns[] = array(
+          'name' => 'p.epoch',
+          'value' => $cursor->getDateCreated(),
+          'type' => 'int',
+        );
+        break;
     }
+
+    $columns[] = array(
+      'name' => 'r.id',
+      'value' => $cursor->getID(),
+      'type' => 'int',
+    );
+
+    return $this->buildPagingClauseFromMultipleColumns(
+      $conn_r,
+      $columns,
+      array(
+        'reversed' => (bool)($before_id xor $this->getReversePaging()),
+      ));
   }
 
   protected function getPagingColumn() {
