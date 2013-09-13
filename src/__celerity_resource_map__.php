@@ -800,7 +800,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-bars' =>
   array(
-    'uri' => '/res/4c79c429/rsrc/css/aphront/aphront-bars.css',
+    'uri' => '/res/dc8fd846/rsrc/css/aphront/aphront-bars.css',
     'type' => 'css',
     'requires' =>
     array(

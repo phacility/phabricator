@@ -13,13 +13,13 @@ div.aphront-bar.progress {
 div.aphront-bar.progress div {
   width: 100px;
   border: 1px solid;
-  border-top-color: #A4A4A4;
-  border-right-color: #BBB;
-  border-bottom-color: #D5D5D5;
-  border-left-color: #BBB;
+  border-top-color: {$lightgreyborder};
+  border-right-color: {$lightgreyborder};
+  border-bottom-color: {$lightgreyborder};
+  border-left-color: {$greyborder};
   background: white;
   float: left;
-  margin-right: 1em;
+  margin-right: 12px;
 }
 
 div.aphront-bar.progress div div {
@@ -47,7 +47,7 @@ div.aphront-bar.glyph div.glyphs {
   position: relative;
   color: #aaa;
   font-family: monospace;
-  height: 1.3em;
+  height: 16px;
 }
 
 div.aphront-bar.glyph div.glyphs.starstar {
@@ -67,7 +67,7 @@ div.aphront-bar.glyph div.caption {
   padding: 0;
   margin: 0;
   float: left;
-  margin-left: 1.5em;
+  margin-left: 12px;
   color: {$greytext};
 }
 
@@ -76,25 +76,25 @@ div.aphront-bar.glyph div.caption {
  * Common color classes
  */
 div.aphront-bar.progress.color-default div div {
-  background: #6D84B4;
+  background: {$blue};
 }
 
 div.aphront-bar.glyph.color-default div.glyphs div.fg {
-  color: #6D84B4;
+  color: {$blue};
 }
 
 div.aphront-bar.progress.color-warning div div {
-  background: #FFCC5F;
+  background: {$yellow};
 }
 
 div.aphront-bar.glyph.color-warning div.glyphs div.fg {
-  color: #FFCC5F;
+  color: {$yellow};
 }
 
 div.aphront-bar.progress.color-danger div div {
-  background: #FF6E6E;
+  background: {$red};
 }
 
 div.aphront-bar.glyph.color-danger div.glyphs div.fg {
-  color: #FF6E6E;
+  color: {$red};
 }
