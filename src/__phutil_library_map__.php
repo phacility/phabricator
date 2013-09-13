@@ -719,7 +719,6 @@ phutil_register_library_map(array(
     'ManiphestTaskDetailController' => 'applications/maniphest/controller/ManiphestTaskDetailController.php',
     'ManiphestTaskEditController' => 'applications/maniphest/controller/ManiphestTaskEditController.php',
     'ManiphestTaskExtensions' => 'applications/maniphest/extensions/ManiphestTaskExtensions.php',
-    'ManiphestTaskListController' => 'applications/maniphest/controller/ManiphestTaskListController.php',
     'ManiphestTaskListControllerPro' => 'applications/maniphest/controller/ManiphestTaskListControllerPro.php',
     'ManiphestTaskListView' => 'applications/maniphest/view/ManiphestTaskListView.php',
     'ManiphestTaskMailReceiver' => 'applications/maniphest/mail/ManiphestTaskMailReceiver.php',
@@ -2791,7 +2790,6 @@ phutil_register_library_map(array(
     'ManiphestTaskDescriptionPreviewController' => 'ManiphestController',
     'ManiphestTaskDetailController' => 'ManiphestController',
     'ManiphestTaskEditController' => 'ManiphestController',
-    'ManiphestTaskListController' => 'ManiphestController',
     'ManiphestTaskListControllerPro' =>
     array(
       0 => 'ManiphestController',
