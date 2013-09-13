@@ -148,6 +148,7 @@ foreach ($rows as $row) {
       case 'order':
         $map = array(
           'priority' => 'priority',
+          'updated' => 'updated',
           'created' => 'created',
           'title' => 'title',
         );
