@@ -36,9 +36,10 @@ final class SlowvoteEmbedView extends AphrontView {
     }
     $phids[] = $poll->getAuthorPHID();
 
-    $this->handles = id(new PhabricatorObjectHandleData($phids))
+    $this->handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $options = $poll->getOptions();
 

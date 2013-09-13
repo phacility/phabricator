@@ -34,12 +34,12 @@ final class PhabricatorCountdownListController
     $this->loadHandles(mpull($countdowns, 'getAuthorPHID'));
 
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
     foreach ($countdowns as $countdown) {
       $id = $countdown->getID();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName("C{$id}")
         ->setHeader($countdown->getTitle())
         ->setHref($this->getApplicationURI("{$id}/"))

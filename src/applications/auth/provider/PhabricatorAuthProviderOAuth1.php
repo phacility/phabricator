@@ -245,7 +245,7 @@ abstract class PhabricatorAuthProviderOAuth1 extends PhabricatorAuthProvider {
 
   public function willRenderLinkedAccount(
     PhabricatorUser $viewer,
-    PhabricatorObjectItemView $item,
+    PHUIObjectItemView $item,
     PhabricatorExternalAccount $account) {
 
     $item->addAttribute(pht('OAuth1 Account'));

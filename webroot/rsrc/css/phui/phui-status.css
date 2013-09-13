@@ -14,7 +14,7 @@
 }
 
 .phui-status-item-target {
-  padding: 0 12px 0 4px;
+  padding: 0 12px 0 0;
   line-height: 20px;
   white-space: nowrap;
 }

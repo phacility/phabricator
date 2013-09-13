@@ -132,9 +132,10 @@ abstract class DifferentialMail extends PhabricatorMail {
         $raw = $revision->getRawRelations($relation_subscribed);
 
         $reason_phids = ipull($raw, 'reasonPHID');
-        $reason_handles = id(new PhabricatorObjectHandleData($reason_phids))
+        $reason_handles = id(new PhabricatorHandleQuery())
           ->setViewer($this->getActor())
-          ->loadHandles();
+          ->withPHIDs($reason_phids)
+          ->execute();
 
         $explicit_cc = array();
         foreach ($raw as $relation) {
@@ -173,12 +174,14 @@ abstract class DifferentialMail extends PhabricatorMail {
     }
     $phids = array_keys($phids);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getActor())
-      ->loadHandles();
-    $objects = id(new PhabricatorObjectHandleData($phids))
+      ->withPHIDs($phids)
+      ->execute();
+    $objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->getActor())
-      ->loadObjects();
+      ->withPHIDs($phids)
+      ->execute();
 
     $to_handles = array_select_keys($handles, $to_phids);
     $cc_handles = array_select_keys($handles, $cc_phids);

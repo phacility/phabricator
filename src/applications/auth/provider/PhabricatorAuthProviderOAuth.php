@@ -310,7 +310,7 @@ abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
 
   public function willRenderLinkedAccount(
     PhabricatorUser $viewer,
-    PhabricatorObjectItemView $item,
+    PHUIObjectItemView $item,
     PhabricatorExternalAccount $account) {
 
     // Get a valid token, possibly refreshing it.

@@ -22,6 +22,7 @@ final class ReleephPHIDTypeRequest extends PhabricatorPHIDType {
 
     return id(new ReleephRequestQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

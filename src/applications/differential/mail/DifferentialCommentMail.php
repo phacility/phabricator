@@ -98,9 +98,10 @@ final class DifferentialCommentMail extends DifferentialMail {
       array());
     $load = array_merge($m_reviewers, $m_cc);
     if ($load) {
-      $handles = id(new PhabricatorObjectHandleData($load))
+      $handles = id(new PhabricatorHandleQuery())
         ->setViewer($this->getActor())
-        ->loadHandles();
+        ->withPHIDs($load)
+        ->execute();
       if ($m_reviewers) {
         $this->addedReviewers = $this->renderHandleList($handles, $m_reviewers);
       }

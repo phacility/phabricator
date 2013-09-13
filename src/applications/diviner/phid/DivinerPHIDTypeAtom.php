@@ -22,6 +22,7 @@ final class DivinerPHIDTypeAtom extends PhabricatorPHIDType {
 
     return id(new DivinerAtomQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

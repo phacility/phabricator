@@ -226,9 +226,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     if (!$user_phid) {
       return $default;
     }
-    $handle = PhabricatorObjectHandleData::loadOneHandle(
-      $user_phid,
-      $actor);
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($actor)
+      ->withPHIDs(array($user_phid))
+      ->executeOne();
+
     return '@'.$handle->getName();
   }
 

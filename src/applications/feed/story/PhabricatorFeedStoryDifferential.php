@@ -90,7 +90,7 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
 
   // TODO: At some point, make feed rendering not terrible and remove this
   // hacky mess.
-  public function renderForAsanaBridge() {
+  public function renderForAsanaBridge($implied_context = false) {
     $data = $this->getStoryData();
     $comment = $data->getValue('feedback_content');
 
@@ -102,7 +102,15 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
       ->setConfig('viewer', new PhabricatorUser())
       ->setMode(PhutilRemarkupEngine::MODE_TEXT);
 
-    $title = "{$author_name} {$verb} this revision.";
+    $revision_phid = $this->getPrimaryObjectPHID();
+    $revision_name = $this->getHandle($revision_phid)->getFullName();
+
+    if ($implied_context) {
+      $title = "{$author_name} {$verb} this revision.";
+    } else {
+      $title = "{$author_name} {$verb} revision {$revision_name}.";
+    }
+
     if (strlen($comment)) {
       $comment = $engine->markupText($comment);
 

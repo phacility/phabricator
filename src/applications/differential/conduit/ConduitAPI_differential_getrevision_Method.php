@@ -65,9 +65,10 @@ final class ConduitAPI_differential_getrevision_Method
 
     $commit_dicts = array();
     $commit_phids = $revision->loadCommitPHIDs();
-    $handles = id(new PhabricatorObjectHandleData($commit_phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs($commit_phids)
+      ->execute();
 
     foreach ($commit_phids as $commit_phid) {
       $commit_dicts[] = array(

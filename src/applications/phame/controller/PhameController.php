@@ -67,7 +67,7 @@ abstract class PhameController extends PhabricatorController {
           $blogger, $blog);
       }
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObject($post)
         ->setHeader($post->getTitle())
         ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/'));

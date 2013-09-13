@@ -22,6 +22,7 @@ final class PhabricatorConfigPHIDTypeConfig extends PhabricatorPHIDType {
 
     return id(new PhabricatorConfigEntryQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

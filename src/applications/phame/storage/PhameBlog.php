@@ -93,45 +93,8 @@ final class PhameBlog extends PhameDAO
     return $valid;
   }
 
-  public function loadBloggerPHIDs() {
-    if (!$this->getPHID()) {
-      return $this;
-    }
-
-    if ($this->bloggerPHIDs) {
-      return $this;
-    }
-
-    $this->bloggerPHIDs = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $this->getPHID(),
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER);
-
-    return $this;
-  }
-
   public function getBloggerPHIDs() {
     return $this->assertAttached($this->bloggerPHIDs);
-  }
-
-  public function loadBloggers() {
-    if ($this->bloggers) {
-      return $this->bloggers;
-    }
-
-    $blogger_phids = $this->loadBloggerPHIDs()->getBloggerPHIDs();
-
-    if (empty($blogger_phids)) {
-      return array();
-    }
-
-    $bloggers = id(new PhabricatorObjectHandleData($blogger_phids))
-      // TODO: This should be Query-based (T603).
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
-
-    $this->attachBloggers($bloggers);
-
-    return $this;
   }
 
   public function attachBloggers(array $bloggers) {

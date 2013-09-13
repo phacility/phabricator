@@ -22,6 +22,7 @@ final class PhabricatorPastePHIDTypePaste extends PhabricatorPHIDType {
 
     return id(new PhabricatorPasteQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

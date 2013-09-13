@@ -53,11 +53,12 @@ final class ConduitAPI_releeph_request_Method
           ->setErrorDescription($ex->getMessage());
       }
     }
+    $requested_commit_phids = mpull($requested_commits, 'getPHID');
 
     // Find any existing requests that clash on the commit id, for this branch
     $existing_releeph_requests = id(new ReleephRequest())->loadAllWhere(
       'requestCommitPHID IN (%Ls) AND branchID = %d',
-      mpull($requested_commits, 'getPHID'),
+      $requested_commit_phids,
       $releeph_branch->getID());
     $existing_releeph_requests = mpull(
       $existing_releeph_requests,
@@ -73,11 +74,12 @@ final class ConduitAPI_releeph_request_Method
     }
 
     $results = array();
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs($requested_commit_phids)
+      ->execute();
     foreach ($requested_commits as $thing => $commit) {
       $phid = $commit->getPHID();
-      $handles = id(new PhabricatorObjectHandleData(array($phid)))
-        ->setViewer($user)
-        ->loadHandles();
       $name = id($handles[$phid])->getName();
 
       $releeph_request = null;

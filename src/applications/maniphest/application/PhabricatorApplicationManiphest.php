@@ -34,6 +34,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
 
   public function getEventListeners() {
     return array(
+      new ManiphestNameIndexEventListener(),
       new ManiphestPeopleMenuEventListener(),
       new ManiphestHovercardEventListener(),
     );
@@ -49,8 +50,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return array(
       '/T(?P<id>[1-9]\d*)' => 'ManiphestTaskDetailController',
       '/maniphest/' => array(
-        '' => 'ManiphestTaskListController',
-        'view/(?P<view>\w+)/' => 'ManiphestTaskListController',
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'ManiphestTaskListController',
         'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
         'batch/' => 'ManiphestBatchEditController',
         'task/' => array(
@@ -68,11 +68,6 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
-        'custom/' => array(
-          '' => 'ManiphestSavedQueryListController',
-          'edit/(?:(?P<id>[1-9]\d*)/)?' => 'ManiphestSavedQueryEditController',
-          'delete/(?P<id>[1-9]\d*)/'   => 'ManiphestSavedQueryDeleteController',
-        ),
         'subscribe/(?P<action>add|rem)/(?P<id>[1-9]\d*)/'
         => 'ManiphestSubscribeController',
       ),
@@ -83,31 +78,15 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     $status = array();
 
     $query = id(new ManiphestTaskQuery())
+      ->setViewer($user)
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW)
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
+      ->withOwners(array($user->getPHID()));
+    $count = count($query->execute());
 
-    $count = $query->getRowCount();
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Unbreak Now Task(s)!', $count))
-      ->setCount($count);
-
-    $query = id(new ManiphestTaskQuery())
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withOwners(array($user->getPHID()))
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
-
-    $count = $query->getRowCount();
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Assigned Task(s)', $count))
+      ->setText(pht('%s Assigned Task(s)', new PhutilNumber($count)))
       ->setCount($count);
 
     return $status;

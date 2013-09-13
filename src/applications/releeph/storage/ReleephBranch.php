@@ -130,9 +130,10 @@ final class ReleephBranch extends ReleephDAO
         $phids_to_phetch[] = $rr->loadRequestCommitDiffPHID();
       }
     }
-    $handles = id(new PhabricatorObjectHandleData($phids_to_phetch))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadHandles();
+      ->withPHIDs($phids_to_phetch)
+      ->execute();
     return $handles;
   }
 

@@ -42,7 +42,7 @@ final class PhrictionListController
 
     $this->loadHandles($phids);
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
     foreach ($documents as $document) {
       $content = $document->getContent();
@@ -58,7 +58,7 @@ final class PhrictionListController
         $content->getDateCreated(),
         $viewer);
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($content->getTitle())
         ->setHref($slug_uri)
         ->addByline($byline)

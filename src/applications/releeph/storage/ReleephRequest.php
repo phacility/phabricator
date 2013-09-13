@@ -207,13 +207,15 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function loadRequestCommitDiffPHID() {
+    $phids = array();
     $commit = $this->loadPhabricatorRepositoryCommit();
     if ($commit) {
-      $edges = $this
-        ->loadPhabricatorRepositoryCommit()
-        ->loadRelativeEdges(PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
-      return head(array_keys($edges));
+      $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $commit->getPHID(),
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
     }
+
+    return head($phids);
   }
 
 

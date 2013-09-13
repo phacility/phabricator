@@ -241,7 +241,7 @@ final class PhabricatorAuthProviderPassword
 
   public function willRenderLinkedAccount(
     PhabricatorUser $viewer,
-    PhabricatorObjectItemView $item,
+    PHUIObjectItemView $item,
     PhabricatorExternalAccount $account) {
     return;
   }

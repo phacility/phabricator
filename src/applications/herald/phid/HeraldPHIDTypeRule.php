@@ -22,6 +22,7 @@ final class HeraldPHIDTypeRule extends PhabricatorPHIDType {
 
     return id(new HeraldRuleQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

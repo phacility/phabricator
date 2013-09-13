@@ -344,9 +344,10 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
 
     $phids = array($this->getActorPHID());
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getActor())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     $actor_handle = $handles[$this->getActorPHID()];
 
     $changesets = null;

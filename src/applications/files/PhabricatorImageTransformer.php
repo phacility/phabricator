@@ -393,7 +393,7 @@ final class PhabricatorImageTransformer {
       case 'image/png':
         if (function_exists('imagepng')) {
           ob_start();
-          imagepng($data);
+          imagepng($data, null, 9);
           return ob_get_clean();
         }
         break;
@@ -407,7 +407,7 @@ final class PhabricatorImageTransformer {
       $img = ob_get_clean();
     } else if (function_exists('imagepng')) {
       ob_start();
-      imagepng($data);
+      imagepng($data, null, 9);
       $img = ob_get_clean();
     } else if (function_exists('imagegif')) {
       ob_start();

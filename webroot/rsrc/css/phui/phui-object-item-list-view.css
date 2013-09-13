@@ -1,28 +1,28 @@
 /**
- * @provides phabricator-object-item-list-view-css
+ * @provides phui-object-item-list-view-css
  */
 
-.phabricator-object-item-list-view {
+.phui-object-item-list-view {
   padding: 8px 6px;
 }
 
-.device-desktop .phabricator-object-item-list-view {
+.device-desktop .phui-object-item-list-view {
   padding: 20px;
 }
 
-.phabricator-object-item-list-view + .phabricator-object-item-list-view {
+.phui-object-item-list-view + .phui-object-item-list-view {
   padding-top: 0;
 }
 
-.phabricator-object-item-list-view.phabricator-object-list-flush {
+.phui-object-item-list-view.phui-object-list-flush {
   padding: 0;
 }
 
-.phabricator-object-item-list-view .aphront-error-view {
+.phui-object-item-list-view .aphront-error-view {
   margin: 0;
 }
 
-.phabricator-object-item {
+.phui-object-item {
   background: #ffffff;
   border-style: solid;
   border-color: {$lightgreyborder};
@@ -31,11 +31,11 @@
   overflow: hidden;
 }
 
-.phabricator-object-item .phui-icon-view {
+.phui-object-item .phui-icon-view {
   display: inline-block;
 }
 
-.phabricator-object-item-frame {
+.phui-object-item-frame {
   border-style: solid;
   border-color: {$lightgreyborder};
   border-bottom-color: {$greyborder};
@@ -45,54 +45,54 @@
   min-height: 29px;
 }
 
-.phabricator-object-list-cards .phabricator-object-item-frame {
+.phui-object-list-cards .phui-object-item-frame {
   border-bottom-right-radius: 3px;
   border-top-right-radius: 3px;
 }
 
-.device-desktop .phabricator-object-item {
+.device-desktop .phui-object-item {
   margin: 0 0 5px 0;
 }
 
-.phabricator-object-item-name {
+.phui-object-item-name {
   display: inline-block;
   font-weight: bold;
   padding: 6px 8px 0;
   white-space: nowrap;
 }
 
-.phabricator-object-item-link {
+.phui-object-item-link {
   display: inline-block;
 }
 
-.phabricator-object-item-objname {
+.phui-object-item-objname {
   color: {$darkgreytext};
   cursor: text;
 }
 
-.phabricator-object-item-content {
+.phui-object-item-content {
   margin-top: 4px;
   overflow: hidden;
 }
 
-.phabricator-object-item-grippable {
+.phui-object-item-grippable {
   cursor: move;
 }
 
-.phabricator-object-item-grip {
+.phui-object-item-grip {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   width: 17px;
-  background: url(/rsrc/image/texture/grip.png) center center no-repeat;
+  background: url('/rsrc/image/texture/grip.png') center center no-repeat;
 }
 
-.phabricator-object-item-grippable .phabricator-object-item-frame {
+.phui-object-item-grippable .phui-object-item-frame {
   padding-left: 11px;
 }
 
-.phabricator-object-item-list-header {
+.phui-object-item-list-header {
   padding: 0 0 8px 0;
   color: {$darkgreytext};
 }
@@ -103,7 +103,7 @@
 
 */
 
-.phabricator-object-item-actions {
+.phui-object-item-actions {
   position: absolute;
   right: 0;
   top: 0;
@@ -113,7 +113,7 @@
   border-left: 1px solid {$lightgreyborder};
 }
 
-.phabricator-object-item-actions .phui-list-item-view {
+.phui-object-item-actions .phui-list-item-view {
   float: right;
   height: 100%;
   width: 24px;
@@ -121,23 +121,23 @@
   position: relative;
 }
 
-.phabricator-object-item-actions .phui-list-item-view +
+.phui-object-item-actions .phui-list-item-view +
 .phui-list-item-view {
   border-right: 1px solid #d6d6e9;
 }
 
-.phabricator-object-item-actions .phui-list-item-href {
+.phui-object-item-actions .phui-list-item-href {
   display: inline-block;
   position: relative;
   width: 24px;
   height: 100%;
 }
 
-.phabricator-object-item-actions .phui-list-item-href:hover {
+.phui-object-item-actions .phui-list-item-href:hover {
   background: #e9e9f9;
 }
 
-.phabricator-object-item-actions .phui-list-item-icon {
+.phui-object-item-actions .phui-list-item-icon {
   width: 14px;
   height: 14px;
   position: absolute;
@@ -147,19 +147,19 @@
   left: 5px;
 }
 
-.phabricator-object-item-actions .phui-list-item-name {
+.phui-object-item-actions .phui-list-item-name {
   display: none;
 }
 
-.phabricator-object-item-with-1-actions .phabricator-object-item-content-box {
+.phui-object-item-with-1-actions .phui-object-item-content-box {
   margin-right: 24px;
 }
 
-.phabricator-object-item-with-2-actions .phabricator-object-item-content-box {
+.phui-object-item-with-2-actions .phui-object-item-content-box {
   margin-right: 48px;
 }
 
-.phabricator-object-item-with-3-actions .phabricator-object-item-content-box {
+.phui-object-item-with-3-actions .phui-object-item-content-box {
   margin-right: 72px;
 }
 
@@ -170,17 +170,17 @@
 
 */
 
-.phabricator-object-item-list-view.phabricator-object-list-stackable
-  .phabricator-object-item {
+.phui-object-item-list-view.phui-object-list-stackable
+  .phui-object-item {
   margin: -1px 0 0 0;
 }
 
-.phabricator-object-list-stackable .phabricator-object-item {
+.phui-object-list-stackable .phui-object-item {
   border-left-width: 1px;
 }
 
-.device-desktop .phabricator-object-list-stackable
-  .phabricator-object-item:hover {
+.device-desktop .phui-object-list-stackable
+  .phui-object-item:hover {
   background: #e9ecf5;
 }
 
@@ -190,7 +190,7 @@
 
 */
 
-.phabricator-object-item-subhead {
+.phui-object-item-subhead {
   color: {$greytext};
   padding: 0 8px 6px;
 }
@@ -202,16 +202,16 @@
 
 */
 
-.phabricator-object-item-attributes {
+.phui-object-item-attributes {
   padding: 0 8px 6px;
 }
 
-.phabricator-object-item-attribute {
+.phui-object-item-attribute {
   display: inline;
   color: {$greytext};
 }
 
-.phabricator-object-item-attribute-spacer {
+.phui-object-item-attribute-spacer {
   padding: 0 4px;
 }
 
@@ -223,20 +223,20 @@
 
 */
 
-.phabricator-object-icon-pane {
+.phui-object-icon-pane {
   float: right;
   margin-top: 6px;
 }
 
-.device .phabricator-object-item-no-icon-images .phabricator-object-icon-pane {
+.device .phui-object-item-no-icon-images .phui-object-icon-pane {
   display: none;
 }
 
-.phabricator-object-item-with-handle-icons .phabricator-object-item-icons {
+.phui-object-item-with-handle-icons .phui-object-item-icons {
   padding-bottom: 30px;
 }
 
-.phabricator-object-item-icons {
+.phui-object-item-icons {
   float: right;
   padding: 0 10px;
 }
@@ -246,32 +246,32 @@
    the width + padding of the icon div, so the icons have some space even if
    the content is wider than available space. */
 
-.device-desktop .phabricator-object-icon-pane {
+.device-desktop .phui-object-icon-pane {
   width: 120px;
 }
 
-.device-desktop .phabricator-object-item-with-icons
-  .phabricator-object-item-content,
-.device-desktop .phabricator-object-item-with-handle-icons
-  .phabricator-object-item-content {
+.device-desktop .phui-object-item-with-icons
+  .phui-object-item-content,
+.device-desktop .phui-object-item-with-handle-icons
+  .phui-object-item-content {
   margin-right: 132px;
 }
 
-.device .phabricator-object-item-icons {
+.device .phui-object-item-icons {
   width: 18px;
 }
 
-.device .phabricator-object-item-with-icons .phabricator-object-item-content,
-.device .phabricator-object-item-with-handle-icons
-  .phabricator-object-item-content {
+.device .phui-object-item-with-icons .phui-object-item-content,
+.device .phui-object-item-with-handle-icons
+  .phui-object-item-content {
   margin-right: 30px;
 }
 
-.device .phabricator-object-item-icon-label {
+.device .phui-object-item-icon-label {
   display: none;
 }
 
-.phabricator-object-item-icon {
+.phui-object-item-icon {
   vertical-align: middle;
   position: relative;
   font-size: 11px;
@@ -288,19 +288,19 @@
  * Items with icon 'none' still have on mobile, thus creating a weird vertical
  * margin for elements which follow
  */
-.device-phone .phabricator-object-item-icon-none {
+.device-phone .phui-object-item-icon-none {
   display: none;
 }
 
-.device-desktop .phabricator-object-item-icon {
+.device-desktop .phui-object-item-icon {
   padding-right: 18px;
 }
 
-.device-desktop .phabricator-object-item-icon-none {
+.device-desktop .phui-object-item-icon-none {
   padding-right: 0;
 }
 
-.phabricator-object-item-icon-image {
+.phui-object-item-icon-image {
   position: absolute;
   right: 0;
   top: 2px;
@@ -316,43 +316,43 @@
 
 */
 
-.phabricator-object-item-bar-color-red {
+.phui-object-item-bar-color-red {
   border-left-color: {$red};
 }
 
-.phabricator-object-item-bar-color-orange {
+.phui-object-item-bar-color-orange {
   border-left-color: {$orange};
 }
 
-.phabricator-object-item-bar-color-yellow {
+.phui-object-item-bar-color-yellow {
   border-left-color: {$yellow};
 }
 
-.phabricator-object-item-bar-color-green {
+.phui-object-item-bar-color-green {
   border-left-color: {$green};
 }
 
-.phabricator-object-item-bar-color-sky {
+.phui-object-item-bar-color-sky {
   border-left-color: {$sky};
 }
 
-.phabricator-object-item-bar-color-blue {
+.phui-object-item-bar-color-blue {
   border-left-color: {$blue};
 }
 
-.phabricator-object-item-bar-color-indigo {
+.phui-object-item-bar-color-indigo {
   border-left-color: {$indigo};
 }
 
-.phabricator-object-item-bar-color-violet {
+.phui-object-item-bar-color-violet {
   border-left-color: {$violet};
 }
 
-.phabricator-object-item-bar-color-grey {
+.phui-object-item-bar-color-grey {
   border-left-color: #bdc3c7;
 }
 
-.phabricator-object-item-bar-color-black {
+.phui-object-item-bar-color-black {
   border-left-color: #333333;
 }
 
@@ -362,15 +362,15 @@
 
 */
 
-.phabricator-object-item-disabled {
+.phui-object-item-disabled {
   border-left-color: #d7d7d7;
 }
 
-.phabricator-object-item-disabled .phabricator-object-item-frame {
+.phui-object-item-disabled .phui-object-item-frame {
   border-color: #d7d7d7;
 }
 
-.phabricator-object-item-disabled .phabricator-object-item-objname {
+.phui-object-item-disabled .phui-object-item-objname {
   color: {$greytext};
 }
 
@@ -381,21 +381,21 @@
 
 */
 
-.phabricator-object-item-highlighted {
+.phui-object-item-highlighted {
   background: {$lightyellow};
 }
 
-.phabricator-object-list-cards
- .phabricator-object-item.phabricator-object-item-highlighted {
+.phui-object-list-cards
+ .phui-object-item.phui-object-item-highlighted {
   background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
   background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
 }
 
-.phabricator-object-item-selected {
+.phui-object-item-selected {
   background: {$lightblue};
 }
 
-.phabricator-object-list-flush .aphront-error-view {
+.phui-object-list-flush .aphront-error-view {
   margin: 0;
   background: #fff;
 }
@@ -407,17 +407,17 @@
 
 */
 
-.phabricator-object-item-foot-icons {
+.phui-object-item-foot-icons {
   margin-left: 10px;
   bottom: 0;
   position: absolute;
 }
 
-.phabricator-object-item-with-foot-icons .phabricator-object-item-content {
+.phui-object-item-with-foot-icons .phui-object-item-content {
   padding-bottom: 22px;
 }
 
-.phabricator-object-item-foot-icon {
+.phui-object-item-foot-icon {
   display: inline-block;
   background: #909090;
   color: #ffffff;
@@ -429,7 +429,7 @@
   position: relative;
 }
 
-.phabricator-object-item-foot-icon .sprite-icons {
+.phui-object-item-foot-icon .sprite-icons {
   width: 14px;
   height: 14px;
   position: absolute;
@@ -444,7 +444,7 @@
 
 */
 
-.phabricator-object-item-handle-icons {
+.phui-object-item-handle-icons {
   height: 28px;
   margin-right: 10px;
   bottom: 0;
@@ -453,7 +453,7 @@
   position: absolute;
 }
 
-.phabricator-object-item-handle-icon {
+.phui-object-item-handle-icon {
   margin: 1px;
   width: 28px;
   height: 28px;
@@ -469,7 +469,7 @@
 
 */
 
-.phabricator-object-item-bylines {
+.phui-object-item-bylines {
   float: right;
   clear: right;
   padding: 0 10px;
@@ -488,23 +488,23 @@
 */
 
 /* Hard to sprite since we can't have other sprites appearing in tall cells */
-.phabricator-object-list-cards .phabricator-object-item {
+.phui-object-list-cards .phui-object-item {
   border-radius: 3px;
   border-left-width: 6px;
   background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
   margin-bottom: 4px;
 }
 
-.phabricator-object-list-cards .phabricator-object-item-frame {
+.phui-object-list-cards .phui-object-item-frame {
   min-height: 50px;
 }
 
-.phabricator-object-list-cards .phabricator-object-item-selected {
+.phui-object-list-cards .phui-object-item-selected {
   background: #bfdcff;
 }
 
-.phabricator-object-list-cards .phabricator-object-item-selected
-  .phabricator-object-item-frame {
+.phui-object-list-cards .phui-object-item-selected
+  .phui-object-item-frame {
   border-color: #99ccff;
 }
 
@@ -530,3 +530,25 @@
 .drag-sending {
   opacity: 0.75;
 }
+
+/* - Plain ---------------------------------------------------------------------
+
+  Remove all border styles, just a list of objects
+
+*/
+
+.phui-object-list-plain .phui-object-item {
+  background: transparent;
+}
+
+.phui-object-list-plain .phui-object-item,
+.phui-object-list-plain .phui-object-item-frame {
+  border: none;
+}
+
+.phui-object-list-plain .phui-object-item-attributes,
+.phui-object-list-plain .phui-object-item-name {
+  padding-left: 0;
+  padding-top: 0;
+}
+

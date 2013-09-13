@@ -114,16 +114,118 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $sliced_results = $pager->sliceResults($results);
 
-    if ($pager->getBeforeID() || (count($results) > $pager->getPageSize())) {
-      $pager->setNextPageID($this->getPagingValue(last($sliced_results)));
-    }
+    if ($sliced_results) {
+      if ($pager->getBeforeID() || (count($results) > $pager->getPageSize())) {
+        $pager->setNextPageID($this->getPagingValue(last($sliced_results)));
+      }
 
-    if ($pager->getAfterID() ||
-       ($pager->getBeforeID() && (count($results) > $pager->getPageSize()))) {
-      $pager->setPrevPageID($this->getPagingValue(head($sliced_results)));
+      if ($pager->getAfterID() ||
+         ($pager->getBeforeID() && (count($results) > $pager->getPageSize()))) {
+        $pager->setPrevPageID($this->getPagingValue(head($sliced_results)));
+      }
     }
 
     return $sliced_results;
+  }
+
+
+  /**
+   * Simplifies the task of constructing a paging clause across multiple
+   * columns. In the general case, this looks like:
+   *
+   *   A > a OR (A = a AND B > b) OR (A = a AND B = b AND C > c)
+   *
+   * To build a clause, specify the name, type, and value of each column
+   * to include:
+   *
+   *   $this->buildPagingClauseFromMultipleColumns(
+   *     $conn_r,
+   *     array(
+   *       array(
+   *         'name' => 'title',
+   *         'type' => 'string',
+   *         'value' => $cursor->getTitle(),
+   *         'reverse' => true,
+   *       ),
+   *       array(
+   *         'name' => 'id',
+   *         'type' => 'int',
+   *         'value' => $cursor->getID(),
+   *       ),
+   *     ),
+   *     array(
+   *       'reversed' => $is_reversed,
+   *     ));
+   *
+   * This method will then return a composable clause for inclusion in WHERE.
+   *
+   * @param AphrontDatabaseConnection Connection query will execute on.
+   * @param list<map> Column description dictionaries.
+   * @param map Additional constuction options.
+   * @return string Query clause.
+   */
+  final protected function buildPagingClauseFromMultipleColumns(
+    AphrontDatabaseConnection $conn,
+    array $columns,
+    array $options) {
+
+    foreach ($columns as $column) {
+      PhutilTypeSpec::checkMap(
+        $column,
+        array(
+          'name' => 'string',
+          'value' => 'wild',
+          'type' => 'string',
+          'reverse' => 'optional bool',
+        ));
+    }
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'reversed' => 'optional bool',
+      ));
+
+    $is_query_reversed = idx($options, 'reversed', false);
+
+    $clauses = array();
+    $accumulated = array();
+    $last_key = last_key($columns);
+    foreach ($columns as $key => $column) {
+      $name = $column['name'];
+
+      $type = $column['type'];
+      switch ($type) {
+        case 'int':
+          $value = qsprintf($conn, '%d', $column['value']);
+          break;
+        case 'string':
+          $value = qsprintf($conn, '%s', $column['value']);
+          break;
+        default:
+          throw new Exception("Unknown column type '{$type}'!");
+      }
+
+      $is_column_reversed = idx($column, 'reverse', false);
+      $reverse = ($is_query_reversed xor $is_column_reversed);
+
+      $clause = $accumulated;
+      $clause[] = qsprintf(
+        $conn,
+        '%Q %Q %Q',
+        $name,
+        $reverse ? '>' : '<',
+        $value);
+      $clauses[] = '('.implode(') AND (', $clause).')';
+
+      $accumulated[] = qsprintf(
+        $conn,
+        '%Q = %Q',
+        $name,
+        $value);
+    }
+
+    return '('.implode(') OR (', $clauses).')';
   }
 
 }

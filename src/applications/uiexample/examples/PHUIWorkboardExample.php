@@ -14,88 +14,88 @@ final class PHUIWorkboardExample extends PhabricatorUIExample {
 
     /* List 1 */
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
     $list->setFlush(true);
 
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Business Card'))
         ->setBarColor('red'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('House of Cards'))
         ->setBarColor('yellow'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Cardigan'))
         ->setBarColor('green'));
     $list->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Cardamom'))
         ->addFootIcon('highlight-white', 'Spice')
         ->setBarColor('blue'));
 
     /* List 2 */
 
-    $list2 = new PhabricatorObjectItemListView();
+    $list2 = new PHUIObjectItemListView();
     $list2->setCards(true);
     $list2->setFlush(true);
 
     $list2->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Business Card'))
         ->setBarColor('red'));
     $list2->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange'));
 
     /* List 3 */
 
-    $list3 = new PhabricatorObjectItemListView();
+    $list3 = new PHUIObjectItemListView();
     $list3->setCards(true);
     $list3->setFlush(true);
 
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Business Card'))
         ->setBarColor('red'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('House of Cards'))
         ->setBarColor('yellow'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Cardigan'))
         ->setBarColor('green'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Cardamom'))
         ->addFootIcon('highlight-white', 'Spice')
         ->setBarColor('blue'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Business Card'))
         ->setBarColor('red'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Business Card'))
         ->setBarColor('red'));
     $list3->addItem(
-      id(new PhabricatorObjectItemView())
+      id(new PHUIObjectItemView())
         ->setHeader(pht('Playing Card'))
         ->setBarColor('orange'));
 

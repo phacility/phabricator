@@ -97,9 +97,10 @@ final class ConduitAPI_differential_getcommitmessage_Method
       $aux_phids[$field_key] = $field->getRequiredHandlePHIDsForCommitMessage();
     }
     $phids = array_unique(array_mergev($aux_phids));
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     foreach ($aux_fields as $field_key => $field) {
       $field->setHandles(array_select_keys($handles, $aux_phids[$field_key]));
     }

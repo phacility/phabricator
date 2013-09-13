@@ -40,7 +40,7 @@ final class PhabricatorFileListController extends PhabricatorFileController
 
     $highlighted_ids = array_fill_keys($highlighted_ids, true);
 
-    $list_view = id(new PhabricatorObjectItemListView())
+    $list_view = id(new PHUIObjectItemListView())
       ->setUser($user);
 
     foreach ($files as $file) {
@@ -58,7 +58,7 @@ final class PhabricatorFileListController extends PhabricatorFileController
         $uploaded = pht('Uploaded on %s', $date_created);
       }
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObject($file)
         ->setObjectName("F{$id}")
         ->setHeader($name)

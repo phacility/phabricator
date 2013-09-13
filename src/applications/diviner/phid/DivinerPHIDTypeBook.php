@@ -22,6 +22,7 @@ final class DivinerPHIDTypeBook extends PhabricatorPHIDType {
 
     return id(new DivinerBookQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

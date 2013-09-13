@@ -56,7 +56,7 @@ final class ReleephProjectViewController extends ReleephProjectController
       $requests = mgroup($requests, 'getBranchID');
     }
 
-    $list = id(new PhabricatorObjectItemListView())
+    $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
     foreach ($branches as $branch) {
       $diffusion_href = null;
@@ -85,7 +85,7 @@ final class ReleephProjectViewController extends ReleephProjectController
           $branch_link);
       }
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($branch->getDisplayName())
         ->setHref($branch->getURI())
         ->addAttribute($branch_link);

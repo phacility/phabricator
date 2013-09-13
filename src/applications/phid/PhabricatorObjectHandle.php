@@ -130,7 +130,7 @@ final class PhabricatorObjectHandle
    * completely loaded (e.g., the type or data for the PHID could not be
    * identified or located).
    *
-   * Basically, @{class:PhabricatorObjectHandleData} gives you back a handle for
+   * Basically, @{class:PhabricatorHandleQuery} gives you back a handle for
    * any PHID you give it, but it gives you a complete handle only for valid
    * PHIDs.
    *

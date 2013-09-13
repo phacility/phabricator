@@ -124,7 +124,7 @@ final class PhabricatorSearchManagementIndexWorkflow
       $indexer_phid = $indexer->getIndexableObject()->generatePHID();
       $indexer_type = phid_get_type($indexer_phid);
 
-      if ($type && ($indexer_type != $type)) {
+      if ($type && strcasecmp($indexer_type, $type)) {
         continue;
       }
 

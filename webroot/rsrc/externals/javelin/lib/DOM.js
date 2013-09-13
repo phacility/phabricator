@@ -157,7 +157,29 @@ JX.install('HTML', {
         fragment.appendChild(wrapper.removeChild(wrapper.firstChild));
       }
       return fragment;
+    },
+
+    /**
+     * Convert the raw HTML string into a single DOM node. This only works
+     * if the element has a single top-level element. Otherwise, use
+     * @{method:getFragment} to get a document fragment instead.
+     *
+     * @return Node Single node represented by the object.
+     * @task nodes
+     */
+    getNode : function() {
+      var fragment = this.getFragment();
+      if (__DEV__) {
+        if (fragment.childNodes.length < 1) {
+          JX.$E('JX.HTML.getNode(): Markup has no root node!');
+        }
+        if (fragment.childNodes.length > 1) {
+          JX.$E('JX.HTML.getNode(): Markup has more than one root node!');
+        }
+      }
+      return fragment.firstChild;
     }
+
   }
 });
 
@@ -856,11 +878,56 @@ JX.install('DOM', {
       }
 
       if (!result.length) {
-        JX.$E('JX.DOM.find(<node>, "' +
-          tagname + '", "' + sigil + '"): '+ 'matched no nodes.');
+        JX.$E(
+          'JX.DOM.find(<node>, "' + tagname + '", "' + sigil + '"): ' +
+          'matched no nodes.');
       }
 
       return result[0];
+    },
+
+
+    /**
+     * Select a node uniquely identified by an anchor, tagname, and sigil. This
+     * is similar to JX.DOM.find() but walks up the DOM tree instead of down
+     * it.
+     *
+     * @param   Node    Node to look above.
+     * @param   string  Tag name, like 'a' or 'textarea'.
+     * @param   string  Optionally, sigil which selected node must have.
+     * @return  Node    Matching node.
+     *
+     * @task    query
+     */
+    findAbove : function(anchor, tagname, sigil) {
+      if (__DEV__) {
+        if (!JX.DOM.isNode(anchor)) {
+          JX.$E(
+            'JX.DOM.findAbove(<glop>, "' + tagname + '", "' + sigil + '"): ' +
+            'first argument must be a DOM node.');
+        }
+      }
+
+      var result = anchor.parentNode;
+      while (true) {
+        if (!result) {
+          break;
+        }
+        if (JX.DOM.isType(result, tagname)) {
+          if (!sigil || JX.Stratcom.hasSigil(result, sigil)) {
+            break;
+          }
+        }
+        result = result.parentNode;
+      }
+
+      if (!result) {
+        JX.$E(
+          'JX.DOM.findAbove(<node>, "' + tagname + '", "' + sigil + '"): ' +
+          'no matching node.');
+      }
+
+      return result;
     },
 
 

@@ -41,7 +41,7 @@ final class PhrictionHistoryController
     $author_phids = mpull($history, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($author_phids);
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     foreach ($history as $content) {
 
@@ -88,7 +88,7 @@ final class PhrictionHistoryController
           break;
       }
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader(pht('%s by %s', $change_type, $author))
         ->setBarColor($color)
         ->addAttribute(

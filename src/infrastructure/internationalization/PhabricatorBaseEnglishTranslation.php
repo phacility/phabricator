@@ -677,6 +677,10 @@ abstract class PhabricatorBaseEnglishTranslation
         'Old (%s days)',
       ),
 
+      '%s Commit(s)' => array(
+        '%s Commit',
+        '%s Commits',
+      ),
 
     );
   }

@@ -37,7 +37,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController
 
     $lang_map = PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setUser($user);
     foreach ($pastes as $paste) {
       $created = phabricator_date($paste->getDateCreated(), $user);
@@ -58,7 +58,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController
 
       $title = nonempty($paste->getTitle(), pht('(An Untitled Masterwork)'));
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName('P'.$paste->getID())
         ->setHeader($title)
         ->setHref('/P'.$paste->getID())

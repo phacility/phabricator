@@ -121,7 +121,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         break;
       default:
         $label = $this->getLabel();
-        throw new ManiphestAuxiliaryFieldTypeException(
+        throw new Exception(
           "Field type '{$type}' is not a valid type (for field '{$label}').");
         break;
     }
@@ -248,7 +248,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     switch ($this->getFieldType()) {
       case self::TYPE_INT:
         if ($this->getValue() && !is_numeric($this->getValue())) {
-          throw new ManiphestAuxiliaryFieldValidationException(
+          throw new PhabricatorCustomFieldValidationException(
             pht(
               '%s must be an integer value.',
               $this->getLabel()));
@@ -262,7 +262,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         return true;
       case self::TYPE_DATE:
         if ((int)$this->getValue() <= 0 && $this->isRequired()) {
-          throw new ManiphestAuxiliaryFieldValidationException(
+          throw new PhabricatorCustomFieldValidationException(
             pht(
               '%s must be a valid date.',
               $this->getLabel()));
@@ -271,7 +271,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
       case self::TYPE_USER:
       case self::TYPE_USERS:
         if (!is_array($this->getValue())) {
-          throw new ManiphestAuxiliaryFieldValidationException(
+          throw new PhabricatorCustomFieldValidationException(
             pht(
               '%s is not a valid list of user PHIDs.',
               $this->getLabel()));

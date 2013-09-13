@@ -1,120 +1,30 @@
 <?php
 
-final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
+/**
+ * Publishes tasks representing work that needs to be done into Asana, and
+ * updates the tasks as the corresponding Phabricator objects are updated.
+ */
+final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
 
   private $provider;
-  private $publisher;
-  private $workspaceID;
-  private $feedStory;
-  private $storyObject;
 
-  private function getProvider() {
-    if (!$this->provider) {
-      $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
-      if (!$provider) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          'No Asana provider configured.');
-      }
-      $this->provider = $provider;
-    }
-    return $this->provider;
+
+/* -(  Publishing Stories  )------------------------------------------------- */
+
+
+  /**
+   * This worker is enabled when an Asana workspace ID is configured with
+   * `asana.workspace-id`.
+   */
+  public function isEnabled() {
+    return (bool)$this->getWorkspaceID();
   }
 
-  private function getWorkspaceID() {
-    if (!$this->workspaceID) {
-      $workspace_id = PhabricatorEnv::getEnvConfig('asana.workspace-id');
-      if (!$workspace_id) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          'No workspace Asana ID configured.');
-      }
-      $this->workspaceID = $workspace_id;
-    }
-    return $this->workspaceID;
-  }
 
-  private function getFeedStory() {
-    if (!$this->feedStory) {
-      $story = $this->loadFeedStory();
-      $this->feedStory = $story;
-    }
-    return $this->feedStory;
-  }
-
-  private function getViewer() {
-    return PhabricatorUser::getOmnipotentUser();
-  }
-
-  private function getPublisher() {
-    return $this->publisher;
-  }
-
-  private function getStoryObject() {
-    if (!$this->storyObject) {
-      $story = $this->getFeedStory();
-      try {
-        $object = $story->getPrimaryObject();
-      } catch (Exception $ex) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          $ex->getMessage());
-      }
-      $this->storyObject = $object;
-    }
-    return $this->storyObject;
-  }
-
-  private function getAsanaTaskData($object) {
-    $publisher = $this->getPublisher();
-
-    $title = $publisher->getObjectTitle($object);
-    $uri = $publisher->getObjectURI($object);
-    $description = $publisher->getObjectDescription($object);
-    $is_completed = $publisher->isObjectClosed($object);
-
-    $notes = array(
-      $description,
-      $uri,
-      $this->getSynchronizationWarning(),
-    );
-
-    $notes = implode("\n\n", $notes);
-
-    return array(
-      'name' => $title,
-      'notes' => $notes,
-      'completed' => $is_completed,
-    );
-  }
-
-  private function getAsanaSubtaskData($object) {
-    $publisher = $this->getPublisher();
-
-    $title = $publisher->getResponsibilityTitle($object);
-    $uri = $publisher->getObjectURI($object);
-    $description = $publisher->getObjectDescription($object);
-
-    $notes = array(
-      $description,
-      $uri,
-      $this->getSynchronizationWarning(),
-    );
-
-    $notes = implode("\n\n", $notes);
-
-    return array(
-      'name' => $title,
-      'notes' => $notes,
-    );
-  }
-
-  private function getSynchronizationWarning() {
-    return
-      "\xE2\x9A\xA0 DO NOT EDIT THIS TASK \xE2\x9A\xA0\n".
-      "\xE2\x98\xA0 Your changes will not be reflected in Phabricator.\n".
-      "\xE2\x98\xA0 Your changes will be destroyed the next time state ".
-      "is synchronized.";
-  }
-
-  protected function doWork() {
+  /**
+   * Publish stories into Asana using the Asana API.
+   */
+  protected function publishFeedStory() {
     $story = $this->getFeedStory();
     $data = $story->getStoryData();
 
@@ -125,30 +35,7 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     $object = $this->getStoryObject();
     $src_phid = $object->getPHID();
 
-    $chronological_key = $story->getChronologicalKey();
-
-    $publishers = id(new PhutilSymbolLoader())
-      ->setAncestorClass('DoorkeeperFeedStoryPublisher')
-      ->loadObjects();
-    foreach ($publishers as $publisher) {
-      if ($publisher->canPublishStory($story, $object)) {
-        $publisher
-          ->setViewer($viewer)
-          ->setFeedStory($story);
-
-        $object = $publisher->willPublishStory($object);
-        $this->storyObject = $object;
-
-        $this->publisher = $publisher;
-        $this->log("Using publisher '%s'.\n", get_class($publisher));
-        break;
-      }
-    }
-
-    if (!$this->publisher) {
-      $this->log("Story is about an unsupported object type.\n");
-      return;
-    }
+    $publisher = $this->getPublisher();
 
     // Figure out all the users related to the object. Users go into one of
     // four buckets:
@@ -527,7 +414,9 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       // because everything else is idempotent, so this is the only effect we
       // can't safely run more than once.
 
-      $text = $publisher->getStoryText($object);
+      $text = $publisher
+        ->setRenderWithImpliedContext(true)
+        ->getStoryText($object);
 
       $this->makeAsanaAPICall(
         $oauth_token,
@@ -537,6 +426,77 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
           'text' => $text,
         ));
     }
+  }
+
+
+/* -(  Internals  )---------------------------------------------------------- */
+
+  private function getWorkspaceID() {
+    return PhabricatorEnv::getEnvConfig('asana.workspace-id');
+  }
+
+  private function getProvider() {
+    if (!$this->provider) {
+      $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+      if (!$provider) {
+        throw new PhabricatorWorkerPermanentFailureException(
+          'No Asana provider configured.');
+      }
+      $this->provider = $provider;
+    }
+    return $this->provider;
+  }
+
+  private function getAsanaTaskData($object) {
+    $publisher = $this->getPublisher();
+
+    $title = $publisher->getObjectTitle($object);
+    $uri = $publisher->getObjectURI($object);
+    $description = $publisher->getObjectDescription($object);
+    $is_completed = $publisher->isObjectClosed($object);
+
+    $notes = array(
+      $description,
+      $uri,
+      $this->getSynchronizationWarning(),
+    );
+
+    $notes = implode("\n\n", $notes);
+
+    return array(
+      'name' => $title,
+      'notes' => $notes,
+      'completed' => $is_completed,
+    );
+  }
+
+  private function getAsanaSubtaskData($object) {
+    $publisher = $this->getPublisher();
+
+    $title = $publisher->getResponsibilityTitle($object);
+    $uri = $publisher->getObjectURI($object);
+    $description = $publisher->getObjectDescription($object);
+
+    $notes = array(
+      $description,
+      $uri,
+      $this->getSynchronizationWarning(),
+    );
+
+    $notes = implode("\n\n", $notes);
+
+    return array(
+      'name' => $title,
+      'notes' => $notes,
+    );
+  }
+
+  private function getSynchronizationWarning() {
+    return
+      "\xE2\x9A\xA0 DO NOT EDIT THIS TASK \xE2\x9A\xA0\n".
+      "\xE2\x98\xA0 Your changes will not be reflected in Phabricator.\n".
+      "\xE2\x98\xA0 Your changes will be destroyed the next time state ".
+      "is synchronized.";
   }
 
   private function lookupAsanaUserIDs($all_phids) {
@@ -658,15 +618,6 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
     return $ref;
   }
 
-  public function getMaximumRetryCount() {
-    return 4;
-  }
-
-  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
-    $count = $task->getFailureCount();
-    return (5 * 60) * pow(8, $count);
-  }
-
   private function addFollowers(
     $oauth_token,
     $task_id,
@@ -693,6 +644,5 @@ final class DoorkeeperFeedWorkerAsana extends FeedPushWorker {
       'POST',
       $data);
   }
-
 
 }

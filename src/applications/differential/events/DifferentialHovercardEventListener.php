@@ -44,9 +44,10 @@ final class DifferentialHovercardEventListener extends PhutilEventListener {
       $reviewer_phids,
       $tasks);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $hovercard->setTitle('D'.$rev->getID());
     $hovercard->setDetail($rev->getTitle());

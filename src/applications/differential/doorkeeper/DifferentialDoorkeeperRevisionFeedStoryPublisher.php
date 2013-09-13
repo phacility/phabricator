@@ -93,9 +93,11 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
   }
 
   public function getStoryText($object) {
+    $implied_context = $this->getRenderWithImpliedContext();
+
     $story = $this->getFeedStory();
     if ($story instanceof PhabricatorFeedStoryDifferential) {
-      $text = $story->renderForAsanaBridge();
+      $text = $story->renderForAsanaBridge($implied_context);
     } else {
       $text = $story->renderText();
     }

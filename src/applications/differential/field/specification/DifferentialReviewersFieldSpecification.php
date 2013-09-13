@@ -164,9 +164,10 @@ final class DifferentialReviewersFieldSpecification
       return null;
     }
 
-    $handles = id(new PhabricatorObjectHandleData($this->reviewers))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->getUser())
-      ->loadHandles();
+      ->withPHIDs($this->reviewers)
+      ->execute();
     $handles = array_select_keys(
       $handles,
       array($this->getRevision()->getPrimaryReviewer())) + $handles;

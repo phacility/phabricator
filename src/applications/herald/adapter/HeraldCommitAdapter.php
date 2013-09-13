@@ -71,6 +71,13 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   public function getConditionsForField($field) {
     switch ($field) {
       case self::FIELD_DIFFERENTIAL_REVIEWERS:
+        return array(
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
+          self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+        );
       case self::FIELD_DIFFERENTIAL_CCS:
         return array(
           self::CONDITION_INCLUDE_ALL,

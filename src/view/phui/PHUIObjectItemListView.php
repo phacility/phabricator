@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorObjectItemListView extends AphrontTagView {
+final class PHUIObjectItemListView extends AphrontTagView {
 
   private $header;
   private $items;
@@ -9,9 +9,15 @@ final class PhabricatorObjectItemListView extends AphrontTagView {
   private $cards;
   private $noDataString;
   private $flush;
+  private $plain;
 
   public function setFlush($flush) {
     $this->flush = $flush;
+    return $this;
+  }
+
+  public function setPlain($plain) {
+    $this->plain = $plain;
     return $this;
   }
 
@@ -30,7 +36,7 @@ final class PhabricatorObjectItemListView extends AphrontTagView {
     return $this;
   }
 
-  public function addItem(PhabricatorObjectItemView $item) {
+  public function addItem(PHUIObjectItemView $item) {
     $this->items[] = $item;
     return $this;
   }
@@ -52,15 +58,18 @@ final class PhabricatorObjectItemListView extends AphrontTagView {
   protected function getTagAttributes() {
     $classes = array();
 
-    $classes[] = 'phabricator-object-item-list-view';
+    $classes[] = 'phui-object-item-list-view';
     if ($this->stackable) {
-      $classes[] = 'phabricator-object-list-stackable';
+      $classes[] = 'phui-object-list-stackable';
     }
     if ($this->cards) {
-      $classes[] = 'phabricator-object-list-cards';
+      $classes[] = 'phui-object-list-cards';
     }
     if ($this->flush) {
-      $classes[] = 'phabricator-object-list-flush';
+      $classes[] = 'phui-object-list-flush';
+    }
+    if ($this->plain) {
+      $classes[] = 'phui-object-list-plain';
     }
 
     return array(
@@ -69,14 +78,14 @@ final class PhabricatorObjectItemListView extends AphrontTagView {
   }
 
   protected function getTagContent() {
-    require_celerity_resource('phabricator-object-item-list-view-css');
+    require_celerity_resource('phui-object-item-list-view-css');
 
     $header = null;
     if (strlen($this->header)) {
       $header = phutil_tag(
         'h1',
         array(
-          'class' => 'phabricator-object-item-list-header',
+          'class' => 'phui-object-item-list-header',
         ),
         $this->header);
     }

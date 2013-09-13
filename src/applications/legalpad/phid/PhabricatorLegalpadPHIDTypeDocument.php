@@ -24,9 +24,10 @@ final class PhabricatorLegalpadPHIDTypeDocument extends PhabricatorPHIDType {
     array $phids) {
 
     return id(new LegalpadDocumentQuery())
-      ->needDocumentBodies(true)
-      ->withPHIDs($phids)
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
+      ->withPHIDs($phids)
+      ->needDocumentBodies(true)
       ->execute();
   }
 

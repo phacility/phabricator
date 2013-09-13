@@ -22,6 +22,7 @@ final class PhluxPHIDTypeVariable extends PhabricatorPHIDType {
 
     return id(new PhluxVariableQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

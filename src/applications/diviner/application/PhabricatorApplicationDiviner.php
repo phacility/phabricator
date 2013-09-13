@@ -11,7 +11,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Documentation';
+    return pht('Documentation');
   }
 
   public function getTitleGlyph() {

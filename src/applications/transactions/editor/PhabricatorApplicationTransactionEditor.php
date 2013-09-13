@@ -535,9 +535,10 @@ abstract class PhabricatorApplicationTransactionEditor
     $handles = array();
     $merged = array_mergev($phids);
     if ($merged) {
-      $handles = id(new PhabricatorObjectHandleData($merged))
+      $handles = id(new PhabricatorHandleQuery())
         ->setViewer($this->requireActor())
-        ->loadHandles();
+        ->withPHIDs($merged)
+        ->execute();
     }
     foreach ($xactions as $key => $xaction) {
       $xaction->setHandles(array_select_keys($handles, $phids[$key]));
@@ -1084,9 +1085,10 @@ abstract class PhabricatorApplicationTransactionEditor
     $email_cc = array_unique($this->getMailCC($object));
 
     $phids = array_merge($email_to, $email_cc);
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireActor())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $template = $this->buildMailTemplate($object);
     $body = $this->buildMailBody($object, $xactions);

@@ -66,7 +66,7 @@ final class PhabricatorAuditCommitListView extends AphrontView {
   }
 
   public function render() {
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setCards(true);
     $list->setFlush(true);
     foreach ($this->commits as $commit) {
@@ -91,7 +91,7 @@ final class PhabricatorAuditCommitListView extends AphrontView {
       $commit_status = PhabricatorAuditCommitStatusConstants::getStatusName(
           $commit->getAuditStatus());
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
           ->setObjectName($commit_name)
           ->setHeader($commit_desc)
           ->setHref($commit_link)

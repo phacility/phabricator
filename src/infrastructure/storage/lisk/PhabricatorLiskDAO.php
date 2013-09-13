@@ -1,57 +1,13 @@
 <?php
 
 /**
- * @task edges  Managing Edges
  * @task config Configuring Storage
  */
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
-  private $edges = self::ATTACHABLE;
   private static $namespaceStack = array();
 
   const ATTACHABLE = "<attachable>";
-
-/* -(  Managing Edges  )----------------------------------------------------- */
-
-
-  /**
-   * @task edges
-   */
-  public function attachEdges(array $edges) {
-    foreach ($edges as $type => $type_edges) {
-      $this->edges[$type] = $type_edges;
-    }
-    return $this;
-  }
-
-
-  /**
-   * @task edges
-   */
-  public function getEdges($type) {
-    return $this->assertAttachedKey($this->edges, $type);
-  }
-
-
-  /**
-   * @task edges
-   */
-  public function loadRelativeEdges($type) {
-    if (!$this->getInSet()) {
-      id(new LiskDAOSet())->addToSet($this);
-    }
-    $this->getInSet()->loadRelativeEdges($type);
-    return $this->getEdges($type);
-  }
-
-
-  /**
-   * @task edges
-   */
-  public function getEdgePHIDs($type) {
-    return ipull($this->getEdges($type), 'dst');
-  }
-
 
 /* -(  Configuring Storage  )------------------------------------------------ */
 

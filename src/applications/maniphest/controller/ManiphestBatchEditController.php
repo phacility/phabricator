@@ -33,12 +33,8 @@ final class ManiphestBatchEditController extends ManiphestController {
       $task_ids = implode(',', mpull($tasks, 'getID'));
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/maniphest/view/custom/?s=oc&tasks='.$task_ids);
+        ->setURI('/maniphest/query/?ids='.$task_ids);
     }
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Maniphest Batch Editor'));
-    $panel->setNoBackground();
 
     $handle_phids = mpull($tasks, 'getOwnerPHID');
     $handles = $this->loadViewerHandles($handle_phids);
@@ -125,15 +121,26 @@ final class ManiphestBatchEditController extends ManiphestController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Update Tasks'))
-          ->addCancelButton('/maniphest/', 'Done'));
+          ->addCancelButton('/maniphest/'));
 
-    $panel->appendChild($form);
+    $title = pht('Batch Editor');
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addCrumb(
+      id(new PhabricatorCrumbView())
+        ->setName($title));
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $form_box = id(new PHUIFormBoxView())
+      ->setHeaderText(pht('Batch Edit Tasks'))
+      ->setForm($form);
+
+    return $this->buildApplicationPage(
       array(
-        'title' => pht('Batch Editor'),
+        $crumbs,
+        $form_box,
+      ),
+      array(
+        'title' => $title,
       ));
   }
 

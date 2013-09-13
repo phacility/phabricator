@@ -665,8 +665,7 @@ final class DifferentialChangesetParser {
     if ($changeset->getChangeType() == DifferentialChangeType::TYPE_DELETE &&
         $old == array('unix:filemode' => '100644')) {
       return false;
-     }
-
+    }
     return true;
   }
 
@@ -691,6 +690,7 @@ final class DifferentialChangesetParser {
     $renderer = $this->getRenderer()
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
+      ->setIsTopLevel($this->isTopLevel)
       ->setOldRender($this->oldRender)
       ->setNewRender($this->newRender)
       ->setHunkStartLines($this->hunkStartLines)

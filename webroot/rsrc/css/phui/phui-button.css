@@ -152,8 +152,8 @@ button.link:hover {
   margin-top: -1px;
   padding: 5px 0;
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
-  border: 1px solid #d7d7d7;
-  border-radius: 3px;
+  border: 1px solid {$lightgreyborder};
+  border-bottom-color: {$greyborder};
 }
 
 .dropdown-menu-frame a,
@@ -219,9 +219,37 @@ a.toggle-fixed {
   content: "";
 }
 
+.caret-right {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-left: 7px solid {$greytext};
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
+.caret-left {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  border-right: 7px solid {$greytext};
+  border-bottom: 5px solid transparent;
+  border-top: 5px solid transparent;
+  content: "";
+  margin-bottom: 4px;
+}
+
 .dropdown .caret {
   margin-top: 7px;
   margin-left: 4px;
+}
+
+.small.dropdown .caret {
+  margin-top: 6px;
 }
 
 .grey.dropdown .caret {
@@ -240,7 +268,7 @@ a.toggle-fixed {
   left: 8px;
 }
 
-.button.has_icon .phui-button-text {
+.button.has-icon .phui-button-text {
   margin-left: 16px;
 }
 

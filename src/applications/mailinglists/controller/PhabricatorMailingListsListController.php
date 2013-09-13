@@ -29,10 +29,10 @@ final class PhabricatorMailingListsListController
     PhabricatorSavedQuery $query) {
     assert_instances_of($lists, 'PhabricatorMetaMTAMailingList');
 
-    $view = id(new PhabricatorObjectItemListView());
+    $view = id(new PHUIObjectItemListView());
 
     foreach ($lists as $list) {
-      $item = new PhabricatorObjectItemView();
+      $item = new PHUIObjectItemView();
 
       $item->setHeader($list->getName());
       $item->setHref($list->getURI());

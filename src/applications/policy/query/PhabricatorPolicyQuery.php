@@ -100,9 +100,10 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     $other_policies = array_diff_key($other_policies, $results);
 
     if ($other_policies) {
-      $handles = id(new PhabricatorObjectHandleData($other_policies))
+      $handles = id(new PhabricatorHandleQuery())
         ->setViewer($this->viewer)
-        ->loadHandles();
+        ->withPHIDs($other_policies)
+        ->execute();
       foreach ($other_policies as $phid) {
         $results[$phid] = PhabricatorPolicy::newFromPolicyAndHandle(
           $phid,

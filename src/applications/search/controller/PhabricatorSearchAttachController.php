@@ -26,16 +26,18 @@ final class PhabricatorSearchAttachController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $handle_data = new PhabricatorObjectHandleData(array($this->phid));
-    $handle_data->setViewer($user);
-    $handles = $handle_data->loadHandles();
-    $handle = $handles[$this->phid];
+    $handle = id(New PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
 
     $object_type = $handle->getType();
     $attach_type = $this->type;
 
-    $objects = $handle_data->loadObjects();
-    $object = idx($objects, $this->phid);
+    $object = id(new PhabricatorObjectQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
 
     if (!$object) {
       return new Aphront404Response();

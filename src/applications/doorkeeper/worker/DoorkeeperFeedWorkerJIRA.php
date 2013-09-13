@@ -1,89 +1,34 @@
 <?php
 
-final class DoorkeeperFeedWorkerJIRA extends FeedPushWorker {
+/**
+ * Publishes feed stories into JIRA, using the "JIRA Issues" field to identify
+ * linked issues.
+ */
+final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
 
   private $provider;
-  private $publisher;
-  private $workspaceID;
-  private $feedStory;
-  private $storyObject;
 
-  private function getProvider() {
-    if (!$this->provider) {
-      $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
-      if (!$provider) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          'No JIRA provider configured.');
-      }
-      $this->provider = $provider;
-    }
-    return $this->provider;
+
+/* -(  Publishing Stories  )------------------------------------------------- */
+
+
+  /**
+   * This worker is enabled when a JIRA authentication provider is active.
+   */
+  public function isEnabled() {
+    return (bool)PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
   }
 
-  private function getFeedStory() {
-    if (!$this->feedStory) {
-      $story = $this->loadFeedStory();
-      $this->feedStory = $story;
-    }
-    return $this->feedStory;
-  }
 
-  private function getViewer() {
-    return PhabricatorUser::getOmnipotentUser();
-  }
-
-  private function getPublisher() {
-    return $this->publisher;
-  }
-
-  private function getStoryObject() {
-    if (!$this->storyObject) {
-      $story = $this->getFeedStory();
-      try {
-        $object = $story->getPrimaryObject();
-      } catch (Exception $ex) {
-        throw new PhabricatorWorkerPermanentFailureException(
-          $ex->getMessage());
-      }
-      $this->storyObject = $object;
-    }
-    return $this->storyObject;
-  }
-
-  protected function doWork() {
+  /**
+   * Publishes stories into JIRA using the JIRA API.
+   */
+  protected function publishFeedStory() {
     $story = $this->getFeedStory();
-    $data = $story->getStoryData();
-
     $viewer = $this->getViewer();
     $provider = $this->getProvider();
-
     $object = $this->getStoryObject();
-    $src_phid = $object->getPHID();
-
-    $chronological_key = $story->getChronologicalKey();
-
-    $publishers = id(new PhutilSymbolLoader())
-      ->setAncestorClass('DoorkeeperFeedStoryPublisher')
-      ->loadObjects();
-    foreach ($publishers as $publisher) {
-      if ($publisher->canPublishStory($story, $object)) {
-        $publisher
-          ->setViewer($viewer)
-          ->setFeedStory($story);
-
-        $object = $publisher->willPublishStory($object);
-        $this->storyObject = $object;
-
-        $this->publisher = $publisher;
-        $this->log("Using publisher '%s'.\n", get_class($publisher));
-        break;
-      }
-    }
-
-    if (!$this->publisher) {
-      $this->log("Story is about an unsupported object type.\n");
-      return;
-    }
+    $publisher = $this->getPublisher();
 
     $jira_issue_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $object->getPHID(),
@@ -109,7 +54,7 @@ final class DoorkeeperFeedWorkerJIRA extends FeedPushWorker {
       return;
     }
 
-    $story_text = $publisher->getStoryText($object);
+    $story_text = $this->renderStoryText();
 
     $xobjs = mgroup($xobjs, 'getApplicationDomain');
     foreach ($xobjs as $domain => $xobj_list) {
@@ -148,15 +93,36 @@ final class DoorkeeperFeedWorkerJIRA extends FeedPushWorker {
     }
   }
 
-  public function getMaximumRetryCount() {
-    return 4;
+
+/* -(  Internals  )---------------------------------------------------------- */
+
+
+  /**
+   * Get the active JIRA provider.
+   *
+   * @return PhabricatorAuthProviderOAuth1JIRA Active JIRA auth provider.
+   * @task internal
+   */
+  private function getProvider() {
+    if (!$this->provider) {
+      $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+      if (!$provider) {
+        throw new PhabricatorWorkerPermanentFailureException(
+          'No JIRA provider configured.');
+      }
+      $this->provider = $provider;
+    }
+    return $this->provider;
   }
 
-  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
-    $count = $task->getFailureCount();
-    return (5 * 60) * pow(8, $count);
-  }
 
+  /**
+   * Get a list of users to act as when publishing into JIRA.
+   *
+   * @return list<phid> Candidate user PHIDs to act as when publishing this
+   *                    story.
+   * @task internal
+   */
   private function findUsersToPossess() {
     $object = $this->getStoryObject();
     $publisher = $this->getPublisher();
@@ -188,6 +154,16 @@ final class DoorkeeperFeedWorkerJIRA extends FeedPushWorker {
     $try_users = array_filter($try_users);
 
     return $try_users;
+  }
+
+  private function renderStoryText() {
+    $object = $this->getStoryObject();
+    $publisher = $this->getPublisher();
+
+    $text = $publisher->getStoryText($object);
+    $uri = $publisher->getObjectURI($object);
+
+    return $text."\n\n".$uri;
   }
 
 }

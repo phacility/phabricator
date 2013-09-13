@@ -858,7 +858,7 @@ abstract class PhabricatorCustomField {
   /**
    * @task list
    */
-  public function renderOnListItem(PhabricatorObjectItemView $view) {
+  public function renderOnListItem(PHUIObjectItemView $view) {
     if ($this->proxy) {
       return $this->proxy->renderOnListItem($view);
     }

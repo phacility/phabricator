@@ -17,12 +17,12 @@ final class PhabricatorDaemonLogListView extends AphrontView {
       throw new Exception("Call setUser() before rendering!");
     }
 
-    $list = id(new PhabricatorObjectItemListView());
+    $list = id(new PHUIObjectItemListView());
     foreach ($this->daemonLogs as $log) {
       $id = $log->getID();
       $epoch = $log->getDateCreated();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName(pht("Daemon %s", $id))
         ->setHeader($log->getDaemon())
         ->setHref("/daemon/log/{$id}/")

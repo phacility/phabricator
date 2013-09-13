@@ -203,7 +203,7 @@ final class PhabricatorApplicationSearchController
       $nav->appendChild($list);
 
       // TODO: This is a bit hacky.
-      if ($list instanceof PhabricatorObjectItemListView) {
+      if ($list instanceof PHUIObjectItemListView) {
         $list->setNoDataString(pht("No results found for this query."));
         $list->setPager($pager);
       } else {
@@ -248,7 +248,7 @@ final class PhabricatorApplicationSearchController
 
     $list_id = celerity_generate_unique_node_id();
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setUser($user);
     $list->setID($list_id);
 
@@ -263,7 +263,7 @@ final class PhabricatorApplicationSearchController
       $class = get_class($engine);
       $key = $named_query->getQueryKey();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($named_query->getQueryName())
         ->setHref($engine->getQueryResultsPageURI($key));
 

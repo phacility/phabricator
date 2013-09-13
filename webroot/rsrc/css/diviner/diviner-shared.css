@@ -15,6 +15,10 @@
   margin: 0 8px 16px;
 }
 
+a.diviner-atom-signature-name {
+  color: {$violet};
+}
+
 .diviner-table-header {
   padding: 4px 16px;
   background-color: {$greybackground};
@@ -65,6 +69,10 @@
   padding: 0 8px 16px 0;
 }
 
+body .diviner-document-section .phabricator-header-view {
+  width: 100%;
+}
+
 .diviner-message-not-documented {
   color: {$lightgreytext};
   font-style: italic;
@@ -108,3 +116,42 @@
   padding-top: 0;
 }
 
+.diviner-list li {
+  line-height: 18px;
+  padding-bottom: 4px;
+}
+
+/* - Book Index ----------------------------------------------------------------
+
+  How big lists of book indexes get displayed
+
+*/
+
+.diviner-book-item {
+  display: block;
+  padding: 4px 16px;
+  margin: 0 -16px;
+}
+
+.diviner-book-item:hover {
+  text-decoration: none;
+}
+
+.device-desktop .diviner-book-item:hover {
+  background-color: {$lightgreybackground};
+}
+
+.diviner-book-item-title {
+  font-weight: bold;
+}
+
+.diviner-book-item-type {
+  color: {$lightgreytext};
+  padding-left: 8px
+}
+
+.diviner-book-item-subtitle {
+  display: block;
+  line-height: 18px;
+  color: {$lightbluetext};
+}

@@ -22,6 +22,7 @@ final class PholioPHIDTypeImage extends PhabricatorPHIDType {
 
     return id(new PholioImageQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

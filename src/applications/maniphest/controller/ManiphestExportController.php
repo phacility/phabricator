@@ -55,10 +55,11 @@ final class ManiphestExportController extends ManiphestController {
     // TODO: PHPExcel has a dependency on the PHP zip extension. We should test
     // for that here, since it fatals if we don't have the ZipArchive class.
 
-    $query = id(new PhabricatorSearchQuery())->loadOneWhere(
-      'queryKey = %s',
-      $this->key);
-    if (!$query) {
+    $saved = id(new PhabricatorSavedQueryQuery())
+      ->setViewer($user)
+      ->withQueryKeys(array($this->key))
+      ->executeOne();
+    if (!$saved) {
       return new Aphront404Response();
     }
 
@@ -88,7 +89,6 @@ final class ManiphestExportController extends ManiphestController {
       $dialog->addCancelButton('/maniphest/');
       $dialog->addSubmitButton(pht('Export to Excel'));
       return id(new AphrontDialogResponse())->setDialog($dialog);
-
     }
 
     $format = idx($formats, $request->getStr("excel-format"));
@@ -96,20 +96,23 @@ final class ManiphestExportController extends ManiphestController {
       throw new Exception('Excel format object not found.');
     }
 
-    $query->setParameter('limit',   null);
-    $query->setParameter('offset',  null);
-    $query->setParameter('order',   'p');
-    $query->setParameter('group',   'n');
+    $saved->makeEphemeral();
+    $saved->setParameter('limit', PHP_INT_MAX);
 
-    list($tasks, $handles) = ManiphestTaskListController::loadTasks(
-      $query,
-      $user);
-    // Ungroup tasks.
-    $tasks = array_mergev($tasks);
+    $engine = id(new ManiphestTaskSearchEngine())
+      ->setViewer($user);
+
+    $query = $engine->buildQueryFromSavedQuery($saved);
+    $query->setViewer($user);
+    $tasks = $query->execute();
 
     $all_projects = array_mergev(mpull($tasks, 'getProjectPHIDs'));
-    $project_handles = $this->loadViewerHandles($all_projects);
-    $handles += $project_handles;
+    $all_assigned = mpull($tasks, 'getOwnerPHID');
+
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array_merge($all_projects, $all_assigned))
+      ->execute();
 
     $workbook = new PHPExcel();
     $format->buildWorkbook($workbook, $tasks, $handles, $user);

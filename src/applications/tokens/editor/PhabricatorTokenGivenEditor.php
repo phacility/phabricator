@@ -99,10 +99,10 @@ final class PhabricatorTokenGivenEditor
   }
 
   private function validateObject($object_phid) {
-    $objects = id(new PhabricatorObjectHandleData(array($object_phid)))
+    $object = id(new PhabricatorObjectQuery())
       ->setViewer($this->requireActor())
-      ->loadObjects();
-    $object = head($objects);
+      ->withPHIDs(array($object_phid))
+      ->executeOne();
 
     if (!$object) {
       throw new Exception("No such object!");

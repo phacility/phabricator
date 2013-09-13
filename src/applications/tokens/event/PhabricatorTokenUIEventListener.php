@@ -93,9 +93,10 @@ final class PhabricatorTokenUIEventListener
     $tokens = mpull($tokens, null, 'getPHID');
 
     $author_phids = mpull($tokens_given, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($author_phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->loadHandles();
+      ->withPHIDs($author_phids)
+      ->execute();
 
     Javelin::initBehavior('phabricator-tooltips');
 

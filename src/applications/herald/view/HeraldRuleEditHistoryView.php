@@ -21,7 +21,7 @@ final class HeraldRuleEditHistoryView extends AphrontView {
   }
 
   public function render() {
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
     $list->setFlush(true);
     $list->setCards(true);
 
@@ -48,7 +48,7 @@ final class HeraldRuleEditHistoryView extends AphrontView {
       $editor = $this->handles[$edit->getEditorPHID()]->renderLink();
       $date = phabricator_datetime($edit->getDateCreated(), $this->user);
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Rule %d', $edit->getRuleID()))
         ->setSubHead($details)
         ->addIcon('none', $date)

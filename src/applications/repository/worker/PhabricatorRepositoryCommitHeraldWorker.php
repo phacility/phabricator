@@ -83,9 +83,10 @@ final class PhabricatorRepositoryCommitHeraldWorker
         $commit->getPHID(),
       ));
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
 
     $commit_handle = $handles[$commit->getPHID()];
     $commit_name = $commit_handle->getName();
@@ -163,9 +164,10 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $mails = $reply_handler->multiplexMail(
       $template,
-      id(new PhabricatorObjectHandleData($email_phids))
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->loadHandles(),
+      id(new PhabricatorHandleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($email_phids)
+      ->execute(),
       array());
 
     foreach ($mails as $mail) {

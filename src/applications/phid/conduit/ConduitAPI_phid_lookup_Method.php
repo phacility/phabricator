@@ -33,9 +33,10 @@ final class ConduitAPI_phid_lookup_Method
     $query->execute();
     $name_map = $query->getNamedResults();
 
-    $handles = id(new PhabricatorObjectHandleData(mpull($name_map, 'getPHID')))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($request->getUser())
-      ->loadHandles();
+      ->withPHIDs(mpull($name_map, 'getPHID'))
+      ->execute();
 
     $result = array();
     foreach ($name_map as $name => $object) {

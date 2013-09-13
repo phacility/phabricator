@@ -47,10 +47,6 @@
   border-color: #660099;
 }
 
-.phabricator-transaction-view .unbreaknow {
-  border-color: #aa0000;
-}
-
 .phabricator-transaction-view .duplicate {
   border-color: #333333;
 }

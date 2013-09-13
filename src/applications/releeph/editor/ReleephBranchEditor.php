@@ -24,12 +24,10 @@ final class ReleephBranchEditor extends PhabricatorEditor {
       $template = ReleephBranchTemplate::getRequiredDefaultTemplate();
     }
 
-    $cut_point_handle = head(
-      id(new PhabricatorObjectHandleData(array($cut_point->getPHID())))
-        // We'll assume that whoever found the $cut_point has passed privacy
-        // checks.
-        ->setViewer($this->requireActor())
-        ->loadHandles());
+    $cut_point_handle = id(new PhabricatorHandleQuery())
+      ->setViewer($this->requireActor())
+      ->withPHIDs(array($cut_point->getPHID()))
+      ->executeOne();
 
     list($name, $errors) = id(new ReleephBranchTemplate())
       ->setCommitHandle($cut_point_handle)

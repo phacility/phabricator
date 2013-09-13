@@ -35,6 +35,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   private $sshKeyfile;
 
+  private $commitCount = self::ATTACHABLE;
+  private $mostRecentCommit = self::ATTACHABLE;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -69,6 +72,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;
+  }
+
+  public function attachCommitCount($count) {
+    $this->commitCount = $count;
+    return $this;
+  }
+
+  public function getCommitCount() {
+    return $this->assertAttached($this->commitCount);
+  }
+
+  public function attachMostRecentCommit(
+    PhabricatorRepositoryCommit $commit = null) {
+    $this->mostRecentCommit = $commit;
+    return $this;
+  }
+
+  public function getMostRecentCommit() {
+    return $this->assertAttached($this->mostRecentCommit);
   }
 
   public function getDiffusionBrowseURIForPath(
@@ -695,13 +717,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
     $matches = null;
     $flags = PREG_SET_ORDER | PREG_OFFSET_CAPTURE;
-    preg_match_all('('.$bugtraq_re.')', $message, $matches, $flags);
+    preg_match_all($bugtraq_re, $message, $matches, $flags);
     foreach ($matches as $match) {
       list($all, $all_offset) = array_shift($match);
 
       if ($id_re != '') {
         // Match substrings with bug IDs
-        preg_match_all('('.$id_re.')', $all, $match, PREG_OFFSET_CAPTURE);
+        preg_match_all($id_re, $all, $match, PREG_OFFSET_CAPTURE);
         list(, $match) = $match;
       } else {
         $all_offset = 0;

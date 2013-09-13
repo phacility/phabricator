@@ -308,6 +308,41 @@ edit, but before it commits the transactions. Data available on this event:
 This is similar to the previous event (will edit edges) but occurs after the
 edit completes.
 
+== Search: Did Update Index ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_SEARCH_DIDUPDATEINDEX`.
+
+This event is dispatched from the Search application's indexing engine, after
+it indexes a document. It allows you to publish search-like indexes into other
+systems.
+
+Note that this event happens after the update is fully complete: you can not
+prevent or modify the update. Further, the event may fire significantly later
+in real time than the update, as indexing may occur in the background. You
+should use other events if you need guarantees about when the event executes.
+
+Finally, this event may fire more than once for a single update. For example,
+if the search indexes are rebuilt, this event will fire on objects which have
+not actually changed.
+
+So, good use cases for event listeners are:
+
+  - Updating secondary search indexes.
+
+Bad use cases are:
+
+  - Editing the object or document.
+  - Anything with side effects, like sending email.
+
+Data available on this event:
+
+  - `phid` The PHID of the updated object.
+  - `object` The object which was updated (like a @{class:ManiphesTask}).
+  - `document` The @{class:PhabricatorSearchAbstractDocument} which was indexed.
+    This contains an abstract representation of the object, and may be useful
+    in populating secondary indexes because it provides a uniform API.
+
 == Test: Did Run Test ==
 
 The constant for this event is

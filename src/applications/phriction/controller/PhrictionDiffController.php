@@ -246,12 +246,12 @@ final class PhrictionDiffController
     $phids = mpull($content, 'getAuthorPHID');
     $handles = $this->loadViewerHandles($phids);
 
-    $list = new PhabricatorObjectItemListView();
+    $list = new PHUIObjectItemListView();
 
     $first = true;
     foreach ($content as $c) {
       $author = $handles[$c->getAuthorPHID()]->renderLink();
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader(pht('%s by %s, %s',
           PhrictionChangeType::getChangeTypeLabel($c->getChangeType()),
           $author,

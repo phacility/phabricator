@@ -33,7 +33,7 @@ final class PhabricatorSlowvoteListController
     assert_instances_of($polls, 'PhabricatorSlowvotePoll');
     $viewer = $this->getRequest()->getUser();
 
-    $list = id(new PhabricatorObjectItemListView())
+    $list = id(new PHUIObjectItemListView())
       ->setUser($viewer);
 
     $phids = mpull($polls, 'getAuthorPHID');
@@ -47,7 +47,7 @@ final class PhabricatorSlowvoteListController
         $author = null;
       }
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setObjectName('V'.$poll->getID())
         ->setHeader($poll->getQuestion())
         ->setHref('/V'.$poll->getID())

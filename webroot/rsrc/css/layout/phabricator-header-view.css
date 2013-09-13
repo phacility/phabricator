@@ -26,11 +26,15 @@ body .phabricator-header-shell.phabricator-bleed-header {
 body .phabricator-header-shell.phabricator-bleed-header
   .phabricator-header-view {
   padding: 8px 24px 8px 16px;
-  font-size: 18px;
+  color: {$bluetext};
 }
 
 .phabricator-header-shell + .phabricator-form-view {
   border-top-width: 0;
+}
+
+.phabricator-property-list-view + .diviner-document-section {
+  margin-top: -1px;
 }
 
 .phabricator-header-view {

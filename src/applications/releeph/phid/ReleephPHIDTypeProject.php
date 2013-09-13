@@ -22,6 +22,7 @@ final class ReleephPHIDTypeProject extends PhabricatorPHIDType {
 
     return id(new ReleephProjectQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

@@ -22,6 +22,7 @@ final class PhabricatorCountdownPHIDTypeCountdown extends PhabricatorPHIDType {
 
     return id(new PhabricatorCountdownQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

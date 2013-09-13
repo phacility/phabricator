@@ -233,11 +233,14 @@ final class PhabricatorSearchController
       }
 
       if ($results) {
-
-        $loader = id(new PhabricatorObjectHandleData($results))
-          ->setViewer($user);
-        $handles = $loader->loadHandles();
-        $objects = $loader->loadObjects();
+        $handles = id(new PhabricatorHandleQuery())
+          ->setViewer($user)
+          ->withPHIDs($results)
+          ->execute();
+        $objects = id(new PhabricatorObjectQuery())
+          ->setViewer($user)
+          ->withPHIDs($results)
+          ->execute();
         $results = array();
         foreach ($handles as $phid => $handle) {
           $view = id(new PhabricatorSearchResultView())

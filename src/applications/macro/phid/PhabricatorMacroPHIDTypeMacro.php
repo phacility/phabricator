@@ -22,6 +22,7 @@ final class PhabricatorMacroPHIDTypeMacro extends PhabricatorPHIDType {
 
     return id(new PhabricatorMacroQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

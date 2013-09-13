@@ -40,7 +40,7 @@ final class PhabricatorConduitListController
         if ($list) {
           $out[] = $list;
         }
-        $list = id(new PhabricatorObjectItemListView());
+        $list = id(new PHUIObjectItemListView());
 
         $app_object = $method->getApplication();
         if ($app_object) {
@@ -52,7 +52,7 @@ final class PhabricatorConduitListController
 
       $method_name = $method->getAPIMethodName();
 
-      $item = id(new PhabricatorObjectItemView())
+      $item = id(new PHUIObjectItemView())
         ->setHeader($method_name)
         ->setHref($this->getApplicationURI('method/'.$method_name.'/'))
         ->addAttribute($method->getMethodDescription());

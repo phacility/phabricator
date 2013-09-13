@@ -22,6 +22,7 @@ final class PonderPHIDTypeQuestion extends PhabricatorPHIDType {
 
     return id(new PonderQuestionQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }

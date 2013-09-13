@@ -455,7 +455,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $old_name = ManiphestTaskPriority::getTaskPriorityName($old);
         $new_name = ManiphestTaskPriority::getTaskPriorityName($new);
 
-        if ($old == ManiphestTaskPriority::PRIORITY_TRIAGE) {
+        if ($old == ManiphestTaskPriority::getDefaultPriority()) {
           $verb = 'Triaged';
           $desc = 'triaged this task as "'.$new_name.'" priority';
         } else if ($old > $new) {
@@ -466,9 +466,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           $verb = 'Raised Priority';
           $desc = 'raised the priority of this task from "'.$old_name.'" to '.
                   '"'.$new_name.'"';
-        }
-        if ($new == ManiphestTaskPriority::PRIORITY_UNBREAK_NOW) {
-          $classes[] = 'unbreaknow';
         }
         break;
       case ManiphestTransactionType::TYPE_ATTACH:

@@ -36,9 +36,10 @@ final class PhabricatorProjectSearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $phids = $saved_query->getParameter('memberPHIDs', array());
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
-      ->loadHandles();
+      ->withPHIDs($phids)
+      ->execute();
     $member_tokens = mpull($handles, 'getFullName', 'getPHID');
 
     $status = $saved_query->getParameter('status');

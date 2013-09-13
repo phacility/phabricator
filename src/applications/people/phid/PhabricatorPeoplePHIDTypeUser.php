@@ -21,10 +21,11 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
     array $phids) {
 
     return id(new PhabricatorPeopleQuery())
+      ->setViewer($query->getViewer())
+      ->setParentQuery($query)
+      ->withPHIDs($phids)
       ->needProfileImage(true)
       ->needStatus(true)
-      ->setViewer($query->getViewer())
-      ->withPHIDs($phids)
       ->execute();
   }
 

@@ -30,6 +30,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
   private $viewer;
   private $raisePolicyExceptions;
+  private $parentQuery;
   private $rawResultLimit;
   private $capabilities;
 
@@ -64,6 +65,52 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
 
   /**
+   * Set the parent query of this query. This is useful for nested queries so
+   * that configuration like whether or not to raise policy exceptions is
+   * seamlessly passed along to child queries.
+   *
+   * @return this
+   * @task config
+   */
+  final public function setParentQuery(PhabricatorPolicyAwareQuery $query) {
+    $this->parentQuery = $query;
+    return $this;
+  }
+
+
+  /**
+   * Get the parent query. See @{method:setParentQuery} for discussion.
+   *
+   * @return PhabricatorPolicyAwareQuery The parent query.
+   * @task config
+   */
+  final public function getParentQuery() {
+    return $this->parentQuery;
+  }
+
+
+  /**
+   * Hook to configure whether this query should raise policy exceptions.
+   *
+   * @return this
+   * @task config
+   */
+  final public function setRaisePolicyExceptions($bool) {
+    $this->raisePolicyExceptions = $bool;
+    return $this;
+  }
+
+
+  /**
+   * @return bool
+   * @task config
+   */
+  final public function shouldRaisePolicyExceptions() {
+    return (bool) $this->raisePolicyExceptions;
+  }
+
+
+  /**
    * @task config
    */
   final public function requireCapabilities(array $capabilities) {
@@ -89,7 +136,6 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    *   }
    *
    * If zero results match the query, this method returns `null`.
-   *
    * If one result matches the query, this method returns that result.
    *
    * If two or more results match the query, this method throws an exception.
@@ -105,11 +151,11 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   final public function executeOne() {
 
-    $this->raisePolicyExceptions = true;
+    $this->setRaisePolicyExceptions(true);
     try {
       $results = $this->execute();
     } catch (Exception $ex) {
-      $this->raisePolicyExceptions = false;
+      $this->setRaisePolicyExceptions(false);
       throw $ex;
     }
 
@@ -136,6 +182,12 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       throw new Exception("Call setViewer() before execute()!");
     }
 
+    $parent_query = $this->getParentQuery();
+    if ($parent_query) {
+      $this->setRaisePolicyExceptions(
+        $parent_query->shouldRaisePolicyExceptions());
+    }
+
     $results = array();
 
     $filter = new PhabricatorPolicyFilter();
@@ -149,7 +201,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
       $capabilities = $this->capabilities;
     }
     $filter->requireCapabilities($capabilities);
-    $filter->raisePolicyExceptions($this->raisePolicyExceptions);
+    $filter->raisePolicyExceptions($this->shouldRaisePolicyExceptions());
 
     $offset = (int)$this->getOffset();
     $limit  = (int)$this->getLimit();
@@ -182,7 +234,11 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
         $maybe_visible = array();
       }
 
-      $visible = $filter->apply($maybe_visible);
+      if ($this->shouldDisablePolicyFiltering()) {
+        $visible = $maybe_visible;
+      } else {
+        $visible = $filter->apply($maybe_visible);
+      }
 
       $removed = array();
       foreach ($maybe_visible as $key => $object) {
@@ -326,6 +382,20 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   protected function didLoadResults(array $results) {
     return $results;
+  }
+
+
+  /**
+   * Allows a subclass to disable policy filtering. This method is dangerous.
+   * It should be used only if the query loads data which has already been
+   * filtered (for example, because it wraps some other query which uses
+   * normal policy filtering).
+   *
+   * @return bool True to disable all policy filtering.
+   * @task policyimpl
+   */
+  protected function shouldDisablePolicyFiltering() {
+    return false;
   }
 
 }

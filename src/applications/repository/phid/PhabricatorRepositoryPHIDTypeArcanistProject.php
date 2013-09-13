@@ -23,8 +23,10 @@ final class PhabricatorRepositoryPHIDTypeArcanistProject
   public function loadObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
+
     return id(new PhabricatorRepositoryArcanistProjectQuery())
       ->setViewer($query->getViewer())
+      ->setParentQuery($query)
       ->withPHIDs($phids)
       ->execute();
   }
