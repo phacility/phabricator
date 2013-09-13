@@ -124,7 +124,8 @@ final class PhabricatorSecurityConfigOptions
             "whitelist is primarily to prevent security issues like ".
             "javascript:// URIs."))
         ->addExample(
-          '{"http": true, "https": true"}', pht('Valid Setting')),
+          '{"http": true, "https": true"}', pht('Valid Setting'))
+        ->setLocked(true),
        $this->newOption(
          'celerity.resource-hash',
          'string',
