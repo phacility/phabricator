@@ -12,5 +12,9 @@ $command = new PhutilExecPassthru(
   $root.'/scripts/search/manage_search.php');
 $err = $command->execute();
 if ($err) {
-  throw new Exception("Update failed!");
+  // NOTE: Just ignore this. The indexing script fails if there are no projects
+  // yet, and even if it actually fails with something terrible and explosive
+  // it isn't very concerning. The worst case here is that "group by projects"
+  // doesn't work perfectly in Maniphest, and re-running the script later on
+  // can fix it.
 }
