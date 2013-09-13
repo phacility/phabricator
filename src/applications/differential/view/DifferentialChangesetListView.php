@@ -311,17 +311,18 @@ final class DifferentialChangesetListView extends AphrontView {
     }
 
     $meta['containerID'] = $detail->getID();
+    $caret = phutil_tag('span', array('class' => 'caret'), '');
 
     return javelin_tag(
       'a',
       array(
-        'class'   => 'button small grey',
+        'class'   => 'button grey small dropdown',
         'meta'    => $meta,
         'href'    => idx($meta, 'detailURI', '#'),
         'target'  => '_blank',
         'sigil'   => 'differential-view-options',
       ),
-      pht('View Options') . " \xE2\x96\xBC");
+      array(pht('View Options'), $caret));
   }
 
 }
