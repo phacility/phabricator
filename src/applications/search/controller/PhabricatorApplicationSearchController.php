@@ -207,7 +207,14 @@ final class PhabricatorApplicationSearchController
         $list->setNoDataString(pht("No results found for this query."));
         $list->setPager($pager);
       } else {
-        $nav->appendChild($pager);
+        if ($pager->willShowPagingControls()) {
+          $pager_box = id(new PHUIBoxView())
+            ->addPadding(PHUI::PADDING_MEDIUM)
+            ->addMargin(PHUI::MARGIN_LARGE)
+            ->setShadow(true)
+            ->appendChild($pager);
+          $nav->appendChild($pager_box);
+        }
       }
     }
 
