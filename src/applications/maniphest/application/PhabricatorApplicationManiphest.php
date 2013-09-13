@@ -85,31 +85,13 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW)
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
+      ->withOwners(array($user->getPHID()));
+    $count = count($query->execute());
 
-    $count = $query->getRowCount();
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Unbreak Now Task(s)!', $count))
-      ->setCount($count);
-
-    $query = id(new ManiphestTaskQuery())
-      ->setViewer($user)
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withOwners(array($user->getPHID()))
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
-
-    $count = $query->getRowCount();
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Assigned Task(s)', $count))
+      ->setText(pht('%s Assigned Task(s)', new PhutilNumber($count)))
       ->setCount($count);
 
     return $status;

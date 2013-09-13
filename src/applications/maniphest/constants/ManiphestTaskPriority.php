@@ -45,46 +45,12 @@ final class ManiphestTaskPriority extends ManiphestConstants {
   }
 
   /**
-   * Get the priorities and some bits for bitwise fun.
-   *
-   * @return  map Priorities to bits.
-   */
-  public static function getLoadMap() {
-    return array(
-      self::PRIORITY_UNBREAK_NOW  => 16,
-      self::PRIORITY_TRIAGE       => 8,
-      self::PRIORITY_HIGH         => 4,
-      self::PRIORITY_NORMAL       => 2,
-      self::PRIORITY_LOW          => 1,
-      self::PRIORITY_WISH         => 0,
-    );
-  }
-
-  /**
-   * Get the lowest defined priority.
-   *
-   * @return  int The value of the lowest priority constant.
-   */
-  public static function getLowestPriority() {
-    return self::PRIORITY_WISH;
-  }
-
-  /**
-   * Get the highest defined priority.
-   *
-   * @return  int The value of the highest priority constant.
-   */
-  public static function getHighestPriority() {
-    return self::PRIORITY_UNBREAK_NOW;
-  }
-  /**
    * Return the default priority for this instance of Phabricator.
    *
    * @return int The value of the default priority constant.
    */
   public static function getDefaultPriority() {
-    return PhabricatorEnv::getEnvConfig(
-      'maniphest.default-priority');
+    return PhabricatorEnv::getEnvConfig('maniphest.default-priority');
   }
 
   /**
