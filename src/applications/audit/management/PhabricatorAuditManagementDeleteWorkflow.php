@@ -103,14 +103,16 @@ final class PhabricatorAuditManagementDeleteWorkflow
     $audits = $query->execute();
     $commits = $query->getCommits();
 
-    // TODO: AuditQuery is currently not policy-aware and uses an old query
-    // to load commits. Load them in the modern way to get repositories. Remove
-    // this after modernizing PhabricatorAuditQuery.
-    $commits = id(new DiffusionCommitQuery())
-      ->setViewer($viewer)
-      ->withPHIDs(mpull($commits, 'getPHID'))
-      ->execute();
-    $commits = mpull($commits, null, 'getPHID');
+    if ($commits) {
+      // TODO: AuditQuery is currently not policy-aware and uses an old query
+      // to load commits. Load them in the modern way to get repositories.
+      // Remove this after modernizing PhabricatorAuditQuery.
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(mpull($commits, 'getPHID'))
+        ->execute();
+      $commits = mpull($commits, null, 'getPHID');
+    }
 
     foreach ($audits as $key => $audit) {
       $commit = idx($commits, $audit->getCommitPHID());
