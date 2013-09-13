@@ -322,7 +322,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return parent::mergeTransactions($u, $v);
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 

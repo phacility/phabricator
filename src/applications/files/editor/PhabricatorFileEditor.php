@@ -36,7 +36,9 @@ final class PhabricatorFileEditor
     PhabricatorApplicationTransaction $xaction) {
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 

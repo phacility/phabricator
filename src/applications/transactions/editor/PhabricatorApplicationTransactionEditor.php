@@ -457,7 +457,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $this->loadHandles($xactions);
 
     $mail = null;
-    if ($this->supportsMail()) {
+    if ($this->shouldSendMail($object, $xactions)) {
       $mail = $this->sendMail($object, $xactions);
     }
 
@@ -1069,7 +1069,9 @@ abstract class PhabricatorApplicationTransactionEditor
   /**
    * @task mail
    */
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return false;
   }
 

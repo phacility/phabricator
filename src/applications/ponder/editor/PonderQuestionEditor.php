@@ -165,7 +165,9 @@ final class PonderQuestionEditor
     return parent::shouldImplyCC($object, $xaction);
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 

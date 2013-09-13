@@ -122,7 +122,9 @@ final class LegalpadDocumentEditor
 
 /* -(  Sending Mail  )------------------------------------------------------- */
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 
