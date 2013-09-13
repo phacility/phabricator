@@ -57,11 +57,13 @@ final class HeraldEngine {
     foreach ($rules as $id => $rule) {
       $this->stack = array();
       try {
-        if (($rule->getRepetitionPolicy() ==
+        if (!$this->getDryRun() &&
+            ($rule->getRepetitionPolicy() ==
              HeraldRepetitionPolicyConfig::FIRST) &&
             $rule->getRuleApplied($object->getPHID())) {
-          // This rule is only supposed to be applied a single time, and it's
-          // aleady been applied, so this is an automatic failure.
+          // This is not a dry run, and this rule is only supposed to be
+          // applied a single time, and it's already been applied...
+          // That means automatic failure.
           $xscript = id(new HeraldRuleTranscript())
             ->setRuleID($id)
             ->setResult(false)
