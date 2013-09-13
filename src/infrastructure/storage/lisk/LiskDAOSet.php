@@ -23,11 +23,10 @@
 final class LiskDAOSet {
   private $daos = array();
   private $relatives = array();
-  private $edges = array();
   private $subsets = array();
 
   public function addToSet(LiskDAO $dao) {
-    if ($this->relatives || $this->edges) {
+    if ($this->relatives) {
       throw new Exception("Don't call addToSet() after loading data!");
     }
     $this->daos[] = $dao;
@@ -42,7 +41,6 @@ final class LiskDAOSet {
   final public function clearSet() {
     $this->daos = array();
     $this->relatives = array();
-    $this->edges = array();
     foreach ($this->subsets as $set) {
       $set->clearSet();
     }
@@ -86,28 +84,6 @@ final class LiskDAOSet {
     }
 
     return $relatives;
-  }
-
-  public function loadRelativeEdges($type) {
-    $edges = &$this->edges[$type];
-
-    if ($edges === null) {
-      if (!$this->daos) {
-        $edges = array();
-      } else {
-        assert_instances_of($this->daos, 'PhabricatorLiskDAO');
-        $phids = mpull($this->daos, 'getPHID', 'getPHID');
-        $edges = id(new PhabricatorEdgeQuery())
-          ->withSourcePHIDs($phids)
-          ->withEdgeTypes(array($type))
-          ->execute();
-        foreach ($this->daos as $dao) {
-          $dao->attachEdges($edges[$dao->getPHID()]);
-        }
-      }
-    }
-
-    return $edges;
   }
 
 }

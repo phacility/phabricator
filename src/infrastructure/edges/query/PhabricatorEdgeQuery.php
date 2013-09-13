@@ -150,8 +150,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
     $result = array();
 
     // When a query specifies types, make sure we return data for all queried
-    // types. This is mostly to make sure PhabricatorLiskDAO->attachEdges()
-    // gets some data, so that getEdges() doesn't throw later.
+    // types.
     if ($this->edgeTypes) {
       foreach ($this->sourcePHIDs as $phid) {
         foreach ($this->edgeTypes as $type) {
