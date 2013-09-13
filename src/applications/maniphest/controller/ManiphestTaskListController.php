@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestTaskListControllerPro
+final class ManiphestTaskListController
   extends ManiphestController
   implements PhabricatorApplicationSearchResultsControllerInterface {
 
