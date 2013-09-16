@@ -151,4 +151,72 @@ final class PhabricatorCustomFieldList extends Phobject {
     return $xactions;
   }
 
+
+  /**
+   * Publish field indexes into index tables, so ApplicationSearch can search
+   * them.
+   *
+   * @return void
+   */
+  public function rebuildIndexes(PhabricatorCustomFieldInterface $object) {
+    $indexes = array();
+    $index_keys = array();
+
+    $phid = $object->getPHID();
+
+    $role = PhabricatorCustomField::ROLE_APPLICATIONSEARCH;
+    foreach ($this->fields as $field) {
+      if (!$field->shouldEnableForRole($role)) {
+        continue;
+      }
+
+      $index_keys[$field->getFieldIndex()] = true;
+
+      foreach ($field->buildFieldIndexes() as $index) {
+        $index->setObjectPHID($phid);
+        $indexes[$index->getTableName()][] = $index;
+      }
+    }
+
+    if (!$indexes) {
+      return;
+    }
+
+    $any_index = head(head($indexes));
+    $conn_w = $any_index->establishConnection('w');
+
+    foreach ($indexes as $table => $index_list) {
+      $sql = array();
+      foreach ($index_list as $index) {
+        $sql[] = $index->formatForInsert($conn_w);
+      }
+      $indexes[$table] = $sql;
+    }
+
+    $any_index->openTransaction();
+
+      foreach ($indexes as $table => $sql_list) {
+        queryfx(
+          $conn_w,
+          'DELETE FROM %T WHERE objectPHID = %s AND indexKey IN (%Ls)',
+          $table,
+          $phid,
+          array_keys($index_keys));
+
+        if (!$sql_list) {
+          continue;
+        }
+
+        foreach (PhabricatorLiskDAO::chunkSQL($sql_list) as $chunk) {
+          queryfx(
+            $conn_w,
+            'INSERT INTO %T (objectPHID, indexKey, indexValue) VALUES %Q',
+            $table,
+            $chunk);
+        }
+      }
+
+    $any_index->saveTransaction();
+  }
+
 }

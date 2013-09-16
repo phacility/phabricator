@@ -101,11 +101,12 @@ final class PhabricatorPeopleQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T user %Q %Q %Q %Q',
+      'SELECT * FROM %T user %Q %Q %Q %Q %Q',
       $table->getTableName(),
       $this->buildJoinsClause($conn_r),
       $this->buildWhereClause($conn_r),
       $this->buildOrderClause($conn_r),
+      $this->buildApplicationSearchGroupClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     if ($this->needPrimaryEmail) {
@@ -180,6 +181,8 @@ final class PhabricatorPeopleQuery
         'JOIN %T email ON email.userPHID = user.PHID',
         $email_table->getTableName());
     }
+
+    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
 
     $joins = implode(' ', $joins);
     return  $joins;
@@ -268,6 +271,10 @@ final class PhabricatorPeopleQuery
 
   protected function getPagingColumn() {
     return 'user.id';
+  }
+
+  protected function getApplicationSearchObjectPHIDColumn() {
+    return 'user.phid';
   }
 
 }

@@ -479,6 +479,19 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $this->didApplyTransactions($xactions);
 
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      // Maybe this makes more sense to move into the search index itself? For
+      // now I'm putting it here since I think we might end up with things that
+      // need it to be up to date once the next page loads, but if we don't go
+      // there we we could move it into search once search moves to the daemons.
+
+      $fields = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+      $fields->readFieldsFromStorage($object);
+      $fields->rebuildIndexes($object);
+    }
+
     return $xactions;
   }
 

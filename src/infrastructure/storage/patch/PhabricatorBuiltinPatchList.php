@@ -1592,6 +1592,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type' => 'php',
         'name' => $this->getPatchPath('20130913.maniphest.1.migratesearch.php'),
       ),
+      '20130914.usercustom.sql' => array(
+        'type' => 'sql',
+        'name' => $this->getPatchPath('20130914.usercustom.sql'),
+      ),
     );
   }
 }

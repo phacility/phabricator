@@ -56,6 +56,10 @@ final class PhabricatorStandardCustomField
     return $this;
   }
 
+  public function getFieldType() {
+    return $this->fieldType;
+  }
+
   public function getFieldValue() {
     return $this->fieldValue;
   }
@@ -71,6 +75,8 @@ final class PhabricatorStandardCustomField
   }
 
   public function setFieldConfig(array $config) {
+    $this->setFieldType('text');
+
     foreach ($config as $key => $value) {
       switch ($key) {
         case 'name':
@@ -78,6 +84,9 @@ final class PhabricatorStandardCustomField
           break;
         case 'type':
           $this->setFieldType($value);
+          break;
+        case 'description':
+          $this->setFieldDescription($value);
           break;
       }
     }
@@ -88,6 +97,7 @@ final class PhabricatorStandardCustomField
   public function getFieldConfigValue($key, $default = null) {
     return idx($this->fieldConfig, $key, $default);
   }
+
 
 
 /* -(  PhabricatorCustomField  )--------------------------------------------- */
@@ -130,7 +140,7 @@ final class PhabricatorStandardCustomField
   }
 
   public function renderEditControl() {
-    $type = $this->getFieldConfigValue('type', 'text');
+    $type = $this->getFieldType();
     switch ($type) {
       case 'text':
       default:
@@ -153,5 +163,75 @@ final class PhabricatorStandardCustomField
     return $this->getFieldValue();
   }
 
+  public function shouldAppearInApplicationSearch() {
+    return $this->getFieldConfigValue('search', false);
+  }
+
+  protected function newStringIndexStorage() {
+    return $this->getApplicationField()->newStringIndexStorage();
+  }
+
+  protected function newNumericIndexStorage() {
+    return $this->getApplicationField()->newNumericIndexStorage();
+  }
+
+  public function buildFieldIndexes() {
+    $type = $this->getFieldType();
+    switch ($type) {
+      case 'text':
+      default:
+        return array(
+          $this->newStringIndex($this->getFieldValue()),
+        );
+    }
+  }
+
+  public function readApplicationSearchValueFromRequest(
+    PhabricatorApplicationSearchEngine $engine,
+    AphrontRequest $request) {
+    $type = $this->getFieldType();
+    switch ($type) {
+      case 'text':
+      default:
+        return $request->getStr('std:'.$this->getFieldIndex());
+    }
+  }
+
+  public function applyApplicationSearchConstraintToQuery(
+    PhabricatorApplicationSearchEngine $engine,
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    $value) {
+    $type = $this->getFieldType();
+    switch ($type) {
+      case 'text':
+      default:
+        if (strlen($value)) {
+          $query->withApplicationSearchContainsConstraint(
+            $this->newStringIndex(null),
+            $value);
+        }
+        break;
+    }
+  }
+
+  public function appendToApplicationSearchForm(
+    PhabricatorApplicationSearchEngine $engine,
+    AphrontFormView $form,
+    $value,
+    array $handles) {
+
+    $type = $this->getFieldType();
+    switch ($type) {
+      case 'text':
+      default:
+        $form->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel($this->getFieldName())
+            ->setName('std:'.$this->getFieldIndex())
+            ->setValue($value));
+        break;
+    }
+
+  }
 
 }
