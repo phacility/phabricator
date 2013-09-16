@@ -19,7 +19,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   private $auxiliaryFields;
 
   public function setAuxiliaryFields(array $fields) {
-    assert_instances_of($fields, 'ManiphestAuxiliaryFieldSpecification');
+    assert_instances_of($fields, 'ManiphestCustomField');
     $this->auxiliaryFields = mpull($fields, null, 'getAuxiliaryKey');
     return $this;
   }

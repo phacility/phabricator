@@ -157,17 +157,29 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $transactions[] = $transaction;
     }
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $task,
+      PhabricatorCustomField::ROLE_EDIT);
+
     $auxiliary = $request->getValue('auxiliary');
     if ($auxiliary) {
-      $task->loadAndAttachAuxiliaryAttributes();
-      foreach ($auxiliary as $aux_key => $aux_value) {
+      foreach ($field_list->getFields() as $key => $field) {
+        if (!array_key_exists($key, $auxiliary)) {
+          continue;
+        }
         $transaction = clone $template;
         $transaction->setTransactionType(
           ManiphestTransactionType::TYPE_AUXILIARY);
-        $transaction->setMetadataValue('aux:key', $aux_key);
-        $transaction->setNewValue($aux_value);
+        $transaction->setMetadataValue('aux:key', $key);
+        $transaction->setOldValue(
+          $field->getOldValueForApplicationTransactions());
+        $transaction->setNewValue($auxiliary[$key]);
         $transactions[] = $transaction;
       }
+    }
+
+    if (!$transactions) {
+      return;
     }
 
     $event = new PhabricatorEvent(
@@ -186,6 +198,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     $editor = new ManiphestTransactionEditor();
     $editor->setActor($request->getUser());
+    $editor->setAuxiliaryFields($field_list->getFields());
     $editor->applyTransactions($task, $transactions);
 
     $event = new PhabricatorEvent(
@@ -217,7 +230,15 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $result = array();
     foreach ($tasks as $task) {
       // TODO: Batch this get as CustomField gets cleaned up.
-      $auxiliary = $task->loadLegacyAuxiliaryFieldMap();
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $task,
+        PhabricatorCustomField::ROLE_EDIT);
+      $field_list->readFieldsFromStorage($task);
+
+      $auxiliary = mpull(
+        $field_list->getFields(),
+        'getValueForStorage',
+        'getFieldKey');
 
       $task_deps = $all_deps->getDestinationPHIDs(
         array($task->getPHID()),

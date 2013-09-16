@@ -90,20 +90,6 @@ abstract class ManiphestAuxiliaryFieldSpecification
 
 
   /**
-   * When the user creates a task, the UI prompts them to "Create another
-   * similar task". This copies some fields (e.g., Owner and CCs) but not other
-   * fields (e.g., description). If this custom field should also be copied,
-   * return true from this method.
-   *
-   * @return bool True to copy the default value from the template task when
-   *              creating a new similar task.
-   */
-  public function shouldCopyWhenCreatingSimilarTask() {
-    return false;
-  }
-
-
-  /**
    * Render a verb to appear in email titles when a transaction involving this
    * field occurs. Specifically, Maniphest emails are formatted like this:
    *
@@ -247,23 +233,56 @@ abstract class ManiphestAuxiliaryFieldSpecification
     return $this->getLabel();
   }
 
+  public function readValueFromRequest(AphrontRequest $request) {
+    return $this->setValueFromRequest($request);
+  }
 
-/* -(  Legacy Migration Support  )------------------------------------------- */
-
-
-  // TODO: Migrate to common storage and remove this.
-  public static function loadLegacyDataFromStorage(
+  public static function writeLegacyAuxiliaryUpdates(
     ManiphestTask $task,
-    PhabricatorCustomFieldList $list) {
+    array $map) {
 
-    $task->loadAndAttachAuxiliaryAttributes();
+    $table = new ManiphestCustomFieldStorage();
+    $conn_w = $table->establishConnection('w');
+    $update = array();
+    $remove = array();
 
-    foreach ($list->getFields() as $field) {
-      if ($task->getID()) {
-        $key = $field->getAuxiliaryKey();
-        $field->setValueFromStorage($task->getAuxiliaryAttribute($key));
+    foreach ($map as $key => $value) {
+      $index = PhabricatorHash::digestForIndex($key);
+      if ($value === null) {
+        $remove[$index] = true;
+      } else {
+        $update[$index] = $value;
       }
     }
+
+    if ($remove) {
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE objectPHID = %s AND fieldIndex IN (%Ls)',
+        $table->getTableName(),
+        $task->getPHID(),
+        array_keys($remove));
+    }
+
+    if ($update) {
+      $sql = array();
+      foreach ($update as $index => $val) {
+        $sql[] = qsprintf(
+          $conn_w,
+          '(%s, %s, %s)',
+          $task->getPHID(),
+          $index,
+          $val);
+      }
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (objectPHID, fieldIndex, fieldValue)
+          VALUES %Q ON DUPLICATE KEY
+          UPDATE fieldValue = VALUES(fieldValue)',
+        $table->getTableName(),
+        implode(', ', $sql));
+    }
+
   }
 
 }

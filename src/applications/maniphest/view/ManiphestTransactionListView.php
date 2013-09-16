@@ -34,7 +34,7 @@ final class ManiphestTransactionListView extends ManiphestView {
   }
 
   public function setAuxiliaryFields(array $fields) {
-    assert_instances_of($fields, 'ManiphestAuxiliaryFieldSpecification');
+    assert_instances_of($fields, 'ManiphestCustomField');
     $this->auxiliaryFields = $fields;
     return $this;
   }

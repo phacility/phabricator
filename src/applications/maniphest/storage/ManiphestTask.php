@@ -35,8 +35,6 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $ownerOrdering;
 
-  private $auxiliaryAttributes = self::ATTACHABLE;
-  private $auxiliaryDirty = array();
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
 
@@ -97,19 +95,6 @@ final class ManiphestTask extends ManiphestDAO
     return $this;
   }
 
-  public function getAuxiliaryAttribute($key, $default = null) {
-    $this->assertAttached($this->auxiliaryAttributes);
-    return idx($this->auxiliaryAttributes, $key, $default);
-  }
-
-  public function setAuxiliaryAttribute($key, $val) {
-    $this->assertAttached($this->auxiliaryAttributes);
-
-    $this->auxiliaryAttributes[$key] = $val;
-    $this->auxiliaryDirty[$key] = true;
-    return $this;
-  }
-
   public function setTitle($title) {
     $this->title = $title;
     if (!$this->getID()) {
@@ -125,41 +110,6 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getGroupByProjectPHID() {
     return $this->assertAttached($this->groupByProjectPHID);
-  }
-
-  public function attachAuxiliaryAttributes(array $attrs) {
-    if ($this->auxiliaryDirty) {
-      throw new Exception(
-        "This object has dirty attributes, you can not attach new attributes ".
-        "without writing or discarding the dirty attributes.");
-    }
-    $this->auxiliaryAttributes = $attrs;
-    return $this;
-  }
-
-  public function loadLegacyAuxiliaryFieldMap() {
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $this,
-      PhabricatorCustomField::ROLE_EDIT);
-    $field_list->readFieldsFromStorage($this);
-
-    $map = array();
-    foreach ($field_list->getFields() as $field) {
-      $map[$field->getFieldKey()] = $field->getValueForStorage();
-    }
-
-    return $map;
-  }
-
-  public function loadAndAttachAuxiliaryAttributes() {
-    if (!$this->getPHID()) {
-      $this->auxiliaryAttributes = array();
-      return $this;
-    }
-
-    $this->auxiliaryAttributes = $this->loadLegacyAuxiliaryFieldMap();
-
-    return $this;
   }
 
   public function save() {
@@ -183,59 +133,9 @@ final class ManiphestTask extends ManiphestDAO
       $this->subscribersNeedUpdate = false;
     }
 
-    if ($this->auxiliaryDirty) {
-      $this->writeAuxiliaryUpdates();
-      $this->auxiliaryDirty = array();
-    }
-
     return $result;
   }
 
-  private function writeAuxiliaryUpdates() {
-    $table = new ManiphestCustomFieldStorage();
-    $conn_w = $table->establishConnection('w');
-    $update = array();
-    $remove = array();
-
-    foreach ($this->auxiliaryDirty as $key => $dirty) {
-      $value = $this->getAuxiliaryAttribute($key);
-
-      $index = PhabricatorHash::digestForIndex($key);
-      if ($value === null) {
-        $remove[$index] = true;
-      } else {
-        $update[$index] = $value;
-      }
-    }
-
-    if ($remove) {
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE objectPHID = %s AND fieldIndex IN (%Ls)',
-        $table->getTableName(),
-        $this->getPHID(),
-        array_keys($remove));
-    }
-
-    if ($update) {
-      $sql = array();
-      foreach ($update as $index => $val) {
-        $sql[] = qsprintf(
-          $conn_w,
-          '(%s, %s, %s)',
-          $this->getPHID(),
-          $index,
-          $val);
-      }
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T (objectPHID, fieldIndex, fieldValue)
-          VALUES %Q ON DUPLICATE KEY
-          UPDATE fieldValue = VALUES(fieldValue)',
-        $table->getTableName(),
-        implode(', ', $sql));
-    }
-  }
 
 
 /* -(  Markup Interface  )--------------------------------------------------- */
