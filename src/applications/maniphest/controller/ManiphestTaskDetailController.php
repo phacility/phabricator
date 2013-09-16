@@ -44,9 +44,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $field->setViewer($user);
     }
 
-    ManiphestAuxiliaryFieldSpecification::loadLegacyDataFromStorage(
-      $task,
-      $field_list);
+    $field_list->readFieldsFromStorage($task);
 
     $aux_fields = $field_list->getFields();
 
@@ -352,7 +350,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setActionList($actions);
 
     $header = $this->buildHeaderView($task);
-    $properties = $this->buildPropertyView($task, $aux_fields, $edges, $engine);
+    $properties = $this->buildPropertyView($task, $field_list, $edges, $engine);
 
     return $this->buildApplicationPage(
       array(
@@ -464,7 +462,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
   private function buildPropertyView(
     ManiphestTask $task,
-    array $aux_fields,
+    PhabricatorCustomFieldList $field_list,
     array $edges,
     PhabricatorMarkupEngine $engine) {
 
@@ -513,13 +511,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ? $this->renderHandlesForPHIDs($task->getProjectPHIDs(), ',')
       : phutil_tag('em', array(), pht('None')));
 
-    foreach ($aux_fields as $aux_field) {
-      $value = $aux_field->renderForDetailView();
-      if (strlen($value)) {
-        $view->addProperty($aux_field->getLabel(), $value);
-      }
-    }
-
+    $field_list->appendFieldsToPropertyList(
+      $task,
+      $viewer,
+      $view);
 
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK

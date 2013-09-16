@@ -239,6 +239,14 @@ abstract class ManiphestAuxiliaryFieldSpecification
     return true;
   }
 
+  public function renderPropertyViewValue() {
+    return $this->renderForDetailView();
+  }
+
+  public function renderPropertyViewLabel() {
+    return $this->getLabel();
+  }
+
 
 /* -(  Legacy Migration Support  )------------------------------------------- */
 
