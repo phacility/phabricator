@@ -67,34 +67,14 @@ final class DifferentialRevisionEditController extends DifferentialController {
         $is_new = !$revision->getID();
         $user = $request->getUser();
 
-        $event = new PhabricatorEvent(
-          PhabricatorEventType::TYPE_DIFFERENTIAL_WILLEDITREVISION,
-            array(
-              'revision'      => $revision,
-              'new'           => $is_new,
-            ));
-
-        $event->setUser($user);
-        $event->setAphrontRequest($request);
-        PhutilEventEngine::dispatchEvent($event);
-
         $editor = new DifferentialRevisionEditor($revision);
         $editor->setActor($request->getUser());
         if ($diff) {
           $editor->addDiff($diff, $request->getStr('comments'));
         }
         $editor->setAuxiliaryFields($aux_fields);
+        $editor->setAphrontRequestForEventDispatch($request);
         $editor->save();
-
-        $event = new PhabricatorEvent(
-          PhabricatorEventType::TYPE_DIFFERENTIAL_DIDEDITREVISION,
-            array(
-              'revision'      => $revision,
-              'new'           => $is_new,
-            ));
-        $event->setUser($user);
-        $event->setAphrontRequest($request);
-        PhutilEventEngine::dispatchEvent($event);
 
         return id(new AphrontRedirectResponse())
           ->setURI('/D'.$revision->getID());
