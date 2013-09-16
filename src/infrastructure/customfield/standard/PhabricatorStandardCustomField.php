@@ -9,6 +9,7 @@ abstract class PhabricatorStandardCustomField
   private $fieldDescription;
   private $fieldConfig;
   private $applicationField;
+  private $strings;
 
   abstract public function getFieldType();
 
@@ -84,6 +85,9 @@ abstract class PhabricatorStandardCustomField
         case 'description':
           $this->setFieldDescription($value);
           break;
+        case 'strings':
+          $this->setStrings($value);
+          break;
         case 'type':
           // We set this earlier on.
           break;
@@ -117,6 +121,15 @@ abstract class PhabricatorStandardCustomField
 
   public function getFieldDescription() {
     return coalesce($this->fieldDescription, parent::getFieldDescription());
+  }
+
+  public function setStrings(array $strings) {
+    $this->strings = $strings;
+    return;
+  }
+
+  public function getString($key, $default = null) {
+    return idx($this->strings, $key, $default);
   }
 
   public function shouldUseStorage() {
