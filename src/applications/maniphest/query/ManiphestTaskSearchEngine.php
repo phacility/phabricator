@@ -3,6 +3,10 @@
 final class ManiphestTaskSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getCustomFieldObject() {
+    return new ManiphestTask();
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -61,6 +65,8 @@ final class ManiphestTaskSearchEngine
     if ($limit > 0) {
       $saved->setParameter('limit', $limit);
     }
+
+    $this->readCustomFieldsFromRequest($request, $saved);
 
     return $saved;
   }
@@ -154,6 +160,8 @@ final class ManiphestTaskSearchEngine
     if ($end) {
       $query->withDateCreatedBefore($end);
     }
+
+    $this->applyCustomFieldsToQuery($query, $saved);
 
     return $query;
   }
@@ -307,6 +315,8 @@ final class ManiphestTaskSearchEngine
           ->setName('ids')
           ->setLabel(pht('Task IDs'))
           ->setValue(implode(', ', $ids)));
+
+    $this->appendCustomFieldsToForm($form, $saved);
 
     $this->buildDateRange(
       $form,

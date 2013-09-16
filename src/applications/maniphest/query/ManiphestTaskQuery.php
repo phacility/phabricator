@@ -718,22 +718,25 @@ final class ManiphestTaskQuery
         break;
     }
 
+    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
+
     return implode(' ', $joins);
   }
 
   private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
-    $joined_multiple_project_rows = (count($this->projectPHIDs) > 1) ||
-                                    (count($this->anyProjectPHIDs) > 1);
+    $joined_multiple_rows = (count($this->projectPHIDs) > 1) ||
+                            (count($this->anyProjectPHIDs) > 1) ||
+                            ($this->getApplicationSearchMayJoinMultipleRows());
 
     $joined_project_name = ($this->groupBy == self::GROUP_PROJECT);
 
     // If we're joining multiple rows, we need to group the results by the
     // task IDs.
-    if ($joined_multiple_project_rows) {
+    if ($joined_multiple_rows) {
       if ($joined_project_name) {
-        return 'GROUP BY task.id, projectGroup.projectPHID';
+        return 'GROUP BY task.phid, projectGroup.projectPHID';
       } else {
-        return 'GROUP BY task.id';
+        return 'GROUP BY task.phid';
       }
     } else {
       return '';
@@ -948,6 +951,10 @@ final class ManiphestTaskQuery
       array(
         'reversed' => (bool)($before_id xor $this->getReversePaging()),
       ));
+  }
+
+  protected function getApplicationSearchObjectPHIDColumn() {
+    return 'task.phid';
   }
 
 }
