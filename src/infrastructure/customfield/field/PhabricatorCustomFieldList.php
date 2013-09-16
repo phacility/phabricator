@@ -20,6 +20,13 @@ final class PhabricatorCustomFieldList extends Phobject {
     return $this->fields;
   }
 
+  public function setViewer(PhabricatorUser $viewer) {
+    foreach ($this->getFields() as $field) {
+      $field->setViewer($viewer);
+    }
+    return $this;
+  }
+
   /**
    * Read stored values for all fields which support storage.
    *

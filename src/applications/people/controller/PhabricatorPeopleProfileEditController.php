@@ -35,7 +35,9 @@ final class PhabricatorPeopleProfileEditController
     $field_list = PhabricatorCustomField::getObjectFields(
       $user,
       PhabricatorCustomField::ROLE_EDIT);
-    $field_list->readFieldsFromStorage($user);
+    $field_list
+      ->setViewer($user)
+      ->readFieldsFromStorage($user);
 
     if ($request->isFormPost()) {
       $xactions = $field_list->buildFieldTransactionsFromRequest(
