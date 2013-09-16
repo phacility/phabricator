@@ -137,17 +137,27 @@ final class ManiphestTask extends ManiphestDAO
     return $this;
   }
 
+  public function loadLegacyAuxiliaryFieldMap() {
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $this,
+      PhabricatorCustomField::ROLE_EDIT);
+    $field_list->readFieldsFromStorage($this);
+
+    $map = array();
+    foreach ($field_list->getFields() as $field) {
+      $map[$field->getFieldKey()] = $field->getValueForStorage();
+    }
+
+    return $map;
+  }
+
   public function loadAndAttachAuxiliaryAttributes() {
     if (!$this->getPHID()) {
       $this->auxiliaryAttributes = array();
       return $this;
     }
 
-    $storage = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
-      'taskPHID = %s',
-      $this->getPHID());
-
-    $this->auxiliaryAttributes = mpull($storage, 'getValue', 'getName');
+    $this->auxiliaryAttributes = $this->loadLegacyAuxiliaryFieldMap();
 
     return $this;
   }
@@ -182,24 +192,26 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   private function writeAuxiliaryUpdates() {
-    $table = new ManiphestTaskAuxiliaryStorage();
+    $table = new ManiphestCustomFieldStorage();
     $conn_w = $table->establishConnection('w');
     $update = array();
     $remove = array();
 
     foreach ($this->auxiliaryDirty as $key => $dirty) {
       $value = $this->getAuxiliaryAttribute($key);
+
+      $index = PhabricatorHash::digestForIndex($key);
       if ($value === null) {
-        $remove[$key] = true;
+        $remove[$index] = true;
       } else {
-        $update[$key] = $value;
+        $update[$index] = $value;
       }
     }
 
     if ($remove) {
       queryfx(
         $conn_w,
-        'DELETE FROM %T WHERE taskPHID = %s AND name IN (%Ls)',
+        'DELETE FROM %T WHERE objectPHID = %s AND fieldIndex IN (%Ls)',
         $table->getTableName(),
         $this->getPHID(),
         array_keys($remove));
@@ -207,21 +219,19 @@ final class ManiphestTask extends ManiphestDAO
 
     if ($update) {
       $sql = array();
-      foreach ($update as $key => $val) {
+      foreach ($update as $index => $val) {
         $sql[] = qsprintf(
           $conn_w,
-          '(%s, %s, %s, %d, %d)',
+          '(%s, %s, %s)',
           $this->getPHID(),
-          $key,
-          $val,
-          time(),
-          time());
+          $index,
+          $val);
       }
       queryfx(
         $conn_w,
-        'INSERT INTO %T (taskPHID, name, value, dateCreated, dateModified)
+        'INSERT INTO %T (objectPHID, fieldIndex, fieldValue)
           VALUES %Q ON DUPLICATE KEY
-          UPDATE value = VALUES(value), dateModified = VALUES(dateModified)',
+          UPDATE fieldValue = VALUES(fieldValue)',
         $table->getTableName(),
         implode(', ', $sql));
     }

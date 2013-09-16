@@ -42,7 +42,7 @@ abstract class ManiphestAuxiliaryFieldSpecification
   }
 
   public function getAuxiliaryKey() {
-    return $this->auxiliaryKey;
+    return 'std:maniphest:'.$this->auxiliaryKey;
   }
 
   public function setCaption($val) {
@@ -232,6 +232,10 @@ abstract class ManiphestAuxiliaryFieldSpecification
   }
 
   public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+  public function shouldUseStorage() {
     return true;
   }
 

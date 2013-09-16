@@ -518,7 +518,12 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         break;
       case ManiphestTransactionType::TYPE_AUXILIARY:
         $aux_key = $transaction->getMetadataValue('aux:key');
+
+        // TODO: Migrate all legacy data when everything migrates for T2217.
         $aux_field = $this->getAuxiliaryField($aux_key);
+        if (!$aux_field) {
+          $aux_field = $this->getAuxiliaryField('std:maniphest:'.$aux_key);
+        }
 
         $verb = null;
         if ($aux_field) {

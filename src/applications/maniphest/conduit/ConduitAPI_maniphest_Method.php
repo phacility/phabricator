@@ -209,11 +209,6 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     $task_phids = mpull($tasks, 'getPHID');
 
-    $all_aux = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
-      'taskPHID in (%Ls)',
-      $task_phids);
-    $all_aux = mgroup($all_aux, 'getTaskPHID');
-
     $all_deps = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs($task_phids)
       ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK));
@@ -221,8 +216,8 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     $result = array();
     foreach ($tasks as $task) {
-      $auxiliary = idx($all_aux, $task->getPHID(), array());
-      $auxiliary = mpull($auxiliary, 'getValue', 'getName');
+      // TODO: Batch this get as CustomField gets cleaned up.
+      $auxiliary = $task->loadLegacyAuxiliaryFieldMap();
 
       $task_deps = $all_deps->getDestinationPHIDs(
         array($task->getPHID()),
