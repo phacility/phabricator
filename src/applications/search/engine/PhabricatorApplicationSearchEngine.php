@@ -504,7 +504,7 @@ abstract class PhabricatorApplicationSearchEngine {
     $handles = array();
     if ($all_phids) {
       $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->getViewer())
+        ->setViewer($this->requireViewer())
         ->withPHIDs($all_phids)
         ->execute();
     }

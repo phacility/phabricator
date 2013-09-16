@@ -105,8 +105,8 @@ final class PhabricatorPeopleQuery
       $table->getTableName(),
       $this->buildJoinsClause($conn_r),
       $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
       $this->buildApplicationSearchGroupClause($conn_r),
+      $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     if ($this->needPrimaryEmail) {
