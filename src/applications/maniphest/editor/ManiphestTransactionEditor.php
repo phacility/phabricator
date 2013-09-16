@@ -212,6 +212,13 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
 
     id(new PhabricatorSearchIndexer())
       ->indexDocumentByPHID($task->getPHID());
+
+    $fields = PhabricatorCustomField::getObjectFields(
+      $task,
+      PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+    $fields->readFieldsFromStorage($task);
+    $fields->rebuildIndexes($task);
+
   }
 
   protected function getSubjectPrefix() {
