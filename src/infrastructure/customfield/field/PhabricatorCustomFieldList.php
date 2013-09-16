@@ -45,11 +45,14 @@ final class PhabricatorCustomFieldList extends Phobject {
 
     $table = head($keys)->newStorageObject();
 
-    $objects = $table->loadAllWhere(
-      'objectPHID = %s AND fieldIndex IN (%Ls)',
-      $object->getPHID(),
-      array_keys($keys));
-    $objects = mpull($objects, null, 'getFieldIndex');
+    $objects = array();
+    if ($object->getPHID()) {
+      $objects = $table->loadAllWhere(
+        'objectPHID = %s AND fieldIndex IN (%Ls)',
+        $object->getPHID(),
+        array_keys($keys));
+      $objects = mpull($objects, null, 'getFieldIndex');
+    }
 
     foreach ($keys as $key => $field) {
       $storage = idx($objects, $key);

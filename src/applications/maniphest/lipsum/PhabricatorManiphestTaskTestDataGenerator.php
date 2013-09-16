@@ -40,20 +40,7 @@ final class PhabricatorManiphestTaskTestDataGenerator
       $transaction->setNewValue($value);
       $transactions[] = $transaction;
     }
-    // Accumulate Auxiliary Transactions
-    $aux_fields = id(ManiphestTaskExtensions::newExtensions())
-      ->loadFields($task, $author);
-    if ($aux_fields) {
-      foreach ($aux_fields as $aux_field) {
-        $transaction = clone $template;
-        $transaction->setTransactionType(
-          ManiphestTransactionType::TYPE_AUXILIARY);
-        $aux_key = $aux_field->getAuxiliaryKey();
-        $transaction->setMetadataValue('aux:key', $aux_key);
-        $transaction->setNewValue($aux_field->getValueForStorage());
-        $transactions[] = $transaction;
-      }
-    }
+
     // Apply Transactions
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($author)

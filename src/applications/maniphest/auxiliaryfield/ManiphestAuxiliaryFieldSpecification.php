@@ -14,27 +14,17 @@ abstract class ManiphestAuxiliaryFieldSpecification
   private $auxiliaryKey;
   private $caption;
   private $value;
-  private $user;
-  private $task;
   private $markupEngine;
   private $handles;
 
-  public function setTask(ManiphestTask $task) {
-    $this->task = $task;
-    return $this;
-  }
-
+  // TODO: Remove; obsolete.
   public function getTask() {
-    return $this->task;
+    return $this->getObject();
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
+  // TODO: Remove; obsolete.
   public function getUser() {
-    return $this->user;
+    return $this->getViewer();
   }
 
   public function setLabel($val) {
@@ -227,6 +217,41 @@ abstract class ManiphestAuxiliaryFieldSpecification
 
   public function shouldUseMarkupCache($field) {
     return true;
+  }
+
+
+/* -(  API Compatibility With New Custom Fields  )--------------------------- */
+
+
+  public function getFieldKey() {
+    return $this->getAuxiliaryKey();
+  }
+
+  public function shouldAppearInEditView() {
+    return true;
+  }
+
+  public function shouldAppearInPropertyView() {
+    return true;
+  }
+
+
+/* -(  Legacy Migration Support  )------------------------------------------- */
+
+
+  // TODO: Migrate to common storage and remove this.
+  public static function loadLegacyDataFromStorage(
+    ManiphestTask $task,
+    PhabricatorCustomFieldList $list) {
+
+    $task->loadAndAttachAuxiliaryAttributes();
+
+    foreach ($list->getFields() as $field) {
+      if ($task->getID()) {
+        $key = $field->getAuxiliaryKey();
+        $field->setValueFromStorage($task->getAuxiliaryAttribute($key));
+      }
+    }
   }
 
 }

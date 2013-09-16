@@ -8,7 +8,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface,
-    PhrequentTrackableInterface {
+    PhrequentTrackableInterface,
+    PhabricatorCustomFieldInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -37,6 +38,7 @@ final class ManiphestTask extends ManiphestDAO
   private $auxiliaryAttributes = self::ATTACHABLE;
   private $auxiliaryDirty = array();
   private $groupByProjectPHID = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -303,6 +305,27 @@ final class ManiphestTask extends ManiphestDAO
           $this->getAuthorPHID(),
           $this->getOwnerPHID(),
         )));
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('maniphest.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'ManiphestCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

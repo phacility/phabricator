@@ -35,8 +35,20 @@ final class ManiphestTaskDetailController extends ManiphestController {
       'taskID = %d ORDER BY id ASC',
       $task->getID());
 
-    $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->loadFields($task, $user);
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $task,
+      PhabricatorCustomField::ROLE_VIEW);
+
+    foreach ($field_list->getFields() as $field) {
+      $field->setObject($task);
+      $field->setViewer($user);
+    }
+
+    ManiphestAuxiliaryFieldSpecification::loadLegacyDataFromStorage(
+      $task,
+      $field_list);
+
+    $aux_fields = $field_list->getFields();
 
     $e_commit = PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT;
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;

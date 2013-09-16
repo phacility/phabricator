@@ -84,8 +84,20 @@ final class ManiphestTaskEditController extends ManiphestController {
     $errors = array();
     $e_title = true;
 
-    $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->loadFields($task, $user);
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $task,
+      PhabricatorCustomField::ROLE_EDIT);
+
+    foreach ($field_list->getFields() as $field) {
+      $field->setObject($task);
+      $field->setViewer($user);
+    }
+
+    ManiphestAuxiliaryFieldSpecification::loadLegacyDataFromStorage(
+      $task,
+      $field_list);
+
+    $aux_fields = $field_list->getFields();
 
     if ($request->isFormPost()) {
       $changes = array();
