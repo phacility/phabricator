@@ -5,6 +5,8 @@ final class DifferentialDiffQuery
 
   private $ids;
   private $revisionIDs;
+  private $needChangesets = false;
+  private $needArcanistProjects = false;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -13,6 +15,16 @@ final class DifferentialDiffQuery
 
   public function withRevisionIDs(array $revision_ids) {
     $this->revisionIDs = $revision_ids;
+    return $this;
+  }
+
+  public function needChangesets($bool) {
+    $this->needChangesets = $bool;
+    return $this;
+  }
+
+  public function needArcanistProjects($bool) {
+    $this->needArcanistProjects = $bool;
     return $this;
   }
 
@@ -29,6 +41,50 @@ final class DifferentialDiffQuery
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  public function willFilterPage(array $diffs) {
+    if ($this->needChangesets) {
+      $this->loadChangesets($diffs);
+    }
+
+    if ($this->needArcanistProjects) {
+      $this->loadArcanistProjects($diffs);
+    }
+
+    return $diffs;
+  }
+
+  private function loadChangesets(array $diffs) {
+    foreach ($diffs as $diff) {
+      $diff->attachChangesets(
+        $diff->loadRelatives(new DifferentialChangeset(), 'diffID'));
+      foreach ($diff->getChangesets() as $changeset) {
+        $changeset->attachHunks(
+          $changeset->loadRelatives(new DifferentialHunk(), 'changesetID'));
+      }
+    }
+    return $diffs;
+  }
+
+  private function loadArcanistProjects(array $diffs) {
+    $phids = array_filter(mpull($diffs, 'getArcanistProjectPHID'));
+    $projects = array();
+    $project_map = array();
+    if ($phids) {
+      $projects = id(new PhabricatorRepositoryArcanistProject())
+        ->loadAllWhere(
+          'phid IN (%Ls)',
+          $phids);
+      $project_map = mpull($projects, null, 'getPHID');
+      foreach ($diffs as $diff) {
+        if ($diff->getArcanistProjectPHID()) {
+          $project = $project_map[$diff->getArcanistProjectPHID()];
+          $diff->attachArcanistProject($project);
+        }
+      }
+    }
+    return $diffs;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {

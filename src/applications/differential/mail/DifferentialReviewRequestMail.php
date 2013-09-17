@@ -87,7 +87,10 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
       $revision = $this->getRevision();
       $revision_id = $revision->getID();
 
-      $diffs = $revision->loadDiffs();
+      $diffs = id(new DifferentialDiffQuery())
+        ->setViewer($this->getActor())
+        ->withRevisionIDs(array($revision_id))
+        ->execute();
       $diff_number = count($diffs);
 
       $attachments[] = new PhabricatorMetaMTAAttachment(
@@ -112,16 +115,15 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
   private function buildPatch() {
     $diff = new DifferentialDiff();
-
     $diff->attachChangesets($this->getChangesets());
-    // TODO: We could batch this to improve performance.
     foreach ($diff->getChangesets() as $changeset) {
-      $changeset->attachHunks($changeset->loadHunks());
+      $changeset->attachHunks(
+        $changeset->loadRelatives(new DifferentialHunk(), 'changesetID'));
     }
-    $diff_dict = $diff->getDiffDict();
 
+    $raw_changes = $diff->buildChangesList();
     $changes = array();
-    foreach ($diff_dict['changes'] as $changedict) {
+    foreach ($raw_changes as $changedict) {
       $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
     }
     $bundle = ArcanistBundle::newFromChanges($changes);

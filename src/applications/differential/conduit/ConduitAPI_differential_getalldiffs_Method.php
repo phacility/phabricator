@@ -6,6 +6,15 @@
 final class ConduitAPI_differential_getalldiffs_Method
   extends ConduitAPIMethod {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return pht(
+      'This method has been deprecated in favor of differential.querydiffs.');
+  }
+
   public function getMethodDescription() {
     return "Load all diffs for given revisions from Differential.";
   }

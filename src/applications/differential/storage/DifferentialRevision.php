@@ -132,15 +132,6 @@ final class DifferentialRevision extends DifferentialDAO
       DifferentialPHIDTypeRevision::TYPECONST);
   }
 
-  public function loadDiffs() {
-    if (!$this->getID()) {
-      return array();
-    }
-    return id(new DifferentialDiff())->loadAllWhere(
-      'revisionID = %d',
-      $this->getID());
-  }
-
   public function loadComments() {
     if (!$this->getID()) {
       return array();
@@ -165,7 +156,10 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function delete() {
     $this->openTransaction();
-      $diffs = $this->loadDiffs();
+    $diffs = id(new DifferentialDiffQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withRevisionIDs(array($this->getID()))
+      ->execute();
       foreach ($diffs as $diff) {
         $diff->delete();
       }
