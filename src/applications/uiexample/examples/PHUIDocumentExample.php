@@ -51,7 +51,7 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
     $divider = id(new PHUIListItemView)
       ->setType(PHUIListItemView::TYPE_DIVIDER);
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader('Installation');
 
     $label1 = id(new PHUIListItemView())

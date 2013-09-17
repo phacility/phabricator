@@ -18,19 +18,19 @@ final class DiffusionRepositoryEditController extends DiffusionController {
 
     $title = pht('Edit %s', $repository->getName());
 
-    $content[] = id(new PhabricatorHeaderView())
+    $content[] = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $content[] = $this->buildBasicActions($repository);
     $content[] = $this->buildBasicProperties($repository);
 
-    $content[] = id(new PhabricatorHeaderView())
+    $content[] = id(new PHUIHeaderView())
       ->setHeader(pht('Text Encoding'));
 
     $content[] = $this->buildEncodingActions($repository);
     $content[] = $this->buildEncodingProperties($repository);
 
-    $content[] = id(new PhabricatorHeaderView())
+    $content[] = id(new PHUIHeaderView())
       ->setHeader(pht('Edit History'));
 
     $xactions = id(new PhabricatorRepositoryTransactionQuery())

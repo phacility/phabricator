@@ -41,7 +41,7 @@ final class PhabricatorCountdownViewController
         id(new PhabricatorCrumbView())
           ->setName("C{$id}"));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $actions = $this->buildActionListView($countdown);

@@ -17,16 +17,20 @@
   font-size: 12px;
 }
 
-.device-desktop .phabricator-header-shell + .phabricator-action-list-view {
+.device-desktop .phui-header-shell + .phabricator-action-list-view {
   margin-top: -33px;
 }
 
-.device-desktop .phabricator-header-shell.phabricator-header-has-image +
+.device-desktop .phui-header-shell.phui-header-tall + .phabricator-action-list-view {
+  margin-top: -55px;
+}
+
+.device-desktop .phui-header-shell.phui-header-has-image +
   .phabricator-action-list-view {
   margin-top: -53px;
 }
 
-.device .phabricator-header-shell + .phabricator-action-list-view {
+.device .phui-header-shell + .phabricator-action-list-view {
   margin-top: -1px;
 }
 

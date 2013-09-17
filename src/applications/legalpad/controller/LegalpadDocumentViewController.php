@@ -61,7 +61,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
 
     $title = $document_body->getTitle();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $actions = $this->buildActionView($document);
@@ -200,7 +200,7 @@ final class LegalpadDocumentViewController extends LegalpadController {
       ? pht('Add Comment')
       : pht('Debate Legislation');
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $button_name = $is_serious

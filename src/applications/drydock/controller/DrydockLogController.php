@@ -29,7 +29,7 @@ final class DrydockLogController extends DrydockController {
 
     $title = pht('Logs');
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $table = $this->buildLogTableView($logs);

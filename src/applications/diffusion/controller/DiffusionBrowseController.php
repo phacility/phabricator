@@ -95,7 +95,7 @@ final class DiffusionBrowseController extends DiffusionController {
         $box->addPadding(PHUI::PADDING_LARGE);
         $box->addMargin(PHUI::MARGIN_LARGE);
 
-        $header = id(new PhabricatorHeaderView())
+        $header = id(new PHUIHeaderView())
           ->setHeader(pht('README'));
 
         $content[] = array(

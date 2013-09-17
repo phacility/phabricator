@@ -133,7 +133,7 @@ abstract class DiffusionController extends PhabricatorController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Pending Differential Revisions'));
 
     return array(

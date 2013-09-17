@@ -8,7 +8,7 @@ final class DrydockResourceListController extends DrydockController {
 
     $title = pht('Resources');
 
-    $resource_header = id(new PhabricatorHeaderView())
+    $resource_header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $pager = new AphrontPagerView();

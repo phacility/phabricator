@@ -151,6 +151,16 @@
       "rule" : ".status-minus-white",
       "hash" : "c5a3771452dda603fbaee87371044f5a"
     },
+    "status-oh-closed"      : {
+      "name" : "status-oh-closed",
+      "rule" : ".status-oh-closed",
+      "hash" : "cbc6a0959ebad3e88cc3ac67743a7f3a"
+    },
+    "status-oh-open"        : {
+      "name" : "status-oh-open",
+      "rule" : ".status-oh-open",
+      "hash" : "e86f83bc40e77664c91c834b27816576"
+    },
     "status-open-blue"      : {
       "name" : "status-open-blue",
       "rule" : ".status-open-blue",
@@ -175,6 +185,41 @@
       "name" : "status-open-white",
       "rule" : ".status-open-white",
       "hash" : "169dc0e8f36444ea30163181f9c88dc2"
+    },
+    "status-policy-admin"   : {
+      "name" : "status-policy-admin",
+      "rule" : ".status-policy-admin",
+      "hash" : "1df35b15bd20880a5d20c0a2da446472"
+    },
+    "status-policy-all"     : {
+      "name" : "status-policy-all",
+      "rule" : ".status-policy-all",
+      "hash" : "ef0c0594968b04ed90ca8dc629a39e54"
+    },
+    "status-policy-custom"  : {
+      "name" : "status-policy-custom",
+      "rule" : ".status-policy-custom",
+      "hash" : "a432adf61806705c54ad7e110e063829"
+    },
+    "status-policy-noone"   : {
+      "name" : "status-policy-noone",
+      "rule" : ".status-policy-noone",
+      "hash" : "23b4a85b15930c46fa409e95d26be2c4"
+    },
+    "status-policy-project" : {
+      "name" : "status-policy-project",
+      "rule" : ".status-policy-project",
+      "hash" : "bbc9e90f3353a357c5a39e703825504e"
+    },
+    "status-policy-public"  : {
+      "name" : "status-policy-public",
+      "rule" : ".status-policy-public",
+      "hash" : "4e6e9763dbb87dca73847e64ef0b87e6"
+    },
+    "status-policy-unknown" : {
+      "name" : "status-policy-unknown",
+      "rule" : ".status-policy-unknown",
+      "hash" : "f32c8a68221f735e443cb8b18b41ee0e"
     },
     "status-question-blue"  : {
       "name" : "status-question-blue",

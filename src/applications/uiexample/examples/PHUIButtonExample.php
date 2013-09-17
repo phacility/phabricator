@@ -151,16 +151,16 @@ final class PHUIButtonExample extends PhabricatorUIExample {
 
     // Set it and forget it
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader('phutil_tag');
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader('PHUIButtonView');
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader('Icon Buttons');
 
-    $head4 = id(new PhabricatorHeaderView())
+    $head4 = id(new PHUIHeaderView())
       ->setHeader('Big Icon Buttons');
 
     $wrap1 = id(new PHUIBoxView())

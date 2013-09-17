@@ -43,7 +43,7 @@ final class PhamePostViewController extends PhameController {
 
     $nav->appendChild($crumbs);
     $nav->appendChild(
-      id(new PhabricatorHeaderView())
+      id(new PHUIHeaderView())
         ->setHeader($post->getTitle()));
 
     if ($post->isDraft()) {

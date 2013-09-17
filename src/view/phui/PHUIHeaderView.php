@@ -1,6 +1,9 @@
 <?php
 
-final class PhabricatorHeaderView extends AphrontView {
+final class PHUIHeaderView extends AphrontView {
+
+  const PROPERTY_STATE = 1;
+  const PROPERTY_POLICY = 2;
 
   private $objectName;
   private $header;
@@ -10,6 +13,7 @@ final class PhabricatorHeaderView extends AphrontView {
   private $gradient;
   private $noBackground;
   private $bleedHeader;
+  private $properties;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -51,14 +55,19 @@ final class PhabricatorHeaderView extends AphrontView {
     return $this;
   }
 
+  public function addProperty($property, $value) {
+    $this->properties[$property] = $value;
+    return $this;
+  }
+
   public function render() {
-    require_celerity_resource('phabricator-header-view-css');
+    require_celerity_resource('phui-header-view-css');
 
     $classes = array();
-    $classes[] = 'phabricator-header-shell';
+    $classes[] = 'phui-header-shell';
 
     if ($this->noBackground) {
-      $classes[] = 'phabricator-header-no-backgound';
+      $classes[] = 'phui-header-no-backgound';
     }
 
     if ($this->bleedHeader) {
@@ -70,16 +79,20 @@ final class PhabricatorHeaderView extends AphrontView {
       $classes[] = 'gradient-'.$this->gradient.'-header';
     }
 
+    if ($this->properties || $this->subheader) {
+      $classes[] = 'phui-header-tall';
+    }
+
     $image = null;
     if ($this->image) {
       $image = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-header-image',
+          'class' => 'phui-header-image',
           'style' => 'background-image: url('.$this->image.')',
         ),
         '');
-      $classes[] = 'phabricator-header-has-image';
+      $classes[] = 'phui-header-has-image';
     }
 
     $header = array();
@@ -102,7 +115,7 @@ final class PhabricatorHeaderView extends AphrontView {
       $header[] = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-header-tags',
+          'class' => 'phui-header-tags',
         ),
         array_interleave(' ', $this->tags));
     }
@@ -111,9 +124,33 @@ final class PhabricatorHeaderView extends AphrontView {
       $header[] = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-header-subheader',
+          'class' => 'phui-header-subheader',
         ),
         $this->subheader);
+    }
+
+    if ($this->properties) {
+      $property_list = array();
+      foreach ($this->properties as $type => $property) {
+        switch ($type) {
+          case self::PROPERTY_STATE:
+            $property_list[] = $property;
+          break;
+          case self::PROPERTY_POLICY:
+            $property_list[] = $property;
+          break;
+          default:
+            throw new Exception('Incorrect Property Passed');
+          break;
+        }
+      }
+
+      $header[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-header-subheader',
+        ),
+        $property_list);
     }
 
     return phutil_tag(
@@ -126,7 +163,7 @@ final class PhabricatorHeaderView extends AphrontView {
         phutil_tag(
           'h1',
           array(
-            'class' => 'phabricator-header-view',
+            'class' => 'phui-header-view',
           ),
           $header),
       ));

@@ -84,7 +84,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->addPadding(PHUI::PADDING_LARGE)
       ->addMargin(PHUI::MARGIN_LARGE);
 
-    $header1 = id(new PhabricatorHeaderView())
+    $header1 = id(new PHUIHeaderView())
       ->setHeader('Colors');
 
     $colors = PhabricatorTagView::getColors();
@@ -103,7 +103,7 @@ final class PhabricatorTagExample extends PhabricatorUIExample {
       ->addPadding(PHUI::PADDING_LARGE)
       ->addMargin(PHUI::MARGIN_LARGE);
 
-    $header2 = id(new PhabricatorHeaderView())
+    $header2 = id(new PHUIHeaderView())
       ->setHeader('Holidays?');
 
 

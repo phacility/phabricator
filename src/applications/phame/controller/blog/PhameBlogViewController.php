@@ -33,7 +33,7 @@ final class PhameBlogViewController extends PhameController {
 
     $nav = $this->renderSideNavFilterView(null);
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($blog->getName());
 
     $handle_phids = array_merge(

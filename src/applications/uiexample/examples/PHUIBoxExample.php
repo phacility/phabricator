@@ -58,13 +58,13 @@ final class PHUIBoxExample extends PhabricatorUIExample {
           ->addPadding(PHUI::PADDING_LARGE)
           ->addMargin(PHUI::MARGIN_LARGE_BOTTOM));
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Plain Box'));
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('Plain Box with space'));
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('Shadow Box with space'));
 
     $wrap1 = id(new PHUIBoxView())

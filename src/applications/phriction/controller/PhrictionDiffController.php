@@ -115,7 +115,7 @@ final class PhrictionDiffController
 
     $title = "Version $l vs $r";
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $crumbs->addCrumb(

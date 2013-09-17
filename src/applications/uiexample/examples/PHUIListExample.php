@@ -187,16 +187,16 @@ final class PHUIListExample extends PhabricatorUIExample {
           ->addMargin(PHUI::MARGIN_MEDIUM)
           ->setShadow(true));
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Unstyled'));
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('Side Navigation'));
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('Top Navigation'));
 
-    $head4 = id(new PhabricatorHeaderView())
+    $head4 = id(new PHUIHeaderView())
       ->setHeader(pht('Action Menu'));
 
     $wrap1 = id(new PHUIBoxView())

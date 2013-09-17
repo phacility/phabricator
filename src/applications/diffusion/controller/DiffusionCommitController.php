@@ -85,7 +85,7 @@ final class DiffusionCommitController extends DiffusionController {
         'diffusion.commitparentsquery',
         array('commit' => $drequest->getCommit()));
 
-      $headsup_view = id(new PhabricatorHeaderView())
+      $headsup_view = id(new PHUIHeaderView())
         ->setHeader(nonempty($commit->getSummary(), pht('Commit Detail')));
 
       $headsup_actions = $this->renderHeadsupActionList($commit, $repository);
@@ -660,7 +660,7 @@ final class DiffusionCommitController extends DiffusionController {
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? pht('Submit') : pht('Cook the Books')));
 
-    $header = new PhabricatorHeaderView();
+    $header = new PHUIHeaderView();
     $header->setHeader(
       $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
 

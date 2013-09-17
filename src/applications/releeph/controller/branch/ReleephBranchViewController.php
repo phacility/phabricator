@@ -98,7 +98,7 @@ final class ReleephBranchViewController extends ReleephProjectController
 
     $id = $branch->getID();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($branch->getDisplayName());
 
     if (!$branch->getIsActive()) {

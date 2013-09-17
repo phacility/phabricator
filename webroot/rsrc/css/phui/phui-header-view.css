@@ -1,8 +1,8 @@
 /**
- * @provides phabricator-header-view-css
+ * @provides phui-header-view-css
  */
 
-.phabricator-header-shell {
+.phui-header-shell {
   background-color: #e0e3ec;
   border-width: 1px 0;
   border-style: solid;
@@ -10,12 +10,12 @@
   overflow: hidden;
 }
 
-body .phabricator-header-shell.phabricator-header-no-backgound {
+body .phui-header-shell.phui-header-no-backgound {
   background-color: transparent;
   border: none;
 }
 
-body .phabricator-header-shell.phabricator-bleed-header {
+body .phui-header-shell.phui-bleed-header {
   background-color: {$lightgreybackground};
   border-top: 1px solid {$thinblueborder};
   border-bottom: none;
@@ -23,13 +23,13 @@ body .phabricator-header-shell.phabricator-bleed-header {
   margin-bottom: 16px;
 }
 
-body .phabricator-header-shell.phabricator-bleed-header
-  .phabricator-header-view {
+body .phui-header-shell.phui-bleed-header
+  .phui-header-view {
   padding: 8px 24px 8px 16px;
   color: {$bluetext};
 }
 
-.phabricator-header-shell + .phabricator-form-view {
+.phui-header-shell + .phabricator-form-view {
   border-top-width: 0;
 }
 
@@ -37,30 +37,30 @@ body .phabricator-header-shell.phabricator-bleed-header
   margin-top: -1px;
 }
 
-.phabricator-header-view {
+.phui-header-view {
   padding: 16px;
   font-size: 15px;
   color: {$darkbluetext};
 }
 
-body.device-phone .phabricator-header-view {
+body.device-phone .phui-header-view {
   padding: 12px 8px;
 }
 
-.device-desktop .phabricator-header-view {
+.device-desktop .phui-header-view {
   width: 66%;
 }
 
-.phabricator-header-tags {
+.phui-header-tags {
   margin-left: 12px;
   font-size: 13px;
 }
 
-.phabricator-header-tags .phabricator-tag-view {
+.phui-header-tags .phabricator-tag-view {
   margin-left: 4px;
 }
 
-.phabricator-header-image {
+.phui-header-image {
   display: inline-block;
   background-repeat: no-repeat;
   border: 1px solid white;
@@ -70,9 +70,18 @@ body.device-phone .phabricator-header-view {
   float: left;
 }
 
-.phabricator-header-subheader {
+.phui-header-subheader {
   color: {$lightbluetext};
   font-weight: normal;
   font-size: 13px;
   margin-top: 4px;
+}
+
+.phui-header-subheader .sprite-status {
+  display: inline-block;
+  margin: -2px 4px -2px 0;
+}
+
+.phui-header-subheader .policy-link {
+  color: {$darkbluetext};
 }

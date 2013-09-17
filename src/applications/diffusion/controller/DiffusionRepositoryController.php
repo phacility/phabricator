@@ -136,7 +136,7 @@ final class DiffusionRepositoryController extends DiffusionController {
   private function buildPropertiesTable(PhabricatorRepository $repository) {
     $user = $this->getRequest()->getUser();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($repository->getName());
 
     $view = id(new PhabricatorPropertyListView())

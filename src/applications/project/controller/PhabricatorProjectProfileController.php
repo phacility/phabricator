@@ -59,7 +59,7 @@ final class PhabricatorProjectProfileController
         $tasks,
         $content);
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
       ->setSubheader(phutil_utf8_shorten($profile->getBlurb(), 1024))
       ->setImage($picture);

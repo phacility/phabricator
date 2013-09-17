@@ -96,7 +96,7 @@ $package_spec = array(
     'phabricator-notification-css',
     'phabricator-notification-menu-css',
     'lightbox-attachment-css',
-    'phabricator-header-view-css',
+    'phui-header-view-css',
     'phabricator-filetree-view-css',
     'phabricator-nav-view-css',
     'phabricator-side-menu-view-css',

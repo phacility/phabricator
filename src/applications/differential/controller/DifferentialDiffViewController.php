@@ -114,7 +114,7 @@ final class DifferentialDiffViewController extends DifferentialController {
       }
     }
 
-    $property_head = id(new PhabricatorHeaderView())
+    $property_head = id(new PHUIHeaderView())
       ->setHeader(pht('Properties'));
 
     $property_view = new PhabricatorPropertyListView();

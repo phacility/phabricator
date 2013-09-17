@@ -27,7 +27,7 @@ final class PhortuneProductListController extends PhabricatorController {
         ->setHref($this->getApplicationURI('product/edit/'))
         ->setIcon('create'));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Product List'));
 
     $product_list = id(new PHUIObjectItemListView())

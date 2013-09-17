@@ -30,7 +30,7 @@ final class PhabricatorDaemonLogViewController
       id(new PhabricatorCrumbView())
         ->setName(pht('Daemon %s', $log->getID())));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($log->getDaemon());
 
     $tag = id(new PhabricatorTagView())

@@ -132,22 +132,22 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setUser($user);
 
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Basic Story'));
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('Title / Text Story'));
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('Token Story'));
 
-    $head4 = id(new PhabricatorHeaderView())
+    $head4 = id(new PHUIHeaderView())
       ->setHeader(pht('Action Story'));
 
-    $head5 = id(new PhabricatorHeaderView())
+    $head5 = id(new PHUIHeaderView())
       ->setHeader(pht('Status Story'));
 
-    $head6 = id(new PhabricatorHeaderView())
+    $head6 = id(new PHUIHeaderView())
       ->setHeader(pht('One Line Story'));
 
     $wrap1 =

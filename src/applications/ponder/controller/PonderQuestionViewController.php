@@ -44,7 +44,7 @@ final class PonderQuestionViewController extends PonderController {
         ->setActionURI("/ponder/answer/add/");
     }
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($question->getTitle());
 
     $actions = $this->buildActionListView($question);
@@ -251,7 +251,7 @@ final class PonderQuestionViewController extends PonderController {
 
       $out[] = phutil_tag('br');
       $out[] = phutil_tag('br');
-      $out[] = id(new PhabricatorHeaderView())
+      $out[] = id(new PHUIHeaderView())
         ->setHeader($this->getHandle($author_phid)->getFullName())
         ->setImage($this->getHandle($author_phid)->getImageURI());
 

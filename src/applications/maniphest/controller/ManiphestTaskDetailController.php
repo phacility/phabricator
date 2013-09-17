@@ -321,7 +321,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       'tokenizers' => $tokenizer_map,
     ));
 
-    $comment_header = id(new PhabricatorHeaderView())
+    $comment_header = id(new PHUIHeaderView())
       ->setHeader($is_serious ? pht('Add Comment') : pht('Weigh In'));
 
     $preview_panel = hsprintf(
@@ -372,7 +372,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
   }
 
   private function buildHeaderView(ManiphestTask $task) {
-    $view = id(new PhabricatorHeaderView())
+    $view = id(new PHUIHeaderView())
       ->setHeader($task->getTitle());
 
     $view->addTag(ManiphestView::renderTagForTask($task));

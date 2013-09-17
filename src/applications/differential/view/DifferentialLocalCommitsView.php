@@ -128,7 +128,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
 
     $headers = phutil_tag('tr', array(), $headers);
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Local Commits'))
       ->render();
 

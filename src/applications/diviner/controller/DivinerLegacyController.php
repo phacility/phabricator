@@ -47,7 +47,7 @@ final class DivinerLegacyController extends DivinerController {
       id(new PhabricatorCrumbView())
         ->setName(pht('Documentation')));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Documentation'));
 
     $document = new PHUIDocumentView();

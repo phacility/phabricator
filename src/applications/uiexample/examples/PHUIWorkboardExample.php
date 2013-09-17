@@ -161,13 +161,13 @@ final class PHUIWorkboardExample extends PhabricatorUIExample {
           ->addAction($person2)
           ->addAction($person3);
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Fixed Panel'));
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('Fluid Panel'));
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('Action Panel'));
 
     $wrap1 = id(new PHUIBoxView())

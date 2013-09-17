@@ -110,13 +110,13 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       ->setShadow(true)
       ->addPadding(PHUI::PADDING_LARGE);
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Greys'));
 
-    $head1b = id(new PhabricatorHeaderView())
+    $head1b = id(new PHUIHeaderView())
       ->setHeader(pht('Blues'));
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('Colors'));
 
     $wrap1 = id(new PHUIBoxView())

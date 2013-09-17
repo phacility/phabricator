@@ -144,7 +144,7 @@ final class PhortuneProductEditController extends PhabricatorController {
         ->setName($is_create ? pht('Create') : pht('Edit'))
         ->setHref($request->getRequestURI()));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit Product'));
 
     return $this->buildApplicationPage(

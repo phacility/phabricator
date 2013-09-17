@@ -54,7 +54,7 @@ final class ReleephRequestViewController extends ReleephProjectController {
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
-    $add_comment_header = id(new PhabricatorHeaderView())
+    $add_comment_header = id(new PHUIHeaderView())
       ->setHeader('Plea or yield');
 
     $draft = PhabricatorDraft::newFromUserAndKey(

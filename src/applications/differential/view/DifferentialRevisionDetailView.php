@@ -119,7 +119,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
   }
 
   private function renderHeader(DifferentialRevision $revision) {
-    $view = id(new PhabricatorHeaderView())
+    $view = id(new PHUIHeaderView())
       ->setHeader($revision->getTitle($revision));
 
     $view->addTag(self::renderTagForRevision($revision));

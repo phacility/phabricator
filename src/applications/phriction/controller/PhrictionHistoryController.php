@@ -144,7 +144,7 @@ final class PhrictionHistoryController
         ->setHref(
           PhrictionDocument::getSlugURI($document->getSlug(), 'history')));
 
-    $header = new PhabricatorHeaderView();
+    $header = new PHUIHeaderView();
     $header->setHeader(pht('Document History for %s',
       phutil_tag(
         'a',

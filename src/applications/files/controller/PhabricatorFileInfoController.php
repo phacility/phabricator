@@ -28,7 +28,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->execute();
 
     $this->loadHandles(array($file->getAuthorPHID()));
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($file->getName());
 
     $ttl = $file->getTTL();
@@ -88,7 +88,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PhabricatorHeaderView())
+    $add_comment_header = id(new PHUIHeaderView())
       ->setHeader(
         $is_serious
           ? pht('Add Comment')

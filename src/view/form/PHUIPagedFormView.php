@@ -257,7 +257,7 @@ final class PHUIPagedFormView extends AphrontTagView {
 
     $header = null;
     if ($selected_page->getPageName()) {
-      $header = id(new PhabricatorHeaderView())
+      $header = id(new PHUIHeaderView())
         ->setHeader($selected_page->getPageName());
     }
 

@@ -18,7 +18,7 @@ final class DrydockLeaseListController extends DrydockController {
 
     $title = pht('Leases');
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $lease_list = $this->buildLeaseListView($leases);

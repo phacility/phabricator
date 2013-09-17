@@ -30,7 +30,7 @@ final class PhabricatorSettingsPanelExternalAccounts
       ->needImages(true)
       ->execute();
 
-    $linked_head = id(new PhabricatorHeaderView())
+    $linked_head = id(new PHUIHeaderView())
       ->setHeader(pht('Linked Accounts and Authentication'));
 
     $linked = id(new PHUIObjectItemListView())
@@ -92,7 +92,7 @@ final class PhabricatorSettingsPanelExternalAccounts
       $linked->addItem($item);
     }
 
-    $linkable_head = id(new PhabricatorHeaderView())
+    $linkable_head = id(new PHUIHeaderView())
       ->setHeader(pht('Add External Account'));
 
     $linkable = id(new PHUIObjectItemListView())

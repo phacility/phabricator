@@ -29,7 +29,7 @@ final class PhortuneAccountViewController extends PhortuneController {
         ->setName(pht('Account'))
         ->setHref($request->getRequestURI()));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $actions = id(new PhabricatorActionListView())
@@ -80,7 +80,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Payment Methods'));
 
     $id = $account->getID();
@@ -141,7 +141,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Purchase History'));
 
     return array(
@@ -154,7 +154,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Account History'));
 
     $xactions = id(new PhortuneAccountTransactionQuery())

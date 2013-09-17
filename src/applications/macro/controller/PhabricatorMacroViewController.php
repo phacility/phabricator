@@ -59,7 +59,7 @@ final class PhabricatorMacroViewController
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title_long);
 
     if ($macro->getIsDisabled()) {
@@ -72,7 +72,7 @@ final class PhabricatorMacroViewController
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PhabricatorHeaderView())
+    $add_comment_header = id(new PHUIHeaderView())
       ->setHeader(
         $is_serious
           ? pht('Add Comment')

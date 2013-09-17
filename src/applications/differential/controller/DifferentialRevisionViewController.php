@@ -846,7 +846,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $view->setHandles($handles);
 
     return array(
-      id(new PhabricatorHeaderView())
+      id(new PHUIHeaderView())
         ->setHeader(pht('Open Revisions Affecting These Files')),
       $view,
     );

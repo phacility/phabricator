@@ -30,7 +30,7 @@ final class PhabricatorCalendarViewStatusController
 
     $nav->appendChild(
       array(
-        id(new PhabricatorHeaderView())->setHeader($page_title),
+        id(new PHUIHeaderView())->setHeader($page_title),
         $status_list,
       ));
 

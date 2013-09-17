@@ -119,7 +119,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     $title = $document_body->getTitle();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $content = array(
