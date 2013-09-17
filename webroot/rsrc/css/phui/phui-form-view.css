@@ -439,3 +439,11 @@ table.aphront-form-control-checkbox-layout th {
 .phui-form-box .aphront-error-view {
   margin-bottom: 0;
 }
+
+.phabricator-standard-custom-field-header {
+  font-size: 16px;
+  color: {$bluetext};
+  border-bottom: 1px solid {$lightbluetext};
+  padding: 16px 0 4px;
+  margin-bottom: 4px;
+}
