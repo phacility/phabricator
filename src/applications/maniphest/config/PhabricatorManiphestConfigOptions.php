@@ -165,6 +165,27 @@ final class PhabricatorManiphestConfigOptions
             'create a task, even if the sender is not a system user. The '.
             'original email address will be stored in an `From Email` field '.
             'on the task.')),
+      $this->newOption(
+        'maniphest.priorities.unbreak-now',
+        'int',
+        100)
+        ->setSummary(pht('Priority used to populate "Unbreak Now" on home.'))
+        ->setDescription(
+          pht(
+            'Temporary setting. If set, this priority is used to populate the '.
+            '"Unbreak Now" panel on the home page. You should adjust this if '.
+            'you adjust priorities using `maniphest.priorities`.')),
+      $this->newOption(
+        'maniphest.priorities.needs-triage',
+        'int',
+        90)
+        ->setSummary(pht('Priority used to populate "Needs Triage" on home.'))
+        ->setDescription(
+          pht(
+            'Temporary setting. If set, this priority is used to populate the '.
+            '"Needs Triage" panel on the home page. You should adjust this if '.
+            'you adjust priorities using `maniphest.priorities`.')),
+
     );
   }
 
