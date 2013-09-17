@@ -9,7 +9,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
   private $auxiliaryFields = array();
 
   public function setAuxiliaryFields(array $fields) {
-    assert_instances_of($fields, 'ManiphestAuxiliaryFieldSpecification');
+    assert_instances_of($fields, 'ManiphestCustomField');
     $this->auxiliaryFields = $fields;
     return $this;
   }
@@ -28,6 +28,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $email_to[] = $task->getOwnerPHID();
 
     $pri_changed = $this->isCreate($transactions);
+    $aux_writes = array();
 
     foreach ($transactions as $key => $transaction) {
       $type = $transaction->getTransactionType();
@@ -75,7 +76,8 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
             throw new Exception(
               "Expected 'aux:key' metadata on TYPE_AUXILIARY transaction.");
           }
-          $old = $task->getAuxiliaryAttribute($aux_key);
+          // This has already been populated.
+          $old = $transaction->getOldValue();
           break;
         default:
           throw new Exception('Unknown action type.');
@@ -160,7 +162,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
             break;
           case ManiphestTransactionType::TYPE_AUXILIARY:
             $aux_key = $transaction->getMetadataValue('aux:key');
-            $task->setAuxiliaryAttribute($aux_key, $new);
+            $aux_writes[$aux_key] = $new;
             break;
           case ManiphestTransactionType::TYPE_EDGE:
             // Edge edits are accomplished through PhabricatorEdgeEditor, which
@@ -184,6 +186,13 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     }
 
     $task->save();
+
+    if ($aux_writes) {
+      ManiphestAuxiliaryFieldSpecification::writeLegacyAuxiliaryUpdates(
+        $task,
+        $aux_writes);
+    }
+
     foreach ($transactions as $transaction) {
       $transaction->setTaskID($task->getID());
       $transaction->save();
@@ -203,6 +212,13 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
 
     id(new PhabricatorSearchIndexer())
       ->indexDocumentByPHID($task->getPHID());
+
+    $fields = PhabricatorCustomField::getObjectFields(
+      $task,
+      PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+    $fields->readFieldsFromStorage($task);
+    $fields->rebuildIndexes($task);
+
   }
 
   protected function getSubjectPrefix() {

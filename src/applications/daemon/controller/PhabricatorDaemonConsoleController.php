@@ -64,7 +64,7 @@ final class PhabricatorDaemonConsoleController
         'n',
       ));
 
-    $completed_header = id(new PhabricatorHeaderView())
+    $completed_header = id(new PHUIHeaderView())
       ->setHeader(pht('Recently Completed Tasks (Last 15m)'));
 
     $completed_panel = new AphrontPanelView();
@@ -76,7 +76,7 @@ final class PhabricatorDaemonConsoleController
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
       ->execute();
 
-    $daemon_header = id(new PhabricatorHeaderView())
+    $daemon_header = id(new PHUIHeaderView())
       ->setHeader(pht('Active Daemons'));
 
     $daemon_table = new PhabricatorDaemonLogListView();

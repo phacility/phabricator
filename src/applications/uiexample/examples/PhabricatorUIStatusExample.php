@@ -42,7 +42,7 @@ final class PhabricatorUIStatusExample extends PhabricatorUIExample {
         ->setTarget(pht('Zucchini'))
         ->setNote(pht('Slimy and gross. Yuck!')));
 
-    $out[] = id(new PhabricatorHeaderView())
+    $out[] = id(new PHUIHeaderView())
       ->setHeader(pht('Fruit and Vegetable Status'));
 
     $out[] = id(new PHUIBoxView())
@@ -65,7 +65,7 @@ final class PhabricatorUIStatusExample extends PhabricatorUIExample {
           ->setTarget($name));
     }
 
-    $out[] = id(new PhabricatorHeaderView())
+    $out[] = id(new PHUIHeaderView())
       ->setHeader(pht('All Icons'));
 
     $out[] = id(new PHUIBoxView())

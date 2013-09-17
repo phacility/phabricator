@@ -38,7 +38,7 @@ final class DifferentialJIRAIssuesFieldSpecification
       ->setCaption(
         pht('Example: %s', phutil_tag('tt', array(), 'JIS-3, JIS-9')))
       ->setName($this->getStorageKey())
-      ->setValue(implode(', ', $this->value))
+      ->setValue(implode(', ', nonempty($this->value, array())))
       ->setError($this->error);
   }
 

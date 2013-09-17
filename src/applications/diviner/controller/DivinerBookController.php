@@ -32,7 +32,7 @@ final class DivinerBookController extends DivinerController {
         ->setName($book->getShortTitle())
         ->setHref('/book/'.$book->getName().'/'));
 
-    $header = id(new PhabricatorHeaderView())->setHeader($book->getTitle());
+    $header = id(new PHUIHeaderView())->setHeader($book->getTitle());
     $document = new PHUIDocumentView();
     $document->setHeader($header);
 

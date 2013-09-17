@@ -54,7 +54,7 @@ final class PhabricatorPropertyListExample extends PhabricatorUIExample {
         'haiku. it is very bad.<br />'.
         'what did you expect?'));
 
-    $edge_cases_header = id(new PhabricatorHeaderView())
+    $edge_cases_header = id(new PHUIHeaderView())
       ->setHeader(pht('Edge Cases'));
 
     $edge_cases_view = new PhabricatorPropertyListView();

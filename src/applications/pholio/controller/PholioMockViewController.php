@@ -67,8 +67,15 @@ final class PholioMockViewController extends PholioController {
 
     $title = $mock->getName();
 
-    $header = id(new PhabricatorHeaderView())
-      ->setHeader($title);
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $mock,
+      $icon = true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title)
+      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
+        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     $actions = $this->buildActionView($mock);
     $properties = $this->buildPropertyView($mock, $engine);
@@ -208,14 +215,6 @@ final class PholioMockViewController extends PholioController {
       pht('Created'),
       phabricator_datetime($mock->getDateCreated(), $user));
 
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
-      $mock);
-
-    $properties->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
-
     if ($this->getManiphestTaskPHIDs()) {
       $properties->addProperty(
         pht('Maniphest Tasks'),
@@ -241,7 +240,7 @@ final class PholioMockViewController extends PholioController {
       ? pht('Add Comment')
       : pht('History Beckons');
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $button_name = $is_serious

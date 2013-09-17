@@ -155,7 +155,7 @@ final class ReleephProjectViewController extends ReleephProjectController
 
     $id = $project->getID();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($project->getName());
 
     if (!$project->getIsActive()) {

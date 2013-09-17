@@ -98,12 +98,12 @@
 
 /* In the common case where we immediately follow a header, move back up 30px
    so we snuggle next to the header. */
-.device-desktop .phabricator-header-view
+.device-desktop .phui-header-view
   + .phabricator-action-list-view {
   margin-top: -30px;
 }
 
-.device-desktop .phabricator-header-view
+.device-desktop .phui-header-view
   + .phabricator-action-list-view
   + .phabricator-property-list-view {
   margin-top: 0px;

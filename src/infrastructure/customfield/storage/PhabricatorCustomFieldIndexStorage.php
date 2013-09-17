@@ -14,5 +14,6 @@ abstract class PhabricatorCustomFieldIndexStorage
   }
 
   abstract public function formatForInsert(AphrontDatabaseConnection $conn);
+  abstract public function getIndexValueType();
 
 }

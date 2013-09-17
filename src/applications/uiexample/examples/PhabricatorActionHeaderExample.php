@@ -13,7 +13,7 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
   public function renderExample() {
 
 /* Colors */
-    $title1 = id(new PhabricatorHeaderView())
+    $title1 = id(new PHUIHeaderView())
       ->setHeader(pht('Header Plain'));
 
     $header1 = id(new PhabricatorActionHeaderView())
@@ -54,7 +54,7 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->addMargin(PHUI::MARGIN_LARGE);
 
 /* Policy Icons */
-    $title2 = id(new PhabricatorHeaderView())
+    $title2 = id(new PHUIHeaderView())
       ->setHeader(pht('With Policy Icons'));
 
     $header1 = id(new PhabricatorActionHeaderView())
@@ -102,7 +102,7 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
 
 
 /* Action Icons */
-    $title3 = id(new PhabricatorHeaderView())
+    $title3 = id(new PHUIHeaderView())
       ->setHeader(pht('With Action Icons'));
 
     $action1 = new PHUIIconView();
@@ -186,7 +186,7 @@ final class PhabricatorActionHeaderExample extends PhabricatorUIExample {
       ->addMargin(PHUI::MARGIN_LARGE);
 
 /* Action Icons */
-    $title4 = id(new PhabricatorHeaderView())
+    $title4 = id(new PHUIHeaderView())
       ->setHeader(pht('With Tags'));
 
     $tag1 = id(new PhabricatorTagView())

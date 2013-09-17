@@ -155,7 +155,9 @@ final class ReleephRequestTransactionalEditor
     return parent::filterTransactions($object, $xactions);
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 

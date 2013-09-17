@@ -8,7 +8,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface,
-    PhrequentTrackableInterface {
+    PhrequentTrackableInterface,
+    PhabricatorCustomFieldInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -34,9 +35,8 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $ownerOrdering;
 
-  private $auxiliaryAttributes = self::ATTACHABLE;
-  private $auxiliaryDirty = array();
   private $groupByProjectPHID = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -95,19 +95,6 @@ final class ManiphestTask extends ManiphestDAO
     return $this;
   }
 
-  public function getAuxiliaryAttribute($key, $default = null) {
-    $this->assertAttached($this->auxiliaryAttributes);
-    return idx($this->auxiliaryAttributes, $key, $default);
-  }
-
-  public function setAuxiliaryAttribute($key, $val) {
-    $this->assertAttached($this->auxiliaryAttributes);
-
-    $this->auxiliaryAttributes[$key] = $val;
-    $this->auxiliaryDirty[$key] = true;
-    return $this;
-  }
-
   public function setTitle($title) {
     $this->title = $title;
     if (!$this->getID()) {
@@ -123,31 +110,6 @@ final class ManiphestTask extends ManiphestDAO
 
   public function getGroupByProjectPHID() {
     return $this->assertAttached($this->groupByProjectPHID);
-  }
-
-  public function attachAuxiliaryAttributes(array $attrs) {
-    if ($this->auxiliaryDirty) {
-      throw new Exception(
-        "This object has dirty attributes, you can not attach new attributes ".
-        "without writing or discarding the dirty attributes.");
-    }
-    $this->auxiliaryAttributes = $attrs;
-    return $this;
-  }
-
-  public function loadAndAttachAuxiliaryAttributes() {
-    if (!$this->getPHID()) {
-      $this->auxiliaryAttributes = array();
-      return $this;
-    }
-
-    $storage = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
-      'taskPHID = %s',
-      $this->getPHID());
-
-    $this->auxiliaryAttributes = mpull($storage, 'getValue', 'getName');
-
-    return $this;
   }
 
   public function save() {
@@ -171,59 +133,9 @@ final class ManiphestTask extends ManiphestDAO
       $this->subscribersNeedUpdate = false;
     }
 
-    if ($this->auxiliaryDirty) {
-      $this->writeAuxiliaryUpdates();
-      $this->auxiliaryDirty = array();
-    }
-
     return $result;
   }
 
-  private function writeAuxiliaryUpdates() {
-    $table = new ManiphestTaskAuxiliaryStorage();
-    $conn_w = $table->establishConnection('w');
-    $update = array();
-    $remove = array();
-
-    foreach ($this->auxiliaryDirty as $key => $dirty) {
-      $value = $this->getAuxiliaryAttribute($key);
-      if ($value === null) {
-        $remove[$key] = true;
-      } else {
-        $update[$key] = $value;
-      }
-    }
-
-    if ($remove) {
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE taskPHID = %s AND name IN (%Ls)',
-        $table->getTableName(),
-        $this->getPHID(),
-        array_keys($remove));
-    }
-
-    if ($update) {
-      $sql = array();
-      foreach ($update as $key => $val) {
-        $sql[] = qsprintf(
-          $conn_w,
-          '(%s, %s, %s, %d, %d)',
-          $this->getPHID(),
-          $key,
-          $val,
-          time(),
-          time());
-      }
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T (taskPHID, name, value, dateCreated, dateModified)
-          VALUES %Q ON DUPLICATE KEY
-          UPDATE value = VALUES(value), dateModified = VALUES(dateModified)',
-        $table->getTableName(),
-        implode(', ', $sql));
-    }
-  }
 
 
 /* -(  Markup Interface  )--------------------------------------------------- */
@@ -303,6 +215,27 @@ final class ManiphestTask extends ManiphestDAO
           $this->getAuthorPHID(),
           $this->getOwnerPHID(),
         )));
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return PhabricatorEnv::getEnvConfig('maniphest.fields');
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'ManiphestCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
   }
 
 }

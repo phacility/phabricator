@@ -21,7 +21,7 @@ abstract class ManiphestController extends PhabricatorController {
       ->addNavigationItems($nav->getMenu());
 
     $nav->addLabel(pht('Reports'));
-    $nav->addFilter('reports', pht('Reports'), 'report/');
+    $nav->addFilter('report', pht('Reports'));
 
     $nav->selectFilter(null);
 

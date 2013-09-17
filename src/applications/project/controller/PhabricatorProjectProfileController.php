@@ -59,7 +59,7 @@ final class PhabricatorProjectProfileController
         $tasks,
         $content);
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($project->getName())
       ->setSubheader(phutil_utf8_shorten($profile->getBlurb(), 1024))
       ->setImage($picture);
@@ -177,24 +177,15 @@ final class PhabricatorProjectProfileController
 
     $open = number_format($count);
 
-    $more_link = phutil_tag(
-      'a',
-      array(
-        'href' => '/maniphest/view/all/?projects='.$project->getPHID(),
-      ),
-      pht("View All Open Tasks \xC2\xBB"));
-
     $content = hsprintf(
       '<div class="phabricator-profile-info-group profile-wrap-responsive">
         <h1 class="phabricator-profile-info-header">%s</h1>'.
         '<div class="phabricator-profile-info-pane">'.
           '%s'.
-          '<div class="phabricator-profile-info-pane-more-link">%s</div>'.
         '</div>
       </div>',
       pht('Open Tasks (%s)', $open),
-      $task_list,
-      $more_link);
+      $task_list);
 
     return $content;
   }

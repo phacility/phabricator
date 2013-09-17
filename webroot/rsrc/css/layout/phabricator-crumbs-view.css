@@ -37,7 +37,7 @@
   background: rgba(0,0,0,.1);
 }
 
-.phabricator-crumbs-view + .phabricator-header-shell {
+.phabricator-crumbs-view + .phui-header-shell {
   border-top: none;
 }
 

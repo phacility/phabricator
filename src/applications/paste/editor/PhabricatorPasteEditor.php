@@ -100,7 +100,17 @@ final class PhabricatorPasteEditor
     }
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorPasteTransaction::TYPE_CREATE:
+          return false;
+        default:
+          break;
+      }
+    }
     return true;
   }
 

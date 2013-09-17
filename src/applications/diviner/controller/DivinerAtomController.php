@@ -72,7 +72,7 @@ final class DivinerAtomController extends DivinerController {
       id(new PhabricatorCrumbView())
         ->setName($atom_short_title));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($this->renderFullSignature($symbol))
       ->addTag(
         id(new PhabricatorTagView())
@@ -153,7 +153,7 @@ final class DivinerAtomController extends DivinerController {
 
         foreach ($tasks as $spec) {
           $section->addContent(
-            id(new PhabricatorHeaderView())
+            id(new PHUIHeaderView())
               ->setNoBackground(true)
               ->setHeader($spec['title']));
 
@@ -203,7 +203,7 @@ final class DivinerAtomController extends DivinerController {
 
       foreach ($methods as $spec) {
         $matom = last($spec['atoms']);
-        $method_header = id(new PhabricatorHeaderView())
+        $method_header = id(new PHUIHeaderView())
           ->setNoBackground(true);
 
         $inherited = $spec['inherited'];

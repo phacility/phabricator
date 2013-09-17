@@ -159,7 +159,7 @@ final class PhrictionDocumentController
       $crumbs->addCrumb($view);
     }
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($page_title);
 
     $page_content = id(new PHUIDocumentView())

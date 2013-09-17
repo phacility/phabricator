@@ -33,7 +33,7 @@ final class PhabricatorWorkerTaskDetailController
     } else {
       $title = pht('Task %d', $task->getID());
 
-      $header = id(new PhabricatorHeaderView())
+      $header = id(new PHUIHeaderView())
         ->setHeader(pht('Task %d (%s)',
           $task->getID(),
           $task->getTaskClass()));
@@ -41,7 +41,7 @@ final class PhabricatorWorkerTaskDetailController
       $actions    = $this->buildActionListView($task);
       $properties = $this->buildPropertyListView($task);
 
-      $retry_head = id(new PhabricatorHeaderView())
+      $retry_head = id(new PHUIHeaderView())
         ->setHeader(pht('Retries'));
 
       $retry_info = $this->buildRetryListView($task);

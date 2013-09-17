@@ -20,7 +20,7 @@ final class PHUIDocumentView extends AphrontTagView {
     return $this;
   }
 
-  public function setHeader(PhabricatorHeaderView $header) {
+  public function setHeader(PHUIHeaderView $header) {
     $header->setGradient(PhabricatorActionHeaderView::HEADER_LIGHTBLUE);
     $this->header = $header;
     return $this;

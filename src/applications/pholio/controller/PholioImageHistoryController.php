@@ -52,7 +52,7 @@ final class PholioImageHistoryController extends PholioController {
       $latest_image->getName(),
       $mock->getName());
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     require_celerity_resource('pholio-css');

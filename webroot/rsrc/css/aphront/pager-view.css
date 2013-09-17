@@ -9,6 +9,10 @@
   font-weight: bold;
 }
 
+.phui-box .aphront-pager-view {
+  padding: 0;
+}
+
 .aphront-pager-view a {
   padding:    2px 3px;
 }

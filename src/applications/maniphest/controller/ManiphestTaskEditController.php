@@ -84,8 +84,18 @@ final class ManiphestTaskEditController extends ManiphestController {
     $errors = array();
     $e_title = true;
 
-    $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->loadFields($task, $user);
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $task,
+      PhabricatorCustomField::ROLE_EDIT);
+
+    foreach ($field_list->getFields() as $field) {
+      $field->setObject($task);
+      $field->setViewer($user);
+    }
+
+    $field_list->readFieldsFromStorage($task);
+
+    $aux_fields = $field_list->getFields();
 
     if ($request->isFormPost()) {
       $changes = array();
@@ -123,12 +133,17 @@ final class ManiphestTaskEditController extends ManiphestController {
         $errors[] = pht('Title is required.');
       }
 
+      $old_values = array();
       foreach ($aux_fields as $aux_arr_key => $aux_field) {
-        $aux_field->setValueFromRequest($request);
-        $aux_key = $aux_field->getAuxiliaryKey();
-        $aux_old_value = $task->getAuxiliaryAttribute($aux_key);
+        // TODO: This should be buildFieldTransactionsFromRequest() once we
+        // switch to ApplicationTransactions properly.
 
-        if ((int)$aux_old_value === $aux_field->getValueForStorage()) {
+        $aux_old_value = $aux_field->getOldValueForApplicationTransactions();
+        $aux_field->readValueFromRequest($request);
+        $aux_new_value = $aux_field->getNewValueForApplicationTransactions();
+
+        // TODO: What's going on here?
+        if ((int)$aux_old_value === $aux_new_value) {
           unset($aux_fields[$aux_arr_key]);
           continue;
         }
@@ -144,6 +159,8 @@ final class ManiphestTaskEditController extends ManiphestController {
           $errors[] = $e->getMessage();
           $aux_field->setError(pht('Invalid'));
         }
+
+        $old_values[$aux_field->getFieldKey()] = $aux_old_value;
       }
 
       if ($errors) {
@@ -208,9 +225,11 @@ final class ManiphestTaskEditController extends ManiphestController {
             $transaction = clone $template;
             $transaction->setTransactionType(
               ManiphestTransactionType::TYPE_AUXILIARY);
-            $aux_key = $aux_field->getAuxiliaryKey();
+            $aux_key = $aux_field->getFieldKey();
             $transaction->setMetadataValue('aux:key', $aux_key);
-            $transaction->setNewValue($aux_field->getValueForStorage());
+            $transaction->setOldValue(idx($old_values, $aux_key));
+            $transaction->setNewValue(
+              $aux_field->getNewValueForApplicationTransactions());
             $transactions[] = $transaction;
           }
         }
@@ -290,16 +309,27 @@ final class ManiphestTaskEditController extends ManiphestController {
             $task->setOwnerPHID($template_task->getOwnerPHID());
             $task->setPriority($template_task->getPriority());
 
-            if ($aux_fields) {
-              $template_task->loadAndAttachAuxiliaryAttributes();
-              foreach ($aux_fields as $aux_field) {
-                if (!$aux_field->shouldCopyWhenCreatingSimilarTask()) {
-                  continue;
-                }
+            $template_fields = PhabricatorCustomField::getObjectFields(
+              $template_task,
+              PhabricatorCustomField::ROLE_EDIT);
 
-                $aux_key = $aux_field->getAuxiliaryKey();
-                $value = $template_task->getAuxiliaryAttribute($aux_key);
-                $aux_field->setValueFromStorage($value);
+            $fields = $template_fields->getFields();
+            foreach ($fields as $key => $field) {
+              if (!$field->shouldCopyWhenCreatingSimilarTask()) {
+                unset($fields[$key]);
+              }
+              if (empty($aux_fields[$key])) {
+                unset($fields[$key]);
+              }
+            }
+
+            if ($fields) {
+              id(new PhabricatorCustomFieldList($fields))
+                ->readFieldsFromStorage($template_task);
+
+              foreach ($fields as $key => $field) {
+                $aux_fields[$key]->setValueFromStorage(
+                  $field->getValueForStorage());
               }
             }
           }

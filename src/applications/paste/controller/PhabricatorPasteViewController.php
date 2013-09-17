@@ -104,7 +104,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PhabricatorHeaderView())
+    $add_comment_header = id(new PHUIHeaderView())
       ->setHeader(
         $is_serious
           ? pht('Add Comment')
@@ -142,8 +142,16 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   }
 
   private function buildHeaderView(PhabricatorPaste $paste) {
-    return id(new PhabricatorHeaderView())
-      ->setHeader($paste->getTitle());
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $this->getRequest()->getUser(),
+      $paste,
+      $icon = true);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($paste->getTitle())
+      ->addProperty(PHUIHeaderView::PROPERTY_POLICY,
+        $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+    return $header;
   }
 
   private function buildActionView(
@@ -216,10 +224,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $user,
       $paste);
-
-    $properties->addProperty(
-      pht('Visible To'),
-      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
     return $properties;
   }

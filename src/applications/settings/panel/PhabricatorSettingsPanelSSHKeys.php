@@ -152,7 +152,7 @@ final class PhabricatorSettingsPanelSSHKeys
           ->addCancelButton($this->getPanelURI())
           ->setValue($save));
 
-    $header_title = new PhabricatorHeaderView();
+    $header_title = new PHUIHeaderView();
     $header_title->setHeader($header);
 
     return id(new AphrontNullView())

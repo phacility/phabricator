@@ -27,7 +27,7 @@ final class PhabricatorApplicationDetailViewController
         ->setName(pht('Applications'))
         ->setHref($this->getApplicationURI()));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $status_tag = id(new PhabricatorTagView())

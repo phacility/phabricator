@@ -3,12 +3,15 @@
 /**
  * A query class which uses cursor-based paging. This paging is much more
  * performant than offset-based paging in the presence of policy filtering.
+ *
+ * @task appsearch Integration with ApplicationSearch
  */
 abstract class PhabricatorCursorPagedPolicyAwareQuery
   extends PhabricatorPolicyAwareQuery {
 
   private $afterID;
   private $beforeID;
+  private $applicationSearchConstraints = array();
 
   protected function getPagingColumn() {
     return 'id';
@@ -226,6 +229,165 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     return '('.implode(') OR (', $clauses).')';
+  }
+
+
+/* -(  Application Search  )------------------------------------------------- */
+
+
+  /**
+   * Constrain the query with an ApplicationSearch index. This adds a constraint
+   * which requires objects to have one or more corresponding rows in the index
+   * with one of the given values. Combined with appropriate indexes, it can
+   * build the most common types of queries, like:
+   *
+   *   - Find users with shirt sizes "X" or "XL".
+   *   - Find shoes with size "13".
+   *
+   * @param PhabricatorCustomFieldIndexStorage Table where the index is stored.
+   * @param string|list<string> One or more values to filter by.
+   * @task appsearch
+   */
+  public function withApplicationSearchContainsConstraint(
+    PhabricatorCustomFieldIndexStorage $index,
+    $value) {
+
+    $this->applicationSearchConstraints[] = array(
+      'type'  => $index->getIndexValueType(),
+      'cond'  => '=',
+      'table' => $index->getTableName(),
+      'index' => $index->getIndexKey(),
+      'value' => $value,
+    );
+
+    return $this;
+  }
+
+
+  /**
+   * Get the name of the query's primary object PHID column, for constructing
+   * JOIN clauses. Normally (and by default) this is just `"phid"`, but if the
+   * query construction requires a table alias it may be something like
+   * `"task.phid"`.
+   *
+   * @return string Column name.
+   * @task appsearch
+   */
+  protected function getApplicationSearchObjectPHIDColumn() {
+    return 'phid';
+  }
+
+
+  /**
+   * Determine if the JOINs built by ApplicationSearch might cause each primary
+   * object to return multiple result rows. Generally, this means the query
+   * needs an extra GROUP BY clause.
+   *
+   * @return bool True if the query may return multiple rows for each object.
+   * @task appsearch
+   */
+  protected function getApplicationSearchMayJoinMultipleRows() {
+    foreach ($this->applicationSearchConstraints as $constraint) {
+      $type = $constraint['type'];
+      $value = $constraint['value'];
+
+      switch ($type) {
+        case 'string':
+        case 'int':
+          if (count((array)$value) > 1) {
+            return true;
+          }
+          break;
+        default:
+          throw new Exception("Unknown constraint type '{$type}!");
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Construct a GROUP BY clause appropriate for ApplicationSearch constraints.
+   *
+   * @param AphrontDatabaseConnection Connection executing the query.
+   * @return string Group clause.
+   * @task appsearch
+   */
+  protected function buildApplicationSearchGroupClause(
+    AphrontDatabaseConnection $conn_r) {
+
+    if ($this->getApplicationSearchMayJoinMultipleRows()) {
+      return qsprintf(
+        $conn_r,
+        'GROUP BY %Q',
+        $this->getApplicationSearchObjectPHIDColumn());
+    } else {
+      return '';
+    }
+  }
+
+
+  /**
+   * Construct a JOIN clause appropriate for applying ApplicationSearch
+   * constraints.
+   *
+   * @param AphrontDatabaseConnection Connection executing the query.
+   * @return string Join clause.
+   * @task appsearch
+   */
+  protected function buildApplicationSearchJoinClause(
+    AphrontDatabaseConnection $conn_r) {
+
+    $joins = array();
+    foreach ($this->applicationSearchConstraints as $key => $constraint) {
+      $table = $constraint['table'];
+      $alias = 'appsearch_'.$key;
+      $index = $constraint['index'];
+      $cond = $constraint['cond'];
+      $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+      if ($cond !== '=') {
+        throw new Exception("Unknown constraint condition '{$cond}'!");
+      }
+
+      $type = $constraint['type'];
+      switch ($type) {
+        case 'string':
+          $joins[] = qsprintf(
+            $conn_r,
+            'JOIN %T %T ON %T.objectPHID = %Q
+              AND %T.indexKey = %s
+              AND %T.indexValue IN (%Ls)',
+            $table,
+            $alias,
+            $alias,
+            $phid_column,
+            $alias,
+            $index,
+            $alias,
+            (array)$constraint['value']);
+          break;
+        case 'int':
+          $joins[] = qsprintf(
+            $conn_r,
+            'JOIN %T %T ON %T.objectPHID = %Q
+              AND %T.indexKey = %s
+              AND %T.indexValue IN (%Ld)',
+            $table,
+            $alias,
+            $alias,
+            $phid_column,
+            $alias,
+            $index,
+            $alias,
+            (array)$constraint['value']);
+          break;
+        default:
+          throw new Exception("Unknown constraint type '{$type}'!");
+      }
+    }
+
+    return implode(' ', $joins);
   }
 
 }

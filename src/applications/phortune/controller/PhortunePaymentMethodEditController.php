@@ -155,7 +155,7 @@ final class PhortunePaymentMethodEditController
     $request = $this->getRequest();
 
     $title = pht('Add Payment Method');
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $crumbs = $this->buildApplicationCrumbs();

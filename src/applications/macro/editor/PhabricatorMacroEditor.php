@@ -78,7 +78,17 @@ final class PhabricatorMacroEditor
     return parent::mergeTransactions($u, $v);
   }
 
-  protected function supportsMail() {
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorMacroTransactionType::TYPE_NAME;
+          return ($xaction->getOldValue() !== null);
+        default:
+          break;
+      }
+    }
     return true;
   }
 

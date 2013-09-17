@@ -32,7 +32,7 @@ final class PhabricatorPeopleProfileController
 
     $picture = $user->loadProfileImageURI();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($user->getUserName().' ('.$user->getRealName().')')
       ->setSubheader($profile->getTitle())
       ->setImage($picture);

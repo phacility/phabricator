@@ -411,13 +411,8 @@ final class ManiphestReportController extends ManiphestController {
         $leftover_closed = idx($result_closed, '', array());
         unset($result_closed['']);
 
-        $base_link = '/maniphest/?users=';
-        $leftover_name = phutil_tag(
-          'a',
-          array(
-            'href' => $base_link.ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
-          ),
-          phutil_tag('em', array(), pht('(Up For Grabs)')));
+        $base_link = '/maniphest/?assigned=';
+        $leftover_name = phutil_tag('em', array(), pht('(Up For Grabs)'));
         $col_header = pht('User');
         $header = pht('Open Tasks by User and Priority (%s)', $date);
         break;
@@ -448,13 +443,8 @@ final class ManiphestReportController extends ManiphestController {
           }
         }
 
-        $base_link = '/maniphest/view/all/?projects=';
-        $leftover_name = phutil_tag(
-          'a',
-          array(
-            'href' => $base_link.ManiphestTaskOwner::PROJECT_NO_PROJECT,
-          ),
-          phutil_tag('em', array(), pht('(No Project)')));
+        $base_link = '/maniphest/?allProjects[]=';
+        $leftover_name = phutil_tag('em', array(), pht('(No Project)'));
         $col_header = pht('Project');
         $header = pht('Open Tasks by Project and Priority (%s)', $date);
         break;

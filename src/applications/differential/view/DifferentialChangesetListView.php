@@ -195,7 +195,7 @@ final class DifferentialChangesetListView extends AphrontView {
     }
 
     return array(
-      id(new PhabricatorHeaderView())
+      id(new PHUIHeaderView())
         ->setHeader($this->getTitle())
         ->render(),
       phutil_tag(

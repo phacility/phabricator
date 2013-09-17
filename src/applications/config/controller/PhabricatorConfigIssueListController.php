@@ -17,7 +17,7 @@ final class PhabricatorConfigIssueListController
     $list = $this->buildIssueList($issues);
     $list->setNoDataString(pht("There are no open setup issues."));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader(pht('Open Phabricator Setup Issues'));
 
     $nav->appendChild(

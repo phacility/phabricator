@@ -18,4 +18,12 @@ final class PhabricatorUserConfiguredCustomField
     return new PhabricatorUserConfiguredCustomFieldStorage();
   }
 
+  protected function newStringIndexStorage() {
+    return new PhabricatorUserCustomFieldStringIndex();
+  }
+
+  protected function newNumericIndexStorage() {
+    return new PhabricatorUserCustomFieldNumericIndex();
+  }
+
 }

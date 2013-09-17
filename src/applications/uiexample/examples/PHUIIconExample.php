@@ -162,19 +162,19 @@ final class PHUIIconExample extends PhabricatorUIExample {
           ->addPadding(PHUI::PADDING_MEDIUM)
           ->setShadow(true));
 
-    $head1 = id(new PhabricatorHeaderView())
+    $head1 = id(new PHUIHeaderView())
       ->setHeader(pht('Action Icons!'));
 
-    $head2 = id(new PhabricatorHeaderView())
+    $head2 = id(new PHUIHeaderView())
       ->setHeader(pht('People!'));
 
-    $head3 = id(new PhabricatorHeaderView())
+    $head3 = id(new PHUIHeaderView())
       ->setHeader(pht('Tokens'));
 
-    $head4 = id(new PhabricatorHeaderView())
+    $head4 = id(new PHUIHeaderView())
       ->setHeader(pht('Payments'));
 
-    $head5 = id(new PhabricatorHeaderView())
+    $head5 = id(new PHUIHeaderView())
       ->setHeader(pht('Authentication'));
 
     $wrap1 = id(new PHUIBoxView())

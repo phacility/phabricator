@@ -21,7 +21,7 @@ final class HeraldRuleViewController extends HeraldController {
       return new Aphront404Response();
     }
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($rule->getName());
 
     $actions = $this->buildActionView($rule);

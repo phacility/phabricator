@@ -157,17 +157,29 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
       $transactions[] = $transaction;
     }
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $task,
+      PhabricatorCustomField::ROLE_EDIT);
+
     $auxiliary = $request->getValue('auxiliary');
     if ($auxiliary) {
-      $task->loadAndAttachAuxiliaryAttributes();
-      foreach ($auxiliary as $aux_key => $aux_value) {
+      foreach ($field_list->getFields() as $key => $field) {
+        if (!array_key_exists($key, $auxiliary)) {
+          continue;
+        }
         $transaction = clone $template;
         $transaction->setTransactionType(
           ManiphestTransactionType::TYPE_AUXILIARY);
-        $transaction->setMetadataValue('aux:key', $aux_key);
-        $transaction->setNewValue($aux_value);
+        $transaction->setMetadataValue('aux:key', $key);
+        $transaction->setOldValue(
+          $field->getOldValueForApplicationTransactions());
+        $transaction->setNewValue($auxiliary[$key]);
         $transactions[] = $transaction;
       }
+    }
+
+    if (!$transactions) {
+      return;
     }
 
     $event = new PhabricatorEvent(
@@ -186,6 +198,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     $editor = new ManiphestTransactionEditor();
     $editor->setActor($request->getUser());
+    $editor->setAuxiliaryFields($field_list->getFields());
     $editor->applyTransactions($task, $transactions);
 
     $event = new PhabricatorEvent(
@@ -209,11 +222,6 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     $task_phids = mpull($tasks, 'getPHID');
 
-    $all_aux = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
-      'taskPHID in (%Ls)',
-      $task_phids);
-    $all_aux = mgroup($all_aux, 'getTaskPHID');
-
     $all_deps = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs($task_phids)
       ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK));
@@ -221,8 +229,16 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     $result = array();
     foreach ($tasks as $task) {
-      $auxiliary = idx($all_aux, $task->getPHID(), array());
-      $auxiliary = mpull($auxiliary, 'getValue', 'getName');
+      // TODO: Batch this get as CustomField gets cleaned up.
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $task,
+        PhabricatorCustomField::ROLE_EDIT);
+      $field_list->readFieldsFromStorage($task);
+
+      $auxiliary = mpull(
+        $field_list->getFields(),
+        'getValueForStorage',
+        'getFieldKey');
 
       $task_deps = $all_deps->getDestinationPHIDs(
         array($task->getPHID()),

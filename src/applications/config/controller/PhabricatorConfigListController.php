@@ -15,7 +15,7 @@ final class PhabricatorConfigListController
 
     $title = pht('Phabricator Configuration');
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $nav->appendChild(

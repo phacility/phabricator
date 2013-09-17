@@ -12,4 +12,8 @@ abstract class PhabricatorCustomFieldNumericIndexStorage
       $this->getIndexValue());
   }
 
+  public function getIndexValueType() {
+    return 'int';
+  }
+
 }

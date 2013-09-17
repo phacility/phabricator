@@ -215,7 +215,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           '</table>'.
         '</form>'.
       '</div>',
-      id(new PhabricatorHeaderView())
+      id(new PHUIHeaderView())
         ->setHeader(pht('Revision Update History'))
         ->render(),
       phutil_implode_html("\n", $rows),

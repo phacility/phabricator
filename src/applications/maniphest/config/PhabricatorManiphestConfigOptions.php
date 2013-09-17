@@ -46,6 +46,18 @@ final class PhabricatorManiphestConfigOptions
       ),
     );
 
+    // This is intentionally blank for now, until we can move more Maniphest
+    // logic to custom fields.
+    $default_fields = array();
+
+    foreach ($default_fields as $key => $enabled) {
+      $default_fields[$key] = array(
+        'disabled' => !$enabled,
+      );
+    }
+
+    $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
+
     return array(
       $this->newOption('maniphest.custom-fields', 'wild', array())
         ->setSummary(pht("Custom Maniphest fields."))
@@ -59,17 +71,9 @@ final class PhabricatorManiphestConfigOptions
           '"type": "int", "caption": "Estimated number of hours this will '.
           'take.", "required": false}}',
           pht('Valid Setting')),
-      $this->newOption(
-        'maniphest.custom-task-extensions-class',
-        'class',
-        'ManiphestDefaultTaskExtensions')
-        ->setBaseClass('ManiphestTaskExtensions')
-        ->setSummary(pht("Class which drives custom field construction."))
-        ->setDescription(
-          pht(
-            "Class which drives custom field construction. See 'Maniphest ".
-            "User Guide: Adding Custom Fields' in the documentation for more ".
-            "information.")),
+      $this->newOption('maniphest.fields', $custom_field_type, $default_fields)
+        ->setCustomData(id(new ManiphestTask())->getCustomFieldBaseClass())
+        ->setDescription(pht("Select and reorder task fields.")),
       $this->newOption('maniphest.priorities', 'wild', $priority_defaults)
         ->setSummary(pht("Configure Maniphest priority names."))
         ->setDescription(
@@ -161,6 +165,27 @@ final class PhabricatorManiphestConfigOptions
             'create a task, even if the sender is not a system user. The '.
             'original email address will be stored in an `From Email` field '.
             'on the task.')),
+      $this->newOption(
+        'maniphest.priorities.unbreak-now',
+        'int',
+        100)
+        ->setSummary(pht('Priority used to populate "Unbreak Now" on home.'))
+        ->setDescription(
+          pht(
+            'Temporary setting. If set, this priority is used to populate the '.
+            '"Unbreak Now" panel on the home page. You should adjust this if '.
+            'you adjust priorities using `maniphest.priorities`.')),
+      $this->newOption(
+        'maniphest.priorities.needs-triage',
+        'int',
+        90)
+        ->setSummary(pht('Priority used to populate "Needs Triage" on home.'))
+        ->setDescription(
+          pht(
+            'Temporary setting. If set, this priority is used to populate the '.
+            '"Needs Triage" panel on the home page. You should adjust this if '.
+            'you adjust priorities using `maniphest.priorities`.')),
+
     );
   }
 

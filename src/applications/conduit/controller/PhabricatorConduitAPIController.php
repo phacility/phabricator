@@ -385,10 +385,10 @@ final class PhabricatorConduitAPIController
     $result_panel->setHeader('Method Result');
     $result_panel->appendChild($result_table);
 
-    $param_head = id(new PhabricatorHeaderView())
+    $param_head = id(new PHUIHeaderView())
       ->setHeader(pht('Method Parameters'));
 
-    $result_head = id(new PhabricatorHeaderView())
+    $result_head = id(new PHUIHeaderView())
       ->setHeader(pht('Method Result'));
 
     $method_uri = $this->getApplicationURI('method/'.$method.'/');

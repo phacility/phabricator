@@ -569,9 +569,7 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   protected function newStringIndexStorage() {
-    if ($this->proxy) {
-      return $this->proxy->newStringIndexStorage();
-    }
+    // NOTE: This intentionally isn't proxied, to avoid call cycles.
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -585,9 +583,7 @@ abstract class PhabricatorCustomField {
    * @task appsearch
    */
   protected function newNumericIndexStorage() {
-    if ($this->proxy) {
-      return $this->proxy->newStringIndexStorage();
-    }
+    // NOTE: This intentionally isn't proxied, to avoid call cycles.
     throw new PhabricatorCustomFieldImplementationIncompleteException($this);
   }
 
@@ -604,7 +600,7 @@ abstract class PhabricatorCustomField {
       return $this->proxy->newStringIndex();
     }
 
-    $key = $this->getFieldIndexKey();
+    $key = $this->getFieldIndex();
     return $this->newStringIndexStorage()
       ->setIndexKey($key)
       ->setIndexValue($value);
@@ -622,10 +618,100 @@ abstract class PhabricatorCustomField {
     if ($this->proxy) {
       return $this->proxy->newNumericIndex();
     }
-    $key = $this->getFieldIndexKey();
+    $key = $this->getFieldIndex();
     return $this->newNumericIndexStorage()
       ->setIndexKey($key)
       ->setIndexValue($value);
+  }
+
+
+  /**
+   * Read a query value from a request, for storage in a saved query. Normally,
+   * this method should, e.g., read a string out of the request.
+   *
+   * @param PhabricatorApplicationSearchEngine Engine building the query.
+   * @param AphrontRequest Request to read from.
+   * @return wild
+   * @task appsearch
+   */
+  public function readApplicationSearchValueFromRequest(
+    PhabricatorApplicationSearchEngine $engine,
+    AphrontRequest $request) {
+    if ($this->proxy) {
+      return $this->proxy->readApplicationSearchValueFromRequest(
+        $engine,
+        $request);
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  /**
+   * Constrain a query, given a field value. Generally, this method should
+   * use `with...()` methods to apply filters or other constraints to the
+   * query.
+   *
+   * @param PhabricatorApplicationSearchEngine Engine executing the query.
+   * @param PhabricatorCursorPagedPolicyAwareQuery Query to constrain.
+   * @param wild Constraint provided by the user.
+   * @return void
+   * @task appsearch
+   */
+  public function applyApplicationSearchConstraintToQuery(
+    PhabricatorApplicationSearchEngine $engine,
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    $value) {
+    if ($this->proxy) {
+      return $this->proxy->applyApplicationSearchConstraintToQuery(
+        $engine,
+        $query,
+        $value);
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  /**
+   * Append search controls to the interface. If you need handles, use
+   * @{method:getRequiredHandlePHIDsForApplicationSearch} to get them.
+   *
+   * @param PhabricatorApplicationSearchEngine Engine constructing the form.
+   * @param AphrontFormView The form to update.
+   * @param wild Value from the saved query.
+   * @param list<PhabricatorObjectHandle> List of handles.
+   * @return void
+   * @task appsearch
+   */
+  public function appendToApplicationSearchForm(
+    PhabricatorApplicationSearchEngine $engine,
+    AphrontFormView $form,
+    $value,
+    array $handles) {
+    if ($this->proxy) {
+      return $this->proxy->appendToApplicationSearchForm(
+        $engine,
+        $form,
+        $value,
+        $handles);
+    }
+    throw new PhabricatorCustomFieldImplementationIncompleteException($this);
+  }
+
+
+  /**
+   * Return a list of PHIDs which @{method:appendToApplicationSearchForm} needs
+   * handles for. This is primarily useful if the field stores PHIDs and you
+   * need to (for example) render a tokenizer control.
+   *
+   * @param wild Value from the saved query.
+   * @return list<phid> List of PHIDs.
+   * @task appsearch
+   */
+  public function getRequiredHandlePHIDsForApplicationSearch($value) {
+    if ($this->proxy) {
+      return $this->proxy->getRequiredHandlePHIDsForApplicationSearch($value);
+    }
+    return array();
   }
 
 

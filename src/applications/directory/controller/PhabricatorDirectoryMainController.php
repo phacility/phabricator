@@ -32,8 +32,12 @@ final class PhabricatorDirectoryMainController
 
     $maniphest = 'PhabricatorApplicationManiphest';
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
+      $unbreak_panel = $this->buildUnbreakNowPanel();
+      $triage_panel = $this->buildNeedsTriagePanel($projects);
       $tasks_panel = $this->buildTasksPanel();
     } else {
+      $unbreak_panel = null;
+      $triage_panel = null;
       $tasks_panel = null;
     }
 
@@ -50,6 +54,8 @@ final class PhabricatorDirectoryMainController
     $content = array(
       $jump_panel,
       $welcome_panel,
+      $unbreak_panel,
+      $triage_panel,
       $revision_panel,
       $tasks_panel,
       $audit_panel,
@@ -88,6 +94,102 @@ final class PhabricatorDirectoryMainController
     } else {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
+  }
+
+  private function buildUnbreakNowPanel() {
+    $unbreak_now = PhabricatorEnv::getEnvConfig(
+      'maniphest.priorities.unbreak-now');
+    if (!$unbreak_now) {
+      return null;
+    }
+
+    $user = $this->getRequest()->getUser();
+
+    $task_query = id(new ManiphestTaskQuery())
+      ->setViewer($user)
+      ->withStatuses(array(ManiphestTaskStatus::STATUS_OPEN))
+      ->withPriorities(array($unbreak_now))
+      ->setLimit(10);
+
+    $tasks = $task_query->execute();
+
+    if (!$tasks) {
+      return $this->renderMiniPanel(
+        'No "Unbreak Now!" Tasks',
+        'Nothing appears to be critically broken right now.');
+    }
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Unbreak Now!');
+    $panel->setCaption('Open tasks with "Unbreak Now!" priority.');
+    $panel->addButton(
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/maniphest/?statuses[]=0&priorities[]='.$unbreak_now.'#R',
+          'class' => 'grey button',
+        ),
+        "View All Unbreak Now \xC2\xBB"));
+
+    $panel->appendChild($this->buildTaskListView($tasks));
+    $panel->setNoBackground();
+
+    return $panel;
+  }
+
+  private function buildNeedsTriagePanel(array $projects) {
+    assert_instances_of($projects, 'PhabricatorProject');
+
+    $needs_triage = PhabricatorEnv::getEnvConfig(
+      'maniphest.priorities.needs-triage');
+    if (!$needs_triage) {
+      return null;
+    }
+
+    $user = $this->getRequest()->getUser();
+    if (!$user->isLoggedIn()) {
+      return null;
+    }
+
+    if ($projects) {
+      $task_query = id(new ManiphestTaskQuery())
+        ->setViewer($user)
+        ->withStatuses(array(ManiphestTaskStatus::STATUS_OPEN))
+        ->withPriorities(array($needs_triage))
+        ->withAnyProjects(mpull($projects, 'getPHID'))
+        ->setLimit(10);
+      $tasks = $task_query->execute();
+    } else {
+      $tasks = array();
+    }
+
+    if (!$tasks) {
+      return $this->renderMiniPanel(
+        'No "Needs Triage" Tasks',
+        hsprintf(
+          'No tasks in <a href="/project/">projects you are a member of</a> '.
+          'need triage.'));
+    }
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Needs Triage');
+    $panel->setCaption(hsprintf(
+      'Open tasks with "Needs Triage" priority in '.
+      '<a href="/project/">projects you are a member of</a>.'));
+
+    $panel->addButton(
+      phutil_tag(
+        'a',
+        array(
+          'href' => '/maniphest/?statuses[]=0&priorities[]='.$needs_triage.
+                    '&userProjects[]='.$user->getPHID().'#R',
+          'class' => 'grey button',
+        ),
+        "View All Triage \xC2\xBB"));
+    $panel->appendChild($this->buildTaskListView($tasks));
+    $panel->setNoBackground();
+
+    return $panel;
   }
 
   private function buildRevisionPanel() {

@@ -60,7 +60,14 @@ final class ManiphestExportController extends ManiphestController {
       ->withQueryKeys(array($this->key))
       ->executeOne();
     if (!$saved) {
-      return new Aphront404Response();
+      $engine = id(new ManiphestTaskSearchEngine())
+        ->setViewer($user);
+      if ($engine->isBuiltinQuery($this->key)) {
+        $saved = $engine->buildSavedQueryFromBuiltin($this->key);
+      }
+      if (!$saved) {
+        return new Aphront404Response();
+      }
     }
 
     $formats = ManiphestExcelFormat::loadAllFormats();

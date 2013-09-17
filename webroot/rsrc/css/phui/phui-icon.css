@@ -18,7 +18,8 @@
 }
 
 .phui-icon-view.sprite-apps,
-.phui-icon-view.sprite-icons {
+.phui-icon-view.sprite-icons,
+.phui-icon-view.sprite-status {
   height: 14px;
   width: 14px;
 }

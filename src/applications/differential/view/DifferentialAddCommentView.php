@@ -173,7 +173,7 @@ final class DifferentialAddCommentView extends AphrontView {
       }
     }
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($is_serious ? pht('Add Comment') : pht('Leap Into Action'));
 
     return hsprintf(

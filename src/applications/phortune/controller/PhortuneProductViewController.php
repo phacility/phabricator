@@ -23,7 +23,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $title = pht('Product: %s', $product->getProductName());
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($product->getProductName());
 
     $account = $this->loadActiveAccount($user);

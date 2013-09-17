@@ -21,7 +21,7 @@ final class PhabricatorConfigGroupController
 
     $title = pht('%s Configuration', $options->getName());
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $list = $this->buildOptionList($options->getOptions());

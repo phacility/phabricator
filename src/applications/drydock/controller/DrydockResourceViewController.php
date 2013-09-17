@@ -19,7 +19,7 @@ final class DrydockResourceViewController extends DrydockController {
 
     $title = 'Resource '.$resource->getID().' '.$resource->getName();
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $actions = $this->buildActionListView($resource);
@@ -33,7 +33,7 @@ final class DrydockResourceViewController extends DrydockController {
       ->needResources(true)
       ->execute();
 
-    $lease_header = id(new PhabricatorHeaderView())
+    $lease_header = id(new PHUIHeaderView())
       ->setHeader(pht('Leases'));
 
     $lease_list = $this->buildLeaseListView($leases);

@@ -3,6 +3,10 @@
 final class PhabricatorPeopleSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getCustomFieldObject() {
+    return new PhabricatorUser();
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -13,6 +17,8 @@ final class PhabricatorPeopleSearchEngine
     $saved->setParameter('isSystemAgent', $request->getStr('isSystemAgent'));
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
+
+    $this->readCustomFieldsFromRequest($request, $saved);
 
     return $saved;
   }
@@ -57,6 +63,9 @@ final class PhabricatorPeopleSearchEngine
     if ($end) {
       $query->withDateCreatedBefore($end);
     }
+
+    $this->applyCustomFieldsToQuery($query, $saved);
+
     return $query;
   }
 
@@ -100,6 +109,8 @@ final class PhabricatorPeopleSearchEngine
             1,
             pht('Show only System Agents.'),
             $is_system_agent));
+
+    $this->appendCustomFieldsToForm($form, $saved);
 
     $this->buildDateRange(
       $form,

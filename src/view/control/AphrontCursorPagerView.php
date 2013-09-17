@@ -79,6 +79,13 @@ final class AphrontCursorPagerView extends AphrontView {
     return $results;
   }
 
+  public function willShowPagingControls() {
+    return $this->prevPageID ||
+           $this->nextPageID ||
+           $this->afterID ||
+           ($this->beforeID && $this->moreResults);
+  }
+
   public function render() {
     if (!$this->uri) {
       throw new Exception(

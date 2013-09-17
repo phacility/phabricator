@@ -30,7 +30,7 @@ final class PhluxViewController extends PhluxController {
         ->setName($title)
         ->setHref($request->getRequestURI()));
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($title);
 
     $actions = id(new PhabricatorActionListView())

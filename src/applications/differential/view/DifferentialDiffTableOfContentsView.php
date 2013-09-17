@@ -232,7 +232,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ->setAnchorName('toc')
         ->setNavigationMarker(true)
         ->render(),
-      id(new PhabricatorHeaderView())
+      id(new PHUIHeaderView())
         ->setHeader(pht('Table of Contents'))
         ->render(),
       pht('Coverage (All)'),

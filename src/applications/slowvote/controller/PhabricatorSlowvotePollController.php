@@ -41,10 +41,10 @@ final class PhabricatorSlowvotePollController
           ));
     }
 
-    $header = id(new PhabricatorHeaderView())
+    $header = id(new PHUIHeaderView())
       ->setHeader($poll->getQuestion());
 
-    $xaction_header = id(new PhabricatorHeaderView())
+    $xaction_header = id(new PHUIHeaderView())
       ->setHeader(pht('Ongoing Deliberations'));
 
     $actions = $this->buildActionView($poll);
@@ -166,7 +166,7 @@ final class PhabricatorSlowvotePollController
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $add_comment_header = id(new PhabricatorHeaderView())
+    $add_comment_header = id(new PHUIHeaderView())
       ->setHeader(
         $is_serious
           ? pht('Add Comment')
