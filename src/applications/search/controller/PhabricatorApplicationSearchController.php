@@ -97,7 +97,7 @@ final class PhabricatorApplicationSearchController
       $saved_query = $engine->buildSavedQueryFromRequest($request);
       $this->saveQuery($saved_query);
       return id(new AphrontRedirectResponse())->setURI(
-        $engine->getQueryResultsPageURI($saved_query->getQueryKey()));
+        $engine->getQueryResultsPageURI($saved_query->getQueryKey()).'#R');
     }
 
     $named_query = null;
@@ -190,6 +190,10 @@ final class PhabricatorApplicationSearchController
     $nav->appendChild($filter_view);
 
     if ($run_query) {
+      $nav->appendChild(
+        $anchor = id(new PhabricatorAnchorView())
+          ->setAnchorName('R'));
+
       $query = $engine->buildQueryFromSavedQuery($saved_query);
 
       $pager = new AphrontCursorPagerView();
