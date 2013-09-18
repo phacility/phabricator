@@ -11,6 +11,7 @@ abstract class PhabricatorStandardCustomField
   private $applicationField;
   private $strings;
   private $caption;
+  private $fieldError;
 
   abstract public function getFieldType();
 
@@ -114,6 +115,14 @@ abstract class PhabricatorStandardCustomField
     return idx($this->fieldConfig, $key, $default);
   }
 
+  public function setFieldError($field_error) {
+    $this->fieldError = $field_error;
+    return $this;
+  }
+
+  public function getFieldError() {
+    return $this->fieldError;
+  }
 
 
 /* -(  PhabricatorCustomField  )--------------------------------------------- */
@@ -178,6 +187,7 @@ abstract class PhabricatorStandardCustomField
       ->setName($this->getFieldKey())
       ->setCaption($this->getCaption())
       ->setValue($this->getFieldValue())
+      ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
   }
 
@@ -228,6 +238,21 @@ abstract class PhabricatorStandardCustomField
     $value,
     array $handles) {
     return;
+  }
+
+  public function validateApplicationTransactions(
+    PhabricatorApplicationTransactionEditor $editor,
+    $type,
+    array $xactions) {
+
+    $this->setFieldError(null);
+
+    $errors = parent::validateApplicationTransactions(
+      $editor,
+      $type,
+      $xactions);
+
+    return $errors;
   }
 
 }

@@ -39,6 +39,7 @@ final class PhabricatorPeopleProfileEditController
       ->setViewer($user)
       ->readFieldsFromStorage($user);
 
+    $validation_exception = null;
     if ($request->isFormPost()) {
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new PhabricatorUserTransaction(),
@@ -50,9 +51,12 @@ final class PhabricatorPeopleProfileEditController
           PhabricatorContentSource::newFromRequest($request))
         ->setContinueOnNoEffect(true);
 
-      $editor->applyTransactions($user, $xactions);
-
-      return id(new AphrontRedirectResponse())->setURI($profile_uri);
+      try {
+        $editor->applyTransactions($user, $xactions);
+        return id(new AphrontRedirectResponse())->setURI($profile_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+      }
     }
 
     $title = pht('Edit Profile');
@@ -78,6 +82,7 @@ final class PhabricatorPeopleProfileEditController
 
     $form_box = id(new PHUIFormBoxView())
       ->setHeaderText(pht('Edit Your Profile'))
+      ->setValidationException($validation_exception)
       ->setForm($form);
 
     return $this->buildApplicationPage(

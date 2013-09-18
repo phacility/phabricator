@@ -185,7 +185,6 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
     return false;
-
   }
 
   protected function applyInitialEffects(
@@ -356,6 +355,18 @@ abstract class PhabricatorApplicationTransactionEditor
     $transaction_open = false;
 
     if (!$is_preview) {
+      $errors = array();
+      $type_map = mgroup($xactions, 'getTransactionType');
+      foreach ($this->getTransactionTypes() as $type) {
+        $type_xactions = idx($type_map, $type, array());
+        $errors[] = $this->validateTransaction($object, $type, $type_xactions);
+      }
+
+      $errors = array_mergev($errors);
+      if ($errors) {
+        throw new PhabricatorApplicationTransactionValidationException($errors);
+      }
+
       if ($object->getID()) {
         foreach ($xactions as $xaction) {
 
@@ -1000,6 +1011,55 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     return $xactions;
+  }
+
+
+  /**
+   * Hook for validating transactions. This callback will be invoked for each
+   * available transaction type, even if an edit does not apply any transactions
+   * of that type. This allows you to raise exceptions when required fields are
+   * missing, by detecting that the object has no field value and there is no
+   * transaction which sets one.
+   *
+   * @param PhabricatorLiskDAO Object being edited.
+   * @param string Transaction type to validate.
+   * @param list<PhabricatorApplicationTransaction> Transactions of given type,
+   *   which may be empty if the edit does not apply any transactions of the
+   *   given type.
+   * @return list<PhabricatorApplicationTransactionValidationError> List of
+   *   validation errors.
+   */
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = array();
+    switch ($type) {
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $groups = array();
+        foreach ($xactions as $xaction) {
+          $groups[$xaction->getMetadataValue('customfield:key')][] = $xaction;
+        }
+
+        $field_list = PhabricatorCustomField::getObjectFields(
+          $object,
+          PhabricatorCustomField::ROLE_EDIT);
+
+        $role_xactions = PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS;
+        foreach ($field_list->getFields() as $field) {
+          if (!$field->shouldEnableForRole($role_xactions)) {
+            continue;
+          }
+          $errors[] = $field->validateApplicationTransactions(
+            $this,
+            $type,
+            idx($groups, $field->getFieldKey(), array()));
+        }
+        break;
+    }
+
+    return array_mergev($errors);
   }
 
 
