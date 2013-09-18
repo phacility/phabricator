@@ -71,7 +71,7 @@ final class PHUIHeaderView extends AphrontView {
     }
 
     if ($this->bleedHeader) {
-      $classes[] = 'phabricator-bleed-header';
+      $classes[] = 'phui-bleed-header';
     }
 
     if ($this->gradient) {
