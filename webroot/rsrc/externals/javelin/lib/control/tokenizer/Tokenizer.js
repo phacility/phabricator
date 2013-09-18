@@ -248,10 +248,20 @@ JX.install('Tokenizer', {
       metrics.x += 24;
       metrics.setDim(focus);
 
-      // This is a pretty ugly hack to force a redraw after copy/paste in
-      // Firefox. If we don't do this, it doesn't redraw the input so pasting
-      // in an email address doesn't give you a very good behavior.
-      focus.value = focus.value;
+      // NOTE: Once, long ago, we set "focus.value = focus.value;" here to fix
+      // an issue with copy/paste in Firefox not redrawing correctly. However,
+      // this breaks input of Japanese glyphs in Chrome, and I can't reproduce
+      // the original issue in modern Firefox.
+      //
+      // If future changes muck around with things here, test that Japanese
+      // inputs still work. Example:
+      //
+      //   - Switch to Hiragana mode.
+      //   - Type "ni".
+      //   - This should produce a glyph, not the value "n".
+      //
+      // With the assignment, Chrome loses the partial input on the "n" when
+      // the value is assigned.
     },
 
     setPlaceholder : function(string) {
